@@ -1,0 +1,81 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:            #0C1810;
+  --bg-card:       #12261A;
+  --bg-card-hover: #1A3326;
+  --bg-deep:       #081210;
+  --border:        #2A4A35;
+  --border-light:  #1E3828;
+  --text-primary:  #E8F5E8;
+  --text-secondary:#8BAF8B;
+  --text-muted:    #5A7A5A;
+
+  --operations: #4ADE80;
+  --fb:         #F0C674;
+  --members:    #A78BFA;
+  --staffing:   #F59E0B;
+  --pipeline:   #F472B6;
+  --briefing:   #6BB8EF;
+
+  --urgent:  #EF4444;
+  --warning: #F59E0B;
+  --success: #22C55E;
+  --info:    #3B82F6;
+
+  --font-sans:  'DM Sans', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+  --font-serif: 'DM Serif Display', serif;
+
+  --sidebar-width: 230px;
+  --sidebar-collapsed: 52px;
+  --header-height: 60px;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+}
+
+a { color: inherit; text-decoration: none; }
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Recharts overrides */
+.recharts-text { fill: var(--text-secondary); font-family: var(--font-sans); }
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line { stroke: var(--border); }
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line { stroke: var(--border-light); }
+
+/* Utility classes */
+.font-mono { font-family: var(--font-mono); }
+.font-serif { font-family: var(--font-serif); }
+.text-muted { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
