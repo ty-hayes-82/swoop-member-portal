@@ -50,3 +50,4 @@ export const navItems = [
     subtitle: 'Guided walkthroughs for demos',
   },
 ];
+export const NAV_ITEMS = navItems;

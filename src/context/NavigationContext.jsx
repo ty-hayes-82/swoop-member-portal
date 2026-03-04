@@ -33,3 +33,5 @@ export const useNavigationContext = () => {
   if (!ctx) throw new Error('useNavigationContext must be used within NavigationProvider');
   return ctx;
 };
+
+export { useNavigationContext as useNavigation };
