@@ -50,6 +50,14 @@ export const navItems = [
     sourceSystems: ['ForeTees', 'Club Prophet'],
   },
   {
+    key: 'integrations',
+    label: 'Integrations',
+    icon: '🔌',
+    color: '#A8D5BA',
+    subtitle: 'Connect your systems. Unlock intelligence.',
+    sourceSystems: [],
+  },
+  {
     key: 'demo-mode',
     label: 'Demo Mode',
     icon: '▶',
