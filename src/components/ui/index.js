@@ -9,3 +9,6 @@ export { default as StoryHeadline }      from './StoryHeadline.jsx';
 export { default as SourceBadge, SourceBadgeRow } from './SourceBadge.jsx';
 export { default as ConnectedSystems }   from './ConnectedSystems.jsx';
 export { default as ArchetypeBadge, getArchetypeColor } from './ArchetypeBadge.jsx';
+export { default as QuickActions }       from './QuickActions.jsx';
+export { default as MorningBriefing }    from './MorningBriefing.jsx';
+export { default as DataQuality }        from './DataQuality.jsx';

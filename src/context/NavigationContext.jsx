@@ -4,8 +4,10 @@ import { navItems } from '@/config/navigation';
 const NavigationContext = createContext(null);
 
 export function NavigationProvider({ children }) {
-  const [currentRoute, setCurrentRoute] = useState('daily-briefing');
+  const [currentRoute, setCurrentRoute]   = useState('daily-briefing');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // 'today' = simplified 3-item briefing | 'deep-dive' = full analytics
+  const [viewMode, setViewMode] = useState('today');
 
   const navigate = (routeKey) => setCurrentRoute(routeKey);
   const toggleSidebar = () => setSidebarCollapsed(c => !c);
@@ -17,10 +19,9 @@ export function NavigationProvider({ children }) {
 
   return (
     <NavigationContext.Provider value={{
-      currentRoute,
-      navigate,
-      sidebarCollapsed,
-      toggleSidebar,
+      currentRoute, navigate,
+      sidebarCollapsed, toggleSidebar,
+      viewMode, setViewMode,
       currentPageMeta,
     }}>
       {children}

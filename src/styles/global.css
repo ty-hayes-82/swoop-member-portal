@@ -5,35 +5,38 @@
 }
 
 :root {
-  --bg:            #0C1810;
-  --bg-card:       #12261A;
-  --bg-card-hover: #1A3326;
-  --bg-deep:       #081210;
-  --border:        #2A4A35;
-  --border-light:  #1E3828;
-  --text-primary:  #E8F5E8;
-  --text-secondary:#8BAF8B;
-  --text-muted:    #5A7A5A;
+  /* Light mode — warm cream + forest green */
+  --bg:            #F7F5F2;
+  --bg-card:       #FFFFFF;
+  --bg-card-hover: #F2EFE9;
+  --bg-deep:       #EDE9E1;
+  --bg-sidebar:    #1F2F24;
+  --border:        #DDD8CF;
+  --border-light:  #EAE6DE;
+  --text-primary:  #1A2B1C;
+  --text-secondary:#4A6350;
+  --text-muted:    #8A9E8D;
 
-  --operations: #4ADE80;
-  --fb:         #F0C674;
-  --members:    #A78BFA;
-  --staffing:   #F59E0B;
-  --pipeline:   #F472B6;
-  --briefing:   #6BB8EF;
+  --operations: #1A7A3C;
+  --fb:         #8B6420;
+  --members:    #5B3FA0;
+  --staffing:   #9A5800;
+  --pipeline:   #8B2258;
+  --briefing:   #1A5C8E;
+  --demo:       #8B6420;
 
-  --urgent:  #EF4444;
-  --warning: #F59E0B;
-  --success: #22C55E;
-  --info:    #3B82F6;
+  --urgent:  #C0392B;
+  --warning: #B5760A;
+  --success: #1A6B34;
+  --info:    #1A5C8E;
 
   --font-sans:  'DM Sans', system-ui, sans-serif;
   --font-mono:  'JetBrains Mono', monospace;
   --font-serif: 'DM Serif Display', serif;
 
-  --sidebar-width: 230px;
+  --sidebar-width:     240px;
   --sidebar-collapsed: 52px;
-  --header-height: 60px;
+  --header-height:     60px;
 }
 
 html, body {
@@ -61,7 +64,7 @@ button {
   background: none;
 }
 
-/* Scrollbar styling */
+/* Scrollbar — light mode */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-deep); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -79,3 +82,12 @@ button {
 .font-serif { font-family: var(--font-serif); }
 .text-muted { color: var(--text-muted); }
 .text-secondary { color: var(--text-secondary); }
+
+/* Print styles for Morning Briefing export */
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { background: white; color: black; font-size: 12px; }
+  .print-break { page-break-before: always; }
+}
+.print-only { display: none; }

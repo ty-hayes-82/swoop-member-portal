@@ -17,7 +17,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       revenue: yesterday.total,
       revenueVsPlan: -0.12,   // -12% vs avg — was revenueVsAvg (NaN bug fix)
       rounds: 82,
-      incidents: ['Grill Room understaffed — 2 service speed complaints', 'mbr_203 filed Service Speed complaint (sentiment -0.8) — unresolved'],
+      incidents: ['Grill Room understaffed — 2 service speed complaints', 'James Whitfield filed a slow-service complaint — left unhappy, no follow-up'],
       weather: yesterday.weather,
       isUnderstaffed: yesterday.isUnderstaffed,
     },
@@ -35,7 +35,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     },
     pendingActions: [
       { playbookId: 'service-save',  title: 'Service Save Protocol',       status: 'recommended', urgency: 'high',
-        reason: 'mbr_203 complaint unresolved — member at risk of resignation' },
+        reason: 'James Whitfield complaint unresolved — at risk of resignation' },
       { playbookId: 'slow-saturday', title: 'Slow Saturday Recovery',      status: 'available',   urgency: 'medium',
         reason: '28% slow round rate — weekend pace deteriorating' },
       { playbookId: 'engagement-decay', title: 'Engagement Decay Intervention', status: 'available', urgency: 'medium',

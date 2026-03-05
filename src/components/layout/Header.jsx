@@ -1,6 +1,15 @@
+// Header — light bar above the main content
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
 import { CLUB_NAME, DEMO_MONTH } from '@/config/constants.js';
+
+// Greeting changes by time of day (simulated — based on 7am for demo morning mode)
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+};
 
 export default function Header() {
   const { currentRoute, toggleSidebar } = useNavigation();
@@ -8,48 +17,43 @@ export default function Header() {
 
   return (
     <header style={{
-      height: '60px',
-      borderBottom: '1px solid var(--border)',
-      display: 'flex',
-      alignItems: 'center',
-      padding: '0 24px',
-      gap: '16px',
-      background: '#0A1C12',
-      flexShrink: 0,
+      height: '60px', borderBottom: '1px solid var(--border)',
+      display: 'flex', alignItems: 'center',
+      padding: '0 24px', gap: '16px',
+      background: 'var(--bg-card)', flexShrink: 0,
+      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
     }}>
-      <button
-        onClick={toggleSidebar}
-        style={{
-          width: 28, height: 28,
-          borderRadius: '6px',
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          color: 'var(--text-muted)',
-          fontSize: '14px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', flexShrink: 0,
-        }}
-      >
-        ☰
-      </button>
+      <button onClick={toggleSidebar} style={{
+        width: 28, height: 28, borderRadius: '6px',
+        background: 'var(--bg-deep)', border: '1px solid var(--border)',
+        color: 'var(--text-muted)', fontSize: '14px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0,
+      }}>☰</button>
 
       {/* Accent line */}
       <div style={{ width: 3, height: 28, borderRadius: 2, background: page.color, flexShrink: 0 }} />
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h1 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.1 }}>
+        <h1 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.1 }}>
           {page.label}
         </h1>
-        <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1, marginTop: '2px',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {page.subtitle}
         </p>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-        <span style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
-          {CLUB_NAME} · {DEMO_MONTH}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+          {getGreeting()} — {CLUB_NAME} · {DEMO_MONTH}
         </span>
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
+        {/* Live indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px',
+          padding: '3px 8px', borderRadius: '12px',
+          background: '#1A6B3412', border: '1px solid #1A6B3430' }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#1A6B34' }} />
+          <span style={{ fontSize: '10px', color: '#1A6B34', fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
+        </div>
       </div>
     </header>
   );

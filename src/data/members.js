@@ -21,9 +21,9 @@ export const healthDistribution = [
 export const atRiskMembers = [
   { memberId: 'mbr_042', name: 'Kevin Hurst',    score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining' },
   { memberId: 'mbr_117', name: 'Linda Leonard',  score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost' },
-  { memberId: 'mbr_203', name: 'Member 203',     score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active' },
+  { memberId: 'mbr_203', name: 'James Whitfield',     score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active' },
   { memberId: 'mbr_089', name: 'Anne Jordan',    score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior' },
-  { memberId: 'mbr_271', name: 'Member 271',     score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining' },
+  { memberId: 'mbr_271', name: 'Robert Callahan',     score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining' },
 ];
 
 export const resignationScenarios = [
@@ -50,7 +50,7 @@ export const resignationScenarios = [
     ],
   },
   {
-    memberId: 'mbr_203', name: 'Member 203', archetype: 'Balanced Active', resignDate: '2026-01-22',
+    memberId: 'mbr_203', name: 'James Whitfield', archetype: 'Balanced Active', resignDate: '2026-01-22',
     pattern: 'Service recovery failure — preventable departure', keySignal: 'Complaint Jan 18, unresolved → resign Jan 22',
     lifetimeValue: 54000, dues: 18000,
     timeline: [
@@ -73,7 +73,7 @@ export const resignationScenarios = [
     ],
   },
   {
-    memberId: 'mbr_271', name: 'Member 271', archetype: 'Declining', resignDate: '2026-01-31',
+    memberId: 'mbr_271', name: 'Robert Callahan', archetype: 'Declining', resignDate: '2026-01-31',
     pattern: 'Obligation-only spending — F&B minimum hit then stop', keySignal: 'Spent exactly $3,020 F&B minimum then ceased',
     lifetimeValue: 54000, dues: 18000,
     timeline: [

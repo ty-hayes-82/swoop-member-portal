@@ -5,21 +5,21 @@ const SERVICE_SAVE_STEPS = [
   {
     title: 'Auto-escalate high-sentiment complaints',
     description: 'Any feedback with sentiment < −0.5 from an engaged member (health score > 60) auto-routes to the department head within 2 hours.',
-    preview: 'mbr_203 complaint (sentiment −0.8) → auto-routed to F&B Director. Alert includes complaint text, member profile, and last 3 visits.',
+    preview: "James Whitfield's complaint (slow service, felt ignored) → auto-routed to F&B Director. Alert includes complaint text, member profile, and last 3 visits.",
     timeline: 'Hour 1–2',
     actionType: 'staff-alert',
   },
   {
     title: 'GM personal alert with member profile',
     description: 'GM receives a push alert with member profile, complaint text, lifetime value, and suggested response script.',
-    preview: 'GM alert sent: "mbr_203 — Balanced Active, 8.2yr tenure, $18K/yr dues. Service Speed complaint unresolved. Recommend personal call today."',
+    preview: 'GM alert: "James Whitfield — member since 2019, $18K/yr dues. Complaint about slow lunch on Jan 16 — unresolved 4 days. Recommend personal call today."',
     timeline: 'Hour 2–4',
     actionType: 'front-desk-flag',
   },
   {
     title: 'Personal GM follow-up + comp offer',
     description: 'GM calls or visits the member directly. Comped experience offered if appropriate. Resolution confirmed in system.',
-    preview: 'Comp offer queued: complimentary dinner for 2. Front desk flagged: greet mbr_203 by name on next visit.',
+    preview: 'Comp offer queued: complimentary dinner for 2. Front desk flagged: greet James by name on next visit.',
     timeline: 'Day 1–2',
     actionType: 'comp-offer',
   },
@@ -75,7 +75,7 @@ const DECAY_AFTER = [
 
 // memberContext passed to Service Save to show archetype of triggered member
 const MBR_203_CONTEXT = {
-  name: 'mbr_203',
+  name: 'James Whitfield',
   archetype: 'Balanced Active',
   color: theme.colors.briefing,
   profile: 'Normally engaged across all domains — complaint from this archetype is a red flag',
@@ -87,7 +87,7 @@ export default function MemberPlaybooks() {
       <PlaybookPanel
         id="service-save"
         title="Service Save Protocol"
-        scenario="The mbr_203 pattern: an engaged member files a negative complaint that goes unresolved, leading to resignation within days. One saved resignation protects $18K–$22K in dues plus $3K–$5K in ancillary revenue."
+        scenario="The pattern we see with members like James Whitfield: an engaged member — in James's case, a 6-year member in good standing — files a complaint that goes unresolved, leading to resignation within days. One saved resignation protects $18K–$22K in dues plus $3K–$5K in ancillary revenue."
         steps={SERVICE_SAVE_STEPS}
         beforeMetrics={SERVICE_SAVE_BEFORE}
         afterMetrics={SERVICE_SAVE_AFTER}

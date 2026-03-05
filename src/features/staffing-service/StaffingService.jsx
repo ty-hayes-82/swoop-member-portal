@@ -19,7 +19,7 @@ export default function StaffingService() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <StoryHeadline
         variant="urgent"
-        headline="The Jan 16 complaint was never resolved. mbr_203 resigns Jan 22 — $18K in annual dues lost."
+        headline="The Jan 16 complaint was never resolved. James Whitfield resigned Jan 22 — $18K in annual dues lost."
         context="A scheduling gap caused slow service. The complaint was acknowledged but not acted on. Four days later, the member is gone. This is the cost of a staffing gap that no single system could see — until now."
       />
       <Panel

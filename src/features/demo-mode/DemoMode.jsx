@@ -13,8 +13,8 @@ const SCENARIOS = [
   {
     title: '"Churn Risk" Scenario',
     icon: '⚠️', color: theme.colors.urgent,
-    description: 'The mbr_203 story: how an active member goes from complaint to resignation in 4 days.',
-    steps: ['Member Retention → Health Overview', 'Find mbr_203 in risk table', 'Staffing & Service → Service Quality', 'Activate Service Save Protocol'],
+    description: 'The James Whitfield story: how an active member goes from complaint to resignation in 4 days.',
+    steps: ['Member Retention → Health Overview', 'Find James Whitfield in the at-risk table', 'Staffing & Service → Service Quality', 'Activate the Service Save response plan'],
   },
   {
     title: '"Hidden Revenue" Scenario',

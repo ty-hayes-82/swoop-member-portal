@@ -1,12 +1,15 @@
 import { SoWhatCallout } from '@/components/ui';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
+import QuickActions from '@/components/ui/QuickActions.jsx';
 import { getHealthDistribution, getAtRiskMembers, getMemberSummary } from '@/services/memberService';
 import { theme } from '@/config/theme';
+import { useState } from 'react';
 
 export default function HealthOverview() {
   const dist = getHealthDistribution();
   const atRisk = getAtRiskMembers();
   const summary = getMemberSummary();
+  const [expanded, setExpanded] = useState(null);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -57,20 +60,31 @@ export default function HealthOverview() {
           </thead>
           <tbody>
             {atRisk.map((m, i) => (
-              <tr key={i} style={{ borderTop: `1px solid ${theme.colors.border}` }}>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                  color: theme.colors.textPrimary, fontWeight: 500 }}>{m.name}</td>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-                  <span style={{ fontFamily: theme.fonts.mono, fontWeight: 700,
-                    color: m.score < 30 ? theme.colors.urgent : theme.colors.warning }}>{m.score}</span>
-                </td>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                  color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>
-                  <ArchetypeBadge archetype={m.archetype} size="xs" />
-                </td>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                  color: theme.colors.textMuted, fontSize: theme.fontSize.xs, maxWidth: 260 }}>{m.topRisk}</td>
-              </tr>
+              <>
+                <tr key={i} style={{ borderTop: `1px solid ${theme.colors.border}`, cursor: 'pointer' }}
+                  onClick={() => setExpanded(expanded === m.memberId ? null : m.memberId)}>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textPrimary, fontWeight: 600 }}>{m.name}</td>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+                    <span style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: m.score < 30 ? theme.colors.urgent : theme.colors.warning }}>{m.score}</span>
+                  </td>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>
+                    <ArchetypeBadge archetype={m.archetype} size="xs" />
+                  </td>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textMuted, fontSize: theme.fontSize.xs, maxWidth: 260 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                      <span>{m.topRisk}</span>
+                      <span style={{ color: theme.colors.textMuted, flexShrink: 0 }}>{expanded === m.memberId ? '▲' : '▼'}</span>
+                    </div>
+                  </td>
+                </tr>
+                {expanded === m.memberId && (
+                  <tr key={`${i}-expand`} style={{ background: theme.colors.bgDeep }}>
+                    <td colSpan={4} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
+                      <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk} />
+                    </td>
+                  </tr>
+                )}
+              </>
             ))}
           </tbody>
         </table>
@@ -79,8 +93,8 @@ export default function HealthOverview() {
       <SoWhatCallout variant="warning">
         <strong>{summary.riskCount} members</strong> are At Risk or Critical —
         representing <strong>${(summary.potentialDuesAtRisk / 1000).toFixed(0)}K</strong> in annual dues.
-        mbr_203 is the most urgent: an unresolved complaint is the only thing standing between
-        an active member and a preventable resignation.
+        James Whitfield is the most urgent: an unresolved service complaint is the only thing standing between
+        an active member and a resignation that should never happen. Tap his name to take action.
       </SoWhatCallout>
     </div>
   );

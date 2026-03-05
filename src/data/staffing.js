@@ -19,7 +19,7 @@ export const understaffedDays = [
 ];
 
 export const feedbackRecords = [
-  { id: 'fb_001', memberId: 'mbr_203', date: '2026-01-18', category: 'Service Speed',
+  { id: 'fb_001', memberId: 'mbr_203', memberName: 'James Whitfield', date: '2026-01-18', category: 'Service Speed',
     sentiment: -0.80, status: 'acknowledged', isUnderstaffedDay: false },
   { id: 'fb_002', memberId: 'mbr_142', date: '2026-01-09', category: 'Service Speed',
     sentiment: -0.64, status: 'resolved', isUnderstaffedDay: true },

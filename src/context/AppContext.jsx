@@ -10,7 +10,7 @@ const PLAYBOOK_DEFS = {
 // Step labels that appear in the activation trail after pressing Activate
 const TRAIL_STEPS = {
   'slow-saturday':    ['📡 Ranger dispatch sent to holes 4, 8, 12, 16', '📋 Saturday tee intervals updated: 8 → 10 min', '✉ Recovery offer template activated for 4:30+ rounds'],
-  'service-save':     ['🚩 mbr_203 flagged at front desk', '📢 F&B Director alerted with complaint details', '✉ GM alert sent with member profile + lifetime value', '🎁 Comp appetizer offer queued for mbr_203'],
+  'service-save':     ['🚩 James Whitfield flagged at front desk', '📢 F&B Director alerted with complaint details', '✉ GM personal alert: James Whitfield — 8K member, 4-day unresolved complaint', '🎁 Comp appetizer offer queued for James Whitfield'],
   'engagement-decay': ['📊 Weekly health scan scheduled (every Monday)', '✉ Personalized event invite campaign queued for 30 declining members', '🚩 Non-responder follow-up flagged for Week 3'],
   'staffing-gap':     ['📊 72-hour shift gap detection enabled', '📢 Flex pool (4 staff) notified for Grill Room backup', '📅 Post-day audit report scheduled daily'],
 };
