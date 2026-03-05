@@ -90,8 +90,10 @@ export default function PipelineSnapshot({ onNavigate }) {
         ))}
       </div>
 
-      <div style={{ marginTop: '8px', fontSize: '11px', color: theme.colors.textMuted, textAlign: 'right' }}>
-        Tap to view full pipeline →
+      <div style={{ marginTop: '8px', textAlign: 'right' }}>
+        <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.pipeline, fontWeight: 500, cursor: 'pointer' }}>
+          View full pipeline →
+        </span>
       </div>
     </div>
   );

@@ -128,17 +128,18 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
             <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6, marginBottom: theme.spacing.md }}>
               Activating <strong>{title}</strong> will trigger the {steps.length} steps shown above. Each step is previewed — nothing will happen that isn't listed. You can deactivate at any time.
             </div>
-            <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+            <div style={{ display: 'flex', gap: theme.spacing.sm, alignItems: 'center' }}>
               <button onClick={handleActivate} style={{
                 padding: `${theme.spacing.sm} ${theme.spacing.lg}`, borderRadius: theme.radius.md,
                 border: 'none', background: accent, color: '#fff',
-                fontSize: theme.fontSize.sm, fontWeight: 700, cursor: 'pointer' }}>
+                fontSize: theme.fontSize.sm, fontWeight: 700, cursor: 'pointer',
+                boxShadow: `0 2px 6px ${accent}50` }}>
                 Yes, activate this plan
               </button>
               <button onClick={() => setConfirming(false)} style={{
                 padding: `${theme.spacing.sm} ${theme.spacing.md}`, borderRadius: theme.radius.md,
-                border: `1px solid ${theme.colors.border}`, background: 'none',
-                color: theme.colors.textMuted, fontSize: theme.fontSize.sm, cursor: 'pointer' }}>
+                border: 'none', background: 'none',
+                color: theme.colors.textMuted, fontSize: theme.fontSize.sm, cursor: 'pointer', fontWeight: 500 }}>
                 Not yet
               </button>
             </div>

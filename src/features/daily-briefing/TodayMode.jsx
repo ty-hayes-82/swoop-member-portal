@@ -106,9 +106,10 @@ export default function TodayMode({ onNavigate }) {
             )}
             <button
               onClick={() => onNavigate(item.linkKey)}
-              style={{ padding: '6px 14px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.xs,
-                fontWeight: 600, cursor: 'pointer', border: `1px solid ${theme.colors.border}`,
-                background: 'none', color: theme.colors.textSecondary }}>
+              style={{ padding: '6px 2px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
+                fontWeight: 500, cursor: 'pointer', border: 'none',
+                background: 'none', color: theme.colors.textMuted,
+                textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               {item.linkLabel}
             </button>
           </div>

@@ -1,3 +1,4 @@
+export { default as Btn }                from './Btn.jsx';
 export { default as StatCard }           from './StatCard.jsx';
 export { default as Panel }              from './Panel.jsx';
 export { default as Badge }              from './Badge.jsx';
