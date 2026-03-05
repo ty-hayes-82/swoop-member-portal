@@ -1,9 +1,8 @@
-// PipelineSnapshot.jsx — pipeline summary widget for Daily Briefing
-// Taps through to Growth Pipeline full view
-// Hard ceiling: 150 lines. Target: 80 lines.
-
+// PipelineSnapshot.jsx — pipeline summary + waitlist intel for Daily Briefing
+// Hard ceiling: 150 lines.
 import { theme } from '@/config/theme';
 import { getPipelineSummary, getWarmLeads } from '@/services/pipelineService';
+import { getWaitlistSummary } from '@/services/waitlistService';
 
 const TIER_COLORS = {
   hot:  theme.colors.accent,
@@ -17,6 +16,7 @@ export default function PipelineSnapshot({ onNavigate }) {
   const leads   = getWarmLeads();
   const hotLeads = leads.filter(l => l.tier === 'hot').slice(0, 2);
   const totalPotential = summary.hotRevenuePotential;
+  const waitlist = getWaitlistSummary();
 
   return (
     <div
@@ -88,6 +88,20 @@ export default function PipelineSnapshot({ onNavigate }) {
             </span>
           </div>
         ))}
+      </div>
+
+      {/* Waitlist intel strip */}
+      <div
+        onClick={e => { e.stopPropagation(); onNavigate?.('waitlist-demand'); }}
+        style={{ marginTop: theme.spacing.sm, padding: '8px 10px', borderRadius: theme.radius.sm,
+          background: 'rgba(34,211,238,0.07)', border: '1px solid rgba(34,211,238,0.25)',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+        <span style={{ fontSize: theme.fontSize.xs, color: '#22D3EE', fontWeight: 600 }}>
+          ⟳ {waitlist.total} on waitlist · {waitlist.highPriority} retention priority
+        </span>
+        <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, fontWeight: 500 }}>
+          Waitlist & Demand →
+        </span>
       </div>
 
       <div style={{ marginTop: '8px', textAlign: 'right' }}>

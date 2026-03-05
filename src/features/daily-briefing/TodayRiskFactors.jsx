@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Badge from '@/components/ui/Badge.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
+import TeeSheetRisk from './TeeSheetRisk.jsx';
 import { theme } from '@/config/theme';
 
 const WEATHER_ICONS = {
@@ -52,7 +53,7 @@ function AtRiskRow({ m, onNavigate }) {
 
 
 export default function TodayRiskFactors({ data, onNavigate }) {
-  const { weather, tempHigh, wind, atRiskTeetimes, staffingGaps, fullyStaffed } = data;
+  const { weather, tempHigh, wind, atRiskTeetimes, staffingGaps, fullyStaffed, cancellationRisk } = data;
   const [archetypeFilter, setArchetypeFilter] = useState(null);
 
   const archetypes = getArchetypes(atRiskTeetimes);
@@ -82,6 +83,9 @@ export default function TodayRiskFactors({ data, onNavigate }) {
           <Badge text={fullyStaffed ? '✓ Fully Staffed' : '⚠ Staffing Gap'} variant={fullyStaffed ? 'success' : 'urgent'} />
         </div>
       </div>
+
+      {/* Tee sheet cancellation risk */}
+      {cancellationRisk && <TeeSheetRisk cancellationRisk={cancellationRisk} />}
 
       {/* At-risk tee times */}
       {atRiskTeetimes.length > 0 && (

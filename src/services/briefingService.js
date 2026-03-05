@@ -2,6 +2,7 @@
 import { getMonthlyRevenueSummary, getRevenueByDay } from './operationsService';
 import { getAtRiskMembers } from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
+import { getCancellationSummary, getWaitlistSummary } from './waitlistService';
 
 export const getDailyBriefing = (date = '2026-01-17') => {
   const revData = getRevenueByDay();
@@ -9,13 +10,15 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   const atRisk = getAtRiskMembers();
   const staffing = getStaffingSummary();
   const complaints = getComplaintCorrelation().filter(c => c.status !== 'resolved');
+  const cancelSummary = getCancellationSummary();
+  const waitlistSummary = getWaitlistSummary();
 
   return {
     currentDate: date,
     yesterdayRecap: {
       date: yesterday.date,
       revenue: yesterday.total,
-      revenueVsPlan: -0.12,   // -12% vs avg — was revenueVsAvg (NaN bug fix)
+      revenueVsPlan: -0.12,
       rounds: 82,
       incidents: ['Grill Room understaffed — 2 service speed complaints', 'James Whitfield filed a slow-service complaint — left unhappy, no follow-up'],
       weather: yesterday.weather,
@@ -24,21 +27,36 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     todayRisks: {
       weather: 'perfect',
       tempHigh: 72,
-      wind: 8,
-      forecast: 'Clear, 72°F — high demand expected',
+      wind: 18,
+      forecast: 'Wind advisory — 18 mph gusts expected by noon',
       atRiskTeetimes: [
         { memberId: 'mbr_089', name: 'Anne Jordan', archetype: 'Weekend Warrior', time: '9:14 AM', score: 28, topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
         { memberId: 'mbr_271', name: 'Member 271',  archetype: 'Declining',       time: '10:02 AM', score: 22, topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
       ],
       staffingGaps: [],
       fullyStaffed: true,
+      cancellationRisk: {
+        highRiskBookings: cancelSummary.highRisk,
+        totalRevAtRisk: cancelSummary.totalRevAtRisk,
+        driverSummary: 'Wind advisory + 2 low-engagement members',
+        suggestedAction: 'Send confirmation nudges to Kevin Hurst (82%), Anne Jordan (71%), James Whitfield (68%)',
+        estimatedRevenueSaved: Math.round(cancelSummary.totalRevAtRisk * 0.34),
+      },
+    },
+    waitlistIntel: {
+      total: waitlistSummary.total,
+      highPriority: waitlistSummary.highPriority,
+      atRisk: waitlistSummary.atRisk,
+      avgDaysWaiting: waitlistSummary.avgDaysWaiting,
     },
     pendingActions: [
-      { playbookId: 'service-save',  title: 'Service Save Protocol',       status: 'recommended', urgency: 'high',
+      { playbookId: 'service-save',      title: 'Service Save Protocol',          status: 'recommended', urgency: 'high',
         reason: 'James Whitfield complaint unresolved — at risk of resignation' },
-      { playbookId: 'slow-saturday', title: 'Slow Saturday Recovery',      status: 'available',   urgency: 'medium',
+      { playbookId: 'peak-demand-capture', title: 'Peak Demand Capture',           status: 'recommended', urgency: 'high',
+        reason: `${cancelSummary.highRisk} high-risk bookings tomorrow · wind advisory · $${cancelSummary.totalRevAtRisk} at stake` },
+      { playbookId: 'slow-saturday',     title: 'Slow Saturday Recovery',          status: 'available',   urgency: 'medium',
         reason: '28% slow round rate — weekend pace deteriorating' },
-      { playbookId: 'engagement-decay', title: 'Engagement Decay Intervention', status: 'available', urgency: 'medium',
+      { playbookId: 'engagement-decay',  title: 'Engagement Decay Intervention',   status: 'available',   urgency: 'medium',
         reason: '5 members showing accelerated email decay' },
     ],
     keyMetrics: {
@@ -53,3 +71,4 @@ export const getDailyBriefing = (date = '2026-01-17') => {
 
 // Data provenance — which vendor systems this service simulates
 export const sourceSystems = ["ForeTees", "Jonas POS", "Northstar", "ClubReady", "Club Prophet"];
+
