@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { theme } from '@/config/theme';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
+import { getAgentSummary, getTopPendingAction } from '@/services/agentService';
+import { useApp } from '@/context/AppContext';
 
 const HOUR = new Date().getHours();
 const IS_MORNING = HOUR < 12;
@@ -66,6 +68,10 @@ function MiniMemberRow({ member, onNavigate }) {
 }
 
 export default function TodayMode({ onNavigate }) {
+  const summary = getAgentSummary();
+  const topAction = getTopPendingAction();
+  const { pendingAgentCount, approveAction, getActionStatus } = useApp();
+  const topStatus = topAction ? getActionStatus(topAction.id) : null;
   const items = [
     {
       priority: 1,
@@ -120,6 +126,43 @@ export default function TodayMode({ onNavigate }) {
           {timeGreet}
         </h2>
       </div>
+
+      {/* Agent Inbox Strip — shown only when there are pending actions */}
+      {pendingAgentCount > 0 && topAction && topStatus === 'pending' && (
+        <div style={{
+          background: 'rgba(34,211,238,0.05)',
+          border: '1px solid rgba(34,211,238,0.2)',
+          borderRadius: theme.radius.md,
+          padding: theme.spacing.md,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: '16px', flexShrink: 0 }}>⬡</span>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '11px', color: '#22D3EE', fontWeight: 700, letterSpacing: '0.06em',
+                textTransform: 'uppercase', marginBottom: 2 }}>
+                {pendingAgentCount} agent action{pendingAgentCount !== 1 ? 's' : ''} ready
+              </div>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {topAction.headline}
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button onClick={() => approveAction(topAction.id)} style={{
+              padding: '5px 12px', borderRadius: theme.radius.sm, cursor: 'pointer',
+              background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)',
+              color: '#4ADE80', fontSize: '11px', fontWeight: 700,
+            }}>✓ Approve top</button>
+            <button onClick={() => onNavigate('agent-command')} style={{
+              padding: '5px 12px', borderRadius: theme.radius.sm, cursor: 'pointer',
+              background: 'transparent', border: '1px solid rgba(34,211,238,0.3)',
+              color: '#22D3EE', fontSize: '11px', fontWeight: 600,
+            }}>View Inbox →</button>
+          </div>
+        </div>
+      )}
 
       {items.map((item) => (
         <div key={item.priority} style={{

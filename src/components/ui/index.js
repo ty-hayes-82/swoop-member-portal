@@ -14,3 +14,6 @@ export { default as QuickActions }       from './QuickActions.jsx';
 export { default as MorningBriefing }    from './MorningBriefing.jsx';
 export { default as DataQuality }        from './DataQuality.jsx';
 export { default as TrendContext }     from './TrendContext.jsx';
+export { AgentThoughtLog }   from './AgentThoughtLog.jsx';
+export { AgentStatusCard }   from './AgentStatusCard.jsx';
+export { AgentActionCard }   from './AgentActionCard.jsx';

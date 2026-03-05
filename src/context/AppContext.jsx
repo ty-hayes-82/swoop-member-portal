@@ -29,6 +29,9 @@ const initialState = {
   trailProgress: {
     'slow-saturday': 0, 'service-save': 0, 'engagement-decay': 0, 'staffing-gap': 0, 'peak-demand-capture': 0,
   },
+  // Agent inbox state — keyed by action id
+  agentActionStatuses: {}, // { [actionId]: 'pending' | 'approved' | 'dismissed' }
+  agentStatuses: {},       // { [agentId]: 'active' | 'paused' }
 };
 
 function reducer(state, action) {
@@ -54,6 +57,24 @@ function reducer(state, action) {
             (state.trailProgress[action.id] ?? 0) + 1,
             (TRAIL_STEPS[action.id]?.length ?? 0)
           ),
+        },
+      };
+    case 'APPROVE_AGENT_ACTION':
+      return {
+        ...state,
+        agentActionStatuses: { ...state.agentActionStatuses, [action.id]: 'approved' },
+      };
+    case 'DISMISS_AGENT_ACTION':
+      return {
+        ...state,
+        agentActionStatuses: { ...state.agentActionStatuses, [action.id]: 'dismissed' },
+      };
+    case 'TOGGLE_AGENT_STATUS':
+      return {
+        ...state,
+        agentStatuses: {
+          ...state.agentStatuses,
+          [action.id]: (state.agentStatuses[action.id] ?? action.currentStatus) === 'active' ? 'paused' : 'active',
         },
       };
     default:
@@ -93,6 +114,15 @@ export function AppProvider({ children }) {
       totalRevenueImpact,
       playbookDefs: PLAYBOOK_DEFS,
       trailSteps: TRAIL_STEPS,
+      // Agent helpers
+      getActionStatus: (id) => state.agentActionStatuses[id] ?? 'pending',
+      getAgentStatus: (id, fallback) => state.agentStatuses[id] ?? fallback,
+      approveAction: (id) => dispatch({ type: 'APPROVE_AGENT_ACTION', id }),
+      dismissAction: (id) => dispatch({ type: 'DISMISS_AGENT_ACTION', id }),
+      toggleAgent: (id, currentStatus) => dispatch({ type: 'TOGGLE_AGENT_STATUS', id, currentStatus }),
+      pendingAgentCount: Object.values(state.agentActionStatuses).filter(s => s !== 'pending').length === 0
+        ? 4  // default: 4 pending actions on first load (matches data)
+        : Math.max(0, 4 - Object.values(state.agentActionStatuses).filter(s => s !== 'pending').length),
     }}>
       {children}
     </AppContext.Provider>

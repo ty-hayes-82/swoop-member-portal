@@ -58,6 +58,14 @@ export const navItems = [
     sourceSystems: ['ForeTees', 'Club Prophet'],
   },
   {
+    key: 'agent-command',
+    label: 'Agent Command',
+    icon: '⬡',
+    color: '#22D3EE',
+    subtitle: 'AI agents working on your behalf — approve, dismiss, configure.',
+    sourceSystems: ['All Systems'],
+  },
+  {
     key: 'integrations',
     label: 'Integrations',
     icon: '🔌',

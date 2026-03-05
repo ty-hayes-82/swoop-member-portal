@@ -10,6 +10,7 @@ import { FBPerformance } from '@/features/fb-performance';
 import { MemberHealth } from '@/features/member-health';
 import { StaffingService } from '@/features/staffing-service';
 import { GrowthPipeline } from '@/features/growth-pipeline';
+import { AgentCommand }    from '@/features/agent-command';
 import { IntegrationsPage } from '@/features/integrations';
 import { DemoMode } from '@/features/demo-mode';
 import { theme } from '@/config/theme';
@@ -22,6 +23,7 @@ const ROUTES = {
   'member-health':    MemberHealth,
   'staffing-service': StaffingService,
   'growth-pipeline':  GrowthPipeline,
+  'agent-command':    AgentCommand,
   'integrations':     IntegrationsPage,
   'demo-mode':        DemoMode,
 };

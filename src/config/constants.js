@@ -22,6 +22,24 @@ export const PLAYBOOK_IDS = {
 
 export const UNDERSTAFFED_DATES = ['2026-01-09', '2026-01-16', '2026-01-28'];
 
+export const AGENT_IDS = {
+  CHIEF_OF_STAFF:      'chief-of-staff',
+  SERVICE_RECOVERY:    'service-recovery',
+  STAFFING_OPTIMIZER:  'staffing-optimizer',
+  RETENTION_SENTINEL:  'retention-sentinel',
+  PIPELINE_NURTURE:    'pipeline-nurture',
+  PLAN_ORCHESTRATOR:   'plan-orchestrator',
+};
+
+export const AGENT_ACTION_TYPES = {
+  DRAFT_NOTE:    { icon: '✉️', label: 'Draft Personal Note',   color: '#6BB8EF' },
+  ALERT_STAFF:   { icon: '📣', label: 'Alert Staff',           color: '#F59E0B' },
+  SCHEDULE_CALL: { icon: '📅', label: 'Schedule Call',         color: '#A78BFA' },
+  ADJUST_STAFF:  { icon: '⊞',  label: 'Adjust Staffing',      color: '#F59E0B' },
+  SEND_INVITE:   { icon: '⛳', label: 'Send Tee Time Invite',  color: '#4ADE80' },
+  ESCALATE:      { icon: '⚠️', label: 'Escalate to GM',       color: '#C0392B' },
+};
+
 export const ROUTES = {
   BRIEFING:   'briefing',
   OPERATIONS: 'operations',
