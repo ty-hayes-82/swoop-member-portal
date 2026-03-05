@@ -29,11 +29,12 @@ export const theme = {
     success:      '#1A6B34',
     info:         '#1A5C8E',
 
-    // Chart
-    chartGolf:    '#1A7A3C',
-    chartFB:      '#D4A017',
-    chartBlue:    '#2E7BB8',
-    chartPurple:  '#7B5DC0',
+    // Chart — teal-shifted so bars don't read as "brand = healthy"
+    // chartGolf is intentionally distinct from operations (forest green)
+    chartGolf:    '#2E8B7A',   // teal-green — golf data bars
+    chartFB:      '#D4A017',   // warm gold — F&B data bars
+    chartBlue:    '#2E7BB8',   // mid blue — supplementary series
+    chartPurple:  '#7B5DC0',   // violet — member/email series
   },
   spacing: {
     xs:  '4px', sm:  '8px', md:  '16px',

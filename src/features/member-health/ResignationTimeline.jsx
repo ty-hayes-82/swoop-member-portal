@@ -3,7 +3,7 @@ import { getResignationScenarios } from '@/services/memberService';
 import { theme } from '@/config/theme';
 
 const DOMAIN_COLORS = {
-  Golf: theme.colors.operations,
+  Golf: theme.colors.chartGolf,
   'F&B': theme.colors.fb,
   Email: theme.colors.members,
   Feedback: theme.colors.urgent,

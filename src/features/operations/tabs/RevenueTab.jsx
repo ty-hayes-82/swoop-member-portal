@@ -103,9 +103,9 @@ export default function RevenueTab() {
             <YAxis tick={{ fill: theme.colors.textMuted, fontSize: 10 }} tickLine={false}
               tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="golf" stackId="a" fill={theme.colors.operations} radius={[0, 0, 0, 0]}>
+            <Bar dataKey="golf" stackId="a" fill={theme.colors.chartGolf} radius={[0, 0, 0, 0]}>
               {data.map((d, i) => (
-                <Cell key={i} fill={d.isUnderstaffed ? theme.colors.warning : theme.colors.operations} />
+                <Cell key={i} fill={d.isUnderstaffed ? theme.colors.warning : theme.colors.chartGolf} />
               ))}
             </Bar>
             <Bar dataKey="fb" stackId="a" fill={theme.colors.fb} radius={[3, 3, 0, 0]}>
@@ -114,7 +114,7 @@ export default function RevenueTab() {
           </BarChart>
         </ResponsiveContainer>
         <div style={{ display: 'flex', gap: theme.spacing.md, marginTop: theme.spacing.sm }}>
-          {[{ color: theme.colors.operations, label: 'Golf' },
+          {[{ color: theme.colors.chartGolf, label: 'Golf' },
             { color: theme.colors.fb, label: 'F&B' },
             { color: theme.colors.warning, label: 'Jan 9, 16, 28 — understaffed' }].map(({ color, label }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -134,7 +134,7 @@ export default function RevenueTab() {
       <TrendChart
         title="Monthly Revenue Trend — Golf + F&B"
         seriesKeys={[
-          { key: 'golfRevenue', color: theme.colors.operations, label: 'Golf Revenue' },
+          { key: 'golfRevenue', color: theme.colors.chartGolf, label: 'Golf Revenue' },
           { key: 'fbRevenue',   color: theme.colors.fb,         label: 'F&B Revenue' },
         ]}
         format="currency"

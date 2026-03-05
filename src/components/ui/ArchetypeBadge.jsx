@@ -2,14 +2,14 @@
 // Hard ceiling: 150 lines. Target: 60 lines.
 
 const ARCHETYPES = {
-  'Die-Hard Golfer':   { color: '#4ADE80', icon: '⛳' },
-  'Social Butterfly':  { color: '#F472B6', icon: '🦋' },
-  'Balanced Active':   { color: '#6BB8EF', icon: '◉'  },
-  'Weekend Warrior':   { color: '#F0C674', icon: '📅'  },
-  'Declining':         { color: '#EF4444', icon: '📉'  },
-  'New Member':        { color: '#22C55E', icon: '★'   },
-  'Ghost':             { color: '#8BAF8B', icon: '👻'  },
-  'Snowbird':          { color: '#A78BFA', icon: '✈'   },
+  'Die-Hard Golfer':   { color: '#2E8B7A', icon: '⛳' },  // teal-green — matches chartGolf
+  'Social Butterfly':  { color: '#C2608A', icon: '🦋' },  // deep rose — distinct
+  'Balanced Active':   { color: '#2E7BB8', icon: '◉'  },  // mid blue — stable
+  'Weekend Warrior':   { color: '#9A6B00', icon: '📅'  },  // warm amber — weekend energy
+  'Declining':         { color: '#8B5A2B', icon: '📉'  },  // warm brown — fading, NOT urgent red
+  'New Member':        { color: '#1A7A9A', icon: '★'   },  // deep teal-blue — fresh, NOT healthy green
+  'Ghost':             { color: '#7A8C7D', icon: '👻'  },  // muted sage — invisible
+  'Snowbird':          { color: '#6B7FBF', icon: '✈'   },  // slate blue — seasonal
 };
 
 export default function ArchetypeBadge({ archetype, size = 'sm' }) {

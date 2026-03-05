@@ -58,13 +58,13 @@ export default function PaceTab() {
                 borderRadius: 8, boxShadow: theme.shadow.md, fontSize: 12 }}
               labelStyle={{ color: theme.colors.textPrimary, fontWeight: 600, marginBottom: 4 }} />
             <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-              {dist.map((d, i) => <Cell key={i} fill={d.isSlow ? theme.colors.urgent : theme.colors.operations} />)}
+              {dist.map((d, i) => <Cell key={i} fill={d.isSlow ? theme.colors.urgent : theme.colors.chartGolf} />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
         <div style={{ display: 'flex', gap: theme.spacing.md }}>
           <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-            <span style={{ color: theme.colors.operations }}>■</span> Normal pace
+            <span style={{ color: theme.colors.chartGolf }}>■</span> Normal pace
           </span>
           <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
             <span style={{ color: theme.colors.urgent }}>■</span> Slow (4:30+)

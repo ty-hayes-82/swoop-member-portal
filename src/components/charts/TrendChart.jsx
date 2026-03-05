@@ -14,7 +14,7 @@ const FMT = {
 };
 
 export default function TrendChart({
-  title, metricKey, seriesKeys, color = theme.colors.operations,
+  title, metricKey, seriesKeys, color = theme.colors.chartGolf,
   format = 'number', defaultExpanded = false,
 }) {
   const [open, setOpen] = useState(defaultExpanded);
