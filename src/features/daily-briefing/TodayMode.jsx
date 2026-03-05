@@ -1,19 +1,69 @@
-// TodayMode — Phase 4: "Collapse into 3 things that matter this morning"
-// Critique: "Show almost nothing — just the one or two things that actually matter today"
+// TodayMode — 3 things that matter this morning.
+// Phase B fix: item 3 renders actual interactive member rows, not prose.
+import { useState } from 'react';
 import { theme } from '@/config/theme';
+import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 
 const HOUR = new Date().getHours();
 const IS_MORNING = HOUR < 12;
 const IS_EOD = HOUR >= 17;
 
-// Time-of-day greeting
 const timeLabel = IS_MORNING ? 'This morning' : IS_EOD ? "Today's close" : 'Right now';
 const timeGreet = IS_MORNING
   ? "Here are the three things that need your attention before the first tee time."
   : IS_EOD
   ? "Here's how the day closed out and what's pending tomorrow."
   : "Here's where things stand mid-day.";
+
+// Hoverable mini member row for item 3
+function MiniMemberRow({ member, onNavigate }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onClick={() => onNavigate?.('member-health')}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: '10px',
+        padding: '9px 12px', borderRadius: theme.radius.sm,
+        background: hovered ? `${theme.colors.members}14` : `${theme.colors.members}08`,
+        border: `1px solid ${hovered ? theme.colors.members + '45' : theme.colors.members + '22'}`,
+        cursor: 'pointer', transition: 'all 0.12s ease',
+      }}
+    >
+      <div style={{
+        width: 28, height: 28, borderRadius: '50%',
+        background: `${theme.colors.members}20`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '11px', fontFamily: theme.fonts.mono,
+        color: theme.colors.members, fontWeight: 700, flexShrink: 0,
+      }}>
+        {member.score}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+          <span style={{
+            fontSize: theme.fontSize.sm, fontWeight: 600,
+            color: hovered ? theme.colors.members : theme.colors.textPrimary,
+            transition: 'color 0.12s ease',
+          }}>
+            {member.name}
+          </span>
+          <ArchetypeBadge archetype={member.archetype} size="xs" />
+        </div>
+        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{member.risk}</div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+        <span style={{ fontSize: theme.fontSize.xs, fontFamily: theme.fonts.mono, color: theme.colors.textSecondary }}>{member.time}</span>
+        <span style={{
+          fontSize: '14px', color: hovered ? theme.colors.members : theme.colors.textMuted,
+          transition: 'color 0.12s ease',
+        }}>›</span>
+      </div>
+    </div>
+  );
+}
 
 export default function TodayMode({ onNavigate }) {
   const items = [
@@ -24,7 +74,6 @@ export default function TodayMode({ onNavigate }) {
       headline: 'James Whitfield filed a complaint 6 days ago. No one has followed up.',
       story: 'He had lunch in the Grill Room on January 16th — the day we were short-staffed. Food took 40 minutes. He complained that evening. We acknowledged it and stopped there. He hasn\'t been back. He has a tee time Saturday morning.',
       stakes: '$18,000/yr in dues',
-      action: 'service-save',
       memberName: 'James Whitfield',
       memberId: 'mbr_203',
       context: 'Slow service complaint at Grill Room — felt ignored after acknowledging.',
@@ -38,7 +87,6 @@ export default function TodayMode({ onNavigate }) {
       headline: 'Wind advisory today — 15+ mph gusts expected by noon.',
       story: 'Historically, wind days reduce golf bookings by 15% after the forecast is confirmed. We have 28 tee times this afternoon. The Grill Room should expect a 20–30% uptick in lunch covers if members cancel and stay.',
       stakes: 'Prepare F&B staff',
-      action: null,
       linkLabel: 'Operations →',
       linkKey: 'operations',
     },
@@ -47,9 +95,12 @@ export default function TodayMode({ onNavigate }) {
       urgency: 'neutral',
       icon: '👥',
       headline: '2 more at-risk members have tee times today.',
-      story: 'Anne Jordan (Weekend Warrior, 3 rounds in 3 months down from 12) tees off at 8:14 AM. Robert Callahan (dining only hitting his F&B minimum) is in the 10:40 group. Both are on a slow path out.',
+      story: null, // replaced by member rows below
+      members: [
+        { name: 'Anne Jordan',      score: 38, archetype: 'Weekend Warrior', risk: '3 rounds in 3 months, down from 12 in October', time: '8:14 AM' },
+        { name: 'Robert Callahan',  score: 41, archetype: 'Declining',        risk: 'Dining only — hitting F&B minimum, nothing more',  time: '10:40 AM' },
+      ],
       stakes: '$36K annual dues',
-      action: null,
       linkLabel: 'Member Retention →',
       linkKey: 'member-health',
     },
@@ -70,7 +121,6 @@ export default function TodayMode({ onNavigate }) {
         </h2>
       </div>
 
-      {/* 3 items only */}
       {items.map((item) => (
         <div key={item.priority} style={{
           background: urgencyBg[item.urgency],
@@ -94,9 +144,20 @@ export default function TodayMode({ onNavigate }) {
                   </div>
                 )}
               </div>
-              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginTop: '6px', lineHeight: 1.6 }}>
-                {item.story}
-              </div>
+              {/* Prose story — items 1 & 2 */}
+              {item.story && (
+                <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginTop: '6px', lineHeight: 1.6 }}>
+                  {item.story}
+                </div>
+              )}
+              {/* Interactive member rows — item 3 */}
+              {item.members && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '10px' }}>
+                  {item.members.map(m => (
+                    <MiniMemberRow key={m.name} member={m} onNavigate={onNavigate} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -106,10 +167,9 @@ export default function TodayMode({ onNavigate }) {
             )}
             <button
               onClick={() => onNavigate(item.linkKey)}
-              style={{ padding: '6px 2px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
+              style={{ padding: '6px 2px', fontSize: theme.fontSize.sm,
                 fontWeight: 500, cursor: 'pointer', border: 'none',
-                background: 'none', color: theme.colors.textMuted,
-                textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                background: 'none', color: theme.colors.textMuted, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               {item.linkLabel}
             </button>
           </div>
