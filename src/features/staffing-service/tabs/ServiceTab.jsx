@@ -81,6 +81,23 @@ export default function ServiceTab() {
             ))}
           </div>
 
+          {/* Service Recovery Agent annotation — Step 12 */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '8px 12px', marginBottom: theme.spacing.sm,
+            background: 'rgba(34,211,238,0.04)',
+            border: '1px solid rgba(34,211,238,0.20)',
+            borderRadius: theme.radius.sm,
+            fontSize: theme.fontSize.xs,
+            color: '#22D3EE',
+          }}>
+            <span style={{ fontFamily: theme.fonts.mono, fontSize: 13, opacity: 0.9 }}>⬡</span>
+            <span>
+              <strong>Service Recovery Agent</strong> flagged this complaint 4 days ago and proposed a follow-up task.
+              No action was approved. <span style={{ color: theme.colors.textMuted, marginLeft: 4 }}>Jan 13 · 8:43 AM</span>
+            </span>
+          </div>
+
           <QuickActions
             memberName="James Whitfield"
             memberId="mbr_203"

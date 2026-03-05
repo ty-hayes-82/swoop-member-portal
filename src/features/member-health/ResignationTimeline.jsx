@@ -11,6 +11,15 @@ const DOMAIN_COLORS = {
   Membership: '#EF4444',
 };
 
+// Sentinel annotations — keyed by memberId (Step 12)
+const SENTINEL_EVENTS = {
+  'mbr_042': { date: 'Jan 5',  note: 'Retention Sentinel flagged multi-domain decay and proposed re-engagement invite — dismissed' },
+  'mbr_117': { date: 'Jan 12', note: 'Retention Sentinel flagged complete disengagement and proposed personal GM outreach — not actioned' },
+  'mbr_203': { date: 'Jan 13', note: 'Retention Sentinel flagged complaint + visit gap and proposed tee time invite — not actioned' },
+  'mbr_089': { date: 'Jan 14', note: 'Retention Sentinel flagged round frequency decline and proposed waitlist priority offer — dismissed' },
+  'mbr_271': { date: 'Jan 20', note: 'Retention Sentinel flagged obligation-only spend pattern and proposed F&B engagement — not actioned' },
+};
+
 export default function ResignationTimeline() {
   const scenarios = getResignationScenarios();
   const [expanded, setExpanded] = useState(null);
@@ -68,6 +77,23 @@ export default function ResignationTimeline() {
                         lineHeight: 1.5 }}>{t.event}</span>
                     </div>
                   ))}
+                  {/* Retention Sentinel annotation — Step 12 */}
+                  {SENTINEL_EVENTS[s.memberId] && (() => {
+                    const sv = SENTINEL_EVENTS[s.memberId];
+                    return (
+                      <div style={{ display: 'flex', gap: theme.spacing.md, alignItems: 'flex-start',
+                        marginTop: 6, paddingTop: 8, borderTop: '1px dashed rgba(34,211,238,0.20)' }}>
+                        <span style={{ flexShrink: 0, width: 70, fontSize: theme.fontSize.xs,
+                          color: '#22D3EE', fontFamily: theme.fonts.mono, paddingTop: 2, opacity: 0.8 }}>
+                          {sv.date}
+                        </span>
+                        <span style={{ flexShrink: 0, fontSize: 11, marginTop: 3, opacity: 0.7, color: '#22D3EE' }}>⬡</span>
+                        <span style={{ fontSize: theme.fontSize.xs, color: '#22D3EE', lineHeight: 1.5, opacity: 0.85 }}>
+                          {sv.note}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             )}
