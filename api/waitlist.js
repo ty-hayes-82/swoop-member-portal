@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         FROM cancellation_risk cr
         JOIN bookings b ON cr.booking_id = b.booking_id
         JOIN members m ON cr.member_id = m.member_id
-        WHERE b.booking_date >= CURRENT_DATE AND b.status = 'confirmed'
+        WHERE b.booking_date::date >= '2026-01-01'::date AND b.status = 'confirmed'
         ORDER BY cr.cancel_probability DESC LIMIT 20`,
 
       sql`
