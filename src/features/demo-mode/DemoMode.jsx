@@ -1,7 +1,7 @@
-import { Panel } from '@/components/ui';
+import { Panel, ConnectedSystems } from '@/components/ui';
+import Integrations from './Integrations';
 import { useNavigation } from '@/hooks/useNavigation';
 import { theme } from '@/config/theme';
-import Integrations from './Integrations';
 
 const SCENARIOS = [
   {
@@ -49,6 +49,7 @@ export default function DemoMode() {
       accentColor={theme.colors.fb}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xl }}>
+
         {/* Scenarios */}
         <div>
           <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary,
@@ -103,11 +104,18 @@ export default function DemoMode() {
           </div>
         </div>
 
-        {/* Integrations — answers "how does it connect?" */}
+        {/* Integrations section */}
         <div>
           <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary,
-            marginBottom: theme.spacing.md }}>System Integrations</div>
+            marginBottom: theme.spacing.md }}>Integrations & Go-Live Timeline</div>
           <Integrations />
+        </div>
+
+        {/* Connected Systems status */}
+        <div>
+          <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary,
+            marginBottom: theme.spacing.md }}>Live Connections (Simulated)</div>
+          <ConnectedSystems />
         </div>
 
         {/* Closing question */}
@@ -119,6 +127,7 @@ export default function DemoMode() {
             "Which of these insights could you get today<br />from your current systems?"
           </div>
         </div>
+
       </div>
     </Panel>
   );
