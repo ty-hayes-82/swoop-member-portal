@@ -51,7 +51,7 @@ export default function Panel({
                     fontSize: '13px',
                     fontWeight: active ? 600 : 400,
                     color: active ? 'var(--text-primary)' : 'var(--text-muted)',
-                    borderBottom: active ? '2px solid var(--operations)' : '2px solid transparent',
+                    borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
                     background: 'none',
                     transition: 'color 0.15s, border-color 0.15s',
                     cursor: 'pointer',

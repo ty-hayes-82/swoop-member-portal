@@ -15,7 +15,7 @@ export default function DemandTab() {
         {[
           { label: 'Waitlist Entries', value: total, sub: 'Total unmet demand', accent: theme.colors.operations },
           { label: 'Event Overlap', value: `${eventOverlapCount}/${gaps.length}`, sub: 'Slots on event days', accent: theme.colors.warning },
-          { label: 'Peak Slot', value: 'Sat 7–9 AM', sub: 'Highest demand window', accent: theme.colors.briefing },
+          { label: 'Peak Slot', value: 'Sat 7–9 AM', sub: 'Highest demand window', accent: theme.colors.textSecondary },
         ].map(({ label, value, sub, accent }) => (
           <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm,
             border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md,

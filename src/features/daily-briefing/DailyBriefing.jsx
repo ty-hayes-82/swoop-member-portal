@@ -78,7 +78,7 @@ export default function DailyBriefing() {
                   James Whitfield · Balanced Active · $18,000/yr in dues
                 </div>
               </div>
-              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.briefing, textAlign: 'right', flexShrink: 0, fontWeight: 500 }}>
+              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, textAlign: 'right', flexShrink: 0, fontWeight: 500 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>Full case →</div>
                 <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>Staffing & Service</div>
               </div>

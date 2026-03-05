@@ -77,7 +77,7 @@ const DECAY_AFTER = [
 const MBR_203_CONTEXT = {
   name: 'James Whitfield',
   archetype: 'Balanced Active',
-  color: theme.colors.briefing,
+  color: theme.colors.textPrimary,
   profile: 'Normally engaged across all domains — complaint from this archetype is a red flag',
 };
 

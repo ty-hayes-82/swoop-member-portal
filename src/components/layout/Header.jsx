@@ -50,9 +50,9 @@ export default function Header() {
         {/* Live indicator */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px',
           padding: '3px 8px', borderRadius: '12px',
-          background: '#1A6B3412', border: '1px solid #1A6B3430' }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#1A6B34' }} />
-          <span style={{ fontSize: '10px', color: '#1A6B34', fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
+          background: '#F3922D12', border: '1px solid #F3922D30' }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#F3922D' }} />
+          <span style={{ fontSize: '10px', color: '#F3922D', fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
         </div>
       </div>
     </header>

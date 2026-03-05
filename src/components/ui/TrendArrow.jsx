@@ -1,7 +1,7 @@
 export default function TrendArrow({ direction, value, period, inverted = false }) {
   const isGood = inverted ? direction === 'down' : direction === 'up';
   const isFlat = direction === 'flat';
-  const color = isFlat ? 'var(--text-muted)' : (isGood ? '#22C55E' : '#EF4444');
+  const color = isFlat ? 'var(--text-muted)' : (isGood ? 'var(--success)' : 'var(--urgent)');
   const arrow = direction === 'up' ? '▲' : direction === 'down' ? '▼' : '—';
   const pct   = value != null ? `${Math.abs(value).toFixed(1)}%` : '';
 

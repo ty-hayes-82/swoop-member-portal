@@ -43,9 +43,9 @@ export default function ArchetypeTab() {
           return (
             <button key={p.archetype} onClick={() => setSelected(p.archetype)} style={{
               padding: '6px 14px', borderRadius: theme.radius.md, cursor: 'pointer',
-              border: `1px solid ${isSelected ? theme.colors.members : theme.colors.border}`,
-              background: isSelected ? `${theme.colors.members}14` : theme.colors.bgCard,
-              color: isSelected ? theme.colors.members : theme.colors.textSecondary,
+              border: `1px solid ${isSelected ? theme.colors.accent : theme.colors.border}`,
+              background: isSelected ? `${theme.colors.accent}08` : theme.colors.bgCard,
+              color: isSelected ? theme.colors.accent : theme.colors.textSecondary,
               fontSize: theme.fontSize.xs, fontWeight: isSelected ? 700 : 400,
             }}>
               {p.archetype}

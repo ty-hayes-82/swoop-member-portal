@@ -26,8 +26,8 @@ export default function PlaybookStep({ stepNumber, title, description, timeline,
     desc: { fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.5 },
     timeline: {
       display: 'inline-block', marginTop: 6,
-      fontSize: theme.fontSize.xs, color: theme.colors.briefing,
-      background: `${theme.colors.briefing}15`,
+      fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
+      background: theme.colors.bgDeep,
       padding: '2px 8px', borderRadius: theme.radius.sm,
     },
   };

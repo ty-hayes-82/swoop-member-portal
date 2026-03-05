@@ -5,7 +5,7 @@ import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 const TIER_COLORS = {
   hot:  theme.colors.urgent,
   warm: theme.colors.warning,
-  cool: theme.colors.briefing,
+  cool: theme.colors.textMuted,
   cold: theme.colors.textMuted,
 };
 
@@ -67,7 +67,7 @@ export default function LeadCard({ lead }) {
                 borderRadius: theme.radius.sm, textAlign: 'center' }}>
                 <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{label}</div>
                 <div style={{ fontSize: theme.fontSize.md, fontFamily: theme.fonts.mono,
-                  fontWeight: 700, color: theme.colors.pipeline }}>{value}</div>
+                  fontWeight: 700, color: theme.colors.textPrimary }}>{value}</div>
               </div>
             ))}
           </div>

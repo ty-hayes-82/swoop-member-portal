@@ -3,8 +3,8 @@ import { useApp } from '@/context/AppContext.jsx';
 
 const PLAYBOOK_META = {
   'service-save':      { color: '#EF4444', urgency: 'urgent',  icon: '🛡', label: 'Service Save' },
-  'slow-saturday':     { color: '#4ADE80', urgency: 'warning', icon: '⏱', label: 'Slow Saturday' },
-  'engagement-decay':  { color: '#A78BFA', urgency: 'warning', icon: '📉', label: 'Engagement Decay' },
+  'slow-saturday':     { color: '#2E8B7A', urgency: 'warning', icon: '⏱', label: 'Slow Saturday' },
+  'engagement-decay':  { color: '#C49A2A', urgency: 'warning', icon: '📉', label: 'Engagement Decay' },
   'staffing-gap':      { color: '#F59E0B', urgency: 'warning', icon: '⚠', label: 'Staffing Gap' },
 };
 

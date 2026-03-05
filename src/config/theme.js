@@ -1,21 +1,24 @@
 // theme.js — Light mode design tokens
-// Warm cream / forest green / confident serif — built for a GM's iPad at 6 AM
+// Clean neutral base + one orange accent — minimal, executive, swoopgolf.com-aligned
 
 export const theme = {
   colors: {
-    // Base — light, warm, trustworthy
-    bg:           '#F7F5F2',   // warm off-white
+    // Base — clean neutral, not parchment
+    bg:           '#F8F9FA',   // near-white, cool-neutral
     bgCard:       '#FFFFFF',
-    bgCardHover:  '#F2EFE9',
-    bgDeep:       '#EDE9E1',
-    bgSidebar:    '#1F2F24',   // dark sidebar stays — contrast and calm
-    border:       '#DDD8CF',
-    borderLight:  '#EAE6DE',
-    textPrimary:  '#1A2B1C',   // near-black forest
-    textSecondary:'#4A6350',   // mid forest
-    textMuted:    '#8A9E8D',   // muted sage
+    bgCardHover:  '#F1F1F2',
+    bgDeep:       '#EAEAEC',
+    bgSidebar:    '#1F2F24',   // dark sidebar — stays exactly as-is
+    border:       '#E4E4E7',
+    borderLight:  '#EFEFEF',
+    textPrimary:  '#18181B',   // near-black, neutral (was green-tinted)
+    textSecondary:'#52525B',   // mid grey (was green-tinted)
+    textMuted:    '#71717A',   // muted grey (was sage-green)
 
-    // Decision-view accents — deep, credible, not neon
+    // Single interactive accent
+    accent:       '#F3922D',   // Swoop orange — every CTA, active state, live indicator
+
+    // Lens orientation — sidebar left-border only, never used in content area
     operations:   '#1A7A3C',   // deep forest green
     fb:           '#8B6420',   // warm amber
     members:      '#5B3FA0',   // deep purple
@@ -23,18 +26,17 @@ export const theme = {
     pipeline:     '#8B2258',   // deep rose
     briefing:     '#1A5C8E',   // deep blue
 
-    // Semantic
+    // Semantic — untouched, must remain unmistakable
     urgent:       '#C0392B',
     warning:      '#B5760A',
     success:      '#1A6B34',
     info:         '#1A5C8E',
 
-    // Chart — teal-shifted so bars don't read as "brand = healthy"
-    // chartGolf is intentionally distinct from operations (forest green)
+    // Chart — two data colors, neither competes with accent orange
     chartGolf:    '#2E8B7A',   // teal-green — golf data bars
-    chartFB:      '#D4A017',   // warm gold — F&B data bars
-    chartBlue:    '#2E7BB8',   // mid blue — supplementary series
-    chartPurple:  '#7B5DC0',   // violet — member/email series
+    chartFB:      '#C49A2A',   // toned warm gold — F&B data bars (was #D4A017)
+    chartBlue:    '#2E7BB8',   // kept for any remaining supplementary use
+    chartPurple:  '#7B5DC0',   // kept for any remaining supplementary use
   },
   spacing: {
     xs:  '4px', sm:  '8px', md:  '16px',

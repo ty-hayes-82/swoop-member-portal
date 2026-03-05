@@ -17,15 +17,15 @@ const VARIANT_STYLES = {
     icon: '◆',
   },
   insight: {
-    borderColor: theme.colors.operations,
-    accentColor: theme.colors.operations,
-    bg: `${theme.colors.operations}06`,
+    borderColor: theme.colors.accent,
+    accentColor: theme.colors.accent,
+    bg: `${theme.colors.accent}06`,
     icon: '◈',
   },
   opportunity: {
-    borderColor: theme.colors.pipeline,
-    accentColor: theme.colors.pipeline,
-    bg: `${theme.colors.pipeline}06`,
+    borderColor: theme.colors.accent,
+    accentColor: theme.colors.accent,
+    bg: `${theme.colors.accent}06`,
     icon: '◎',
   },
 };

@@ -63,16 +63,16 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
         </div>
       )}
       <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
-        {primaryBtn('Draft personal note', '✉', 'note', theme.colors.briefing)}
+        {primaryBtn('Draft personal note', '✉', 'note', theme.colors.accent)}
         {primaryBtn('Schedule a call', '📞', 'call', theme.colors.success)}
         {secondaryBtn('Assign to staff', '→', 'task', theme.colors.staffing)}
       </div>
 
       {mode === 'note' && (
         <div style={{ marginTop: theme.spacing.sm, padding: theme.spacing.md,
-          background: theme.colors.bgCard, border: '1px solid ' + theme.colors.briefing + '30',
+          background: theme.colors.bgCard, border: '1px solid ' + theme.colors.accent + '30',
           borderRadius: theme.radius.md }}>
-          <div style={{ fontSize: '11px', color: theme.colors.briefing, fontWeight: 700, letterSpacing: '0.05em', marginBottom: theme.spacing.sm }}>
+          <div style={{ fontSize: '11px', color: theme.colors.accent, fontWeight: 700, letterSpacing: '0.05em', marginBottom: theme.spacing.sm }}>
             PERSONAL NOTE TO {memberName?.toUpperCase()}
           </div>
           <textarea
@@ -87,8 +87,8 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
             <button onClick={() => handleSend('note')} style={{
               padding: '7px 18px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
               fontWeight: 600, cursor: 'pointer', border: 'none',
-              background: theme.colors.briefing, color: '#fff',
-              boxShadow: '0 1px 4px ' + theme.colors.briefing + '40' }}>
+              background: theme.colors.accent, color: '#fff',
+              boxShadow: '0 1px 4px ' + theme.colors.accent + '40' }}>
               Send via email
             </button>
             <button onClick={() => setMode(null)} style={{
@@ -125,7 +125,7 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
             <button onClick={() => handleSend('call')} style={{
               padding: '7px 18px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
               fontWeight: 600, cursor: 'pointer', border: 'none',
-              background: theme.colors.success, color: '#fff',
+              background: theme.colors.accent, color: '#fff',
               boxShadow: '0 1px 4px ' + theme.colors.success + '40' }}>
               Add to calendar
             </button>
@@ -159,7 +159,7 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
             <button onClick={() => handleSend('task')} style={{
               padding: '7px 18px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
               fontWeight: 600, cursor: 'pointer', border: 'none',
-              background: theme.colors.staffing, color: '#fff',
+              background: theme.colors.accent, color: '#fff',
               boxShadow: '0 1px 4px ' + theme.colors.staffing + '40' }}>
               Assign task
             </button>

@@ -6,9 +6,9 @@ import { theme } from '@/config/theme';
 import { getPipelineSummary, getWarmLeads } from '@/services/pipelineService';
 
 const TIER_COLORS = {
-  hot:  theme.colors.pipeline,
+  hot:  theme.colors.accent,
   warm: theme.colors.warning,
-  cool: theme.colors.briefing,
+  cool: theme.colors.textMuted,
   cold: theme.colors.textMuted,
 };
 
@@ -22,21 +22,21 @@ export default function PipelineSnapshot({ onNavigate }) {
     <div
       onClick={() => onNavigate?.('growth-pipeline')}
       style={{
-        background:   `${theme.colors.pipeline}0A`,
-        border:       `1px solid ${theme.colors.pipeline}35`,
+        background:   `${theme.colors.accent}08`,
+        border:       `1px solid ${theme.colors.accent}30`,
         borderRadius: theme.radius.md,
         padding:      theme.spacing.md,
         cursor:       'pointer',
         transition:   'background 0.15s',
       }}
-      onMouseEnter={e => e.currentTarget.style.background = `${theme.colors.pipeline}14`}
-      onMouseLeave={e => e.currentTarget.style.background = `${theme.colors.pipeline}0A`}
+      onMouseEnter={e => e.currentTarget.style.background = `${theme.colors.accent}10`}
+      onMouseLeave={e => e.currentTarget.style.background = `${theme.colors.accent}08`}
     >
       {/* Header row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.sm }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '14px' }}>◎</span>
-          <span style={{ fontSize: '12px', fontWeight: 700, color: theme.colors.pipeline,
+          <span style={{ fontSize: '12px', fontWeight: 700, color: theme.colors.textPrimary,
             letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             Growth Pipeline
           </span>
@@ -59,7 +59,7 @@ export default function PipelineSnapshot({ onNavigate }) {
       {/* Revenue potential highlight */}
       <div style={{ marginBottom: theme.spacing.sm, display: 'flex', alignItems: 'baseline', gap: '8px' }}>
         <span style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xl,
-          fontWeight: 700, color: theme.colors.pipeline }}>
+          fontWeight: 700, color: theme.colors.textPrimary }}>
           ${totalPotential.toLocaleString()}
         </span>
         <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>
@@ -71,9 +71,9 @@ export default function PipelineSnapshot({ onNavigate }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {hotLeads.map(lead => (
           <div key={lead.guestName} style={{ display: 'flex', alignItems: 'center', gap: '10px',
-            padding: '6px 8px', background: `${theme.colors.pipeline}10`, borderRadius: theme.radius.sm }}>
-            <span style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.pipeline, minWidth: '28px',
-              textAlign: 'center', padding: '2px 4px', background: `${theme.colors.pipeline}20`,
+            padding: '6px 8px', background: `${theme.colors.accent}08`, borderRadius: theme.radius.sm }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.textPrimary, minWidth: '28px',
+              textAlign: 'center', padding: '2px 4px', background: `${theme.colors.accent}12`,
               borderRadius: '3px' }}>
               {lead.score}%
             </span>
@@ -91,7 +91,7 @@ export default function PipelineSnapshot({ onNavigate }) {
       </div>
 
       <div style={{ marginTop: '8px', textAlign: 'right' }}>
-        <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.pipeline, fontWeight: 500, cursor: 'pointer' }}>
+        <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textPrimary, fontWeight: 500, cursor: 'pointer' }}>
           View full pipeline →
         </span>
       </div>

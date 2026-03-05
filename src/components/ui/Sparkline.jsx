@@ -1,6 +1,6 @@
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 
-export default function Sparkline({ data = [], color = '#4ADE80', height = 32, showDots = false }) {
+export default function Sparkline({ data = [], color = '#2E8B7A', height = 32, showDots = false }) {
   if (!data.length) return null;
 
   const chartData = data.map((v, i) => ({ i, v }));

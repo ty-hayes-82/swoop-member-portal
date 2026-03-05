@@ -20,22 +20,22 @@ function AtRiskRow({ m, onNavigate }) {
       style={{
         display: 'flex', alignItems: 'center', gap: '12px',
         padding: '10px 14px',
-        background: hovered ? '#A78BFA16' : '#A78BFA08',
-        border: `1px solid ${hovered ? '#A78BFA50' : '#A78BFA22'}`,
+        background: hovered ? '16' : '08',
+        border: `1px solid ${hovered ? '50' : '22'}`,
         borderRadius: '8px', cursor: 'pointer',
         transition: 'all 0.12s ease',
       }}
     >
-      <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#A78BFA22',
+      <div style={{ width: 32, height: 32, borderRadius: '50%', background: '22',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '12px', color: '#A78BFA', fontWeight: 700, flexShrink: 0 }}>
+        fontSize: '12px', color: '#F3922D', fontWeight: 700, flexShrink: 0 }}>
         {m.score}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
           <span style={{
             fontSize: '13px', fontWeight: 600,
-            color: hovered ? '#A78BFA' : theme.colors.textPrimary,
+            color: hovered ? '#F3922D' : theme.colors.textPrimary,
             transition: 'color 0.12s ease',
           }}>{m.name}</span>
           {m.archetype && <ArchetypeBadge archetype={m.archetype} size="xs" />}
@@ -44,7 +44,7 @@ function AtRiskRow({ m, onNavigate }) {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <div style={{ fontSize: '12px', color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>{m.time}</div>
-        <span style={{ color: hovered ? '#A78BFA' : theme.colors.textMuted, fontSize: '14px', transition: 'color 0.12s ease' }}>›</span>
+        <span style={{ color: hovered ? '#F3922D' : theme.colors.textMuted, fontSize: '14px', transition: 'color 0.12s ease' }}>›</span>
       </div>
     </div>
   );

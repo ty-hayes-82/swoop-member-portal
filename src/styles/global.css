@@ -5,17 +5,19 @@
 }
 
 :root {
-  /* Light mode — warm cream + forest green */
-  --bg:            #F7F5F2;
+  /* Clean neutral base — no parchment, no green cast */
+  --bg:            #F8F9FA;
   --bg-card:       #FFFFFF;
-  --bg-card-hover: #F2EFE9;
-  --bg-deep:       #EDE9E1;
+  --bg-card-hover: #F1F1F2;
+  --bg-deep:       #EAEAEC;
   --bg-sidebar:    #1F2F24;
-  --border:        #DDD8CF;
-  --border-light:  #EAE6DE;
-  --text-primary:  #1A2B1C;
-  --text-secondary:#4A6350;
-  --text-muted:    #8A9E8D;
+  --border:        #E4E4E7;
+  --border-light:  #EFEFEF;
+  --text-primary:  #18181B;
+  --text-secondary:#52525B;
+  --text-muted:    #71717A;
+
+  --accent:     #F3922D;
 
   --operations: #1A7A3C;
   --fb:         #8B6420;

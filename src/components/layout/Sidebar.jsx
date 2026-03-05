@@ -1,15 +1,16 @@
-// Sidebar — dark sidebar, light body. Classic club aesthetic (like a member directory).
+// Sidebar — dark sidebar, light body. Classic club aesthetic.
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { useApp } from '@/context/AppContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
+import { theme } from '@/config/theme.js';
 
 const SIDEBAR_BG    = '#1F2F24';
 const SIDEBAR_CARD  = '#263B2C';
 const SIDEBAR_HOVER = '#2E4835';
 const SIDEBAR_BORDER= '#375040';
-const TEXT_LIGHT    = '#E8F0E8';
-const TEXT_DIM      = '#8BAF8B';
-const TEXT_MUTED    = '#5A7A5A';
+const TEXT_LIGHT    = '#F0F0F0';
+const TEXT_DIM      = 'rgba(255,255,255,0.42)';
+const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
 const TODAY_ITEMS = ['daily-briefing', 'operations', 'member-health', 'staffing-service'];
 
@@ -18,7 +19,6 @@ export default function Sidebar() {
   const { activeCount, totalRevenueImpact } = useApp();
   const w = sidebarCollapsed ? '52px' : '240px';
 
-  // In Today mode only show core items; Deep Dive shows all
   const visibleItems = viewMode === 'today'
     ? NAV_ITEMS.filter(n => TODAY_ITEMS.includes(n.key) || n.key === 'demo-mode')
     : NAV_ITEMS;
@@ -41,7 +41,7 @@ export default function Sidebar() {
       }}>
         <div style={{
           width: 28, height: 28, borderRadius: '6px', flexShrink: 0,
-          background: 'linear-gradient(135deg, #4ADE80, #1A7A3C)',
+          background: `linear-gradient(135deg, ${theme.colors.accent}, #1A7A3C)`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '13px', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px',
         }}>S</div>
@@ -53,15 +53,15 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* Today / Deep Dive mode toggle */}
+      {/* Today / Deep Dive toggle */}
       {!sidebarCollapsed && (
         <div style={{ margin: '12px', display: 'flex', borderRadius: '8px', background: '#0F1F14', padding: '2px' }}>
           {[['today', 'Today'], ['deep-dive', 'Deep Dive']].map(([mode, label]) => (
             <button key={mode} onClick={() => setViewMode(mode)} style={{
               flex: 1, padding: '6px 0', borderRadius: '6px', fontSize: '11px', fontWeight: 600,
               letterSpacing: '0.04em', cursor: 'pointer', border: 'none',
-              background: viewMode === mode ? SIDEBAR_HOVER : 'transparent',
-              color: viewMode === mode ? TEXT_LIGHT : TEXT_MUTED,
+              background: viewMode === mode ? theme.colors.accent : 'transparent',
+              color: viewMode === mode ? '#fff' : TEXT_MUTED,
               transition: 'all 0.15s',
             }}>{label}</button>
           ))}
@@ -74,7 +74,7 @@ export default function Sidebar() {
           <div style={{ fontSize: '10px', color: TEXT_MUTED, letterSpacing: '0.05em', marginBottom: '3px' }}>
             {activeCount} PLAN{activeCount > 1 ? 'S' : ''} ACTIVE
           </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', fontWeight: 600, color: '#4ADE80' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', fontWeight: 600, color: theme.colors.accent }}>
             +${(totalRevenueImpact.annual / 1000).toFixed(0)}K/yr
           </div>
         </div>
@@ -93,17 +93,17 @@ export default function Sidebar() {
                 width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
                 padding: sidebarCollapsed ? '10px 0' : '9px 14px',
                 justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-                background: active ? `${SIDEBAR_HOVER}` : 'none',
+                background: active ? SIDEBAR_HOVER : 'none',
                 borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
                 color: active ? TEXT_LIGHT : TEXT_DIM,
                 fontSize: '13px', fontWeight: active ? 600 : 400,
                 transition: 'all 0.12s', cursor: 'pointer',
                 borderRight: 'none', borderTop: 'none', borderBottom: 'none',
               }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#0F1F14'; }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'none'; }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.background = '#0F1F14'; e.currentTarget.style.color = TEXT_LIGHT; } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = TEXT_DIM; } }}
             >
-              <span style={{ fontSize: '14px', flexShrink: 0 }}>{item.icon}</span>
+              <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
               {!sidebarCollapsed && (
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {item.label}
@@ -119,7 +119,7 @@ export default function Sidebar() {
         <div style={{ margin: '0 12px 8px', padding: '7px 10px', background: '#0F1F14',
           border: `1px solid ${SIDEBAR_BORDER}`, borderRadius: '6px',
           display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#F0C674', flexShrink: 0 }} />
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: theme.colors.accent, opacity: 0.6, flexShrink: 0 }} />
           <span style={{ fontSize: '10px', color: TEXT_MUTED, letterSpacing: '0.04em' }}>
             Demo Environment · Oakmont Hills CC
           </span>

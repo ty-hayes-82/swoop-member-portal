@@ -3,8 +3,8 @@ const VARIANT_STYLES = {
   warning:  { bg: '#F59E0B20', color: '#F59E0B', border: '#F59E0B40' },
   success:  { bg: '#22C55E20', color: '#22C55E', border: '#22C55E40' },
   neutral:  { bg: '#8BAF8B20', color: '#8BAF8B', border: '#8BAF8B40' },
-  effort:   { bg: '#6BB8EF20', color: '#6BB8EF', border: '#6BB8EF40' },
-  timeline: { bg: '#A78BFA20', color: '#A78BFA', border: '#A78BFA40' },
+  effort:   { bg: 'var(--bg-deep)', color: 'var(--text-muted)', border: 'var(--border)' },
+  timeline: { bg: 'var(--bg-deep)', color: 'var(--text-muted)', border: 'var(--border)' },
 };
 
 export default function Badge({ text, variant = 'neutral', size = 'sm' }) {

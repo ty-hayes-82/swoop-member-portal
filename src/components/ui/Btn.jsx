@@ -18,7 +18,7 @@ const SIZE = {
 };
 
 function getVariantStyle(variant, accentColor, disabled) {
-  const accent = accentColor ?? theme.colors.operations;
+  const accent = accentColor ?? theme.colors.accent;   // orange by default
   if (disabled) return {
     background: theme.colors.bgDeep,
     color: theme.colors.textMuted,

@@ -27,17 +27,17 @@ function MiniMemberRow({ member, onNavigate }) {
       style={{
         display: 'flex', alignItems: 'center', gap: '10px',
         padding: '9px 12px', borderRadius: theme.radius.sm,
-        background: hovered ? `${theme.colors.members}14` : `${theme.colors.members}08`,
+        background: hovered ? `${theme.colors.accent}0A` : `${theme.colors.accent}08`,
         border: `1px solid ${hovered ? theme.colors.members + '45' : theme.colors.members + '22'}`,
         cursor: 'pointer', transition: 'all 0.12s ease',
       }}
     >
       <div style={{
         width: 28, height: 28, borderRadius: '50%',
-        background: `${theme.colors.members}20`,
+        background: `${theme.colors.accent}14`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: '11px', fontFamily: theme.fonts.mono,
-        color: theme.colors.members, fontWeight: 700, flexShrink: 0,
+        color: theme.colors.accent, fontWeight: 700, flexShrink: 0,
       }}>
         {member.score}
       </div>
@@ -45,7 +45,7 @@ function MiniMemberRow({ member, onNavigate }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
           <span style={{
             fontSize: theme.fontSize.sm, fontWeight: 600,
-            color: hovered ? theme.colors.members : theme.colors.textPrimary,
+            color: hovered ? theme.colors.accent : theme.colors.textPrimary,
             transition: 'color 0.12s ease',
           }}>
             {member.name}
@@ -57,7 +57,7 @@ function MiniMemberRow({ member, onNavigate }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
         <span style={{ fontSize: theme.fontSize.xs, fontFamily: theme.fonts.mono, color: theme.colors.textSecondary }}>{member.time}</span>
         <span style={{
-          fontSize: '14px', color: hovered ? theme.colors.members : theme.colors.textMuted,
+          fontSize: '14px', color: hovered ? theme.colors.accent : theme.colors.textMuted,
           transition: 'color 0.12s ease',
         }}>›</span>
       </div>

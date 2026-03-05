@@ -10,7 +10,7 @@ export default function GrowthPipeline() {
   const tiers = [
     { key: 'hot',  color: theme.colors.urgent  },
     { key: 'warm', color: theme.colors.warning },
-    { key: 'cool', color: theme.colors.briefing },
+    { key: 'cool', color: theme.colors.textPrimary },
     { key: 'cold', color: theme.colors.textMuted },
   ];
 
@@ -24,7 +24,7 @@ export default function GrowthPipeline() {
     <Panel
       title="Growth Pipeline"
       subtitle="Which guests are ready to become members?"
-      accentColor={theme.colors.pipeline}
+      accentColor={theme.colors.accent}
       sourceSystems={sourceSystems}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -53,7 +53,7 @@ export default function GrowthPipeline() {
               paddingRight: theme.spacing.md, ':last-child': { borderRight: 'none' } }}>
               <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{label}</div>
               <div style={{ fontSize: theme.fontSize.xl, fontFamily: theme.fonts.mono,
-                fontWeight: 700, color: theme.colors.pipeline }}>{value}</div>
+                fontWeight: 700, color: theme.colors.textPrimary }}>{value}</div>
             </div>
           ))}
         </div>

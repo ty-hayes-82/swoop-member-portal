@@ -28,9 +28,9 @@ function MemberRow({ m, isExpanded, onToggle }) {
         <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
           <span style={{
             fontWeight: 600,
-            color: hovered ? theme.colors.members : theme.colors.textPrimary,
+            color: hovered ? theme.colors.accent : theme.colors.textPrimary,
             textDecoration: hovered ? 'underline' : 'none',
-            textDecorationColor: `${theme.colors.members}60`,
+            textDecorationColor: `${theme.colors.accent}50`,
             transition: 'color 0.12s ease',
           }}>
             {m.name}
@@ -46,7 +46,7 @@ function MemberRow({ m, isExpanded, onToggle }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{m.topRisk}</span>
             <span style={{
-              color: isExpanded ? theme.colors.members : theme.colors.textMuted,
+              color: isExpanded ? theme.colors.accent : theme.colors.textMuted,
               flexShrink: 0, fontSize: '14px', fontWeight: 600,
               transition: 'transform 0.15s ease, color 0.12s ease',
               display: 'inline-block',
@@ -143,7 +143,7 @@ export default function HealthOverview() {
       <TrendChart
         title="Member Health Trend — avg score + at-risk count"
         seriesKeys={[
-          { key: 'memberHealthAvg',   color: theme.colors.members, label: 'Avg Health Score' },
+          { key: 'memberHealthAvg',   color: theme.colors.textPrimary, label: 'Avg Health Score' },
           { key: 'atRiskMemberCount', color: theme.colors.urgent,  label: 'At-Risk Members' },
         ]}
         format="number"
