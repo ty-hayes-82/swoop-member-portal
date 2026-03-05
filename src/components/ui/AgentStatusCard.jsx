@@ -8,7 +8,7 @@ function formatTime(iso) {
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
-export function AgentStatusCard({ agent, onToggle, onConfigure, overrideStatus }) {
+export function AgentStatusCard({ agent, onToggle, onConfigure, onViewLog, overrideStatus }) {
   const status = overrideStatus ?? agent.status;
   const isActive = status === 'active';
 
