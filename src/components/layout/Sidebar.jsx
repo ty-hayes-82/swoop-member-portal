@@ -26,12 +26,13 @@ export default function Sidebar() {
 
   return (
     <aside style={{
-      width: w, minWidth: w, height: '100vh',
+      width: w, height: '100vh',
       background: SIDEBAR_BG,
       borderRight: `1px solid ${SIDEBAR_BORDER}`,
       display: 'flex', flexDirection: 'column',
-      transition: 'width 0.2s ease, min-width 0.2s ease',
-      overflow: 'hidden', flexShrink: 0, position: 'sticky', top: 0,
+      transition: 'width 0.2s ease',
+      overflow: 'hidden', flexShrink: 0,
+      position: 'fixed', top: 0, left: 0, zIndex: 100,
     }}>
       {/* Logo */}
       <div style={{

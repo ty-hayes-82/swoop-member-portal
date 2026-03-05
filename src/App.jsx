@@ -29,13 +29,11 @@ function AppShell() {
 
   return (
     <div style={{
-      display: 'flex', minHeight: '100vh',
       background: theme.colors.bg, color: theme.colors.textPrimary,
       fontFamily: theme.fonts.sans,
     }}>
       <Sidebar />
       <div style={{
-        flex: 1,
         marginLeft: sidebarCollapsed ? 52 : 230,
         transition: 'margin-left 0.2s ease',
         display: 'flex', flexDirection: 'column',

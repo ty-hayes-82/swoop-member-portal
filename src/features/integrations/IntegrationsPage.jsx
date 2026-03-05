@@ -5,7 +5,7 @@ import { integrations } from '@/data/integrations';
 import { IntegrationsHero } from './IntegrationsHero';
 import { SelectionPrompt } from './SelectionPrompt';
 import { IntegrationCard } from './IntegrationCard';
-import { StickyPanel } from './StickyPanel';
+import { CombinationPanel } from './CombinationPanel';
 import { AllCombinationsGrid } from './AllCombinationsGrid';
 
 export function IntegrationsPage() {
@@ -21,7 +21,9 @@ export function IntegrationsPage() {
 
   function handleMiniCardSelect(pair) {
     setSelected(pair);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      document.getElementById('combination-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
 
   return (
@@ -35,54 +37,38 @@ export function IntegrationsPage() {
 
       <IntegrationsHero integrationCount={integrations.length} comboCount={14} />
 
-      {/* Two-column body */}
+      <SelectionPrompt selected={selected} />
+
+      <div style={{
+        fontSize: theme.fontSize.xs,
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: '1.2px',
+        color: '#7a8a7a',
+        marginBottom: 14,
+      }}>
+        YOUR CLUB&apos;S DATA SOURCES
+      </div>
+
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 360px',
-        gap: 24,
-        alignItems: 'start',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: 14,
+        marginBottom: 32,
       }}>
-
-        {/* LEFT — scrollable content */}
-        <div>
-          <SelectionPrompt selected={selected} />
-
-          <div style={{
-            fontSize: theme.fontSize.xs,
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '1.2px',
-            color: '#7a8a7a',
-            marginBottom: 14,
-          }}>
-            YOUR CLUB&apos;S DATA SOURCES
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 12,
-            marginBottom: 32,
-          }}>
-            {integrations.map(integration => (
-              <IntegrationCard
-                key={integration.id}
-                integration={integration}
-                isSelected={selected.includes(integration.id)}
-                onClick={() => handleCardClick(integration.id)}
-              />
-            ))}
-          </div>
-
-          <AllCombinationsGrid onSelect={handleMiniCardSelect} />
-        </div>
-
-        {/* RIGHT — sticky panel */}
-        <div style={{ position: 'sticky', top: 24 }}>
-          <StickyPanel selected={selected} />
-        </div>
-
+        {integrations.map(integration => (
+          <IntegrationCard
+            key={integration.id}
+            integration={integration}
+            isSelected={selected.includes(integration.id)}
+            onClick={() => handleCardClick(integration.id)}
+          />
+        ))}
       </div>
+
+      <CombinationPanel selected={selected} />
+
+      <AllCombinationsGrid onSelect={handleMiniCardSelect} />
     </div>
   );
 }
