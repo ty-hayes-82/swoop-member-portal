@@ -1,10 +1,18 @@
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 
 const PLAYBOOK_DEFS = {
   'slow-saturday':    { monthly: 8400,  annual: 100800 },
   'service-save':     { monthly: 18000, annual: 216000 },
   'engagement-decay': { monthly: 9200,  annual: 110400 },
   'staffing-gap':     { monthly: 2100,  annual: 25200  },
+};
+
+// Step labels that appear in the activation trail after pressing Activate
+const TRAIL_STEPS = {
+  'slow-saturday':    ['📡 Ranger dispatch sent to holes 4, 8, 12, 16', '📋 Saturday tee intervals updated: 8 → 10 min', '✉ Recovery offer template activated for 4:30+ rounds'],
+  'service-save':     ['🚩 mbr_203 flagged at front desk', '📢 F&B Director alerted with complaint details', '✉ GM alert sent with member profile + lifetime value', '🎁 Comp appetizer offer queued for mbr_203'],
+  'engagement-decay': ['📊 Weekly health scan scheduled (every Monday)', '✉ Personalized event invite campaign queued for 30 declining members', '🚩 Non-responder follow-up flagged for Week 3'],
+  'staffing-gap':     ['📊 72-hour shift gap detection enabled', '📢 Flex pool (4 staff) notified for Grill Room backup', '📅 Post-day audit report scheduled daily'],
 };
 
 const initialState = {
@@ -15,6 +23,10 @@ const initialState = {
     'engagement-decay': { active: false, activatedAt: null },
     'staffing-gap':     { active: false, activatedAt: null },
   },
+  // trailProgress: { [id]: number } — how many trail steps have "confirmed" (0 = none)
+  trailProgress: {
+    'slow-saturday': 0, 'service-save': 0, 'engagement-decay': 0, 'staffing-gap': 0,
+  },
 };
 
 function reducer(state, action) {
@@ -22,17 +34,24 @@ function reducer(state, action) {
     case 'ACTIVATE_PLAYBOOK':
       return {
         ...state,
-        playbooks: {
-          ...state.playbooks,
-          [action.id]: { active: true, activatedAt: new Date().toISOString() },
-        },
+        playbooks: { ...state.playbooks, [action.id]: { active: true, activatedAt: new Date().toISOString() } },
+        trailProgress: { ...state.trailProgress, [action.id]: 0 },
       };
     case 'DEACTIVATE_PLAYBOOK':
       return {
         ...state,
-        playbooks: {
-          ...state.playbooks,
-          [action.id]: { active: false, activatedAt: null },
+        playbooks: { ...state.playbooks, [action.id]: { active: false, activatedAt: null } },
+        trailProgress: { ...state.trailProgress, [action.id]: 0 },
+      };
+    case 'ADVANCE_TRAIL':
+      return {
+        ...state,
+        trailProgress: {
+          ...state.trailProgress,
+          [action.id]: Math.min(
+            (state.trailProgress[action.id] ?? 0) + 1,
+            (TRAIL_STEPS[action.id]?.length ?? 0)
+          ),
         },
       };
     default:
@@ -51,6 +70,18 @@ export function AppProvider({ children }) {
     annual:  activePlaybooks.reduce((s, [id]) => s + (PLAYBOOK_DEFS[id]?.annual  ?? 0), 0),
   };
 
+  // Auto-advance trail steps with staggered delays when a playbook is activated
+  useEffect(() => {
+    activePlaybooks.forEach(([id]) => {
+      const total = TRAIL_STEPS[id]?.length ?? 0;
+      const current = state.trailProgress[id] ?? 0;
+      if (current < total) {
+        const timer = setTimeout(() => dispatch({ type: 'ADVANCE_TRAIL', id }), 700);
+        return () => clearTimeout(timer);
+      }
+    });
+  }, [state.trailProgress, state.playbooks]);
+
   return (
     <AppContext.Provider value={{
       ...state,
@@ -59,6 +90,7 @@ export function AppProvider({ children }) {
       totalPlaybooks: Object.keys(state.playbooks).length,
       totalRevenueImpact,
       playbookDefs: PLAYBOOK_DEFS,
+      trailSteps: TRAIL_STEPS,
     }}>
       {children}
     </AppContext.Provider>

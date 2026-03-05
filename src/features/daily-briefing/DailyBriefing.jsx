@@ -1,9 +1,10 @@
 // DailyBriefing.jsx — Story-first home screen.
-// Order: Headline → mbr_203 Alert → Yesterday Recap → Today Risks → Playbooks → Connected Systems
-import { Panel, StoryHeadline, ConnectedSystems } from '@/components/ui/index.js';
+// Order: Headline → mbr_203 Alert → Yesterday Recap → Today Risks → Pipeline Snapshot → Playbooks → Connected Systems
+import { Panel, StoryHeadline, ConnectedSystems, SourceBadgeRow } from '@/components/ui/index.js';
 import YesterdayRecap from './YesterdayRecap.jsx';
 import TodayRiskFactors from './TodayRiskFactors.jsx';
 import PendingActions from './PendingActions.jsx';
+import PipelineSnapshot from './PipelineSnapshot.jsx';
 import { getDailyBriefing } from '@/services/briefingService.js';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { CLUB_NAME } from '@/config/constants.js';
@@ -85,6 +86,9 @@ export default function DailyBriefing() {
       <Panel title="Today's Risk Factors" subtitle="What could affect today's operation?">
         <TodayRiskFactors data={briefing.todayRisks} onNavigate={navigate} />
       </Panel>
+
+      {/* Pipeline Snapshot — Phase 4: pipeline visible without nav event */}
+      <PipelineSnapshot onNavigate={navigate} />
 
       {/* Intervention Playbooks */}
       <Panel title="Intervention Playbooks" subtitle="Pre-assembled responses to known operational patterns">

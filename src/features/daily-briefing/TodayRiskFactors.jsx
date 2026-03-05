@@ -1,21 +1,31 @@
+import { useState } from 'react';
 import Badge from '@/components/ui/Badge.jsx';
+import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
+import { theme } from '@/config/theme';
 
 const WEATHER_ICONS = {
-  sunny: '☀️', cloudy: '⛅', rainy: '🌧️', windy: '💨', closed: '🔒',
+  sunny: '☀️', cloudy: '⛅', rainy: '🌧️', windy: '💨', closed: '🔒', perfect: '☀️',
 };
+
+// Unique archetypes in the at-risk list (for filter buttons)
+const getArchetypes = (members) => [...new Set(members.map(m => m.archetype).filter(Boolean))];
 
 export default function TodayRiskFactors({ data, onNavigate }) {
   const { weather, tempHigh, wind, atRiskTeetimes, staffingGaps, fullyStaffed } = data;
+  const [archetypeFilter, setArchetypeFilter] = useState(null);
+
+  const archetypes = getArchetypes(atRiskTeetimes);
+  const filtered   = archetypeFilter
+    ? atRiskTeetimes.filter(m => m.archetype === archetypeFilter)
+    : atRiskTeetimes;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {/* Weather row */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: '12px',
-        padding: '12px 16px',
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        borderRadius: '8px',
+        padding: '12px 16px', background: 'var(--bg-card)',
+        border: '1px solid var(--border)', borderRadius: '8px',
       }}>
         <span style={{ fontSize: '24px' }}>{WEATHER_ICONS[weather] || '☀️'}</span>
         <div>
@@ -35,26 +45,55 @@ export default function TodayRiskFactors({ data, onNavigate }) {
       {/* At-risk tee times */}
       {atRiskTeetimes.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.05em', fontWeight: 600 }}>
-            AT-RISK MEMBERS WITH TEE TIMES TODAY
+          {/* Header with archetype filter — 2-click filter per Phase 4 spec */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.05em', fontWeight: 600 }}>
+              AT-RISK MEMBERS WITH TEE TIMES TODAY
+            </div>
+            {/* Filter by archetype */}
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              {archetypeFilter && (
+                <button onClick={() => setArchetypeFilter(null)} style={{
+                  fontSize: '10px', color: theme.colors.textMuted, background: 'none',
+                  border: `1px solid ${theme.colors.border}`, borderRadius: '4px',
+                  padding: '2px 6px', cursor: 'pointer',
+                }}>
+                  ✕ All
+                </button>
+              )}
+              {archetypes.map(a => (
+                <button key={a} onClick={() => setArchetypeFilter(a === archetypeFilter ? null : a)} style={{
+                  fontSize: '10px', fontWeight: 600, background: 'none', border: 'none',
+                  cursor: 'pointer', padding: '2px 6px', borderRadius: '4px',
+                  color: a === archetypeFilter ? theme.colors.textPrimary : theme.colors.textMuted,
+                  textDecoration: a === archetypeFilter ? 'underline' : 'none',
+                }}>
+                  {a}
+                </button>
+              ))}
+            </div>
           </div>
-          {atRiskTeetimes.map(m => (
+
+          {filtered.map(m => (
             <div key={m.memberId}
               onClick={() => onNavigate?.('member-health')}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
                 padding: '10px 14px',
-                background: '#A78BFA08',
-                border: '1px solid #A78BFA22',
-                borderRadius: '8px',
-                cursor: 'pointer',
+                background: '#A78BFA08', border: '1px solid #A78BFA22',
+                borderRadius: '8px', cursor: 'pointer',
               }}
             >
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#A78BFA22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#A78BFA', fontWeight: 700, flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#A78BFA22',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '12px', color: '#A78BFA', fontWeight: 700, flexShrink: 0 }}>
                 {m.score}
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{m.name}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{m.name}</span>
+                  {m.archetype && <ArchetypeBadge archetype={m.archetype} size="xs" />}
+                </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{m.topRisk}</div>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>{m.time}</div>

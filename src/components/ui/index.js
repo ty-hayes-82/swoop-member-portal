@@ -8,3 +8,4 @@ export { default as EmptyState }         from './EmptyState.jsx';
 export { default as StoryHeadline }      from './StoryHeadline.jsx';
 export { default as SourceBadge, SourceBadgeRow } from './SourceBadge.jsx';
 export { default as ConnectedSystems }   from './ConnectedSystems.jsx';
+export { default as ArchetypeBadge, getArchetypeColor } from './ArchetypeBadge.jsx';

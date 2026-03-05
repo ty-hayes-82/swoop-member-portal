@@ -27,8 +27,8 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       wind: 8,
       forecast: 'Clear, 72°F — high demand expected',
       atRiskTeetimes: [
-        { memberId: 'mbr_089', name: 'Anne Jordan', time: '9:14 AM', score: 28, topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
-        { memberId: 'mbr_271', name: 'Member 271',  time: '10:02 AM', score: 22, topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
+        { memberId: 'mbr_089', name: 'Anne Jordan', archetype: 'Weekend Warrior', time: '9:14 AM', score: 28, topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
+        { memberId: 'mbr_271', name: 'Member 271',  archetype: 'Declining',       time: '10:02 AM', score: 22, topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
       ],
       staffingGaps: [],
       fullyStaffed: true,

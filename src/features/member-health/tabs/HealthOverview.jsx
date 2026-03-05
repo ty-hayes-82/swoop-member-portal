@@ -1,4 +1,5 @@
 import { SoWhatCallout } from '@/components/ui';
+import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import { getHealthDistribution, getAtRiskMembers, getMemberSummary } from '@/services/memberService';
 import { theme } from '@/config/theme';
 
@@ -64,7 +65,9 @@ export default function HealthOverview() {
                     color: m.score < 30 ? theme.colors.urgent : theme.colors.warning }}>{m.score}</span>
                 </td>
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                  color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>{m.archetype}</td>
+                  color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>
+                  <ArchetypeBadge archetype={m.archetype} size="xs" />
+                </td>
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
                   color: theme.colors.textMuted, fontSize: theme.fontSize.xs, maxWidth: 260 }}>{m.topRisk}</td>
               </tr>

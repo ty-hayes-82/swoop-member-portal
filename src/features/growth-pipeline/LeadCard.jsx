@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme';
+import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 
 const TIER_COLORS = {
   hot:  theme.colors.urgent,
@@ -32,8 +33,11 @@ export default function LeadCard({ lead }) {
             {lead.score}
           </div>
           <div>
-            <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}>
-              {lead.guestName}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}>
+                {lead.guestName}
+              </span>
+              {lead.likelyArchetype && <ArchetypeBadge archetype={lead.likelyArchetype} size="xs" />}
             </div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
               {lead.visits} visits · ${lead.totalSpend.toLocaleString()} total spend

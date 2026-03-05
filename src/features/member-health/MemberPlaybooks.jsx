@@ -2,9 +2,27 @@ import { PlaybookPanel } from '@/components/playbooks';
 import { theme } from '@/config/theme';
 
 const SERVICE_SAVE_STEPS = [
-  { title: 'Auto-escalate high-sentiment complaints', description: 'Any feedback with sentiment < −0.5 from an engaged member (health score > 60) auto-routes to the department head within 2 hours.', timeline: 'Hour 1–2' },
-  { title: 'GM personal alert', description: 'GM receives a push alert with member profile, complaint text, lifetime value, and suggested response script.', timeline: 'Hour 2–4' },
-  { title: 'Personal GM follow-up', description: 'GM calls or visits the member directly. Comped experience offered if appropriate. Resolution confirmed in system.', timeline: 'Day 1–2' },
+  {
+    title: 'Auto-escalate high-sentiment complaints',
+    description: 'Any feedback with sentiment < −0.5 from an engaged member (health score > 60) auto-routes to the department head within 2 hours.',
+    preview: 'mbr_203 complaint (sentiment −0.8) → auto-routed to F&B Director. Alert includes complaint text, member profile, and last 3 visits.',
+    timeline: 'Hour 1–2',
+    actionType: 'staff-alert',
+  },
+  {
+    title: 'GM personal alert with member profile',
+    description: 'GM receives a push alert with member profile, complaint text, lifetime value, and suggested response script.',
+    preview: 'GM alert sent: "mbr_203 — Balanced Active, 8.2yr tenure, $18K/yr dues. Service Speed complaint unresolved. Recommend personal call today."',
+    timeline: 'Hour 2–4',
+    actionType: 'front-desk-flag',
+  },
+  {
+    title: 'Personal GM follow-up + comp offer',
+    description: 'GM calls or visits the member directly. Comped experience offered if appropriate. Resolution confirmed in system.',
+    preview: 'Comp offer queued: complimentary dinner for 2. Front desk flagged: greet mbr_203 by name on next visit.',
+    timeline: 'Day 1–2',
+    actionType: 'comp-offer',
+  },
 ];
 
 const SERVICE_SAVE_BEFORE = [
@@ -20,9 +38,27 @@ const SERVICE_SAVE_AFTER = [
 ];
 
 const DECAY_STEPS = [
-  { title: 'Detect — weekly health scan', description: 'Automated weekly scan flags members whose score drops below 50 or declines by 15+ points in 4 weeks.', timeline: 'Every Monday' },
-  { title: 'Re-engage — email + events', description: 'Personalized event invitations based on archetype. Members attending 2+ events/month have 60% lower churn probability.', timeline: 'Week 1–2' },
-  { title: 'Personal outreach', description: 'Non-responders after 2 weeks get a personal call. Script: acknowledge reduced activity, ask open questions, offer specific value.', timeline: 'Week 3' },
+  {
+    title: 'Detect — weekly health scan',
+    description: 'Automated weekly scan flags members whose score drops below 50 or declines by 15+ points in 4 weeks.',
+    preview: 'Weekly scan scheduled every Monday. Currently flagging 30 Declining members. 4 approaching F&B minimum threshold.',
+    timeline: 'Every Monday',
+    actionType: 'report',
+  },
+  {
+    title: 'Re-engage — personalized email + events',
+    description: 'Personalized event invitations based on archetype. Members attending 2+ events/month have 60% lower churn probability.',
+    preview: '30 personalized emails queued. Die-Hard Golfers: pace clinic invite. Social Butterflies: wine dinner. Weekend Warriors: couples golf.',
+    timeline: 'Week 1–2',
+    actionType: 'email',
+  },
+  {
+    title: 'Personal outreach — non-responders',
+    description: 'Non-responders after 2 weeks get a personal call. Script: acknowledge reduced activity, ask open questions, offer specific value.',
+    preview: 'Front desk flagged: 30 members for GM or membership director personal outreach. Call script generated per archetype.',
+    timeline: 'Week 3',
+    actionType: 'front-desk-flag',
+  },
 ];
 
 const DECAY_BEFORE = [
@@ -37,6 +73,14 @@ const DECAY_AFTER = [
   { label: 'Protected annual dues',        value: '$90–110K' },
 ];
 
+// memberContext passed to Service Save to show archetype of triggered member
+const MBR_203_CONTEXT = {
+  name: 'mbr_203',
+  archetype: 'Balanced Active',
+  color: theme.colors.briefing,
+  profile: 'Normally engaged across all domains — complaint from this archetype is a red flag',
+};
+
 export default function MemberPlaybooks() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xl }}>
@@ -48,6 +92,7 @@ export default function MemberPlaybooks() {
         beforeMetrics={SERVICE_SAVE_BEFORE}
         afterMetrics={SERVICE_SAVE_AFTER}
         accentColor={theme.colors.urgent}
+        memberContext={MBR_203_CONTEXT}
       />
       <PlaybookPanel
         id="engagement-decay"
