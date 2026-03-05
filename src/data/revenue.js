@@ -34,3 +34,12 @@ export const dailyRevenue = [
   { date: '2026-01-30', day: 'Fri', golf: 9100, fb: 3300, weather: 'sunny',    isUnderstaffed: false },
   { date: '2026-01-31', day: 'Sat', golf: 14800, fb: 5600, weather: 'perfect', isUnderstaffed: false },
 ];
+
+// Revenue per slot — comparison of reactive vs. retention-priority waitlist fills
+// Used by IntelligenceTab to show dollar value of smart prioritization
+export const revenuePerSlot = {
+  reactive:          187,   // avg total club spend when slot filled first-come-first-served
+  retentionPriority: 312,   // avg total club spend when slot filled via retention-flagged member
+  emptySlot:           0,
+  upliftPct:          67,   // percentage difference
+};

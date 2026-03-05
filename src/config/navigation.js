@@ -18,6 +18,14 @@ export const navItems = [
     sourceSystems: ['ForeTees', 'Weather API'],
   },
   {
+    key: 'waitlist-demand',
+    label: 'Waitlist & Demand',
+    icon: '⟳',
+    color: '#22D3EE',
+    subtitle: 'Who is waiting, who will cancel, and what does it cost?',
+    sourceSystems: ['ForeTees', 'Northstar', 'Jonas POS', 'Weather API'],
+  },
+  {
     key: 'fb-performance',
     label: 'Revenue & F&B',
     icon: '◆',

@@ -4,6 +4,7 @@ import { Sidebar } from '@/components/layout';
 import { Header } from '@/components/layout';
 import { DailyBriefing } from '@/features/daily-briefing';
 import { OperationsDashboard } from '@/features/operations';
+import { WaitlistDemand } from '@/features/waitlist-demand';
 import { FBPerformance } from '@/features/fb-performance';
 import { MemberHealth } from '@/features/member-health';
 import { StaffingService } from '@/features/staffing-service';
@@ -13,14 +14,15 @@ import { DemoMode } from '@/features/demo-mode';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
-  'daily-briefing':  DailyBriefing,
-  'operations':      OperationsDashboard,
-  'fb-performance':  FBPerformance,
-  'member-health':   MemberHealth,
+  'daily-briefing':   DailyBriefing,
+  'operations':       OperationsDashboard,
+  'waitlist-demand':  WaitlistDemand,
+  'fb-performance':   FBPerformance,
+  'member-health':    MemberHealth,
   'staffing-service': StaffingService,
-  'growth-pipeline': GrowthPipeline,
-  'integrations':    IntegrationsPage,
-  'demo-mode':       DemoMode,
+  'growth-pipeline':  GrowthPipeline,
+  'integrations':     IntegrationsPage,
+  'demo-mode':        DemoMode,
 };
 
 function AppShell() {

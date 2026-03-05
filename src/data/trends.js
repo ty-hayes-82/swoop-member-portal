@@ -10,9 +10,11 @@ export const trends = {
   golfRevenue:           [298000, 312000, 326000, 318000, 335000, 352400],
   avgDiningCheck:        [36.2, 37.0, 38.4, 37.8, 38.0, 38.6],
   emailOpenRateAvg:      [0.42, 0.41, 0.40, 0.38, 0.37, 0.36],
-  complaintsPerMonth:    [18,   20,   22,   24,   28,   34  ],
-  newMemberCount:        [3,    2,    4,    2,    3,    1   ],
-  resignationCount:      [0,    1,    1,    2,    2,    5   ],
+  complaintsPerMonth:               [18,   20,   22,   24,   28,   34  ],
+  newMemberCount:                   [3,    2,    4,    2,    3,    1   ],
+  resignationCount:                 [0,    1,    1,    2,    2,    5   ],
+  waitlistFillRate:                 [0.88, 0.84, 0.80, 0.76, 0.72, 0.67],
+  postRoundConversionFromWaitlist:  [0.38, 0.36, 0.34, 0.30, 0.27, 0.22],
 };
 
 export const MONTHS = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'];
