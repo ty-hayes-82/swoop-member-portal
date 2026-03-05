@@ -3,7 +3,8 @@ import { SoWhatCallout } from '@/components/ui/index.js';
 import { trends } from '@/data/trends.js';
 
 export default function YesterdayRecap({ data }) {
-  const { revenue, revenuePlan, revenueVsPlan, rounds, incidents, isUnderstaffed } = data;
+  // revenueVsPlan is a decimal (e.g. -0.12 = -12%). Guard against undefined/NaN.
+  const { revenue, revenueVsPlan = 0, rounds, incidents, isUnderstaffed } = data ?? {};
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

@@ -15,18 +15,20 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     yesterdayRecap: {
       date: yesterday.date,
       revenue: yesterday.total,
-      revenueVsAvg: -12,
+      revenueVsPlan: -0.12,   // -12% vs avg — was revenueVsAvg (NaN bug fix)
       rounds: 82,
-      incidents: ['Grill Room understaffed — 2 service speed complaints'],
+      incidents: ['Grill Room understaffed — 2 service speed complaints', 'mbr_203 filed Service Speed complaint (sentiment -0.8) — unresolved'],
       weather: yesterday.weather,
       isUnderstaffed: yesterday.isUnderstaffed,
     },
     todayRisks: {
       weather: 'perfect',
+      tempHigh: 72,
+      wind: 8,
       forecast: 'Clear, 72°F — high demand expected',
       atRiskTeetimes: [
-        { memberId: 'mbr_089', name: 'Anne Jordan', time: '9:14 AM', score: 28 },
-        { memberId: 'mbr_271', name: 'Member 271',  time: '10:02 AM', score: 22 },
+        { memberId: 'mbr_089', name: 'Anne Jordan', time: '9:14 AM', score: 28, topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
+        { memberId: 'mbr_271', name: 'Member 271',  time: '10:02 AM', score: 22, topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
       ],
       staffingGaps: [],
       fullyStaffed: true,

@@ -1,4 +1,4 @@
-import { Panel, SoWhatCallout } from '@/components/ui';
+import { Panel, SoWhatCallout, StoryHeadline } from '@/components/ui';
 import LeadCard from './LeadCard';
 import { getWarmLeads, getPipelineSummary } from '@/services/pipelineService';
 import { theme } from '@/config/theme';
@@ -15,6 +15,12 @@ export default function GrowthPipeline() {
   ];
 
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <StoryHeadline
+        variant="opportunity"
+        headline="$36,000/year in membership revenue is hiding in your guest data right now."
+        context="David Chen has played 8 times and spent $1,240. He's 92% likely to join if asked. Two hot leads like him represent $36K in annual dues — plus $6–10K in ancillary spend each year."
+      />
     <Panel
       title="Growth Pipeline"
       subtitle="Which guests are ready to become members?"
@@ -63,5 +69,6 @@ export default function GrowthPipeline() {
         </SoWhatCallout>
       </div>
     </Panel>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Panel } from '@/components/ui';
+import { Panel, StoryHeadline } from '@/components/ui';
 import RevenueTab from './tabs/RevenueTab';
 import PaceTab from './tabs/PaceTab';
 import DemandTab from './tabs/DemandTab';
@@ -24,15 +24,22 @@ export default function OperationsDashboard() {
   };
 
   return (
-    <Panel
-      title="Operations"
-      subtitle="How is the golf operation running today?"
-      tabs={TABS}
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
-      accentColor={theme.colors.operations}
-    >
-      {tabContent[activeTab]}
-    </Panel>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <StoryHeadline
+        variant="warning"
+        headline="Understaffing on 3 Fridays cost $3,400 — and contributed to a resignation worth $18K/year."
+        context="Jan 9, 16, 28: Grill Room understaffed. Revenue ran 8% below normal. Complaint rate doubled. One unresolved complaint (Jan 16) is now an active resignation risk."
+      />
+      <Panel
+        title="Operations"
+        subtitle="How is the golf operation running today?"
+        tabs={TABS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        accentColor={theme.colors.operations}
+      >
+        {tabContent[activeTab]}
+      </Panel>
+    </div>
   );
 }

@@ -5,3 +5,4 @@ export { default as TrendArrow }    from './TrendArrow.jsx';
 export { default as Sparkline }     from './Sparkline.jsx';
 export { default as SoWhatCallout } from './SoWhatCallout.jsx';
 export { default as EmptyState }    from './EmptyState.jsx';
+export { default as StoryHeadline } from './StoryHeadline.jsx';
