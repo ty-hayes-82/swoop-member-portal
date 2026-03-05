@@ -11,7 +11,7 @@ const TABS = [
   { key: 'revenue',   label: 'Daily Revenue' },
   { key: 'pace',      label: 'Pace of Play' },
   { key: 'demand',    label: 'Demand Intelligence' },
-  { key: 'playbooks', label: '▶ Playbooks' },
+  { key: 'playbooks', label: '▶ Response Plans' },
 ];
 
 export default function OperationsDashboard() {

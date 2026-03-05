@@ -9,7 +9,7 @@ import { theme } from '@/config/theme';
 const TABS = [
   { key: 'service',   label: 'Service Quality' },
   { key: 'staffing',  label: 'Staffing Impact' },
-  { key: 'playbooks', label: '▶ Playbooks' },
+  { key: 'playbooks', label: '▶ Response Plans' },
 ];
 
 export default function StaffingService() {

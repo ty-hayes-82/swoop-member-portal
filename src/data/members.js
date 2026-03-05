@@ -56,7 +56,7 @@ export const resignationScenarios = [
     timeline: [
       { date: 'Dec 2025', event: 'Active, healthy member. 8 rounds, dining weekly.', domain: 'All' },
       { date: 'Jan 1–17', event: 'Normal activity continues', domain: 'All' },
-      { date: 'Jan 18', event: 'Complaint filed — Service Speed, sentiment -0.8', domain: 'Feedback' },
+      { date: 'Jan 18', event: 'Complaint filed — slow lunch at Grill Room, felt ignored. Very unhappy.', domain: 'Feedback' },
       { date: 'Jan 19–21', event: 'Complaint status: "Acknowledged" — never resolved', domain: 'Feedback' },
       { date: 'Jan 22', event: 'Resignation submitted', domain: 'Membership' },
     ],

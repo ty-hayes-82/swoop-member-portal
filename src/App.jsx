@@ -57,7 +57,7 @@ function AppShell() {
           textAlign: 'center',
         }}>
           Swoop Golf · Integrated Intelligence for Private Clubs ·
-          Simulated Data · Oakmont Hills CC · January 2026
+          Demo Environment · Oakmont Hills CC · January 2026
         </footer>
       </div>
     </div>

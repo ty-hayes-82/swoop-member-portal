@@ -13,7 +13,7 @@ const TABS = [
   { key: 'archetypes',   label: 'Archetypes' },
   { key: 'email',        label: 'Email Decay' },
   { key: 'resignations', label: 'Resignations' },
-  { key: 'playbooks',    label: '▶ Playbooks' },
+  { key: 'playbooks',    label: '▶ Response Plans' },
 ];
 
 export default function MemberHealth() {

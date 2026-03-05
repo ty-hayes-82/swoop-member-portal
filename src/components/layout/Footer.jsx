@@ -18,7 +18,7 @@ export default function Footer() {
         Swoop Golf · Integrated Intelligence for Private Clubs
       </span>
       <span style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
-        Simulated Data · {CLUB_NAME} · January 2026
+        Demo Environment · {CLUB_NAME} · January 2026
       </span>
       <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
         <span>Powered by</span>
