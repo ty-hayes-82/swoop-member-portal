@@ -30,3 +30,6 @@ export const getMemberSummary = () => {
     potentialDuesAtRisk: (atRisk + critical) * 18000,
   };
 };
+
+// Data provenance — which vendor systems this service simulates
+export const sourceSystems = ["Northstar", "Club Prophet", "ForeTees"];

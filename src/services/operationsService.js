@@ -46,3 +46,6 @@ export const getDemandGaps = () =>
   }));
 
 export const getPaceFBImpact = () => paceFBImpact;
+
+// Data provenance — which vendor systems this service simulates
+export const sourceSystems = ["ForeTees", "Weather API"];

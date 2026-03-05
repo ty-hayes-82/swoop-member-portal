@@ -3,6 +3,7 @@ import { Panel, StoryHeadline } from '@/components/ui';
 import OutletTab from './tabs/OutletTab';
 import ConversionTab from './tabs/ConversionTab';
 import WeatherTab from './tabs/WeatherTab';
+import { sourceSystems } from '@/services/fbService';
 import { theme } from '@/config/theme';
 
 const TABS = [
@@ -28,6 +29,7 @@ export default function FBPerformance() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         accentColor={theme.colors.fb}
+        sourceSystems={sourceSystems}
       >
         {activeTab === 'outlets'    && <OutletTab />}
         {activeTab === 'conversion' && <ConversionTab />}

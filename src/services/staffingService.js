@@ -19,3 +19,6 @@ export const getStaffingSummary = () => ({
   annualizedLoss: understaffedDays.reduce((s, d) => s + d.revenueLoss, 0) * 12,
   unresolvedComplaints: feedbackRecords.filter(f => f.status !== 'resolved').length,
 });
+
+// Data provenance — which vendor systems this service simulates
+export const sourceSystems = ["ClubReady", "Jonas POS", "Northstar"];

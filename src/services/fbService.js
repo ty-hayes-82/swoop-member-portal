@@ -43,3 +43,6 @@ export const getFBSummary = () => ({
     outlets.reduce((s, o) => s + o.covers, 0)
   ).toFixed(2),
 });
+
+// Data provenance — which vendor systems this service simulates
+export const sourceSystems = ["Jonas POS", "ForeTees", "Weather API"];

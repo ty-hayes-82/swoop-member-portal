@@ -1,6 +1,7 @@
 import { Panel } from '@/components/ui';
 import { useNavigation } from '@/hooks/useNavigation';
 import { theme } from '@/config/theme';
+import Integrations from './Integrations';
 
 const SCENARIOS = [
   {
@@ -100,6 +101,13 @@ export default function DemoMode() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Integrations — answers "how does it connect?" */}
+        <div>
+          <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary,
+            marginBottom: theme.spacing.md }}>System Integrations</div>
+          <Integrations />
         </div>
 
         {/* Closing question */}

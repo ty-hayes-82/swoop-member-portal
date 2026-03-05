@@ -1,5 +1,8 @@
+import { SourceBadge } from './index.js';
+
 export default function Panel({
   title, subtitle, tabs, activeTab, onTabChange, actions, children,
+  sourceSystems,
 }) {
   return (
     <div style={{
@@ -15,7 +18,7 @@ export default function Panel({
         paddingBottom: tabs ? '0' : '16px',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.2 }}>
               {title}
             </h3>
@@ -24,8 +27,14 @@ export default function Panel({
                 {subtitle}
               </p>
             )}
+            {sourceSystems && sourceSystems.length > 0 && (
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '8px', alignItems: 'center' }}>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Source:</span>
+                {sourceSystems.map(s => <SourceBadge key={s} system={s} size="xs" />)}
+              </div>
+            )}
           </div>
-          {actions && <div style={{ flexShrink: 0 }}>{actions}</div>}
+          {actions && <div style={{ flexShrink: 0, marginLeft: '12px' }}>{actions}</div>}
         </div>
 
         {/* Tabs */}

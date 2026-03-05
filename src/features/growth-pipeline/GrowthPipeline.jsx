@@ -1,6 +1,6 @@
 import { Panel, SoWhatCallout, StoryHeadline } from '@/components/ui';
 import LeadCard from './LeadCard';
-import { getWarmLeads, getPipelineSummary } from '@/services/pipelineService';
+import { getWarmLeads, getPipelineSummary, sourceSystems } from '@/services/pipelineService';
 import { theme } from '@/config/theme';
 
 export default function GrowthPipeline() {
@@ -25,6 +25,7 @@ export default function GrowthPipeline() {
       title="Growth Pipeline"
       subtitle="Which guests are ready to become members?"
       accentColor={theme.colors.pipeline}
+      sourceSystems={sourceSystems}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
         {/* Pipeline funnel KPIs */}

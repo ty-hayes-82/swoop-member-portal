@@ -11,3 +11,6 @@ export const getPipelineSummary = () => ({
   hotRevenuePotential: warmLeads.filter(l => l.tier === 'hot').reduce((s, l) => s + l.potentialDues, 0),
   totalRevenuePotential: warmLeads.reduce((s, l) => s + l.potentialDues, 0),
 });
+
+// Data provenance — which vendor systems this service simulates
+export const sourceSystems = ["ForeTees", "Club Prophet"];

@@ -1,4 +1,5 @@
 // config/navigation.js — decision-based GM navigation items
+// Each entry declares sourceSystems for data provenance display
 export const navItems = [
   {
     key: 'daily-briefing',
@@ -6,6 +7,7 @@ export const navItems = [
     icon: '📋',
     color: '#6BB8EF',
     subtitle: 'What needs my attention today?',
+    sourceSystems: ['ForeTees', 'Jonas POS', 'Northstar', 'ClubReady'],
   },
   {
     key: 'operations',
@@ -13,6 +15,7 @@ export const navItems = [
     icon: '⌘',
     color: '#4ADE80',
     subtitle: 'How is the golf operation running?',
+    sourceSystems: ['ForeTees', 'Weather API'],
   },
   {
     key: 'fb-performance',
@@ -20,6 +23,7 @@ export const navItems = [
     icon: '◆',
     color: '#F0C674',
     subtitle: 'Where is money being made or lost?',
+    sourceSystems: ['Jonas POS', 'ForeTees', 'Weather API'],
   },
   {
     key: 'member-health',
@@ -27,6 +31,7 @@ export const navItems = [
     icon: '◉',
     color: '#A78BFA',
     subtitle: 'Who is at risk and what do we do?',
+    sourceSystems: ['Northstar', 'Club Prophet', 'ForeTees'],
   },
   {
     key: 'staffing-service',
@@ -34,6 +39,7 @@ export const navItems = [
     icon: '⊞',
     color: '#F59E0B',
     subtitle: 'Are we staffed right and serving members well?',
+    sourceSystems: ['ClubReady', 'Jonas POS', 'Northstar'],
   },
   {
     key: 'growth-pipeline',
@@ -41,6 +47,7 @@ export const navItems = [
     icon: '◎',
     color: '#F472B6',
     subtitle: 'Which guests are ready to become members?',
+    sourceSystems: ['ForeTees', 'Club Prophet'],
   },
   {
     key: 'demo-mode',
@@ -48,6 +55,7 @@ export const navItems = [
     icon: '▶',
     color: '#F0C674',
     subtitle: 'Guided walkthroughs for demos',
+    sourceSystems: [],
   },
 ];
 export const NAV_ITEMS = navItems;

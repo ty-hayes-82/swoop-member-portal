@@ -50,3 +50,6 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     },
   };
 };
+
+// Data provenance — which vendor systems this service simulates
+export const sourceSystems = ["ForeTees", "Jonas POS", "Northstar", "ClubReady", "Club Prophet"];

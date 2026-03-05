@@ -11,10 +11,10 @@ export default function Footer() {
       flexShrink: 0,
     }}>
       <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-        Swoop Golf · Integrated Intelligence for Private Clubs
+        Swoop Golf &middot; Integrated Intelligence for Private Clubs
       </span>
       <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-        Simulated Data · {CLUB_NAME} · January 2026
+        Simulated Data &middot; {CLUB_NAME} &middot; January 2026 &middot; Powered by ForeTees &middot; Jonas POS &middot; Northstar &middot; ClubReady &middot; Club Prophet
       </span>
     </footer>
   );

@@ -5,6 +5,7 @@ import ArchetypeTab from './tabs/ArchetypeTab';
 import EmailTab from './tabs/EmailTab';
 import ResignationTimeline from './ResignationTimeline';
 import MemberPlaybooks from './MemberPlaybooks';
+import { sourceSystems } from '@/services/memberService';
 import { theme } from '@/config/theme';
 
 const TABS = [
@@ -32,6 +33,7 @@ export default function MemberHealth() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         accentColor={theme.colors.members}
+        sourceSystems={sourceSystems}
       >
         {activeTab === 'health'       && <HealthOverview />}
         {activeTab === 'archetypes'   && <ArchetypeTab />}

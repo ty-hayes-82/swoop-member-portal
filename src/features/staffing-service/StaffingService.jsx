@@ -1,9 +1,9 @@
-// StaffingService.jsx
 import { useState } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
 import ServiceTab from './tabs/ServiceTab';
 import StaffingTab from './tabs/StaffingTab';
 import StaffingPlaybooks from './StaffingPlaybooks';
+import { sourceSystems } from '@/services/staffingService';
 import { theme } from '@/config/theme';
 
 const TABS = [
@@ -29,6 +29,7 @@ export default function StaffingService() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         accentColor={theme.colors.staffing}
+        sourceSystems={sourceSystems}
       >
         {activeTab === 'service'   && <ServiceTab />}
         {activeTab === 'staffing'  && <StaffingTab />}

@@ -4,12 +4,13 @@ import RevenueTab from './tabs/RevenueTab';
 import PaceTab from './tabs/PaceTab';
 import DemandTab from './tabs/DemandTab';
 import OperationsPlaybooks from './OperationsPlaybooks';
+import { sourceSystems } from '@/services/operationsService';
 import { theme } from '@/config/theme';
 
 const TABS = [
-  { key: 'revenue', label: 'Daily Revenue' },
-  { key: 'pace',    label: 'Pace of Play' },
-  { key: 'demand',  label: 'Demand Intelligence' },
+  { key: 'revenue',   label: 'Daily Revenue' },
+  { key: 'pace',      label: 'Pace of Play' },
+  { key: 'demand',    label: 'Demand Intelligence' },
   { key: 'playbooks', label: '▶ Playbooks' },
 ];
 
@@ -37,6 +38,7 @@ export default function OperationsDashboard() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         accentColor={theme.colors.operations}
+        sourceSystems={sourceSystems}
       >
         {tabContent[activeTab]}
       </Panel>

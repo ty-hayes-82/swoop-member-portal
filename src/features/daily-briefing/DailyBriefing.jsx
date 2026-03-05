@@ -1,6 +1,6 @@
 // DailyBriefing.jsx — Story-first home screen.
-// Order: Headline → mbr_203 Alert → Yesterday Recap → Today Risks → Playbooks
-import { Panel, StoryHeadline } from '@/components/ui/index.js';
+// Order: Headline → mbr_203 Alert → Yesterday Recap → Today Risks → Playbooks → Connected Systems
+import { Panel, StoryHeadline, ConnectedSystems } from '@/components/ui/index.js';
 import YesterdayRecap from './YesterdayRecap.jsx';
 import TodayRiskFactors from './TodayRiskFactors.jsx';
 import PendingActions from './PendingActions.jsx';
@@ -32,7 +32,7 @@ export default function DailyBriefing() {
         context="mbr_203 filed a service complaint yesterday. It was acknowledged but never resolved. Members in this pattern resign within 4 days — activate Service Save Protocol now to prevent it."
       />
 
-      {/* mbr_203 live alert — the preventable resignation, front and center */}
+      {/* mbr_203 live alert */}
       <div
         onClick={() => navigate('staffing-service')}
         style={{
@@ -90,6 +90,9 @@ export default function DailyBriefing() {
       <Panel title="Intervention Playbooks" subtitle="Pre-assembled responses to known operational patterns">
         <PendingActions actions={briefing.pendingActions} onNavigate={navigate} />
       </Panel>
+
+      {/* Connected Systems — answers "how does it know this?" */}
+      <ConnectedSystems />
     </div>
   );
 }
