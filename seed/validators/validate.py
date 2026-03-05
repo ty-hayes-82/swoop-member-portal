@@ -14,8 +14,14 @@ FAIL = '✗'
 def _q(conn, sql: str):
     cur = conn.cursor()
     cur.execute(sql)
-    result = cur.fetchone()[0]
-    return result
+    raw = cur.fetchone()[0]
+    # Coerce HTTP string results to numeric when possible
+    if isinstance(raw, str):
+        try:
+            return int(raw) if '.' not in raw else float(raw)
+        except (ValueError, TypeError):
+            pass
+    return raw
 
 
 def run_all(conn) -> bool:
@@ -116,12 +122,12 @@ def run_all(conn) -> bool:
         check('rain day F&B check (skipped — no rain days)', True)
 
     under_ticket = _q(conn, '''
-        SELECT AVG((julianday(last_item_fulfilled_at) - julianday(first_item_fired_at)) * 1440)
+        SELECT AVG(EXTRACT(EPOCH FROM (last_item_fulfilled_at::timestamptz - first_item_fired_at::timestamptz)) / 60)
         FROM pos_checks
         WHERE is_understaffed_day=1 AND first_item_fired_at IS NOT NULL
     ''') or 0
     normal_ticket = _q(conn, '''
-        SELECT AVG((julianday(last_item_fulfilled_at) - julianday(first_item_fired_at)) * 1440)
+        SELECT AVG(EXTRACT(EPOCH FROM (last_item_fulfilled_at::timestamptz - first_item_fired_at::timestamptz)) / 60)
         FROM pos_checks
         WHERE is_understaffed_day=0 AND first_item_fired_at IS NOT NULL
     ''') or 1
