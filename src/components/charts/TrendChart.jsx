@@ -33,8 +33,13 @@ export default function TrendChart({
         borderBottom: open ? `1px solid ${theme.colors.border}` : 'none',
       }}>
         <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary,
-          fontWeight: 600, letterSpacing: '0.04em' }}>
-          {open ? '▾' : '▸'} {title}
+          fontWeight: 600, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{
+            display: 'inline-block', fontSize: '14px', color: theme.colors.textMuted,
+            transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+            transition: 'transform 0.15s ease',
+          }}>›</span>
+          {title}
         </span>
         <span style={{ fontSize: '10px', color: theme.colors.textMuted }}>Aug–Jan · 6 months</span>
       </button>
@@ -49,8 +54,8 @@ export default function TrendChart({
               <Tooltip
                 formatter={(v, name) => [fmt(v), seriesKeys?.find(s => s.key === name)?.label ?? name]}
                 contentStyle={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-                  borderRadius: 8, fontSize: 12 }}
-                labelStyle={{ color: theme.colors.textPrimary }} />
+                  borderRadius: 8, fontSize: 12, boxShadow: theme.shadow.md }}
+                labelStyle={{ color: theme.colors.textPrimary, fontWeight: 600 }} />
               {seriesKeys ? seriesKeys.map(s => (
                 <Bar key={s.key} dataKey={s.key} fill={s.color} radius={[3,3,0,0]}>
                   {data.map((d, i) => <Cell key={i} fill={d.isCurrent ? s.color : `${s.color}70`} />)}

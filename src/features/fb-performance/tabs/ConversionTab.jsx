@@ -37,9 +37,10 @@ export default function ConversionTab() {
               tick={{ fill: theme.colors.textMuted, fontSize: 10 }} tickLine={false} />
             <YAxis type="category" dataKey="archetype" tick={{ fill: theme.colors.textSecondary, fontSize: 11 }}
               tickLine={false} width={120} />
-            <Tooltip formatter={v => [`${(v * 100).toFixed(0)}%`, 'Conversion']}
-              contentStyle={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: 8 }}
-              labelStyle={{ color: theme.colors.textPrimary }} />
+            <Tooltip formatter={v => [`${(v * 100).toFixed(0)}%`, 'Conversion rate']}
+              contentStyle={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
+                borderRadius: 8, boxShadow: theme.shadow.md, fontSize: 12 }}
+              labelStyle={{ color: theme.colors.textPrimary, fontWeight: 600 }} />
             <Bar dataKey="rate" fill={theme.colors.fb} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>

@@ -49,9 +49,14 @@ export default function PaceTab() {
           <BarChart data={dist} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
             <XAxis dataKey="bucket" tick={{ fill: theme.colors.textMuted, fontSize: 11 }} tickLine={false} />
             <YAxis tick={{ fill: theme.colors.textMuted, fontSize: 10 }} tickLine={false} />
-            <Tooltip formatter={(v) => [`${v} rounds`, 'Count']}
-              contentStyle={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: 8 }}
-              labelStyle={{ color: theme.colors.textPrimary }} />
+            <Tooltip
+              formatter={(v, _name, props) => {
+                const isSlow = props?.payload?.isSlow;
+                return [`${v} rounds`, isSlow ? 'Slow round' : 'Normal round'];
+              }}
+              contentStyle={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
+                borderRadius: 8, boxShadow: theme.shadow.md, fontSize: 12 }}
+              labelStyle={{ color: theme.colors.textPrimary, fontWeight: 600, marginBottom: 4 }} />
             <Bar dataKey="count" radius={[4, 4, 0, 0]}>
               {dist.map((d, i) => <Cell key={i} fill={d.isSlow ? theme.colors.urgent : theme.colors.operations} />)}
             </Bar>
