@@ -11,13 +11,23 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-export const getUnderstaffedDays  = () => _d ? _d.understaffedDays  : understaffedDays;
-export const getShiftCoverage     = () => _d ? _d.shiftCoverage     : shiftCoverage;
-export const getFeedbackSummary   = () => _d ? _d.feedbackSummary   : feedbackSummary;
+export const getUnderstaffedDays  = () => {
+  const data = _d ? _d.understaffedDays : understaffedDays;
+  return Array.isArray(data) ? data : understaffedDays;
+};
+export const getShiftCoverage     = () => {
+  const data = _d ? _d.shiftCoverage : shiftCoverage;
+  return Array.isArray(data) ? data : shiftCoverage;
+};
+export const getFeedbackSummary   = () => {
+  const data = _d ? _d.feedbackSummary : feedbackSummary;
+  return Array.isArray(data) ? data : feedbackSummary;
+};
 
 export const getComplaintCorrelation = () => {
   const src = _d ? _d.feedbackRecords : feedbackRecords;
-  return src.map(f => ({
+  const arr = Array.isArray(src) ? src : feedbackRecords;
+  return arr.map(f => ({
     date:         f.date ?? f.submitted_at,
     sentiment:    f.sentiment,
     status:       f.status,
