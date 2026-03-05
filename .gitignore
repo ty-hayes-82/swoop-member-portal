@@ -4,3 +4,7 @@ dist/
 .env.local
 *.log
 .DS_Store
+-e 
+# Local SQLite test database
+oakmont_hills_jan2026.db
+*.db

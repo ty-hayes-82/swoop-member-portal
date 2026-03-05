@@ -1,0 +1,314 @@
+# =============================================================================
+# Swoop Golf Seed Configuration
+# Oakmont Hills Country Club · January 2026
+# Edit parameters here — no code changes required
+# =============================================================================
+
+random_seed: 42
+simulation_month: "2026-01"
+club_id: "club_001"
+
+# ─── Member population ────────────────────────────────────────────────────────
+member_count: 300
+
+archetype_weights:
+  Die-Hard Golfer:   54   # 18%
+  Social Butterfly:  45   # 15%
+  Balanced Active:   66   # 22%
+  Weekend Warrior:   45   # 15%
+  Declining:         30   # 10%
+  New Member:        24   #  8%
+  Ghost:             21   #  7%
+  Snowbird:          15   #  5%
+
+# ─── Golf operations ──────────────────────────────────────────────────────────
+weekday_utilization_min: 0.55
+weekday_utilization_max: 0.70
+weekend_utilization_min: 0.85
+weekend_utilization_max: 0.95
+
+slow_round_threshold_minutes: 270    # 18-hole rounds above this flagged as slow
+post_round_dining_window_minutes: 90  # window after round end to link dining check
+
+# ─── F&B ──────────────────────────────────────────────────────────────────────
+tax_rate: 0.085          # Arizona sales tax
+comp_rate: 0.05          # 5% of checks comped
+discount_rate: 0.08      # 8% of checks discounted
+void_rate: 0.02          # 2% of checks have void items
+tip_rate_avg: 0.18        # average tip percentage
+
+payment_method_mix:
+  member_charge: 0.75
+  credit_card:   0.18
+  cash:          0.05
+  split:         0.02
+
+# ─── Understaffed dates (Grill Room) ─────────────────────────────────────────
+understaffed_dates:
+  - "2026-01-09"
+  - "2026-01-16"
+  - "2026-01-28"
+
+understaffed_ticket_time_multiplier: 1.20   # 20% longer ticket times
+understaffed_complaint_multiplier: 2.0      # 2x complaint rate
+understaffed_revenue_multiplier: 0.92       # ~8% lower F&B revenue
+
+# ─── Resignation scenarios ────────────────────────────────────────────────────
+resignation_scenarios:
+  - member_id: "mbr_042"   # Kevin Hurst
+    resigned_on: "2026-01-08"
+    archetype: "Declining"
+    pattern: "gradual_decay"
+
+  - member_id: "mbr_117"   # Linda Leonard
+    resigned_on: "2026-01-15"
+    archetype: "Ghost"
+    pattern: "ghost_departure"
+
+  - member_id: "mbr_203"   # James Whitfield
+    resigned_on: "2026-01-22"
+    archetype: "Balanced Active"
+    pattern: "service_failure"
+    complaint_date: "2026-01-18"
+    complaint_sentiment: -0.8
+    complaint_category: "Service Speed"
+
+  - member_id: "mbr_089"   # Anne Jordan
+    resigned_on: "2026-01-27"
+    archetype: "Weekend Warrior"
+    pattern: "slow_withdrawal"
+
+  - member_id: "mbr_271"   # Steven Park
+    resigned_on: "2026-01-31"
+    archetype: "Declining"
+    pattern: "fb_minimum_hit"
+
+# ─── Email campaigns ──────────────────────────────────────────────────────────
+email_campaigns:
+  - id: "cam_001"
+    subject: "Happy New Year from Oakmont Hills"
+    type: "newsletter"
+    send_date: "2026-01-02"
+
+  - id: "cam_002"
+    subject: "Course Maintenance Notice (Jan 6)"
+    type: "operational"
+    send_date: "2026-01-06"
+
+  - id: "cam_003"
+    subject: "Member-Guest Invitational Details"
+    type: "event_promo"
+    send_date: "2026-01-09"
+
+  - id: "cam_004"
+    subject: "January Wine Dinner Recap"
+    type: "newsletter"
+    send_date: "2026-01-14"
+
+  - id: "cam_005"
+    subject: "MLK Weekend at the Club"
+    type: "event_promo"
+    send_date: "2026-01-17"
+
+  - id: "cam_006"
+    subject: "New Grill Room Winter Menu"
+    type: "fb_promo"
+    send_date: "2026-01-21"
+
+  - id: "cam_007"
+    subject: "February Events Preview"
+    type: "newsletter"
+    send_date: "2026-01-27"
+
+  - id: "cam_008"
+    subject: "Super Bowl Party Final Details"
+    type: "event_promo"
+    send_date: "2026-01-30"
+
+# ─── Event calendar ───────────────────────────────────────────────────────────
+events:
+  - id: "evt_001"
+    name: "New Year Scramble"
+    type: "golf_tournament"
+    date: "2026-01-04"
+    capacity: 72
+    fee: 75.00
+
+  - id: "evt_002"
+    name: "Wine Dinner: Napa Valley"
+    type: "dining"
+    date: "2026-01-08"
+    capacity: 40
+    fee: 125.00
+
+  - id: "evt_003"
+    name: "Member-Guest Invitational (Day 1)"
+    type: "golf_tournament"
+    date: "2026-01-11"
+    capacity: 80
+    fee: 150.00
+
+  - id: "evt_004"
+    name: "Member-Guest Invitational (Day 2)"
+    type: "golf_tournament"
+    date: "2026-01-12"
+    capacity: 80
+    fee: 0.00
+
+  - id: "evt_005"
+    name: "Ladies League Round 1"
+    type: "league"
+    date: "2026-01-15"
+    capacity: 24
+    fee: 25.00
+
+  - id: "evt_006"
+    name: "Family Movie Night"
+    type: "social"
+    date: "2026-01-18"
+    capacity: 60
+    fee: 0.00
+
+  - id: "evt_007"
+    name: "MLK Golf Classic"
+    type: "golf_tournament"
+    date: "2026-01-19"
+    capacity: 64
+    fee: 100.00
+
+  - id: "evt_008"
+    name: "Ladies League Round 2"
+    type: "league"
+    date: "2026-01-22"
+    capacity: 24
+    fee: 25.00
+
+  - id: "evt_009"
+    name: "Business Networking Mixer"
+    type: "social"
+    date: "2026-01-23"
+    capacity: 45
+    fee: 35.00
+
+  - id: "evt_010"
+    name: "Couples Golf Day"
+    type: "golf_tournament"
+    date: "2026-01-25"
+    capacity: 48
+    fee: 50.00
+
+  - id: "evt_011"
+    name: "Ladies League Round 3"
+    type: "league"
+    date: "2026-01-29"
+    capacity: 24
+    fee: 25.00
+
+  - id: "evt_012"
+    name: "Super Bowl Party Pre-Game"
+    type: "social"
+    date: "2026-01-31"
+    capacity: 80
+    fee: 25.00
+
+# ─── Waitlist / demand intelligence ──────────────────────────────────────────
+waitlist_priority_health_threshold: 50   # health score below this = HIGH priority
+cancel_risk_wind_threshold_mph: 15       # wind above this triggers weather cancel signal
+post_round_revenue_reactive: 187         # avg club spend when slot filled reactively
+post_round_revenue_priority: 312         # avg club spend when filled via retention-priority
+
+# ─── Archetype behavioral parameters ─────────────────────────────────────────
+# golf_rounds_per_month: [min, max]
+# dining_checks_per_month: [min, max]
+# email_open_rate: float (0–1)
+# email_click_rate: float (0–1)
+# event_attendance_rate: float (0–1)
+archetype_params:
+  Die-Hard Golfer:
+    golf_rounds_per_month: [12, 18]
+    dining_checks_per_month: [4, 8]
+    email_open_rate: 0.18
+    email_click_rate: 0.04
+    event_attendance_rate: 0.20    # golf events only
+    weekend_only: false
+    post_round_dining_rate: 0.50
+
+  Social Butterfly:
+    golf_rounds_per_month: [2, 5]
+    dining_checks_per_month: [8, 14]
+    email_open_rate: 0.72
+    email_click_rate: 0.22
+    event_attendance_rate: 0.75
+    weekend_only: false
+    post_round_dining_rate: 0.40
+
+  Balanced Active:
+    golf_rounds_per_month: [8, 12]
+    dining_checks_per_month: [5, 10]
+    email_open_rate: 0.55
+    email_click_rate: 0.14
+    event_attendance_rate: 0.45
+    weekend_only: false
+    post_round_dining_rate: 0.40
+
+  Weekend Warrior:
+    golf_rounds_per_month: [4, 8]
+    dining_checks_per_month: [4, 7]
+    email_open_rate: 0.32
+    email_click_rate: 0.08
+    event_attendance_rate: 0.30
+    weekend_only: true
+    post_round_dining_rate: 0.25
+
+  Declining:
+    golf_rounds_per_month: [0, 3]
+    dining_checks_per_month: [1, 4]
+    email_open_rate: 0.20
+    email_click_rate: 0.04
+    event_attendance_rate: 0.05
+    weekend_only: false
+    post_round_dining_rate: 0.15
+
+  New Member:
+    golf_rounds_per_month: [4, 10]
+    dining_checks_per_month: [3, 8]
+    email_open_rate: 0.68
+    email_click_rate: 0.18
+    event_attendance_rate: 0.50
+    weekend_only: false
+    post_round_dining_rate: 0.35
+
+  Ghost:
+    golf_rounds_per_month: [0, 1]
+    dining_checks_per_month: [0, 2]
+    email_open_rate: 0.10
+    email_click_rate: 0.01
+    event_attendance_rate: 0.02
+    weekend_only: false
+    post_round_dining_rate: 0.10
+
+  Snowbird:
+    golf_rounds_per_month: [6, 12]
+    dining_checks_per_month: [4, 9]
+    email_open_rate: 0.40
+    email_click_rate: 0.10
+    event_attendance_rate: 0.35
+    weekend_only: false
+    post_round_dining_rate: 0.38
+
+# ─── Scottsdale January weather distribution ─────────────────────────────────
+weather_distribution:
+  sunny:   20
+  perfect: 4
+  cloudy:  4
+  windy:   2
+  rainy:   1
+# Jan 6 = closed (maintenance)
+# Total operating days: 30
+
+weather_modifiers:
+  sunny:   { golf: 0.0,   fb: 0.0  }
+  perfect: { golf: 0.10,  fb: 0.0  }
+  cloudy:  { golf: -0.05, fb: 0.05 }
+  windy:   { golf: -0.15, fb: 0.05 }
+  rainy:   { golf: -0.40, fb: 0.15 }
