@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { AGENT_ACTION_TYPES } from '@/config/constants';
 import { agentActionThreads } from '@/data/agents';
+import { draftAgentMessage } from '@/services/agentService';
 
 const PRIORITY_COLORS = {
   high:   { bg: 'rgba(192,57,43,0.06)', border: 'rgba(192,57,43,0.25)', label: '#C0392B' },
@@ -13,10 +14,22 @@ const PRIORITY_COLORS = {
 
 export function AgentActionCard({ action, onApprove, onDismiss, showRationale = false, overrideStatus }) {
   const [expanded, setExpanded] = useState(showRationale);
+  const [draft, setDraft] = useState(action.proposedAction?.body ?? action.proposedAction?.message ?? '');
+  const [drafting, setDrafting] = useState(false);
   const status = overrideStatus ?? action.status;
   const isDone = status === 'approved' || status === 'dismissed';
   const pc = PRIORITY_COLORS[action.priority] ?? PRIORITY_COLORS.low;
   const actionTypeMeta = AGENT_ACTION_TYPES[action.proposedAction?.type] ?? { icon: '⚡', label: action.proposedAction?.type, color: '#22D3EE' };
+  const isDraftable = ['DRAFT_NOTE', 'SEND_INVITE', 'SCHEDULE_CALL'].includes(action.proposedAction?.type);
+
+  async function handleGenerateDraft() {
+    setDrafting(true);
+    try {
+      const memberCtx = { name: action.proposedAction?.recipientName, id: action.proposedAction?.recipient };
+      const result = await draftAgentMessage(memberCtx, action);
+      if (result) setDraft(result);
+    } finally { setDrafting(false); }
+  }
 
   return (
     <div style={{
@@ -68,11 +81,21 @@ export function AgentActionCard({ action, onApprove, onDismiss, showRationale = 
         <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.6,
           background: theme.colors.bgDeep, borderRadius: theme.radius.sm, padding: theme.spacing.sm, marginBottom: 10 }}>
           {action.rationale}
-          {action.proposedAction?.body && (
-            <div style={{ marginTop: 8, padding: 8, background: theme.colors.bgCard,
-              borderRadius: theme.radius.sm, fontFamily: theme.fonts.mono, fontSize: '11px',
-              color: theme.colors.textPrimary, whiteSpace: 'pre-wrap', borderLeft: `2px solid #22D3EE` }}>
-              {action.proposedAction.body || action.proposedAction.message || action.proposedAction.note}
+          {(action.proposedAction?.body || action.proposedAction?.message || action.proposedAction?.note || draft) && (
+            <div style={{ marginTop: 8 }}>
+              {isDraftable && (
+                <button onClick={handleGenerateDraft} disabled={drafting} style={{
+                  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                  fontSize: '10px', color: '#22D3EE', fontWeight: 600, marginBottom: 6, opacity: drafting ? 0.5 : 1,
+                }}>
+                  {drafting ? '⟳ Generating...' : '↺ Regenerate with AI'}
+                </button>
+              )}
+              <div style={{ padding: 8, background: theme.colors.bgCard,
+                borderRadius: theme.radius.sm, fontFamily: theme.fonts.mono, fontSize: '11px',
+                color: theme.colors.textPrimary, whiteSpace: 'pre-wrap', borderLeft: `2px solid #22D3EE` }}>
+                {draft || action.proposedAction?.body || action.proposedAction?.message || action.proposedAction?.note}
+              </div>
             </div>
           )}
         </div>
