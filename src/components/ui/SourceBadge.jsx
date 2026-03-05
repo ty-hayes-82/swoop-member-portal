@@ -36,14 +36,16 @@ export default function SourceBadge({ system, size = 'sm' }) {
         gap:            '4px',
         padding,
         borderRadius:   '4px',
-        background:     `${color}14`,
-        border:         `1px solid ${color}30`,
+        background:     `${color}0D`,
+        border:         `1px solid ${color}22`,
         fontSize,
-        color:          `${color}CC`,
+        color:          `${color}AA`,
         fontWeight:     500,
         letterSpacing:  '0.02em',
         whiteSpace:     'nowrap',
         flexShrink:     0,
+        cursor:         'default',
+        userSelect:     'none',
       }}
     >
       <span style={{ fontSize: size === 'xs' ? '9px' : '10px' }}>{icon}</span>

@@ -108,7 +108,12 @@ export default function DataQuality() {
                 <div style={{ height: '100%', background: sys.quality > 95 ? theme.colors.success : theme.colors.warning, borderRadius: 3, width: `${sys.quality}%` }} />
               </div>
               <span style={{ fontSize: '10px', color: theme.colors.textMuted, width: 30, flexShrink: 0 }}>{sys.quality}%</span>
-              <span style={{ fontSize: '10px', color: theme.colors.textMuted }}>{isOpen ? '▲' : '▼'}</span>
+              <span style={{
+                fontSize: '14px', color: theme.colors.textMuted,
+                display: 'inline-block',
+                transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.15s ease',
+              }}>›</span>
             </div>
             {isOpen && (
               <div style={{ padding: `${theme.spacing.sm} ${theme.spacing.lg} ${theme.spacing.md}`, background: theme.colors.bgDeep, borderBottom: `1px solid ${theme.colors.border}` }}>

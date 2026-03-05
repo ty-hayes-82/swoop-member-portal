@@ -7,6 +7,65 @@ import { getHealthDistribution, getAtRiskMembers, getMemberSummary } from '@/ser
 import { theme } from '@/config/theme';
 import { useState } from 'react';
 
+// MemberRow — interactive row with hover state + expand chevron
+function MemberRow({ m, isExpanded, onToggle }) {
+  const [hovered, setHovered] = useState(false);
+  const riskColor = m.score < 30 ? theme.colors.urgent : theme.colors.warning;
+
+  return (
+    <>
+      <tr
+        onClick={onToggle}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          borderTop: `1px solid ${theme.colors.border}`,
+          cursor: 'pointer',
+          background: hovered ? theme.colors.bgCardHover : 'transparent',
+          transition: 'background 0.12s ease',
+        }}
+      >
+        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+          <span style={{
+            fontWeight: 600,
+            color: hovered ? theme.colors.members : theme.colors.textPrimary,
+            textDecoration: hovered ? 'underline' : 'none',
+            textDecorationColor: `${theme.colors.members}60`,
+            transition: 'color 0.12s ease',
+          }}>
+            {m.name}
+          </span>
+        </td>
+        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+          <span style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: riskColor }}>{m.score}</span>
+        </td>
+        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+          <ArchetypeBadge archetype={m.archetype} size="xs" />
+        </td>
+        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, maxWidth: 260 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{m.topRisk}</span>
+            <span style={{
+              color: isExpanded ? theme.colors.members : theme.colors.textMuted,
+              flexShrink: 0, fontSize: '14px', fontWeight: 600,
+              transition: 'transform 0.15s ease, color 0.12s ease',
+              display: 'inline-block',
+              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+            }}>›</span>
+          </div>
+        </td>
+      </tr>
+      {isExpanded && (
+        <tr style={{ background: theme.colors.bgDeep }}>
+          <td colSpan={4} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
+            <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk} />
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
 export default function HealthOverview() {
   const dist = getHealthDistribution();
   const atRisk = getAtRiskMembers();
@@ -62,31 +121,12 @@ export default function HealthOverview() {
           </thead>
           <tbody>
             {atRisk.map((m, i) => (
-              <>
-                <tr key={i} style={{ borderTop: `1px solid ${theme.colors.border}`, cursor: 'pointer' }}
-                  onClick={() => setExpanded(expanded === m.memberId ? null : m.memberId)}>
-                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textPrimary, fontWeight: 600 }}>{m.name}</td>
-                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-                    <span style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: m.score < 30 ? theme.colors.urgent : theme.colors.warning }}>{m.score}</span>
-                  </td>
-                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>
-                    <ArchetypeBadge archetype={m.archetype} size="xs" />
-                  </td>
-                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textMuted, fontSize: theme.fontSize.xs, maxWidth: 260 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-                      <span>{m.topRisk}</span>
-                      <span style={{ color: theme.colors.textMuted, flexShrink: 0 }}>{expanded === m.memberId ? '▲' : '▼'}</span>
-                    </div>
-                  </td>
-                </tr>
-                {expanded === m.memberId && (
-                  <tr key={`${i}-expand`} style={{ background: theme.colors.bgDeep }}>
-                    <td colSpan={4} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
-                      <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk} />
-                    </td>
-                  </tr>
-                )}
-              </>
+              <MemberRow
+                key={m.memberId}
+                m={m}
+                isExpanded={expanded === m.memberId}
+                onToggle={() => setExpanded(expanded === m.memberId ? null : m.memberId)}
+              />
             ))}
           </tbody>
         </table>

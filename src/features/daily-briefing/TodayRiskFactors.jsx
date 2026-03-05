@@ -7,8 +7,49 @@ const WEATHER_ICONS = {
   sunny: '☀️', cloudy: '⛅', rainy: '🌧️', windy: '💨', closed: '🔒', perfect: '☀️',
 };
 
-// Unique archetypes in the at-risk list (for filter buttons)
 const getArchetypes = (members) => [...new Set(members.map(m => m.archetype).filter(Boolean))];
+
+// AtRiskRow — hoverable member row with visible interactive feedback
+function AtRiskRow({ m, onNavigate }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onClick={() => onNavigate?.('member-health')}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: '12px',
+        padding: '10px 14px',
+        background: hovered ? '#A78BFA16' : '#A78BFA08',
+        border: `1px solid ${hovered ? '#A78BFA50' : '#A78BFA22'}`,
+        borderRadius: '8px', cursor: 'pointer',
+        transition: 'all 0.12s ease',
+      }}
+    >
+      <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#A78BFA22',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '12px', color: '#A78BFA', fontWeight: 700, flexShrink: 0 }}>
+        {m.score}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+          <span style={{
+            fontSize: '13px', fontWeight: 600,
+            color: hovered ? '#A78BFA' : theme.colors.textPrimary,
+            transition: 'color 0.12s ease',
+          }}>{m.name}</span>
+          {m.archetype && <ArchetypeBadge archetype={m.archetype} size="xs" />}
+        </div>
+        <div style={{ fontSize: '12px', color: theme.colors.textMuted }}>{m.topRisk}</div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ fontSize: '12px', color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>{m.time}</div>
+        <span style={{ color: hovered ? '#A78BFA' : theme.colors.textMuted, fontSize: '14px', transition: 'color 0.12s ease' }}>›</span>
+      </div>
+    </div>
+  );
+}
+
 
 export default function TodayRiskFactors({ data, onNavigate }) {
   const { weather, tempHigh, wind, atRiskTeetimes, staffingGaps, fullyStaffed } = data;
@@ -75,29 +116,7 @@ export default function TodayRiskFactors({ data, onNavigate }) {
           </div>
 
           {filtered.map(m => (
-            <div key={m.memberId}
-              onClick={() => onNavigate?.('member-health')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '10px 14px',
-                background: '#A78BFA08', border: '1px solid #A78BFA22',
-                borderRadius: '8px', cursor: 'pointer',
-              }}
-            >
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#A78BFA22',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '12px', color: '#A78BFA', fontWeight: 700, flexShrink: 0 }}>
-                {m.score}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{m.name}</span>
-                  {m.archetype && <ArchetypeBadge archetype={m.archetype} size="xs" />}
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{m.topRisk}</div>
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>{m.time}</div>
-            </div>
+            <AtRiskRow key={m.memberId} m={m} onNavigate={onNavigate} />
           ))}
         </div>
       )}
