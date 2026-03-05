@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { AGENT_ACTION_TYPES } from '@/config/constants';
+import { agentActionThreads } from '@/data/agents';
 
 const PRIORITY_COLORS = {
   high:   { bg: 'rgba(192,57,43,0.06)', border: 'rgba(192,57,43,0.25)', label: '#C0392B' },
@@ -90,6 +91,26 @@ export function AgentActionCard({ action, onApprove, onDismiss, showRationale = 
             background: 'transparent', border: `1px solid ${theme.colors.border}`,
             color: theme.colors.textMuted, fontSize: '12px',
           }}>Dismiss</button>
+        </div>
+      )}
+
+      {/* Action thread — follow-up sequence (Phase B Step 14) */}
+      {status === 'approved' && agentActionThreads[action.id] && (
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px dashed rgba(34,211,238,0.2)` }}>
+          <div style={{ fontSize: '10px', fontWeight: 700, color: '#22D3EE', textTransform: 'uppercase',
+            letterSpacing: '0.06em', marginBottom: 8 }}>
+            ⬡ Follow-up thread
+          </div>
+          {agentActionThreads[action.id].map(t => (
+            <div key={t.id} style={{
+              display: 'flex', gap: 8, alignItems: 'flex-start',
+              background: theme.colors.bgDeep, borderRadius: theme.radius.sm,
+              padding: '7px 10px', fontSize: theme.fontSize.xs,
+            }}>
+              <span style={{ color: '#22D3EE', flexShrink: 0, marginTop: 1 }}>→</span>
+              <span style={{ color: theme.colors.textSecondary, lineHeight: 1.5 }}>{t.headline}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

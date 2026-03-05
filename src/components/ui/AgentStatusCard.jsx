@@ -84,6 +84,15 @@ export function AgentStatusCard({ agent, onToggle, onConfigure, overrideStatus }
         }}>
           {isActive ? 'Pause Agent' : 'Resume Agent'}
         </button>
+        {onViewLog && (
+          <button onClick={onViewLog} style={{
+            padding: '6px 12px', borderRadius: theme.radius.sm, cursor: 'pointer',
+            background: 'transparent', border: `1px solid rgba(34,211,238,0.25)`,
+            color: '#22D3EE', fontSize: '11px', fontWeight: 500,
+          }}>
+            Log
+          </button>
+        )}
         <button onClick={onConfigure} style={{
           padding: '6px 14px', borderRadius: theme.radius.sm, cursor: 'pointer',
           background: 'transparent', border: `1px solid ${theme.colors.border}`,

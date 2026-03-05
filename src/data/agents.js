@@ -249,3 +249,25 @@ export const agentThoughtLogs = {
     { time: '06:00:55', text: 'Sweep complete. 5 members flagged for intervention. 2 action cards queued.' },
   ],
 };
+
+// Action threads — follow-up actions generated after approval (Phase B Step 14)
+export const agentActionThreads = {
+  'action_001': [
+    {
+      id: 'thread_001a',
+      createdAt: '2026-01-17T09:05:00',
+      status: 'pending',
+      headline: 'Follow up in 48h if James Whitfield hasn\'t rebooked a tee time',
+      rationale: 'If no booking by Jan 19, resignation risk escalates to 85%. Propose a comp round.',
+    },
+  ],
+  'action_002': [
+    {
+      id: 'thread_002a',
+      createdAt: '2026-01-17T06:10:00',
+      status: 'pending',
+      headline: 'Check Anne Jordan\'s booking confirmation by 8 AM Saturday',
+      rationale: 'If the invite goes unaccepted by 8 AM, route cancellation slot to next waitlist member.',
+    },
+  ],
+};

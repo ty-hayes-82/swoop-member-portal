@@ -4,11 +4,13 @@ import { AgentStatusCard, AgentThoughtLog } from '@/components/ui';
 import { getAgentDefinitions, getThoughtLog } from '@/services/agentService';
 import { useApp } from '@/context/AppContext';
 import { theme } from '@/config/theme';
+import AgentConfigDrawer from '../AgentConfigDrawer';
 
 export default function AgentsTab() {
-  const { toggleAgent, getAgentStatus } = useApp();
+  const { toggleAgent, getAgentStatus, saveAgentConfig, getAgentConfig } = useApp();
   const agents = getAgentDefinitions();
   const [expandedLog, setExpandedLog] = useState(null);
+  const [configAgent, setConfigAgent] = useState(null); // agentId showing config drawer
 
   const active = agents.filter(a => (getAgentStatus(a.id, a.status)) === 'active').length;
 
@@ -45,8 +47,25 @@ export default function AgentsTab() {
               agent={agent}
               overrideStatus={getAgentStatus(agent.id, agent.status)}
               onToggle={() => toggleAgent(agent.id, getAgentStatus(agent.id, agent.status))}
-              onConfigure={() => setExpandedLog(expandedLog === agent.id ? null : agent.id)}
+              onConfigure={() => {
+                setConfigAgent(configAgent === agent.id ? null : agent.id);
+                setExpandedLog(null);
+              }}
+              onViewLog={() => {
+                setExpandedLog(expandedLog === agent.id ? null : agent.id);
+                setConfigAgent(null);
+              }}
             />
+
+            {/* Config drawer */}
+            {configAgent === agent.id && (
+              <AgentConfigDrawer
+                agent={agent}
+                initialConfig={getAgentConfig(agent.id)}
+                onSave={(cfg) => saveAgentConfig(agent.id, cfg)}
+                onClose={() => setConfigAgent(null)}
+              />
+            )}
 
             {/* Thought log drawer */}
             {expandedLog === agent.id && (

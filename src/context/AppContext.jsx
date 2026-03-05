@@ -32,6 +32,7 @@ const initialState = {
   // Agent inbox state — keyed by action id
   agentActionStatuses: {}, // { [actionId]: 'pending' | 'approved' | 'dismissed' }
   agentStatuses: {},       // { [agentId]: 'active' | 'paused' }
+  agentConfigs: {},        // { [agentId]: { threshold, escalationHours, notifications, scope } }
 };
 
 function reducer(state, action) {
@@ -77,6 +78,11 @@ function reducer(state, action) {
           [action.id]: (state.agentStatuses[action.id] ?? action.currentStatus) === 'active' ? 'paused' : 'active',
         },
       };
+    case 'SAVE_AGENT_CONFIG':
+      return {
+        ...state,
+        agentConfigs: { ...state.agentConfigs, [action.id]: action.config },
+      };
     default:
       return state;
   }
@@ -84,8 +90,19 @@ function reducer(state, action) {
 
 const AppContext = createContext(null);
 
+function loadPersistedState(base) {
+  try {
+    return {
+      ...base,
+      agentStatuses: JSON.parse(localStorage.getItem('swoop_agent_statuses') || '{}'),
+      agentConfigs:  JSON.parse(localStorage.getItem('swoop_agent_configs')  || '{}'),
+      agentActionStatuses: JSON.parse(localStorage.getItem('swoop_agent_action_statuses') || '{}'),
+    };
+  } catch { return base; }
+}
+
 export function AppProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState, loadPersistedState);
 
   const activePlaybooks = Object.entries(state.playbooks).filter(([, v]) => v.active);
   const totalRevenueImpact = {
@@ -105,6 +122,15 @@ export function AppProvider({ children }) {
     });
   }, [state.trailProgress, state.playbooks]);
 
+  // Persist agent state across sessions
+  useEffect(() => {
+    try {
+      localStorage.setItem('swoop_agent_statuses', JSON.stringify(state.agentStatuses));
+      localStorage.setItem('swoop_agent_configs', JSON.stringify(state.agentConfigs));
+      localStorage.setItem('swoop_agent_action_statuses', JSON.stringify(state.agentActionStatuses));
+    } catch {}
+  }, [state.agentStatuses, state.agentConfigs, state.agentActionStatuses]);
+
   return (
     <AppContext.Provider value={{
       ...state,
@@ -120,6 +146,8 @@ export function AppProvider({ children }) {
       approveAction: (id) => dispatch({ type: 'APPROVE_AGENT_ACTION', id }),
       dismissAction: (id) => dispatch({ type: 'DISMISS_AGENT_ACTION', id }),
       toggleAgent: (id, currentStatus) => dispatch({ type: 'TOGGLE_AGENT_STATUS', id, currentStatus }),
+      saveAgentConfig: (id, config) => dispatch({ type: 'SAVE_AGENT_CONFIG', id, config }),
+      getAgentConfig: (id) => state.agentConfigs[id] ?? null,
       pendingAgentCount: Object.values(state.agentActionStatuses).filter(s => s !== 'pending').length === 0
         ? 4  // default: 4 pending actions on first load (matches data)
         : Math.max(0, 4 - Object.values(state.agentActionStatuses).filter(s => s !== 'pending').length),
