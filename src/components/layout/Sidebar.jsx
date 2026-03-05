@@ -19,8 +19,9 @@ export default function Sidebar() {
   const { activeCount, totalRevenueImpact } = useApp();
   const w = sidebarCollapsed ? '52px' : '240px';
 
+  const ALWAYS_VISIBLE = ['demo-mode', 'integrations'];
   const visibleItems = viewMode === 'today'
-    ? NAV_ITEMS.filter(n => TODAY_ITEMS.includes(n.key) || n.key === 'demo-mode')
+    ? NAV_ITEMS.filter(n => TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key))
     : NAV_ITEMS;
 
   return (
