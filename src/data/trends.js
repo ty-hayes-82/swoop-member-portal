@@ -16,3 +16,13 @@ export const trends = {
 };
 
 export const MONTHS = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'];
+
+// Per-outlet monthly revenue — Aug through Jan
+// Seasonal patterns: Grill Room strong year-round, Pool Bar peaks in summer (off-peak in Jan)
+export const outletTrends = {
+  'Grill Room':     [38000, 40000, 42000, 41000, 43000, 44200],
+  'Main Dining':    [28000, 29000, 31000, 30000, 32000, 33800],
+  'Bar/Lounge':     [18000, 19000, 20000, 19500, 20000, 20400],
+  'Halfway House':  [12000, 11000, 12000, 11500, 12000, 12200],
+  'Pool Bar':       [14000, 13000, 11000,  9000,  8500,  8800],
+};

@@ -1,5 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { SoWhatCallout } from '@/components/ui';
+import TrendContext from '@/components/ui/TrendContext.jsx';
+import TrendChart from '@/components/charts/TrendChart.jsx';
 import { getRevenueByDay, getMonthlyRevenueSummary } from '@/services/operationsService';
 import { theme } from '@/config/theme';
 
@@ -29,11 +31,11 @@ export default function RevenueTab() {
       {/* KPI strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
         {[
-          { label: 'Monthly Total', value: `$${(summary.total / 1000).toFixed(0)}K` },
-          { label: 'Daily Average', value: `$${summary.dailyAvg.toLocaleString()}` },
-          { label: 'Weekend Avg', value: `$${summary.weekendAvg.toLocaleString()}` },
-          { label: 'Weekday Avg', value: `$${summary.weekdayAvg.toLocaleString()}` },
-        ].map(({ label, value }) => (
+          { label: 'Monthly Total', value: `$${(summary.total / 1000).toFixed(0)}K`, metric: 'golfRevenue', format: 'currency' },
+          { label: 'Daily Average', value: `$${summary.dailyAvg.toLocaleString()}`, metric: null },
+          { label: 'Weekend Avg', value: `$${summary.weekendAvg.toLocaleString()}`, metric: null },
+          { label: 'Weekday Avg', value: `$${summary.weekdayAvg.toLocaleString()}`, metric: null },
+        ].map(({ label, value, metric, format }) => (
           <div key={label} style={{ background: theme.colors.bgCardHover,
             border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md,
             padding: theme.spacing.md }}>
@@ -41,6 +43,7 @@ export default function RevenueTab() {
               textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
             <div style={{ fontSize: theme.fontSize.xl, fontFamily: theme.fonts.mono,
               fontWeight: 700, color: theme.colors.textPrimary, marginTop: 4 }}>{value}</div>
+            {metric && <TrendContext metricKey={metric} format={format} style={{ marginTop: 4 }} />}
           </div>
         ))}
       </div>
@@ -82,6 +85,16 @@ export default function RevenueTab() {
         Jan 9, 16, 28 — Grill Room understaffed — revenue ran ~8% below comparable days.
         Three gaps cost an estimated <strong>$3,400</strong> in lost revenue this month.
       </SoWhatCallout>
+
+      {/* Full trend chart #1 — 6-month revenue */}
+      <TrendChart
+        title="Monthly Revenue Trend — Golf + F&B"
+        seriesKeys={[
+          { key: 'golfRevenue', color: theme.colors.operations, label: 'Golf Revenue' },
+          { key: 'fbRevenue',   color: theme.colors.fb,         label: 'F&B Revenue' },
+        ]}
+        format="currency"
+      />
     </div>
   );
 }

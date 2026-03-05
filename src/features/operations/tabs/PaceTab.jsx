@@ -1,5 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { SoWhatCallout, Badge } from '@/components/ui';
+import TrendContext from '@/components/ui/TrendContext.jsx';
+import TrendChart from '@/components/charts/TrendChart.jsx';
 import { getPaceDistribution, getSlowRoundRate, getBottleneckHoles, getPaceFBImpact } from '@/services/operationsService';
 import { theme } from '@/config/theme';
 
@@ -16,12 +18,12 @@ export default function PaceTab() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: theme.spacing.md }}>
         {[
           { label: 'Slow Round Rate', value: `${(stats.overallRate * 100).toFixed(0)}%`,
-            sub: `>${stats.threshold} min`, urgent: true },
+            sub: `>${stats.threshold} min`, urgent: true, metric: 'slowRoundRate' },
           { label: 'Weekend Rate', value: `${(stats.weekendRate * 100).toFixed(0)}%`,
-            sub: 'Sat/Sun only', urgent: true },
+            sub: 'Sat/Sun only', urgent: true, metric: null },
           { label: 'Weekday Rate', value: `${(stats.weekdayRate * 100).toFixed(0)}%`,
-            sub: 'Mon–Fri', urgent: false },
-        ].map(({ label, value, sub, urgent }) => (
+            sub: 'Mon–Fri', urgent: false, metric: null },
+        ].map(({ label, value, sub, urgent, metric }) => (
           <div key={label} style={{ background: theme.colors.bgCardHover,
             border: `1px solid ${urgent ? `${theme.colors.urgent}40` : theme.colors.border}`,
             borderRadius: theme.radius.md, padding: theme.spacing.md }}>
@@ -29,7 +31,10 @@ export default function PaceTab() {
               textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
             <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono,
               fontWeight: 700, color: urgent ? theme.colors.urgent : theme.colors.textPrimary }}>{value}</div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{sub}</div>
+            {metric
+              ? <TrendContext metricKey={metric} format="percent" style={{ marginTop: 4 }} />
+              : <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{sub}</div>
+            }
           </div>
         ))}
       </div>
@@ -90,6 +95,14 @@ export default function PaceTab() {
         {` ${(fbImpact.slowConversionRate * 100).toFixed(0)}%`} for slow rounds —
         costing roughly <strong>{lostRevFmt}/month</strong> in lost dining revenue.
       </SoWhatCallout>
+
+      {/* Full trend chart #2 — 6-month slow round rate */}
+      <TrendChart
+        title="Slow Round Rate Trend — 6-month deterioration"
+        metricKey="slowRoundRate"
+        color={theme.colors.urgent}
+        format="percent"
+      />
     </div>
   );
 }

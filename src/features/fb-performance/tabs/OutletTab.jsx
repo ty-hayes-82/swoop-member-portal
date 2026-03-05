@@ -1,6 +1,8 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { SoWhatCallout } from '@/components/ui';
+import { SoWhatCallout, Sparkline } from '@/components/ui';
+import TrendContext from '@/components/ui/TrendContext.jsx';
 import { getOutletPerformance, getFBSummary } from '@/services/fbService';
+import { outletTrends, MONTHS } from '@/data/trends.js';
 import { theme } from '@/config/theme';
 
 export default function OutletTab() {
@@ -12,16 +14,17 @@ export default function OutletTab() {
       {/* Summary KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: theme.spacing.md }}>
         {[
-          { label: 'Total F&B Revenue', value: `$${(summary.totalRevenue / 1000).toFixed(0)}K` },
-          { label: 'Total Covers', value: summary.totalCovers.toLocaleString() },
-          { label: 'Understaffing Loss', value: `-$${(summary.understaffingLoss / 1000).toFixed(1)}K` },
-        ].map(({ label, value }) => (
+          { label: 'Total F&B Revenue', value: `$${(summary.totalRevenue / 1000).toFixed(0)}K`, metric: 'fbRevenue', format: 'currency' },
+          { label: 'Total Covers', value: summary.totalCovers.toLocaleString(), metric: null },
+          { label: 'Understaffing Loss', value: `-$${(summary.understaffingLoss / 1000).toFixed(1)}K`, metric: null },
+        ].map(({ label, value, metric, format }) => (
           <div key={label} style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
             border: `1px solid ${theme.colors.border}`, padding: theme.spacing.md }}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
               textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
             <div style={{ fontSize: theme.fontSize.xl, fontFamily: theme.fonts.mono,
               fontWeight: 700, color: theme.colors.fb, marginTop: 4 }}>{value}</div>
+            {metric && <TrendContext metricKey={metric} format={format} style={{ marginTop: 4 }} />}
           </div>
         ))}
       </div>
@@ -52,7 +55,7 @@ export default function OutletTab() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
           <thead>
             <tr style={{ background: theme.colors.bg }}>
-              {['Outlet', 'Revenue', 'Covers', 'Avg Check', 'Understaffing Impact'].map(h => (
+              {['Outlet', 'Revenue', 'Covers', 'Avg Check', '6-mo Trend', 'Understaffing Impact'].map(h => (
                 <th key={h} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'left',
                   color: theme.colors.textMuted, fontSize: theme.fontSize.xs, textTransform: 'uppercase',
                   letterSpacing: '0.06em', fontWeight: 500 }}>{h}</th>
@@ -73,6 +76,13 @@ export default function OutletTab() {
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
                   color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>
                   ${o.avgCheck.toFixed(2)}
+                </td>
+                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+                  {outletTrends[o.outlet] && (
+                    <div style={{ width: 72, height: 24 }}>
+                      <Sparkline data={outletTrends[o.outlet]} height={24} color={theme.colors.fb} />
+                    </div>
+                  )}
                 </td>
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
                   {o.understaffedImpact < 0

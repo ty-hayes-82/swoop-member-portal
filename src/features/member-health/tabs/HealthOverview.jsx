@@ -1,6 +1,8 @@
 import { SoWhatCallout } from '@/components/ui';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
+import TrendContext from '@/components/ui/TrendContext.jsx';
+import TrendChart from '@/components/charts/TrendChart.jsx';
 import { getHealthDistribution, getAtRiskMembers, getMemberSummary } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import { useState } from 'react';
@@ -96,6 +98,16 @@ export default function HealthOverview() {
         James Whitfield is the most urgent: an unresolved service complaint is the only thing standing between
         an active member and a resignation that should never happen. Tap his name to take action.
       </SoWhatCallout>
+
+      {/* Full trend chart #3 — 6-month member health trajectory */}
+      <TrendChart
+        title="Member Health Trend — avg score + at-risk count"
+        seriesKeys={[
+          { key: 'memberHealthAvg',   color: theme.colors.members, label: 'Avg Health Score' },
+          { key: 'atRiskMemberCount', color: theme.colors.urgent,  label: 'At-Risk Members' },
+        ]}
+        format="number"
+      />
     </div>
   );
 }
