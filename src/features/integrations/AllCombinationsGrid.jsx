@@ -85,9 +85,6 @@ export function AllCombinationsGrid({ onSelect }) {
             onClick={() => {
               const [idA, idB] = combo.key.split('+');
               onSelect([idA, idB]);
-              setTimeout(() => {
-                document.getElementById('combination-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }, 50);
             }}
           />
         ))}
