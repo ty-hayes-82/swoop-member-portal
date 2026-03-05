@@ -2,6 +2,7 @@ import { useState } from 'react';
 import TrendArrow from './TrendArrow.jsx';
 import Sparkline from './Sparkline.jsx';
 import Badge from './Badge.jsx';
+import SourceBadge from './SourceBadge.jsx';
 
 function formatValue(value, format) {
   if (format === 'currency') {
@@ -14,7 +15,7 @@ function formatValue(value, format) {
 }
 
 export default function StatCard({
-  label, value, format, trend, sparklineData, badge, onClick,
+  label, value, format, trend, sparklineData, badge, onClick, source,
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -62,6 +63,11 @@ export default function StatCard({
           </div>
         )}
       </div>
+      {source && (
+        <div style={{ marginTop: '2px' }}>
+          <SourceBadge system={source} size="xs" />
+        </div>
+      )}
     </div>
   );
 }

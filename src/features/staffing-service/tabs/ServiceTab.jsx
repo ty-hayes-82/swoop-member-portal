@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { SoWhatCallout } from '@/components/ui';
 import QuickActions from '@/components/ui/QuickActions.jsx';
+import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import { getComplaintCorrelation, getFeedbackSummary } from '@/services/staffingService';
 import { theme } from '@/config/theme';
 
@@ -39,8 +40,9 @@ export default function ServiceTab() {
               <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700 }}>
                 ⚠ Member Needs Personal Attention
               </span>
-              <div style={{ fontFamily: theme.fonts.serif, fontSize: theme.fontSize.xl, color: theme.colors.textPrimary, marginTop: 4 }}>
+              <div style={{ fontFamily: theme.fonts.serif, fontSize: theme.fontSize.xl, color: theme.colors.textPrimary, marginTop: 4, display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
                 James Whitfield
+                <ArchetypeBadge archetype="Balanced Active" size="sm" />
               </div>
               <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginTop: 4 }}>
                 Member since 2019 · Full Golf · $18,000/yr in dues · 47 rounds this year

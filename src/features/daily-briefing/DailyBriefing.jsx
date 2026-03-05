@@ -1,6 +1,6 @@
 // DailyBriefing — Today mode: 3 things. Deep Dive: full analytical briefing.
 // Critique Phase 4: two-mode experience.
-import { Panel, ConnectedSystems } from '@/components/ui/index.js';
+import { Panel, ConnectedSystems, StoryHeadline } from '@/components/ui/index.js';
 import TodayMode from './TodayMode.jsx';
 import YesterdayRecap from './YesterdayRecap.jsx';
 import TodayRiskFactors from './TodayRiskFactors.jsx';
@@ -18,6 +18,12 @@ export default function DailyBriefing() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '900px' }}>
+
+      <StoryHeadline
+        variant="urgent"
+        headline="James Whitfield filed a complaint Jan 18. It was never resolved. He resigned Jan 22 — $18K/year in dues lost."
+        context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. The Jan 9 and Jan 28 gaps follow the same pattern."
+      />
 
       {/* Mode switcher + print action */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
