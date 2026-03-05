@@ -1,35 +1,36 @@
-// memberService.js — Phase 1 data access layer
+// memberService.js — Phase 1 static · Phase 2 /api/members
 
 import { memberArchetypes, healthDistribution, atRiskMembers, resignationScenarios } from '@/data/members';
 import { emailHeatmap, decayingMembers } from '@/data/email';
 
-export const getHealthDistribution = () => healthDistribution;
+let _d = null;
 
-export const getAtRiskMembers = () => atRiskMembers;
+export const _init = async () => {
+  try {
+    const res = await fetch('/api/members');
+    if (res.ok) _d = await res.json();
+  } catch { /* keep static fallback */ }
+};
 
-export const getArchetypeProfiles = () => memberArchetypes;
-
-export const getResignationScenarios = () => resignationScenarios;
-
-export const getEmailHeatmap = () => emailHeatmap;
-
-export const getDecayingMembers = () => decayingMembers;
+export const getHealthDistribution  = () => _d ? _d.healthDistribution  : healthDistribution;
+export const getAtRiskMembers       = () => _d ? _d.atRiskMembers        : atRiskMembers;
+export const getArchetypeProfiles   = () => _d ? _d.memberArchetypes     : memberArchetypes;
+export const getResignationScenarios= () => _d ? _d.resignationScenarios : resignationScenarios;
+export const getEmailHeatmap        = () => _d ? _d.emailHeatmap         : emailHeatmap;
+export const getDecayingMembers     = () => _d ? _d.decayingMembers      : decayingMembers;
 
 export const getMemberSummary = () => {
-  const total = memberArchetypes.reduce((s, a) => s + a.count, 0);
-  const atRisk = healthDistribution.find(h => h.level === 'At Risk')?.count ?? 0;
+  if (_d) return _d.memberSummary;
+  const total    = memberArchetypes.reduce((s, a) => s + a.count, 0);
+  const atRisk   = healthDistribution.find(h => h.level === 'At Risk')?.count  ?? 0;
   const critical = healthDistribution.find(h => h.level === 'Critical')?.count ?? 0;
-  const healthy = healthDistribution.find(h => h.level === 'Healthy')?.count ?? 0;
+  const healthy  = healthDistribution.find(h => h.level === 'Healthy')?.count  ?? 0;
   return {
-    total,
-    healthy,
-    atRisk,
-    critical,
-    riskCount: atRisk + critical,
-    avgHealthScore: 62,
+    total, healthy, atRisk, critical,
+    riskCount:           atRisk + critical,
+    avgHealthScore:      62,
     potentialDuesAtRisk: (atRisk + critical) * 18000,
   };
 };
 
-// Data provenance — which vendor systems this service simulates
-export const sourceSystems = ["Northstar", "Club Prophet", "ForeTees"];
+export const sourceSystems = ['Northstar', 'Club Prophet', 'ForeTees'];

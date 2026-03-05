@@ -1,5 +1,6 @@
 import { AppProvider } from '@/context/AppContext';
 import { NavigationProvider, useNavigationContext } from '@/context/NavigationContext';
+import { DataProvider } from '@/context/DataProvider';
 import { Sidebar } from '@/components/layout';
 import { Header } from '@/components/layout';
 import { DailyBriefing } from '@/features/daily-briefing';
@@ -68,10 +69,12 @@ function AppShell() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <NavigationProvider>
-        <AppShell />
-      </NavigationProvider>
-    </AppProvider>
+    <DataProvider>
+      <AppProvider>
+        <NavigationProvider>
+          <AppShell />
+        </NavigationProvider>
+      </AppProvider>
+    </DataProvider>
   );
 }

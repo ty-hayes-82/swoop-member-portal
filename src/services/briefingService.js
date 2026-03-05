@@ -1,74 +1,87 @@
-// briefingService.js — aggregates across all domains for Daily Briefing
+// briefingService.js — Phase 1 static · Phase 2 /api/briefing
+
 import { getMonthlyRevenueSummary, getRevenueByDay } from './operationsService';
-import { getAtRiskMembers } from './memberService';
+import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
-import { getCancellationSummary, getWaitlistSummary } from './waitlistService';
+import { getCancellationSummary, getWaitlistSummary }  from './waitlistService';
+
+let _d = null;
+
+export const _init = async () => {
+  try {
+    const res = await fetch('/api/briefing');
+    if (res.ok) _d = await res.json();
+  } catch { /* keep static fallback */ }
+};
 
 export const getDailyBriefing = (date = '2026-01-17') => {
-  const revData = getRevenueByDay();
-  const yesterday = revData.find(d => d.date === '2026-01-16') ?? revData[15];
-  const atRisk = getAtRiskMembers();
-  const staffing = getStaffingSummary();
+  if (_d) return _d;
+
+  // Phase 1 static fallback — identical shape to API response
+  const revData    = getRevenueByDay();
+  const yesterday  = revData.find(d => d.date === '2026-01-16') ?? revData[15];
+  const atRisk     = getAtRiskMembers();
+  const staffing   = getStaffingSummary();
   const complaints = getComplaintCorrelation().filter(c => c.status !== 'resolved');
-  const cancelSummary = getCancellationSummary();
+  const cancelSummary  = getCancellationSummary();
   const waitlistSummary = getWaitlistSummary();
 
   return {
     currentDate: date,
     yesterdayRecap: {
-      date: yesterday.date,
-      revenue: yesterday.total,
-      revenueVsPlan: -0.12,
-      rounds: 82,
-      incidents: ['Grill Room understaffed — 2 service speed complaints', 'James Whitfield filed a slow-service complaint — left unhappy, no follow-up'],
-      weather: yesterday.weather,
+      date:           yesterday.date,
+      revenue:        yesterday.total,
+      revenueVsPlan:  -0.12,
+      rounds:         82,
+      incidents: [
+        'Grill Room understaffed — 2 service speed complaints',
+        'James Whitfield filed a slow-service complaint — left unhappy, no follow-up',
+      ],
+      weather:        yesterday.weather,
       isUnderstaffed: yesterday.isUnderstaffed,
     },
     todayRisks: {
-      weather: 'perfect',
-      tempHigh: 72,
-      wind: 18,
-      forecast: 'Wind advisory — 18 mph gusts expected by noon',
+      weather:    'perfect', tempHigh: 72, wind: 18,
+      forecast:   'Wind advisory — 18 mph gusts expected by noon',
       atRiskTeetimes: [
-        { memberId: 'mbr_089', name: 'Anne Jordan', archetype: 'Weekend Warrior', time: '9:14 AM', score: 28, topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
-        { memberId: 'mbr_271', name: 'Member 271',  archetype: 'Declining',       time: '10:02 AM', score: 22, topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
+        { memberId: 'mbr_089', name: 'Anne Jordan',  archetype: 'Weekend Warrior', time: '9:14 AM', score: 28,
+          topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
+        { memberId: 'mbr_271', name: 'Member 271',   archetype: 'Declining',       time: '10:02 AM', score: 22,
+          topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
       ],
-      staffingGaps: [],
-      fullyStaffed: true,
+      staffingGaps: [], fullyStaffed: true,
       cancellationRisk: {
-        highRiskBookings: cancelSummary.highRisk,
-        totalRevAtRisk: cancelSummary.totalRevAtRisk,
-        driverSummary: 'Wind advisory + 2 low-engagement members',
-        suggestedAction: 'Send confirmation nudges to Kevin Hurst (82%), Anne Jordan (71%), James Whitfield (68%)',
+        highRiskBookings:     cancelSummary.highRisk,
+        totalRevAtRisk:       cancelSummary.totalRevAtRisk,
+        driverSummary:        'Wind advisory + 2 low-engagement members',
+        suggestedAction:      'Send confirmation nudges to Kevin Hurst (82%), Anne Jordan (71%), James Whitfield (68%)',
         estimatedRevenueSaved: Math.round(cancelSummary.totalRevAtRisk * 0.34),
       },
     },
     waitlistIntel: {
-      total: waitlistSummary.total,
-      highPriority: waitlistSummary.highPriority,
-      atRisk: waitlistSummary.atRisk,
-      avgDaysWaiting: waitlistSummary.avgDaysWaiting,
+      total:           waitlistSummary.total,
+      highPriority:    waitlistSummary.highPriority,
+      atRisk:          waitlistSummary.atRisk,
+      avgDaysWaiting:  waitlistSummary.avgDaysWaiting,
     },
     pendingActions: [
-      { playbookId: 'service-save',      title: 'Service Save Protocol',          status: 'recommended', urgency: 'high',
+      { playbookId: 'service-save',       title: 'Service Save Protocol',        status: 'recommended', urgency: 'high',
         reason: 'James Whitfield complaint unresolved — at risk of resignation' },
-      { playbookId: 'peak-demand-capture', title: 'Peak Demand Capture',           status: 'recommended', urgency: 'high',
+      { playbookId: 'peak-demand-capture',title: 'Peak Demand Capture',          status: 'recommended', urgency: 'high',
         reason: `${cancelSummary.highRisk} high-risk bookings tomorrow · wind advisory · $${cancelSummary.totalRevAtRisk} at stake` },
-      { playbookId: 'slow-saturday',     title: 'Slow Saturday Recovery',          status: 'available',   urgency: 'medium',
+      { playbookId: 'slow-saturday',      title: 'Slow Saturday Recovery',       status: 'available',   urgency: 'medium',
         reason: '28% slow round rate — weekend pace deteriorating' },
-      { playbookId: 'engagement-decay',  title: 'Engagement Decay Intervention',   status: 'available',   urgency: 'medium',
+      { playbookId: 'engagement-decay',   title: 'Engagement Decay Intervention',status: 'available',   urgency: 'medium',
         reason: '5 members showing accelerated email decay' },
     ],
     keyMetrics: {
-      monthlyRevenue: 218400,
-      revenueVsPlan: +4.2,
-      atRiskMembers: atRisk.length,
+      monthlyRevenue: getMonthlyRevenueSummary().total,
+      revenueVsPlan:  +4.2,
+      atRiskMembers:  atRisk.length,
       openComplaints: complaints.length,
       understaffedDays: staffing.understaffedDaysCount,
     },
   };
 };
 
-// Data provenance — which vendor systems this service simulates
-export const sourceSystems = ["ForeTees", "Jonas POS", "Northstar", "ClubReady", "Club Prophet"];
-
+export const sourceSystems = ['ForeTees', 'Jonas POS', 'Northstar', 'ClubReady', 'Club Prophet'];

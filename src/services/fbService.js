@@ -1,48 +1,59 @@
-// fbService.js — Phase 1 data access layer
+// fbService.js — Phase 1 static · Phase 2 /api/fb
 
 import { outlets, postRoundConversion, rainDayImpact } from '@/data/outlets';
 import { dailyRevenue } from '@/data/revenue';
 
-export const getOutletPerformance = () => outlets;
+let _d = null;
 
-export const getPostRoundConversion = () => postRoundConversion;
+export const _init = async () => {
+  try {
+    const res = await fetch('/api/fb');
+    if (res.ok) _d = await res.json();
+  } catch { /* keep static fallback */ }
+};
+
+export const getOutletPerformance = () => _d ? _d.outlets : outlets;
+
+export const getPostRoundConversion = () =>
+  _d ? _d.postRoundConversion : postRoundConversion;
 
 export const getRainDayImpact = () => {
-  const avgGolf = dailyRevenue
-    .filter(d => d.weather !== 'rainy' && d.golf > 0)
-    .reduce((s, d) => s + d.golf, 0) / dailyRevenue.filter(d => d.weather !== 'rainy' && d.golf > 0).length;
-
-  const avgFb = dailyRevenue
-    .filter(d => d.weather !== 'rainy')
-    .reduce((s, d) => s + d.fb, 0) / dailyRevenue.filter(d => d.weather !== 'rainy').length;
-
+  if (_d) return _d.rainDayImpact;
+  const avgGolf = dailyRevenue.filter(d => d.weather !== 'rainy' && d.golf > 0)
+    .reduce((s, d) => s + d.golf, 0) /
+    dailyRevenue.filter(d => d.weather !== 'rainy' && d.golf > 0).length;
+  const avgFb = dailyRevenue.filter(d => d.weather !== 'rainy')
+    .reduce((s, d) => s + d.fb, 0) /
+    dailyRevenue.filter(d => d.weather !== 'rainy').length;
   return rainDayImpact.map(d => ({
     ...d,
     golfVsAvg: Math.round(((d.golfRevenue - avgGolf) / avgGolf) * 100),
-    fbVsAvg: Math.round(((d.fbRevenue - avgFb) / avgFb) * 100),
+    fbVsAvg:   Math.round(((d.fbRevenue   - avgFb)   / avgFb)   * 100),
   }));
 };
 
-export const getMealPeriodBreakdown = () =>
-  outlets.flatMap(o =>
-    o.periods.map(p => ({
-      outlet: o.outlet,
-      period: p.period,
-      revenue: p.revenue,
-      covers: p.covers,
+export const getMealPeriodBreakdown = () => {
+  const src = _d ? _d.outlets : outlets;
+  return src.flatMap(o =>
+    (o.periods ?? []).map(p => ({
+      outlet: o.outlet, period: p.period,
+      revenue: p.revenue, covers: p.covers,
       avgCheck: p.covers > 0 ? +(p.revenue / p.covers).toFixed(2) : 0,
     }))
   );
+};
 
-export const getFBSummary = () => ({
-  totalRevenue: outlets.reduce((s, o) => s + o.revenue, 0),
-  totalCovers: outlets.reduce((s, o) => s + o.covers, 0),
-  understaffingLoss: outlets.reduce((s, o) => s + Math.abs(o.understaffedImpact), 0),
-  overallAvgCheck: +(
-    outlets.reduce((s, o) => s + o.revenue, 0) /
-    outlets.reduce((s, o) => s + o.covers, 0)
-  ).toFixed(2),
-});
+export const getFBSummary = () => {
+  if (_d) return _d.fbSummary;
+  return {
+    totalRevenue:       outlets.reduce((s, o) => s + o.revenue, 0),
+    totalCovers:        outlets.reduce((s, o) => s + o.covers, 0),
+    understaffingLoss:  outlets.reduce((s, o) => s + Math.abs(o.understaffedImpact), 0),
+    overallAvgCheck:    +(
+      outlets.reduce((s, o) => s + o.revenue, 0) /
+      outlets.reduce((s, o) => s + o.covers, 0)
+    ).toFixed(2),
+  };
+};
 
-// Data provenance — which vendor systems this service simulates
-export const sourceSystems = ["Jonas POS", "ForeTees", "Weather API"];
+export const sourceSystems = ['Jonas POS', 'ForeTees', 'Weather API'];
