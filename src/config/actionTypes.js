@@ -10,6 +10,8 @@ export const ACTION_TYPES = {
   'calendar':        { icon: '📅', label: 'Schedule Update', color: '#F472B6' },
   'dispatch':        { icon: '📡', label: 'Dispatch',        color: '#22C55E' },
   'schedule':        { icon: '📋', label: 'Tee Sheet',       color: '#F0C674' },
+  'outreach':        { icon: '📣', label: 'Outreach',        color: '#22D3EE' },
+  'track':           { icon: '📈', label: 'Track',           color: '#A78BFA' },
 };
 
 // Simulated history records for each playbook — what happened last time it ran
@@ -28,5 +30,9 @@ export const PLAYBOOK_HISTORY = {
   'staffing-gap': [
     { quarter: 'Q4 2025', runs: 8, outcome: '7 of 8 gaps filled before service degraded', retained: null, impact: '$8,400 revenue preserved' },
     { quarter: 'Q3 2025', runs: 5, outcome: '5 of 5 gaps filled', retained: null, impact: '$5,250 revenue preserved' },
+  ],
+  'peak-demand-capture': [
+    { quarter: 'Q4 2025', runs: 5, outcome: 'Waitlist fill rate: 61% → 88%; 3 at-risk members retained', retained: 3, impact: '+$31,000 revenue' },
+    { quarter: 'Q3 2025', runs: 3, outcome: 'Waitlist fill rate: 58% → 82%; post-round conversion from fills: 22% → 39%', retained: null, impact: '+$18,600 revenue' },
   ],
 };

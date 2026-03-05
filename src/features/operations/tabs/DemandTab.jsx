@@ -1,12 +1,59 @@
-import { SoWhatCallout } from '@/components/ui';
+import { SoWhatCallout, ArchetypeBadge } from '@/components/ui';
 import { getDemandGaps } from '@/services/operationsService';
+import { getWaitlistWithRiskScoring, getWaitlistSummary } from '@/services/pipelineService';
 import { theme } from '@/config/theme';
+
+const RISK_COLORS = {
+  Healthy:   '#1A6B34',
+  Watch:     '#B5760A',
+  'At Risk': '#D97706',
+  Critical:  '#C0392B',
+};
+
+function WaitlistRow({ memberName, archetype, healthScore, riskLevel, requestedSlot, daysWaiting, retentionPriority, diningHistory }) {
+  const isPriority = retentionPriority === 'HIGH';
+  return (
+    <tr style={{ borderTop: `1px solid ${theme.colors.border}`, background: isPriority ? 'rgba(192,57,43,0.04)' : 'transparent' }}>
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+          {isPriority && (
+            <span style={{ fontSize: 10, background: theme.colors.urgent, color: '#fff',
+              padding: '1px 5px', borderRadius: 3, fontWeight: 700, letterSpacing: '0.04em' }}>
+              PRIORITY
+            </span>
+          )}
+          <span style={{ fontSize: theme.fontSize.sm, fontWeight: isPriority ? 600 : 400,
+            color: theme.colors.textPrimary }}>{memberName}</span>
+        </div>
+        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>{diningHistory}</div>
+      </td>
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+        <ArchetypeBadge archetype={archetype} size="sm" />
+      </td>
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'center' }}>
+        <span style={{ fontFamily: theme.fonts.mono, fontWeight: 700, fontSize: theme.fontSize.sm,
+          color: RISK_COLORS[riskLevel] || theme.colors.textSecondary }}>
+          {healthScore}
+        </span>
+        <div style={{ fontSize: 10, color: RISK_COLORS[riskLevel], marginTop: 1 }}>{riskLevel}</div>
+      </td>
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+        color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>{requestedSlot}</td>
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'center',
+        fontFamily: theme.fonts.mono, fontSize: theme.fontSize.sm,
+        color: daysWaiting >= 4 ? theme.colors.warning : theme.colors.textMuted }}>
+        {daysWaiting}d
+      </td>
+    </tr>
+  );
+}
 
 export default function DemandTab() {
   const gaps = getDemandGaps();
   const total = gaps.reduce((s, g) => s + g.waitlistCount, 0);
   const eventOverlapCount = gaps.filter(g => g.eventOverlap).length;
-  const satAM = gaps.filter(g => g.slot?.includes('Sat') && g.slot?.includes('AM'));
+  const waitlist = getWaitlistWithRiskScoring();
+  const summary = getWaitlistSummary();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -14,7 +61,7 @@ export default function DemandTab() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: theme.spacing.md }}>
         {[
           { label: 'Waitlist Entries', value: total, sub: 'Total unmet demand', accent: theme.colors.operations },
-          { label: 'Event Overlap', value: `${eventOverlapCount}/${gaps.length}`, sub: 'Slots on event days', accent: theme.colors.warning },
+          { label: 'Retention Priority', value: summary.highPriority, sub: 'At-risk members waiting', accent: theme.colors.urgent },
           { label: 'Peak Slot', value: 'Sat 7–9 AM', sub: 'Highest demand window', accent: theme.colors.textSecondary },
         ].map(({ label, value, sub, accent }) => (
           <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm,
@@ -29,12 +76,58 @@ export default function DemandTab() {
         ))}
       </div>
 
-      {/* Waitlist table */}
+      {/* Waitlist Intelligence */}
+      <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
+        borderRadius: theme.radius.md, overflow: 'hidden', boxShadow: theme.shadow.sm }}>
+        <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: theme.colors.bgDeep }}>
+          <div>
+            <span style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>
+              Waitlist Intelligence
+            </span>
+            <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginLeft: theme.spacing.sm }}>
+              Retention-priority queue · {summary.total} members waiting
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+            {[
+              { label: `${summary.highPriority} retention priority`, color: theme.colors.urgent },
+              { label: `${summary.atRisk} at-risk`, color: theme.colors.warning },
+              { label: `avg ${summary.avgDaysWaiting}d wait`, color: theme.colors.textMuted },
+            ].map(({ label, color }) => (
+              <span key={label} style={{ fontSize: 11, color, fontWeight: 500,
+                background: theme.colors.bg, border: `1px solid ${theme.colors.border}`,
+                borderRadius: theme.radius.sm, padding: '2px 8px' }}>{label}</span>
+            ))}
+          </div>
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
+            <thead>
+              <tr style={{ background: theme.colors.bg }}>
+                {['Member', 'Archetype', 'Health', 'Requested Slot', 'Waiting'].map(h => (
+                  <th key={h} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+                    textAlign: h === 'Health' || h === 'Waiting' ? 'center' : 'left',
+                    color: theme.colors.textMuted, fontSize: theme.fontSize.xs,
+                    textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {waitlist.map(entry => (
+                <WaitlistRow key={entry.memberId} {...entry} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Slot-level detail */}
       <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         border: `1px solid ${theme.colors.border}`, overflow: 'hidden' }}>
         <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}` }}>
           <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
-            Waitlist Detail
+            Slot-Level Demand
           </span>
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
@@ -71,10 +164,10 @@ export default function DemandTab() {
         </table>
       </div>
 
-      <SoWhatCallout variant="opportunity">
-        <strong>{total} unmet tee times</strong> this month — 83% on event days.
-        Saturday 7–9 AM is chronically oversubscribed. Opening Executive 9-hole
-        overflow or expanding Championship capacity could capture this demand directly.
+      <SoWhatCallout variant="warning">
+        <strong>{summary.highPriority} at-risk members</strong> are waiting {summary.avgDaysWaiting}+ days for Saturday morning slots.
+        First-come-first-served alerts are costing you retention, not just tee times — notifying them first when
+        a cancellation opens is estimated to reduce resignation probability by 34%.
       </SoWhatCallout>
     </div>
   );

@@ -5,17 +5,19 @@ import PaceTab from './tabs/PaceTab';
 import DemandTab from './tabs/DemandTab';
 import OperationsPlaybooks from './OperationsPlaybooks';
 import { sourceSystems } from '@/services/operationsService';
+import { getWaitlistSummary } from '@/services/pipelineService';
 import { theme } from '@/config/theme';
-
-const TABS = [
-  { key: 'revenue',   label: 'Daily Revenue' },
-  { key: 'pace',      label: 'Pace of Play' },
-  { key: 'demand',    label: 'Demand Intelligence' },
-  { key: 'playbooks', label: '▶ Response Plans' },
-];
 
 export default function OperationsDashboard() {
   const [activeTab, setActiveTab] = useState('revenue');
+  const waitlistSummary = getWaitlistSummary();
+
+  const TABS = [
+    { key: 'revenue',   label: 'Daily Revenue' },
+    { key: 'pace',      label: 'Pace of Play' },
+    { key: 'demand',    label: `Demand Intelligence${waitlistSummary.highPriority > 0 ? ` · ${waitlistSummary.highPriority} priority` : ''}` },
+    { key: 'playbooks', label: '▶ Response Plans' },
+  ];
 
   const tabContent = {
     revenue:   <RevenueTab />,

@@ -1,10 +1,11 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
 
 const PLAYBOOK_DEFS = {
-  'slow-saturday':    { monthly: 8400,  annual: 100800 },
-  'service-save':     { monthly: 18000, annual: 216000 },
-  'engagement-decay': { monthly: 9200,  annual: 110400 },
-  'staffing-gap':     { monthly: 2100,  annual: 25200  },
+  'slow-saturday':       { monthly: 8400,  annual: 100800 },
+  'service-save':        { monthly: 18000, annual: 216000 },
+  'engagement-decay':    { monthly: 9200,  annual: 110400 },
+  'staffing-gap':        { monthly: 2100,  annual: 25200  },
+  'peak-demand-capture': { monthly: 6200,  annual: 74400  },
 };
 
 // Step labels that appear in the activation trail after pressing Activate
@@ -13,19 +14,20 @@ const TRAIL_STEPS = {
   'service-save':     ['🚩 James Whitfield flagged at front desk', '📢 F&B Director alerted with complaint details', '✉ GM personal alert: James Whitfield — 8K member, 4-day unresolved complaint', '🎁 Comp appetizer offer queued for James Whitfield'],
   'engagement-decay': ['📊 Weekly health scan scheduled (every Monday)', '✉ Personalized event invite campaign queued for 30 declining members', '🚩 Non-responder follow-up flagged for Week 3'],
   'staffing-gap':     ['📊 72-hour shift gap detection enabled', '📢 Flex pool (4 staff) notified for Grill Room backup', '📅 Post-day audit report scheduled daily'],
+  'peak-demand-capture': ['📊 5 at-risk members identified in Saturday AM waitlist', '📣 Priority cancellation alerts queued for retention-flagged members', '🎁 Post-round lunch reservation attached to waitlist notifications', '📢 F&B Director notified: prep for +15% Saturday covers', '📈 Visit session tracking enabled: tee fill → dining conversion → health delta'],
 };
 
 const initialState = {
   currentDate: '2026-01-17',
   playbooks: {
-    'slow-saturday':    { active: false, activatedAt: null },
-    'service-save':     { active: false, activatedAt: null },
-    'engagement-decay': { active: false, activatedAt: null },
-    'staffing-gap':     { active: false, activatedAt: null },
+    'slow-saturday':       { active: false, activatedAt: null },
+    'service-save':        { active: false, activatedAt: null },
+    'engagement-decay':    { active: false, activatedAt: null },
+    'staffing-gap':        { active: false, activatedAt: null },
+    'peak-demand-capture': { active: false, activatedAt: null },
   },
-  // trailProgress: { [id]: number } — how many trail steps have "confirmed" (0 = none)
   trailProgress: {
-    'slow-saturday': 0, 'service-save': 0, 'engagement-decay': 0, 'staffing-gap': 0,
+    'slow-saturday': 0, 'service-save': 0, 'engagement-decay': 0, 'staffing-gap': 0, 'peak-demand-capture': 0,
   },
 };
 
