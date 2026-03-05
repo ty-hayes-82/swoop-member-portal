@@ -15,7 +15,7 @@ export default function StaffingTab() {
           { label: 'Revenue Loss',      value: `-$${summary.totalRevenueLoss.toLocaleString()}`, sub: 'Estimated',  accent: theme.colors.urgent },
           { label: 'Annualized',        value: `-$${(summary.annualizedLoss / 1000).toFixed(0)}K`, sub: 'At current rate', accent: theme.colors.urgent },
         ].map(({ label, value, sub, accent }) => (
-          <div key={label} style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+          <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${theme.colors.border}`, padding: theme.spacing.md }}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
               textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
@@ -29,7 +29,7 @@ export default function StaffingTab() {
       {/* Understaffed day detail */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
         {days.map((d, i) => (
-          <div key={i} style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+          <div key={i} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${theme.colors.border}`, padding: theme.spacing.md }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: theme.spacing.md }}>
               <div>

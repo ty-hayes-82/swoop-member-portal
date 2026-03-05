@@ -24,7 +24,7 @@ export default function PaceTab() {
           { label: 'Weekday Rate', value: `${(stats.weekdayRate * 100).toFixed(0)}%`,
             sub: 'Mon–Fri', urgent: false, metric: null },
         ].map(({ label, value, sub, urgent, metric }) => (
-          <div key={label} style={{ background: theme.colors.bgCardHover,
+          <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm,
             border: `1px solid ${urgent ? `${theme.colors.urgent}40` : theme.colors.border}`,
             borderRadius: theme.radius.md, padding: theme.spacing.md }}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
@@ -40,7 +40,7 @@ export default function PaceTab() {
       </div>
 
       {/* Round distribution chart */}
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
         <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
           Round Duration Distribution — Jan 2026
@@ -68,7 +68,7 @@ export default function PaceTab() {
       </div>
 
       {/* Bottleneck holes */}
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
         <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary,
           marginBottom: theme.spacing.md }}>Bottleneck Holes</div>

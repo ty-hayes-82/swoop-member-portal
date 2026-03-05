@@ -19,7 +19,7 @@ export default function WeatherTab() {
           { label: 'Rain Impact — Golf', value: '−40%', sub: 'Demand reduction', accent: theme.colors.urgent },
           { label: 'Rain Impact — F&B', value: '+15%', sub: 'Revenue opportunity', accent: theme.colors.success },
         ].map(({ label, value, sub, accent }) => (
-          <div key={label} style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+          <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${theme.colors.border}`, padding: theme.spacing.lg, textAlign: 'center' }}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
               textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: theme.spacing.sm }}>{label}</div>
@@ -29,7 +29,7 @@ export default function WeatherTab() {
         ))}
       </div>
 
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         border: `1px solid ${theme.colors.border}`, overflow: 'hidden' }}>
         <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}` }}>
           <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
@@ -66,7 +66,7 @@ export default function WeatherTab() {
       </div>
 
       {rainDays.length > 0 && (
-        <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+        <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
           padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
           <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary,
             marginBottom: theme.spacing.md }}>January Rain Days</div>

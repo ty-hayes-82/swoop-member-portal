@@ -23,7 +23,7 @@ export default function EmailTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       {/* Heatmap */}
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         padding: theme.spacing.md, border: `1px solid ${theme.colors.border}`, overflowX: 'auto' }}>
         <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary,
           marginBottom: theme.spacing.md }}>Email Open Rate Heatmap</div>
@@ -64,7 +64,7 @@ export default function EmailTab() {
       </div>
 
       {/* Decay watch list */}
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         border: `1px solid ${theme.colors.urgent}30`, overflow: 'hidden' }}>
         <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}` }}>
           <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.urgent }}>

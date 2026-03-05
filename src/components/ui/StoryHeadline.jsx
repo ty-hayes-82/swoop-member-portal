@@ -46,6 +46,10 @@ export default function StoryHeadline({ headline, context, variant = 'insight' }
       borderRadius: `0 ${theme.radius.md} ${theme.radius.md} 0`,
       padding: `${theme.spacing.md} ${theme.spacing.lg}`,
       marginBottom: theme.spacing.sm,
+      boxShadow: `0 2px 8px ${s.borderColor}18`,
+      borderTop: `1px solid ${s.borderColor}22`,
+      borderBottom: `1px solid ${s.borderColor}22`,
+      borderRight: `1px solid ${s.borderColor}18`,
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: theme.spacing.md }}>
         <span style={{

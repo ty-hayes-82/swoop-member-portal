@@ -36,7 +36,7 @@ export default function RevenueTab() {
           { label: 'Weekend Avg', value: `$${summary.weekendAvg.toLocaleString()}`, metric: null },
           { label: 'Weekday Avg', value: `$${summary.weekdayAvg.toLocaleString()}`, metric: null },
         ].map(({ label, value, metric, format }) => (
-          <div key={label} style={{ background: theme.colors.bgCardHover,
+          <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm,
             border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md,
             padding: theme.spacing.md }}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
@@ -49,7 +49,7 @@ export default function RevenueTab() {
       </div>
 
       {/* Chart */}
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
         <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
           Daily Revenue — January 2026

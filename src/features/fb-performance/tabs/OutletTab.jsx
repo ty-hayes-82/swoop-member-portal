@@ -18,7 +18,7 @@ export default function OutletTab() {
           { label: 'Total Covers', value: summary.totalCovers.toLocaleString(), metric: null },
           { label: 'Understaffing Loss', value: `-$${(summary.understaffingLoss / 1000).toFixed(1)}K`, metric: null },
         ].map(({ label, value, metric, format }) => (
-          <div key={label} style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+          <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${theme.colors.border}`, padding: theme.spacing.md }}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
               textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
@@ -30,7 +30,7 @@ export default function OutletTab() {
       </div>
 
       {/* Outlet revenue chart */}
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
         <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
           Revenue by Outlet — January 2026
@@ -50,7 +50,7 @@ export default function OutletTab() {
       </div>
 
       {/* Outlet detail table */}
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         border: `1px solid ${theme.colors.border}`, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
           <thead>

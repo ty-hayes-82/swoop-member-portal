@@ -77,7 +77,7 @@ export default function HealthOverview() {
       {/* Health distribution bars */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
         {dist.map(d => (
-          <div key={d.level} style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+          <div key={d.level} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${d.color}40`, padding: theme.spacing.md }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: theme.spacing.sm }}>
               <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
@@ -98,7 +98,7 @@ export default function HealthOverview() {
       </div>
 
       {/* At-risk member table */}
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         border: `1px solid ${theme.colors.urgent}30`, overflow: 'hidden' }}>
         <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}`,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

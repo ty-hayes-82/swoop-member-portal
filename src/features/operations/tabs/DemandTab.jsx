@@ -17,7 +17,7 @@ export default function DemandTab() {
           { label: 'Event Overlap', value: `${eventOverlapCount}/${gaps.length}`, sub: 'Slots on event days', accent: theme.colors.warning },
           { label: 'Peak Slot', value: 'Sat 7–9 AM', sub: 'Highest demand window', accent: theme.colors.briefing },
         ].map(({ label, value, sub, accent }) => (
-          <div key={label} style={{ background: theme.colors.bgCardHover,
+          <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm,
             border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md,
             padding: theme.spacing.md }}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
@@ -30,7 +30,7 @@ export default function DemandTab() {
       </div>
 
       {/* Waitlist table */}
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         border: `1px solid ${theme.colors.border}`, overflow: 'hidden' }}>
         <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}` }}>
           <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>

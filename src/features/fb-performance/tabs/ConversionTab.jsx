@@ -15,7 +15,7 @@ export default function ConversionTab() {
           { label: 'Best Archetype',  value: '50%', sub: 'Die-Hard Golfer', accent: theme.colors.success },
           { label: 'Lowest Archetype', value: '10%', sub: 'Ghost',          accent: theme.colors.urgent },
         ].map(({ label, value, sub, accent }) => (
-          <div key={label} style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+          <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${theme.colors.border}`, padding: theme.spacing.md }}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
               textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
@@ -26,7 +26,7 @@ export default function ConversionTab() {
         ))}
       </div>
 
-      <div style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
         <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
           Post-Round Dining Conversion by Archetype
