@@ -1,10 +1,58 @@
 // services/integrationsService.js — Phase 1 static | Phase 2 swap: fetch('/api/integrations')
-// Data flow: data/integrations.js → this service → Integrations.jsx
+// Data flow: data/integrations.js -> this service -> Integrations.jsx
+// Hard ceiling: 150 lines
 
-import { SYSTEMS, COMBOS, VENDOR_LANDSCAPE } from '@/data/integrations';
+import { CATEGORIES, VENDORS, SYSTEMS, COMBOS, VENDOR_LANDSCAPE } from '@/data/integrations';
 import { trends } from '@/data/trends';
 
-/** All 8 integration systems with status and metadata */
+// ── Vendor catalog functions (new in Sprint 1) ────────────────────────────────
+
+/** All 10 categories */
+export function getCategories() {
+  return CATEGORIES;
+}
+
+/** Categories with vendor counts injected */
+export function getCategoryStats() {
+  return CATEGORIES.map(cat => ({
+    ...cat,
+    count: VENDORS.filter(v => v.categoryId === cat.id).length,
+  }));
+}
+
+/** All vendors, optionally filtered by categoryId (null = all) */
+export function getVendorsByCategory(categoryId = null) {
+  if (!categoryId) return VENDORS;
+  return VENDORS.filter(v => v.categoryId === categoryId);
+}
+
+/** Single vendor by id */
+export function getVendorById(id) {
+  return VENDORS.find(v => v.id === id) ?? null;
+}
+
+/** All combos that involve a given vendor id */
+export function getCombosForVendor(vendorId) {
+  return COMBOS.filter(c => c.systems.includes(vendorId));
+}
+
+/** Summary counts for the health strip */
+export function getIntegrationSummary() {
+  const connected = VENDORS.filter(v => v.status === 'connected').length;
+  const combosActive = COMBOS.filter(c =>
+    c.systems.every(id => VENDORS.find(v => v.id === id)?.status === 'connected')
+  ).length;
+  return {
+    connected,
+    total: VENDORS.length,
+    combosActive,
+    totalCombos: COMBOS.length,
+  };
+}
+
+// ── Backward-compat functions (unchanged — used by current Integrations.jsx) ──
+
+/** Original 8 systems for IntegrationCard / IntegrationMap */
 export function getSystems() {
   return SYSTEMS;
 }
@@ -34,17 +82,17 @@ export function resolveSparklineData(sparklineKey) {
   return trends[sparklineKey] ?? [];
 }
 
-/** Single system by id */
+/** Single system by id (backward compat) */
 export function getSystemById(id) {
   return SYSTEMS.find(s => s.id === id) ?? null;
 }
 
-/** Full vendor landscape organized by category */
+/** Full vendor landscape organized by category (for VendorLandscapeSection) */
 export function getVendorLandscape() {
   return VENDOR_LANDSCAPE;
 }
 
 /** Total vendor count across all categories */
 export function getVendorCount() {
-  return VENDOR_LANDSCAPE.reduce((sum, cat) => sum + cat.vendors.length, 0);
+  return VENDORS.length;
 }
