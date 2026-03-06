@@ -11,7 +11,7 @@ export default function ComboInsightCard({
   return (
     <div style={{
       background: theme.colors.bgCard,
-      border: `1px solid ${theme.colors.border ?? '#E5E5E5'}`,
+      border: `1px solid ${theme.colors.border}`,
       borderRadius: theme.radius.md,
       overflow: 'hidden',
       transition: 'box-shadow 0.15s ease',
@@ -28,15 +28,25 @@ export default function ComboInsightCard({
             <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, lineHeight: 1.3 }}>
               {label}
             </div>
-            {swoop_only && (
-              <span style={{
-                fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                color: theme.colors.accent, background: `${theme.colors.accent}18`,
-                padding: '1px 5px', borderRadius: '3px', display: 'inline-block', marginTop: '3px',
-              }}>
-                Swoop Only
-              </span>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px' }}>
+              {swoop_only && (
+                <span title="This insight is only possible when systems are connected through Swoop — no single vendor can see across all of these data sources alone." style={{
+                  fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
+                  color: theme.colors.accent, background: `${theme.colors.accent}18`,
+                  padding: '1px 5px', borderRadius: '3px', display: 'inline-block', cursor: 'help',
+                }}>
+                  Swoop Only ⓘ
+                </span>
+              )}
+              {!isExpanded && preview?.value && (
+                <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>
+                  <span style={{ fontWeight: 700, color: theme.colors.textPrimary, fontFamily: theme.fonts.mono }}>
+                    {preview.value}
+                  </span>
+                  {' · '}{preview.label}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <span style={{ color: theme.colors.textMuted, fontSize: '12px', marginLeft: '8px', flexShrink: 0 }}>

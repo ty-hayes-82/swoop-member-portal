@@ -4,9 +4,9 @@
 import { theme } from '@/config/theme';
 
 const TIER = {
-  1: { label: 'Priority', colorKey: 'operations' },  // deep green
-  2: { label: 'Standard', colorKey: 'briefing'    },  // deep blue
-  3: { label: 'Roadmap',  colorKey: 'textMuted'   },  // neutral grey
+  1: { label: 'Priority', colorKey: 'operations', tip: 'Swoop recommends connecting these first — widest data footprint, unlocks the most insights.' },
+  2: { label: 'Standard', colorKey: 'briefing',   tip: 'Important for segment coverage. Connect after Priority integrations are stable.' },
+  3: { label: 'Roadmap',  colorKey: 'textMuted',  tip: 'Valuable for specific use cases. Queued for a future sprint.' },
 };
 
 export default function TierBadge({ tier = 1, size = 'sm' }) {
@@ -15,7 +15,7 @@ export default function TierBadge({ tier = 1, size = 'sm' }) {
   const isMd  = size === 'md';
 
   return (
-    <span style={{
+    <span title={cfg.tip} style={{
       display:       'inline-flex',
       alignItems:    'center',
       gap:           '4px',
