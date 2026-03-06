@@ -1,90 +1,120 @@
-// IntegrationMap — SVG constellation showing system nodes + combo edges
-// Props: systems, combos, selectedIds, onSelectSystem, width, height
+// IntegrationMap — SVG constellation showing 28 vendor nodes grouped by category
+// Props: categories, vendors, combos, selectedVendorId, onSelectVendor, width, height
+// Sprint 4: category arc strokes, 28-node layout, vendor-driven selection
 import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { useMapLayout } from '@/hooks/useMapLayout';
 
-export default function IntegrationMap({ systems, combos, selectedIds, onSelectSystem, width = 520, height = 380 }) {
+export default function IntegrationMap({
+  categories = [], vendors = [], combos = [],
+  selectedVendorId = null, onSelectVendor,
+  width = 640, height = 460,
+}) {
   const [hoveredNode, setHoveredNode] = useState(null);
   const [hoveredEdge, setHoveredEdge] = useState(null);
-  const { nodes, edges } = useMapLayout(systems, combos, width, height);
+  const { nodes, arcs, edges } = useMapLayout(categories, vendors, combos, width, height);
+  const nodeR = 13;
 
   return (
     <div style={{ position: 'relative', width: '100%', maxWidth: width, margin: '0 auto' }}>
-      <svg width="100%" viewBox={`0 0 ${width} ${height}`} style={{ display: 'block', overflow: 'visible' }}>
-        {/* Edges */}
+      <svg width="100%" viewBox={`0 0 ${width} ${height}`}
+        style={{ display: 'block', overflow: 'visible' }}>
+
+        {/* Category arc strokes */}
+        {arcs.map(arc => {
+          const color   = theme.colors[arc.themeColor] ?? theme.colors.accent;
+          const isActive = hoveredNode
+            ? vendors.find(v => v.id === hoveredNode)?.categoryId === arc.id
+            : false;
+          return (
+            <path key={arc.id} d={arc.path}
+              stroke={color} strokeWidth={2.5} fill="none" strokeLinecap="round"
+              opacity={isActive ? 0.6 : 0.2}
+              style={{ transition: 'opacity 0.2s' }}
+            />
+          );
+        })}
+
+        {/* Combo edges */}
         {edges.map(edge => {
-          const isActive = hoveredNode ? edge.systems.includes(hoveredNode) : true;
-          const isHovered = hoveredEdge === edge.id;
-          const color = theme.colors[edge.themeColor] ?? theme.colors.accent;
+          const isLit  = hoveredNode ? edge.systems.includes(hoveredNode) : true;
+          const isHov  = hoveredEdge === edge.id;
+          const color  = theme.colors[edge.themeColor] ?? theme.colors.accent;
           return (
             <path key={edge.id} d={edge.path}
-              stroke={color} strokeWidth={isHovered ? 2.5 : 1.5}
+              stroke={color} strokeWidth={isHov ? 2 : 1}
               fill="none" strokeLinecap="round"
-              opacity={isActive ? (isHovered ? 0.9 : 0.35) : 0.05}
-              style={{ transition: 'opacity 0.2s, stroke-width 0.2s', cursor: 'pointer' }}
+              opacity={isLit ? (isHov ? 0.85 : 0.28) : 0.04}
+              style={{ transition: 'opacity 0.2s, stroke-width 0.15s', cursor: 'pointer' }}
               onMouseEnter={() => setHoveredEdge(edge.id)}
               onMouseLeave={() => setHoveredEdge(null)}
             />
           );
         })}
 
-        {/* Nodes */}
+        {/* Vendor nodes */}
         {nodes.map(node => {
-          const isSelected = selectedIds.includes(node.id);
-          const isHovered = hoveredNode === node.id;
-          const color = theme.colors[node.themeColor] ?? theme.colors.accent;
-          const r = isSelected || isHovered ? 32 : 28;
+          const isSelected = selectedVendorId === node.id;
+          const isHov      = hoveredNode === node.id;
+          const color      = theme.colors[node.themeColor] ?? theme.colors.accent;
+          const r          = isSelected || isHov ? nodeR + 3 : nodeR;
           return (
             <g key={node.id} style={{ cursor: 'pointer' }}
               onMouseEnter={() => setHoveredNode(node.id)}
               onMouseLeave={() => setHoveredNode(null)}
-              onClick={() => onSelectSystem(node.id)}
+              onClick={() => onSelectVendor?.(node.id)}
             >
-              <circle cx={node.x} cy={node.y} r={r + 6} fill={color} opacity={0.08} style={{ transition: 'all 0.15s' }} />
-              <circle cx={node.x} cy={node.y} r={r} fill={isSelected ? color : theme.colors.bgCard}
-                stroke={color} strokeWidth={isSelected ? 0 : 2}
-                style={{ transition: 'all 0.15s' }} />
-              <text x={node.x} y={node.y - 2} textAnchor="middle" dominantBaseline="middle"
-                fontSize="16" style={{ pointerEvents: 'none', userSelect: 'none' }}>
+              <circle cx={node.x} cy={node.y} r={r + 5}
+                fill={color} opacity={0.07}
+                style={{ transition: 'all 0.15s' }}
+              />
+              <circle cx={node.x} cy={node.y} r={r}
+                fill={isSelected ? color : theme.colors.bgCard}
+                stroke={color} strokeWidth={isSelected ? 0 : 1.5}
+                style={{ transition: 'all 0.15s' }}
+              />
+              <text x={node.x} y={node.y} textAnchor="middle" dominantBaseline="middle"
+                fontSize={isSelected ? '11' : '10'}
+                style={{ pointerEvents: 'none', userSelect: 'none' }}>
                 {node.icon}
-              </text>
-              <text x={node.x} y={node.y + r + 12} textAnchor="middle"
-                fontSize="9" fontWeight="700" fill={color}
-                style={{ pointerEvents: 'none', userSelect: 'none', fontFamily: 'DM Sans, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {node.name.length > 10 ? node.name.slice(0, 9) + '…' : node.name}
               </text>
             </g>
           );
         })}
 
-        {/* Center Swoop wordmark */}
-        <circle cx={width / 2} cy={height / 2} r={26} fill={theme.colors.bgSidebar} />
-        <text x={width / 2} y={height / 2 - 4} textAnchor="middle" dominantBaseline="middle"
-          fontSize="8" fontWeight="800" fill={theme.colors.accent}
-          style={{ fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.1em', userSelect: 'none' }}>
+        {/* Center Swoop mark */}
+        <circle cx={width / 2} cy={height / 2} r={22} fill={theme.colors.bgSidebar} />
+        <text x={width / 2} y={height / 2 - 3} textAnchor="middle" dominantBaseline="middle"
+          fontSize="7" fontWeight="800" fill={theme.colors.accent}
+          style={{ fontFamily: theme.fonts.sans, letterSpacing: '0.1em', userSelect: 'none' }}>
           SWOOP
         </text>
-        <text x={width / 2} y={height / 2 + 8} textAnchor="middle" dominantBaseline="middle"
-          fontSize="6" fill="#FFFFFF80" style={{ fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.06em', userSelect: 'none' }}>
+        <text x={width / 2} y={height / 2 + 7} textAnchor="middle" dominantBaseline="middle"
+          fontSize="5" fill={`${theme.colors.bgCard}80`}
+          style={{ fontFamily: theme.fonts.sans, letterSpacing: '0.06em', userSelect: 'none' }}>
           GOLF
         </text>
       </svg>
 
       {/* Edge tooltip */}
       {hoveredEdge && (() => {
-        const edge = edges.find(e => e.id === hoveredEdge);
+        const edge  = edges.find(e => e.id === hoveredEdge);
         const combo = edge?.combo;
         if (!combo) return null;
         return (
           <div style={{
-            position: 'absolute', top: '8px', right: '8px',
-            background: theme.colors.bgCard, border: `1px solid ${theme.colors.border ?? '#E5E5E5'}`,
-            borderRadius: theme.radius.sm, padding: '8px 12px', maxWidth: '220px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            position: 'absolute', bottom: '8px', left: '50%', transform: 'translateX(-50%)',
+            background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
+            borderRadius: theme.radius.sm, padding: '6px 12px', pointerEvents: 'none',
+            boxShadow: theme.shadow.md, whiteSpace: 'nowrap', zIndex: 10,
           }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.textPrimary, marginBottom: '2px' }}>{combo.label}</div>
-            <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>{combo.preview.value} — {combo.preview.subtext}</div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.textPrimary }}>
+              {combo.label}
+            </span>
+            <span style={{ fontSize: '10px', color: theme.colors.accent, marginLeft: '6px',
+              fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Swoop Only
+            </span>
           </div>
         );
       })()}
