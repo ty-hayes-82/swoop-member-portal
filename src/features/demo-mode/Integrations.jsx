@@ -1,91 +1,146 @@
-// Integrations.jsx — supported systems + go-live timeline for Demo Mode
-// Answers: "How quickly can Swoop connect to our systems?"
+// Integrations.jsx — Connected Intelligence page for Demo Mode
+// Sections: HealthStrip → Map → System Cards → Combo Explorer
+// Data flow: integrationsService → this component → primitives
+import { useState, useRef } from 'react';
 import { theme } from '@/config/theme';
+import {
+  getSystems, getIntegrationHealth, getCombos, resolveSparklineData,
+} from '@/services/integrationsService';
+import IntegrationHealthStrip from '@/components/ui/IntegrationHealthStrip';
+import IntegrationCard from '@/components/ui/IntegrationCard';
+import ComboInsightCard from '@/components/ui/ComboInsightCard';
+import IntegrationMap from '@/components/ui/IntegrationMap';
 
-const SUPPORTED_SYSTEMS = [
-  { name: 'ForeTees',     category: 'Tee Sheet',          icon: '⛳', color: theme.colors.operations,  goLive: '3–5 days' },
-  { name: 'Jonas POS',    category: 'Food & Beverage',    icon: '🍽', color: theme.colors.fb,           goLive: '3–5 days' },
-  { name: 'Northstar',    category: 'Member CRM',         icon: '★',  color: theme.colors.members,      goLive: '5–7 days' },
-  { name: 'ClubReady',    category: 'Staff Scheduling',   icon: '📅', color: theme.colors.staffing,     goLive: '2–3 days' },
-  { name: 'Club Prophet', category: 'Membership Mgmt',    icon: '◉',  color: theme.colors.briefing,     goLive: '5–7 days' },
-  { name: 'Lightspeed',   category: 'POS (alternative)',  icon: '⚡', color: theme.colors.fb,           goLive: '5–7 days' },
-  { name: 'GolfGenius',   category: 'Tournament Mgmt',    icon: '🏆', color: theme.colors.operations,   goLive: '3–5 days' },
-  { name: 'EZLinks',      category: 'Tee Sheet (alt)',    icon: '🔗', color: theme.colors.pipeline,     goLive: '5–7 days' },
-];
-
-const TIMELINE = [
-  { day: 'Day 1–2',   label: 'Credential exchange',  detail: 'API keys provided, connection tested in sandbox' },
-  { day: 'Day 3–5',   label: 'Data validation',       detail: 'Historical data ingested, correlation checks run' },
-  { day: 'Day 5–7',   label: 'Dashboard live',        detail: 'GM receives login, first Daily Briefing generated' },
-  { day: 'Day 7–14',  label: 'Playbooks configured',  detail: "Thresholds tuned to the club's specific patterns" },
-];
+const systems = getSystems();
+const health = getIntegrationHealth();
 
 export default function Integrations() {
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [expandedCombo, setExpandedCombo] = useState(null);
+  const comboRef = useRef(null);
+
+  const combos = getCombos(selectedIds.length >= 2 ? selectedIds : []);
+
+  function toggleSystem(id) {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  }
+
+  function scrollToCombos() {
+    comboRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
 
-      {/* Supported systems grid */}
-      <div>
-        <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary,
-          marginBottom: theme.spacing.md }}>
-          Supported Systems
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.sm }}>
-          {SUPPORTED_SYSTEMS.map(sys => (
-            <div key={sys.name} style={{
-              background: theme.colors.bgCardHover,
-              border: `1px solid ${sys.color}30`,
-              borderRadius: theme.radius.sm,
-              padding: theme.spacing.sm,
-              display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
+      {/* Section 1 — Health Strip */}
+      <IntegrationHealthStrip
+        {...health}
+        onClickConnected={() => {}}
+        onClickCombos={scrollToCombos}
+      />
+
+      {/* Section 2a — Constellation Map */}
+      <div style={{
+        background: theme.colors.bgCard,
+        border: `1px solid ${theme.colors.border ?? '#E5E5E5'}`,
+        borderRadius: theme.radius.md,
+        padding: theme.spacing.md,
+      }}>
+        <SectionHeader
+          title="Connected Systems"
+          sub={selectedIds.length
+            ? `${selectedIds.length} selected — click another to filter insights`
+            : 'Click a node to filter cross-system insights below'}
+        />
+        <IntegrationMap
+          systems={systems} combos={getCombos([])}
+          selectedIds={selectedIds}
+          onSelectSystem={id => { toggleSystem(id); scrollToCombos(); }}
+        />
+
+        {/* Clear selection */}
+        {selectedIds.length > 0 && (
+          <div style={{ textAlign: 'center', marginTop: '8px' }}>
+            <button onClick={() => setSelectedIds([])} style={{
+              fontSize: '11px', color: theme.colors.textMuted, background: 'none',
+              border: 'none', cursor: 'pointer', textDecoration: 'underline',
             }}>
-              <span style={{ fontSize: '18px' }}>{sys.icon}</span>
-              <div>
-                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: sys.color }}>{sys.name}</div>
-                <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>{sys.category}</div>
-                <div style={{ fontSize: '10px', color: theme.colors.success, marginTop: '2px' }}>Live in {sys.goLive}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+              Clear selection
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Go-live timeline */}
-      <div>
-        <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary,
-          marginBottom: theme.spacing.md }}>
-          Typical Go-Live Timeline: ForeTees + Jonas POS
-        </div>
+      {/* Section 2b — System Cards grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.sm }}>
+        {systems.map(sys => (
+          <IntegrationCard
+            key={sys.id} {...sys}
+            isSelected={selectedIds.includes(sys.id)}
+            onSelect={() => { toggleSystem(sys.id); scrollToCombos(); }}
+          />
+        ))}
+      </div>
+
+      {/* Section 3 — Combo Insight Explorer */}
+      <div ref={comboRef}>
+        <SectionHeader
+          title={selectedIds.length >= 2
+            ? `Cross-System Insights — ${selectedIds.length} systems selected`
+            : 'Cross-System Insights'}
+          sub={selectedIds.length >= 2
+            ? `Showing combos involving your selected systems`
+            : 'Select two systems above to filter, or browse all insights'}
+        />
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          {TIMELINE.map((step, i) => (
-            <div key={i} style={{ display: 'flex', gap: theme.spacing.md, alignItems: 'flex-start' }}>
-              <div style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: theme.colors.operations,
-                fontWeight: 700, minWidth: '60px', paddingTop: '2px' }}>
-                {step.day}
-              </div>
-              <div style={{ flex: 1, borderLeft: `2px solid ${theme.colors.border}`, paddingLeft: theme.spacing.md }}>
-                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
-                  {step.label}
-                </div>
-                <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '2px' }}>
-                  {step.detail}
-                </div>
-              </div>
+          {combos.length === 0 && (
+            <div style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm, padding: theme.spacing.md, textAlign: 'center' }}>
+              No cross-system insights match that combination. Try a different pair.
             </div>
+          )}
+          {combos.map(combo => (
+            <ComboInsightCard
+              key={combo.id}
+              {...combo}
+              allSystems={systems}
+              isExpanded={expandedCombo === combo.id}
+              onToggle={() => setExpandedCombo(prev => prev === combo.id ? null : combo.id)}
+              sparklineData={combo.preview.sparklineKey
+                ? resolveSparklineData(combo.preview.sparklineKey)
+                : undefined}
+            />
           ))}
         </div>
       </div>
 
       {/* Closing stat */}
-      <div style={{ padding: theme.spacing.md, background: `${theme.colors.operations}10`,
-        border: `1px solid ${theme.colors.operations}30`, borderRadius: theme.radius.sm,
-        textAlign: 'center' }}>
-        <span style={{ fontSize: theme.fontSize.md, color: theme.colors.textPrimary }}>
-          Most clubs are live in{' '}
-          <strong style={{ color: theme.colors.operations, fontFamily: theme.fonts.mono }}>under 2 weeks</strong>
-          {' '}— with no changes to existing systems.
-        </span>
+      <div style={{
+        background: `${theme.colors.bgSidebar}`,
+        borderRadius: theme.radius.md,
+        padding: theme.spacing.lg,
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '28px', fontWeight: 800, color: theme.colors.accent, fontFamily: 'DM Serif Display, serif' }}>
+          Live in under 2 weeks.
+        </div>
+        <div style={{ fontSize: theme.fontSize.sm, color: '#FFFFFFAA', marginTop: '6px' }}>
+          Most clubs are connected within 3–5 business days. Swoop handles the integration — no IT team required.
+        </div>
       </div>
+
+    </div>
+  );
+}
+
+function SectionHeader({ title, sub }) {
+  return (
+    <div style={{ marginBottom: theme.spacing.sm }}>
+      <div style={{ fontSize: theme.fontSize.md ?? '14px', fontWeight: 700, color: theme.colors.textPrimary }}>
+        {title}
+      </div>
+      {sub && <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '2px' }}>{sub}</div>}
     </div>
   );
 }

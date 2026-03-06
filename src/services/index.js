@@ -6,3 +6,5 @@ export * from './pipelineService';
 export * from './waitlistService';
 export * from './briefingService';
 export * from './agentService';
+export * from './integrationsService';
+export * from './trendsService';
