@@ -4,938 +4,1159 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Swoop Golf — Club Intelligence for General Managers</title>
-<meta name="description" content="Swoop unifies your tee sheet, POS, CRM, and email data into one intelligence layer. See who's at risk, what went wrong, and exactly what to do about it.">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --forest:    #0A1A0A;
-  --forest-mid:#142314;
-  --forest-l:  #1C3220;
-  --fairway:   #2A5034;
-  --green-viv: #3A7A44;
-  --gold:      #C8921A;
-  --gold-l:    #E8AD30;
-  --gold-pale: #F5D98A;
-  --cream:     #F9F5EE;
-  --cream-d:   #F0EAE0;
-  --parchment: #EDE4D3;
-  --ink:       #1A1A14;
-  --ink-mid:   #3A3A30;
-  --ink-l:     #6A6A5A;
-  --linen:     #FDFAF5;
-  --red:       #C0392B;
-  --radius:    10px;
+  --ink: #0B1A0D;
+  --forest: #1A2F1C;
+  --green: #2A4A2C;
+  --moss: #3D6640;
+  --sage: #6B8F6E;
+  --mist: #D4E4D6;
+  --gold: #C9943A;
+  --gold-light: #E8B05A;
+  --gold-pale: #F5E8D0;
+  --ivory: #F7F3EC;
+  --cream: #EDE8DF;
+  --white: #FFFFFF;
+  --red-risk: #C0392B;
+  --blue-intel: #2563EB;
+  --text-muted: #6B7A6E;
+  --border: rgba(42,74,44,0.12);
 }
 
 html { scroll-behavior: smooth; }
 body {
   font-family: 'Outfit', sans-serif;
+  background: var(--ivory);
   color: var(--ink);
-  background: var(--linen);
   overflow-x: hidden;
   line-height: 1.6;
 }
 
-/* ─── NAV ─── */
+/* ─── NAV ─────────────────────────────────────────────── */
 nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 68px;
+  background: rgba(11,26,13,0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 56px; height: 68px;
-  background: rgba(10, 26, 10, 0.0);
-  border-bottom: 1px solid rgba(255,255,255,0.0);
-  backdrop-filter: blur(0px);
-  transition: all 0.4s ease;
+  padding: 0 56px;
+  border-bottom: 1px solid rgba(201,148,58,0.15);
 }
-nav.scrolled {
-  background: rgba(10, 26, 10, 0.96);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(20px);
-}
-.nav-brand {
+.nav-logo {
   display: flex; align-items: center; gap: 12px;
-  text-decoration: none; font-weight: 700; font-size: 18px; color: white;
-  letter-spacing: 0.04em;
+  text-decoration: none; color: var(--white);
 }
-.nav-logo-mark {
-  width: 36px; height: 36px; background: var(--gold);
-  border-radius: 8px; display: flex; align-items: center;
-  justify-content: center; font-family: 'Cormorant Garamond', serif;
-  font-size: 22px; font-weight: 700; color: white;
-  letter-spacing: 0;
+.logo-mark {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700; font-size: 20px; color: var(--white);
+  letter-spacing: -0.02em;
 }
-.nav-links { display: flex; align-items: center; gap: 36px; }
-.nav-links a {
-  color: rgba(255,255,255,0.75); text-decoration: none;
-  font-size: 14px; font-weight: 500; letter-spacing: 0.02em;
-  transition: color 0.2s;
+.logo-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 600;
+  letter-spacing: 0.02em;
 }
-.nav-links a:hover { color: white; }
+.logo-text span { color: var(--gold-light); }
+.nav-center {
+  display: flex; align-items: center; gap: 36px;
+}
+.nav-center a {
+  font-size: 14px; font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none; transition: color 0.2s;
+  letter-spacing: 0.01em;
+}
+.nav-center a:hover { color: var(--white); }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-link-plain {
+  font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.6);
+  text-decoration: none; transition: color 0.2s;
+}
+.nav-link-plain:hover { color: var(--white); }
 .nav-cta {
-  background: var(--gold); color: white !important;
-  padding: 10px 24px; border-radius: 8px;
-  font-weight: 600 !important; transition: all 0.2s !important;
-  letter-spacing: 0.01em !important;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: var(--white); text-decoration: none;
+  padding: 9px 22px; border-radius: 8px;
+  font-size: 14px; font-weight: 600;
+  transition: all 0.25s;
+  box-shadow: 0 2px 12px rgba(201,148,58,0.25);
 }
-.nav-cta:hover { background: var(--gold-l) !important; transform: translateY(-1px); }
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(201,148,58,0.35); }
 
-/* ─── HERO ─── */
+/* ─── HERO ─────────────────────────────────────────────── */
 .hero {
-  position: relative; min-height: 100vh;
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--ink) 0%, var(--forest) 45%, #1E3C20 100%);
   display: flex; align-items: center;
-  background: var(--forest);
-  padding: 120px 56px 96px;
-  overflow: hidden;
+  padding: 140px 56px 100px;
+  position: relative; overflow: hidden;
 }
-.hero-bg-image {
+.hero-bg-grid {
   position: absolute; inset: 0;
-  background: url('https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=1800&q=80') center/cover;
-  opacity: 0.06;
-  mix-blend-mode: luminosity;
+  background-image:
+    linear-gradient(rgba(201,148,58,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,148,58,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
 }
-.hero-grain {
-  position: absolute; inset: 0; opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+.hero-bg-glow {
+  position: absolute; top: -20%; right: -10%;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(42,74,44,0.4) 0%, transparent 70%);
+  border-radius: 50%;
 }
-.hero-glow {
-  position: absolute; bottom: -200px; left: 50%; transform: translateX(-50%);
-  width: 900px; height: 600px;
-  background: radial-gradient(ellipse, rgba(58,122,68,0.18) 0%, transparent 70%);
-  pointer-events: none;
+.hero-content {
+  position: relative; z-index: 2;
+  max-width: 680px;
 }
-.hero-content { position: relative; z-index: 2; max-width: 760px; }
-
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 10px;
-  background: rgba(200,146,26,0.12); border: 1px solid rgba(200,146,26,0.25);
-  color: var(--gold-l); padding: 7px 18px; border-radius: 50px;
-  font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
-  text-transform: uppercase; margin-bottom: 36px;
+  background: rgba(201,148,58,0.12);
+  border: 1px solid rgba(201,148,58,0.25);
+  color: var(--gold-light);
+  padding: 6px 18px; border-radius: 50px;
+  font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 32px;
 }
-.hero-eyebrow .pulse {
-  width: 7px; height: 7px; background: var(--gold-l);
-  border-radius: 50%; animation: pulse 2s infinite;
+.eyebrow-dot {
+  width: 6px; height: 6px;
+  background: var(--gold-light); border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
 }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
 .hero h1 {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(52px, 6vw, 80px);
-  font-weight: 600; line-height: 1.06;
-  color: white; letter-spacing: -0.02em;
+  font-size: 72px; font-weight: 600;
+  line-height: 1.04; color: var(--white);
+  letter-spacing: -0.02em;
   margin-bottom: 28px;
 }
-.hero h1 em { font-style: italic; color: var(--gold-pale); }
+.hero h1 .accent { color: var(--gold-light); font-style: italic; }
+.hero h1 .line-break { display: block; }
 
 .hero-sub {
-  font-size: clamp(16px, 1.8vw, 19px);
-  color: rgba(255,255,255,0.65);
-  max-width: 560px; line-height: 1.75;
-  margin-bottom: 48px; font-weight: 300;
+  font-size: 19px; color: rgba(255,255,255,0.65);
+  line-height: 1.65; max-width: 520px;
+  margin-bottom: 44px;
 }
 .hero-sub strong { color: rgba(255,255,255,0.9); font-weight: 500; }
 
-.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 72px; }
-.btn-gold {
+.hero-ctas { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 64px; }
+.btn-hero-primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: var(--white); text-decoration: none;
+  padding: 16px 38px; border-radius: 10px;
+  font-size: 16px; font-weight: 600;
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--gold); color: white;
-  padding: 16px 36px; border-radius: 10px;
-  font-size: 15px; font-weight: 600; text-decoration: none;
-  letter-spacing: 0.01em; transition: all 0.25s;
-  box-shadow: 0 4px 24px rgba(200,146,26,0.3);
+  transition: all 0.25s;
+  box-shadow: 0 6px 28px rgba(201,148,58,0.3);
 }
-.btn-gold:hover { background: var(--gold-l); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,146,26,0.35); }
-.btn-ghost {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85);
-  padding: 16px 36px; border-radius: 10px;
-  font-size: 15px; font-weight: 500; text-decoration: none;
-  border: 1px solid rgba(255,255,255,0.15); transition: all 0.25s;
+.btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(201,148,58,0.4); }
+.btn-hero-secondary {
+  color: rgba(255,255,255,0.8); text-decoration: none;
+  padding: 16px 32px; border-radius: 10px;
+  font-size: 16px; font-weight: 500;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  transition: all 0.25s;
 }
-.btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+.btn-hero-secondary:hover { border-color: rgba(255,255,255,0.4); color: var(--white); background: rgba(255,255,255,0.04); }
+
+.free-callout {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(201,148,58,0.08); border: 1px solid rgba(201,148,58,0.2);
+  border-radius: 8px; padding: 10px 18px;
+  color: var(--gold-light); font-size: 14px; font-weight: 500;
+}
+.free-badge {
+  background: var(--gold); color: var(--white);
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
 
 .hero-stats {
-  display: grid; grid-template-columns: repeat(3, auto);
-  gap: 0; border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 40px; width: fit-content;
+  display: flex; gap: 56px;
+  padding-top: 48px;
+  border-top: 1px solid rgba(255,255,255,0.08);
 }
-.hero-stat {
-  padding: 0 48px 0 0;
-  border-right: 1px solid rgba(255,255,255,0.1);
-  margin-right: 48px;
+.hero-stat .val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px; font-weight: 600;
+  color: var(--gold-light); line-height: 1;
 }
-.hero-stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
-.hero-stat .num {
-  display: block; font-family: 'JetBrains Mono', monospace;
-  font-size: 38px; color: var(--gold-pale); font-weight: 500;
-  line-height: 1; margin-bottom: 6px; letter-spacing: -0.02em;
+.hero-stat .lbl {
+  font-size: 13px; color: rgba(255,255,255,0.45);
+  margin-top: 6px; font-weight: 400;
+  max-width: 120px; line-height: 1.4;
 }
-.hero-stat .lbl { font-size: 12px; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
 
-/* ─── INTEGRATION BAR ─── */
-.integration-bar {
-  background: var(--cream-d); border-bottom: 1px solid rgba(0,0,0,0.08);
-  padding: 22px 56px;
-  display: flex; align-items: center; gap: 40px; flex-wrap: wrap;
+.hero-right {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 45%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 140px 56px 100px 0;
+  z-index: 2;
 }
-.ib-label { font-size: 11px; font-weight: 700; color: var(--ink-l); text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; }
-.ib-logos { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
-.ib-logo { font-size: 14px; font-weight: 600; color: var(--ink-l); opacity: 0.55; transition: opacity 0.2s; }
-.ib-logo:hover { opacity: 0.85; }
+.dashboard-preview {
+  width: 100%; max-width: 500px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+}
+.dp-header {
+  background: rgba(255,255,255,0.05);
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 8px;
+}
+.dp-dot { width: 10px; height: 10px; border-radius: 50%; }
+.dp-dot.r { background: #FF6058; }
+.dp-dot.y { background: #FFBD2E; }
+.dp-dot.g { background: #28C840; }
+.dp-url {
+  margin-left: auto; margin-right: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: rgba(255,255,255,0.3);
+}
+.dp-body { padding: 20px; }
+.dp-label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.3); margin-bottom: 14px;
+}
+.health-members { display: flex; flex-direction: column; gap: 8px; }
+.hm-row {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px; padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.hm-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--white); flex-shrink: 0;
+}
+.av-red { background: rgba(192,57,43,0.6); }
+.av-amber { background: rgba(217,132,0,0.6); }
+.av-green { background: rgba(42,74,44,0.8); }
+.hm-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); flex: 1; }
+.hm-detail { font-size: 11px; color: rgba(255,255,255,0.35); }
+.health-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 500;
+}
+.score-red { color: #EF5350; }
+.score-amber { color: #FFA726; }
+.score-green { color: #66BB6A; }
+.hm-trend {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 4px;
+}
+.trend-dn { background: rgba(192,57,43,0.2); color: #EF9A9A; }
+.trend-up { background: rgba(42,74,44,0.4); color: #81C784; }
+.trend-flat { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.35); }
 
-/* ─── SHARED SECTION ─── */
-.section { padding: 112px 56px; }
-.section-label {
-  font-size: 11px; font-weight: 700; color: var(--gold);
-  text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 16px;
+.dp-alert {
+  margin-top: 12px;
+  background: rgba(192,57,43,0.1);
+  border: 1px solid rgba(192,57,43,0.2);
+  border-radius: 10px; padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.dp-alert-icon { font-size: 16px; }
+.dp-alert-text { font-size: 12px; color: rgba(255,255,255,0.65); }
+.dp-alert-text strong { color: #EF9A9A; }
+
+/* ─── SOCIAL PROOF BAR ─────────────────────────────────── */
+.proof-bar {
+  background: var(--cream);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 56px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 48px; flex-wrap: wrap;
+}
+.proof-label {
+  font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+.proof-integrations { display: flex; gap: 32px; flex-wrap: wrap; align-items: center; }
+.proof-int {
+  font-size: 14px; font-weight: 600; color: var(--sage);
+  opacity: 0.7;
+}
+.proof-divider { width: 1px; height: 24px; background: var(--border); }
+
+/* ─── SECTION COMMONS ──────────────────────────────────── */
+section { padding: 104px 56px; }
+.section-eyebrow {
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--gold);
+  margin-bottom: 14px;
 }
 .section-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(36px, 4vw, 54px);
-  font-weight: 600; line-height: 1.1;
-  letter-spacing: -0.02em; color: var(--ink);
-  margin-bottom: 20px;
+  font-size: 50px; font-weight: 600;
+  line-height: 1.1; color: var(--ink);
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
 }
-.section-title em { font-style: italic; color: var(--fairway); }
-.section-sub { font-size: 17px; color: var(--ink-l); max-width: 560px; line-height: 1.75; font-weight: 300; }
+.section-sub {
+  font-size: 18px; color: var(--text-muted);
+  line-height: 1.65; max-width: 560px;
+}
 
-/* ─── PROBLEM SECTION ─── */
-.problem-section { background: var(--linen); }
-.problem-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; max-width: 1200px; margin: 0 auto; }
-.problem-text .section-sub { margin-bottom: 48px; }
-.problem-quotes { display: flex; flex-direction: column; gap: 20px; margin-top: 40px; }
+/* ─── PROBLEM SECTION ──────────────────────────────────── */
+.problem-section {
+  background: var(--ivory);
+}
+.problem-layout {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: start;
+  max-width: 1180px; margin: 0 auto;
+}
 .problem-quote {
-  display: flex; gap: 18px;
-  background: white; border-radius: 14px;
-  padding: 24px 24px; border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  transition: all 0.25s; cursor: default;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px; font-style: italic; font-weight: 500;
+  color: var(--ink); line-height: 1.4;
+  border-left: 3px solid var(--gold);
+  padding-left: 24px;
+  margin: 36px 0;
 }
-.problem-quote:hover { transform: translateX(4px); box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-.pq-icon {
-  flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
+.problem-cards { display: flex; flex-direction: column; gap: 14px; margin-top: 36px; }
+.problem-card {
+  background: var(--white);
+  border-radius: 12px; padding: 20px 22px;
+  border-left: 3px solid var(--red-risk);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
 }
-.pq-red { background: rgba(192,57,43,0.08); }
-.pq-amber { background: rgba(200,146,26,0.08); }
-.pq-purple { background: rgba(139,92,246,0.08); }
-.problem-quote h4 { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
-.problem-quote p { font-size: 13px; color: var(--ink-l); line-height: 1.65; }
+.problem-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+.problem-card h4 { font-size: 15px; font-weight: 600; }
+.problem-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
 
-.problem-visual {
-  position: sticky; top: 100px;
+.problem-right { padding-top: 8px; }
+.signal-box {
+  background: var(--white);
+  border-radius: 16px; padding: 32px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.05);
 }
-.pv-card {
-  background: white; border-radius: 20px;
-  border: 1px solid rgba(0,0,0,0.08);
-  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+.signal-box h4 {
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--text-muted); margin-bottom: 22px;
 }
-.pv-header {
-  background: var(--forest-mid); padding: 18px 24px;
-  display: flex; align-items: center; justify-content: space-between;
+.signal-row {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 18px; padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
 }
-.pv-header-title { color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
-.pv-dot { width: 8px; height: 8px; border-radius: 50%; }
-.pv-dot-g { background: #3A7A44; }
-.pv-dot-y { background: var(--gold); }
-.pv-dot-r { background: var(--red); }
-.pv-dots { display: flex; gap: 6px; }
-.pv-body { padding: 20px; }
-.pv-member-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+.signal-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.signal-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 40px; font-weight: 600; color: var(--gold);
+  min-width: 90px; line-height: 1;
 }
-.pv-member-row:last-child { border-bottom: none; }
-.pv-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; color: white; flex-shrink: 0;
-}
-.pv-name { font-size: 13px; font-weight: 600; color: var(--ink); }
-.pv-detail { font-size: 11px; color: var(--ink-l); margin-top: 1px; }
-.pv-score-bar { flex: 1; height: 6px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; }
-.pv-score-fill { height: 100%; border-radius: 4px; transition: width 1.5s ease; }
-.pv-score-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; min-width: 32px; text-align: right; }
-.pv-badge {
-  font-size: 10px; font-weight: 700; padding: 3px 8px;
-  border-radius: 50px; text-transform: uppercase; letter-spacing: 0.06em;
-}
-.badge-critical { background: rgba(192,57,43,0.1); color: var(--red); }
-.badge-risk { background: rgba(200,146,26,0.1); color: var(--gold); }
-.badge-watch { background: rgba(139,92,246,0.1); color: #7C3AED; }
-.badge-healthy { background: rgba(58,122,68,0.1); color: var(--green-viv); }
-.pv-alert {
-  margin-top: 16px; padding: 14px 16px;
-  background: rgba(192,57,43,0.05); border: 1px solid rgba(192,57,43,0.15);
-  border-radius: 10px; border-left: 3px solid var(--red);
-}
-.pv-alert-title { font-size: 12px; font-weight: 700; color: var(--red); margin-bottom: 3px; }
-.pv-alert-body { font-size: 11px; color: var(--ink-l); line-height: 1.5; }
+.signal-text { font-size: 14px; color: var(--ink); line-height: 1.5; }
+.signal-text strong { font-weight: 600; }
 
-/* ─── QUESTIONS SECTION ─── */
-.questions-section {
-  background: var(--forest);
-  padding: 112px 56px;
+/* ─── WEDGE / PRICING ──────────────────────────────────── */
+.pricing-section {
+  background: linear-gradient(180deg, var(--forest) 0%, #152817 100%);
+  padding: 104px 56px;
+}
+.pricing-header { text-align: center; margin-bottom: 72px; }
+.pricing-header .section-title { color: var(--white); }
+.pricing-header .section-sub { color: rgba(255,255,255,0.55); margin: 0 auto; }
+
+.wedge-framework {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; max-width: 1100px; margin: 0 auto 16px;
+}
+.wedge-step {
+  flex: 1; text-align: center;
+  padding: 8px 20px;
+  font-size: 13px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.ws-see { color: rgba(255,255,255,0.5); }
+.ws-fix { color: var(--gold-light); }
+.ws-prove { color: var(--gold); }
+.wedge-arrow {
+  color: rgba(255,255,255,0.15); font-size: 20px;
+  margin-top: -2px;
+}
+
+.pricing-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px; max-width: 1100px; margin: 0 auto;
+}
+
+.pricing-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 36px;
+  transition: all 0.3s;
+  position: relative;
+}
+.pricing-card:hover { border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); }
+.pricing-card.featured {
+  background: rgba(201,148,58,0.06);
+  border-color: rgba(201,148,58,0.3);
+  box-shadow: 0 0 0 1px rgba(201,148,58,0.15), 0 24px 60px rgba(0,0,0,0.3);
+}
+
+.featured-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: var(--white); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 4px 16px; border-radius: 20px;
+  white-space: nowrap;
+}
+
+.pc-tier {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.35); margin-bottom: 10px;
+}
+.pc-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px; font-weight: 600; color: var(--white);
+  margin-bottom: 6px;
+}
+.pc-tagline {
+  font-size: 14px; color: rgba(255,255,255,0.45);
+  line-height: 1.5; margin-bottom: 28px;
+  min-height: 42px;
+}
+
+.pc-price-row {
+  display: flex; align-items: baseline; gap: 6px;
+  margin-bottom: 6px;
+}
+.pc-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 52px; font-weight: 600; color: var(--white); line-height: 1;
+}
+.pc-price-unit { font-size: 16px; color: rgba(255,255,255,0.4); }
+.pc-price-note { font-size: 13px; color: rgba(255,255,255,0.35); margin-bottom: 28px; }
+
+.pc-cta {
+  display: block; text-align: center; text-decoration: none;
+  padding: 14px; border-radius: 10px;
+  font-size: 15px; font-weight: 600;
+  transition: all 0.25s;
+  margin-bottom: 32px;
+}
+.pc-cta-free {
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.8);
+}
+.pc-cta-free:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+.pc-cta-pro {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: var(--white);
+  box-shadow: 0 4px 20px rgba(201,148,58,0.25);
+}
+.pc-cta-pro:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(201,148,58,0.35); }
+.pc-cta-club {
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(201,148,58,0.25);
+  color: var(--gold-light);
+}
+.pc-cta-club:hover { background: rgba(201,148,58,0.08); }
+
+.pc-divider {
+  height: 1px; background: rgba(255,255,255,0.07);
+  margin-bottom: 24px;
+}
+.pc-features-label {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.25); margin-bottom: 14px;
+}
+.pc-feature {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 12px;
+  font-size: 14px; color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+}
+.pc-check { color: var(--gold-light); flex-shrink: 0; margin-top: 1px; }
+.pc-check-muted { color: rgba(255,255,255,0.2); flex-shrink: 0; margin-top: 1px; }
+.pc-feature .bold { color: rgba(255,255,255,0.88); font-weight: 500; }
+
+.pc-soon {
+  display: inline-block;
+  font-size: 10px; font-weight: 600;
+  background: rgba(201,148,58,0.15); color: var(--gold-light);
+  padding: 1px 7px; border-radius: 4px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-left: 6px; vertical-align: middle;
+}
+
+/* ─── LENSES SECTION ───────────────────────────────────── */
+.lenses-section {
+  background: var(--ivory);
+}
+.lenses-header { text-align: center; margin-bottom: 72px; }
+.lenses-header .section-sub { margin: 0 auto; }
+
+.lenses-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 24px; max-width: 1160px; margin: 0 auto;
+}
+.lens-card {
+  background: var(--white); border-radius: 16px;
+  padding: 32px; border: 1px solid var(--border);
+  transition: all 0.3s;
   position: relative; overflow: hidden;
 }
-.questions-section::before {
-  content: ''; position: absolute;
-  top: -200px; right: -200px; width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(58,122,68,0.15) 0%, transparent 65%);
+.lens-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
 }
-.questions-section .section-title { color: white; }
-.questions-section .section-title em { color: var(--gold-pale); }
-.questions-section .section-label { color: var(--gold-l); }
-.questions-section .section-sub { color: rgba(255,255,255,0.55); max-width: 680px; }
-.questions-header { max-width: 1200px; margin: 0 auto 64px; }
-.questions-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 24px; max-width: 1200px; margin: 0 auto;
-}
-.q-card {
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 16px; padding: 32px; transition: all 0.3s;
-}
-.q-card:hover {
-  background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12);
-  transform: translateY(-4px);
-}
-.q-icon {
-  width: 46px; height: 46px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; margin-bottom: 20px;
-}
-.qi-green { background: rgba(58,122,68,0.2); }
-.qi-gold { background: rgba(200,146,26,0.2); }
-.qi-blue { background: rgba(59,130,246,0.2); }
-.qi-red { background: rgba(192,57,43,0.2); }
-.qi-purple { background: rgba(139,92,246,0.2); }
-.qi-teal { background: rgba(20,184,166,0.2); }
-.q-card h3 { font-size: 16px; font-weight: 600; color: white; margin-bottom: 10px; }
-.q-card p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.75; }
-.q-card .q-stat {
-  margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.07);
-  font-size: 12px; color: var(--gold-l); font-weight: 600; letter-spacing: 0.04em;
-}
+.lc-green::before { background: linear-gradient(90deg, var(--moss), var(--sage)); }
+.lc-gold::before { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+.lc-red::before { background: linear-gradient(90deg, #C0392B, #E74C3C); }
+.lc-blue::before { background: linear-gradient(90deg, #2563EB, #60A5FA); }
+.lc-purple::before { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
+.lc-teal::before { background: linear-gradient(90deg, #0D9488, #2DD4BF); }
 
-/* ─── SCENARIO SECTION ─── */
-.scenario-section { background: var(--cream-d); padding: 112px 56px; }
-.scenario-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; max-width: 1200px; margin: 0 auto; }
-.scenario-timeline { display: flex; flex-direction: column; gap: 0; }
-.tl-item {
-  display: flex; gap: 24px; position: relative;
+.lens-card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.08); transform: translateY(-4px); border-color: transparent; }
+.lens-icon { font-size: 28px; margin-bottom: 16px; }
+.lens-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.lens-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+.lens-tag {
+  display: inline-block; margin-top: 14px;
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 3px 10px; border-radius: 4px;
 }
-.tl-item:not(:last-child)::after {
-  content: ''; position: absolute;
-  left: 19px; top: 48px; width: 2px;
-  height: calc(100% - 8px);
-  background: rgba(0,0,0,0.08);
-}
-.tl-dot {
-  flex-shrink: 0; width: 40px; height: 40px;
-  border-radius: 50%; border: 2px solid;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700; z-index: 1;
-}
-.tl-dot-ok { border-color: var(--green-viv); background: rgba(58,122,68,0.08); color: var(--green-viv); }
-.tl-dot-warn { border-color: var(--gold); background: rgba(200,146,26,0.08); color: var(--gold); }
-.tl-dot-red { border-color: var(--red); background: rgba(192,57,43,0.08); color: var(--red); }
-.tl-dot-dark { border-color: var(--ink-l); background: rgba(0,0,0,0.04); color: var(--ink-l); }
-.tl-content { padding-bottom: 36px; }
-.tl-date { font-size: 11px; font-weight: 700; color: var(--ink-l); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; }
-.tl-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
-.tl-desc { font-size: 13px; color: var(--ink-l); line-height: 1.65; }
-.tl-chip {
-  display: inline-block; margin-top: 8px;
-  font-size: 11px; font-weight: 600; padding: 4px 10px;
-  border-radius: 50px; letter-spacing: 0.04em;
-}
-.chip-swoop { background: rgba(58,122,68,0.12); color: var(--fairway); }
-.chip-miss { background: rgba(192,57,43,0.1); color: var(--red); }
+.tag-free { background: rgba(42,74,44,0.1); color: var(--moss); }
+.tag-pro { background: rgba(201,148,58,0.12); color: var(--gold); }
+.tag-club { background: rgba(124,58,237,0.1); color: #7C3AED; }
 
-.scenario-copy .section-sub { margin-bottom: 32px; }
-.scenario-callout {
-  background: var(--forest); color: white;
-  border-radius: 16px; padding: 32px;
-  margin-top: 36px;
-}
-.sc-stat {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 48px; font-weight: 600; color: var(--gold-pale);
-  line-height: 1; margin-bottom: 8px;
-}
-.sc-desc { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.7; }
-.sc-desc strong { color: rgba(255,255,255,0.9); }
-
-/* ─── HOW IT WORKS ─── */
-.how-section { background: var(--linen); }
-.how-header { max-width: 1200px; margin: 0 auto 64px; text-align: center; }
-.how-header .section-sub { margin: 0 auto; }
-.how-grid {
+/* ─── HOW IT WORKS ─────────────────────────────────────── */
+.how-section { background: var(--cream); }
+.how-header { max-width: 520px; margin-bottom: 64px; }
+.how-steps {
   display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 2px; max-width: 1200px; margin: 0 auto;
-  background: rgba(0,0,0,0.06); border-radius: 20px; overflow: hidden;
+  gap: 32px; max-width: 1160px; margin: 0 auto;
+  position: relative;
 }
-.how-step {
-  background: white; padding: 40px 32px;
-  position: relative; transition: background 0.25s;
+.how-steps::before {
+  content: '';
+  position: absolute; top: 28px; left: calc(12.5% + 20px);
+  right: calc(12.5% + 20px); height: 1px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+  opacity: 0.3;
 }
-.how-step:hover { background: var(--cream); }
-.how-step-num {
+.how-step { text-align: center; padding-top: 8px; }
+.step-circle {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--white);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; font-weight: 500;
-  color: var(--gold); margin-bottom: 20px;
-  letter-spacing: 0.1em;
+  font-size: 16px; font-weight: 600; color: var(--gold);
+  margin: 0 auto 20px;
+  position: relative; z-index: 2;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 }
-.how-step h4 { font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--ink); }
-.how-step p { font-size: 13px; color: var(--ink-l); line-height: 1.7; }
-.how-step-arrow {
-  position: absolute; right: -14px; top: 50%;
-  transform: translateY(-50%); z-index: 2;
-  width: 28px; height: 28px; background: var(--cream-d);
-  border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; color: var(--ink-l); font-size: 12px;
-  border: 1px solid rgba(0,0,0,0.08);
-}
-.how-step:last-child .how-step-arrow { display: none; }
+.how-step h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.how-step p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
 
-/* ─── METRICS ─── */
-.metrics-section {
-  background: linear-gradient(160deg, var(--forest-l) 0%, var(--forest) 60%);
-  padding: 112px 56px;
+/* ─── INTEGRATIONS ─────────────────────────────────────── */
+.integrations-section { background: var(--ivory); }
+.integrations-header { max-width: 520px; margin-bottom: 52px; }
+.integrations-grid {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  max-width: 900px;
 }
-.metrics-section .section-title { color: white; }
-.metrics-section .section-label { color: var(--gold-l); }
-.metrics-section .section-sub { color: rgba(255,255,255,0.55); margin-bottom: 64px; }
-.metrics-header { max-width: 1200px; margin: 0 auto; }
-.metrics-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 20px; max-width: 1200px; margin: 0 auto;
-}
-.metric-card {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px; padding: 28px;
-}
-.metric-card .m-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 42px; font-weight: 500; color: var(--gold-pale);
-  line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em;
-}
-.metric-card .m-label { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
-.metric-card .m-sub { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 6px; }
-
-/* ─── INTEGRATIONS ─── */
-.integrations-section { background: var(--cream-d); padding: 80px 56px; }
-.integrations-inner { max-width: 900px; margin: 0 auto; text-align: center; }
-.integrations-inner .section-sub { margin: 0 auto 48px; }
-.integrations-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; }
 .int-chip {
-  display: flex; align-items: center; gap: 10px;
-  background: white; border: 1px solid rgba(0,0,0,0.08);
-  padding: 13px 22px; border-radius: 10px;
-  font-size: 14px; font-weight: 600; color: var(--ink-mid);
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 50px; padding: 10px 22px;
+  font-size: 14px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
   transition: all 0.2s;
 }
-.int-chip:hover { border-color: var(--gold); color: var(--ink); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-.int-chip-icon { font-size: 18px; }
+.int-chip:hover { border-color: var(--gold); color: var(--gold); box-shadow: 0 2px 12px rgba(201,148,58,0.12); }
+.int-note {
+  margin-top: 28px;
+  font-size: 13px; color: var(--text-muted);
+  display: flex; align-items: center; gap: 8px;
+}
 
-/* ─── TESTIMONIAL ─── */
-.testimonial-section { background: var(--linen); padding: 96px 56px; }
-.testimonial-inner { max-width: 780px; margin: 0 auto; text-align: center; }
-.t-quote {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(22px, 3vw, 30px);
-  font-weight: 500; line-height: 1.55;
-  color: var(--ink); margin-bottom: 36px;
-  position: relative; padding: 0 24px;
-}
-.t-quote::before, .t-quote::after {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 80px; color: var(--gold); opacity: 0.2;
-  position: absolute; line-height: 1;
-}
-.t-quote::before { content: '\201C'; top: -10px; left: -8px; }
-.t-quote::after { content: '\201D'; bottom: -40px; right: -8px; }
-.t-author { display: flex; align-items: center; justify-content: center; gap: 16px; }
-.t-avatar {
-  width: 50px; height: 50px; border-radius: 50%;
-  background: var(--forest); color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 18px;
-}
-.t-name { font-size: 15px; font-weight: 700; text-align: left; }
-.t-role { font-size: 13px; color: var(--ink-l); }
-
-/* ─── CTA ─── */
-.cta-section {
-  background: var(--forest-mid);
-  padding: 112px 56px;
-  position: relative; overflow: hidden;
-}
-.cta-section::before {
-  content: ''; position: absolute;
-  top: -50%; left: -10%;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(200,146,26,0.08) 0%, transparent 65%);
-}
-.cta-section::after {
-  content: ''; position: absolute;
-  bottom: -50%; right: -10%;
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(58,122,68,0.12) 0%, transparent 65%);
-}
-.cta-inner { max-width: 660px; margin: 0 auto; text-align: center; position: relative; z-index: 2; }
-.cta-section .section-title { color: white; font-size: clamp(36px, 4vw, 52px); }
-.cta-section .section-label { color: var(--gold-l); text-align: center; }
-.cta-desc { font-size: 17px; color: rgba(255,255,255,0.6); margin-bottom: 48px; font-weight: 300; line-height: 1.75; }
-.email-form {
-  display: flex; gap: 12px; max-width: 500px; margin: 0 auto 20px;
-}
-.email-input {
-  flex: 1; padding: 16px 20px; border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.08);
-  color: white; font-size: 15px; font-family: 'Outfit', sans-serif;
-  outline: none; transition: border-color 0.2s;
-}
-.email-input::placeholder { color: rgba(255,255,255,0.35); }
-.email-input:focus { border-color: var(--gold); }
-.email-form .btn-gold { white-space: nowrap; padding: 16px 28px; font-size: 14px; }
-.cta-trust {
-  display: flex; align-items: center; justify-content: center; gap: 20px;
-  flex-wrap: wrap; margin-top: 24px;
-}
-.cta-trust-item {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 12px; color: rgba(255,255,255,0.4);
-}
-.cta-trust-item::before { content: '✓'; color: var(--green-viv); font-weight: 700; }
-.risk-notice {
-  display: inline-flex; align-items: center; gap: 10px;
-  background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.18);
-  border-radius: 10px; padding: 14px 20px; margin-bottom: 36px;
-  font-size: 13px; color: rgba(255,255,255,0.65);
-}
-.risk-notice strong { color: #FF9090; }
-
-/* ─── FOOTER ─── */
-footer {
+/* ─── GM QUOTES ────────────────────────────────────────── */
+.quotes-section {
   background: var(--forest);
-  padding: 44px 56px;
+  padding: 104px 56px;
+}
+.quotes-header { text-align: center; margin-bottom: 64px; }
+.quotes-header .section-title { color: var(--white); }
+.quotes-header .section-sub { color: rgba(255,255,255,0.5); margin: 0 auto; }
+
+.quotes-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 24px; max-width: 1160px; margin: 0 auto;
+}
+.quote-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px; padding: 32px;
+}
+.quote-mark {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 64px; color: var(--gold); opacity: 0.4;
+  line-height: 0.5; margin-bottom: 20px;
+}
+.quote-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px; font-style: italic;
+  color: rgba(255,255,255,0.8); line-height: 1.55;
+  margin-bottom: 24px;
+}
+.quote-author {
+  display: flex; align-items: center; gap: 12px;
+}
+.qa-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--green); border: 2px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--white);
+}
+.qa-name { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.8); }
+.qa-role { font-size: 12px; color: rgba(255,255,255,0.35); }
+
+/* ─── CTA SECTION ──────────────────────────────────────── */
+.cta-section {
+  background: var(--ivory);
+  text-align: center; padding: 120px 56px;
+}
+.cta-inner { max-width: 640px; margin: 0 auto; }
+.cta-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 54px; font-weight: 600; line-height: 1.1;
+  color: var(--ink); letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+.cta-title em { color: var(--gold); font-style: italic; }
+.cta-sub {
+  font-size: 18px; color: var(--text-muted);
+  line-height: 1.65; margin-bottom: 44px;
+}
+.cta-buttons { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+.btn-cta-primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: var(--white); text-decoration: none;
+  padding: 17px 40px; border-radius: 10px;
+  font-size: 16px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all 0.25s;
+  box-shadow: 0 6px 28px rgba(201,148,58,0.28);
+}
+.btn-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(201,148,58,0.38); }
+.btn-cta-free {
+  color: var(--moss); text-decoration: none;
+  padding: 17px 32px; border-radius: 10px;
+  font-size: 16px; font-weight: 600;
+  border: 2px solid var(--border);
+  transition: all 0.25s;
+}
+.btn-cta-free:hover { border-color: var(--moss); background: rgba(42,74,44,0.04); }
+
+.risk-stat {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(192,57,43,0.06);
+  border: 1px solid rgba(192,57,43,0.12);
+  border-radius: 8px; padding: 12px 20px;
+  font-size: 14px; color: var(--red-risk);
+}
+.rs-icon { font-size: 16px; }
+
+/* ─── FOOTER ───────────────────────────────────────────── */
+footer {
+  background: var(--ink);
+  padding: 48px 56px;
   display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 20px;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
 .footer-brand { display: flex; align-items: center; gap: 12px; }
-.footer-brand span { font-size: 17px; font-weight: 700; color: rgba(255,255,255,0.9); }
-footer .copy { font-size: 13px; color: rgba(255,255,255,0.3); }
-.footer-links { display: flex; gap: 24px; }
-.footer-links a { font-size: 13px; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
-.footer-links a:hover { color: rgba(255,255,255,0.8); }
+.footer-brand .logo-mark { width: 32px; height: 32px; font-size: 17px; }
+.footer-brand span {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px; font-weight: 600; color: rgba(255,255,255,0.7);
+}
+.footer-tagline { font-size: 13px; color: rgba(255,255,255,0.3); }
+.footer-links { display: flex; gap: 28px; }
+.footer-links a {
+  font-size: 13px; color: rgba(255,255,255,0.3);
+  text-decoration: none; transition: color 0.2s;
+}
+.footer-links a:hover { color: rgba(255,255,255,0.7); }
 
-/* ─── ANIMATIONS ─── */
+/* ─── SCROLL ANIMATIONS ────────────────────────────────── */
 .fade-up {
   opacity: 0; transform: translateY(28px);
   transition: opacity 0.7s ease, transform 0.7s ease;
 }
-.fade-up.visible { opacity: 1; transform: none; }
+.fade-up.visible {
+  opacity: 1; transform: translateY(0);
+}
 .fade-up-delay-1 { transition-delay: 0.1s; }
 .fade-up-delay-2 { transition-delay: 0.2s; }
 .fade-up-delay-3 { transition-delay: 0.3s; }
-.fade-up-delay-4 { transition-delay: 0.4s; }
 
-/* ─── RESPONSIVE ─── */
-@media (max-width: 960px) {
-  nav { padding: 0 24px; }
-  .nav-links { display: none; }
-  .hero, .section, .questions-section, .scenario-section, .how-section,
-  .metrics-section, .integrations-section, .testimonial-section, .cta-section { padding-left: 24px; padding-right: 24px; }
-  .hero { padding-top: 100px; padding-bottom: 72px; }
-  .hero-stats { grid-template-columns: repeat(2, auto); }
-  .hero-stat:last-child { grid-column: span 2; border-right: none; padding-right: 0; margin-right: 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; margin-top: 8px; }
-  .problem-layout, .scenario-layout { grid-template-columns: 1fr; gap: 48px; }
-  .problem-visual { position: static; }
-  .questions-grid { grid-template-columns: 1fr; }
-  .how-grid { grid-template-columns: 1fr 1fr; }
-  .metrics-grid { grid-template-columns: 1fr 1fr; }
-  .email-form { flex-direction: column; }
-  .email-form .btn-gold { width: 100%; justify-content: center; }
-  footer { flex-direction: column; align-items: flex-start; gap: 16px; }
-  .integration-bar { padding: 20px 24px; gap: 20px; }
+/* ─── RESPONSIVE ───────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .hero-right { display: none; }
+  .hero { padding: 140px 40px 100px; }
+  .hero h1 { font-size: 56px; }
+  nav { padding: 0 32px; }
+  .nav-center { display: none; }
 }
-@media (max-width: 600px) {
-  .how-grid { grid-template-columns: 1fr; }
-  .metrics-grid { grid-template-columns: 1fr; }
-  .hero-stats { grid-template-columns: 1fr 1fr; }
+@media (max-width: 860px) {
+  section { padding: 72px 28px; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+  .lenses-grid { grid-template-columns: 1fr 1fr; }
+  .how-steps { grid-template-columns: 1fr 1fr; }
+  .quotes-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+  .section-title { font-size: 38px; }
+  .problem-layout { grid-template-columns: 1fr; gap: 40px; }
 }
 </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav id="nav">
-  <a href="#" class="nav-brand">
-    <div class="nav-logo-mark">S</div>
-    SWOOP
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-mark">S</div>
+    <span class="logo-text">Swoop <span>Golf</span></span>
   </a>
-  <div class="nav-links">
+  <div class="nav-center">
+    <a href="#pricing">Pricing</a>
     <a href="#features">Platform</a>
     <a href="#how-it-works">How It Works</a>
     <a href="#integrations">Integrations</a>
-    <a href="#cta" class="nav-cta">Book a Demo</a>
+  </div>
+  <div class="nav-right">
+    <a href="#" class="nav-link-plain">Sign In</a>
+    <a href="#pricing" class="nav-cta">Get Started Free →</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-bg-image"></div>
-  <div class="hero-grain"></div>
-  <div class="hero-glow"></div>
+  <div class="hero-bg-grid"></div>
+  <div class="hero-bg-glow"></div>
   <div class="hero-content">
     <div class="hero-eyebrow">
-      <div class="pulse"></div>
-      Private Club Intelligence
+      <div class="eyebrow-dot"></div>
+      Club Intelligence Platform · Free to Start
     </div>
-    <h1>Your members are signaling.<br>Most clubs miss it <em>until it's too late.</em></h1>
+    <h1>
+      Stop managing<br>
+      <span class="accent">by anecdote.</span>
+    </h1>
     <p class="hero-sub">
-      Swoop unifies your tee sheet, POS, CRM, and email data into a single intelligence layer —
-      so your GM sees <strong>who's at risk, what triggered it, and exactly how to respond</strong>
-      before a resignation letter arrives.
+      Swoop gives GMs a single view across golf, dining, and member activity —
+      so you can spot who's quietly disengaging <strong>weeks before they resign.</strong>
     </p>
-    <div class="hero-actions">
-      <a href="#cta" class="btn-gold">Book Your Demo &rarr;</a>
-      <a href="#features" class="btn-ghost">See the Platform</a>
+    <div class="hero-ctas">
+      <a href="#pricing" class="btn-hero-primary">Get Member Health Scores Free →</a>
+      <a href="#pricing" class="btn-hero-secondary">See All Plans</a>
+    </div>
+    <div class="free-callout">
+      <span class="free-badge">Free Forever</span>
+      Member Health Scores for your entire club — no credit card required
     </div>
     <div class="hero-stats">
       <div class="hero-stat">
-        <span class="num" data-target="6" data-suffix="–8 wk">0</span>
-        <span class="lbl">Early warning before resignation</span>
+        <div class="val">90%</div>
+        <div class="lbl">of GMs call daily health scores "extremely valuable"</div>
       </div>
       <div class="hero-stat">
-        <span class="num" data-target="140" data-prefix="$" data-suffix="K+">0</span>
-        <span class="lbl">Avg preventable dues loss / year</span>
+        <div class="val">$140K</div>
+        <div class="lbl">average in preventable resignations per year</div>
       </div>
       <div class="hero-stat">
-        <span class="num" data-target="10" data-suffix=" signals">0</span>
-        <span class="lbl">Cross-domain correlations detected</span>
+        <div class="val">6–8</div>
+        <div class="lbl">weeks of warning before a member resigns</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="dashboard-preview">
+      <div class="dp-header">
+        <div class="dp-dot r"></div>
+        <div class="dp-dot y"></div>
+        <div class="dp-dot g"></div>
+        <div class="dp-url">app.swoopgolf.com · Member Health</div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-label">Today's At-Risk Members</div>
+        <div class="health-members">
+          <div class="hm-row">
+            <div class="hm-avatar av-red">JK</div>
+            <div style="flex:1">
+              <div class="hm-name">James Kirkland</div>
+              <div class="hm-detail">No golf in 41 days · Dining ↓64%</div>
+            </div>
+            <div class="health-score score-red">38</div>
+            <div class="hm-trend trend-dn">↓12</div>
+          </div>
+          <div class="hm-row">
+            <div class="hm-avatar av-amber">SW</div>
+            <div style="flex:1">
+              <div class="hm-name">Sandra Whitmore</div>
+              <div class="hm-detail">3rd event miss this month</div>
+            </div>
+            <div class="health-score score-amber">54</div>
+            <div class="hm-trend trend-dn">↓7</div>
+          </div>
+          <div class="hm-row">
+            <div class="hm-avatar av-green">RP</div>
+            <div style="flex:1">
+              <div class="hm-name">Robert Park</div>
+              <div class="hm-detail">Engagement recovering</div>
+            </div>
+            <div class="health-score score-green">82</div>
+            <div class="hm-trend trend-up">↑9</div>
+          </div>
+        </div>
+        <div class="dp-alert">
+          <div class="dp-alert-icon">⚠️</div>
+          <div class="dp-alert-text"><strong>James Kirkland has a tee time at 9:40am.</strong> Consider a check-in — last satisfaction score was 4.1/10.</div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- INTEGRATION BAR -->
-<div class="integration-bar">
-  <span class="ib-label">Connects to</span>
-  <div class="ib-logos">
-    <span class="ib-logo">ForeTees</span>
-    <span class="ib-logo">Northstar</span>
-    <span class="ib-logo">Club Prophet</span>
-    <span class="ib-logo">Jonas POS</span>
-    <span class="ib-logo">ClubReady</span>
-    <span class="ib-logo">Weather API</span>
-    <span class="ib-logo">+ more</span>
+<!-- PROOF BAR -->
+<div class="proof-bar">
+  <span class="proof-label">Connects to</span>
+  <div class="proof-integrations">
+    <span class="proof-int">ForeTees</span>
+    <div class="proof-divider"></div>
+    <span class="proof-int">Northstar</span>
+    <div class="proof-divider"></div>
+    <span class="proof-int">Jonas</span>
+    <div class="proof-divider"></div>
+    <span class="proof-int">Club Prophet</span>
+    <div class="proof-divider"></div>
+    <span class="proof-int">Lightspeed</span>
+    <div class="proof-divider"></div>
+    <span class="proof-int">Clubessential</span>
+    <div class="proof-divider"></div>
+    <span class="proof-int">Chronogolf</span>
   </div>
 </div>
 
 <!-- PROBLEM SECTION -->
-<section class="section problem-section" id="features">
+<section class="problem-section" id="problem">
   <div class="problem-layout">
-    <div class="problem-text">
-      <div class="section-label">The Problem</div>
-      <h2 class="section-title">Your systems see <em>pieces.</em><br>Swoop sees the pattern.</h2>
-      <p class="section-sub">The tee sheet doesn't know about the complaint. The POS doesn't see that email opens dropped. By the time any one system flags a problem, the pattern has been building for months.</p>
-      <div class="problem-quotes fade-up">
-        <div class="problem-quote">
-          <div class="pq-icon pq-red">⚠️</div>
-          <div>
-            <h4>Invisible Decay Signals</h4>
-            <p>Email open rates drop 15% month-over-month. Rounds decrease. F&B spend hits the annual minimum exactly — then stops. Each system sees a fragment. None sees the churn.</p>
+    <div>
+      <div class="section-eyebrow">The Blind Spot</div>
+      <h2 class="section-title">You feel it. You can't see it.</h2>
+      <div class="problem-quote">
+        "I can see rounds played, but I can't see that John Smith is quietly disengaging everywhere."
+      </div>
+      <div class="problem-cards">
+        <div class="problem-card fade-up">
+          <div class="problem-card-header">
+            <h4>⛳ Tee sheet is full — but your best members aren't on it</h4>
           </div>
+          <p>High-dues members reduce frequency months before they resign. It's invisible until it's too late.</p>
         </div>
-        <div class="problem-quote fade-up fade-up-delay-1">
-          <div class="pq-icon pq-amber">🔔</div>
-          <div>
-            <h4>Complaints That Cost Memberships</h4>
-            <p>A member files a service complaint on an understaffed Saturday. It gets "acknowledged" — but no follow-up. Four days later, they resign. That was $22,000 walking out the door.</p>
+        <div class="problem-card fade-up fade-up-delay-1">
+          <div class="problem-card-header">
+            <h4>🍽️ F&B margins are negative, but you don't know which service failures caused it</h4>
           </div>
+          <p>When pace slows on holes 7-9 and the kitchen backs up, should you delay seating? You have no way to know.</p>
         </div>
-        <div class="problem-quote fade-up fade-up-delay-2">
-          <div class="pq-icon pq-purple">📊</div>
-          <div>
-            <h4>Data Without Context Is Just Noise</h4>
-            <p>You have dashboards. But does your tee sheet dashboard tell you that slow rounds are lowering post-round dining conversion by 15%? That's the question only cross-domain intelligence answers.</p>
+        <div class="problem-card fade-up fade-up-delay-2">
+          <div class="problem-card-header">
+            <h4>📋 You're managing by anecdote, not intelligence</h4>
           </div>
+          <p>By the time a complaint reaches you, the damage is done. The data existed — it just wasn't connected.</p>
         </div>
       </div>
     </div>
-    <div class="problem-visual fade-up fade-up-delay-1">
-      <div class="pv-card">
-        <div class="pv-header">
-          <span class="pv-header-title">Member Health Dashboard</span>
-          <div class="pv-dots">
-            <div class="pv-dot pv-dot-g"></div>
-            <div class="pv-dot pv-dot-y"></div>
-            <div class="pv-dot pv-dot-r"></div>
-          </div>
+    <div class="problem-right">
+      <div class="signal-box fade-up">
+        <h4>Survey signals from 16+ private clubs</h4>
+        <div class="signal-row">
+          <div class="signal-num">90%</div>
+          <div class="signal-text">of GMs find a <strong>daily Member Health Score</strong> valuable or extremely valuable</div>
         </div>
-        <div class="pv-body">
-          <div class="pv-member-row">
-            <div class="pv-avatar" style="background:#2A5034">KH</div>
-            <div style="flex:1">
-              <div class="pv-name">Kevin Hurst</div>
-              <div class="pv-detail">Full Golf · No activity since Dec</div>
-            </div>
-            <div class="pv-score-bar">
-              <div class="pv-score-fill" style="width:18%; background:#C0392B;"></div>
-            </div>
-            <div class="pv-score-num" style="color:#C0392B">18</div>
-            <div class="pv-badge badge-critical">Critical</div>
-          </div>
-          <div class="pv-member-row">
-            <div class="pv-avatar" style="background:#1A5C8E">JW</div>
-            <div style="flex:1">
-              <div class="pv-name">James Whitfield</div>
-              <div class="pv-detail">Balanced Active · Complaint unresolved</div>
-            </div>
-            <div class="pv-score-bar">
-              <div class="pv-score-fill" style="width:34%; background:#C8921A;"></div>
-            </div>
-            <div class="pv-score-num" style="color:#C8921A">34</div>
-            <div class="pv-badge badge-risk">At Risk</div>
-          </div>
-          <div class="pv-member-row">
-            <div class="pv-avatar" style="background:#7C3AED">AJ</div>
-            <div style="flex:1">
-              <div class="pv-name">Anne Jordan</div>
-              <div class="pv-detail">Weekend Warrior · Rounds declining</div>
-            </div>
-            <div class="pv-score-bar">
-              <div class="pv-score-fill" style="width:48%; background:#C8921A;"></div>
-            </div>
-            <div class="pv-score-num" style="color:#C8921A">48</div>
-            <div class="pv-badge badge-watch">Watch</div>
-          </div>
-          <div class="pv-member-row">
-            <div class="pv-avatar" style="background:#3A7A44">MB</div>
-            <div style="flex:1">
-              <div class="pv-name">Margaret Blake</div>
-              <div class="pv-detail">Social Butterfly · 3 events this month</div>
-            </div>
-            <div class="pv-score-bar">
-              <div class="pv-score-fill" style="width:87%; background:#3A7A44;"></div>
-            </div>
-            <div class="pv-score-num" style="color:#3A7A44">87</div>
-            <div class="pv-badge badge-healthy">Healthy</div>
-          </div>
-          <div class="pv-alert">
-            <div class="pv-alert-title">⚡ Action Required — James Whitfield</div>
-            <div class="pv-alert-body">Complaint filed Jan 18 (Service Speed, -0.8 sentiment) remains unresolved. Health score dropped 22 pts in 4 days. Probability of resignation within 7 days: <strong style="color:#C0392B">74%</strong>. <u style="cursor:pointer">Send personal outreach →</u></div>
-          </div>
+        <div class="signal-row">
+          <div class="signal-num">11/16</div>
+          <div class="signal-text">clubs selected <strong>service consistency</strong> as a top-3 outcome for 2026</div>
+        </div>
+        <div class="signal-row">
+          <div class="signal-num">8/10</div>
+          <div class="signal-text">clubs are running <strong>F&B at negative or subsidized margins</strong></div>
+        </div>
+        <div class="signal-row">
+          <div class="signal-num">1/10</div>
+          <div class="signal-text">clubs are ready to <strong>switch systems</strong> — the solution must layer on, not rip-and-replace</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- QUESTIONS ONLY WE ANSWER -->
-<section class="questions-section">
-  <div class="questions-header">
-    <div class="section-label">Layer 3 Intelligence</div>
-    <h2 class="section-title" style="max-width:680px">Questions <em>only we</em> can answer — because they cross every system you run</h2>
-    <p class="section-sub" style="margin-top:16px">These are impossible for any single vendor to surface. They exist in the space between your platforms — and that's exactly where Swoop lives.</p>
+<!-- PRICING / WEDGE SECTION -->
+<section class="pricing-section" id="pricing">
+  <div class="pricing-header">
+    <div class="section-eyebrow" style="color:var(--gold-light)">See It → Fix It → Prove It</div>
+    <h2 class="section-title">Start free. Grow when you're ready.</h2>
+    <p class="section-sub">The Member Health Score is free forever. Add operational intelligence, AI agents, and ROI proof as your club needs them.</p>
   </div>
-  <div class="questions-grid">
-    <div class="q-card fade-up">
-      <div class="q-icon qi-red">🔍</div>
-      <h3>Which members are about to resign?</h3>
-      <p>Golf activity down, F&B spend at the minimum, email opens dropping 12% month-over-month, no events in 6 weeks. That's 4 systems — and it's one member silently leaving.</p>
-      <div class="q-stat">Avg 6–8 weeks of advance warning</div>
+
+  <div class="wedge-framework">
+    <div class="wedge-step ws-see">👁 See It</div>
+    <div class="wedge-arrow">→</div>
+    <div class="wedge-step ws-fix">⚙️ Fix It</div>
+    <div class="wedge-arrow">→</div>
+    <div class="wedge-step ws-prove">📈 Prove It</div>
+  </div>
+
+  <div class="pricing-grid">
+
+    <!-- FREE -->
+    <div class="pricing-card fade-up">
+      <div class="pc-tier">Starter</div>
+      <div class="pc-name">Health Score</div>
+      <div class="pc-tagline">Daily member health visibility. The intelligence every club should have — at zero cost.</div>
+      <div class="pc-price-row">
+        <div class="pc-price">$0</div>
+        <div class="pc-price-unit">/ month</div>
+      </div>
+      <div class="pc-price-note">Free forever · No credit card required</div>
+      <a href="#" class="pc-cta pc-cta-free">Get Started Free →</a>
+      <div class="pc-divider"></div>
+      <div class="pc-features-label">What's included</div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">Daily Member Health Scores</span> — every member, every day</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">At-Risk Flagging</span> — who needs attention today</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">Decay Signal Detection</span> — golf, dining, and events combined</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span>7-day trend history per member</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span>Morning email digest</span></div>
+      <div class="pc-feature"><span class="pc-check-muted">○</span><span style="color:rgba(255,255,255,0.25)">Real-time operational cockpit</span></div>
+      <div class="pc-feature"><span class="pc-check-muted">○</span><span style="color:rgba(255,255,255,0.25)">Automated playbooks</span></div>
+      <div class="pc-feature"><span class="pc-check-muted">○</span><span style="color:rgba(255,255,255,0.25)">AI recovery agents</span></div>
     </div>
-    <div class="q-card fade-up fade-up-delay-1">
-      <div class="q-icon qi-gold">💰</div>
-      <h3>What did understaffing cost us this weekend?</h3>
-      <p>On Jan 9, 16, and 28 the Grill Room was short-staffed. Ticket times ran 20% longer. Complaints doubled. Revenue was 8% lower. That connection is invisible without Swoop.</p>
-      <div class="q-stat">Avg $2,100/mo in recoverable staffing losses</div>
+
+    <!-- PRO -->
+    <div class="pricing-card featured fade-up fade-up-delay-1">
+      <div class="featured-badge">Most Popular · Best Value</div>
+      <div class="pc-tier">Professional</div>
+      <div class="pc-name">Cockpit</div>
+      <div class="pc-tagline">The real-time GM command center. See problems forming — and act before members feel them.</div>
+      <div class="pc-price-row">
+        <div class="pc-price" style="color:var(--gold-light)">$699</div>
+        <div class="pc-price-unit">/ month</div>
+      </div>
+      <div class="pc-price-note">Per club · Billed annually</div>
+      <a href="#" class="pc-cta pc-cta-pro">Book a Demo →</a>
+      <div class="pc-divider"></div>
+      <div class="pc-features-label">Everything in Starter, plus</div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">Real-Time Operations Cockpit</span> — live club-wide view</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">F&B Performance Intelligence</span> — margins, covers, conversion</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">Pace of Play + Demand Forecasting</span> with weather adjustment</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">Staffing Gap Detection</span> — connect complaints to coverage</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">4 Automated Playbooks</span> — Slow Saturday, Service Save, Engagement Decay, Staffing Gap</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">90-day trend history</span> + resignation prediction timeline</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span>Member archetype segmentation</span></div>
+      <div class="pc-feature"><span class="pc-check-muted">○</span><span style="color:rgba(255,255,255,0.25)">AI agent automations</span></div>
     </div>
-    <div class="q-card fade-up fade-up-delay-2">
-      <div class="q-icon qi-green">⛳</div>
-      <h3>Are slow rounds killing our dining revenue?</h3>
-      <p>Rounds exceeding 4.5 hours correlate with 15% lower post-round dining conversion. Members who endure a slow round don't stay for lunch — they leave frustrated.</p>
-      <div class="q-stat">Linked via booking_id to every dining check</div>
+
+    <!-- CLUB -->
+    <div class="pricing-card fade-up fade-up-delay-2">
+      <div class="pc-tier">Club Intelligence</div>
+      <div class="pc-name">Full Platform</div>
+      <div class="pc-tagline">AI agents, board-ready ROI reporting, and the complete Five Lenses platform. Built for clubs ready to lead.</div>
+      <div class="pc-price-row">
+        <div class="pc-price">$1,499</div>
+        <div class="pc-price-unit">/ month</div>
+      </div>
+      <div class="pc-price-note">Per club · Billed annually</div>
+      <a href="#" class="pc-cta pc-cta-club">Contact Sales →</a>
+      <div class="pc-divider"></div>
+      <div class="pc-features-label">Everything in Pro, plus</div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">AI Recovery Agents</span> — auto-draft personal outreach for at-risk members</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">Growth Pipeline Intelligence</span> — prospect scoring and conversion tracking</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">Board-Ready ROI Reports</span> — dues protected, churn prevented, $$ saved</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">All 5 Lenses</span> — full cross-domain intelligence platform</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span><span class="bold">Unlimited history</span> + year-over-year comparisons</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span>Multi-staff access with role-based views</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span>Dedicated onboarding + CS team</span></div>
+      <div class="pc-feature"><span class="pc-check">✓</span><span>Custom integrations on request</span></div>
     </div>
-    <div class="q-card fade-up">
-      <div class="q-icon qi-blue">🌧️</div>
-      <h3>When golf drops, does F&B pick up the slack?</h3>
-      <p>Rain days reduce golf bookings 40% — but F&B revenue rises 15% as members still come to the club and dine instead of play. Without both data streams, you can't plan for either.</p>
-      <div class="q-stat">Weather × demand forecast, daily</div>
-    </div>
-    <div class="q-card fade-up fade-up-delay-1">
-      <div class="q-icon qi-purple">📧</div>
-      <h3>What's the earliest churn signal we have?</h3>
-      <p>Email open rate decline precedes reduced golf and dining activity by 4–6 weeks. It's the canary in the coal mine — but only if you're connecting email to membership data.</p>
-      <div class="q-stat">4–6 weeks before any other signal fires</div>
-    </div>
-    <div class="q-card fade-up fade-up-delay-2">
-      <div class="q-icon qi-teal">🎟️</div>
-      <h3>Which events actually drive retention?</h3>
-      <p>Members attending 2+ events per month have a 60% lower churn probability. But that stat only exists when event registrations are connected to your membership health model.</p>
-      <div class="q-stat">60% lower churn for 2+ events/month</div>
-    </div>
+
   </div>
 </section>
 
-<!-- SCENARIO / STORY SECTION -->
-<section class="scenario-section">
-  <div class="scenario-layout">
-    <div class="scenario-copy fade-up">
-      <div class="section-label">The Service Save Scenario</div>
-      <h2 class="section-title">One unresolved complaint.<br>A <em>preventable</em> $22,000 resignation.</h2>
-      <p class="section-sub">This happened at Oakmont Hills. Every signal was visible. No single system saw all of them — until Swoop connected the dots. This is what early warning actually looks like in practice.</p>
-      <div class="scenario-callout">
-        <div class="sc-stat">$216,000</div>
-        <p class="sc-desc">Annual protected dues value from the <strong>Service Save Protocol</strong> — one of four response playbooks built into the Swoop platform for GMs who want to act, not just observe.</p>
-      </div>
+<!-- FEATURES / LENSES -->
+<section class="lenses-section" id="features">
+  <div class="lenses-header">
+    <div class="section-eyebrow">The Five Lenses</div>
+    <h2 class="section-title">One platform. Five complete pictures.</h2>
+    <p class="section-sub">Swoop connects your existing systems and surfaces insights that are invisible when they work in isolation.</p>
+  </div>
+  <div class="lenses-grid">
+    <div class="lens-card lc-gold fade-up">
+      <div class="lens-icon">📋</div>
+      <h3>Daily Briefing</h3>
+      <p>Your morning command center. See who needs attention today, which at-risk members have tee times, and what's trending across the club.</p>
+      <span class="lens-tag tag-free">Free</span>
     </div>
-    <div class="scenario-timeline fade-up fade-up-delay-1">
-      <div class="tl-item">
-        <div class="tl-dot tl-dot-ok">✓</div>
-        <div class="tl-content">
-          <div class="tl-date">December 2025</div>
-          <div class="tl-title">Member fully engaged</div>
-          <div class="tl-desc">James Whitfield — Full Golf membership, Balanced Active archetype. 10 rounds, 8 dining visits, 2 events. Health score: 82. Zero flags.</div>
-          <div class="tl-chip chip-swoop">Swoop: All clear</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-dot tl-dot-warn">!</div>
-        <div class="tl-content">
-          <div class="tl-date">January 9 &amp; 16</div>
-          <div class="tl-title">Grill Room understaffed</div>
-          <div class="tl-desc">Two service gaps this month. Ticket times up 22%. No action taken — neither incident was connected to member-level risk across systems.</div>
-          <div class="tl-chip chip-miss">Traditional systems: Invisible</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-dot tl-dot-red">✗</div>
-        <div class="tl-content">
-          <div class="tl-date">January 18</div>
-          <div class="tl-title">Complaint filed — never resolved</div>
-          <div class="tl-desc">Service Speed complaint. Sentiment score: -0.8. Status set to "acknowledged." Health score drops 25 points instantly. No follow-up scheduled.</div>
-          <div class="tl-chip chip-swoop">Swoop: Urgent alert fired</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-dot tl-dot-dark">→</div>
-        <div class="tl-content">
-          <div class="tl-date">January 22</div>
-          <div class="tl-title">Resignation received</div>
-          <div class="tl-desc">Four days after the complaint. $22,000 in annual dues lost. No personal outreach was made. The window to save this relationship was 4 days wide.</div>
-          <div class="tl-chip chip-miss">Traditional systems: "We had no idea"</div>
-        </div>
-      </div>
+    <div class="lens-card lc-green fade-up fade-up-delay-1">
+      <div class="lens-icon">📊</div>
+      <h3>Operations Intelligence</h3>
+      <p>Daily revenue, pace of play, demand forecasting, and weather-adjusted staffing — all connected. See exactly how understaffing hits your bottom line.</p>
+      <span class="lens-tag tag-pro">Pro</span>
+    </div>
+    <div class="lens-card lc-red fade-up fade-up-delay-2">
+      <div class="lens-icon">🎯</div>
+      <h3>Member Health & Retention</h3>
+      <p>Health scores, behavioral archetypes, engagement decay tracking, and resignation prediction. Know who's leaving 6–8 weeks before they do.</p>
+      <span class="lens-tag tag-free">Free → Pro</span>
+    </div>
+    <div class="lens-card lc-blue fade-up">
+      <div class="lens-icon">👥</div>
+      <h3>Staffing & Service Quality</h3>
+      <p>Connect complaints to staffing gaps automatically. Get AI-drafted personal recovery outreach for unhappy members — in one click.</p>
+      <span class="lens-tag tag-pro">Pro</span>
+    </div>
+    <div class="lens-card lc-purple fade-up fade-up-delay-1">
+      <div class="lens-icon">🤖</div>
+      <h3>AI Recovery Agents</h3>
+      <p>When a member's health score drops, Swoop can automatically draft personal outreach, schedule a check-in call, or alert your team — without you lifting a finger.</p>
+      <span class="lens-tag tag-club">Club</span>
+    </div>
+    <div class="lens-card lc-teal fade-up fade-up-delay-2">
+      <div class="lens-icon">📈</div>
+      <h3>Growth Pipeline & ROI Proof</h3>
+      <p>Track prospects, measure conversions, and produce board-ready reports showing exactly how much dues revenue Swoop protected this quarter.</p>
+      <span class="lens-tag tag-club">Club</span>
     </div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
-<section class="section how-section" id="how-it-works">
+<section class="how-section" id="how-it-works">
   <div class="how-header">
-    <div class="section-label">The Platform</div>
-    <h2 class="section-title">Live in under two weeks.<br>No rip-and-replace.</h2>
-    <p class="section-sub">Swoop layers onto your existing stack. We connect to the systems you already run — we never ask you to replace them.</p>
+    <div class="section-eyebrow">Getting Started</div>
+    <h2 class="section-title">Live in under two weeks.</h2>
+    <p class="section-sub">No rip-and-replace. Swoop layers onto your existing systems — we connect them, you run the club.</p>
   </div>
-  <div class="how-grid">
+  <div class="how-steps">
     <div class="how-step fade-up">
-      <div class="how-step-num">01 &mdash;</div>
+      <div class="step-circle">01</div>
       <h4>Connect Your Systems</h4>
-      <p>Secure, read-only integrations with ForeTees, Northstar, Jonas POS, Club Prophet, ClubReady, and your scheduling platform. No disruption to current workflows.</p>
-      <div class="how-step-arrow">›</div>
+      <p>Plug into ForeTees, Northstar, Jonas, Club Prophet, and more. Secure, read-only API connections. No IT project required.</p>
     </div>
     <div class="how-step fade-up fade-up-delay-1">
-      <div class="how-step-num">02 &mdash;</div>
-      <h4>Swoop Maps Cross-Domain Patterns</h4>
-      <p>Our intelligence engine cross-references activity across every platform, detecting the 10 behavioral correlations that single-vendor systems structurally cannot see.</p>
-      <div class="how-step-arrow">›</div>
+      <div class="step-circle">02</div>
+      <h4>Swoop Maps Patterns</h4>
+      <p>Our intelligence engine cross-references data across every platform — finding the decay signals hiding in plain sight.</p>
     </div>
     <div class="how-step fade-up fade-up-delay-2">
-      <div class="how-step-num">03 &mdash;</div>
-      <h4>Your Daily Briefing Lands at 6 AM</h4>
-      <p>Who's at risk today. What triggered the change. Which members have tee times in the next 48 hours. Which complaints need follow-up before the morning round.</p>
-      <div class="how-step-arrow">›</div>
+      <div class="step-circle">03</div>
+      <h4>Get Your Daily Briefing</h4>
+      <p>Every morning, your dashboard shows who needs attention — at-risk members, complaints, revenue trends, and staffing alerts.</p>
     </div>
     <div class="how-step fade-up fade-up-delay-3">
-      <div class="how-step-num">04 &mdash;</div>
-      <h4>Act With One-Click Playbooks</h4>
-      <p>Draft a personal note. Schedule a call. Alert F&B staff. Activate a coordinated response plan across departments — before the member decides to leave.</p>
-    </div>
-  </div>
-</section>
-
-<!-- METRICS / PROOF -->
-<section class="metrics-section">
-  <div class="metrics-header fade-up">
-    <div class="section-label">Built on Real Club Data</div>
-    <h2 class="section-title" style="color:white;max-width:700px">Every insight validated against <em>real patterns</em> from private club operations</h2>
-    <p class="section-sub">Swoop's intelligence model was built from 107,360 rows of correlated, multi-domain club data — with 10 cross-domain behavioral correlations verified by SQL query against the underlying database.</p>
-  </div>
-  <div class="metrics-grid" style="margin-top:0">
-    <div class="metric-card fade-up">
-      <div class="m-value">300</div>
-      <div class="m-label">Member behavioral profiles across 8 distinct archetypes</div>
-      <div class="m-sub">Die-Hard Golfer · Social Butterfly · Declining · Ghost · + 4 more</div>
-    </div>
-    <div class="metric-card fade-up fade-up-delay-1">
-      <div class="m-value">10</div>
-      <div class="m-label">Cross-domain correlations embedded and verified in production data</div>
-      <div class="m-sub">Golf → F&B · Email → Churn · Staffing → Revenue · + 7 more</div>
-    </div>
-    <div class="metric-card fade-up fade-up-delay-2">
-      <div class="m-value">35%</div>
-      <div class="m-label">Post-round dining conversion rate when rounds are linked to tee sheet</div>
-      <div class="m-sub">Drops to 22% after rounds exceeding 270 minutes</div>
-    </div>
-    <div class="metric-card fade-up fade-up-delay-3">
-      <div class="m-value">90%</div>
-      <div class="m-label">Of GMs surveyed say a daily Member Health Score would be valuable</div>
-      <div class="m-sub">2 clubs gave 100% of their technology budget to this capability</div>
+      <div class="step-circle">04</div>
+      <h4>Act Before It's Too Late</h4>
+      <p>Draft a personal note. Schedule a call. Trigger an AI agent. One-click actions that save members and protect dues revenue.</p>
     </div>
   </div>
 </section>
 
 <!-- INTEGRATIONS -->
 <section class="integrations-section" id="integrations">
-  <div class="integrations-inner">
-    <div class="section-label" style="text-align:center">Integrations</div>
-    <h2 class="section-title" style="text-align:center">Connects to everything you already run</h2>
-    <p class="section-sub">Eight data sources. Fourteen cross-domain insights. Zero disruption to your existing workflow.</p>
-    <div class="integrations-row">
-      <div class="int-chip"><span class="int-chip-icon">⛳</span>Tee Sheet (ForeTees)</div>
-      <div class="int-chip"><span class="int-chip-icon">🍽️</span>POS (Jonas)</div>
-      <div class="int-chip"><span class="int-chip-icon">👤</span>CRM (Northstar)</div>
-      <div class="int-chip"><span class="int-chip-icon">📅</span>Scheduling (ClubReady)</div>
-      <div class="int-chip"><span class="int-chip-icon">📊</span>Analytics (Club Prophet)</div>
-      <div class="int-chip"><span class="int-chip-icon">🌤️</span>Weather API</div>
-      <div class="int-chip"><span class="int-chip-icon">✉️</span>Email &amp; Communications</div>
-      <div class="int-chip"><span class="int-chip-icon">💳</span>Accounting</div>
-    </div>
+  <div class="integrations-header">
+    <div class="section-eyebrow">Integrations</div>
+    <h2 class="section-title">Works with everything you already use.</h2>
+    <p class="section-sub">Eight data sources. Fourteen cross-domain insights. Zero disruption to your workflow.</p>
+  </div>
+  <div class="integrations-grid">
+    <div class="int-chip">💳 Point of Sale</div>
+    <div class="int-chip">⛳ Tee Sheet</div>
+    <div class="int-chip">👥 CRM / Membership</div>
+    <div class="int-chip">🌤️ Weather Service</div>
+    <div class="int-chip">📅 Staff Scheduling</div>
+    <div class="int-chip">🍽️ Dining Reservations</div>
+    <div class="int-chip">📒 Accounting</div>
+    <div class="int-chip">✉️ Email & Comms</div>
+  </div>
+  <div class="int-note">
+    <span>🔒</span>
+    Read-only connections · SOC 2 compliant · No data sold or shared · Your members' data stays yours
   </div>
 </section>
 
-<!-- TESTIMONIAL -->
-<section class="testimonial-section">
-  <div class="testimonial-inner">
-    <p class="t-quote">We had five members resign last quarter. Swoop showed us that every single one had cross-domain warning signals weeks before the letter arrived. If we'd had this 90 days earlier, I believe we could have saved at least three — that's over $50,000 in annual dues we didn't have to lose.</p>
-    <div class="t-author">
-      <div class="t-avatar">MR</div>
-      <div>
-        <div class="t-name">Michael Reynolds</div>
-        <div class="t-role">General Manager, Oakmont Hills Country Club</div>
+<!-- QUOTES / TESTIMONIALS -->
+<section class="quotes-section">
+  <div class="quotes-header">
+    <div class="section-eyebrow" style="color:var(--gold-light)">From the Field</div>
+    <h2 class="section-title">What GMs actually said.</h2>
+    <p class="section-sub">Pulled directly from club surveys — these are the words operators used to describe their pain.</p>
+  </div>
+  <div class="quotes-grid">
+    <div class="quote-card fade-up">
+      <div class="quote-mark">"</div>
+      <div class="quote-text">I can feel when we're off, but I can't prove it until it's too late.</div>
+      <div class="quote-author">
+        <div class="qa-avatar">GM</div>
+        <div>
+          <div class="qa-name">General Manager</div>
+          <div class="qa-role">Mid-Atlantic Private Club</div>
+        </div>
+      </div>
+    </div>
+    <div class="quote-card fade-up fade-up-delay-1">
+      <div class="quote-mark">"</div>
+      <div class="quote-text">I manage by anecdote. By the time I see the data, the damage is done.</div>
+      <div class="quote-author">
+        <div class="qa-avatar">GM</div>
+        <div>
+          <div class="qa-name">General Manager</div>
+          <div class="qa-role">Southeast Country Club</div>
+        </div>
+      </div>
+    </div>
+    <div class="quote-card fade-up fade-up-delay-2">
+      <div class="quote-mark">"</div>
+      <div class="quote-text">I have a CRM, but it's a database, not an early warning system. It tells me who members are, not how they're feeling.</div>
+      <div class="quote-author">
+        <div class="qa-avatar">GM</div>
+        <div>
+          <div class="qa-name">General Manager</div>
+          <div class="qa-role">Midwest Private Club</div>
+        </div>
       </div>
     </div>
   </div>
@@ -944,117 +1165,59 @@ footer .copy { font-size: 13px; color: rgba(255,255,255,0.3); }
 <!-- CTA -->
 <section class="cta-section" id="cta">
   <div class="cta-inner">
-    <div class="section-label" style="text-align:center">Get Early Access</div>
-    <h2 class="section-title">Every week without Swoop is a week you can't get back.</h2>
-    <p class="cta-desc">See exactly what Swoop would surface at your club — with a personalized demo using real behavioral patterns from clubs like yours.</p>
-    <div class="risk-notice">
-      <span>⚠️</span>
-      <span>The average private club loses <strong>$140,000+</strong> per year in preventable resignations. Most GMs find out on exit interview day.</span>
+    <div class="section-eyebrow">Ready to See the Full Picture?</div>
+    <h2 class="cta-title">Every week you wait,<br>another member <em>quietly walks away.</em></h2>
+    <p class="cta-sub">Start with your free Member Health Scores today. No credit card. No commitment. Just the visibility every GM should have.</p>
+    <div class="cta-buttons">
+      <a href="#" class="btn-cta-primary">Get Started Free →</a>
+      <a href="#" class="btn-cta-free">Book a Demo Instead</a>
     </div>
-    <div class="email-form">
-      <input type="email" class="email-input" placeholder="your@club.com" id="emailInput">
-      <a href="#" class="btn-gold" onclick="handleSubmit(event)">Book Demo &rarr;</a>
+    <div class="risk-stat">
+      <span class="rs-icon">⚠️</span>
+      The average private club loses <strong>&nbsp;$140K+&nbsp;</strong> in preventable resignations per year.
     </div>
-    <div class="cta-trust">
-      <span class="cta-trust-item">No rip-and-replace required</span>
-      <span class="cta-trust-item">Live in under 2 weeks</span>
-      <span class="cta-trust-item">Read-only integrations</span>
-      <span class="cta-trust-item">No long-term contracts</span>
-    </div>
-    <p id="submitMsg" style="margin-top:16px;font-size:13px;color:rgba(255,255,255,0);transition:color 0.4s">
-      ✓ Request received — we'll reach out within 1 business day.
-    </p>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
   <div class="footer-brand">
-    <div class="nav-logo-mark">S</div>
+    <div class="logo-mark">S</div>
     <span>Swoop Golf</span>
   </div>
-  <p class="copy">© 2026 Swoop Golf · Integrated Intelligence for Private Clubs</p>
+  <div class="footer-tagline">Integrated Intelligence for Private Clubs</div>
   <div class="footer-links">
     <a href="#">Privacy</a>
     <a href="#">Terms</a>
     <a href="#">Contact</a>
+    <a href="mailto:ty@swoopgolf.com">ty@swoopgolf.com</a>
   </div>
 </footer>
 
 <script>
-// Navbar scroll
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 40);
-}, { passive: true });
-
-// Intersection observer for fade-up
+// Scroll-triggered fade-up animations
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
+  entries.forEach(el => {
+    if (el.isIntersecting) {
+      el.target.classList.add('visible');
     }
   });
-}, { threshold: 0.15 });
+}, { threshold: 0.12 });
+
 document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-// Animated counters in hero
-function animateCounter(el) {
-  const target = parseFloat(el.dataset.target);
-  const prefix = el.dataset.prefix || '';
-  const suffix = el.dataset.suffix || '';
-  const duration = 1800;
+// Smooth counter animations for hero stats
+function animateCount(el, target, suffix = '', duration = 1800) {
   const start = performance.now();
-  const isDecimal = target % 1 !== 0;
-  function update(now) {
-    const p = Math.min((now - start) / duration, 1);
-    const ease = 1 - Math.pow(1 - p, 3);
-    const val = target * ease;
-    el.textContent = prefix + (isDecimal ? val.toFixed(1) : Math.floor(val)) + suffix;
-    if (p < 1) requestAnimationFrame(update);
-  }
+  const isFloat = target.toString().includes('.');
+  const update = (time) => {
+    const progress = Math.min((time - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const val = isFloat ? (ease * target).toFixed(1) : Math.floor(ease * target);
+    el.textContent = val + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  };
   requestAnimationFrame(update);
-}
-
-const heroObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      document.querySelectorAll('.hero-stat .num[data-target]').forEach(animateCounter);
-      heroObserver.disconnect();
-    }
-  });
-}, { threshold: 0.5 });
-const heroStats = document.querySelector('.hero-stats');
-if (heroStats) heroObserver.observe(heroStats);
-
-// Score bar animation
-const pvObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.querySelectorAll('.pv-score-fill').forEach(bar => {
-        const w = bar.style.width;
-        bar.style.width = '0';
-        setTimeout(() => bar.style.width = w, 200);
-      });
-      pvObserver.disconnect();
-    }
-  });
-}, { threshold: 0.3 });
-const pvCard = document.querySelector('.pv-card');
-if (pvCard) pvObserver.observe(pvCard);
-
-// CTA form
-function handleSubmit(e) {
-  e.preventDefault();
-  const input = document.getElementById('emailInput');
-  const msg = document.getElementById('submitMsg');
-  if (input.value && input.value.includes('@')) {
-    msg.style.color = 'rgba(255,255,255,0.7)';
-    input.style.borderColor = '#3A7A44';
-  } else {
-    input.style.borderColor = '#C0392B';
-    input.placeholder = 'Please enter a valid email';
-  }
 }
 </script>
 </body>
