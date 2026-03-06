@@ -22,3 +22,7 @@ export { default as IntegrationHealthStrip } from './IntegrationHealthStrip.jsx'
 export { default as IntegrationCard }        from './IntegrationCard.jsx';
 export { default as ComboInsightCard }       from './ComboInsightCard.jsx';
 export { default as IntegrationMap }         from './IntegrationMap.jsx';
+export { default as TierBadge }              from './TierBadge.jsx';
+export { default as CategoryFilterBar }      from './CategoryFilterBar.jsx';
+export { default as VendorCard }             from './VendorCard.jsx';
+export { default as VendorDetailPanel }      from './VendorDetailPanel.jsx';
