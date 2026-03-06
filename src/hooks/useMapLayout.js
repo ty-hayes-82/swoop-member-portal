@@ -1,79 +1,70 @@
-// useMapLayout — computes node positions, category arc segments, and edge paths
-// Used by IntegrationMap. Sprint 4: supports categories + vendors (28-vendor layout).
-// Returns: { nodes, arcs, edges }
+// useMapLayout — computes 10 category node positions + category-pair edges
+// Returns: { nodes, edges }
+// nodes: category circles placed evenly around a ring
+// edges: one per unique category-pair that shares a combo
 import { useMemo } from 'react';
-
-const GAP = 0.05; // radians gap between category segments on the ring
 
 export function useMapLayout(categories, vendors, combos, width, height) {
   return useMemo(() => {
     const cx = width / 2, cy = height / 2;
     const radius = Math.min(width, height) * 0.38;
-    const arcR   = radius + 20;
-    const total  = vendors.length || 1;
+    const count  = categories.length || 1;
 
-    // Build per-category angle ranges proportional to vendor count
-    let cursor = -Math.PI / 2;
-    const catRanges = {};
-    categories.forEach(cat => {
-      const cv = vendors.filter(v => v.categoryId === cat.id);
-      if (!cv.length) return;
-      const span = (cv.length / total) * 2 * Math.PI;
-      catRanges[cat.id] = { start: cursor, span, vendors: cv, cat };
-      cursor += span;
+    // Vendor count per category (for node sizing)
+    const vendorCount = {};
+    const connectedCats = new Set();
+    vendors.forEach(v => {
+      vendorCount[v.categoryId] = (vendorCount[v.categoryId] ?? 0) + 1;
+      if (v.status === 'connected') connectedCats.add(v.categoryId);
     });
 
-    // Place vendor nodes evenly within each category's arc segment
-    const nodes = [];
-    Object.values(catRanges).forEach(({ start, span, vendors: cv }) => {
-      cv.forEach((v, i) => {
-        const frac  = cv.length === 1 ? 0.5 : i / (cv.length - 1);
-        const angle = start + GAP / 2 + frac * (span - GAP);
-        nodes.push({
-          ...v,
-          x: Math.round(cx + radius * Math.cos(angle)),
-          y: Math.round(cy + radius * Math.sin(angle)),
-        });
-      });
-    });
-
-    // Build SVG arc strokes for each category
-    const arcs = Object.values(catRanges).map(({ start, span, cat }) => {
-      const a1 = start + GAP / 2, a2 = start + span - GAP / 2;
-      const x1 = Math.round(cx + arcR * Math.cos(a1));
-      const y1 = Math.round(cy + arcR * Math.sin(a1));
-      const x2 = Math.round(cx + arcR * Math.cos(a2));
-      const y2 = Math.round(cy + arcR * Math.sin(a2));
-      const large = (span - GAP) > Math.PI ? 1 : 0;
+    // Place category nodes evenly around the ring, starting top
+    const nodes = categories.map((cat, i) => {
+      const angle = (i / count) * 2 * Math.PI - Math.PI / 2;
       return {
-        id: cat.id,
-        themeColor: cat.themeColor,
-        midAngle: start + span / 2,
-        path: `M ${x1} ${y1} A ${arcR} ${arcR} 0 ${large} 1 ${x2} ${y2}`,
+        ...cat,
+        x: Math.round(cx + radius * Math.cos(angle)),
+        y: Math.round(cy + radius * Math.sin(angle)),
+        count: vendorCount[cat.id] ?? 0,
+        hasConnected: connectedCats.has(cat.id),
       };
     });
 
-    // Build bezier edges from combo system pairs
-    const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
-    const edges = combos.map(combo => {
-      const [aId, bId] = combo.systems;
-      const a = nodeMap[aId], b = nodeMap[bId];
-      if (!a || !b) return null;
+    // Build vendor → categoryId lookup
+    const vendorCat = {};
+    vendors.forEach(v => { vendorCat[v.id] = v.categoryId; });
+
+    // Build unique category-pair edges from combos
+    const nodeMap  = Object.fromEntries(nodes.map(n => [n.id, n]));
+    const seenPairs = new Set();
+    const edges = [];
+
+    combos.forEach(combo => {
+      const [aV, bV] = combo.systems;
+      const aCat = vendorCat[aV], bCat = vendorCat[bV];
+      if (!aCat || !bCat || aCat === bCat) return;
+      const pairKey = [aCat, bCat].sort().join('|');
+      if (seenPairs.has(pairKey)) return;
+      seenPairs.add(pairKey);
+
+      const a = nodeMap[aCat], b = nodeMap[bCat];
+      if (!a || !b) return;
+
+      // Bezier bowing inward toward center
       const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
       const dx = cx - mx, dy = cy - my;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const cpx = mx + (dx / dist) * dist * 0.3;
-      const cpy = my + (dy / dist) * dist * 0.3;
-      const srcV = vendors.find(v => v.id === aId);
-      return {
-        id: combo.id,
-        path: `M ${a.x} ${a.y} Q ${cpx} ${cpy} ${b.x} ${b.y}`,
-        systems: combo.systems,
-        themeColor: srcV?.themeColor ?? 'operations',
-        combo,
-      };
-    }).filter(Boolean);
+      const cpx  = mx + (dx / dist) * dist * 0.3;
+      const cpy  = my + (dy / dist) * dist * 0.3;
 
-    return { nodes, arcs, edges };
+      edges.push({
+        id: pairKey,
+        path: `M ${a.x} ${a.y} Q ${cpx} ${cpy} ${b.x} ${b.y}`,
+        catA: aCat, catB: bCat,
+        themeColor: categories.find(c => c.id === aCat)?.themeColor ?? 'operations',
+      });
+    });
+
+    return { nodes, edges };
   }, [categories, vendors, combos, width, height]);
 }

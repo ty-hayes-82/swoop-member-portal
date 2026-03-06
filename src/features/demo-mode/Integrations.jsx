@@ -57,24 +57,24 @@ export default function Integrations() {
       }}>
         <SectionHeader
           title="Connected Systems"
-          sub={selectedVendorId
-            ? `${selectedVendor?.name} selected — click again to deselect`
-            : 'Click a vendor node to explore combo insights'}
+          sub={activeCategory
+            ? `${categories.find(c => c.id === activeCategory)?.label} selected — click again to clear`
+            : 'Click a category to filter vendors below'}
         />
         <IntegrationMap
           categories={categories}
           vendors={allVendors}
           combos={getCombos([])}
-          selectedVendorId={selectedVendorId}
-          onSelectVendor={selectVendor}
+          activeCategory={activeCategory}
+          onSelectCategory={cat => setActiveCategory(p => p === cat ? null : cat)}
         />
-        {selectedVendorId && (
+        {activeCategory && (
           <div style={{ textAlign: 'center', marginTop: '8px' }}>
-            <button onClick={() => setSelectedVendorId(null)} style={{
+            <button onClick={() => setActiveCategory(null)} style={{
               fontSize: '11px', color: theme.colors.textMuted,
               background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline',
             }}>
-              Clear selection
+              Show all categories
             </button>
           </div>
         )}
