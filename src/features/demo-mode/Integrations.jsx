@@ -6,19 +6,22 @@ import {
   getCombos, resolveSparklineData,
   getCategoryStats, getVendorsByCategory, getVendorById,
   getCombosForVendor, getIntegrationSummary,
+  getQuestionCategories, getCombosByQuestion, getQuestionReadiness,
 } from '@/services/integrationsService';
-import IntegrationHealthStrip from '@/components/ui/IntegrationHealthStrip';
-import IntegrationMap        from '@/components/ui/IntegrationMap';
-import ComboInsightCard      from '@/components/ui/ComboInsightCard';
-import CategoryFilterBar     from '@/components/ui/CategoryFilterBar';
-import VendorCard            from '@/components/ui/VendorCard';
-import VendorDetailPanel     from '@/components/ui/VendorDetailPanel';
+import IntegrationHealthStrip  from '@/components/ui/IntegrationHealthStrip';
+import IntegrationMap          from '@/components/ui/IntegrationMap';
+import ComboInsightCard        from '@/components/ui/ComboInsightCard';
+import CategoryFilterBar       from '@/components/ui/CategoryFilterBar';
+import VendorCard              from '@/components/ui/VendorCard';
+import VendorDetailPanel       from '@/components/ui/VendorDetailPanel';
+import QuestionCategoryCard    from '@/components/ui/QuestionCategoryCard';
 
 // ── Module-level static data (resolved once) ─────────────────────────────────
-const summary    = getIntegrationSummary();
-const categories = getCategoryStats();
-const allVendors = getVendorsByCategory(null);
-const allCombos  = getCombos([]);
+const summary         = getIntegrationSummary();
+const categories      = getCategoryStats();
+const allVendors      = getVendorsByCategory(null);
+const allCombos       = getCombos([]);
+const questionCats    = getQuestionCategories();
 
 // Tier-1 available vendors (recommended next connections)
 const nextRecommended = allVendors
@@ -29,14 +32,20 @@ export default function Integrations() {
   const [activeCategory, setActiveCategory]     = useState(null);
   const [selectedVendorId, setSelectedVendorId] = useState(null);
   const [expandedCombo, setExpandedCombo]       = useState(null);
+  const [activeQuestion, setActiveQuestion]     = useState(null);
   const comboRef = useRef(null);
 
-  const filteredVendors = getVendorsByCategory(activeCategory);
+  const filteredVendors   = getVendorsByCategory(activeCategory);
   const connectedVendors  = filteredVendors.filter(v => v.status === 'connected');
   const remainingVendors  = filteredVendors.filter(v => v.status !== 'connected');
   const selectedVendor    = selectedVendorId ? getVendorById(selectedVendorId) : null;
   const vendorCombos      = selectedVendorId ? getCombosForVendor(selectedVendorId) : [];
-  const displayCombos     = selectedVendorId ? vendorCombos : allCombos;
+  const activeQCat        = activeQuestion ? questionCats.find(q => q.id === activeQuestion) : null;
+  const displayCombos     = selectedVendorId
+    ? vendorCombos
+    : activeQuestion
+      ? getCombosByQuestion(activeQuestion)
+      : allCombos;
 
   const scrollToCombos = () =>
     comboRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -56,27 +65,71 @@ export default function Integrations() {
         onClickConnected={() => {}}       onClickCombos={scrollToCombos}
       />
 
-      {/* 2 — Top Insights teaser */}
+      {/* 2 — Questions You Can Answer */}
       <div style={{
         background: theme.colors.bgCard,
         border: `1px solid ${theme.colors.border}`,
         borderRadius: theme.radius.md,
         padding: theme.spacing.md,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.sm }}>
-          <SectionHeader title="Cross-System Insights" sub="Unique intelligence only possible when systems are connected through Swoop" />
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: theme.spacing.md }}>
+          <div>
+            <div style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary }}>
+              Questions You Can Answer
+            </div>
+            <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '2px' }}>
+              Each question requires specific systems to be connected. Click any to explore the insights it unlocks.
+            </div>
+          </div>
           <button onClick={scrollToCombos} style={{
             fontSize: '11px', color: theme.colors.accent, fontWeight: 600,
             background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0,
           }}>
-            View all {allCombos.length} →
+            View all {allCombos.length} insights →
           </button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: theme.spacing.sm }}>
-          {allCombos.slice(0, 3).map(combo => (
-            <InsightTeaser key={combo.id} combo={combo} allVendors={allVendors}
-              onExpand={() => { scrollToCombos(); setExpandedCombo(combo.id); }}
+
+        {/* Tier 1 questions — 2-col grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: theme.spacing.sm, marginBottom: theme.spacing.sm }}>
+          {questionCats.filter(q => q.tier === 1 && !q.flagship).map(q => (
+            <QuestionCategoryCard
+              key={q.id}
+              question={q}
+              readiness={getQuestionReadiness(q.id)}
+              comboCount={getCombosByQuestion(q.id).length}
+              onExplore={() => { scrollToCombos(); setActiveQuestion(q.id); }}
             />
+          ))}
+        </div>
+
+        {/* Flagship — full width */}
+        {questionCats.filter(q => q.flagship).map(q => (
+          <QuestionCategoryCard
+            key={q.id}
+            question={q}
+            readiness={getQuestionReadiness(q.id)}
+            comboCount={getCombosByQuestion(q.id).length}
+            onExplore={() => { scrollToCombos(); setActiveQuestion(q.id); }}
+          />
+        ))}
+
+        {/* Tier 2/3 — collapsed summary row */}
+        <div style={{
+          marginTop: theme.spacing.sm,
+          borderTop: `1px solid ${theme.colors.bgDeep}`,
+          paddingTop: theme.spacing.sm,
+          display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap',
+        }}>
+          <span style={{ fontSize: '11px', color: theme.colors.textMuted, fontWeight: 600 }}>Also available:</span>
+          {questionCats.filter(q => q.tier > 1 && !q.flagship).map(q => (
+            <button key={q.id} onClick={() => { scrollToCombos(); setActiveQuestion(q.id); }} style={{
+              fontSize: '11px', color: theme.colors.textMuted,
+              background: theme.colors.bgDeep, border: 'none',
+              borderRadius: theme.radius.sm, padding: '3px 10px',
+              cursor: 'pointer',
+            }}>
+              {q.icon} {q.label}
+            </button>
           ))}
         </div>
       </div>
@@ -171,12 +224,28 @@ export default function Integrations() {
 
       {/* 8 — Full Combo Explorer */}
       <div ref={comboRef}>
-        <SectionHeader
-          title={selectedVendorId ? `Insights: ${selectedVendor?.name}` : 'All Cross-System Insights'}
-          sub={selectedVendorId
-            ? `${vendorCombos.length} insight${vendorCombos.length !== 1 ? 's' : ''} for this vendor`
-            : `${allCombos.length} insights across your connected and available systems`}
-        />
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: theme.spacing.sm }}>
+          <SectionHeader
+            title={selectedVendorId
+              ? `Insights: ${selectedVendor?.name}`
+              : activeQCat
+                ? activeQCat.label
+                : 'All Cross-System Insights'}
+            sub={selectedVendorId
+              ? `${vendorCombos.length} insight${vendorCombos.length !== 1 ? 's' : ''} for this vendor`
+              : activeQCat
+                ? `"${activeQCat.question}"`
+                : `${allCombos.length} insights across your connected and available systems`}
+          />
+          {(activeQuestion || selectedVendorId) && (
+            <button onClick={() => { setActiveQuestion(null); setSelectedVendorId(null); }} style={{
+              fontSize: '11px', color: theme.colors.textMuted, flexShrink: 0,
+              background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline',
+            }}>
+              Show all
+            </button>
+          )}
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
           {displayCombos.map(combo => (
             <ComboInsightCard key={combo.id} {...combo}
@@ -189,8 +258,6 @@ export default function Integrations() {
           ))}
         </div>
       </div>
-
-      {/* 9 — Go-live CTA */}
       <div style={{
         background: theme.colors.bgSidebar, borderRadius: theme.radius.md,
         padding: theme.spacing.lg, textAlign: 'center',
@@ -216,22 +283,4 @@ function SectionHeader({ title, sub }) {
   );
 }
 
-function InsightTeaser({ combo, allVendors, onExpand }) {
-  const color = theme.colors[
-    allVendors.find(v => v.id === combo.systems[0])?.themeColor
-  ] ?? theme.colors.accent;
-  return (
-    <button onClick={onExpand} style={{
-      textAlign: 'left', background: `${color}08`,
-      border: `1px solid ${color}30`, borderRadius: theme.radius.sm,
-      padding: '10px 12px', cursor: 'pointer',
-      transition: 'background 0.15s',
-    }}>
-      <div style={{ fontSize: '18px', fontWeight: 800, color: theme.colors.textPrimary, fontFamily: theme.fonts.mono, lineHeight: 1 }}>
-        {combo.preview?.value}
-      </div>
-      <div style={{ fontSize: '11px', fontWeight: 600, color: theme.colors.textPrimary, marginTop: '4px' }}>{combo.label}</div>
-      <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: '2px' }}>{combo.preview?.subtext}</div>
-    </button>
-  );
-}
+

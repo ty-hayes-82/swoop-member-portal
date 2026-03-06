@@ -277,6 +277,7 @@ export const VENDORS = [
 export const COMBOS = [
   {
     id: 'tee-to-table',
+    questionCategory: 'fb-leakage',
     systems: ['foretees', 'jonas'],
     label: 'Tee-to-Table Revenue',
     insight: 'After a slow round (>270 min), post-round dining conversion drops 15%. Slow rounds cost an estimated $5,760/month in lost F&B revenue.',
@@ -290,6 +291,7 @@ export const COMBOS = [
   },
   {
     id: 'weather-demand',
+    questionCategory: 'fb-leakage',
     systems: ['foretees', 'weather'],
     label: 'Weather x Demand',
     insight: 'Rain reduces golf bookings 40% but increases F&B revenue 15% — members come to the club anyway. Invisible when systems are siloed.',
@@ -303,6 +305,7 @@ export const COMBOS = [
   },
   {
     id: 'churn-signal',
+    questionCategory: 'member-retention',
     systems: ['northstar', 'foretees'],
     label: 'Engagement Decay -> Churn',
     insight: 'Members who resign show a 2-3 month decay pattern across golf, dining, and email before submitting notice. No single system sees the full picture.',
@@ -316,6 +319,7 @@ export const COMBOS = [
   },
   {
     id: 'complaint-churn',
+    questionCategory: 'experience-degradation',
     systems: ['northstar', 'jonas'],
     label: 'Service Failure -> Resignation',
     insight: 'James Whitfield: active Balanced Active member. Service Speed complaint Jan 18 went unresolved. Resigned Jan 22. A $22K/year dues loss, preventable in 4 days.',
@@ -329,6 +333,7 @@ export const COMBOS = [
   },
   {
     id: 'staff-revenue',
+    questionCategory: 'service-staffing',
     systems: ['clubready', 'jonas'],
     label: 'Staffing Gap -> Revenue Loss',
     insight: 'On understaffed Grill Room days (Jan 9, 16, 28), ticket times ran 20% longer, complaints doubled, and F&B revenue was ~8% lower. The cost is invisible unless staffing and POS are connected.',
@@ -342,6 +347,7 @@ export const COMBOS = [
   },
   {
     id: 'email-churn',
+    questionCategory: 'communication-effectiveness',
     systems: ['email', 'northstar'],
     label: 'Email Decay -> Churn Prediction',
     insight: 'Members who stop opening emails are 3x more likely to resign within 90 days. Email silence is a churn signal most clubs miss entirely.',
@@ -355,6 +361,7 @@ export const COMBOS = [
   },
   {
     id: 'pace-fb',
+    questionCategory: 'pace-experience',
     systems: ['tagmarshal', 'jonas'],
     label: 'Slow Round -> Lost Dining',
     insight: 'Tagmarshal real-time pace data lets the F&B host know a group is running long before they finish. A proactive table hold converts slow rounds into dining revenue instead of apologies.',
@@ -368,6 +375,7 @@ export const COMBOS = [
   },
   {
     id: 'waitlist-archetype',
+    questionCategory: 'access-friction',
     systems: ['noteefy', 'northstar'],
     label: 'Right Member, Right Slot',
     insight: 'Noteefy fills open tee times fast. Swoop tells you if the waiting member is the right archetype for that slot - a Die-Hard in a prime Saturday morning spot vs. a Weekend Warrior in a midweek afternoon.',
@@ -381,6 +389,7 @@ export const COMBOS = [
   },
   {
     id: 'pricing-demand',
+    questionCategory: 'profitability',
     systems: ['sagacity', 'foretees'],
     label: 'Pricing x Archetype Fit',
     insight: 'Dynamic price drops on slow Saturdays attract more bookings, but often the wrong archetype. Swoop surfaces the revenue vs. membership quality tradeoff so the GM can decide, not just accept.',
@@ -394,6 +403,7 @@ export const COMBOS = [
   },
   {
     id: 'event-retention',
+    questionCategory: 'event-social',
     systems: ['golf-genius', 'northstar'],
     label: 'Event Drop-Off -> Early Churn',
     insight: 'Members who stop entering tournaments show 3x higher resignation rates within 90 days. Tournament disengagement is the earliest visible signal before the health score drops.',
@@ -407,6 +417,7 @@ export const COMBOS = [
   },
   {
     id: 'survey-health',
+    questionCategory: 'experience-degradation',
     systems: ['players1st', 'northstar'],
     label: 'Survey Score -> Health Score',
     insight: "Players 1st satisfaction data enriches Swoop's member health score with the member's own words. A behavioral score of 72 paired with a satisfaction score of 4.1/10 is a different risk profile than 72 paired with 8.9/10.",
@@ -420,6 +431,7 @@ export const COMBOS = [
   },
   {
     id: 'incart-fb',
+    questionCategory: 'fb-leakage',
     systems: ['izon', 'jonas'],
     label: 'On-Course Ordering Trends',
     insight: 'IZON in-cart orders peak on slow round days - members order more food and drinks when waiting on the tee. Swoop surfaces this F&B opportunity invisible in POS data alone.',
@@ -433,6 +445,7 @@ export const COMBOS = [
   },
   {
     id: 'weather-staffing',
+    questionCategory: 'service-staffing',
     systems: ['weather', 'clubready'],
     label: 'Forecast -> Staff Adjustment',
     insight: "A 72-hour weather forecast for rain reliably predicts a dining surge. Swoop connects the forecast to the staffing schedule 3 days early - before the GM knows they're short.",
@@ -446,6 +459,7 @@ export const COMBOS = [
   },
   {
     id: 'pace-archetype',
+    questionCategory: 'pace-experience',
     systems: ['tagmarshal', 'foretees'],
     label: 'Slow Pairing Detection',
     insight: 'When a tee time booking includes a known slow archetype combination, Tagmarshal pace history confirms the pattern. Swoop flags future pairings before they cause a cascade of delays.',
@@ -457,12 +471,86 @@ export const COMBOS = [
     preview: { type: 'kpi', value: '68%', label: 'Slow round prediction accuracy', subtext: 'For flagged archetype pairings vs. 34% baseline' },
     swoop_only: true,
   },
+
+  {
+    id: 'access-frustration-churn',
+    questionCategory: 'access-friction',
+    systems: ['foretees', 'northstar'],
+    label: 'Access Friction → Churn Risk',
+    insight: 'Members who fail to secure a preferred tee time 3+ times in 30 days show 2.4x higher churn risk within 90 days. When tee sheet and CRM data are siloed, access frustration is completely invisible — the GM only sees the resignation letter.',
+    automations: [
+      'Flag members with 3+ consecutive waitlist failures for proactive outreach',
+      'Surface access friction score in member health view alongside health score',
+      'Trigger personalized scheduling outreach before frustration escalates to churn',
+    ],
+    preview: { type: 'kpi', value: '2.4x', label: 'Churn risk — chronic access failures', subtext: 'vs. members who consistently secure preferred times' },
+    swoop_only: true,
+  },
+  {
+    id: 'fb-undergolf',
+    questionCategory: 'fb-leakage',
+    systems: ['northstar', 'jonas'],
+    label: 'Golf-Heavy Members Under-Index on F&B',
+    insight: 'Die-Hard Golfer and Weekend Warrior archetypes average 3.2 rounds/month but only $28/visit in F&B spend — 40% below the club average for members with similar visit frequency. This gap represents $180K/year in unactivated revenue at Oakmont Hills.',
+    automations: [
+      'Identify golf-heavy members below F&B spend threshold by archetype',
+      'Auto-trigger post-round dining incentive for chronically low-spend golfers',
+      'Surface F&B conversion opportunity in daily briefing when high-frequency golfers have no dining reservation',
+    ],
+    preview: { type: 'kpi', value: '-40%', label: 'F&B spend — golf-heavy vs. club average', subtext: '$180K/yr in unactivated revenue at Oakmont Hills' },
+    swoop_only: true,
+  },
+  {
+    id: 'complaint-prediction',
+    questionCategory: 'experience-degradation',
+    systems: ['players1st', 'foretees'],
+    label: 'Compound Failure → Complaint Prediction',
+    insight: 'Members who experience a slow round AND below-average service in the same visit are 3.8x more likely to file a formal complaint within 7 days. Cross-referencing pace data with survey scores lets Swoop flag these members before the complaint is ever submitted.',
+    automations: [
+      'Flag members with combined pace + service risk in the GM daily briefing',
+      'Trigger proactive service recovery outreach within 24 hours of a compounded negative experience',
+      'Route high-risk return visits to senior staff before the member arrives',
+    ],
+    preview: { type: 'kpi', value: '3.8x', label: 'Complaint probability — pace + service failure', subtext: 'vs. members with single-factor issues' },
+    swoop_only: true,
+  },
+  {
+    id: 'event-lift',
+    questionCategory: 'event-social',
+    systems: ['golf-genius', 'jonas'],
+    label: 'Event Participation → F&B Lift',
+    insight: 'Members who attend club events show a 34% lift in F&B spend in the 30 days following each event versus non-attendees with identical golf frequency. Events are a dining multiplier — that connection is completely invisible in POS or event registration data alone.',
+    automations: [
+      'Surface event-to-dining conversion rate in the weekly GM report',
+      'Identify high-golf / low-event members as event engagement targets',
+      'Correlate event attendance with 30-day spend trajectory inside member health score',
+    ],
+    preview: { type: 'kpi', value: '+34%', label: 'F&B lift in 30 days post-event', subtext: 'vs. non-attendees with same golf frequency' },
+    swoop_only: true,
+  },
+  {
+    id: 'cross-domain-intervention',
+    questionCategory: 'cross-domain',
+    flagship: true,
+    systems: ['northstar', 'foretees', 'jonas', 'clubready', 'players1st'],
+    label: 'Full Member Risk Picture — Today',
+    insight: 'A member with 3 recent waitlist failures, a slow round last Saturday, an unresolved service complaint, an understaffed F&B shift today, and a declining email open rate is at acute resignation risk — today. No single system sees all five signals. Only Swoop does. This is the question only a fully connected club can answer.',
+    automations: [
+      'Generate a single risk score combining all five data sources — updated daily',
+      'Surface the top 3 at-risk members in the GM daily briefing with a recommended intervention',
+      'Auto-draft personalized outreach for members at acute risk before their next scheduled visit',
+      'Alert F&B and front desk when an at-risk member is booked for today',
+    ],
+    preview: { type: 'kpi', value: '5 signals', label: 'No single system sees them all', subtext: 'Waitlist + pace + service + staffing + engagement — unified' },
+    swoop_only: true,
+  },
 ];
 
 // ── Backward-compat aliases ────────────────────────────────────────────────────
 // IntegrationCard and IntegrationMap reference SYSTEMS[]. These are now derived
 // from VENDORS so no changes are needed in those components.
 const ORIGINAL_IDS = ['foretees', 'jonas', 'northstar', 'clubready', 'weather', 'email', 'clubprophet', 'golf-genius'];
+
 export const SYSTEMS = VENDORS.filter(v =>
   ORIGINAL_IDS.includes(v.id)
 ).map(v => ({
@@ -486,3 +574,130 @@ export const VENDOR_LANDSCAPE = CATEGORIES.map(cat => ({
       tier: v.tier === 1 ? 'primary' : v.tier === 2 ? 'supported' : 'coming_soon',
     })),
 }));
+
+// ── Question Categories (10 GM decision lenses) ───────────────────────────────
+// Ordered by resonance priority per Layer3 doc
+// requiredCategories: system category IDs that must be connected to answer the question
+export const QUESTION_CATEGORIES = [
+  {
+    id: 'member-retention',
+    tier: 1,
+    icon: '📉',
+    label: 'Member Retention Risk',
+    question: 'Which high-value members are showing early disengagement signals before renewal risk becomes visible?',
+    why: 'Protects dues revenue and gives GMs a proactive retention tool instead of a reactive resignation discussion.',
+    requiredCategories: ['member-crm', 'tee-sheet'],
+    niceToHave: ['fb-pos', 'events', 'communications', 'cx-feedback'],
+    primaryBuyer: 'GM, Membership Director',
+    themeColor: 'members',
+  },
+  {
+    id: 'access-friction',
+    tier: 1,
+    icon: '🔒',
+    label: 'Access Friction & Demand',
+    question: 'Which members repeatedly fail to get preferred tee times — and does that frustration predict churn?',
+    why: 'Access fairness is one of the most emotional issues in private clubs. This surfaces member frustration before it becomes a resignation.',
+    requiredCategories: ['tee-sheet', 'member-crm'],
+    niceToHave: ['waitlist', 'cx-feedback'],
+    primaryBuyer: 'GM, Director of Golf',
+    themeColor: 'operations',
+  },
+  {
+    id: 'fb-leakage',
+    tier: 1,
+    icon: '🍽',
+    label: 'F&B Revenue Leakage',
+    question: 'Which golf-heavy members under-index on F&B spend, and which tee windows drive the strongest dining conversion?',
+    why: 'Ties club usage to wallet share and surfaces where revenue is leaking across the member journey.',
+    requiredCategories: ['fb-pos', 'member-crm', 'tee-sheet'],
+    niceToHave: ['pace-hardware', 'staffing', 'cx-feedback'],
+    primaryBuyer: 'GM, F&B Director',
+    themeColor: 'fb',
+  },
+  {
+    id: 'service-staffing',
+    tier: 1,
+    icon: '👥',
+    label: 'Service & Staffing Impact',
+    question: 'When staffing drops below threshold, which service outcomes degrade first — and what does that cost in revenue?',
+    why: 'Connects labor decisions to revenue and member experience instead of treating staffing as a standalone scheduling problem.',
+    requiredCategories: ['staffing', 'fb-pos'],
+    niceToHave: ['member-crm', 'cx-feedback', 'tee-sheet'],
+    primaryBuyer: 'GM, COO',
+    themeColor: 'staffing',
+  },
+  {
+    id: 'pace-experience',
+    tier: 1,
+    icon: '⏱',
+    label: 'Pace of Play & Revenue',
+    question: 'How much spend is lost per pace delay, and do slow rounds drive lower satisfaction or follow-on engagement?',
+    why: 'Reframes pace as a revenue and retention issue — not just a golf operations issue.',
+    requiredCategories: ['pace-hardware', 'tee-sheet'],
+    niceToHave: ['fb-pos', 'cx-feedback', 'member-crm'],
+    primaryBuyer: 'GM, Director of Golf',
+    themeColor: 'operations',
+  },
+  {
+    id: 'experience-degradation',
+    tier: 2,
+    icon: '⚠️',
+    label: 'Experience & Complaint Prediction',
+    question: 'Which service failures most often precede negative feedback — and can we predict complaints before they happen?',
+    why: 'Moves the club from reactive service recovery to predictive recovery, with clear revenue and retention implications.',
+    requiredCategories: ['cx-feedback', 'member-crm'],
+    niceToHave: ['fb-pos', 'tee-sheet', 'staffing'],
+    primaryBuyer: 'GM, COO',
+    themeColor: 'members',
+  },
+  {
+    id: 'event-social',
+    tier: 2,
+    icon: '🏆',
+    label: 'Event & Social Engagement',
+    question: 'Which events deepen full-club engagement — and which households are socially active but under-engaged elsewhere?',
+    why: 'Expands the story beyond golf. Helps clubs understand how social programming affects retention and total wallet share.',
+    requiredCategories: ['events', 'member-crm'],
+    niceToHave: ['fb-pos', 'communications', 'tee-sheet'],
+    primaryBuyer: 'GM, Events Director',
+    themeColor: 'pipeline',
+  },
+  {
+    id: 'communication-effectiveness',
+    tier: 2,
+    icon: '✉️',
+    label: 'Communication & Behavior',
+    question: 'Which members disengage from communications before activity declines — and which campaigns actually drive behavior change?',
+    why: 'Turns communications into a measurable behavior-change engine rather than a broadcast tool.',
+    requiredCategories: ['communications', 'member-crm'],
+    niceToHave: ['tee-sheet', 'fb-pos', 'events'],
+    primaryBuyer: 'GM, Membership Director',
+    themeColor: 'members',
+  },
+  {
+    id: 'profitability',
+    tier: 3,
+    icon: '📊',
+    label: 'Profitability by Usage Pattern',
+    question: 'Which tee blocks or member segments are busiest but least profitable — and where is demand strong but monetization weak?',
+    why: 'Strong Board and CFO story. Moves the club from activity reporting to economic optimization.',
+    requiredCategories: ['fb-pos', 'tee-sheet'],
+    niceToHave: ['member-crm', 'staffing', 'events'],
+    primaryBuyer: 'CFO, GM, Board',
+    themeColor: 'pipeline',
+  },
+  {
+    id: 'cross-domain',
+    tier: 1,
+    flagship: true,
+    icon: '🎯',
+    label: 'Full Cross-Domain Intelligence',
+    question: 'Which members are most likely to have a bad visit today — and what combination of signals should trigger action right now?',
+    why: "This is the strongest 'only we can answer this' category. It shifts Swoop from analytics to operational decision support.",
+    requiredCategories: ['member-crm', 'tee-sheet', 'fb-pos', 'staffing', 'cx-feedback'],
+    niceToHave: ['waitlist', 'communications', 'events'],
+    primaryBuyer: 'GM, COO, CEO',
+    themeColor: 'accent',
+  },
+];

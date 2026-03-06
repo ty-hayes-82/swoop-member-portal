@@ -26,3 +26,5 @@ export { default as TierBadge }              from './TierBadge.jsx';
 export { default as CategoryFilterBar }      from './CategoryFilterBar.jsx';
 export { default as VendorCard }             from './VendorCard.jsx';
 export { default as VendorDetailPanel }      from './VendorDetailPanel.jsx';
+
+export { default as QuestionCategoryCard } from './QuestionCategoryCard';

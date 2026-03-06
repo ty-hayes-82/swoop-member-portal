@@ -2,7 +2,7 @@
 // Data flow: data/integrations.js -> this service -> Integrations.jsx
 // Hard ceiling: 150 lines
 
-import { CATEGORIES, VENDORS, SYSTEMS, COMBOS, VENDOR_LANDSCAPE } from '@/data/integrations';
+import { CATEGORIES, VENDORS, SYSTEMS, COMBOS, VENDOR_LANDSCAPE, QUESTION_CATEGORIES } from '@/data/integrations';
 import { trends } from '@/data/trends';
 
 // ── Vendor catalog functions (new in Sprint 1) ────────────────────────────────
@@ -95,4 +95,25 @@ export function getVendorLandscape() {
 /** Total vendor count across all categories */
 export function getVendorCount() {
   return VENDORS.length;
+}
+
+// ── Question Category functions ───────────────────────────────────────────────
+
+export function getQuestionCategories() {
+  return QUESTION_CATEGORIES;
+}
+
+export function getCombosByQuestion(questionCategoryId) {
+  return COMBOS.filter(c => c.questionCategory === questionCategoryId);
+}
+
+/** How many required category IDs are currently connected for a question */
+export function getQuestionReadiness(questionCategoryId) {
+  const q = QUESTION_CATEGORIES.find(q => q.id === questionCategoryId);
+  if (!q) return { connected: 0, required: 0, ready: false };
+  const required = q.requiredCategories.length;
+  const connected = q.requiredCategories.filter(catId =>
+    VENDORS.some(v => v.categoryId === catId && v.status === 'connected')
+  ).length;
+  return { connected, required, ready: connected === required };
 }
