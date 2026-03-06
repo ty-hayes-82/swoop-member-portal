@@ -1,7 +1,7 @@
 // services/integrationsService.js — Phase 1 static | Phase 2 swap: fetch('/api/integrations')
 // Data flow: data/integrations.js → this service → Integrations.jsx
 
-import { SYSTEMS, COMBOS } from '@/data/integrations';
+import { SYSTEMS, COMBOS, VENDOR_LANDSCAPE } from '@/data/integrations';
 import { trends } from '@/data/trends';
 
 /** All 8 integration systems with status and metadata */
@@ -37,4 +37,14 @@ export function resolveSparklineData(sparklineKey) {
 /** Single system by id */
 export function getSystemById(id) {
   return SYSTEMS.find(s => s.id === id) ?? null;
+}
+
+/** Full vendor landscape organized by category */
+export function getVendorLandscape() {
+  return VENDOR_LANDSCAPE;
+}
+
+/** Total vendor count across all categories */
+export function getVendorCount() {
+  return VENDOR_LANDSCAPE.reduce((sum, cat) => sum + cat.vendors.length, 0);
 }

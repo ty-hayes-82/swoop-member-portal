@@ -4,15 +4,17 @@
 import { useState, useRef } from 'react';
 import { theme } from '@/config/theme';
 import {
-  getSystems, getIntegrationHealth, getCombos, resolveSparklineData,
+  getSystems, getIntegrationHealth, getCombos, resolveSparklineData, getVendorLandscape,
 } from '@/services/integrationsService';
 import IntegrationHealthStrip from '@/components/ui/IntegrationHealthStrip';
 import IntegrationCard from '@/components/ui/IntegrationCard';
 import ComboInsightCard from '@/components/ui/ComboInsightCard';
 import IntegrationMap from '@/components/ui/IntegrationMap';
+import VendorLandscapeSection from '@/components/ui/VendorLandscapeSection';
 
 const systems = getSystems();
 const health = getIntegrationHealth();
+const vendorLandscape = getVendorLandscape();
 
 export default function Integrations() {
   const [selectedIds, setSelectedIds] = useState([]);
@@ -114,6 +116,9 @@ export default function Integrations() {
           ))}
         </div>
       </div>
+
+      {/* Section 4 — Vendor Landscape */}
+      <VendorLandscapeSection categories={vendorLandscape} />
 
       {/* Closing stat */}
       <div style={{

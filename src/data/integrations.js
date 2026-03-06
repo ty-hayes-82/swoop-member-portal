@@ -195,3 +195,129 @@ export const integrations = SYSTEMS.map(s => ({
 export const integrationsById = Object.fromEntries(
   integrations.map(i => [i.id, i])
 );
+
+// ── Full vendor landscape ─────────────────────────────────────────────────────
+// ALL vendors organized by category — used in the Vendor Landscape section
+// tier: 'primary' = live integration | 'supported' = available | 'coming_soon'
+export const VENDOR_LANDSCAPE = [
+  {
+    category: 'Tee Sheet & Golf Operations',
+    icon: '⛳',
+    themeColor: 'operations',
+    description: 'Reservation systems, pace tracking, and round management.',
+    vendors: [
+      { name: 'ForeTees', tier: 'primary' },
+      { name: 'EZLinks', tier: 'primary' },
+      { name: 'Golf Genius', tier: 'primary' },
+      { name: 'Chronogolf', tier: 'supported' },
+      { name: 'Teesnap', tier: 'supported' },
+      { name: 'GolfNow / Lightspeed Golf', tier: 'supported' },
+      { name: 'Club Caddie', tier: 'supported' },
+      { name: 'Tee-On', tier: 'coming_soon' },
+      { name: 'Perfect Golf', tier: 'coming_soon' },
+    ],
+  },
+  {
+    category: 'Food & Beverage / POS',
+    icon: '🍽',
+    themeColor: 'fb',
+    description: 'Point of sale, inventory, check management, and dining analytics.',
+    vendors: [
+      { name: 'Jonas Club Software', tier: 'primary' },
+      { name: 'Northstar ClubPOS', tier: 'primary' },
+      { name: 'Lightspeed Restaurant', tier: 'primary' },
+      { name: 'Agilysys', tier: 'supported' },
+      { name: 'Toast', tier: 'supported' },
+      { name: 'Silverware', tier: 'supported' },
+      { name: 'Square for Restaurants', tier: 'supported' },
+      { name: 'Micros (Oracle)', tier: 'coming_soon' },
+    ],
+  },
+  {
+    category: 'Member CRM & Management',
+    icon: '👤',
+    themeColor: 'members',
+    description: 'Member profiles, dues, household management, and lifecycle.',
+    vendors: [
+      { name: 'Northstar Club Management', tier: 'primary' },
+      { name: 'ClubEssential', tier: 'primary' },
+      { name: 'Jonas Club Software', tier: 'primary' },
+      { name: 'MembersFirst', tier: 'primary' },
+      { name: 'Club Prophet', tier: 'supported' },
+      { name: 'Daxko', tier: 'supported' },
+      { name: 'Salesforce (custom)', tier: 'supported' },
+      { name: 'ClubConnect', tier: 'coming_soon' },
+    ],
+  },
+  {
+    category: 'Staff Scheduling & HR',
+    icon: '📅',
+    themeColor: 'staffing',
+    description: 'Shift scheduling, labor forecasting, and coverage management.',
+    vendors: [
+      { name: 'ClubReady', tier: 'primary' },
+      { name: '7shifts', tier: 'primary' },
+      { name: 'HotSchedules (Fourth)', tier: 'primary' },
+      { name: 'When I Work', tier: 'supported' },
+      { name: 'Deputy', tier: 'supported' },
+      { name: 'Homebase', tier: 'supported' },
+      { name: 'Harri', tier: 'coming_soon' },
+    ],
+  },
+  {
+    category: 'Events & Tournament Software',
+    icon: '🏆',
+    themeColor: 'pipeline',
+    description: 'Tournament management, event registration, and RSVP tracking.',
+    vendors: [
+      { name: 'Golf Genius', tier: 'primary' },
+      { name: 'Tripleseat', tier: 'primary' },
+      { name: 'OpenTable', tier: 'primary' },
+      { name: 'Perfect Golf', tier: 'supported' },
+      { name: 'Eventbrite', tier: 'supported' },
+      { name: 'Jonas Events', tier: 'supported' },
+      { name: 'ClubEssential Events', tier: 'coming_soon' },
+    ],
+  },
+  {
+    category: 'Communications & Email',
+    icon: '✉',
+    themeColor: 'members',
+    description: 'Member communications, campaign automation, engagement tracking.',
+    vendors: [
+      { name: 'MembersFirst Engage', tier: 'primary' },
+      { name: 'Mailchimp', tier: 'primary' },
+      { name: 'Klaviyo', tier: 'primary' },
+      { name: 'Constant Contact', tier: 'supported' },
+      { name: 'SendGrid (Twilio)', tier: 'supported' },
+      { name: 'ClubEssential Comms', tier: 'supported' },
+      { name: 'Listrak', tier: 'coming_soon' },
+    ],
+  },
+  {
+    category: 'Dynamic Pricing & Yield',
+    icon: '💲',
+    themeColor: 'briefing',
+    description: 'Tee time pricing optimization and demand-based rate management.',
+    vendors: [
+      { name: 'Whoosh', tier: 'primary' },
+      { name: 'Tee-On Pricing', tier: 'supported' },
+      { name: 'Club Caddie Pricing', tier: 'supported' },
+      { name: 'GolfNow Flex', tier: 'supported' },
+      { name: 'PriceLabs (custom)', tier: 'coming_soon' },
+    ],
+  },
+  {
+    category: 'Waitlist & Demand Management',
+    icon: '📋',
+    themeColor: 'operations',
+    description: 'Waitlist management, cancellation recovery, demand forecasting.',
+    vendors: [
+      { name: 'Noteefy', tier: 'primary' },
+      { name: 'Golf Genius Waitlist', tier: 'supported' },
+      { name: 'ForeTees Waitlist', tier: 'supported' },
+      { name: 'EZLinks Alerts', tier: 'supported' },
+      { name: 'Custom SMS/Email', tier: 'supported' },
+    ],
+  },
+];

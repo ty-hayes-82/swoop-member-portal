@@ -17,6 +17,7 @@ export { default as TrendContext }     from './TrendContext.jsx';
 export { AgentThoughtLog }   from './AgentThoughtLog.jsx';
 export { AgentStatusCard }   from './AgentStatusCard.jsx';
 export { AgentActionCard }   from './AgentActionCard.jsx';
+export { default as VendorLandscapeSection } from './VendorLandscapeSection.jsx';
 export { default as IntegrationHealthStrip } from './IntegrationHealthStrip.jsx';
 export { default as IntegrationCard }        from './IntegrationCard.jsx';
 export { default as ComboInsightCard }       from './ComboInsightCard.jsx';
