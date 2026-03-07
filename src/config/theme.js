@@ -37,6 +37,14 @@ export const theme = {
     chartFB:      '#C49A2A',   // toned warm gold — F&B data bars (was #D4A017)
     chartBlue:    '#2E7BB8',   // kept for any remaining supplementary use
     chartPurple:  '#7B5DC0',   // kept for any remaining supplementary use
+
+    // Landing page
+    landingCream: '#F7F5F2',
+    lensMemberIntelligence: '#A78BFA',
+    lensTeeSheetDemand: '#4ADE80',
+    lensFbOperations: '#F97316',
+    lensStaffingLabor: '#F59E0B',
+    lensRevenuePipeline: '#34D399',
   },
   spacing: {
     xs:  '4px', sm:  '8px', md:  '16px',
