@@ -12,7 +12,7 @@ const TEXT_LIGHT    = '#F0F0F0';
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-const TODAY_ITEMS = ['daily-briefing', 'operations', 'member-health', 'staffing-service'];
+const TODAY_ITEMS = ['daily-briefing', 'operations', 'waitlist-demand', 'member-health', 'staffing-service'];
 
 export default function Sidebar() {
   const { currentRoute, navigate, sidebarCollapsed, toggleSidebar, viewMode, setViewMode } = useNavigation();

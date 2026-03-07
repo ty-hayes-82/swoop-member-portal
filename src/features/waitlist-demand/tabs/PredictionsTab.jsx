@@ -1,62 +1,87 @@
-import { SoWhatCallout, ArchetypeBadge, StoryHeadline } from '@/components/ui';
-import { getCancellationPredictions, getCancellationSummary } from '@/services/waitlistService';
+import { Badge, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
+import {
+  getCancellationPredictions,
+  getCancellationSummary,
+  getCancellationRiskSparkline,
+} from '@/services/waitlistService';
 import { theme } from '@/config/theme';
 
-const PROB_COLOR = (p) => {
-  if (p >= 0.65) return theme.colors.urgent;
-  if (p >= 0.45) return theme.colors.warning;
+const PROBABILITY_COLOR = (probability) => {
+  if (probability >= 0.65) return theme.colors.urgent;
+  if (probability >= 0.45) return theme.colors.warning;
   return theme.colors.success;
 };
 
-function ProbBar({ probability }) {
+const PROBABILITY_TIER = (probability) => {
+  if (probability >= 0.65) return { text: 'High Risk', variant: 'urgent' };
+  if (probability >= 0.45) return { text: 'Watch', variant: 'warning' };
+  return { text: 'Stable', variant: 'success' };
+};
+
+function ProbabilityBar({ probability }) {
+  const color = PROBABILITY_COLOR(probability);
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div style={{ flex: 1, height: 6, background: theme.colors.bgDeep,
-        borderRadius: 3, overflow: 'hidden' }}>
-        <div style={{ width: `${probability * 100}%`, height: '100%',
-          background: PROB_COLOR(probability), borderRadius: 3,
-          transition: 'width 0.3s ease' }} />
+      <div
+        style={{
+          flex: 1,
+          height: 6,
+          borderRadius: 999,
+          overflow: 'hidden',
+          background: theme.colors.bgDeep,
+        }}
+      >
+        <div
+          style={{
+            width: `${Math.round(probability * 100)}%`,
+            height: '100%',
+            borderRadius: 999,
+            background: color,
+          }}
+        />
       </div>
-      <span style={{ fontFamily: theme.fonts.mono, fontWeight: 700, fontSize: theme.fontSize.sm,
-        color: PROB_COLOR(probability), minWidth: 36, textAlign: 'right' }}>
+      <span style={{ minWidth: 36, textAlign: 'right', color, fontFamily: theme.fonts.mono, fontWeight: 700 }}>
         {Math.round(probability * 100)}%
       </span>
     </div>
   );
 }
 
-function PredictionRow({ memberName, archetype, teeTime, cancelProbability, drivers, recommendedAction, estimatedRevenueLost }) {
-  const isHighRisk = cancelProbability >= 0.60;
+function PredictionRow({ prediction }) {
+  const isHighRisk = prediction.cancelProbability >= 0.6;
+  const riskTier = PROBABILITY_TIER(prediction.cancelProbability);
+
   return (
-    <tr style={{ borderTop: `1px solid ${theme.colors.border}`,
-      background: isHighRisk ? 'rgba(192,57,43,0.03)' : 'transparent' }}>
-      <td style={{ padding: `10px ${theme.spacing.md}` }}>
-        <div style={{ fontWeight: isHighRisk ? 600 : 400, fontSize: theme.fontSize.sm,
-          color: theme.colors.textPrimary }}>{memberName}</div>
-        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
-          {teeTime}
+    <tr style={{ borderTop: `1px solid ${theme.colors.border}`, background: isHighRisk ? `${theme.colors.urgent}08` : 'transparent' }}>
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+        <div style={{ color: theme.colors.textPrimary, fontWeight: 600, fontSize: theme.fontSize.sm }}>
+          {prediction.memberName}
         </div>
+        <div style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.xs }}>{prediction.teeTime}</div>
       </td>
-      <td style={{ padding: `10px ${theme.spacing.md}` }}>
-        <ArchetypeBadge archetype={archetype} size="sm" />
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>
+        {prediction.archetype}
       </td>
-      <td style={{ padding: `10px ${theme.spacing.md}`, minWidth: 160 }}>
-        <ProbBar probability={cancelProbability} />
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, minWidth: 160 }}>
+        <ProbabilityBar probability={prediction.cancelProbability} />
       </td>
-      <td style={{ padding: `10px ${theme.spacing.md}`, fontSize: theme.fontSize.xs,
-        color: theme.colors.textSecondary, maxWidth: 200 }}>
-        {drivers.slice(0, 2).map((d, i) => (
-          <div key={i} style={{ marginBottom: i < drivers.length - 1 ? 2 : 0 }}>· {d}</div>
-        ))}
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+        <Badge text={riskTier.text} variant={riskTier.variant} size="sm" />
       </td>
-      <td style={{ padding: `10px ${theme.spacing.md}`, fontSize: theme.fontSize.xs,
-        color: isHighRisk ? theme.colors.warning : theme.colors.textMuted }}>
-        {recommendedAction}
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>
+        {prediction.recommendedAction}
       </td>
-      <td style={{ padding: `10px ${theme.spacing.md}`, textAlign: 'right',
-        fontFamily: theme.fonts.mono, fontSize: theme.fontSize.sm,
-        color: isHighRisk ? theme.colors.urgent : theme.colors.textMuted }}>
-        ${estimatedRevenueLost.toLocaleString()}
+      <td
+        style={{
+          padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+          textAlign: 'right',
+          fontFamily: theme.fonts.mono,
+          color: isHighRisk ? theme.colors.urgent : theme.colors.textMuted,
+          fontSize: theme.fontSize.sm,
+          fontWeight: 700,
+        }}
+      >
+        ${prediction.estimatedRevenueLost.toLocaleString()}
       </td>
     </tr>
   );
@@ -65,67 +90,123 @@ function PredictionRow({ memberName, archetype, teeTime, cancelProbability, driv
 export default function PredictionsTab() {
   const predictions = getCancellationPredictions();
   const summary = getCancellationSummary();
+  const topRisk = predictions[0];
+
+  const stats = [
+    {
+      label: 'Bookings Scored',
+      value: summary.total,
+      sparklineData: getCancellationRiskSparkline(),
+      badge: { text: 'Forecast Window', variant: 'timeline' },
+      source: 'ForeTees',
+    },
+    {
+      label: 'High-Risk Cancellations',
+      value: summary.highRisk,
+      badge: { text: 'Immediate Action', variant: 'urgent' },
+      sparklineData: predictions.slice(0, 6).map((p) => Math.round(p.cancelProbability * 100)).reverse(),
+      source: 'Weather API',
+    },
+    {
+      label: 'Revenue at Risk',
+      value: summary.totalRevAtRisk,
+      format: 'currency',
+      badge: { text: 'If Unaddressed', variant: 'warning' },
+      sparklineData: predictions.slice(0, 6).map((p) => p.estimatedRevenueLost).reverse(),
+      source: 'Jonas POS',
+    },
+  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-      <StoryHeadline
-        variant="insight"
-        headline="Tomorrow's wind advisory will likely trigger 4–6 cancellations — 3 from members already at retention risk."
-        context="Wind speed correlates with 2 prior cancellations each for Kevin Hurst and Anne Jordan. Combined revenue at risk: $863. Proactive confirmation + waitlist pre-alert sent 18h out historically reduces no-show rate by 34%."
-      />
-
-      {/* Summary strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: theme.spacing.md }}>
-        {[
-          { label: 'Bookings Scored',   value: summary.total,                             accent: theme.colors.textSecondary },
-          { label: 'High-Risk (≥60%)',  value: summary.highRisk,                          accent: theme.colors.urgent },
-          { label: 'Revenue at Risk',   value: `$${summary.totalRevAtRisk.toLocaleString()}`, accent: theme.colors.warning },
-        ].map(({ label, value, accent }) => (
-          <div key={label} style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-            borderRadius: theme.radius.md, padding: theme.spacing.md, boxShadow: theme.shadow.sm }}>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
-              textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
-            <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono,
-              fontWeight: 700, color: accent }}>{value}</div>
-          </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: theme.spacing.md }}>
+        {stats.map((stat) => (
+          <StatCard key={stat.label} {...stat} />
         ))}
       </div>
 
-      {/* Predictions table */}
-      <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md, overflow: 'hidden', boxShadow: theme.shadow.sm }}>
-        <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}`,
-          background: theme.colors.bgDeep }}>
-          <span style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
-            Cancellation Risk · Jan 18 Tee Sheet
-          </span>
-          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginLeft: 8 }}>
-            Sorted by probability · Weather × history × engagement signals
-          </span>
+      <div
+        style={{
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.md,
+          background: theme.colors.bgCard,
+          boxShadow: theme.shadow.sm,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            padding: theme.spacing.md,
+            borderBottom: `1px solid ${theme.colors.border}`,
+            background: theme.colors.bgDeep,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <div>
+            <div style={{ color: theme.colors.textPrimary, fontWeight: 700, fontSize: theme.fontSize.sm }}>
+              Cancellation Risk Scoring
+            </div>
+            <div style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.xs }}>
+              Weather + engagement + history signals ranked by cancellation probability.
+            </div>
+          </div>
+          <Badge text={summary.topDriver} variant="effort" />
         </div>
+
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: theme.colors.bg }}>
-                {['Member', 'Archetype', 'Cancel Risk', 'Drivers', 'Recommended Action', 'Rev at Risk'].map(h => (
-                  <th key={h} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                    textAlign: h === 'Rev at Risk' ? 'right' : 'left',
-                    color: theme.colors.textMuted, fontSize: theme.fontSize.xs,
-                    textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>{h}</th>
+                {['Member', 'Archetype', 'Cancel Risk', 'Tier', 'Recommended Action', 'Rev at Risk'].map((heading) => (
+                  <th
+                    key={heading}
+                    style={{
+                      padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+                      textAlign: heading === 'Rev at Risk' ? 'right' : 'left',
+                      color: theme.colors.textMuted,
+                      fontSize: theme.fontSize.xs,
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {heading}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {predictions.map(p => <PredictionRow key={p.bookingId} {...p} />)}
+              {predictions.map((prediction) => (
+                <PredictionRow key={prediction.bookingId} prediction={prediction} />
+              ))}
             </tbody>
           </table>
         </div>
       </div>
 
+      <div
+        style={{
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.md,
+          background: theme.colors.bgCard,
+          padding: theme.spacing.md,
+        }}
+      >
+        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>
+          Cancellation Risk Trend (Top 6 bookings)
+        </div>
+        <div style={{ height: 48 }}>
+          <Sparkline data={getCancellationRiskSparkline()} color={theme.colors.warning} height={48} showDots />
+        </div>
+      </div>
+
       <SoWhatCallout variant="insight">
-        <strong>Proactive confirmation nudge + waitlist pre-alert</strong> sent 18 hours out historically reduces
-        no-show rate by 34%. For Kevin Hurst (82% risk), a GM personal outreach is the difference between a
-        retained round and an empty slot — and possibly a retained member.
+        <strong>GM decision:</strong> pre-confirm and personally intervene on <strong>{topRisk?.memberName}</strong> first.
+        This booking has a <strong>{Math.round((topRisk?.cancelProbability ?? 0) * 100)}%</strong> cancellation likelihood,
+        with ${topRisk?.estimatedRevenueLost?.toLocaleString() ?? 0} at immediate risk. Proactive outreach and
+        pre-alerting the waitlist converts probable loss into retained play.
       </SoWhatCallout>
     </div>
   );

@@ -1,116 +1,171 @@
-import { SoWhatCallout, StoryHeadline } from '@/components/ui';
 import TrendChart from '@/components/charts/TrendChart';
-import { getDemandHeatmap, getRevenuePerSlot } from '@/services/waitlistService';
+import { Badge, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
+import { getDemandHeatmap, getDemandInsight, getRevenuePerSlot } from '@/services/waitlistService';
 import { theme } from '@/config/theme';
 
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const BLOCKS = ['7–8 AM', '8–9 AM', '9–10 AM', '10–11 AM', '11 AM–12'];
+
 const LEVEL_STYLES = {
-  oversubscribed: { bg: 'rgba(192,57,43,0.15)', border: '1px solid rgba(192,57,43,0.3)', color: theme.colors.urgent },
-  normal:         { bg: 'rgba(26,122,60,0.10)', border: `1px solid rgba(26,122,60,0.2)`, color: theme.colors.success },
-  underutilized:  { bg: 'rgba(181,118,10,0.10)', border: `1px solid rgba(181,118,10,0.2)`, color: theme.colors.warning },
+  oversubscribed: {
+    bg: `${theme.colors.urgent}14`,
+    border: `${theme.colors.urgent}33`,
+    color: theme.colors.urgent,
+  },
+  normal: {
+    bg: `${theme.colors.success}12`,
+    border: `${theme.colors.success}2E`,
+    color: theme.colors.success,
+  },
+  underutilized: {
+    bg: `${theme.colors.warning}12`,
+    border: `${theme.colors.warning}2E`,
+    color: theme.colors.warning,
+  },
 };
 
-function HeatmapCell({ day, block, fillRate, unmetRounds, level }) {
-  const s = LEVEL_STYLES[level];
+function HeatmapCell({ cell }) {
+  const style = LEVEL_STYLES[cell.level];
   return (
-    <div style={{ background: s.bg, border: s.border, borderRadius: theme.radius.sm,
-      padding: '6px 8px', minWidth: 90 }}>
-      <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{block}</div>
-      <div style={{ fontFamily: theme.fonts.mono, fontWeight: 700, fontSize: theme.fontSize.sm,
-        color: s.color }}>{Math.round(fillRate * 100)}%</div>
-      {unmetRounds > 0 && (
-        <div style={{ fontSize: 10, color: theme.colors.urgent }}>+{unmetRounds} unmet</div>
-      )}
+    <div
+      style={{
+        background: style.bg,
+        border: `1px solid ${style.border}`,
+        borderRadius: theme.radius.sm,
+        padding: '6px 8px',
+      }}
+    >
+      <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{cell.block}</div>
+      <div style={{ fontFamily: theme.fonts.mono, color: style.color, fontWeight: 700, fontSize: theme.fontSize.sm }}>
+        {Math.round(cell.fillRate * 100)}%
+      </div>
+      <div style={{ fontSize: 10, color: cell.unmetRounds > 0 ? theme.colors.urgent : theme.colors.textMuted }}>
+        {cell.unmetRounds > 0 ? `+${cell.unmetRounds} unmet rounds` : 'No unmet rounds'}
+      </div>
     </div>
   );
 }
 
+function summarizeDemand(heatmap) {
+  const weekendCells = heatmap.filter((cell) => ['Sat', 'Sun'].includes(cell.day));
+  const weekdayCells = heatmap.filter((cell) => !['Sat', 'Sun'].includes(cell.day));
+  const unmetWeekendRounds = weekendCells.reduce((sum, cell) => sum + cell.unmetRounds, 0);
+  const weekendFill = Math.round(
+    (weekendCells.reduce((sum, cell) => sum + cell.fillRate, 0) / Math.max(weekendCells.length, 1)) * 100,
+  );
+  const weekdayFill = Math.round(
+    (weekdayCells.reduce((sum, cell) => sum + cell.fillRate, 0) / Math.max(weekdayCells.length, 1)) * 100,
+  );
+
+  return { unmetWeekendRounds, weekendFill, weekdayFill };
+}
+
 export default function IntelligenceTab() {
   const heatmap = getDemandHeatmap();
-  const revPerSlot = getRevenuePerSlot();
+  const revenuePerSlot = getRevenuePerSlot();
+  const { unmetWeekendRounds, weekendFill, weekdayFill } = summarizeDemand(heatmap);
 
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const blocks = ['7–8 AM', '8–9 AM', '9–10 AM', '10–11 AM', '11 AM–12'];
+  const stats = [
+    {
+      label: 'Reactive Fill Value',
+      value: revenuePerSlot.reactive,
+      format: 'currency',
+      badge: { text: 'Current State', variant: 'timeline' },
+      source: 'Jonas POS',
+    },
+    {
+      label: 'Retention-Priority Fill Value',
+      value: revenuePerSlot.retentionPriority,
+      format: 'currency',
+      badge: { text: `+${revenuePerSlot.upliftPct}%`, variant: 'success' },
+      source: 'Northstar',
+    },
+    {
+      label: 'Weekend Fill Rate',
+      value: `${weekendFill}%`,
+      badge: { text: 'Overloaded', variant: 'warning' },
+      source: 'ForeTees',
+    },
+    {
+      label: 'Weekday Fill Rate',
+      value: `${weekdayFill}%`,
+      badge: { text: 'Underused Capacity', variant: 'effort' },
+      source: 'ForeTees',
+    },
+  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-      <StoryHeadline
-        variant="opportunity"
-        headline="Saturday 7–9 AM is chronically oversubscribed. Tuesday–Thursday 7–9 AM runs at 52–65% — the same club, 40% fewer rounds."
-        context="Opening Executive 9-hole overflow on Saturday AM could capture 12+ unmet rounds/month. That's $9,600 in estimated annual golf + dining revenue from capacity that already exists."
-      />
-
-      {/* Revenue attribution */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.spacing.md }}>
-        {[
-          {
-            label: 'Reactive Waitlist Fill',
-            sub: 'First-come-first-served alert',
-            value: `$${revPerSlot.reactive}`,
-            note: 'Avg total club spend per slot filled',
-            accent: theme.colors.textSecondary,
-          },
-          {
-            label: 'Retention-Priority Fill',
-            sub: 'At-risk member notified first',
-            value: `$${revPerSlot.retentionPriority}`,
-            note: `+${revPerSlot.upliftPct}% vs. reactive · avg total club spend`,
-            accent: '#22D3EE',
-          },
-        ].map(({ label, sub, value, note, accent }) => (
-          <div key={label} style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-            borderRadius: theme.radius.md, padding: theme.spacing.lg, boxShadow: theme.shadow.sm }}>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
-              textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: theme.spacing.sm }}>{sub}</div>
-            <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono,
-              fontWeight: 700, color: accent }}>{value}</div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 4 }}>{note}</div>
-          </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: theme.spacing.md }}>
+        {stats.map((stat) => (
+          <StatCard key={stat.label} {...stat} />
         ))}
       </div>
 
-      {/* Demand heatmap */}
-      <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md, overflow: 'hidden', boxShadow: theme.shadow.sm }}>
-        <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}`,
-          background: theme.colors.bgDeep, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
-            Demand Heatmap · Tee Sheet Fill Rate by Day × Time
-          </span>
-          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-            {[
-              { label: 'Oversubscribed', color: theme.colors.urgent },
-              { label: 'Normal',         color: theme.colors.success },
-              { label: 'Underutilized',  color: theme.colors.warning },
-            ].map(({ label, color }) => (
-              <span key={label} style={{ fontSize: 11, color, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 2, background: color, display: 'inline-block' }} />
-                {label}
-              </span>
-            ))}
+      <div
+        style={{
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.md,
+          background: theme.colors.bgCard,
+          padding: theme.spacing.md,
+          boxShadow: theme.shadow.sm,
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.sm }}>
+          <div>
+            <div style={{ fontWeight: 700, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>
+              Demand Heatmap
+            </div>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+              Tee sheet fill rate by day and time block.
+            </div>
           </div>
+          <Badge text="Capacity Rebalance Candidate" variant="timeline" />
         </div>
-        <div style={{ padding: theme.spacing.md, overflowX: 'auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: `80px repeat(${days.length}, 1fr)`, gap: 6,
-            minWidth: 700 }}>
+
+        <div style={{ overflowX: 'auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `80px repeat(${DAYS.length}, 1fr)`, gap: 6, minWidth: 720 }}>
             <div />
-            {days.map(d => (
-              <div key={d} style={{ fontSize: theme.fontSize.xs, fontWeight: 600,
-                color: (d === 'Sat' || d === 'Sun') ? theme.colors.operations : theme.colors.textMuted,
-                textAlign: 'center', paddingBottom: 4 }}>{d}</div>
+            {DAYS.map((day) => (
+              <div
+                key={day}
+                style={{
+                  textAlign: 'center',
+                  color: ['Sat', 'Sun'].includes(day) ? theme.colors.info : theme.colors.textMuted,
+                  fontWeight: 600,
+                  fontSize: theme.fontSize.xs,
+                }}
+              >
+                {day}
+              </div>
             ))}
-            {blocks.map(block => (
+
+            {BLOCKS.map((block) => (
               <>
-                <div key={block} style={{ fontSize: 11, color: theme.colors.textMuted,
-                  display: 'flex', alignItems: 'center' }}>{block}</div>
-                {days.map(day => {
-                  const cell = heatmap.find(c => c.day === day && c.block === block);
-                  return cell
-                    ? <HeatmapCell key={day} {...cell} />
-                    : <div key={day} style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.sm,
-                        padding: '6px 8px', minWidth: 90, opacity: 0.4 }}>
-                        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>—</div>
-                      </div>;
+                <div key={`${block}-label`} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                  {block}
+                </div>
+                {DAYS.map((day) => {
+                  const cell = heatmap.find((item) => item.day === day && item.block === block);
+                  return (
+                    <div key={`${day}-${block}`}>
+                      {cell ? (
+                        <HeatmapCell cell={cell} />
+                      ) : (
+                        <div
+                          style={{
+                            background: theme.colors.bgDeep,
+                            borderRadius: theme.radius.sm,
+                            padding: '6px 8px',
+                            color: theme.colors.textMuted,
+                            fontSize: theme.fontSize.xs,
+                          }}
+                        >
+                          —
+                        </div>
+                      )}
+                    </div>
+                  );
                 })}
               </>
             ))}
@@ -118,12 +173,42 @@ export default function IntelligenceTab() {
         </div>
       </div>
 
-      {/* Trend charts */}
+      <div
+        style={{
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.md,
+          background: theme.colors.bgCard,
+          padding: theme.spacing.md,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: theme.spacing.md,
+        }}
+      >
+        <div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>
+            Unmet Weekend Demand Signal
+          </div>
+          <div style={{ height: 48 }}>
+            <Sparkline
+              data={heatmap.filter((cell) => ['Sat', 'Sun'].includes(cell.day)).map((cell) => cell.unmetRounds)}
+              color={theme.colors.urgent}
+              height={48}
+              showDots
+            />
+          </div>
+        </div>
+
+        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
+          <strong>{unmetWeekendRounds}</strong> unmet rounds were concentrated in weekend mornings. Rebalancing overflow
+          into weekday capacity can recover golf and F&B spend without adding tee sheet inventory.
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.spacing.md }}>
         <TrendChart
           title="Waitlist Fill Rate"
           metricKey="waitlistFillRate"
-          color="#22D3EE"
+          color={theme.colors.info}
           format="percent"
         />
         <TrendChart
@@ -135,10 +220,8 @@ export default function IntelligenceTab() {
       </div>
 
       <SoWhatCallout variant="opportunity">
-        <strong>This is not a tee time tool.</strong> Reactive fill = $187/slot.
-        Retention-priority fill = $312/slot. That's a $125 delta per cancellation recovered —
-        across 44 monthly waitlist entries, that's <strong>$5,500/month in recoverable revenue</strong> from
-        smarter queue management alone.
+        <strong>GM decision:</strong> shift member messaging and overflow routing toward Tuesday-Thursday morning windows.
+        That converts idle weekday capacity into revenue while protecting weekend experience quality. {getDemandInsight()}
       </SoWhatCallout>
     </div>
   );
