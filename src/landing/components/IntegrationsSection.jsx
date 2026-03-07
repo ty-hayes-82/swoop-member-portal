@@ -46,6 +46,13 @@ export default function IntegrationsSection() {
                 }}>
                   {category.systems} connected systems
                 </p>
+                <p style={{
+                  color: theme.colors.textMuted,
+                  fontSize: theme.fontSize.sm,
+                  marginTop: 6,
+                }}>
+                  {category.vendors.join(', ')}
+                </p>
               </div>
             ))}
           </div>

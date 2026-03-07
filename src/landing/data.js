@@ -55,7 +55,7 @@ export const comparisonFeatures = [
   {
     feature: 'Retention-prioritized waitlist',
     swoop: true,
-    noteefy: true,
+    noteefy: false,
     crm: false,
     sheets: false,
   },
@@ -76,7 +76,7 @@ export const comparisonFeatures = [
   {
     feature: 'Real-time behavioral data',
     swoop: true,
-    noteefy: true,
+    noteefy: false,
     crm: false,
     sheets: false,
   },
@@ -123,14 +123,14 @@ export const agents = [
 ];
 
 export const integrationCategories = [
-  { label: 'Tee Sheet & Booking', systems: 4 },
-  { label: 'Member CRM', systems: 3 },
-  { label: 'POS & F&B', systems: 5 },
-  { label: 'Communications', systems: 4 },
-  { label: 'Staffing & Payroll', systems: 3 },
-  { label: 'Finance & BI', systems: 4 },
-  { label: 'Web & Lead Capture', systems: 2 },
-  { label: 'Access & Activity', systems: 3 },
+  { label: 'Tee Sheet & Booking', systems: 4, vendors: ['ForeTees', 'Chelsea', 'EZLinks', 'GolfNow'] },
+  { label: 'Member CRM', systems: 3, vendors: ['Northstar', 'Jonas Club Software', 'Club Essential'] },
+  { label: 'POS & F&B', systems: 5, vendors: ['Jonas POS', 'Clubessential POS', 'Square', 'Toast', 'Lightspeed'] },
+  { label: 'Communications', systems: 4, vendors: ['Twilio', 'SendGrid', 'Mailchimp', 'Intercom'] },
+  { label: 'Staffing & Payroll', systems: 3, vendors: ['ADP', 'Paychex', 'When I Work'] },
+  { label: 'Finance & BI', systems: 4, vendors: ['QuickBooks', 'Sage', 'NetSuite', 'Power BI'] },
+  { label: 'Web & Lead Capture', systems: 2, vendors: ['HubSpot', 'Typeform'] },
+  { label: 'Access & Activity', systems: 3, vendors: ['Gatekeeper', 'BrivoAccess', 'Club Automation'] },
 ];
 
 export const testimonials = [

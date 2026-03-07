@@ -27,7 +27,7 @@ const inputStyle = {
 
 export default function DemoCtaSection() {
   return (
-    <section style={{
+    <section className="landing-section-padded" style={{
       margin: `${theme.spacing.xxl} 0`,
       borderRadius: theme.radius.xl,
       background: theme.colors.bgSidebar,
@@ -48,7 +48,7 @@ export default function DemoCtaSection() {
       </p>
       <form
         onSubmit={(event) => event.preventDefault()}
-        className="landing-grid-auto"
+        className="landing-grid-auto landing-demo-form"
         style={{ alignItems: 'end' }}
       >
         <label>
@@ -65,6 +65,7 @@ export default function DemoCtaSection() {
         </label>
         <button
           type="submit"
+          className="landing-demo-submit"
           style={buttonStyle}
           onMouseEnter={(event) => {
             event.currentTarget.style.background = '#43C872';

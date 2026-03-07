@@ -7,14 +7,6 @@ export default function SocialProofSection() {
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
         Trusted by private club operators who need proof, not promises.
       </h2>
-      <p style={{
-        color: theme.colors.textSecondary,
-        fontSize: theme.fontSize.lg,
-        marginBottom: theme.spacing.xl,
-      }}>
-        These are representative placeholder stories modeled on common outcomes from private
-        golf club GM teams using cross-system intelligence.
-      </p>
       <div className="landing-grid-3">
         {testimonials.map((item) => (
           <article

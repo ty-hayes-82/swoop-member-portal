@@ -3,7 +3,7 @@ import { problemCards } from '@/landing/data';
 
 export default function ProblemSection() {
   return (
-    <section style={{
+    <section className="landing-section-padded" style={{
       background: theme.colors.landingCream,
       borderRadius: theme.radius.xl,
       padding: '56px 28px',

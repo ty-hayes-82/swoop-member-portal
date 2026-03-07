@@ -14,7 +14,7 @@ const ctaBase = {
 
 export default function HeroSection() {
   return (
-    <section style={{ padding: '88px 0 80px' }}>
+    <section className="landing-section-padded" style={{ padding: '88px 0 80px' }}>
       <div style={{ maxWidth: 780 }}>
         <p style={{
           color: theme.colors.accent,
@@ -42,7 +42,7 @@ export default function HeroSection() {
           marginBottom: theme.spacing.xl,
         }}>
           The AI-powered GM platform that fills tee times with the right members
-          and proves the revenue impact of every decision.
+          {' '}— and proves the revenue impact of every decision.
         </p>
         <div style={{ display: 'flex', gap: theme.spacing.md, flexWrap: 'wrap' }}>
           <button
