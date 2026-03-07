@@ -8,8 +8,8 @@ const buttonStyle = {
   fontWeight: 700,
   fontSize: '16px',
   padding: '0 24px',
-  background: '#4ADE80',
-  color: '#1F2F24',
+  background: theme.colors.ctaGreen,
+  color: theme.colors.ctaGreenText,
   border: '2px solid transparent',
   transition: 'background 150ms ease',
 };
@@ -68,10 +68,10 @@ export default function DemoCtaSection() {
           className="landing-demo-submit"
           style={buttonStyle}
           onMouseEnter={(event) => {
-            event.currentTarget.style.background = '#43C872';
+            event.currentTarget.style.background = theme.colors.ctaGreenHover;
           }}
           onMouseLeave={(event) => {
-            event.currentTarget.style.background = '#4ADE80';
+            event.currentTarget.style.background = theme.colors.ctaGreen;
           }}
         >
           Book Your Demo

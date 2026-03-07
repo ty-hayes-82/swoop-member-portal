@@ -49,14 +49,14 @@ export default function HeroSection() {
             type="button"
             style={{
               ...ctaBase,
-              background: '#4ADE80',
-              color: '#1F2F24',
+              background: theme.colors.ctaGreen,
+              color: theme.colors.ctaGreenText,
             }}
             onMouseEnter={(event) => {
-              event.currentTarget.style.background = '#43C872';
+              event.currentTarget.style.background = theme.colors.ctaGreenHover;
             }}
             onMouseLeave={(event) => {
-              event.currentTarget.style.background = '#4ADE80';
+              event.currentTarget.style.background = theme.colors.ctaGreen;
             }}
           >
             Book a Demo
@@ -66,16 +66,16 @@ export default function HeroSection() {
             style={{
               ...ctaBase,
               background: 'transparent',
-              color: '#4ADE80',
-              borderColor: '#4ADE80',
+              color: theme.colors.ctaGreen,
+              borderColor: theme.colors.ctaGreen,
             }}
             onMouseEnter={(event) => {
-              event.currentTarget.style.background = '#4ADE80';
-              event.currentTarget.style.color = '#1F2F24';
+              event.currentTarget.style.background = theme.colors.ctaGreen;
+              event.currentTarget.style.color = theme.colors.ctaGreenText;
             }}
             onMouseLeave={(event) => {
               event.currentTarget.style.background = 'transparent';
-              event.currentTarget.style.color = '#4ADE80';
+              event.currentTarget.style.color = theme.colors.ctaGreen;
             }}
           >
             See the Platform

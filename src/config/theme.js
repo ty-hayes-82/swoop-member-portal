@@ -45,6 +45,9 @@ export const theme = {
     lensFbOperations: '#F97316',
     lensStaffingLabor: '#F59E0B',
     lensRevenuePipeline: '#34D399',
+    ctaGreen: '#4ADE80',
+    ctaGreenHover: '#43C872',
+    ctaGreenText: '#1F2F24',
   },
   spacing: {
     xs:  '4px', sm:  '8px', md:  '16px',
