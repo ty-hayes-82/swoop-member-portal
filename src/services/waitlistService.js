@@ -1,3 +1,4 @@
+// Pipeline test — verified 2026-03-07T23:02:54Z.
 // waitlistService.js — Phase 1 static · Phase 2 /api/waitlist
 
 import {
