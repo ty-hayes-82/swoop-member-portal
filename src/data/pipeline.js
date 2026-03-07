@@ -67,6 +67,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 4,
     lastRound: 'Dec 28',
     diningHistory: 'Low converter',
+    memberValueAnnual: 6800,
+    churnRiskScore: 0.72,
     retentionPriority: 'HIGH',
   },
   {
@@ -80,6 +82,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 6,
     lastRound: 'Dec 14',
     diningHistory: 'Stopped in Nov',
+    memberValueAnnual: 12000,
+    churnRiskScore: 0.86,
     retentionPriority: 'HIGH',
   },
   {
@@ -93,6 +97,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 3,
     lastRound: 'Nov 22',
     diningHistory: 'Minimum spend only',
+    memberValueAnnual: 9400,
+    churnRiskScore: 0.74,
     retentionPriority: 'HIGH',
   },
   {
@@ -106,6 +112,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 2,
     lastRound: 'Jan 14',
     diningHistory: 'Open complaint Jan 16',
+    memberValueAnnual: 22000,
+    churnRiskScore: 0.68,
     retentionPriority: 'HIGH',
   },
   {
@@ -119,6 +127,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 8,
     lastRound: 'Oct 11',
     diningHistory: 'None since September',
+    memberValueAnnual: 6100,
+    churnRiskScore: 0.92,
     retentionPriority: 'HIGH',
   },
   {
@@ -132,6 +142,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 1,
     lastRound: 'Jan 15',
     diningHistory: 'Regular',
+    memberValueAnnual: 15500,
+    churnRiskScore: 0.12,
     retentionPriority: 'NORMAL',
   },
   {
@@ -145,6 +157,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 2,
     lastRound: 'Jan 16',
     diningHistory: 'Post-round regular',
+    memberValueAnnual: 18000,
+    churnRiskScore: 0.05,
     retentionPriority: 'NORMAL',
   },
   {
@@ -158,6 +172,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 3,
     lastRound: 'Jan 11',
     diningHistory: 'Occasional',
+    memberValueAnnual: 8200,
+    churnRiskScore: 0.34,
     retentionPriority: 'NORMAL',
   },
   {
@@ -171,6 +187,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 1,
     lastRound: 'Jan 13',
     diningHistory: 'Exploring',
+    memberValueAnnual: 12500,
+    churnRiskScore: 0.18,
     retentionPriority: 'NORMAL',
   },
   {
@@ -184,6 +202,8 @@ export const memberWaitlistEntries = [
     daysWaiting: 1,
     lastRound: 'Jan 16',
     diningHistory: 'High spender in season',
+    memberValueAnnual: 21000,
+    churnRiskScore: 0.08,
     retentionPriority: 'NORMAL',
   },
 ];
