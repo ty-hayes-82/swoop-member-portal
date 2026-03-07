@@ -94,6 +94,50 @@ Define props contracts here before building any component. No exceptions.
 
 ---
 
+### WaitlistRow *(Sprint A — ~80 lines)*
+
+```js
+{
+  memberId: string,
+  memberName: string,
+  archetype: string,
+  healthScore: number,
+  riskLevel: 'Healthy' | 'Watch' | 'At Risk' | 'Critical',
+  retentionPriority: 'HIGH' | 'NORMAL',
+  requestedSlot: string,
+  daysWaiting: number,
+  lastRound: string,
+  memberValueAnnual?: number,
+  churnRiskScore?: number,
+  onSelect?: (memberId: string) => void,
+}
+```
+
+**Render:** single row for the retention-prioritized waitlist queue. No data access. All values passed as props.
+
+---
+
+### CancellationRiskRow *(Sprint A — ~80 lines)*
+
+```js
+{
+  bookingId: string,
+  memberId: string,
+  memberName: string,
+  archetype: string,
+  teeTime: string,
+  cancelProbability: number, // 0..1
+  drivers: string[],
+  recommendedAction: string,
+  estimatedRevenueLost: number,
+  onSelect?: (bookingId: string) => void,
+}
+```
+
+**Render:** single row for cancellations-at-risk table, sorted by cancelProbability descending.
+
+---
+
 ### IntegrationHealthStrip *(exists — ~50 lines)*
 
 ```js
