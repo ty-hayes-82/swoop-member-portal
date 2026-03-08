@@ -79,7 +79,7 @@ export const getDemandInsight = () =>
 export const getWaitlistInsight = () => {
   const s = getWaitlistSummary();
   return `${s.highPriority} at-risk members are waiting for Saturday morning slots. ` +
-    `Noteefy would notify all ${s.total} equally. ` +
+    `Standalone waitlist tools would notify all ${s.total} equally. ` +
     'Swoop fills slots with the right members first — and proves the retention impact of every slot.';
 };
 
