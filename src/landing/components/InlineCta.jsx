@@ -9,7 +9,7 @@ export default function InlineCta({ text = 'See how it works', targetId = 'demo-
   return (
     <div style={{ textAlign: 'center', marginBottom: theme.spacing.xxl }}>
       <a href={`#${targetId}`} onClick={onClick} style={{
-        color: theme.colors.accent,
+        color: theme.colors.ctaGreen,
         textDecoration: 'none',
         fontWeight: 600,
         fontSize: theme.fontSize.lg,
