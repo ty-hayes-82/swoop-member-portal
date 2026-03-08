@@ -4,6 +4,7 @@ import { getMonthlyRevenueSummary, getRevenueByDay } from './operationsService';
 import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
 import { getCancellationSummary, getWaitlistSummary }  from './waitlistService';
+import { cancellationProbabilities } from '../data/pipeline';
 
 let _d = null;
 
@@ -25,6 +26,26 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   const complaints = getComplaintCorrelation().filter(c => c.status !== 'resolved');
   const cancelSummary  = getCancellationSummary();
   const waitlistSummary = getWaitlistSummary();
+  const topCancellationRiskMembers = [...cancellationProbabilities]
+    .sort((a, b) => b.cancelProbability - a.cancelProbability)
+    .slice(0, 3)
+    .map((risk) => {
+      const urgency = risk.cancelProbability > 0.6
+        ? 'high'
+        : risk.cancelProbability >= 0.3
+          ? 'medium'
+          : 'low';
+      const predictedDaysUntilCancellation = Math.max(1, 5 - Math.round(risk.cancelProbability * 4));
+
+      return {
+        memberId: risk.memberId,
+        memberName: risk.memberName,
+        probability: Math.round(risk.cancelProbability * 100),
+        predictedDaysUntilCancellation,
+        recommendedAction: risk.recommendedAction,
+        urgency,
+      };
+    });
 
   return {
     currentDate: date,
@@ -56,6 +77,12 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         driverSummary:        'Wind advisory + 2 low-engagement members',
         suggestedAction:      'Send confirmation nudges to Kevin Hurst (82%), Anne Jordan (71%), James Whitfield (68%)',
         estimatedRevenueSaved: Math.round(cancelSummary.totalRevAtRisk * 0.34),
+        briefingCard: {
+          title: 'Tee Sheet Cancellation Risk',
+          subtitle: 'Top 3 at-risk members today',
+          items: topCancellationRiskMembers,
+        },
+        topAtRiskMembers: topCancellationRiskMembers,
       },
     },
     waitlistIntel: {
