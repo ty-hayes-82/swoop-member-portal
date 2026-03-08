@@ -29,7 +29,7 @@ export default function GrowthPipeline() {
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
         {/* Pipeline funnel KPIs */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
+        <div className="grid-responsive-4">
           {tiers.map(t => (
             <div key={t.key} style={{ background: theme.colors.bgCardHover, borderRadius: theme.radius.md,
               border: `1px solid ${t.color}40`, padding: theme.spacing.md, textAlign: 'center' }}>

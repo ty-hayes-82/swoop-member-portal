@@ -82,7 +82,7 @@ export default function QueueTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: theme.spacing.md }}>
+      <div className="grid-responsive-4">
         {stats.map((stat) => (
           <StatCard key={stat.label} {...stat} />
         ))}

@@ -75,7 +75,7 @@ export default function HealthOverview() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       {/* Health distribution bars */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
+      <div className="grid-responsive-4">
         {dist.map(d => (
           <div key={d.level} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${d.color}40`, padding: theme.spacing.md }}>

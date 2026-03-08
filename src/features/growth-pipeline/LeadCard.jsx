@@ -55,8 +55,7 @@ export default function LeadCard({ lead }) {
       {expanded && (
         <div style={{ padding: `0 ${theme.spacing.md} ${theme.spacing.md}`,
           borderTop: `1px solid ${theme.colors.border}` }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: theme.spacing.sm, margin: `${theme.spacing.md} 0` }}>
+          <div className="grid-responsive-4" style={{ margin: `${theme.spacing.md} 0` }}>
             {[
               { label: 'Rounds', value: lead.rounds },
               { label: 'Dining Visits', value: lead.dining },

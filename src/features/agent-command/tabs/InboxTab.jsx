@@ -33,7 +33,7 @@ export default function InboxTab() {
         context="Each proposal includes source, impact estimate, and an approval path. Review individually or apply bulk decisions by filter."
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
+      <div className="grid-responsive-4">
         {[
           { label: 'Pending', value: pendingCount, accent: theme.colors.agentCyan },
           { label: 'Visible', value: visible.length, accent: theme.colors.textSecondary },

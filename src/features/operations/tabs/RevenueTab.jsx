@@ -71,7 +71,7 @@ export default function RevenueTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       {/* KPI strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
+      <div className="grid-responsive-4">
         {[
           { label: 'Monthly Total', value: `$${(summary.total / 1000).toFixed(0)}K`, metric: 'golfRevenue', format: 'currency' },
           { label: 'Daily Average', value: `$${summary.dailyAvg.toLocaleString()}`, metric: null },

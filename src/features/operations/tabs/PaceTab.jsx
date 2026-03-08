@@ -77,7 +77,7 @@ export default function PaceTab() {
         padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
         <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary,
           marginBottom: theme.spacing.md }}>Bottleneck Holes</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.sm }}>
+        <div className="grid-responsive-4">
           {holes.map(h => (
             <div key={h.hole} style={{ textAlign: 'center', padding: theme.spacing.sm,
               background: theme.colors.bg, borderRadius: theme.radius.md,
