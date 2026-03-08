@@ -123,14 +123,14 @@ export const agents = [
 ];
 
 export const integrationCategories = [
-  { label: 'Tee Sheet & Booking', systems: 4, vendors: ['ForeTees', 'Chelsea', 'EZLinks', 'GolfNow'] },
-  { label: 'Member CRM', systems: 3, vendors: ['Northstar', 'Jonas Club Software', 'Club Essential'] },
-  { label: 'POS & F&B', systems: 5, vendors: ['Jonas POS', 'Clubessential POS', 'Square', 'Toast', 'Lightspeed'] },
-  { label: 'Communications', systems: 4, vendors: ['Twilio', 'SendGrid', 'Mailchimp', 'Intercom'] },
-  { label: 'Staffing & Payroll', systems: 3, vendors: ['ADP', 'Paychex', 'When I Work'] },
-  { label: 'Finance & BI', systems: 4, vendors: ['QuickBooks', 'Sage', 'NetSuite', 'Power BI'] },
-  { label: 'Web & Lead Capture', systems: 2, vendors: ['HubSpot', 'Typeform'] },
-  { label: 'Access & Activity', systems: 3, vendors: ['Gatekeeper', 'BrivoAccess', 'Club Automation'] },
+  { label: 'Tee Sheet & Booking', systems: 4, description: 'Leading tee sheet platforms' },
+  { label: 'Member CRM', systems: 3, description: 'Club management systems' },
+  { label: 'POS & F&B', systems: 5, description: 'Point-of-sale platforms' },
+  { label: 'Communications', systems: 4, description: 'Email & SMS providers' },
+  { label: 'Staffing & Payroll', systems: 3, description: 'Payroll & scheduling platforms' },
+  { label: 'Finance & BI', systems: 4, description: 'Accounting & analytics tools' },
+  { label: 'Web & Lead Capture', systems: 2, description: 'Marketing & CRM platforms' },
+  { label: 'Access & Activity', systems: 3, description: 'Access control systems' },
 ];
 
 export const foundingPartnerBenefits = [

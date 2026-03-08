@@ -1,9 +1,15 @@
 import { theme } from '@/config/theme';
 import { foundingPartnerBenefits } from '@/landing/data';
 
-const integrations = [
-  'ForeTees', 'Jonas Club Software', 'Northstar', 'Club Essential',
-  'Square POS', 'Lightspeed', 'QuickBooks', 'ClubReady',
+const integrationCategories = [
+  'Tee Sheet Platforms',
+  'Club Management Systems',
+  'POS & F&B',
+  'CRM & Email',
+  'Payroll & Scheduling',
+  'Finance & BI',
+  'Access Control',
+  'Web & Leads',
 ];
 
 const pillStyle = {
@@ -58,8 +64,8 @@ export default function SocialProofSection() {
           Connects to the systems you already use
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: theme.spacing.md }}>
-          {integrations.map((name) => (
-            <span key={name} style={pillStyle}>{name}</span>
+          {integrationCategories.map((category) => (
+            <span key={category} style={pillStyle}>{category}</span>
           ))}
         </div>
         <p style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm, margin: 0 }}>
