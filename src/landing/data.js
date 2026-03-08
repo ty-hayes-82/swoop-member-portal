@@ -137,19 +137,19 @@ export const proofMetrics = [
   {
     metric: '91%',
     label: 'Waitlist fill rate',
-    context: 'Up from 67% with first-come-first-served queuing',
+    context: 'Up from 67% after switching from first-come-first-served queueing',
     icon: 'TrendingUp',
   },
   {
     metric: '$312',
     label: 'Revenue per tee slot',
-    context: 'Vs $187 with reactive tee sheet management',
+    context: 'Up from $187 when tee-sheet actions are prioritized by demand and retention',
     icon: 'DollarSign',
   },
   {
     metric: '6 days',
     label: 'Early warning on resignations',
-    context: 'Swoop flagged James Whitfield before anyone else saw it coming',
+    context: 'Average lead time before a resignation is formally reported',
     icon: 'AlertTriangle',
   },
 ];
