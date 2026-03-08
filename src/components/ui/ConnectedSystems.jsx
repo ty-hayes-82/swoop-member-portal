@@ -5,7 +5,7 @@ import { theme } from '@/config/theme';
 
 const SYSTEMS = [
   {
-    name:     'ForeTees',
+    name:     'Tee Sheet',
     role:     'Tee Sheet · Golf Operations',
     icon:     '⛳',
     color:    theme.colors.operations,
@@ -13,7 +13,7 @@ const SYSTEMS = [
     records:  '2,524 bookings',
   },
   {
-    name:     'Jonas POS',
+    name:     'POS',
     role:     'Food & Beverage · Payments',
     icon:     '🍽',
     color:    theme.colors.fb,
@@ -21,7 +21,7 @@ const SYSTEMS = [
     records:  '3,851 checks',
   },
   {
-    name:     'Northstar',
+    name:     'Member CRM',
     role:     'Member CRM · Email',
     icon:     '★',
     color:    theme.colors.textSecondary,
@@ -29,7 +29,7 @@ const SYSTEMS = [
     records:  '300 members',
   },
   {
-    name:     'ClubReady',
+    name:     'Scheduling',
     role:     'Staff Scheduling',
     icon:     '📅',
     color:    theme.colors.staffing,
@@ -37,7 +37,7 @@ const SYSTEMS = [
     records:  '701 shifts',
   },
   {
-    name:     'Club Prophet',
+    name:     'Analytics',
     role:     'Membership Management',
     icon:     '◉',
     color:    theme.colors.textSecondary,

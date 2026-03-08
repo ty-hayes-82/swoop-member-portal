@@ -1,5 +1,7 @@
 // Member data — Oakmont Hills CC, January 2026
 
+import { theme } from '@/config/theme';
+
 export const memberArchetypes = [
   { archetype: 'Die-Hard Golfer',  count: 54, golf: 88, dining: 42, events: 28, email: 32, trend: +4  },
   { archetype: 'Social Butterfly', count: 45, golf: 18, dining: 82, events: 78, email: 72, trend: +6  },
@@ -84,4 +86,3 @@ export const resignationScenarios = [
     ],
   },
 ];
-import { theme } from '@/config/theme';

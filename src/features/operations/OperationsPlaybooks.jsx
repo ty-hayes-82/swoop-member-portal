@@ -29,7 +29,7 @@ const PEAK_DEMAND_STEPS = [
   {
     title: 'Identify At-Risk Members in Queue',
     description: 'Score every waitlist entry against health score and resignation risk. Members with health < 50 are flagged for priority notification.',
-    preview: 'Health scores pulled from Northstar + ForeTees: 5 members flagged as retention priority.',
+    preview: 'Health scores pulled from Member CRM + Tee Sheet: 5 members flagged as retention priority.',
     timeline: 'Immediate',
     actionType: 'report',
   },
@@ -42,7 +42,7 @@ const PEAK_DEMAND_STEPS = [
   },
   {
     title: 'Attach Post-Round Dining Incentive',
-    description: '"Table reserved for post-round lunch" added to every priority notification. Coordinates ForeTees + Jonas POS in one action.',
+    description: '"Table reserved for post-round lunch" added to every priority notification. Coordinates Tee Sheet + POS in one action.',
     preview: 'Comp reservation pre-attached: Grill Room, 11 AM–1 PM window, linked to booking confirmation.',
     timeline: 'On notification send',
     actionType: 'comp-offer',

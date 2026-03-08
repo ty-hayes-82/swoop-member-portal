@@ -34,4 +34,4 @@ export const getMemberSummary = () => {
   };
 };
 
-export const sourceSystems = ['Northstar', 'Club Prophet', 'ForeTees'];
+export const sourceSystems = ['Member CRM', 'Analytics', 'Tee Sheet'];

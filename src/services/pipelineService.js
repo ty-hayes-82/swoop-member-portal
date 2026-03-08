@@ -44,4 +44,4 @@ export const getWaitlistSummary = () => {
   return { total: entries.length, highPriority: highPriority.length, atRisk: atRisk.length, avgDaysWaiting };
 };
 
-export const sourceSystems = ['ForeTees', 'Club Prophet'];
+export const sourceSystems = ['Tee Sheet', 'Analytics'];

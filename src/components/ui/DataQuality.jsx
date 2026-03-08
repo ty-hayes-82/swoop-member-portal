@@ -6,7 +6,7 @@ import { theme } from '@/config/theme';
 
 const SYSTEMS = [
   {
-    name: 'ForeTees',
+    name: 'Tee Sheet',
     type: 'Tee Sheet & Reservations',
     status: 'connected',
     lastSync: '4 min ago',
@@ -15,7 +15,7 @@ const SYSTEMS = [
     note: null,
   },
   {
-    name: 'Jonas POS',
+    name: 'POS',
     type: 'Food & Beverage',
     status: 'connected',
     lastSync: '7 min ago',
@@ -24,7 +24,7 @@ const SYSTEMS = [
     note: '6% of checks are guest transactions — not linked to member profiles. This is expected.',
   },
   {
-    name: 'Northstar',
+    name: 'Member CRM',
     type: 'Member CRM & Dues',
     status: 'connected',
     lastSync: '12 min ago',
@@ -33,7 +33,7 @@ const SYSTEMS = [
     note: null,
   },
   {
-    name: 'ClubReady',
+    name: 'Scheduling',
     type: 'Staffing & Scheduling',
     status: 'connected',
     lastSync: '1 min ago',
@@ -42,7 +42,7 @@ const SYSTEMS = [
     note: null,
   },
   {
-    name: 'Club Prophet',
+    name: 'Analytics',
     type: 'Events & Programming',
     status: 'connected',
     lastSync: '9 min ago',
@@ -136,7 +136,7 @@ export default function DataQuality() {
 
       <div style={{ padding: theme.spacing.md, background: theme.colors.bgDeep, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>
-          Typical go-live timeline with ForeTees + Jonas: 10–14 days
+          Typical go-live timeline with Tee Sheet + POS: 10–14 days
         </span>
         <span style={{ fontSize: '11px', color: theme.colors.success, fontWeight: 600 }}>● All systems syncing normally</span>
       </div>

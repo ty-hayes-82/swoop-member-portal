@@ -1,6 +1,6 @@
 import { CLUB_NAME } from '@/config/constants.js';
 
-const SYSTEMS = ['ForeTees', 'Jonas POS', 'Northstar', 'ClubReady', 'Club Prophet'];
+const SYSTEMS = ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Analytics'];
 
 export default function Footer() {
   return (
