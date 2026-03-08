@@ -89,7 +89,19 @@ button {
 @media print {
   .no-print { display: none !important; }
   .print-only { display: block !important; }
-  body { background: white; color: black; font-size: 12px; }
+  body { background: white !important; color: black !important; font-size: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .print-break { page-break-before: always; }
+  /* Hide everything except the briefing modal */
+  aside, header, footer, nav { display: none !important; }
+  main { margin: 0 !important; padding: 0 !important; }
+  div[style*="marginLeft"] { margin-left: 0 !important; }
+  /* Clean up the modal for print */
+  div[style*="position: fixed"][style*="inset: 0"] {
+    position: static !important; background: none !important; padding: 0 !important;
+  }
+  div[style*="position: fixed"][style*="inset: 0"] > div {
+    box-shadow: none !important; max-height: none !important; border-radius: 0 !important;
+  }
+  button { display: none !important; }
 }
 .print-only { display: none; }

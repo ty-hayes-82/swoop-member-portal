@@ -82,6 +82,7 @@ export const navItems = [
     color: theme.colors.navDemo,
     subtitle: 'Guided walkthroughs for demos',
     sourceSystems: [],
+    hidden: true, // Accessible via /#/demo-mode URL only — not shown in main nav
   },
 ];
 export const NAV_ITEMS = navItems;

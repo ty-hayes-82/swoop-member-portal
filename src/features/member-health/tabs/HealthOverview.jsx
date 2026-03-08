@@ -115,7 +115,13 @@ export default function HealthOverview() {
               {['Member', 'Health Score', 'Archetype', 'Primary Risk Signal'].map(h => (
                 <th key={h} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'left',
                   color: theme.colors.textMuted, fontSize: theme.fontSize.xs, textTransform: 'uppercase',
-                  letterSpacing: '0.06em', fontWeight: 500 }}>{h}</th>
+                  letterSpacing: '0.06em', fontWeight: 500 }}>
+                  {h}
+                  {h === 'Health Score' && (
+                    <span title="Composite score (0–100) based on: visit frequency, F&B spend trends, email engagement, complaint history, tenure length, and event participation. Updated daily."
+                      style={{ cursor: 'help', marginLeft: '4px', fontSize: '11px', opacity: 0.7 }}>ⓘ</span>
+                  )}
+                </th>
               ))}
             </tr>
           </thead>

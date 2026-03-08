@@ -38,7 +38,7 @@ export default function TrendContext({ metricKey, format = 'number', style = {} 
       flexWrap: 'wrap', ...style,
     }}>
       <span style={{ color: arrowColor, fontWeight: 700 }}>
-        {ARROW[t.direction]} {sign}{Math.abs(t.pctChange).toFixed(0)}%
+        {ARROW[t.direction]} {sign}{typeof t.pctChange === 'number' && !isNaN(t.pctChange) ? Math.abs(t.pctChange).toFixed(0) : '—'}%
       </span>
       <span>vs. {t.priorMonth}</span>
       {t.streak >= 2 && (

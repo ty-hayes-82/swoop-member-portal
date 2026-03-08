@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { AppProvider } from '@/context/AppContext';
 import { NavigationProvider, useNavigationContext } from '@/context/NavigationContext';
 import { DataProvider } from '@/context/DataProvider';
@@ -31,23 +32,42 @@ const ROUTES = {
 function AppShell() {
   const { currentRoute, sidebarCollapsed } = useNavigationContext();
   const PageComponent = ROUTES[currentRoute] ?? DailyBriefing;
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => { setMobileMenuOpen(false); }, [currentRoute]);
+
+  const sidebarWidth = isMobile ? 0 : (sidebarCollapsed ? 52 : 230);
 
   return (
     <div style={{
       background: theme.colors.bg, color: theme.colors.textPrimary,
       fontFamily: theme.fonts.sans,
     }}>
-      <Sidebar />
+      {/* Mobile overlay */}
+      {isMobile && mobileMenuOpen && (
+        <div onClick={() => setMobileMenuOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99 }} />
+      )}
+      {/* Sidebar: hidden on mobile unless menu is open */}
+      {(!isMobile || mobileMenuOpen) && <Sidebar />}
       <div style={{
-        marginLeft: sidebarCollapsed ? 52 : 230,
+        marginLeft: sidebarWidth,
         transition: 'margin-left 0.2s ease',
         display: 'flex', flexDirection: 'column',
         minHeight: '100vh',
       }}>
-        <Header />
+        <Header onMobileMenuToggle={isMobile ? () => setMobileMenuOpen(v => !v) : undefined} />
         <main style={{
           flex: 1,
-          padding: theme.spacing.xl,
+          padding: isMobile ? '16px' : theme.spacing.xl,
           maxWidth: 1200,
           width: '100%',
           margin: '0 auto',
@@ -55,7 +75,7 @@ function AppShell() {
           <PageComponent />
         </main>
         <footer style={{
-          padding: `${theme.spacing.md} ${theme.spacing.xl}`,
+          padding: `${theme.spacing.md} ${isMobile ? '16px' : theme.spacing.xl}`,
           borderTop: `1px solid ${theme.colors.border}`,
           fontSize: theme.fontSize.xs,
           color: theme.colors.textMuted,
