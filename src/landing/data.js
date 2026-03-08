@@ -153,9 +153,9 @@ export const foundingPartnerBenefits = [
 
 export const objections = [
   {
-    question: 'Why not just use Noteefy?',
+    question: 'Why not just use a standalone waitlist tool?',
     answer:
-      "Noteefy fills cancelled slots — one function from one data source. Swoop gives you cross-lens intelligence: which members to prioritize, what their dining and engagement patterns predict, and how to close the loop with personalized outreach. Noteefy is a feature. Swoop is the operating layer.",
+      "Standalone waitlist tools fill cancelled slots — one function from one data source. Swoop gives you cross-lens intelligence: which members to prioritize, what their dining and engagement patterns predict, and how to close the loop with personalized outreach. Waitlist software is a feature. Swoop is the operating layer.",
   },
   {
     question: 'Why not just use my CRM reports?',
@@ -242,8 +242,8 @@ export const faqItems = [
       'Absolutely. Our Free tier gives you health scores with no credit card required. Pro includes a 14-day trial.',
   },
   {
-    question: 'What makes Swoop different from Noteefy?',
+    question: 'What makes Swoop different from standalone waitlist tools?',
     answer:
-      'Noteefy fills cancelled tee times — one function, one system. Swoop is a full intelligence platform across five operational lenses with AI agents, member behavioral data, and closed-loop engagement. Noteefy is a feature; Swoop is the operating layer.',
+      'Standalone waitlist tools fill cancelled tee times — one function, one system. Swoop is a full intelligence platform across five operational lenses with AI agents, member behavioral data, and closed-loop engagement. Waitlist software is a feature; Swoop is the operating layer.',
   },
 ];

@@ -46,7 +46,7 @@ export default function ComparisonSection() {
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 680 }}>
           <thead>
             <tr style={{ background: theme.colors.bgDeep }}>
-              {['Feature', 'Swoop', 'Noteefy', 'Your CRM Alone', 'Spreadsheets'].map((header) => (
+              {['Feature', 'Swoop', 'Waitlist Tools', 'Your CRM Alone', 'Spreadsheets'].map((header) => (
                 <th
                   key={header}
                   style={{
