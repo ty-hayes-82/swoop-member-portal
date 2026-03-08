@@ -1,6 +1,7 @@
 import { theme } from '@/config/theme';
 import HeroSection from '@/landing/components/HeroSection';
 import ProblemSection from '@/landing/components/ProblemSection';
+import InlineCta from '@/landing/components/InlineCta';
 import LensesSection from '@/landing/components/LensesSection';
 import ComparisonSection from '@/landing/components/ComparisonSection';
 import AgentsSection from '@/landing/components/AgentsSection';
@@ -35,7 +36,9 @@ export default function LandingPage() {
       <main style={container}>
         <HeroSection />
         <ProblemSection />
+        <InlineCta />
         <LensesSection />
+        <InlineCta />
         <ComparisonSection />
         <AgentsSection />
         <IntegrationsSection />

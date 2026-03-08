@@ -13,6 +13,14 @@ const ctaBase = {
 };
 
 export default function HeroSection() {
+  const goToDemoForm = () => {
+    document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const goToApp = () => {
+    window.location.assign('/');
+  };
+
   return (
     <section className="landing-section-padded" style={{ padding: '88px 0 80px' }}>
       <div style={{ maxWidth: 780 }}>
@@ -52,6 +60,7 @@ export default function HeroSection() {
               background: theme.colors.ctaGreen,
               color: theme.colors.ctaGreenText,
             }}
+            onClick={goToDemoForm}
             onMouseEnter={(event) => {
               event.currentTarget.style.background = theme.colors.ctaGreenHover;
             }}
@@ -69,6 +78,7 @@ export default function HeroSection() {
               color: theme.colors.ctaGreen,
               borderColor: theme.colors.ctaGreen,
             }}
+            onClick={goToApp}
             onMouseEnter={(event) => {
               event.currentTarget.style.background = theme.colors.ctaGreen;
               event.currentTarget.style.color = theme.colors.ctaGreenText;

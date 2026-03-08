@@ -49,13 +49,13 @@ export const comparisonFeatures = [
     feature: 'Member churn prediction',
     swoop: true,
     noteefy: false,
-    crm: false,
+    crm: 'partial',
     sheets: false,
   },
   {
     feature: 'Retention-prioritized waitlist',
     swoop: true,
-    noteefy: false,
+    noteefy: 'partial',
     crm: false,
     sheets: false,
   },
@@ -63,8 +63,8 @@ export const comparisonFeatures = [
     feature: 'Cross-lens analytics',
     swoop: true,
     noteefy: false,
-    crm: false,
-    sheets: false,
+    crm: 'partial',
+    sheets: 'partial',
   },
   {
     feature: 'AI agent automation',
@@ -76,15 +76,15 @@ export const comparisonFeatures = [
   {
     feature: 'Real-time behavioral data',
     swoop: true,
-    noteefy: false,
-    crm: false,
+    noteefy: 'partial',
+    crm: 'partial',
     sheets: false,
   },
   {
     feature: 'Closed-loop engagement',
     swoop: true,
     noteefy: false,
-    crm: false,
+    crm: 'partial',
     sheets: false,
   },
 ];
@@ -133,29 +133,23 @@ export const integrationCategories = [
   { label: 'Access & Activity', systems: 3, vendors: ['Gatekeeper', 'BrivoAccess', 'Club Automation'] },
 ];
 
-export const testimonials = [
+export const proofMetrics = [
   {
-    club: 'Ridgeview Country Club, Dallas TX',
-    quote:
-      'Swoop surfaced three resignations-in-progress we would have missed. We retained two and recovered six figures in annual dues value.',
-    author: 'Elena Vasquez, General Manager',
-    metricLabel: 'Annual dues at risk recovered',
-    metricValue: '$186K',
+    metric: '91%',
+    label: 'Waitlist fill rate',
+    context: 'Up from 67% with first-come-first-served queuing',
+    icon: 'TrendingUp',
   },
   {
-    club: 'Stonebridge Golf & Lake Club, Naples FL',
-    quote:
-      'The retention-prioritized waitlist changed how we fill late openings. Members feel seen, and our tee sheet now protects relationships and revenue.',
-    author: 'Michael Carver, General Manager',
-    metricLabel: 'Waitlist fill conversion lift',
-    metricValue: '+31%',
+    metric: '$312',
+    label: 'Revenue per tee slot',
+    context: 'Vs $187 with reactive tee sheet management',
+    icon: 'DollarSign',
   },
   {
-    club: 'Cedar Point Club, Charlotte NC',
-    quote:
-      'For the first time, we can prove which interventions changed outcomes. The board finally sees analytics tied to member experience and dollars.',
-    author: 'Priya Natarajan, General Manager',
-    metricLabel: 'Churn-risk members retained',
-    metricValue: '14 in 90 days',
+    metric: '6 days',
+    label: 'Early warning on resignations',
+    context: 'Swoop flagged James Whitfield before anyone else saw it coming',
+    icon: 'AlertTriangle',
   },
 ];

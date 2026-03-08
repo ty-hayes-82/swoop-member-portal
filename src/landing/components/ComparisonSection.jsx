@@ -2,7 +2,12 @@ import { theme } from '@/config/theme';
 import { comparisonFeatures } from '@/landing/data';
 
 function Cell({ value }) {
-  const color = value ? theme.colors.success : theme.colors.urgent;
+  const color = value === true
+    ? theme.colors.success
+    : value === 'partial'
+      ? theme.colors.warning
+      : theme.colors.urgent;
+  const symbol = value === true ? '✓' : value === 'partial' ? '~' : '✕';
   return (
     <td style={{
       textAlign: 'center',
@@ -12,7 +17,7 @@ function Cell({ value }) {
       padding: '12px 10px',
       borderBottom: `1px solid ${theme.colors.borderLight}`,
     }}>
-      {value ? '✓' : '✕'}
+      {symbol}
     </td>
   );
 }

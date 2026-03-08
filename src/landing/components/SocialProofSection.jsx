@@ -1,16 +1,25 @@
 import { theme } from '@/config/theme';
-import { testimonials } from '@/landing/data';
+import { proofMetrics } from '@/landing/data';
+
+const iconLabel = {
+  TrendingUp: 'UP',
+  DollarSign: '$$',
+  AlertTriangle: 'AL',
+};
 
 export default function SocialProofSection() {
   return (
     <section style={{ marginBottom: theme.spacing.xxl }}>
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
-        Trusted by private club operators who need proof, not promises.
+        Platform performance from Oakmont Hills demo scenario
       </h2>
+      <p style={{ color: theme.colors.textMuted, marginBottom: theme.spacing.lg }}>
+        Simulated data from a 300-member private club
+      </p>
       <div className="landing-grid-3">
-        {testimonials.map((item) => (
+        {proofMetrics.map((item) => (
           <article
-            key={item.club}
+            key={item.label}
             style={{
               border: `1px solid ${theme.colors.border}`,
               borderRadius: theme.radius.lg,
@@ -20,35 +29,22 @@ export default function SocialProofSection() {
           >
             <p style={{
               color: theme.colors.textMuted,
-              fontSize: theme.fontSize.sm,
+              fontFamily: theme.fonts.mono,
+              fontSize: theme.fontSize.xs,
               marginBottom: theme.spacing.sm,
             }}>
-              {item.club}
-            </p>
-            <p style={{
-              fontSize: theme.fontSize.md,
-              marginBottom: theme.spacing.md,
-              lineHeight: 1.6,
-            }}>
-              "{item.quote}"
-            </p>
-            <p style={{ color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
-              {item.author}
-            </p>
-            <p style={{
-              color: theme.colors.textMuted,
-              fontSize: theme.fontSize.sm,
-              marginBottom: 4,
-            }}>
-              {item.metricLabel}
+              {iconLabel[item.icon] || 'MT'}
             </p>
             <p style={{
               fontFamily: theme.fonts.mono,
-              fontSize: theme.fontSize.xl,
+              fontSize: 'clamp(34px, 5vw, 44px)',
               fontWeight: 700,
+              marginBottom: 4,
             }}>
-              {item.metricValue}
+              {item.metric}
             </p>
+            <p style={{ fontSize: theme.fontSize.lg, marginBottom: theme.spacing.sm }}>{item.label}</p>
+            <p style={{ color: theme.colors.textSecondary }}>{item.context}</p>
           </article>
         ))}
       </div>
