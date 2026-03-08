@@ -155,7 +155,7 @@ export const objections = [
   {
     question: 'Why not just use a standalone waitlist tool?',
     answer:
-      "Standalone waitlist tools fill cancelled slots — one function from one data source. Swoop gives you cross-lens intelligence: which members to prioritize, what their dining and engagement patterns predict, and how to close the loop with personalized outreach. Waitlist software is a feature. Swoop is the operating layer.",
+      "Standalone waitlist tools fill cancelled slots — one function from one data source. Swoop gives you cross-system intelligence: which members to prioritize, what their dining and engagement patterns predict, and how to close the loop with personalized outreach. Waitlist software is a feature. Swoop is the operating layer.",
   },
   {
     question: 'Why not just use my CRM reports?',
