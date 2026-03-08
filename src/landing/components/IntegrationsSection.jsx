@@ -128,7 +128,7 @@ export default function IntegrationsSection() {
               <div style={{ fontSize: '32px', color: theme.colors.ctaGreen }}>→</div>
             </div>
 
-            {/* Right: Five Lenses */}
+            {/* Right: What Swoop Delivers */}
             <div>
               <p style={{
                 fontSize: theme.fontSize.xs,
