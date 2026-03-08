@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
 import { theme } from '@/config/theme';
 import QueueTab from './tabs/QueueTab';
 import PredictionsTab from './tabs/PredictionsTab';
 import IntelligenceTab from './tabs/IntelligenceTab';
+import { useNavigation } from '@/context/NavigationContext';
 import {
   sourceSystems,
   getWaitlistSummary,
@@ -18,9 +19,17 @@ const TABS = [
 ];
 
 export default function WaitlistDemand() {
+  const { routeIntent, clearRouteIntent } = useNavigation();
   const [activeTab, setActiveTab] = useState('queue');
   const waitlistSummary = getWaitlistSummary();
   const cancellationSummary = getCancellationSummary();
+
+  useEffect(() => {
+    if (routeIntent?.waitlistTab && TABS.some((tab) => tab.key === routeIntent.waitlistTab)) {
+      setActiveTab(routeIntent.waitlistTab);
+      clearRouteIntent();
+    }
+  }, [routeIntent, clearRouteIntent]);
 
   const tabsWithBadges = TABS.map((tab) => {
     if (tab.key === 'queue' && waitlistSummary.highPriority > 0) {

@@ -51,6 +51,11 @@ function AtRiskRow({ m, onNavigate }) {
   );
 }
 
+function getAlertColor(probability) {
+  if (probability > 60) return { border: '#EF444460', bg: '#EF444410', label: '#EF4444', text: 'Red Alert' };
+  if (probability >= 30) return { border: '#F59E0B60', bg: '#F59E0B10', label: '#F59E0B', text: 'Yellow Alert' };
+  return null;
+}
 
 export default function TodayRiskFactors({ data, onNavigate }) {
   const { weather, tempHigh, wind, atRiskTeetimes, staffingGaps, fullyStaffed, cancellationRisk } = data;
@@ -60,6 +65,11 @@ export default function TodayRiskFactors({ data, onNavigate }) {
   const filtered   = archetypeFilter
     ? atRiskTeetimes.filter(m => m.archetype === archetypeFilter)
     : atRiskTeetimes;
+  const cancellationAlerts = (cancellationRisk?.topAtRiskMembers || [])
+    .map((member) => ({ ...member, alert: getAlertColor(member.probability) }))
+    .filter((member) => member.alert);
+
+  const navigateToPredictions = () => onNavigate?.('waitlist-demand', { waitlistTab: 'predictions' });
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -86,6 +96,48 @@ export default function TodayRiskFactors({ data, onNavigate }) {
 
       {/* Tee sheet cancellation risk */}
       {cancellationRisk && <TeeSheetRisk cancellationRisk={cancellationRisk} />}
+
+      {/* Tee sheet risk alerts */}
+      {cancellationAlerts.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.05em', fontWeight: 600 }}>
+            TEE SHEET RISK ALERTS
+          </div>
+          {cancellationAlerts.map((member) => (
+            <button
+              key={member.memberId}
+              onClick={navigateToPredictions}
+              style={{
+                width: '100%',
+                textAlign: 'left',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                border: `1px solid ${member.alert.border}`,
+                background: member.alert.bg,
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{member.memberName}</span>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: member.alert.label, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {member.alert.text}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {member.recommendedAction}
+                  </div>
+                </div>
+                <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 700, color: member.alert.label }}>{member.probability}%</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Predictions →</div>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* At-risk tee times */}
       {atRiskTeetimes.length > 0 && (
