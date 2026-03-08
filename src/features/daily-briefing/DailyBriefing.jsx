@@ -83,7 +83,7 @@ export default function DailyBriefing() {
                 <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>Staffing & Service</div>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.sm, marginBottom: theme.spacing.md }}>
+            <div className="grid-responsive-4" style={{ marginBottom: theme.spacing.md }}>
               {[
                 { label: 'Complaint filed', value: 'Jan 16', color: theme.colors.urgent },
                 { label: 'Follow-up status', value: 'Not resolved', color: theme.colors.warning },
