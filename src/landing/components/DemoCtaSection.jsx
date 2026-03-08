@@ -95,12 +95,20 @@ export default function DemoCtaSection() {
       </h2>
       <p style={{
         color: `${theme.colors.bgCard}D9`,
-        marginBottom: theme.spacing.xl,
+        marginBottom: theme.spacing.sm,
         maxWidth: 780,
         fontSize: theme.fontSize.lg,
       }}>
         Book a live walkthrough with your own operating scenarios: tee sheet leakage, at-risk
         members, F&B staffing pressure, and revenue pipeline blind spots.
+      </p>
+      <p style={{
+        color: `${theme.colors.bgCard}D9`,
+        marginBottom: theme.spacing.xl,
+        maxWidth: 780,
+      }}>
+        Limited founding partner slots available — early clubs get hands-on onboarding and direct
+        input on the roadmap.
       </p>
       <form
         onSubmit={handleSubmit}
@@ -165,6 +173,9 @@ export default function DemoCtaSection() {
           ) : 'Book Your Demo'}
         </button>
       </form>
+      <p style={{ marginTop: theme.spacing.md, color: `${theme.colors.bgCard}D9`, fontSize: theme.fontSize.sm }}>
+        No credit card required · 30-minute walkthrough · Cancel anytime
+      </p>
       {status === 'success' && (
         <p style={{ marginTop: theme.spacing.md, color: theme.colors.ctaGreen }}>
           {`Thanks, ${submittedName}! We'll reach out within 24 hours.`}

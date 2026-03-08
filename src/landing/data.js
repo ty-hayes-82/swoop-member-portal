@@ -168,3 +168,82 @@ export const objections = [
       "You can build a dashboard. You can't build prediction. Swoop's AI agents monitor behavioral signals in real time and recommend interventions before problems become resignations. Spreadsheets report the past. Swoop protects the future.",
   },
 ];
+
+export const pricingTiers = [
+  {
+    name: 'Free — Health Scores',
+    price: '$0/mo',
+    description:
+      'Connect your existing systems. See member health scores and basic risk alerts powered by integration data alone.',
+    features: [
+      'Health score dashboard',
+      'Basic risk alerts',
+      'Up to 3 system integrations',
+      'Email support',
+    ],
+    cta: 'Start Free',
+  },
+  {
+    name: 'Pro — Intelligence Dashboard',
+    price: '$99/mo',
+    badge: 'Most Popular',
+    description:
+      'Full Five Lenses analytics with cross-system intelligence. Optional member app integration for richer behavioral data.',
+    features: [
+      'All 5 Lenses',
+      'Cross-lens analytics',
+      'AI agent recommendations',
+      'Up to 10 integrations',
+      'Priority support',
+    ],
+    cta: 'Start 14-Day Trial',
+  },
+  {
+    name: 'Club — Full Platform',
+    price: '$1,499/mo',
+    description:
+      'Everything in Pro plus the Swoop member app, GPS behavioral data, push notifications, and closed-loop engagement.',
+    features: [
+      'Everything in Pro',
+      'Swoop member app included',
+      'GPS + real-time behavioral data',
+      'Push notification channel',
+      'Closed-loop engagement tracking',
+      'Dedicated success manager',
+    ],
+    cta: 'Book a Demo',
+  },
+];
+
+export const faqItems = [
+  {
+    question: 'How long does setup take?',
+    answer:
+      'Most clubs are live in under 2 weeks. We connect to your existing tee sheet, POS, and CRM — no rip-and-replace required.',
+  },
+  {
+    question: 'Do I need to replace my current software?',
+    answer:
+      'No. Swoop sits on top of your existing systems and connects via API. We support 28 integrations across 10 categories.',
+  },
+  {
+    question: "What if I don't have a tee sheet system?",
+    answer:
+      "You can still use Swoop's member intelligence, F&B, and staffing lenses with manual data entry or CSV import. The tee sheet lens activates when you connect a supported system.",
+  },
+  {
+    question: "Is my members' data secure?",
+    answer:
+      'Yes. All data is encrypted in transit and at rest. We never share member data with third parties. SOC 2 compliance is on our roadmap.',
+  },
+  {
+    question: 'Can I try it before committing?',
+    answer:
+      'Absolutely. Our Free tier gives you health scores with no credit card required. Pro includes a 14-day trial.',
+  },
+  {
+    question: 'What makes Swoop different from Noteefy?',
+    answer:
+      'Noteefy fills cancelled tee times — one function, one system. Swoop is a full intelligence platform across five operational lenses with AI agents, member behavioral data, and closed-loop engagement. Noteefy is a feature; Swoop is the operating layer.',
+  },
+];
