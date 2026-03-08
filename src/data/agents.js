@@ -2,8 +2,8 @@ import { theme } from '@/config/theme';
 
 export const agentDefinitions = [
   {
-    id: 'retention-sentinel',
-    name: 'Retention Sentinel',
+    id: 'member-pulse',
+    name: 'Member Pulse',
     description: 'Detects early churn signals and proposes interventions before members disengage.',
     status: 'active',
     lastAction: '2026-01-17T06:04:00Z',
@@ -38,8 +38,8 @@ export const agentDefinitions = [
     accentColor: theme.colors.navPipeline,
   },
   {
-    id: 'engagement-coach',
-    name: 'Engagement Coach',
+    id: 'engagement-autopilot',
+    name: 'Engagement Autopilot',
     description: 'Monitors declining participation and proposes targeted outreach for member reactivation.',
     status: 'idle',
     lastAction: '2026-01-16T18:12:00Z',
@@ -47,9 +47,9 @@ export const agentDefinitions = [
     accentColor: theme.colors.navMembers,
   },
   {
-    id: 'draft-communicator',
-    name: 'Draft Communicator',
-    description: 'Generates message drafts for outreach, staff alerts, and call scripts for approval.',
+    id: 'labor-optimizer',
+    name: 'Labor Optimizer',
+    description: 'Forecasts staffing gaps and recommends coverage shifts to protect service quality and margin.',
     status: 'active',
     lastAction: '2026-01-17T06:21:00Z',
     accuracy: 90,
@@ -61,8 +61,8 @@ export const agentActions = [
   {
     id: 'agx_001',
     timestamp: '2026-01-17T06:02:00Z',
-    agentId: 'retention-sentinel',
-    source: 'Retention Sentinel',
+    agentId: 'member-pulse',
+    source: 'Member Pulse',
     actionType: 'RETENTION_OUTREACH',
     description: 'Prioritize personal outreach to James Whitfield before his 9:20 AM tee time.',
     status: 'pending',
@@ -83,8 +83,8 @@ export const agentActions = [
   {
     id: 'agx_003',
     timestamp: '2026-01-17T06:09:00Z',
-    agentId: 'draft-communicator',
-    source: 'Draft Communicator',
+    agentId: 'labor-optimizer',
+    source: 'Labor Optimizer',
     actionType: 'DRAFT_MESSAGE',
     description: 'Draft apology + recovery note for unresolved Grill Room service issue.',
     status: 'pending',
@@ -116,8 +116,8 @@ export const agentActions = [
   {
     id: 'agx_006',
     timestamp: '2026-01-17T06:21:00Z',
-    agentId: 'draft-communicator',
-    source: 'Draft Communicator',
+    agentId: 'labor-optimizer',
+    source: 'Labor Optimizer',
     actionType: 'DRAFT_MESSAGE',
     description: 'Prepare sponsor outreach script for David Chen membership conversation.',
     status: 'approved',
@@ -127,8 +127,8 @@ export const agentActions = [
   {
     id: 'agx_007',
     timestamp: '2026-01-17T07:02:00Z',
-    agentId: 'engagement-coach',
-    source: 'Engagement Coach',
+    agentId: 'engagement-autopilot',
+    source: 'Engagement Autopilot',
     actionType: 'RE_ENGAGEMENT',
     description: 'Send low-friction 9-hole invite to two weekend members with declining activity.',
     status: 'dismissed',
@@ -160,8 +160,8 @@ export const agentActions = [
   {
     id: 'agx_010',
     timestamp: '2026-01-17T08:05:00Z',
-    agentId: 'retention-sentinel',
-    source: 'Retention Sentinel',
+    agentId: 'member-pulse',
+    source: 'Member Pulse',
     actionType: 'RETENTION_OUTREACH',
     description: 'Queue 48-hour follow-up if James has not rebooked after recovery touchpoint.',
     status: 'approved',
