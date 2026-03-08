@@ -7,6 +7,7 @@ import ComparisonSection from '@/landing/components/ComparisonSection';
 import AgentsSection from '@/landing/components/AgentsSection';
 import IntegrationsSection from '@/landing/components/IntegrationsSection';
 import PricingSection from '@/landing/components/PricingSection';
+import RoiCalculatorSection from '@/landing/components/RoiCalculatorSection';
 import SocialProofSection from '@/landing/components/SocialProofSection';
 import FaqSection from '@/landing/components/FaqSection';
 import DemoCtaSection from '@/landing/components/DemoCtaSection';
@@ -45,6 +46,7 @@ export default function LandingPage() {
         <AgentsSection />
         <IntegrationsSection />
         <PricingSection />
+        <RoiCalculatorSection />
         <SocialProofSection />
         <FaqSection />
       </main>
