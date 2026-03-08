@@ -60,7 +60,7 @@ export const comparisonFeatures = [
     sheets: false,
   },
   {
-    feature: 'Cross-lens analytics',
+    feature: 'Cross-system analytics',
     swoop: true,
     waitlistTools: 'partial',
     crm: 'partial',
