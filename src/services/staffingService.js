@@ -37,4 +37,4 @@ export const getStaffingSummary = () => {
   };
 };
 
-export const sourceSystems = ['ClubReady', 'Jonas POS', 'Northstar'];
+export const sourceSystems = ['Scheduling', 'POS', 'Member CRM'];

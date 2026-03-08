@@ -49,4 +49,4 @@ export const getDemandGaps = () =>
          waitlistCount: w.count, eventOverlap: w.hasEventOverlap,
        }));
 
-export const sourceSystems = ['ForeTees', 'Weather API'];
+export const sourceSystems = ['Tee Sheet', 'Weather API'];

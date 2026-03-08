@@ -44,7 +44,7 @@ export const theme = {
     // Landing page
     landingCream: '#F7F5F2',
     // §9 NOTE: lens* variable names are INTERNAL ONLY (architecture/config)
-    // NEVER use "lens" or "lenses" language in customer-facing copy
+    // internal: NEVER use "lens" or "lenses" language in customer-facing copy
     // See ARCHITECTURE.md §9 for translation table
     lensMemberIntelligence: '#A78BFA',
     lensTeeSheetDemand: '#4ADE80',

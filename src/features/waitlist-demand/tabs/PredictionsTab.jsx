@@ -70,7 +70,7 @@ export default function PredictionsTab() {
       value: summary.total,
       sparklineData: predictions.map((p) => Math.round(p.cancelProbability * 100)).reverse(),
       badge: { text: 'Forecast Window', variant: 'timeline' },
-      source: 'ForeTees',
+      source: 'Tee Sheet',
     },
     {
       label: 'High-Risk Cancellations',
@@ -85,7 +85,7 @@ export default function PredictionsTab() {
       format: 'currency',
       badge: { text: 'If Unaddressed', variant: 'warning' },
       sparklineData: predictions.slice(0, 6).map((p) => p.estimatedRevenueLost).reverse(),
-      source: 'Jonas POS',
+      source: 'POS',
     },
   ];
 

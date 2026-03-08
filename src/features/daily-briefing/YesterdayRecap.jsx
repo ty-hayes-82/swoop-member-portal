@@ -16,20 +16,20 @@ export default function YesterdayRecap({ data }) {
           format="currency"
           trend={{ direction: revenueVsLastWeek < 0 ? 'down' : 'up', value: Math.abs(revenueVsLastWeek), period: 'vs. last Sat' }}
           sparklineData={trends.golfRevenue}
-          source="Jonas POS"
+          source="POS"
         />
         <StatCard
           label="Rounds Played"
           value={rounds}
           trend={{ direction: roundsVsLastWeek < 0 ? 'down' : 'up', value: Math.abs(roundsVsLastWeek), period: 'vs. last Sat' }}
-          source="ForeTees"
+          source="Tee Sheet"
         />
         <StatCard
           label="Complaints Filed"
           value={5}
           badge={{ text: 'Understaffed', variant: 'urgent' }}
           trend={{ direction: 'up', value: 150, period: 'vs. avg', inverted: true }}
-          source="Club Prophet"
+          source="Analytics"
         />
       </div>
 

@@ -3,12 +3,12 @@
 // Props: system (string), size ('sm'|'xs')
 
 const SYSTEM_ICONS = {
-  'ForeTees':     '⛳',
-  'Jonas POS':    '🍽',
-  'Northstar':    '★',
-  'ClubReady':    '📅',
-  'Club Prophet': '◉',
-  'Weather API':  '☁',
+  'Tee Sheet':   '⛳',
+  'POS':         '🍽',
+  'Member CRM':  '★',
+  'Scheduling':  '📅',
+  'Analytics':   '◉',
+  'Weather API': '☁',
 };
 
 export default function SourceBadge({ system, size = 'sm' }) {

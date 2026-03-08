@@ -152,4 +152,4 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   };
 };
 
-export const sourceSystems = ['ForeTees', 'Jonas POS', 'Northstar', 'ClubReady', 'Club Prophet'];
+export const sourceSystems = ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Analytics'];

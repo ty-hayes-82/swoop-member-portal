@@ -9,7 +9,7 @@ export const navItems = [
     icon: '📋',
     color: theme.colors.navBriefing,
     subtitle: 'What needs my attention today?',
-    sourceSystems: ['ForeTees', 'Jonas POS', 'Northstar', 'ClubReady'],
+    sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling'],
   },
   {
     key: 'operations',
@@ -17,7 +17,7 @@ export const navItems = [
     icon: '⌘',
     color: theme.colors.navOperations,
     subtitle: 'How is the golf operation running?',
-    sourceSystems: ['ForeTees', 'Weather API'],
+    sourceSystems: ['Tee Sheet', 'Weather API'],
   },
   {
     key: 'waitlist-demand',
@@ -25,7 +25,7 @@ export const navItems = [
     icon: '⟳',
     color: theme.colors.navWaitlist,
     subtitle: 'Who is waiting, who will cancel, and what does it cost?',
-    sourceSystems: ['ForeTees', 'Northstar', 'Jonas POS', 'Weather API'],
+    sourceSystems: ['Tee Sheet', 'Member CRM', 'POS', 'Weather API'],
   },
   {
     key: 'fb-performance',
@@ -33,7 +33,7 @@ export const navItems = [
     icon: '◆',
     color: theme.colors.navFb,
     subtitle: 'Where is money being made or lost?',
-    sourceSystems: ['Jonas POS', 'ForeTees', 'Weather API'],
+    sourceSystems: ['POS', 'Tee Sheet', 'Weather API'],
   },
   {
     key: 'member-health',
@@ -41,7 +41,7 @@ export const navItems = [
     icon: '◉',
     color: theme.colors.navMembers,
     subtitle: 'Who is at risk and what do we do?',
-    sourceSystems: ['Northstar', 'Club Prophet', 'ForeTees'],
+    sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet'],
   },
   {
     key: 'staffing-service',
@@ -49,7 +49,7 @@ export const navItems = [
     icon: '⊞',
     color: theme.colors.navStaffing,
     subtitle: 'Are we staffed right and serving members well?',
-    sourceSystems: ['ClubReady', 'Jonas POS', 'Northstar'],
+    sourceSystems: ['Scheduling', 'POS', 'Member CRM'],
   },
   {
     key: 'growth-pipeline',
@@ -57,7 +57,7 @@ export const navItems = [
     icon: '◎',
     color: theme.colors.navPipeline,
     subtitle: 'Which guests are ready to become members?',
-    sourceSystems: ['ForeTees', 'Club Prophet'],
+    sourceSystems: ['Tee Sheet', 'Analytics'],
   },
   {
     key: 'agent-command',

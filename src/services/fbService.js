@@ -56,4 +56,4 @@ export const getFBSummary = () => {
   };
 };
 
-export const sourceSystems = ['Jonas POS', 'ForeTees', 'Weather API'];
+export const sourceSystems = ['POS', 'Tee Sheet', 'Weather API'];

@@ -83,4 +83,4 @@ export const getWaitlistInsight = () => {
     'Swoop fills slots with the right members first — and proves the retention impact of every slot.';
 };
 
-export const sourceSystems = ['ForeTees', 'Northstar', 'Jonas POS', 'Weather API'];
+export const sourceSystems = ['Tee Sheet', 'Member CRM', 'POS', 'Weather API'];

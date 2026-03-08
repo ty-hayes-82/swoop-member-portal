@@ -85,25 +85,6 @@ button {
 .text-muted { color: var(--text-muted); }
 .text-secondary { color: var(--text-secondary); }
 
-/* Responsive grid utilities */
-.grid-responsive-4 {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-md, 16px);
-}
-
-@media (min-width: 640px) {
-  .grid-responsive-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid-responsive-4 {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
 /* Responsive grid — 4 cols desktop, 2 cols tablet, 1 col mobile */
 .grid-responsive-4 {
   display: grid;
@@ -111,13 +92,13 @@ button {
   gap: 16px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .grid-responsive-4 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .grid-responsive-4 {
     grid-template-columns: 1fr;
   }

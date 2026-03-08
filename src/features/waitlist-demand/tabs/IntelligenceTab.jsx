@@ -79,26 +79,26 @@ export default function IntelligenceTab() {
       value: revenuePerSlot.reactive,
       format: 'currency',
       badge: { text: 'Current State', variant: 'timeline' },
-      source: 'Jonas POS',
+      source: 'POS',
     },
     {
       label: 'Retention-Priority Fill Value',
       value: revenuePerSlot.retentionPriority,
       format: 'currency',
       badge: { text: `+${revenuePerSlot.upliftPct}%`, variant: 'success' },
-      source: 'Northstar',
+      source: 'Member CRM',
     },
     {
       label: 'Weekend Fill Rate',
       value: `${weekendFill}%`,
       badge: { text: 'Overloaded', variant: 'warning' },
-      source: 'ForeTees',
+      source: 'Tee Sheet',
     },
     {
       label: 'Weekday Fill Rate',
       value: `${weekdayFill}%`,
       badge: { text: 'Underused Capacity', variant: 'effort' },
-      source: 'ForeTees',
+      source: 'Tee Sheet',
     },
   ];
 

@@ -26,7 +26,7 @@ function buildQueueStats(summary, queue) {
       trend: { direction: 'up', value: '+12%', period: 'vs last month' },
       sparklineData: getWaitlistDemandSparkline(),
       badge: { text: 'Live Queue', variant: 'timeline' },
-      source: 'ForeTees',
+      source: 'Tee Sheet',
     },
     {
       label: 'Retention Priority',
@@ -34,7 +34,7 @@ function buildQueueStats(summary, queue) {
       trend: { direction: 'up', value: '+2', period: 'vs last weekend', inverted: true },
       sparklineData: queue.slice(0, 6).map((member) => member.daysWaiting).reverse(),
       badge: { text: 'Escalate', variant: 'warning' },
-      source: 'Northstar',
+      source: 'Member CRM',
     },
     {
       label: 'At-Risk Dues Exposed',
@@ -47,7 +47,7 @@ function buildQueueStats(summary, queue) {
         .map((member) => member.memberValueAnnual ?? 0)
         .reverse(),
       badge: { text: 'GM Attention', variant: 'urgent' },
-      source: 'Northstar',
+      source: 'Member CRM',
     },
     {
       label: 'Average Health Score',
@@ -55,7 +55,7 @@ function buildQueueStats(summary, queue) {
       trend: { direction: 'down', value: '-4 pts', period: 'past 2 weeks', inverted: true },
       sparklineData: queue.slice(0, 6).map((member) => member.healthScore).reverse(),
       badge: { text: 'Member Health', variant: 'effort' },
-      source: 'Club Prophet',
+      source: 'Analytics',
     },
   ];
 }
