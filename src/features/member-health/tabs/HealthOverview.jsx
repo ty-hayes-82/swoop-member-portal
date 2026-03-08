@@ -109,7 +109,8 @@ export default function HealthOverview() {
             ${(summary.potentialDuesAtRisk / 1000).toFixed(0)}K dues at risk
           </span>
         </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
           <thead>
             <tr style={{ background: theme.colors.bg }}>
               {['Member', 'Health Score', 'Archetype', 'Primary Risk Signal'].map(h => (
@@ -136,6 +137,7 @@ export default function HealthOverview() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <SoWhatCallout variant="warning">

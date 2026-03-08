@@ -21,7 +21,7 @@ export const navItems = [
   },
   {
     key: 'waitlist-demand',
-    label: 'Waitlist & Demand',
+    label: 'Tee Sheet & Demand',
     icon: '⟳',
     color: theme.colors.navWaitlist,
     subtitle: 'Who is waiting, who will cancel, and what does it cost?',
@@ -29,7 +29,7 @@ export const navItems = [
   },
   {
     key: 'fb-performance',
-    label: 'Revenue & F&B',
+    label: 'F&B Operations',
     icon: '◆',
     color: theme.colors.navFb,
     subtitle: 'Where is money being made or lost?',
@@ -37,7 +37,7 @@ export const navItems = [
   },
   {
     key: 'member-health',
-    label: 'Member Retention',
+    label: 'Member Intelligence',
     icon: '◉',
     color: theme.colors.navMembers,
     subtitle: 'Who is at risk and what do we do?',
@@ -45,7 +45,7 @@ export const navItems = [
   },
   {
     key: 'staffing-service',
-    label: 'Staffing & Service',
+    label: 'Staffing & Labor',
     icon: '⊞',
     color: theme.colors.navStaffing,
     subtitle: 'Are we staffed right and serving members well?',
@@ -53,7 +53,7 @@ export const navItems = [
   },
   {
     key: 'growth-pipeline',
-    label: 'Growth Pipeline',
+    label: 'Revenue & Pipeline',
     icon: '◎',
     color: theme.colors.navPipeline,
     subtitle: 'Which guests are ready to become members?',
