@@ -2,7 +2,7 @@ import { theme } from '@/config/theme';
 import HeroSection from '@/landing/components/HeroSection';
 import ProblemSection from '@/landing/components/ProblemSection';
 import InlineCta from '@/landing/components/InlineCta';
-import LensesSection from '@/landing/components/LensesSection';
+import CoreCapabilitiesSection from '@/landing/components/CoreCapabilitiesSection';
 import ComparisonSection from '@/landing/components/ComparisonSection';
 import AgentsSection from '@/landing/components/AgentsSection';
 import IntegrationsSection from '@/landing/components/IntegrationsSection';
@@ -39,7 +39,7 @@ export default function LandingPage() {
         <HeroSection />
         <ProblemSection />
         <InlineCta />
-        <LensesSection />
+        <CoreCapabilitiesSection />
         <InlineCta />
         <ComparisonSection />
         <AgentsSection />

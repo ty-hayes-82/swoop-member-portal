@@ -6,7 +6,7 @@ export const problemCards = [
   'James Whitfield complained. No one followed up. He resigned. $24K gone in 4 days.',
 ];
 
-export const lenses = [
+export const coreCapabilities = [
   {
     icon: 'Users',
     title: 'Member Intelligence',

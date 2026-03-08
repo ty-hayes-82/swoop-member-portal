@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { theme } from '@/config/theme';
-import { lenses } from '@/landing/data';
+import { coreCapabilities } from '@/landing/data';
 
 const iconLabel = {
   Users: 'MI',
@@ -10,7 +10,7 @@ const iconLabel = {
   DollarSign: 'RP',
 };
 
-export default function LensesSection() {
+export default function CoreCapabilitiesSection() {
   const cardRefs = useRef([]);
   const prefersReducedMotion = useMemo(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -50,15 +50,15 @@ export default function LensesSection() {
         team can act with confidence instead of assumptions.
       </p>
       <div className="landing-grid-auto">
-        {lenses.map((lens, index) => (
+        {coreCapabilities.map((capability, index) => (
           <article
-            key={lens.title}
+            key={capability.title}
             ref={(element) => { cardRefs.current[index] = element; }}
             className="reveal-up"
             style={{
               background: theme.colors.bgCard,
               border: `1px solid ${theme.colors.border}`,
-              borderTop: `5px solid ${lens.color}`,
+              borderTop: `5px solid ${capability.color}`,
               borderRadius: theme.radius.lg,
               padding: '22px 18px 20px',
               minHeight: 220,
@@ -69,8 +69,8 @@ export default function LensesSection() {
               height: 34,
               width: 34,
               borderRadius: theme.radius.md,
-              background: `${lens.color}22`,
-              color: lens.color,
+              background: `${capability.color}22`,
+              color: capability.color,
               fontFamily: theme.fonts.mono,
               fontSize: theme.fontSize.sm,
               fontWeight: 600,
@@ -79,13 +79,13 @@ export default function LensesSection() {
               justifyContent: 'center',
               marginBottom: theme.spacing.md,
             }}>
-              {iconLabel[lens.icon]}
+              {iconLabel[capability.icon]}
             </div>
             <h3 style={{ fontSize: theme.fontSize.lg, marginBottom: theme.spacing.sm }}>
-              {lens.title}
+              {capability.title}
             </h3>
             <p style={{ color: theme.colors.textSecondary }}>
-              {lens.description}
+              {capability.description}
             </p>
           </article>
         ))}
