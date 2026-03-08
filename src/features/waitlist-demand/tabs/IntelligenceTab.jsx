@@ -1,5 +1,5 @@
 import TrendChart from '@/components/charts/TrendChart';
-import { Badge, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
+import { Badge, SoWhatCallout, Sparkline, StatCard, InfoTooltip } from '@/components/ui';
 import { demandHeatmap } from '@/data/pipeline';
 import { revenuePerSlot } from '@/data/revenue';
 import { getDemandInsight } from '@/services/waitlistService';
@@ -121,8 +121,9 @@ export default function IntelligenceTab() {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.sm }}>
           <div>
-            <div style={{ fontWeight: 700, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>
+            <div style={{ fontWeight: 700, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm, display: 'flex', alignItems: 'center', gap: '6px' }}>
               Demand Heatmap
+              <InfoTooltip text="Fill Rate = (Booked Slots ÷ Available Slots) × 100. Shows capacity utilization by time block. Unmet rounds = waitlist members who couldn't be accommodated in that window." />
             </div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
               Fill rate and unmet demand by day and time block.

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Badge, Btn, SoWhatCallout, Sparkline, StatCard, WaitlistRow } from '@/components/ui';
+import { Badge, Btn, SoWhatCallout, Sparkline, StatCard, WaitlistRow, InfoTooltip } from '@/components/ui';
 import {
   getWaitlistQueue,
   getWaitlistSummary,
@@ -99,8 +99,9 @@ export default function QueueTab() {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.sm }}>
           <div>
-            <div style={{ fontWeight: 700, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>
+            <div style={{ fontWeight: 700, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm, display: 'flex', alignItems: 'center', gap: '6px' }}>
               Retention-Prioritized Queue
+              <InfoTooltip text="Members are ranked by retention value and health score, not FIFO. At-risk members get priority access to prevent churn — even if they requested later than healthier members." />
             </div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
               Members are ranked by retention value and current health, not by timestamp.
