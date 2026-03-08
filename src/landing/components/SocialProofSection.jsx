@@ -16,6 +16,33 @@ const pillStyle = {
   fontWeight: 500,
 };
 
+const metricCards = [
+  {
+    title: 'Early Warning System',
+    metric: '6 days',
+    subtitle: 'Average advance notice on at-risk members',
+    description: 'Detected James Whitfield resignation risk 6 days before it happened by connecting POS spend decline, CRM complaint, and tee sheet pattern changes.',
+  },
+  {
+    title: 'Waitlist Performance',
+    metric: '91%',
+    subtitle: 'Fill rate with retention-prioritized queue',
+    description: 'Improved from 67% reactive fill rate by ranking waitlist members by retention value and match-fit, not just timestamp.',
+  },
+  {
+    title: 'Revenue Per Slot',
+    metric: '$312',
+    subtitle: 'Average revenue per slot with intelligence',
+    description: 'Increased from $187 reactive average by backfilling cancellations with high-engagement, high-F&B members first.',
+  },
+  {
+    title: 'Dues at Risk Visibility',
+    metric: '$1.4M',
+    subtitle: 'Annual dues identified as at-risk in demo',
+    description: '5 members flagged across health score decline, declining visits, unresolved complaints, and behavioral pattern changes.',
+  },
+];
+
 export default function SocialProofSection() {
   return (
     <section style={{ marginBottom: theme.spacing.xxl }}>
@@ -38,6 +65,43 @@ export default function SocialProofSection() {
         <p style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm, margin: 0 }}>
           28 integrations · Live in under 2 weeks · No rip-and-replace
         </p>
+      </div>
+
+      {/* Metric Proof Cards */}
+      <div style={{ marginBottom: theme.spacing.xxl }}>
+        <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.sm, textAlign: 'center' }}>
+          What Swoop detects in the demo scenario
+        </h2>
+        <p style={{ color: theme.colors.textMuted, marginBottom: theme.spacing.xl, textAlign: 'center', maxWidth: 700, margin: '0 auto ' + theme.spacing.xl }}>
+          These metrics are from the Oakmont Hills CC demo environment (300 members, Jan 2026). Real founding partner case studies will be published as clubs onboard.
+        </p>
+        <div className="landing-grid-2" style={{ gap: theme.spacing.lg }}>
+          {metricCards.map((card) => (
+            <article
+              key={card.title}
+              style={{
+                border: `1px solid ${theme.colors.border}`,
+                borderLeft: `4px solid ${theme.colors.ctaGreen}`,
+                borderRadius: theme.radius.lg,
+                padding: '24px',
+                background: theme.colors.bgCard,
+              }}
+            >
+              <p style={{ fontSize: theme.fontSize.sm, textTransform: 'uppercase', fontWeight: 600, color: theme.colors.textMuted, marginBottom: theme.spacing.xs }}>
+                {card.title}
+              </p>
+              <p style={{ fontSize: '42px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.ctaGreen, marginBottom: theme.spacing.xs, lineHeight: 1 }}>
+                {card.metric}
+              </p>
+              <p style={{ fontSize: theme.fontSize.md, fontWeight: 600, marginBottom: theme.spacing.sm, color: theme.colors.textPrimary }}>
+                {card.subtitle}
+              </p>
+              <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
+                {card.description}
+              </p>
+            </article>
+          ))}
+        </div>
       </div>
 
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
