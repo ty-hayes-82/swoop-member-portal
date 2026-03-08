@@ -17,10 +17,6 @@ export default function HeroSection() {
     document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const goToApp = () => {
-    window.location.assign('/');
-  };
-
   return (
     <section className="landing-section-padded" style={{ padding: '88px 0 80px' }}>
       <div style={{ maxWidth: 780 }}>
@@ -78,7 +74,7 @@ export default function HeroSection() {
               color: theme.colors.ctaGreen,
               borderColor: theme.colors.ctaGreen,
             }}
-            onClick={goToApp}
+            onClick={goToDemoForm}
             onMouseEnter={(event) => {
               event.currentTarget.style.background = theme.colors.ctaGreen;
               event.currentTarget.style.color = theme.colors.ctaGreenText;
@@ -88,7 +84,7 @@ export default function HeroSection() {
               event.currentTarget.style.color = theme.colors.ctaGreen;
             }}
           >
-            See the Platform
+            See How It Works
           </button>
         </div>
       </div>
