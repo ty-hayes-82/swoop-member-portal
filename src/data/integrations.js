@@ -49,16 +49,7 @@ export const SYSTEMS = [
     lastSync: '11m ago',
     endpoints: ['schedules', 'laborForecast', 'clockEvents'],
   },
-  {
-    id: 'noteefy',
-    name: 'Noteefy',
-    category: 'waitlist',
-    tier: 2,
-    logo: 'N',
-    status: 'connected',
-    lastSync: '5m ago',
-    endpoints: ['alerts', 'demandSignals', 'fills'],
-  },
+
   {
     id: 'clubready',
     name: 'ClubReady',
@@ -96,10 +87,10 @@ export const COMBOS = [
     },
   },
   {
-    id: 'foretees-noteefy',
-    systems: ['foretees', 'noteefy'],
-    insight: 'Waitlist fills are strongest in off-peak slots when alerts go out within 90 seconds.',
-    kpi: { value: '3.4x', label: 'Fill rate with real-time cancellation alerts' },
+    id: 'foretees-swoop-demand',
+    systems: ['foretees'],
+    insight: 'Swoop detects cancellations instantly and prioritizes waitlist by member retention value and tee time match-fit.',
+    kpi: { value: '3.4x', label: 'Fill rate with retention-prioritized alerts' },
     preview: { type: 'kpi', value: '86%', label: 'Recovered cancellations in 30 days' },
   },
   {
@@ -123,9 +114,9 @@ export const COMBOS = [
     preview: { type: 'kpi', value: '27%', label: 'Prime windows flagged understaffed' },
   },
   {
-    id: 'clubessential-noteefy',
-    systems: ['clubessential', 'noteefy'],
-    insight: 'Members with repeated waitlist misses have sharply lower 60-day engagement scores.',
+    id: 'clubessential-swoop-waitlist',
+    systems: ['clubessential'],
+    insight: 'Swoop detects repeated waitlist misses and flags members with sharply lower 60-day engagement scores.',
     kpi: { value: '2.1x', label: 'Churn risk after 3+ failed waitlists' },
     preview: {
       type: 'sparkline',

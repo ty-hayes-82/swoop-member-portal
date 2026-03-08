@@ -73,7 +73,7 @@ export default function ComparisonSection() {
                   {row.feature}
                 </td>
                 <Cell value={row.swoop} />
-                <Cell value={row.noteefy} />
+                <Cell value={row.waitlistTools} />
                 <Cell value={row.crm} />
                 <Cell value={row.sheets} />
               </tr>
