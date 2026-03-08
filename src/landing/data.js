@@ -185,13 +185,13 @@ export const pricingTiers = [
   },
   {
     name: 'Pro — Intelligence Dashboard',
-    price: '$99/mo',
+    price: '$499/mo',
     badge: 'Most Popular',
     description:
       'Full platform access with cross-system intelligence. Optional member app integration for richer behavioral data.',
     features: [
-      'Full cross-system intelligence',
-      'Cross-lens analytics',
+      'Complete platform access',
+      'Cross-system intelligence',
       'AI agent recommendations',
       'Up to 10 integrations',
       'Priority support',
