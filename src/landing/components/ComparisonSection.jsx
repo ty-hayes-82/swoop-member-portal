@@ -1,5 +1,5 @@
 import { theme } from '@/config/theme';
-import { comparisonFeatures } from '@/landing/data';
+import { comparisonFeatures, objections } from '@/landing/data';
 
 function Cell({ value }) {
   const color = value === true
@@ -80,6 +80,29 @@ export default function ComparisonSection() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div style={{ marginTop: theme.spacing.xl }}>
+        <h3 style={{ fontSize: theme.fontSize.xl, marginBottom: theme.spacing.md }}>
+          Why not just...
+        </h3>
+        <div className="landing-grid-3">
+          {objections.map((item) => (
+            <article
+              key={item.question}
+              style={{
+                border: `1px solid ${theme.colors.border}`,
+                borderRadius: theme.radius.lg,
+                padding: '18px',
+                background: theme.colors.bgCard,
+              }}
+            >
+              <p style={{ fontSize: theme.fontSize.lg, fontWeight: 700, marginBottom: theme.spacing.sm }}>
+                {item.question}
+              </p>
+              <p style={{ color: theme.colors.textSecondary }}>{item.answer}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );

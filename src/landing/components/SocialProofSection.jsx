@@ -1,25 +1,20 @@
 import { theme } from '@/config/theme';
-import { proofMetrics } from '@/landing/data';
-
-const iconLabel = {
-  TrendingUp: 'UP',
-  DollarSign: '$$',
-  AlertTriangle: 'AL',
-};
+import { foundingPartnerBenefits } from '@/landing/data';
 
 export default function SocialProofSection() {
   return (
     <section style={{ marginBottom: theme.spacing.xxl }}>
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
-        What Swoop surfaces — demo scenario results
+        Founding Partner Program
       </h2>
       <p style={{ color: theme.colors.textMuted, marginBottom: theme.spacing.lg }}>
-        Performance metrics from a simulated 300-member private club. Real club results coming soon.
+        We&apos;re onboarding our first 10 clubs with hands-on implementation, direct roadmap input,
+        and locked-in pricing. Be one of them.
       </p>
       <div className="landing-grid-3">
-        {proofMetrics.map((item) => (
+        {foundingPartnerBenefits.map((benefit) => (
           <article
-            key={item.label}
+            key={benefit.title}
             style={{
               border: `1px solid ${theme.colors.border}`,
               borderRadius: theme.radius.lg,
@@ -27,26 +22,33 @@ export default function SocialProofSection() {
               background: theme.colors.bgCard,
             }}
           >
-            <p style={{
-              color: theme.colors.textMuted,
-              fontFamily: theme.fonts.mono,
-              fontSize: theme.fontSize.xs,
-              marginBottom: theme.spacing.sm,
-            }}>
-              {iconLabel[item.icon] || 'MT'}
+            <p style={{ fontSize: theme.fontSize.lg, marginBottom: theme.spacing.sm, fontWeight: 700 }}>
+              {benefit.title}
             </p>
-            <p style={{
-              fontFamily: theme.fonts.mono,
-              fontSize: 'clamp(34px, 5vw, 44px)',
-              fontWeight: 700,
-              marginBottom: 4,
-            }}>
-              {item.metric}
-            </p>
-            <p style={{ fontSize: theme.fontSize.lg, marginBottom: theme.spacing.sm }}>{item.label}</p>
-            <p style={{ color: theme.colors.textSecondary }}>{item.context}</p>
+            <p style={{ color: theme.colors.textSecondary }}>{benefit.description}</p>
           </article>
         ))}
+      </div>
+      <div style={{ marginTop: theme.spacing.lg }}>
+        <a
+          href="#demo-form"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '12px 20px',
+            borderRadius: theme.radius.md,
+            background: theme.colors.ctaGreen,
+            color: theme.colors.ctaGreenText,
+            fontWeight: 700,
+            textDecoration: 'none',
+          }}
+        >
+          Apply for Founding Partner
+        </a>
+        <p style={{ marginTop: theme.spacing.sm, color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
+          3 of 10 spots remaining
+        </p>
       </div>
     </section>
   );

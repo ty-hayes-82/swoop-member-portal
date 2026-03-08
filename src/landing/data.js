@@ -133,23 +133,38 @@ export const integrationCategories = [
   { label: 'Access & Activity', systems: 3, vendors: ['Gatekeeper', 'BrivoAccess', 'Club Automation'] },
 ];
 
-export const proofMetrics = [
+export const foundingPartnerBenefits = [
   {
-    metric: '91%',
-    label: 'Waitlist fill rate',
-    context: 'Up from 67% after switching from first-come-first-served queueing',
-    icon: 'TrendingUp',
+    title: 'Hands-on Onboarding',
+    description:
+      'Our team configures your integrations, trains your staff, and validates your data in the first 2 weeks.',
   },
   {
-    metric: '$312',
-    label: 'Revenue per tee slot',
-    context: 'Up from $187 when tee-sheet actions are prioritized by demand and retention',
-    icon: 'DollarSign',
+    title: 'Shape the Roadmap',
+    description:
+      'Monthly calls with our product team. Your feature requests get priority. Your workflows drive development.',
   },
   {
-    metric: '6 days',
-    label: 'Early warning on resignations',
-    context: 'Average lead time before a resignation is formally reported',
-    icon: 'AlertTriangle',
+    title: 'Locked-in Pricing',
+    description:
+      'Founding partners keep their launch rate for life, even as the platform grows and pricing increases.',
+  },
+];
+
+export const objections = [
+  {
+    question: 'Why not just use Noteefy?',
+    answer:
+      "Noteefy fills cancelled slots — one function from one data source. Swoop gives you cross-lens intelligence: which members to prioritize, what their dining and engagement patterns predict, and how to close the loop with personalized outreach. Noteefy is a feature. Swoop is the operating layer.",
+  },
+  {
+    question: 'Why not just use my CRM reports?',
+    answer:
+      "Your CRM stores records. Swoop connects records across systems — tee sheet, POS, member engagement, staffing — and turns the gaps between them into actionable intelligence. A CRM tells you who resigned. Swoop tells you who's about to.",
+  },
+  {
+    question: 'Why not build dashboards in Excel?',
+    answer:
+      "You can build a dashboard. You can't build prediction. Swoop's AI agents monitor behavioral signals in real time and recommend interventions before problems become resignations. Spreadsheets report the past. Swoop protects the future.",
   },
 ];
