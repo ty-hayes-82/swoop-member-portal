@@ -29,14 +29,14 @@ function AtRiskRow({ m, onNavigate }) {
     >
       <div style={{ width: 32, height: 32, borderRadius: '50%', background: '22',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '12px', color: '#F3922D', fontWeight: 700, flexShrink: 0 }}>
+        fontSize: '12px', color: theme.colors.accent, fontWeight: 700, flexShrink: 0 }}>
         {m.score}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
           <span style={{
             fontSize: '13px', fontWeight: 600,
-            color: hovered ? '#F3922D' : theme.colors.textPrimary,
+            color: hovered ? theme.colors.accent : theme.colors.textPrimary,
             transition: 'color 0.12s ease',
           }}>{m.name}</span>
           {m.archetype && <ArchetypeBadge archetype={m.archetype} size="xs" />}
@@ -45,15 +45,15 @@ function AtRiskRow({ m, onNavigate }) {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <div style={{ fontSize: '12px', color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>{m.time}</div>
-        <span style={{ color: hovered ? '#F3922D' : theme.colors.textMuted, fontSize: '14px', transition: 'color 0.12s ease' }}>›</span>
+        <span style={{ color: hovered ? theme.colors.accent : theme.colors.textMuted, fontSize: '14px', transition: 'color 0.12s ease' }}>›</span>
       </div>
     </div>
   );
 }
 
 function getAlertColor(probability) {
-  if (probability > 60) return { border: '#EF444460', bg: '#EF444410', label: '#EF4444', text: 'Red Alert' };
-  if (probability >= 30) return { border: '#F59E0B60', bg: '#F59E0B10', label: '#F59E0B', text: 'Yellow Alert' };
+  if (probability > 60) return { border: `${theme.colors.urgent}60`, bg: `${theme.colors.urgent}10`, label: theme.colors.urgent, text: 'Red Alert' };
+  if (probability >= 30) return { border: `${theme.colors.warning}60`, bg: `${theme.colors.warning}10`, label: theme.colors.warning, text: 'Yellow Alert' };
   return null;
 }
 
@@ -83,7 +83,7 @@ export default function TodayRiskFactors({ data, onNavigate }) {
         <div>
           <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
             {tempHigh}°F · {weather.charAt(0).toUpperCase() + weather.slice(1)}
-            {wind > 15 && <span style={{ color: '#F59E0B', fontSize: '12px', marginLeft: '8px' }}>Wind advisory: {wind} mph</span>}
+            {wind > 15 && <span style={{ color: theme.colors.warning, fontSize: '12px', marginLeft: '8px' }}>Wind advisory: {wind} mph</span>}
           </div>
           <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
             Saturday Jan 17 — {wind < 12 ? 'Ideal golf conditions' : 'Elevated pace risk on exposed holes'}
@@ -179,9 +179,9 @@ export default function TodayRiskFactors({ data, onNavigate }) {
 
       {/* Staffing gaps */}
       {staffingGaps.length > 0 && (
-        <div style={{ padding: '10px 14px', background: '#EF444410', border: '1px solid #EF444430', borderRadius: '8px' }}>
+        <div style={{ padding: '10px 14px', background: `${theme.colors.urgent}10`, border: `1px solid ${theme.colors.urgent}30`, borderRadius: '8px' }}>
           {staffingGaps.map((gap, i) => (
-            <div key={i} style={{ fontSize: '13px', color: '#EF4444' }}>⚠ {gap}</div>
+            <div key={i} style={{ fontSize: '13px', color: theme.colors.urgent }}>⚠ {gap}</div>
           ))}
         </div>
       )}

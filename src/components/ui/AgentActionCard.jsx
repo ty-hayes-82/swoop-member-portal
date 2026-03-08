@@ -14,16 +14,16 @@ function formatTime(timestamp) {
 }
 
 const PRIORITY_COLOR = {
-  high: '#EF4444',
-  medium: '#F59E0B',
-  low: '#94A3B8',
+  high: theme.colors.urgent,
+  medium: theme.colors.warning,
+  low: theme.colors.agentDismissed,
 };
 
 export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }) {
   const [pulse, setPulse] = useState(false);
   const status = overrideStatus ?? action.status;
   const isDone = status !== 'pending';
-  const typeMeta = AGENT_ACTION_TYPES[action.actionType] ?? { icon: '⬡', label: action.actionType, color: '#22D3EE' };
+  const typeMeta = AGENT_ACTION_TYPES[action.actionType] ?? { icon: '⬡', label: action.actionType, color: theme.colors.agentCyan };
   const agent = getAgentById(action.agentId);
 
   const trigger = (handler) => {
@@ -39,7 +39,7 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
       style={{
         background: theme.colors.bgCard,
         border: `1px solid ${theme.colors.border}`,
-        borderLeft: `3px solid ${PRIORITY_COLOR[action.priority] ?? '#22D3EE'}`,
+        borderLeft: `3px solid ${PRIORITY_COLOR[action.priority] ?? theme.colors.agentCyan}`,
         borderRadius: theme.radius.md,
         padding: theme.spacing.md,
         opacity: isDone ? 0.68 : 1,
@@ -72,9 +72,9 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
         <span
           style={{
             fontSize: '11px',
-            color: agent?.accentColor ?? '#22D3EE',
-            background: `${agent?.accentColor ?? '#22D3EE'}1A`,
-            border: `1px solid ${(agent?.accentColor ?? '#22D3EE')}33`,
+            color: agent?.accentColor ?? theme.colors.agentCyan,
+            background: `${agent?.accentColor ?? theme.colors.agentCyan}1A`,
+            border: `1px solid ${(agent?.accentColor ?? theme.colors.agentCyan)}33`,
             borderRadius: theme.radius.sm,
             padding: '2px 8px',
           }}
@@ -84,9 +84,9 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
         <span
           style={{
             fontSize: '11px',
-            color: '#4ADE80',
-            background: 'rgba(74,222,128,0.1)',
-            border: '1px solid rgba(74,222,128,0.25)',
+            color: theme.colors.agentApproved,
+            background: `${theme.colors.agentApproved}1A`,
+            border: `1px solid ${theme.colors.agentApproved}40`,
             borderRadius: theme.radius.sm,
             padding: '2px 8px',
           }}
@@ -95,7 +95,7 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
         </span>
       </div>
 
-      {status === 'approved' && <div style={{ fontSize: '11px', color: '#4ADE80', fontWeight: 700 }}>Approved</div>}
+      {status === 'approved' && <div style={{ fontSize: '11px', color: theme.colors.agentApproved, fontWeight: 700 }}>Approved</div>}
       {status === 'dismissed' && <div style={{ fontSize: '11px', color: theme.colors.textMuted, fontWeight: 700 }}>Dismissed</div>}
 
       {!isDone && (
@@ -105,9 +105,9 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
             style={{
               flex: 1,
               borderRadius: theme.radius.sm,
-              border: '1px solid rgba(74,222,128,0.3)',
-              background: 'rgba(74,222,128,0.12)',
-              color: '#4ADE80',
+              border: `1px solid ${theme.colors.agentApproved}4D`,
+              background: `${theme.colors.agentApproved}1F`,
+              color: theme.colors.agentApproved,
               padding: '7px 0',
               fontSize: '12px',
               fontWeight: 700,

@@ -11,7 +11,7 @@ function EmptyState({ selected }) {
 
   return (
     <div style={{
-      background: '#fff',
+      background: theme.colors.white,
       border: `1px solid ${theme.colors.border}`,
       borderRadius: 12,
       padding: '36px 24px',
@@ -114,7 +114,7 @@ function ComboResult({ idA, idB }) {
   const intB = integrationsById[idB];
 
   const panelStyle = {
-    background: '#fff',
+    background: theme.colors.white,
     border: `1px solid ${theme.colors.border}`,
     borderRadius: 12,
     overflow: 'hidden',
@@ -172,9 +172,9 @@ function ComboResult({ idA, idB }) {
 
       {/* Insights */}
       <div style={{ padding: '16px 20px 0' }}>
-        <SectionLabel color="#1a5c8e">Insights Unlocked</SectionLabel>
+        <SectionLabel color={theme.colors.integrationTeeSheet}>Insights Unlocked</SectionLabel>
         {combo.insights.map((text, i) => (
-          <ListItem key={i} color="#1a5c8e" text={text} last={i === combo.insights.length - 1} />
+          <ListItem key={i} color={theme.colors.integrationTeeSheet} text={text} last={i === combo.insights.length - 1} />
         ))}
       </div>
 
@@ -183,9 +183,9 @@ function ComboResult({ idA, idB }) {
 
       {/* Automations */}
       <div style={{ padding: '0 20px' }}>
-        <SectionLabel color="#1a7a3c">Automations Enabled</SectionLabel>
+        <SectionLabel color={theme.colors.operations}>Automations Enabled</SectionLabel>
         {combo.automations.map((text, i) => (
-          <ListItem key={i} color="#1a7a3c" text={text} last={i === combo.automations.length - 1} />
+          <ListItem key={i} color={theme.colors.operations} text={text} last={i === combo.automations.length - 1} />
         ))}
       </div>
 
@@ -194,12 +194,12 @@ function ComboResult({ idA, idB }) {
         margin: '14px 20px 20px',
         background: 'rgba(139,100,32,0.05)',
         border: `1px solid rgba(139,100,32,0.18)`,
-        borderLeft: `4px solid #8b6420`,
+        borderLeft: `4px solid ${theme.colors.integrationPos}`,
         borderRadius: '0 8px 8px 0',
         padding: '12px 14px',
       }}>
         <div style={{
-          fontSize: 10, fontWeight: 600, color: '#8b6420',
+          fontSize: 10, fontWeight: 600, color: theme.colors.integrationPos,
           letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: 5,
         }}>
           Example Swoop Insight

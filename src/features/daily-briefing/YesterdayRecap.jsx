@@ -1,3 +1,4 @@
+import { theme } from '@/config/theme';
 import { StatCard } from '@/components/ui/index.js';
 import { SoWhatCallout } from '@/components/ui/index.js';
 import { trends } from '@/data/trends.js';
@@ -38,12 +39,12 @@ export default function YesterdayRecap({ data }) {
             <div key={i} style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '10px 14px',
-              background: '#EF444408',
-              border: '1px solid #EF444422',
+              background: `${theme.colors.urgent}08`,
+              border: `1px solid ${theme.colors.urgent}22`,
               borderRadius: '8px',
               fontSize: '13px', color: 'var(--text-secondary)',
             }}>
-              <span style={{ color: '#EF4444', fontSize: '10px' }}>●</span>
+              <span style={{ color: theme.colors.urgent, fontSize: '10px' }}>●</span>
               {inc}
             </div>
           ))}

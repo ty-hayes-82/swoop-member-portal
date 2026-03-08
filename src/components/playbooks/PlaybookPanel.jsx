@@ -131,7 +131,7 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
             <div style={{ display: 'flex', gap: theme.spacing.sm, alignItems: 'center' }}>
               <button onClick={handleActivate} style={{
                 padding: `${theme.spacing.sm} ${theme.spacing.lg}`, borderRadius: theme.radius.md,
-                border: 'none', background: accent, color: '#fff',
+                border: 'none', background: accent, color: theme.colors.white,
                 fontSize: theme.fontSize.sm, fontWeight: 700, cursor: 'pointer',
                 boxShadow: `0 2px 6px ${accent}50` }}>
                 Yes, activate this plan
@@ -155,7 +155,7 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
               padding: `${theme.spacing.sm} ${theme.spacing.md}`, borderRadius: theme.radius.md,
               border: `1px solid ${active ? theme.colors.border : accent}`,
               background: active ? theme.colors.bgDeep : accent,
-              color: active ? theme.colors.textSecondary : '#fff',
+              color: active ? theme.colors.textSecondary : theme.colors.white,
               fontSize: theme.fontSize.md, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
             }}>
             {active ? '✓ Active — Deactivate' : `Activate this response plan`}

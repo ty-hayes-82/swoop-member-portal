@@ -1,8 +1,10 @@
+import { theme } from '@/config/theme';
+
 const VARIANT_STYLES = {
-  insight:     { border: '#6BB8EF', bg: '#6BB8EF0D', icon: '💡', color: '#6BB8EF' },
-  warning:     { border: '#F59E0B', bg: '#F59E0B0D', icon: '⚠️', color: '#F59E0B' },
-  urgent:      { border: '#C0392B', bg: '#C0392B0D', icon: '⚠',  color: '#C0392B' },
-  opportunity: { border: '#F3922D', bg: '#F3922D0D', icon: '◎',  color: '#F3922D' },
+  insight:     { border: theme.colors.navBriefing, bg: `${theme.colors.navBriefing}0D`, icon: '💡', color: theme.colors.navBriefing },
+  warning:     { border: theme.colors.warning, bg: `${theme.colors.warning}0D`, icon: '⚠️', color: theme.colors.warning },
+  urgent:      { border: theme.colors.urgent, bg: `${theme.colors.urgent}0D`, icon: '⚠',  color: theme.colors.urgent },
+  opportunity: { border: theme.colors.accent, bg: `${theme.colors.accent}0D`, icon: '◎',  color: theme.colors.accent },
 };
 
 export default function SoWhatCallout({ children, variant = 'insight' }) {

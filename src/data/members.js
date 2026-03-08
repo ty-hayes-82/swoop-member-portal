@@ -12,10 +12,10 @@ export const memberArchetypes = [
 ];
 
 export const healthDistribution = [
-  { level: 'Healthy',  min: 70,  count: 138, percentage: 0.46, color: '#1A6B34' },  // theme.colors.success
-  { level: 'Watch',    min: 50,  count: 82,  percentage: 0.27, color: '#B5760A' },  // theme.colors.warning
-  { level: 'At Risk',  min: 30,  count: 52,  percentage: 0.17, color: '#C07020' },  // between warning + urgent
-  { level: 'Critical', min: 0,   count: 28,  percentage: 0.09, color: '#C0392B' },  // theme.colors.urgent
+  { level: 'Healthy',  min: 70,  count: 138, percentage: 0.46, color: theme.colors.success },  // theme.colors.success
+  { level: 'Watch',    min: 50,  count: 82,  percentage: 0.27, color: theme.colors.warning },  // theme.colors.warning
+  { level: 'At Risk',  min: 30,  count: 52,  percentage: 0.17, color: theme.colors.riskAtRiskAlt },  // between warning + urgent
+  { level: 'Critical', min: 0,   count: 28,  percentage: 0.09, color: theme.colors.urgent },  // theme.colors.urgent
 ];
 
 export const atRiskMembers = [
@@ -84,3 +84,4 @@ export const resignationScenarios = [
     ],
   },
 ];
+import { theme } from '@/config/theme';

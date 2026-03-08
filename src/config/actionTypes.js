@@ -1,24 +1,26 @@
+import { theme } from '@/config/theme';
+
 export const ACTION_TYPES = {
-  email: { icon: '✉', label: 'Email', color: '#6BB8EF' },
-  'staff-alert': { icon: '📢', label: 'Staff Alert', color: '#F59E0B' },
-  'front-desk-flag': { icon: '🚩', label: 'Front Desk Flag', color: '#A78BFA' },
-  'comp-offer': { icon: '🎁', label: 'Comp Offer', color: '#4ADE80' },
-  report: { icon: '📊', label: 'Report', color: '#8BAF8B' },
-  calendar: { icon: '📅', label: 'Schedule Update', color: '#F472B6' },
-  dispatch: { icon: '📡', label: 'Dispatch', color: '#22C55E' },
-  schedule: { icon: '📋', label: 'Tee Sheet', color: '#F0C674' },
-  outreach: { icon: '📣', label: 'Outreach', color: '#22D3EE' },
-  track: { icon: '📈', label: 'Track', color: '#A78BFA' },
+  email: { icon: '✉', label: 'Email', color: theme.colors.navBriefing },
+  'staff-alert': { icon: '📢', label: 'Staff Alert', color: theme.colors.navStaffing },
+  'front-desk-flag': { icon: '🚩', label: 'Front Desk Flag', color: theme.colors.navMembers },
+  'comp-offer': { icon: '🎁', label: 'Comp Offer', color: theme.colors.agentApproved },
+  report: { icon: '📊', label: 'Report', color: theme.colors.reportSage },
+  calendar: { icon: '📅', label: 'Schedule Update', color: theme.colors.navPipeline },
+  dispatch: { icon: '📡', label: 'Dispatch', color: theme.colors.dispatchGreen },
+  schedule: { icon: '📋', label: 'Tee Sheet', color: theme.colors.navFb },
+  outreach: { icon: '📣', label: 'Outreach', color: theme.colors.agentCyan },
+  track: { icon: '📈', label: 'Track', color: theme.colors.navMembers },
 };
 
 export const AGENT_ACTION_TYPES = {
-  RETENTION_OUTREACH: { icon: '🎯', label: 'Retention Outreach', color: '#22D3EE' },
-  WAITLIST_PRIORITY: { icon: '⛳', label: 'Waitlist Priority', color: '#4ADE80' },
-  SERVICE_ESCALATION: { icon: '🛎', label: 'Service Escalation', color: '#F59E0B' },
-  REVENUE_CAPTURE: { icon: '💵', label: 'Revenue Capture', color: '#F472B6' },
-  RE_ENGAGEMENT: { icon: '🤝', label: 'Re-engagement', color: '#A78BFA' },
-  DRAFT_MESSAGE: { icon: '✉', label: 'Draft Message', color: '#6BB8EF' },
-  STAFFING_ALERT: { icon: '📢', label: 'Staffing Alert', color: '#F59E0B' },
+  RETENTION_OUTREACH: { icon: '🎯', label: 'Retention Outreach', color: theme.colors.agentCyan },
+  WAITLIST_PRIORITY: { icon: '⛳', label: 'Waitlist Priority', color: theme.colors.agentApproved },
+  SERVICE_ESCALATION: { icon: '🛎', label: 'Service Escalation', color: theme.colors.navStaffing },
+  REVENUE_CAPTURE: { icon: '💵', label: 'Revenue Capture', color: theme.colors.navPipeline },
+  RE_ENGAGEMENT: { icon: '🤝', label: 'Re-engagement', color: theme.colors.navMembers },
+  DRAFT_MESSAGE: { icon: '✉', label: 'Draft Message', color: theme.colors.navBriefing },
+  STAFFING_ALERT: { icon: '📢', label: 'Staffing Alert', color: theme.colors.navStaffing },
 };
 
 export const PLAYBOOK_HISTORY = {

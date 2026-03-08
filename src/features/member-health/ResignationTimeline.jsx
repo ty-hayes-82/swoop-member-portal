@@ -8,7 +8,7 @@ const DOMAIN_COLORS = {
   Email: theme.colors.members,
   Feedback: theme.colors.urgent,
   All: theme.colors.textMuted,
-  Membership: '#EF4444',
+  Membership: theme.colors.urgent,
 };
 
 const AGENT_ANNOTATIONS = {
@@ -88,14 +88,14 @@ export default function ResignationTimeline() {
                         alignItems: 'flex-start',
                         marginTop: 6,
                         paddingTop: 8,
-                        borderTop: '1px dashed rgba(34,211,238,0.20)',
+                        borderTop: `1px dashed ${theme.colors.agentCyan}33`,
                       }}
                     >
-                      <span style={{ flexShrink: 0, width: 70, fontSize: theme.fontSize.xs, color: '#22D3EE', fontFamily: theme.fonts.mono, paddingTop: 2, opacity: 0.8 }}>
+                      <span style={{ flexShrink: 0, width: 70, fontSize: theme.fontSize.xs, color: theme.colors.agentCyan, fontFamily: theme.fonts.mono, paddingTop: 2, opacity: 0.8 }}>
                         {annotation.date}
                       </span>
-                      <span style={{ flexShrink: 0, fontSize: 11, marginTop: 3, opacity: 0.7, color: '#22D3EE' }}>⬡</span>
-                      <span style={{ fontSize: theme.fontSize.xs, color: '#22D3EE', lineHeight: 1.5, opacity: 0.9 }}>{annotation.note}</span>
+                      <span style={{ flexShrink: 0, fontSize: 11, marginTop: 3, opacity: 0.7, color: theme.colors.agentCyan }}>⬡</span>
+                      <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.agentCyan, lineHeight: 1.5, opacity: 0.9 }}>{annotation.note}</span>
                     </div>
                   )}
                 </div>

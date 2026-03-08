@@ -12,9 +12,9 @@ function formatLastAction(timestamp) {
 }
 
 const STATUS_STYLE = {
-  active: { label: 'Active', color: '#4ADE80', bg: 'rgba(74,222,128,0.12)' },
-  idle: { label: 'Idle', color: '#94A3B8', bg: 'rgba(148,163,184,0.12)' },
-  learning: { label: 'Learning', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
+  active: { label: 'Active', color: theme.colors.agentApproved, bg: `${theme.colors.agentApproved}1F` },
+  idle: { label: 'Idle', color: theme.colors.agentDismissed, bg: `${theme.colors.agentDismissed}1F` },
+  learning: { label: 'Learning', color: theme.colors.warning, bg: `${theme.colors.warning}1F` },
 };
 
 export function AgentStatusCard({ agent, overrideStatus, onToggle, onConfigure, onViewLog }) {
@@ -27,7 +27,7 @@ export function AgentStatusCard({ agent, overrideStatus, onToggle, onConfigure, 
       style={{
         background: theme.colors.bgCard,
         border: `1px solid ${theme.colors.border}`,
-        borderLeft: `3px solid ${agent.accentColor ?? '#22D3EE'}`,
+        borderLeft: `3px solid ${agent.accentColor ?? theme.colors.agentCyan}`,
         borderRadius: theme.radius.md,
         padding: theme.spacing.md,
         display: 'flex',
@@ -59,7 +59,7 @@ export function AgentStatusCard({ agent, overrideStatus, onToggle, onConfigure, 
           <span style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: theme.colors.textPrimary }}>{accuracy}%</span>
         </div>
         <div style={{ height: 6, borderRadius: 999, background: theme.colors.bgDeep, overflow: 'hidden' }}>
-          <div style={{ width: `${accuracy}%`, height: '100%', background: '#22D3EE', transition: 'width 0.2s ease' }} />
+          <div style={{ width: `${accuracy}%`, height: '100%', background: theme.colors.agentCyan, transition: 'width 0.2s ease' }} />
         </div>
       </div>
 
@@ -73,9 +73,9 @@ export function AgentStatusCard({ agent, overrideStatus, onToggle, onConfigure, 
           style={{
             flex: 1,
             borderRadius: theme.radius.sm,
-            border: `1px solid ${status === 'active' ? 'rgba(245,158,11,0.35)' : 'rgba(74,222,128,0.35)'}`,
-            background: status === 'active' ? 'rgba(245,158,11,0.1)' : 'rgba(74,222,128,0.1)',
-            color: status === 'active' ? '#F59E0B' : '#4ADE80',
+            border: `1px solid ${status === 'active' ? `${theme.colors.warning}59` : `${theme.colors.agentApproved}59`}`,
+            background: status === 'active' ? `${theme.colors.warning}1A` : `${theme.colors.agentApproved}1A`,
+            color: status === 'active' ? theme.colors.warning : theme.colors.agentApproved,
             padding: '6px 8px',
             fontSize: '11px',
             fontWeight: 700,
@@ -89,9 +89,9 @@ export function AgentStatusCard({ agent, overrideStatus, onToggle, onConfigure, 
             onClick={onViewLog}
             style={{
               borderRadius: theme.radius.sm,
-              border: '1px solid rgba(34,211,238,0.3)',
+              border: `1px solid ${theme.colors.agentCyan}4D`,
               background: 'transparent',
-              color: '#22D3EE',
+              color: theme.colors.agentCyan,
               padding: '6px 10px',
               fontSize: '11px',
               cursor: 'pointer',

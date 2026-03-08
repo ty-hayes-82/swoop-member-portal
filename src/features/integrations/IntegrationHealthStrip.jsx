@@ -1,7 +1,7 @@
 import { theme } from '@/config/theme';
 
 export function IntegrationHealthStrip({ health }) {
-  const freshnessColor = health.dataFreshness === 'n/a' ? '#8e6d1a' : '#1a7a3c';
+  const freshnessColor = health.dataFreshness === 'n/a' ? theme.colors.integrationWarn : theme.colors.operations;
 
   return (
     <div style={{
@@ -13,7 +13,7 @@ export function IntegrationHealthStrip({ health }) {
       <StatCard
         label="Connected Systems"
         value={`${health.connected}/${health.total}`}
-        accent="#1a7a3c"
+        accent={theme.colors.operations}
       />
       <StatCard
         label="Data Freshness"
@@ -23,7 +23,7 @@ export function IntegrationHealthStrip({ health }) {
       <StatCard
         label="Sync Status"
         value={health.syncStatus}
-        accent={health.syncStatus === 'Healthy' ? '#1a7a3c' : '#8e6d1a'}
+        accent={health.syncStatus === 'Healthy' ? theme.colors.operations : theme.colors.integrationWarn}
       />
     </div>
   );
@@ -32,7 +32,7 @@ export function IntegrationHealthStrip({ health }) {
 function StatCard({ label, value, accent }) {
   return (
     <div style={{
-      background: '#fff',
+      background: theme.colors.white,
       border: `1px solid ${theme.colors.border}`,
       borderRadius: 10,
       padding: '12px 14px',

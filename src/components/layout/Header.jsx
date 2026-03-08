@@ -2,6 +2,7 @@
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
 import { CLUB_NAME, DEMO_MONTH } from '@/config/constants.js';
+import { theme } from '@/config/theme';
 
 // Greeting changes by time of day (simulated — based on 7am for demo morning mode)
 const getGreeting = () => {
@@ -50,9 +51,9 @@ export default function Header() {
         {/* Live indicator */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px',
           padding: '3px 8px', borderRadius: '12px',
-          background: '#F3922D12', border: '1px solid #F3922D30' }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#F3922D' }} />
-          <span style={{ fontSize: '10px', color: '#F3922D', fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
+          background: `${theme.colors.accent}12`, border: `1px solid ${theme.colors.accent}30` }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: theme.colors.accent }} />
+          <span style={{ fontSize: '10px', color: theme.colors.accent, fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
         </div>
       </div>
     </header>

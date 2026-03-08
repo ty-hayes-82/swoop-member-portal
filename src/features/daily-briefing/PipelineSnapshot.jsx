@@ -94,9 +94,9 @@ export default function PipelineSnapshot({ onNavigate }) {
       <div
         onClick={e => { e.stopPropagation(); onNavigate?.('waitlist-demand'); }}
         style={{ marginTop: theme.spacing.sm, padding: '8px 10px', borderRadius: theme.radius.sm,
-          background: 'rgba(34,211,238,0.07)', border: '1px solid rgba(34,211,238,0.25)',
+          background: `${theme.colors.agentCyan}12`, border: `1px solid ${theme.colors.agentCyan}40`,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
-        <span style={{ fontSize: theme.fontSize.xs, color: '#22D3EE', fontWeight: 600 }}>
+        <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.agentCyan, fontWeight: 600 }}>
           ⟳ {waitlist.total} on waitlist · {waitlist.highPriority} retention priority
         </span>
         <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, fontWeight: 500 }}>

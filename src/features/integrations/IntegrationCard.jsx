@@ -1,29 +1,29 @@
 import { theme } from '@/config/theme';
 
 const CATEGORY_COLORS = {
-  'tee-sheet': '#1a5c8e',
-  pos: '#8b6420',
-  crm: '#6e4e9a',
-  staffing: '#1a7a3c',
-  waitlist: '#9f3f65',
+  'tee-sheet': theme.colors.integrationTeeSheet,
+  pos: theme.colors.integrationPos,
+  crm: theme.colors.integrationCrm,
+  staffing: theme.colors.operations,
+  waitlist: theme.colors.integrationWaitlist,
 };
 
 const STATUS_COLORS = {
-  connected: '#1a7a3c',
-  available: '#8b6420',
-  'coming-soon': '#6f7780',
+  connected: theme.colors.operations,
+  available: theme.colors.integrationPos,
+  'coming-soon': theme.colors.integrationMuted,
 };
 
 export function IntegrationCard({ system, isSelected, onClick, cardRef }) {
-  const categoryColor = CATEGORY_COLORS[system.category] ?? '#4c5f70';
-  const statusColor = STATUS_COLORS[system.status] ?? '#4c5f70';
+  const categoryColor = CATEGORY_COLORS[system.category] ?? theme.colors.integrationNeutral;
+  const statusColor = STATUS_COLORS[system.status] ?? theme.colors.integrationNeutral;
 
   return (
     <article
       ref={cardRef}
       onClick={onClick}
       style={{
-        background: '#fff',
+        background: theme.colors.white,
         border: isSelected ? `2px solid ${categoryColor}` : `1px solid ${theme.colors.border}`,
         borderRadius: 12,
         padding: 16,
@@ -37,7 +37,7 @@ export function IntegrationCard({ system, isSelected, onClick, cardRef }) {
           <h3 style={{ margin: 0, fontSize: theme.fontSize.md, color: theme.colors.textPrimary }}>{system.name}</h3>
           <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
             <Badge text={system.category} color={categoryColor} />
-            <Badge text={`Tier ${system.tier}`} color="#4c5f70" />
+            <Badge text={`Tier ${system.tier}`} color={theme.colors.integrationNeutral} />
           </div>
         </div>
         <span style={{

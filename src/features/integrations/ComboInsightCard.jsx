@@ -1,6 +1,6 @@
 import { theme } from '@/config/theme';
 
-const trendColor = (trend) => (trend === 'down' ? '#8f3d2b' : '#1a7a3c');
+const trendColor = (trend) => (trend === 'down' ? theme.colors.integrationTrendDown : theme.colors.operations);
 
 export function ComboInsightCard({ combo, systemsById }) {
   const [leftId, rightId] = combo.systems;
@@ -11,7 +11,7 @@ export function ComboInsightCard({ combo, systemsById }) {
 
   return (
     <article style={{
-      background: '#fff',
+      background: theme.colors.white,
       border: `1px solid ${theme.colors.border}`,
       borderRadius: 12,
       padding: 16,

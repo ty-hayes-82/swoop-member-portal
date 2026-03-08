@@ -78,11 +78,11 @@ export default function ServiceTab() {
               gap: 8,
               padding: '8px 12px',
               marginBottom: theme.spacing.sm,
-              background: 'rgba(34,211,238,0.04)',
-              border: '1px solid rgba(34,211,238,0.20)',
+              background: `${theme.colors.agentCyan}0A`,
+              border: `1px solid ${theme.colors.agentCyan}33`,
               borderRadius: theme.radius.sm,
               fontSize: theme.fontSize.xs,
-              color: '#22D3EE',
+              color: theme.colors.agentCyan,
             }}
           >
             <span style={{ fontFamily: theme.fonts.mono, fontSize: 13, opacity: 0.9 }}>⬡</span>

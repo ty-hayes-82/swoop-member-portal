@@ -16,14 +16,14 @@ function Toggle({ checked, onChange, label }) {
     <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', userSelect: 'none' }}>
       <div onClick={onChange} style={{
         width: 36, height: 20, borderRadius: 10, position: 'relative',
-        background: checked ? '#22D3EE' : theme.colors.bgDeep,
-        border: `1px solid ${checked ? '#22D3EE' : theme.colors.border}`,
+        background: checked ? theme.colors.agentCyan : theme.colors.bgDeep,
+        border: `1px solid ${checked ? theme.colors.agentCyan : theme.colors.border}`,
         transition: 'all 0.15s', cursor: 'pointer', flexShrink: 0,
       }}>
         <div style={{
           position: 'absolute', top: 2, left: checked ? 17 : 2,
           width: 14, height: 14, borderRadius: '50%',
-          background: checked ? '#000' : theme.colors.textMuted,
+          background: checked ? theme.colors.textPrimary : theme.colors.textMuted,
           transition: 'left 0.15s',
         }} />
       </div>
@@ -37,12 +37,12 @@ function Checkbox({ checked, onChange, label }) {
     <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
       <div onClick={onChange} style={{
         width: 16, height: 16, borderRadius: 3, flexShrink: 0,
-        background: checked ? '#22D3EE' : 'transparent',
-        border: `1.5px solid ${checked ? '#22D3EE' : theme.colors.border}`,
+        background: checked ? theme.colors.agentCyan : 'transparent',
+        border: `1.5px solid ${checked ? theme.colors.agentCyan : theme.colors.border}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         cursor: 'pointer',
       }}>
-        {checked && <span style={{ fontSize: 10, color: '#000', fontWeight: 900 }}>✓</span>}
+        {checked && <span style={{ fontSize: 10, color: theme.colors.textPrimary, fontWeight: 900 }}>✓</span>}
       </div>
       <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>{label}</span>
     </label>
@@ -73,13 +73,13 @@ export default function AgentConfigDrawer({ agent, initialConfig, onSave, onClos
   return (
     <div style={{
       marginTop: 8, background: theme.colors.bgCard,
-      border: `1px solid rgba(34,211,238,0.25)`,
+      border: `1px solid ${theme.colors.agentCyan}40`,
       borderRadius: theme.radius.md, padding: theme.spacing.lg,
     }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.lg }}>
         <div>
-          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: '#22D3EE' }}>
+          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.agentCyan }}>
             Configure: {agent.name}
           </div>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
@@ -99,11 +99,11 @@ export default function AgentConfigDrawer({ agent, initialConfig, onSave, onClos
           Auto-Approve Threshold
         </div>
         <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginBottom: 10 }}>
-          Auto-approve actions where estimated impact is under <strong style={{ color: '#22D3EE' }}>${cfg.threshold.toLocaleString()}</strong>
+          Auto-approve actions where estimated impact is under <strong style={{ color: theme.colors.agentCyan }}>${cfg.threshold.toLocaleString()}</strong>
         </div>
         <input type="range" min={0} max={5000} step={100} value={cfg.threshold}
           onChange={e => update('threshold', Number(e.target.value))}
-          style={{ width: '100%', accentColor: '#22D3EE' }}
+          style={{ width: '100%', accentColor: theme.colors.agentCyan }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: theme.colors.textMuted, marginTop: 2 }}>
           <span>$0 (manual only)</span><span>$5,000</span>
@@ -162,9 +162,9 @@ export default function AgentConfigDrawer({ agent, initialConfig, onSave, onClos
       {/* Save */}
       <button onClick={handleSave} style={{
         width: '100%', padding: '9px 0', borderRadius: theme.radius.sm, cursor: 'pointer',
-        background: saved ? 'rgba(74,222,128,0.15)' : 'rgba(34,211,238,0.12)',
-        border: `1px solid ${saved ? 'rgba(74,222,128,0.4)' : 'rgba(34,211,238,0.35)'}`,
-        color: saved ? '#4ADE80' : '#22D3EE', fontSize: '12px', fontWeight: 700, transition: 'all 0.2s',
+        background: saved ? `${theme.colors.agentApproved}26` : `${theme.colors.agentCyan}1F`,
+        border: `1px solid ${saved ? `${theme.colors.agentApproved}66` : `${theme.colors.agentCyan}59`}`,
+        color: saved ? theme.colors.agentApproved : theme.colors.agentCyan, fontSize: '12px', fontWeight: 700, transition: 'all 0.2s',
       }}>
         {saved ? '✓ Saved' : 'Save Configuration'}
       </button>

@@ -2,11 +2,11 @@ import { useMemo } from 'react';
 import { theme } from '@/config/theme';
 
 const CATEGORY_COLORS = {
-  'tee-sheet': '#1a5c8e',
-  pos: '#8b6420',
-  crm: '#6e4e9a',
-  staffing: '#1a7a3c',
-  waitlist: '#9f3f65',
+  'tee-sheet': theme.colors.integrationTeeSheet,
+  pos: theme.colors.integrationPos,
+  crm: theme.colors.integrationCrm,
+  staffing: theme.colors.operations,
+  waitlist: theme.colors.integrationWaitlist,
 };
 
 export function IntegrationMap({ systems, combos, activeSystemId, onSelectSystem }) {
@@ -30,7 +30,7 @@ export function IntegrationMap({ systems, combos, activeSystemId, onSelectSystem
   }).filter(Boolean), [combos, nodes]);
 
   return (
-    <div style={{ background: '#fff', border: `1px solid ${theme.colors.border}`, borderRadius: 12, marginBottom: 18, padding: 12 }}>
+    <div style={{ background: theme.colors.white, border: `1px solid ${theme.colors.border}`, borderRadius: 12, marginBottom: 18, padding: 12 }}>
       <style>{`
         @keyframes edgePulse {
           from { stroke-dashoffset: 0; }
@@ -49,7 +49,7 @@ export function IntegrationMap({ systems, combos, activeSystemId, onSelectSystem
               y1={link.a.y}
               x2={link.b.x}
               y2={link.b.y}
-              stroke={active ? '#1a7a3c' : '#c5ced6'}
+              stroke={active ? theme.colors.operations : theme.colors.integrationLinkInactive}
               strokeWidth={active ? 2.5 : 1.5}
               strokeDasharray="6 6"
               style={active ? { animation: 'edgePulse 1.2s linear infinite' } : undefined}
@@ -73,7 +73,7 @@ export function IntegrationMap({ systems, combos, activeSystemId, onSelectSystem
                 cx={node.x}
                 cy={node.y}
                 r={active ? 24 : 19}
-                fill={active ? CATEGORY_COLORS[node.category] : '#fff'}
+                fill={active ? CATEGORY_COLORS[node.category] : theme.colors.white}
                 stroke={CATEGORY_COLORS[node.category]}
                 strokeWidth={active ? 0 : (highlighted ? 2.5 : 1.6)}
               />
@@ -83,7 +83,7 @@ export function IntegrationMap({ systems, combos, activeSystemId, onSelectSystem
                 textAnchor="middle"
                 fontSize="10"
                 fontWeight="700"
-                fill={active ? '#fff' : CATEGORY_COLORS[node.category]}
+                fill={active ? theme.colors.white : CATEGORY_COLORS[node.category]}
               >
                 {node.logo}
               </text>

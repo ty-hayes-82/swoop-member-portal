@@ -7,10 +7,10 @@ import { getWaitlistWithRiskScoring, getWaitlistSummary } from '@/services/pipel
 import { theme } from '@/config/theme';
 
 const RISK_COLORS = {
-  Healthy: '#1A6B34',
-  Watch: '#B5760A',
-  'At Risk': '#D97706',
-  Critical: '#C0392B',
+  Healthy: theme.colors.success,
+  Watch: theme.colors.warning,
+  'At Risk': theme.colors.riskAtRisk,
+  Critical: theme.colors.urgent,
 };
 
 const MONTH_INDEX = {
@@ -52,7 +52,7 @@ function WaitlistRow({ memberName, archetype, healthScore, riskLevel, requestedS
       <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
           {isPriority && (
-            <span style={{ fontSize: 10, background: theme.colors.urgent, color: '#fff',
+            <span style={{ fontSize: 10, background: theme.colors.urgent, color: theme.colors.white,
               padding: '1px 5px', borderRadius: 3, fontWeight: 700, letterSpacing: '0.04em' }}>
               PRIORITY
             </span>

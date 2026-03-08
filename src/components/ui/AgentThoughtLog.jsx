@@ -9,7 +9,7 @@ export function AgentThoughtLog({ thoughts = [] }) {
     <div
       style={{
         background: theme.colors.bgDeep,
-        border: '1px solid rgba(34,211,238,0.22)',
+        border: `1px solid ${theme.colors.agentCyan}38`,
         borderRadius: theme.radius.md,
         padding: theme.spacing.sm,
       }}
@@ -17,7 +17,7 @@ export function AgentThoughtLog({ thoughts = [] }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {rows.map((entry, index) => (
           <div key={`${entry.timestamp}-${index}`} style={{ display: 'grid', gridTemplateColumns: '64px 1fr', gap: 10 }}>
-            <span style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: '#22D3EE' }}>
+            <span style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: theme.colors.agentCyan }}>
               {entry.timestamp ?? entry.time}
             </span>
             <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
@@ -34,7 +34,7 @@ export function AgentThoughtLog({ thoughts = [] }) {
             marginTop: 8,
             border: 'none',
             background: 'none',
-            color: '#22D3EE',
+            color: theme.colors.agentCyan,
             cursor: 'pointer',
             fontSize: '11px',
             fontWeight: 600,

@@ -35,10 +35,10 @@ export default function InboxTab() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
         {[
-          { label: 'Pending', value: pendingCount, accent: '#22D3EE' },
+          { label: 'Pending', value: pendingCount, accent: theme.colors.agentCyan },
           { label: 'Visible', value: visible.length, accent: theme.colors.textSecondary },
-          { label: 'Approved', value: approvedToday, accent: '#4ADE80' },
-          { label: 'Dismissed', value: dismissedToday, accent: '#94A3B8' },
+          { label: 'Approved', value: approvedToday, accent: theme.colors.agentApproved },
+          { label: 'Dismissed', value: dismissedToday, accent: theme.colors.agentDismissed },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -101,9 +101,9 @@ export default function InboxTab() {
             onClick={bulkApprove}
             style={{
               borderRadius: theme.radius.sm,
-              border: '1px solid rgba(74,222,128,0.3)',
-              background: 'rgba(74,222,128,0.12)',
-              color: '#4ADE80',
+              border: `1px solid ${theme.colors.agentApproved}4D`,
+              background: `${theme.colors.agentApproved}1F`,
+              color: theme.colors.agentApproved,
               padding: '6px 10px',
               fontSize: '11px',
               fontWeight: 700,

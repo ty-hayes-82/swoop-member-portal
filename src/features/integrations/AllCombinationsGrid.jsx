@@ -14,7 +14,7 @@ function CombinationMiniCard({ combo, onClick }) {
     <div
       onClick={onClick}
       style={{
-        background: '#fff',
+        background: theme.colors.white,
         border: `1px solid ${theme.colors.border}`,
         borderRadius: 10,
         padding: '14px 16px',
@@ -25,8 +25,8 @@ function CombinationMiniCard({ combo, onClick }) {
         gap: 8,
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = '#1a7a3c';
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(26,122,60,0.12)';
+        e.currentTarget.style.borderColor = theme.colors.operations;
+        e.currentTarget.style.boxShadow = `0 2px 8px ${theme.colors.operations}1F`;
         e.currentTarget.style.transform = 'translateY(-1px)';
       }}
       onMouseLeave={e => {
@@ -68,7 +68,7 @@ export function AllCombinationsGrid({ onSelect }) {
         fontWeight: 600,
         textTransform: 'uppercase',
         letterSpacing: '1.2px',
-        color: '#7a8a7a',
+        color: theme.colors.integrationHighlight,
         marginBottom: 16,
       }}>
         ALL POSSIBLE COMBINATIONS

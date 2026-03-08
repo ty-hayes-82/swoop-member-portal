@@ -63,9 +63,9 @@ export function IntegrationsPage() {
     <div>
       <section style={{
         borderRadius: theme.radius.lg,
-        background: 'linear-gradient(120deg, #183024 0%, #234533 45%, #10251e 100%)',
+        background: `linear-gradient(120deg, ${theme.colors.integrationHeroStart} 0%, ${theme.colors.integrationHeroMid} 45%, ${theme.colors.integrationHeroEnd} 100%)`,
         padding: '36px 42px',
-        color: '#fff',
+        color: theme.colors.white,
         marginBottom: 18,
       }}>
         <h1 style={{ margin: '0 0 10px', fontSize: 30, lineHeight: 1.2 }}>Integrations Power Real Club Intelligence</h1>
@@ -90,9 +90,9 @@ export function IntegrationsPage() {
               key={cat}
               onClick={() => setCategory(cat)}
               style={{
-                border: `1px solid ${cat === category ? '#1a7a3c' : theme.colors.border}`,
-                background: cat === category ? 'rgba(26,122,60,0.08)' : '#fff',
-                color: cat === category ? '#1a7a3c' : theme.colors.textSecondary,
+                border: `1px solid ${cat === category ? theme.colors.operations : theme.colors.border}`,
+                background: cat === category ? `${theme.colors.operations}14` : theme.colors.white,
+                color: cat === category ? theme.colors.operations : theme.colors.textSecondary,
                 borderRadius: 999,
                 padding: '6px 11px',
                 fontSize: 12,
@@ -116,7 +116,7 @@ export function IntegrationsPage() {
             padding: '9px 12px',
             fontSize: 13,
             color: theme.colors.textPrimary,
-            background: '#fff',
+            background: theme.colors.white,
           }}
         />
       </section>

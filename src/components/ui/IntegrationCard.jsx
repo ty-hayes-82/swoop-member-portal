@@ -5,7 +5,7 @@ import { theme } from '@/config/theme';
 
 const STATUS_CONFIG = {
   connected:   { label: 'Connected',   dot: theme.colors.success },
-  available:   { label: 'Available',   dot: theme.colors.warning ?? '#B5760A' },
+  available:   { label: 'Available',   dot: theme.colors.warning },
   coming_soon: { label: 'Coming Q2',   dot: theme.colors.textMuted },
 };
 
@@ -22,7 +22,7 @@ export default function IntegrationCard({
       style={{
         display: 'block', width: '100%', textAlign: 'left',
         background: isSelected ? `${color}12` : theme.colors.bgCard,
-        border: `1.5px solid ${isSelected ? color : (theme.colors.border ?? '#E5E5E5')}`,
+        border: `1.5px solid ${isSelected ? color : theme.colors.border}`,
         borderRadius: theme.radius.md,
         padding: theme.spacing.md,
         cursor: 'pointer',

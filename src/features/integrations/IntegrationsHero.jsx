@@ -2,18 +2,18 @@
 import { theme } from '@/config/theme';
 
 const heroStyle = {
-  background: 'linear-gradient(135deg, #1a2b1c 0%, #2e4835 50%, #1a3a24 100%)',
+  background: `linear-gradient(135deg, ${theme.colors.integrationHeroStart} 0%, ${theme.colors.sidebarHover} 50%, ${theme.colors.sidebarAccent} 100%)`,
   borderRadius: theme.radius.lg,
   padding: '40px 48px',
   marginBottom: theme.spacing.xl,
-  color: '#fff',
+  color: theme.colors.white,
 };
 
 const headlineStyle = {
   fontFamily: theme.fonts.serif,
   fontSize: '28px',
   fontWeight: 700,
-  color: '#fff',
+  color: theme.colors.white,
   margin: '0 0 12px 0',
   lineHeight: 1.2,
 };
@@ -41,7 +41,7 @@ const statNumberStyle = {
   fontFamily: theme.fonts.mono,
   fontSize: '28px',
   fontWeight: 700,
-  color: '#f0c674',
+  color: theme.colors.navFb,
   lineHeight: 1,
 };
 

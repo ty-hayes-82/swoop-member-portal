@@ -4,7 +4,7 @@ import { theme } from '@/config/theme';
 
 function heatColor(rate) {
   if (rate >= 0.65) return theme.colors.success;
-  if (rate >= 0.45) return '#84CC16';
+  if (rate >= 0.45) return theme.colors.success;
   if (rate >= 0.25) return theme.colors.warning;
   if (rate >= 0.10) return theme.colors.staffing;
   return theme.colors.urgent;

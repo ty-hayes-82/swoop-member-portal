@@ -31,7 +31,7 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
         fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px',
         border: `1px solid ${mode === key ? color + '60' : color}`,
         background: mode === key ? color + '18' : color,
-        color: mode === key ? color : '#fff',
+        color: mode === key ? color : theme.colors.white,
         boxShadow: mode === key ? 'none' : '0 1px 4px ' + color + '40',
         transition: 'all 0.15s',
       }}
@@ -87,7 +87,7 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
             <button onClick={() => handleSend('note')} style={{
               padding: '7px 18px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
               fontWeight: 600, cursor: 'pointer', border: 'none',
-              background: theme.colors.accent, color: '#fff',
+              background: theme.colors.accent, color: theme.colors.white,
               boxShadow: '0 1px 4px ' + theme.colors.accent + '40' }}>
               Send via email
             </button>
@@ -125,7 +125,7 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
             <button onClick={() => handleSend('call')} style={{
               padding: '7px 18px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
               fontWeight: 600, cursor: 'pointer', border: 'none',
-              background: theme.colors.accent, color: '#fff',
+              background: theme.colors.accent, color: theme.colors.white,
               boxShadow: '0 1px 4px ' + theme.colors.success + '40' }}>
               Add to calendar
             </button>
@@ -159,7 +159,7 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
             <button onClick={() => handleSend('task')} style={{
               padding: '7px 18px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
               fontWeight: 600, cursor: 'pointer', border: 'none',
-              background: theme.colors.accent, color: '#fff',
+              background: theme.colors.accent, color: theme.colors.white,
               boxShadow: '0 1px 4px ' + theme.colors.staffing + '40' }}>
               Assign task
             </button>

@@ -1,19 +1,21 @@
 // ArchetypeBadge.jsx — inline archetype label for member name references
 // Hard ceiling: 150 lines. Target: 60 lines.
 
+import { theme } from '@/config/theme';
+
 const ARCHETYPES = {
-  'Die-Hard Golfer':   { color: '#2E8B7A', icon: '⛳' },  // teal-green — matches chartGolf
-  'Social Butterfly':  { color: '#C2608A', icon: '🦋' },  // deep rose — distinct
-  'Balanced Active':   { color: '#2E7BB8', icon: '◉'  },  // mid blue — stable
-  'Weekend Warrior':   { color: '#9A6B00', icon: '📅'  },  // warm amber — weekend energy
-  'Declining':         { color: '#8B5A2B', icon: '📉'  },  // warm brown — fading, NOT urgent red
-  'New Member':        { color: '#1A7A9A', icon: '★'   },  // deep teal-blue — fresh, NOT healthy green
-  'Ghost':             { color: '#7A8C7D', icon: '👻'  },  // muted sage — invisible
-  'Snowbird':          { color: '#6B7FBF', icon: '✈'   },  // slate blue — seasonal
+  'Die-Hard Golfer':   { color: theme.colors.chartGolf, icon: '⛳' },  // teal-green — matches chartGolf
+  'Social Butterfly':  { color: theme.colors.archetypeRose, icon: '🦋' },  // deep rose — distinct
+  'Balanced Active':   { color: theme.colors.chartBlue, icon: '◉'  },  // mid blue — stable
+  'Weekend Warrior':   { color: theme.colors.archetypeWeekend, icon: '📅'  },  // warm amber — weekend energy
+  'Declining':         { color: theme.colors.archetypeBrown, icon: '📉'  },  // warm brown — fading, NOT urgent red
+  'New Member':        { color: theme.colors.archetypeTeal, icon: '★'   },  // deep teal-blue — fresh, NOT healthy green
+  'Ghost':             { color: theme.colors.archetypeGhost, icon: '👻'  },  // muted sage — invisible
+  'Snowbird':          { color: theme.colors.archetypeSnowbird, icon: '✈'   },  // slate blue — seasonal
 };
 
 export default function ArchetypeBadge({ archetype, size = 'sm' }) {
-  const def   = ARCHETYPES[archetype] ?? { color: '#8BAF8B', icon: '◈' };
+  const def   = ARCHETYPES[archetype] ?? { color: theme.colors.reportSage, icon: '◈' };
   const small = size === 'xs';
 
   return (
@@ -43,4 +45,4 @@ export default function ArchetypeBadge({ archetype, size = 'sm' }) {
 
 // Utility: get archetype color for inline use
 export const getArchetypeColor = (archetype) =>
-  ARCHETYPES[archetype]?.color ?? '#8BAF8B';
+  ARCHETYPES[archetype]?.color ?? theme.colors.reportSage;

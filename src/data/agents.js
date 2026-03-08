@@ -1,3 +1,5 @@
+import { theme } from '@/config/theme';
+
 export const agentDefinitions = [
   {
     id: 'retention-sentinel',
@@ -6,7 +8,7 @@ export const agentDefinitions = [
     status: 'active',
     lastAction: '2026-01-17T06:04:00Z',
     accuracy: 91,
-    accentColor: '#22D3EE',
+    accentColor: theme.colors.agentCyan,
   },
   {
     id: 'demand-optimizer',
@@ -15,7 +17,7 @@ export const agentDefinitions = [
     status: 'active',
     lastAction: '2026-01-17T06:11:00Z',
     accuracy: 88,
-    accentColor: '#4ADE80',
+    accentColor: theme.colors.agentApproved,
   },
   {
     id: 'service-recovery',
@@ -24,7 +26,7 @@ export const agentDefinitions = [
     status: 'learning',
     lastAction: '2026-01-17T08:43:00Z',
     accuracy: 84,
-    accentColor: '#F59E0B',
+    accentColor: theme.colors.warning,
   },
   {
     id: 'revenue-analyst',
@@ -33,7 +35,7 @@ export const agentDefinitions = [
     status: 'active',
     lastAction: '2026-01-17T07:55:00Z',
     accuracy: 93,
-    accentColor: '#F472B6',
+    accentColor: theme.colors.navPipeline,
   },
   {
     id: 'engagement-coach',
@@ -42,7 +44,7 @@ export const agentDefinitions = [
     status: 'idle',
     lastAction: '2026-01-16T18:12:00Z',
     accuracy: 86,
-    accentColor: '#A78BFA',
+    accentColor: theme.colors.navMembers,
   },
   {
     id: 'draft-communicator',
@@ -51,7 +53,7 @@ export const agentDefinitions = [
     status: 'active',
     lastAction: '2026-01-17T06:21:00Z',
     accuracy: 90,
-    accentColor: '#6BB8EF',
+    accentColor: theme.colors.navBriefing,
   },
 ];
 

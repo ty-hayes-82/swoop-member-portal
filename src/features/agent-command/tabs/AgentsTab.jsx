@@ -30,7 +30,7 @@ export default function AgentsTab() {
             {activeCount} active · {agents.length - activeCount} idle/learning
           </div>
         </div>
-        <div style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.sm, color: '#22D3EE', fontWeight: 700 }}>
+        <div style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.sm, color: theme.colors.agentCyan, fontWeight: 700 }}>
           {Math.round(agents.reduce((sum, agent) => sum + agent.accuracy, 0) / agents.length)}% avg accuracy
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function AgentsTab() {
                 style={{
                   marginTop: 8,
                   background: theme.colors.bgCard,
-                  border: '1px solid rgba(34,211,238,0.2)',
+                  border: `1px solid ${theme.colors.agentCyan}33`,
                   borderRadius: theme.radius.md,
                   padding: theme.spacing.md,
                 }}
@@ -59,7 +59,7 @@ export default function AgentsTab() {
                 <div
                   style={{
                     fontSize: '11px',
-                    color: '#22D3EE',
+                    color: theme.colors.agentCyan,
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     letterSpacing: '0.06em',

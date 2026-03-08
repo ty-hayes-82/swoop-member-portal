@@ -43,7 +43,7 @@ export function AgentCommand() {
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Queue health</div>
-          <div style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: '#22D3EE', fontSize: theme.fontSize.md }}>
+          <div style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.agentCyan, fontSize: theme.fontSize.md }}>
             {summary.approved} approved · {summary.dismissed} dismissed
           </div>
         </div>
@@ -60,7 +60,7 @@ export function AgentCommand() {
                 padding: '8px 16px',
                 borderRadius: `${theme.radius.sm} ${theme.radius.sm} 0 0`,
                 border: 'none',
-                borderBottom: active ? '2px solid #22D3EE' : '2px solid transparent',
+                borderBottom: active ? `2px solid ${theme.colors.agentCyan}` : '2px solid transparent',
                 background: 'transparent',
                 color: active ? theme.colors.textPrimary : theme.colors.textMuted,
                 cursor: 'pointer',
@@ -75,8 +75,8 @@ export function AgentCommand() {
                     marginLeft: 6,
                     fontSize: '10px',
                     fontWeight: 700,
-                    background: '#22D3EE',
-                    color: '#000',
+                    background: theme.colors.agentCyan,
+                    color: theme.colors.textPrimary,
                     borderRadius: 10,
                     padding: '1px 6px',
                   }}

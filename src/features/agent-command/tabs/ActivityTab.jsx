@@ -14,9 +14,9 @@ function formatTimestamp(timestamp) {
 }
 
 const STATUS_STYLE = {
-  pending: { color: '#22D3EE', bg: 'rgba(34,211,238,0.12)' },
-  approved: { color: '#4ADE80', bg: 'rgba(74,222,128,0.12)' },
-  dismissed: { color: '#94A3B8', bg: 'rgba(148,163,184,0.12)' },
+  pending: { color: theme.colors.agentCyan, bg: `${theme.colors.agentCyan}1F` },
+  approved: { color: theme.colors.agentApproved, bg: `${theme.colors.agentApproved}1F` },
+  dismissed: { color: theme.colors.agentDismissed, bg: `${theme.colors.agentDismissed}1F` },
 };
 
 export default function ActivityTab() {
@@ -127,7 +127,7 @@ export default function ActivityTab() {
               <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, fontWeight: 600, marginBottom: 4 }}>
                 {entry.description}
               </div>
-              <div style={{ fontSize: theme.fontSize.xs, color: '#4ADE80' }}>Impact: {entry.impactMetric}</div>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.agentApproved }}>Impact: {entry.impactMetric}</div>
             </div>
           );
         })}
