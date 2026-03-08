@@ -91,34 +91,34 @@ export const comparisonFeatures = [
 
 export const agents = [
   {
-    icon: 'Radar',
-    name: 'Demand Sentinel',
-    description: 'Flags demand swings by segment and recommends inventory moves before losses compound.',
-  },
-  {
-    icon: 'RefreshCw',
-    name: 'Waitlist Optimizer',
-    description: 'Reorders waitlists by retention value and match-fit, then auto-notifies best-fit members.',
-  },
-  {
     icon: 'UserRound',
-    name: 'Member Save Agent',
-    description: 'Detects service-risk members and triggers personalized save sequences for GM follow-up.',
+    name: 'Member Pulse',
+    description: 'Detects early churn signals and proposes interventions before members disengage.',
+  },
+  {
+    icon: 'Radar',
+    name: 'Demand Optimizer',
+    description: 'Balances waitlist demand, cancellation prediction, and tee sheet fill optimization.',
   },
   {
     icon: 'ChefHat',
-    name: 'F&B Flow Agent',
-    description: 'Predicts rushes from tee sheet and weather signals to adjust outlet prep and staffing.',
+    name: 'Service Recovery',
+    description: 'Surfaces unresolved complaints and drafts recovery actions before resignation windows close.',
   },
   {
     icon: 'UsersRound',
-    name: 'Labor Planner',
-    description: 'Forecasts coverage gaps and recommends shifts to protect service level and margin.',
+    name: 'Labor Optimizer',
+    description: 'Forecasts staffing gaps and recommends coverage shifts to protect service quality and margin.',
   },
   {
     icon: 'LineChart',
     name: 'Revenue Analyst',
-    description: 'Attribution-ready insights connect actions to recovered revenue and retained annual value.',
+    description: 'Flags preventable revenue leakage and recommends high-confidence margin actions.',
+  },
+  {
+    icon: 'RefreshCw',
+    name: 'Engagement Autopilot',
+    description: 'Monitors declining participation and proposes targeted outreach for member reactivation.',
   },
 ];
 

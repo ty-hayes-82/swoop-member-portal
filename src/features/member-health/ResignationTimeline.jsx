@@ -12,11 +12,11 @@ const DOMAIN_COLORS = {
 };
 
 const AGENT_ANNOTATIONS = {
-  mbr_042: { date: 'Jan 5', note: 'Engagement Coach flagged multi-domain decay and proposed a re-activation invite. Action dismissed.' },
-  mbr_117: { date: 'Jan 12', note: 'Retention Sentinel flagged complete disengagement and recommended personal GM outreach. Not actioned.' },
-  mbr_203: { date: 'Jan 13', note: 'Service Recovery + Retention Sentinel flagged unresolved complaint with high resignation probability. Not actioned.' },
+  mbr_042: { date: 'Jan 5', note: 'Engagement Autopilot flagged multi-domain decay and proposed a re-activation invite. Action dismissed.' },
+  mbr_117: { date: 'Jan 12', note: 'Member Pulse flagged complete disengagement and recommended personal GM outreach. Not actioned.' },
+  mbr_203: { date: 'Jan 13', note: 'Service Recovery + Member Pulse flagged unresolved complaint with high resignation probability. Not actioned.' },
   mbr_089: { date: 'Jan 14', note: 'Demand Optimizer flagged high-value waitlist priority intervention. Action dismissed.' },
-  mbr_271: { date: 'Jan 20', note: 'Engagement Coach flagged obligation-only spend pattern and recommended targeted F&B outreach.' },
+  mbr_271: { date: 'Jan 20', note: 'Engagement Autopilot flagged obligation-only spend pattern and recommended targeted F&B outreach.' },
 };
 
 export default function ResignationTimeline() {

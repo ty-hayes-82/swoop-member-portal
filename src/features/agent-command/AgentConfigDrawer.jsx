@@ -144,7 +144,7 @@ export default function AgentConfigDrawer({ agent, initialConfig, onSave, onClos
         </div>
       </div>
 
-      {/* Scope (only for Retention Sentinel) */}
+      {/* Scope (only for Member Pulse) */}
       {agent.id === 'retention-sentinel' && (
         <div style={{ marginBottom: theme.spacing.lg }}>
           <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textPrimary,
