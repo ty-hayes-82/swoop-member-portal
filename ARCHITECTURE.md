@@ -335,3 +335,122 @@ Sections (top to bottom):
 - Arc opacity animates to 60% on hover of any node in that category  
 - All existing hover/click/edge behavior preserved
 
+
+---
+
+## §9 — Customer Language vs. Internal Architecture
+
+### The Five Lenses Rule
+
+**The Five Lenses are an internal strategic framework.** They're how Swoop's team thinks, sells to investors, and builds the product. They are NOT customer-facing language.
+
+**Internal use (lenses ARE appropriate):**
+- Pitch decks
+- Sales training materials  
+- Investor presentations
+- Internal product documentation
+- Engineering specs
+- Strategic planning
+
+**Customer-facing (lenses are HIDDEN):**
+- GM Dashboard navigation
+- Landing page copy
+- Marketing website headlines
+- In-app section labels
+- Email communications
+- Help documentation
+
+### The Translation Table
+
+| Internal Lens | What GMs Call It | Customer-Facing Label |
+|---------------|------------------|----------------------|
+| Operator's Lens | "What do I need to handle today?" | Daily Briefing |
+| Economic Buyer Lens | "How are we performing? What's the number?" | Revenue & F&B |
+| Member Retention Lens | "Who's about to leave and why?" | Member Health |
+| Labor & Service Lens | "Are we staffed right? Are members happy?" | Staffing & Service |
+| Growth Pipeline Lens | "Who's next? What's in the pipeline?" | Growth Pipeline |
+
+### Positioning Principle
+
+**The Five Lenses are how Swoop sees the club. The GM never has to know that.**
+
+The lenses are a product architecture concept — they define what cross-domain questions each section can answer. But in the app and on the website, every label, headline, and navigation item should answer: **"What is the GM trying to do right now?"**
+
+### Practical Rules
+
+1. **Navigation labels** = GM actions/outcomes, never lens names
+   - ✅ "Member Health" 
+   - ❌ "Member Retention Lens"
+
+2. **Section headlines** = questions a GM would ask out loud
+   - ✅ "Who's at risk today?"
+   - ❌ "Retention Intelligence Dashboard"
+
+3. **Marketing copy** = outcomes and proof, not framework names
+   - ✅ "Prevented 3 resignations this month"
+   - ❌ "Member Health Lens detected churn signals"
+
+4. **Feature descriptions** = what it does, not what it's called internally
+   - ✅ "See which members need attention and why"
+   - ❌ "The Member Retention Lens analyzes behavioral signals"
+
+5. **Sales/demo materials** = lenses CAN live here because you're selling the platform holistically to a buyer who wants to understand the full architecture
+
+### The Apple Analogy
+
+Apple doesn't sell "the A18 chip architecture." They sell "the fastest iPhone ever."
+
+The chip is real and it matters — it just lives in the engineering docs, not the billboard.
+
+**The Five Lenses are your chip architecture.** Powerful. Essential. Internal.
+
+### Enforcement
+
+- Any PR that adds "lens" language to customer-facing copy = reject with reference to §9
+- Marketing website can have /lenses/ URLs for SEO, but page headlines must be outcome-based
+- Pricing copy: "Full platform access" not "All 5 Lenses"
+- Landing page: Feature outcomes, not lens inventory
+
+
+---
+
+## §9 — Customer Language vs. Internal Architecture
+
+### The Five Lenses Rule
+
+**The Five Lenses are an internal strategic framework.** They're how Swoop's team thinks, sells to investors, and builds the product. They are NOT customer-facing language.
+
+**Internal use (lenses ARE appropriate):**
+- Pitch decks, sales training, investor presentations
+- Internal product docs, engineering specs, strategic planning
+
+**Customer-facing (lenses are HIDDEN):**
+- GM Dashboard navigation, landing page, marketing website
+- In-app labels, email comms, help docs
+
+### The Translation Table
+
+| Internal Lens | Customer-Facing Label |
+|---------------|----------------------|
+| Operator's Lens | Daily Briefing |
+| Economic Buyer Lens | Revenue & F&B |
+| Member Retention Lens | Member Health |
+| Labor & Service Lens | Staffing & Service |
+| Growth Pipeline Lens | Growth Pipeline |
+
+### Positioning Principle
+
+**The Five Lenses are how Swoop sees the club. The GM never has to know that.**
+
+Navigation labels = GM actions/outcomes, never lens names. Headlines = questions GMs ask. Copy = outcomes and proof, not framework names.
+
+### The Apple Analogy
+
+Apple sells "the fastest iPhone ever," not "the A18 chip architecture." The Five Lenses are your chip architecture — powerful, essential, internal.
+
+### Enforcement
+
+- Any PR adding "lens" language to customer-facing copy = reject with §9 reference
+- Marketing /lenses/ URLs OK for SEO, but headlines must be outcome-based
+- Pricing: "Full platform access" not "All 5 Lenses"
+
