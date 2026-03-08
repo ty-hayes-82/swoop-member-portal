@@ -1,5 +1,4 @@
 import { Panel, ConnectedSystems } from '@/components/ui';
-import Integrations from './Integrations';
 import { useNavigation } from '@/hooks/useNavigation';
 import { theme } from '@/config/theme';
 
@@ -102,13 +101,6 @@ export default function DemoMode() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Integrations section */}
-        <div>
-          <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary,
-            marginBottom: theme.spacing.md }}>Integrations & Go-Live Timeline</div>
-          <Integrations />
         </div>
 
         {/* Connected Systems status */}

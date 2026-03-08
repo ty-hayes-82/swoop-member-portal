@@ -28,7 +28,7 @@ function getVariantStyle(variant, accentColor, disabled) {
   switch (variant) {
     case 'primary':
       return {
-        background: accent, color: '#fff',
+        background: accent, color: theme.colors.white,
         border: `1px solid ${accent}`,
         boxShadow: `0 1px 3px ${accent}40`,
       };

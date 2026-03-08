@@ -85,11 +85,61 @@ button {
 .text-muted { color: var(--text-muted); }
 .text-secondary { color: var(--text-secondary); }
 
+/* Responsive grid utilities */
+.grid-responsive-4 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md, 16px);
+}
+
+@media (min-width: 640px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Responsive grid — 4 cols desktop, 2 cols tablet, 1 col mobile */
+.grid-responsive-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-responsive-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Print styles for Morning Briefing export */
 @media print {
   .no-print { display: none !important; }
   .print-only { display: block !important; }
-  body { background: white; color: black; font-size: 12px; }
+  body { background: white !important; color: black !important; font-size: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .print-break { page-break-before: always; }
+  /* Hide everything except the briefing modal */
+  aside, header, footer, nav { display: none !important; }
+  main { margin: 0 !important; padding: 0 !important; }
+  div[style*="marginLeft"] { margin-left: 0 !important; }
+  /* Clean up the modal for print */
+  div[style*="position: fixed"][style*="inset: 0"] {
+    position: static !important; background: none !important; padding: 0 !important;
+  }
+  div[style*="position: fixed"][style*="inset: 0"] > div {
+    box-shadow: none !important; max-height: none !important; border-radius: 0 !important;
+  }
+  button { display: none !important; }
 }
 .print-only { display: none; }

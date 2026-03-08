@@ -29,7 +29,8 @@ export const getMemberSummary = () => {
     total, healthy, atRisk, critical,
     riskCount:           atRisk + critical,
     avgHealthScore:      62,
-    potentialDuesAtRisk: (atRisk + critical) * 18000,
+    // Weighted avg: critical members avg $12K, at-risk avg $8.5K
+    potentialDuesAtRisk: (critical * 12000) + (atRisk * 8500),
   };
 };
 

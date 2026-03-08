@@ -1,91 +1,99 @@
-// features/integrations/IntegrationCard.jsx
 import { theme } from '@/config/theme';
 
-const categoryStyle = (color) => ({
-  display: 'inline-block',
-  fontSize: theme.fontSize.xs,
-  fontWeight: 600,
-  color,
-  background: `${color}14`,
-  borderRadius: 4,
-  padding: '2px 7px',
-  letterSpacing: '0.5px',
-  textTransform: 'uppercase',
-});
-
-const dataPointStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 6,
-  fontSize: theme.fontSize.xs,
-  color: theme.colors.textMuted,
+const CATEGORY_COLORS = {
+  'tee-sheet': theme.colors.integrationTeeSheet,
+  pos: theme.colors.integrationPos,
+  crm: theme.colors.integrationCrm,
+  staffing: theme.colors.operations,
+  waitlist: theme.colors.integrationWaitlist,
 };
 
-export function IntegrationCard({ integration, isSelected, onClick }) {
-  const { name, icon, category, color, description, dataPoints } = integration;
+const STATUS_COLORS = {
+  connected: theme.colors.operations,
+  available: theme.colors.integrationPos,
+  'coming-soon': theme.colors.integrationMuted,
+};
 
-  const cardStyle = {
-    background: isSelected ? `rgba(26,122,60,0.04)` : '#fff',
-    border: isSelected ? `2px solid #1a7a3c` : `1px solid ${theme.colors.border}`,
-    boxShadow: isSelected ? '0 0 0 2px rgba(26,122,60,0.15)' : '0 1px 3px rgba(0,0,0,0.06)',
-    borderRadius: 10,
-    padding: '20px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    position: 'relative',
-    userSelect: 'none',
-  };
+export function IntegrationCard({ system, isSelected, onClick, cardRef }) {
+  const categoryColor = CATEGORY_COLORS[system.category] ?? theme.colors.integrationNeutral;
+  const statusColor = STATUS_COLORS[system.status] ?? theme.colors.integrationNeutral;
 
   return (
-    <div
-      style={cardStyle}
+    <article
+      ref={cardRef}
       onClick={onClick}
-      onMouseEnter={e => {
-        if (!isSelected) {
-          e.currentTarget.style.transform = 'translateY(-1px)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-        }
-      }}
-      onMouseLeave={e => {
-        if (!isSelected) {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
-        }
+      style={{
+        background: theme.colors.white,
+        border: isSelected ? `2px solid ${categoryColor}` : `1px solid ${theme.colors.border}`,
+        borderRadius: 12,
+        padding: 16,
+        cursor: 'pointer',
+        boxShadow: isSelected ? '0 0 0 2px rgba(26,122,60,0.15)' : '0 1px 4px rgba(0,0,0,0.05)',
+        transition: 'all 0.2s ease',
       }}
     >
-      {isSelected && (
-        <div style={{
-          position: 'absolute', top: 10, right: 10,
-          width: 22, height: 22, borderRadius: '50%',
-          background: '#1a7a3c', color: '#fff',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 12, fontWeight: 700,
-        }}>✓</div>
-      )}
-
-      <div style={{ fontSize: 28, marginBottom: 10 }}>{icon}</div>
-      <div style={{ fontWeight: 600, fontSize: theme.fontSize.md, color: theme.colors.textPrimary, marginBottom: 6 }}>
-        {name}
-      </div>
-      <div style={{ marginBottom: 10 }}>
-        <span style={categoryStyle(color)}>{category}</span>
-      </div>
-
-      {isSelected && (
-        <>
-          <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5, margin: '10px 0 10px' }}>
-            {description}
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {dataPoints.map((dp, i) => (
-              <div key={i} style={dataPointStyle}>
-                <span style={{ color, fontSize: 10 }}>●</span>
-                {dp}
-              </div>
-            ))}
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: theme.fontSize.md, color: theme.colors.textPrimary }}>{system.name}</h3>
+          <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+            <Badge text={system.category} color={categoryColor} />
+            <Badge text={`Tier ${system.tier}`} color={theme.colors.integrationNeutral} />
           </div>
-        </>
-      )}
-    </div>
+        </div>
+        <span style={{
+          width: 34,
+          height: 34,
+          borderRadius: 10,
+          border: `1px solid ${theme.colors.border}`,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 12,
+          fontWeight: 700,
+        }}>
+          {system.logo}
+        </span>
+      </div>
+
+      <div style={{ fontSize: 12, color: theme.colors.textSecondary, marginBottom: 10 }}>
+        <strong style={{ color: statusColor }}>{system.status}</strong>
+        {' · '}
+        Last sync: {system.lastSync ?? 'Not connected yet'}
+      </div>
+
+      <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: theme.colors.textMuted, marginBottom: 6 }}>
+        Key Endpoints
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {system.endpoints.map((endpoint) => (
+          <span key={endpoint} style={{
+            background: theme.colors.bgDeep,
+            borderRadius: 6,
+            padding: '3px 7px',
+            fontSize: 11,
+            color: theme.colors.textSecondary,
+          }}>
+            {endpoint}
+          </span>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function Badge({ text, color }) {
+  return (
+    <span style={{
+      fontSize: 10,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      color,
+      background: `${color}18`,
+      borderRadius: 4,
+      padding: '2px 6px',
+    }}>
+      {text}
+    </span>
   );
 }

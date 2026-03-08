@@ -38,7 +38,7 @@ export function CombinationPanel({ selected }) {
   const intB = integrationsById[idB];
 
   const panelStyle = {
-    background: '#fff',
+    background: theme.colors.white,
     border: `1px solid ${theme.colors.border}`,
     borderRadius: 12,
     overflow: 'hidden',
@@ -103,10 +103,10 @@ export function CombinationPanel({ selected }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', padding: '28px 36px', gap: 36 }}>
         {/* Insights */}
         <div>
-          <div style={sectionLabelStyle('#1a5c8e')}>Insights Unlocked</div>
+          <div style={sectionLabelStyle(theme.colors.integrationTeeSheet)}>Insights Unlocked</div>
           {combo.insights.map((insight, i) => (
-            <div key={i} style={{ ...listItemStyle('#1a5c8e'), borderBottom: i < combo.insights.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
-              <span style={bulletStyle('#1a5c8e')} />
+            <div key={i} style={{ ...listItemStyle(theme.colors.integrationTeeSheet), borderBottom: i < combo.insights.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
+              <span style={bulletStyle(theme.colors.integrationTeeSheet)} />
               {insight}
             </div>
           ))}
@@ -114,10 +114,10 @@ export function CombinationPanel({ selected }) {
 
         {/* Automations */}
         <div>
-          <div style={sectionLabelStyle('#1a7a3c')}>Automations Enabled</div>
+          <div style={sectionLabelStyle(theme.colors.operations)}>Automations Enabled</div>
           {combo.automations.map((auto, i) => (
-            <div key={i} style={{ ...listItemStyle('#1a7a3c'), borderBottom: i < combo.automations.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
-              <span style={bulletStyle('#1a7a3c')} />
+            <div key={i} style={{ ...listItemStyle(theme.colors.operations), borderBottom: i < combo.automations.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
+              <span style={bulletStyle(theme.colors.operations)} />
               {auto}
             </div>
           ))}
@@ -129,11 +129,11 @@ export function CombinationPanel({ selected }) {
         margin: '0 36px 28px',
         background: 'rgba(139,100,32,0.06)',
         border: `1px solid rgba(139,100,32,0.2)`,
-        borderLeft: `4px solid #8b6420`,
+        borderLeft: `4px solid ${theme.colors.integrationPos}`,
         borderRadius: '0 8px 8px 0',
         padding: '14px 18px',
       }}>
-        <div style={{ fontSize: theme.fontSize.xs, fontWeight: 600, color: '#8b6420', letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontSize: theme.fontSize.xs, fontWeight: 600, color: theme.colors.integrationPos, letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: 6 }}>
           Example Swoop Insight
         </div>
         <p style={{ fontSize: theme.fontSize.sm, fontStyle: 'italic', color: theme.colors.textPrimary, lineHeight: 1.6, margin: 0, fontWeight: 500 }}>

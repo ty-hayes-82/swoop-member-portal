@@ -1,6 +1,7 @@
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import { theme } from '@/config/theme';
 
-export default function Sparkline({ data = [], color = '#2E8B7A', height = 32, showDots = false }) {
+export default function Sparkline({ data = [], color = theme.colors.chartGolf, height = 32, showDots = false }) {
   if (!data.length) return null;
 
   const chartData = data.map((v, i) => ({ i, v }));

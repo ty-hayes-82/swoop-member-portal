@@ -75,7 +75,7 @@ export default function HealthOverview() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       {/* Health distribution bars */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
+      <div className="grid-responsive-4">
         {dist.map(d => (
           <div key={d.level} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${d.color}40`, padding: theme.spacing.md }}>
@@ -109,13 +109,20 @@ export default function HealthOverview() {
             ${(summary.potentialDuesAtRisk / 1000).toFixed(0)}K dues at risk
           </span>
         </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
           <thead>
             <tr style={{ background: theme.colors.bg }}>
               {['Member', 'Health Score', 'Archetype', 'Primary Risk Signal'].map(h => (
                 <th key={h} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'left',
                   color: theme.colors.textMuted, fontSize: theme.fontSize.xs, textTransform: 'uppercase',
-                  letterSpacing: '0.06em', fontWeight: 500 }}>{h}</th>
+                  letterSpacing: '0.06em', fontWeight: 500 }}>
+                  {h}
+                  {h === 'Health Score' && (
+                    <span title="Composite score (0–100) based on: visit frequency, F&B spend trends, email engagement, complaint history, tenure length, and event participation. Updated daily."
+                      style={{ cursor: 'help', marginLeft: '4px', fontSize: '11px', opacity: 0.7 }}>ⓘ</span>
+                  )}
+                </th>
               ))}
             </tr>
           </thead>
@@ -130,6 +137,7 @@ export default function HealthOverview() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <SoWhatCallout variant="warning">

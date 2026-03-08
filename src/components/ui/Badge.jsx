@@ -1,8 +1,10 @@
+import { theme } from '@/config/theme';
+
 const VARIANT_STYLES = {
-  urgent:   { bg: '#EF444420', color: '#EF4444', border: '#EF444440' },
-  warning:  { bg: '#F59E0B20', color: '#F59E0B', border: '#F59E0B40' },
-  success:  { bg: '#22C55E20', color: '#22C55E', border: '#22C55E40' },
-  neutral:  { bg: '#8BAF8B20', color: '#8BAF8B', border: '#8BAF8B40' },
+  urgent:   { bg: `${theme.colors.urgent}20`, color: theme.colors.urgent, border: `${theme.colors.urgent}40` },
+  warning:  { bg: `${theme.colors.warning}20`, color: theme.colors.warning, border: `${theme.colors.warning}40` },
+  success:  { bg: `${theme.colors.success}20`, color: theme.colors.success, border: `${theme.colors.success}40` },
+  neutral:  { bg: `${theme.colors.reportSage}20`, color: theme.colors.reportSage, border: `${theme.colors.reportSage}40` },
   effort:   { bg: 'var(--bg-deep)', color: 'var(--text-muted)', border: 'var(--border)' },
   timeline: { bg: 'var(--bg-deep)', color: 'var(--text-muted)', border: 'var(--border)' },
 };

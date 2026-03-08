@@ -3,7 +3,7 @@ export default function TrendArrow({ direction, value, period, inverted = false 
   const isFlat = direction === 'flat';
   const color = isFlat ? 'var(--text-muted)' : (isGood ? 'var(--success)' : 'var(--urgent)');
   const arrow = direction === 'up' ? '▲' : direction === 'down' ? '▼' : '—';
-  const pct   = value != null ? `${Math.abs(value).toFixed(1)}%` : '';
+  const pct   = value == null ? '' : typeof value === 'string' ? value : `${Math.abs(value).toFixed(1)}%`;
 
   return (
     <span style={{

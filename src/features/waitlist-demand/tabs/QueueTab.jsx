@@ -1,125 +1,197 @@
-import { SoWhatCallout, ArchetypeBadge } from '@/components/ui';
-import { getWaitlistQueue, getWaitlistSummary } from '@/services/waitlistService';
+import { useMemo, useState } from 'react';
+import { Badge, Btn, SoWhatCallout, Sparkline, StatCard, WaitlistRow, InfoTooltip } from '@/components/ui';
+import {
+  getWaitlistQueue,
+  getWaitlistSummary,
+  getWaitlistInsight,
+  getWaitlistDemandSparkline,
+} from '@/services/waitlistService';
 import { theme } from '@/config/theme';
 
-const RISK_COLORS = {
-  Healthy:   theme.colors.success,
-  Watch:     theme.colors.warning,
-  'At Risk': '#D97706',
-  Critical:  theme.colors.urgent,
-};
+const SLOT_WINDOWS = ['Sat 7:00', 'Sat 7:08', 'Sat 7:16', 'Sat 7:24', 'Sun 7:00', 'Sun 7:08'];
 
-function WaitlistRow({ memberName, memberId, archetype, healthScore, riskLevel,
-  requestedSlot, alternatesAccepted, daysWaiting, retentionPriority, diningHistory, lastRound }) {
-  const isPriority = retentionPriority === 'HIGH';
-  return (
-    <tr style={{ borderTop: `1px solid ${theme.colors.border}`,
-      background: isPriority ? 'rgba(192,57,43,0.04)' : 'transparent' }}>
-      <td style={{ padding: `10px ${theme.spacing.md}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {isPriority && (
-            <span style={{ fontSize: 10, background: theme.colors.urgent, color: '#fff',
-              padding: '1px 6px', borderRadius: 3, fontWeight: 700, letterSpacing: '0.04em',
-              flexShrink: 0 }}>PRIORITY</span>
-          )}
-          <span style={{ fontSize: theme.fontSize.sm, fontWeight: isPriority ? 600 : 400,
-            color: theme.colors.textPrimary }}>{memberName}</span>
-        </div>
-        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
-          Last round: {lastRound} · {diningHistory}
-        </div>
-      </td>
-      <td style={{ padding: `10px ${theme.spacing.md}` }}>
-        <ArchetypeBadge archetype={archetype} size="sm" />
-      </td>
-      <td style={{ padding: `10px ${theme.spacing.md}`, textAlign: 'center' }}>
-        <div style={{ fontFamily: theme.fonts.mono, fontWeight: 700, fontSize: theme.fontSize.sm,
-          color: RISK_COLORS[riskLevel] }}>{healthScore}</div>
-        <div style={{ fontSize: 10, color: RISK_COLORS[riskLevel] }}>{riskLevel}</div>
-      </td>
-      <td style={{ padding: `10px ${theme.spacing.md}`, fontSize: theme.fontSize.xs,
-        color: theme.colors.textSecondary }}>
-        <div>{requestedSlot}</div>
-        {alternatesAccepted.length > 0 && (
-          <div style={{ color: theme.colors.textMuted, marginTop: 2 }}>
-            Alt: {alternatesAccepted.slice(0, 2).join(', ')}
-          </div>
-        )}
-      </td>
-      <td style={{ padding: `10px ${theme.spacing.md}`, textAlign: 'center',
-        fontFamily: theme.fonts.mono, fontWeight: 600, fontSize: theme.fontSize.sm,
-        color: daysWaiting >= 4 ? theme.colors.warning : theme.colors.textMuted }}>
-        {daysWaiting}d
-      </td>
-    </tr>
+function buildQueueStats(summary, queue) {
+  const atRiskRevenue = queue
+    .filter((member) => ['At Risk', 'Critical'].includes(member.riskLevel))
+    .reduce((sum, member) => sum + (member.memberValueAnnual ?? 0), 0);
+
+  const avgHealthScore = Math.round(
+    queue.reduce((sum, member) => sum + member.healthScore, 0) / Math.max(queue.length, 1),
   );
+
+  return [
+    {
+      label: 'Total Waiting',
+      value: summary.total,
+      trend: { direction: 'up', value: '+12%', period: 'vs last month' },
+      sparklineData: getWaitlistDemandSparkline(),
+      badge: { text: 'Live Queue', variant: 'timeline' },
+      source: 'ForeTees',
+    },
+    {
+      label: 'Retention Priority',
+      value: summary.highPriority,
+      trend: { direction: 'up', value: '+2', period: 'vs last weekend', inverted: true },
+      sparklineData: queue.slice(0, 6).map((member) => member.daysWaiting).reverse(),
+      badge: { text: 'Escalate', variant: 'warning' },
+      source: 'Northstar',
+    },
+    {
+      label: 'At-Risk Dues Exposed',
+      value: atRiskRevenue,
+      format: 'currency',
+      trend: { direction: 'up', value: '+$4.1K', period: 'if not routed today', inverted: true },
+      sparklineData: queue
+        .filter((member) => ['At Risk', 'Critical'].includes(member.riskLevel))
+        .slice(0, 6)
+        .map((member) => member.memberValueAnnual ?? 0)
+        .reverse(),
+      badge: { text: 'GM Attention', variant: 'urgent' },
+      source: 'Northstar',
+    },
+    {
+      label: 'Average Health Score',
+      value: avgHealthScore,
+      trend: { direction: 'down', value: '-4 pts', period: 'past 2 weeks', inverted: true },
+      sparklineData: queue.slice(0, 6).map((member) => member.healthScore).reverse(),
+      badge: { text: 'Member Health', variant: 'effort' },
+      source: 'Club Prophet',
+    },
+  ];
 }
 
 export default function QueueTab() {
   const queue = getWaitlistQueue();
   const summary = getWaitlistSummary();
-  const priorityCount = queue.filter(e => e.retentionPriority === 'HIGH').length;
+  const stats = buildQueueStats(summary, queue);
+
+  const [selectedMemberId, setSelectedMemberId] = useState(queue[0]?.memberId ?? null);
+  const [selectedSlot, setSelectedSlot] = useState(SLOT_WINDOWS[0]);
+
+  const selectedMember = useMemo(
+    () => queue.find((member) => member.memberId === selectedMemberId) ?? queue[0],
+    [queue, selectedMemberId],
+  );
+
+  const slotCandidates = useMemo(() => {
+    if (!selectedMember) return SLOT_WINDOWS;
+    const preferred = selectedMember.alternatesAccepted ?? [];
+    const merged = [...preferred, ...SLOT_WINDOWS];
+    return [...new Set(merged)].slice(0, 6);
+  }, [selectedMember]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-      {/* Summary strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
-        {[
-          { label: 'Total Waiting',       value: summary.total,         accent: theme.colors.operations },
-          { label: 'Retention Priority',  value: summary.highPriority,  accent: theme.colors.urgent },
-          { label: 'At-Risk Members',     value: summary.atRisk,        accent: theme.colors.warning },
-          { label: 'Avg Days Waiting',    value: `${summary.avgDaysWaiting}d`, accent: theme.colors.textSecondary },
-        ].map(({ label, value, accent }) => (
-          <div key={label} style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-            borderRadius: theme.radius.md, padding: theme.spacing.md, boxShadow: theme.shadow.sm }}>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
-              textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
-            <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono,
-              fontWeight: 700, color: accent }}>{value}</div>
-          </div>
+      <div className="grid-responsive-4">
+        {stats.map((stat) => (
+          <StatCard key={stat.label} {...stat} />
         ))}
       </div>
 
-      {/* Queue table */}
-      <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md, overflow: 'hidden', boxShadow: theme.shadow.sm }}>
-        <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}`,
-          background: theme.colors.bgDeep, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.md,
+          background: theme.colors.bgCard,
+          padding: theme.spacing.md,
+          boxShadow: theme.shadow.sm,
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.sm }}>
           <div>
-            <span style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
-              Member Queue
-            </span>
-            <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginLeft: 8 }}>
-              Sorted by retention risk · {priorityCount} flagged for priority notification
-            </span>
+            <div style={{ fontWeight: 700, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              Retention-Prioritized Queue
+              <InfoTooltip text="Members are ranked by retention value and health score, not FIFO. At-risk members get priority access to prevent churn — even if they requested later than healthier members." />
+            </div>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+              Members are ranked by retention value and current health, not by timestamp.
+            </div>
           </div>
-          <span style={{ fontSize: 11, color: '#22D3EE', fontWeight: 600,
-            background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.25)',
-            borderRadius: theme.radius.sm, padding: '2px 10px' }}>
-            Retention-first · not first-come
-          </span>
+          <Badge text="Retention-First Routing" variant="timeline" />
         </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: theme.colors.bg }}>
-              {['Member', 'Archetype', 'Health', 'Requested Slot', 'Waiting'].map(h => (
-                <th key={h} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                  textAlign: h === 'Health' || h === 'Waiting' ? 'center' : 'left',
-                  color: theme.colors.textMuted, fontSize: theme.fontSize.xs,
-                  textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {queue.map(entry => <WaitlistRow key={entry.memberId} {...entry} />)}
-          </tbody>
-        </table>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+          {queue.map((entry) => (
+            <WaitlistRow
+              key={entry.memberId}
+              {...entry}
+              onSelect={setSelectedMemberId}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div
+        style={{
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.md,
+          background: theme.colors.bgCard,
+          padding: theme.spacing.md,
+          display: 'grid',
+          gridTemplateColumns: '1.25fr 1fr',
+          gap: theme.spacing.md,
+          alignItems: 'start',
+        }}
+      >
+        <div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>
+            Queue Pressure Trend
+          </div>
+          <div style={{ height: 46, marginBottom: theme.spacing.sm }}>
+            <Sparkline data={getWaitlistDemandSparkline()} color={theme.colors.info} height={46} showDots />
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
+            Priority members account for <strong>{summary.highPriority}</strong> of <strong>{summary.total}</strong> queue entries.
+            Average wait is <strong>{summary.avgDaysWaiting} days</strong>, concentrated in Saturday 7:00-9:00 windows.
+          </div>
+        </div>
+
+        <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.sm }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <strong style={{ color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>Queue Management</strong>
+            <Badge text={selectedMember?.retentionPriority === 'HIGH' ? 'Priority' : 'Standard'} variant="effort" size="sm" />
+          </div>
+
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginBottom: 8 }}>
+            Next candidate: <strong>{selectedMember?.memberName ?? 'None selected'}</strong>
+          </div>
+
+          <div style={{ display: 'grid', gap: 6, marginBottom: theme.spacing.sm }}>
+            {slotCandidates.map((slot) => {
+              const selected = slot === selectedSlot;
+              return (
+                <button
+                  key={slot}
+                  onClick={() => setSelectedSlot(slot)}
+                  style={{
+                    textAlign: 'left',
+                    border: `1px solid ${selected ? theme.colors.info : theme.colors.border}`,
+                    background: selected ? `${theme.colors.info}12` : theme.colors.bgCard,
+                    color: theme.colors.textSecondary,
+                    borderRadius: theme.radius.sm,
+                    padding: '6px 8px',
+                    cursor: 'pointer',
+                    fontSize: theme.fontSize.xs,
+                  }}
+                >
+                  {slot}
+                </button>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Btn variant="primary" size="sm" accent={theme.colors.info}>Assign Slot</Btn>
+            <Btn variant="ghost" size="sm">Notify Concierge</Btn>
+            <Btn variant="ghost" size="sm">Escalate to GM</Btn>
+          </div>
+        </div>
       </div>
 
       <SoWhatCallout variant="warning">
-        <strong>Anne Jordan has been waiting 4 days.</strong> Her last round was Dec 28. Health score: 38.
-        Filling this slot today has an estimated 68% chance of preventing resignation — worth $12,000 in annual dues.
-        Noteefy would notify all {summary.total} members equally. Swoop routes the cancellation alert to her first.
+        <strong>{selectedMember?.memberName}</strong> should receive the next available <strong>{selectedSlot}</strong> opening.
+        This action protects member value, reduces queue-time friction, and converts cancellation volatility into
+        measurable retention impact. {getWaitlistInsight()}
       </SoWhatCallout>
     </div>
   );

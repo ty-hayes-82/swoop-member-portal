@@ -42,4 +42,5 @@ export const revenuePerSlot = {
   retentionPriority: 312,   // avg total club spend when slot filled via retention-flagged member
   emptySlot:           0,
   upliftPct:          67,   // percentage difference
+  upliftDollars:     125,   // 312 - 187 per slot
 };

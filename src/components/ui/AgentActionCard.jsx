@@ -1,139 +1,135 @@
-// components/ui/AgentActionCard.jsx — 100 lines
-// Contract: action{}, onApprove(), onDismiss(), showRationale?, overrideStatus?
 import { useState } from 'react';
 import { theme } from '@/config/theme';
-import { AGENT_ACTION_TYPES } from '@/config/constants';
-import { agentActionThreads } from '@/data/agents';
-import { draftAgentMessage } from '@/services/agentService';
+import { AGENT_ACTION_TYPES } from '@/config/actionTypes';
+import { getAgentById } from '@/services/agentService';
 
-const PRIORITY_COLORS = {
-  high:   { bg: 'rgba(192,57,43,0.06)', border: 'rgba(192,57,43,0.25)', label: '#C0392B' },
-  medium: { bg: 'rgba(245,158,11,0.06)', border: 'rgba(245,158,11,0.25)', label: '#F59E0B' },
-  low:    { bg: 'transparent',           border: theme.colors.border,     label: theme.colors.textMuted },
+function formatTime(timestamp) {
+  return new Date(timestamp).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
+const PRIORITY_COLOR = {
+  high: theme.colors.urgent,
+  medium: theme.colors.warning,
+  low: theme.colors.agentDismissed,
 };
 
-export function AgentActionCard({ action, onApprove, onDismiss, showRationale = false, overrideStatus }) {
-  const [expanded, setExpanded] = useState(showRationale);
-  const [draft, setDraft] = useState(action.proposedAction?.body ?? action.proposedAction?.message ?? '');
-  const [drafting, setDrafting] = useState(false);
+export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }) {
+  const [pulse, setPulse] = useState(false);
   const status = overrideStatus ?? action.status;
-  const isDone = status === 'approved' || status === 'dismissed';
-  const pc = PRIORITY_COLORS[action.priority] ?? PRIORITY_COLORS.low;
-  const actionTypeMeta = AGENT_ACTION_TYPES[action.proposedAction?.type] ?? { icon: '⚡', label: action.proposedAction?.type, color: '#22D3EE' };
-  const isDraftable = ['DRAFT_NOTE', 'SEND_INVITE', 'SCHEDULE_CALL'].includes(action.proposedAction?.type);
+  const isDone = status !== 'pending';
+  const typeMeta = AGENT_ACTION_TYPES[action.actionType] ?? { icon: '⬡', label: action.actionType, color: theme.colors.agentCyan };
+  const agent = getAgentById(action.agentId);
 
-  async function handleGenerateDraft() {
-    setDrafting(true);
-    try {
-      const memberCtx = { name: action.proposedAction?.recipientName, id: action.proposedAction?.recipient };
-      const result = await draftAgentMessage(memberCtx, action);
-      if (result) setDraft(result);
-    } finally { setDrafting(false); }
-  }
+  const trigger = (handler) => {
+    setPulse(true);
+    window.setTimeout(() => {
+      handler?.();
+      setPulse(false);
+    }, 140);
+  };
 
   return (
-    <div style={{
-      background: isDone ? theme.colors.bg : pc.bg,
-      border: `1px solid ${isDone ? theme.colors.border : pc.border}`,
-      borderRadius: theme.radius.md,
-      padding: theme.spacing.md,
-      opacity: isDone ? 0.6 : 1,
-      transition: 'opacity 0.2s',
-    }}>
-      {/* Type pill + headline */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
-        <span style={{
-          flexShrink: 0, fontSize: '11px', fontWeight: 700,
-          background: `${actionTypeMeta.color}18`, color: actionTypeMeta.color,
-          border: `1px solid ${actionTypeMeta.color}30`,
-          borderRadius: theme.radius.sm, padding: '2px 8px', whiteSpace: 'nowrap',
-        }}>
-          {actionTypeMeta.icon} {actionTypeMeta.label}
+    <div
+      style={{
+        background: theme.colors.bgCard,
+        border: `1px solid ${theme.colors.border}`,
+        borderLeft: `3px solid ${PRIORITY_COLOR[action.priority] ?? theme.colors.agentCyan}`,
+        borderRadius: theme.radius.md,
+        padding: theme.spacing.md,
+        opacity: isDone ? 0.68 : 1,
+        transform: pulse ? 'scale(0.992)' : 'scale(1)',
+        transition: 'transform 0.14s ease, opacity 0.2s ease',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <span
+          style={{
+            fontSize: '11px',
+            fontWeight: 700,
+            color: typeMeta.color,
+            background: `${typeMeta.color}1A`,
+            border: `1px solid ${typeMeta.color}33`,
+            borderRadius: theme.radius.sm,
+            padding: '2px 8px',
+          }}
+        >
+          {typeMeta.icon} {typeMeta.label}
         </span>
-        {status === 'approved' && <span style={{ fontSize: '11px', color: '#4ADE80', fontWeight: 600 }}>✓ Approved</span>}
-        {status === 'dismissed' && <span style={{ fontSize: '11px', color: theme.colors.textMuted, fontWeight: 600 }}>✕ Dismissed</span>}
+        <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{formatTime(action.timestamp)}</span>
       </div>
 
-      <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, lineHeight: 1.4, marginBottom: 6 }}>
-        {action.headline}
+      <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, fontWeight: 600, lineHeight: 1.5, marginBottom: 8 }}>
+        {action.description}
       </div>
 
-      {/* Impact + signals */}
-      <div style={{ display: 'flex', gap: theme.spacing.md, marginBottom: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '11px', background: 'rgba(74,222,128,0.1)', color: '#4ADE80',
-          border: '1px solid rgba(74,222,128,0.2)', borderRadius: theme.radius.sm, padding: '1px 8px' }}>
-          {action.estimatedImpact}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+        <span
+          style={{
+            fontSize: '11px',
+            color: agent?.accentColor ?? theme.colors.agentCyan,
+            background: `${agent?.accentColor ?? theme.colors.agentCyan}1A`,
+            border: `1px solid ${(agent?.accentColor ?? theme.colors.agentCyan)}33`,
+            borderRadius: theme.radius.sm,
+            padding: '2px 8px',
+          }}
+        >
+          {action.source}
         </span>
-        <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>
-          {action.sourceSignals?.length} signals · {new Date(action.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+        <span
+          style={{
+            fontSize: '11px',
+            color: theme.colors.agentApproved,
+            background: `${theme.colors.agentApproved}1A`,
+            border: `1px solid ${theme.colors.agentApproved}40`,
+            borderRadius: theme.radius.sm,
+            padding: '2px 8px',
+          }}
+        >
+          Impact: {action.impactMetric}
         </span>
       </div>
 
-      {/* Expandable rationale */}
-      <button onClick={() => setExpanded(e => !e)} style={{
-        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-        fontSize: '11px', color: '#22D3EE', fontWeight: 500, marginBottom: expanded ? 8 : 0,
-      }}>
-        {expanded ? '▾ Hide rationale' : '▸ Show rationale'}
-      </button>
+      {status === 'approved' && <div style={{ fontSize: '11px', color: theme.colors.agentApproved, fontWeight: 700 }}>Approved</div>}
+      {status === 'dismissed' && <div style={{ fontSize: '11px', color: theme.colors.textMuted, fontWeight: 700 }}>Dismissed</div>}
 
-      {expanded && (
-        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.6,
-          background: theme.colors.bgDeep, borderRadius: theme.radius.sm, padding: theme.spacing.sm, marginBottom: 10 }}>
-          {action.rationale}
-          {(action.proposedAction?.body || action.proposedAction?.message || action.proposedAction?.note || draft) && (
-            <div style={{ marginTop: 8 }}>
-              {isDraftable && (
-                <button onClick={handleGenerateDraft} disabled={drafting} style={{
-                  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                  fontSize: '10px', color: '#22D3EE', fontWeight: 600, marginBottom: 6, opacity: drafting ? 0.5 : 1,
-                }}>
-                  {drafting ? '⟳ Generating...' : '↺ Regenerate with AI'}
-                </button>
-              )}
-              <div style={{ padding: 8, background: theme.colors.bgCard,
-                borderRadius: theme.radius.sm, fontFamily: theme.fonts.mono, fontSize: '11px',
-                color: theme.colors.textPrimary, whiteSpace: 'pre-wrap', borderLeft: `2px solid #22D3EE` }}>
-                {draft || action.proposedAction?.body || action.proposedAction?.message || action.proposedAction?.note}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Approve / Dismiss buttons */}
       {!isDone && (
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={onApprove} style={{
-            flex: 1, padding: '7px 0', borderRadius: theme.radius.sm, cursor: 'pointer',
-            background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)',
-            color: '#4ADE80', fontSize: '12px', fontWeight: 700,
-          }}>✓ Approve</button>
-          <button onClick={onDismiss} style={{
-            padding: '7px 18px', borderRadius: theme.radius.sm, cursor: 'pointer',
-            background: 'transparent', border: `1px solid ${theme.colors.border}`,
-            color: theme.colors.textMuted, fontSize: '12px',
-          }}>Dismiss</button>
-        </div>
-      )}
-
-      {/* Action thread — follow-up sequence (Phase B Step 14) */}
-      {status === 'approved' && agentActionThreads[action.id] && (
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px dashed rgba(34,211,238,0.2)` }}>
-          <div style={{ fontSize: '10px', fontWeight: 700, color: '#22D3EE', textTransform: 'uppercase',
-            letterSpacing: '0.06em', marginBottom: 8 }}>
-            ⬡ Follow-up thread
-          </div>
-          {agentActionThreads[action.id].map(t => (
-            <div key={t.id} style={{
-              display: 'flex', gap: 8, alignItems: 'flex-start',
-              background: theme.colors.bgDeep, borderRadius: theme.radius.sm,
-              padding: '7px 10px', fontSize: theme.fontSize.xs,
-            }}>
-              <span style={{ color: '#22D3EE', flexShrink: 0, marginTop: 1 }}>→</span>
-              <span style={{ color: theme.colors.textSecondary, lineHeight: 1.5 }}>{t.headline}</span>
-            </div>
-          ))}
+          <button
+            onClick={() => trigger(onApprove)}
+            style={{
+              flex: 1,
+              borderRadius: theme.radius.sm,
+              border: `1px solid ${theme.colors.agentApproved}4D`,
+              background: `${theme.colors.agentApproved}1F`,
+              color: theme.colors.agentApproved,
+              padding: '7px 0',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            Approve
+          </button>
+          <button
+            onClick={() => trigger(onDismiss)}
+            style={{
+              borderRadius: theme.radius.sm,
+              border: `1px solid ${theme.colors.border}`,
+              background: 'transparent',
+              color: theme.colors.textMuted,
+              padding: '7px 12px',
+              fontSize: '12px',
+              cursor: 'pointer',
+            }}
+          >
+            Dismiss
+          </button>
         </div>
       )}
     </div>

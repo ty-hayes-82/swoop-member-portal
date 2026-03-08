@@ -29,12 +29,24 @@ export function DataProvider({ children }) {
       return;
     }
 
-    Promise.allSettled([
-      initOps(), initFB(), initMembers(), initStaffing(),
-      initPipeline(), initTrends(), initWaitlist(), initBriefing(),
+    // 3-second timeout — if Neon cold-starts, don't block the UI
+    const timeout = new Promise(resolve =>
+      setTimeout(() => resolve('timeout'), 3000)
+    );
+
+    Promise.race([
+      Promise.allSettled([
+        initOps(), initFB(), initMembers(), initStaffing(),
+        initPipeline(), initTrends(), initWaitlist(), initBriefing(),
+      ]),
+      timeout,
     ]).then(results => {
-      const anySucceeded = results.some(r => r.status === 'fulfilled');
-      if (anySucceeded) setPhase(2);
+      if (results !== 'timeout') {
+        const anySucceeded = results.some(r => r.status === 'fulfilled');
+        if (anySucceeded) setPhase(2);
+      } else {
+        console.info('[DataProvider] API timeout — using static data');
+      }
       setReady(true);
     }).catch(err => {
       console.warn('[DataProvider] API hydration failed, using static data:', err);

@@ -1,10 +1,11 @@
+import { theme } from '@/config/theme';
 import { StatCard } from '@/components/ui/index.js';
 import { SoWhatCallout } from '@/components/ui/index.js';
 import { trends } from '@/data/trends.js';
 
 export default function YesterdayRecap({ data }) {
   // revenueVsPlan is a decimal (e.g. -0.12 = -12%). Guard against undefined/NaN.
-  const { revenue, revenueVsPlan = 0, rounds, incidents, isUnderstaffed } = data ?? {};
+  const { revenue, revenueVsPlan = 0, revenueVsLastWeek = 0, rounds, roundsVsLastWeek = 0, incidents, isUnderstaffed } = data ?? {};
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -13,14 +14,14 @@ export default function YesterdayRecap({ data }) {
           label="Revenue (Jan 16)"
           value={revenue}
           format="currency"
-          trend={{ direction: revenueVsPlan < 0 ? 'down' : 'up', value: Math.abs(revenueVsPlan * 100), period: 'vs. avg' }}
+          trend={{ direction: revenueVsLastWeek < 0 ? 'down' : 'up', value: Math.abs(revenueVsLastWeek), period: 'vs. last Sat' }}
           sparklineData={trends.golfRevenue}
           source="Jonas POS"
         />
         <StatCard
           label="Rounds Played"
           value={rounds}
-          trend={{ direction: 'down', value: 8.2, period: 'vs. avg Fri' }}
+          trend={{ direction: roundsVsLastWeek < 0 ? 'down' : 'up', value: Math.abs(roundsVsLastWeek), period: 'vs. last Sat' }}
           source="ForeTees"
         />
         <StatCard
@@ -38,12 +39,12 @@ export default function YesterdayRecap({ data }) {
             <div key={i} style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '10px 14px',
-              background: '#EF444408',
-              border: '1px solid #EF444422',
+              background: `${theme.colors.urgent}08`,
+              border: `1px solid ${theme.colors.urgent}22`,
               borderRadius: '8px',
               fontSize: '13px', color: 'var(--text-secondary)',
             }}>
-              <span style={{ color: '#EF4444', fontSize: '10px' }}>●</span>
+              <span style={{ color: theme.colors.urgent, fontSize: '10px' }}>●</span>
               {inc}
             </div>
           ))}

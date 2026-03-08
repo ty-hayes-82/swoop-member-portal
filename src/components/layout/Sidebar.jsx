@@ -4,25 +4,26 @@ import { useApp } from '@/context/AppContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
 import { theme } from '@/config/theme.js';
 
-const SIDEBAR_BG    = '#1F2F24';
-const SIDEBAR_CARD  = '#263B2C';
-const SIDEBAR_HOVER = '#2E4835';
-const SIDEBAR_BORDER= '#375040';
-const TEXT_LIGHT    = '#F0F0F0';
+const SIDEBAR_BG    = theme.colors.bgSidebar;
+const SIDEBAR_CARD  = theme.colors.sidebarCard;
+const SIDEBAR_HOVER = theme.colors.sidebarHover;
+const SIDEBAR_BORDER= theme.colors.sidebarBorder;
+const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-const TODAY_ITEMS = ['daily-briefing', 'operations', 'member-health', 'staffing-service'];
+const TODAY_ITEMS = ['daily-briefing', 'operations', 'waitlist-demand', 'member-health', 'staffing-service'];
 
 export default function Sidebar() {
   const { currentRoute, navigate, sidebarCollapsed, toggleSidebar, viewMode, setViewMode } = useNavigation();
   const { activeCount, totalRevenueImpact } = useApp();
   const w = sidebarCollapsed ? '52px' : '240px';
 
-  const ALWAYS_VISIBLE = ['agent-command', 'demo-mode', 'integrations'];
+  const ALWAYS_VISIBLE = ['agent-command', 'integrations'];
+  const allVisible = NAV_ITEMS.filter(n => !n.hidden);
   const visibleItems = viewMode === 'today'
-    ? NAV_ITEMS.filter(n => TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key))
-    : NAV_ITEMS;
+    ? allVisible.filter(n => TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key))
+    : allVisible;
 
   return (
     <aside style={{
@@ -43,9 +44,9 @@ export default function Sidebar() {
       }}>
         <div style={{
           width: 28, height: 28, borderRadius: '6px', flexShrink: 0,
-          background: `linear-gradient(135deg, ${theme.colors.accent}, #1A7A3C)`,
+          background: `linear-gradient(135deg, ${theme.colors.accent}, ${theme.colors.operations})`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '13px', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px',
+          fontSize: '13px', fontWeight: 800, color: theme.colors.white, letterSpacing: '-0.5px',
         }}>S</div>
         {!sidebarCollapsed && (
           <div>
@@ -57,13 +58,13 @@ export default function Sidebar() {
 
       {/* Today / Deep Dive toggle */}
       {!sidebarCollapsed && (
-        <div style={{ margin: '12px', display: 'flex', borderRadius: '8px', background: '#0F1F14', padding: '2px' }}>
+        <div style={{ margin: '12px', display: 'flex', borderRadius: '8px', background: theme.colors.sidebarTint, padding: '2px' }}>
           {[['today', 'Today'], ['deep-dive', 'Deep Dive']].map(([mode, label]) => (
             <button key={mode} onClick={() => setViewMode(mode)} style={{
-              flex: 1, padding: '6px 0', borderRadius: '6px', fontSize: '11px', fontWeight: 600,
+              flex: 1, padding: '10px 0', minHeight: '44px', borderRadius: '6px', fontSize: '11px', fontWeight: 600,
               letterSpacing: '0.04em', cursor: 'pointer', border: 'none',
               background: viewMode === mode ? theme.colors.accent : 'transparent',
-              color: viewMode === mode ? '#fff' : TEXT_MUTED,
+              color: viewMode === mode ? theme.colors.white : TEXT_MUTED,
               transition: 'all 0.15s',
             }}>{label}</button>
           ))}
@@ -72,7 +73,7 @@ export default function Sidebar() {
 
       {/* Revenue impact */}
       {!sidebarCollapsed && activeCount > 0 && (
-        <div style={{ margin: '0 12px 8px', padding: '10px 12px', background: '#1A3A22', border: `1px solid #2A5A32`, borderRadius: '8px' }}>
+        <div style={{ margin: '0 12px 8px', padding: '10px 12px', background: theme.colors.sidebarAccent, border: `1px solid ${theme.colors.sidebarAccentBorder}`, borderRadius: '8px' }}>
           <div style={{ fontSize: '10px', color: TEXT_MUTED, letterSpacing: '0.05em', marginBottom: '3px' }}>
             {activeCount} PLAN{activeCount > 1 ? 'S' : ''} ACTIVE
           </div>
@@ -93,7 +94,7 @@ export default function Sidebar() {
               title={sidebarCollapsed ? item.label : undefined}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-                padding: sidebarCollapsed ? '10px 0' : '9px 14px',
+                padding: sidebarCollapsed ? '15px 0' : '12px 14px', minHeight: '44px',
                 justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                 background: active ? SIDEBAR_HOVER : 'none',
                 borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
@@ -102,7 +103,7 @@ export default function Sidebar() {
                 transition: 'all 0.12s', cursor: 'pointer',
                 borderRight: 'none', borderTop: 'none', borderBottom: 'none',
               }}
-              onMouseEnter={e => { if (!active) { e.currentTarget.style.background = '#0F1F14'; e.currentTarget.style.color = TEXT_LIGHT; } }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.background = theme.colors.sidebarTint; e.currentTarget.style.color = TEXT_LIGHT; } }}
               onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = TEXT_DIM; } }}
             >
               <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
@@ -118,7 +119,7 @@ export default function Sidebar() {
 
       {/* Demo Environment badge */}
       {!sidebarCollapsed && (
-        <div style={{ margin: '0 12px 8px', padding: '7px 10px', background: '#0F1F14',
+        <div style={{ margin: '0 12px 8px', padding: '7px 10px', background: theme.colors.sidebarTint,
           border: `1px solid ${SIDEBAR_BORDER}`, borderRadius: '6px',
           display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: theme.colors.accent, opacity: 0.6, flexShrink: 0 }} />
@@ -131,9 +132,9 @@ export default function Sidebar() {
       {/* Toggle */}
       <div style={{ borderTop: `1px solid ${SIDEBAR_BORDER}`, padding: '12px', display: 'flex', justifyContent: sidebarCollapsed ? 'center' : 'flex-end' }}>
         <button onClick={toggleSidebar} style={{
-          width: 28, height: 28, borderRadius: '6px',
+          minWidth: '44px', minHeight: '44px', borderRadius: '6px',
           background: SIDEBAR_CARD, border: `1px solid ${SIDEBAR_BORDER}`,
-          color: TEXT_MUTED, fontSize: '12px',
+          color: TEXT_MUTED, fontSize: '14px',
           display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
         }}>
           {sidebarCollapsed ? '›' : '‹'}

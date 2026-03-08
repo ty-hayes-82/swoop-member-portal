@@ -3,7 +3,7 @@ import { theme } from '@/config/theme';
 import { integrationsById } from '@/data/integrations';
 
 const barStyle = (visible) => ({
-  background: '#fff',
+  background: theme.colors.white,
   border: `1px solid ${theme.colors.border}`,
   borderRadius: theme.radius.md,
   padding: '12px 20px',
@@ -23,7 +23,7 @@ const dotStyle = (color) => ({
   width: 8,
   height: 8,
   borderRadius: '50%',
-  background: color || '#1a7a3c',
+  background: color || theme.colors.operations,
   flexShrink: 0,
 });
 

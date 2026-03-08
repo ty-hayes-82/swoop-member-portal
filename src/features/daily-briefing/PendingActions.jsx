@@ -1,11 +1,12 @@
+import { theme } from '@/config/theme';
 import Badge from '@/components/ui/Badge.jsx';
 import { useApp } from '@/context/AppContext.jsx';
 
 const PLAYBOOK_META = {
-  'service-save':      { color: '#EF4444', urgency: 'urgent',  icon: '🛡', label: 'Service Save' },
-  'slow-saturday':     { color: '#2E8B7A', urgency: 'warning', icon: '⏱', label: 'Slow Saturday' },
-  'engagement-decay':  { color: '#C49A2A', urgency: 'warning', icon: '📉', label: 'Engagement Decay' },
-  'staffing-gap':      { color: '#F59E0B', urgency: 'warning', icon: '⚠', label: 'Staffing Gap' },
+  'service-save':      { color: theme.colors.urgent, urgency: 'urgent',  icon: '🛡', label: 'Service Save' },
+  'slow-saturday':     { color: theme.colors.chartGolf, urgency: 'warning', icon: '⏱', label: 'Slow Saturday' },
+  'engagement-decay':  { color: theme.colors.chartFB, urgency: 'warning', icon: '📉', label: 'Engagement Decay' },
+  'staffing-gap':      { color: theme.colors.warning, urgency: 'warning', icon: '⚠', label: 'Staffing Gap' },
 };
 
 export default function PendingActions({ actions, onNavigate }) {
@@ -47,7 +48,7 @@ export default function PendingActions({ actions, onNavigate }) {
                   fontSize: '12px',
                   fontWeight: 600,
                   background: isActive ? 'transparent' : meta.color,
-                  color: isActive ? 'var(--text-muted)' : '#000',
+                  color: isActive ? 'var(--text-muted)' : theme.colors.textPrimary,
                   border: isActive ? '1px solid var(--border)' : 'none',
                   cursor: isActive ? 'default' : 'pointer',
                   transition: 'all 0.15s',

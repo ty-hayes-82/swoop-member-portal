@@ -111,7 +111,7 @@ export default function OperationsPlaybooks() {
         steps={PEAK_DEMAND_STEPS}
         beforeMetrics={PEAK_DEMAND_BEFORE}
         afterMetrics={PEAK_DEMAND_AFTER}
-        accentColor="#22D3EE"
+        accentColor={theme.colors.agentCyan}
       />
     </div>
   );
