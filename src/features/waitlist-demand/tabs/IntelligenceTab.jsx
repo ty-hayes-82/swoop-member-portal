@@ -1,6 +1,8 @@
 import TrendChart from '@/components/charts/TrendChart';
 import { Badge, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
-import { getDemandHeatmap, getDemandInsight, getRevenuePerSlot } from '@/services/waitlistService';
+import { demandHeatmap } from '@/data/pipeline';
+import { revenuePerSlot } from '@/data/revenue';
+import { getDemandInsight } from '@/services/waitlistService';
 import { theme } from '@/config/theme';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -49,6 +51,8 @@ function HeatmapCell({ cell }) {
 function summarizeDemand(heatmap) {
   const weekendCells = heatmap.filter((cell) => ['Sat', 'Sun'].includes(cell.day));
   const weekdayCells = heatmap.filter((cell) => !['Sat', 'Sun'].includes(cell.day));
+  const peakCell = [...heatmap].sort((a, b) => b.unmetRounds - a.unmetRounds)[0];
+
   const unmetWeekendRounds = weekendCells.reduce((sum, cell) => sum + cell.unmetRounds, 0);
   const weekendFill = Math.round(
     (weekendCells.reduce((sum, cell) => sum + cell.fillRate, 0) / Math.max(weekendCells.length, 1)) * 100,
@@ -57,13 +61,17 @@ function summarizeDemand(heatmap) {
     (weekdayCells.reduce((sum, cell) => sum + cell.fillRate, 0) / Math.max(weekdayCells.length, 1)) * 100,
   );
 
-  return { unmetWeekendRounds, weekendFill, weekdayFill };
+  return { unmetWeekendRounds, weekendFill, weekdayFill, peakCell };
+}
+
+function estimateRevenueOpportunity(unmetRounds) {
+  return unmetRounds * (revenuePerSlot.retentionPriority - revenuePerSlot.reactive);
 }
 
 export default function IntelligenceTab() {
-  const heatmap = getDemandHeatmap();
-  const revenuePerSlot = getRevenuePerSlot();
-  const { unmetWeekendRounds, weekendFill, weekdayFill } = summarizeDemand(heatmap);
+  const heatmap = demandHeatmap;
+  const { unmetWeekendRounds, weekendFill, weekdayFill, peakCell } = summarizeDemand(heatmap);
+  const opportunity = estimateRevenueOpportunity(unmetWeekendRounds);
 
   const stats = [
     {
@@ -117,7 +125,7 @@ export default function IntelligenceTab() {
               Demand Heatmap
             </div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-              Tee sheet fill rate by day and time block.
+              Fill rate and unmet demand by day and time block.
             </div>
           </div>
           <Badge text="Capacity Rebalance Candidate" variant="timeline" />
@@ -141,10 +149,8 @@ export default function IntelligenceTab() {
             ))}
 
             {BLOCKS.map((block) => (
-              <>
-                <div key={`${block}-label`} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-                  {block}
-                </div>
+              <div key={block} style={{ display: 'contents' }}>
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{block}</div>
                 {DAYS.map((day) => {
                   const cell = heatmap.find((item) => item.day === day && item.block === block);
                   return (
@@ -161,13 +167,13 @@ export default function IntelligenceTab() {
                             fontSize: theme.fontSize.xs,
                           }}
                         >
-                          —
+                          -
                         </div>
                       )}
                     </div>
                   );
                 })}
-              </>
+              </div>
             ))}
           </div>
         </div>
@@ -199,8 +205,9 @@ export default function IntelligenceTab() {
         </div>
 
         <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
-          <strong>{unmetWeekendRounds}</strong> unmet rounds were concentrated in weekend mornings. Rebalancing overflow
-          into weekday capacity can recover golf and F&B spend without adding tee sheet inventory.
+          Peak stress window is <strong>{peakCell?.day} {peakCell?.block}</strong> with <strong>{peakCell?.unmetRounds}</strong> unmet rounds.
+          Re-routing those fills to retention-priority members yields an estimated <strong>${opportunity.toLocaleString()}</strong> additional
+          slot value this period.
         </div>
       </div>
 
@@ -220,8 +227,9 @@ export default function IntelligenceTab() {
       </div>
 
       <SoWhatCallout variant="opportunity">
-        <strong>GM decision:</strong> shift member messaging and overflow routing toward Tuesday-Thursday morning windows.
-        That converts idle weekday capacity into revenue while protecting weekend experience quality. {getDemandInsight()}
+        <strong>GM decision:</strong> shift overflow messaging into Tuesday-Thursday mornings and reserve the next weekend
+        cancellation for high-priority members. That captures dormant weekday capacity while preserving peak-weekend
+        experience and improving per-slot yield. {getDemandInsight()}
       </SoWhatCallout>
     </div>
   );
