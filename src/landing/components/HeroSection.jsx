@@ -37,7 +37,7 @@ export default function HeroSection() {
           marginBottom: theme.spacing.lg,
           maxWidth: 760,
         }}>
-          Your club runs on gut feeling. Swoop changes that.
+          Know a member is leaving before they do.
         </h1>
         <p style={{
           color: theme.colors.textSecondary,
