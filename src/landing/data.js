@@ -244,6 +244,6 @@ export const faqItems = [
   {
     question: 'What makes Swoop different from standalone waitlist tools?',
     answer:
-      'Standalone waitlist tools fill cancelled tee times — one function, one system. Swoop is a full intelligence platform across five operational lenses with AI agents, member behavioral data, and closed-loop engagement. Waitlist software is a feature; Swoop is the operating layer.',
+      'Standalone waitlist tools fill cancelled tee times — one function, one system. Swoop is a full intelligence platform that connects members, demand, service, labor, and revenue with AI agents, behavioral data, and closed-loop engagement. Waitlist software is a feature; Swoop is the operating layer.',
   },
 ];

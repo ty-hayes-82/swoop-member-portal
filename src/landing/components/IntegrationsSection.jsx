@@ -226,7 +226,7 @@ export default function IntegrationsSection() {
             Typical launch: <span className="font-mono">10 business days</span>.
           </p>
           <p style={{ color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
-            Week 1: connector setup, data validation, and lens baselines. Week 2: workflows,
+            Week 1: connector setup, data validation, and intelligence baselines. Week 2: workflows,
             AI agent playbooks, and GM readiness.
           </p>
           <div style={{

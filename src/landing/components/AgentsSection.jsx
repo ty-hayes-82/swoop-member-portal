@@ -21,7 +21,7 @@ export default function AgentsSection() {
         fontSize: theme.fontSize.lg,
         marginBottom: theme.spacing.xl,
       }}>
-        AI agents monitor each lens continuously, recommend actions, and trigger automation
+        AI agents monitor your operations continuously, recommend actions, and trigger automation
         where your team loses time today.
       </p>
       <div className="landing-grid-3">

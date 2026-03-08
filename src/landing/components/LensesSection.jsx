@@ -38,7 +38,7 @@ export default function LensesSection() {
   return (
     <section style={{ marginBottom: theme.spacing.xxl }}>
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
-        Five lenses. One operating view.
+        Five core capabilities. One operating view.
       </h2>
       <p style={{
         color: theme.colors.textSecondary,
