@@ -37,9 +37,9 @@ const metricCards = [
   },
   {
     title: 'Dues at Risk Visibility',
-    metric: '$1.4M',
+    metric: '$1.38M',
     subtitle: 'Annual dues identified as at-risk in demo',
-    description: '5 members flagged across health score decline, declining visits, unresolved complaints, and behavioral pattern changes.',
+    description: '23 members flagged across health score decline, declining visits, unresolved complaints, and behavioral pattern changes.',
   },
 ];
 

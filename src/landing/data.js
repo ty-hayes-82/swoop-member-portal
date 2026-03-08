@@ -188,9 +188,9 @@ export const pricingTiers = [
     price: '$99/mo',
     badge: 'Most Popular',
     description:
-      'Full Five Lenses analytics with cross-system intelligence. Optional member app integration for richer behavioral data.',
+      'Full platform access with cross-system intelligence. Optional member app integration for richer behavioral data.',
     features: [
-      'All 5 Lenses',
+      'Full cross-system intelligence',
       'Cross-lens analytics',
       'AI agent recommendations',
       'Up to 10 integrations',
@@ -229,7 +229,7 @@ export const faqItems = [
   {
     question: "What if I don't have a tee sheet system?",
     answer:
-      "You can still use Swoop's member intelligence, F&B, and staffing lenses with manual data entry or CSV import. The tee sheet lens activates when you connect a supported system.",
+      "You can still use Swoop's member intelligence, F&B, and staffing capabilities with manual data entry or CSV import. Tee sheet analytics activate when you connect a supported booking system.",
   },
   {
     question: "Is my members' data secure?",
