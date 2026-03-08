@@ -1,0 +1,58 @@
+/* Platform Visual Polish — hover states, responsive grids, reduced motion */
+
+/* StatCard hover effects (replacing onMouseEnter/Leave JS faking) */
+[class*="stat-card"],
+[data-component="stat-card"] {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+[class*="stat-card"]:hover,
+[data-component="stat-card"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(31, 47, 36, 0.12);
+}
+
+/* Responsive grid overrides for dashboard layouts */
+@media (max-width: 1024px) {
+  [class*="dashboard-grid"],
+  [data-layout="dashboard-grid"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [class*="stat-row"],
+  [data-layout="stat-row"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  [class*="stat-row"],
+  [data-layout="stat-row"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* QuickActions button polish */
+[data-component="quick-action"] {
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+[data-component="quick-action"]:hover {
+  transform: scale(1.02);
+}
+
+/* Sidebar navigation smooth transitions */
+[data-component="sidebar"] nav a {
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+/* Platform reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

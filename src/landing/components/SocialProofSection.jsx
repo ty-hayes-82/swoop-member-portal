@@ -1,9 +1,45 @@
 import { theme } from '@/config/theme';
 import { foundingPartnerBenefits } from '@/landing/data';
 
+const integrations = [
+  'ForeTees', 'Jonas Club Software', 'Northstar', 'Club Essential',
+  'Square POS', 'Lightspeed', 'QuickBooks', 'ClubReady',
+];
+
+const pillStyle = {
+  display: 'inline-block',
+  padding: '6px 14px',
+  borderRadius: 999,
+  background: theme.colors.bgCard,
+  border: `1px solid ${theme.colors.border}`,
+  fontSize: theme.fontSize.sm,
+  fontWeight: 500,
+};
+
 export default function SocialProofSection() {
   return (
     <section style={{ marginBottom: theme.spacing.xxl }}>
+      {/* Integration Trust Strip */}
+      <div style={{
+        background: '#F3F4F6',
+        borderRadius: theme.radius.lg,
+        padding: '24px',
+        marginBottom: theme.spacing.xl,
+        textAlign: 'center',
+      }}>
+        <p style={{ fontWeight: 600, marginBottom: theme.spacing.md, color: theme.colors.textPrimary }}>
+          Connects to the systems you already use
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: theme.spacing.md }}>
+          {integrations.map((name) => (
+            <span key={name} style={pillStyle}>{name}</span>
+          ))}
+        </div>
+        <p style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm, margin: 0 }}>
+          28 integrations · Live in under 2 weeks · No rip-and-replace
+        </p>
+      </div>
+
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
         Founding Partner Program
       </h2>
@@ -47,7 +83,7 @@ export default function SocialProofSection() {
           Apply for Founding Partner
         </a>
         <p style={{ marginTop: theme.spacing.sm, color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
-          3 of 10 spots remaining
+          Limited founding partner spots — early clubs get direct roadmap input
         </p>
       </div>
     </section>

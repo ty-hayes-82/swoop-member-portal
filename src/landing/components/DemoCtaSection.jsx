@@ -76,9 +76,15 @@ export default function DemoCtaSection() {
       setSubmittedName(payload.name);
       setStatus('success');
       event.currentTarget.reset();
-    } catch (error) {
-      setStatus('error');
-      setErrorMsg(error.message || 'Unable to submit demo request.');
+    } catch (_error) {
+      // Fallback: open mailto with form data
+      const subject = encodeURIComponent(`Demo Request from ${payload.name} at ${payload.club}`);
+      const body = encodeURIComponent(
+        `Name: ${payload.name}\nClub: ${payload.club}\nEmail: ${payload.email}\nPhone: ${payload.phone}\n\nRequesting a demo of the Swoop platform.`
+      );
+      window.open(`mailto:demo@swoopgolf.com?subject=${subject}&body=${body}`, '_self');
+      setSubmittedName(payload.name);
+      setStatus('success');
     }
   }
 
@@ -175,6 +181,16 @@ export default function DemoCtaSection() {
       </form>
       <p style={{ marginTop: theme.spacing.md, color: `${theme.colors.bgCard}D9`, fontSize: theme.fontSize.sm }}>
         No credit card required · 30-minute walkthrough · Cancel anytime
+      </p>
+      <p style={{ marginTop: theme.spacing.sm, color: `${theme.colors.bgCard}99`, fontSize: theme.fontSize.sm }}>
+        Or email us directly:{' '}
+        <a href="mailto:demo@swoopgolf.com" style={{ color: theme.colors.ctaGreen, textDecoration: 'underline' }}>
+          demo@swoopgolf.com
+        </a>
+        {' · '}Prefer to talk?{' '}
+        <a href="tel:+14802259702" style={{ color: theme.colors.ctaGreen, textDecoration: 'underline' }}>
+          (480) 225-9702
+        </a>
       </p>
       {status === 'success' && (
         <p style={{ marginTop: theme.spacing.md, color: theme.colors.ctaGreen }}>
