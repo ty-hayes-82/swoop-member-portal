@@ -1,20 +1,26 @@
-// actionTypes.js — all playbook action type definitions
-// Each step in a playbook declares one of these types for icon + color display
-
 export const ACTION_TYPES = {
-  'email':           { icon: '✉',  label: 'Email',          color: '#6BB8EF' },
-  'staff-alert':     { icon: '📢', label: 'Staff Alert',     color: '#F59E0B' },
+  email: { icon: '✉', label: 'Email', color: '#6BB8EF' },
+  'staff-alert': { icon: '📢', label: 'Staff Alert', color: '#F59E0B' },
   'front-desk-flag': { icon: '🚩', label: 'Front Desk Flag', color: '#A78BFA' },
-  'comp-offer':      { icon: '🎁', label: 'Comp Offer',      color: '#4ADE80' },
-  'report':          { icon: '📊', label: 'Report',          color: '#8BAF8B' },
-  'calendar':        { icon: '📅', label: 'Schedule Update', color: '#F472B6' },
-  'dispatch':        { icon: '📡', label: 'Dispatch',        color: '#22C55E' },
-  'schedule':        { icon: '📋', label: 'Tee Sheet',       color: '#F0C674' },
-  'outreach':        { icon: '📣', label: 'Outreach',        color: '#22D3EE' },
-  'track':           { icon: '📈', label: 'Track',           color: '#A78BFA' },
+  'comp-offer': { icon: '🎁', label: 'Comp Offer', color: '#4ADE80' },
+  report: { icon: '📊', label: 'Report', color: '#8BAF8B' },
+  calendar: { icon: '📅', label: 'Schedule Update', color: '#F472B6' },
+  dispatch: { icon: '📡', label: 'Dispatch', color: '#22C55E' },
+  schedule: { icon: '📋', label: 'Tee Sheet', color: '#F0C674' },
+  outreach: { icon: '📣', label: 'Outreach', color: '#22D3EE' },
+  track: { icon: '📈', label: 'Track', color: '#A78BFA' },
 };
 
-// Simulated history records for each playbook — what happened last time it ran
+export const AGENT_ACTION_TYPES = {
+  RETENTION_OUTREACH: { icon: '🎯', label: 'Retention Outreach', color: '#22D3EE' },
+  WAITLIST_PRIORITY: { icon: '⛳', label: 'Waitlist Priority', color: '#4ADE80' },
+  SERVICE_ESCALATION: { icon: '🛎', label: 'Service Escalation', color: '#F59E0B' },
+  REVENUE_CAPTURE: { icon: '💵', label: 'Revenue Capture', color: '#F472B6' },
+  RE_ENGAGEMENT: { icon: '🤝', label: 'Re-engagement', color: '#A78BFA' },
+  DRAFT_MESSAGE: { icon: '✉', label: 'Draft Message', color: '#6BB8EF' },
+  STAFFING_ALERT: { icon: '📢', label: 'Staffing Alert', color: '#F59E0B' },
+};
+
 export const PLAYBOOK_HISTORY = {
   'slow-saturday': [
     { quarter: 'Q4 2025', runs: 3, outcome: 'Slow round rate: 32% → 17%', retained: null, impact: '+$24,100 revenue' },

@@ -1,92 +1,85 @@
-// services/agentService.js — Phase A: serves static mock data
-// Phase C: swap getPendingActions/runSweep to use /api/agents/sweep.js
-// To enable Phase C: set VITE_AGENTS_LIVE=true in Vercel environment variables
+import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents';
 
-import {
-  agentDefinitions,
-  agentActions,
-  agentActivityLog,
-  agentThoughtLogs,
-} from '@/data/agents';
+let actionStore = agentActions.map((action) => ({ ...action }));
 
-const PHASE_C = import.meta.env.VITE_AGENTS_LIVE === 'true';
+const byNewest = (a, b) => b.timestamp.localeCompare(a.timestamp);
 
-export function getAgentDefinitions() {
+export function getAgents() {
   return agentDefinitions;
 }
 
-export function getAgentById(id) {
-  return agentDefinitions.find(a => a.id === id) ?? null;
+export function getAgentDefinitions() {
+  return getAgents();
 }
 
-export function getPendingActions() {
-  return agentActions.filter(a => a.status === 'pending');
+export function getAgentById(id) {
+  return agentDefinitions.find((agent) => agent.id === id) ?? null;
 }
 
 export function getAllActions() {
-  return agentActions;
+  return [...actionStore].sort(byNewest);
 }
 
-export function getAgentSummary() {
-  const active = agentDefinitions.filter(a => a.status === 'active').length;
-  const pending = agentActions.filter(a => a.status === 'pending').length;
-  const highPriority = agentActions.filter(a => a.status === 'pending' && a.priority === 'high').length;
-  const approved = agentActions.filter(a => a.status === 'approved').length;
-  return { active, total: agentDefinitions.length, pending, highPriority, approved };
+export function getPendingActions() {
+  return getAllActions().filter((action) => action.status === 'pending');
 }
 
-export function getActivityLog() {
-  return [...agentActivityLog].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+export function approveAction(id) {
+  actionStore = actionStore.map((action) =>
+    action.id === id ? { ...action, status: 'approved' } : action
+  );
+  return actionStore.find((action) => action.id === id) ?? null;
+}
+
+export function dismissAction(id) {
+  actionStore = actionStore.map((action) =>
+    action.id === id ? { ...action, status: 'dismissed' } : action
+  );
+  return actionStore.find((action) => action.id === id) ?? null;
 }
 
 export function getThoughtLog(agentId) {
   return agentThoughtLogs[agentId] ?? [];
 }
 
+export function getAgentSummary() {
+  const agents = getAgents();
+  const actions = getAllActions();
+  return {
+    active: agents.filter((agent) => agent.status === 'active').length,
+    total: agents.length,
+    pending: actions.filter((action) => action.status === 'pending').length,
+    approved: actions.filter((action) => action.status === 'approved').length,
+    dismissed: actions.filter((action) => action.status === 'dismissed').length,
+  };
+}
+
 export function getTopPendingAction() {
-  const pending = agentActions.filter(a => a.status === 'pending');
-  const high = pending.filter(a => a.priority === 'high');
-  return high[0] ?? pending[0] ?? null;
+  return getPendingActions()[0] ?? null;
 }
 
-// ─── Phase C: live API functions ───────────────────────────────────────────
-// Return shapes are identical to Phase A — zero component changes required.
-
-export async function runAgentSweep(agentId, context = {}) {
-  if (!PHASE_C) {
-    // Phase A/B: return mock pending actions for this agent
-    return agentActions.filter(a => a.agentId === agentId && a.status === 'pending');
-  }
-  const res = await fetch('/api/agents/sweep', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ agentId, context }),
-  });
-  const { actions } = await res.json();
-  return actions;
+export function getActivityLog() {
+  return getAllActions().map((action) => ({
+    id: `log_${action.id}`,
+    timestamp: action.timestamp,
+    type: action.actionType,
+    agentId: action.agentId,
+    summary: action.description,
+    details: `${action.source} · ${action.impactMetric} · ${action.status}`,
+    status: action.status,
+  }));
 }
 
-export async function draftAgentMessage(memberContext, actionContext, tone) {
-  if (!PHASE_C) {
-    return actionContext.proposedAction?.body ?? actionContext.proposedAction?.message ?? '';
-  }
-  const res = await fetch('/api/agents/draft', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ memberContext, actionContext, tone }),
-  });
-  const { draft } = await res.json();
-  return draft;
+export async function draftAgentMessage(memberContext, actionContext) {
+  const recipientName = memberContext?.name ?? 'Member';
+  const actionDetail = actionContext?.description ?? 'an important update';
+  return `Hi ${recipientName},\n\nI wanted to personally follow up regarding ${actionDetail.toLowerCase()}.\n\nPlease reply if you would like me to handle this directly today.\n\nBest,\n[GM Name]`;
 }
 
-export async function explainAgentAction(action, clubContext = {}) {
-  if (!PHASE_C) return action.rationale;
-  const res = await fetch('/api/agents/explain', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, clubContext }),
-  });
-  const { explanation } = await res.json();
-  return explanation;
+export async function explainAgentAction(action) {
+  return `${action.source} recommended this based on cross-system signal correlation and expected impact: ${action.impactMetric}.`;
 }
 
+export function __resetAgentActions() {
+  actionStore = agentActions.map((action) => ({ ...action }));
+}
