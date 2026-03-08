@@ -18,6 +18,7 @@ export const PLAYBOOK_IDS = {
   engagementDecay:   'engagement-decay',
   staffingGap:       'staffing-gap',
   peakDemand:        'peak-demand-capture',
+  PEAK_DEMAND:       'peak-demand-capture',
 };
 
 export const UNDERSTAFFED_DATES = ['2026-01-09', '2026-01-16', '2026-01-28'];
