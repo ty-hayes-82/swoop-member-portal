@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { theme } from '@/config/theme';
 
 const buttonStyle = {
@@ -27,65 +26,10 @@ const inputStyle = {
 };
 
 export default function DemoCtaSection() {
-  const [status, setStatus] = useState('idle');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [submittedName, setSubmittedName] = useState('');
-  const isSubmitting = status === 'submitting';
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  function validatePayload(payload) {
-    if (!payload.name || !payload.club || !payload.email || !payload.phone) {
-      return 'All fields are required.';
-    }
-    if (!emailPattern.test(payload.email)) {
-      return 'Please provide a valid email address.';
-    }
-    return null;
-  }
-
-  async function handleSubmit(event) {
+  function handleSubmit(event) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const payload = {
-      name: `${formData.get('name') ?? ''}`.trim(),
-      club: `${formData.get('club') ?? ''}`.trim(),
-      email: `${formData.get('email') ?? ''}`.trim(),
-      phone: `${formData.get('phone') ?? ''}`.trim(),
-    };
-
-    const validationError = validatePayload(payload);
-    if (validationError) {
-      setStatus('error');
-      setErrorMsg(validationError);
-      return;
-    }
-
-    setStatus('submitting');
-    setErrorMsg('');
-
-    try {
-      const response = await fetch('/api/demo-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.error || 'Unable to submit demo request.');
-      }
-      setSubmittedName(payload.name);
-      setStatus('success');
-      event.currentTarget.reset();
-    } catch (_error) {
-      // Fallback: open mailto with form data
-      const subject = encodeURIComponent(`Demo Request from ${payload.name} at ${payload.club}`);
-      const body = encodeURIComponent(
-        `Name: ${payload.name}\nClub: ${payload.club}\nEmail: ${payload.email}\nPhone: ${payload.phone}\n\nRequesting a demo of the Swoop platform.`
-      );
-      window.open(`mailto:demo@swoopgolf.com?subject=${subject}&body=${body}`, '_self');
-      setSubmittedName(payload.name);
-      setStatus('success');
-    }
+    // Redirect to marketing site book-demo page
+    window.location.href = 'https://swoopgolf.com/book-demo';
   }
 
   return (
@@ -123,60 +67,32 @@ export default function DemoCtaSection() {
       >
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Name</span>
-          <input type="text" name="name" autoComplete="name" style={inputStyle} disabled={isSubmitting} required />
+          <input type="text" name="name" autoComplete="name" style={inputStyle} />
         </label>
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Club</span>
-          <input type="text" name="club" autoComplete="organization" style={inputStyle} disabled={isSubmitting} required />
+          <input type="text" name="club" autoComplete="organization" style={inputStyle} />
         </label>
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Email</span>
-          <input
-            type="email"
-            name="email"
-            autoComplete="email"
-            style={inputStyle}
-            disabled={isSubmitting}
-            required
-          />
+          <input type="email" name="email" autoComplete="email" style={inputStyle} />
         </label>
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Phone</span>
-          <input type="tel" name="phone" autoComplete="tel" style={inputStyle} disabled={isSubmitting} required />
+          <input type="tel" name="phone" autoComplete="tel" style={inputStyle} />
         </label>
         <button
           type="submit"
           className="landing-demo-submit"
-          style={{
-            ...buttonStyle,
-            opacity: isSubmitting ? 0.85 : 1,
-            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-          }}
-          disabled={isSubmitting}
+          style={{ ...buttonStyle, cursor: 'pointer' }}
           onMouseEnter={(event) => {
-            if (!isSubmitting) event.currentTarget.style.background = theme.colors.ctaGreenHover;
+            event.currentTarget.style.background = theme.colors.ctaGreenHover;
           }}
           onMouseLeave={(event) => {
             event.currentTarget.style.background = theme.colors.ctaGreen;
           }}
         >
-          {isSubmitting ? (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: theme.spacing.sm }}>
-              <span
-                aria-hidden="true"
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  border: `2px solid ${theme.colors.ctaGreenText}`,
-                  borderRightColor: 'transparent',
-                  display: 'inline-block',
-                  animation: 'spin 700ms linear infinite',
-                }}
-              />
-              Submitting...
-            </span>
-          ) : 'Book Your Demo'}
+          Book Your Demo
         </button>
       </form>
       <p style={{ marginTop: theme.spacing.md, color: `${theme.colors.bgCard}D9`, fontSize: theme.fontSize.sm }}>
@@ -192,17 +108,6 @@ export default function DemoCtaSection() {
           (480) 225-9702
         </a>
       </p>
-      {status === 'success' && (
-        <p style={{ marginTop: theme.spacing.md, color: theme.colors.ctaGreen }}>
-          {`Thanks, ${submittedName}! We'll reach out within 24 hours.`}
-        </p>
-      )}
-      {status === 'error' && (
-        <p style={{ marginTop: theme.spacing.md, color: theme.colors.urgent }}>
-          {errorMsg}
-        </p>
-      )}
-      <style>{'@keyframes spin { to { transform: rotate(360deg); } }'}</style>
     </section>
   );
 }
