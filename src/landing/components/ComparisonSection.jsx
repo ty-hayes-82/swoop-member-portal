@@ -40,7 +40,8 @@ export default function ComparisonSection() {
       <div className="landing-table-wrap" style={{
         border: `1px solid ${theme.colors.border}`,
         borderRadius: theme.radius.lg,
-        overflow: 'hidden',
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
         background: theme.colors.bgCard,
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 680 }}>
