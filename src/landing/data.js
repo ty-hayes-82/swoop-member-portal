@@ -83,7 +83,7 @@ export const comparisonFeatures = [
   {
     feature: 'Closed-loop engagement',
     swoop: true,
-    waitlistTools: false,
+    waitlistTools: true,
     crm: 'partial',
     sheets: false,
   },
