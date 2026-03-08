@@ -171,11 +171,16 @@ export default function TodayMode({ onNavigate }) {
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: theme.spacing.sm }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', 
+            gap: theme.spacing.sm 
+          }}>
             {quickWins.map((win) => (
               <div
                 key={win.id}
                 onClick={() => onNavigate?.(win.link)}
+                className="quick-win-card"
                 style={{
                   background: theme.colors.white,
                   border: `1px solid ${theme.colors.border}`,

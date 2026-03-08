@@ -41,9 +41,90 @@
   transform: scale(1.02);
 }
 
+/* Action approval success animation */
+@keyframes approveSuccess {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    border-color: var(--success, #4ADE80);
+    background: rgba(74, 222, 128, 0.08);
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+[data-status="approved"] {
+  animation: approveSuccess 0.6s ease forwards;
+}
+
+/* Success checkmark pulse */
+@keyframes successPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.success-checkmark {
+  animation: successPulse 0.4s ease;
+}
+
 /* Sidebar navigation smooth transitions */
 [data-component="sidebar"] nav a {
   transition: color 0.2s ease, background 0.2s ease;
+}
+
+/* Quick Win Cards mobile optimization */
+.quick-win-card {
+  min-height: 140px;
+}
+
+@media (max-width: 768px) {
+  .quick-win-card {
+    min-height: auto;
+    padding: 12px !important;
+  }
+  
+  /* Ensure touch targets are at least 44px */
+  .quick-win-card button {
+    min-height: 44px;
+    padding: 12px 16px !important;
+  }
+}
+
+/* Landing grid responsiveness */
+.landing-grid-2,
+.landing-grid-3,
+.landing-grid-auto {
+  display: grid;
+  gap: 16px;
+}
+
+.landing-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.landing-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.landing-grid-auto {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .landing-grid-2,
+  .landing-grid-3,
+  .landing-grid-auto {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* Platform reduced motion */
