@@ -8,3 +8,4 @@ dist/
 # Local SQLite test database
 oakmont_hills_jan2026.db
 *.db
+.npm-cache/
