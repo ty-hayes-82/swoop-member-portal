@@ -26,9 +26,9 @@ export default function Header({ onMobileMenuToggle }) {
       boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
     }}>
       <button onClick={handleMenuClick} style={{
-        width: 28, height: 28, borderRadius: '6px',
+        minWidth: '44px', minHeight: '44px', borderRadius: '6px',
         background: 'var(--bg-deep)', border: '1px solid var(--border)',
-        color: 'var(--text-muted)', fontSize: '14px',
+        color: 'var(--text-muted)', fontSize: '16px',
         display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0,
       }}>☰</button>
 

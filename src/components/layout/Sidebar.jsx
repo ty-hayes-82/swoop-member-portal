@@ -61,7 +61,7 @@ export default function Sidebar() {
         <div style={{ margin: '12px', display: 'flex', borderRadius: '8px', background: theme.colors.sidebarTint, padding: '2px' }}>
           {[['today', 'Today'], ['deep-dive', 'Deep Dive']].map(([mode, label]) => (
             <button key={mode} onClick={() => setViewMode(mode)} style={{
-              flex: 1, padding: '6px 0', borderRadius: '6px', fontSize: '11px', fontWeight: 600,
+              flex: 1, padding: '10px 0', minHeight: '44px', borderRadius: '6px', fontSize: '11px', fontWeight: 600,
               letterSpacing: '0.04em', cursor: 'pointer', border: 'none',
               background: viewMode === mode ? theme.colors.accent : 'transparent',
               color: viewMode === mode ? theme.colors.white : TEXT_MUTED,
@@ -94,7 +94,7 @@ export default function Sidebar() {
               title={sidebarCollapsed ? item.label : undefined}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-                padding: sidebarCollapsed ? '10px 0' : '9px 14px',
+                padding: sidebarCollapsed ? '15px 0' : '12px 14px', minHeight: '44px',
                 justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                 background: active ? SIDEBAR_HOVER : 'none',
                 borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
@@ -132,9 +132,9 @@ export default function Sidebar() {
       {/* Toggle */}
       <div style={{ borderTop: `1px solid ${SIDEBAR_BORDER}`, padding: '12px', display: 'flex', justifyContent: sidebarCollapsed ? 'center' : 'flex-end' }}>
         <button onClick={toggleSidebar} style={{
-          width: 28, height: 28, borderRadius: '6px',
+          minWidth: '44px', minHeight: '44px', borderRadius: '6px',
           background: SIDEBAR_CARD, border: `1px solid ${SIDEBAR_BORDER}`,
-          color: TEXT_MUTED, fontSize: '12px',
+          color: TEXT_MUTED, fontSize: '14px',
           display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
         }}>
           {sidebarCollapsed ? '›' : '‹'}
