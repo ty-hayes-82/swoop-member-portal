@@ -68,9 +68,9 @@ export function IntegrationsPage() {
         color: theme.colors.white,
         marginBottom: 18,
       }}>
-        <h1 style={{ margin: '0 0 10px', fontSize: 30, lineHeight: 1.2 }}>Integrations Power Real Club Intelligence</h1>
+        <h1 style={{ margin: '0 0 10px', fontSize: 30, lineHeight: 1.2 }}>The Intelligence Layer on Top of Your Systems</h1>
         <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, maxWidth: 760, color: 'rgba(255,255,255,0.82)' }}>
-          One system can report activity. Connected systems explain cause and impact. Swoop links tee sheet, POS, CRM, staffing, and waitlist signals so teams can see problems early and act with confidence.
+          Your systems collect data. Swoop connects them, adds real-time location intelligence and behavioral signals, then turns cross-system patterns into actionable recommendations. No single integration can provide this — it's what they unlock together.
         </p>
       </section>
 

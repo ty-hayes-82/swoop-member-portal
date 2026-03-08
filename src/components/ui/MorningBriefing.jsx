@@ -71,11 +71,40 @@ export default function MorningBriefing() {
                   Yesterday's Results
                 </div>
                 <div style={{ background: theme.colors.briefingPaper, borderRadius: '8px', padding: '14px 16px', fontSize: '14px', lineHeight: 1.7, color: theme.colors.briefingInk }}>
-                  Revenue <strong>${briefing.yesterdayRecap.revenue.toLocaleString()}</strong> — {briefing.yesterdayRecap.revenueVsPlan > 0 ? '▲' : '▼'} {Math.abs(briefing.yesterdayRecap.revenueVsPlan)}% vs. plan.
-                  {' '}{briefing.yesterdayRecap.rounds} rounds completed.
+                  Revenue <strong>${briefing.yesterdayRecap.revenue.toLocaleString()}</strong> — {briefing.yesterdayRecap.revenueVsPlan > 0 ? '▲' : '▼'} {Math.abs(briefing.yesterdayRecap.revenueVsPlan)}% vs. plan
+                  {briefing.yesterdayRecap.revenueVsLastWeek && (
+                    <>, {briefing.yesterdayRecap.revenueVsLastWeek > 0 ? '▲' : '▼'} {Math.abs(briefing.yesterdayRecap.revenueVsLastWeek).toFixed(1)}% vs. last Sat</>
+                  )}.
+                  {' '}{briefing.yesterdayRecap.rounds} rounds completed
+                  {briefing.yesterdayRecap.roundsVsLastWeek && (
+                    <> ({briefing.yesterdayRecap.roundsVsLastWeek > 0 ? '+' : ''}{briefing.yesterdayRecap.roundsVsLastWeek} vs. last Sat)</>
+                  )}.
                   {briefing.yesterdayRecap.incidents.length > 0 && (
                     <span style={{ color: theme.colors.urgent }}> {briefing.yesterdayRecap.incidents.length} issue{briefing.yesterdayRecap.incidents.length > 1 ? 's' : ''} to follow up on.</span>
                   )}
+                </div>
+              </section>
+
+              {/* Priority Actions for Today */}
+              <section>
+                <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: theme.colors.success, marginBottom: '8px', textTransform: 'uppercase' }}>
+                  Priority Actions — Do These First
+                </div>
+                <div style={{ background: theme.colors.briefingPaper, borderRadius: '8px', padding: '12px 16px' }}>
+                  {(briefing.quickWins || []).map((win, idx) => (
+                    <div key={win.id} style={{ borderBottom: idx < briefing.quickWins.length - 1 ? `1px solid ${theme.colors.briefingDivider}` : 'none', paddingBottom: '10px', marginBottom: idx < briefing.quickWins.length - 1 ? '10px' : 0 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: theme.colors.briefingInk, marginBottom: '4px' }}>
+                        {win.icon} {win.title}
+                      </div>
+                      <div style={{ fontSize: '12px', color: theme.colors.briefingMuted, lineHeight: 1.5 }}>
+                        {win.detail}
+                      </div>
+                      <div style={{ fontSize: '11px', color: theme.colors.success, fontWeight: 600, marginTop: '4px' }}>
+                        Impact: {win.impact} · Effort: {win.effort}
+                        {win.conversionRate && <> · {win.conversionRate}% conversion</>}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </section>
 

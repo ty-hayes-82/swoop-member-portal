@@ -54,11 +54,9 @@ const statLabelStyle = {
 export function IntegrationsHero({ integrationCount = 8, comboCount = 14 }) {
   return (
     <div style={heroStyle}>
-      <h1 style={headlineStyle}>Connected Intelligence</h1>
+      <h1 style={headlineStyle}>The Intelligence Layer on Top of Your Systems</h1>
       <p style={subtitleStyle}>
-        No single system sees the full picture of your club. Swoop unifies your operational data
-        across every platform — surfacing insights that are invisible when systems work in isolation.
-        Select any two integrations below to see what they unlock together.
+        Your systems collect data. Swoop connects them, adds real-time location intelligence and behavioral signals, then turns cross-system patterns into actionable recommendations. No single integration can provide this — it's what they unlock together.
       </p>
       <div style={statsRowStyle}>
         <div style={statStyle}>

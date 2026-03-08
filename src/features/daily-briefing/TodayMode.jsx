@@ -5,6 +5,7 @@ import QuickActions from '@/components/ui/QuickActions.jsx';
 import { AgentInboxStrip } from '@/components/ui';
 import { getTopPendingAction } from '@/services/agentService';
 import { useApp } from '@/context/AppContext';
+import { getDailyBriefing } from '@/services/briefingService';
 
 const HOUR = new Date().getHours();
 const IS_MORNING = HOUR < 12;
@@ -81,6 +82,8 @@ function MiniMemberRow({ member, onNavigate }) {
 export default function TodayMode({ onNavigate }) {
   const topAction = getTopPendingAction();
   const { pendingAgentCount, approveAction } = useApp();
+  const briefing = getDailyBriefing();
+  const quickWins = briefing.quickWins || [];
 
   const items = [
     {
@@ -141,6 +144,103 @@ export default function TodayMode({ onNavigate }) {
         onApproveTop={() => topAction && approveAction(topAction.id)}
         onOpenInbox={() => onNavigate?.('agent-command')}
       />
+
+      {/* Quick Wins — Immediate Revenue Opportunities */}
+      {quickWins.length > 0 && (
+        <div style={{
+          background: `linear-gradient(135deg, ${theme.colors.success}08 0%, ${theme.colors.operations}08 100%)`,
+          border: `1.5px solid ${theme.colors.success}`,
+          borderRadius: theme.radius.md,
+          padding: theme.spacing.lg,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: theme.spacing.md }}>
+            <span style={{ fontSize: '18px' }}>⚡</span>
+            <h3 style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary, margin: 0 }}>
+              Quick Wins — Do These First
+            </h3>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              color: theme.colors.success,
+              background: `${theme.colors.success}12`,
+              padding: '2px 8px',
+              borderRadius: '12px',
+              marginLeft: 'auto',
+            }}>
+              {quickWins.reduce((sum, w) => sum + (parseInt(w.effort) || 0), 0)} min total
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: theme.spacing.sm }}>
+            {quickWins.map((win) => (
+              <div
+                key={win.id}
+                onClick={() => onNavigate?.(win.link)}
+                style={{
+                  background: theme.colors.white,
+                  border: `1px solid ${theme.colors.border}`,
+                  borderRadius: theme.radius.sm,
+                  padding: theme.spacing.md,
+                  cursor: 'pointer',
+                  transition: 'all 0.12s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = theme.colors.success;
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = theme.shadow.md;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = theme.colors.border;
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '20px', flexShrink: 0 }}>{win.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, lineHeight: 1.3, marginBottom: '4px' }}>
+                      {win.title}
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: theme.colors.success,
+                        background: `${theme.colors.success}10`,
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                      }}>
+                        {win.impact}
+                      </span>
+                      <span style={{ fontSize: '11px', color: theme.colors.textMuted, fontFamily: theme.fonts.mono }}>
+                        {win.effort} effort
+                      </span>
+                      {win.conversionRate && (
+                        <span style={{ fontSize: '11px', color: theme.colors.textMuted, fontFamily: theme.fonts.mono }}>
+                          {win.conversionRate}% conversion
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5, marginBottom: '8px' }}>
+                  {win.detail}
+                </div>
+                <div style={{
+                  fontSize: theme.fontSize.xs,
+                  fontWeight: 600,
+                  color: theme.colors.success,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}>
+                  {win.action} →
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {items.map((item) => (
         <div
