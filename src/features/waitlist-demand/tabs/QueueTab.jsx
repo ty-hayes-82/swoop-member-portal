@@ -1,4 +1,5 @@
-import { Badge, SoWhatCallout, Sparkline, StatCard, WaitlistRow } from '@/components/ui';
+import { useMemo, useState } from 'react';
+import { Badge, Btn, SoWhatCallout, Sparkline, StatCard, WaitlistRow } from '@/components/ui';
 import {
   getWaitlistQueue,
   getWaitlistSummary,
@@ -6,6 +7,8 @@ import {
   getWaitlistDemandSparkline,
 } from '@/services/waitlistService';
 import { theme } from '@/config/theme';
+
+const SLOT_WINDOWS = ['Sat 7:00', 'Sat 7:08', 'Sat 7:16', 'Sat 7:24', 'Sun 7:00', 'Sun 7:08'];
 
 function buildQueueStats(summary, queue) {
   const atRiskRevenue = queue
@@ -60,8 +63,22 @@ function buildQueueStats(summary, queue) {
 export default function QueueTab() {
   const queue = getWaitlistQueue();
   const summary = getWaitlistSummary();
-  const topPriority = queue.find((member) => member.retentionPriority === 'HIGH') ?? queue[0];
   const stats = buildQueueStats(summary, queue);
+
+  const [selectedMemberId, setSelectedMemberId] = useState(queue[0]?.memberId ?? null);
+  const [selectedSlot, setSelectedSlot] = useState(SLOT_WINDOWS[0]);
+
+  const selectedMember = useMemo(
+    () => queue.find((member) => member.memberId === selectedMemberId) ?? queue[0],
+    [queue, selectedMemberId],
+  );
+
+  const slotCandidates = useMemo(() => {
+    if (!selectedMember) return SLOT_WINDOWS;
+    const preferred = selectedMember.alternatesAccepted ?? [];
+    const merged = [...preferred, ...SLOT_WINDOWS];
+    return [...new Set(merged)].slice(0, 6);
+  }, [selectedMember]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -86,7 +103,7 @@ export default function QueueTab() {
               Retention-Prioritized Queue
             </div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-              Highest-risk members are surfaced first, not first-come-first-served.
+              Members are ranked by retention value and current health, not by timestamp.
             </div>
           </div>
           <Badge text="Retention-First Routing" variant="timeline" />
@@ -94,7 +111,11 @@ export default function QueueTab() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
           {queue.map((entry) => (
-            <WaitlistRow key={entry.memberId} {...entry} />
+            <WaitlistRow
+              key={entry.memberId}
+              {...entry}
+              onSelect={setSelectedMemberId}
+            />
           ))}
         </div>
       </div>
@@ -106,30 +127,70 @@ export default function QueueTab() {
           background: theme.colors.bgCard,
           padding: theme.spacing.md,
           display: 'grid',
-          gridTemplateColumns: '1.2fr 1fr',
+          gridTemplateColumns: '1.25fr 1fr',
           gap: theme.spacing.md,
-          alignItems: 'center',
+          alignItems: 'start',
         }}
       >
         <div>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>
-            Waiting Pressure Trend
+            Queue Pressure Trend
           </div>
-          <div style={{ height: 46 }}>
+          <div style={{ height: 46, marginBottom: theme.spacing.sm }}>
             <Sparkline data={getWaitlistDemandSparkline()} color={theme.colors.info} height={46} showDots />
           </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
+            Priority members account for <strong>{summary.highPriority}</strong> of <strong>{summary.total}</strong> queue entries.
+            Average wait is <strong>{summary.avgDaysWaiting} days</strong>, concentrated in Saturday 7:00-9:00 windows.
+          </div>
         </div>
-        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
-          Priority members account for <strong>{summary.highPriority}</strong> of <strong>{summary.total}</strong> queue entries.
-          Average wait is <strong>{summary.avgDaysWaiting} days</strong>, with queue demand rising into Saturday windows.
+
+        <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.sm }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <strong style={{ color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>Queue Management</strong>
+            <Badge text={selectedMember?.retentionPriority === 'HIGH' ? 'Priority' : 'Standard'} variant="effort" size="sm" />
+          </div>
+
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginBottom: 8 }}>
+            Next candidate: <strong>{selectedMember?.memberName ?? 'None selected'}</strong>
+          </div>
+
+          <div style={{ display: 'grid', gap: 6, marginBottom: theme.spacing.sm }}>
+            {slotCandidates.map((slot) => {
+              const selected = slot === selectedSlot;
+              return (
+                <button
+                  key={slot}
+                  onClick={() => setSelectedSlot(slot)}
+                  style={{
+                    textAlign: 'left',
+                    border: `1px solid ${selected ? theme.colors.info : theme.colors.border}`,
+                    background: selected ? `${theme.colors.info}12` : theme.colors.bgCard,
+                    color: theme.colors.textSecondary,
+                    borderRadius: theme.radius.sm,
+                    padding: '6px 8px',
+                    cursor: 'pointer',
+                    fontSize: theme.fontSize.xs,
+                  }}
+                >
+                  {slot}
+                </button>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Btn variant="primary" size="sm" accent={theme.colors.info}>Assign Slot</Btn>
+            <Btn variant="ghost" size="sm">Notify Concierge</Btn>
+            <Btn variant="ghost" size="sm">Escalate to GM</Btn>
+          </div>
         </div>
       </div>
 
       <SoWhatCallout variant="warning">
-        <strong>{topPriority?.memberName}</strong> is currently waiting for a high-demand slot with a health score of{' '}
-        <strong>{topPriority?.healthScore}</strong>. GM action: route the next cancellation to this member first, then trigger
-        concierge outreach to preserve dues and improve engagement trajectory.
-        {' '}{getWaitlistInsight()}
+        <strong>{selectedMember?.memberName}</strong> should receive the next available <strong>{selectedSlot}</strong> opening.
+        This action protects member value, reduces queue-time friction, and converts cancellation volatility into
+        measurable retention impact. {getWaitlistInsight()}
       </SoWhatCallout>
     </div>
   );
