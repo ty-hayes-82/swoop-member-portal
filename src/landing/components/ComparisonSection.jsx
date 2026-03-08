@@ -7,7 +7,8 @@ function Cell({ value }) {
     : value === 'partial'
       ? theme.colors.warning
       : theme.colors.urgent;
-  const symbol = value === true ? '✓' : value === 'partial' ? '~' : '✕';
+  const symbol = value === true ? '✓' : value === 'partial' ? '◐' : '✕';
+  const label = value === true ? 'Yes' : value === 'partial' ? 'Partial' : 'No';
   return (
     <td style={{
       textAlign: 'center',
@@ -17,7 +18,7 @@ function Cell({ value }) {
       padding: '12px 10px',
       borderBottom: `1px solid ${theme.colors.borderLight}`,
     }}>
-      {symbol}
+      <span aria-label={label} title={label}>{symbol}</span>
     </td>
   );
 }

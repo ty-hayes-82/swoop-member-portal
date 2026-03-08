@@ -62,9 +62,9 @@ export const comparisonFeatures = [
   {
     feature: 'Cross-lens analytics',
     swoop: true,
-    noteefy: false,
+    noteefy: 'partial',
     crm: 'partial',
-    sheets: 'partial',
+    sheets: false,
   },
   {
     feature: 'AI agent automation',
