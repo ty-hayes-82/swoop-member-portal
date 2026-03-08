@@ -1,76 +1,152 @@
-// features/agent-command/tabs/InboxTab.jsx — 140 lines target
+import { useMemo, useState } from 'react';
 import { AgentActionCard, SoWhatCallout, StoryHeadline } from '@/components/ui';
-import { getPendingActions, getAgentSummary, getTopPendingAction } from '@/services/agentService';
+import { getAgents } from '@/services/agentService';
 import { useApp } from '@/context/AppContext';
 import { theme } from '@/config/theme';
 
-const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
-
 export default function InboxTab() {
-  const { getActionStatus, approveAction, dismissAction } = useApp();
-  const actions = getPendingActions().sort(
-    (a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
+  const { inbox, pendingCount, approveAction, dismissAction } = useApp();
+  const [filterAgent, setFilterAgent] = useState('all');
+  const agents = getAgents();
+
+  const pendingActions = useMemo(
+    () => inbox.filter((item) => item.status === 'pending'),
+    [inbox]
   );
-  const summary = getAgentSummary();
-  const approved = actions.filter(a => getActionStatus(a.id) === 'approved').length;
-  const dismissed = actions.filter(a => getActionStatus(a.id) === 'dismissed').length;
-  const stillPending = actions.filter(a => getActionStatus(a.id) === 'pending').length;
+
+  const visible = useMemo(() => {
+    if (filterAgent === 'all') return pendingActions;
+    return pendingActions.filter((item) => item.agentId === filterAgent);
+  }, [pendingActions, filterAgent]);
+
+  const approvedToday = inbox.filter((item) => item.status === 'approved').length;
+  const dismissedToday = inbox.filter((item) => item.status === 'dismissed').length;
+
+  const bulkApprove = () => visible.forEach((item) => approveAction(item.id));
+  const bulkDismiss = () => visible.forEach((item) => dismissAction(item.id));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <StoryHeadline
         variant="insight"
-        headline={`${stillPending} agent action${stillPending !== 1 ? 's' : ''} waiting for your approval.`}
-        context="Your agents ran their morning sweeps and identified the highest-leverage interventions for today. Each action has a rationale, estimated impact, and a draft ready to execute. You approve. They act."
+        headline={`${pendingCount} agent action${pendingCount !== 1 ? 's' : ''} waiting for approval.`}
+        context="Each proposal includes source, impact estimate, and an approval path. Review individually or apply bulk decisions by filter."
       />
 
-      {/* Summary strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md }}>
         {[
-          { label: 'Pending',  value: stillPending, accent: '#22D3EE' },
-          { label: 'High Priority', value: actions.filter(a => a.priority === 'high' && getActionStatus(a.id) === 'pending').length, accent: theme.colors.urgent },
-          { label: 'Approved Today', value: approved, accent: '#4ADE80' },
-          { label: 'Active Agents', value: summary.active, accent: theme.colors.textSecondary },
-        ].map(({ label, value, accent }) => (
-          <div key={label} style={{
-            background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-            borderRadius: theme.radius.md, padding: theme.spacing.md, boxShadow: theme.shadow.sm,
-          }}>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
-              textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
-            <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono,
-              fontWeight: 700, color: accent, marginTop: 2 }}>{value}</div>
+          { label: 'Pending', value: pendingCount, accent: '#22D3EE' },
+          { label: 'Visible', value: visible.length, accent: theme.colors.textSecondary },
+          { label: 'Approved', value: approvedToday, accent: '#4ADE80' },
+          { label: 'Dismissed', value: dismissedToday, accent: '#94A3B8' },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            style={{
+              background: theme.colors.bgCard,
+              border: `1px solid ${theme.colors.border}`,
+              borderRadius: theme.radius.md,
+              padding: theme.spacing.md,
+            }}
+          >
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {stat.label}
+            </div>
+            <div style={{ marginTop: 2, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xl, fontWeight: 700, color: stat.accent }}>
+              {stat.value}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Action cards */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 10,
+          background: theme.colors.bgCard,
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.md,
+          padding: theme.spacing.md,
+          flexWrap: 'wrap',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Filter by agent</span>
+          <select
+            value={filterAgent}
+            onChange={(event) => setFilterAgent(event.target.value)}
+            style={{
+              background: theme.colors.bgDeep,
+              border: `1px solid ${theme.colors.border}`,
+              borderRadius: theme.radius.sm,
+              color: theme.colors.textPrimary,
+              fontSize: theme.fontSize.xs,
+              padding: '6px 8px',
+            }}
+          >
+            <option value="all">All agents</option>
+            {agents.map((agent) => (
+              <option key={agent.id} value={agent.id}>
+                {agent.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            disabled={visible.length === 0}
+            onClick={bulkApprove}
+            style={{
+              borderRadius: theme.radius.sm,
+              border: '1px solid rgba(74,222,128,0.3)',
+              background: 'rgba(74,222,128,0.12)',
+              color: '#4ADE80',
+              padding: '6px 10px',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: visible.length > 0 ? 'pointer' : 'default',
+              opacity: visible.length > 0 ? 1 : 0.5,
+            }}
+          >
+            Approve visible
+          </button>
+          <button
+            disabled={visible.length === 0}
+            onClick={bulkDismiss}
+            style={{
+              borderRadius: theme.radius.sm,
+              border: `1px solid ${theme.colors.border}`,
+              background: 'transparent',
+              color: theme.colors.textMuted,
+              padding: '6px 10px',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: visible.length > 0 ? 'pointer' : 'default',
+              opacity: visible.length > 0 ? 1 : 0.5,
+            }}
+          >
+            Dismiss visible
+          </button>
+        </div>
+      </div>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-        {actions.map(action => (
+        {visible.map((action) => (
           <AgentActionCard
             key={action.id}
             action={action}
-            overrideStatus={getActionStatus(action.id)}
-            showRationale={action.priority === 'high' && getActionStatus(action.id) === 'pending'}
             onApprove={() => approveAction(action.id)}
             onDismiss={() => dismissAction(action.id)}
           />
         ))}
       </div>
 
-      {stillPending === 0 && (
+      {visible.length === 0 && (
         <SoWhatCallout variant="insight">
-          <strong>Inbox clear.</strong> All {actions.length} actions have been reviewed.
-          {approved > 0 && ` ${approved} approved and ready for execution.`}
-          {dismissed > 0 && ` ${dismissed} dismissed.`} Next agent sweep at 6:00 AM tomorrow.
-        </SoWhatCallout>
-      )}
-
-      {stillPending > 0 && (
-        <SoWhatCallout variant="warning">
-          <strong>Each approval takes less than 30 seconds.</strong> Without them, three at-risk members
-          go uncontacted today — including James Whitfield, who has a tee time in 3 hours and an unresolved
-          complaint. Noteefy fills tee times. Swoop prevents the resignations.
+          No pending actions for this filter. Change filter scope or wait for the next agent sweep.
         </SoWhatCallout>
       )}
     </div>
