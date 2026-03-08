@@ -29,17 +29,36 @@ const inputStyle = {
 export default function DemoCtaSection() {
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
-  const [submittedFirstName, setSubmittedFirstName] = useState('');
+  const [submittedName, setSubmittedName] = useState('');
   const isSubmitting = status === 'submitting';
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function validatePayload(payload) {
+    if (!payload.name || !payload.club || !payload.email || !payload.phone) {
+      return 'All fields are required.';
+    }
+    if (!emailPattern.test(payload.email)) {
+      return 'Please provide a valid email address.';
+    }
+    return null;
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const payload = {
-      firstName: `${formData.get('firstName') ?? ''}`.trim(),
+      name: `${formData.get('name') ?? ''}`.trim(),
       club: `${formData.get('club') ?? ''}`.trim(),
       email: `${formData.get('email') ?? ''}`.trim(),
+      phone: `${formData.get('phone') ?? ''}`.trim(),
     };
+
+    const validationError = validatePayload(payload);
+    if (validationError) {
+      setStatus('error');
+      setErrorMsg(validationError);
+      return;
+    }
 
     setStatus('submitting');
     setErrorMsg('');
@@ -54,8 +73,9 @@ export default function DemoCtaSection() {
       if (!response.ok) {
         throw new Error(data?.error || 'Unable to submit demo request.');
       }
-      setSubmittedFirstName(payload.firstName);
+      setSubmittedName(payload.name);
       setStatus('success');
+      event.currentTarget.reset();
     } catch (error) {
       setStatus('error');
       setErrorMsg(error.message || 'Unable to submit demo request.');
@@ -88,16 +108,27 @@ export default function DemoCtaSection() {
         style={{ alignItems: 'end' }}
       >
         <label>
-          <span style={{ display: 'block', marginBottom: 6 }}>First Name</span>
-          <input type="text" name="firstName" autoComplete="given-name" style={inputStyle} disabled={isSubmitting} />
+          <span style={{ display: 'block', marginBottom: 6 }}>Name</span>
+          <input type="text" name="name" autoComplete="name" style={inputStyle} disabled={isSubmitting} required />
         </label>
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Club</span>
-          <input type="text" name="club" autoComplete="organization" style={inputStyle} disabled={isSubmitting} />
+          <input type="text" name="club" autoComplete="organization" style={inputStyle} disabled={isSubmitting} required />
         </label>
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Email</span>
-          <input type="email" name="email" autoComplete="email" style={inputStyle} disabled={isSubmitting} />
+          <input
+            type="email"
+            name="email"
+            autoComplete="email"
+            style={inputStyle}
+            disabled={isSubmitting}
+            required
+          />
+        </label>
+        <label>
+          <span style={{ display: 'block', marginBottom: 6 }}>Phone</span>
+          <input type="tel" name="phone" autoComplete="tel" style={inputStyle} disabled={isSubmitting} required />
         </label>
         <button
           type="submit"
@@ -136,7 +167,7 @@ export default function DemoCtaSection() {
       </form>
       {status === 'success' && (
         <p style={{ marginTop: theme.spacing.md, color: theme.colors.ctaGreen }}>
-          {`Thanks, ${submittedFirstName}! We'll reach out within 24 hours.`}
+          {`Thanks, ${submittedName}! We'll reach out within 24 hours.`}
         </p>
       )}
       {status === 'error' && (

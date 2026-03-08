@@ -1,49 +1,45 @@
-const ALLOWED_ORIGINS = new Set([
-  'http://localhost:5173',
-  'https://swoop-member-portal-git-dev-tyhayesswoopgolfcos-projects.vercel.app',
-]);
+const WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/placeholder';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function applyCors(req, res) {
-  const origin = req.headers.origin;
-  if (origin && ALLOWED_ORIGINS.has(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
-
-function getError(firstName, club, email) {
-  if (!firstName || !firstName.trim()) return 'First name is required.';
-  if (!club || !club.trim()) return 'Club is required.';
+function getError(name, email, club, phone) {
+  if (!name || !name.trim()) return 'Name is required.';
   if (!email || !email.trim()) return 'Email is required.';
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (!isEmailValid) return 'Please provide a valid email address.';
+  if (!club || !club.trim()) return 'Club is required.';
+  if (!phone || !phone.trim()) return 'Phone is required.';
+  if (!EMAIL_PATTERN.test(email)) return 'Please provide a valid email address.';
   return null;
 }
 
-export default function handler(req, res) {
-  applyCors(req, res);
-
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed.' });
   }
 
-  const { firstName, club, email } = req.body ?? {};
-  const error = getError(firstName, club, email);
+  const { name, email, club, phone } = req.body ?? {};
+  const error = getError(name, email, club, phone);
   if (error) {
     return res.status(400).json({ error });
   }
 
-  console.log('Demo request submitted', {
-    firstName: firstName.trim(),
-    club: club.trim(),
-    email: email.trim().toLowerCase(),
-    submittedAt: new Date().toISOString(),
-  });
+  try {
+    const webhookResponse = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        club: club.trim(),
+        phone: phone.trim(),
+        submittedAt: new Date().toISOString(),
+      }),
+    });
 
-  return res.status(200).json({ success: true });
+    if (!webhookResponse.ok) {
+      return res.status(502).json({ error: 'Failed to forward demo request.' });
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: 'Unable to process demo request.' });
+  }
 }
