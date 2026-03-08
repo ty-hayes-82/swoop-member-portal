@@ -11,10 +11,10 @@ export default function SocialProofSection() {
   return (
     <section style={{ marginBottom: theme.spacing.xxl }}>
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
-        What Swoop detects in 90 days
+        What Swoop surfaces — demo scenario results
       </h2>
       <p style={{ color: theme.colors.textMuted, marginBottom: theme.spacing.lg }}>
-        Early signal visibility and revenue lift from real platform benchmarks
+        Performance metrics from a simulated 300-member private club. Real club results coming soon.
       </p>
       <div className="landing-grid-3">
         {proofMetrics.map((item) => (
