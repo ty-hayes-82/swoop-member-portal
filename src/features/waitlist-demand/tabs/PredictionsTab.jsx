@@ -1,102 +1,74 @@
+import { useMemo } from 'react';
 import { Badge, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
-import {
-  getCancellationPredictions,
-  getCancellationSummary,
-  getCancellationRiskSparkline,
-} from '@/services/waitlistService';
+import CancellationRiskRow from '@/features/pipeline/components/CancellationRiskRow';
+import { cancellationProbabilities } from '@/data/pipeline';
 import { theme } from '@/config/theme';
 
-const PROBABILITY_COLOR = (probability) => {
-  if (probability >= 0.65) return theme.colors.urgent;
-  if (probability >= 0.45) return theme.colors.warning;
-  return theme.colors.success;
-};
+const FORECAST_WINDOWS = [
+  { key: '30d', label: '30 Days', multiplier: 1.0, weight: 0.52 },
+  { key: '60d', label: '60 Days', multiplier: 1.8, weight: 0.35 },
+  { key: '90d', label: '90 Days', multiplier: 2.3, weight: 0.13 },
+];
 
-const PROBABILITY_TIER = (probability) => {
-  if (probability >= 0.65) return { text: 'High Risk', variant: 'urgent' };
-  if (probability >= 0.45) return { text: 'Watch', variant: 'warning' };
-  return { text: 'Stable', variant: 'success' };
-};
+function buildForecast(predictions) {
+  const baseRevenueAtRisk = predictions
+    .filter((p) => p.cancelProbability >= 0.45)
+    .reduce((sum, p) => sum + p.estimatedRevenueLost, 0);
 
-function ProbabilityBar({ probability }) {
-  const color = PROBABILITY_COLOR(probability);
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div
-        style={{
-          flex: 1,
-          height: 6,
-          borderRadius: 999,
-          overflow: 'hidden',
-          background: theme.colors.bgDeep,
-        }}
-      >
-        <div
-          style={{
-            width: `${Math.round(probability * 100)}%`,
-            height: '100%',
-            borderRadius: 999,
-            background: color,
-          }}
-        />
-      </div>
-      <span style={{ minWidth: 36, textAlign: 'right', color, fontFamily: theme.fonts.mono, fontWeight: 700 }}>
-        {Math.round(probability * 100)}%
-      </span>
-    </div>
-  );
+  return FORECAST_WINDOWS.map((window) => {
+    const projectedCancellations = Math.round(
+      predictions.reduce((sum, prediction) => sum + prediction.cancelProbability * window.weight, 0),
+    );
+
+    return {
+      ...window,
+      projectedCancellations,
+      projectedRevenueAtRisk: Math.round(baseRevenueAtRisk * window.multiplier),
+      preventablePct: Math.round(58 - window.multiplier * 8),
+    };
+  });
 }
 
-function PredictionRow({ prediction }) {
-  const isHighRisk = prediction.cancelProbability >= 0.6;
-  const riskTier = PROBABILITY_TIER(prediction.cancelProbability);
+function buildTrend(prediction) {
+  const p = prediction.cancelProbability;
+  return [
+    Math.max(0.05, p - 0.14),
+    Math.max(0.05, p - 0.09),
+    Math.max(0.05, p - 0.05),
+    Math.max(0.05, p - 0.02),
+    p,
+  ];
+}
 
-  return (
-    <tr style={{ borderTop: `1px solid ${theme.colors.border}`, background: isHighRisk ? `${theme.colors.urgent}08` : 'transparent' }}>
-      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-        <div style={{ color: theme.colors.textPrimary, fontWeight: 600, fontSize: theme.fontSize.sm }}>
-          {prediction.memberName}
-        </div>
-        <div style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.xs }}>{prediction.teeTime}</div>
-      </td>
-      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>
-        {prediction.archetype}
-      </td>
-      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, minWidth: 160 }}>
-        <ProbabilityBar probability={prediction.cancelProbability} />
-      </td>
-      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-        <Badge text={riskTier.text} variant={riskTier.variant} size="sm" />
-      </td>
-      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontSize: theme.fontSize.xs }}>
-        {prediction.recommendedAction}
-      </td>
-      <td
-        style={{
-          padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-          textAlign: 'right',
-          fontFamily: theme.fonts.mono,
-          color: isHighRisk ? theme.colors.urgent : theme.colors.textMuted,
-          fontSize: theme.fontSize.sm,
-          fontWeight: 700,
-        }}
-      >
-        ${prediction.estimatedRevenueLost.toLocaleString()}
-      </td>
-    </tr>
-  );
+function buildCountdown(index) {
+  const base = 2 + (index % 5);
+  return Math.max(1, base);
 }
 
 export default function PredictionsTab() {
-  const predictions = getCancellationPredictions();
-  const summary = getCancellationSummary();
+  const predictions = useMemo(
+    () => [...cancellationProbabilities].sort((a, b) => b.cancelProbability - a.cancelProbability),
+    [],
+  );
+
+  const summary = useMemo(() => {
+    const highRisk = predictions.filter((p) => p.cancelProbability >= 0.6);
+    return {
+      total: predictions.length,
+      highRisk: highRisk.length,
+      totalRevAtRisk: highRisk.reduce((sum, p) => sum + p.estimatedRevenueLost, 0),
+      topDriver: 'Wind advisory + unresolved service friction',
+    };
+  }, [predictions]);
+
+  const forecast = useMemo(() => buildForecast(predictions), [predictions]);
   const topRisk = predictions[0];
 
   const stats = [
     {
       label: 'Bookings Scored',
       value: summary.total,
-      sparklineData: getCancellationRiskSparkline(),
+      sparklineData: predictions.map((p) => Math.round(p.cancelProbability * 100)).reverse(),
       badge: { text: 'Forecast Window', variant: 'timeline' },
       source: 'ForeTees',
     },
@@ -149,7 +121,7 @@ export default function PredictionsTab() {
               Cancellation Risk Scoring
             </div>
             <div style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.xs }}>
-              Weather + engagement + history signals ranked by cancellation probability.
+              Ranked using weather, behavior drift, and unresolved service events.
             </div>
           </div>
           <Badge text={summary.topDriver} variant="effort" />
@@ -159,12 +131,12 @@ export default function PredictionsTab() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: theme.colors.bg }}>
-                {['Member', 'Archetype', 'Cancel Risk', 'Tier', 'Recommended Action', 'Rev at Risk'].map((heading) => (
+                {['Member', 'Cancel Risk', 'Countdown', 'Last Activity', 'Trend'].map((heading) => (
                   <th
                     key={heading}
                     style={{
                       padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                      textAlign: heading === 'Rev at Risk' ? 'right' : 'left',
+                      textAlign: 'left',
                       color: theme.colors.textMuted,
                       fontSize: theme.fontSize.xs,
                       letterSpacing: '0.05em',
@@ -178,12 +150,44 @@ export default function PredictionsTab() {
               </tr>
             </thead>
             <tbody>
-              {predictions.map((prediction) => (
-                <PredictionRow key={prediction.bookingId} prediction={prediction} />
+              {predictions.map((prediction, index) => (
+                <CancellationRiskRow
+                  key={prediction.bookingId}
+                  memberName={prediction.memberName}
+                  cancelProbability={prediction.cancelProbability}
+                  daysUntilCancellation={buildCountdown(index)}
+                  lastActivityDate={prediction.drivers?.[0] ?? 'Unknown'}
+                  trend={buildTrend(prediction)}
+                />
               ))}
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: theme.spacing.md }}>
+        {forecast.map((item) => (
+          <div
+            key={item.key}
+            style={{
+              border: `1px solid ${theme.colors.border}`,
+              borderRadius: theme.radius.md,
+              background: theme.colors.bgCard,
+              padding: theme.spacing.md,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <strong style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{item.label}</strong>
+              <Badge text={`${item.preventablePct}% preventable`} variant="success" size="sm" />
+            </div>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 8 }}>
+              Projected cancellations: <strong>{item.projectedCancellations}</strong>
+            </div>
+            <div style={{ fontFamily: theme.fonts.mono, color: theme.colors.warning, fontWeight: 700 }}>
+              ${item.projectedRevenueAtRisk.toLocaleString()} at risk
+            </div>
+          </div>
+        ))}
       </div>
 
       <div
@@ -198,15 +202,19 @@ export default function PredictionsTab() {
           Cancellation Risk Trend (Top 6 bookings)
         </div>
         <div style={{ height: 48 }}>
-          <Sparkline data={getCancellationRiskSparkline()} color={theme.colors.warning} height={48} showDots />
+          <Sparkline
+            data={predictions.slice(0, 6).map((p) => Math.round(p.cancelProbability * 100)).reverse()}
+            color={theme.colors.warning}
+            height={48}
+            showDots
+          />
         </div>
       </div>
 
       <SoWhatCallout variant="insight">
-        <strong>GM decision:</strong> pre-confirm and personally intervene on <strong>{topRisk?.memberName}</strong> first.
-        This booking has a <strong>{Math.round((topRisk?.cancelProbability ?? 0) * 100)}%</strong> cancellation likelihood,
-        with ${topRisk?.estimatedRevenueLost?.toLocaleString() ?? 0} at immediate risk. Proactive outreach and
-        pre-alerting the waitlist converts probable loss into retained play.
+        <strong>GM decision:</strong> intervene first on <strong>{topRisk?.memberName}</strong> and pre-assign their likely
+        cancellation slot to the highest-priority waitlist member. This converts forecasted churn volatility into
+        protected play volume and retained spend.
       </SoWhatCallout>
     </div>
   );
