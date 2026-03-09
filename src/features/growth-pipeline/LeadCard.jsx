@@ -11,9 +11,20 @@ const TIER_COLORS = {
 
 const TIER_LABELS = { hot: '🔥 Hot', warm: '♨ Warm', cool: '💧 Cool', cold: '❄ Cold' };
 
+const toNumber = (value, fallback = 0) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+};
+
 export default function LeadCard({ lead }) {
   const [expanded, setExpanded] = useState(false);
-  const tierColor = TIER_COLORS[lead.tier];
+  const tierColor = TIER_COLORS[lead.tier] ?? theme.colors.textSecondary;
+  const displayName = lead.guestName || lead.name || lead.prospectName || 'Prospect';
+  const visitCount = toNumber(lead.visits, toNumber(lead.visitCount, 0));
+  const totalSpendValue = toNumber(
+    lead.totalSpend,
+    toNumber(lead.totalSpendUsd, toNumber(lead.spend, 0)),
+  );
 
   return (
     <div style={{
@@ -35,12 +46,12 @@ export default function LeadCard({ lead }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}>
-                {lead.guestName}
+                {displayName}
               </span>
               {lead.likelyArchetype && <ArchetypeBadge archetype={lead.likelyArchetype} size="xs" />}
             </div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-              {lead.visits} visits · ${lead.totalSpend.toLocaleString()} total spend
+              {visitCount} visits · ${totalSpendValue.toLocaleString()} total spend
             </div>
           </div>
         </div>
