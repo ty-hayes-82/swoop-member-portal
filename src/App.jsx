@@ -44,7 +44,7 @@ function AppShell() {
   // Close mobile menu on route change
   useEffect(() => { setMobileMenuOpen(false); }, [currentRoute]);
 
-  const sidebarWidth = isMobile ? 0 : (sidebarCollapsed ? 52 : 230);
+  const sidebarWidth = isMobile ? 0 : (sidebarCollapsed ? 52 : 240);
 
   return (
     <div style={{
@@ -59,10 +59,12 @@ function AppShell() {
       {/* Sidebar: hidden on mobile unless menu is open */}
       {(!isMobile || mobileMenuOpen) && <Sidebar />}
       <div style={{
-        marginLeft: sidebarWidth,
-        transition: 'margin-left 0.2s ease',
+        paddingLeft: sidebarWidth,
+        transition: 'padding 0.2s ease',
         display: 'flex', flexDirection: 'column',
         minHeight: '100vh',
+        boxSizing: 'border-box',
+        width: '100%',
       }}>
         <Header onMobileMenuToggle={isMobile ? () => setMobileMenuOpen(v => !v) : undefined} />
         <main style={{
