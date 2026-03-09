@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import MemberLink from '@/components/MemberLink.jsx';
 import { Badge, Btn, SoWhatCallout, Sparkline, StatCard, WaitlistRow, InfoTooltip } from '@/components/ui';
 import {
   getWaitlistQueue,
