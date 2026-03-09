@@ -45,6 +45,7 @@ export default async function handler(req, res) {
                                  AND pc.opened_at::date = b.booking_date::date
         CROSS JOIN (SELECT annual_dues FROM membership_types WHERE type_code = 'FG') mt
         WHERE bp.is_guest = 1 AND bp.is_warm_lead = 1
+          AND bp.guest_name IS NOT NULL AND bp.guest_name <> ''
         GROUP BY bp.player_id, bp.guest_name, bp.booking_id, b.booking_date, b.course_id,
                  m_sponsor.first_name, m_sponsor.last_name, m_sponsor.archetype, mt.annual_dues
         ORDER BY visit_count DESC, total_spend DESC`,

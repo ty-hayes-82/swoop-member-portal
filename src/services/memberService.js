@@ -19,6 +19,24 @@ const FALLBACK_HEALTH_DIST = [
   { level: 'Critical', min: 0, count: 12, percentage: 0.04, color: '#C0392B' },
 ];
 
+const deriveAverageDues = () => {
+  const profileValues = Object.values(memberProfiles ?? {})
+    .map((profile) => toNumber(profile?.duesAnnual, NaN))
+    .filter((value) => Number.isFinite(value) && value > 0);
+
+  if (!profileValues.length) return 18000;
+  const total = profileValues.reduce((sum, value) => sum + value, 0);
+  return Math.round(total / profileValues.length);
+};
+
+const buildDuesEstimate = (criticalCount, atRiskCount) => {
+  const averageDues = deriveAverageDues();
+  const criticalAvg = Math.max(12000, Math.round(averageDues * 1.1));
+  const atRiskAvg = Math.max(9000, Math.round(averageDues * 0.85));
+  const estimate = (criticalCount * criticalAvg) + (atRiskCount * atRiskAvg);
+  return { estimate, averageDues };
+};
+
 const normalizeAtRiskMembers = (source) => {
   const list = Array.isArray(source)
     ? source
@@ -163,11 +181,26 @@ export const getMemberSummary = () => {
   const healthy = dist.find((h) => h.level === 'Healthy')?.count ?? 0;
   const apiSummary = _d?.memberSummary;
   const avgHealthScore = formatMaybeNumber(apiSummary?.avgHealthScore, 62);
-  const potentialDuesAtRisk = formatMaybeNumber(apiSummary?.potentialDuesAtRisk, (critical * 12000) + (atRisk * 8500));
+  const { estimate: estimatedDuesAtRisk, averageDues } = buildDuesEstimate(critical, atRisk);
+  const rawDues = formatMaybeNumber(apiSummary?.potentialDuesAtRisk, estimatedDuesAtRisk);
+  const riskCount = atRisk + critical;
+  const plausibleCeiling = Math.max(
+    estimatedDuesAtRisk,
+    Math.round(Math.max(riskCount, 1) * averageDues * 1.4),
+  );
+
+  let potentialDuesAtRisk = rawDues;
+  if (potentialDuesAtRisk > plausibleCeiling) {
+    potentialDuesAtRisk = estimatedDuesAtRisk;
+  }
+  if (potentialDuesAtRisk <= 0) {
+    potentialDuesAtRisk = estimatedDuesAtRisk;
+  }
+  potentialDuesAtRisk = Math.round(potentialDuesAtRisk);
 
   return {
     total, healthy, atRisk, critical,
-    riskCount:           atRisk + critical,
+    riskCount,
     avgHealthScore,
     potentialDuesAtRisk,
   };

@@ -8,6 +8,33 @@ import { getHealthDistribution, getAtRiskMembers, getMemberSummary } from '@/ser
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 
+const fullCurrencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+});
+
+const formatFullCurrency = (value) => {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? fullCurrencyFormatter.format(amount) : '—';
+};
+
+const formatCompactCurrency = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return '—';
+  if (amount >= 1_000_000) {
+    const millions = amount / 1_000_000;
+    const digits = millions >= 10 ? 1 : 2;
+    return `$${millions.toFixed(digits)}M`;
+  }
+  if (amount >= 1_000) {
+    const thousands = amount / 1_000;
+    const digits = thousands >= 10 ? 0 : 1;
+    return `$${thousands.toFixed(digits)}K`;
+  }
+  return formatFullCurrency(amount);
+};
+
 // MemberRow — interactive row with hover state + expand chevron
 function MemberRow({ m, isExpanded, onToggle }) {
   const [hovered, setHovered] = useState(false);
@@ -147,8 +174,11 @@ export default function HealthOverview() {
           <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
             At Risk & Critical Members
           </span>
-          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent }}>
-            ${(summary.potentialDuesAtRisk / 1000).toFixed(0)}K dues at risk
+          <span
+            style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent }}
+            title={formatFullCurrency(summary.potentialDuesAtRisk)}
+          >
+            {formatCompactCurrency(summary.potentialDuesAtRisk)} dues at risk
           </span>
         </div>
         <div style={{ overflowX: 'auto' }}>
@@ -192,7 +222,9 @@ export default function HealthOverview() {
 
       <SoWhatCallout variant="warning">
         <strong>{summary.riskCount} members</strong> are At Risk or Critical —
-        representing <strong>${(summary.potentialDuesAtRisk / 1000).toFixed(0)}K</strong> in annual dues.
+        representing <strong title={formatFullCurrency(summary.potentialDuesAtRisk)}>
+          {formatCompactCurrency(summary.potentialDuesAtRisk)}
+        </strong> in annual dues.
         James Whitfield is the most urgent: an unresolved service complaint is the only thing standing between
         an active member and a resignation that should never happen. Tap his name to take action.
       </SoWhatCallout>

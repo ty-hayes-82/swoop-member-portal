@@ -60,7 +60,10 @@ export default function GrowthPipeline() {
 
         {/* Lead cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          {leads.map(l => <LeadCard key={l.guestName} lead={l} />)}
+          {leads.map((lead, index) => {
+            const key = lead.guestName || lead.name || lead.prospectName || lead.memberId || lead.id || `prospect-${index}`;
+            return <LeadCard key={key} lead={lead} />;
+          })}
         </div>
 
         <SoWhatCallout variant="opportunity">

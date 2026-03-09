@@ -23,8 +23,12 @@ const ROUTE_LABEL = 'Tee Sheet & Demand';
 export default function WaitlistDemand() {
   const { routeIntent, clearRouteIntent } = useNavigation();
   const [activeTab, setActiveTab] = useState('queue');
-  const waitlistSummary = getWaitlistSummary();
-  const cancellationSummary = getCancellationSummary();
+  const waitlistSummary = getWaitlistSummary() ?? {
+    total: 0, highPriority: 0, atRisk: 0, avgDaysWaiting: 0,
+  };
+  const cancellationSummary = getCancellationSummary() ?? {
+    total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: 'Insufficient data',
+  };
 
   useEffect(() => {
     if (routeIntent?.waitlistTab && TABS.some((tab) => tab.key === routeIntent.waitlistTab)) {
@@ -34,10 +38,10 @@ export default function WaitlistDemand() {
   }, [routeIntent, clearRouteIntent]);
 
   const tabsWithBadges = TABS.map((tab) => {
-    if (tab.key === 'queue' && waitlistSummary.highPriority > 0) {
+    if (tab.key === 'queue' && waitlistSummary?.highPriority > 0) {
       return { ...tab, label: `${tab.label} · ${waitlistSummary.highPriority} priority` };
     }
-    if (tab.key === 'predictions' && cancellationSummary.highRisk > 0) {
+    if (tab.key === 'predictions' && cancellationSummary?.highRisk > 0) {
       return { ...tab, label: `${tab.label} · ${cancellationSummary.highRisk} high-risk` };
     }
     return tab;
