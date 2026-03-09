@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { theme } from '@/config/theme';
-import { MemberProfileContent } from '@/components/members/MemberProfileDrawer.jsx';
+import { MemberProfileContent } from '@/features/member-profile/MemberProfileDrawer.jsx';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { useNavigationContext } from '@/context/NavigationContext';
 

@@ -1,11 +1,11 @@
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { theme } from '@/config/theme';
 
-export default function MemberLink({ memberId, children, mode = 'drawer', style, className }) {
+export default function MemberLink({ memberId, name, children, mode = 'drawer', style, className }) {
   const { openProfile } = useMemberProfile();
 
   if (!memberId) {
-    return <span className={className} style={style}>{children}</span>;
+    return <span className={className} style={style}>{children ?? name}</span>;
   }
 
   const handleClick = (event) => {
@@ -31,7 +31,7 @@ export default function MemberLink({ memberId, children, mode = 'drawer', style,
         ...style,
       }}
     >
-      {children}
+      {children ?? name}
     </button>
   );
 }

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Badge, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
 import CancellationRiskRow from '@/features/pipeline/components/CancellationRiskRow';
-import MemberLink from '@/components/members/MemberLink.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import { cancellationProbabilities } from '@/data/pipeline';
 import { theme } from '@/config/theme';
 

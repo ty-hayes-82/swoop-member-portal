@@ -28,6 +28,14 @@ export const navItems = [
     sourceSystems: ['Tee Sheet', 'Member CRM', 'POS', 'Weather API'],
   },
   {
+    key: 'location-intelligence',
+    label: 'Location Intelligence',
+    icon: '📍',
+    color: theme.colors.navOperations,
+    subtitle: 'Where is everyone on property right now?',
+    sourceSystems: ['Swoop App', 'Member CRM'],
+  },
+  {
     key: 'fb-performance',
     label: 'F&B Operations',
     icon: '◆',

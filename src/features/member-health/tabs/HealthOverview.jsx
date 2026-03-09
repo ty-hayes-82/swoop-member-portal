@@ -1,5 +1,5 @@
 import { SoWhatCallout } from '@/components/ui';
-import MemberLink from '@/components/members/MemberLink.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import TrendContext from '@/components/ui/TrendContext.jsx';

@@ -75,6 +75,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
   }
 
   const [noteText, setNoteText] = useState('');
+  const initials = (profile.name || '?').split(' ').map((part) => part[0]).join('').slice(0, 2);
 
   const topMetrics = useMemo(() => [
     { label: 'Annual dues', value: profile.duesAnnual ? `$${profile.duesAnnual.toLocaleString()}` : '—' },
@@ -97,8 +98,24 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: theme.spacing.md }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: theme.spacing.md, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: theme.spacing.md, alignItems: 'center' }}>
+          <div style={{
+            width: layout === 'page' ? 80 : 64,
+            height: layout === 'page' ? 80 : 64,
+            borderRadius: '50%',
+            background: theme.colors.bgDeep,
+            border: `1px solid ${theme.colors.border}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: layout === 'page' ? 28 : 20,
+            fontWeight: 700,
+            color: theme.colors.textPrimary,
+          }}>
+            {initials}
+          </div>
+          <div>
           <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Member Snapshot</div>
           <h2 style={{ margin: '4px 0', fontSize: layout === 'page' ? 32 : 24 }}>{profile.name}</h2>
           <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>
@@ -112,6 +129,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               </div>
             ))}
           </div>
+        </div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Health score</div>
