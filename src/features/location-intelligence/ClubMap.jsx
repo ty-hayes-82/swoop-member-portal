@@ -1,129 +1,184 @@
-import { memo } from 'react';
+import { useEffect, useRef, memo } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet.heat';
 import { theme } from '@/config/theme';
 
-const HEALTH_COLORS = {
-  healthy: theme.colors.success,
-  watch: theme.colors.warning,
-  'at-risk': theme.colors.urgent,
-  critical: '#8E1C17',
-};
+// Oakmont Hills CC — placed on a real Scottsdale golf course footprint
+const CENTER = [33.6095, -111.8985];
+const DEFAULT_ZOOM = 17;
 
-const ZONE_SHAPES = [
-  { id: 'course', type: 'path', d: 'M120 80 Q80 200 180 320 T420 520 Q520 600 720 540 T900 340 Q960 260 910 180 T760 80 Z', label: 'Course', labelX: 520, labelY: 200 },
-  { id: 'driving-range', type: 'rect', x: 90, y: 90, width: 140, height: 80, label: 'Range', labelX: 160, labelY: 80 },
-  { id: 'practice-green', type: 'circle', cx: 300, cy: 120, r: 45, label: 'Practice', labelX: 300, labelY: 80 },
-  { id: 'clubhouse', type: 'rect', x: 600, y: 260, width: 180, height: 140, label: 'Clubhouse', labelX: 690, labelY: 250 },
-  { id: 'grill-room', type: 'rect', x: 610, y: 270, width: 70, height: 60, label: 'Grill', labelX: 645, labelY: 260 },
-  { id: 'main-dining', type: 'rect', x: 690, y: 270, width: 70, height: 60, label: 'Dining', labelX: 725, labelY: 260 },
-  { id: 'lounge', type: 'rect', x: 610, y: 340, width: 150, height: 50, label: 'Lounge', labelX: 685, labelY: 405 },
-  { id: 'pool', type: 'rect', x: 500, y: 420, width: 140, height: 90, label: 'Pool', labelX: 570, labelY: 525 },
-  { id: 'fitness', type: 'rect', x: 450, y: 410, width: 40, height: 80, label: 'Fitness', labelX: 470, labelY: 390 },
-  { id: 'pro-shop', type: 'rect', x: 360, y: 250, width: 80, height: 60, label: 'Pro Shop', labelX: 400, labelY: 240 },
-  { id: 'parking', type: 'rect', x: 200, y: 500, width: 260, height: 80, label: 'Parking', labelX: 330, labelY: 595 },
-  { id: 'tennis', type: 'rect', x: 840, y: 360, width: 90, height: 160, label: 'Tennis', labelX: 885, labelY: 350 },
+const ZONES = [
+  { id: 'clubhouse', label: 'Clubhouse', coords: [[33.6098, -111.8992], [33.6098, -111.8978], [33.6093, -111.8978], [33.6093, -111.8992]], color: '#F3922D' },
+  { id: 'grill-room', label: 'Grill Room', coords: [[33.6097, -111.8990], [33.6097, -111.8985], [33.6095, -111.8985], [33.6095, -111.8990]], color: '#F3922D' },
+  { id: 'main-dining', label: 'Main Dining', coords: [[33.6097, -111.8985], [33.6097, -111.8980], [33.6095, -111.8980], [33.6095, -111.8985]], color: '#F3922D' },
+  { id: 'pro-shop', label: 'Pro Shop', coords: [[33.6100, -111.8988], [33.6100, -111.8982], [33.6098, -111.8982], [33.6098, -111.8988]], color: '#2E7BB8' },
+  { id: 'driving-range', label: 'Driving Range', coords: [[33.6105, -111.8998], [33.6105, -111.8980], [33.6102, -111.8980], [33.6102, -111.8998]], color: '#7B5DC0' },
+  { id: 'pool', label: 'Pool & Fitness', coords: [[33.6092, -111.8995], [33.6092, -111.8988], [33.6089, -111.8988], [33.6089, -111.8995]], color: '#2E7BB8' },
+  { id: 'tennis', label: 'Tennis Courts', coords: [[33.6092, -111.8975], [33.6092, -111.8968], [33.6089, -111.8968], [33.6089, -111.8975]], color: '#7B5DC0' },
+  { id: 'parking', label: 'Parking', coords: [[33.6088, -111.8998], [33.6088, -111.8975], [33.6085, -111.8975], [33.6085, -111.8998]], color: '#444' },
 ];
 
-function ZoneShape({ zone, intensity }) {
-  const fillColor = `rgba(243,146,45, ${0.08 + intensity * 0.25})`;
-  const stroke = '#2B2B2B';
-  if (zone.type === 'rect') {
-    return (
-      <rect
-        x={zone.x}
-        y={zone.y}
-        width={zone.width}
-        height={zone.height}
-        rx={12}
-        ry={12}
-        fill={fillColor}
-        stroke={stroke}
-        strokeWidth={1.5}
-      />
-    );
-  }
-  if (zone.type === 'circle') {
-    return (
-      <circle
-        cx={zone.cx}
-        cy={zone.cy}
-        r={zone.r}
-        fill={fillColor}
-        stroke={stroke}
-        strokeWidth={1.5}
-      />
-    );
-  }
-  return (
-    <path
-      d={zone.d}
-      fill={fillColor}
-      stroke={stroke}
-      strokeWidth={1.5}
-    />
-  );
-}
-
-function MemberDot({ member, isSelected, onSelect }) {
-  const size = isSelected ? 8 : 6;
-  const color = HEALTH_COLORS[member.status] ?? theme.colors.textPrimary;
-  return (
-    <g onClick={() => onSelect?.(member.memberId)} style={{ cursor: 'pointer' }}>
-      {member.needsAttention && (
-        <circle
-          cx={member.x}
-          cy={member.y}
-          r={20}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.5}
-          opacity={0.4}
-        >
-          <animate attributeName="r" values="10;26" dur="2.4s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.6;0" dur="2.4s" repeatCount="indefinite" />
-        </circle>
-      )}
-      <circle
-        cx={member.x}
-        cy={member.y}
-        r={size}
-        fill={color}
-        stroke={isSelected ? theme.colors.white : '#1F1F1F'}
-        strokeWidth={isSelected ? 2 : 1.2}
-      />
-      <title>{member.name}</title>
-    </g>
-  );
-}
+const HEALTH_COLORS = {
+  healthy: '#22c55e',
+  watch: '#eab308',
+  'at-risk': '#F3922D',
+  critical: '#dc2626',
+};
 
 function ClubMap({ members, selectedMemberId, onSelectMember, densityByZone }) {
-  const maxDensity = Math.max(...Object.values(densityByZone ?? { course: 1 }));
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markersRef = useRef([]);
+  const heatLayerRef = useRef(null);
+
+  // Initialize map once
+  useEffect(() => {
+    if (mapInstanceRef.current) return;
+
+    const map = L.map(mapRef.current, {
+      center: CENTER,
+      zoom: DEFAULT_ZOOM,
+      zoomControl: false,
+      attributionControl: false,
+    });
+
+    // Esri satellite imagery (free, no API key)
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom: 20 }
+    ).addTo(map);
+
+    // Subtle road labels overlay
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom: 20, opacity: 0.35 }
+    ).addTo(map);
+
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    // Zone polygons with dashed outlines
+    ZONES.forEach((zone) => {
+      const polygon = L.polygon(zone.coords, {
+        color: zone.color,
+        weight: 2,
+        opacity: 0.7,
+        fillColor: zone.color,
+        fillOpacity: 0.15,
+        dashArray: '6 4',
+      }).addTo(map);
+      polygon.bindTooltip(zone.label, {
+        permanent: true,
+        direction: 'center',
+        className: 'zone-label',
+      });
+    });
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, []);
+
+  // Heatmap layer — Tableau-style gradient
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !members.length) return;
+
+    if (heatLayerRef.current) {
+      map.removeLayer(heatLayerRef.current);
+    }
+
+    const heatPoints = members.map((m) => {
+      const intensity =
+        m.status === 'critical' ? 1.0 :
+        m.status === 'at-risk' ? 0.8 :
+        m.status === 'watch' ? 0.5 : 0.3;
+      return [m.lat, m.lng, intensity];
+    });
+
+    heatLayerRef.current = L.heatLayer(heatPoints, {
+      radius: 35,
+      blur: 25,
+      maxZoom: 19,
+      max: 1.0,
+      gradient: {
+        0.15: '#3b82f6',
+        0.35: '#22c55e',
+        0.55: '#eab308',
+        0.75: '#F3922D',
+        1.0: '#dc2626',
+      },
+    }).addTo(map);
+  }, [members]);
+
+  // Member markers with pulse animation for at-risk
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    markersRef.current.forEach((m) => map.removeLayer(m));
+    markersRef.current = [];
+
+    members.forEach((member) => {
+      const isSelected = member.memberId === selectedMemberId;
+      const color = HEALTH_COLORS[member.status] || '#888';
+      const size = isSelected ? 16 : member.needsAttention ? 12 : 9;
+
+      const pulseHtml = member.needsAttention
+        ? `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;border:2px solid ${color};animation:pulse-ring 2s ease-out infinite;opacity:0.6;"></div>`
+        : '';
+
+      const icon = L.divIcon({
+        className: 'member-dot',
+        html: `<div style="position:relative;">${pulseHtml}<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid ${isSelected ? '#fff' : 'rgba(0,0,0,0.5)'};box-shadow:0 0 8px ${color}40;position:relative;z-index:2;"></div></div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+      });
+
+      const marker = L.marker([member.lat, member.lng], { icon }).addTo(map);
+
+      marker.bindTooltip(
+        `<div style="font-family:system-ui;font-size:12px;line-height:1.5;min-width:160px;">` +
+        `<strong>${member.name}</strong><br/>` +
+        `<span style="color:${color};">\u25cf </span>${member.status} \u00b7 Score ${member.healthScore}<br/>` +
+        `<span style="opacity:0.7;">${member.zone} \u00b7 ${member.timeInZone}</span>` +
+        (member.needsAttention ? `<br/><strong style="color:#F3922D;">\u26a0 Needs attention</strong>` : '') +
+        `</div>`,
+        { direction: 'top', offset: [0, -10] }
+      );
+
+      marker.on('click', () => onSelectMember?.(member.memberId));
+      markersRef.current.push(marker);
+    });
+  }, [members, selectedMemberId, onSelectMember]);
+
   return (
-    <svg viewBox="0 0 1000 650" role="img" aria-label="Oakmont Hills property map" style={{ width: '100%', height: '100%' }}>
-      <rect x={0} y={0} width={1000} height={650} fill={theme.colors.bgSidebar} rx={32} />
-      {ZONE_SHAPES.map((zone) => (
-        <g key={zone.id}>
-          <ZoneShape zone={zone} intensity={(densityByZone?.[zone.id] ?? 0) / Math.max(maxDensity, 1)} />
-          <text
-            x={zone.labelX}
-            y={zone.labelY}
-            textAnchor="middle"
-            fontSize="22"
-            fill={theme.colors.textOnDark}
-            opacity={0.35}
-          >
-            {zone.label}
-          </text>
-        </g>
-      ))}
-      {members.map((member) => (
-        <MemberDot
-          key={member.memberId}
-          member={member}
-          isSelected={member.memberId === selectedMemberId}
-          onSelect={onSelectMember}
-        />
-      ))}
-    </svg>
+    <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: theme.radius.md, overflow: 'hidden' }}>
+      <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+      <style>{`
+        .zone-label {
+          background: rgba(0,0,0,0.75) !important;
+          border: 1px solid rgba(243,146,45,0.4) !important;
+          color: #fff !important;
+          font-size: 11px !important;
+          font-weight: 600 !important;
+          padding: 2px 8px !important;
+          border-radius: 4px !important;
+          box-shadow: none !important;
+          letter-spacing: 0.03em !important;
+        }
+        .zone-label::before { display: none !important; }
+        .member-dot { background: none !important; border: none !important; }
+        @keyframes pulse-ring {
+          0% { transform: translate(-50%,-50%) scale(0.5); opacity: 0.7; }
+          100% { transform: translate(-50%,-50%) scale(2.2); opacity: 0; }
+        }
+        .leaflet-container { background: #1a1a1a !important; }
+      `}</style>
+    </div>
   );
 }
 
