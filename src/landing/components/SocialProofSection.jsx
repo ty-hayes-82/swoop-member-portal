@@ -63,11 +63,11 @@ export default function SocialProofSection() {
         <p style={{ fontWeight: 600, marginBottom: theme.spacing.md, color: theme.colors.textPrimary }}>
           Connects to the systems you already use
         </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: theme.spacing.md }}>
+        <ul className="landing-trust-strip" style={{ listStyle: 'none', padding: 0, margin: 0, marginBottom: theme.spacing.md }}>
           {integrationCategories.map((category) => (
-            <span key={category} style={pillStyle}>{category}</span>
+            <li key={category} className="landing-trust-chip" style={pillStyle}>{category}</li>
           ))}
-        </div>
+        </ul>
         <p style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm, margin: 0 }}>
           28 integrations · Live in under 2 weeks · No rip-and-replace
         </p>

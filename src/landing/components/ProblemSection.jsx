@@ -6,13 +6,13 @@ export default function ProblemSection() {
     <section className="landing-section-padded" style={{
       background: theme.colors.landingCream,
       borderRadius: theme.radius.xl,
-      padding: '56px 28px',
+      padding: 'clamp(32px, 6vw, 56px) clamp(18px, 4vw, 28px)',
       marginBottom: theme.spacing.xxl,
     }}>
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.lg }}>
         Most clubs are flying blind.
       </h2>
-      <div className="landing-grid-3">
+      <div className="landing-problem-grid">
         {problemCards.map((card) => (
           <article
             key={card}
@@ -20,7 +20,7 @@ export default function ProblemSection() {
               background: theme.colors.bgCard,
               border: `1px solid ${theme.colors.border}`,
               borderRadius: theme.radius.lg,
-              padding: '24px 22px',
+              padding: 'clamp(18px, 4vw, 24px) clamp(16px, 3vw, 22px)',
               boxShadow: theme.shadow.sm,
               minHeight: 140,
               display: 'flex',

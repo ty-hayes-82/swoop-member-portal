@@ -32,8 +32,12 @@ export default function AgentsSection() {
               border: `1px solid ${theme.colors.border}`,
               borderRadius: theme.radius.lg,
               background: theme.colors.bgCard,
-              padding: '18px',
-              minHeight: 190,
+              padding: 'clamp(18px, 3vw, 22px)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.sm,
+              minHeight: 0,
+              height: '100%',
             }}
           >
             <div style={{

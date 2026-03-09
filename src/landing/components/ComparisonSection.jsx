@@ -82,6 +82,7 @@ export default function ComparisonSection() {
           </tbody>
         </table>
       </div>
+      <p className="landing-scroll-hint">Swipe horizontally to compare every column →</p>
       <div style={{ marginTop: theme.spacing.xl }}>
         <h3 style={{ fontSize: theme.fontSize.xl, marginBottom: theme.spacing.md }}>
           Why not just...

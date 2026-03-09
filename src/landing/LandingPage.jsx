@@ -23,14 +23,15 @@ const container = {
   width: '100%',
   maxWidth: 1180,
   margin: '0 auto',
-  padding: '0 24px',
+  padding: '0 clamp(16px, 4vw, 32px)',
+  boxSizing: 'border-box',
 };
 
 const fullWidth = {
-  width: '100vw',
-  marginLeft: 'calc(50% - 50vw)',
-  marginRight: 'calc(50% - 50vw)',
-  padding: '0 24px',
+  width: '100%',
+  margin: '0 auto',
+  padding: '0 clamp(16px, 4vw, 32px)',
+  boxSizing: 'border-box',
 };
 
 export default function LandingPage() {

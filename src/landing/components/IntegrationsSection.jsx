@@ -28,7 +28,7 @@ export default function IntegrationsSection() {
           border: `2px solid ${theme.colors.ctaGreen}`,
           borderRadius: theme.radius.lg,
           background: theme.colors.bgCard,
-          padding: '24px',
+          padding: 'clamp(18px, 4vw, 28px)',
           marginBottom: theme.spacing.xl,
         }}>
           <p style={{
@@ -64,7 +64,7 @@ export default function IntegrationsSection() {
           border: `1px solid ${theme.colors.border}`,
           borderRadius: theme.radius.lg,
           background: theme.colors.bgCard,
-          padding: '24px',
+          padding: 'clamp(18px, 4vw, 28px)',
           marginBottom: theme.spacing.xl,
         }}>
           <p style={{
@@ -75,7 +75,7 @@ export default function IntegrationsSection() {
           }}>
             From disconnected systems to unified intelligence
           </p>
-          <div className="landing-grid-3" style={{ gap: 20, alignItems: 'center' }}>
+          <div className="landing-flow-grid" style={{ gap: 20 }}>
             {/* Left: Systems */}
             <div>
               <p style={{
@@ -167,7 +167,7 @@ export default function IntegrationsSection() {
           border: `1px solid ${theme.colors.border}`,
           borderRadius: theme.radius.lg,
           background: theme.colors.bgCard,
-          padding: '20px',
+          padding: 'clamp(18px, 4vw, 24px)',
           marginBottom: theme.spacing.lg,
         }}>
           <p style={{
@@ -211,7 +211,7 @@ export default function IntegrationsSection() {
           border: `1px solid ${theme.colors.border}`,
           borderRadius: theme.radius.lg,
           background: theme.colors.bgDeep,
-          padding: '20px',
+          padding: 'clamp(18px, 4vw, 24px)',
         }}>
           <p style={{
             fontSize: theme.fontSize.sm,
