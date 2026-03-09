@@ -91,25 +91,47 @@ export default function TodayMode({ onNavigate }) {
       urgency: 'urgent',
       icon: '⚠',
       headline: 'James Whitfield filed a complaint 6 days ago. No one has followed up.',
-      story:
-        "He had lunch in the Grill Room on January 16th — the day we were short-staffed. Food took 40 minutes. We acknowledged the complaint and stopped there. He hasn't been back. He has a tee time Saturday morning.",
+      bullets: [
+        'Complaint acknowledged but unresolved — timer exceeded 6-day SLA.',
+        'Average Grill Room check dropped from $47 → $28 since January 3.',
+        'Health score fell 78 → 42 once the third complaint hit.',
+      ],
       stakes: '$18,000/yr in dues',
       memberName: 'James Whitfield',
       memberId: 'mbr_203',
       context: 'Slow service complaint at Grill Room — felt ignored after acknowledging.',
       linkLabel: 'Full case → Staffing & Service',
       linkKey: 'staffing-service',
+      meta: {
+        sourceIcon: '🗂',
+        source: 'CRM + POS + Complaints',
+        freshness: 'Updated 11 min ago',
+        confidence: '93% confidence',
+        why: 'Complaint aging 6d & spend down 42%',
+        metric: { value: '6-day', label: 'warning lead time' },
+      },
     },
     {
       priority: 2,
       urgency: 'warning',
       icon: '☁',
       headline: 'Wind advisory today — 15+ mph gusts expected by noon.',
-      story:
-        'Historically, wind days reduce golf bookings by 15% after forecast confirmation. We have 28 tee times this afternoon. Grill Room should expect a 20–30% lunch cover shift if members cancel and stay.',
+      bullets: [
+        'Wind days reduce confirmations by 15% once forecast lock hits.',
+        '28 tee times after noon × $312 revenue/slot = $8,736 at risk.',
+        'Grill Room sees 20–30% lunch spike when golfers stay inside.',
+      ],
       stakes: 'Prepare F&B staff',
       linkLabel: 'Operations →',
       linkKey: 'operations',
+      meta: {
+        sourceIcon: '🌤',
+        source: 'Weather + Tee Sheet',
+        freshness: 'Forecast updated 18 min ago',
+        confidence: '87% confidence',
+        why: 'High-risk bookings overlap gust window',
+        metric: { value: '$8.7K', label: 'revenue at risk' },
+      },
     },
     {
       priority: 3,
@@ -120,9 +142,21 @@ export default function TodayMode({ onNavigate }) {
         { name: 'Anne Jordan', score: 38, archetype: 'Weekend Warrior', risk: '3 rounds in 3 months, down from 12 in October', time: '8:14 AM' },
         { name: 'Robert Callahan', score: 41, archetype: 'Declining', risk: 'Dining only — hitting F&B minimum, nothing more', time: '10:40 AM' },
       ],
+      bullets: [
+        'Both members are in the bottom quartile of engagement.',
+        'Combined dues at risk: $36K + secondary spend.',
+      ],
       stakes: '$36K annual dues',
       linkLabel: 'Member Retention →',
       linkKey: 'member-health',
+      meta: {
+        sourceIcon: '📊',
+        source: 'Member Pulse',
+        freshness: 'Scores refreshed 9 min ago',
+        confidence: '90% confidence',
+        why: 'Health scores <45 + tee times today',
+        metric: { value: '$36K', label: 'dues at stake today' },
+      },
     },
   ];
 
@@ -231,16 +265,24 @@ export default function TodayMode({ onNavigate }) {
                 <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5, marginBottom: '8px' }}>
                   {win.detail}
                 </div>
-                <div style={{
-                  fontSize: theme.fontSize.xs,
-                  fontWeight: 600,
-                  color: theme.colors.success,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}>
-                  {win.action} →
-                </div>
+                <button
+                  onClick={(event) => { event.stopPropagation(); onNavigate?.(win.link); }}
+                  style={{
+                    marginTop: '8px',
+                    padding: '8px 10px',
+                    fontSize: theme.fontSize.xs,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    borderRadius: theme.radius.sm,
+                    border: 'none',
+                    background: theme.colors.success,
+                    color: theme.colors.white,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {win.action}
+                </button>
               </div>
             ))}
           </div>
@@ -256,13 +298,22 @@ export default function TodayMode({ onNavigate }) {
             borderRadius: theme.radius.md,
             padding: theme.spacing.lg,
             borderLeft: `4px solid ${urgencyBorder[item.urgency]}`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.sm,
           }}
         >
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: theme.spacing.sm }}>
-            <span style={{ fontSize: '20px', flexShrink: 0, marginTop: 2 }}>{item.icon}</span>
-            <div style={{ flex: 1 }}>
+          {item.meta && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
+              <span>{item.meta.sourceIcon} {item.meta.source}</span>
+              <span>Updated {item.meta.freshness}</span>
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '22px', flexShrink: 0, marginTop: 2 }}>{item.icon}</span>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-                <div style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary, lineHeight: 1.3 }}>{item.headline}</div>
+                <div style={{ fontSize: '20px', fontWeight: 700, color: theme.colors.textPrimary, lineHeight: 1.3 }}>{item.headline}</div>
                 {item.stakes && (
                   <div
                     style={{
@@ -270,8 +321,8 @@ export default function TodayMode({ onNavigate }) {
                       fontWeight: 700,
                       color: urgencyBorder[item.urgency],
                       background: `${urgencyBorder[item.urgency]}12`,
-                      padding: '3px 8px',
-                      borderRadius: '12px',
+                      padding: '3px 10px',
+                      borderRadius: '999px',
                       flexShrink: 0,
                     }}
                   >
@@ -279,38 +330,57 @@ export default function TodayMode({ onNavigate }) {
                   </div>
                 )}
               </div>
-
-              {item.story && <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginTop: '6px', lineHeight: 1.6 }}>{item.story}</div>}
-
+              {item.bullets?.length > 0 && (
+                <ul style={{ margin: 0, paddingLeft: '18px', color: theme.colors.textSecondary, fontSize: theme.fontSize.sm, lineHeight: 1.5 }}>
+                  {item.bullets.map((point) => (
+                    <li key={point} style={{ marginBottom: '4px' }}>{point}</li>
+                  ))}
+                </ul>
+              )}
               {item.members && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {item.members.map((member) => (
                     <MiniMemberRow key={member.name} member={member} onNavigate={onNavigate} />
                   ))}
                 </div>
               )}
+              {item.meta?.why && (
+                <div style={{ fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
+                  Why this surfaced
+                  <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>{item.meta.why}</div>
+                </div>
+              )}
+              {item.meta?.metric && (
+                <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '10px 12px', display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+                  <span style={{ fontSize: '22px', fontFamily: theme.fonts.mono, fontWeight: 700 }}>{item.meta.metric.value}</span>
+                  <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{item.meta.metric.label}</span>
+                </div>
+              )}
             </div>
           </div>
-
-          <div style={{ display: 'flex', gap: theme.spacing.sm, alignItems: 'center', flexWrap: 'wrap', marginTop: theme.spacing.sm }}>
-            {item.memberName && <QuickActions memberName={item.memberName} memberId={item.memberId} context={item.context} />}
-            <button
-              onClick={() => onNavigate(item.linkKey)}
-              style={{
-                padding: '6px 2px',
-                fontSize: theme.fontSize.sm,
-                fontWeight: 500,
-                cursor: 'pointer',
-                border: 'none',
-                background: 'none',
-                color: theme.colors.textMuted,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
-              {item.linkLabel}
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: theme.spacing.sm }}>
+            <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap', alignItems: 'center' }}>
+              {item.memberName && <QuickActions memberName={item.memberName} memberId={item.memberId} context={item.context} />}
+              <button
+                onClick={() => onNavigate(item.linkKey)}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: theme.fontSize.sm,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  borderRadius: theme.radius.sm,
+                  border: 'none',
+                  background: theme.colors.white,
+                  color: theme.colors.textPrimary,
+                  boxShadow: theme.shadow.xs,
+                }}
+              >
+                {item.linkLabel}
+              </button>
+            </div>
+            {item.meta?.confidence && (
+              <span style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.textPrimary, background: `${theme.colors.textPrimary}12`, padding: '4px 12px', borderRadius: '999px' }}>{item.meta.confidence}</span>
+            )}
           </div>
         </div>
       ))}

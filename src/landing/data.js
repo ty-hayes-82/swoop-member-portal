@@ -1,9 +1,45 @@
 import { theme } from '@/config/theme';
 
 export const problemCards = [
-  'You have 5 disconnected systems. Zero connected intelligence.',
-  "You know something is wrong. You just can't see it until it's too late.",
-  'James Whitfield complained. No one followed up. He resigned. $24K gone in 4 days.',
+  {
+    title: 'Member risk blind spot',
+    summary: 'Your systems see pieces. None of them see the resignation forming.',
+    highlights: [
+      'CRM sees complaints. Tee sheet sees no-shows. POS sees declining spend.',
+      'No shared timeline, so the GM reacts after the resignation letter arrives.',
+    ],
+    source: 'CRM + POS + Email',
+    freshness: 'Updated 12 min ago',
+    why: 'Engagement down 28% across six weeks',
+    confidence: '91% confidence',
+    metric: { value: '6-day', label: 'warning missed' },
+  },
+  {
+    title: 'Complaint follow-up gap',
+    summary: 'Acknowledged ≠ resolved. Your complaint inbox tracks tickets, not saves.',
+    highlights: [
+      'James Whitfield waited 42 minutes, filed a complaint, and sat in “Acknowledged” for 6 days.',
+      'No alert fired because the CRM saw a reply, not the absence of action.',
+    ],
+    source: 'Member CRM + Service Desk',
+    freshness: 'Complaint aging: 6 days',
+    why: 'No callback recorded · satisfaction trending negative',
+    confidence: '88% confidence',
+    metric: { value: '$22K', label: 'annual dues at risk' },
+  },
+  {
+    title: 'Demand vs. experience disconnect',
+    summary: 'Tee sheet tools optimize fill rate, not retention outcomes.',
+    highlights: [
+      'FIFO waitlists keep healthy members happy while at-risk members walk away.',
+      'Wind advisory shifts bookings indoors, but staffing and F&B prep stay blind.',
+    ],
+    source: 'Tee Sheet + Weather + POS',
+    freshness: 'Wind advisory confirmed 45 min ago',
+    why: '91% fill rate but 3 resignations tied to poor experience',
+    confidence: '84% confidence',
+    metric: { value: '$36K', label: 'dues + F&B leakage' },
+  },
 ];
 
 export const coreCapabilities = [
@@ -11,36 +47,76 @@ export const coreCapabilities = [
     icon: 'Users',
     title: 'Member Intelligence',
     color: theme.colors.lensMemberIntelligence,
-    description:
-      'Surface changing engagement behavior before it turns into churn risk. Prioritize interventions by member value and relationship sensitivity.',
+    summary: 'Know who is drifting before they resign.',
+    bullets: [
+      'Ranks every member by retention value × urgency.',
+      'Connects complaints, spend, rounds, and email engagement.',
+    ],
+    source: 'CRM + POS + Email',
+    freshness: 'Updated 14 min ago',
+    confidence: '92% confidence',
+    why: 'Engagement down 28% & unresolved complaint',
+    metric: { value: '6.4 wks', label: 'avg. early warning' },
   },
   {
     icon: 'Calendar',
     title: 'Tee Sheet & Demand',
     color: theme.colors.lensTeeSheetDemand,
-    description:
-      'Predict cancellations and backfill each open slot with the right member. Optimize pace and demand signals without overbooking guesswork.',
+    summary: 'Fill every slot with the member who needs it most.',
+    bullets: [
+      'Predict cancellations 24-72 hours ahead.',
+      'Route openings to retention-priority members automatically.',
+    ],
+    source: 'Tee Sheet + Weather + Waitlist',
+    freshness: 'High-risk slots recalculated 9 min ago',
+    confidence: '89% confidence',
+    why: 'Wind advisory + low-engagement bookings',
+    metric: { value: '91%', label: 'fill rate w/ routing' },
   },
   {
     icon: 'Utensils',
     title: 'F&B Operations',
     color: theme.colors.lensFbOperations,
-    description:
-      'Connect golf flow, weather, and reservations to outlet demand in real time. Shift prep and staffing before service degrades.',
+    summary: 'Tie culinary prep to what golf & weather already know.',
+    bullets: [
+      'Forecast post-round dining conversion by tee block.',
+      'Flag pace-of-play issues before they crush the Grill Room.',
+    ],
+    source: 'POS + Tee Sheet + Weather',
+    freshness: 'Prep forecast updated 7 min ago',
+    confidence: '86% confidence',
+    why: 'Rounds running 4:45 · patio demand spiking',
+    metric: { value: '$5.7K', label: 'monthly F&B upside' },
   },
   {
     icon: 'UsersRound',
     title: 'Staffing & Labor',
     color: theme.colors.lensStaffingLabor,
-    description:
-      'Tie labor coverage to predicted demand across golf and clubhouse touchpoints. Catch understaffed windows early enough to avoid member friction.',
+    summary: 'Staff to predicted demand, not static templates.',
+    bullets: [
+      'Coverage gap alerts 48 hours before service windows.',
+      'Overtime + labor cost per dollar tracked in real time.',
+    ],
+    source: 'Scheduling + Tee Sheet',
+    freshness: 'Coverage model recalculated hourly',
+    confidence: '90% confidence',
+    why: 'Saturday lunch forecast 95 covers vs. 6 staff scheduled',
+    metric: { value: '223x', label: 'ROI on alert' },
   },
   {
     icon: 'DollarSign',
     title: 'Revenue & Pipeline',
     color: theme.colors.lensRevenuePipeline,
-    description:
-      'Track revenue opportunities and risks from lead to retained member. Prove which actions moved conversion, spend, and renewal outcomes.',
+    summary: 'Show the board which actions protected revenue.',
+    bullets: [
+      'Attribution from alert → action → dues protected.',
+      'Pipeline insights tie guest play to future memberships.',
+    ],
+    source: 'Revenue + CRM + POS',
+    freshness: 'Board-ready report generated nightly',
+    confidence: '94% confidence',
+    why: '4 members saved this month via playbooks',
+    metric: { value: '$251K', label: 'annualized impact' },
   },
 ];
 
