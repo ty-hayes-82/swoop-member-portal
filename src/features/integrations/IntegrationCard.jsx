@@ -35,9 +35,10 @@ export function IntegrationCard({ system, isSelected, onClick, cardRef }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
         <div>
           <h3 style={{ margin: 0, fontSize: theme.fontSize.md, color: theme.colors.textPrimary }}>{system.name}</h3>
-          <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
             <Badge text={system.category} color={categoryColor} />
             <Badge text={`Tier ${system.tier}`} color={theme.colors.integrationNeutral} />
+            <Badge text={system.status} color={statusColor} />
           </div>
         </div>
         <span style={{

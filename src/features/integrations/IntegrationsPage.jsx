@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { theme } from '@/config/theme';
 import {
   getConnectedSystems,
@@ -26,11 +26,18 @@ export function IntegrationsPage() {
   const [search, setSearch] = useState('');
   const [activeSystemId, setActiveSystemId] = useState(null);
   const cardRefs = useRef({});
+  const [flowOffset, setFlowOffset] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setFlowOffset((prev) => (prev + 2) % 200), 80);
+    return () => clearInterval(timer);
+  }, []);
 
   const systemsById = useMemo(
     () => Object.fromEntries(systems.map((system) => [system.id, system])),
     [systems],
   );
+  const activeSystem = activeSystemId ? systemsById[activeSystemId] : null;
 
   const visibleSystems = useMemo(() => systems.filter((system) => {
     const categoryMatch = category === 'all' || system.category === category;
@@ -140,6 +147,41 @@ export function IntegrationsPage() {
         </div>
       </section>
 
+      {activeSystem && (
+        <section style={{ marginBottom: 24, padding: '16px 18px', border: `1px solid ${theme.colors.border}`, borderRadius: 12, background: theme.colors.bgCard }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>{activeSystem.name}</div>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Status: {activeSystem.status} · Tier {activeSystem.tier}</div>
+            </div>
+            <div style={{ textAlign: 'right', fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+              Last sync: {activeSystem.lastSync ?? 'Not connected yet'}
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+            {activeSystem.endpoints.map((endpoint) => (
+              <span key={endpoint} style={{ padding: '4px 10px', borderRadius: 20, background: theme.colors.bgDeep, fontSize: 11 }}>
+                {endpoint}
+              </span>
+            ))}
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted, marginBottom: 6 }}>Connection Flow</div>
+            <div style={{ height: 6, borderRadius: 999, background: theme.colors.border, overflow: 'hidden' }}>
+              <div
+                style={{
+                  height: '100%',
+                  width: '200%',
+                  background: 'linear-gradient(90deg, rgba(34,197,94,0.9), rgba(59,130,246,0.9), rgba(34,197,94,0.9))',
+                  backgroundSize: '200% 100%',
+                  backgroundPosition: `${flowOffset}% 0`,
+                  transition: 'background-position 0.15s linear',
+                }}
+              />
+            </div>
+          </div>
+        </section>
+      )}
       <section>
         <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted, marginBottom: 10 }}>
           Cross-System Intelligence
