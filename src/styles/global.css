@@ -46,7 +46,7 @@ html, body {
   background-color: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -64,6 +64,23 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+}
+
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select,
+textarea {
+  min-height: 44px;
+}
+
+.touch-target,
+a[role="button"],
+a.button-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Scrollbar — light mode */
