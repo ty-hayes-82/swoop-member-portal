@@ -2,6 +2,20 @@
   min-height: 100vh;
 }
 
+.landing-hero-ctas {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.landing-hero-cta {
+  min-width: 200px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .landing-sticky-cta {
   display: none;
 }
@@ -71,6 +85,28 @@
     z-index: 100;
     justify-content: center;
     gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-hero-ctas {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .landing-hero-cta {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .landing-demo-form {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-demo-submit {
+    width: 100%;
   }
 }
 

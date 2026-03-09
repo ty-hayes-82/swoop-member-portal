@@ -3,6 +3,7 @@
 // Return shapes IDENTICAL to memberService.js
 
 import { sql } from '@vercel/postgres';
+import { theme } from '../src/config/theme.js';
 
 export default async function handler(req, res) {
   try {
@@ -124,10 +125,20 @@ export default async function handler(req, res) {
     const total = dist.reduce((s, d) => s + Number(d.count), 0);
     const atRiskCount = getCount('At Risk') + getCount('Critical');
 
+    const levelColors = {
+      Healthy: theme.colors.success,
+      Watch: theme.colors.warning,
+      'At Risk': theme.colors.riskAtRiskAlt,
+      Critical: theme.colors.urgent,
+      Churned: theme.colors.urgent,
+    };
+
     res.status(200).json({
       healthDistribution: dist.map(d => ({
         level: d.level,
         count: Number(d.count),
+        percentage: total > 0 ? Number(d.count) / total : 0,
+        color: levelColors[d.level] ?? theme.colors.info,
       })),
 
       memberSummary: {
