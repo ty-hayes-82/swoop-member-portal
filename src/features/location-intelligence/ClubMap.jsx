@@ -4,19 +4,19 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.heat';
 import { theme } from '@/config/theme';
 
-// Oakmont Hills CC — placed on a real Scottsdale golf course footprint
-const CENTER = [33.6095, -111.8985];
-const DEFAULT_ZOOM = 17;
+// Pinetree Country Club — Kennesaw, Georgia
+const CENTER = [34.0395, -84.5975];
+const DEFAULT_ZOOM = 16;
 
 const ZONES = [
-  { id: 'clubhouse', label: 'Clubhouse', coords: [[33.6098, -111.8992], [33.6098, -111.8978], [33.6093, -111.8978], [33.6093, -111.8992]], color: '#F3922D' },
-  { id: 'grill-room', label: 'Grill Room', coords: [[33.6097, -111.8990], [33.6097, -111.8985], [33.6095, -111.8985], [33.6095, -111.8990]], color: '#F3922D' },
-  { id: 'main-dining', label: 'Main Dining', coords: [[33.6097, -111.8985], [33.6097, -111.8980], [33.6095, -111.8980], [33.6095, -111.8985]], color: '#F3922D' },
-  { id: 'pro-shop', label: 'Pro Shop', coords: [[33.6100, -111.8988], [33.6100, -111.8982], [33.6098, -111.8982], [33.6098, -111.8988]], color: '#2E7BB8' },
-  { id: 'driving-range', label: 'Driving Range', coords: [[33.6105, -111.8998], [33.6105, -111.8980], [33.6102, -111.8980], [33.6102, -111.8998]], color: '#7B5DC0' },
-  { id: 'pool', label: 'Pool & Fitness', coords: [[33.6092, -111.8995], [33.6092, -111.8988], [33.6089, -111.8988], [33.6089, -111.8995]], color: '#2E7BB8' },
-  { id: 'tennis', label: 'Tennis Courts', coords: [[33.6092, -111.8975], [33.6092, -111.8968], [33.6089, -111.8968], [33.6089, -111.8975]], color: '#7B5DC0' },
-  { id: 'parking', label: 'Parking', coords: [[33.6088, -111.8998], [33.6088, -111.8975], [33.6085, -111.8975], [33.6085, -111.8998]], color: '#444' },
+  { id: 'clubhouse', label: 'Clubhouse', coords: [[34.0400, -84.5982], [34.0400, -84.5968], [34.0393, -84.5968], [34.0393, -84.5982]], color: '#F3922D' },
+  { id: 'grill-room', label: 'Grill Room', coords: [[34.0399, -84.5980], [34.0399, -84.5975], [34.0396, -84.5975], [34.0396, -84.5980]], color: '#F3922D' },
+  { id: 'main-dining', label: 'Main Dining', coords: [[34.0399, -84.5975], [34.0399, -84.5970], [34.0396, -84.5970], [34.0396, -84.5975]], color: '#F3922D' },
+  { id: 'pro-shop', label: 'Pro Shop', coords: [[34.0402, -84.5978], [34.0402, -84.5972], [34.0400, -84.5972], [34.0400, -84.5978]], color: '#2E7BB8' },
+  { id: 'driving-range', label: 'Driving Range', coords: [[34.0410, -84.5990], [34.0410, -84.5970], [34.0405, -84.5970], [34.0405, -84.5990]], color: '#7B5DC0' },
+  { id: 'pool', label: 'Pool & Fitness', coords: [[34.0392, -84.5985], [34.0392, -84.5978], [34.0388, -84.5978], [34.0388, -84.5985]], color: '#2E7BB8' },
+  { id: 'tennis', label: 'Tennis Courts', coords: [[34.0392, -84.5965], [34.0392, -84.5958], [34.0388, -84.5958], [34.0388, -84.5965]], color: '#7B5DC0' },
+  { id: 'parking', label: 'Parking', coords: [[34.0387, -84.5990], [34.0387, -84.5965], [34.0383, -84.5965], [34.0383, -84.5990]], color: '#444' },
 ];
 
 const HEALTH_COLORS = {

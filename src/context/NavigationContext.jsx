@@ -8,6 +8,7 @@ const VALID_ROUTES = new Set([
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
   'member-health', 'staffing-service', 'growth-pipeline', 'agent-command',
   'location-intelligence', 'integrations', 'demo-mode', 'member-profile',
+  'integrations/csv-import',
 ]);
 
 function parseHash() {

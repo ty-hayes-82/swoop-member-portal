@@ -88,7 +88,7 @@ export const memberWaitlistEntries = [
   },
   {
     memberId: 'mbr_271',
-    memberName: 'Steven Park',
+    memberName: 'Robert Callahan',
     archetype: 'Declining',
     healthScore: 31,
     riskLevel: 'At Risk',
@@ -246,7 +246,7 @@ export const cancellationProbabilities = [
   {
     bookingId: 'bkg_1731',
     memberId: 'mbr_271',
-    memberName: 'Steven Park',
+    memberName: 'Robert Callahan',
     archetype: 'Declining',
     teeTime: 'Sat Jan 18 · 9:00 AM',
     cancelProbability: 0.59,
