@@ -61,12 +61,14 @@ export default function Btn({
   onClick,
   children,
   style = {},
+  type = 'button',
 }) {
   const sizeStyle = variant === 'tertiary' ? {} : SIZE[size];
   const variantStyle = getVariantStyle(variant, accent, disabled);
 
   return (
     <button
+      type={type}
       onClick={disabled ? undefined : onClick}
       style={{ ...BASE, ...sizeStyle, ...variantStyle, ...style }}
     >
