@@ -1,7 +1,6 @@
 import { theme } from '@/config/theme';
 
 const ctaBase = {
-  minWidth: 180,
   height: 48,
   borderRadius: 8,
   fontFamily: theme.fonts.sans,
@@ -48,9 +47,10 @@ export default function HeroSection() {
           The AI-powered GM platform that fills tee times with the right members
           {' '}— and proves the revenue impact of every decision.
         </p>
-        <div style={{ display: 'flex', gap: theme.spacing.md, flexWrap: 'wrap' }}>
+        <div className="landing-hero-ctas">
           <button
             type="button"
+            className="landing-hero-cta"
             style={{
               ...ctaBase,
               background: theme.colors.ctaGreen,
@@ -68,6 +68,7 @@ export default function HeroSection() {
           </button>
           <button
             type="button"
+            className="landing-hero-cta"
             style={{
               ...ctaBase,
               background: 'transparent',
