@@ -19,8 +19,10 @@ const STATUS_LABEL = {
 };
 
 export default function ServiceTab() {
-  const complaints = getComplaintCorrelation();
-  const summary = getFeedbackSummary();
+  const complaintsData = getComplaintCorrelation();
+  const summaryData = getFeedbackSummary();
+  const complaints = Array.isArray(complaintsData) ? complaintsData : [];
+  const summary = Array.isArray(summaryData) ? summaryData : [];
   const whitfield = complaints.find((item) => item.memberId === 'mbr_203');
   const [showArchetypes] = useState(false);
 

@@ -3,8 +3,15 @@ import { getUnderstaffedDays, getStaffingSummary } from '@/services/staffingServ
 import { theme } from '@/config/theme';
 
 export default function StaffingTab() {
-  const days = getUnderstaffedDays();
-  const summary = getStaffingSummary();
+  const rawDays = getUnderstaffedDays();
+  const days = Array.isArray(rawDays) ? rawDays : [];
+  const summaryData = getStaffingSummary() ?? {};
+  const totalLoss = days.reduce((sum, day) => sum + (day?.revenueLoss ?? 0), 0);
+  const summary = {
+    understaffedDaysCount: summaryData.understaffedDaysCount ?? days.length,
+    totalRevenueLoss: summaryData.totalRevenueLoss ?? totalLoss,
+    annualizedLoss: summaryData.annualizedLoss ?? totalLoss * 12,
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
