@@ -1,6 +1,7 @@
 // WaitlistRow.jsx — UI primitive for member-aware waitlist queue
 // Props contract: see ARCHITECTURE.md §7
 
+import { useState } from 'react';
 import { theme } from '@/config/theme';
 import ArchetypeBadge from './ArchetypeBadge';
 
@@ -36,21 +37,27 @@ export default function WaitlistRow({
   const r = riskStyles(riskLevel);
   const p = priorityStyles(retentionPriority);
   const clickable = typeof onSelect === 'function';
+  const [hovered, setHovered] = useState(false);
 
   return (
     <div
       role="row"
       onClick={clickable ? () => onSelect(memberId) : undefined}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         display: 'grid',
         gridTemplateColumns: '1.4fr 1fr 110px 92px 110px 140px',
         gap: theme.spacing.sm,
         alignItems: 'center',
         padding: '10px 12px',
-        border: `1px solid ${theme.colors.border}`,
+        border: `1px solid ${hovered ? theme.colors.info + '40' : theme.colors.border}`,
         borderRadius: theme.radius.md,
-        background: theme.colors.bgCard,
+        background: hovered ? theme.colors.bgCardHover : theme.colors.bgCard,
         cursor: clickable ? 'pointer' : 'default',
+        transition: 'border-color 0.15s ease, background 0.15s ease, transform 0.12s ease',
+        boxShadow: hovered ? theme.shadow.sm : 'none',
+        transform: hovered ? 'translateY(-1px)' : 'none',
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
