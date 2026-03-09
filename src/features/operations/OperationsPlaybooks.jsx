@@ -36,7 +36,7 @@ const PEAK_DEMAND_STEPS = [
   {
     title: 'Send Priority Cancellation Alerts',
     description: 'Notify retention-flagged members first when a Saturday AM cancellation opens — ahead of general first-come list.',
-    preview: 'Priority alert queued: Anne Jordan, Kevin Hurst, James Whitfield, Steven Park, Linda Leonard.',
+    preview: 'Priority alert queued: Anne Jordan, Kevin Hurst, James Whitfield, Robert Callahan, Linda Leonard.',
     timeline: 'On next cancellation',
     actionType: 'outreach',
   },

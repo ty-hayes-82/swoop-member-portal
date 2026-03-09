@@ -73,7 +73,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       atRiskTeetimes: [
         { memberId: 'mbr_089', name: 'Anne Jordan',  archetype: 'Weekend Warrior', time: '9:14 AM', score: 28,
           topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
-        { memberId: 'mbr_271', name: 'Member 271',   archetype: 'Declining',       time: '10:02 AM', score: 22,
+        { memberId: 'mbr_271', name: 'Robert Callahan',   archetype: 'Declining',       time: '10:02 AM', score: 27,
           topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
       ],
       staffingGaps: [], fullyStaffed: true,

@@ -147,8 +147,8 @@ export const memberProfiles = {
       { id: 'note_whitfield_1', author: 'Membership Director', department: 'Membership', text: 'Hosted 2025 member-guest; expects white-glove treatment when entertaining clients.', timestamp: '2025-11-04T18:10:00Z' },
     ],
     auditTrail: [
-      { id: 'recommend', status: 'Recommended by Member Pulse', owner: 'Member Pulse', timestamp: 'Jan 17 · 6:02 AM' },
-      { id: 'queued', status: 'Queued for GM review', owner: 'Agent Command', timestamp: 'Jan 17 · 6:05 AM' },
+      { id: 'recommend', status: 'Recommended by Member Pulse', owner: 'Member Pulse', timestamp: '2026-01-17T06:02:00Z' },
+      { id: 'queued', status: 'Queued for GM review', owner: 'Agent Command', timestamp: '2026-01-17T06:05:00Z' },
     ],
   },
   mbr_089: {
@@ -203,7 +203,7 @@ export const memberProfiles = {
       { id: 'note_jordan_1', author: 'Head Golf Professional', department: 'Golf', text: 'Prefers walking groups; pace-of-play messaging resonates.', timestamp: '2025-12-15T15:22:00Z' },
     ],
     auditTrail: [
-      { id: 'recommend', status: 'Recommended by Demand Optimizer', owner: 'Demand Optimizer', timestamp: 'Jan 17 · 6:04 AM' },
+      { id: 'recommend', status: 'Recommended by Demand Optimizer', owner: 'Demand Optimizer', timestamp: '2026-01-17T06:04:00Z' },
     ],
   },
   mbr_271: {
@@ -258,7 +258,7 @@ export const memberProfiles = {
       { id: 'note_callahan_1', author: 'F&B Director', department: 'F&B', text: 'Prefers mid-week lunch with CFO. Always orders sparkling water + chopped salad.', timestamp: '2025-10-02T19:15:00Z' },
     ],
     auditTrail: [
-      { id: 'recommend', status: 'Escalated by Service Recovery', owner: 'Service Recovery', timestamp: 'Jan 17 · 8:43 AM' },
+      { id: 'recommend', status: 'Escalated by Service Recovery', owner: 'Service Recovery', timestamp: '2026-01-17T08:43:00Z' },
     ],
   },
   mbr_146: {
@@ -312,7 +312,7 @@ export const memberProfiles = {
       { id: 'note_chen_1', author: 'Events Director', department: 'Events', text: 'Relies on us for guest seating. Text reminder the morning of events boosts turnout.', timestamp: '2025-12-01T16:00:00Z' },
     ],
     auditTrail: [
-      { id: 'recommend', status: 'Flagged by F&B Intelligence', owner: 'F&B Intelligence', timestamp: 'Jan 13 · 9:05 AM' },
+      { id: 'recommend', status: 'Flagged by F&B Intelligence', owner: 'F&B Intelligence', timestamp: '2026-01-13T09:05:00Z' },
     ],
   },
   mbr_312: {
@@ -368,7 +368,7 @@ export const memberProfiles = {
       { id: 'note_mills_1', author: 'Head Golf Professional', department: 'Golf', text: 'Values proactive marshal coverage. Invite him to weigh in on new player-assist tech.', timestamp: '2025-12-18T12:05:00Z' },
     ],
     auditTrail: [
-      { id: 'recommend', status: 'Flagged by Operations', owner: 'Operations Intelligence', timestamp: 'Jan 14 · 7:05 AM' },
+      { id: 'recommend', status: 'Flagged by Operations', owner: 'Operations Intelligence', timestamp: '2026-01-14T07:05:00Z' },
     ],
   },
 };

@@ -33,7 +33,7 @@ export const getComplaintCorrelation = () => {
     status:       f.status,
     category:     f.category,
     memberId:     f.memberId ?? f.member_id,
-    isUnderstaffed: f.isUnderstaffed ?? f.is_understaffed_day,
+    isUnderstaffed: f.isUnderstaffed ?? f.is_understaffed_day ?? f.isUnderstaffedDay,
   }));
 };
 
