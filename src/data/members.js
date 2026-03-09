@@ -3,14 +3,14 @@
 import { theme } from '@/config/theme';
 
 export const memberArchetypes = [
-  { archetype: 'Die-Hard Golfer',  count: 54, golf: 88, dining: 42, events: 28, email: 32, trend: +4  },
-  { archetype: 'Social Butterfly', count: 45, golf: 18, dining: 82, events: 78, email: 72, trend: +6  },
-  { archetype: 'Balanced Active',  count: 66, golf: 68, dining: 62, events: 54, email: 55, trend: -2  },
-  { archetype: 'Weekend Warrior',  count: 45, golf: 52, dining: 44, events: 32, email: 28, trend: -8  },
+  { archetype: 'Die-Hard Golfer',  count: 52, golf: 88, dining: 42, events: 28, email: 32, trend: +4  },
+  { archetype: 'Social Butterfly', count: 44, golf: 18, dining: 82, events: 78, email: 72, trend: +6  },
+  { archetype: 'Balanced Active',  count: 64, golf: 68, dining: 62, events: 54, email: 55, trend: -2  },
+  { archetype: 'Weekend Warrior',  count: 46, golf: 52, dining: 44, events: 32, email: 28, trend: -8  },
   { archetype: 'Declining',        count: 30, golf: 24, dining: 18, events: 8,  email: 22, trend: -18 },
   { archetype: 'New Member',       count: 24, golf: 42, dining: 48, events: 38, email: 68, trend: +14 },
-  { archetype: 'Ghost',            count: 21, golf: 4,  dining: 6,  events: 2,  email: 8,  trend: -4  },
-  { archetype: 'Snowbird',         count: 15, golf: 62, dining: 52, events: 34, email: 44, trend: +2  },
+  { archetype: 'Ghost',            count: 24, golf: 4,  dining: 6,  events: 2,  email: 8,  trend: -4  },
+  { archetype: 'Snowbird',         count: 16, golf: 62, dining: 52, events: 34, email: 44, trend: +2  },
 ];
 
 export const healthDistribution = [

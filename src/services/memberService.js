@@ -3,6 +3,35 @@
 import { memberArchetypes, healthDistribution, atRiskMembers, resignationScenarios } from '@/data/members';
 import { emailHeatmap, decayingMembers } from '@/data/email';
 
+const toNumber = (value, fallback = 0) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+};
+
+const normalizeAtRiskMembers = (source) => {
+  const list = Array.isArray(source)
+    ? source
+    : Array.isArray(source?.members)
+      ? source.members
+      : [];
+
+  return list.map((member, index) => {
+    const first = member?.firstName ?? member?.member?.firstName ?? '';
+    const last = member?.lastName ?? member?.member?.lastName ?? '';
+    const derivedName = `${first} ${last}`.trim();
+    const name = member?.name ?? member?.memberName ?? (derivedName || `Member ${index + 1}`);
+
+    return {
+      memberId: member?.memberId ?? member?.id ?? member?.member?.id ?? `member-${index}`,
+      name,
+      score: Math.max(0, Math.min(100, toNumber(member?.score ?? member?.healthScore, 0))),
+      archetype: member?.archetype ?? member?.archetypeName ?? member?.segment ?? 'Unknown',
+      topRisk: member?.topRisk ?? member?.primaryRisk ?? member?.primarySignal ?? member?.risk ?? 'No risk signal available',
+      trend: member?.trend ?? member?.trendDirection ?? 'declining',
+    };
+  });
+};
+
 let _d = null;
 
 export const _init = async () => {
@@ -13,7 +42,7 @@ export const _init = async () => {
 };
 
 export const getHealthDistribution  = () => _d ? _d.healthDistribution  : healthDistribution;
-export const getAtRiskMembers       = () => _d ? _d.atRiskMembers        : atRiskMembers;
+export const getAtRiskMembers       = () => normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? _d?.atRisk ?? atRiskMembers);
 export const getArchetypeProfiles   = () => _d ? _d.memberArchetypes     : memberArchetypes;
 export const getResignationScenarios= () => _d ? _d.resignationScenarios : resignationScenarios;
 export const getEmailHeatmap        = () => _d ? _d.emailHeatmap         : emailHeatmap;
