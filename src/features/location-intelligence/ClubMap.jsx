@@ -26,10 +26,11 @@ const HEALTH_COLORS = {
   critical: '#dc2626',
 };
 
-function ClubMap({ members, selectedMemberId, onSelectMember, densityByZone }) {
+function ClubMap({ members, staffMembers = [], selectedMemberId, onSelectMember, densityByZone }) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
+  const staffMarkersRef = useRef([]);
   const heatLayerRef = useRef(null);
 
   // Initialize map once
@@ -154,6 +155,35 @@ function ClubMap({ members, selectedMemberId, onSelectMember, densityByZone }) {
       markersRef.current.push(marker);
     });
   }, [members, selectedMemberId, onSelectMember]);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    staffMarkersRef.current.forEach((marker) => map.removeLayer(marker));
+    staffMarkersRef.current = [];
+
+    staffMembers.forEach((staff) => {
+      const icon = L.divIcon({
+        className: 'staff-dot',
+        html: `<div style="width:14px;height:14px;transform:rotate(45deg);background:${theme.colors.accent};border:2px solid #fff;box-shadow:0 0 8px rgba(46,123,184,0.7);border-radius:2px;"></div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+
+      const marker = L.marker([staff.lat, staff.lng], { icon }).addTo(map);
+      marker.bindTooltip(
+        `<div style="font-family:system-ui;font-size:12px;line-height:1.5;min-width:160px;">` +
+        `<strong>${staff.name}</strong><br/>` +
+        `<span style="color:${theme.colors.accent};">\u25c6 Staff</span> \u00b7 ${staff.role}<br/>` +
+        `<span style="opacity:0.7;">${staff.zone} \u00b7 ${staff.status}</span><br/>` +
+        `<strong>${staff.etaText}</strong>` +
+        `</div>`,
+        { direction: 'top', offset: [0, -10] }
+      );
+      staffMarkersRef.current.push(marker);
+    });
+  }, [staffMembers]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: theme.radius.md, overflow: 'hidden' }}>
