@@ -66,7 +66,7 @@ export default function MorningBriefing() {
             <div style={{ padding: '24px 32px', borderBottom: `2px solid ${theme.colors.operations}`, background: theme.colors.briefingPaper }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: '22px', fontWeight: 400, color: theme.colors.briefingInk }}>
+                  <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontSize: '22px', fontWeight: 400, color: theme.colors.briefingInk }}>
                     Oakmont Hills CC
                   </div>
                   <div style={{ fontSize: '13px', color: theme.colors.briefingMuted, marginTop: 2 }}>

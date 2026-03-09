@@ -119,9 +119,9 @@ export const theme = {
     sm: '6px', md: '10px', lg: '16px', xl: '24px',
   },
   fonts: {
-    sans:  "'DM Sans', system-ui, sans-serif",
+    sans:  "'Plus Jakarta Sans', system-ui, sans-serif",
     mono:  "'JetBrains Mono', monospace",
-    serif: "'DM Serif Display', serif",
+    serif: "'Plus Jakarta Sans', system-ui, sans-serif",
   },
   fontSize: {
     xs: '12px', sm: '14px', md: '16px',
