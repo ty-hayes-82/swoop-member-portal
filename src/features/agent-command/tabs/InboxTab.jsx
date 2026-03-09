@@ -5,7 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { theme } from '@/config/theme';
 
 export default function InboxTab() {
-  const { inbox, pendingCount, approveAction, dismissAction } = useApp();
+  const { inbox, pendingCount, approveAction, dismissAction, showToast } = useApp();
   const [filterAgent, setFilterAgent] = useState('all');
   const agents = getAgents();
 
@@ -22,8 +22,16 @@ export default function InboxTab() {
   const approvedToday = inbox.filter((item) => item.status === 'approved').length;
   const dismissedToday = inbox.filter((item) => item.status === 'dismissed').length;
 
-  const bulkApprove = () => visible.forEach((item) => approveAction(item.id));
-  const bulkDismiss = () => visible.forEach((item) => dismissAction(item.id));
+  const handleApprove = (item) => {
+    approveAction(item.id);
+    showToast(`Approved ${item.description}`, 'success');
+  };
+  const handleDismiss = (item) => {
+    dismissAction(item.id);
+    showToast(`Dismissed ${item.description}`, 'warning');
+  };
+  const bulkApprove = () => visible.forEach(handleApprove);
+  const bulkDismiss = () => visible.forEach(handleDismiss);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -138,8 +146,8 @@ export default function InboxTab() {
           <AgentActionCard
             key={action.id}
             action={action}
-            onApprove={() => approveAction(action.id)}
-            onDismiss={() => dismissAction(action.id)}
+            onApprove={() => handleApprove(action)}
+            onDismiss={() => handleDismiss(action)}
           />
         ))}
       </div>

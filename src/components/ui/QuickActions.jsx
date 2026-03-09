@@ -2,10 +2,12 @@
 // Phase A: Button hierarchy — Draft/Call are primary (filled), Assign is secondary (tinted outline).
 import { useState } from 'react';
 import { theme } from '@/config/theme';
+import { useApp } from '@/context/AppContext';
 
 const STAFF = ['F&B Director', 'Head Golf Professional', 'Membership Director', 'Grill Room Manager', 'Club Manager'];
 
 export default function QuickActions({ memberName, memberId, context = '' }) {
+  const { showToast } = useApp();
   const [mode, setMode]   = useState(null);
   const [note, setNote]   = useState('');
   const [time, setTime]   = useState('');
@@ -19,6 +21,12 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
   const handleSend = (type) => {
     setSent(type);
     setMode(null);
+    const message = type === 'note'
+      ? `Draft ready for ${memberName}`
+      : type === 'call'
+        ? `Call scheduled for ${memberName}`
+        : `Task assigned to ${staff}`;
+    showToast(message, 'info');
     setTimeout(() => setSent(null), 4000);
   };
 

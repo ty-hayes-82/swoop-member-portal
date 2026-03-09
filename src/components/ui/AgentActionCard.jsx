@@ -21,6 +21,7 @@ const PRIORITY_COLOR = {
 
 export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }) {
   const [pulse, setPulse] = useState(false);
+  const [exiting, setExiting] = useState(false);
   const status = overrideStatus ?? action.status;
   const isDone = status !== 'pending';
   const typeMeta = AGENT_ACTION_TYPES[action.actionType] ?? { icon: '⬡', label: action.actionType, color: theme.colors.agentCyan };
@@ -28,6 +29,7 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
 
   const trigger = (handler) => {
     setPulse(true);
+    setExiting(true);
     window.setTimeout(() => {
       handler?.();
       setPulse(false);
@@ -42,9 +44,11 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
         borderLeft: `3px solid ${PRIORITY_COLOR[action.priority] ?? theme.colors.agentCyan}`,
         borderRadius: theme.radius.md,
         padding: theme.spacing.md,
-        opacity: isDone ? 0.68 : 1,
+        opacity: exiting ? 0 : isDone ? 0.68 : 1,
         transform: pulse ? 'scale(0.992)' : 'scale(1)',
-        transition: 'transform 0.14s ease, opacity 0.2s ease',
+        maxHeight: exiting ? 0 : 500,
+        overflow: 'hidden',
+        transition: 'transform 0.14s ease, opacity 0.2s ease, max-height 0.25s ease',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>

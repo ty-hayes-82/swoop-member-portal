@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { getAgents, getAllActions, getPendingActions, approveAction as approveAgentServiceAction, dismissAction as dismissAgentServiceAction } from '@/services/agentService';
+import { useToast } from '@/components/ui/Toast.jsx';
 
 const PLAYBOOK_DEFS = {
   'slow-saturday': { monthly: 8400, annual: 100800 },
@@ -128,6 +129,7 @@ function loadPersistedState(base) {
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState, loadPersistedState);
+  const { showToast, ToastContainer } = useToast();
 
   const activePlaybooks = Object.entries(state.playbooks).filter(([, value]) => value.active);
   const totalRevenueImpact = {
@@ -184,9 +186,11 @@ export function AppProvider({ children }) {
         getAgentConfig: (id) => state.agentConfigs[id] ?? null,
         pendingAgentCount: state.pendingCount,
         getAllActions: () => state.inbox,
+        showToast,
       }}
     >
       {children}
+      <ToastContainer />
     </AppContext.Provider>
   );
 }
