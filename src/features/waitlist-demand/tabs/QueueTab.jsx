@@ -67,10 +67,28 @@ export default function QueueTab() {
 
   const [selectedMemberId, setSelectedMemberId] = useState(queue[0]?.memberId ?? null);
   const [selectedSlot, setSelectedSlot] = useState(SLOT_WINDOWS[0]);
+  const [sortKey, setSortKey] = useState('priority');
+  const [sortDir, setSortDir] = useState('desc');
+
+  const sortedQueue = useMemo(() => {
+    const score = {
+      priority: (member) => (member.retentionPriority === 'HIGH' ? 1 : 0),
+      health: (member) => member.healthScore,
+      waiting: (member) => member.daysWaiting,
+    };
+    const getter = score[sortKey] ?? score.priority;
+    return [...queue].sort((a, b) => {
+      const valA = getter(a);
+      const valB = getter(b);
+      if (valA === valB) return 0;
+      if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+      return sortDir === 'asc' ? -1 : 1;
+    });
+  }, [queue, sortKey, sortDir]);
 
   const selectedMember = useMemo(
-    () => queue.find((member) => member.memberId === selectedMemberId) ?? queue[0],
-    [queue, selectedMemberId],
+    () => sortedQueue.find((member) => member.memberId === selectedMemberId) ?? sortedQueue[0],
+    [sortedQueue, selectedMemberId],
   );
 
   const slotCandidates = useMemo(() => {
@@ -110,8 +128,39 @@ export default function QueueTab() {
           <Badge text="Retention-First Routing" variant="timeline" />
         </div>
 
+        <div style={{ display: 'flex', gap: theme.spacing.sm, alignItems: 'center', flexWrap: 'wrap', marginBottom: theme.spacing.sm }}>
+          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Sort by:</span>
+          {[
+            { key: 'priority', label: 'Retention Priority' },
+            { key: 'health', label: 'Health Score' },
+            { key: 'waiting', label: 'Days Waiting' },
+          ].map((opt) => (
+            <button
+              key={opt.key}
+              onClick={() => {
+                if (sortKey === opt.key) {
+                  setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+                } else {
+                  setSortKey(opt.key);
+                  setSortDir('desc');
+                }
+              }}
+              style={{
+                border: `1px solid ${sortKey === opt.key ? theme.colors.info : theme.colors.border}`,
+                background: sortKey === opt.key ? `${theme.colors.info}12` : 'transparent',
+                color: sortKey === opt.key ? theme.colors.info : theme.colors.textSecondary,
+                borderRadius: theme.radius.sm,
+                padding: '4px 10px',
+                fontSize: theme.fontSize.xs,
+                cursor: 'pointer',
+              }}
+            >
+              {opt.label} {sortKey === opt.key ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+            </button>
+          ))}
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          {queue.map((entry) => (
+          {sortedQueue.map((entry) => (
             <WaitlistRow
               key={entry.memberId}
               {...entry}

@@ -5,7 +5,7 @@ import TrendContext from '@/components/ui/TrendContext.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
 import { getHealthDistribution, getAtRiskMembers, getMemberSummary } from '@/services/memberService';
 import { theme } from '@/config/theme';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 // MemberRow — interactive row with hover state + expand chevron
 function MemberRow({ m, isExpanded, onToggle }) {
@@ -37,7 +37,10 @@ function MemberRow({ m, isExpanded, onToggle }) {
           </span>
         </td>
         <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-          <span style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: riskColor }}>{m.score}</span>
+          <span
+            title="Composite health score (0–100) blending tee sheet activity, F&B spend, complaint history, email engagement, and tenure length. Lower scores = higher churn risk."
+            style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: riskColor }}
+          >{m.score}</span>
         </td>
         <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
           <ArchetypeBadge archetype={m.archetype} size="xs" />
@@ -71,6 +74,41 @@ export default function HealthOverview() {
   const atRisk = getAtRiskMembers();
   const summary = getMemberSummary();
   const [expanded, setExpanded] = useState(null);
+  const [sortColumn, setSortColumn] = useState('score');
+  const [sortDir, setSortDir] = useState('desc');
+
+  const sortedMembers = useMemo(() => {
+    const mapKey = {
+      name: (m) => m.name.toLowerCase(),
+      score: (m) => m.score,
+      archetype: (m) => m.archetype.toLowerCase(),
+      risk: (m) => m.topRisk.toLowerCase(),
+    };
+    const getter = mapKey[sortColumn] ?? mapKey.score;
+    return [...atRisk].sort((a, b) => {
+      const valA = getter(a);
+      const valB = getter(b);
+      if (valA === valB) return 0;
+      if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+      return sortDir === 'asc' ? -1 : 1;
+    });
+  }, [atRisk, sortColumn, sortDir]);
+
+  const toggleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortColumn(column);
+      setSortDir('asc');
+    }
+  };
+
+  const columns = [
+    { key: 'name', label: 'Member' },
+    { key: 'score', label: 'Health Score' },
+    { key: 'archetype', label: 'Archetype' },
+    { key: 'risk', label: 'Primary Risk Signal' },
+  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -113,12 +151,20 @@ export default function HealthOverview() {
           <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
           <thead>
             <tr style={{ background: theme.colors.bg }}>
-              {['Member', 'Health Score', 'Archetype', 'Primary Risk Signal'].map(h => (
-                <th key={h} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'left',
+              {columns.map((col) => (
+                <th key={col.key} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'left',
                   color: theme.colors.textMuted, fontSize: theme.fontSize.xs, textTransform: 'uppercase',
                   letterSpacing: '0.06em', fontWeight: 500 }}>
-                  {h}
-                  {h === 'Health Score' && (
+                  <button
+                    onClick={() => toggleSort(col.key)}
+                    style={{ background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                  >
+                    {col.label}
+                    {sortColumn === col.key && (
+                      <span style={{ fontSize: '11px' }}>{sortDir === 'asc' ? '▲' : '▼'}</span>
+                    )}
+                  </button>
+                  {col.key === 'score' && (
                     <span title="Composite score (0–100) based on: visit frequency, F&B spend trends, email engagement, complaint history, tenure length, and event participation. Updated daily."
                       style={{ cursor: 'help', marginLeft: '4px', fontSize: '11px', opacity: 0.7 }}>ⓘ</span>
                   )}
@@ -127,7 +173,7 @@ export default function HealthOverview() {
             </tr>
           </thead>
           <tbody>
-            {atRisk.map((m, i) => (
+            {sortedMembers.map((m) => (
               <MemberRow
                 key={m.memberId}
                 m={m}
