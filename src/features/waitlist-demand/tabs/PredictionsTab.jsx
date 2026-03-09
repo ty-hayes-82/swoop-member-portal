@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Badge, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
 import CancellationRiskRow from '@/features/pipeline/components/CancellationRiskRow';
+import MemberLink from '@/components/members/MemberLink.jsx';
 import { cancellationProbabilities } from '@/data/pipeline';
 import { theme } from '@/config/theme';
 
@@ -153,6 +154,7 @@ export default function PredictionsTab() {
               {predictions.map((prediction, index) => (
                 <CancellationRiskRow
                   key={prediction.bookingId}
+                  memberId={prediction.memberId}
                   memberName={prediction.memberName}
                   cancelProbability={prediction.cancelProbability}
                   daysUntilCancellation={buildCountdown(index)}
@@ -212,7 +214,11 @@ export default function PredictionsTab() {
       </div>
 
       <SoWhatCallout variant="insight">
-        <strong>GM decision:</strong> intervene first on <strong>{topRisk?.memberName}</strong> and pre-assign their likely
+        <strong>GM decision:</strong> intervene first on {topRisk ? (
+          <MemberLink memberId={topRisk.memberId}>{topRisk.memberName}</MemberLink>
+        ) : (
+          <strong>the top-ranked member</strong>
+        )} and pre-assign their likely
         cancellation slot to the highest-priority waitlist member. This converts forecasted churn volatility into
         protected play volume and retained spend.
       </SoWhatCallout>

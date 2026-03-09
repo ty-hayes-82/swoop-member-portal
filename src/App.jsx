@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AppProvider } from '@/context/AppContext';
 import { NavigationProvider, useNavigationContext } from '@/context/NavigationContext';
+import { MemberProfileProvider } from '@/context/MemberProfileContext';
 import { DataProvider } from '@/context/DataProvider';
 import { Sidebar } from '@/components/layout';
 import { Header } from '@/components/layout';
@@ -11,22 +12,25 @@ import { FBPerformance } from '@/features/fb-performance';
 import { MemberHealth } from '@/features/member-health';
 import { StaffingService } from '@/features/staffing-service';
 import { GrowthPipeline } from '@/features/growth-pipeline';
-import { AgentCommand }    from '@/features/agent-command';
+import { AgentCommand } from '@/features/agent-command';
 import { DemoMode } from '@/features/demo-mode';
 import { IntegrationsPage } from '@/features/integrations';
+import MemberProfileDrawer from '@/components/members/MemberProfileDrawer.jsx';
+import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
-  'daily-briefing':   DailyBriefing,
-  'operations':       OperationsDashboard,
-  'waitlist-demand':  WaitlistDemand,
-  'fb-performance':   FBPerformance,
-  'member-health':    MemberHealth,
+  'daily-briefing': DailyBriefing,
+  operations: OperationsDashboard,
+  'waitlist-demand': WaitlistDemand,
+  'fb-performance': FBPerformance,
+  'member-health': MemberHealth,
   'staffing-service': StaffingService,
-  'growth-pipeline':  GrowthPipeline,
-  'agent-command':    AgentCommand,
-  'integrations':     IntegrationsPage,
-  'demo-mode':        DemoMode,
+  'growth-pipeline': GrowthPipeline,
+  'agent-command': AgentCommand,
+  integrations: IntegrationsPage,
+  'demo-mode': DemoMode,
+  'member-profile': MemberProfilePage,
 };
 
 function AppShell() {
@@ -42,48 +46,61 @@ function AppShell() {
   }, []);
 
   // Close mobile menu on route change
-  useEffect(() => { setMobileMenuOpen(false); }, [currentRoute]);
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [currentRoute]);
 
-  const sidebarWidth = isMobile ? 0 : (sidebarCollapsed ? 52 : 240);
+  const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 52 : 240;
 
   return (
-    <div style={{
-      background: theme.colors.bg, color: theme.colors.textPrimary,
-      fontFamily: theme.fonts.sans,
-    }}>
+    <div
+      style={{
+        background: theme.colors.bg,
+        color: theme.colors.textPrimary,
+        fontFamily: theme.fonts.sans,
+      }}
+    >
       {/* Mobile overlay */}
       {isMobile && mobileMenuOpen && (
-        <div onClick={() => setMobileMenuOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99 }} />
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99 }}
+        />
       )}
       {/* Sidebar: hidden on mobile unless menu is open */}
       {(!isMobile || mobileMenuOpen) && <Sidebar />}
-      <div style={{
-        paddingLeft: sidebarWidth,
-        transition: 'padding 0.2s ease',
-        display: 'flex', flexDirection: 'column',
-        minHeight: '100vh',
-        boxSizing: 'border-box',
-        width: '100%',
-      }}>
-        <Header onMobileMenuToggle={isMobile ? () => setMobileMenuOpen(v => !v) : undefined} />
-        <main style={{
-          flex: 1,
-          padding: isMobile ? '16px' : theme.spacing.xl,
+      <div
+        style={{
+          paddingLeft: sidebarWidth,
+          transition: 'padding 0.2s ease',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          boxSizing: 'border-box',
           width: '100%',
-          minHeight: 0,
-        }}>
+        }}
+      >
+        <Header onMobileMenuToggle={isMobile ? () => setMobileMenuOpen((v) => !v) : undefined} />
+        <main
+          style={{
+            flex: 1,
+            padding: isMobile ? '16px' : theme.spacing.xl,
+            width: '100%',
+            minHeight: 0,
+          }}
+        >
           <PageComponent />
         </main>
-        <footer style={{
-          padding: `${theme.spacing.md} ${isMobile ? '16px' : theme.spacing.xl}`,
-          borderTop: `1px solid ${theme.colors.border}`,
-          fontSize: theme.fontSize.xs,
-          color: theme.colors.textMuted,
-          textAlign: 'center',
-        }}>
-          Swoop Golf · Integrated Intelligence for Private Clubs ·
-          Demo Environment · Oakmont Hills CC · January 2026
+        <footer
+          style={{
+            padding: `${theme.spacing.md} ${isMobile ? '16px' : theme.spacing.xl}`,
+            borderTop: `1px solid ${theme.colors.border}`,
+            fontSize: theme.fontSize.xs,
+            color: theme.colors.textMuted,
+            textAlign: 'center',
+          }}
+        >
+          Swoop Golf · Integrated Intelligence for Private Clubs · Demo Environment · Oakmont Hills CC · January 2026
         </footer>
       </div>
     </div>
@@ -95,7 +112,10 @@ export default function App() {
     <DataProvider>
       <AppProvider>
         <NavigationProvider>
-          <AppShell />
+          <MemberProfileProvider>
+            <AppShell />
+            <MemberProfileDrawer />
+          </MemberProfileProvider>
         </NavigationProvider>
       </AppProvider>
     </DataProvider>

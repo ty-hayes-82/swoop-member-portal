@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import MemberLink from '@/components/members/MemberLink.jsx';
 import { getResignationScenarios } from '@/services/memberService';
 import { theme } from '@/config/theme';
 
@@ -58,7 +59,12 @@ export default function ResignationTimeline() {
               }}
             >
               <div>
-                <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}>{scenario.name}</div>
+                <MemberLink
+                  memberId={scenario.memberId}
+                  style={{ fontSize: theme.fontSize.md, fontWeight: 600 }}
+                >
+                  {scenario.name}
+                </MemberLink>
                 <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
                   {scenario.archetype} · Resigned {scenario.resignDate} · {formatDues(scenario.dues)} dues
                 </div>
