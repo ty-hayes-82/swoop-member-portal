@@ -84,6 +84,14 @@ export const navItems = [
     sourceSystems: [],
   },
   {
+    key: 'integrations/csv-import',
+    label: 'CSV Import Hub',
+    icon: '⬇️',
+    color: theme.colors.navIntegrations,
+    subtitle: 'Upload CSV/XLSX when APIs are missing.',
+    sourceSystems: [],
+  },
+  {
     key: 'demo-mode',
     label: 'Demo Mode',
     icon: '▶',

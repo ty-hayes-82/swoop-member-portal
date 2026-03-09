@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { theme } from '@/config/theme';
+import { useNavigation } from '@/context/NavigationContext';
 import {
   getConnectedSystems,
   getCombinations,
@@ -19,6 +20,7 @@ const CATEGORY_LABELS = {
 };
 
 export function IntegrationsPage() {
+  const { navigate } = useNavigation();
   const systems = useMemo(() => getConnectedSystems(), []);
   const combos = useMemo(() => getCombinations(), []);
   const health = useMemo(() => getIntegrationHealth(), []);
@@ -79,6 +81,39 @@ export function IntegrationsPage() {
         <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, maxWidth: 760, color: 'rgba(255,255,255,0.82)' }}>
           Your systems collect data. Swoop connects them, adds real-time location intelligence and behavioral signals, then turns cross-system patterns into actionable recommendations. No single integration can provide this — it's what they unlock together.
         </p>
+      </section>
+
+      <section style={{
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: theme.radius.md,
+        padding: '18px 20px',
+        background: theme.colors.bgCard,
+        marginBottom: 18,
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 12,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+        <div style={{ maxWidth: 520 }}>
+          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>No API? No problem.</div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>Upload CSV or XLSX exports for members, tee sheet, staffing, reservations, complaints, and more. The CSV Import Hub handles mapping, validation, and audit trails for any vendor.</div>
+        </div>
+        <button
+          type='button'
+          onClick={() => navigate('integrations/csv-import')}
+          style={{
+            padding: '10px 18px',
+            borderRadius: theme.radius.sm,
+            border: 'none',
+            background: theme.colors.accent,
+            color: theme.colors.white,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          Open CSV Import Hub →
+        </button>
       </section>
 
       <IntegrationHealthStrip health={health} />

@@ -19,7 +19,7 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const { activeCount, totalRevenueImpact } = useApp();
   const w = isMobile ? 280 : sidebarCollapsed ? 52 : 240;
 
-  const ALWAYS_VISIBLE = ['agent-command', 'integrations'];
+  const ALWAYS_VISIBLE = ['agent-command', 'integrations', 'integrations/csv-import'];
   const allVisible = NAV_ITEMS.filter(n => !n.hidden);
   const visibleItems = viewMode === 'today'
     ? allVisible.filter(n => TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key))
