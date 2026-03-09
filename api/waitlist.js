@@ -4,6 +4,20 @@
 
 import { sql } from '@vercel/postgres';
 
+const normalizeHealthScore = (value) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  const normalized = numeric <= 1 ? numeric * 100 : numeric;
+  return Math.round(normalized);
+};
+
+const deriveRiskLevel = (score) => {
+  if (score >= 70) return 'Healthy';
+  if (score >= 50) return 'Watch';
+  if (score >= 30) return 'At Risk';
+  return 'Critical';
+};
+
 export default async function handler(req, res) {
   try {
     const [queue, predictions, heatmap, revenueAttr] = await Promise.all([
@@ -60,24 +74,27 @@ export default async function handler(req, res) {
         FROM visit_sessions vs`,
     ]);
 
-    const queueRows = queue.rows.map(w => ({
-      waitlistId:           w.waitlist_id,
-      memberId:             w.member_id,
-      memberName:           w.member_name,
-      archetype:            w.archetype,
-      requestedSlot:        w.requested_slot,
-      daysWaiting:          Number(w.days_waiting),
-      alternatesAccepted:   JSON.parse(w.alternatives_accepted ?? '[]'),
-      retentionPriority:    w.retention_priority,
-      diningIncentiveAttached: w.dining_incentive_attached === 1,
-      notifiedAt:           w.notified_at,
-      filledAt:             w.filled_at,
-      healthScore:          Number(w.health_score),
-      riskLevel:            w.risk_level,
-      lastRound:            w.last_round,
-      diningHistory:        Number(w.dining_history_rate) > 0.35 ? 'High converter'
-                          : Number(w.dining_history_rate) > 0.20 ? 'Moderate' : 'Low converter',
-    }));
+    const queueRows = queue.rows.map(w => {
+      const healthScore = normalizeHealthScore(w.health_score);
+      return {
+        waitlistId:           w.waitlist_id,
+        memberId:             w.member_id,
+        memberName:           w.member_name,
+        archetype:            w.archetype,
+        requestedSlot:        w.requested_slot,
+        daysWaiting:          Number(w.days_waiting),
+        alternatesAccepted:   JSON.parse(w.alternatives_accepted ?? '[]'),
+        retentionPriority:    w.retention_priority,
+        diningIncentiveAttached: w.dining_incentive_attached === 1,
+        notifiedAt:           w.notified_at,
+        filledAt:             w.filled_at,
+        healthScore,
+        riskLevel:            deriveRiskLevel(healthScore),
+        lastRound:            w.last_round,
+        diningHistory:        Number(w.dining_history_rate) > 0.35 ? 'High converter'
+                            : Number(w.dining_history_rate) > 0.20 ? 'Moderate' : 'Low converter',
+      };
+    });
 
     const predRows = predictions.rows.map(p => ({
       riskId:               p.risk_id,
