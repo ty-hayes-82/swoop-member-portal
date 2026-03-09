@@ -12,18 +12,18 @@ const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-const TODAY_ITEMS = ['daily-briefing', 'operations', 'waitlist-demand', 'member-health', 'staffing-service'];
+const TODAY_ITEMS = ['daily-briefing', 'operations', 'agent-command'];
 
 export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const { currentRoute, navigate, sidebarCollapsed, toggleSidebar, viewMode, setViewMode } = useNavigation();
   const { activeCount, totalRevenueImpact } = useApp();
   const w = isMobile ? 280 : sidebarCollapsed ? 52 : 240;
 
-  const ALWAYS_VISIBLE = ['agent-command', 'integrations', 'integrations/csv-import'];
+  const ALWAYS_VISIBLE = ['integrations', 'integrations/csv-import'];
   const allVisible = NAV_ITEMS.filter(n => !n.hidden);
   const visibleItems = viewMode === 'today'
-    ? allVisible.filter(n => TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key))
-    : allVisible;
+    ? allVisible.filter((n) => TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key))
+    : allVisible.filter((n) => !TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key));
   const SECTION_LABELS = {
     'location-intelligence': 'Location Intelligence',
     integrations: 'Integrations',
@@ -94,7 +94,7 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
       {/* Today / Deep Dive toggle */}
       {(!sidebarCollapsed || isMobile) && (
         <div style={{ margin: '12px', display: 'flex', borderRadius: '8px', background: theme.colors.sidebarTint, padding: '2px' }}>
-          {[['today', 'Today'], ['deep-dive', 'Deep Dive']].map(([mode, label]) => (
+          {[['today', 'Today'], ['analytics', 'Analytics']].map(([mode, label]) => (
             <button
               key={mode}
               onClick={() => setViewMode(mode)}

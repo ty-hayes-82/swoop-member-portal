@@ -11,6 +11,12 @@ const PRIORITY_BADGES = {
   low: { label: 'Low Priority', color: theme.colors.agentDismissed },
 };
 
+const DRAFT_TABS = [
+  { key: 'call', label: 'Call' },
+  { key: 'email', label: 'Email' },
+  { key: 'sms', label: 'SMS' },
+];
+
 const formatDateTime = (value) => {
   if (!value) return '—';
   const date = new Date(value);
@@ -89,6 +95,17 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
   const [callNotes, setCallNotes] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [smsDraft, setSmsDraft] = useState('');
+  const [activeDraftTab, setActiveDraftTab] = useState('call');
+
+  const contactInfo = profile?.contact ?? null;
+  const riskSignals = profile?.riskSignals ?? [];
+  const historyEvents = profile?.activity ?? [];
+  const hasContactInfo = Boolean(
+    contactInfo && (contactInfo.phone || contactInfo.email || contactInfo.preferredChannel || contactInfo.lastOutreach)
+  );
+  const hasRiskSignals = riskSignals.length > 0;
+  const hasRecentHistory = historyEvents.length > 0;
+  const hasMemberProfile = Boolean(profile);
 
   useEffect(() => {
     const defaultCall = profile?.drafts?.callScript?.length
@@ -181,9 +198,26 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
     background: theme.colors.bgCard,
   };
 
+  const contentStyle = {
+    flex: 1,
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.md,
+    paddingRight: isMobile ? 0 : theme.spacing.sm,
+  };
+
+  const footerStyle = {
+    borderTop: `1px solid ${theme.colors.border}`,
+    paddingTop: theme.spacing.md,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.md,
+  };
+
   const renderContact = () => {
-    if (!profile?.contact) return 'No contact info available.';
-    const { phone, email, preferredChannel, lastOutreach } = profile.contact;
+    if (!contactInfo) return null;
+    const { phone, email, preferredChannel, lastOutreach } = contactInfo;
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.sm }}>
         <span><strong>Phone:</strong> {phone ?? '—'}</span>
@@ -195,11 +229,10 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
   };
 
   const renderRiskSignals = () => {
-    const signals = profile?.riskSignals ?? [];
-    if (!signals.length) return <span style={{ fontSize: theme.fontSize.sm }}>No active risk signals.</span>;
+    if (!riskSignals.length) return null;
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {signals.map((signal) => (
+        {riskSignals.map((signal) => (
           <div
             key={signal.id}
             style={{
@@ -227,11 +260,10 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
   };
 
   const renderHistory = () => {
-    const events = profile?.activity ?? [];
-    if (!events.length) return <span style={{ fontSize: theme.fontSize.sm }}>No recent activity recorded.</span>;
+    if (!historyEvents.length) return null;
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {events.slice(0, 10).map((event) => (
+        {historyEvents.slice(0, 10).map((event) => (
           <div key={event.id} style={{ display: 'flex', gap: 10 }}>
             <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, minWidth: 120 }}>{event.timestamp}</span>
             <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
@@ -243,32 +275,87 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
     );
   };
 
+  const renderDraftContent = () => {
+    switch (activeDraftTab) {
+      case 'call':
+        return (
+          <textarea
+            value={callNotes}
+            onChange={(event) => setCallNotes(event.target.value)}
+            style={{
+              width: '100%',
+              minHeight: 120,
+              borderRadius: theme.radius.sm,
+              border: `1px solid ${theme.colors.border}`,
+              padding: theme.spacing.sm,
+              fontFamily: theme.fonts.sans,
+            }}
+          />
+        );
+      case 'email':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Subject</div>
+            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600 }}>{profile?.drafts?.emailSubject ?? 'Subject TBD'}</div>
+            <textarea
+              value={emailBody}
+              onChange={(event) => setEmailBody(event.target.value)}
+              style={{
+                width: '100%',
+                minHeight: 140,
+                borderRadius: theme.radius.sm,
+                border: `1px solid ${theme.colors.border}`,
+                padding: theme.spacing.sm,
+                fontFamily: theme.fonts.sans,
+              }}
+            />
+          </div>
+        );
+      case 'sms':
+      default:
+        return (
+          <textarea
+            value={smsDraft}
+            onChange={(event) => setSmsDraft(event.target.value)}
+            style={{
+              width: '100%',
+              minHeight: 100,
+              borderRadius: theme.radius.sm,
+              border: `1px solid ${theme.colors.border}`,
+              padding: theme.spacing.sm,
+              fontFamily: theme.fonts.sans,
+            }}
+          />
+        );
+    }
+  };
 
-  const memberSnapshot = profile ? (
+
+  const memberSnapshot = hasMemberProfile ? (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-      <div>
-        <div style={{ fontSize: theme.fontSize.md, fontWeight: 700 }}>{profile.name}</div>
-        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-          {profile.tier} · Joined {profile.joinDate}
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: theme.spacing.sm }}>
         <div>
+          <div style={{ fontSize: theme.fontSize.md, fontWeight: 700 }}>{profile.name}</div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+            {profile.tier} · Joined {profile.joinDate}
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Health Score</div>
           <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono, color: theme.colors.urgent }}>{profile.healthScore}</div>
         </div>
-        <div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>30-day trend</div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: theme.spacing.md }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>30-day trend</div>
           <Sparkline data={profile.trend} />
         </div>
-      </div>
-      <div style={{ fontSize: theme.fontSize.sm }}>
-        <strong>Annual value:</strong> ${profile.memberValueAnnual?.toLocaleString() ?? profile.duesAnnual?.toLocaleString() ?? '—'}
+        <div style={{ fontSize: theme.fontSize.sm, textAlign: 'right' }}>
+          <strong>Annual value:</strong> ${profile.memberValueAnnual?.toLocaleString() ?? profile.duesAnnual?.toLocaleString() ?? '—'}
+        </div>
       </div>
     </div>
-  ) : (
-    <div>No member profile data available for this action.</div>
-  );
+  ) : null;
 
   return createPortal(
     <>
@@ -322,178 +409,160 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
           </button>
         </div>
 
-        <div style={sectionStyle}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Member snapshot</div>
-          {memberSnapshot}
-        </div>
-
-        <div style={sectionStyle}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Contact info</div>
-          {renderContact()}
-        </div>
-
-        <div style={sectionStyle}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Risk signals</div>
-          {renderRiskSignals()}
-        </div>
-
-        <div style={{ ...sectionStyle, maxHeight: '22vh', overflowY: 'auto' }}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Recent history (30 days)</div>
-          {renderHistory()}
-        </div>
-
-        <div style={sectionStyle}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Draft outreach</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-            <div>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Call Script</div>
-              <textarea
-                value={callNotes}
-                onChange={(event) => setCallNotes(event.target.value)}
-                style={{
-                  width: '100%',
-                  minHeight: 90,
-                  borderRadius: theme.radius.sm,
-                  border: `1px solid ${theme.colors.border}`,
-                  padding: theme.spacing.sm,
-                  fontFamily: theme.fonts.sans,
-                }}
-              />
+        <div style={contentStyle}>
+          {hasMemberProfile && (
+            <div style={sectionStyle}>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Member snapshot</div>
+              {memberSnapshot}
             </div>
-            <div>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Email Subject</div>
-              <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600 }}>{profile?.drafts?.emailSubject ?? 'Subject TBD'}</div>
+          )}
+
+          {hasContactInfo && (
+            <div style={sectionStyle}>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Contact info</div>
+              {renderContact()}
             </div>
-            <div>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Email Draft</div>
-              <textarea
-                value={emailBody}
-                onChange={(event) => setEmailBody(event.target.value)}
-                style={{
-                  width: '100%',
-                  minHeight: 140,
-                  borderRadius: theme.radius.sm,
-                  border: `1px solid ${theme.colors.border}`,
-                  padding: theme.spacing.sm,
-                  fontFamily: theme.fonts.sans,
-                }}
-              />
+          )}
+
+          {hasRiskSignals && (
+            <div style={sectionStyle}>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Risk signals</div>
+              {renderRiskSignals()}
             </div>
-            <div>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>SMS Draft</div>
-              <textarea
-                value={smsDraft}
-                onChange={(event) => setSmsDraft(event.target.value)}
-                style={{
-                  width: '100%',
-                  minHeight: 80,
-                  borderRadius: theme.radius.sm,
-                  border: `1px solid ${theme.colors.border}`,
-                  padding: theme.spacing.sm,
-                  fontFamily: theme.fonts.sans,
-                }}
-              />
+          )}
+
+          {hasRecentHistory && (
+            <div style={{ ...sectionStyle, maxHeight: '22vh', overflowY: 'auto' }}>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Recent history (30 days)</div>
+              {renderHistory()}
             </div>
+          )}
+
+          <div style={sectionStyle}>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Draft outreach</div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: theme.spacing.sm }}>
+              {DRAFT_TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveDraftTab(tab.key)}
+                  style={{
+                    flex: 1,
+                    borderRadius: theme.radius.sm,
+                    border: activeDraftTab === tab.key ? 'none' : `1px solid ${theme.colors.border}`,
+                    background: activeDraftTab === tab.key ? theme.colors.agentCyan : 'transparent',
+                    color: activeDraftTab === tab.key ? theme.colors.white : theme.colors.textSecondary,
+                    padding: '8px 12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            {renderDraftContent()}
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          <button
-            onClick={() => performApprove('Approve & Send')}
-            style={{
-              flex: 1,
-              minWidth: 140,
-              border: 'none',
-              background: theme.colors.agentApproved,
-              color: theme.colors.white,
-              borderRadius: theme.radius.md,
-              padding: '10px 12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            Approve & Send
-          </button>
-          <button
-            onClick={() => performApprove('Approve & Schedule')}
-            style={{
-              flex: 1,
-              minWidth: 140,
-              border: `1px solid ${theme.colors.agentApproved}50`,
-              background: `${theme.colors.agentApproved}10`,
-              color: theme.colors.agentApproved,
-              borderRadius: theme.radius.md,
-              padding: '10px 12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            Approve & Schedule
-          </button>
-          <button
-            onClick={() => performApprove('Approve & Assign')}
-            style={{
-              flex: 1,
-              minWidth: 140,
-              border: `1px solid ${theme.colors.border}`,
-              background: 'transparent',
-              color: theme.colors.textPrimary,
-              borderRadius: theme.radius.md,
-              padding: '10px 12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            Approve & Assign
-          </button>
-          <button
-            onClick={handleSnooze}
-            style={{
-              flex: 1,
-              minWidth: 120,
-              border: `1px solid ${theme.colors.border}`,
-              background: theme.colors.bgDeep,
-              color: theme.colors.textSecondary,
-              borderRadius: theme.radius.md,
-              padding: '10px 12px',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            Snooze 2h
-          </button>
-          <button
-            onClick={() => performDismiss('Dismissed from drawer')}
-            style={{
-              flex: 1,
-              minWidth: 120,
-              border: `1px solid ${theme.colors.agentDismissed}50`,
-              background: `${theme.colors.agentDismissed}10`,
-              color: theme.colors.agentDismissed,
-              borderRadius: theme.radius.md,
-              padding: '10px 12px',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            Dismiss
-          </button>
-        </div>
+        <div style={footerStyle}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <button
+              onClick={() => performApprove('Approve & Send')}
+              style={{
+                flex: 1,
+                minWidth: 140,
+                border: 'none',
+                background: theme.colors.agentApproved,
+                color: theme.colors.white,
+                borderRadius: theme.radius.md,
+                padding: '10px 12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Approve & Send
+            </button>
+            <button
+              onClick={() => performApprove('Approve & Schedule')}
+              style={{
+                flex: 1,
+                minWidth: 140,
+                border: `1px solid ${theme.colors.agentApproved}50`,
+                background: `${theme.colors.agentApproved}10`,
+                color: theme.colors.agentApproved,
+                borderRadius: theme.radius.md,
+                padding: '10px 12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Approve & Schedule
+            </button>
+            <button
+              onClick={() => performApprove('Approve & Assign')}
+              style={{
+                flex: 1,
+                minWidth: 140,
+                border: `1px solid ${theme.colors.border}`,
+                background: 'transparent',
+                color: theme.colors.textPrimary,
+                borderRadius: theme.radius.md,
+                padding: '10px 12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Approve & Assign
+            </button>
+            <button
+              onClick={handleSnooze}
+              style={{
+                flex: 1,
+                minWidth: 120,
+                border: `1px solid ${theme.colors.border}`,
+                background: theme.colors.bgDeep,
+                color: theme.colors.textSecondary,
+                borderRadius: theme.radius.md,
+                padding: '10px 12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Snooze 2h
+            </button>
+            <button
+              onClick={() => performDismiss('Dismissed from drawer')}
+              style={{
+                flex: 1,
+                minWidth: 120,
+                border: `1px solid ${theme.colors.agentDismissed}50`,
+                background: `${theme.colors.agentDismissed}10`,
+                color: theme.colors.agentDismissed,
+                borderRadius: theme.radius.md,
+                padding: '10px 12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Dismiss
+            </button>
+          </div>
 
-        <div style={sectionStyle}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Audit trail</div>
-          {auditTrail.length === 0 ? (
-            <span style={{ fontSize: theme.fontSize.sm }}>No status changes recorded yet.</span>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {auditTrail.map((entry) => (
-                <div key={entry.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: theme.fontSize.sm }}>
-                  <span style={{ fontWeight: 600 }}>{entry.status}</span>
-                  <span style={{ color: theme.colors.textMuted }}>{entry.owner} · {formatDateTime(entry.timestamp)}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <div style={sectionStyle}>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 6 }}>Audit trail</div>
+            {auditTrail.length === 0 ? (
+              <span style={{ fontSize: theme.fontSize.sm }}>No status changes recorded yet.</span>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {auditTrail.map((entry) => (
+                  <div key={entry.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: theme.fontSize.sm }}>
+                    <span style={{ fontWeight: 600 }}>{entry.status}</span>
+                    <span style={{ color: theme.colors.textMuted }}>{entry.owner} · {formatDateTime(entry.timestamp)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>,
