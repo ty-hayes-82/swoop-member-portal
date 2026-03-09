@@ -135,12 +135,11 @@ export const getMemberSummary = () => {
   };
 };
 
-};
 
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
   if (_d?.memberProfiles?.[memberId]) return normalizeMemberProfile(_d.memberProfiles[memberId]);
-  return normalizeMemberProfile(memberProfiles[memberId] ?? null);
+  return null;
 };
 
 export const sourceSystems = ['Member CRM', 'Analytics', 'Tee Sheet'];
