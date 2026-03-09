@@ -6,6 +6,7 @@ export const trends = {
   slowRoundRate:         [0.19, 0.20, 0.22, 0.24, 0.26, 0.28],
   memberHealthAvg:       [72,   71,   70,   69,   67,   65  ],
   atRiskMemberCount:     [54,   58,   62,   66,   70,   72  ],
+  // December held flat at $228K so January's $204K shows a believable −10% swing
   fbRevenue:             [108000, 110000, 116000, 110000, 228000, 204000],
   golfRevenue:           [298000, 312000, 326000, 318000, 335000, 352400],
   avgDiningCheck:        [36.2, 37.0, 38.4, 37.8, 38.0, 38.6],
