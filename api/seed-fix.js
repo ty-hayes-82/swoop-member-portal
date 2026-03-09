@@ -27,7 +27,7 @@ export default async function handler(req, res) {
         WHERE week_number = ${weekNum}
         ORDER BY random()
       `;
-      const memberIds = membersResult.rows.map(r => r.member_id);
+      const memberIds = membersResult.rows.map(r => String(r.member_id));
 
       const tiers = [
         { ids: memberIds.slice(0, 240), min: 70, max: 95 },
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
                 ELSE 0.02 + random() * 0.15
               END
           WHERE week_number = ${weekNum}
-            AND member_id = ANY(${tier.ids}::int[])
+            AND member_id = ANY(${tier.ids}::text[])
         `;
         totalUpdated += tier.ids.length;
       }
