@@ -57,7 +57,7 @@ Daily Briefing · Operations · Revenue & F&B · Member Retention · Staffing & 
 | Sidebar | `#1A1A1A` (dark green) |
 | Accent | `#F3922D` (Swoop orange) |
 | Lens colors | `operations` · `fb` · `members` · `staffing` · `pipeline` · `briefing` |
-| Fonts | DM Sans (body) · JetBrains Mono (numbers) · DM Serif Display (hero) |
+| Fonts | Plus Jakarta Sans (body / hero) · JetBrains Mono (numbers) |
 
 ---
 
