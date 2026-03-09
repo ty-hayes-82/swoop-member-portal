@@ -30,12 +30,13 @@ const ROUTES = {
   'growth-pipeline': GrowthPipeline,
   'agent-command': AgentCommand,
   integrations: IntegrationsPage,
+  'location-intelligence': LocationIntelligence,
   'demo-mode': DemoMode,
   'member-profile': MemberProfilePage,
 };
 
 function AppShell() {
-  const { currentRoute, sidebarCollapsed } = useNavigationContext();
+  const { currentRoute } = useNavigationContext();
   const PageComponent = ROUTES[currentRoute] ?? DailyBriefing;
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -51,58 +52,62 @@ function AppShell() {
     setMobileMenuOpen(false);
   }, [currentRoute]);
 
-  const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 52 : 240;
-
   return (
     <div
       style={{
         background: theme.colors.bg,
         color: theme.colors.textPrimary,
         fontFamily: theme.fonts.sans,
+        minHeight: '100vh',
       }}
     >
       {/* Mobile overlay */}
       {isMobile && mobileMenuOpen && (
         <div
           onClick={() => setMobileMenuOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99 }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 110 }}
         />
       )}
-      {/* Sidebar: hidden on mobile unless menu is open */}
-      {(!isMobile || mobileMenuOpen) && <Sidebar />}
-      <div
-        style={{
-          paddingLeft: sidebarWidth,
-          transition: 'padding 0.2s ease',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          boxSizing: 'border-box',
-          width: '100%',
-        }}
-      >
-        <Header onMobileMenuToggle={isMobile ? () => setMobileMenuOpen((v) => !v) : undefined} />
-        <main
+      <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
+        {/* Sidebar: hidden on mobile unless menu is open */}
+        {(!isMobile || mobileMenuOpen) && (
+          <Sidebar isMobile={isMobile} mobileMenuOpen={mobileMenuOpen} />
+        )}
+        <div
           style={{
             flex: 1,
-            padding: isMobile ? '16px' : theme.spacing.xl,
+            marginLeft: isMobile ? 0 : 0,
+            transition: 'margin 0.2s ease',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100vh',
             width: '100%',
-            minHeight: 0,
+            paddingLeft: isMobile ? 0 : 0,
           }}
         >
-          <PageComponent />
-        </main>
-        <footer
-          style={{
-            padding: `${theme.spacing.md} ${isMobile ? '16px' : theme.spacing.xl}`,
-            borderTop: `1px solid ${theme.colors.border}`,
-            fontSize: theme.fontSize.xs,
-            color: theme.colors.textMuted,
-            textAlign: 'center',
-          }}
-        >
-          Swoop Golf · Integrated Intelligence for Private Clubs · Demo Environment · Oakmont Hills CC · January 2026
-        </footer>
+          <Header onMobileMenuToggle={isMobile ? () => setMobileMenuOpen((v) => !v) : undefined} />
+          <main
+            style={{
+              flex: 1,
+              padding: isMobile ? '16px' : theme.spacing.xl,
+              width: '100%',
+              minHeight: 0,
+            }}
+          >
+            <PageComponent />
+          </main>
+          <footer
+            style={{
+              padding: `${theme.spacing.md} ${isMobile ? '16px' : theme.spacing.xl}`,
+              borderTop: `1px solid ${theme.colors.border}`,
+              fontSize: theme.fontSize.xs,
+              color: theme.colors.textMuted,
+              textAlign: 'center',
+            }}
+          >
+            Swoop Golf · Integrated Intelligence for Private Clubs · Demo Environment · Oakmont Hills CC · January 2026
+          </footer>
+        </div>
       </div>
     </div>
   );
