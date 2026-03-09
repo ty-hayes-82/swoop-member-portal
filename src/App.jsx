@@ -35,6 +35,7 @@ const ROUTES = {
   'demo-mode': DemoMode,
   'member-profile': MemberProfilePage,
   'integrations/csv-import': CsvImportHub,
+  'csv-import': CsvImportHub,
 };
 
 function AppShell() {

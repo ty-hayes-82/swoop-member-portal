@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { theme } from '@/config/theme';
 import ClubMap from './ClubMap.jsx';
-import { locationMembers, zoneAnalytics, alertsFeed } from '@/data/location';
+import { locationMembers, zoneAnalytics, alertsFeed, staffOnDuty } from '@/data/location';
 import { StoryHeadline, SoWhatCallout } from '@/components/ui';
 import MemberLink from '@/components/MemberLink.jsx';
 import { useApp } from '@/context/AppContext';
@@ -20,6 +20,27 @@ const HEALTH_COLORS = {
   'at-risk': theme.colors.urgent,
   critical: '#8E1C17',
 };
+
+const STAFF_STATUS_COLORS = {
+  Available: theme.colors.success,
+  'With member': theme.colors.warning,
+  'On radio': theme.colors.accent,
+};
+
+function distanceInFeet(from, to) {
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const earthRadiusMeters = 6371000;
+  const lat1 = toRadians(from.lat);
+  const lat2 = toRadians(to.lat);
+  const dLat = lat2 - lat1;
+  const dLng = toRadians(to.lng - from.lng);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const meters = earthRadiusMeters * c;
+  return Math.round(meters * 3.28084);
+}
 
 function StatCard({ label, value, accent, sub }) {
   return (
@@ -41,8 +62,10 @@ function StatCard({ label, value, accent, sub }) {
 
 export default function LocationIntelligence() {
   const members = locationMembers;
+  const staffMembers = staffOnDuty;
   const { showToast } = useApp();
   const { openProfile } = useMemberProfile();
+  const [mapMode, setMapMode] = useState('live');
   const [selectedMemberId, setSelectedMemberId] = useState(() => members.find((m) => m.needsAttention)?.memberId ?? members[0]?.memberId ?? null);
 
   const onsiteCount = members.length;
@@ -61,11 +84,25 @@ export default function LocationIntelligence() {
 
   const handleQuickAction = (action) => {
     if (!selectedMember) return;
-    const message = action === 'dispatch'
-      ? `Notified staff to greet ${selectedMember.name}.`
-      : action === 'message'
-        ? `Drafted SMS update for ${selectedMember.name}.`
-        : `Opening profile for ${selectedMember.name}.`;
+    if (action === 'dispatch') {
+      const nearestStaff = staffMembers.reduce((closest, staff) => {
+        const distanceFeet = distanceInFeet(selectedMember, staff);
+        if (!closest || distanceFeet < closest.distanceFeet) {
+          return { staff, distanceFeet };
+        }
+        return closest;
+      }, null);
+      if (nearestStaff) {
+        showToast(
+          `Dispatched ${nearestStaff.staff.name} (${nearestStaff.staff.role}) · ${nearestStaff.distanceFeet} ft away · ${nearestStaff.staff.etaText}`,
+          'success'
+        );
+      }
+      return;
+    }
+    const message = action === 'message'
+      ? `Drafted SMS update for ${selectedMember.name}.`
+      : `Opening profile for ${selectedMember.name}.`;
     showToast(message, 'info');
     if (action === 'profile') {
       openProfile(selectedMember.memberId);
@@ -90,22 +127,70 @@ export default function LocationIntelligence() {
         <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.lg, padding: theme.spacing.md, minHeight: 520 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.sm, flexWrap: 'wrap', gap: theme.spacing.sm }}>
             <h3 style={{ margin: 0, fontSize: theme.fontSize.lg }}>Live club map</h3>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              {Object.entries(HEALTH_LABELS).map(([status, label]) => (
-                <span key={status} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: HEALTH_COLORS[status] }} />
-                  {label}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'inline-flex', border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, overflow: 'hidden' }}>
+                {[
+                  { key: 'live', label: 'Live' },
+                  { key: 'historical', label: 'Historical (typical Monday)' },
+                ].map((option) => (
+                  <button
+                    key={option.key}
+                    onClick={() => setMapMode(option.key)}
+                    style={{
+                      border: 'none',
+                      background: mapMode === option.key ? theme.colors.accent : 'transparent',
+                      color: mapMode === option.key ? theme.colors.white : theme.colors.textSecondary,
+                      fontSize: theme.fontSize.xs,
+                      fontWeight: 600,
+                      padding: '8px 10px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {Object.entries(HEALTH_LABELS).map(([status, label]) => (
+                  <span key={status} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: HEALTH_COLORS[status] }} />
+                    {label}
+                  </span>
+                ))}
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: theme.colors.accent }} />
+                  Staff on duty
                 </span>
-              ))}
+              </div>
             </div>
           </div>
-          <div style={{ width: '100%', height: 500 }}>
+          <div style={{ width: '100%', height: 500, position: 'relative' }}>
             <ClubMap
               members={members}
+              staffMembers={staffMembers}
               selectedMemberId={selectedMemberId}
               onSelectMember={setSelectedMemberId}
               densityByZone={densityByZone}
             />
+            {mapMode === 'historical' && (
+              <div style={{
+                position: 'absolute',
+                left: theme.spacing.md,
+                bottom: theme.spacing.md,
+                background: 'rgba(5, 22, 40, 0.9)',
+                color: theme.colors.white,
+                border: `1px solid ${theme.colors.border}`,
+                borderRadius: theme.radius.sm,
+                padding: theme.spacing.sm,
+                maxWidth: 360,
+                backdropFilter: 'blur(2px)',
+              }}>
+                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, marginBottom: 4 }}>Typical Monday flow</div>
+                <div style={{ fontSize: theme.fontSize.xs, opacity: 0.9 }}>6:30-8:30 AM: Pro Shop and range surge (+42%).</div>
+                <div style={{ fontSize: theme.fontSize.xs, opacity: 0.9 }}>11:45 AM-1:15 PM: Grill Room lunch wave (+37%).</div>
+                <div style={{ fontSize: theme.fontSize.xs, opacity: 0.9 }}>4:00-6:00 PM hotspot: Clubhouse lounge, board-member cluster.</div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -139,6 +224,26 @@ export default function LocationIntelligence() {
               </div>
             </div>
           )}
+
+          <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.md }}>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: theme.fontSize.sm, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.colors.textMuted }}>Staff on duty</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {staffMembers.map((staff) => (
+                <div key={staff.id} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '8px 10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                    <div>
+                      <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600 }}>{staff.name}</div>
+                      <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{staff.role} · {staff.zone}</div>
+                    </div>
+                    <span style={{ fontSize: theme.fontSize.xs, color: STAFF_STATUS_COLORS[staff.status] || theme.colors.textSecondary }}>
+                      {staff.status}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 4 }}>{staff.etaText}</div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.md }}>
             <h4 style={{ margin: '0 0 8px 0', fontSize: theme.fontSize.sm, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.colors.textMuted }}>Zone density</h4>

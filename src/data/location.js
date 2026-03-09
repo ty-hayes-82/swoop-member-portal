@@ -54,6 +54,15 @@ export const locationMembers = [
   { memberId: 'mbr_503', name: 'Fred Murray', lat: 34.0406, lng: -84.5983, zone: 'Driving Range', zoneId: 'driving-range', status: 'healthy', healthScore: 85, timeInZone: '25m', needsAttention: false, recommendedAction: 'No action needed.' },
 ];
 
+
+export const staffOnDuty = [
+  { id: 'stf_01', name: 'Maya Patel', role: 'F&B Captain', lat: 34.0399, lng: -84.5979, zone: 'Grill Room', status: 'Available', etaText: 'ETA 2 min' },
+  { id: 'stf_02', name: 'Jordan Lee', role: 'Member Services', lat: 34.0401, lng: -84.5975, zone: 'Clubhouse', status: 'With member', etaText: 'ETA 5 min' },
+  { id: 'stf_03', name: 'Noah Bennett', role: 'Golf Operations', lat: 34.0410, lng: -84.5982, zone: 'Driving Range', status: 'Available', etaText: 'ETA 3 min' },
+  { id: 'stf_04', name: 'Elena Ruiz', role: 'Pool Concierge', lat: 34.0390, lng: -84.5983, zone: 'Pool Deck', status: 'Available', etaText: 'ETA 4 min' },
+  { id: 'stf_05', name: 'Caleb Wright', role: 'Pro Shop Lead', lat: 34.0402, lng: -84.5976, zone: 'Pro Shop', status: 'On radio', etaText: 'ETA 3 min' },
+];
+
 export const zoneAnalytics = [
   { id: 'course', label: 'Course', count: 22, dwell: 'Avg 2h 15m', peak: '7:00-9:30 AM' },
   { id: 'grill-room', label: 'Grill Room', count: 5, dwell: 'Avg 38m', peak: '11:30 AM-1:00 PM' },
