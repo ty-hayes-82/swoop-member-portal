@@ -1,6 +1,4 @@
-// pipelineService.js — Phase 1 static · Phase 2 /api/pipeline
-
-import { warmLeads, memberWaitlistEntries } from '@/data/pipeline';
+// pipelineService.js — live data via /api/pipeline
 
 let _d = null;
 
@@ -11,23 +9,15 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-export const getWarmLeads = () => _d ? _d.warmLeads : warmLeads;
+export const getWarmLeads = () => Array.isArray(_d?.warmLeads) ? _d.warmLeads : [];
 
 export const getPipelineSummary = () => {
-  if (_d) return _d.pipelineSummary;
-  return {
-    hot:  warmLeads.filter(l => l.tier === 'hot').length,
-    warm: warmLeads.filter(l => l.tier === 'warm').length,
-    cool: warmLeads.filter(l => l.tier === 'cool').length,
-    cold: warmLeads.filter(l => l.tier === 'cold').length,
-    totalGuests:           warmLeads.length,
-    hotRevenuePotential:   warmLeads.filter(l => l.tier === 'hot').reduce((s, l) => s + l.potentialDues, 0),
-    totalRevenuePotential: warmLeads.reduce((s, l) => s + l.potentialDues, 0),
-  };
+  if (_d?.pipelineSummary) return _d.pipelineSummary;
+  return { hot: 0, warm: 0, cool: 0, cold: 0, totalGuests: 0, hotRevenuePotential: 0, totalRevenuePotential: 0 };
 };
 
 export const getWaitlistWithRiskScoring = () => {
-  const entries = _d ? _d.waitlistEntries : memberWaitlistEntries;
+  const entries = Array.isArray(_d?.waitlistEntries) ? _d.waitlistEntries : [];
   return [...entries].sort((a, b) => {
     if (a.retentionPriority !== b.retentionPriority)
       return a.retentionPriority === 'HIGH' ? -1 : 1;
@@ -36,12 +26,8 @@ export const getWaitlistWithRiskScoring = () => {
 };
 
 export const getWaitlistSummary = () => {
-  if (_d) return _d.waitlistSummary;
-  const entries = memberWaitlistEntries;
-  const highPriority = entries.filter(e => e.retentionPriority === 'HIGH');
-  const atRisk = entries.filter(e => ['At Risk','Critical'].includes(e.riskLevel));
-  const avgDaysWaiting = Math.round(entries.reduce((s, e) => s + e.daysWaiting, 0) / entries.length);
-  return { total: entries.length, highPriority: highPriority.length, atRisk: atRisk.length, avgDaysWaiting };
+  if (_d?.waitlistSummary) return _d.waitlistSummary;
+  return { total: 0, highPriority: 0, atRisk: 0, avgDaysWaiting: 0 };
 };
 
 export const sourceSystems = ['Tee Sheet', 'Analytics'];
