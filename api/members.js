@@ -7,7 +7,7 @@ import { theme } from '../src/config/theme.js';
 
 export default async function handler(req, res) {
   try {
-    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, decaying] = await Promise.all([
+    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, decaying, summaryStats] = await Promise.all([
 
       // Health score distribution bucketed into 5 levels
       sql`
@@ -117,6 +117,16 @@ export default async function handler(req, res) {
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
         WHERE m.membership_status = 'resigned'
         ORDER BY m.member_id, w.week_number`,
+
+      // Summary stats
+      sql`
+        SELECT
+          ROUND(AVG(w.engagement_score)::numeric, 1)                         AS avg_health_score,
+          SUM(CASE WHEN w.engagement_score < 50 THEN m.annual_dues ELSE 0 END) AS dues_at_risk
+        FROM members m
+        JOIN member_engagement_weekly w ON m.member_id = w.member_id
+        WHERE w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
+          AND m.membership_status = 'active'`,
     ]);
 
     // Compute member summary from results
@@ -124,6 +134,9 @@ export default async function handler(req, res) {
     const getCount = level => Number(dist.find(d => d.level === level)?.count ?? 0);
     const total = dist.reduce((s, d) => s + Number(d.count), 0);
     const atRiskCount = getCount('At Risk') + getCount('Critical');
+    const summaryRow = summaryStats.rows[0] ?? {};
+    const avgHealthScore = Number(summaryRow.avg_health_score) || 0;
+    const potentialDuesAtRisk = Number(summaryRow.dues_at_risk) || 0;
 
     const levelColors = {
       Healthy: theme.colors.success,
@@ -147,32 +160,50 @@ export default async function handler(req, res) {
         atRisk:              getCount('At Risk'),
         critical:            getCount('Critical'),
         riskCount:           atRiskCount,
-        avgHealthScore:      62,
-        potentialDuesAtRisk: atRiskCount * 18000,
+        avgHealthScore,
+        potentialDuesAtRisk,
       },
 
-      memberArchetypes: archetypes.rows.map(a => ({
-        archetype:      a.archetype,
-        count:          Number(a.count),
-        avgHealth:      Number(a.avg_health),
-        avgRounds:      Number(a.avg_rounds),
-        avgDiningSpend: Number(a.avg_dining_spend),
-        avgOpenRate:    Number(a.avg_open_rate),
-        avgEvents:      Number(a.avg_events),
-      })),
+      memberArchetypes: archetypes.rows.map(a => {
+        const avgRounds = Number(a.avg_rounds) || 0;
+        const avgDiningSpend = Number(a.avg_dining_spend) || 0;
+        const avgEvents = Number(a.avg_events) || 0;
+        const avgOpenRate = Number(a.avg_open_rate) || 0;
+        return {
+          archetype: a.archetype,
+          count: Number(a.count),
+          golf: Math.round(Math.min(100, (avgRounds / 4) * 100)),
+          dining: Math.round(Math.min(100, (avgDiningSpend / 150) * 100)),
+          events: Math.round(Math.min(100, avgEvents * 100)),
+          email: Math.round(Math.min(100, avgOpenRate * 100)),
+          trend: 0,
+        };
+      }),
 
-      atRiskMembers: atRisk.rows.map(m => ({
-        memberId:     m.member_id,
-        name:         m.name,
-        archetype:    m.archetype,
-        membershipType: m.membership_type,
-        annualDues:   Number(m.annual_dues),
-        healthScore:  Number(m.health_score),
-        riskLevel:    m.risk_level,
-        roundsPlayed: Number(m.rounds_played),
-        diningSpend:  Number(m.dining_spend),
-        emailOpenRate:Number(m.email_open_rate),
-      })),
+      atRiskMembers: atRisk.rows.map(m => {
+        const rounds = Number(m.rounds_played) || 0;
+        const diningSpend = Number(m.dining_spend) || 0;
+        const emailOpenRate = Number(m.email_open_rate) || 0;
+        const riskReasons = [];
+        if (rounds === 0) riskReasons.push('Zero golf activity');
+        if (emailOpenRate < 0.15) riskReasons.push('Email engagement dropped');
+        if (diningSpend < 30) riskReasons.push('Minimal dining');
+        return {
+          memberId:      m.member_id,
+          name:          m.name,
+          archetype:     m.archetype,
+          membershipType: m.membership_type,
+          annualDues:    Number(m.annual_dues),
+          healthScore:   Number(m.health_score),
+          score:         Number(m.health_score),
+          riskLevel:     m.risk_level,
+          roundsPlayed:  rounds,
+          diningSpend,
+          emailOpenRate,
+          trend:         'declining',
+          topRisk:       riskReasons.join('; ') || 'Monitoring',
+        };
+      }),
 
       resignationScenarios: resignations.rows.map(r => ({
         memberId:          r.member_id,

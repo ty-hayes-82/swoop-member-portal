@@ -93,16 +93,24 @@ export default async function handler(req, res) {
                    : visits === 2 || spend > 200 ? 'warm'
                    : visits === 1 && spend > 100 ? 'cool'
                    : 'cold';
+      const score  = Math.min(100, (visits * 12) + (spend / 20));
       return {
-        playerId:       l.player_id,
-        name:           l.name,
+        playerId:        l.player_id,
+        guestName:       l.name,
+        name:            l.name,
         tier,
-        visitCount:     visits,
-        totalSpend:     spend,
-        sponsoredBy:    l.sponsored_by,
-        sponsorArchetype: l.sponsor_archetype,
-        lastVisit:      l.booking_date,
-        potentialDues:  Number(l.potential_dues),
+        visits,
+        visitCount:      visits,
+        totalSpend:      spend,
+        sponsor:         l.sponsored_by,
+        sponsoredBy:     l.sponsored_by,
+        likelyArchetype: l.sponsor_archetype,
+        lastVisit:       l.booking_date,
+        potentialDues:   Number(l.potential_dues),
+        score:           Math.round(score),
+        rounds:          visits,
+        dining:          Math.floor(visits * 0.6),
+        events:          Math.floor(visits * 0.2),
       };
     });
 

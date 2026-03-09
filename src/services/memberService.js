@@ -1,7 +1,4 @@
-// memberService.js — Phase 1 static · Phase 2 /api/members
-
-import { memberArchetypes, healthDistribution, atRiskMembers, resignationScenarios, memberProfiles } from '@/data/members';
-import { emailHeatmap, decayingMembers } from '@/data/email';
+// memberService.js — live data via /api/members
 
 const toNumber = (value, fallback = 0) => {
   const num = Number(value);
@@ -12,31 +9,6 @@ const formatMaybeNumber = (value, fallback = '—') => {
   return Number.isFinite(num) ? num : fallback;
 };
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-const FALLBACK_HEALTH_DIST = [
-  { level: 'Healthy', min: 70, count: 254, percentage: 0.85, color: '#F3922D' },
-  { level: 'Watch', min: 50, count: 0, percentage: 0, color: '#D97706' },
-  { level: 'At Risk', min: 30, count: 34, percentage: 0.11, color: '#B45309' },
-  { level: 'Critical', min: 0, count: 12, percentage: 0.04, color: '#C0392B' },
-];
-
-const deriveAverageDues = () => {
-  const profileValues = Object.values(memberProfiles ?? {})
-    .map((profile) => toNumber(profile?.duesAnnual, NaN))
-    .filter((value) => Number.isFinite(value) && value > 0);
-
-  if (!profileValues.length) return 18000;
-  const total = profileValues.reduce((sum, value) => sum + value, 0);
-  return Math.round(total / profileValues.length);
-};
-
-const buildDuesEstimate = (criticalCount, atRiskCount) => {
-  const averageDues = deriveAverageDues();
-  const criticalAvg = Math.max(12000, Math.round(averageDues * 1.1));
-  const atRiskAvg = Math.max(9000, Math.round(averageDues * 0.85));
-  const estimate = (criticalCount * criticalAvg) + (atRiskCount * atRiskAvg);
-  return { estimate, averageDues };
-};
-
 const normalizeAtRiskMembers = (source) => {
   const list = Array.isArray(source)
     ? source
@@ -62,7 +34,7 @@ const normalizeAtRiskMembers = (source) => {
 };
 
 const normalizeArchetypes = (source) => {
-  const list = Array.isArray(source) && source.length ? source : memberArchetypes;
+  const list = Array.isArray(source) ? source : [];
   return list.map((row) => ({
     archetype: row?.archetype ?? 'Unknown',
     count: Math.max(0, Math.round(toNumber(row?.count, 0))),
@@ -75,48 +47,26 @@ const normalizeArchetypes = (source) => {
 };
 
 const normalizeHealthDistribution = (source, totalMembers) => {
-  const base = Array.isArray(source) && source.length ? source : healthDistribution;
-  const levelIndex = new Map();
-  base.forEach((item) => {
-    if (item?.level) levelIndex.set(item.level, item);
-  });
-  const order = ['Healthy', 'Watch', 'At Risk', 'Critical'];
-  const normalized = order.map((level, index) => {
-    const fallback = FALLBACK_HEALTH_DIST[index];
-    const item = levelIndex.get(level) ?? fallback;
-    return {
-      level,
-      min: toNumber(item?.min, fallback.min),
-      count: Math.max(0, Math.round(toNumber(item?.count, fallback.count))),
-      percentage: Math.max(0, toNumber(item?.percentage, fallback.percentage)),
-      color: item?.color ?? fallback.color,
-    };
-  });
-
-  const hardFloor = { Healthy: 254, Watch: 0, 'At Risk': 34, Critical: 12 };
-  normalized.forEach((item) => {
-    if (hardFloor[item.level] !== undefined) item.count = hardFloor[item.level];
-  });
-
-  const requestedTotal = Math.max(0, Math.round(toNumber(totalMembers, normalized.reduce((sum, item) => sum + item.count, 0))));
-  const currentTotal = normalized.reduce((sum, item) => sum + item.count, 0);
-  if (requestedTotal !== currentTotal && requestedTotal > 0) {
-    const healthyRow = normalized.find((item) => item.level === 'Healthy');
-    if (healthyRow) {
-      const delta = requestedTotal - currentTotal;
-      healthyRow.count = Math.max(0, healthyRow.count + delta);
-    }
-  }
-
-  const finalTotal = normalized.reduce((sum, item) => sum + item.count, 0) || 1;
-  return normalized.map((item) => ({
-    ...item,
-    percentage: clamp(item.count / finalTotal, 0, 1),
+  const base = Array.isArray(source) ? source : [];
+  const normalized = base.map((item) => ({
+    level: item?.level ?? 'Unknown',
+    min: toNumber(item?.min, 0),
+    count: Math.max(0, Math.round(toNumber(item?.count, 0))),
+    percentage: clamp(toNumber(item?.percentage, 0), 0, 1),
+    color: item?.color ?? '#D4D4D8',
   }));
+  const totalCount = normalized.reduce((sum, row) => sum + row.count, 0);
+  const denominator = totalCount || Math.max(0, Math.round(toNumber(totalMembers, 0)));
+  if (denominator > 0) {
+    normalized.forEach((row) => {
+      row.percentage = clamp(row.count / denominator, 0, 1);
+    });
+  }
+  return normalized;
 };
 
 const normalizeDecayingMembers = (source) => {
-  const list = Array.isArray(source) ? source : decayingMembers;
+  const list = Array.isArray(source) ? source : [];
   return list.map((member, index) => {
     const nov = clamp(toNumber(member?.nov, 0), 0, 1);
     const dec = clamp(toNumber(member?.dec, 0), 0, 1);
@@ -162,48 +112,29 @@ export const _init = async () => {
 };
 
 export const getHealthDistribution = () => {
-  const archetypes = normalizeArchetypes(_d?.memberArchetypes ?? memberArchetypes);
+  const archetypes = normalizeArchetypes(_d?.memberArchetypes);
   const totalMembers = archetypes.reduce((sum, item) => sum + item.count, 0);
   return normalizeHealthDistribution(_d?.healthDistribution, totalMembers);
 };
-export const getAtRiskMembers       = () => normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? _d?.atRisk ?? atRiskMembers);
-export const getArchetypeProfiles   = () => normalizeArchetypes(_d?.memberArchetypes ?? memberArchetypes);
-export const getResignationScenarios= () => _d ? _d.resignationScenarios : resignationScenarios;
-export const getEmailHeatmap        = () => _d ? _d.emailHeatmap         : emailHeatmap;
-export const getDecayingMembers     = () => normalizeDecayingMembers(_d?.decayingMembers ?? decayingMembers);
+export const getAtRiskMembers       = () => normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? []);
+export const getArchetypeProfiles   = () => normalizeArchetypes(_d?.memberArchetypes);
+export const getResignationScenarios= () => Array.isArray(_d?.resignationScenarios) ? _d.resignationScenarios : [];
+export const getEmailHeatmap        = () => Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
+export const getDecayingMembers     = () => normalizeDecayingMembers(_d?.decayingMembers);
 
 export const getMemberSummary = () => {
-  const archetypes = getArchetypeProfiles();
-  const dist = getHealthDistribution();
-  const total = archetypes.reduce((sum, row) => sum + row.count, 0);
-  const atRisk = dist.find((h) => h.level === 'At Risk')?.count ?? 0;
-  const critical = dist.find((h) => h.level === 'Critical')?.count ?? 0;
-  const healthy = dist.find((h) => h.level === 'Healthy')?.count ?? 0;
-  const apiSummary = _d?.memberSummary;
-  const avgHealthScore = formatMaybeNumber(apiSummary?.avgHealthScore, 62);
-  const { estimate: estimatedDuesAtRisk, averageDues } = buildDuesEstimate(critical, atRisk);
-  const rawDues = formatMaybeNumber(apiSummary?.potentialDuesAtRisk, estimatedDuesAtRisk);
-  const riskCount = atRisk + critical;
-  const plausibleCeiling = Math.max(
-    estimatedDuesAtRisk,
-    Math.round(Math.max(riskCount, 1) * averageDues * 1.4),
-  );
-
-  let potentialDuesAtRisk = rawDues;
-  if (potentialDuesAtRisk > plausibleCeiling) {
-    potentialDuesAtRisk = estimatedDuesAtRisk;
-  }
-  if (potentialDuesAtRisk <= 0) {
-    potentialDuesAtRisk = estimatedDuesAtRisk;
-  }
-  potentialDuesAtRisk = Math.round(potentialDuesAtRisk);
-
+  const summary = _d?.memberSummary ?? {};
   return {
-    total, healthy, atRisk, critical,
-    riskCount,
-    avgHealthScore,
-    potentialDuesAtRisk,
+    total: Math.max(0, Math.round(toNumber(summary.total, 0))),
+    healthy: Math.max(0, Math.round(toNumber(summary.healthy, 0))),
+    atRisk: Math.max(0, Math.round(toNumber(summary.atRisk, 0))),
+    critical: Math.max(0, Math.round(toNumber(summary.critical, 0))),
+    riskCount: Math.max(0, Math.round(toNumber(summary.riskCount, 0))),
+    avgHealthScore: formatMaybeNumber(summary.avgHealthScore, 0),
+    potentialDuesAtRisk: formatMaybeNumber(summary.potentialDuesAtRisk, 0),
   };
+};
+
 };
 
 export const getMemberProfile = (memberId) => {
