@@ -606,3 +606,19 @@ export const importData = async ({
 
   return newEntry;
 };
+
+export const getDataArchitectPlaybook = () => {
+  return templateLibrary.map((template) => ({
+    templateKey: template.key,
+    templateLabel: template.label,
+    requiredFieldKeys: template.fields.filter((field) => field.required).map((field) => field.key),
+    optionalFieldKeys: template.fields.filter((field) => !field.required).map((field) => field.key),
+    validationRules: template.fields
+      .filter((field) => field.type)
+      .map((field) => ({
+        field: field.key,
+        type: field.type,
+        options: field.options ?? null,
+      })),
+  }));
+};

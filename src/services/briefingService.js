@@ -135,7 +135,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         conversionRate: null,
         detail: 'Wind advisory (18 mph gusts by noon) historically reduces golf bookings by 15% but increases Grill Room lunch covers by 20-30% as members stay indoors. Add 2 servers, prep 15 extra grilled items.',
         action: 'View F&B operations',
-        link: 'fb-operations',
+        link: 'fb-performance',
       },
       {
         id: 'at-risk-touchpoints',
@@ -147,6 +147,17 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         detail: 'Anne Jordan (8:14 AM) and Robert Callahan (10:40 AM) are both at-risk members with tee times today. Personal GM greeting + brief conversation can prevent further disengagement.',
         action: 'View member details',
         link: 'member-health',
+      },
+      {
+        id: 'location-live-monitor',
+        icon: '📍',
+        title: 'Monitor live zone density for service-recovery members',
+        impact: '2 live intervention windows',
+        effort: '5 min',
+        conversionRate: null,
+        detail: 'Location Intelligence shows James, Sandra, and Robert currently on property with active service signals. Dispatching nearest staff closes feedback loops before departure.',
+        action: 'Open location dashboard',
+        link: 'location-intelligence',
       },
     ],
   };

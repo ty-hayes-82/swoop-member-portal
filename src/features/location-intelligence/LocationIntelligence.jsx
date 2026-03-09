@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { theme } from '@/config/theme';
 import ClubMap from './ClubMap.jsx';
-import { locationMembers, zoneAnalytics, alertsFeed, staffOnDuty } from '@/data/location';
+import { getLiveMemberLocations, getServiceRecoveryAlerts, getStaffLocations, getZoneDensity } from '@/services/locationService';
 import { StoryHeadline, SoWhatCallout } from '@/components/ui';
 import MemberLink from '@/components/MemberLink.jsx';
 import { useApp } from '@/context/AppContext';
@@ -61,8 +61,10 @@ function StatCard({ label, value, accent, sub }) {
 }
 
 export default function LocationIntelligence() {
-  const members = locationMembers;
-  const staffMembers = staffOnDuty;
+  const members = getLiveMemberLocations();
+  const staffMembers = getStaffLocations();
+  const alertsFeed = getServiceRecoveryAlerts();
+  const zoneAnalytics = getZoneDensity(members);
   const { showToast } = useApp();
   const { openProfile } = useMemberProfile();
   const [mapMode, setMapMode] = useState('live');
@@ -270,7 +272,13 @@ export default function LocationIntelligence() {
             <h4 style={{ margin: '0 0 8px 0', fontSize: theme.fontSize.sm, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.colors.textMuted }}>Live alerts</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {alertsFeed.map((alert) => (
-                <div key={alert.id} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '10px 12px' }}>
+                <div key={alert.id} style={{
+                  border: `1px solid ${theme.colors.border}`,
+                  borderRadius: theme.radius.sm,
+                  padding: '10px 12px',
+                  background: alert.severity === 'high' ? `${theme.colors.warning}10` : theme.colors.bgCard,
+                  animation: alert.severity === 'high' ? 'location-alert-pulse 2.2s ease-in-out infinite' : 'none',
+                }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
                     <span>{alert.timestamp}</span>
                     <span>{alert.severity.toUpperCase()}</span>
@@ -292,6 +300,12 @@ export default function LocationIntelligence() {
       <SoWhatCallout variant="opportunity">
         Location Intelligence converts passive GPS pings into immediate actions: identify who is on property, route staff proactively, and prove interventions in minutes instead of hours.
       </SoWhatCallout>
+      <style>{`
+        @keyframes location-alert-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(243,146,45,0.0); }
+          50% { box-shadow: 0 0 0 6px rgba(243,146,45,0.14); }
+        }
+      `}</style>
     </div>
   );
 }

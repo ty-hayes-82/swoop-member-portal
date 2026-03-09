@@ -24,16 +24,30 @@ export function getPendingActions() {
   return getAllActions().filter((action) => action.status === 'pending');
 }
 
-export function approveAction(id) {
+export function approveAction(id, meta = {}) {
   actionStore = actionStore.map((action) =>
-    action.id === id ? { ...action, status: 'approved' } : action
+    action.id === id
+      ? {
+          ...action,
+          status: 'approved',
+          approvedAt: new Date().toISOString(),
+          approvalAction: meta.approvalAction ?? action.approvalAction ?? null,
+        }
+      : action
   );
   return actionStore.find((action) => action.id === id) ?? null;
 }
 
-export function dismissAction(id) {
+export function dismissAction(id, meta = {}) {
   actionStore = actionStore.map((action) =>
-    action.id === id ? { ...action, status: 'dismissed' } : action
+    action.id === id
+      ? {
+          ...action,
+          status: 'dismissed',
+          dismissedAt: new Date().toISOString(),
+          dismissalReason: meta.reason ?? action.dismissalReason ?? '',
+        }
+      : action
   );
   return actionStore.find((action) => action.id === id) ?? null;
 }

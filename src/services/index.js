@@ -8,3 +8,4 @@ export * from './briefingService';
 export * from './agentService';
 export * from './integrationsService';
 export * from './trendsService';
+export * from './locationService';

@@ -1,4 +1,4 @@
-import { COMBOS, SYSTEMS } from '@/data/integrations';
+import { COMBOS, SYSTEMS, INTEGRATION_CATEGORY_SECTIONS, VENDOR_INTELLIGENCE_DETAILS } from '@/data/integrations';
 
 export function getConnectedSystems() {
   return SYSTEMS;
@@ -35,6 +35,14 @@ export function getIntegrationHealth() {
 // Backward-compatible aliases used in other modules.
 export function getSystems() {
   return getConnectedSystems();
+}
+
+export function getIntegrationCategorySections() {
+  return INTEGRATION_CATEGORY_SECTIONS;
+}
+
+export function getVendorIntelligenceDetails(vendorId) {
+  return VENDOR_INTELLIGENCE_DETAILS[vendorId] ?? null;
 }
 
 export function getCombos() {

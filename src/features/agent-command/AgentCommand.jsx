@@ -21,8 +21,8 @@ export function AgentCommand() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <div
         style={{
-          background: 'rgba(34,211,238,0.04)',
-          border: '1px solid rgba(34,211,238,0.15)',
+          background: `${theme.colors.accent}10`,
+          border: `1px solid ${theme.colors.accent}44`,
           borderRadius: theme.radius.lg,
           padding: theme.spacing.lg,
           display: 'flex',

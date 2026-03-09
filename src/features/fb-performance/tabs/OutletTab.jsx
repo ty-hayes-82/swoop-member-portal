@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell, CartesianGrid } from 'recharts';
 import { SoWhatCallout, Sparkline } from '@/components/ui';
 import TrendContext from '@/components/ui/TrendContext.jsx';
 import { getOutletPerformance, getFBSummary } from '@/services/fbService';
@@ -50,10 +50,10 @@ export default function OutletTab() {
       </div>
 
       <div style={{
-        background: 'linear-gradient(120deg, #0F0F0F 0%, #1F1F1F 60%, #0F0F0F 100%)',
+        background: `linear-gradient(120deg, ${theme.colors.black} 0%, #1F1F1F 60%, ${theme.colors.black} 100%)`,
         borderRadius: theme.radius.lg,
         padding: theme.spacing.lg,
-        border: `1px solid rgba(255,255,255,0.08)`,
+        border: `1px solid #2A2A2A`,
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: theme.spacing.md }}>
           <div style={{ fontSize: theme.fontSize.sm, color: 'rgba(255,255,255,0.85)' }}>Revenue by Outlet — January 2026</div>
@@ -67,6 +67,7 @@ export default function OutletTab() {
                 <stop offset="90%" stopColor="#F3922D" stopOpacity={1} />
               </linearGradient>
             </defs>
+            <CartesianGrid stroke="#2A2A2A" strokeDasharray="3 3" />
             <XAxis dataKey="outlet" tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 11 }} tickLine={false} angle={-20} textAnchor="end" interval={0} />
             <YAxis tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 11 }} tickLine={false} />
             <ReferenceLine y={goal} stroke="rgba(255,255,255,0.3)" strokeDasharray="4 4" />
@@ -78,6 +79,17 @@ export default function OutletTab() {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        <div style={{
+          marginTop: theme.spacing.sm,
+          fontSize: theme.fontSize.xs,
+          color: 'rgba(255,255,255,0.82)',
+          background: 'rgba(243,146,45,0.12)',
+          border: '1px solid rgba(243,146,45,0.48)',
+          borderRadius: theme.radius.sm,
+          padding: theme.spacing.sm,
+        }}>
+          Annotation: when pace slows, Grill Room post-round traffic drops first; pace recovery is an F&B lever, not only a golf ops lever.
+        </div>
       </div>
 
       <div style={{ background: theme.colors.bgCard, borderRadius: theme.radius.md, border: `1px solid ${theme.colors.border}`, overflow: 'hidden' }}>

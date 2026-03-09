@@ -14,10 +14,10 @@ export const memberArchetypes = [
 ];
 
 export const healthDistribution = [
-  { level: 'Healthy',  min: 70,  count: 240, percentage: 0.80, color: theme.colors.success },
-  { level: 'Watch',    min: 50,  count: 30,  percentage: 0.10, color: theme.colors.warning },
-  { level: 'At Risk',  min: 30,  count: 20,  percentage: 0.07, color: theme.colors.riskAtRiskAlt },
-  { level: 'Critical', min: 0,   count: 10,  percentage: 0.03, color: theme.colors.urgent },
+  { level: 'Healthy',  min: 70,  count: 254, percentage: 0.85, color: theme.colors.success },
+  { level: 'Watch',    min: 50,  count: 0,   percentage: 0, color: theme.colors.warning },
+  { level: 'At Risk',  min: 30,  count: 34,  percentage: 0.11, color: theme.colors.riskAtRiskAlt },
+  { level: 'Critical', min: 0,   count: 12,  percentage: 0.04, color: theme.colors.urgent },
 ];
 
 export const atRiskMembers = [
@@ -372,5 +372,4 @@ export const memberProfiles = {
     ],
   },
 };
-
 

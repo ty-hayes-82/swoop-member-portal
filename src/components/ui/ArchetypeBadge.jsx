@@ -4,12 +4,12 @@
 import { theme } from '@/config/theme';
 
 const ARCHETYPES = {
-  'Die-Hard Golfer':   { color: theme.colors.chartGolf, icon: '⛳' },  // teal-green — matches chartGolf
+  'Die-Hard Golfer':   { color: theme.colors.chartGolf, icon: '⛳' },  // primary accent
   'Social Butterfly':  { color: theme.colors.archetypeRose, icon: '🦋' },  // deep rose — distinct
   'Balanced Active':   { color: theme.colors.chartBlue, icon: '◉'  },  // mid blue — stable
   'Weekend Warrior':   { color: theme.colors.archetypeWeekend, icon: '📅'  },  // warm amber — weekend energy
   'Declining':         { color: theme.colors.archetypeBrown, icon: '📉'  },  // warm brown — fading, NOT urgent red
-  'New Member':        { color: theme.colors.archetypeTeal, icon: '★'   },  // deep teal-blue — fresh, NOT healthy green
+  'New Member':        { color: theme.colors.archetypeTeal, icon: '★'   },  // warm onboarding accent
   'Ghost':             { color: theme.colors.archetypeGhost, icon: '👻'  },  // muted sage — invisible
   'Snowbird':          { color: theme.colors.archetypeSnowbird, icon: '✈'   },  // slate blue — seasonal
 };

@@ -42,6 +42,21 @@ export default function StaffingTab() {
 
       {/* Understaffed day detail */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+        {days.length === 0 && (
+          <div
+            style={{
+              background: theme.colors.bgCard,
+              boxShadow: theme.shadow.sm,
+              borderRadius: theme.radius.md,
+              border: `1px solid ${theme.colors.border}`,
+              padding: theme.spacing.lg,
+              textAlign: 'center',
+              color: theme.colors.textSecondary,
+            }}
+          >
+            No understaffed days were returned for this period.
+          </div>
+        )}
         {days.map((d, i) => (
           <div key={i} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${theme.colors.border}`, padding: theme.spacing.md }}>
@@ -69,8 +84,8 @@ export default function StaffingTab() {
                     ? `${d.scheduledStaff} / ${d.requiredStaff}`
                     : '—',
                 },
-                { label: 'Ticket Time +',      value: formatPercent(d.ticketTimeIncrease) },
-                { label: 'Complaint Rate',     value: formatMultiplier(d.complaintMultiplier) },
+                { label: 'Ticket Time +',      value: formatPercent(Number(d.ticketTimeIncrease)) },
+                { label: 'Complaint Rate',     value: formatMultiplier(Number(d.complaintMultiplier)) },
               ].map(({ label, value }) => (
                 <div key={label} style={{ padding: theme.spacing.sm, background: theme.colors.bg,
                   borderRadius: theme.radius.sm }}>
