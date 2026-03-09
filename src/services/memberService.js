@@ -168,10 +168,7 @@ export const getHealthDistribution = () => {
 };
 export const getAtRiskMembers       = () => normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? _d?.atRisk ?? atRiskMembers);
 export const getArchetypeProfiles   = () => normalizeArchetypes(_d?.memberArchetypes ?? memberArchetypes);
-export const getResignationScenarios = () => {
-  const apiScenarios = Array.isArray(_d?.resignationScenarios) ? _d.resignationScenarios : null;
-  return apiScenarios && apiScenarios.length ? apiScenarios : resignationScenarios;
-};
+export const getResignationScenarios= () => _d ? _d.resignationScenarios : resignationScenarios;
 export const getEmailHeatmap        = () => _d ? _d.emailHeatmap         : emailHeatmap;
 export const getDecayingMembers     = () => normalizeDecayingMembers(_d?.decayingMembers ?? decayingMembers);
 
@@ -211,11 +208,8 @@ export const getMemberSummary = () => {
 
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
-  const staticProfile = memberProfiles[memberId] ?? null;
-  const apiProfile = _d?.memberProfiles?.[memberId];
-  if (apiProfile && staticProfile) return normalizeMemberProfile({ ...staticProfile, ...apiProfile });
-  if (apiProfile) return normalizeMemberProfile(apiProfile);
-  return normalizeMemberProfile(staticProfile);
+  if (_d?.memberProfiles?.[memberId]) return normalizeMemberProfile(_d.memberProfiles[memberId]);
+  return normalizeMemberProfile(memberProfiles[memberId] ?? null);
 };
 
 export const sourceSystems = ['Member CRM', 'Analytics', 'Tee Sheet'];
