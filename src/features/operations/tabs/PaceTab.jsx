@@ -6,22 +6,30 @@ import { getPaceDistribution, getSlowRoundRate, getBottleneckHoles, getPaceFBImp
 import { theme } from '@/config/theme';
 
 export default function PaceTab() {
-  const dist = getPaceDistribution();
-  const stats = getSlowRoundRate();
-  const holes = getBottleneckHoles();
-  const fbImpact = getPaceFBImpact();
-  const lostRevFmt = `$${fbImpact.revenueLostPerMonth.toLocaleString()}`;
+  const dist = Array.isArray(getPaceDistribution()) ? getPaceDistribution() : [];
+  const stats = getSlowRoundRate() ?? {};
+  const holes = Array.isArray(getBottleneckHoles()) ? getBottleneckHoles() : [];
+  const fbImpact = getPaceFBImpact() ?? {};
+  const overallRate = Number.isFinite(stats.overallRate) ? stats.overallRate : 0;
+  const weekendRate = Number.isFinite(stats.weekendRate) ? stats.weekendRate : 0;
+  const weekdayRate = Number.isFinite(stats.weekdayRate) ? stats.weekdayRate : 0;
+  const threshold = Number.isFinite(stats.threshold) ? stats.threshold : 270;
+  const fastConversion = Number.isFinite(fbImpact.fastConversionRate) ? fbImpact.fastConversionRate : 0;
+  const slowConversion = Number.isFinite(fbImpact.slowConversionRate) ? fbImpact.slowConversionRate : 0;
+  const conversionGap = Math.max(0, fastConversion - slowConversion);
+  const revenueLost = Number.isFinite(fbImpact.revenueLostPerMonth) ? fbImpact.revenueLostPerMonth : 0;
+  const lostRevFmt = `$${revenueLost.toLocaleString()}`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       {/* KPI strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: theme.spacing.md }}>
         {[
-          { label: 'Slow Round Rate', value: `${(stats.overallRate * 100).toFixed(0)}%`,
-            sub: `>${stats.threshold} min`, urgent: true, metric: 'slowRoundRate' },
-          { label: 'Weekend Rate', value: `${(stats.weekendRate * 100).toFixed(0)}%`,
+          { label: 'Slow Round Rate', value: `${(overallRate * 100).toFixed(0)}%`,
+            sub: `>${threshold} min`, urgent: true, metric: 'slowRoundRate' },
+          { label: 'Weekend Rate', value: `${(weekendRate * 100).toFixed(0)}%`,
             sub: 'Sat/Sun only', urgent: true, metric: null },
-          { label: 'Weekday Rate', value: `${(stats.weekdayRate * 100).toFixed(0)}%`,
+          { label: 'Weekday Rate', value: `${(weekdayRate * 100).toFixed(0)}%`,
             sub: 'Mon–Fri', urgent: false, metric: null },
         ].map(({ label, value, sub, urgent, metric }) => (
           <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm,
@@ -62,6 +70,19 @@ export default function PaceTab() {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        <div style={{
+          marginTop: theme.spacing.md,
+          background: `${theme.colors.warning}12`,
+          border: `1px solid ${theme.colors.warning}55`,
+          borderRadius: theme.radius.sm,
+          padding: theme.spacing.sm,
+          fontSize: theme.fontSize.xs,
+          color: theme.colors.textSecondary,
+        }}>
+          <strong style={{ color: theme.colors.warning }}>Key insight:</strong> when rounds move past 4:30, dining conversion drops
+          {' '}<strong style={{ color: theme.colors.warning }}>{(conversionGap * 100).toFixed(0)} points</strong> and creates
+          {' '}<strong style={{ color: theme.colors.urgent }}>${revenueLost.toLocaleString()}/month</strong> leakage.
+        </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.md }}>
           <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
             <span style={{ color: theme.colors.chartGolf }}>■</span> Normal pace
@@ -96,8 +117,8 @@ export default function PaceTab() {
       {/* F&B impact inline */}
       <SoWhatCallout variant="warning">
         Slow rounds → <strong>15% lower post-round dining conversion</strong>.
-        Fast rounds convert at {(fbImpact.fastConversionRate * 100).toFixed(0)}% vs
-        {` ${(fbImpact.slowConversionRate * 100).toFixed(0)}%`} for slow rounds —
+        Fast rounds convert at {(fastConversion * 100).toFixed(0)}% vs
+        {` ${(slowConversion * 100).toFixed(0)}%`} for slow rounds —
         costing roughly <strong>{lostRevFmt}/month</strong> in lost dining revenue.
       </SoWhatCallout>
 

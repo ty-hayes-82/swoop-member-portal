@@ -50,7 +50,7 @@
   50% {
     transform: scale(1.02);
     border-color: var(--success, #F3922D);
-    background: rgba(74, 222, 128, 0.08);
+    background: rgba(243, 146, 45, 0.08);
   }
   100% {
     transform: scale(0.95);

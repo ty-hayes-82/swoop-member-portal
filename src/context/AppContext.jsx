@@ -78,12 +78,30 @@ function reducer(state, action) {
     }
     case 'APPROVE_ACTION':
     case 'APPROVE_AGENT_ACTION': {
-      const inbox = state.inbox.map((item) => (item.id === action.id ? { ...item, status: 'approved' } : item));
+      const inbox = state.inbox.map((item) => (
+        item.id === action.id
+          ? {
+              ...item,
+              status: 'approved',
+              approvalAction: action.meta?.approvalAction ?? item.approvalAction ?? null,
+              approvedAt: new Date().toISOString(),
+            }
+          : item
+      ));
       return { ...state, inbox, pendingCount: computePendingCount(inbox) };
     }
     case 'DISMISS_ACTION':
     case 'DISMISS_AGENT_ACTION': {
-      const inbox = state.inbox.map((item) => (item.id === action.id ? { ...item, status: 'dismissed' } : item));
+      const inbox = state.inbox.map((item) => (
+        item.id === action.id
+          ? {
+              ...item,
+              status: 'dismissed',
+              dismissalReason: action.meta?.reason ?? item.dismissalReason ?? '',
+              dismissedAt: new Date().toISOString(),
+            }
+          : item
+      ));
       return { ...state, inbox, pendingCount: computePendingCount(inbox) };
     }
     case 'TOGGLE_AGENT_STATUS': {
@@ -157,14 +175,14 @@ export function AppProvider({ children }) {
     } catch {}
   }, [state.inbox, state.agentStatuses, state.agentConfigs]);
 
-  function approveAction(id) {
-    approveAgentServiceAction(id);
-    dispatch({ type: 'APPROVE_ACTION', id });
+  function approveAction(id, meta = {}) {
+    approveAgentServiceAction(id, meta);
+    dispatch({ type: 'APPROVE_ACTION', id, meta });
   }
 
-  function dismissAction(id) {
-    dismissAgentServiceAction(id);
-    dispatch({ type: 'DISMISS_ACTION', id });
+  function dismissAction(id, meta = {}) {
+    dismissAgentServiceAction(id, meta);
+    dispatch({ type: 'DISMISS_ACTION', id, meta });
   }
 
   return (

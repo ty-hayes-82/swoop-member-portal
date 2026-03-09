@@ -118,7 +118,12 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
   };
 
   const performDismiss = (label) => {
-    onDismiss?.(label);
+    const reason = window.prompt('Dismiss reason (required):', action.dismissalReason ?? '');
+    if (!reason || !reason.trim()) {
+      showToast('Dismissal reason is required.', 'warning');
+      return;
+    }
+    onDismiss?.(`${label} · ${reason.trim()}`);
     handleClose();
   };
 
@@ -351,7 +356,7 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
                   borderRadius: theme.radius.sm,
                   border: `1px solid ${theme.colors.border}`,
                   padding: theme.spacing.sm,
-                  fontFamily: theme.fonts.body,
+                  fontFamily: theme.fonts.sans,
                 }}
               />
             </div>
@@ -370,7 +375,7 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
                   borderRadius: theme.radius.sm,
                   border: `1px solid ${theme.colors.border}`,
                   padding: theme.spacing.sm,
-                  fontFamily: theme.fonts.body,
+                  fontFamily: theme.fonts.sans,
                 }}
               />
             </div>
@@ -385,7 +390,7 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
                   borderRadius: theme.radius.sm,
                   border: `1px solid ${theme.colors.border}`,
                   padding: theme.spacing.sm,
-                  fontFamily: theme.fonts.body,
+                  fontFamily: theme.fonts.sans,
                 }}
               />
             </div>

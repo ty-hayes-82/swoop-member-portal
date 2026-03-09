@@ -24,6 +24,11 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const visibleItems = viewMode === 'today'
     ? allVisible.filter(n => TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key))
     : allVisible;
+  const SECTION_LABELS = {
+    'location-intelligence': 'Location Intelligence',
+    integrations: 'Integrations',
+    'integrations/csv-import': 'Integrations',
+  };
 
   const basePosition = isMobile
     ? {
@@ -128,52 +133,68 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
 
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-        {visibleItems.map(item => {
+        {visibleItems.map((item, index) => {
           const active = currentRoute === item.key;
+          const previous = visibleItems[index - 1];
+          const showSection = (!previous || SECTION_LABELS[previous.key] !== SECTION_LABELS[item.key]) && SECTION_LABELS[item.key];
           return (
-            <button
-              key={item.key}
-              onClick={() => navigate(item.key)}
-              title={sidebarCollapsed && !isMobile ? item.label : undefined}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
-                minHeight: '44px',
-                justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
-                background: active ? SIDEBAR_HOVER : 'none',
-                borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
-                color: active ? TEXT_LIGHT : TEXT_DIM,
-                fontSize: '13px',
-                fontWeight: active ? 600 : 400,
-                transition: 'all 0.12s',
-                cursor: 'pointer',
-                borderRight: 'none',
-                borderTop: 'none',
-                borderBottom: 'none',
-              }}
-              onMouseEnter={e => {
-                if (!active) {
-                  e.currentTarget.style.background = theme.colors.sidebarTint;
-                  e.currentTarget.style.color = TEXT_LIGHT;
-                }
-              }}
-              onMouseLeave={e => {
-                if (!active) {
-                  e.currentTarget.style.background = 'none';
-                  e.currentTarget.style.color = TEXT_DIM;
-                }
-              }}
-            >
-              <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
-              {(!sidebarCollapsed || isMobile) && (
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {item.label}
-                </span>
+            <div key={item.key}>
+              {(!sidebarCollapsed || isMobile) && showSection && (
+                <div style={{
+                  marginTop: 8,
+                  padding: '8px 14px 4px',
+                  fontSize: 10,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: TEXT_MUTED,
+                  fontWeight: 700,
+                }}>
+                  {SECTION_LABELS[item.key]}
+                </div>
               )}
-            </button>
+              <button
+                onClick={() => navigate(item.key)}
+                title={sidebarCollapsed && !isMobile ? item.label : undefined}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
+                  minHeight: '44px',
+                  justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
+                  background: active ? SIDEBAR_HOVER : 'none',
+                  borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
+                  color: active ? TEXT_LIGHT : TEXT_DIM,
+                  fontSize: '13px',
+                  fontWeight: active ? 600 : 400,
+                  transition: 'all 0.12s',
+                  cursor: 'pointer',
+                  borderRight: 'none',
+                  borderTop: 'none',
+                  borderBottom: 'none',
+                }}
+                onMouseEnter={e => {
+                  if (!active) {
+                    e.currentTarget.style.background = theme.colors.sidebarTint;
+                    e.currentTarget.style.color = TEXT_LIGHT;
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!active) {
+                    e.currentTarget.style.background = 'none';
+                    e.currentTarget.style.color = TEXT_DIM;
+                  }
+                }}
+              >
+                <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
+                {(!sidebarCollapsed || isMobile) && (
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.label}
+                  </span>
+                )}
+              </button>
+            </div>
           );
         })}
       </nav>

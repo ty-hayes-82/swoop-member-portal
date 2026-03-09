@@ -31,11 +31,11 @@ export default function InboxTab() {
   const dismissedToday = inbox.filter((item) => item.status === 'dismissed').length;
 
   const handleApprove = (item, contextLabel) => {
-    approveAction(item.id);
+    approveAction(item.id, { approvalAction: contextLabel ?? 'Approve' });
     showToast(`Approved ${item.description}${contextLabel ? ` — ${contextLabel}` : ''}`, 'success');
   };
   const handleDismiss = (item, contextLabel) => {
-    dismissAction(item.id);
+    dismissAction(item.id, { reason: contextLabel ?? 'No reason provided' });
     showToast(`Dismissed ${item.description}${contextLabel ? ` — ${contextLabel}` : ''}`, 'warning');
   };
   const bulkApprove = () => visible.forEach((item) => handleApprove(item));

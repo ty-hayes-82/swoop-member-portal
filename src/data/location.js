@@ -1,4 +1,4 @@
-// Location Intelligence demo data — Pinetree Country Club, Kennesaw GA
+// Location Intelligence demo data — Oakmont Hills CC
 // 47 members on property with real GPS coordinates
 
 export const locationMembers = [

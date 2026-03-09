@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { getAgents } from '@/services/agentService';
 import { useApp } from '@/context/AppContext';
 import { theme } from '@/config/theme';
+import { AgentActionDrawer } from '../AgentActionDrawer';
 
 function formatTimestamp(timestamp) {
   return new Date(timestamp).toLocaleString('en-US', {
@@ -20,10 +21,11 @@ const STATUS_STYLE = {
 };
 
 export default function ActivityTab() {
-  const { inbox } = useApp();
+  const { inbox, approveAction, dismissAction, showToast } = useApp();
   const agents = getAgents();
   const [agentFilter, setAgentFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [drawerAction, setDrawerAction] = useState(null);
 
   const filtered = useMemo(() => {
     return inbox
@@ -99,11 +101,13 @@ export default function ActivityTab() {
           return (
             <div
               key={entry.id}
+              onClick={() => setDrawerAction(entry)}
               style={{
                 background: theme.colors.bgCard,
                 border: `1px solid ${theme.colors.border}`,
                 borderRadius: theme.radius.md,
                 padding: theme.spacing.md,
+                cursor: 'pointer',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8 }}>
@@ -132,6 +136,20 @@ export default function ActivityTab() {
           );
         })}
       </div>
+      {drawerAction && (
+        <AgentActionDrawer
+          action={drawerAction}
+          onClose={() => setDrawerAction(null)}
+          onApprove={(label) => {
+            approveAction(drawerAction.id, { approvalAction: label ?? 'Approved from activity log' });
+            showToast(`Approved ${drawerAction.description}`, 'success');
+          }}
+          onDismiss={(label) => {
+            dismissAction(drawerAction.id, { reason: label ?? 'Dismissed from activity log' });
+            showToast(`Dismissed ${drawerAction.description}`, 'warning');
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell, CartesianGrid } from 'recharts';
 import { SoWhatCallout } from '@/components/ui';
 import { getPostRoundConversion } from '@/services/fbService';
 import { theme } from '@/config/theme';
@@ -78,10 +78,10 @@ export default function ConversionTab() {
       </div>
 
       <div style={{
-        background: '#111111',
+        background: theme.colors.black,
         borderRadius: theme.radius.lg,
         padding: theme.spacing.lg,
-        border: `1px solid rgba(255,255,255,0.08)`,
+        border: `1px solid ${theme.colors.graphite ?? '#2A2A2A'}`,
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -100,6 +100,7 @@ export default function ConversionTab() {
                 ))}
               </linearGradient>
             </defs>
+            <CartesianGrid stroke={theme.colors.graphite ?? '#2A2A2A'} strokeDasharray="3 3" />
             <XAxis
               type="number"
               domain={[0, 0.6]}
@@ -127,6 +128,17 @@ export default function ConversionTab() {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        <div style={{
+          marginTop: theme.spacing.sm,
+          fontSize: theme.fontSize.xs,
+          color: 'rgba(255,255,255,0.8)',
+          background: 'rgba(243,146,45,0.12)',
+          border: '1px solid rgba(243,146,45,0.5)',
+          borderRadius: theme.radius.sm,
+          padding: theme.spacing.sm,
+        }}>
+          Callout: slow rounds (4:30+) are converting near 22%, versus 41% when rounds finish on pace.
+        </div>
       </div>
 
       <SoWhatCallout variant="opportunity">

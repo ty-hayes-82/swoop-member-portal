@@ -5,6 +5,8 @@ import {
   getConnectedSystems,
   getCombinations,
   getIntegrationHealth,
+  getIntegrationCategorySections,
+  getVendorIntelligenceDetails,
 } from '@/services/integrationsService';
 import { IntegrationCard } from './IntegrationCard';
 import { IntegrationHealthStrip } from './IntegrationHealthStrip';
@@ -29,6 +31,7 @@ export function IntegrationsPage() {
   const [activeSystemId, setActiveSystemId] = useState(null);
   const cardRefs = useRef({});
   const [flowOffset, setFlowOffset] = useState(0);
+  const categorySections = useMemo(() => getIntegrationCategorySections(), []);
 
   useEffect(() => {
     const timer = setInterval(() => setFlowOffset((prev) => (prev + 2) % 200), 80);
@@ -163,22 +166,51 @@ export function IntegrationsPage() {
         />
       </section>
 
+      <section style={{ marginBottom: 18, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+        {Object.entries(categorySections).map(([id, section]) => (
+          <div key={id} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, background: theme.colors.bgCard, padding: '12px 14px' }}>
+            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 6 }}>{section.title}</div>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>What we read</div>
+            {section.read.map((line) => (
+              <div key={line} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginBottom: 4 }}>• {line}</div>
+            ))}
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '8px 0 4px' }}>What intelligence we add</div>
+            {section.intelligence.map((line) => (
+              <div key={line} style={{ fontSize: theme.fontSize.xs, color: theme.colors.accent, marginBottom: 4 }}>• {line}</div>
+            ))}
+          </div>
+        ))}
+      </section>
+
       <section style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted, marginBottom: 10 }}>
           Connected Systems
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 12 }}>
-          {visibleSystems.map((system) => (
-            <IntegrationCard
-              key={system.id}
-              system={system}
-              isSelected={activeSystemId === system.id}
-              onClick={() => setActiveSystemId((prev) => (prev === system.id ? null : system.id))}
-              cardRef={(el) => {
-                cardRefs.current[system.id] = el;
-              }}
-            />
-          ))}
+          {visibleSystems.map((system) => {
+            const vendorDetails = getVendorIntelligenceDetails(system.id);
+            return (
+              <div key={system.id} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <IntegrationCard
+                  system={system}
+                  isSelected={activeSystemId === system.id}
+                  onClick={() => setActiveSystemId((prev) => (prev === system.id ? null : system.id))}
+                  cardRef={(el) => {
+                    cardRefs.current[system.id] = el;
+                  }}
+                />
+                {vendorDetails && (
+                  <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, background: theme.colors.bgCard, padding: '8px 10px' }}>
+                    <div style={{ fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.colors.textMuted, marginBottom: 4 }}>
+                      Vendor Detail
+                    </div>
+                    <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>Reads: {vendorDetails.reads.join(' · ')}</div>
+                    <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.accent, marginTop: 4 }}>Adds: {vendorDetails.adds.join(' · ')}</div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -207,7 +239,7 @@ export function IntegrationsPage() {
                 style={{
                   height: '100%',
                   width: '200%',
-                  background: 'linear-gradient(90deg, rgba(34,197,94,0.9), rgba(59,130,246,0.9), rgba(34,197,94,0.9))',
+                  background: 'linear-gradient(90deg, rgba(243,146,45,0.95), rgba(42,42,42,0.9), rgba(243,146,45,0.95))',
                   backgroundSize: '200% 100%',
                   backgroundPosition: `${flowOffset}% 0`,
                   transition: 'background-position 0.15s linear',

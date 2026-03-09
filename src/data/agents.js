@@ -125,6 +125,7 @@ export const agentActions = [
     status: 'pending',
     impactMetric: '$2.1K F&B revenue protected',
     priority: 'medium',
+    memberId: 'mbr_146',
   },
   {
     id: 'agx_005',
@@ -136,6 +137,7 @@ export const agentActions = [
     status: 'approved',
     impactMetric: '+$1.4K projected same-day uplift',
     priority: 'medium',
+    memberId: 'mbr_312',
   },
   {
     id: 'agx_006',
@@ -147,6 +149,7 @@ export const agentActions = [
     status: 'approved',
     impactMetric: '$18K new-member opportunity',
     priority: 'low',
+    memberId: 'mbr_146',
   },
   {
     id: 'agx_007',
@@ -158,6 +161,7 @@ export const agentActions = [
     status: 'dismissed',
     impactMetric: '2 members flagged in watch-to-risk window',
     priority: 'low',
+    memberId: 'mbr_089',
   },
   {
     id: 'agx_008',
@@ -188,6 +192,7 @@ export const agentActions = [
     status: 'pending',
     impactMetric: '$780 incremental weekly revenue',
     priority: 'low',
+    memberId: 'mbr_312',
   },
   {
     id: 'agx_010',
@@ -199,6 +204,7 @@ export const agentActions = [
     status: 'approved',
     impactMetric: 'Prevents second-chance drop-off',
     priority: 'medium',
+    memberId: 'mbr_203',
   },
   {
     id: 'agx_011',
@@ -229,6 +235,7 @@ export const agentActions = [
     status: 'dismissed',
     impactMetric: '+$312 projected slot value',
     priority: 'low',
+    memberId: 'mbr_089',
   },
 ];
 
