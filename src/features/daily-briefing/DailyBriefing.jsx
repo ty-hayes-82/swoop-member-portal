@@ -16,6 +16,13 @@ export default function DailyBriefing() {
   const { navigate, viewMode, setViewMode } = useNavigation();
   const briefing = getDailyBriefing();
 
+  const recapItems = [
+    { label: 'Actions completed', value: '4 of 6 approved' },
+    { label: 'Open items carried forward', value: '2 awaiting owners' },
+    { label: 'Revenue recovered', value: '$2,340 estimated' },
+    { label: 'Member saves', value: '1 intervention successful' },
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
 
@@ -24,6 +31,64 @@ export default function DailyBriefing() {
         headline="James Whitfield filed a complaint Jan 18. It was never resolved. He resigned Jan 22 — $18K/year in dues lost."
         context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. The Jan 9 and Jan 28 gaps follow the same pattern."
       />
+
+      <div
+        style={{
+          background: `${theme.colors.success}0F`,
+          border: `1px solid ${theme.colors.success}33`,
+          borderRadius: theme.radius.md,
+          padding: theme.spacing.md,
+        }}
+      >
+        <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.sm }}>Yesterday Recap</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: theme.spacing.sm }}>
+          {recapItems.map((item) => (
+            <div key={item.label} style={{ background: theme.colors.bgCard, borderRadius: theme.radius.sm, padding: theme.spacing.sm, border: `1px solid ${theme.colors.border}` }}>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>{item.label}</div>
+              <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        style={{
+          background: theme.colors.bgCard,
+          borderRadius: theme.radius.md,
+          border: `1px solid ${theme.colors.borderLight}`,
+          borderLeft: '4px solid #4ADE80',
+          padding: theme.spacing.md,
+          boxShadow: theme.shadow.sm,
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+          <div>
+            <p style={{ fontSize: theme.fontSize.sm, fontWeight: 700, margin: 0 }}>Morning Briefing Sheet</p>
+            <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 4 }}>Print-ready summary for your 8am stand-up</p>
+          </div>
+          <button
+            type="button"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              background: '#4ADE80',
+              color: '#0B3B1F',
+              fontWeight: 700,
+              fontSize: theme.fontSize.sm,
+              borderRadius: theme.radius.md,
+              padding: '12px 18px',
+              border: 'none',
+              cursor: 'pointer',
+              minWidth: 240,
+            }}
+          >
+            <span role="img" aria-label="document">📄</span> Generate Today's Briefing
+          </button>
+          <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, margin: 0 }}>Share via email to department heads</p>
+        </div>
+      </div>
 
       {/* Mode switcher + print action */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

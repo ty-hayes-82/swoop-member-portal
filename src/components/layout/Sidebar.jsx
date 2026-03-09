@@ -205,7 +205,7 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
         >
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: theme.colors.accent, opacity: 0.6, flexShrink: 0 }} />
           <span style={{ fontSize: '10px', color: TEXT_MUTED, letterSpacing: '0.04em' }}>
-            Demo Environment · Oakmont Hills CC
+            Demo Environment — Oakmont Hills CC simulated data Jan 2026
           </span>
         </div>
       )}

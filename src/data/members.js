@@ -148,7 +148,7 @@ export const memberProfiles = {
     ],
     auditTrail: [
       { id: 'recommend', status: 'Recommended by Member Pulse', owner: 'Member Pulse', timestamp: '2026-01-17T06:02:00Z' },
-      { id: 'queued', status: 'Queued for GM review', owner: 'Agent Command', timestamp: '2026-01-17T06:05:00Z' },
+      { id: 'queued', status: 'Queued for GM review', owner: 'Recommended Actions', timestamp: '2026-01-17T06:05:00Z' },
     ],
   },
   mbr_089: {

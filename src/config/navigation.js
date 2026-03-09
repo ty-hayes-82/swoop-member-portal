@@ -69,10 +69,10 @@ export const navItems = [
   },
   {
     key: 'agent-command',
-    label: 'Agent Command',
+    label: 'Recommended Actions',
     icon: '⬡',
     color: theme.colors.navAgents,
-    subtitle: 'AI agents working on your behalf — approve, dismiss, configure.',
+    subtitle: 'Approve or assign high-impact actions before members feel the pain.',
     sourceSystems: ['All Systems'],
   },
   {
