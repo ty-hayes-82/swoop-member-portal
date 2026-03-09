@@ -30,6 +30,7 @@ const ROUTES = {
   'growth-pipeline': GrowthPipeline,
   'agent-command': AgentCommand,
   integrations: IntegrationsPage,
+  'location-intelligence': LocationIntelligence,
   'demo-mode': DemoMode,
   'member-profile': MemberProfilePage,
 };
