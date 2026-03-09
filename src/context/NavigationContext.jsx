@@ -30,9 +30,10 @@ export function NavigationProvider({ children }) {
   const [viewMode, setViewMode] = useState('today');
 
   const navigate = useCallback((routeKey, intent = null) => {
-    setCurrentRoute(routeKey);
+    const safeRoute = VALID_ROUTES.has(routeKey) ? routeKey : 'daily-briefing';
+    setCurrentRoute(safeRoute);
     setRouteIntent(intent);
-    setHash(routeKey);
+    setHash(safeRoute);
   }, []);
 
   // Listen for browser back/forward
