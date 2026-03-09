@@ -163,10 +163,7 @@ export const getMemberSummary = () => {
   const healthy = dist.find((h) => h.level === 'Healthy')?.count ?? 0;
   const apiSummary = _d?.memberSummary;
   const avgHealthScore = formatMaybeNumber(apiSummary?.avgHealthScore, 62);
-  const potentialDuesAtRisk = formatMaybeNumber(
-    apiSummary?.potentialDuesAtRisk,
-    (critical * 18000) + (atRisk * 15000)
-  );
+  const potentialDuesAtRisk = (critical * 18000) + (atRisk * 15000);
 
   return {
     total, healthy, atRisk, critical,
