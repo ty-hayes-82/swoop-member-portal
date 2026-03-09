@@ -1,5 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
-import { SoWhatCallout, Badge } from '@/components/ui';
+import { SoWhatCallout, Badge, Sparkline } from '@/components/ui';
 import TrendContext from '@/components/ui/TrendContext.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
 import { getPaceDistribution, getSlowRoundRate, getBottleneckHoles, getPaceFBImpact } from '@/services/operationsService';

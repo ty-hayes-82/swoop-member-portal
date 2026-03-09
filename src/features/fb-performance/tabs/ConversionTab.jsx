@@ -11,8 +11,8 @@ export default function ConversionTab() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: theme.spacing.md }}>
         {[
-          { label: 'Overall Conversion', value: `${(overall * 100).toFixed(0)}%`, accent: theme.colors.fb },
-          { label: 'Best Archetype',  value: '50%', sub: 'Die-Hard Golfer', accent: theme.colors.success },
+          { label: 'Overall Conversion', value: `${(overall * 100).toFixed(0)}%`, accent: theme.colors.chartBlue },
+          { label: 'Best Archetype',  value: '50%', sub: 'Die-Hard Golfer', accent: theme.colors.chartPurple },
           { label: 'Lowest Archetype', value: '10%', sub: 'Ghost',          accent: theme.colors.urgent },
         ].map(({ label, value, sub, accent }) => (
           <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
@@ -41,7 +41,7 @@ export default function ConversionTab() {
               contentStyle={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
                 borderRadius: 8, boxShadow: theme.shadow.md, fontSize: 12 }}
               labelStyle={{ color: theme.colors.textPrimary, fontWeight: 600 }} />
-            <Bar dataKey="rate" fill={theme.colors.fb} radius={[0, 4, 4, 0]} />
+            <Bar dataKey="rate" fill={theme.colors.chartPurple} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -10,7 +10,7 @@
   --bg-card:       #FFFFFF;
   --bg-card-hover: #F1F1F2;
   --bg-deep:       #EAEAEC;
-  --bg-sidebar:    #1F2F24;
+  --bg-sidebar:    #1A1A1A;
   --border:        #E4E4E7;
   --border-light:  #EFEFEF;
   --text-primary:  #18181B;
@@ -19,17 +19,17 @@
 
   --accent:     #F3922D;
 
-  --operations: #1A7A3C;
-  --fb:         #8B6420;
+  --operations: #F3922D;
+  --fb:         #2E7BB8;
   --members:    #5B3FA0;
-  --staffing:   #9A5800;
-  --pipeline:   #8B2258;
-  --briefing:   #1A5C8E;
-  --demo:       #8B6420;
+  --staffing:   #E07D20;
+  --pipeline:   #F472B6;
+  --briefing:   #2E7BB8;
+  --demo:       #F3922D;
 
   --urgent:  #C0392B;
   --warning: #B5760A;
-  --success: #1A6B34;
+  --success: #F3922D;
   --info:    #1A5C8E;
 
   --font-sans:  'DM Sans', system-ui, sans-serif;

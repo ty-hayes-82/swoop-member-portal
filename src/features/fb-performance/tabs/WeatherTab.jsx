@@ -17,7 +17,7 @@ export default function WeatherTab() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: theme.spacing.md }}>
         {[
           { label: 'Rain Impact — Golf', value: '−40%', sub: 'Demand reduction', accent: theme.colors.urgent },
-          { label: 'Rain Impact — F&B', value: '+15%', sub: 'Revenue opportunity', accent: theme.colors.success },
+          { label: 'Rain Impact — F&B', value: '+15%', sub: 'Revenue opportunity', accent: theme.colors.chartBlue },
         ].map(({ label, value, sub, accent }) => (
           <div key={label} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
             border: `1px solid ${theme.colors.border}`, padding: theme.spacing.lg, textAlign: 'center' }}>
@@ -52,10 +52,10 @@ export default function WeatherTab() {
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
                   color: theme.colors.textPrimary, fontWeight: 500 }}>{r.weather}</td>
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                  color: r.golf.startsWith('−') ? theme.colors.urgent : theme.colors.success,
+                  color: r.golf.startsWith('−') ? theme.colors.urgent : theme.colors.chartBlue,
                   fontFamily: theme.fonts.mono }}>{r.golf}</td>
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                  color: r.fb.startsWith('+') ? theme.colors.success : theme.colors.textSecondary,
+                  color: r.fb.startsWith('+') ? theme.colors.chartBlue : theme.colors.textSecondary,
                   fontFamily: theme.fonts.mono }}>{r.fb}</td>
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
                   color: theme.colors.textMuted, fontSize: theme.fontSize.xs }}>{r.note}</td>
@@ -78,7 +78,7 @@ export default function WeatherTab() {
               <span style={{ color: theme.colors.urgent, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>
                 Golf: ${d.golfRevenue.toLocaleString()}
               </span>
-              <span style={{ color: theme.colors.success, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>
+              <span style={{ color: theme.colors.chartBlue, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>
                 F&B: ${d.fbRevenue.toLocaleString()}
               </span>
             </div>
