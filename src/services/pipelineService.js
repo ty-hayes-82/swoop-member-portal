@@ -4,6 +4,14 @@ import { warmLeads, memberWaitlistEntries } from '@/data/pipeline';
 
 let _d = null;
 
+const deriveScoreByTier = (tier = 'warm') => {
+  const normalized = tier.toLowerCase();
+  if (normalized === 'hot') return 92;
+  if (normalized === 'warm') return 84;
+  if (normalized === 'cool') return 76;
+  return 70;
+};
+
 export const _init = async () => {
   try {
     const res = await fetch('/api/pipeline');
@@ -11,7 +19,34 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-export const getWarmLeads = () => _d ? _d.warmLeads : warmLeads;
+export const getWarmLeads = () => {
+  if (!_d || !_d.warmLeads) return warmLeads;
+  const staticMap = warmLeads.reduce((acc, lead) => {
+    acc[lead.name] = lead;
+    acc[lead.guestName || lead.name] = lead;
+    return acc;
+  }, {});
+
+  return _d.warmLeads.map((apiLead) => {
+    const fallback = staticMap[apiLead.name] || staticMap[apiLead.guestName];
+    const tier = apiLead.tier || fallback?.tier || 'warm';
+    const visitCount = apiLead.visitCount ?? fallback?.visitCount ?? fallback?.rounds ?? 0;
+    const merged = {
+      ...fallback,
+      ...apiLead,
+    };
+    merged.guestName = merged.guestName || merged.name;
+    merged.sponsor = merged.sponsor || merged.sponsoredBy || fallback?.sponsor;
+    merged.rounds = merged.rounds ?? visitCount;
+    merged.dining = merged.dining ?? Math.floor(visitCount * 0.6);
+    merged.events = merged.events ?? Math.floor(visitCount * 0.2);
+    merged.score = merged.score ?? deriveScoreByTier(tier);
+    merged.tier = tier;
+    if (merged.potentialDues == null && fallback?.potentialDues) merged.potentialDues = fallback.potentialDues;
+    if (!merged.likelyArchetype && fallback?.likelyArchetype) merged.likelyArchetype = fallback.likelyArchetype;
+    return merged;
+  });
+};
 
 export const getPipelineSummary = () => {
   if (_d) return _d.pipelineSummary;
