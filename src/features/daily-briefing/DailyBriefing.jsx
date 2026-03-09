@@ -51,6 +51,45 @@ export default function DailyBriefing() {
         </div>
       </div>
 
+      <div
+        style={{
+          background: theme.colors.bgCard,
+          borderRadius: theme.radius.md,
+          border: `1px solid ${theme.colors.borderLight}`,
+          borderLeft: '4px solid #4ADE80',
+          padding: theme.spacing.md,
+          boxShadow: theme.shadow.sm,
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+          <div>
+            <p style={{ fontSize: theme.fontSize.sm, fontWeight: 700, margin: 0 }}>Morning Briefing Sheet</p>
+            <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 4 }}>Print-ready summary for your 8am stand-up</p>
+          </div>
+          <button
+            type="button"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              background: '#4ADE80',
+              color: '#0B3B1F',
+              fontWeight: 700,
+              fontSize: theme.fontSize.sm,
+              borderRadius: theme.radius.md,
+              padding: '12px 18px',
+              border: 'none',
+              cursor: 'pointer',
+              minWidth: 240,
+            }}
+          >
+            <span role="img" aria-label="document">📄</span> Generate Today's Briefing
+          </button>
+          <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, margin: 0 }}>Share via email to department heads</p>
+        </div>
+      </div>
+
       {/* Mode switcher + print action */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', background: theme.colors.bgDeep, borderRadius: theme.radius.md, padding: '3px', border: `1px solid ${theme.colors.border}` }}>
