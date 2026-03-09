@@ -1,135 +1,306 @@
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { theme } from '@/config/theme';
 
-const MAP_WIDTH = 1000;
-const MAP_HEIGHT = 640;
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVwMDAwMGwycm5rZXJ0MG1mZmNtIn0.demo';
+const MAP_CENTER = [-111.89, 33.55];
+const MAP_STYLE = 'mapbox://styles/mapbox/satellite-streets-v12';
+
+const HEAT_OFFSETS = [
+  [0, 0],
+  [0.00018, 0.00012],
+  [-0.00016, 0.0001],
+  [0.00012, -0.00012],
+  [-0.00014, -0.00008],
+];
 
 const ZONES = [
-  { id: 'clubhouse', label: 'Clubhouse', polygon: '120,180 290,150 340,260 160,290', tone: '#2A2A2A' },
-  { id: 'grill-room', label: 'Grill Room', polygon: '220,250 320,230 350,300 250,320', tone: '#F3922D' },
-  { id: 'main-dining', label: 'Main Dining', polygon: '260,190 360,170 390,230 290,250', tone: '#FFB347' },
-  { id: 'pro-shop', label: 'Pro Shop', polygon: '365,265 455,245 495,315 400,335', tone: '#D97706' },
-  { id: 'driving-range', label: 'Driving Range', polygon: '510,150 790,120 900,280 620,320', tone: '#F5B97A' },
-  { id: 'pool', label: 'Pool & Fitness', polygon: '120,335 260,320 300,430 145,470', tone: '#A1A1AA' },
-  { id: 'course', label: 'Course', polygon: '390,330 940,280 960,610 430,620', tone: '#3F3F46' },
+  { id: 'clubhouse', name: 'Clubhouse', center: [-111.8918, 33.5509], defaultCount: 24, activity: 'High' },
+  { id: 'grill-room', name: 'Grill Room', center: [-111.8924, 33.5504], defaultCount: 18, activity: 'High' },
+  { id: 'pro-shop', name: 'Pro Shop', center: [-111.8906, 33.5515], defaultCount: 14, activity: 'Medium' },
+  { id: 'practice-green', name: 'Practice Green', center: [-111.8894, 33.5518], defaultCount: 12, activity: 'Medium' },
+  { id: 'first-tee', name: 'First Tee', center: [-111.8897, 33.553], defaultCount: 16, activity: 'Medium' },
+  { id: 'pool', name: 'Pool & Fitness', center: [-111.8933, 33.5501], defaultCount: 10, activity: 'Low' },
+  { id: 'parking', name: 'Member Parking', center: [-111.8942, 33.5512], defaultCount: 8, activity: 'Low' },
 ];
 
 const HEALTH_COLORS = {
-  healthy: theme.colors.accent,
-  watch: theme.colors.warning,
-  'at-risk': theme.colors.urgent,
+  healthy: '#4ADE80',
+  watch: '#F3922D',
+  'at-risk': '#FF5C35',
   critical: '#8E1C17',
 };
 
-const minMax = (arr) => ({ min: Math.min(...arr), max: Math.max(...arr) });
-
-function scalePosition(value, min, max, size, padding = 44) {
-  if (!Number.isFinite(value) || max === min) return size / 2;
-  const ratio = (value - min) / (max - min);
-  return padding + ratio * (size - padding * 2);
+function buildZoneFeatures() {
+  return {
+    type: 'FeatureCollection',
+    features: ZONES.flatMap((zone) => {
+      const pointCount = Math.min(HEAT_OFFSETS.length, Math.max(3, Math.round(zone.defaultCount / 6)));
+      return HEAT_OFFSETS.slice(0, pointCount).map((offset, index) => ({
+        type: 'Feature',
+        properties: {
+          zoneId: zone.id,
+          intensity: zone.defaultCount * (0.7 + index * 0.08),
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            zone.center[0] + offset[0] * (0.4 + index * 0.12),
+            zone.center[1] + offset[1] * (0.4 + index * 0.12),
+          ],
+        },
+      }));
+    }),
+  };
 }
 
-function getMemberXY(member, latMin, latMax, lngMin, lngMax) {
+const zoneCenterMap = Object.fromEntries(ZONES.map((zone) => [zone.id, zone.center]));
+
+function resolveZoneCenter(zoneId, zoneName) {
+  if (zoneCenterMap[zoneId]) return zoneCenterMap[zoneId];
+  if (zoneName) {
+    const normalized = zoneName.toLowerCase();
+    const match = ZONES.find((zone) =>
+      zone.name.toLowerCase().includes(normalized) || normalized.includes(zone.name.toLowerCase())
+    );
+    if (match) return match.center;
+  }
+  return zoneCenterMap.clubhouse;
+}
+
+function offsetCoordinates(base, key) {
+  if (!base) return MAP_CENTER;
+  const hash = Array.from(key).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const latOffset = ((hash % 7) - 3) * 0.00006;
+  const lngOffset = (((hash >> 3) % 7) - 3) * 0.00006;
+  return [base[0] + lngOffset, base[1] + latOffset];
+}
+
+function buildMemberFeatures(members) {
   return {
-    x: scalePosition(member.lng, lngMin, lngMax, MAP_WIDTH),
-    y: MAP_HEIGHT - scalePosition(member.lat, latMin, latMax, MAP_HEIGHT),
+    type: 'FeatureCollection',
+    features: members.map((member) => {
+      const zoneCenter = resolveZoneCenter(member.zoneId, member.zone);
+      const coordinates = offsetCoordinates(zoneCenter, member.memberId);
+      return {
+        type: 'Feature',
+        properties: {
+          memberId: member.memberId,
+          status: member.status,
+          name: member.name,
+        },
+        geometry: {
+          type: 'Point',
+          coordinates,
+        },
+      };
+    }),
+  };
+}
+
+function buildStaffFeatures(staffMembers) {
+  return {
+    type: 'FeatureCollection',
+    features: staffMembers.map((staff) => {
+      const zoneCenter = resolveZoneCenter(staff.zoneId, staff.zone);
+      const coordinates = offsetCoordinates(zoneCenter, staff.id ?? staff.name ?? 'staff');
+      return {
+        type: 'Feature',
+        properties: {
+          name: staff.name,
+          role: staff.role,
+          zone: staff.zone,
+        },
+        geometry: {
+          type: 'Point',
+          coordinates,
+        },
+      };
+    }),
   };
 }
 
 function ClubMap({ members = [], staffMembers = [], selectedMemberId, onSelectMember, densityByZone = {} }) {
-  const latStats = useMemo(() => members.length ? minMax(members.map((m) => m.lat)) : { min: 34.038, max: 34.045 }, [members]);
-  const lngStats = useMemo(() => members.length ? minMax(members.map((m) => m.lng)) : { min: -84.602, max: -84.594 }, [members]);
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
 
-  const memberPoints = useMemo(() => members.map((member) => ({
-    member,
-    ...getMemberXY(member, latStats.min, latStats.max, lngStats.min, lngStats.max),
-  })), [members, latStats.max, latStats.min, lngStats.max, lngStats.min]);
+  const heatmapFeatures = useMemo(() => buildZoneFeatures(), []);
+  const memberGeoJson = useMemo(() => buildMemberFeatures(members), [members]);
+  const staffGeoJson = useMemo(() => buildStaffFeatures(staffMembers), [staffMembers]);
 
-  const selected = memberPoints.find((entry) => entry.member.memberId === selectedMemberId);
+  const legendZones = useMemo(() => ZONES.map((zone) => ({
+    ...zone,
+    count: densityByZone[zone.id] ?? zone.defaultCount,
+  })), [densityByZone]);
+
+  useEffect(() => {
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: MAP_STYLE,
+      center: MAP_CENTER,
+      zoom: 15.7,
+      pitch: 45,
+      bearing: -12,
+    });
+
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
+
+    map.on('load', () => {
+      map.addSource('member-activity', {
+        type: 'geojson',
+        data: heatmapFeatures,
+      });
+      map.addLayer({
+        id: 'member-activity-heat',
+        type: 'heatmap',
+        source: 'member-activity',
+        paint: {
+          'heatmap-weight': ['interpolate', ['linear'], ['get', 'intensity'], 0, 0, 40, 0.6, 70, 1],
+          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 14, 0.8, 17, 1.6],
+          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 14, 22, 17, 40],
+          'heatmap-color': [
+            'interpolate',
+            ['linear'],
+            ['heatmap-density'],
+            0, 'rgba(0,0,0,0)',
+            0.2, 'rgba(16, 46, 30, 0.35)',
+            0.4, 'rgba(28, 92, 54, 0.55)',
+            0.65, 'rgba(52, 168, 95, 0.8)',
+            1, 'rgba(74, 222, 128, 0.95)'
+          ],
+          'heatmap-opacity': 0.85,
+        },
+      });
+      map.addLayer({
+        id: 'member-activity-points',
+        type: 'circle',
+        source: 'member-activity',
+        minzoom: 16,
+        paint: {
+          'circle-radius': 5,
+          'circle-color': '#4ADE80',
+          'circle-opacity': 0.7,
+        },
+      });
+
+      map.addSource('live-members', {
+        type: 'geojson',
+        data: memberGeoJson,
+      });
+      map.addLayer({
+        id: 'live-member-points',
+        type: 'circle',
+        source: 'live-members',
+        paint: {
+          'circle-radius': 5.5,
+          'circle-color': [
+            'match',
+            ['get', 'status'],
+            'healthy', HEALTH_COLORS.healthy,
+            'watch', HEALTH_COLORS.watch,
+            'at-risk', HEALTH_COLORS['at-risk'],
+            'critical', HEALTH_COLORS.critical,
+            '#F7A341'
+          ],
+          'circle-stroke-color': '#FFFFFF',
+          'circle-stroke-width': 1.5,
+        },
+      });
+      map.addLayer({
+        id: 'selected-member-glow',
+        type: 'circle',
+        source: 'live-members',
+        paint: {
+          'circle-radius': 10,
+          'circle-color': 'rgba(255,255,255,0.0)',
+          'circle-stroke-color': theme.colors.accent,
+          'circle-stroke-width': 2.5,
+        },
+        filter: ['==', ['get', 'memberId'], '•'],
+      });
+
+      map.addSource('staff-members', {
+        type: 'geojson',
+        data: staffGeoJson,
+      });
+      map.addLayer({
+        id: 'staff-members',
+        type: 'symbol',
+        source: 'staff-members',
+        layout: {
+          'icon-image': 'marker-15',
+          'icon-size': 1.1,
+          'icon-offset': [0, -6],
+        },
+        paint: {
+          'icon-color': theme.colors.accent,
+        },
+      });
+
+      map.on('click', 'live-member-points', (event) => {
+        const memberId = event.features?.[0]?.properties?.memberId;
+        if (memberId && onSelectMember) {
+          onSelectMember(memberId);
+        }
+      });
+
+      map.getCanvas().style.cursor = 'crosshair';
+    });
+
+    mapRef.current = map;
+    return () => map.remove();
+  }, [heatmapFeatures, onSelectMember]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const source = mapRef.current.getSource('live-members');
+    if (source) source.setData(memberGeoJson);
+  }, [memberGeoJson]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const source = mapRef.current.getSource('staff-members');
+    if (source) source.setData(staffGeoJson);
+  }, [staffGeoJson]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const map = mapRef.current;
+    if (map.getLayer('selected-member-glow')) {
+      if (selectedMemberId) {
+        map.setFilter('selected-member-glow', ['==', ['get', 'memberId'], selectedMemberId]);
+      } else {
+        map.setFilter('selected-member-glow', ['==', ['get', 'memberId'], '•']);
+      }
+    }
+  }, [selectedMemberId]);
+
+  const totalMembers = members.length || legendZones.reduce((sum, zone) => sum + zone.count, 0);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 420, borderRadius: theme.radius.md, overflow: 'hidden', background: '#101010' }}>
-      <svg viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} width="100%" height="100%" role="img" aria-label="Oakmont Hills location map">
-        <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2A2A2A" strokeWidth="1" />
-          </pattern>
-        </defs>
-        <rect x="0" y="0" width={MAP_WIDTH} height={MAP_HEIGHT} fill="#0F0F0F" />
-        <rect x="0" y="0" width={MAP_WIDTH} height={MAP_HEIGHT} fill="url(#grid)" opacity="0.7" />
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <div ref={mapContainerRef} style={{ width: '100%', height: '100%', minHeight: 500, borderRadius: theme.radius.md, overflow: 'hidden' }} />
 
-        {ZONES.map((zone) => {
-          const density = densityByZone[zone.id] ?? 0;
-          const opacity = Math.min(0.44, 0.12 + density * 0.02);
-          return (
-            <g key={zone.id}>
-              <polygon points={zone.polygon} fill={zone.tone} opacity={opacity} stroke={zone.tone} strokeWidth="2" />
-              <text
-                x={zone.id === 'course' ? 640 : zone.id === 'driving-range' ? 700 : zone.id === 'clubhouse' ? 220 : zone.id === 'pool' ? 210 : 300}
-                y={zone.id === 'course' ? 470 : zone.id === 'driving-range' ? 190 : zone.id === 'clubhouse' ? 210 : zone.id === 'pool' ? 390 : 280}
-                fill="#EFEFEF"
-                fontSize="14"
-                fontWeight="600"
-                textAnchor="middle"
-              >
-                {zone.label}
-              </text>
-            </g>
-          );
-        })}
-
-        {staffMembers.map((staff) => {
-          const point = getMemberXY(staff, latStats.min, latStats.max, lngStats.min, lngStats.max);
-          return (
-            <g key={staff.id}>
-              <rect x={point.x - 7} y={point.y - 7} width="14" height="14" rx="2" fill={theme.colors.accent} transform={`rotate(45 ${point.x} ${point.y})`} />
-            </g>
-          );
-        })}
-
-        {memberPoints.map(({ member, x, y }) => {
-          const color = HEALTH_COLORS[member.status] ?? theme.colors.warning;
-          const isSelected = member.memberId === selectedMemberId;
-          return (
-            <g key={member.memberId} onClick={() => onSelectMember?.(member.memberId)} style={{ cursor: 'pointer' }}>
-              {member.needsAttention && (
-                <circle cx={x} cy={y} r="16" fill="none" stroke={color} strokeWidth="2" opacity="0.6">
-                  <animate attributeName="r" values="9;23" dur="1.7s" repeatCount="indefinite" />
-                  <animate attributeName="opacity" values="0.9;0" dur="1.7s" repeatCount="indefinite" />
-                </circle>
-              )}
-              <circle cx={x} cy={y} r={isSelected ? 8 : 6} fill={color} stroke="#FFFFFF" strokeWidth={isSelected ? 2 : 1.5} />
-            </g>
-          );
-        })}
-      </svg>
-
-      {selected && (
-        <div
-          style={{
-            position: 'absolute',
-            left: `${Math.min(78, (selected.x / MAP_WIDTH) * 100)}%`,
-            top: `${Math.max(8, (selected.y / MAP_HEIGHT) * 100 - 8)}%`,
-            transform: 'translate(-20%, -110%)',
-            background: 'rgba(15,15,15,0.95)',
-            border: `1px solid ${theme.colors.accent}66`,
-            borderRadius: theme.radius.sm,
-            color: theme.colors.white,
-            minWidth: 210,
-            padding: theme.spacing.sm,
-            boxShadow: theme.shadow.md,
-          }}
-        >
-          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700 }}>{selected.member.name}</div>
-          <div style={{ fontSize: theme.fontSize.xs, color: '#E4E4E7' }}>{selected.member.zone} · {selected.member.timeInZone}</div>
-          <div style={{ marginTop: 4, fontSize: theme.fontSize.xs, color: HEALTH_COLORS[selected.member.status] ?? theme.colors.warning }}>
-            Health {selected.member.healthScore}
-          </div>
+      <div style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(9,12,16,0.9)', color: theme.colors.white, borderRadius: theme.radius.md, border: `1px solid ${theme.colors.border}`, padding: '12px 16px', minWidth: 260, boxShadow: theme.shadow.lg }}>
+        <div style={{ fontSize: theme.fontSize.xs, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.colors.textMuted }}>Live member density</div>
+        <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono, fontWeight: 700 }}>{totalMembers}</div>
+        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginBottom: 10 }}>On property right now</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 210, overflowY: 'auto' }}>
+          {legendZones.map((zone) => (
+            <div key={zone.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+              <div>
+                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>{zone.name}</div>
+                <div style={{ fontSize: theme.fontSize.xs, opacity: 0.75 }}>Activity · {zone.activity}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700 }}>{zone.count}</div>
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>members</div>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
-
-      <div style={{ position: 'absolute', right: 10, bottom: 10, background: 'rgba(24,24,24,0.92)', border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '8px 10px', color: theme.colors.white, fontSize: 11 }}>
-        Oakmont Hills zones · live member telemetry
       </div>
     </div>
   );

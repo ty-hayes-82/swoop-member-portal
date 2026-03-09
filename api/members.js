@@ -64,7 +64,7 @@ export default async function handler(req, res) {
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
         WHERE w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
           AND w.engagement_score < 50
-          AND m.membership_status = 'active'
+          AND m.membership_status <> 'resigned'
         ORDER BY w.engagement_score ASC
         LIMIT 20`,
 
@@ -126,7 +126,7 @@ export default async function handler(req, res) {
         FROM members m
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
         WHERE w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
-          AND m.membership_status = 'active'`,
+          AND m.membership_status <> 'resigned'`,
     ]);
 
     // Compute member summary from results
