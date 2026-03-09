@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { AGENT_ACTION_TYPES } from '@/config/actionTypes';
+import MemberLink from '@/components/MemberLink.jsx';
+import { getMemberProfile } from '@/services/memberService';
 import { getAgentById } from '@/services/agentService';
 
 function formatTime(timestamp) {
@@ -26,6 +28,7 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
   const isDone = status !== 'pending';
   const typeMeta = AGENT_ACTION_TYPES[action.actionType] ?? { icon: '⬡', label: action.actionType, color: theme.colors.agentCyan };
   const agent = getAgentById(action.agentId);
+  const memberProfile = action.memberId ? getMemberProfile(action.memberId) : null;
 
   const trigger = (handler) => {
     setPulse(true);
@@ -78,6 +81,13 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
       <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, fontWeight: 600, lineHeight: 1.5, marginBottom: 8 }}>
         {action.description}
       </div>
+      {memberProfile && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: 8 }}>
+          <MemberLink memberId={memberProfile.memberId} style={{ fontWeight: 700 }}>{memberProfile.name}</MemberLink>
+          <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{memberProfile.tier}</span>
+          <span style={{ fontSize: '11px', fontFamily: theme.fonts.mono, color: theme.colors.textSecondary }}>Score {memberProfile.healthScore}</span>
+        </div>
+      )}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
         <span

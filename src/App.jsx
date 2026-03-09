@@ -15,7 +15,8 @@ import { GrowthPipeline } from '@/features/growth-pipeline';
 import { AgentCommand } from '@/features/agent-command';
 import { DemoMode } from '@/features/demo-mode';
 import { IntegrationsPage } from '@/features/integrations';
-import MemberProfileDrawer from '@/components/members/MemberProfileDrawer.jsx';
+import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
+import LocationIntelligence from '@/features/location-intelligence/LocationIntelligence.jsx';
 import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import { theme } from '@/config/theme';
 

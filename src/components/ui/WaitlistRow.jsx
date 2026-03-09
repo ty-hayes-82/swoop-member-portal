@@ -2,7 +2,7 @@
 // Props contract: see ARCHITECTURE.md §7
 
 import { useState } from 'react';
-import MemberLink from '@/components/members/MemberLink.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import { theme } from '@/config/theme';
 import ArchetypeBadge from './ArchetypeBadge';
 

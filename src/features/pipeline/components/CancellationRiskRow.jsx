@@ -1,5 +1,5 @@
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
-import MemberLink from '@/components/members/MemberLink.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import { theme } from '@/config/theme';
 
 

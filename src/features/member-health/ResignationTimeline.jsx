@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import MemberLink from '@/components/members/MemberLink.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import { getResignationScenarios } from '@/services/memberService';
 import { theme } from '@/config/theme';
 

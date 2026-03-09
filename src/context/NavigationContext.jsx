@@ -7,7 +7,7 @@ const NavigationContext = createContext(null);
 const VALID_ROUTES = new Set([
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
   'member-health', 'staffing-service', 'growth-pipeline', 'agent-command',
-  'integrations', 'demo-mode', 'member-profile',
+  'location-intelligence', 'integrations', 'demo-mode', 'member-profile',
 ]);
 
 function parseHash() {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { theme } from '@/config/theme';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import { AgentInboxStrip } from '@/components/ui';
 import { getTopPendingAction } from '@/services/agentService';
 import { useApp } from '@/context/AppContext';
@@ -57,16 +58,12 @@ function MiniMemberRow({ member, onNavigate }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-          <span
-            style={{
-              fontSize: theme.fontSize.sm,
-              fontWeight: 600,
-              color: hovered ? theme.colors.accent : theme.colors.textPrimary,
-              transition: 'color 0.12s ease',
-            }}
+          <MemberLink
+            memberId={member.memberId}
+            style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: hovered ? theme.colors.accent : theme.colors.textPrimary, transition: 'color 0.12s ease' }}
           >
             {member.name}
-          </span>
+          </MemberLink>
           <ArchetypeBadge archetype={member.archetype} size="xs" />
         </div>
         <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{member.risk}</div>
@@ -139,8 +136,8 @@ export default function TodayMode({ onNavigate }) {
       icon: '👥',
       headline: '2 more at-risk members have tee times today.',
       members: [
-        { name: 'Anne Jordan', score: 38, archetype: 'Weekend Warrior', risk: '3 rounds in 3 months, down from 12 in October', time: '8:14 AM' },
-        { name: 'Robert Callahan', score: 41, archetype: 'Declining', risk: 'Dining only — hitting F&B minimum, nothing more', time: '10:40 AM' },
+        { name: 'Anne Jordan', memberId: 'mbr_089', score: 38, archetype: 'Weekend Warrior', risk: '3 rounds in 3 months, down from 12 in October', time: '8:14 AM' },
+        { name: 'Robert Callahan', memberId: 'mbr_271', score: 41, archetype: 'Declining', risk: 'Dining only — hitting F&B minimum, nothing more', time: '10:40 AM' },
       ],
       bullets: [
         'Both members are in the bottom quartile of engagement.',
@@ -162,6 +159,23 @@ export default function TodayMode({ onNavigate }) {
 
   const urgencyBorder = { urgent: theme.colors.urgent, warning: theme.colors.warning, neutral: theme.colors.border };
   const urgencyBg = { urgent: `${theme.colors.urgent}06`, warning: `${theme.colors.warning}06`, neutral: theme.colors.bgCard };
+  const renderHeadline = (item) => {
+    if (!item.memberName || !item.memberId) return item.headline;
+    const segments = item.headline.split(item.memberName);
+    if (segments.length === 1) {
+      return (
+        <MemberLink memberId={item.memberId} style={{ fontWeight: 700 }}>{item.headline}</MemberLink>
+      );
+    }
+    return (
+      <>
+        {segments[0]}
+        <MemberLink memberId={item.memberId} style={{ fontWeight: 700 }}>{item.memberName}</MemberLink>
+        {segments.slice(1).join(item.memberName)}
+      </>
+    );
+  };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
@@ -313,7 +327,7 @@ export default function TodayMode({ onNavigate }) {
             <span style={{ fontSize: '22px', flexShrink: 0, marginTop: 2 }}>{item.icon}</span>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-                <div style={{ fontSize: '20px', fontWeight: 700, color: theme.colors.textPrimary, lineHeight: 1.3 }}>{item.headline}</div>
+                <div style={{ fontSize: '20px', fontWeight: 700, color: theme.colors.textPrimary, lineHeight: 1.3 }}>{renderHeadline(item)}</div>
                 {item.stakes && (
                   <div
                     style={{

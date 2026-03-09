@@ -1,5 +1,5 @@
 import { SoWhatCallout, ArchetypeBadge } from '@/components/ui';
-import MemberLink from '@/components/members/MemberLink.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import CancellationRiskRow from '@/features/pipeline/components/CancellationRiskRow';
 import { DEMO_DATE } from '@/config/constants';
 import { cancellationProbabilities, memberWaitlistEntries } from '@/data/pipeline';
