@@ -68,6 +68,14 @@ export const agentActions = [
     status: 'pending',
     impactMetric: '$18K dues retention at risk',
     priority: 'high',
+    memberId: 'mbr_203',
+    dueBy: '2026-01-17T09:00:00Z',
+    suggestedOwner: 'GM · Alice Monroe',
+    recommendedChannel: 'Call',
+    confidence: 0.93,
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Member Pulse', timestamp: '2026-01-17T06:02:00Z' },
+    ],
   },
   {
     id: 'agx_002',
@@ -79,6 +87,14 @@ export const agentActions = [
     status: 'pending',
     impactMetric: '68% churn-risk reduction for flagged member',
     priority: 'high',
+    memberId: 'mbr_089',
+    dueBy: '2026-01-17T07:10:00Z',
+    suggestedOwner: 'Membership Director · Rafael Reyes',
+    recommendedChannel: 'SMS',
+    confidence: 0.88,
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Demand Optimizer', timestamp: '2026-01-17T06:04:00Z' },
+    ],
   },
   {
     id: 'agx_003',
@@ -90,6 +106,14 @@ export const agentActions = [
     status: 'pending',
     impactMetric: 'Response time cut by 85%',
     priority: 'medium',
+    memberId: 'mbr_203',
+    dueBy: '2026-01-17T08:30:00Z',
+    suggestedOwner: 'Service Recovery · Maya Chen',
+    recommendedChannel: 'Email',
+    confidence: 0.82,
+    auditTrail: [
+      { id: 'rec', status: 'Queued for drafting', owner: 'Labor Optimizer', timestamp: '2026-01-17T06:09:00Z' },
+    ],
   },
   {
     id: 'agx_004',
@@ -145,6 +169,14 @@ export const agentActions = [
     status: 'pending',
     impactMetric: '$9.6K renewal risk mitigation',
     priority: 'high',
+    memberId: 'mbr_271',
+    dueBy: '2026-01-17T12:00:00Z',
+    suggestedOwner: 'F&B Director · Maya Chen',
+    recommendedChannel: 'Call',
+    confidence: 0.9,
+    auditTrail: [
+      { id: 'rec', status: 'Escalated', owner: 'Service Recovery', timestamp: '2026-01-17T07:27:00Z' },
+    ],
   },
   {
     id: 'agx_009',
@@ -178,6 +210,14 @@ export const agentActions = [
     status: 'pending',
     impactMetric: 'Complaint closure SLA within 4 hours',
     priority: 'high',
+    memberId: 'mbr_203',
+    dueBy: '2026-01-17T12:30:00Z',
+    suggestedOwner: 'GM · Alice Monroe',
+    recommendedChannel: 'Call',
+    confidence: 0.91,
+    auditTrail: [
+      { id: 'rec', status: 'Escalated', owner: 'Service Recovery', timestamp: '2026-01-17T08:43:00Z' },
+    ],
   },
   {
     id: 'agx_012',

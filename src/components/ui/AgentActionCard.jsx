@@ -19,7 +19,7 @@ const PRIORITY_COLOR = {
   low: theme.colors.agentDismissed,
 };
 
-export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }) {
+export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, onSelect }) {
   const [pulse, setPulse] = useState(false);
   const [exiting, setExiting] = useState(false);
   const status = overrideStatus ?? action.status;
@@ -36,8 +36,14 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
     }, 140);
   };
 
+  const handleSelect = () => {
+    if (onSelect) onSelect(action);
+  };
+
   return (
     <div
+      onClick={handleSelect}
+      role={onSelect ? 'button' : undefined}
       style={{
         background: theme.colors.bgCard,
         border: `1px solid ${theme.colors.border}`,
@@ -49,6 +55,7 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
         maxHeight: exiting ? 0 : 500,
         overflow: 'hidden',
         transition: 'transform 0.14s ease, opacity 0.2s ease, max-height 0.25s ease',
+        cursor: onSelect ? 'pointer' : 'default',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -105,7 +112,10 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
       {!isDone && (
         <div style={{ display: 'flex', gap: 8 }}>
           <button
-            onClick={() => trigger(onApprove)}
+            onClick={(event) => {
+              event.stopPropagation();
+              trigger(onApprove);
+            }}
             style={{
               flex: 1,
               borderRadius: theme.radius.sm,
@@ -121,7 +131,10 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus }
             Approve
           </button>
           <button
-            onClick={() => trigger(onDismiss)}
+            onClick={(event) => {
+              event.stopPropagation();
+              trigger(onDismiss);
+            }}
             style={{
               borderRadius: theme.radius.sm,
               border: `1px solid ${theme.colors.border}`,
