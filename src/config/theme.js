@@ -116,8 +116,8 @@ export const theme = {
     serif: "'DM Serif Display', serif",
   },
   fontSize: {
-    xs: '11px', sm: '13px', md: '15px',
-    lg: '18px', xl: '24px', xxl: '36px', hero: '48px',
+    xs: '12px', sm: '14px', md: '16px',
+    lg: '20px', xl: '26px', xxl: '38px', hero: '52px',
   },
   shadow: {
     sm:  '0 1px 3px rgba(0,0,0,0.06)',

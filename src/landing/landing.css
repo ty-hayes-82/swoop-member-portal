@@ -8,6 +8,11 @@
   box-sizing: border-box;
 }
 
+.landing-page p {
+  font-size: clamp(1rem, 1rem + 0.2vw, 1.125rem);
+  line-height: 1.6;
+}
+
 .landing-hero-ctas {
   display: flex;
   gap: 16px;
@@ -216,7 +221,7 @@
   }
 
   .landing-page p {
-    font-size: 15px !important;
+    font-size: 16px !important;
   }
 
   .landing-demo-form {
