@@ -21,11 +21,13 @@ export const healthDistribution = [
 ];
 
 export const atRiskMembers = [
-  { memberId: 'mbr_042', name: 'Kevin Hurst',    score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining' },
-  { memberId: 'mbr_117', name: 'Linda Leonard',  score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost' },
-  { memberId: 'mbr_203', name: 'James Whitfield',     score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active' },
-  { memberId: 'mbr_089', name: 'Anne Jordan',    score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior' },
-  { memberId: 'mbr_271', name: 'Robert Callahan',     score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining' },
+  { memberId: 'mbr_042', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining' },
+  { memberId: 'mbr_117', name: 'Linda Leonard', score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost' },
+  { memberId: 'mbr_203', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active' },
+  { memberId: 'mbr_089', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior' },
+  { memberId: 'mbr_271', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining' },
+  { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining visits down 60% and events skipped', archetype: 'Social Butterfly' },
+  { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Practicing but skipping clubhouse spend; slow-play complaints unresolved', archetype: 'Balanced Active' },
 ];
 
 export const resignationScenarios = [
@@ -87,6 +89,7 @@ export const resignationScenarios = [
   },
 ];
 
+
 export const memberProfiles = {
   mbr_203: {
     memberId: 'mbr_203',
@@ -99,6 +102,17 @@ export const memberProfiles = {
     duesAnnual: 18000,
     memberValueAnnual: 26000,
     preferredChannel: 'Call',
+    lastSeenLocation: 'Hole 14 · North Course',
+    family: [
+      { name: 'Erin Whitfield', relation: 'Spouse', notes: 'Loves Grill Room wine dinners' },
+      { name: 'Logan Whitfield', relation: 'Son', notes: 'Junior golf clinics' },
+    ],
+    preferences: {
+      favoriteSpots: ['Grill Room booth 12', 'North course back nine'],
+      teeWindows: 'Thu/Fri 7:00–8:30 AM',
+      dining: 'Prefers slow mornings with coffee refills and booth seating',
+      notes: 'Responds best to personal call from GM within 24h of any feedback.',
+    },
     contact: {
       phone: '(480) 555-0129',
       email: 'james.whitfield@example.com',
@@ -115,7 +129,7 @@ export const memberProfiles = {
       { id: 'act2', timestamp: 'Jan 16 · 7:14 PM', type: 'Feedback', detail: 'Submitted complaint: “Felt ignored after we were seated.”' },
       { id: 'act3', timestamp: 'Jan 14 · 9:20 AM', type: 'Golf', detail: '18 holes w/ Saturday group — normal pace' },
       { id: 'act4', timestamp: 'Jan 12 · 5:40 PM', type: 'Dining', detail: 'Family dinner · $142 check · 5-star feedback' },
-      { id: 'act5', timestamp: 'Jan 8 · 4:02 PM', type: 'Email', detail: 'Opened “Course Maintenance” email · no click' },
+      { id: 'act5', timestamp: 'Jan 08 · 4:02 PM', type: 'Email', detail: 'Opened “Course Maintenance” email · no click' },
     ],
     drafts: {
       callScript: [
@@ -124,9 +138,14 @@ export const memberProfiles = {
         'Invite him to pick the follow-up time/place — keep it personal.',
       ],
       emailSubject: 'Making Friday right before your 9:20 tee time',
-      emailBody: 'Hi James — I saw your note about Friday’s lunch and I agree we missed the mark. We overhauled that shift and I reserved your usual table for Saturday in case you and your foursome would like to stay after the round. I’d also like to call you personally if you have five minutes today. Appreciate you allowing us to fix this.\n\n— Alice',
+      emailBody: `Hi James — I saw your note about Friday’s lunch and I agree we missed the mark. We overhauled that shift and I reserved your usual table for Saturday in case you and your foursome would like to stay after the round. I’d also like to call you personally if you have five minutes today. Appreciate you allowing us to fix this.
+
+— Alice`,
       smsDraft: 'James — it’s Alice from Oakmont Hills. Saw your Friday lunch note and I’d like to call you personally before your tee time tomorrow. What time works?',
     },
+    staffNotes: [
+      { id: 'note_whitfield_1', author: 'Membership Director', department: 'Membership', text: 'Hosted 2025 member-guest; expects white-glove treatment when entertaining clients.', timestamp: '2025-11-04T18:10:00Z' },
+    ],
     auditTrail: [
       { id: 'recommend', status: 'Recommended by Member Pulse', owner: 'Member Pulse', timestamp: 'Jan 17 · 6:02 AM' },
       { id: 'queued', status: 'Queued for GM review', owner: 'Agent Command', timestamp: 'Jan 17 · 6:05 AM' },
@@ -143,6 +162,16 @@ export const memberProfiles = {
     duesAnnual: 12000,
     memberValueAnnual: 17800,
     preferredChannel: 'SMS',
+    lastSeenLocation: 'Practice putting green',
+    family: [
+      { name: 'Marcus Jordan', relation: 'Spouse', notes: 'Prefers late-morning tee times' },
+    ],
+    preferences: {
+      favoriteSpots: ['West course front nine', 'Mixed-grill patio'],
+      teeWindows: 'Sat/Sun 7:30–9:00 AM',
+      dining: 'High on-demand for patio seating after early rounds',
+      notes: 'Texts preferred; will decline calls during workday.',
+    },
     contact: {
       phone: '(480) 555-0198',
       email: 'anne.jordan@example.com',
@@ -165,9 +194,14 @@ export const memberProfiles = {
         'Invite her to join Thursday evening 9-hole social event.',
       ],
       emailSubject: 'You’re first on Saturday’s 7:00 AM slot',
-      emailBody: 'Anne — a prime Saturday slot just opened and I can hold it for you for the next hour. I’d also like to make sure the pace fits what you’re looking for so let me know how last weekend felt. Happy to coordinate your foursome if that helps.\n\n— Rafael',
+      emailBody: `Anne — a prime Saturday slot just opened and I can hold it for you for the next hour. I’d also like to make sure the pace fits what you’re looking for so let me know how last weekend felt. Happy to coordinate your foursome if that helps.
+
+— Rafael`,
       smsDraft: 'Anne, it’s Rafael. 7:00 AM Saturday just freed up — want it? I’ll hold for 60 min.',
     },
+    staffNotes: [
+      { id: 'note_jordan_1', author: 'Head Golf Professional', department: 'Golf', text: 'Prefers walking groups; pace-of-play messaging resonates.', timestamp: '2025-12-15T15:22:00Z' },
+    ],
     auditTrail: [
       { id: 'recommend', status: 'Recommended by Demand Optimizer', owner: 'Demand Optimizer', timestamp: 'Jan 17 · 6:04 AM' },
     ],
@@ -183,6 +217,16 @@ export const memberProfiles = {
     duesAnnual: 18000,
     memberValueAnnual: 21000,
     preferredChannel: 'Email',
+    lastSeenLocation: 'Grill Room',
+    family: [
+      { name: 'Elizabeth Callahan', relation: 'Spouse', notes: 'Only attends wine dinners.' },
+    ],
+    preferences: {
+      favoriteSpots: ['Executive dining room', 'Wine cellar'],
+      teeWindows: 'Client rounds Tue/Thu 1 PM',
+      dining: 'Meets F&B minimum with methodical lunches. Values quiet corner table.',
+      notes: 'Needs reassurance on service consistency before recommitting.',
+    },
     contact: {
       phone: '(602) 555-0144',
       email: 'robert.callahan@example.com',
@@ -205,11 +249,128 @@ export const memberProfiles = {
         'Ask what “great service” looks like to him next visit.',
       ],
       emailSubject: 'Let me host you after next round',
-      emailBody: 'Robert — I’m stepping in to close the loop on your Grill Room note. We re-staffed that shift and I’d like to host you (and a guest) after your next round to make sure the experience is right. Can you let me know which day works?\n\n— Maya, F&B Director',
+      emailBody: `Robert — I’m stepping in to close the loop on your Grill Room note. We re-staffed that shift and I’d like to host you (and a guest) after your next round to make sure the experience is right. Can you let me know which day works?
+
+— Maya, F&B Director`,
       smsDraft: 'Robert, it’s Maya at Oakmont Hills. Saw your note. Free tomorrow to talk?',
     },
+    staffNotes: [
+      { id: 'note_callahan_1', author: 'F&B Director', department: 'F&B', text: 'Prefers mid-week lunch with CFO. Always orders sparkling water + chopped salad.', timestamp: '2025-10-02T19:15:00Z' },
+    ],
     auditTrail: [
       { id: 'recommend', status: 'Escalated by Service Recovery', owner: 'Service Recovery', timestamp: 'Jan 17 · 8:43 AM' },
     ],
   },
+  mbr_146: {
+    memberId: 'mbr_146',
+    name: 'Sandra Chen',
+    tier: 'House',
+    joinDate: '2021-05-22',
+    archetype: 'Social Butterfly',
+    healthScore: 36,
+    trend: [72, 70, 65, 58, 52, 44, 36],
+    duesAnnual: 9000,
+    memberValueAnnual: 14500,
+    preferredChannel: 'SMS',
+    lastSeenLocation: 'Grill Room',
+    family: [
+      { name: 'Avery Chen', relation: 'Daughter', notes: 'Volleyball team — summer camps' },
+    ],
+    preferences: {
+      favoriteSpots: ['Grill Room', 'Event lawn'],
+      teeWindows: 'Rarely plays golf',
+      dining: 'Prefers table 6 near windows; pescatarian.',
+      notes: 'Attends every wine dinner when personally invited.',
+    },
+    contact: {
+      phone: '(480) 555-0173',
+      email: 'sandra.chen@example.com',
+      preferredChannel: 'SMS',
+      lastOutreach: '2026-01-11T14:30:00Z',
+    },
+    riskSignals: [
+      { id: 'dining', label: 'Dining spend down 58% MoM', timestamp: '2026-01-08T19:00:00Z', source: 'POS', confidence: '74%' },
+      { id: 'events', label: 'Declined last 3 social invitations', timestamp: '2026-01-12T09:10:00Z', source: 'Events', confidence: '69%' },
+    ],
+    activity: [
+      { id: 'chen1', timestamp: 'Jan 13 · 6:42 PM', type: 'Dining', detail: 'Canceled wine dinner RSVP (schedule conflict)' },
+      { id: 'chen2', timestamp: 'Jan 09 · 8:05 PM', type: 'Lounge', detail: 'Stopped by lounge for 30 min · no spend' },
+      { id: 'chen3', timestamp: 'Jan 05 · 1:20 PM', type: 'Dining', detail: 'Grab-and-go salad · $18' },
+    ],
+    drafts: {
+      callScript: [
+        'Invite Sandra to host 2 guests at the next wine dinner with complimentary pairings.',
+        'Offer to reserve her favorite booth and pre-select pescatarian options.',
+      ],
+      emailSubject: 'Save you a booth for Friday’s wine dinner?',
+      emailBody: `Sandra — we missed you at the last dinner and wanted to hold booth 6 for you this Friday. Chef added two pescatarian pairings just for you. Should I confirm 7:15 PM for you and Avery?
+
+— Nina`,
+      smsDraft: 'Sandra! Booth 6 is yours Friday if you want it. New Riesling flight just landed 🍷',
+    },
+    staffNotes: [
+      { id: 'note_chen_1', author: 'Events Director', department: 'Events', text: 'Relies on us for guest seating. Text reminder the morning of events boosts turnout.', timestamp: '2025-12-01T16:00:00Z' },
+    ],
+    auditTrail: [
+      { id: 'recommend', status: 'Flagged by F&B Intelligence', owner: 'F&B Intelligence', timestamp: 'Jan 13 · 9:05 AM' },
+    ],
+  },
+  mbr_312: {
+    memberId: 'mbr_312',
+    name: 'Robert Mills',
+    tier: 'Full Golf',
+    joinDate: '2014-02-09',
+    archetype: 'Balanced Active',
+    healthScore: 33,
+    trend: [68, 64, 60, 55, 49, 40, 33],
+    duesAnnual: 18000,
+    memberValueAnnual: 23000,
+    preferredChannel: 'Call',
+    lastSeenLocation: 'Driving range',
+    family: [
+      { name: 'Maya Mills', relation: 'Spouse', notes: 'Prefers spa + pool during events' },
+      { name: 'Ethan Mills', relation: 'Son', notes: 'College freshman — plays summer golf' },
+    ],
+    preferences: {
+      favoriteSpots: ['Driving range', 'North course finishing stretch'],
+      teeWindows: 'Weekdays 6:30–8:00 AM',
+      dining: 'Orders flat white + breakfast sandwich post-practice',
+      notes: 'Huge advocate when he feels seen. Dials golf staff directly.',
+    },
+    contact: {
+      phone: '(480) 555-0114',
+      email: 'robert.mills@example.com',
+      preferredChannel: 'Call',
+      lastOutreach: '2026-01-10T07:15:00Z',
+    },
+    riskSignals: [
+      { id: 'range', label: 'Practicing but skipping post-round dining', timestamp: '2026-01-14T08:42:00Z', source: 'POS', confidence: '71%' },
+      { id: 'complaint', label: 'Mentioned slow-driver issue twice without follow-up', timestamp: '2026-01-06T06:55:00Z', source: 'CRM', confidence: '64%' },
+    ],
+    activity: [
+      { id: 'mills1', timestamp: 'Jan 14 · 6:48 AM', type: 'Practice', detail: 'Driving range session — no clubhouse spend' },
+      { id: 'mills2', timestamp: 'Jan 11 · 2:15 PM', type: 'Golf', detail: '18 holes · +45 mins pace · left club immediately' },
+      { id: 'mills3', timestamp: 'Jan 05 · 7:35 AM', type: 'Complaint', detail: 'Flagged slow marshal response on holes 9–10' },
+    ],
+    drafts: {
+      callScript: [
+        'Invite Robert to test the new TrackMan range session with the head pro.',
+        'Offer coffee + breakfast at the Grill Room right after practice.',
+        'Close loop on marshal staffing for weekday mornings.',
+      ],
+      emailSubject: 'Walk the back nine with us tomorrow?',
+      emailBody: `Robert — we added a TrackMan bay this week and I’d love for you to try it with our head pro. I also blocked a table for your usual flat white afterwards. Can we meet at 6:45 AM tomorrow?
+
+— Chris`,
+      smsDraft: 'Range looks perfect tomorrow early. Want your usual TrackMan bay at 6:45? Coffee’s on me.',
+    },
+    staffNotes: [
+      { id: 'note_mills_1', author: 'Head Golf Professional', department: 'Golf', text: 'Values proactive marshal coverage. Invite him to weigh in on new player-assist tech.', timestamp: '2025-12-18T12:05:00Z' },
+    ],
+    auditTrail: [
+      { id: 'recommend', status: 'Flagged by Operations', owner: 'Operations Intelligence', timestamp: 'Jan 14 · 7:05 AM' },
+    ],
+  },
 };
+
+

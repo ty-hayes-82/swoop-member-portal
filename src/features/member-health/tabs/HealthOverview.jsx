@@ -1,4 +1,5 @@
 import { SoWhatCallout } from '@/components/ui';
+import MemberLink from '@/components/members/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import TrendContext from '@/components/ui/TrendContext.jsx';
@@ -26,15 +27,18 @@ function MemberRow({ m, isExpanded, onToggle }) {
         }}
       >
         <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-          <span style={{
-            fontWeight: 600,
-            color: hovered ? theme.colors.accent : theme.colors.textPrimary,
-            textDecoration: hovered ? 'underline' : 'none',
-            textDecorationColor: `${theme.colors.accent}50`,
-            transition: 'color 0.12s ease',
-          }}>
+          <MemberLink
+            memberId={m.memberId}
+            style={{
+              fontWeight: 600,
+              color: hovered ? theme.colors.accent : theme.colors.textPrimary,
+              textDecoration: hovered ? 'underline' : 'none',
+              textDecorationColor: `${theme.colors.accent}50`,
+              transition: 'color 0.12s ease',
+            }}
+          >
             {m.name}
-          </span>
+          </MemberLink>
         </td>
         <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
           <span

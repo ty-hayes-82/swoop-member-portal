@@ -1,4 +1,5 @@
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import MemberLink from '@/components/members/MemberLink.jsx';
 import { theme } from '@/config/theme';
 
 
@@ -15,6 +16,7 @@ const formatCountdown = (daysUntilCancellation) => {
 };
 
 export default function CancellationRiskRow({
+  memberId,
   memberName,
   cancelProbability,
   daysUntilCancellation,
@@ -27,8 +29,8 @@ export default function CancellationRiskRow({
 
   return (
     <tr style={{ borderTop: `1px solid ${theme.colors.border}` }}>
-      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm, fontWeight: 600 }}>
-        {memberName}
+      <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, fontSize: theme.fontSize.sm, fontWeight: 600 }}>
+        <MemberLink memberId={memberId}>{memberName}</MemberLink>
       </td>
       <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
         <span style={{

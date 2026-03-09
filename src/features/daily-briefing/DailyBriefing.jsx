@@ -17,7 +17,7 @@ export default function DailyBriefing() {
   const briefing = getDailyBriefing();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '900px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
 
       <StoryHeadline
         variant="urgent"

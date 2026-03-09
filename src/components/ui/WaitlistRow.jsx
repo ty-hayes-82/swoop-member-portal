@@ -2,6 +2,7 @@
 // Props contract: see ARCHITECTURE.md §7
 
 import { useState } from 'react';
+import MemberLink from '@/components/members/MemberLink.jsx';
 import { theme } from '@/config/theme';
 import ArchetypeBadge from './ArchetypeBadge';
 
@@ -62,9 +63,12 @@ export default function WaitlistRow({
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-          <span style={{ fontWeight: 700, color: theme.colors.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <MemberLink
+            memberId={memberId}
+            style={{ fontWeight: 700, color: theme.colors.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          >
             {memberName}
-          </span>
+          </MemberLink>
           <span style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: theme.colors.textMuted }}>
             {memberId}
           </span>

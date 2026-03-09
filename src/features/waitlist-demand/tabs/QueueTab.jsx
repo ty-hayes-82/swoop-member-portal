@@ -202,7 +202,14 @@ export default function QueueTab() {
           </div>
 
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginBottom: 8 }}>
-            Next candidate: <strong>{selectedMember?.memberName ?? 'None selected'}</strong>
+            Next candidate:{' '}
+            {selectedMember ? (
+              <MemberLink memberId={selectedMember.memberId} style={{ fontWeight: 700 }}>
+                {selectedMember.memberName}
+              </MemberLink>
+            ) : (
+              <strong>None selected</strong>
+            )}
           </div>
 
           <div style={{ display: 'grid', gap: 6, marginBottom: theme.spacing.sm }}>
@@ -238,7 +245,13 @@ export default function QueueTab() {
       </div>
 
       <SoWhatCallout variant="warning">
-        <strong>{selectedMember?.memberName}</strong> should receive the next available <strong>{selectedSlot}</strong> opening.
+        {selectedMember ? (
+          <MemberLink memberId={selectedMember.memberId} style={{ fontWeight: 700 }}>
+            {selectedMember.memberName}
+          </MemberLink>
+        ) : (
+          <strong>The selected member</strong>
+        )} should receive the next available <strong>{selectedSlot}</strong> opening.
         This action protects member value, reduces queue-time friction, and converts cancellation volatility into
         measurable retention impact. {getWaitlistInsight()}
       </SoWhatCallout>

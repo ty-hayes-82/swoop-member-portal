@@ -1,4 +1,5 @@
 import { SoWhatCallout, ArchetypeBadge } from '@/components/ui';
+import MemberLink from '@/components/members/MemberLink.jsx';
 import CancellationRiskRow from '@/features/pipeline/components/CancellationRiskRow';
 import { DEMO_DATE } from '@/config/constants';
 import { cancellationProbabilities, memberWaitlistEntries } from '@/data/pipeline';
@@ -45,7 +46,7 @@ const buildTrend = (cancelProbability, index) => {
   return [p - 14 + bias, p - 9 - bias, p - 5 + bias, p].map((v) => Math.max(2, Math.min(98, v)));
 };
 
-function WaitlistRow({ memberName, archetype, healthScore, riskLevel, requestedSlot, daysWaiting, retentionPriority, diningHistory }) {
+function WaitlistRow({ memberId, memberName, archetype, healthScore, riskLevel, requestedSlot, daysWaiting, retentionPriority, diningHistory }) {
   const isPriority = retentionPriority === 'HIGH';
   return (
     <tr style={{ borderTop: `1px solid ${theme.colors.border}`, background: isPriority ? 'rgba(192,57,43,0.04)' : 'transparent' }}>
@@ -57,8 +58,12 @@ function WaitlistRow({ memberName, archetype, healthScore, riskLevel, requestedS
               PRIORITY
             </span>
           )}
-          <span style={{ fontSize: theme.fontSize.sm, fontWeight: isPriority ? 600 : 400,
-            color: theme.colors.textPrimary }}>{memberName}</span>
+          <MemberLink
+            memberId={memberId}
+            style={{ fontSize: theme.fontSize.sm, fontWeight: isPriority ? 600 : 400 }}
+          >
+            {memberName}
+          </MemberLink>
         </div>
         <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>{diningHistory}</div>
       </td>
@@ -213,6 +218,7 @@ export default function DemandTab() {
               {cancellationRows.map((entry) => (
                 <CancellationRiskRow
                   key={entry.bookingId}
+                  memberId={entry.memberId}
                   memberName={entry.memberName}
                   cancelProbability={entry.cancelProbability}
                   daysUntilCancellation={entry.daysUntilCancellation}
