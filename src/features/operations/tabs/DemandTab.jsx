@@ -125,9 +125,17 @@ export default function DemandTab() {
       {/* Waitlist Intelligence */}
       <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
         borderRadius: theme.radius.md, overflow: 'hidden', boxShadow: theme.shadow.sm }}>
-        <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: theme.colors.bgDeep }}>
-          <div>
+        <div style={{
+          padding: theme.spacing.md,
+          borderBottom: `1px solid ${theme.colors.border}`,
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: theme.spacing.sm,
+          background: theme.colors.bgDeep,
+        }}>
+          <div style={{ flex: '1 1 220px', minWidth: 0 }}>
             <span style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>
               Waitlist Intelligence
             </span>
@@ -135,7 +143,7 @@ export default function DemandTab() {
               Retention-priority queue · {summary.total} members waiting
             </span>
           </div>
-          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.xs }}>
             {[
               { label: `${summary.highPriority} retention priority`, color: theme.colors.urgent },
               { label: `${summary.atRisk} at-risk`, color: theme.colors.warning },
@@ -171,9 +179,17 @@ export default function DemandTab() {
       {/* Cancellation risk */}
       <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
         borderRadius: theme.radius.md, overflow: 'hidden', boxShadow: theme.shadow.sm }}>
-        <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: theme.colors.bgDeep }}>
-          <div>
+        <div style={{
+          padding: theme.spacing.md,
+          borderBottom: `1px solid ${theme.colors.border}`,
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: theme.spacing.xs,
+          justifyContent: 'space-between',
+          background: theme.colors.bgDeep,
+        }}>
+          <div style={{ flex: '1 1 220px', minWidth: 0 }}>
             <span style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>
               Cancellation Risk Watchlist
             </span>

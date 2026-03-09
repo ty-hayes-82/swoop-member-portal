@@ -113,7 +113,7 @@ export default function RevenueTab() {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <div style={{ display: 'flex', gap: theme.spacing.md, marginTop: theme.spacing.sm }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.md, marginTop: theme.spacing.sm }}>
           {[{ color: theme.colors.chartGolf, label: 'Golf' },
             { color: theme.colors.fb, label: 'F&B' },
             { color: theme.colors.warning, label: 'Jan 9, 16, 28 — understaffed' }].map(({ color, label }) => (

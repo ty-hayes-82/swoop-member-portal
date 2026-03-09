@@ -39,7 +39,14 @@ export default function Panel({
 
         {/* Tabs */}
         {tabs && (
-          <div style={{ display: 'flex', gap: '0', marginTop: '16px' }}>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            columnGap: 0,
+            rowGap: '8px',
+            marginTop: '16px',
+            maxWidth: '100%',
+          }}>
             {tabs.map(tab => {
               const active = tab.key === activeTab;
               return (
@@ -56,6 +63,7 @@ export default function Panel({
                     transition: 'color 0.15s, border-color 0.15s',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
+                    flex: '0 1 auto',
                   }}
                 >
                   {tab.label}
