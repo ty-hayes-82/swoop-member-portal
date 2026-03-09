@@ -1,6 +1,6 @@
 // memberService.js — Phase 1 static · Phase 2 /api/members
 
-import { memberArchetypes, healthDistribution, atRiskMembers, resignationScenarios } from '@/data/members';
+import { memberArchetypes, healthDistribution, atRiskMembers, resignationScenarios, memberProfiles } from '@/data/members';
 import { emailHeatmap, decayingMembers } from '@/data/email';
 
 const toNumber = (value, fallback = 0) => {
@@ -61,6 +61,12 @@ export const getMemberSummary = () => {
     // Weighted avg: critical members avg $12K, at-risk avg $8.5K
     potentialDuesAtRisk: (critical * 12000) + (atRisk * 8500),
   };
+};
+
+export const getMemberProfile = (memberId) => {
+  if (!memberId) return null;
+  if (_d?.memberProfiles?.[memberId]) return _d.memberProfiles[memberId];
+  return memberProfiles[memberId] ?? null;
 };
 
 export const sourceSystems = ['Member CRM', 'Analytics', 'Tee Sheet'];

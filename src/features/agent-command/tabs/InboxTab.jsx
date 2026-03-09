@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AgentActionCard, SoWhatCallout, StoryHeadline } from '@/components/ui';
 import { getAgents } from '@/services/agentService';
 import { useApp } from '@/context/AppContext';
 import { theme } from '@/config/theme';
+import { AgentActionDrawer } from '../AgentActionDrawer';
 
 export default function InboxTab() {
   const { inbox, pendingCount, approveAction, dismissAction, showToast } = useApp();
   const [filterAgent, setFilterAgent] = useState('all');
+  const [drawerAction, setDrawerAction] = useState(null);
   const agents = getAgents();
 
   const pendingActions = useMemo(
@@ -19,19 +21,25 @@ export default function InboxTab() {
     return pendingActions.filter((item) => item.agentId === filterAgent);
   }, [pendingActions, filterAgent]);
 
+  useEffect(() => {
+    if (drawerAction && !visible.some((item) => item.id === drawerAction.id)) {
+      setDrawerAction(null);
+    }
+  }, [drawerAction, visible]);
+
   const approvedToday = inbox.filter((item) => item.status === 'approved').length;
   const dismissedToday = inbox.filter((item) => item.status === 'dismissed').length;
 
-  const handleApprove = (item) => {
+  const handleApprove = (item, contextLabel) => {
     approveAction(item.id);
-    showToast(`Approved ${item.description}`, 'success');
+    showToast(`Approved ${item.description}${contextLabel ? ` — ${contextLabel}` : ''}`, 'success');
   };
-  const handleDismiss = (item) => {
+  const handleDismiss = (item, contextLabel) => {
     dismissAction(item.id);
-    showToast(`Dismissed ${item.description}`, 'warning');
+    showToast(`Dismissed ${item.description}${contextLabel ? ` — ${contextLabel}` : ''}`, 'warning');
   };
-  const bulkApprove = () => visible.forEach(handleApprove);
-  const bulkDismiss = () => visible.forEach(handleDismiss);
+  const bulkApprove = () => visible.forEach((item) => handleApprove(item));
+  const bulkDismiss = () => visible.forEach((item) => handleDismiss(item));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -148,6 +156,7 @@ export default function InboxTab() {
             action={action}
             onApprove={() => handleApprove(action)}
             onDismiss={() => handleDismiss(action)}
+            onSelect={() => setDrawerAction(action)}
           />
         ))}
       </div>
@@ -156,6 +165,15 @@ export default function InboxTab() {
         <SoWhatCallout variant="insight">
           No pending actions for this filter. Change filter scope or wait for the next agent sweep.
         </SoWhatCallout>
+      )}
+
+      {drawerAction && (
+        <AgentActionDrawer
+          action={drawerAction}
+          onClose={() => setDrawerAction(null)}
+          onApprove={(label) => handleApprove(drawerAction, label)}
+          onDismiss={(label) => handleDismiss(drawerAction, label)}
+        />
       )}
     </div>
   );
