@@ -13,6 +13,50 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
   const [time, setTime]   = useState('');
   const [staff, setStaff] = useState(STAFF[0]);
   const [sent, setSent]   = useState(null);
+  const [actionLog, setActionLog] = useState([]);
+
+  const ACTION_META = {
+    note: { label: 'Personal note', icon: '✉', color: theme.colors.accent },
+    call: { label: 'Scheduled call', icon: '📞', color: theme.colors.success },
+    task: { label: 'Staff assignment', icon: '→', color: theme.colors.staffing },
+  };
+
+  const STATUS_STYLES = {
+    Completed: { color: theme.colors.success, background: theme.colors.success + '14' },
+    Scheduled: { color: theme.colors.info, background: theme.colors.info + '14' },
+    Assigned:  { color: theme.colors.staffing, background: theme.colors.staffing + '14' },
+  };
+
+  const getDueLabel = (type) => {
+    if (type === 'call') return time || 'Next tee-side touchpoint';
+    if (type === 'task') {
+      const due = new Date();
+      due.setDate(due.getDate() + 1);
+      return due.toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+    }
+    return 'Sent now';
+  };
+
+  const addActionEntry = (type) => {
+    const entry = {
+      id: `${type}-${Date.now()}`,
+      type,
+      owner: type === 'task' ? staff : 'GM',
+      dueLabel: getDueLabel(type),
+      status: type === 'note' ? 'Completed' : type === 'call' ? 'Scheduled' : 'Assigned',
+      createdAt: new Date(),
+    };
+    setActionLog((prev) => [entry, ...prev].slice(0, 5));
+  };
+
+  const markActionCompleted = (id) => {
+    setActionLog((prev) => prev.map((entry) => (entry.id === id ? { ...entry, status: 'Completed' } : entry)));
+  };
+
+  const formatLoggedAt = (createdAt) => {
+    if (!(createdAt instanceof Date)) return '';
+    return createdAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  };
 
   const firstName = memberName?.split(' ')[0] ?? 'the member';
 
@@ -21,6 +65,8 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
   const handleSend = (type) => {
     setSent(type);
     setMode(null);
+    addActionEntry(type);
+    if (type === 'call') setTime('');
     const message = type === 'note'
       ? `Draft ready for ${memberName}`
       : type === 'call'
@@ -176,6 +222,53 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
               cursor: 'pointer', border: 'none', background: 'none',
               color: theme.colors.textMuted, fontWeight: 500 }}>Dismiss</button>
           </div>
+        </div>
+      )}
+
+      {actionLog.length > 0 && (
+        <div style={{ marginTop: theme.spacing.md, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.md, overflow: 'hidden' }}>
+          <div style={{ padding: '10px 12px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.colors.textMuted, background: theme.colors.bgDeep }}>
+            Follow-up tracker
+          </div>
+          {actionLog.map((entry, idx) => {
+            const meta = ACTION_META[entry.type] ?? ACTION_META.note;
+            const isLast = idx === actionLog.length - 1;
+            const statusMeta = STATUS_STYLES[entry.status] || { color: theme.colors.textSecondary, background: theme.colors.bgDeep };
+            return (
+              <div key={entry.id} style={{
+                padding: '12px 14px',
+                borderBottom: isLast ? 'none' : '1px solid ' + theme.colors.border,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: theme.spacing.sm,
+                flexWrap: 'wrap',
+              }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: meta.color, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span aria-hidden="true">{meta.icon}</span> {meta.label}
+                  </div>
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 4 }}>
+                    Owner: <strong>{entry.owner}</strong> · Due: {entry.dueLabel}
+                  </div>
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                    Logged {formatLoggedAt(entry.createdAt)}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: statusMeta.color, background: statusMeta.background, padding: '4px 12px', borderRadius: '999px' }}>{entry.status}</span>
+                  {entry.status !== 'Completed' && (
+                    <button onClick={() => markActionCompleted(entry.id)} style={{
+                      padding: '4px 10px', borderRadius: theme.radius.sm, border: '1px solid ' + theme.colors.border,
+                      background: 'none', color: theme.colors.accent, fontSize: theme.fontSize.xs, cursor: 'pointer', fontWeight: 600,
+                    }}>
+                      Mark done
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

@@ -18,6 +18,8 @@ const TABS = [
   { key: 'intelligence', label: 'Demand Intelligence' },
 ];
 
+const ROUTE_LABEL = 'Tee Sheet & Demand';
+
 export default function WaitlistDemand() {
   const { routeIntent, clearRouteIntent } = useNavigation();
   const [activeTab, setActiveTab] = useState('queue');
@@ -52,11 +54,11 @@ export default function WaitlistDemand() {
       <StoryHeadline
         variant="warning"
         headline={`${waitlistSummary.highPriority} retention-priority members are waiting while ${cancellationSummary.highRisk} bookings show high cancel risk.`}
-        context={getWaitlistInsight()}
+        context={`${getWaitlistInsight()} Route them directly inside ${ROUTE_LABEL}.`}
       />
 
       <Panel
-        title="Waitlist & Demand"
+        title={ROUTE_LABEL}
         subtitle="Who is waiting, who will cancel, and what does it cost?"
         tabs={tabsWithBadges}
         activeTab={activeTab}
