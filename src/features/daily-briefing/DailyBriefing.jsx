@@ -1,4 +1,4 @@
-// DailyBriefing — Today mode: 3 things. Deep Dive: full analytical briefing.
+// DailyBriefing — Today mode: immediate priorities. Analytics mode: full briefing.
 // Critique Phase 4: two-mode experience.
 import { Panel, ConnectedSystems, StoryHeadline } from '@/components/ui/index.js';
 import TodayMode from './TodayMode.jsx';
@@ -28,7 +28,7 @@ export default function DailyBriefing() {
       {/* Mode switcher + print action */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', background: theme.colors.bgDeep, borderRadius: theme.radius.md, padding: '3px', border: `1px solid ${theme.colors.border}` }}>
-          {[['today', 'Today'], ['deep-dive', 'Deep Dive']].map(([mode, label]) => (
+          {[['today', 'Today'], ['analytics', 'Analytics']].map(([mode, label]) => (
             <button key={mode} onClick={() => setViewMode(mode)} style={{
               padding: '7px 20px', borderRadius: '8px', fontSize: theme.fontSize.sm, fontWeight: 600,
               cursor: 'pointer', border: 'none', transition: 'all 0.15s',
@@ -46,8 +46,8 @@ export default function DailyBriefing() {
         <TodayMode onNavigate={navigate} />
       )}
 
-      {/* DEEP DIVE mode — full analytical briefing */}
-      {viewMode === 'deep-dive' && (
+      {/* ANALYTICS mode — full analytical briefing */}
+      {viewMode === 'analytics' && (
         <>
           {/* Date header */}
           <div style={{ paddingBottom: '4px', borderBottom: `1px solid ${theme.colors.border}` }}>

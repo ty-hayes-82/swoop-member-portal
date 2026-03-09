@@ -33,7 +33,7 @@ export function NavigationProvider({ children }) {
   const [{ route, memberId }, setRouteState] = useState(parseHash);
   const [routeIntent, setRouteIntent] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  // 'today' = simplified 3-item briefing | 'deep-dive' = full analytics
+  // 'today' = simplified 3-item briefing | 'analytics' = trend & deep-dive modules
   const [viewMode, setViewMode] = useState('today');
 
   const currentRoute = route;
