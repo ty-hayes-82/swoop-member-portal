@@ -1,5 +1,11 @@
 .landing-page {
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.landing-page,
+.landing-page * {
+  box-sizing: border-box;
 }
 
 .landing-hero-ctas {
@@ -34,8 +40,54 @@
 
 .landing-grid-auto {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+}
+
+.landing-scroll-hint {
+  display: none;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: right;
+  margin-top: 8px;
+}
+
+.landing-trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.landing-trust-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.landing-trust-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.landing-problem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.landing-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: center;
 }
 
 .reveal-up {
@@ -59,6 +111,12 @@
 }
 
 @media (max-width: 1024px) {
+  .landing-flow-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
   .landing-grid-3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -86,6 +144,22 @@
     justify-content: center;
     gap: 12px;
   }
+
+  .landing-flow-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-trust-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding-bottom: 6px;
+  }
+
+  .landing-trust-chip {
+    flex: 0 0 auto;
+  }
 }
 
 @media (max-width: 640px) {
@@ -108,11 +182,19 @@
   .landing-demo-submit {
     width: 100%;
   }
+
+  .landing-grid-auto {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
   .landing-table-wrap {
     overflow-x: auto;
+  }
+
+  .landing-scroll-hint {
+    display: block;
   }
 }
 
