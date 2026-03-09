@@ -62,7 +62,7 @@ export default function PaceTab() {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <div style={{ display: 'flex', gap: theme.spacing.md }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.md }}>
           <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
             <span style={{ color: theme.colors.chartGolf }}>■</span> Normal pace
           </span>
