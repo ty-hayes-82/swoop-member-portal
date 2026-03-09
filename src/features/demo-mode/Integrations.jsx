@@ -34,6 +34,7 @@ export default function Integrations() {
   const [expandedCombo, setExpandedCombo]       = useState(null);
   const [activeQuestion, setActiveQuestion]     = useState(null);
   const comboRef = useRef(null);
+  const connectedRef = useRef(null);
 
   const filteredVendors   = getVendorsByCategory(activeCategory);
   const connectedVendors  = filteredVendors.filter(v => v.status === 'connected');
@@ -49,6 +50,11 @@ export default function Integrations() {
 
   const scrollToCombos = () =>
     comboRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollToConnected = () => {
+    setActiveCategory(null);
+    setSelectedVendorId(null);
+    connectedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   const selectVendor = id => {
     setSelectedVendorId(p => p === id ? null : id);
     scrollToCombos();
@@ -62,7 +68,7 @@ export default function Integrations() {
         connected={summary.connected}     total={summary.total}
         combosActive={summary.combosActive} totalCombos={summary.totalCombos}
         nextRecommended={nextRecommended}
-        onClickConnected={() => {}}       onClickCombos={scrollToCombos}
+        onClickConnected={scrollToConnected}       onClickCombos={scrollToCombos}
       />
 
       {/* 2 — Questions You Can Answer */}
@@ -170,7 +176,7 @@ export default function Integrations() {
 
       {/* 5 — Connected vendors (always shown first) */}
       {connectedVendors.length > 0 && (
-        <div>
+        <div ref={connectedRef}>
           <div style={{
             fontSize: '11px', fontWeight: 700, color: theme.colors.success,
             textTransform: 'uppercase', letterSpacing: '0.06em',

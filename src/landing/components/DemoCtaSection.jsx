@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { theme } from '@/config/theme';
 
 const buttonStyle = {
@@ -14,6 +15,8 @@ const buttonStyle = {
   transition: 'background 150ms ease',
 };
 
+const DEMO_ENDPOINT = import.meta.env.VITE_DEMO_ENDPOINT || 'https://swoopgolf.com/api/demo-request';
+
 const inputStyle = {
   width: '100%',
   border: `1px solid ${theme.colors.border}`,
@@ -26,10 +29,32 @@ const inputStyle = {
 };
 
 export default function DemoCtaSection() {
-  function handleSubmit(event) {
+  const [status, setStatus] = useState('idle');
+  const [feedback, setFeedback] = useState('');
+
+  async function handleSubmit(event) {
     event.preventDefault();
-    // Redirect to marketing site book-demo page
-    window.location.href = 'https://swoopgolf.com/book-demo';
+    setStatus('submitting');
+    setFeedback('');
+    const form = new FormData(event.currentTarget);
+    const payload = Object.fromEntries(form.entries());
+    try {
+      const response = await fetch(DEMO_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(body.error || 'Submission failed. Please try again.');
+      }
+      setStatus('success');
+      setFeedback("Thanks! We'll reach out within 24 hours to schedule your walkthrough.");
+      event.currentTarget.reset();
+    } catch (error) {
+      setStatus('error');
+      setFeedback(error.message || 'Something went wrong. Please try again.');
+    }
   }
 
   return (
@@ -84,17 +109,23 @@ export default function DemoCtaSection() {
         <button
           type="submit"
           className="landing-demo-submit"
-          style={{ ...buttonStyle, cursor: 'pointer' }}
+          style={{ ...buttonStyle, cursor: status === 'submitting' ? 'wait' : 'pointer', opacity: status === 'submitting' ? 0.7 : 1 }}
+          disabled={status === 'submitting'}
           onMouseEnter={(event) => {
-            event.currentTarget.style.background = theme.colors.ctaGreenHover;
+            if (status !== 'submitting') event.currentTarget.style.background = theme.colors.ctaGreenHover;
           }}
           onMouseLeave={(event) => {
             event.currentTarget.style.background = theme.colors.ctaGreen;
           }}
         >
-          Book Your Demo
+          {status === 'submitting' ? 'Submitting…' : 'Book Your Demo'}
         </button>
       </form>
+      {(status === 'success' || status === 'error') && feedback && (
+        <p style={{ marginTop: theme.spacing.md, fontSize: theme.fontSize.sm, color: status === 'success' ? theme.colors.ctaGreen : theme.colors.urgent }} role="status">
+          {feedback}
+        </p>
+      )}
       <p style={{ marginTop: theme.spacing.md, color: `${theme.colors.bgCard}D9`, fontSize: theme.fontSize.sm }}>
         No credit card required · 30-minute walkthrough · Cancel anytime
       </p>
