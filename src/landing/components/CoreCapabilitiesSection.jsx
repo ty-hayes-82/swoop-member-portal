@@ -60,11 +60,18 @@ export default function CoreCapabilitiesSection() {
               border: `1px solid ${theme.colors.border}`,
               borderTop: `5px solid ${capability.color}`,
               borderRadius: theme.radius.lg,
-              padding: '22px 18px 20px',
-              minHeight: 220,
+              padding: '24px 20px 22px',
+              minHeight: 260,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
               transitionDelay: `${index * 90}ms`,
             }}
           >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
+              <span>📡 {capability.source}</span>
+              <span>⏱ {capability.freshness}</span>
+            </div>
             <div style={{
               height: 34,
               width: 34,
@@ -77,16 +84,37 @@ export default function CoreCapabilitiesSection() {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: theme.spacing.md,
             }}>
               {iconLabel[capability.icon]}
             </div>
-            <h3 style={{ fontSize: theme.fontSize.lg, marginBottom: theme.spacing.sm }}>
-              {capability.title}
-            </h3>
-            <p style={{ color: theme.colors.textSecondary }}>
-              {capability.description}
-            </p>
+            <div>
+              <h3 style={{ fontSize: theme.fontSize.lg, marginBottom: theme.spacing.xs }}>
+                {capability.title}
+              </h3>
+              <p style={{ color: theme.colors.textSecondary, fontSize: theme.fontSize.sm }}>
+                {capability.summary || capability.description}
+              </p>
+            </div>
+            {capability.bullets?.length > 0 && (
+              <ul style={{ margin: 0, paddingLeft: '18px', color: theme.colors.textPrimary, fontSize: theme.fontSize.sm, lineHeight: 1.5 }}>
+                {capability.bullets.map((bullet) => (
+                  <li key={bullet} style={{ marginBottom: '4px' }}>{bullet}</li>
+                ))}
+              </ul>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
+                Why this surfaced
+                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>{capability.why}</div>
+              </div>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: capability.color, background: `${capability.color}16`, padding: '4px 12px', borderRadius: '999px' }}>{capability.confidence}</span>
+            </div>
+            {capability.metric && (
+              <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: '12px', display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+                <span style={{ fontSize: '24px', fontFamily: theme.fonts.mono, fontWeight: 700 }}>{capability.metric.value}</span>
+                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{capability.metric.label}</span>
+              </div>
+            )}
           </article>
         ))}
       </div>
