@@ -13,7 +13,7 @@ import { StaffingService } from '@/features/staffing-service';
 import { GrowthPipeline } from '@/features/growth-pipeline';
 import { AgentCommand }    from '@/features/agent-command';
 import { DemoMode } from '@/features/demo-mode';
-import Integrations from '@/features/demo-mode/Integrations';
+import { IntegrationsPage } from '@/features/integrations';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -25,7 +25,7 @@ const ROUTES = {
   'staffing-service': StaffingService,
   'growth-pipeline':  GrowthPipeline,
   'agent-command':    AgentCommand,
-  'integrations':     Integrations,
+  'integrations':     IntegrationsPage,
   'demo-mode':        DemoMode,
 };
 
