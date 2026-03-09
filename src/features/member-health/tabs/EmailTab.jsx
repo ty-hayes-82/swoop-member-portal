@@ -10,6 +10,9 @@ function heatColor(rate) {
   return theme.colors.urgent;
 }
 
+const formatPercent = (value) => (Number.isFinite(value) ? `${(value * 100).toFixed(0)}%` : '—');
+const formatTrend = (value) => (Number.isFinite(value) ? `${value}% trend` : '—');
+
 export default function EmailTab() {
   const heatmap = getEmailHeatmap();
   const decaying = getDecayingMembers();
@@ -45,14 +48,15 @@ export default function EmailTab() {
                   fontSize: 10, maxWidth: 140 }}>{c}</td>
                 {archetypes.map(a => {
                   const rate = getRate(c, a);
+                  const color = Number.isFinite(rate) ? heatColor(rate) : theme.colors.textMuted;
                   return (
                     <td key={a} style={{ padding: '4px 8px', textAlign: 'center' }}>
                       <div style={{
-                        background: `${heatColor(rate)}30`, border: `1px solid ${heatColor(rate)}60`,
+                        background: `${color}30`, border: `1px solid ${color}60`,
                         borderRadius: 4, padding: '3px 6px',
-                        color: heatColor(rate), fontFamily: theme.fonts.mono, fontSize: 10,
+                        color, fontFamily: theme.fonts.mono, fontSize: 10,
                       }}>
-                        {rate > 0 ? `${(rate * 100).toFixed(0)}%` : '—'}
+                        {rate > 0 ? formatPercent(rate) : '—'}
                       </div>
                     </td>
                   );
@@ -79,13 +83,13 @@ export default function EmailTab() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>{m.name}</span>
               <span style={{ color: theme.colors.urgent, fontFamily: theme.fonts.mono,
-                fontSize: theme.fontSize.sm }}>{m.trend}% trend</span>
+                fontSize: theme.fontSize.sm }}>{formatTrend(m.trend)}</span>
             </div>
             <div style={{ display: 'flex', gap: theme.spacing.md, marginTop: 4 }}>
               {[['Nov', m.nov], ['Dec', m.dec], ['Jan', m.jan]].map(([label, val]) => (
                 <span key={label} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-                  {label}: <span style={{ color: heatColor(val), fontFamily: theme.fonts.mono }}>
-                    {(val * 100).toFixed(0)}%
+                  {label}: <span style={{ color: heatColor(Number.isFinite(val) ? val : 0), fontFamily: theme.fonts.mono }}>
+                    {formatPercent(val)}
                   </span>
                 </span>
               ))}

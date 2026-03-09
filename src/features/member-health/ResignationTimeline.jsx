@@ -19,6 +19,8 @@ const AGENT_ANNOTATIONS = {
   mbr_271: { date: 'Jan 20', note: 'Engagement Autopilot flagged obligation-only spend pattern and recommended targeted F&B outreach.' },
 };
 
+const formatDues = (value) => (Number.isFinite(value) ? `$${(value / 1000).toFixed(0)}K` : '—');
+
 export default function ResignationTimeline() {
   const scenarios = getResignationScenarios();
   const [expanded, setExpanded] = useState(null);
@@ -58,7 +60,7 @@ export default function ResignationTimeline() {
               <div>
                 <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}>{scenario.name}</div>
                 <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
-                  {scenario.archetype} · Resigned {scenario.resignDate} · ${(scenario.dues / 1000).toFixed(0)}K dues
+                  {scenario.archetype} · Resigned {scenario.resignDate} · {formatDues(scenario.dues)} dues
                 </div>
               </div>
               <span style={{ color: theme.colors.textMuted }}>{isOpen ? '▾' : '▸'}</span>
