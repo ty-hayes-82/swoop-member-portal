@@ -12,23 +12,37 @@ const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-const TODAY_ITEMS = ['daily-briefing', 'operations', 'agent-command'];
+const SECTION_CONFIG = [
+  {
+    label: 'RIGHT NOW',
+    keys: ['daily-briefing', 'location-intelligence', 'waitlist-demand', 'operations'],
+    emphasis: true,
+  },
+  {
+    label: 'INTELLIGENCE',
+    keys: ['member-health', 'fb-performance', 'staffing-service', 'growth-pipeline'],
+    emphasis: false,
+  },
+  {
+    label: 'SYSTEM',
+    keys: ['agent-command', 'integrations', 'integrations/csv-import'],
+    emphasis: false,
+  },
+];
 
 export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
-  const { currentRoute, navigate, sidebarCollapsed, toggleSidebar, viewMode, setViewMode } = useNavigation();
+  const { currentRoute, navigate, sidebarCollapsed, toggleSidebar } = useNavigation();
   const { activeCount, totalRevenueImpact } = useApp();
   const w = isMobile ? 280 : sidebarCollapsed ? 52 : 240;
 
-  const ALWAYS_VISIBLE = ['integrations', 'integrations/csv-import'];
-  const allVisible = NAV_ITEMS.filter(n => !n.hidden);
-  const visibleItems = viewMode === 'today'
-    ? allVisible.filter((n) => TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key))
-    : allVisible.filter((n) => !TODAY_ITEMS.includes(n.key) || ALWAYS_VISIBLE.includes(n.key));
-  const SECTION_LABELS = {
-    'location-intelligence': 'Location Intelligence',
-    integrations: 'Integrations',
-    'integrations/csv-import': 'Integrations',
-  };
+  const navMap = NAV_ITEMS.filter((n) => !n.hidden).reduce((acc, item) => {
+    acc[item.key] = item;
+    return acc;
+  }, {});
+  const navSections = SECTION_CONFIG.map((section) => ({
+    ...section,
+    items: section.keys.map((key) => navMap[key]).filter(Boolean),
+  })).filter((section) => section.items.length > 0);
 
   const basePosition = isMobile
     ? {
@@ -91,34 +105,6 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
         )}
       </div>
 
-      {/* Today / Deep Dive toggle */}
-      {(!sidebarCollapsed || isMobile) && (
-        <div style={{ margin: '12px', display: 'flex', borderRadius: '8px', background: theme.colors.sidebarTint, padding: '2px' }}>
-          {[['today', 'Today'], ['analytics', 'Analytics']].map(([mode, label]) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              style={{
-                flex: 1,
-                padding: '10px 0',
-                minHeight: '44px',
-                borderRadius: '6px',
-                fontSize: '11px',
-                fontWeight: 600,
-                letterSpacing: '0.04em',
-                cursor: 'pointer',
-                border: 'none',
-                background: viewMode === mode ? theme.colors.accent : 'transparent',
-                color: viewMode === mode ? theme.colors.white : TEXT_MUTED,
-                transition: 'all 0.15s',
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Revenue impact */}
       {(!sidebarCollapsed || isMobile) && activeCount > 0 && (
         <div style={{ margin: '0 12px 8px', padding: '10px 12px', background: theme.colors.sidebarAccent, border: `1px solid ${theme.colors.sidebarAccentBorder}`, borderRadius: '8px' }}>
@@ -133,14 +119,11 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
 
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-        {visibleItems.map((item, index) => {
-          const active = currentRoute === item.key;
-          const previous = visibleItems[index - 1];
-          const showSection = (!previous || SECTION_LABELS[previous.key] !== SECTION_LABELS[item.key]) && SECTION_LABELS[item.key];
-          return (
-            <div key={item.key}>
-              {(!sidebarCollapsed || isMobile) && showSection && (
-                <div style={{
+        {navSections.map((section) => (
+          <div key={section.label}>
+            {(!sidebarCollapsed || isMobile) && (
+              <div
+                style={{
                   marginTop: 8,
                   padding: '8px 14px 4px',
                   fontSize: 10,
@@ -148,55 +131,62 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                   textTransform: 'uppercase',
                   color: TEXT_MUTED,
                   fontWeight: 700,
-                }}>
-                  {SECTION_LABELS[item.key]}
-                </div>
-              )}
-              <button
-                onClick={() => navigate(item.key)}
-                title={sidebarCollapsed && !isMobile ? item.label : undefined}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
-                  minHeight: '44px',
-                  justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
-                  background: active ? SIDEBAR_HOVER : 'none',
-                  borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
-                  color: active ? TEXT_LIGHT : TEXT_DIM,
-                  fontSize: '13px',
-                  fontWeight: active ? 600 : 400,
-                  transition: 'all 0.12s',
-                  cursor: 'pointer',
-                  borderRight: 'none',
-                  borderTop: 'none',
-                  borderBottom: 'none',
-                }}
-                onMouseEnter={e => {
-                  if (!active) {
-                    e.currentTarget.style.background = theme.colors.sidebarTint;
-                    e.currentTarget.style.color = TEXT_LIGHT;
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!active) {
-                    e.currentTarget.style.background = 'none';
-                    e.currentTarget.style.color = TEXT_DIM;
-                  }
                 }}
               >
-                <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
-                {(!sidebarCollapsed || isMobile) && (
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {item.label}
-                  </span>
-                )}
-              </button>
-            </div>
-          );
-        })}
+                {section.label}
+              </div>
+            )}
+            {section.items.map((item) => {
+              const active = currentRoute === item.key;
+              const inactiveWeight = section.emphasis ? 500 : 400;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => navigate(item.key)}
+                  title={sidebarCollapsed && !isMobile ? item.label : undefined}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
+                    minHeight: '44px',
+                    justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
+                    background: active ? SIDEBAR_HOVER : 'none',
+                    borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
+                    color: active ? TEXT_LIGHT : TEXT_DIM,
+                    fontSize: '13px',
+                    fontWeight: active ? 600 : inactiveWeight,
+                    transition: 'all 0.12s',
+                    cursor: 'pointer',
+                    borderRight: 'none',
+                    borderTop: 'none',
+                    borderBottom: 'none',
+                  }}
+                  onMouseEnter={e => {
+                    if (!active) {
+                      e.currentTarget.style.background = theme.colors.sidebarTint;
+                      e.currentTarget.style.color = TEXT_LIGHT;
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) {
+                      e.currentTarget.style.background = 'none';
+                      e.currentTarget.style.color = TEXT_DIM;
+                    }
+                  }}
+                >
+                  <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
+                  {(!sidebarCollapsed || isMobile) && (
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.label}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* Demo Environment badge */}
