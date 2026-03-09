@@ -68,9 +68,8 @@ function AppShell() {
         <main style={{
           flex: 1,
           padding: isMobile ? '16px' : theme.spacing.xl,
-          maxWidth: 1200,
           width: '100%',
-          margin: '0 auto',
+          minHeight: 0,
         }}>
           <PageComponent />
         </main>

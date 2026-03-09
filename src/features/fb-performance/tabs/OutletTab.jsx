@@ -23,7 +23,7 @@ export default function OutletTab() {
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
               textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
             <div style={{ fontSize: theme.fontSize.xl, fontFamily: theme.fonts.mono,
-              fontWeight: 700, color: theme.colors.fb, marginTop: 4 }}>{value}</div>
+              fontWeight: 700, color: theme.colors.chartGolf, marginTop: 4 }}>{value}</div>
             {metric && <TrendContext metricKey={metric} format={format} style={{ marginTop: 4 }} />}
           </div>
         ))}
@@ -44,7 +44,7 @@ export default function OutletTab() {
             <Tooltip formatter={v => [`$${v.toLocaleString()}`, 'Revenue']}
               contentStyle={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: 8 }}
               labelStyle={{ color: theme.colors.textPrimary }} />
-            <Bar dataKey="revenue" fill={theme.colors.fb} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="revenue" fill={theme.colors.chartGolf} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -68,7 +68,7 @@ export default function OutletTab() {
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
                   color: theme.colors.textPrimary, fontWeight: 500 }}>{o.outlet}</td>
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                  color: theme.colors.fb, fontFamily: theme.fonts.mono }}>
+                  color: theme.colors.chartGolf, fontFamily: theme.fonts.mono }}>
                   ${o.revenue.toLocaleString()}
                 </td>
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`,
@@ -80,7 +80,7 @@ export default function OutletTab() {
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
                   {outletTrends[o.outlet] && (
                     <div style={{ width: 72, height: 24 }}>
-                      <Sparkline data={outletTrends[o.outlet]} height={24} color={theme.colors.fb} />
+                      <Sparkline data={outletTrends[o.outlet]} height={24} color={theme.colors.chartBlue} />
                     </div>
                   )}
                 </td>
