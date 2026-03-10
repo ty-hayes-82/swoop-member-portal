@@ -10,6 +10,18 @@ const toNumber = (value, fallback = 0) => {
   return Number.isFinite(numeric) ? numeric : fallback;
 };
 
+const archetypeBaselines = {
+  'Die-Hard Golfer':  { rounds: 8,  dining: 140, events: 1, email: 0.42 },
+  'Social Butterfly': { rounds: 3,  dining: 260, events: 3, email: 0.55 },
+  'Balanced Active':  { rounds: 6,  dining: 180, events: 2, email: 0.48 },
+  'Weekend Warrior':  { rounds: 5,  dining: 120, events: 1, email: 0.36 },
+  'Declining':        { rounds: 4,  dining: 90,  events: 1, email: 0.22 },
+  'New Member':       { rounds: 4,  dining: 150, events: 2, email: 0.52 },
+  'Ghost':            { rounds: 2,  dining: 60,  events: 0, email: 0.18 },
+  'Snowbird':         { rounds: 6,  dining: 210, events: 2, email: 0.44 },
+  default:            { rounds: 4,  dining: 150, events: 1, email: 0.4 },
+};
+
 export default async function handler(req, res) {
   try {
     const latestWeekResult = await sql`SELECT MAX(week_number) AS latest_week FROM member_engagement_weekly`;
@@ -83,10 +95,24 @@ export default async function handler(req, res) {
             ELSE 'Critical'
           END                                AS risk_level,
           w.rounds_played,
+          w.dining_visits,
           w.dining_spend,
-          w.email_open_rate
+          w.events_attended,
+          w.email_open_rate,
+          f.category                         AS open_complaint_category,
+          f.days_open                        AS open_complaint_days_open
         FROM members m
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
+        LEFT JOIN LATERAL (
+          SELECT
+            fb.category,
+            DATE_PART('day', CURRENT_DATE - fb.submitted_at::date) AS days_open
+          FROM feedback fb
+          WHERE fb.member_id = m.member_id
+            AND fb.status IN ('acknowledged', 'in_progress', 'escalated')
+          ORDER BY fb.submitted_at DESC
+          LIMIT 1
+        ) f ON TRUE
         WHERE w.week_number = ${latestWeek}
           AND w.engagement_score < 50
           AND m.membership_status <> 'resigned'
@@ -253,12 +279,55 @@ export default async function handler(req, res) {
       atRiskMembers: atRisk.rows.map((row) => {
         const rounds = toNumber(row.rounds_played);
         const diningSpend = toNumber(row.dining_spend);
+        const diningVisits = toNumber(row.dining_visits);
+        const eventsAttended = toNumber(row.events_attended);
         const emailOpenRate = toNumber(row.email_open_rate);
         const annualDues = toNumber(row.annual_dues);
-        const riskReasons = [];
-        if (rounds === 0) riskReasons.push('Zero golf activity');
-        if (emailOpenRate < 0.15) riskReasons.push('Email engagement dropped');
-        if (diningSpend < 30) riskReasons.push('Minimal dining');
+        const baseline = archetypeBaselines[row.archetype] || archetypeBaselines.default;
+        const reasons = [];
+        const addReason = (reason) => {
+          if (!reason) return;
+          if (!reasons.includes(reason)) reasons.push(reason);
+        };
+
+        if (row.open_complaint_category) {
+          const daysOpen = toNumber(row.open_complaint_days_open, 0);
+          const dayLabel = daysOpen > 0 ? `${daysOpen} day${daysOpen === 1 ? '' : 's'}` : 'today';
+          addReason(`Open ${row.open_complaint_category.toLowerCase()} complaint ${dayLabel}`);
+        }
+
+        const roundDrop = baseline.rounds
+          ? Math.round(Math.max(0, ((baseline.rounds - rounds) / baseline.rounds) * 100))
+          : 0;
+        if (rounds === 0) {
+          addReason('Zero golf activity in 30 days');
+        } else if (roundDrop >= 25) {
+          addReason(`Golf frequency down ${roundDrop}%`);
+        }
+
+        const diningDrop = baseline.dining
+          ? Math.round(Math.max(0, ((baseline.dining - diningSpend) / baseline.dining) * 100))
+          : 0;
+        if (diningDrop >= 30) {
+          addReason(`Dining spend -${diningDrop}% vs usual`);
+        } else if (diningSpend < 50) {
+          addReason('Minimal dining activity');
+        } else if (diningVisits === 0 && reasons.length < 2) {
+          addReason('No recent dining visits logged');
+        }
+
+        if (baseline.events >= 1 && eventsAttended === 0) {
+          addReason('No event attendance in 8 weeks');
+        }
+
+        const emailPercent = Math.round(emailOpenRate * 100);
+        if (baseline.email && emailOpenRate < baseline.email * 0.6) {
+          addReason(`Email opens down to ${emailPercent}%`);
+        } else if (emailOpenRate < 0.15) {
+          addReason('Email engagement dropped');
+        }
+
+        const primaryRisk = reasons.length ? reasons.slice(0, 2).join(' • ') : 'Behavioral decay detected across systems';
 
         return {
           memberId: row.member_id,
@@ -275,7 +344,7 @@ export default async function handler(req, res) {
           diningSpend,
           emailOpenRate,
           trend: 'declining',
-          topRisk: riskReasons.join('; ') || 'Monitoring',
+          topRisk: primaryRisk,
         };
       }),
 
