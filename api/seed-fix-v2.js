@@ -100,9 +100,9 @@ export default async function handler(req, res) {
         WHEN o.wk_rank = 2 THEN LEAST(0.45, mew.email_open_rate + 0.08)
         ELSE GREATEST(0.03, mew.email_open_rate - 0.10)
       END
-      FROM ordered o
-      JOIN target t ON t.member_id = mew.member_id::text
-      WHERE mew.week_number = o.week_number
+      FROM ordered o, target t
+      WHERE t.member_id = mew.member_id::text
+        AND mew.week_number = o.week_number
     `);
     step('Email decay trends applied');
 
