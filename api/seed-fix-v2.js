@@ -320,7 +320,7 @@ export default async function handler(req, res) {
         SELECT * FROM (VALUES (1,'7-8 AM'),(2,'8-9 AM'),(3,'9-10 AM'),(4,'10-11 AM'),(5,'11-12 PM'),(6,'12-1 PM'),(7,'1-2 PM'),(8,'2-3 PM')) AS b(idx, label)
       ),
       courses AS (
-        SELECT * FROM (VALUES ('course_main'),('course_exec')) AS c(cid)
+        SELECT course_id AS cid FROM courses
       )
       INSERT INTO demand_heatmap (heatmap_id, course_id, day_of_week, time_block, fill_rate, unmet_rounds, demand_level, computed_for_month)
       SELECT
