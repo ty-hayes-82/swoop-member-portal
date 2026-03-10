@@ -69,9 +69,21 @@ const normalizeHealthDistribution = (source, totalMembers) => {
 const normalizeDecayingMembers = (source) => {
   const list = Array.isArray(source) ? source : [];
   return list.map((member, index) => {
-    const nov = clamp(toNumber(member?.nov, 0), 0, 1);
-    const dec = clamp(toNumber(member?.dec, 0), 0, 1);
-    const jan = clamp(toNumber(member?.jan, 0), 0, 1);
+    let nov, dec, jan;
+    if (Array.isArray(member?.weeks) && member.weeks.length > 0) {
+      // API format: weeks array sorted by week_number
+      const weeks = member.weeks.sort((a, b) => a.week - b.week);
+      const len = weeks.length;
+      // Map last 3 weeks to nov/dec/jan
+      nov = clamp(toNumber(weeks[Math.max(0, len - 3)]?.openRate, 0), 0, 1);
+      dec = clamp(toNumber(weeks[Math.max(0, len - 2)]?.openRate, 0), 0, 1);
+      jan = clamp(toNumber(weeks[len - 1]?.openRate, 0), 0, 1);
+    } else {
+      // Static format: direct nov/dec/jan fields
+      nov = clamp(toNumber(member?.nov, 0), 0, 1);
+      dec = clamp(toNumber(member?.dec, 0), 0, 1);
+      jan = clamp(toNumber(member?.jan, 0), 0, 1);
+    }
     const baseline = nov || 0.01;
     const trend = Number.isFinite(Number(member?.trend))
       ? toNumber(member.trend, 0)
@@ -120,7 +132,15 @@ export const getHealthDistribution = () => {
 export const getAtRiskMembers       = () => normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? []);
 export const getArchetypeProfiles   = () => normalizeArchetypes(_d?.memberArchetypes);
 export const getResignationScenarios= () => Array.isArray(_d?.resignationScenarios) ? _d.resignationScenarios : [];
-export const getEmailHeatmap        = () => Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
+export const getEmailHeatmap        = () => {
+  const raw = Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
+  return raw.map(e => ({
+    campaign: e.campaign ?? e.subject ?? 'Unknown',
+    archetype: e.archetype ?? 'Unknown',
+    openRate: toNumber(e.openRate, 0),
+    clickRate: toNumber(e.clickRate, 0),
+  }));
+};
 export const getDecayingMembers     = () => normalizeDecayingMembers(_d?.decayingMembers);
 
 export const getMemberSummary = () => {
