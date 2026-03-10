@@ -10,6 +10,7 @@ import PendingActions from './PendingActions.jsx';
 import PipelineSnapshot from './PipelineSnapshot.jsx';
 import MorningBriefing from '@/components/ui/MorningBriefing.jsx';
 import DataQuality from '@/components/ui/DataQuality.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import { getDailyBriefing } from '@/services/briefingService.js';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { theme } from '@/config/theme.js';
@@ -27,7 +28,22 @@ export default function DailyBriefing() {
 
       <StoryHeadline
         variant="urgent"
-        headline="James Whitfield filed a complaint Jan 18. It was never resolved. He resigned Jan 22 — $18K/year in dues lost."
+        headline={(
+          <>
+            <MemberLink
+              mode="drawer"
+              memberId="mbr_203"
+              style={{
+                fontWeight: 700,
+                color: theme.colors.textPrimary,
+                textDecorationColor: `${theme.colors.urgent}80`,
+              }}
+            >
+              James Whitfield
+            </MemberLink>
+            {' '}filed a complaint Jan 18. It was never resolved. He resigned Jan 22 — $18K/year in dues lost.
+          </>
+        )}
         context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. The Jan 9 and Jan 28 gaps follow the same pattern."
       />
 
@@ -88,7 +104,18 @@ export default function DailyBriefing() {
                   ⚠ Member Needs Attention — Preventable Resignation In Progress
                 </div>
                 <div style={{ fontFamily: theme.fonts.serif, fontSize: theme.fontSize.xl, color: theme.colors.textPrimary, marginTop: 4 }}>
-                  James Whitfield · Balanced Active · $18,000/yr in dues
+                  <MemberLink
+                    mode="drawer"
+                    memberId="mbr_203"
+                    style={{
+                      fontWeight: 600,
+                      color: theme.colors.textPrimary,
+                      textDecorationColor: `${theme.colors.urgent}80`,
+                    }}
+                  >
+                    James Whitfield
+                  </MemberLink>
+                  {' '}· Balanced Active · $18,000/yr in dues
                 </div>
               </div>
               <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, textAlign: 'right', flexShrink: 0, fontWeight: 500 }}>

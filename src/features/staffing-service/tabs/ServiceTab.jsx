@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SoWhatCallout } from '@/components/ui';
 import QuickActions from '@/components/ui/QuickActions.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import { getComplaintCorrelation, getFeedbackSummary } from '@/services/staffingService';
 import { theme } from '@/config/theme';
@@ -36,7 +37,13 @@ export default function ServiceTab() {
                 ⚠ Member Needs Personal Attention
               </span>
               <div style={{ fontFamily: theme.fonts.serif, fontSize: theme.fontSize.xl, color: theme.colors.textPrimary, marginTop: 4, display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
-                James Whitfield
+                <MemberLink
+                  mode="drawer"
+                  memberId="mbr_203"
+                  style={{ fontFamily: theme.fonts.serif, fontSize: theme.fontSize.xl, color: theme.colors.textPrimary }}
+                >
+                  James Whitfield
+                </MemberLink>
                 <ArchetypeBadge archetype="Balanced Active" size="sm" />
               </div>
               <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginTop: 4 }}>

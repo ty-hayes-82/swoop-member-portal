@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Badge from '@/components/ui/Badge.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
+import MemberLink from '@/components/MemberLink.jsx';
 import TeeSheetRisk from './TeeSheetRisk.jsx';
 import { theme } from '@/config/theme';
 
@@ -34,11 +35,16 @@ function AtRiskRow({ m, onNavigate }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-          <span style={{
-            fontSize: '13px', fontWeight: 600,
-            color: hovered ? theme.colors.accent : theme.colors.textPrimary,
-            transition: 'color 0.12s ease',
-          }}>{m.name}</span>
+          <MemberLink
+            memberId={m.memberId}
+            style={{
+              fontSize: '13px', fontWeight: 600,
+              color: hovered ? theme.colors.accent : theme.colors.textPrimary,
+              transition: 'color 0.12s ease',
+            }}
+          >
+            {m.name}
+          </MemberLink>
           {m.archetype && <ArchetypeBadge archetype={m.archetype} size="xs" />}
         </div>
         <div style={{ fontSize: '12px', color: theme.colors.textMuted }}>{m.topRisk}</div>

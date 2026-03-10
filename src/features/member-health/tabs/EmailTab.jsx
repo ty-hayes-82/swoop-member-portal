@@ -1,4 +1,5 @@
 import { SoWhatCallout } from '@/components/ui';
+import MemberLink from '@/components/MemberLink.jsx';
 import { getEmailHeatmap, getDecayingMembers } from '@/services/memberService';
 import { theme } from '@/config/theme';
 
@@ -81,7 +82,12 @@ export default function EmailTab() {
           <div key={i} style={{ padding: theme.spacing.md,
             borderBottom: i < decaying.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>{m.name}</span>
+              <MemberLink
+                memberId={m.memberId}
+                style={{ color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}
+              >
+                {m.name}
+              </MemberLink>
               <span style={{ color: theme.colors.urgent, fontFamily: theme.fonts.mono,
                 fontSize: theme.fontSize.sm }}>{formatTrend(m.trend)}</span>
             </div>

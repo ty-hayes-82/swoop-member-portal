@@ -2,6 +2,7 @@
 // Critique Phase 3: "Many GMs still run morning standups with printed sheets."
 import { useState } from 'react';
 import { theme } from '@/config/theme';
+import MemberLink from '@/components/MemberLink.jsx';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getAtRiskMembers } from '@/services/memberService';
 
@@ -138,7 +139,12 @@ export default function MorningBriefing() {
                 {!collapsed.members && atRisk.filter(m => m.score < 40).map(m => (
                   <div key={m.memberId} style={{ borderBottom: `1px solid ${theme.colors.briefingDivider}`, padding: '10px 0', display: 'flex', justifyContent: 'space-between' }}>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: theme.colors.briefingInk }}>{m.name}</div>
+                      <MemberLink
+                        memberId={m.memberId}
+                        style={{ fontSize: '14px', fontWeight: 600, color: theme.colors.briefingInk }}
+                      >
+                        {m.name}
+                      </MemberLink>
                       <div style={{ fontSize: '12px', color: theme.colors.briefingMuted, marginTop: 2 }}>{m.topRisk}</div>
                     </div>
                     <div style={{ fontSize: '12px', color: theme.colors.urgent, fontWeight: 600, flexShrink: 0, marginLeft: '16px', marginTop: 4 }}>

@@ -60,26 +60,32 @@ const formatPercent = (value, fallback = '—') => (Number.isFinite(value) ? `${
 
 export default function ConversionTab() {
   const dataSource = getPostRoundConversion();
-  const rawData = Array.isArray(dataSource)
-    ? dataSource.map((entry) => ({
-        archetype: entry?.archetype ?? 'Unknown',
-        rate: Number.isFinite(Number(entry?.rate)) ? Number(entry.rate) : 0,
-        avgCheck: Number.isFinite(Number(entry?.avgCheck)) ? Number(entry.avgCheck) : null,
-      }))
-    : [];
-  const data = rawData.sort((a, b) => b.rate - a.rate);
+  const byArchetype = Array.isArray(dataSource?.byArchetype)
+    ? dataSource.byArchetype
+    : Array.isArray(dataSource)
+      ? dataSource
+      : [];
+  const rawData = byArchetype.map((entry = {}) => ({
+    archetype: entry?.archetype ?? 'Unknown',
+    rate: Number.isFinite(Number(entry?.rate)) ? Number(entry.rate) : 0,
+    avgCheck: Number.isFinite(Number(entry?.avgCheck)) ? Number(entry.avgCheck) : null,
+  }));
+  const data = [...rawData].sort((a, b) => b.rate - a.rate);
   const hasData = data.length > 0;
-  const overall = hasData
-    ? data.reduce((sum, item) => sum + item.rate, 0) / data.length
-    : 0.35;
+  const serviceOverall = Number.isFinite(Number(dataSource?.overall)) ? Number(dataSource.overall) : null;
+  const overall = Number.isFinite(serviceOverall)
+    ? serviceOverall
+    : hasData
+      ? data.reduce((sum, item) => sum + item.rate, 0) / data.length
+      : 0.35;
   const best = hasData ? data.reduce((prev, curr) => (curr.rate > prev.rate ? curr : prev), data[0]) : null;
   const lowest = hasData ? data.reduce((prev, curr) => (curr.rate < prev.rate ? curr : prev), data[0]) : null;
   const weekendRate = data.find((item) => /weekend/i.test(item.archetype))?.rate ?? null;
   const summaryCards = [
     {
       label: 'Overall Conversion',
-      value: formatPercent(hasData ? overall : 0.35),
-      sub: hasData ? 'Weighted average' : 'Demo baseline',
+      value: formatPercent(Number.isFinite(overall) ? overall : 0.35),
+      sub: Number.isFinite(serviceOverall) ? 'Live POS data' : hasData ? 'Weighted average' : 'Demo baseline',
       accent: theme.colors.accent,
     },
     {
@@ -96,7 +102,9 @@ export default function ConversionTab() {
     },
   ];
 
-  const weekendLift = Number.isFinite(weekendRate) ? Math.max(0, overall - weekendRate) : 0.1;
+  const weekendLift = Number.isFinite(overall) && Number.isFinite(weekendRate)
+    ? Math.max(0, overall - weekendRate)
+    : 0.1;
   const estimatedImpact = Math.round(weekendLift * 14000) || 1400;
 
   return (

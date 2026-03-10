@@ -14,8 +14,45 @@ export const _init = async () => {
 
 export const getOutletPerformance = () => _d ? _d.outlets : outlets;
 
-export const getPostRoundConversion = () =>
-  _d ? _d.postRoundConversion : postRoundConversion;
+const toNumber = (value, fallback = 0) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+};
+
+const normalizeConversionEntries = (entries = []) =>
+  entries.map((entry = {}) => ({
+    archetype: entry.archetype ?? 'Unknown',
+    rate: toNumber(entry.rate),
+    avgCheck: Number.isFinite(Number(entry.avgCheck)) ? Number(entry.avgCheck) : null,
+  }));
+
+export const getPostRoundConversion = () => {
+  const source = _d?.postRoundConversion ?? postRoundConversion;
+
+  if (!source) {
+    return { overall: 0, byArchetype: [] };
+  }
+
+  if (Array.isArray(source)) {
+    const byArchetype = normalizeConversionEntries(source);
+    const overall = byArchetype.length
+      ? byArchetype.reduce((sum, item) => sum + item.rate, 0) / byArchetype.length
+      : 0;
+
+    return { overall, byArchetype };
+  }
+
+  const byArchetype = normalizeConversionEntries(source.byArchetype);
+  const overallFromApi = toNumber(source.overall, NaN);
+  const fallbackOverall = byArchetype.length
+    ? byArchetype.reduce((sum, item) => sum + item.rate, 0) / byArchetype.length
+    : 0;
+
+  return {
+    overall: Number.isFinite(overallFromApi) ? overallFromApi : fallbackOverall,
+    byArchetype,
+  };
+};
 
 export const getRainDayImpact = () => {
   if (_d) return _d.rainDayImpact;
