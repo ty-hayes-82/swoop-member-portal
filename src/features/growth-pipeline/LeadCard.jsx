@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import MemberLink from '@/components/MemberLink.jsx';
 import { theme } from '@/config/theme';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 
@@ -20,6 +21,19 @@ export default function LeadCard({ lead }) {
   const [expanded, setExpanded] = useState(false);
   const tierColor = TIER_COLORS[lead.tier] ?? theme.colors.textSecondary;
   const displayName = lead.guestName || lead.name || lead.prospectName || 'Prospect';
+  const nameContent = lead.memberId ? (
+    <MemberLink
+      memberId={lead.memberId}
+      mode="drawer"
+      style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}
+    >
+      {displayName}
+    </MemberLink>
+  ) : (
+    <span style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}>
+      {displayName}
+    </span>
+  );
   const visitCount = toNumber(lead.visits, toNumber(lead.visitCount, 0));
   const totalSpendValue = toNumber(
     lead.totalSpend,
@@ -45,9 +59,7 @@ export default function LeadCard({ lead }) {
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}>
-                {displayName}
-              </span>
+              {nameContent}
               {lead.likelyArchetype && <ArchetypeBadge archetype={lead.likelyArchetype} size="xs" />}
             </div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
