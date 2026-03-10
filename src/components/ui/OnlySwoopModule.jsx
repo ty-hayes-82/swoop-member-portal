@@ -1,121 +1,133 @@
+import { useState } from 'react';
 import { theme } from '@/config/theme.js';
 
-export default function OnlySwoopModule({ question, sources = [], insights = [], action }) {
+export default function OnlySwoopModule({ question, insights = [], action }) {
+  const [showSignals, setShowSignals] = useState(false);
+
   if (!question) return null;
+
+  const insightCount = insights.length;
 
   return (
     <section
       style={{
         border: `1.5px solid ${theme.colors.borderStrong ?? theme.colors.border}`,
         borderRadius: theme.radius.xl,
-        padding: theme.spacing.xl,
+        padding: theme.spacing.lg,
         background: theme.colors.bgCard,
         boxShadow: theme.shadow.sm,
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.lg,
+        gap: theme.spacing.md,
         marginBottom: theme.spacing.xl,
       }}
       data-animate
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-        <span style={{
-          fontSize: theme.fontSize.xs,
-          letterSpacing: '0.2em',
-          textTransform: 'uppercase',
-          color: theme.colors.textMuted,
-          fontWeight: 700,
-        }}>
-          Only Swoop can answer
-        </span>
-        <h2 style={{
-          fontSize: theme.fontSize.xl,
-          fontFamily: theme.fonts.serif,
-          color: theme.colors.textPrimary,
-          margin: 0,
-          lineHeight: 1.2,
-        }}>
-          {question}
-        </h2>
-      </div>
-
-      {sources.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm }}>
-          <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, fontWeight: 600 }}>
-            Because we connect:
-          </span>
-          {sources.map((source) => (
-            <span
-              key={source}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'stretch',
+          gap: theme.spacing.md,
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 240 }}>
+          <h2
+            style={{
+              fontSize: theme.fontSize.xl,
+              fontFamily: theme.fonts.serif,
+              color: theme.colors.textPrimary,
+              margin: 0,
+              lineHeight: 1.25,
+            }}
+          >
+            {question}
+          </h2>
+        </div>
+        {action && (
+          <div
+            style={{
+              flexBasis: 320,
+              flexShrink: 0,
+              borderRadius: theme.radius.lg,
+              background: theme.colors.bgDeep,
+              border: `1px solid ${theme.colors.border}`,
+              padding: theme.spacing.md,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.xs,
+            }}
+          >
+            <p
               style={{
-                padding: '4px 12px',
-                borderRadius: '999px',
-                background: `${theme.colors.cta}14`,
-                color: theme.colors.textPrimary,
+                margin: 0,
                 fontSize: theme.fontSize.sm,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: theme.colors.textMuted,
+              }}
+            >
+              Immediate action
+            </p>
+            <p style={{ margin: 0, fontSize: theme.fontSize.md, lineHeight: 1.4 }}>{action.text}</p>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: theme.spacing.xs,
+                fontSize: theme.fontSize.sm,
+                color: theme.colors.textSecondary,
                 fontWeight: 600,
               }}
             >
-              {source}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {insights.length > 0 && (
-        <div style={{ display: 'grid', gap: theme.spacing.sm }}>
-          <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, fontWeight: 600 }}>
-            What we see that others can’t:
-          </span>
-          <ul style={{
-            margin: 0,
-            paddingLeft: theme.spacing.lg,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.xs,
-            color: theme.colors.textPrimary,
-          }}>
-            {insights.map((insight) => (
-              <li key={insight} style={{ lineHeight: 1.5 }}>
-                {insight}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {action && (
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: theme.spacing.md,
-          alignItems: 'center',
-          borderTop: `1px solid ${theme.colors.border}`,
-          paddingTop: theme.spacing.md,
-        }}>
-          <div style={{ flex: 1, minWidth: 220 }}>
-            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 600 }}>
-              What to do today
+              <span style={{ color: theme.colors.textPrimary }}>{action.owner}</span>
+              {action.dueBy && <span style={{ color: theme.colors.textMuted }}>· Due {action.dueBy}</span>}
             </div>
-            <p style={{ margin: `${theme.spacing.xs} 0 0`, fontSize: theme.fontSize.md, lineHeight: 1.5 }}>
-              {action.text}
-            </p>
           </div>
-          <div style={{
-            minWidth: 220,
-            background: `${theme.colors.bgDeep}CC`,
-            borderRadius: theme.radius.lg,
-            padding: theme.spacing.md,
-            border: `1px solid ${theme.colors.border}`,
-          }}>
-            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, fontWeight: 600 }}>Owner</div>
-            <div style={{ fontWeight: 700 }}>{action.owner}</div>
-            {action.dueBy && (
-              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, marginTop: 4 }}>
-                Due by {action.dueBy}
-              </div>
-            )}
-          </div>
+        )}
+      </div>
+
+      {insightCount > 0 && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowSignals((prev) => !prev)}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              color: theme.colors.textMuted,
+              fontSize: theme.fontSize.sm,
+              fontWeight: 700,
+              textAlign: 'left',
+              padding: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              cursor: 'pointer',
+            }}
+          >
+            <span>{showSignals ? '▾' : '▸'}</span>
+            <span>{showSignals ? 'Hide signals' : `Signals (${insightCount})`}</span>
+          </button>
+
+          {showSignals && (
+            <ul
+              style={{
+                margin: `${theme.spacing.sm} 0 0`,
+                paddingLeft: theme.spacing.lg,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.xs,
+                color: theme.colors.textPrimary,
+              }}
+            >
+              {insights.map((insight) => (
+                <li key={insight} style={{ lineHeight: 1.5 }}>
+                  {insight}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </section>
