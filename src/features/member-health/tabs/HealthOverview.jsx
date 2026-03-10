@@ -62,7 +62,7 @@ function MemberRow({ m, isExpanded, onToggle }) {
       >
         <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
           <MemberLink
-            mode="route"
+            mode="drawer"
             memberId={m.memberId}
             style={{
               fontWeight: 600,

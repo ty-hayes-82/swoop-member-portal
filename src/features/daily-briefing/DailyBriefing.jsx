@@ -1,5 +1,6 @@
 // DailyBriefing — Today mode: immediate priorities. Analytics mode: full briefing.
 // Critique Phase 4: two-mode experience.
+import React from 'react';
 import { Panel, ConnectedSystems, StoryHeadline } from '@/components/ui/index.js';
 import TodayMode from './TodayMode.jsx';
 import YesterdayRecap from './YesterdayRecap.jsx';
@@ -16,11 +17,16 @@ export default function DailyBriefing() {
   const { navigate, viewMode, setViewMode } = useNavigation();
   const briefing = getDailyBriefing();
 
+  const yesterday = briefing.yesterdayRecap || {};
+  const km = briefing.keyMetrics || {};
+  const pending = briefing.pendingActions || [];
+  const [briefingGenerated, setBriefingGenerated] = React.useState(false);
+
   const recapItems = [
-    { label: 'Actions completed', value: '4 of 6 approved' },
-    { label: 'Open items carried forward', value: '2 awaiting owners' },
-    { label: 'Revenue recovered', value: '$2,340 estimated' },
-    { label: 'Member saves', value: '1 intervention successful' },
+    { label: 'Yesterday revenue', value: yesterday.revenue ? '$' + yesterday.revenue.toLocaleString() : '—', color: yesterday.revenueVsLastWeek >= 0 ? theme.colors.success : theme.colors.urgent },
+    { label: 'Rounds played', value: yesterday.rounds ? String(yesterday.rounds) + ' rounds' : '—', sub: yesterday.roundsVsLastWeek ? (yesterday.roundsVsLastWeek > 0 ? '+' : '') + yesterday.roundsVsLastWeek + ' vs last week' : null },
+    { label: 'At-risk members', value: String(km.atRiskMembers || 0), color: (km.atRiskMembers || 0) > 3 ? theme.colors.warning : theme.colors.success },
+    { label: 'Open complaints', value: String(km.openComplaints || 0), color: (km.openComplaints || 0) > 2 ? theme.colors.urgent : theme.colors.textPrimary },
   ];
 
   return (
@@ -40,15 +46,28 @@ export default function DailyBriefing() {
           padding: theme.spacing.md,
         }}
       >
-        <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.sm }}>Yesterday Recap</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.sm }}>
+          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>Yesterday — {yesterday.date || 'Jan 16'}</div>
+          {yesterday.isUnderstaffed && <span style={{ fontSize: theme.fontSize.xs, padding: '2px 8px', borderRadius: theme.radius.sm, background: theme.colors.urgent + '18', color: theme.colors.urgent, fontWeight: 600 }}>Understaffed</span>}
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: theme.spacing.sm }}>
           {recapItems.map((item) => (
             <div key={item.label} style={{ background: theme.colors.bgCard, borderRadius: theme.radius.sm, padding: theme.spacing.sm, border: `1px solid ${theme.colors.border}` }}>
               <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>{item.label}</div>
-              <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: theme.colors.textPrimary }}>{item.value}</div>
+              <div style={{ fontSize: theme.fontSize.md, fontWeight: 600, color: item.color || theme.colors.textPrimary }}>{item.value}</div>
+              {item.sub && <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>{item.sub}</div>}
             </div>
           ))}
         </div>
+        {(yesterday.incidents || []).length > 0 && (
+          <div style={{ marginTop: theme.spacing.sm, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {yesterday.incidents.map((inc, i) => (
+              <div key={i} style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 8 }}>●</span> {inc}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div
