@@ -19,7 +19,6 @@ import { IntegrationsPage } from '@/features/integrations';
 import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
 import LocationIntelligence from '@/features/location-intelligence/LocationIntelligence.jsx';
 import { CsvImportHub } from '@/features/csv-import';
-import MemberProfile from '@/features/member-profile';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -127,7 +126,6 @@ function PortalApplication() {
 function RouterViews() {
   return (
     <Routes>
-      <Route path="/member/:memberId" element={<MemberProfile />} />
       <Route path="*" element={<PortalApplication />} />
     </Routes>
   );
