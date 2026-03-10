@@ -1,12 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { theme } from '@/config/theme';
-import { StoryHeadline, SoWhatCallout } from '@/components/ui';
-import MemberLink from '@/components/MemberLink.jsx';
-import { useNavigationContext } from '@/context/NavigationContext';
+import { StoryHeadline } from '@/components/ui';
 import { useMemberProfile } from '@/context/MemberProfileContext';
-import { getAtRiskMembers } from '@/services/memberService';
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar,
+  AreaChart, Area,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts';
 
@@ -62,56 +59,6 @@ function Section({ title, children, cols }) {
     }}>
       {title && <h3 style={{ margin: 0, marginBottom: theme.spacing.md, fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary }}>{title}</h3>}
       {cols ? <div style={{ display: 'grid', gridTemplateColumns: cols, gap: theme.spacing.md }}>{children}</div> : children}
-    </div>
-  );
-}
-
-// --- Member search/select ---
-function MemberSelector({ onSelect, selectedId }) {
-  const [search, setSearch] = useState('');
-  const allMembers = useMemo(() => {
-    const atRisk = getAtRiskMembers();
-    return atRisk;
-  }, []);
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, flexWrap: 'wrap' }}>
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search member by name or ID..."
-        style={{
-          flex: '1 1 260px', padding: '10px 14px', borderRadius: theme.radius.sm,
-          border: `1px solid ${theme.colors.border}`, background: theme.colors.bgDeep,
-          color: theme.colors.textPrimary, fontSize: theme.fontSize.sm,
-        }}
-      />
-      {search.length >= 2 && (
-        <div style={{
-          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20,
-          background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-          borderRadius: theme.radius.md, maxHeight: 240, overflowY: 'auto',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        }}>
-          {allMembers
-            .filter((m) => m.name?.toLowerCase().includes(search.toLowerCase()) || m.memberId?.toLowerCase().includes(search.toLowerCase()))
-            .slice(0, 8)
-            .map((m) => (
-              <button
-                key={m.memberId}
-                onClick={() => { onSelect(m.memberId); setSearch(''); }}
-                style={{
-                  display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px',
-                  border: 'none', background: 'none', cursor: 'pointer', color: theme.colors.textPrimary,
-                  fontSize: theme.fontSize.sm, borderBottom: `1px solid ${theme.colors.border}`,
-                }}
-              >
-                <strong>{m.name}</strong> <span style={{ color: theme.colors.textMuted }}>{m.memberId} · {m.archetype}</span>
-              </button>
-            ))}
-        </div>
-      )}
     </div>
   );
 }
