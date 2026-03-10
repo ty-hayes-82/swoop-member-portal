@@ -241,6 +241,30 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
         </div>
       )}
 
+      {/* Conversion CTA */}
+      {(!sidebarCollapsed || isMobile) && (
+        <a
+          href="https://swoop-member-intelligence-website.vercel.app/book-demo"
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            margin: '0 12px 8px',
+            padding: '12px',
+            borderRadius: '8px',
+            border: `1px solid ${SIDEBAR_BORDER}`,
+            background: SIDEBAR_CARD,
+            color: TEXT_LIGHT,
+            textDecoration: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px',
+          }}
+        >
+          <span style={{ fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: TEXT_MUTED }}>Get Swoop for your club</span>
+          <span style={{ fontSize: '14px', fontWeight: 600 }}>Book a live walkthrough →</span>
+        </a>
+      )}
+
       {/* Toggle */}
       <div style={{ borderTop: `1px solid ${SIDEBAR_BORDER}`, padding: '12px', display: 'flex', justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-end' }}>
         <button
