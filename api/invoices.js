@@ -100,18 +100,18 @@ export default async function handler(req, res) {
       ? Math.round((parseInt(pastDueMembersCount.rows[0].count) / parseInt(totalMembersCount.rows[0].count)) * 10000) / 100
       : 0;
 
-    // At-risk correlation: % of past-due members who also have health_score < 50
+    // At-risk correlation: % of past-due members who also have engagement_score < 50
     const atRiskCorrelationResult = await sql`
       SELECT
         COUNT(DISTINCT i.member_id) as at_risk_count
       FROM member_invoices i
       INNER JOIN (
-        SELECT member_id, health_score,
-               ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY week_start DESC) as rn
+        SELECT member_id, engagement_score,
+               ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY week_number DESC) as rn
         FROM member_engagement_weekly
       ) e ON i.member_id = e.member_id AND e.rn = 1
       WHERE i.status IN ('past_due_30', 'past_due_60', 'past_due_90')
-        AND e.health_score < 50
+        AND e.engagement_score < 50
     `;
     const atRiskCount = parseInt(atRiskCorrelationResult.rows[0].at_risk_count);
     const pastDueTotal = parseInt(pastDueMembersCount.rows[0].count);
@@ -134,7 +134,7 @@ export default async function handler(req, res) {
         m.first_name || ' ' || m.last_name as name,
         m.archetype,
         m.membership_type,
-        COALESCE(e.health_score, 0) as health_score,
+        COALESCE(e.engagement_score, 0) as health_score,
         SUM(i.amount - i.paid_amount + i.late_fee) as total_past_due,
         MAX(i.days_past_due) as oldest_days_past_due,
         COUNT(i.invoice_id) as invoice_count,
@@ -149,13 +149,13 @@ export default async function handler(req, res) {
       FROM member_invoices i
       INNER JOIN members m ON i.member_id = m.member_id
       LEFT JOIN (
-        SELECT member_id, health_score,
-               ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY week_start DESC) as rn
+        SELECT member_id, engagement_score,
+               ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY week_number DESC) as rn
         FROM member_engagement_weekly
       ) e ON m.member_id = e.member_id AND e.rn = 1
       WHERE i.status IN ('past_due_30', 'past_due_60', 'past_due_90')
       GROUP BY m.member_id, m.first_name, m.last_name, m.archetype,
-               m.membership_type, e.health_score, m.annual_dues
+               m.membership_type, e.engagement_score, m.annual_dues
       ORDER BY oldest_days_past_due DESC
     `;
 
