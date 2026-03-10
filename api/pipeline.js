@@ -14,6 +14,15 @@ const deriveRiskLevel = (score) => {
   return 'Critical';
 };
 
+const inferPotentialDues = (visits, totalSpend) => {
+  const visitCount = Number(visits) || 0;
+  const spend = Number(totalSpend) || 0;
+  if (visitCount >= 4 || spend >= 3000) return 36000;
+  if (visitCount >= 3 || spend >= 1500) return 24000;
+  if (visitCount >= 2 || spend >= 600) return 18000;
+  return 12000;
+};
+
 export default async function handler(req, res) {
   try {
     const [leads, waitlist] = await Promise.all([
@@ -24,14 +33,12 @@ export default async function handler(req, res) {
           ROUND(COALESCE(SUM(pc.total), 0)::numeric, 2) AS total_spend,
           MAX(b.booking_date) AS last_visit,
           MAX(m_sponsor.first_name || ' ' || m_sponsor.last_name) AS sponsored_by,
-          MAX(m_sponsor.archetype) AS sponsor_archetype,
-          MAX(mt.annual_dues) AS potential_dues
+          MAX(m_sponsor.archetype) AS sponsor_archetype
         FROM booking_players bp
         JOIN bookings b ON bp.booking_id = b.booking_id
         JOIN booking_players bp_sponsor ON bp_sponsor.booking_id = b.booking_id AND bp_sponsor.is_guest = 0
         JOIN members m_sponsor ON bp_sponsor.member_id = m_sponsor.member_id
         LEFT JOIN pos_checks pc ON pc.member_id = m_sponsor.member_id AND pc.opened_at::date = b.booking_date::date
-        CROSS JOIN (SELECT annual_dues FROM membership_types WHERE type_code = 'FG') mt
         WHERE bp.is_guest = 1
           AND bp.is_warm_lead = 1
           AND bp.guest_name IS NOT NULL
@@ -74,11 +81,12 @@ export default async function handler(req, res) {
                  : visits === 2 || spend > 200 ? 'warm'
                  : 'cold';
       const score = Math.min(100, (visits * 12) + (spend / 20));
+      const potentialDues = inferPotentialDues(visits, spend);
       return {
         guestName: l.name, name: l.name, tier, visits, visitCount: visits,
         totalSpend: spend, sponsor: l.sponsored_by, sponsoredBy: l.sponsored_by,
         likelyArchetype: l.sponsor_archetype, lastVisit: l.last_visit,
-        potentialDues: Number(l.potential_dues), score: Math.round(score),
+        potentialDues, score: Math.round(score),
         rounds: visits, dining: Math.floor(visits * 0.6), events: Math.floor(visits * 0.2),
       };
     });
