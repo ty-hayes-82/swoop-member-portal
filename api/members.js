@@ -9,6 +9,12 @@ const toNumber = (value, fallback = 0) => {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : fallback;
 };
+const formatCurrency = (value) => {
+  const numeric = toNumber(value, null);
+  if (numeric === null) return '—';
+  return `$${Math.round(numeric).toLocaleString('en-US')}`;
+};
+const formatPercent = (value) => `${Math.max(0, Math.round(value))}%`;
 
 const archetypeBaselines = {
   'Die-Hard Golfer':  { rounds: 8,  dining: 140, events: 1, email: 0.42 },
@@ -47,7 +53,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, decayingInitial, summaryStats] = await Promise.all([
+    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, summaryStats] = await Promise.all([
       sql`
         WITH latest_scores AS (
           SELECT member_id, engagement_score AS score
@@ -123,6 +129,7 @@ export default async function handler(req, res) {
           COALESCE(NULLIF(TRIM(m.first_name || ' ' || m.last_name), ''), 'Member ' || RIGHT(m.member_id::text, 3)) AS name,
           m.archetype,
           m.membership_type,
+          m.annual_dues,
           m.resigned_on,
           f.sentiment_score,
           f.category                          AS complaint_category,
@@ -153,20 +160,6 @@ export default async function handler(req, res) {
 
       sql`
         SELECT
-          m.member_id::text AS member_id,
-          COALESCE(NULLIF(TRIM(m.first_name || ' ' || m.last_name), ''), 'Member ' || RIGHT(m.member_id::text, 3)) AS name,
-          m.archetype,
-          w.week_number,
-          w.email_open_rate,
-          w.engagement_score
-        FROM members m
-        JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
-        WHERE COALESCE(m.membership_status, 'active') <> 'resigned'
-          AND w.week_number >= ${Math.max(1, latestWeek - 8)}
-        ORDER BY m.member_id, w.week_number`,
-
-      sql`
-        SELECT
           ROUND(AVG(w.engagement_score)::numeric, 1)                            AS avg_health_score,
           SUM(CASE WHEN w.engagement_score < 50 THEN m.annual_dues ELSE 0 END) AS dues_at_risk
         FROM members m
@@ -175,52 +168,51 @@ export default async function handler(req, res) {
           AND COALESCE(m.membership_status, 'active') <> 'resigned'`,
     ]);
 
-    let decaying = decayingInitial;
-    if (!decaying?.rowCount) {
-      decaying = await sql`
-        WITH recent_weeks AS (
-          SELECT
-            w.member_id,
-            m.first_name || ' ' || m.last_name AS name,
-            m.archetype,
-            w.week_number,
-            w.email_open_rate,
-            w.engagement_score,
-            ROW_NUMBER() OVER (PARTITION BY w.member_id ORDER BY w.week_number DESC) AS week_rank
-          FROM member_engagement_weekly w
-          JOIN members m ON m.member_id::text = w.member_id::text
-          WHERE w.week_number >= ${Math.max(1, latestWeek - 8)}
-        ), trending AS (
-          SELECT
-            member_id,
-            name,
-            archetype,
-            MAX(CASE WHEN week_rank = 1 THEN email_open_rate END) AS latest_open,
-            MAX(CASE WHEN week_rank = 3 THEN email_open_rate END) AS open_three_weeks_ago
-          FROM recent_weeks
-          WHERE week_rank <= 6
-          GROUP BY member_id, name, archetype
-        ), decaying_ids AS (
-          SELECT member_id
-          FROM trending
-          WHERE open_three_weeks_ago IS NOT NULL
-            AND latest_open IS NOT NULL
-            AND latest_open <= open_three_weeks_ago * 0.75
-          ORDER BY latest_open ASC
-          LIMIT 8
-        )
+    // Decaying members: find members whose email open rate dropped 25%+ over 3 weeks
+    const decaying = await sql`
+      WITH recent_weeks AS (
         SELECT
-          m.member_id,
+          w.member_id,
           m.first_name || ' ' || m.last_name AS name,
           m.archetype,
           w.week_number,
           w.email_open_rate,
-          w.engagement_score
+          w.engagement_score,
+          ROW_NUMBER() OVER (PARTITION BY w.member_id ORDER BY w.week_number DESC) AS week_rank
         FROM member_engagement_weekly w
         JOIN members m ON m.member_id::text = w.member_id::text
-        WHERE w.member_id IN (SELECT member_id FROM decaying_ids)
-        ORDER BY m.member_id, w.week_number`;
-    }
+        WHERE w.week_number >= ${Math.max(1, latestWeek - 8)}
+          AND COALESCE(m.membership_status, 'active') <> 'resigned'
+      ), trending AS (
+        SELECT
+          member_id,
+          name,
+          archetype,
+          MAX(CASE WHEN week_rank = 1 THEN email_open_rate END) AS latest_open,
+          MAX(CASE WHEN week_rank = 3 THEN email_open_rate END) AS open_three_weeks_ago
+        FROM recent_weeks
+        WHERE week_rank <= 6
+        GROUP BY member_id, name, archetype
+      ), decaying_ids AS (
+        SELECT member_id
+        FROM trending
+        WHERE open_three_weeks_ago IS NOT NULL
+          AND latest_open IS NOT NULL
+          AND open_three_weeks_ago > 0.05
+          AND latest_open <= open_three_weeks_ago * 0.75
+        ORDER BY latest_open ASC
+        LIMIT 8
+      )
+      SELECT
+        rw.member_id,
+        rw.name,
+        rw.archetype,
+        rw.week_number,
+        rw.email_open_rate,
+        rw.engagement_score
+      FROM recent_weeks rw
+      WHERE rw.member_id IN (SELECT member_id FROM decaying_ids)
+      ORDER BY rw.member_id, rw.week_number`;
 
     const dist = healthDist.rows;
     const getCount = (level) => toNumber(dist.find((row) => row.level === level)?.count, 0);
@@ -256,7 +248,6 @@ export default async function handler(req, res) {
       },
 
       memberArchetypes: (() => {
-        // Curated radar profiles per archetype — DB averages compress to near-identical charts
         const radarProfiles = {
           'Die-Hard Golfer':  { golf: 88, dining: 42, events: 28, email: 32, trend: +4 },
           'Social Butterfly': { golf: 18, dining: 82, events: 78, email: 72, trend: +6 },
@@ -328,6 +319,26 @@ export default async function handler(req, res) {
           addReason('Email engagement dropped');
         }
 
+        if (!reasons.length) {
+          const fallbackDetails = [];
+          if (rounds === 0) {
+            fallbackDetails.push('Zero golf activity in 30 days');
+          } else {
+            fallbackDetails.push(`${rounds} round${rounds === 1 ? '' : 's'} logged in 30 days`);
+          }
+
+          if (diningSpend > 0) {
+            fallbackDetails.push(`Dining spend ${formatCurrency(diningSpend)}`);
+          }
+
+          if (eventsAttended === 0) {
+            fallbackDetails.push('No event attendance recorded');
+          }
+
+          fallbackDetails.push(`Email opens ${formatPercent(emailPercent)}`);
+          reasons.push(...fallbackDetails);
+        }
+
         const primaryRisk = reasons.length ? reasons.slice(0, 2).join(' • ') : 'Behavioral decay detected across systems';
 
         return {
@@ -335,7 +346,6 @@ export default async function handler(req, res) {
           name: row.name,
           archetype: row.archetype,
           membershipType: row.membership_type,
-          // ON-41 data model note: return both keys for frontend normalization compatibility
           annualDues,
           duesAnnual: annualDues,
           healthScore: toNumber(row.health_score),
@@ -354,6 +364,7 @@ export default async function handler(req, res) {
         name: row.name,
         archetype: row.archetype,
         membershipType: row.membership_type,
+        annualDues: toNumber(row.annual_dues),
         resignedOn: row.resigned_on,
         complaintSentiment: row.sentiment_score ? toNumber(row.sentiment_score) : null,
         complaintCategory: row.complaint_category,
