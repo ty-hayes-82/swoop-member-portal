@@ -83,7 +83,49 @@ export default function MemberProfilePage() {
     setLoading(true);
     fetch(`/api/member-detail?id=${encodeURIComponent(memberId)}`)
       .then((r) => r.ok ? r.json() : null)
-      .then((data) => { if (!cancelled) { setProfile(data); setLoading(false); } })
+      .then((data) => {
+        if (!cancelled) {
+          if (data?.member) {
+            const m = data.member;
+            const f = data.financials ?? {};
+            const c = data.contact ?? {};
+            const km = data.keyMetrics ?? [];
+            setProfile({
+              ...data,
+              memberId: m.id,
+              name: m.name,
+              initials: m.initials,
+              firstName: m.name?.split(" ")[0],
+              lastName: m.name?.split(" ").slice(1).join(" "),
+              membershipType: m.membershipType,
+              memberSince: m.joinDate,
+              membershipStatus: m.status,
+              archetype: m.archetype,
+              healthScore: m.healthScore,
+              scoreDelta: m.scoreDelta,
+              healthTrend: m.healthTrend,
+              tier: m.healthScore >= 70 ? "Gold" : m.healthScore >= 50 ? "Silver" : "Bronze",
+              trend: (data.engagementHistory ?? []).map((w) => w.score),
+              duesAnnual: f.annualDues,
+              memberValueAnnual: f.ytdTotal || f.annualDues,
+              accountBalance: f.ytdTotal ?? 0,
+              emailOpenRate: null,
+              roundsPlayed: km.find((k) => k.id === "rounds")?.value ?? null,
+              diningSpend: km.find((k) => k.id === "dining")?.value ?? null,
+              contact: c,
+              family: data.family ?? [],
+              preferences: data.preferences ?? {},
+              activityTimeline: data.activityTimeline ?? [],
+              riskSignals: data.riskSignals ?? [],
+              notes: data.notes ?? [],
+              invoices: data.invoices ?? {},
+            });
+          } else {
+            setProfile(data);
+          }
+          setLoading(false);
+        }
+      })
       .catch(() => { if (!cancelled) { setProfile(null); setLoading(false); } });
     return () => { cancelled = true; };
   }, [memberId]);
