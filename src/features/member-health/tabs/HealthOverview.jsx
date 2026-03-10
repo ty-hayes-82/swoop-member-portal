@@ -41,40 +41,39 @@ const levelDescriptions = {
   Critical: 'require immediate outreach',
 };
 
-const getActionStatus = (score) => {
-  const numeric = Number(score);
-  if (!Number.isFinite(numeric)) {
-    return { label: 'Needs review', color: theme.colors.textMuted, background: theme.colors.border + '40', description: 'Score unavailable — verify data.' };
-  }
-  if (numeric < 30) {
-    return {
-      label: 'Call today',
-      color: theme.colors.urgent,
-      background: theme.colors.urgent + '16',
-      description: 'Critical member. Immediate outreach required.',
-    };
-  }
-  if (numeric < 40) {
-    return {
-      label: 'Outreach this week',
-      color: theme.colors.warning,
-      background: theme.colors.warning + '16',
-      description: 'At-risk member. Schedule a personal touch within 5 days.',
-    };
-  }
-  if (numeric < 50) {
-    return {
-      label: 'Watch list',
-      color: theme.colors.info,
-      background: theme.colors.info + '16',
-      description: 'Trending down — keep on radar and verify staff touches.',
-    };
-  }
+const archetypeChannel = {
+  'Social Member': 'Concierge text',
+  'Weekend Warrior': 'Pro shop call',
+  'Family Champion': 'Family invite',
+  'Executive Stakeholder': 'GM call',
+};
+
+const summarizeRisk = (signal) => {
+  if (!signal) return '';
+  const primary = signal.split('•')[0].split('—')[0].trim();
+  if (!primary) return '';
+  return primary.charAt(0).toUpperCase() + primary.slice(1);
+};
+
+const getActionStatus = (member) => {
+  const numeric = Number(member?.score);
+  const defaultStatus = !Number.isFinite(numeric)
+    ? { label: 'Needs review', color: theme.colors.textMuted, background: theme.colors.border + '40', description: 'Score unavailable — verify data.' }
+    : numeric < 30
+    ? { label: 'Call today', color: theme.colors.urgent, background: theme.colors.urgent + '16', description: 'Critical member. Immediate outreach required.' }
+    : numeric < 40
+    ? { label: 'Outreach this week', color: theme.colors.warning, background: theme.colors.warning + '16', description: 'At-risk member. Schedule a personal touch within 5 days.' }
+    : numeric < 50
+    ? { label: 'Watch list', color: theme.colors.info, background: theme.colors.info + '16', description: 'Trending down — keep on radar and verify staff touches.' }
+    : { label: 'Monitoring', color: theme.colors.textMuted, background: theme.colors.border + '30', description: 'Healthy member — no action required today.' };
+
+  const channel = archetypeChannel[member?.archetype] ?? (numeric < 40 ? 'GM call' : 'Concierge touch');
+  const riskSummary = summarizeRisk(member?.topRisk);
+
   return {
-    label: 'Monitoring',
-    color: theme.colors.textMuted,
-    background: theme.colors.border + '30',
-    description: 'Healthy member — no action required today.',
+    ...defaultStatus,
+    label: riskSummary ? `${channel} · ${riskSummary}` : `${channel} · ${defaultStatus.label}`,
+    description: `${defaultStatus.description} ${riskSummary ? `Primary signal: ${riskSummary}.` : ''}`.trim(),
   };
 };
 
@@ -82,7 +81,7 @@ const getActionStatus = (score) => {
 function MemberRow({ m, isExpanded, onToggle }) {
   const [hovered, setHovered] = useState(false);
   const riskColor = m.score < 30 ? theme.colors.urgent : theme.colors.warning;
-  const actionStatus = getActionStatus(m.score);
+  const actionStatus = getActionStatus(m);
 
   return (
     <>
@@ -153,7 +152,7 @@ function MemberRow({ m, isExpanded, onToggle }) {
       </tr>
       {isExpanded && (
         <tr style={{ background: theme.colors.bgDeep }}>
-          <td colSpan={4} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
+          <td colSpan={5} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
             <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk} />
           </td>
         </tr>
@@ -267,7 +266,7 @@ export default function HealthOverview() {
           </span>
         </div>
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
+          <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse', fontSize: theme.fontSize.sm, tableLayout: 'fixed' }}>
           <thead>
             <tr style={{ background: theme.colors.bg }}>
               {columns.map((col) => (
