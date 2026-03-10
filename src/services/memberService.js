@@ -54,6 +54,7 @@ const normalizeHealthDistribution = (source, totalMembers) => {
     count: Math.max(0, Math.round(toNumber(item?.count, 0))),
     percentage: clamp(toNumber(item?.percentage, 0), 0, 1),
     color: item?.color ?? '#D4D4D8',
+    delta: toNumber(item?.delta, 0),
   }));
   const totalCount = normalized.reduce((sum, row) => sum + row.count, 0);
   const denominator = totalCount || Math.max(0, Math.round(toNumber(totalMembers, 0)));

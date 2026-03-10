@@ -35,6 +35,13 @@ const formatCompactCurrency = (value) => {
   return formatFullCurrency(amount);
 };
 
+const levelDescriptions = {
+  Healthy: 'are actively engaged across the club',
+  Watch: 'need monitoring before small issues appear',
+  'At Risk': 'are at risk of disengaging',
+  Critical: 'require immediate outreach',
+};
+
 // MemberRow — interactive row with hover state + expand chevron
 function MemberRow({ m, isExpanded, onToggle }) {
   const [hovered, setHovered] = useState(false);
@@ -146,25 +153,37 @@ export default function HealthOverview() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       {/* Health distribution bars */}
       <div className="grid-responsive-4">
-        {dist.map(d => (
-          <div key={d.level} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
-            border: `1px solid ${d.color}40`, padding: theme.spacing.md }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: theme.spacing.sm }}>
-              <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
-                textTransform: 'uppercase', letterSpacing: '0.06em' }}>{d.level}</span>
-              <span style={{ fontSize: theme.fontSize.xs, color: d.color }}>
-                {(d.percentage * 100).toFixed(0)}%
-              </span>
+        {dist.map((d) => {
+          const delta = Number.isFinite(d?.delta) ? d.delta : 0;
+          const descriptor = levelDescriptions[d.level] ?? 'are in this state';
+          const deltaColor = delta > 0 ? theme.colors.urgent : delta < 0 ? theme.colors.success : theme.colors.textMuted;
+          const deltaCopy = delta === 0
+            ? 'same as last month.'
+            : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;
+          return (
+            <div key={d.level} style={{ background: theme.colors.bgCard, boxShadow: theme.shadow.sm, borderRadius: theme.radius.md,
+              border: `1px solid ${d.color}40`, padding: theme.spacing.md }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: theme.spacing.sm }}>
+                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
+                  textTransform: 'uppercase', letterSpacing: '0.06em' }}>{d.level}</span>
+                <span style={{ fontSize: theme.fontSize.xs, color: d.color }}>
+                  {(d.percentage * 100).toFixed(0)}%
+                </span>
+              </div>
+              <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono,
+                fontWeight: 700, color: d.color }}>{d.count}</div>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>members</div>
+              <div style={{ height: 4, background: theme.colors.border, borderRadius: 2, marginTop: theme.spacing.sm }}>
+                <div style={{ height: '100%', background: d.color, borderRadius: 2,
+                  width: `${d.percentage * 100}%` }} />
+              </div>
+              <div style={{ marginTop: theme.spacing.sm, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.4 }}>
+                <strong>{d.count} members</strong> {descriptor} —{' '}
+                <span style={{ color: deltaColor }}>{deltaCopy}</span>
+              </div>
             </div>
-            <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono,
-              fontWeight: 700, color: d.color }}>{d.count}</div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>members</div>
-            <div style={{ height: 4, background: theme.colors.border, borderRadius: 2, marginTop: theme.spacing.sm }}>
-              <div style={{ height: '100%', background: d.color, borderRadius: 2,
-                width: `${d.percentage * 100}%` }} />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* At-risk member table */}
