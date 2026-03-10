@@ -1,5 +1,4 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { useNavigate as useRouterNavigate } from 'react-router-dom';
 import { getMemberProfile } from '@/services/memberService';
 import { useApp } from '@/context/AppContext';
 
@@ -7,7 +6,6 @@ const MemberProfileContext = createContext(null);
 
 export function MemberProfileProvider({ children }) {
   const { showToast } = useApp();
-  const routerNavigate = useRouterNavigate();
   const [drawerMemberId, setDrawerMemberId] = useState(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [staffNotes, setStaffNotes] = useState({});
@@ -25,20 +23,11 @@ export function MemberProfileProvider({ children }) {
     };
   }, [activeMemberId, staffNotes]);
 
-  const openProfile = useCallback(
-    (memberId, options = {}) => {
-      if (!memberId) return;
-      const mode = options.mode ?? 'drawer';
-      if (mode === 'page') {
-        routerNavigate(`/member/${memberId}`);
-        setDrawerOpen(false);
-        return;
-      }
-      setDrawerMemberId(memberId);
-      setDrawerOpen(true);
-    },
-    [routerNavigate]
-  );
+  const openProfile = useCallback((memberId) => {
+    if (!memberId) return;
+    setDrawerMemberId(memberId);
+    setDrawerOpen(true);
+  }, []);
 
   const closeDrawer = useCallback(() => {
     setDrawerOpen(false);
@@ -91,7 +80,7 @@ export function MemberProfileProvider({ children }) {
         activeMemberId,
         isDrawerOpen,
         openProfile,
-        openProfilePage: (memberId) => openProfile(memberId, { mode: 'page' }),
+        openProfilePage: (memberId) => openProfile(memberId),
         closeDrawer,
         addStaffNote,
         triggerQuickAction,

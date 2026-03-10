@@ -7,7 +7,7 @@ import { theme } from '../src/config/theme.js';
 
 export default async function handler(req, res) {
   try {
-    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, decaying, summaryStats] = await Promise.all([
+    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, decayingInitial, summaryStats] = await Promise.all([
 
       // Health score distribution bucketed into 5 levels
       sql`
@@ -117,6 +117,54 @@ export default async function handler(req, res) {
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
         WHERE m.membership_status = 'resigned'
         ORDER BY m.member_id, w.week_number`,
+
+    let decaying = decayingInitial;
+    if (!decaying?.rowCount) {
+      decaying = await sql`
+        WITH recent_weeks AS (
+          SELECT
+            w.member_id,
+            m.first_name || ' ' || m.last_name AS name,
+            m.archetype,
+            w.week_number,
+            w.email_open_rate,
+            w.engagement_score,
+            ROW_NUMBER() OVER (PARTITION BY w.member_id ORDER BY w.week_number DESC) AS week_rank
+          FROM member_engagement_weekly w
+          JOIN members m ON m.member_id = w.member_id
+          WHERE w.week_number >= (SELECT MAX(week_number) - 8 FROM member_engagement_weekly)
+        ), trending AS (
+          SELECT
+            member_id,
+            name,
+            archetype,
+            MAX(CASE WHEN week_rank = 1 THEN email_open_rate END) AS latest_open,
+            MAX(CASE WHEN week_rank = 3 THEN email_open_rate END) AS open_three_weeks_ago
+          FROM recent_weeks
+          WHERE week_rank <= 6
+          GROUP BY member_id, name, archetype
+        ), decaying_ids AS (
+          SELECT member_id
+          FROM trending
+          WHERE open_three_weeks_ago IS NOT NULL
+            AND latest_open IS NOT NULL
+            AND latest_open <= open_three_weeks_ago * 0.75
+          ORDER BY latest_open ASC
+          LIMIT 6
+        )
+        SELECT
+          m.member_id,
+          m.first_name || ' ' || m.last_name AS name,
+          m.archetype,
+          w.week_number,
+          w.email_open_rate,
+          w.engagement_score
+        FROM member_engagement_weekly w
+        JOIN members m ON m.member_id = w.member_id
+        WHERE w.member_id IN (SELECT member_id FROM decaying_ids)
+        ORDER BY m.member_id, w.week_number`;
+    }
+
 
       // Summary stats
       sql`
