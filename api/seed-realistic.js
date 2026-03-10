@@ -1077,10 +1077,10 @@ export default async function handler(req, res) {
     // dining_outlets
     await sql.query(`DELETE FROM dining_outlets`).catch(() => {});
     await sql.query(`
-      INSERT INTO dining_outlets (outlet_id, club_id, name, type) VALUES
-        ('outlet_grill', 'club_001', 'The Grill Room', 'casual'),
-        ('outlet_bar', 'club_001', 'The 19th Hole Bar', 'bar'),
-        ('outlet_dining', 'club_001', 'The Veranda', 'fine_dining')
+      INSERT INTO dining_outlets (outlet_id, club_id, name, type, meal_periods, weekday_covers, weekend_covers) VALUES
+        ('outlet_grill', 'club_001', 'The Grill Room', 'casual', 'lunch,dinner', 80, 120),
+        ('outlet_bar', 'club_001', 'The 19th Hole Bar', 'bar', 'lunch,dinner', 60, 90),
+        ('outlet_dining', 'club_001', 'The Veranda', 'fine_dining', 'dinner', 40, 70)
       ON CONFLICT (outlet_id) DO NOTHING
     `).catch(() => {});
     summary.dining_outlets = 3;
@@ -1088,15 +1088,15 @@ export default async function handler(req, res) {
     // courses
     await sql.query(`DELETE FROM courses`).catch(() => {});
     await sql.query(`
-      INSERT INTO courses (course_id, club_id, name, holes, par) VALUES
-        ('course_main', 'club_001', 'Championship Course', 18, 72)
+      INSERT INTO courses (course_id, club_id, name, holes, par, tee_interval_min, first_tee, last_tee) VALUES
+        ('course_main', 'club_001', 'Championship Course', 18, 72, 10, '06:30', '15:00')
       ON CONFLICT (course_id) DO NOTHING
     `).catch(() => {});
     summary.courses = 1;
 
     // clubs (if exists)
     await sql.query(`
-      INSERT INTO clubs (club_id, name) VALUES ('club_001', 'Oakmont Hills Country Club')
+      INSERT INTO club (club_id, name, city, state, zip) VALUES ('club_001', 'Oakmont Hills Country Club', 'Scottsdale', 'AZ', '85255')
       ON CONFLICT (club_id) DO NOTHING
     `).catch(() => {});
 
