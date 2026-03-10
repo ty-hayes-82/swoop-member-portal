@@ -144,6 +144,17 @@ export default async function handler(req, res) {
       END
       WHERE opened_at::date >= '2026-01-01'::date AND opened_at::date < '2026-02-01'::date
     `);
+    // Remap staff_shifts to canonical outlets before removing orphans
+    await sql.query(`
+      UPDATE staff_shifts
+      SET outlet_id = CASE
+        WHEN outlet_id IN ('outlet_main_dining','outlet_grill','outlet_bar_lounge','outlet_halfway_house','outlet_pool_bar') THEN outlet_id
+        WHEN outlet_id LIKE '%dining%' THEN 'outlet_main_dining'
+        WHEN outlet_id LIKE '%bar%' THEN 'outlet_bar_lounge'
+        ELSE 'outlet_grill'
+      END
+      WHERE outlet_id IS NOT NULL
+    `);
     // Remove orphaned outlet rows
     await sql.query(`
       DELETE FROM dining_outlets
