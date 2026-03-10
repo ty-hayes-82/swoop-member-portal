@@ -686,7 +686,7 @@ function generatePosChecks(members) {
         total: Math.max(0, total),
         payment_method: paymentMethod,
         post_round_dining: postRound,
-        linked_booking_id: linkedBooking,
+        linked_booking_id: null,
         event_id: null,
         is_understaffed_day: isUnderstaffedDay,
       });
