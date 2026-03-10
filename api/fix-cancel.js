@@ -6,22 +6,19 @@ export default async function handler(req, res) {
   try {
     // Set bookings tied to cancellation_risk back to 'confirmed'
     const r1 = await sql`
-      UPDATE bookings b SET status = 'confirmed'
-      FROM cancellation_risk cr
-      WHERE b.booking_id = cr.booking_id`;
+      UPDATE bookings SET status = 'confirmed'
+      WHERE booking_id IN (SELECT booking_id FROM cancellation_risk)`;
 
     // Also create ~20 upcoming confirmed bookings for realism
     // Update their dates to be in the near future
     const r2 = await sql`
       UPDATE bookings SET
         booking_date = TO_CHAR((CURRENT_DATE + (ABS(hashtext(booking_id)) % 14 + 1) * INTERVAL '1 day')::date, 'YYYY-MM-DD'),
-        status = 'confirmed',
         check_in_time = NULL,
         round_start = NULL,
         round_end = NULL,
         duration_minutes = NULL
-      FROM cancellation_risk cr
-      WHERE bookings.booking_id = cr.booking_id`;
+      WHERE booking_id IN (SELECT booking_id FROM cancellation_risk)`;
 
     // Verify
     const check = await sql`
