@@ -38,11 +38,15 @@ const toNumber = (value, fallback = 0) => {
   return Number.isFinite(next) ? next : fallback;
 };
 
+const toString = (value, fallback = '') => (typeof value === 'string' && value.trim() ? value.trim() : fallback);
+
 export const _init = async () => {
   try {
     const res = await fetch('/api/staffing');
     if (res.ok) _d = await res.json();
-  } catch { /* keep static fallback */ }
+  } catch {
+    /* keep static fallback */
+  }
 };
 
 const sanitizeUnderstaffedDays = (source) => {
@@ -61,21 +65,50 @@ const sanitizeUnderstaffedDays = (source) => {
   });
 };
 
-export const getUnderstaffedDays = () => sanitizeUnderstaffedDays(_d ? _d.understaffedDays : understaffedDays);
-export const getShiftCoverage     = () => _d ? _d.shiftCoverage     : shiftCoverage;
-export const getFeedbackSummary   = () => _d ? _d.feedbackSummary   : feedbackSummary;
+const sanitizeShiftCoverage = (source) => {
+  if (!Array.isArray(source) || source.length === 0) return [];
+  return source.map((shift) => {
+    const scheduled = Math.max(0, Math.round(toNumber(shift?.scheduled)));
+    const required = Math.max(0, Math.round(toNumber(shift?.required)));
+    const calculatedGap = Math.max(0, required - scheduled);
+    return {
+      date: shift?.date ?? 'N/A',
+      department: toString(shift?.department, 'Staffing'),
+      scheduled,
+      required,
+      gap: Math.max(0, Math.round(toNumber(shift?.gap, calculatedGap))),
+    };
+  });
+};
 
-export const getComplaintCorrelation = () => {
-  const src = _d ? _d.feedbackRecords : feedbackRecords;
-  return src.map(f => ({
-    date:         f.date ?? f.submitted_at,
-    sentiment:    f.sentiment,
-    status:       f.status,
-    category:     f.category,
-    memberId:     f.memberId ?? f.member_id,
-    isUnderstaffed: f.isUnderstaffed ?? f.is_understaffed_day ?? f.isUnderstaffedDay,
+const sanitizeFeedbackSummary = (source) => {
+  if (!Array.isArray(source) || source.length === 0) return [];
+  return source.map((row) => ({
+    category: toString(row?.category, 'General'),
+    count: Math.max(0, Math.round(toNumber(row?.count))),
+    avgSentiment: Math.max(-1, Math.min(1, toNumber(row?.avgSentiment))),
+    unresolvedCount: Math.max(0, Math.round(toNumber(row?.unresolvedCount))),
   }));
 };
+
+const sanitizeFeedbackRecords = (source) => {
+  if (!Array.isArray(source) || source.length === 0) return [];
+  return source.map((record) => ({
+    date: record?.date ?? record?.submitted_at ?? 'Unknown date',
+    sentiment: toNumber(record?.sentiment, -0.15),
+    status: toString(record?.status, 'acknowledged'),
+    category: toString(record?.category, 'Service'),
+    memberId: toString(record?.memberId ?? record?.member_id ?? 'unknown'),
+    memberName: toString(record?.memberName ?? record?.member_name ?? ''),
+    isUnderstaffed: Boolean(record?.isUnderstaffed ?? record?.is_understaffed_day ?? record?.isUnderstaffedDay),
+  }));
+};
+
+export const getUnderstaffedDays = () => sanitizeUnderstaffedDays(_d ? _d.understaffedDays : understaffedDays);
+export const getShiftCoverage = () => sanitizeShiftCoverage(_d ? _d.shiftCoverage : shiftCoverage);
+export const getFeedbackSummary = () => sanitizeFeedbackSummary(_d ? _d.feedbackSummary : feedbackSummary);
+
+export const getComplaintCorrelation = () => sanitizeFeedbackRecords(_d ? _d.feedbackRecords : feedbackRecords);
 
 export const getStaffingSummary = () => {
   if (_d?.staffingSummary) {
@@ -91,9 +124,9 @@ export const getStaffingSummary = () => {
   const days = getUnderstaffedDays();
   return {
     understaffedDaysCount: days.length,
-    totalRevenueLoss:      days.reduce((s, d) => s + d.revenueLoss, 0),
-    annualizedLoss:        days.reduce((s, d) => s + d.revenueLoss, 0) * 12,
-    unresolvedComplaints:  feedbackRecords.filter(f => f.status !== 'resolved').length,
+    totalRevenueLoss: days.reduce((s, d) => s + d.revenueLoss, 0),
+    annualizedLoss: days.reduce((s, d) => s + d.revenueLoss, 0) * 12,
+    unresolvedComplaints: sanitizeFeedbackRecords(feedbackRecords).filter((f) => f.status !== 'resolved').length,
   };
 };
 
