@@ -11,6 +11,21 @@ const formatTimelineEntry = (entries = []) =>
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 20);
 
+const diffInDays = (date) => {
+  if (!date) return null;
+  const target = new Date(date);
+  if (Number.isNaN(target.getTime())) return null;
+  const now = new Date();
+  return Math.max(0, Math.floor((now - target) / (1000 * 60 * 60 * 24)));
+};
+
+const trendPercent = (current = 0, previous = 0) => {
+  if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0) {
+    return Number.isFinite(current) ? 100 : 0;
+  }
+  return ((current - previous) / Math.abs(previous)) * 100;
+};
+
 export default async function handler(req, res) {
   const memberId = req.query.memberId || req.query.id;
 
@@ -43,7 +58,7 @@ export default async function handler(req, res) {
         FROM member_engagement_weekly
         WHERE member_id = ${memberId}
         ORDER BY week_number DESC
-        LIMIT 6
+        LIMIT 12
       `,
       sql`
         SELECT feedback_id, category, sentiment_score, description, submitted_at, status
@@ -77,11 +92,13 @@ export default async function handler(req, res) {
       `,
       sql`
         SELECT
+          DATE_PART('year', pc.opened_at::timestamp) AS spend_year,
           COALESCE(SUM(CASE WHEN pc.post_round_dining = 1 THEN pc.total ELSE 0 END), 0) AS dining_spend,
           COALESCE(SUM(pc.total), 0) AS total_spend
         FROM pos_checks pc
         WHERE pc.member_id = ${memberId}
-          AND DATE_PART('year', pc.opened_at::timestamp) = DATE_PART('year', CURRENT_DATE)
+          AND DATE_PART('year', pc.opened_at::timestamp) IN (DATE_PART('year', CURRENT_DATE), DATE_PART('year', CURRENT_DATE) - 1)
+        GROUP BY spend_year
       `,
       sql`
         SELECT occurred_at, event_type
@@ -115,29 +132,81 @@ export default async function handler(req, res) {
     const latestScore = weekly.at(-1)?.score ?? null;
     const prevScore = weekly.at(-2)?.score ?? latestScore;
     const scoreDelta = latestScore !== null && prevScore !== null ? latestScore - prevScore : 0;
+    const healthTrend = scoreDelta > 2 ? 'improving' : scoreDelta < -2 ? 'declining' : 'stable';
 
-    const activitySummary = {
-      rounds: {
+    const currentYear = new Date().getFullYear();
+    const spendRows = spendRes.rows.map((row) => ({
+      year: Number(row.spend_year),
+      dining: numberOr(row.dining_spend),
+      total: numberOr(row.total_spend),
+    }));
+
+    const currentSpend = spendRows.find((row) => row.year === currentYear) ?? { dining: 0, total: 0 };
+    const priorSpend = spendRows.find((row) => row.year === currentYear - 1) ?? { dining: 0, total: 0 };
+
+    const eventsSpendYtd = eventsRes.rows
+      .filter((evt) => evt.event_date && new Date(evt.event_date).getFullYear() === currentYear)
+      .reduce((sum, evt) => sum + numberOr(evt.fee_paid), 0);
+
+    const ytdGolfSpend = weekly.reduce((sum, row) => sum + row.rounds * 120, 0);
+    const ytdDiningSpend = currentSpend.dining;
+    const ytdProShopSpend = Math.max(currentSpend.total - currentSpend.dining, 0);
+    const ytdEventSpend = eventsSpendYtd;
+    const ytdTotalSpend = ytdGolfSpend + ytdDiningSpend + ytdProShopSpend + ytdEventSpend;
+
+    const weeksCurrent = weekly.slice(-4);
+    const weeksPrev = weekly.slice(-8, -4);
+
+    const sumBy = (rows, key) => rows.reduce((sum, row) => sum + (row[key] ?? 0), 0);
+
+    const roundsCurrent = sumBy(weeksCurrent, 'rounds');
+    const roundsPrev = weeksPrev.length ? sumBy(weeksPrev, 'rounds') : 0;
+    const diningCurrent = sumBy(weeksCurrent, 'diningSpend');
+    const diningPrev = weeksPrev.length ? sumBy(weeksPrev, 'diningSpend') : 0;
+    const eventsCurrent = sumBy(weeksCurrent, 'eventsAttended');
+    const eventsPrev = weeksPrev.length ? sumBy(weeksPrev, 'eventsAttended') : 0;
+
+    const lastVisitDate = visitsRes.rows[0]?.session_date ?? null;
+    const prevVisitDate = visitsRes.rows[1]?.session_date ?? null;
+    const daysSinceLastVisit = diffInDays(lastVisitDate);
+    const prevDaysSince = diffInDays(prevVisitDate);
+
+    const keyMetrics = [
+      {
+        id: 'rounds',
         label: 'Rounds this month',
-        value: weekly.reduce((sum, row) => sum + row.rounds, 0),
-        trend: scoreDelta,
+        value: roundsCurrent,
+        unit: 'rounds',
+        trend: trendPercent(roundsCurrent, roundsPrev),
+        comparison: 'vs prior month',
       },
-      dining: {
-        label: 'Dining spend',
-        value: weekly.reduce((sum, row) => sum + row.diningSpend, 0),
-        trend: weekly.at(-1)?.diningSpend ?? 0,
+      {
+        id: 'dining',
+        label: 'Dining spend (MTD)',
+        value: diningCurrent,
+        unit: 'currency',
+        trend: trendPercent(diningCurrent, diningPrev),
+        comparison: 'vs prior month',
       },
-      email: {
-        label: 'Email engagement',
-        value: Number(((weekly.at(-1)?.emailOpenRate ?? 0) * 100).toFixed(1)),
-        trend: ((weekly.at(-1)?.emailOpenRate ?? 0) - (weekly.at(-2)?.emailOpenRate ?? 0)) * 100,
+      {
+        id: 'events',
+        label: 'Event attendance',
+        value: eventsCurrent,
+        unit: 'events',
+        trend: trendPercent(eventsCurrent, eventsPrev),
+        comparison: 'vs prior month',
       },
-      events: {
-        label: 'Events attended',
-        value: weekly.reduce((sum, row) => sum + row.eventsAttended, 0),
-        trend: weekly.at(-1)?.eventsAttended ?? 0,
+      {
+        id: 'visit-gap',
+        label: 'Days since last visit',
+        value: daysSinceLastVisit ?? '—',
+        unit: 'days',
+        trend: Number.isFinite(prevDaysSince) && Number.isFinite(daysSinceLastVisit)
+          ? prevDaysSince - daysSinceLastVisit
+          : 0,
+        comparison: 'change vs prior visit',
       },
-    };
+    ];
 
     const riskSignals = [];
     const lastWeek = weekly.at(-1);
@@ -173,7 +242,7 @@ export default async function handler(req, res) {
       });
     });
 
-    const engagementTimeline = formatTimelineEntry([
+    const timelineEntries = formatTimelineEntry([
       ...visitsRes.rows.map((visit) => ({
         id: visit.session_id,
         type: visit.anchor_type,
@@ -204,11 +273,28 @@ export default async function handler(req, res) {
       })),
     ]);
 
-    const diningSpendYtd = numberOr(spendRes.rows[0]?.dining_spend);
-    const totalDiningYtd = numberOr(spendRes.rows[0]?.total_spend);
-    const eventsSpendYtd = eventsRes.rows
-      .filter((evt) => evt.event_date && new Date(evt.event_date).getFullYear() === new Date().getFullYear())
-      .reduce((sum, evt) => sum + numberOr(evt.fee_paid), 0);
+    const timelineOutreach = outreachRes.rows[0];
+
+    const noteEntries = [
+      ...(feedbackRes.rows || []).map((row) => ({
+        id: `note-${row.feedback_id}`,
+        owner: 'GM',
+        channel: 'In Person',
+        note: row.description?.slice(0, 140) ?? 'Service issue logged',
+        date: row.submitted_at,
+      })),
+      timelineOutreach
+        ? {
+            id: 'last-outreach',
+            owner: 'Membership Director',
+            channel: 'Email',
+            note: `Sent ${timelineOutreach.event_type} follow-up`,
+            date: timelineOutreach.occurred_at,
+          }
+        : null,
+    ].filter(Boolean)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 4);
 
     const tenureYears = (() => {
       if (!memberRow.join_date) return 1;
@@ -217,8 +303,6 @@ export default async function handler(req, res) {
       const diff = new Date().getFullYear() - joinDate.getFullYear();
       return Math.max(1, diff + 1);
     })();
-
-    const timelineOutreach = outreachRes.rows[0];
 
     res.status(200).json({
       member: {
@@ -231,35 +315,45 @@ export default async function handler(req, res) {
         archetype: memberRow.archetype,
         healthScore: latestScore,
         scoreDelta,
+        healthTrend,
       },
       healthTimeline: weekly.map((row) => ({
         label: `Week ${row.weekNumber}`,
         score: row.score,
         weekStart: row.start,
       })),
-      activitySummary,
+      engagementHistory: weekly.map((row) => ({
+        label: `W${row.weekNumber}`,
+        score: row.score,
+      })),
+      keyMetrics,
       riskSignals,
-      engagementTimeline,
+      activityTimeline: timelineEntries,
+      engagementTimeline: timelineEntries,
       contact: {
         email: memberRow.email,
         phone: memberRow.phone,
         preferredChannel: memberRow.email ? 'Email' : memberRow.phone ? 'Phone' : 'Unspecified',
         lastOutreach: timelineOutreach?.occurred_at,
+        lastVisitDate,
+        daysSinceLastVisit,
       },
-      outreachHistory: {
-        lastOutreachDate: timelineOutreach?.occurred_at ?? null,
-        lastOutreachType: timelineOutreach?.event_type ?? null,
-        owner: 'Membership Director',
-        notes: timelineOutreach ? `Automated ${timelineOutreach.event_type} sent` : 'No outreach logged recently.',
-      },
+      notes: noteEntries,
       financials: {
         annualDues: numberOr(memberRow.annual_dues),
-        ytdDiningSpend: diningSpendYtd,
-        ytdGolfSpend: weekly.reduce((sum, row) => sum + row.rounds * 120, 0),
-        ytdEventSpend: eventsSpendYtd,
-        lifetimeValue: numberOr(memberRow.annual_dues) * tenureYears + totalDiningYtd,
+        breakdown: {
+          golf: ytdGolfSpend,
+          dining: ytdDiningSpend,
+          events: ytdEventSpend,
+          proShop: ytdProShopSpend,
+        },
         renewalDate: memberRow.join_date,
+        ytdTotal: ytdTotalSpend,
+        priorYearTotal: priorSpend.total,
+        deltaVsPrior: ytdTotalSpend - priorSpend.total,
+        lifetimeValue: numberOr(memberRow.annual_dues) * tenureYears + currentSpend.total,
       },
+      activitySummary: {},
     });
   } catch (error) {
     console.error('member-detail error', error);

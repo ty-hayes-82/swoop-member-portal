@@ -137,6 +137,10 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             {profile.healthScore ?? '—'}
           </div>
           <Sparkline data={profile.trend ?? []} />
+          {layout !== 'page' && onOpenFullPage && (
+            <button
+              type="button"
+              onClick={onOpenFullPage}
               style={{ marginTop: theme.spacing.sm, border: 'none', background: 'none', color: theme.colors.accent, fontWeight: 600, cursor: 'pointer' }}
             >
               Open full profile →
