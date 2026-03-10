@@ -70,7 +70,7 @@ export const navItems = [
   },
   {
     key: 'agent-command',
-    label: 'Recommended Actions',
+    label: 'AI Agents',
     icon: '⬡',
     color: theme.colors.navAgents,
     subtitle: 'Approve or assign high-impact actions before members feel the pain.',

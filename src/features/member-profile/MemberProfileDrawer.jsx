@@ -137,10 +137,6 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             {profile.healthScore ?? '—'}
           </div>
           <Sparkline data={profile.trend ?? []} />
-          {onOpenFullPage && layout === 'drawer' && (
-            <button
-              type="button"
-              onClick={() => onOpenFullPage(profile.memberId)}
               style={{ marginTop: theme.spacing.sm, border: 'none', background: 'none', color: theme.colors.accent, fontWeight: 600, cursor: 'pointer' }}
             >
               Open full profile →
@@ -344,7 +340,7 @@ export default function MemberProfileDrawer() {
 
   const panelStyle = isMobile
     ? { ...panelBase, left: 0, right: 0, bottom: 0, height: '85vh', transform: isAnimating ? 'translateY(0)' : 'translateY(100%)' }
-    : { ...panelBase, top: 0, right: 0, width: 420, height: '100vh', transform: isAnimating ? 'translateX(0)' : 'translateX(105%)' };
+    : { ...panelBase, top: 0, right: 0, width: 680, height: '100vh', transform: isAnimating ? 'translateX(0)' : 'translateX(105%)' };
 
   const overlayStyle = {
     position: 'fixed',
