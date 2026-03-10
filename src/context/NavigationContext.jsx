@@ -43,7 +43,9 @@ export function NavigationProvider({ children }) {
     if (routeKey === 'member-profile') {
       const targetMemberId = intent?.memberId ?? intent?.member ?? null;
       if (!targetMemberId) {
-        console.warn('navigate(member-profile) requires memberId');
+        setRouteState({ route: 'member-profile', memberId: null });
+        setRouteIntent(null);
+        setHashPath('member-profile');
         return;
       }
       setRouteState({ route: 'member-profile', memberId: targetMemberId });
