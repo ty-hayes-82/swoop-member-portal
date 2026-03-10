@@ -170,6 +170,77 @@ const normalizeMemberProfile = (profile) => {
   };
 };
 
+
+// ── Resignation scenario normalizer ──
+
+const DUES_BY_TYPE = { FG: 18000, SOC: 7500, SPT: 12000, JR: 8000, LEG: 22000, NR: 15000 };
+
+const ARCHETYPE_PATTERNS = {
+  Ghost:            'Ghost pattern — complete disengagement before resignation',
+  Declining:        'Gradual multi-domain decay over several months',
+  'Weekend Warrior':  'Weekend-only usage dwindling to nothing',
+  'Balanced Active':  'Previously active member — possible service failure',
+  'Social Only':      'Social/dining-focused member disengaged from club life',
+};
+
+const buildSyntheticTimeline = (resignDate, archetype, complaint) => {
+  const rd = new Date(resignDate + 'T00:00:00');
+  const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const fmtMonth = (d) => mn[d.getMonth()] + ' ' + d.getFullYear();
+  const fmtDay = (d) => mn[d.getMonth()] + ' ' + d.getDate();
+  const m3 = new Date(rd); m3.setMonth(m3.getMonth() - 3);
+  const m2 = new Date(rd); m2.setMonth(m2.getMonth() - 2);
+  const m1 = new Date(rd); m1.setMonth(m1.getMonth() - 1);
+  const timeline = [];
+  const arch = (archetype || '').toLowerCase();
+  if (arch.includes('ghost')) {
+    timeline.push({ date: fmtMonth(m3), event: 'Last recorded visit to club', domain: 'Golf' });
+    timeline.push({ date: fmtMonth(m2), event: 'Stops opening emails entirely', domain: 'Email' });
+    timeline.push({ date: fmtMonth(m1), event: 'No activity across all domains', domain: 'All' });
+  } else if (arch.includes('weekend') || arch.includes('warrior')) {
+    timeline.push({ date: fmtMonth(m3), event: 'Weekend rounds drop from 4 to 2/mo', domain: 'Golf' });
+    timeline.push({ date: fmtMonth(m2), event: 'Down to 1 round; skips weekend events', domain: 'Golf' });
+    timeline.push({ date: fmtMonth(m1), event: 'No rounds played; no dining or events', domain: 'All' });
+  } else if (arch.includes('social')) {
+    timeline.push({ date: fmtMonth(m3), event: 'Dining visits drop from weekly to biweekly', domain: 'F&B' });
+    timeline.push({ date: fmtMonth(m2), event: 'Skips two regular social events', domain: 'Events' });
+    timeline.push({ date: fmtMonth(m1), event: 'Zero dining visits; email open rate below 10%', domain: 'F&B' });
+  } else if (arch.includes('balanced') || arch.includes('active')) {
+    timeline.push({ date: fmtMonth(m3), event: 'Active, healthy member across all domains', domain: 'All' });
+    timeline.push({ date: fmtMonth(m2), event: 'Activity remains normal', domain: 'All' });
+    if (complaint) {
+      const cWeek = new Date(rd); cWeek.setDate(cWeek.getDate() - 5);
+      timeline.push({ date: fmtDay(cWeek), event: 'Complaint filed — ' + complaint + '. Unresolved.', domain: 'Feedback' });
+    } else {
+      timeline.push({ date: fmtMonth(m1), event: 'Sudden drop in all engagement metrics', domain: 'All' });
+    }
+  } else {
+    timeline.push({ date: fmtMonth(m3), event: 'Engagement begins declining across domains', domain: 'Golf' });
+    timeline.push({ date: fmtMonth(m2), event: 'Email open rate drops below 20%', domain: 'Email' });
+    timeline.push({ date: fmtMonth(m1), event: 'Near-zero activity; possible F&B minimum only', domain: 'F&B' });
+  }
+  timeline.push({ date: fmtDay(rd), event: 'Resignation submitted', domain: 'Membership' });
+  return timeline;
+};
+
+const normalizeResignationScenarios = (raw) => {
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+  if (raw[0].timeline) return raw;
+  return raw.map((r) => {
+    const resignDate = r.resignedOn
+      ? (typeof r.resignedOn === 'string' ? r.resignedOn.slice(0, 10) : new Date(r.resignedOn).toISOString().slice(0, 10))
+      : '2026-01-15';
+    const typeCode = (r.membershipType || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
+    const dues = r.annualDues || DUES_BY_TYPE[typeCode] || 18000;
+    const archetype = r.archetype || 'Declining';
+    const complaint = r.complaintCategory || null;
+    const pattern = ARCHETYPE_PATTERNS[archetype]
+      || (complaint ? 'Service issue (' + complaint + ') preceded resignation' : 'Gradual multi-domain decay over several months');
+    const timeline = buildSyntheticTimeline(resignDate, archetype, complaint);
+    return { memberId: r.memberId, name: r.name, archetype, resignDate, pattern, dues, timeline };
+  });
+};
+
 let _d = {
   memberArchetypes: staticArchetypes,
   healthDistribution: staticHealthDistribution,
@@ -196,7 +267,7 @@ export const getHealthDistribution = () => {
 };
 export const getAtRiskMembers       = () => normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
 export const getArchetypeProfiles   = () => normalizeArchetypes(_d?.memberArchetypes);
-export const getResignationScenarios= () => Array.isArray(_d?.resignationScenarios) ? _d.resignationScenarios : [];
+export const getResignationScenarios= () => normalizeResignationScenarios(_d?.resignationScenarios);
 export const getEmailHeatmap        = () => {
   const raw = Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
   return raw.map(e => ({

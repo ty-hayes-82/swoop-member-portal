@@ -37,7 +37,6 @@ export const navItems = [
     color: theme.colors.navOperations,
     subtitle: 'Where is everyone on property right now?',
     sourceSystems: ['Swoop App', 'Member CRM'],
-    hidden: true,
   },
   {
     key: 'member-health',
@@ -47,6 +46,15 @@ export const navItems = [
     color: theme.colors.navMembers,
     subtitle: 'Who is at risk and what do we do?',
     sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet'],
+},
+  {
+    key: 'member-profile',
+    label: 'Member Profiles',
+    section: 'INTELLIGENCE',
+    icon: '👤',
+    color: theme.colors.navMembers,
+    subtitle: 'Full member dossier with history, family, preferences, and invoices.',
+    sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Analytics'],
   },
   {
     key: 'fb-performance',
