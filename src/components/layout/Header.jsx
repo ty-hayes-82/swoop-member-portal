@@ -17,6 +17,7 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
   const page = NAV_ITEMS.find((n) => n.key === currentRoute) || NAV_ITEMS[0];
   const handleMenuClick = onMobileMenuToggle || toggleSidebar;
   const padding = isMobile ? '12px 16px' : '0 24px';
+  const showGreeting = page?.key === 'daily-briefing';
 
   return (
     <header
@@ -37,6 +38,7 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
           flexDirection: isMobile ? 'column' : 'row',
           width: '100%',
           gap: isMobile ? '12px' : '16px',
+          flexWrap: 'wrap',
         }}
       >
         <div
@@ -96,20 +98,45 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
             alignItems: isMobile ? 'flex-start' : 'center',
-            gap: '8px',
+            gap: isMobile ? '8px' : '12px',
             marginLeft: isMobile ? 0 : 'auto',
             width: isMobile ? '100%' : 'auto',
           }}
         >
-          <span
+          <div
             style={{
-              fontSize: isMobile ? '11px' : '12px',
-              color: 'var(--text-muted)',
-              lineHeight: 1.3,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: isMobile ? 'flex-start' : 'flex-end',
+              textAlign: isMobile ? 'left' : 'right',
+              gap: 2,
+              minWidth: 0,
             }}
           >
-            {getGreeting()} — {CLUB_NAME} · {DEMO_MONTH}
-          </span>
+            {showGreeting && (
+              <span
+                style={{
+                  fontSize: isMobile ? '11px' : '12px',
+                  color: 'var(--text-muted)',
+                  lineHeight: 1.2,
+                  fontWeight: 600,
+                }}
+              >
+                {getGreeting()}
+              </span>
+            )}
+            <span
+              style={{
+                fontSize: isMobile ? '11px' : '12px',
+                color: 'var(--text-muted)',
+                lineHeight: 1.2,
+                whiteSpace: 'normal',
+              }}
+            >
+              {CLUB_NAME} · {DEMO_MONTH}
+            </span>
+          </div>
+
           {/* Data freshness indicator */}
           <div
             style={{
