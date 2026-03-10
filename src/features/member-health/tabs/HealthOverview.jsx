@@ -41,10 +41,48 @@ const levelDescriptions = {
   Critical: 'require immediate outreach',
 };
 
+const getActionStatus = (score) => {
+  const numeric = Number(score);
+  if (!Number.isFinite(numeric)) {
+    return { label: 'Needs review', color: theme.colors.textMuted, background: theme.colors.border + '40', description: 'Score unavailable — verify data.' };
+  }
+  if (numeric < 30) {
+    return {
+      label: 'Call today',
+      color: theme.colors.urgent,
+      background: theme.colors.urgent + '16',
+      description: 'Critical member. Immediate outreach required.',
+    };
+  }
+  if (numeric < 40) {
+    return {
+      label: 'Outreach this week',
+      color: theme.colors.warning,
+      background: theme.colors.warning + '16',
+      description: 'At-risk member. Schedule a personal touch within 5 days.',
+    };
+  }
+  if (numeric < 50) {
+    return {
+      label: 'Watch list',
+      color: theme.colors.info,
+      background: theme.colors.info + '16',
+      description: 'Trending down — keep on radar and verify staff touches.',
+    };
+  }
+  return {
+    label: 'Monitoring',
+    color: theme.colors.textMuted,
+    background: theme.colors.border + '30',
+    description: 'Healthy member — no action required today.',
+  };
+};
+
 // MemberRow — interactive row with hover state + expand chevron
 function MemberRow({ m, isExpanded, onToggle }) {
   const [hovered, setHovered] = useState(false);
   const riskColor = m.score < 30 ? theme.colors.urgent : theme.colors.warning;
+  const actionStatus = getActionStatus(m.score);
 
   return (
     <>
@@ -94,6 +132,23 @@ function MemberRow({ m, isExpanded, onToggle }) {
               transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
             }}>›</span>
           </div>
+        </td>
+        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+          <span
+            title={actionStatus.description}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '2px 10px',
+              borderRadius: 999,
+              fontSize: theme.fontSize.xs,
+              fontWeight: 600,
+              color: actionStatus.color,
+              background: actionStatus.background,
+            }}
+          >
+            {actionStatus.label}
+          </span>
         </td>
       </tr>
       {isExpanded && (
@@ -156,6 +211,7 @@ export default function HealthOverview() {
     { key: 'score', label: 'Health Score' },
     { key: 'archetype', label: 'Archetype' },
     { key: 'risk', label: 'Primary Risk Signal' },
+    { key: 'action', label: 'Action Status', sortable: false },
   ];
 
   return (
@@ -218,15 +274,19 @@ export default function HealthOverview() {
                 <th key={col.key} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'left',
                   color: theme.colors.textMuted, fontSize: theme.fontSize.xs, textTransform: 'uppercase',
                   letterSpacing: '0.06em', fontWeight: 500 }}>
-                  <button
-                    onClick={() => toggleSort(col.key)}
-                    style={{ background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                  >
-                    {col.label}
-                    {sortColumn === col.key && (
-                      <span style={{ fontSize: '11px' }}>{sortDir === 'asc' ? '▲' : '▼'}</span>
-                    )}
-                  </button>
+                  {col.sortable === false ? (
+                    <span>{col.label}</span>
+                  ) : (
+                    <button
+                      onClick={() => toggleSort(col.key)}
+                      style={{ background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                    >
+                      {col.label}
+                      {sortColumn === col.key && (
+                        <span style={{ fontSize: '11px' }}>{sortDir === 'asc' ? '▲' : '▼'}</span>
+                      )}
+                    </button>
+                  )}
                   {col.key === 'score' && (
                     <span title="Composite score (0–100) based on: visit frequency, F&B spend trends, email engagement, complaint history, tenure length, and event participation. Updated daily."
                       style={{ cursor: 'help', marginLeft: '4px', fontSize: '11px', opacity: 0.7 }}>ⓘ</span>

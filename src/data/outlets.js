@@ -69,3 +69,11 @@ export const rainDayImpact = [
   { date: '2026-01-26', weather: 'rainy', golfRevenue: 5600,  fbRevenue: 4800 },
   { date: '2026-01-27', weather: 'rainy', golfRevenue: 3200,  fbRevenue: 5800 },
 ];
+
+export const fbMonthComparison = {
+  currentMonth: 'January 2026',
+  previousMonth: 'December 2025',
+  currentRevenue: 98400,
+  previousRevenue: 108600,
+  context: 'December included six holiday banquets and a 3-day closure, so January typically runs about 10% softer.',
+};

@@ -1,7 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell, CartesianGrid } from 'recharts';
 import { SoWhatCallout, Sparkline } from '@/components/ui';
-import TrendContext from '@/components/ui/TrendContext.jsx';
-import { getOutletPerformance, getFBSummary } from '@/services/fbService';
+import { getOutletPerformance, getFBSummary, getFBMonthComparison } from '@/services/fbService';
 import { outletTrends } from '@/data/trends.js';
 import { theme } from '@/config/theme';
 
@@ -51,6 +50,11 @@ export default function OutletTab() {
   const totalRevenue = Math.round(safeNumber(summary.totalRevenue));
   const totalCovers = Math.max(0, Math.round(safeNumber(summary.totalCovers)));
   const understaffingLoss = Math.round(Math.abs(safeNumber(summary.understaffingLoss)));
+  const monthComparison = getFBMonthComparison();
+  const prev = Number(monthComparison?.previousRevenue) || 0;
+  const curr = Number(monthComparison?.currentRevenue) || totalRevenue;
+  const deltaPct = prev > 0 ? ((curr - prev) / prev) * 100 : null;
+  const deltaLabel = typeof deltaPct === 'number' ? `${deltaPct >= 0 ? '+' : ''}${Math.round(deltaPct)}% vs ${monthComparison?.previousMonth ?? 'last month'}` : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -58,9 +62,9 @@ export default function OutletTab() {
         {[{
           label: 'Total F&B Revenue',
           value: formatWholeDollar(totalRevenue),
-          metric: 'fbRevenue',
-          format: 'currency',
           accent: theme.colors.accent,
+          delta: deltaLabel,
+          deltaContext: monthComparison?.context,
         }, {
           label: 'Total Covers',
           value: totalCovers.toLocaleString(),
@@ -79,7 +83,14 @@ export default function OutletTab() {
           }}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{card.label}</div>
             <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono, fontWeight: 700, color: card.accent }}>{card.value}</div>
-            {card.metric && <TrendContext metricKey={card.metric} format={card.format} style={{ marginTop: 4 }} />}
+            {card.delta && (
+              <div
+                title={card.deltaContext || undefined}
+                style={{ fontSize: theme.fontSize.xs, color: card.delta.startsWith('+') ? theme.colors.success : theme.colors.textSecondary, marginTop: 4 }}
+              >
+                {card.delta}
+              </div>
+            )}
           </div>
         ))}
       </div>
