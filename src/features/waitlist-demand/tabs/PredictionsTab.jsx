@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { Badge, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
 import CancellationRiskRow from '@/features/pipeline/components/CancellationRiskRow';
 import MemberLink from '@/components/MemberLink.jsx';
-import { cancellationProbabilities } from '@/data/pipeline';
 import { theme } from '@/config/theme';
+import { getCancellationPredictions, getCancellationSummary } from '@/services/waitlistService';
 
 const FORECAST_WINDOWS = [
   { key: '30d', label: '30 Days', multiplier: 1.0, weight: 0.52 },
@@ -48,17 +48,17 @@ function buildCountdown(index) {
 
 export default function PredictionsTab() {
   const predictions = useMemo(
-    () => [...cancellationProbabilities].sort((a, b) => b.cancelProbability - a.cancelProbability),
+    () => [...getCancellationPredictions()].sort((a, b) => b.cancelProbability - a.cancelProbability),
     [],
   );
 
   const summary = useMemo(() => {
-    const highRisk = predictions.filter((p) => p.cancelProbability >= 0.6);
+    const base = getCancellationSummary();
     return {
-      total: predictions.length,
-      highRisk: highRisk.length,
-      totalRevAtRisk: highRisk.reduce((sum, p) => sum + p.estimatedRevenueLost, 0),
-      topDriver: 'Wind advisory + unresolved service friction',
+      total: Number(base?.total ?? predictions.length),
+      highRisk: Number(base?.highRisk ?? 0),
+      totalRevAtRisk: Number(base?.totalRevAtRisk ?? 0),
+      topDriver: base?.topDriver ?? 'Wind advisory + unresolved service friction',
     };
   }, [predictions]);
 

@@ -12,10 +12,6 @@ import { theme } from '@/config/theme';
 const SLOT_WINDOWS = ['Sat 7:00', 'Sat 7:08', 'Sat 7:16', 'Sat 7:24', 'Sun 7:00', 'Sun 7:08'];
 
 function buildQueueStats(summary, queue) {
-  const atRiskRevenue = queue
-    .filter((member) => ['At Risk', 'Critical'].includes(member.riskLevel))
-    .reduce((sum, member) => sum + (member.memberValueAnnual ?? 0), 0);
-
   const avgHealthScore = Math.round(
     queue.reduce((sum, member) => sum + member.healthScore, 0) / Math.max(queue.length, 1),
   );
@@ -39,7 +35,7 @@ function buildQueueStats(summary, queue) {
     },
     {
       label: 'At-Risk Dues Exposed',
-      value: atRiskRevenue,
+      value: summary.atRiskDuesExposed,
       format: 'currency',
       trend: { direction: 'up', value: '+$4.1K', period: 'if not routed today', inverted: true },
       sparklineData: queue
@@ -51,9 +47,9 @@ function buildQueueStats(summary, queue) {
       source: 'Member CRM',
     },
     {
-      label: 'Average Health Score',
-      value: avgHealthScore,
-      trend: { direction: 'down', value: '-4 pts', period: 'past 2 weeks', inverted: true },
+      label: 'Risk-Scored Today',
+      value: summary.riskScoredToday,
+      trend: { direction: 'down', value: `${avgHealthScore} avg score`, period: 'queue baseline', inverted: true },
       sparklineData: queue.slice(0, 6).map((member) => member.healthScore).reverse(),
       badge: { text: 'Member Health', variant: 'effort' },
       source: 'Analytics',

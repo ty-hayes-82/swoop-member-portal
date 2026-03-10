@@ -5,31 +5,57 @@
 import { sql } from '@vercel/postgres';
 import { theme } from '../src/config/theme.js';
 
+const toNumber = (value, fallback = 0) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : fallback;
+};
+
 export default async function handler(req, res) {
   try {
-    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, decayingInitial, summaryStats] = await Promise.all([
+    const latestWeekResult = await sql`SELECT MAX(week_number) AS latest_week FROM member_engagement_weekly`;
+    const latestWeek = toNumber(latestWeekResult.rows[0]?.latest_week, 0);
 
-      // Health score distribution bucketed into 5 levels
+    if (!latestWeek) {
+      return res.status(200).json({
+        healthDistribution: [],
+        memberSummary: {
+          total: 0,
+          healthy: 0,
+          atRisk: 0,
+          critical: 0,
+          riskCount: 0,
+          avgHealthScore: 0,
+          potentialDuesAtRisk: 0,
+        },
+        memberArchetypes: [],
+        atRiskMembers: [],
+        resignationScenarios: [],
+        emailHeatmap: [],
+        decayingMembers: [],
+      });
+    }
+
+    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, decayingInitial, summaryStats] = await Promise.all([
       sql`
+        WITH latest_scores AS (
+          SELECT member_id, engagement_score AS score
+          FROM member_engagement_weekly
+          WHERE week_number = ${latestWeek}
+        )
         SELECT
           CASE
-            WHEN latest.score >= 70 THEN 'Healthy'
-            WHEN latest.score >= 50 THEN 'Watch'
-            WHEN latest.score >= 30 THEN 'At Risk'
             WHEN m.membership_status = 'resigned' THEN 'Churned'
+            WHEN ls.score >= 70 THEN 'Healthy'
+            WHEN ls.score >= 50 THEN 'Watch'
+            WHEN ls.score >= 30 THEN 'At Risk'
             ELSE 'Critical'
           END AS level,
           COUNT(*) AS count
         FROM members m
-        JOIN (
-          SELECT member_id, engagement_score AS score
-          FROM member_engagement_weekly
-          WHERE week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
-        ) latest ON m.member_id = latest.member_id
+        LEFT JOIN latest_scores ls ON ls.member_id = m.member_id
         GROUP BY 1
-        ORDER BY MIN(latest.score) DESC`,
+        ORDER BY MIN(COALESCE(ls.score, 0)) DESC`,
 
-      // Archetype summary
       sql`
         SELECT
           m.archetype,
@@ -41,34 +67,31 @@ export default async function handler(req, res) {
           ROUND(AVG(w.events_attended)::numeric, 2)   AS avg_events
         FROM members m
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
+        WHERE w.week_number = ${latestWeek}
         GROUP BY m.archetype`,
 
-      // At-risk members (score < 50, latest week, not resigned)
       sql`
         SELECT
           m.member_id,
-          m.first_name || ' ' || m.last_name  AS name,
+          m.first_name || ' ' || m.last_name AS name,
           m.archetype,
           m.membership_type,
           m.annual_dues,
-          w.engagement_score                  AS health_score,
+          w.engagement_score                 AS health_score,
           CASE
-            WHEN w.engagement_score >= 50 THEN 'Watch'
             WHEN w.engagement_score >= 30 THEN 'At Risk'
             ELSE 'Critical'
-          END                                 AS risk_level,
+          END                                AS risk_level,
           w.rounds_played,
           w.dining_spend,
           w.email_open_rate
         FROM members m
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
-        WHERE w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
+        WHERE w.week_number = ${latestWeek}
           AND w.engagement_score < 50
           AND m.membership_status <> 'resigned'
-        ORDER BY w.engagement_score ASC
-        LIMIT 20`,
+        ORDER BY w.engagement_score ASC`,
 
-      // Resignation scenarios
       sql`
         SELECT
           m.member_id,
@@ -85,12 +108,11 @@ export default async function handler(req, res) {
         WHERE m.membership_status = 'resigned'
         ORDER BY m.resigned_on`,
 
-      // Email heatmap — open rate per campaign per archetype
       sql`
         SELECT
           ec.subject,
           ec.send_date,
-          ec.type                                                              AS campaign_type,
+          ec.type                                                             AS campaign_type,
           m.archetype,
           COUNT(*) FILTER (WHERE ee.event_type = 'send')                     AS sends,
           COUNT(*) FILTER (WHERE ee.event_type = 'open')                     AS opens,
@@ -104,7 +126,6 @@ export default async function handler(req, res) {
         GROUP BY ec.campaign_id, ec.subject, ec.send_date, ec.type, m.archetype
         ORDER BY ec.send_date, m.archetype`,
 
-      // Decaying members — resignees with weekly open rate trend
       sql`
         SELECT
           m.member_id,
@@ -117,6 +138,16 @@ export default async function handler(req, res) {
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
         WHERE m.membership_status = 'resigned'
         ORDER BY m.member_id, w.week_number`,
+
+      sql`
+        SELECT
+          ROUND(AVG(w.engagement_score)::numeric, 1)                            AS avg_health_score,
+          SUM(CASE WHEN w.engagement_score < 50 THEN m.annual_dues ELSE 0 END) AS dues_at_risk
+        FROM members m
+        JOIN member_engagement_weekly w ON m.member_id = w.member_id
+        WHERE w.week_number = ${latestWeek}
+          AND m.membership_status <> 'resigned'`,
+    ]);
 
     let decaying = decayingInitial;
     if (!decaying?.rowCount) {
@@ -132,7 +163,7 @@ export default async function handler(req, res) {
             ROW_NUMBER() OVER (PARTITION BY w.member_id ORDER BY w.week_number DESC) AS week_rank
           FROM member_engagement_weekly w
           JOIN members m ON m.member_id = w.member_id
-          WHERE w.week_number >= (SELECT MAX(week_number) - 8 FROM member_engagement_weekly)
+          WHERE w.week_number >= ${Math.max(1, latestWeek - 8)}
         ), trending AS (
           SELECT
             member_id,
@@ -150,7 +181,7 @@ export default async function handler(req, res) {
             AND latest_open IS NOT NULL
             AND latest_open <= open_three_weeks_ago * 0.75
           ORDER BY latest_open ASC
-          LIMIT 6
+          LIMIT 8
         )
         SELECT
           m.member_id,
@@ -165,26 +196,11 @@ export default async function handler(req, res) {
         ORDER BY m.member_id, w.week_number`;
     }
 
-
-      // Summary stats
-      sql`
-        SELECT
-          ROUND(AVG(w.engagement_score)::numeric, 1)                         AS avg_health_score,
-          SUM(CASE WHEN w.engagement_score < 50 THEN m.annual_dues ELSE 0 END) AS dues_at_risk
-        FROM members m
-        JOIN member_engagement_weekly w ON m.member_id = w.member_id
-        WHERE w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
-          AND m.membership_status <> 'resigned'`,
-    ]);
-
-    // Compute member summary from results
     const dist = healthDist.rows;
-    const getCount = level => Number(dist.find(d => d.level === level)?.count ?? 0);
-    const total = dist.reduce((s, d) => s + Number(d.count), 0);
+    const getCount = (level) => toNumber(dist.find((row) => row.level === level)?.count, 0);
+    const total = dist.reduce((sum, row) => sum + toNumber(row.count), 0);
     const atRiskCount = getCount('At Risk') + getCount('Critical');
     const summaryRow = summaryStats.rows[0] ?? {};
-    const avgHealthScore = Number(summaryRow.avg_health_score) || 0;
-    const potentialDuesAtRisk = Number(summaryRow.dues_at_risk) || 0;
 
     const levelColors = {
       Healthy: theme.colors.success,
@@ -195,31 +211,31 @@ export default async function handler(req, res) {
     };
 
     res.status(200).json({
-      healthDistribution: dist.map(d => ({
-        level: d.level,
-        count: Number(d.count),
-        percentage: total > 0 ? Number(d.count) / total : 0,
-        color: levelColors[d.level] ?? theme.colors.info,
+      healthDistribution: dist.map((row) => ({
+        level: row.level,
+        count: toNumber(row.count),
+        percentage: total > 0 ? toNumber(row.count) / total : 0,
+        color: levelColors[row.level] ?? theme.colors.info,
       })),
 
       memberSummary: {
         total,
-        healthy:             getCount('Healthy'),
-        atRisk:              getCount('At Risk'),
-        critical:            getCount('Critical'),
-        riskCount:           atRiskCount,
-        avgHealthScore,
-        potentialDuesAtRisk,
+        healthy: getCount('Healthy'),
+        atRisk: getCount('At Risk'),
+        critical: getCount('Critical'),
+        riskCount: atRiskCount,
+        avgHealthScore: toNumber(summaryRow.avg_health_score),
+        potentialDuesAtRisk: Math.round(toNumber(summaryRow.dues_at_risk)),
       },
 
-      memberArchetypes: archetypes.rows.map(a => {
-        const avgRounds = Number(a.avg_rounds) || 0;
-        const avgDiningSpend = Number(a.avg_dining_spend) || 0;
-        const avgEvents = Number(a.avg_events) || 0;
-        const avgOpenRate = Number(a.avg_open_rate) || 0;
+      memberArchetypes: archetypes.rows.map((row) => {
+        const avgRounds = toNumber(row.avg_rounds);
+        const avgDiningSpend = toNumber(row.avg_dining_spend);
+        const avgEvents = toNumber(row.avg_events);
+        const avgOpenRate = toNumber(row.avg_open_rate);
         return {
-          archetype: a.archetype,
-          count: Number(a.count),
+          archetype: row.archetype,
+          count: toNumber(row.count),
           golf: Math.round(Math.min(100, (avgRounds / 4) * 100)),
           dining: Math.round(Math.min(100, (avgDiningSpend / 150) * 100)),
           events: Math.round(Math.min(100, avgEvents * 100)),
@@ -228,57 +244,69 @@ export default async function handler(req, res) {
         };
       }),
 
-      atRiskMembers: atRisk.rows.map(m => {
-        const rounds = Number(m.rounds_played) || 0;
-        const diningSpend = Number(m.dining_spend) || 0;
-        const emailOpenRate = Number(m.email_open_rate) || 0;
+      atRiskMembers: atRisk.rows.map((row) => {
+        const rounds = toNumber(row.rounds_played);
+        const diningSpend = toNumber(row.dining_spend);
+        const emailOpenRate = toNumber(row.email_open_rate);
         const riskReasons = [];
         if (rounds === 0) riskReasons.push('Zero golf activity');
         if (emailOpenRate < 0.15) riskReasons.push('Email engagement dropped');
         if (diningSpend < 30) riskReasons.push('Minimal dining');
+
         return {
-          memberId:      m.member_id,
-          name:          m.name,
-          archetype:     m.archetype,
-          membershipType: m.membership_type,
-          annualDues:    Number(m.annual_dues),
-          healthScore:   Number(m.health_score),
-          score:         Number(m.health_score),
-          riskLevel:     m.risk_level,
-          roundsPlayed:  rounds,
+          memberId: row.member_id,
+          name: row.name,
+          archetype: row.archetype,
+          membershipType: row.membership_type,
+          annualDues: toNumber(row.annual_dues),
+          healthScore: toNumber(row.health_score),
+          score: toNumber(row.health_score),
+          riskLevel: row.risk_level,
+          roundsPlayed: rounds,
           diningSpend,
           emailOpenRate,
-          trend:         'declining',
-          topRisk:       riskReasons.join('; ') || 'Monitoring',
+          trend: 'declining',
+          topRisk: riskReasons.join('; ') || 'Monitoring',
         };
       }),
 
-      resignationScenarios: resignations.rows.map(r => ({
-        memberId:          r.member_id,
-        name:              r.name,
-        archetype:         r.archetype,
-        membershipType:    r.membership_type,
-        resignedOn:        r.resigned_on,
-        complaintSentiment:r.sentiment_score ? Number(r.sentiment_score) : null,
-        complaintCategory: r.complaint_category,
-        complaintStatus:   r.complaint_status,
+      resignationScenarios: resignations.rows.map((row) => ({
+        memberId: row.member_id,
+        name: row.name,
+        archetype: row.archetype,
+        membershipType: row.membership_type,
+        resignedOn: row.resigned_on,
+        complaintSentiment: row.sentiment_score ? toNumber(row.sentiment_score) : null,
+        complaintCategory: row.complaint_category,
+        complaintStatus: row.complaint_status,
       })),
 
-      emailHeatmap: emailHeatmap.rows.map(e => ({
-        subject:      e.subject,
-        sendDate:     e.send_date,
-        campaignType: e.campaign_type,
-        archetype:    e.archetype,
-        sends:        Number(e.sends),
-        opens:        Number(e.opens),
-        openRate:     Number(e.open_rate),
+      emailHeatmap: emailHeatmap.rows.map((row) => ({
+        subject: row.subject,
+        sendDate: row.send_date,
+        campaignType: row.campaign_type,
+        archetype: row.archetype,
+        sends: toNumber(row.sends),
+        opens: toNumber(row.opens),
+        openRate: toNumber(row.open_rate),
       })),
 
       decayingMembers: (() => {
         const byMember = {};
-        for (const r of decaying.rows) {
-          if (!byMember[r.member_id]) byMember[r.member_id] = { memberId: r.member_id, name: r.name, archetype: r.archetype, weeks: [] };
-          byMember[r.member_id].weeks.push({ week: Number(r.week_number), openRate: Number(r.email_open_rate), score: Number(r.engagement_score) });
+        for (const row of decaying.rows) {
+          if (!byMember[row.member_id]) {
+            byMember[row.member_id] = {
+              memberId: row.member_id,
+              name: row.name,
+              archetype: row.archetype,
+              weeks: [],
+            };
+          }
+          byMember[row.member_id].weeks.push({
+            week: toNumber(row.week_number),
+            openRate: toNumber(row.email_open_rate),
+            score: toNumber(row.engagement_score),
+          });
         }
         return Object.values(byMember);
       })(),
