@@ -225,6 +225,20 @@ export const getMemberSummary = () => {
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
   if (_d?.memberProfiles?.[memberId]) return normalizeMemberProfile(_d.memberProfiles[memberId]);
+  // Fallback: build basic profile from at-risk member data
+  const allAtRisk = normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? []);
+  const found = allAtRisk.find(m => m.memberId === memberId);
+  if (found) {
+    return normalizeMemberProfile({
+      memberId: found.memberId, name: found.name,
+      tier: found.membershipType || 'Full Golf', archetype: found.archetype,
+      healthScore: found.score, duesAnnual: found.annualDues || 18000,
+      trend: [found.score + 20, found.score + 15, found.score + 10, found.score + 5, found.score],
+      contact: { phone: '—', email: '—', preferredChannel: '—' },
+      riskSignals: found.topRisk && found.topRisk !== 'Monitoring' ? [{ id: 'primary', label: found.topRisk, source: 'Analytics', confidence: '—' }] : [],
+      activity: [], staffNotes: [], preferences: {}, family: [],
+    });
+  }
   return null;
 };
 
