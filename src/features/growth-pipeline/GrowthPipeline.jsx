@@ -2,6 +2,8 @@ import { Fragment, useMemo, useState } from 'react';
 import { Panel, SoWhatCallout, StoryHeadline } from '@/components/ui';
 import { getWarmLeads, getPipelineSummary, getConversionInsights, sourceSystems } from '@/services/pipelineService';
 import { theme } from '@/config/theme';
+import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
+import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -149,6 +151,7 @@ export default function GrowthPipeline() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <OnlySwoopModule {...onlySwoopAngles.revenuePipeline} />
       <StoryHeadline
         variant="opportunity"
         headline="Your guest list is carrying four dues tiers worth $180K+."
