@@ -1,5 +1,15 @@
 // memberService.js — live data via /api/members
 
+import {
+  memberArchetypes as staticArchetypes,
+  healthDistribution as staticHealthDistribution,
+  atRiskMembers as staticAtRiskMembers,
+  resignationScenarios as staticResignationScenarios,
+  memberProfiles as staticMemberProfiles,
+  memberSummary as staticMemberSummary,
+} from '@/data/members';
+import { decayingMembers as staticDecayingMembers, emailHeatmap as staticEmailHeatmap } from '@/data/email';
+
 const toNumber = (value, fallback = 0) => {
   const num = Number(value);
   return Number.isFinite(num) ? num : fallback;
@@ -115,7 +125,17 @@ const normalizeMemberProfile = (profile) => {
   };
 };
 
-let _d = null;
+let _d = {
+  memberArchetypes: staticArchetypes,
+  healthDistribution: staticHealthDistribution,
+  atRiskMembers: staticAtRiskMembers,
+  membersAtRisk: staticAtRiskMembers,
+  resignationScenarios: staticResignationScenarios,
+  memberProfiles: staticMemberProfiles,
+  memberSummary: staticMemberSummary,
+  emailHeatmap: staticEmailHeatmap,
+  decayingMembers: staticDecayingMembers,
+};
 
 export const _init = async () => {
   try {
