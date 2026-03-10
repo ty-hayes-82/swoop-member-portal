@@ -111,41 +111,47 @@ export default function OutletTab() {
       </div>
 
       <div style={{ background: theme.colors.bgCard, borderRadius: theme.radius.md, border: `1px solid ${theme.colors.border}`, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
-          <thead>
-            <tr style={{ background: theme.colors.bg }}>
-              {['Outlet', 'Revenue', 'Covers', 'Avg Check', '6-mo Trend', 'Understaffing Impact'].map(h => (
-                <th key={h} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'left', color: theme.colors.textMuted, fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {outlets.map((o, i) => (
-              <tr key={o.outlet} style={{ borderTop: `1px solid ${theme.colors.border}`, background: i % 2 ? theme.colors.bg : theme.colors.bgCard }}>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textPrimary, fontWeight: 500 }}>{o.outlet}</td>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.accent, fontFamily: theme.fonts.mono }}>
-                  ${o.revenue.toLocaleString()}
-                </td>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>{o.covers.toLocaleString()}</td>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>
-                  ${o.avgCheck.toFixed(2)}
-                </td>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-                  {outletTrends[o.outlet] && (
-                    <div style={{ width: 80, height: 26 }}>
-                      <Sparkline data={outletTrends[o.outlet]} height={26} color={theme.colors.navOperations} />
-                    </div>
-                  )}
-                </td>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-                  {o.understaffedImpact < 0
-                    ? <span style={{ color: theme.colors.warning, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>-${Math.abs(o.understaffedImpact).toLocaleString()}</span>
-                    : <span style={{ color: theme.colors.textMuted }}>—</span>}
-                </td>
+        {outlets.length ? (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
+            <thead>
+              <tr style={{ background: theme.colors.bg }}>
+                {['Outlet', 'Revenue', 'Covers', 'Avg Check', '6-mo Trend', 'Understaffing Impact'].map(h => (
+                  <th key={h} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'left', color: theme.colors.textMuted, fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {outlets.map((o, i) => (
+                <tr key={o.outlet} style={{ borderTop: `1px solid ${theme.colors.border}`, background: i % 2 ? theme.colors.bg : theme.colors.bgCard }}>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textPrimary, fontWeight: 500 }}>{o.outlet}</td>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.accent, fontFamily: theme.fonts.mono }}>
+                    ${o.revenue.toLocaleString()}
+                  </td>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>{o.covers.toLocaleString()}</td>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>
+                    ${o.avgCheck.toFixed(2)}
+                  </td>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+                    {outletTrends[o.outlet] && (
+                      <div style={{ width: 80, height: 26 }}>
+                        <Sparkline data={outletTrends[o.outlet]} height={26} color={theme.colors.navOperations} />
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+                    {o.understaffedImpact < 0
+                      ? <span style={{ color: theme.colors.warning, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>-${Math.abs(o.understaffedImpact).toLocaleString()}</span>
+                      : <span style={{ color: theme.colors.textMuted }}>—</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div style={{ padding: theme.spacing.lg, textAlign: 'center', color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
+            No outlet performance data available yet. Connect POS or refresh to load the latest F&B numbers.
+          </div>
+        )}
       </div>
 
       <SoWhatCallout variant="warning">

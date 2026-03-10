@@ -164,13 +164,13 @@ export default function TodayMode({ onNavigate }) {
     const segments = item.headline.split(item.memberName);
     if (segments.length === 1) {
       return (
-        <MemberLink mode="route" memberId={item.memberId} style={{ fontWeight: 700 }}>{item.headline}</MemberLink>
+        <MemberLink mode="drawer" memberId={item.memberId} style={{ fontWeight: 700 }}>{item.headline}</MemberLink>
       );
     }
     return (
       <>
         {segments[0]}
-        <MemberLink mode="route" memberId={item.memberId} style={{ fontWeight: 700 }}>{item.memberName}</MemberLink>
+        <MemberLink mode="drawer" memberId={item.memberId} style={{ fontWeight: 700 }}>{item.memberName}</MemberLink>
         {segments.slice(1).join(item.memberName)}
       </>
     );
