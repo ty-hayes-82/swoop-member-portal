@@ -1052,7 +1052,7 @@ export default async function handler(req, res) {
     const startTime = Date.now();
     const summary = {};
 
-    // 1. TRUNCATE all tables
+    // 1. TRUNCATE all tables (CASCADE handles FK dependencies)
     await sql.query(`
       TRUNCATE TABLE
         pace_hole_segments,
@@ -1072,6 +1072,33 @@ export default async function handler(req, res) {
         members
       CASCADE
     `);
+
+    // 1b. Seed parent/lookup tables that have FK constraints
+    // dining_outlets
+    await sql.query(`DELETE FROM dining_outlets`).catch(() => {});
+    await sql.query(`
+      INSERT INTO dining_outlets (outlet_id, club_id, name, type) VALUES
+        ('outlet_grill', 'club_001', 'The Grill Room', 'casual'),
+        ('outlet_bar', 'club_001', 'The 19th Hole Bar', 'bar'),
+        ('outlet_dining', 'club_001', 'The Veranda', 'fine_dining')
+      ON CONFLICT (outlet_id) DO NOTHING
+    `).catch(() => {});
+    summary.dining_outlets = 3;
+
+    // courses
+    await sql.query(`DELETE FROM courses`).catch(() => {});
+    await sql.query(`
+      INSERT INTO courses (course_id, club_id, name, holes, par) VALUES
+        ('course_main', 'club_001', 'Championship Course', 18, 72)
+      ON CONFLICT (course_id) DO NOTHING
+    `).catch(() => {});
+    summary.courses = 1;
+
+    // clubs (if exists)
+    await sql.query(`
+      INSERT INTO clubs (club_id, name) VALUES ('club_001', 'Oakmont Hills Country Club')
+      ON CONFLICT (club_id) DO NOTHING
+    `).catch(() => {});
 
     // 2. Generate all data
     const members = generateMembers();
