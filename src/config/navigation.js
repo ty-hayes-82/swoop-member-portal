@@ -1,35 +1,38 @@
 import { theme } from '@/config/theme';
 
-// config/navigation.js — decision-based GM navigation items
-// Each entry declares sourceSystems for data provenance display
+// navItems — canonical navigation definitions + grouping
 export const navItems = [
   {
     key: 'daily-briefing',
     label: 'Daily Briefing',
+    section: 'RIGHT NOW',
     icon: '📋',
     color: theme.colors.navBriefing,
     subtitle: 'What needs my attention today?',
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling'],
   },
   {
-    key: 'operations',
-    label: 'Operations',
-    icon: '⌘',
-    color: theme.colors.navOperations,
-    subtitle: 'How is the golf operation running?',
-    sourceSystems: ['Tee Sheet', 'Weather API'],
-  },
-  {
     key: 'waitlist-demand',
     label: 'Tee Sheet & Demand',
+    section: 'RIGHT NOW',
     icon: '⟳',
     color: theme.colors.navWaitlist,
     subtitle: 'Who is waiting, who will cancel, and what does it cost?',
     sourceSystems: ['Tee Sheet', 'Member CRM', 'POS', 'Weather API'],
   },
   {
+    key: 'operations',
+    label: 'Operations',
+    section: 'RIGHT NOW',
+    icon: '⌘',
+    color: theme.colors.navOperations,
+    subtitle: 'How is the golf operation running?',
+    sourceSystems: ['Tee Sheet', 'Weather API'],
+  },
+  {
     key: 'location-intelligence',
     label: 'Location Intelligence',
+    section: 'RIGHT NOW',
     icon: '📍',
     color: theme.colors.navOperations,
     subtitle: 'Where is everyone on property right now?',
@@ -37,24 +40,27 @@ export const navItems = [
     hidden: true,
   },
   {
-    key: 'fb-performance',
-    label: 'F&B Operations',
-    icon: '◆',
-    color: theme.colors.navFb,
-    subtitle: 'Where is money being made or lost?',
-    sourceSystems: ['POS', 'Tee Sheet', 'Weather API'],
-  },
-  {
     key: 'member-health',
     label: 'Member Intelligence',
+    section: 'INTELLIGENCE',
     icon: '◉',
     color: theme.colors.navMembers,
     subtitle: 'Who is at risk and what do we do?',
     sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet'],
   },
   {
+    key: 'fb-performance',
+    label: 'F&B Operations',
+    section: 'INTELLIGENCE',
+    icon: '◆',
+    color: theme.colors.navFb,
+    subtitle: 'Where is money being made or lost?',
+    sourceSystems: ['POS', 'Tee Sheet', 'Weather API'],
+  },
+  {
     key: 'staffing-service',
     label: 'Staffing & Labor',
+    section: 'INTELLIGENCE',
     icon: '⊞',
     color: theme.colors.navStaffing,
     subtitle: 'Are we staffed right and serving members well?',
@@ -63,6 +69,7 @@ export const navItems = [
   {
     key: 'growth-pipeline',
     label: 'Revenue & Pipeline',
+    section: 'INTELLIGENCE',
     icon: '◎',
     color: theme.colors.navPipeline,
     subtitle: 'Which guests are ready to become members?',
@@ -71,6 +78,7 @@ export const navItems = [
   {
     key: 'agent-command',
     label: 'AI Agents',
+    section: 'SYSTEM',
     icon: '⬡',
     color: theme.colors.navAgents,
     subtitle: 'Approve or assign high-impact actions before members feel the pain.',
@@ -79,6 +87,7 @@ export const navItems = [
   {
     key: 'integrations',
     label: 'Integrations',
+    section: 'SYSTEM',
     icon: '🔌',
     color: theme.colors.navIntegrations,
     subtitle: 'Connect your systems. Unlock intelligence.',
@@ -87,6 +96,7 @@ export const navItems = [
   {
     key: 'integrations/csv-import',
     label: 'CSV Import Hub',
+    section: 'SYSTEM',
     icon: '⬇️',
     color: theme.colors.navIntegrations,
     subtitle: 'Upload CSV/XLSX when APIs are missing.',
@@ -95,11 +105,13 @@ export const navItems = [
   {
     key: 'demo-mode',
     label: 'Demo Mode',
+    section: 'SYSTEM',
     icon: '▶',
     color: theme.colors.navDemo,
     subtitle: 'Guided walkthroughs for demos',
     sourceSystems: [],
-    hidden: true, // Accessible via /#/demo-mode URL only — not shown in main nav
+    hidden: true,
   },
 ];
+
 export const NAV_ITEMS = navItems;

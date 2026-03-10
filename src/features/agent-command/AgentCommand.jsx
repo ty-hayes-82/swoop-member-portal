@@ -10,6 +10,46 @@ const TABS = [
   { key: 'agents', label: 'Agents' },
 ];
 
+function AgentBadge() {
+  return (
+    <div
+      style={{
+        width: 32,
+        height: 32,
+        borderRadius: '999px',
+        border: `1px solid ${theme.colors.agentCyan}44`,
+        background: `${theme.colors.agentCyan}15`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 700,
+        color: theme.colors.agentCyan,
+        fontSize: theme.fontSize.sm,
+      }}
+      aria-hidden="true"
+    >
+      AI
+    </div>
+  );
+}
+
+function MetricSeparator() {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        width: 6,
+        height: 6,
+        borderRadius: '50%',
+        background: theme.colors.border,
+        opacity: 0.7,
+        display: 'inline-flex',
+        flexShrink: 0,
+      }}
+    />
+  );
+}
+
 export function AgentCommand() {
   const summary = getAgentSummary();
   const { pendingAgentCount } = useApp();
@@ -30,21 +70,46 @@ export function AgentCommand() {
           gap: theme.spacing.md,
         }}
       >
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-            <span style={{ fontSize: 20 }}>⬡</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <AgentBadge />
             <span style={{ fontSize: theme.fontSize.xl, fontWeight: 700, color: theme.colors.textPrimary, fontFamily: theme.fonts.serif }}>
               AI Agents
             </span>
           </div>
-          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>
-            {pendingAgentCount} actions ready for review · {summary.approved} approved / {summary.dismissed} dismissed today
+          <div
+            style={{
+              fontSize: theme.fontSize.sm,
+              color: theme.colors.textSecondary,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span>{pendingAgentCount} actions ready for review</span>
+            <MetricSeparator />
+            <span>{summary.approved} approved / {summary.dismissed} dismissed today</span>
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'right', minWidth: 220 }}>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Impact summary</div>
-          <div style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.agentCyan, fontSize: theme.fontSize.md }}>
-            {summary.active} playbooks monitoring · {summary.total} total
+          <div
+            style={{
+              fontFamily: theme.fonts.mono,
+              fontWeight: 700,
+              color: theme.colors.agentCyan,
+              fontSize: theme.fontSize.md,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 10,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span>{summary.active} playbooks monitoring</span>
+            <MetricSeparator />
+            <span>{summary.total} total</span>
           </div>
         </div>
       </div>

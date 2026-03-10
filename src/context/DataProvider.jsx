@@ -23,8 +23,13 @@ export function DataProvider({ children }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // In Phase 1 (no VITE_API_ENABLED), skip fetching — go straight to static data
-    if (!import.meta.env.VITE_API_ENABLED) {
+    const rawFlag = import.meta.env?.VITE_API_ENABLED;
+    const normalized = typeof rawFlag === 'string' ? rawFlag.trim().toLowerCase() : undefined;
+    const disabledValues = ['false', '0', 'off', 'no'];
+    const apiEnabled = normalized ? !disabledValues.includes(normalized) : true;
+
+    // In Phase 1 (explicitly disabled), skip fetching — go straight to static data
+    if (!apiEnabled) {
       setReady(true);
       return;
     }
