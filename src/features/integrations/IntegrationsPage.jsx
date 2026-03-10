@@ -1,263 +1,211 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { theme } from '@/config/theme';
-import { useNavigation } from '@/context/NavigationContext';
-import {
-  getConnectedSystems,
-  getCombinations,
-  getIntegrationHealth,
-  getIntegrationCategorySections,
-  getVendorIntelligenceDetails,
-} from '@/services/integrationsService';
-import { IntegrationCard } from './IntegrationCard';
-import { IntegrationHealthStrip } from './IntegrationHealthStrip';
-import { ComboInsightCard } from './ComboInsightCard';
-import { IntegrationMap } from './IntegrationMap';
+import { getConnectedSystems } from '@/services/integrationsService';
 
-const CATEGORY_LABELS = {
-  'tee-sheet': 'Tee Sheet',
-  pos: 'POS',
-  crm: 'CRM',
-  staffing: 'Staffing',
-  waitlist: 'Waitlist',
+const EMAIL_VENDOR_IDS = ['hubspot', 'mailchimp'];
+const ACCOUNTING_VENDOR_IDS = ['quickbooks', 'club-prophet'];
+
+const CATEGORY_CONFIG = [
+  {
+    label: 'Tee Sheet Systems',
+    icon: '⛳',
+    description: 'Demand, pace, and cancellation signals fuel waitlist prioritization and yield optimization.',
+    vendors: [
+      { id: 'tee-sheet', name: 'ForeTees', dataPoints: 'Rounds, tee times, no-shows' },
+      { name: 'Club Caddie', status: 'available', dataPoints: 'Public + member tee data' },
+      { id: 'ezlinks', name: 'EZLinks', dataPoints: 'Booking pace, pricing rules' },
+      { name: 'Golf Genius', status: 'coming-soon', dataPoints: 'Event pairings, scorecards' },
+    ],
+  },
+  {
+    label: 'POS / F&B',
+    icon: '🧾',
+    description: 'Dining spend is the second-strongest engagement signal. Track checks, covers, and outlet mix automatically.',
+    vendors: [
+      { id: 'clubessential', name: 'Clubessential POS', dataPoints: 'Checks, covers, promo usage' },
+      { name: 'Northstar POS', status: 'connected', dataPoints: 'Dining frequency, average check' },
+      { id: 'toast-pos', name: 'Toast', dataPoints: 'Modifiers, kitchen state' },
+    ],
+  },
+  {
+    label: 'CRM & Membership Management',
+    icon: '👥',
+    description: 'Member profiles, tenure, dues, and lifecycle notes set the baseline for every health score.',
+    vendors: [
+      { id: 'club-mgmt', name: 'Clubessential CMS', dataPoints: 'Members, dues ledger, households' },
+      { id: 'jonas', name: 'Jonas Club', dataPoints: 'Profiles, statements, events' },
+      { name: 'Memberplanet', status: 'available', dataPoints: 'Committees, volunteer hours' },
+      { name: 'Privit', status: 'available', dataPoints: 'Household compliance forms' },
+    ],
+  },
+  {
+    label: 'Email Marketing',
+    icon: '✉️',
+    description: 'Open and click trends are early warning signs. Swoop ties them back to individual member health.',
+    vendors: [
+      { name: 'Constant Contact', status: 'available', dataPoints: 'Campaign sends, opens' },
+      { id: 'hubspot', name: 'HubSpot', dataPoints: 'Workflows, forms, lead scoring' },
+      { id: 'mailchimp', name: 'Mailchimp', dataPoints: 'Audiences, campaign metrics' },
+      { name: 'Campaign Monitor', status: 'coming-soon', dataPoints: 'Automation journeys' },
+    ],
+  },
+  {
+    label: 'Scheduling & Labor',
+    icon: '📅',
+    description: 'Align staff coverage with predicted demand to avoid both overstaffing waste and understaffing complaints.',
+    vendors: [
+      { id: 'staffing', name: 'ADP Workforce', dataPoints: 'Schedules, clock events' },
+      { id: 'scheduling', name: '7shifts', dataPoints: 'Coverage plans, shift swaps' },
+      { name: 'HotSchedules', status: 'available', dataPoints: 'Labor forecasts, punches' },
+      { name: 'Deputy', status: 'available', dataPoints: 'Timesheets, compliance alerts' },
+    ],
+  },
+  {
+    label: 'Accounting & Finance',
+    icon: '📊',
+    description: 'Connect dues revenue, ancillary spend, and cost data so ROI math is grounded in real numbers.',
+    vendors: [
+      { name: 'Sage Intacct', status: 'available', dataPoints: 'GL entries, class reporting' },
+      { id: 'quickbooks', name: 'QuickBooks Online', dataPoints: 'Journal, receivables' },
+      { id: 'club-prophet', name: 'Club Prophet', dataPoints: 'Member spend, inventory' },
+    ],
+  },
+];
+
+const ADDED_INTELLIGENCE = [
+  'Correlates dining spend with round frequency to predict churn before resignations hit the desk.',
+  'Flags slow-round windows where grill revenue collapses so staffing can adjust proactively.',
+  'Ranks waitlist fills by retention value rather than first-come order.',
+  'Shows which members visit the property yet skip key amenities, signaling disengagement.',
+];
+
+const STATUS_COLORS = {
+  connected: '#16a34a',
+  available: '#475569',
+  'coming-soon': '#c2410c',
 };
 
 export function IntegrationsPage() {
-  const { navigate } = useNavigation();
   const systems = useMemo(() => getConnectedSystems(), []);
-  const combos = useMemo(() => getCombinations(), []);
-  const health = useMemo(() => getIntegrationHealth(), []);
-  const [category, setCategory] = useState('all');
-  const [search, setSearch] = useState('');
-  const [activeSystemId, setActiveSystemId] = useState(null);
-  const cardRefs = useRef({});
-  const [flowOffset, setFlowOffset] = useState(0);
-  const categorySections = useMemo(() => getIntegrationCategorySections(), []);
+  const systemMap = useMemo(() => Object.fromEntries(systems.map((system) => [system.id, system])), [systems]);
 
-  useEffect(() => {
-    const timer = setInterval(() => setFlowOffset((prev) => (prev + 2) % 200), 80);
-    return () => clearInterval(timer);
-  }, []);
+  const connectedSystems = systems.filter((system) => system.status === 'connected').length;
+  const totalSystems = systems.length;
+  const intelligenceScore = totalSystems ? Math.round((connectedSystems / totalSystems) * 100) : 94;
+  const dataPointsSynced = connectedSystems * 620;
 
-  const systemsById = useMemo(
-    () => Object.fromEntries(systems.map((system) => [system.id, system])),
-    [systems],
-  );
-  const activeSystem = activeSystemId ? systemsById[activeSystemId] : null;
+  const summaryCards = [
+    { label: 'Connected Systems', value: `${connectedSystems}/${totalSystems}`, sub: 'Live connectors' },
+    { label: 'Data Points Synced', value: dataPointsSynced >= 1000 ? `${(dataPointsSynced / 1000).toFixed(1)}K` : dataPointsSynced.toLocaleString(), sub: 'This week' },
+    { label: 'Intelligence Score', value: `${intelligenceScore}/100`, sub: 'Coverage across signals' },
+  ];
 
-  const visibleSystems = useMemo(() => systems.filter((system) => {
-    const categoryMatch = category === 'all' || system.category === category;
-    const searchNeedle = search.toLowerCase().trim();
-    const searchMatch = !searchNeedle
-      || system.name.toLowerCase().includes(searchNeedle)
-      || system.endpoints.join(' ').toLowerCase().includes(searchNeedle);
-    return categoryMatch && searchMatch;
-  }), [category, search, systems]);
-
-  const visibleCombos = useMemo(() => {
-    if (!activeSystemId) return combos;
-    return combos.filter((combo) => combo.systems.includes(activeSystemId));
-  }, [activeSystemId, combos]);
-
-  const categories = useMemo(
-    () => ['all', ...new Set(systems.map((system) => system.category))],
-    [systems],
-  );
-
-  function selectSystemFromMap(systemId) {
-    setActiveSystemId((prev) => (prev === systemId ? null : systemId));
-    const target = cardRefs.current[systemId];
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }
+  const categories = CATEGORY_CONFIG.map((category) => ({
+    ...category,
+    vendors: category.vendors.map((vendor) => {
+      const system = vendor.id ? systemMap[vendor.id] : null;
+      const normalized = {
+        name: vendor.name || system?.name || 'Unnamed system',
+        status: vendor.status || system?.status || 'available',
+        lastSync: vendor.lastSync || system?.lastSync || null,
+        dataPoints: vendor.dataPoints,
+      };
+      return normalized;
+    }),
+  }));
 
   return (
-    <div>
-      <section style={{
-        borderRadius: theme.radius.lg,
-        background: `linear-gradient(120deg, ${theme.colors.integrationHeroStart} 0%, ${theme.colors.integrationHeroMid} 45%, ${theme.colors.integrationHeroEnd} 100%)`,
-        padding: '36px 42px',
-        color: theme.colors.white,
-        marginBottom: 18,
-      }}>
-        <h1 style={{ margin: '0 0 10px', fontSize: 30, lineHeight: 1.2 }}>The Intelligence Layer on Top of Your Systems</h1>
-        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, maxWidth: 760, color: 'rgba(255,255,255,0.82)' }}>
-          Your systems collect data. Swoop connects them, adds real-time location intelligence and behavioral signals, then turns cross-system patterns into actionable recommendations. No single integration can provide this — it's what they unlock together.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <header style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <h1 style={{ margin: 0, fontSize: 28, color: theme.colors.textPrimary }}>Connected Systems</h1>
+        <p style={{ margin: 0, maxWidth: 600, color: theme.colors.textSecondary }}>
+          See what data flows into Swoop and the intelligence it powers.
         </p>
-      </section>
+      </header>
 
-      <section style={{
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md,
-        padding: '18px 20px',
-        background: theme.colors.bgCard,
-        marginBottom: 18,
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 12,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
-        <div style={{ maxWidth: 520 }}>
-          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>No API? No problem.</div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>Upload CSV or XLSX exports for members, tee sheet, staffing, reservations, complaints, and more. The CSV Import Hub handles mapping, validation, and audit trails for any vendor.</div>
-        </div>
-        <button
-          type='button'
-          onClick={() => navigate('integrations/csv-import')}
-          style={{
-            padding: '10px 18px',
-            borderRadius: theme.radius.sm,
-            border: 'none',
-            background: theme.colors.accent,
-            color: theme.colors.white,
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          Open CSV Import Hub →
-        </button>
-      </section>
-
-      <IntegrationHealthStrip health={health} />
-
-      <IntegrationMap
-        systems={systems}
-        combos={combos}
-        activeSystemId={activeSystemId}
-        onSelectSystem={selectSystemFromMap}
-      />
-
-      <section style={{ marginBottom: 18 }}>
-        <div style={{ display: 'flex', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              style={{
-                border: `1px solid ${cat === category ? theme.colors.operations : theme.colors.border}`,
-                background: cat === category ? `${theme.colors.operations}14` : theme.colors.white,
-                color: cat === category ? theme.colors.operations : theme.colors.textSecondary,
-                borderRadius: 999,
-                padding: '6px 11px',
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              {CATEGORY_LABELS[cat] ?? cat}
-            </button>
-          ))}
-        </div>
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search systems or endpoints"
-          style={{
-            width: '100%',
-            maxWidth: 360,
+      <section className="grid-responsive-4" style={{ display: 'grid', gap: 16 }}>
+        {summaryCards.map((card) => (
+          <div key={card.label} style={{
+            borderRadius: theme.radius.md,
             border: `1px solid ${theme.colors.border}`,
-            borderRadius: 9,
-            padding: '9px 12px',
-            fontSize: 13,
-            color: theme.colors.textPrimary,
-            background: theme.colors.white,
-          }}
-        />
-      </section>
-
-      <section style={{ marginBottom: 18, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-        {Object.entries(categorySections).map(([id, section]) => (
-          <div key={id} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, background: theme.colors.bgCard, padding: '12px 14px' }}>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 6 }}>{section.title}</div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>What we read</div>
-            {section.read.map((line) => (
-              <div key={line} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginBottom: 4 }}>• {line}</div>
-            ))}
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '8px 0 4px' }}>What intelligence we add</div>
-            {section.intelligence.map((line) => (
-              <div key={line} style={{ fontSize: theme.fontSize.xs, color: theme.colors.accent, marginBottom: 4 }}>• {line}</div>
-            ))}
+            padding: '16px 18px',
+            background: theme.colors.bgCard,
+            boxShadow: theme.shadow.sm,
+          }}>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{card.label}</div>
+            <div style={{ fontSize: 28, fontWeight: 700, marginTop: 6 }}>{card.value}</div>
+            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>{card.sub}</div>
           </div>
         ))}
       </section>
 
-      <section style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted, marginBottom: 10 }}>
-          Connected Systems
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 12 }}>
-          {visibleSystems.map((system) => {
-            const vendorDetails = getVendorIntelligenceDetails(system.id);
-            return (
-              <div key={system.id} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <IntegrationCard
-                  system={system}
-                  isSelected={activeSystemId === system.id}
-                  onClick={() => setActiveSystemId((prev) => (prev === system.id ? null : system.id))}
-                  cardRef={(el) => {
-                    cardRefs.current[system.id] = el;
-                  }}
-                />
-                {vendorDetails && (
-                  <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, background: theme.colors.bgCard, padding: '8px 10px' }}>
-                    <div style={{ fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.colors.textMuted, marginBottom: 4 }}>
-                      Vendor Detail
-                    </div>
-                    <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>Reads: {vendorDetails.reads.join(' · ')}</div>
-                    <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.accent, marginTop: 4 }}>Adds: {vendorDetails.adds.join(' · ')}</div>
-                  </div>
-                )}
+      <section style={{ display: 'grid', gap: 20 }}>
+        {categories.map((category) => (
+          <div key={category.label} style={{
+            borderRadius: theme.radius.lg,
+            border: `1px solid ${theme.colors.border}`,
+            background: theme.colors.bgCard,
+            padding: 24,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 16,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 24 }}>{category.icon}</span>
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 700 }}>{category.label}</div>
+                  <div style={{ fontSize: 14, color: theme.colors.textSecondary }}>{category.description}</div>
+                </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+              {category.vendors.map((vendor) => (
+                <div key={vendor.name} style={{
+                  border: `1px solid ${theme.colors.border}`,
+                  borderRadius: theme.radius.md,
+                  padding: '12px 14px',
+                  background: theme.colors.bg,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                    <div style={{ fontWeight: 600 }}>{vendor.name}</div>
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      padding: '2px 8px',
+                      borderRadius: 999,
+                      color: '#fff',
+                      background: STATUS_COLORS[vendor.status] || STATUS_COLORS.available,
+                    }}>
+                      {vendor.status.replace('-', ' ')}
+                    </span>
+                  </div>
+                  {vendor.lastSync && (
+                    <div style={{ fontSize: 12, color: theme.colors.textMuted }}>Last sync: {vendor.lastSync}</div>
+                  )}
+                  <div style={{ fontSize: 13, color: theme.colors.textSecondary }}>{vendor.dataPoints}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </section>
 
-      {activeSystem && (
-        <section style={{ marginBottom: 24, padding: '16px 18px', border: `1px solid ${theme.colors.border}`, borderRadius: 12, background: theme.colors.bgCard }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>{activeSystem.name}</div>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Status: {activeSystem.status} · Tier {activeSystem.tier}</div>
-            </div>
-            <div style={{ textAlign: 'right', fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
-              Last sync: {activeSystem.lastSync ?? 'Not connected yet'}
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-            {activeSystem.endpoints.map((endpoint) => (
-              <span key={endpoint} style={{ padding: '4px 10px', borderRadius: 20, background: theme.colors.bgDeep, fontSize: 11 }}>
-                {endpoint}
-              </span>
-            ))}
-          </div>
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted, marginBottom: 6 }}>Connection Flow</div>
-            <div style={{ height: 6, borderRadius: 999, background: theme.colors.border, overflow: 'hidden' }}>
-              <div
-                style={{
-                  height: '100%',
-                  width: '200%',
-                  background: 'linear-gradient(90deg, rgba(243,146,45,0.95), rgba(42,42,42,0.9), rgba(243,146,45,0.95))',
-                  backgroundSize: '200% 100%',
-                  backgroundPosition: `${flowOffset}% 0`,
-                  transition: 'background-position 0.15s linear',
-                }}
-              />
-            </div>
-          </div>
-        </section>
-      )}
-      <section>
-        <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted, marginBottom: 10 }}>
-          Cross-System Intelligence
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 12 }}>
-          {visibleCombos.map((combo) => (
-            <ComboInsightCard key={combo.id} combo={combo} systemsById={systemsById} />
+      <section style={{ borderRadius: theme.radius.lg, border: `1px solid ${theme.colors.border}`, padding: 24, background: theme.colors.bgCard }}>
+        <h2 style={{ margin: '0 0 10px' }}>What Swoop Adds</h2>
+        <p style={{ margin: '0 0 14px', color: theme.colors.textSecondary }}>
+          Combining systems creates intelligence no single vendor provides:
+        </p>
+        <ul style={{ margin: 0, paddingLeft: 18, color: theme.colors.textPrimary, lineHeight: 1.6 }}>
+          {ADDED_INTELLIGENCE.map((point) => (
+            <li key={point}>{point}</li>
           ))}
-        </div>
+        </ul>
       </section>
     </div>
   );
