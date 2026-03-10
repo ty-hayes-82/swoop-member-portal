@@ -804,7 +804,6 @@ function generateBookings(members) {
         booking_id: `bkg_${pad(bkgCounter++, 4)}`,
         club_id: 'club_001',
         course_id: 'course_main',
-        member_id: m.member_id,
         booking_date: isoDate(bookingDate),
         tee_time: teeTime,
         player_count: playerCount,
@@ -1181,7 +1180,7 @@ export default async function handler(req, res) {
     summary.feedback = feedbackRows.length;
 
     // 12. Insert bookings
-    const bkgCols = ['booking_id','club_id','course_id','member_id','booking_date','tee_time','player_count','has_guest','transportation','has_caddie','round_type','status','check_in_time','round_start','round_end','duration_minutes'];
+    const bkgCols = ['booking_id','club_id','course_id','booking_date','tee_time','player_count','has_guest','transportation','has_caddie','round_type','status','check_in_time','round_start','round_end','duration_minutes'];
     for (const stmt of buildBatchInsert('bookings', bkgCols, bookings, 100)) {
       await sql.query(stmt);
     }
