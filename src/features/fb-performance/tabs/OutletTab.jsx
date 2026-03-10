@@ -12,27 +12,45 @@ const tooltipStyle = {
   boxShadow: theme.shadow.md,
 };
 
+const safeNumber = (value, fallback = 0) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+};
+
 export default function OutletTab() {
-  const outlets = getOutletPerformance();
-  const summary = getFBSummary();
+  const outletSource = getOutletPerformance();
+  const outletsData = Array.isArray(outletSource) ? outletSource : [];
+  const summary = getFBSummary() ?? {};
   const goal = 95000;
+
+  const outlets = outletsData.map((o) => ({
+    ...o,
+    revenue: safeNumber(o.revenue),
+    covers: Math.max(0, Math.round(safeNumber(o.covers))),
+    avgCheck: safeNumber(o.avgCheck),
+    understaffedImpact: safeNumber(o.understaffedImpact),
+  }));
+
+  const totalRevenue = safeNumber(summary.totalRevenue);
+  const totalCovers = Math.max(0, Math.round(safeNumber(summary.totalCovers)));
+  const understaffingLoss = safeNumber(summary.understaffingLoss);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: theme.spacing.md }}>
         {[{
           label: 'Total F&B Revenue',
-          value: `$${(summary.totalRevenue / 1000).toFixed(0)}K`,
+          value: `$${Math.round(totalRevenue / 1000)}K`,
           metric: 'fbRevenue',
           format: 'currency',
           accent: theme.colors.accent,
         }, {
           label: 'Total Covers',
-          value: summary.totalCovers.toLocaleString(),
+          value: totalCovers.toLocaleString(),
           accent: theme.colors.navOperations,
         }, {
           label: 'Understaffing Loss',
-          value: `-$${(summary.understaffingLoss / 1000).toFixed(1)}K`,
+          value: `-$${(understaffingLoss / 1000).toFixed(1)}K`,
           accent: theme.colors.warning,
         }].map(card => (
           <div key={card.label} style={{
@@ -108,7 +126,7 @@ export default function OutletTab() {
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.accent, fontFamily: theme.fonts.mono }}>
                   ${o.revenue.toLocaleString()}
                 </td>
-                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>{o.covers}</td>
+                <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>{o.covers.toLocaleString()}</td>
                 <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>
                   ${o.avgCheck.toFixed(2)}
                 </td>

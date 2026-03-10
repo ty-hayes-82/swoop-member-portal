@@ -3,7 +3,8 @@ import { getRainDayImpact } from '@/services/fbService';
 import { theme } from '@/config/theme';
 
 export default function WeatherTab() {
-  const rainDays = getRainDayImpact();
+  const rainSource = getRainDayImpact();
+  const rainDays = Array.isArray(rainSource) ? rainSource : [];
 
   const rows = [
     { weather: '☀️ Sunny', golf: '+10%', fb: 'Baseline', note: 'Normal day' },
@@ -70,19 +71,23 @@ export default function WeatherTab() {
           padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
           <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary,
             marginBottom: theme.spacing.md }}>January Rain Days</div>
-          {rainDays.map((d, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between',
-              padding: `${theme.spacing.sm} 0`, borderBottom: i < rainDays.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
-              <span style={{ color: theme.colors.textSecondary, fontFamily: theme.fonts.mono,
-                fontSize: theme.fontSize.xs }}>{d.date}</span>
-              <span style={{ color: theme.colors.urgent, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>
-                Golf: ${d.golfRevenue.toLocaleString()}
-              </span>
-              <span style={{ color: theme.colors.accent, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>
-                F&B: ${d.fbRevenue.toLocaleString()}
-              </span>
-            </div>
-          ))}
+          {rainDays.map((d, i) => {
+            const golfRevenue = Number.isFinite(Number(d?.golfRevenue)) ? Number(d.golfRevenue) : 0;
+            const fbRevenue = Number.isFinite(Number(d?.fbRevenue)) ? Number(d.fbRevenue) : 0;
+            return (
+              <div key={d?.date ?? i} style={{ display: 'flex', justifyContent: 'space-between',
+                padding: `${theme.spacing.sm} 0`, borderBottom: i < rainDays.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
+                <span style={{ color: theme.colors.textSecondary, fontFamily: theme.fonts.mono,
+                  fontSize: theme.fontSize.xs }}>{d?.date ?? 'Unknown date'}</span>
+                <span style={{ color: theme.colors.urgent, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>
+                  Golf: ${golfRevenue.toLocaleString()}
+                </span>
+                <span style={{ color: theme.colors.accent, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>
+                  F&B: ${fbRevenue.toLocaleString()}
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
 

@@ -34,6 +34,7 @@ export const navItems = [
     color: theme.colors.navOperations,
     subtitle: 'Where is everyone on property right now?',
     sourceSystems: ['Swoop App', 'Member CRM'],
+    hidden: true,
   },
   {
     key: 'fb-performance',

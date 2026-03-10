@@ -28,14 +28,14 @@ export default async function handler(req, res) {
           MAX(mt.annual_dues) AS potential_dues
         FROM booking_players bp
         JOIN bookings b ON bp.booking_id = b.booking_id
-        JOIN booking_players bp_sponsor ON bp_sponsor.booking_id = b.booking_id
-                                        AND bp_sponsor.is_guest = 0
+        JOIN booking_players bp_sponsor ON bp_sponsor.booking_id = b.booking_id AND bp_sponsor.is_guest = 0
         JOIN members m_sponsor ON bp_sponsor.member_id = m_sponsor.member_id
-        LEFT JOIN pos_checks pc ON pc.member_id = m_sponsor.member_id
-                                 AND pc.opened_at::date = b.booking_date::date
+        LEFT JOIN pos_checks pc ON pc.member_id = m_sponsor.member_id AND pc.opened_at::date = b.booking_date::date
         CROSS JOIN (SELECT annual_dues FROM membership_types WHERE type_code = 'FG') mt
-        WHERE bp.is_guest = 1 AND bp.is_warm_lead = 1
-          AND bp.guest_name IS NOT NULL AND bp.guest_name <> ''
+        WHERE bp.is_guest = 1
+          AND bp.is_warm_lead = 1
+          AND bp.guest_name IS NOT NULL
+          AND bp.guest_name <> ''
         GROUP BY bp.guest_name
         ORDER BY visit_count DESC, total_spend DESC`,
 
