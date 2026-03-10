@@ -21,10 +21,25 @@ const clampScore = (value) => {
 const inferPotentialDues = (visits, totalSpend) => {
   const visitCount = toNumber(visits, 0);
   const spend = toNumber(totalSpend, 0);
-  if (spend >= 5000 || visitCount >= 10) return 36000;
-  if (spend >= 2500 || visitCount >= 7) return 24000;
-  if (spend >= 1200 || visitCount >= 4) return 18000;
+  if (visitCount >= 4 || spend >= 3000) return 36000;
+  if (visitCount >= 3 || spend >= 1500) return 24000;
+  if (visitCount >= 2 || spend >= 600) return 18000;
   return 12000;
+};
+
+const TIER_LABELS = {
+  starter: { label: '$12K Starter', min: 12000 },
+  core: { label: '$18K Core', min: 18000 },
+  high: { label: '$24K High', min: 24000 },
+  premium: { label: '$36K Premium', min: 36000 },
+};
+
+const getTierKeyForAmount = (amount) => {
+  const value = toNumber(amount, 0);
+  if (value >= TIER_LABELS.premium.min) return 'premium';
+  if (value >= TIER_LABELS.high.min) return 'high';
+  if (value >= TIER_LABELS.core.min) return 'core';
+  return 'starter';
 };
 
 const normalizeTier = (value) => {
@@ -48,6 +63,7 @@ const sanitizeLead = (lead = {}) => {
   const tier = normalizeTier(lead.tier ?? (visits >= 3 || totalSpend > 400 ? 'hot' : 'warm'));
   const inferredDues = inferPotentialDues(visits, totalSpend);
   const potentialDues = toNumber(lead.potentialDues ?? lead.projectedDues, inferredDues);
+  const potentialTier = getTierKeyForAmount(potentialDues);
   const rounds = toNumber(lead.rounds ?? lead.golfRounds, visits);
   const dining = toNumber(lead.dining ?? lead.diningVisits, Math.max(0, Math.floor(visits * 0.6)));
   const events = toNumber(lead.events ?? lead.eventCount, Math.max(0, Math.floor(visits * 0.25)));
@@ -68,6 +84,8 @@ const sanitizeLead = (lead = {}) => {
     dining,
     events,
     potentialDues,
+    potentialTier,
+    potentialTierLabel: TIER_LABELS[potentialTier]?.label ?? TIER_LABELS.core.label,
     likelyArchetype: lead.likelyArchetype ?? lead.archetype ?? null,
     lastVisit,
   };
@@ -108,6 +126,10 @@ const dedupeLeads = (leads = []) => {
 
 const buildPipelineSummary = (leads) => {
   if (!Array.isArray(leads) || leads.length === 0) {
+    const emptyBreakdown = Object.keys(TIER_LABELS).reduce((acc, key) => {
+      acc[key] = { label: TIER_LABELS[key].label, count: 0, revenue: 0 };
+      return acc;
+    }, {});
     return {
       hot: 0,
       warm: 0,
@@ -116,6 +138,7 @@ const buildPipelineSummary = (leads) => {
       hotRevenuePotential: 0,
       totalRevenuePotential: 0,
       avgFrequentGuestSpend: 0,
+      tierBreakdown: emptyBreakdown,
     };
   }
 
@@ -139,6 +162,18 @@ const buildPipelineSummary = (leads) => {
     .filter((lead) => (lead?.tier ?? '').toLowerCase() === 'hot')
     .reduce((sum, lead) => sum + toNumber(lead?.potentialDues), 0);
 
+  const tierBreakdown = Object.keys(TIER_LABELS).reduce((acc, key) => {
+    acc[key] = { label: TIER_LABELS[key].label, count: 0, revenue: 0 };
+    return acc;
+  }, {});
+
+  leads.forEach((lead) => {
+    const key = lead?.potentialTier ?? getTierKeyForAmount(lead?.potentialDues);
+    const bucket = tierBreakdown[key] ?? tierBreakdown.core;
+    bucket.count += 1;
+    bucket.revenue += toNumber(lead?.potentialDues);
+  });
+
   return {
     hot: tierCounts.hot,
     warm: tierCounts.warm,
@@ -147,6 +182,7 @@ const buildPipelineSummary = (leads) => {
     hotRevenuePotential,
     totalRevenuePotential,
     avgFrequentGuestSpend,
+    tierBreakdown,
   };
 };
 

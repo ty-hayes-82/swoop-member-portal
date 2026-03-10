@@ -4,8 +4,7 @@ import { AppProvider } from '@/context/AppContext';
 import { NavigationProvider, useNavigationContext } from '@/context/NavigationContext';
 import { MemberProfileProvider } from '@/context/MemberProfileContext';
 import { DataProvider } from '@/context/DataProvider';
-import { Sidebar } from '@/components/layout';
-import { Header } from '@/components/layout';
+import { Sidebar, Header, MobileConversionBar } from '@/components/layout';
 import { DailyBriefing } from '@/features/daily-briefing';
 import { OperationsDashboard } from '@/features/operations';
 import { WaitlistDemand } from '@/features/waitlist-demand';
@@ -91,7 +90,7 @@ function AppShell() {
           <main
             style={{
               flex: 1,
-              padding: isMobile ? '16px' : theme.spacing.xl,
+              padding: isMobile ? '16px 16px 96px' : theme.spacing.xl,
               width: '100%',
               minHeight: 0,
             }}
@@ -111,6 +110,7 @@ function AppShell() {
           </footer>
         </div>
       </div>
+      {isMobile && <MobileConversionBar />}
     </div>
   );
 }
