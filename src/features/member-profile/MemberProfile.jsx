@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, ReferenceArea, Tooltip } from 'recharts';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  ReferenceArea,
+  Tooltip,
+  AreaChart,
+  Area,
+} from 'recharts';
 import { theme } from '@/config/theme';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-const percentFormatter = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 1 });
 
 const formatCurrency = (value) => {
   const amount = Number(value);
@@ -12,113 +21,40 @@ const formatCurrency = (value) => {
   return currencyFormatter.format(amount);
 };
 
-const formatPercent = (value) => {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return '—';
-  return percentFormatter.format(amount / 100);
-};
-
 const formatDate = (value) => {
   if (!value) return '—';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
+  if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 const formatDateTime = (value) => {
   if (!value) return '—';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
+  if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 };
 
-const SectionCard = ({ title, subtitle, children, actions }) => (
-  <section
-    style={{
-      background: theme.colors.bgCard,
-      borderRadius: theme.radius.lg,
-      border: `1px solid ${theme.colors.border}`,
-      padding: theme.spacing.lg,
-      boxShadow: theme.shadow.sm,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: theme.spacing.md,
-    }}
-  >
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <h2 style={{ margin: 0, fontSize: '18px' }}>{title}</h2>
-      {subtitle && <p style={{ margin: 0, fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>{subtitle}</p>}
-    </div>
-    {children}
-    {actions}
-  </section>
-);
+const severityStyles = {
+  critical: 'border-red-500/40 bg-red-50 text-red-900',
+  warning: 'border-amber-500/40 bg-amber-50 text-amber-900',
+  info: 'border-blue-500/30 bg-blue-50 text-blue-900',
+};
 
-const ActivityCard = ({ label, value, trend }) => (
-  <div
-    style={{
-      background: theme.colors.bg,
-      borderRadius: theme.radius.md,
-      border: `1px solid ${theme.colors.border}`,
-      padding: theme.spacing.md,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 8,
-    }}
-  >
-    <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <strong style={{ fontSize: theme.fontSize.xl }}>{value}</strong>
-      {trend !== undefined && (
-        <span style={{ fontSize: theme.fontSize.sm, color: trend >= 0 ? theme.colors.success : theme.colors.urgent }}>
-          {trend >= 0 ? '▲' : '▼'} {Math.abs(trend).toFixed?.(1) ?? trend}
-        </span>
-      )}
-    </div>
-  </div>
-);
+const actionButtons = [
+  { label: 'Send Email', icon: '✉️' },
+  { label: 'Schedule Call', icon: '📞' },
+  { label: 'Add Note', icon: '📝' },
+];
 
-const RiskCard = ({ label, detail, action, severity }) => (
-  <div
-    style={{
-      borderRadius: theme.radius.md,
-      border: `1px solid ${severity === 'critical' ? theme.colors.urgent : theme.colors.warning}40`,
-      background: severity === 'critical' ? `${theme.colors.urgent}08` : `${theme.colors.warning}08`,
-      padding: theme.spacing.md,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 6,
-    }}
-  >
-    <strong>{label}</strong>
-    <p style={{ margin: 0, color: theme.colors.textSecondary }}>{detail}</p>
-    <p style={{ margin: 0, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}><strong>Recommended:</strong> {action}</p>
-  </div>
-);
-
-const TimelineItem = ({ icon, title, description, date }) => (
-  <div style={{ display: 'flex', gap: theme.spacing.md }}>
-    <div style={{ width: 32, display: 'flex', justifyContent: 'center' }}>
-      <span style={{ fontSize: '20px' }}>{icon}</span>
-    </div>
-    <div style={{ flex: 1, paddingBottom: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}` }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-        <strong>{title}</strong>
-        <span style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.xs }}>{formatDateTime(date)}</span>
-      </div>
-      <p style={{ margin: 0, color: theme.colors.textSecondary }}>{description}</p>
-    </div>
-  </div>
-);
-
-const TooltipContent = ({ active, payload }) => {
+const HealthTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   const item = payload[0]?.payload;
   if (!item) return null;
   return (
-    <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: theme.spacing.sm }}>
-      <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600 }}>{item.label}</div>
-      <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>Engagement score: {item.score}</div>
+    <div className="rounded-md border border-slate-200 bg-white px-3 py-2 shadow">
+      <div className="text-sm font-semibold text-slate-700">{item.label}</div>
+      <div className="text-sm text-slate-500">Health score: {item.score}</div>
     </div>
   );
 };
@@ -154,224 +90,336 @@ export default function MemberProfile() {
 
   const profile = state.data;
 
-  const headerStats = useMemo(() => (
-    profile ? [
-      { label: 'Membership', value: profile.member.membershipType ?? '—' },
-      { label: 'Joined', value: formatDate(profile.member.joinDate) },
-      { label: 'Status', value: profile.member.status ?? 'Active' },
-    ] : []
-  ), [profile]);
-
-  const activityCards = useMemo(() => {
-    if (!profile) return [];
-    return [
-      { label: profile.activitySummary.rounds.label, value: profile.activitySummary.rounds.value ?? '—', trend: profile.activitySummary.rounds.trend },
-      { label: profile.activitySummary.dining.label, value: formatCurrency(profile.activitySummary.dining.value), trend: profile.activitySummary.dining.trend },
-      { label: profile.activitySummary.email.label, value: `${profile.activitySummary.email.value ?? 0}%`, trend: profile.activitySummary.email.trend },
-      { label: profile.activitySummary.events.label, value: profile.activitySummary.events.value ?? '—', trend: profile.activitySummary.events.trend },
-    ];
+  const healthColor = useMemo(() => {
+    const score = profile?.member?.healthScore ?? 0;
+    if (score >= 75) return '#16a34a';
+    if (score >= 50) return '#facc15';
+    if (score >= 30) return '#fb923c';
+    return '#ef4444';
   }, [profile]);
 
-  const timeline = profile?.engagementTimeline ?? [];
-  const riskSignals = profile?.riskSignals ?? [];
+  const metricValue = (metric) => {
+    if (!metric) return '—';
+    if (metric.unit === 'currency') return formatCurrency(metric.value);
+    if (metric.unit === 'days') return `${metric.value ?? '—'} days`;
+    return metric.value ?? '—';
+  };
+
+  const trendCopy = (metric) => {
+    if (!metric) return '—';
+    if (metric.id === 'visit-gap') {
+      const direction = metric.trend > 0 ? 'Improving' : metric.trend < 0 ? 'Worsening' : 'No change';
+      return `${direction} ${metric.comparison}`;
+    }
+    const value = Number(metric.trend ?? 0);
+    const symbol = value >= 0 ? '+' : '−';
+    return `${symbol}${Math.abs(value).toFixed(1)}% ${metric.comparison}`;
+  };
+
+  const timelineEntries = profile?.activityTimeline ?? [];
+  const engagementHistory = profile?.engagementHistory ?? [];
+  const notes = profile?.notes ?? [];
   const financials = profile?.financials ?? {};
+  const breakdown = financials.breakdown ?? {};
+
+  const gaugeStyle = {
+    background: `conic-gradient(${healthColor} ${(profile?.member?.healthScore ?? 0) * 3.6}deg, #e2e8f0 ${(profile?.member?.healthScore ?? 0) * 3.6}deg)`,
+  };
 
   return (
-    <div style={{ background: theme.colors.bg, minHeight: '100vh', padding: theme.spacing.xl }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-10">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
         <button
           type="button"
           onClick={() => navigate('/', { replace: true })}
-          style={{
-            alignSelf: 'flex-start',
-            border: 'none',
-            background: theme.colors.bgCard,
-            borderRadius: theme.radius.md,
-            padding: '8px 14px',
-            boxShadow: theme.shadow.sm,
-            cursor: 'pointer',
-            fontWeight: 600,
-          }}
+          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900"
         >
-          ← Back to Dashboard
+          ← Back to dashboard
         </button>
 
         {state.loading && (
-          <div style={{ background: theme.colors.bgCard, borderRadius: theme.radius.lg, border: `1px solid ${theme.colors.border}`, padding: theme.spacing.xl, textAlign: 'center' }}>
+          <div className="rounded-3xl border border-slate-100 bg-white px-6 py-16 text-center text-lg font-semibold text-slate-500 shadow">
             Loading member profile…
           </div>
         )}
 
         {state.error && (
-          <div style={{ background: `${theme.colors.urgent}10`, borderRadius: theme.radius.lg, border: `1px solid ${theme.colors.urgent}40`, padding: theme.spacing.xl }}>
-            <strong>Unable to load member profile.</strong>
-            <p style={{ marginTop: theme.spacing.sm }}>{state.error}</p>
+          <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-8 text-red-700 shadow">
+            <p className="text-lg font-semibold">Unable to load member profile.</p>
+            <p className="mt-2 text-sm">{state.error}</p>
           </div>
         )}
 
         {profile && !state.loading && (
-          <>
-            {/* Header */}
-            <section
-              style={{
-                background: theme.colors.bgCard,
-                borderRadius: theme.radius.lg,
-                border: `1px solid ${theme.colors.border}`,
-                padding: theme.spacing.lg,
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: theme.spacing.lg,
-                alignItems: 'center',
-              }}
-            >
-              <div style={{ display: 'flex', gap: theme.spacing.md, alignItems: 'center' }}>
-                <div
-                  style={{
-                    width: 96,
-                    height: 96,
-                    borderRadius: '50%',
-                    background: theme.colors.bgDeep,
-                    border: `2px solid ${theme.colors.border}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 32,
-                    fontWeight: 700,
-                  }}
-                >
-                  {profile.member.initials || '??'}
-                </div>
-                <div>
-                  <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Member Profile</span>
-                  <h1 style={{ margin: '4px 0', fontSize: 36 }}>{profile.member.name}</h1>
-                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                    {headerStats.map((stat) => (
-                      <div key={stat.label} style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>
-                        <strong style={{ color: theme.colors.textPrimary }}>{stat.value}</strong> · {stat.label}
+          <div className="flex flex-col gap-8">
+            {/* Hero */}
+            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl sm:p-8">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-900 text-2xl font-semibold text-white md:h-24 md:w-24 md:text-3xl">
+                      {profile.member.initials || '??'}
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Member Profile</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-3">
+                        <h1 className="text-3xl font-semibold text-slate-900 md:text-4xl">{profile.member.name}</h1>
+                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                          {profile.member.membershipType || 'Member'}
+                        </span>
                       </div>
-                    ))}
+                      <p className="text-sm text-slate-500">
+                        Member since {formatDate(profile.member.joinDate)} · Status: {profile.member.status || 'Active'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+                    <span>Archetype: <strong>{profile.member.archetype || '—'}</strong></span>
+                    <span>Health trend: <strong className="capitalize">{profile.member.healthTrend}</strong></span>
                   </div>
                 </div>
-              </div>
-              <div style={{ marginLeft: 'auto', textAlign: 'center' }}>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Health Score</div>
-                <div style={{ fontSize: 56, fontFamily: theme.fonts.mono, color: profile.member.healthScore > 69 ? theme.colors.success : profile.member.healthScore > 40 ? theme.colors.warning : theme.colors.urgent }}>
-                  {profile.member.healthScore ?? '—'}
-                </div>
-                <div style={{ fontSize: theme.fontSize.sm, color: profile.member.scoreDelta >= 0 ? theme.colors.success : theme.colors.urgent }}>
-                  {profile.member.scoreDelta >= 0 ? '▲' : '▼'} {Math.abs(profile.member.scoreDelta).toFixed(1)} vs last week
+
+                <div className="flex flex-1 flex-col items-end gap-4">
+                  <div className="flex items-center gap-6">
+                    <div className="relative h-28 w-28">
+                      <div className="absolute inset-0 rounded-full" style={gaugeStyle} />
+                      <div className="absolute inset-2 flex flex-col items-center justify-center rounded-full bg-white text-center">
+                        <span className="text-3xl font-semibold text-slate-900">{profile.member.healthScore ?? '—'}</span>
+                        <span className="text-xs uppercase tracking-wide text-slate-500">Health</span>
+                      </div>
+                    </div>
+                    <div className="text-sm text-slate-500">
+                      <div className="text-xs uppercase tracking-wider text-slate-400">Δ vs last week</div>
+                      <div className={`text-lg font-semibold ${profile.member.scoreDelta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                        {profile.member.scoreDelta >= 0 ? '▲' : '▼'} {Math.abs(profile.member.scoreDelta ?? 0).toFixed(1)} pts
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    {actionButtons.map((button) => (
+                      <button
+                        key={button.label}
+                        type="button"
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                      >
+                        <span>{button.icon}</span>
+                        {button.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </section>
 
             {/* Health timeline */}
-            <SectionCard title="Health Score Timeline" subtitle="Last five weeks">
-              {profile.healthTimeline?.length ? (
-                <div style={{ width: '100%', height: 240 }}>
+            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900">Health Score</h2>
+                  <p className="text-sm text-slate-500">Last 12 weeks</p>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+                    Trend: <span className="capitalize">{profile.member.healthTrend}</span>
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4 h-80 w-full">
+                {profile.healthTimeline?.length ? (
                   <ResponsiveContainer>
                     <LineChart data={profile.healthTimeline} margin={{ top: 10, right: 20, bottom: 0, left: 0 }}>
-                      <XAxis dataKey="label" stroke={theme.colors.textMuted} fontSize={12} />
+                      <XAxis dataKey="label" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                       <YAxis domain={[0, 100]} hide />
-                      <Tooltip content={<TooltipContent />} />
-                      <ReferenceArea y1={70} y2={100} fill={theme.colors.success} fillOpacity={0.08} stroke="none" />
-                      <ReferenceArea y1={50} y2={70} fill={theme.colors.warning} fillOpacity={0.06} stroke="none" />
-                      <ReferenceArea y1={30} y2={50} fill={theme.colors.urgent} fillOpacity={0.04} stroke="none" />
+                      <Tooltip content={<HealthTooltip />} />
+                      <ReferenceArea y1={70} y2={100} fill="#dcfce7" fillOpacity={0.4} stroke="none" />
+                      <ReferenceArea y1={50} y2={70} fill="#fef9c3" fillOpacity={0.4} stroke="none" />
+                      <ReferenceArea y1={30} y2={50} fill="#fee2e2" fillOpacity={0.4} stroke="none" />
                       <Line type="monotone" dataKey="score" stroke={theme.colors.accent} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                     </LineChart>
                   </ResponsiveContainer>
-                </div>
-              ) : (
-                <p style={{ color: theme.colors.textSecondary }}>Not enough historical data.</p>
-              )}
-            </SectionCard>
-
-            {/* Activity summary */}
-            <SectionCard title="Activity Summary">
-              <div className="grid-responsive-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: theme.spacing.md }}>
-                {activityCards.map((card) => (
-                  <ActivityCard key={card.label} {...card} />
-                ))}
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-slate-500">Not enough historical data.</div>
+                )}
               </div>
-            </SectionCard>
+            </section>
+
+            {/* Key metrics */}
+            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+              <h2 className="text-xl font-semibold text-slate-900">Key Metrics</h2>
+              <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {(profile.keyMetrics ?? []).map((metric) => {
+                  const positive = metric.id === 'visit-gap' ? metric.trend > 0 : metric.trend >= 0;
+                  return (
+                    <div key={metric.id} className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                      <p className="text-xs uppercase tracking-widest text-slate-400">{metric.label}</p>
+                      <div className="mt-2 text-3xl font-semibold text-slate-900">{metricValue(metric)}</div>
+                      <div className={`mt-1 text-sm font-semibold ${positive ? 'text-emerald-600' : 'text-red-500'}`}>{trendCopy(metric)}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
 
             {/* Risk signals */}
-            <SectionCard title="Risk Signals" subtitle="Signals driving current risk score">
-              {riskSignals.length ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: theme.spacing.md }}>
-                  {riskSignals.map((signal) => (
-                    <RiskCard key={signal.id} {...signal} />
+            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-slate-900">Risk Signals</h2>
+                <p className="text-sm text-slate-500">Signals driving the current score</p>
+              </div>
+              {profile.riskSignals?.length ? (
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  {profile.riskSignals.map((signal) => (
+                    <div key={signal.id} className={`rounded-2xl border p-4 ${severityStyles[signal.severity] ?? severityStyles.warning}`}>
+                      <p className="text-sm font-semibold">{signal.label}</p>
+                      <p className="mt-1 text-sm">{signal.detail}</p>
+                      <p className="mt-2 text-sm font-semibold"><span className="text-xs uppercase tracking-widest">Recommended:</span> {signal.action}</p>
+                    </div>
                   ))}
                 </div>
               ) : (
-                <p style={{ color: theme.colors.textSecondary }}>No active risks — keep monitoring weekly.</p>
+                <p className="mt-4 text-sm text-slate-500">No active risks — keep monitoring weekly.</p>
               )}
-            </SectionCard>
+            </section>
 
-            {/* Engagement timeline */}
-            <SectionCard title="Engagement Timeline" subtitle="Most recent touchpoints">
-              {timeline.length ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-                  {timeline.map((item) => (
-                    <TimelineItem key={item.id} icon={item.icon ?? '•'} title={item.type?.toUpperCase?.() ?? 'Event'} description={item.description} date={item.date} />
+            {/* Activity timeline & engagement history */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-slate-900">Recent Activity</h2>
+                  <span className="text-xs uppercase tracking-widest text-slate-400">Last 20 touchpoints</span>
+                </div>
+                <div className="mt-4 flex flex-col gap-4">
+                  {timelineEntries.map((item) => (
+                    <div key={item.id} className="relative pl-6">
+                      <span className="absolute left-0 top-2 text-lg">{item.icon ?? '•'}</span>
+                      <div className="flex items-center justify-between text-sm">
+                        <p className="font-semibold text-slate-900">{item.type?.toUpperCase?.() ?? 'Event'}</p>
+                        <span className="text-xs text-slate-400">{formatDateTime(item.date)}</span>
+                      </div>
+                      <p className="text-sm text-slate-600">{item.description}</p>
+                    </div>
                   ))}
+                  {!timelineEntries.length && <p className="text-sm text-slate-500">No recent touchpoints logged.</p>}
                 </div>
-              ) : (
-                <p style={{ color: theme.colors.textSecondary }}>No recent touchpoints logged.</p>
-              )}
-            </SectionCard>
+              </section>
 
-            {/* Contact & outreach */}
-            <SectionCard title="Contact & Outreach">
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: theme.spacing.md }}>
+              <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-900">Engagement History</h2>
+                    <p className="text-sm text-slate-500">Weekly score trend</p>
+                  </div>
+                </div>
+                <div className="mt-6 h-64 w-full">
+                  {engagementHistory.length ? (
+                    <ResponsiveContainer>
+                      <AreaChart data={engagementHistory} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+                        <XAxis dataKey="label" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis domain={[0, 100]} hide />
+                        <Tooltip content={<HealthTooltip />} />
+                        <Area type="monotone" dataKey="score" stroke={theme.colors.accent} fill="#fde68a" strokeWidth={3} fillOpacity={0.4} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-sm text-slate-500">Not enough data.</div>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            {/* Contact & notes */}
+            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+              <div className="grid gap-6 lg:grid-cols-2">
                 <div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Email</div>
-                  <div style={{ fontSize: theme.fontSize.md, fontWeight: 600 }}>{profile.contact?.email ?? '—'}</div>
+                  <h2 className="text-xl font-semibold text-slate-900">Contact</h2>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-slate-400">Email</p>
+                      <p className="text-sm font-semibold text-slate-900">{profile.contact?.email ?? '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-slate-400">Phone</p>
+                      <p className="text-sm font-semibold text-slate-900">{profile.contact?.phone ?? '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-slate-400">Preferred channel</p>
+                      <p className="text-sm font-semibold text-slate-900">{profile.contact?.preferredChannel ?? '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-slate-400">Last outreach</p>
+                      <p className="text-sm font-semibold text-slate-900">{formatDateTime(profile.contact?.lastOutreach)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-slate-400">Last visit</p>
+                      <p className="text-sm font-semibold text-slate-900">{formatDate(profile.contact?.lastVisitDate)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-slate-400">Days since visit</p>
+                      <p className="text-sm font-semibold text-slate-900">{profile.contact?.daysSinceLastVisit ?? '—'}</p>
+                    </div>
+                  </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Phone</div>
-                  <div style={{ fontSize: theme.fontSize.md, fontWeight: 600 }}>{profile.contact?.phone ?? '—'}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Preferred Channel</div>
-                  <div style={{ fontSize: theme.fontSize.md, fontWeight: 600 }}>{profile.contact?.preferredChannel ?? '—'}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Last Outreach</div>
-                  <div style={{ fontSize: theme.fontSize.md, fontWeight: 600 }}>{formatDateTime(profile.outreachHistory?.lastOutreachDate)}</div>
+                  <h2 className="text-xl font-semibold text-slate-900">Notes & Outreach</h2>
+                  <div className="mt-4 flex flex-col gap-3">
+                    {notes.map((note) => (
+                      <div key={note.id} className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                        <div className="flex items-center justify-between text-xs uppercase tracking-widest text-slate-400">
+                          <span>{note.owner}</span>
+                          <span>{note.channel ?? '—'}</span>
+                        </div>
+                        <p className="mt-2 text-sm font-semibold text-slate-900">{note.note}</p>
+                        <p className="text-xs text-slate-500">{formatDateTime(note.date)}</p>
+                      </div>
+                    ))}
+                    {!notes.length && <p className="text-sm text-slate-500">No notes logged yet.</p>}
+                  </div>
                 </div>
               </div>
-              <p style={{ margin: 0, color: theme.colors.textSecondary }}>{profile.outreachHistory?.notes}</p>
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  style={{
-                    padding: '10px 16px',
-                    borderRadius: theme.radius.md,
-                    background: theme.colors.accent,
-                    color: theme.colors.white,
-                    fontWeight: 600,
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => window.alert('Outreach logged in demo environment.')}
-                >
-                  Log Outreach
-                </button>
-              </div>
-            </SectionCard>
+            </section>
 
             {/* Financial summary */}
-            <SectionCard title="Financial Summary">
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: theme.spacing.md }}>
-                <ActivityCard label="Annual Dues" value={formatCurrency(financials.annualDues)} />
-                <ActivityCard label="YTD Golf Spend" value={formatCurrency(financials.ytdGolfSpend)} />
-                <ActivityCard label="YTD Dining Spend" value={formatCurrency(financials.ytdDiningSpend)} />
-                <ActivityCard label="YTD Event Spend" value={formatCurrency(financials.ytdEventSpend)} />
-                <ActivityCard label="Lifetime Value (est)" value={formatCurrency(financials.lifetimeValue)} />
-                <ActivityCard label="Renewal Date" value={formatDate(financials.renewalDate)} />
+            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+              <div className="flex flex-col gap-2">
+                <h2 className="text-xl font-semibold text-slate-900">Financial Summary</h2>
+                <p className="text-sm text-slate-500">Real spend backing this member&apos;s health score</p>
               </div>
-            </SectionCard>
-          </>
+              <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Annual dues</p>
+                  <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(financials.annualDues)}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                  <p className="text-xs uppercase tracking-widest text-slate-400">YTD total spend</p>
+                  <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(financials.ytdTotal)}</p>
+                  <p className={`text-sm font-semibold ${financials.deltaVsPrior >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {financials.deltaVsPrior >= 0 ? '▲' : '▼'} {formatCurrency(Math.abs(financials.deltaVsPrior || 0))} vs prior year
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Prior year spend</p>
+                  <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(financials.priorYearTotal)}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Lifetime value (est)</p>
+                  <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(financials.lifetimeValue)}</p>
+                </div>
+              </div>
+              <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { label: 'YTD Golf', value: breakdown.golf },
+                  { label: 'YTD Dining', value: breakdown.dining },
+                  { label: 'YTD Events', value: breakdown.events },
+                  { label: 'YTD Pro Shop', value: breakdown.proShop },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-slate-100 p-4">
+                    <p className="text-xs uppercase tracking-widest text-slate-400">{item.label}</p>
+                    <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(item.value)}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
         )}
       </div>
     </div>
