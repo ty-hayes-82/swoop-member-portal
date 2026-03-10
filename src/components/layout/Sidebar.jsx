@@ -138,7 +138,8 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
             )}
             {section.items.map((item) => {
               const active = currentRoute === item.key;
-              const inactiveWeight = section.emphasis ? 500 : 400;
+              const isIntelligence = section.label === 'INTELLIGENCE';
+              const inactiveWeight = section.emphasis ? 500 : isIntelligence ? 350 : 400;
               return (
                 <button
                   key={item.key}
@@ -178,8 +179,38 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                 >
                   <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
                   {(!sidebarCollapsed || isMobile) && (
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.label}
+                    <span
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
+                      {item.key === 'daily-briefing' && (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '10px',
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                            fontWeight: 700,
+                            color: theme.colors.success,
+                            background: `${theme.colors.success}12`,
+                            padding: '2px 8px',
+                            borderRadius: '999px',
+                            border: `1px solid ${theme.colors.success}40`,
+                          }}
+                        >
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: theme.colors.success, boxShadow: `0 0 6px ${theme.colors.success}` }} />
+                          Start Here
+                        </span>
+                      )}
                     </span>
                   )}
                 </button>
