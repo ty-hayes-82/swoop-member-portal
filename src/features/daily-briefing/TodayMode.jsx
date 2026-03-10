@@ -396,6 +396,19 @@ export default function TodayMode({ onNavigate }) {
               <span style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.textPrimary, background: `${theme.colors.textPrimary}12`, padding: '4px 12px', borderRadius: '999px' }}>{item.meta.confidence}</span>
             )}
           </div>
+          <div
+            style={{
+              marginTop: theme.spacing.sm,
+              borderLeft: `3px solid ${theme.colors.success}`,
+              background: `${theme.colors.success}0F`,
+              padding: '10px 12px',
+              fontSize: theme.fontSize.sm,
+              fontWeight: 600,
+              color: theme.colors.textPrimary,
+            }}
+          >
+            <strong>Recommended:</strong> Membership Director to call top 3 at-risk members by end of day.
+          </div>
         </div>
       ))}
     </div>
