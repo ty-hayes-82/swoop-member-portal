@@ -18,19 +18,16 @@ export default async function handler(req, res) {
     // If booking_ids don't match, re-seed cancellation_risk with real booking IDs
     // Pick 20 bookings and set them to 'confirmed' + future dates
     const fixResult = await sql`
-      WITH future_bookings AS (
-        SELECT booking_id,
-          ROW_NUMBER() OVER (ORDER BY md5(booking_id)) AS rn
-        FROM bookings
-        WHERE booking_id NOT IN (SELECT booking_id FROM pace_of_play)
-        LIMIT 20
-      )
       UPDATE bookings SET
         status = 'confirmed',
-        booking_date = TO_CHAR((CURRENT_DATE + (ABS(hashtext(booking_id)) % 14 + 1) * INTERVAL '1 day')::date, 'YYYY-MM-DD'),
+        booking_date = TO_CHAR((CURRENT_DATE + (ABS(hashtext(bookings.booking_id)) % 14 + 1) * INTERVAL '1 day')::date, 'YYYY-MM-DD'),
         check_in_time = NULL, round_start = NULL, round_end = NULL, duration_minutes = NULL
-      FROM future_bookings fb
-      WHERE bookings.booking_id = fb.booking_id
+      WHERE bookings.booking_id IN (
+        SELECT b2.booking_id FROM bookings b2
+        WHERE b2.booking_id NOT IN (SELECT pp.booking_id FROM pace_of_play pp)
+        ORDER BY md5(b2.booking_id)
+        LIMIT 20
+      )
       RETURNING bookings.booking_id`;
 
     // Delete old cancellation_risk and re-seed with real confirmed bookings
