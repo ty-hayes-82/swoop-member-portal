@@ -104,6 +104,25 @@ a.button-link {
   gap: 16px;
 }
 
+
+.grid-responsive-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .grid-responsive-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-responsive-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1024px) {
   .grid-responsive-4 {
     grid-template-columns: repeat(2, 1fr);

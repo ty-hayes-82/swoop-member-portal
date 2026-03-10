@@ -9,3 +9,5 @@ dist/
 oakmont_hills_jan2026.db
 *.db
 .npm-cache/
+
+dist.locked-*

@@ -17,6 +17,13 @@ const toNumber = (value, fallback = 0) => {
   return Number.isFinite(num) ? num : fallback;
 };
 
+const formatDate = (value) => {
+  if (!value) return '—';
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return value;
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
 export default function LeadCard({ lead }) {
   const [expanded, setExpanded] = useState(false);
   const tierColor = TIER_COLORS[lead.tier] ?? theme.colors.textSecondary;
@@ -93,8 +100,19 @@ export default function LeadCard({ lead }) {
               </div>
             ))}
           </div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-            Sponsor: <span style={{ color: theme.colors.textSecondary }}>{lead.sponsor}</span>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: theme.spacing.md,
+            fontSize: theme.fontSize.xs,
+            color: theme.colors.textMuted,
+          }}>
+            <span>
+              Sponsor: <span style={{ color: theme.colors.textSecondary }}>{lead.sponsorName || lead.sponsor || 'Unknown sponsor'}</span>
+            </span>
+            <span>
+              Last visit: <span style={{ color: theme.colors.textSecondary }}>{formatDate(lead.lastVisit)}</span>
+            </span>
           </div>
         </div>
       )}
