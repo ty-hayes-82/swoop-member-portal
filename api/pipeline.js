@@ -69,9 +69,9 @@ export default async function handler(req, res) {
     const tieredLeads = leads.rows.map(l => {
       const visits = Number(l.visit_count);
       const spend = Number(l.total_spend);
+      // ON-42 data model note: backend now emits Hot/Warm/Cold only.
       const tier = visits >= 3 || spend > 400 ? 'hot'
                  : visits === 2 || spend > 200 ? 'warm'
-                 : visits === 1 && spend > 100 ? 'cool'
                  : 'cold';
       const score = Math.min(100, (visits * 12) + (spend / 20));
       return {
@@ -105,7 +105,7 @@ export default async function handler(req, res) {
       warmLeads: tieredLeads,
       pipelineSummary: {
         hot: byTier('hot').length, warm: byTier('warm').length,
-        cool: byTier('cool').length, cold: byTier('cold').length,
+        cold: byTier('cold').length,
         totalGuests: tieredLeads.length,
         hotRevenuePotential: byTier('hot').reduce((s, l) => s + l.potentialDues, 0),
         totalRevenuePotential: tieredLeads.reduce((s, l) => s + l.potentialDues, 0),

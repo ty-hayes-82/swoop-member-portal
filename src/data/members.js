@@ -31,13 +31,14 @@ export const memberSummary = {
 };
 
 export const atRiskMembers = [
-  { memberId: 'mbr_042', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining' },
-  { memberId: 'mbr_117', name: 'Linda Leonard', score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost' },
-  { memberId: 'mbr_203', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active' },
-  { memberId: 'mbr_089', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior' },
-  { memberId: 'mbr_271', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining' },
-  { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining visits down 60% and events skipped', archetype: 'Social Butterfly' },
-  { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Practicing but skipping clubhouse spend; slow-play complaints unresolved', archetype: 'Balanced Active' },
+  // ON-41 data model note: include duesAnnual on at-risk rows so UI can derive totals from row data.
+  { memberId: 'mbr_042', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining', duesAnnual: 18000 },
+  { memberId: 'mbr_117', name: 'Linda Leonard', score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost', duesAnnual: 18000 },
+  { memberId: 'mbr_203', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active', duesAnnual: 18000 },
+  { memberId: 'mbr_089', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior', duesAnnual: 12000 },
+  { memberId: 'mbr_271', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining', duesAnnual: 18000 },
+  { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining visits down 60% and events skipped', archetype: 'Social Butterfly', duesAnnual: 9000 },
+  { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Practicing but skipping clubhouse spend; slow-play complaints unresolved', archetype: 'Balanced Active', duesAnnual: 18000 },
 ];
 
 export const resignationScenarios = [
@@ -382,4 +383,3 @@ export const memberProfiles = {
     ],
   },
 };
-

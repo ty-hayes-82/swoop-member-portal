@@ -2,9 +2,8 @@ import { SoWhatCallout } from '@/components/ui';
 import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
-import TrendContext from '@/components/ui/TrendContext.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
-import { getHealthDistribution, getAtRiskMembers, getMemberSummary } from '@/services/memberService';
+import { getHealthDistribution, getAtRiskMembers } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 
@@ -111,7 +110,6 @@ function MemberRow({ m, isExpanded, onToggle }) {
 export default function HealthOverview() {
   const dist = getHealthDistribution();
   const atRisk = getAtRiskMembers();
-  const summary = getMemberSummary();
   const [expanded, setExpanded] = useState(null);
   const [sortColumn, setSortColumn] = useState('score');
   const [sortDir, setSortDir] = useState('desc');
@@ -132,6 +130,17 @@ export default function HealthOverview() {
       return sortDir === 'asc' ? -1 : 1;
     });
   }, [atRisk, sortColumn, sortDir]);
+
+  const atRiskDuesDisplay = useMemo(() => {
+    const dues = atRisk
+      .map((member) => Number(member?.duesAnnual))
+      .filter((value) => Number.isFinite(value));
+    if (!dues.length || dues.length !== atRisk.length) {
+      return { compact: '—', full: '—' };
+    }
+    const total = dues.reduce((sum, value) => sum + value, 0);
+    return { compact: formatCompactCurrency(total), full: formatFullCurrency(total) };
+  }, [atRisk]);
 
   const toggleSort = (column) => {
     if (sortColumn === column) {
@@ -196,9 +205,9 @@ export default function HealthOverview() {
           </span>
           <span
             style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent }}
-            title={formatFullCurrency(summary.potentialDuesAtRisk)}
+            title={atRiskDuesDisplay.full}
           >
-            {formatCompactCurrency(summary.potentialDuesAtRisk)} dues at risk
+            {atRiskDuesDisplay.compact} dues at risk
           </span>
         </div>
         <div style={{ overflowX: 'auto' }}>
@@ -241,9 +250,9 @@ export default function HealthOverview() {
       </div>
 
       <SoWhatCallout variant="warning">
-        <strong>{summary.riskCount} members</strong> are At Risk or Critical —
-        representing <strong title={formatFullCurrency(summary.potentialDuesAtRisk)}>
-          {formatCompactCurrency(summary.potentialDuesAtRisk)}
+        <strong>{atRisk.length} members</strong> are At Risk or Critical —
+        representing <strong title={atRiskDuesDisplay.full}>
+          {atRiskDuesDisplay.compact}
         </strong> in annual dues.
         James Whitfield is the most urgent: an unresolved service complaint is the only thing standing between
         an active member and a resignation that should never happen. Tap his name to take action.
