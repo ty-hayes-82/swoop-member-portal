@@ -1,6 +1,7 @@
 // pipelineService.js — live data via /api/pipeline with static Oakmont fallback
 
 import { warmLeads, memberWaitlistEntries } from '@/data/pipeline';
+import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetrics';
 
 let _d = null;
 
@@ -134,29 +135,7 @@ const buildPipelineSummary = (leads) => {
 
 const normalizeWaitlistEntries = (entries) => {
   if (!Array.isArray(entries) || entries.length === 0) return [];
-  return entries.map((entry) => ({
-    ...entry,
-    healthScore: toNumber(entry?.healthScore),
-    daysWaiting: toNumber(entry?.daysWaiting),
-    memberValueAnnual: toNumber(entry?.memberValueAnnual),
-    retentionPriority: entry?.retentionPriority ?? 'NORMAL',
-    riskLevel: entry?.riskLevel ?? 'Healthy',
-  }));
-};
-
-const buildWaitlistSummary = (entries) => {
-  if (!Array.isArray(entries) || entries.length === 0) {
-    return { total: 0, highPriority: 0, atRisk: 0, avgDaysWaiting: 0 };
-  }
-
-  const total = entries.length;
-  const highPriority = entries.filter((entry) => entry.retentionPriority === 'HIGH').length;
-  const atRisk = entries.filter((entry) => ['At Risk', 'Critical'].includes(entry.riskLevel)).length;
-  const avgDaysWaiting = Math.round(
-    entries.reduce((sum, entry) => sum + toNumber(entry.daysWaiting), 0) / Math.max(total, 1),
-  );
-
-  return { total, highPriority, atRisk, avgDaysWaiting };
+  return entries.map((entry) => normalizeWaitlistEntry(entry));
 };
 
 const getStaticWaitlistEntries = () => normalizeWaitlistEntries(memberWaitlistEntries);
@@ -228,11 +207,10 @@ export const getWaitlistWithRiskScoring = () => {
 };
 
 export const getWaitlistSummary = () => {
-  if (_d?.waitlistSummary) return _d.waitlistSummary;
   const source = Array.isArray(_d?.waitlistEntries) && _d.waitlistEntries.length
     ? _d.waitlistEntries
     : getStaticWaitlistEntries();
-  return buildWaitlistSummary(source);
+  return summarizeWaitlistEntries(source);
 };
 
 export const sourceSystems = ['Tee Sheet', 'Analytics'];

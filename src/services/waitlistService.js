@@ -8,6 +8,7 @@ import {
   demandHeatmap,
 } from '@/data/pipeline';
 import { revenuePerSlot } from '@/data/revenue';
+import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetrics';
 
 let _d = null;
 
@@ -22,7 +23,8 @@ export const _init = async () => {
 
 export const getWaitlistQueue = () => {
   const entries = _d ? _d.queue : memberWaitlistEntries;
-  return [...entries].sort((a, b) => {
+  const normalized = Array.isArray(entries) ? entries.map((entry) => normalizeWaitlistEntry(entry)) : [];
+  return normalized.sort((a, b) => {
     if (a.retentionPriority !== b.retentionPriority) {
       return a.retentionPriority === 'HIGH' ? -1 : 1;
     }
@@ -31,14 +33,8 @@ export const getWaitlistQueue = () => {
 };
 
 export const getWaitlistSummary = () => {
-  if (_d) return _d.summary;
-  const entries = memberWaitlistEntries;
-  return {
-    total: entries.length,
-    highPriority: entries.filter((e) => e.retentionPriority === 'HIGH').length,
-    atRisk: entries.filter((e) => ['At Risk', 'Critical'].includes(e.riskLevel)).length,
-    avgDaysWaiting: Math.round(entries.reduce((s, e) => s + e.daysWaiting, 0) / entries.length),
-  };
+  if (_d?.queue) return summarizeWaitlistEntries(_d.queue);
+  return summarizeWaitlistEntries(memberWaitlistEntries);
 };
 
 export const getCancellationPredictions = () => {

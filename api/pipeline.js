@@ -43,7 +43,8 @@ export default async function handler(req, res) {
         SELECT
           mw.waitlist_id, mw.member_id,
           m.first_name || ' ' || m.last_name AS member_name,
-          m.archetype, mw.requested_slot, mw.days_waiting,
+          m.archetype, m.annual_dues AS member_value_annual,
+          mw.requested_slot, mw.days_waiting,
           mw.alternatives_accepted, mw.retention_priority,
           mw.dining_incentive_attached, mw.notified_at, mw.filled_at,
           w.engagement_score AS health_score,
@@ -87,6 +88,7 @@ export default async function handler(req, res) {
       return {
         waitlistId: w.waitlist_id, memberId: w.member_id,
         memberName: w.member_name, archetype: w.archetype,
+        memberValueAnnual: Number(w.member_value_annual) || 0,
         requestedSlot: w.requested_slot, daysWaiting: Number(w.days_waiting),
         alternatesAccepted: JSON.parse(w.alternatives_accepted ?? '[]'),
         retentionPriority: w.retention_priority,
@@ -97,6 +99,7 @@ export default async function handler(req, res) {
     });
 
     const byTier = t => tieredLeads.filter(l => l.tier === t);
+    const atRiskQueue = waitlistEntries.filter((entry) => ['At Risk', 'Critical'].includes(entry.riskLevel));
 
     res.status(200).json({
       warmLeads: tieredLeads,
@@ -111,9 +114,12 @@ export default async function handler(req, res) {
       waitlistSummary: {
         total: waitlistEntries.length,
         highPriority: waitlistEntries.filter(w => w.retentionPriority === 'HIGH').length,
-        atRisk: waitlistEntries.filter(w => ['At Risk','Critical'].includes(w.riskLevel)).length,
+        atRisk: atRiskQueue.length,
+        critical: waitlistEntries.filter((w) => w.riskLevel === 'Critical').length,
         avgDaysWaiting: waitlistEntries.length
           ? Math.round(waitlistEntries.reduce((s, w) => s + w.daysWaiting, 0) / waitlistEntries.length) : 0,
+        riskScoredToday: waitlistEntries.filter((w) => Number.isFinite(w.healthScore) && w.healthScore > 0).length,
+        atRiskDuesExposed: Math.round(atRiskQueue.reduce((sum, row) => sum + (row.memberValueAnnual || 0), 0)),
       },
     });
   } catch (err) {

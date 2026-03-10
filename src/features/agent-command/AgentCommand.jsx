@@ -32,19 +32,19 @@ export function AgentCommand() {
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-            <span style={{ fontSize: 20 }}>\u2b21</span>
+            <span style={{ fontSize: 20 }}>⬡</span>
             <span style={{ fontSize: theme.fontSize.xl, fontWeight: 700, color: theme.colors.textPrimary, fontFamily: theme.fonts.serif }}>
               AI Agents
             </span>
           </div>
           <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>
-            {pendingAgentCount} actions ready for review \u00b7 {summary.approved} approved / {summary.dismissed} dismissed today
+            {pendingAgentCount} actions ready for review · {summary.approved} approved / {summary.dismissed} dismissed today
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Impact summary</div>
           <div style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.agentCyan, fontSize: theme.fontSize.md }}>
-            {summary.active} playbooks monitoring \u00b7 {summary.total} total
+            {summary.active} playbooks monitoring · {summary.total} total
           </div>
         </div>
       </div>

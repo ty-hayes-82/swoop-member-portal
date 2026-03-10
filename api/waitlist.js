@@ -26,6 +26,7 @@ export default async function handler(req, res) {
         SELECT
           mw.waitlist_id, mw.member_id,
           m.first_name || ' ' || m.last_name  AS member_name, m.archetype,
+          m.annual_dues AS member_value_annual,
           mw.requested_slot, mw.days_waiting, mw.alternatives_accepted,
           mw.retention_priority, mw.dining_incentive_attached,
           mw.notified_at, mw.filled_at,
@@ -81,6 +82,7 @@ export default async function handler(req, res) {
         memberId:             w.member_id,
         memberName:           w.member_name,
         archetype:            w.archetype,
+        memberValueAnnual:    Number(w.member_value_annual) || 0,
         requestedSlot:        w.requested_slot,
         daysWaiting:          Number(w.days_waiting),
         alternatesAccepted:   JSON.parse(w.alternatives_accepted ?? '[]'),
@@ -113,15 +115,19 @@ export default async function handler(req, res) {
     }));
 
     const highRisk = predRows.filter(p => p.cancelProbability >= 0.60);
+    const atRiskQueue = queueRows.filter((entry) => ['At Risk', 'Critical'].includes(entry.riskLevel));
 
     res.status(200).json({
       queue: queueRows,
       summary: {
         total: queueRows.length,
         highPriority: queueRows.filter(w => w.retentionPriority === 'HIGH').length,
-        atRisk: queueRows.filter(w => ['At Risk','Critical'].includes(w.riskLevel)).length,
+        atRisk: atRiskQueue.length,
+        critical: queueRows.filter((w) => w.riskLevel === 'Critical').length,
         avgDaysWaiting: queueRows.length
           ? Math.round(queueRows.reduce((s, w) => s + w.daysWaiting, 0) / queueRows.length) : 0,
+        riskScoredToday: queueRows.filter((w) => Number.isFinite(w.healthScore) && w.healthScore > 0).length,
+        atRiskDuesExposed: Math.round(atRiskQueue.reduce((sum, row) => sum + (row.memberValueAnnual || 0), 0)),
       },
       cancellationPredictions: predRows,
       cancellationSummary: {
