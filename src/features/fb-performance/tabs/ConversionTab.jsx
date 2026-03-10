@@ -42,7 +42,13 @@ const tooltipStyle = {
 };
 
 export default function ConversionTab() {
-  const data = getPostRoundConversion();
+  const dataSource = getPostRoundConversion();
+  const data = Array.isArray(dataSource)
+    ? dataSource.map((entry) => ({
+        archetype: entry?.archetype ?? 'Unknown',
+        rate: Number.isFinite(Number(entry?.rate)) ? Number(entry.rate) : 0,
+      }))
+    : [];
   const overall = 0.35;
 
   return (
