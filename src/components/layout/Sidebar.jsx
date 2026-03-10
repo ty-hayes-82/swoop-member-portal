@@ -15,7 +15,7 @@ const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 const SECTION_CONFIG = [
   {
     label: 'RIGHT NOW',
-    keys: ['daily-briefing', 'location-intelligence', 'waitlist-demand', 'operations'],
+    keys: ['daily-briefing', 'waitlist-demand', 'operations'],
     emphasis: true,
   },
   {
