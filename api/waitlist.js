@@ -24,8 +24,10 @@ export default async function handler(req, res) {
 
       sql`
         SELECT
-          mw.waitlist_id, mw.member_id,
-          m.first_name || ' ' || m.last_name  AS member_name, m.archetype,
+          mw.waitlist_id,
+          mw.member_id::text AS member_id,
+          COALESCE(NULLIF(TRIM(m.first_name || ' ' || m.last_name), ''), 'Member ' || RIGHT(mw.member_id::text, 3)) AS member_name,
+          m.archetype,
           m.annual_dues AS member_value_annual,
           mw.requested_slot, mw.days_waiting, mw.alternatives_accepted,
           mw.retention_priority, mw.dining_incentive_attached,
@@ -37,25 +39,26 @@ export default async function handler(req, res) {
                ELSE 'Critical' END AS risk_level,
           (SELECT MAX(b.booking_date) FROM bookings b
            JOIN booking_players bp ON b.booking_id = bp.booking_id
-           WHERE bp.member_id = mw.member_id AND b.status = 'completed') AS last_round,
+           WHERE bp.member_id::text = mw.member_id::text AND b.status = 'completed') AS last_round,
           (SELECT COUNT(*) FILTER (WHERE pc.post_round_dining = 1)::float /
                   NULLIF(COUNT(*), 0)
-           FROM pos_checks pc WHERE pc.member_id = mw.member_id) AS dining_history_rate
+           FROM pos_checks pc WHERE pc.member_id::text = mw.member_id::text) AS dining_history_rate
         FROM member_waitlist mw
-        JOIN members m ON mw.member_id = m.member_id
-        JOIN member_engagement_weekly w ON m.member_id = w.member_id
+        JOIN members m ON mw.member_id::text = m.member_id::text
+        JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
           AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
         ORDER BY CASE mw.retention_priority WHEN 'HIGH' THEN 0 ELSE 1 END, w.engagement_score ASC`,
 
       sql`
-        SELECT cr.risk_id, cr.booking_id, cr.member_id,
-               m.first_name || ' ' || m.last_name AS member_name, m.archetype,
+        SELECT cr.risk_id, cr.booking_id, cr.member_id::text AS member_id,
+               COALESCE(NULLIF(TRIM(m.first_name || ' ' || m.last_name), ''), 'Member ' || RIGHT(cr.member_id::text, 3)) AS member_name,
+               m.archetype,
                b.tee_time, b.booking_date,
                cr.cancel_probability, cr.drivers, cr.recommended_action,
                cr.estimated_revenue_lost, cr.action_taken, cr.outcome
         FROM cancellation_risk cr
         JOIN bookings b ON cr.booking_id = b.booking_id
-        JOIN members m ON cr.member_id = m.member_id
+        JOIN members m ON cr.member_id::text = m.member_id::text
         WHERE b.booking_date::date >= '2026-01-01'::date AND b.status = 'confirmed'
         ORDER BY cr.cancel_probability DESC LIMIT 20`,
 
@@ -77,6 +80,9 @@ export default async function handler(req, res) {
 
     const queueRows = queue.rows.map(w => {
       const healthScore = normalizeHealthScore(w.health_score);
+      const alternatives = Array.isArray(w.alternatives_accepted)
+        ? w.alternatives_accepted
+        : JSON.parse(w.alternatives_accepted ?? '[]');
       return {
         waitlistId:           w.waitlist_id,
         memberId:             w.member_id,
@@ -85,9 +91,9 @@ export default async function handler(req, res) {
         memberValueAnnual:    Number(w.member_value_annual) || 0,
         requestedSlot:        w.requested_slot,
         daysWaiting:          Number(w.days_waiting),
-        alternatesAccepted:   JSON.parse(w.alternatives_accepted ?? '[]'),
+        alternatesAccepted:   alternatives,
         retentionPriority:    w.retention_priority,
-        diningIncentiveAttached: w.dining_incentive_attached === 1,
+        diningIncentiveAttached: Number(w.dining_incentive_attached) === 1 || w.dining_incentive_attached === true,
         notifiedAt:           w.notified_at,
         filledAt:             w.filled_at,
         healthScore,

@@ -8,32 +8,42 @@ import { sql } from '@vercel/postgres';
 // The DB only has January 2026 data. Aug–Dec are static prior-period values
 // (identical to data/trends.js). This function merges them so chart shapes are unchanged.
 const PRIOR_TRENDS = {
-  postRoundConversion: [0.31, 0.33, 0.35, 0.32, 0.34],
-  slowRoundRate:       [0.24, 0.22, 0.26, 0.27, 0.25],
-  memberHealthAvg:     [66,   65,   63,   61,   60],
-  atRiskMemberCount:   [18,   20,   24,   28,   31],
-  fbRevenue:           [48200,46800,51300,44100,49700],
-  golfRevenue:         [82400,79600,88200,76300,85100],
-  avgDiningCheck:      [34,   35,   36,   34,   37],
-  emailOpenRateAvg:    [0.48, 0.46, 0.45, 0.43, 0.42],
-  complaintsPerMonth:  [8,    7,    9,    11,   10],
-  newMemberCount:      [4,    3,    5,    2,    4],
-  resignationCount:    [1,    2,    1,    2,    2],
+  postRoundConversion: [0.39, 0.40, 0.41, 0.38],
+  slowRoundRate:       [0.19, 0.20, 0.22, 0.24],
+  memberHealthAvg:     [72,   71,   70,   69],
+  atRiskMemberCount:   [54,   58,   62,   66],
+  fbRevenue:           [108000, 110000, 116000, 110000],
+  golfRevenue:         [298000, 312000, 326000, 318000],
+  avgDiningCheck:      [36.2, 37.0, 38.4, 37.8],
+  emailOpenRateAvg:    [0.42, 0.41, 0.40, 0.38],
+  complaintsPerMonth:  [18,   20,   22,   24],
+  newMemberCount:      [3,    2,    4,    2],
+  resignationCount:    [0,    1,    1,    2],
 };
 
 const PRIOR_OUTLET_TRENDS = {
-  'Grill Room':        [14200, 13800, 15100, 12900, 14600],
-  'Main Dining Room':  [19800, 18900, 21300, 17400, 20100],
-  'Bar/Lounge':        [8400,  8100,  8900,  7600,  8700],
-  'Halfway House':     [5100,  4800,  5600,  4200,  5300],
-  'Pool Bar':          [1200,  900,   1400,  700,   1100],
+  'Grill Room':        [38000, 40000, 42000, 41000, 43000],
+  'Main Dining Room':  [28000, 29000, 31000, 30000, 32000],
+  'Bar/Lounge':        [18000, 19000, 20000, 19500, 20000],
+  'Halfway House':     [12000, 11000, 12000, 11500, 12000],
+  'Pool Bar':          [14000, 13000, 11000,  9000,  8500],
 };
 
 export default async function handler(req, res) {
   try {
     // January actuals
-    const [revenue, paceData, members, email, fbData, eventsData, outletRev] = await Promise.all([
-      sql`SELECT SUM(fb_revenue) AS fb, SUM(golf_revenue) AS golf FROM close_outs`,
+    const [monthlyRevenue, paceData, members, email, fbData, eventsData, outletRev] = await Promise.all([
+      sql`
+        SELECT
+          DATE_TRUNC('month', date::date)::date AS month_start,
+          COUNT(*)::int AS day_count,
+          SUM(fb_revenue)::numeric AS fb,
+          SUM(golf_revenue)::numeric AS golf
+        FROM close_outs
+        WHERE date::date >= '2025-12-01'::date
+          AND date::date < '2026-02-01'::date
+        GROUP BY 1
+        ORDER BY 1`,
       sql`SELECT COUNT(*) AS total, SUM(is_slow_round) AS slow FROM pace_of_play`,
       sql`
         SELECT
@@ -56,6 +66,8 @@ export default async function handler(req, res) {
         SELECT o.name, ROUND(SUM(pc.total)::numeric, 0) AS revenue
         FROM pos_checks pc
         JOIN dining_outlets o ON pc.outlet_id = o.outlet_id
+        WHERE pc.opened_at::date >= '2026-01-01'::date
+          AND pc.opened_at::date < '2026-02-01'::date
         GROUP BY o.name`,
     ]);
 
@@ -67,8 +79,18 @@ export default async function handler(req, res) {
       WHERE week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
         AND member_id IN (SELECT member_id FROM members WHERE membership_status = 'active')`;
 
-    const janFb         = Math.round(Number(revenue.rows[0].fb));
-    const janGolf       = Math.round(Number(revenue.rows[0].golf));
+    const monthly = new Map(monthlyRevenue.rows.map((row) => [String(row.month_start).slice(0, 10), row]));
+    const decRaw = monthly.get('2025-12-01');
+    const janRaw = monthly.get('2026-01-01');
+    const monthProjection = (row, key) => {
+      const total = Number(row?.[key] ?? 0);
+      const dayCount = Math.max(1, Number(row?.day_count ?? 31));
+      return Math.round((total / dayCount) * 31);
+    };
+    const decFb = monthProjection(decRaw, 'fb');
+    const decGolf = monthProjection(decRaw, 'golf');
+    const janFb = monthProjection(janRaw, 'fb');
+    const janGolf = monthProjection(janRaw, 'golf');
     const janTotal      = Number(paceData.rows[0].total) || 1;
     const janSlow       = Number(paceData.rows[0].slow) || 0;
     const janHealth     = Number(healthRow.rows[0].avg_health) || 62;
@@ -81,21 +103,29 @@ export default async function handler(req, res) {
 
     // Build outlet map for January
     const janOutletMap = {};
-    for (const r of outletRev.rows) janOutletMap[r.name] = Math.round(Number(r.revenue));
+    const canonicalOutletName = (name) => {
+      if (name === 'The Grill Room' || name === 'Grill Room') return 'Grill Room';
+      if (name === 'Main Dining' || name === 'Main Dining Room' || name === 'The Veranda') return 'Main Dining Room';
+      if (name === 'Bar / Lounge' || name === 'Bar/Lounge' || name === 'The 19th Hole Bar') return 'Bar/Lounge';
+      if (name === 'Halfway House') return 'Halfway House';
+      if (name === 'Pool Bar') return 'Pool Bar';
+      return name;
+    };
+    for (const r of outletRev.rows) janOutletMap[canonicalOutletName(r.name)] = Math.round(Number(r.revenue));
 
     // Assemble 6-month arrays (Aug–Dec from prior + Jan actuals)
     const trends = {
-      postRoundConversion: [...PRIOR_TRENDS.postRoundConversion, +(janSlow > 0 ? janSlow / janTotal : 0.35).toFixed(3)],
-      slowRoundRate:       [...PRIOR_TRENDS.slowRoundRate,       +(janSlow / janTotal).toFixed(3)],
-      memberHealthAvg:     [...PRIOR_TRENDS.memberHealthAvg,     janHealth],
-      atRiskMemberCount:   [...PRIOR_TRENDS.atRiskMemberCount,   janAtRisk],
-      fbRevenue:           [...PRIOR_TRENDS.fbRevenue,           janFb],
-      golfRevenue:         [...PRIOR_TRENDS.golfRevenue,         janGolf],
-      avgDiningCheck:      [...PRIOR_TRENDS.avgDiningCheck,      Math.round(janAvgCheck)],
-      emailOpenRateAvg:    [...PRIOR_TRENDS.emailOpenRateAvg,    +janOpenRate.toFixed(3)],
-      complaintsPerMonth:  [...PRIOR_TRENDS.complaintsPerMonth,  janComplaints],
-      newMemberCount:      [...PRIOR_TRENDS.newMemberCount,      janNewMembers],
-      resignationCount:    [...PRIOR_TRENDS.resignationCount,    janResigned],
+      postRoundConversion: [...PRIOR_TRENDS.postRoundConversion, 0.37, +(janSlow > 0 ? janSlow / janTotal : 0.35).toFixed(3)],
+      slowRoundRate:       [...PRIOR_TRENDS.slowRoundRate,       0.26, +(janSlow / janTotal).toFixed(3)],
+      memberHealthAvg:     [...PRIOR_TRENDS.memberHealthAvg,     67, janHealth],
+      atRiskMemberCount:   [...PRIOR_TRENDS.atRiskMemberCount,   70, janAtRisk],
+      fbRevenue:           [...PRIOR_TRENDS.fbRevenue,           decFb || 228000, janFb],
+      golfRevenue:         [...PRIOR_TRENDS.golfRevenue,         decGolf || 335000, janGolf],
+      avgDiningCheck:      [...PRIOR_TRENDS.avgDiningCheck,      38.0, Math.round(janAvgCheck)],
+      emailOpenRateAvg:    [...PRIOR_TRENDS.emailOpenRateAvg,    0.37, +janOpenRate.toFixed(3)],
+      complaintsPerMonth:  [...PRIOR_TRENDS.complaintsPerMonth,  28, janComplaints],
+      newMemberCount:      [...PRIOR_TRENDS.newMemberCount,      3, janNewMembers],
+      resignationCount:    [...PRIOR_TRENDS.resignationCount,    2, janResigned],
     };
 
     const outletTrends = {};

@@ -40,6 +40,6 @@ export const decayingMembers = [
   { memberId: 'mbr_042', name: 'Kevin Hurst',  nov: 0.41, dec: 0.22, jan: 0.08, trend: -80 },
   { memberId: 'mbr_089', name: 'Anne Jordan',  nov: 0.38, dec: 0.24, jan: 0.14, trend: -63 },
   { memberId: 'mbr_271', name: 'Robert Callahan',   nov: 0.44, dec: 0.28, jan: 0.12, trend: -73 },
-  { memberId: 'mbr_156', name: 'Member 156',   nov: 0.52, dec: 0.38, jan: 0.22, trend: -58 },
-  { memberId: 'mbr_198', name: 'Member 198',   nov: 0.48, dec: 0.34, jan: 0.18, trend: -63 },
+  { memberId: 'mbr_156', name: 'Priya Brock',   nov: 0.52, dec: 0.38, jan: 0.22, trend: -58 },
+  { memberId: 'mbr_198', name: 'Marcus Flynn',  nov: 0.48, dec: 0.34, jan: 0.18, trend: -63 },
 ];

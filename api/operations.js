@@ -9,7 +9,10 @@ export default async function handler(req, res) {
     const [closeouts, pace, bottlenecks, waitlist] = await Promise.all([
       sql`SELECT date, TO_CHAR(date::date, 'Dy') AS day, golf_revenue, fb_revenue,
                  golf_revenue + fb_revenue AS total, weather, is_understaffed
-          FROM close_outs ORDER BY date`,
+          FROM close_outs
+          WHERE date::date >= '2026-01-01'::date
+            AND date::date < '2026-02-01'::date
+          ORDER BY date`,
 
       sql`SELECT
             CASE WHEN total_minutes < 240 THEN 'Under 4h'
@@ -29,7 +32,10 @@ export default async function handler(req, res) {
                  we.peak_slot AS slot,
                  we.waitlist_count,
                  we.has_event_overlap
-          FROM waitlist_entries we ORDER BY we.requested_date`,
+          FROM waitlist_entries we
+          WHERE we.requested_date::date >= '2026-01-01'::date
+            AND we.requested_date::date < '2026-02-01'::date
+          ORDER BY we.requested_date`,
     ]);
 
     // Monthly summary computed from close_outs
