@@ -18,6 +18,7 @@ import { IntegrationsPage } from '@/features/integrations';
 import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
 import LocationIntelligence from '@/features/location-intelligence/LocationIntelligence.jsx';
 import { CsvImportHub } from '@/features/csv-import';
+import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -34,6 +35,7 @@ const ROUTES = {
   'demo-mode': DemoMode,
   'integrations/csv-import': CsvImportHub,
   'csv-import': CsvImportHub,
+  'member-profile': MemberProfilePage,
 };
 
 function AppShell() {
