@@ -12,37 +12,47 @@ const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-const SECTION_CONFIG = [
-  {
-    label: 'RIGHT NOW',
-    keys: ['daily-briefing', 'waitlist-demand', 'operations'],
-    emphasis: true,
-  },
-  {
-    label: 'INTELLIGENCE',
-    keys: ['member-health', 'fb-performance', 'staffing-service', 'growth-pipeline'],
-    emphasis: false,
-  },
-  {
-    label: 'SYSTEM',
-    keys: ['agent-command', 'integrations'],
-    emphasis: false,
-  },
-];
+const SECTION_ORDER = ['RIGHT NOW', 'INTELLIGENCE', 'SYSTEM'];
 
 export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const { currentRoute, navigate, sidebarCollapsed, toggleSidebar } = useNavigation();
   const { activeCount, totalRevenueImpact } = useApp();
   const w = isMobile ? 280 : sidebarCollapsed ? 52 : 240;
 
-  const navMap = NAV_ITEMS.filter((n) => !n.hidden).reduce((acc, item) => {
-    acc[item.key] = item;
-    return acc;
-  }, {});
-  const navSections = SECTION_CONFIG.map((section) => ({
-    ...section,
-    items: section.keys.map((key) => navMap[key]).filter(Boolean),
-  })).filter((section) => section.items.length > 0);
+  const visibleNavItems = NAV_ITEMS.filter((n) => !n.hidden);
+  const sectionBuckets = new Map();
+  const sectionOrderFromItems = [];
+  visibleNavItems.forEach((item) => {
+    const label = item.section ?? 'INTELLIGENCE';
+    if (!sectionBuckets.has(label)) {
+      sectionBuckets.set(label, []);
+      sectionOrderFromItems.push(label);
+    }
+    sectionBuckets.get(label).push(item);
+  });
+
+  const navSections = [];
+  const addedSections = new Set();
+  SECTION_ORDER.forEach((label) => {
+    if (sectionBuckets.has(label)) {
+      navSections.push({
+        label,
+        items: sectionBuckets.get(label),
+        emphasis: label === 'RIGHT NOW',
+      });
+      addedSections.add(label);
+    }
+  });
+  sectionOrderFromItems.forEach((label) => {
+    if (!addedSections.has(label) && sectionBuckets.has(label)) {
+      navSections.push({
+        label,
+        items: sectionBuckets.get(label),
+        emphasis: false,
+      });
+      addedSections.add(label);
+    }
+  });
 
   const basePosition = isMobile
     ? {
