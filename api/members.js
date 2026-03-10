@@ -146,11 +146,11 @@ export default async function handler(req, res) {
           ec.send_date,
           ec.type                                                             AS campaign_type,
           m.archetype,
-          COUNT(*) FILTER (WHERE ee.event_type = 'send')                     AS sends,
-          COUNT(*) FILTER (WHERE ee.event_type = 'open')                     AS opens,
+          COUNT(*) FILTER (WHERE ee.event_type = 'sent')                     AS sends,
+          COUNT(*) FILTER (WHERE ee.event_type = 'opened')                     AS opens,
           ROUND(
-            COUNT(*) FILTER (WHERE ee.event_type = 'open')::numeric /
-            NULLIF(COUNT(*) FILTER (WHERE ee.event_type = 'send'), 0), 3
+            COUNT(*) FILTER (WHERE ee.event_type = 'opened')::numeric /
+            NULLIF(COUNT(*) FILTER (WHERE ee.event_type = 'sent'), 0), 3
           )                                                                   AS open_rate
         FROM email_campaigns ec
         JOIN email_events ee ON ec.campaign_id = ee.campaign_id
