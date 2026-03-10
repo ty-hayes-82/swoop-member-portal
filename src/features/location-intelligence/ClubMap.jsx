@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { theme } from '@/config/theme';
@@ -124,6 +124,7 @@ function buildStaffFeatures(staffMembers) {
 function ClubMap({ members = [], staffMembers = [], selectedMemberId, onSelectMember, densityByZone = {} }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
+  const [mapError, setMapError] = useState(null);
 
   const heatmapFeatures = useMemo(() => buildZoneFeatures(), []);
   const memberGeoJson = useMemo(() => buildMemberFeatures(members), [members]);
@@ -135,109 +136,132 @@ function ClubMap({ members = [], staffMembers = [], selectedMemberId, onSelectMe
   })), [densityByZone]);
 
   useEffect(() => {
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: MAP_STYLE,
-      center: MAP_CENTER,
-      zoom: 15.7,
-      pitch: 45,
-      bearing: -12,
-    });
+    if (!mapContainerRef.current) return undefined;
+    if (typeof window === 'undefined') return undefined;
+    if (!window.WebGLRenderingContext) {
+      setMapError('Map rendering is unavailable in this browser.');
+      return undefined;
+    }
 
+    let map;
+    try {
+      mapboxgl.accessToken = MAPBOX_TOKEN;
+      map = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: MAP_STYLE,
+        center: MAP_CENTER,
+        zoom: 15.7,
+        pitch: 45,
+        bearing: -12,
+      });
+    } catch (error) {
+      setMapError(error?.message || 'Unable to initialize live map.');
+      return undefined;
+    }
+
+    setMapError(null);
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 
+    map.on('error', (event) => {
+      const message = event?.error?.message || 'Live map is temporarily unavailable.';
+      setMapError(message);
+    });
+
     map.on('load', () => {
-      map.addSource('member-activity', {
-        type: 'geojson',
-        data: heatmapFeatures,
-      });
-      map.addLayer({
-        id: 'member-activity-heat',
-        type: 'heatmap',
-        source: 'member-activity',
-        paint: {
-          'heatmap-weight': ['interpolate', ['linear'], ['get', 'intensity'], 0, 0, 40, 0.6, 70, 1],
-          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 14, 0.8, 17, 1.6],
-          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 14, 22, 17, 40],
-          'heatmap-color': [
-            'interpolate',
-            ['linear'],
-            ['heatmap-density'],
-            0, 'rgba(0,0,0,0)',
-            0.2, 'rgba(16, 46, 30, 0.35)',
-            0.4, 'rgba(28, 92, 54, 0.55)',
-            0.65, 'rgba(52, 168, 95, 0.8)',
-            1, 'rgba(74, 222, 128, 0.95)'
-          ],
-          'heatmap-opacity': 0.85,
-        },
-      });
-      map.addLayer({
-        id: 'member-activity-points',
-        type: 'circle',
-        source: 'member-activity',
-        minzoom: 16,
-        paint: {
-          'circle-radius': 5,
-          'circle-color': '#4ADE80',
-          'circle-opacity': 0.7,
-        },
-      });
+      try {
+        map.addSource('member-activity', {
+          type: 'geojson',
+          data: heatmapFeatures,
+        });
+        map.addLayer({
+          id: 'member-activity-heat',
+          type: 'heatmap',
+          source: 'member-activity',
+          paint: {
+            'heatmap-weight': ['interpolate', ['linear'], ['get', 'intensity'], 0, 0, 40, 0.6, 70, 1],
+            'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 14, 0.8, 17, 1.6],
+            'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 14, 22, 17, 40],
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(0,0,0,0)',
+              0.2, 'rgba(16, 46, 30, 0.35)',
+              0.4, 'rgba(28, 92, 54, 0.55)',
+              0.65, 'rgba(52, 168, 95, 0.8)',
+              1, 'rgba(74, 222, 128, 0.95)'
+            ],
+            'heatmap-opacity': 0.85,
+          },
+        });
+        map.addLayer({
+          id: 'member-activity-points',
+          type: 'circle',
+          source: 'member-activity',
+          minzoom: 16,
+          paint: {
+            'circle-radius': 5,
+            'circle-color': '#4ADE80',
+            'circle-opacity': 0.7,
+          },
+        });
 
-      map.addSource('live-members', {
-        type: 'geojson',
-        data: memberGeoJson,
-      });
-      map.addLayer({
-        id: 'live-member-points',
-        type: 'circle',
-        source: 'live-members',
-        paint: {
-          'circle-radius': 5.5,
-          'circle-color': [
-            'match',
-            ['get', 'status'],
-            'healthy', HEALTH_COLORS.healthy,
-            'watch', HEALTH_COLORS.watch,
-            'at-risk', HEALTH_COLORS['at-risk'],
-            'critical', HEALTH_COLORS.critical,
-            '#F7A341'
-          ],
-          'circle-stroke-color': '#FFFFFF',
-          'circle-stroke-width': 1.5,
-        },
-      });
-      map.addLayer({
-        id: 'selected-member-glow',
-        type: 'circle',
-        source: 'live-members',
-        paint: {
-          'circle-radius': 10,
-          'circle-color': 'rgba(255,255,255,0.0)',
-          'circle-stroke-color': theme.colors.accent,
-          'circle-stroke-width': 2.5,
-        },
-        filter: ['==', ['get', 'memberId'], '•'],
-      });
+        map.addSource('live-members', {
+          type: 'geojson',
+          data: memberGeoJson,
+        });
+        map.addLayer({
+          id: 'live-member-points',
+          type: 'circle',
+          source: 'live-members',
+          paint: {
+            'circle-radius': 5.5,
+            'circle-color': [
+              'match',
+              ['get', 'status'],
+              'healthy', HEALTH_COLORS.healthy,
+              'watch', HEALTH_COLORS.watch,
+              'at-risk', HEALTH_COLORS['at-risk'],
+              'critical', HEALTH_COLORS.critical,
+              '#F7A341'
+            ],
+            'circle-stroke-color': '#FFFFFF',
+            'circle-stroke-width': 1.5,
+          },
+        });
+        map.addLayer({
+          id: 'selected-member-glow',
+          type: 'circle',
+          source: 'live-members',
+          paint: {
+            'circle-radius': 10,
+            'circle-color': 'rgba(255,255,255,0.0)',
+            'circle-stroke-color': theme.colors.accent,
+            'circle-stroke-width': 2.5,
+          },
+          filter: ['==', ['get', 'memberId'], '•'],
+        });
 
-      map.addSource('staff-members', {
-        type: 'geojson',
-        data: staffGeoJson,
-      });
-      map.addLayer({
-        id: 'staff-members',
-        type: 'symbol',
-        source: 'staff-members',
-        layout: {
-          'icon-image': 'marker-15',
-          'icon-size': 1.1,
-          'icon-offset': [0, -6],
-        },
-        paint: {
-          'icon-color': theme.colors.accent,
-        },
-      });
+        map.addSource('staff-members', {
+          type: 'geojson',
+          data: staffGeoJson,
+        });
+        map.addLayer({
+          id: 'staff-members',
+          type: 'symbol',
+          source: 'staff-members',
+          layout: {
+            'icon-image': 'marker-15',
+            'icon-size': 1.1,
+            'icon-offset': [0, -6],
+          },
+          paint: {
+            'icon-color': theme.colors.accent,
+          },
+        });
+      } catch (error) {
+        setMapError(error?.message || 'Unable to load map layers.');
+      }
 
       map.on('click', 'live-member-points', (event) => {
         const memberId = event.features?.[0]?.properties?.memberId;
@@ -250,31 +274,41 @@ function ClubMap({ members = [], staffMembers = [], selectedMemberId, onSelectMe
     });
 
     mapRef.current = map;
-    return () => map.remove();
+    return () => {
+      try {
+        map.remove();
+      } catch {}
+    };
   }, [heatmapFeatures, onSelectMember]);
 
   useEffect(() => {
     if (!mapRef.current) return;
-    const source = mapRef.current.getSource('live-members');
-    if (source) source.setData(memberGeoJson);
+    try {
+      const source = mapRef.current.getSource('live-members');
+      if (source) source.setData(memberGeoJson);
+    } catch {}
   }, [memberGeoJson]);
 
   useEffect(() => {
     if (!mapRef.current) return;
-    const source = mapRef.current.getSource('staff-members');
-    if (source) source.setData(staffGeoJson);
+    try {
+      const source = mapRef.current.getSource('staff-members');
+      if (source) source.setData(staffGeoJson);
+    } catch {}
   }, [staffGeoJson]);
 
   useEffect(() => {
     if (!mapRef.current) return;
     const map = mapRef.current;
-    if (map.getLayer('selected-member-glow')) {
-      if (selectedMemberId) {
-        map.setFilter('selected-member-glow', ['==', ['get', 'memberId'], selectedMemberId]);
-      } else {
-        map.setFilter('selected-member-glow', ['==', ['get', 'memberId'], '•']);
+    try {
+      if (map.getLayer('selected-member-glow')) {
+        if (selectedMemberId) {
+          map.setFilter('selected-member-glow', ['==', ['get', 'memberId'], selectedMemberId]);
+        } else {
+          map.setFilter('selected-member-glow', ['==', ['get', 'memberId'], '•']);
+        }
       }
-    }
+    } catch {}
   }, [selectedMemberId]);
 
   const totalMembers = members.length || legendZones.reduce((sum, zone) => sum + zone.count, 0);
@@ -282,6 +316,28 @@ function ClubMap({ members = [], staffMembers = [], selectedMemberId, onSelectMe
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div ref={mapContainerRef} style={{ width: '100%', height: '100%', minHeight: 500, borderRadius: theme.radius.md, overflow: 'hidden' }} />
+      {mapError && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          padding: theme.spacing.lg,
+          background: 'rgba(9, 12, 16, 0.72)',
+          color: theme.colors.white,
+          borderRadius: theme.radius.md,
+          border: `1px solid ${theme.colors.border}`,
+        }}>
+          <div>
+            <div style={{ fontSize: theme.fontSize.md, fontWeight: 700, marginBottom: 8 }}>Live map unavailable</div>
+            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, maxWidth: 420 }}>
+              {mapError}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(9,12,16,0.9)', color: theme.colors.white, borderRadius: theme.radius.md, border: `1px solid ${theme.colors.border}`, padding: '12px 16px', minWidth: 260, boxShadow: theme.shadow.lg }}>
         <div style={{ fontSize: theme.fontSize.xs, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.colors.textMuted }}>Live member density</div>
