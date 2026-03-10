@@ -76,6 +76,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
   const [noteText, setNoteText] = useState('');
   const initials = (profile.name || '?').split(' ').map((part) => part[0]).join('').slice(0, 2);
+  const isDrawerLayout = layout === 'drawer';
 
   const topMetrics = useMemo(() => [
     { label: 'Annual dues', value: profile.duesAnnual ? `$${profile.duesAnnual.toLocaleString()}` : '—' },
@@ -260,27 +261,29 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
       </Section>
 
-      <Section title="Quick actions">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm }}>
-          {quickActions.map((action) => (
-            <button
-              key={action.key}
-              type="button"
-              onClick={() => onQuickAction?.(profile.memberId, action.key)}
-              style={{
-                padding: '8px 14px',
-                borderRadius: theme.radius.md,
-                border: '1px solid ' + theme.colors.border,
-                background: theme.colors.bgDeep,
-                cursor: 'pointer',
-                fontWeight: 600,
-              }}
-            >
-              {action.icon} {action.label}
-            </button>
-          ))}
-        </div>
-      </Section>
+      <div style={isDrawerLayout ? { position: 'sticky', bottom: 0, background: theme.colors.white, padding: `${theme.spacing.md} 0 ${theme.spacing.sm}`, boxShadow: '0 -12px 32px rgba(15, 23, 42, 0.08)', zIndex: 5 } : undefined}>
+        <Section title="Quick actions">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm }}>
+            {quickActions.map((action) => (
+              <button
+                key={action.key}
+                type="button"
+                onClick={() => onQuickAction?.(profile.memberId, action.key)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: theme.radius.md,
+                  border: '1px solid ' + theme.colors.border,
+                  background: theme.colors.bgDeep,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+              >
+                {action.icon} {action.label}
+              </button>
+            ))}
+          </div>
+        </Section>
+      </div>
 
       {onClose && (
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -340,11 +343,13 @@ export default function MemberProfileDrawer() {
     gap: theme.spacing.md,
     transition: 'transform 0.25s ease',
     zIndex: 1002,
+    overflowY: 'auto',
+    maxHeight: '100vh',
   };
 
   const panelStyle = isMobile
-    ? { ...panelBase, left: 0, right: 0, bottom: 0, height: '85vh', transform: isAnimating ? 'translateY(0)' : 'translateY(100%)' }
-    : { ...panelBase, top: 0, right: 0, width: 680, height: '100vh', transform: isAnimating ? 'translateX(0)' : 'translateX(105%)' };
+    ? { ...panelBase, left: 0, right: 0, bottom: 0, height: '85vh', maxHeight: '85vh', transform: isAnimating ? 'translateY(0)' : 'translateY(100%)' }
+    : { ...panelBase, top: 0, right: 0, width: 680, maxHeight: '100vh', transform: isAnimating ? 'translateX(0)' : 'translateX(105%)' };
 
   const overlayStyle = {
     position: 'fixed',

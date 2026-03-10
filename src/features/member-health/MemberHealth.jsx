@@ -18,14 +18,54 @@ const TABS = [
 
 export default function MemberHealth() {
   const [activeTab, setActiveTab] = useState('health');
+  const [showInsight, setShowInsight] = useState(true);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-      <StoryHeadline
-        variant="urgent"
-        headline="5 members will resign this month — all showed decay signals 6–8 weeks before leaving."
-        context="Email open rates dropped first, then golf frequency, then dining. No single system sees the full picture. Swoop connected all three — 30 more members are showing early-stage decay right now."
-      />
+      {showInsight ? (
+        <div style={{ position: 'relative' }}>
+          <StoryHeadline
+            variant="urgent"
+            headline="5 members will resign this month — all showed decay signals 6–8 weeks before leaving."
+            context="Email open rates dropped first, then golf frequency, then dining. No single system sees the full picture. Swoop connected all three — 30 more members are showing early-stage decay right now."
+          />
+          <button
+            type="button"
+            onClick={() => setShowInsight(false)}
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 12,
+              border: 'none',
+              background: 'none',
+              color: theme.colors.textMuted,
+              fontSize: theme.fontSize.xs,
+              cursor: 'pointer',
+            }}
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowInsight(true)}
+          style={{
+            alignSelf: 'flex-end',
+            border: '1px dashed ' + theme.colors.border,
+            background: theme.colors.bg,
+            color: theme.colors.textSecondary,
+            fontSize: theme.fontSize.xs,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            padding: '6px 10px',
+            borderRadius: theme.radius.sm,
+            cursor: 'pointer',
+          }}
+        >
+          Show AI insight
+        </button>
+      )}
       <Panel
         title="Member Retention"
         subtitle="Who's at risk and what do we do about it?"

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '@/context/AppContext';
 import { NavigationProvider, useNavigationContext } from '@/context/NavigationContext';
-import { MemberProfileProvider } from '@/context/MemberProfileContext';
+import { MemberProfileProvider, useMemberProfile } from '@/context/MemberProfileContext';
 import { DataProvider } from '@/context/DataProvider';
 import { Sidebar, Header, MobileConversionBar } from '@/components/layout';
 import { DailyBriefing } from '@/features/daily-briefing';
@@ -44,11 +44,13 @@ const ROUTES = {
 
 function AppShell() {
   const { currentRoute } = useNavigationContext();
+  const { isDrawerOpen } = useMemberProfile();
   const PageComponent = ROUTES[currentRoute] ?? DailyBriefing;
   const moduleConfig = onlySwoopModules[currentRoute];
   const isLandingExperience = currentRoute === 'landing';
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const drawerOffset = !isMobile && isDrawerOpen ? 700 : 0;
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -111,8 +113,7 @@ function AppShell() {
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 110 }}
         />
       )}
-      <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
-        {(!isMobile || mobileMenuOpen) && (
+      <div style={{ display: 'flex', minHeight: '100vh', position: 'relative', paddingRight: drawerOffset ? `${drawerOffset}px` : 0, transition: 'padding 0.25s ease' }}>        {(!isMobile || mobileMenuOpen) && (
           <Sidebar isMobile={isMobile} mobileMenuOpen={mobileMenuOpen} />
         )}
         <div
@@ -125,6 +126,7 @@ function AppShell() {
             minHeight: '100vh',
             width: '100%',
             paddingLeft: isMobile ? 0 : 0,
+            paddingRight: drawerOffset ? `${Math.max(drawerOffset - 24, 0)}px` : 0,
           }}
         >
           <Header
