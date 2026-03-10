@@ -61,10 +61,22 @@ function StatCard({ label, value, accent, sub }) {
 }
 
 export default function LocationIntelligence() {
-  const members = getLiveMemberLocations();
-  const staffMembers = getStaffLocations();
-  const alertsFeed = getServiceRecoveryAlerts();
-  const zoneAnalytics = getZoneDensity(members);
+  const members = useMemo(() => {
+    const next = getLiveMemberLocations();
+    return Array.isArray(next) ? next : [];
+  }, []);
+  const staffMembers = useMemo(() => {
+    const next = getStaffLocations();
+    return Array.isArray(next) ? next : [];
+  }, []);
+  const alertsFeed = useMemo(() => {
+    const next = getServiceRecoveryAlerts();
+    return Array.isArray(next) ? next : [];
+  }, []);
+  const zoneAnalytics = useMemo(() => {
+    const next = getZoneDensity(members);
+    return Array.isArray(next) ? next : [];
+  }, [members]);
   const { showToast } = useApp();
   const { openProfile } = useMemberProfile();
   const [mapMode, setMapMode] = useState('live');
@@ -118,6 +130,16 @@ export default function LocationIntelligence() {
         headline="Know who is on property right now — and who needs attention before they leave."
         context="47 members are on site this morning. Three are at-risk, two have active service-recovery opportunities, and alerts fire the moment they cross a zone."
       />
+      <div style={{
+        background: `${theme.colors.warning}12`,
+        border: `1px solid ${theme.colors.warning}60`,
+        borderRadius: theme.radius.md,
+        padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+        color: theme.colors.textSecondary,
+        fontSize: theme.fontSize.sm,
+      }}>
+        Demo environment: location signals are simulated. Connect the Swoop member app GPS feed to enable live operational intelligence.
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px,1fr))', gap: theme.spacing.md }}>
         <StatCard label="Members on property" value={onsiteCount} accent={theme.colors.accent} sub="Live via Swoop app GPS" />
@@ -194,6 +216,18 @@ export default function LocationIntelligence() {
               </div>
             )}
           </div>
+          {members.length === 0 && (
+            <div style={{
+              marginTop: theme.spacing.sm,
+              fontSize: theme.fontSize.sm,
+              color: theme.colors.textMuted,
+              border: `1px dashed ${theme.colors.border}`,
+              borderRadius: theme.radius.sm,
+              padding: theme.spacing.sm,
+            }}>
+              Location intelligence is available when member app GPS is connected.
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
@@ -244,6 +278,11 @@ export default function LocationIntelligence() {
                   <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 4 }}>{staff.etaText}</div>
                 </div>
               ))}
+              {staffMembers.length === 0 && (
+                <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted }}>
+                  No staff presence detected yet.
+                </div>
+              )}
             </div>
           </div>
 
@@ -251,7 +290,7 @@ export default function LocationIntelligence() {
             <h4 style={{ margin: '0 0 8px 0', fontSize: theme.fontSize.sm, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.colors.textMuted }}>Zone density</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {zoneAnalytics.map((zone) => {
-                const percent = Math.round((zone.count / onsiteCount) * 100);
+                const percent = onsiteCount > 0 ? Math.round((zone.count / onsiteCount) * 100) : 0;
                 return (
                   <div key={zone.id}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: theme.fontSize.sm, fontWeight: 600 }}>
@@ -265,6 +304,11 @@ export default function LocationIntelligence() {
                   </div>
                 );
               })}
+              {zoneAnalytics.length === 0 && (
+                <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted }}>
+                  Waiting for zone analytics data.
+                </div>
+              )}
             </div>
           </div>
 
@@ -292,6 +336,11 @@ export default function LocationIntelligence() {
                   )}
                 </div>
               ))}
+              {alertsFeed.length === 0 && (
+                <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted }}>
+                  No live alerts at the moment.
+                </div>
+              )}
             </div>
           </div>
         </div>
