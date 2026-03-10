@@ -11,7 +11,14 @@ export default async function handler(req, res) {
       sql`
         SELECT
           o.outlet_id,
-          o.name AS outlet,
+          CASE
+            WHEN o.name IN ('The Grill Room', 'Grill Room') THEN 'Grill Room'
+            WHEN o.name IN ('Main Dining', 'Main Dining Room', 'The Veranda') THEN 'Main Dining Room'
+            WHEN o.name IN ('Bar / Lounge', 'Bar/Lounge', 'The 19th Hole Bar') THEN 'Bar/Lounge'
+            WHEN o.name IN ('Halfway House') THEN 'Halfway House'
+            WHEN o.name IN ('Pool Bar') THEN 'Pool Bar'
+            ELSE o.name
+          END AS outlet,
           o.type,
           COUNT(DISTINCT pc.check_id)                              AS check_count,
           ROUND(SUM(pc.total)::numeric, 2)                        AS revenue,
