@@ -18,6 +18,15 @@ const clampScore = (value) => {
   return Math.max(0, Math.min(100, Math.round(numeric)));
 };
 
+const inferPotentialDues = (visits, totalSpend) => {
+  const visitCount = toNumber(visits, 0);
+  const spend = toNumber(totalSpend, 0);
+  if (spend >= 5000 || visitCount >= 10) return 36000;
+  if (spend >= 2500 || visitCount >= 7) return 24000;
+  if (spend >= 1200 || visitCount >= 4) return 18000;
+  return 12000;
+};
+
 const normalizeTier = (value) => {
   const tier = String(value || '').toLowerCase();
   // ON-42 data model note: normalize to a single Hot/Warm/Cold taxonomy.
@@ -37,7 +46,8 @@ const sanitizeLead = (lead = {}) => {
   const visits = toNumber(lead.visits ?? lead.visitCount, 0);
   const totalSpend = toNumber(lead.totalSpend ?? lead.totalSpendUsd ?? lead.spend, 0);
   const tier = normalizeTier(lead.tier ?? (visits >= 3 || totalSpend > 400 ? 'hot' : 'warm'));
-  const potentialDues = toNumber(lead.potentialDues ?? lead.projectedDues, 12000);
+  const inferredDues = inferPotentialDues(visits, totalSpend);
+  const potentialDues = toNumber(lead.potentialDues ?? lead.projectedDues, inferredDues);
   const rounds = toNumber(lead.rounds ?? lead.golfRounds, visits);
   const dining = toNumber(lead.dining ?? lead.diningVisits, Math.max(0, Math.floor(visits * 0.6)));
   const events = toNumber(lead.events ?? lead.eventCount, Math.max(0, Math.floor(visits * 0.25)));

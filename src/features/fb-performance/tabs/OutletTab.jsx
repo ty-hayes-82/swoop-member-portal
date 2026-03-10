@@ -17,6 +17,23 @@ const safeNumber = (value, fallback = 0) => {
   return Number.isFinite(num) ? num : fallback;
 };
 
+const currencyWhole = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
+const currencyPrecise = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const formatWholeDollar = (value) => currencyWhole.format(Math.round(safeNumber(value)));
+const formatPreciseDollar = (value) => currencyPrecise.format(safeNumber(value));
+
 export default function OutletTab() {
   const outletSource = getOutletPerformance();
   const outletsData = Array.isArray(outletSource) ? outletSource : [];
@@ -25,22 +42,22 @@ export default function OutletTab() {
 
   const outlets = outletsData.map((o) => ({
     ...o,
-    revenue: safeNumber(o.revenue),
+    revenue: Math.round(safeNumber(o.revenue)),
     covers: Math.max(0, Math.round(safeNumber(o.covers))),
     avgCheck: safeNumber(o.avgCheck),
-    understaffedImpact: safeNumber(o.understaffedImpact),
+    understaffedImpact: Math.round(safeNumber(o.understaffedImpact)),
   }));
 
-  const totalRevenue = safeNumber(summary.totalRevenue);
+  const totalRevenue = Math.round(safeNumber(summary.totalRevenue));
   const totalCovers = Math.max(0, Math.round(safeNumber(summary.totalCovers)));
-  const understaffingLoss = safeNumber(summary.understaffingLoss);
+  const understaffingLoss = Math.round(Math.abs(safeNumber(summary.understaffingLoss)));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: theme.spacing.md }}>
         {[{
           label: 'Total F&B Revenue',
-          value: `$${Math.round(totalRevenue / 1000)}K`,
+          value: formatWholeDollar(totalRevenue),
           metric: 'fbRevenue',
           format: 'currency',
           accent: theme.colors.accent,
@@ -50,7 +67,7 @@ export default function OutletTab() {
           accent: theme.colors.navOperations,
         }, {
           label: 'Understaffing Loss',
-          value: `-$${(understaffingLoss / 1000).toFixed(1)}K`,
+          value: formatWholeDollar(-understaffingLoss),
           accent: theme.colors.warning,
         }].map(card => (
           <div key={card.label} style={{
@@ -125,11 +142,11 @@ export default function OutletTab() {
                 <tr key={o.outlet} style={{ borderTop: `1px solid ${theme.colors.border}`, background: i % 2 ? theme.colors.bg : theme.colors.bgCard }}>
                   <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textPrimary, fontWeight: 500 }}>{o.outlet}</td>
                   <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.accent, fontFamily: theme.fonts.mono }}>
-                    ${o.revenue.toLocaleString()}
+                    {formatWholeDollar(o.revenue)}
                   </td>
                   <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>{o.covers.toLocaleString()}</td>
                   <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>
-                    ${o.avgCheck.toFixed(2)}
+                    {formatPreciseDollar(o.avgCheck)}
                   </td>
                   <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
                     {outletTrends[o.outlet] && (
@@ -140,7 +157,11 @@ export default function OutletTab() {
                   </td>
                   <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
                     {o.understaffedImpact < 0
-                      ? <span style={{ color: theme.colors.warning, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>-${Math.abs(o.understaffedImpact).toLocaleString()}</span>
+                      ? (
+                        <span style={{ color: theme.colors.warning, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs }}>
+                          {formatWholeDollar(o.understaffedImpact)}
+                        </span>
+                        )
                       : <span style={{ color: theme.colors.textMuted }}>—</span>}
                   </td>
                 </tr>
