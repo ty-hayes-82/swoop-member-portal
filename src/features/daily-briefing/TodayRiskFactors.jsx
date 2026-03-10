@@ -120,7 +120,7 @@ export default function TodayRiskFactors({ data, onNavigate }) {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <MemberLink
+                    <MemberLink mode="route"
                       memberId={member.memberId}
                       style={{ fontSize: '13px', fontWeight: 700 }}
                     >

@@ -1,19 +1,18 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useNavigate as useRouterNavigate } from 'react-router-dom';
 import { getMemberProfile } from '@/services/memberService';
-import { useNavigationContext } from '@/context/NavigationContext';
 import { useApp } from '@/context/AppContext';
 
 const MemberProfileContext = createContext(null);
 
 export function MemberProfileProvider({ children }) {
-  const { currentRoute, memberRouteId, navigate } = useNavigationContext();
   const { showToast } = useApp();
+  const routerNavigate = useRouterNavigate();
   const [drawerMemberId, setDrawerMemberId] = useState(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [staffNotes, setStaffNotes] = useState({});
 
-  const isFullPageActive = currentRoute === 'member-profile';
-  const activeMemberId = isFullPageActive ? memberRouteId : drawerMemberId;
+  const activeMemberId = drawerMemberId;
 
   const profile = useMemo(() => {
     if (!activeMemberId) return null;
@@ -31,14 +30,14 @@ export function MemberProfileProvider({ children }) {
       if (!memberId) return;
       const mode = options.mode ?? 'drawer';
       if (mode === 'page') {
-        navigate('member-profile', { memberId });
+        routerNavigate(`/member/${memberId}`);
         setDrawerOpen(false);
         return;
       }
       setDrawerMemberId(memberId);
       setDrawerOpen(true);
     },
-    [navigate]
+    [routerNavigate]
   );
 
   const closeDrawer = useCallback(() => {
@@ -91,7 +90,6 @@ export function MemberProfileProvider({ children }) {
         profile,
         activeMemberId,
         isDrawerOpen,
-        isFullPageActive,
         openProfile,
         openProfilePage: (memberId) => openProfile(memberId, { mode: 'page' }),
         closeDrawer,

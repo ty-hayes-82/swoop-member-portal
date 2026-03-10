@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '@/context/AppContext';
 import { NavigationProvider, useNavigationContext } from '@/context/NavigationContext';
 import { MemberProfileProvider } from '@/context/MemberProfileContext';
@@ -17,8 +18,8 @@ import { DemoMode } from '@/features/demo-mode';
 import { IntegrationsPage } from '@/features/integrations';
 import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
 import LocationIntelligence from '@/features/location-intelligence/LocationIntelligence.jsx';
-import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import { CsvImportHub } from '@/features/csv-import';
+import MemberProfile from '@/features/member-profile';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -33,7 +34,6 @@ const ROUTES = {
   integrations: IntegrationsPage,
   'location-intelligence': LocationIntelligence,
   'demo-mode': DemoMode,
-  'member-profile': MemberProfilePage,
   'integrations/csv-import': CsvImportHub,
   'csv-import': CsvImportHub,
 };
@@ -50,7 +50,6 @@ function AppShell() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [currentRoute]);
@@ -64,7 +63,6 @@ function AppShell() {
         minHeight: '100vh',
       }}
     >
-      {/* Mobile overlay */}
       {isMobile && mobileMenuOpen && (
         <div
           onClick={() => setMobileMenuOpen(false)}
@@ -72,7 +70,6 @@ function AppShell() {
         />
       )}
       <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
-        {/* Sidebar: hidden on mobile unless menu is open */}
         {(!isMobile || mobileMenuOpen) && (
           <Sidebar isMobile={isMobile} mobileMenuOpen={mobileMenuOpen} />
         )}
@@ -116,17 +113,34 @@ function AppShell() {
   );
 }
 
+function PortalApplication() {
+  return (
+    <NavigationProvider>
+      <MemberProfileProvider>
+        <AppShell />
+        <MemberProfileDrawer />
+      </MemberProfileProvider>
+    </NavigationProvider>
+  );
+}
+
+function RouterViews() {
+  return (
+    <Routes>
+      <Route path="/member/:memberId" element={<MemberProfile />} />
+      <Route path="*" element={<PortalApplication />} />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
-    <DataProvider>
-      <AppProvider>
-        <NavigationProvider>
-          <MemberProfileProvider>
-            <AppShell />
-            <MemberProfileDrawer />
-          </MemberProfileProvider>
-        </NavigationProvider>
-      </AppProvider>
-    </DataProvider>
+    <BrowserRouter>
+      <DataProvider>
+        <AppProvider>
+          <RouterViews />
+        </AppProvider>
+      </DataProvider>
+    </BrowserRouter>
   );
 }
