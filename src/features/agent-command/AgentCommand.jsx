@@ -26,7 +26,7 @@ export function AgentCommand() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
             <span style={{ fontSize: 20 }}>🗂</span>
             <span style={{ fontSize: theme.fontSize.xl, fontWeight: 700, color: theme.colors.textPrimary, fontFamily: theme.fonts.serif }}>
-              Recommended Actions
+              AI Agents
             </span>
           </div>
           <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>
