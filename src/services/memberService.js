@@ -19,7 +19,44 @@ const formatMaybeNumber = (value, fallback = '—') => {
   return Number.isFinite(num) ? num : fallback;
 };
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-const normalizeAtRiskMembers = (source) => {
+
+const GENERIC_RISK_PHRASES = new Set(['', '—', 'none', 'n/a', 'monitoring', 'monitoring ›', 'watch', 'watch list', 'no risk signal available']);
+
+const coerceSignalList = (signals = []) => {
+  if (typeof signals === 'string') return [signals];
+  if (!Array.isArray(signals)) return [];
+  return signals
+    .map((signal) => {
+      if (typeof signal === 'string') return signal;
+      if (signal && typeof signal === 'object') {
+        return signal.label ?? signal.description ?? signal.reason ?? '';
+      }
+      return '';
+    })
+    .map((text) => text.trim())
+    .filter(Boolean);
+};
+
+const resolveRiskSignal = (member, profileMap = {}) => {
+  const candidate = (member?.topRisk ?? member?.primaryRisk ?? member?.primarySignal ?? member?.risk ?? '').trim();
+  if (candidate && !GENERIC_RISK_PHRASES.has(candidate.toLowerCase())) return candidate;
+
+  const memberSignals = coerceSignalList(member?.riskSignals ?? member?.drivers);
+  if (memberSignals.length) return memberSignals.slice(0, 2).join(' • ');
+
+  if (member?.memberId && profileMap?.[member.memberId]) {
+    const profileSignals = coerceSignalList(profileMap[member.memberId].riskSignals);
+    if (profileSignals.length) return profileSignals.slice(0, 2).join(' • ');
+  }
+
+  if (member?.trend && typeof member.trend === 'string' && member.trend.toLowerCase().includes('declin')) {
+    return 'Health score trending down across systems';
+  }
+
+  return 'Behavioral decay detected across systems';
+};
+
+const normalizeAtRiskMembers = (source, profileMap = {}) => {
   const list = Array.isArray(source)
     ? source
     : Array.isArray(source?.members)
@@ -36,7 +73,7 @@ const normalizeAtRiskMembers = (source) => {
     const duesAnnualRaw = member?.duesAnnual ?? member?.annualDues ?? member?.dues ?? member?.member?.annualDues;
     const duesAnnual = Number(duesAnnualRaw);
 
-    return {
+    const normalized = {
       memberId: member?.memberId ?? member?.id ?? member?.member?.id ?? `member-${index}`,
       name,
       score: Math.max(0, Math.min(100, toNumber(member?.score ?? member?.healthScore, 0))),
@@ -45,6 +82,9 @@ const normalizeAtRiskMembers = (source) => {
       trend: member?.trend ?? member?.trendDirection ?? 'declining',
       duesAnnual: Number.isFinite(duesAnnual) ? duesAnnual : null,
     };
+
+    normalized.topRisk = resolveRiskSignal({ ...member, ...normalized }, profileMap);
+    return normalized;
   });
 };
 
@@ -154,7 +194,7 @@ export const getHealthDistribution = () => {
   const totalMembers = archetypes.reduce((sum, item) => sum + item.count, 0);
   return normalizeHealthDistribution(_d?.healthDistribution, totalMembers);
 };
-export const getAtRiskMembers       = () => normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? []);
+export const getAtRiskMembers       = () => normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
 export const getArchetypeProfiles   = () => normalizeArchetypes(_d?.memberArchetypes);
 export const getResignationScenarios= () => Array.isArray(_d?.resignationScenarios) ? _d.resignationScenarios : [];
 export const getEmailHeatmap        = () => {

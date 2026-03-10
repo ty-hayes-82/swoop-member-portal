@@ -124,6 +124,23 @@ export default function GrowthPipeline() {
     },
   ];
 
+  const duesTierHighlights = ['premium', 'high', 'core', 'starter'].map((key) => {
+    const bucket = summary?.tierBreakdown?.[key];
+    const label = bucket?.label ?? (key === 'premium'
+      ? '$36K Premium'
+      : key === 'high'
+        ? '$24K High'
+        : key === 'core'
+          ? '$18K Core'
+          : '$12K Starter');
+    return {
+      key,
+      label,
+      count: bucket?.count ?? 0,
+      revenue: bucket?.revenue ?? 0,
+    };
+  });
+
   const rowsByTier = [
     { key: 'hot', rows: groupedRows.hot },
     { key: 'warm', rows: groupedRows.warm },
@@ -134,8 +151,8 @@ export default function GrowthPipeline() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <StoryHeadline
         variant="opportunity"
-        headline="$36,000/year in membership revenue is hiding in your guest data right now."
-        context="David Chen has played 8 times and spent $1,240. He's 92% likely to join if asked. Two hot leads like him represent $36K in annual dues — plus $6–10K in ancillary spend each year."
+        headline="Your guest list is carrying four dues tiers worth $180K+."
+        context="David Chen has played 8 times and spent $1,240. He's a $36K premium-tier prospect. Line him up with Sarah Mitchell ($36K) and Lisa Yamamoto ($24K high-tier) and you have $96K in dues before spring."
       />
       <Panel
         title="Growth Pipeline"
@@ -211,6 +228,29 @@ export default function GrowthPipeline() {
                   }}
                 >
                   {value}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid-responsive-4">
+            {duesTierHighlights.map((tier) => (
+              <div
+                key={tier.key}
+                style={{
+                  background: theme.colors.bgCard,
+                  borderRadius: theme.radius.md,
+                  border: `1px solid ${theme.colors.border}`,
+                  padding: theme.spacing.md,
+                }}
+              >
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{tier.label}</div>
+                <div style={{ fontSize: theme.fontSize.lg, fontFamily: theme.fonts.mono, fontWeight: 700 }}>
+                  {tier.count}
+                  <span style={{ fontSize: theme.fontSize.xs, marginLeft: 6, color: theme.colors.textMuted }}>prospects</span>
+                </div>
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 4 }}>
+                  {formatCurrencyK(tier.revenue)} potential dues
                 </div>
               </div>
             ))}
