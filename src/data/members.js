@@ -14,11 +14,21 @@ export const memberArchetypes = [
 ];
 
 export const healthDistribution = [
-  { level: 'Healthy',  min: 70,  count: 240, percentage: 0.80, color: theme.colors.success, delta: -6 },
-  { level: 'Watch',    min: 50,  count: 14,  percentage: 0.047, color: theme.colors.warning, delta: 3 },
-  { level: 'At Risk',  min: 30,  count: 34,  percentage: 0.11, color: theme.colors.riskAtRiskAlt, delta: 12 },
-  { level: 'Critical', min: 0,   count: 12,  percentage: 0.04, color: theme.colors.urgent, delta: 3 },
+  { level: 'Healthy',  min: 70,  count: 254, percentage: 0.846, color: theme.colors.success, delta: -4 },
+  { level: 'Watch',    min: 50,  count: 0,   percentage: 0,     color: theme.colors.warning, delta: 0 },
+  { level: 'At Risk',  min: 30,  count: 34,  percentage: 0.113, color: theme.colors.riskAtRiskAlt, delta: 6 },
+  { level: 'Critical', min: 0,   count: 12,  percentage: 0.04,  color: theme.colors.urgent, delta: 3 },
 ];
+
+export const memberSummary = {
+  total: 300,
+  healthy: 254,
+  atRisk: 34,
+  critical: 12,
+  riskCount: 46,
+  avgHealthScore: 74,
+  potentialDuesAtRisk: 533000,
+};
 
 export const atRiskMembers = [
   { memberId: 'mbr_042', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining' },

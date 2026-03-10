@@ -84,7 +84,10 @@ function AppShell() {
             paddingLeft: isMobile ? 0 : 0,
           }}
         >
-          <Header onMobileMenuToggle={isMobile ? () => setMobileMenuOpen((v) => !v) : undefined} />
+          <Header
+            isMobile={isMobile}
+            onMobileMenuToggle={isMobile ? () => setMobileMenuOpen((v) => !v) : undefined}
+          />
           <main
             style={{
               flex: 1,
