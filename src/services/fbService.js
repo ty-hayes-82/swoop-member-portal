@@ -1,6 +1,6 @@
 // fbService.js — Phase 1 static · Phase 2 /api/fb
 
-import { outlets, postRoundConversion, rainDayImpact } from '@/data/outlets';
+import { outlets, postRoundConversion, rainDayImpact, fbMonthComparison } from '@/data/outlets';
 import { dailyRevenue } from '@/data/revenue';
 
 let _d = null;
@@ -67,6 +67,11 @@ export const getRainDayImpact = () => {
     golfVsAvg: Math.round(((d.golfRevenue - avgGolf) / avgGolf) * 100),
     fbVsAvg:   Math.round(((d.fbRevenue   - avgFb)   / avgFb)   * 100),
   }));
+};
+
+export const getFBMonthComparison = () => {
+  if (_d?.fbMonthComparison) return _d.fbMonthComparison;
+  return fbMonthComparison;
 };
 
 export const getMealPeriodBreakdown = () => {
