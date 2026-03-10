@@ -25,7 +25,7 @@ const SECTION_CONFIG = [
   },
   {
     label: 'SYSTEM',
-    keys: ['agent-command', 'integrations', 'integrations/csv-import'],
+    keys: ['agent-command', 'integrations'],
     emphasis: false,
   },
 ];
