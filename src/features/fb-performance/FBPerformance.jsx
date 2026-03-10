@@ -5,6 +5,8 @@ import ConversionTab from './tabs/ConversionTab';
 import WeatherTab from './tabs/WeatherTab';
 import { sourceSystems } from '@/services/fbService';
 import { theme } from '@/config/theme';
+import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
+import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
 
 const TABS = [
   { key: 'outlets',    label: 'Outlet Performance' },
@@ -17,6 +19,7 @@ export default function FBPerformance() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <OnlySwoopModule {...onlySwoopAngles.fbPerformance} />
       <StoryHeadline
         variant="opportunity"
         headline="Slow rounds are leaving $5,700/month in dining revenue on the table."

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme';
+import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
+import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
 import { getAgentSummary } from '@/services/agentService';
 import { useApp } from '@/context/AppContext';
 import InboxTab from './tabs/InboxTab';
@@ -57,6 +59,7 @@ export function AgentCommand() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <OnlySwoopModule {...onlySwoopAngles.agentCommand} />
       <div
         style={{
           background: `${theme.colors.accent}10`,

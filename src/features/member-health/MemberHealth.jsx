@@ -7,6 +7,8 @@ import ResignationTimeline from './ResignationTimeline';
 import MemberPlaybooks from './MemberPlaybooks';
 import { sourceSystems } from '@/services/memberService';
 import { theme } from '@/config/theme';
+import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
+import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
 
 const TABS = [
   { key: 'health',       label: 'Health Overview' },
@@ -22,6 +24,7 @@ export default function MemberHealth() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <OnlySwoopModule {...onlySwoopAngles.memberHealth} />
       {showInsight ? (
         <div style={{ position: 'relative' }}>
           <StoryHeadline
