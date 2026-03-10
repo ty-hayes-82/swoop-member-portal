@@ -20,6 +20,8 @@ import LocationIntelligence from '@/features/location-intelligence/LocationIntel
 import { CsvImportHub } from '@/features/csv-import';
 import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import PortalLanding from '@/features/landing/PortalLanding.jsx';
+import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
+import { onlySwoopModules } from '@/config/onlySwoopModules.js';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -43,6 +45,8 @@ const ROUTES = {
 function AppShell() {
   const { currentRoute } = useNavigationContext();
   const PageComponent = ROUTES[currentRoute] ?? DailyBriefing;
+  const moduleConfig = onlySwoopModules[currentRoute];
+  const isLandingExperience = currentRoute === 'landing';
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -55,6 +59,42 @@ function AppShell() {
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [currentRoute]);
+
+  if (isLandingExperience) {
+    return (
+      <div
+        style={{
+          background: theme.colors.bg,
+          color: theme.colors.textPrimary,
+          fontFamily: theme.fonts.sans,
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <main
+          style={{
+            flex: 1,
+            width: '100%',
+            padding: isMobile ? '24px 16px 48px' : theme.spacing.xl,
+          }}
+        >
+          <PortalLanding />
+        </main>
+        <footer
+          style={{
+            padding: `${theme.spacing.md} ${isMobile ? '16px' : theme.spacing.xl}`,
+            borderTop: `1px solid ${theme.colors.border}`,
+            fontSize: theme.fontSize.xs,
+            color: theme.colors.textMuted,
+            textAlign: 'center',
+          }}
+        >
+          Demo environment · Oakmont Hills CC · January 2026
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -99,6 +139,7 @@ function AppShell() {
               minHeight: 0,
             }}
           >
+            {moduleConfig && <OnlySwoopModule {...moduleConfig} />}
             <PageComponent />
           </main>
           <footer

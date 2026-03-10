@@ -19,7 +19,9 @@ function parseHash() {
     const [, memberId] = raw.split('/');
     return { route: 'member-profile', memberId: memberId || null };
   }
-  return { route: VALID_ROUTES.has(raw) ? raw : 'daily-briefing', memberId: null };
+  const normalized = raw.replace(/\/+$/, '');
+  const safeRoute = normalized || 'daily-briefing';
+  return { route: VALID_ROUTES.has(safeRoute) ? safeRoute : 'daily-briefing', memberId: null };
 }
 
 function setHashPath(path) {
