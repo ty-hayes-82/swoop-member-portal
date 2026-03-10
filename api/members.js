@@ -56,7 +56,6 @@ export default async function handler(req, res) {
         )
         SELECT
           CASE
-            WHEN m.membership_status = 'resigned' THEN 'Churned'
             WHEN ls.score >= 70 THEN 'Healthy'
             WHEN ls.score >= 50 THEN 'Watch'
             WHEN ls.score >= 30 THEN 'At Risk'
@@ -64,7 +63,7 @@ export default async function handler(req, res) {
           END AS level,
           COUNT(*) AS count
         FROM members m
-        LEFT JOIN latest_scores ls ON ls.member_id = m.member_id
+        LEFT JOIN latest_scores ls ON ls.member_id::text = m.member_id::text
         GROUP BY 1
         ORDER BY MIN(COALESCE(ls.score, 0)) DESC`,
 
@@ -78,14 +77,14 @@ export default async function handler(req, res) {
           ROUND(AVG(w.email_open_rate)::numeric, 3)   AS avg_open_rate,
           ROUND(AVG(w.events_attended)::numeric, 2)   AS avg_events
         FROM members m
-        JOIN member_engagement_weekly w ON m.member_id = w.member_id
+        JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
         WHERE w.week_number = ${latestWeek}
         GROUP BY m.archetype`,
 
       sql`
         SELECT
-          m.member_id,
-          m.first_name || ' ' || m.last_name AS name,
+          m.member_id::text AS member_id,
+          COALESCE(NULLIF(TRIM(m.first_name || ' ' || m.last_name), ''), 'Member ' || RIGHT(m.member_id::text, 3)) AS name,
           m.archetype,
           m.membership_type,
           m.annual_dues,
@@ -102,11 +101,11 @@ export default async function handler(req, res) {
           f.category                         AS open_complaint_category,
           f.days_open                        AS open_complaint_days_open
         FROM members m
-        JOIN member_engagement_weekly w ON m.member_id = w.member_id
+        JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
         LEFT JOIN LATERAL (
           SELECT
             fb.category,
-            DATE_PART('day', CURRENT_DATE - fb.submitted_at::date) AS days_open
+            (CURRENT_DATE - fb.submitted_at::date) AS days_open
           FROM feedback fb
           WHERE fb.member_id = m.member_id
             AND fb.status IN ('acknowledged', 'in_progress', 'escalated')
@@ -115,13 +114,13 @@ export default async function handler(req, res) {
         ) f ON TRUE
         WHERE w.week_number = ${latestWeek}
           AND w.engagement_score < 50
-          AND m.membership_status <> 'resigned'
+          AND COALESCE(m.membership_status, 'active') <> 'resigned'
         ORDER BY w.engagement_score ASC`,
 
       sql`
         SELECT
-          m.member_id,
-          m.first_name || ' ' || m.last_name AS name,
+          m.member_id::text AS member_id,
+          COALESCE(NULLIF(TRIM(m.first_name || ' ' || m.last_name), ''), 'Member ' || RIGHT(m.member_id::text, 3)) AS name,
           m.archetype,
           m.membership_type,
           m.resigned_on,
@@ -148,21 +147,22 @@ export default async function handler(req, res) {
           )                                                                   AS open_rate
         FROM email_campaigns ec
         JOIN email_events ee ON ec.campaign_id = ee.campaign_id
-        JOIN members m ON ee.member_id = m.member_id
+        JOIN members m ON ee.member_id::text = m.member_id::text
         GROUP BY ec.campaign_id, ec.subject, ec.send_date, ec.type, m.archetype
         ORDER BY ec.send_date, m.archetype`,
 
       sql`
         SELECT
-          m.member_id,
-          m.first_name || ' ' || m.last_name AS name,
+          m.member_id::text AS member_id,
+          COALESCE(NULLIF(TRIM(m.first_name || ' ' || m.last_name), ''), 'Member ' || RIGHT(m.member_id::text, 3)) AS name,
           m.archetype,
           w.week_number,
           w.email_open_rate,
           w.engagement_score
         FROM members m
-        JOIN member_engagement_weekly w ON m.member_id = w.member_id
-        WHERE m.membership_status = 'resigned'
+        JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
+        WHERE COALESCE(m.membership_status, 'active') <> 'resigned'
+          AND w.week_number >= ${Math.max(1, latestWeek - 8)}
         ORDER BY m.member_id, w.week_number`,
 
       sql`
@@ -170,9 +170,9 @@ export default async function handler(req, res) {
           ROUND(AVG(w.engagement_score)::numeric, 1)                            AS avg_health_score,
           SUM(CASE WHEN w.engagement_score < 50 THEN m.annual_dues ELSE 0 END) AS dues_at_risk
         FROM members m
-        JOIN member_engagement_weekly w ON m.member_id = w.member_id
+        JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
         WHERE w.week_number = ${latestWeek}
-          AND m.membership_status <> 'resigned'`,
+          AND COALESCE(m.membership_status, 'active') <> 'resigned'`,
     ]);
 
     let decaying = decayingInitial;
@@ -188,7 +188,7 @@ export default async function handler(req, res) {
             w.engagement_score,
             ROW_NUMBER() OVER (PARTITION BY w.member_id ORDER BY w.week_number DESC) AS week_rank
           FROM member_engagement_weekly w
-          JOIN members m ON m.member_id = w.member_id
+          JOIN members m ON m.member_id::text = w.member_id::text
           WHERE w.week_number >= ${Math.max(1, latestWeek - 8)}
         ), trending AS (
           SELECT
@@ -217,7 +217,7 @@ export default async function handler(req, res) {
           w.email_open_rate,
           w.engagement_score
         FROM member_engagement_weekly w
-        JOIN members m ON m.member_id = w.member_id
+        JOIN members m ON m.member_id::text = w.member_id::text
         WHERE w.member_id IN (SELECT member_id FROM decaying_ids)
         ORDER BY m.member_id, w.week_number`;
     }
@@ -227,6 +227,7 @@ export default async function handler(req, res) {
     const total = dist.reduce((sum, row) => sum + toNumber(row.count), 0);
     const atRiskCount = getCount('At Risk') + getCount('Critical');
     const summaryRow = summaryStats.rows[0] ?? {};
+    const duesAtRiskFromRoster = atRisk.rows.reduce((sum, row) => sum + toNumber(row.annual_dues), 0);
 
     const levelColors = {
       Healthy: theme.colors.success,
@@ -251,7 +252,7 @@ export default async function handler(req, res) {
         critical: getCount('Critical'),
         riskCount: atRiskCount,
         avgHealthScore: toNumber(summaryRow.avg_health_score),
-        potentialDuesAtRisk: Math.round(toNumber(summaryRow.dues_at_risk)),
+        potentialDuesAtRisk: Math.round(duesAtRiskFromRoster || toNumber(summaryRow.dues_at_risk)),
       },
 
       memberArchetypes: (() => {
