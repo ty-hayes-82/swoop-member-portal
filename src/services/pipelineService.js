@@ -5,7 +5,7 @@ import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetr
 
 let _d = null;
 
-const tierRank = { hot: 0, warm: 1, cool: 2, cold: 3 };
+const tierRank = { hot: 0, warm: 1, cold: 2 };
 
 const toNumber = (value, fallback = 0) => {
   const next = Number(value);
@@ -20,7 +20,9 @@ const clampScore = (value) => {
 
 const normalizeTier = (value) => {
   const tier = String(value || '').toLowerCase();
-  if (['hot', 'warm', 'cool', 'cold'].includes(tier)) return tier;
+  // ON-42 data model note: normalize to a single Hot/Warm/Cold taxonomy.
+  if (tier === 'cool') return 'cold';
+  if (['hot', 'warm', 'cold'].includes(tier)) return tier;
   return 'warm';
 };
 
@@ -99,23 +101,28 @@ const buildPipelineSummary = (leads) => {
     return {
       hot: 0,
       warm: 0,
-      cool: 0,
       cold: 0,
       totalGuests: 0,
       hotRevenuePotential: 0,
       totalRevenuePotential: 0,
+      avgFrequentGuestSpend: 0,
     };
   }
 
   const tierCounts = leads.reduce((acc, lead) => {
-    const tier = lead.tier ?? 'cool';
+    const tier = normalizeTier(lead.tier);
     if (acc[tier] === undefined) {
-      acc.cool += 1;
+      acc.cold += 1;
     } else {
       acc[tier] += 1;
     }
     return acc;
-  }, { hot: 0, warm: 0, cool: 0, cold: 0 });
+  }, { hot: 0, warm: 0, cold: 0 });
+
+  const frequentGuests = leads.filter((lead) => toNumber(lead.visitCount ?? lead.visits, 0) >= 3);
+  const avgFrequentGuestSpend = frequentGuests.length
+    ? Math.round(frequentGuests.reduce((sum, lead) => sum + toNumber(lead.totalSpend), 0) / frequentGuests.length)
+    : 0;
 
   const totalRevenuePotential = leads.reduce((sum, lead) => sum + toNumber(lead?.potentialDues), 0);
   const hotRevenuePotential = leads
@@ -125,11 +132,11 @@ const buildPipelineSummary = (leads) => {
   return {
     hot: tierCounts.hot,
     warm: tierCounts.warm,
-    cool: tierCounts.cool,
     cold: tierCounts.cold,
     totalGuests: leads.length,
     hotRevenuePotential,
     totalRevenuePotential,
+    avgFrequentGuestSpend,
   };
 };
 
@@ -145,6 +152,12 @@ const getSanitizedLeads = () => {
   return dedupeLeads(source);
 };
 
+const getPipelineSnapshot = () => {
+  const leads = getSanitizedLeads();
+  const summary = buildPipelineSummary(leads);
+  return { leads, summary };
+};
+
 export const _init = async () => {
   try {
     const res = await fetch('/api/pipeline');
@@ -154,9 +167,9 @@ export const _init = async () => {
   }
 };
 
-export const getWarmLeads = () => getSanitizedLeads();
+export const getWarmLeads = () => getPipelineSnapshot().leads;
 
-export const getPipelineSummary = () => buildPipelineSummary(getSanitizedLeads());
+export const getPipelineSummary = () => getPipelineSnapshot().summary;
 
 export const getConversionInsights = () => {
   const leads = getSanitizedLeads();

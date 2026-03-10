@@ -248,6 +248,7 @@ export default async function handler(req, res) {
         const rounds = toNumber(row.rounds_played);
         const diningSpend = toNumber(row.dining_spend);
         const emailOpenRate = toNumber(row.email_open_rate);
+        const annualDues = toNumber(row.annual_dues);
         const riskReasons = [];
         if (rounds === 0) riskReasons.push('Zero golf activity');
         if (emailOpenRate < 0.15) riskReasons.push('Email engagement dropped');
@@ -258,7 +259,9 @@ export default async function handler(req, res) {
           name: row.name,
           archetype: row.archetype,
           membershipType: row.membership_type,
-          annualDues: toNumber(row.annual_dues),
+          // ON-41 data model note: return both keys for frontend normalization compatibility
+          annualDues,
+          duesAnnual: annualDues,
           healthScore: toNumber(row.health_score),
           score: toNumber(row.health_score),
           riskLevel: row.risk_level,

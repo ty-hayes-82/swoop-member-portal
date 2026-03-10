@@ -32,6 +32,10 @@ const normalizeAtRiskMembers = (source) => {
     const derivedName = `${first} ${last}`.trim();
     const name = member?.name ?? member?.memberName ?? (derivedName || `Member ${index + 1}`);
 
+    // ON-41 data model note: expose normalized annual dues on each at-risk member row
+    const duesAnnualRaw = member?.duesAnnual ?? member?.annualDues ?? member?.dues ?? member?.member?.annualDues;
+    const duesAnnual = Number(duesAnnualRaw);
+
     return {
       memberId: member?.memberId ?? member?.id ?? member?.member?.id ?? `member-${index}`,
       name,
@@ -39,6 +43,7 @@ const normalizeAtRiskMembers = (source) => {
       archetype: member?.archetype ?? member?.archetypeName ?? member?.segment ?? 'Unknown',
       topRisk: member?.topRisk ?? member?.primaryRisk ?? member?.primarySignal ?? member?.risk ?? 'No risk signal available',
       trend: member?.trend ?? member?.trendDirection ?? 'declining',
+      duesAnnual: Number.isFinite(duesAnnual) ? duesAnnual : null,
     };
   });
 };
