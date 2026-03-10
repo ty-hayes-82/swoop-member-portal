@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { theme } from '@/config/theme';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVwMDAwMGwycm5rZXJ0MG1mZmNtIn0.demo';
-const MAP_CENTER = [-111.89, 33.55];
+const MAP_CENTER = [-84.5975, 34.0400];
 const MAP_STYLE = 'mapbox://styles/mapbox/satellite-streets-v12';
 
 const HEAT_OFFSETS = [
@@ -16,13 +16,13 @@ const HEAT_OFFSETS = [
 ];
 
 const ZONES = [
-  { id: 'clubhouse', name: 'Clubhouse', center: [-111.8918, 33.5509], defaultCount: 24, activity: 'High' },
-  { id: 'grill-room', name: 'Grill Room', center: [-111.8924, 33.5504], defaultCount: 18, activity: 'High' },
-  { id: 'pro-shop', name: 'Pro Shop', center: [-111.8906, 33.5515], defaultCount: 14, activity: 'Medium' },
-  { id: 'practice-green', name: 'Practice Green', center: [-111.8894, 33.5518], defaultCount: 12, activity: 'Medium' },
-  { id: 'first-tee', name: 'First Tee', center: [-111.8897, 33.553], defaultCount: 16, activity: 'Medium' },
-  { id: 'pool', name: 'Pool & Fitness', center: [-111.8933, 33.5501], defaultCount: 10, activity: 'Low' },
-  { id: 'parking', name: 'Member Parking', center: [-111.8942, 33.5512], defaultCount: 8, activity: 'Low' },
+  { id: "course", name: "Golf Course", center: [-84.5975, 34.0425], defaultCount: 22, activity: "High" },
+  { id: "grill-room", name: "Grill Room", center: [-84.5977, 34.0398], defaultCount: 5, activity: "High" },
+  { id: "main-dining", name: "Main Dining", center: [-84.5972, 34.0397], defaultCount: 5, activity: "Medium" },
+  { id: "clubhouse", name: "Clubhouse / Lounge", center: [-84.5980, 34.0396], defaultCount: 3, activity: "Medium" },
+  { id: "pool", name: "Pool & Fitness", center: [-84.5982, 34.0390], defaultCount: 6, activity: "Medium" },
+  { id: "pro-shop", name: "Pro Shop", center: [-84.5975, 34.0401], defaultCount: 3, activity: "Low" },
+  { id: "driving-range", name: "Driving Range", center: [-84.5982, 34.0408], defaultCount: 4, activity: "Medium" },
 ];
 
 const HEALTH_COLORS = {
