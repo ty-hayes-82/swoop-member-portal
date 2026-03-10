@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { theme } from '@/config/theme';
 
 export default function MemberLink({ memberId, name, children, mode = 'drawer', style, className }) {
   const { openProfile } = useMemberProfile();
+  const navigate = useNavigate();
 
   if (!memberId) {
     return <span className={className} style={style}>{children ?? name}</span>;
@@ -10,6 +12,11 @@ export default function MemberLink({ memberId, name, children, mode = 'drawer', 
 
   const handleClick = (event) => {
     event?.stopPropagation?.();
+    event?.preventDefault?.();
+    if (mode === 'route') {
+      navigate(`/member/${memberId}`);
+      return;
+    }
     openProfile(memberId, { mode });
   };
 
