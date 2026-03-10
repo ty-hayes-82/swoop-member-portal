@@ -254,6 +254,7 @@ function generateMembers() {
 
     members.push({
       member_id: memberId(i),
+      member_number: i + 1,
       first_name: firstName,
       last_name: lastName,
       membership_type: mt.code,
@@ -896,7 +897,7 @@ export default async function handler(req, res) {
     const waitlistEntries = generateWaitlistEntries();
 
     // 3. Insert members
-    const memberCols = ['member_id','first_name','last_name','membership_type','join_date','annual_dues','archetype','membership_status','household_id','email','phone','account_balance'];
+    const memberCols = ['member_id','member_number','first_name','last_name','membership_type','join_date','annual_dues','archetype','membership_status','household_id','email','phone','account_balance'];
     for (const stmt of buildBatchInsert('members', memberCols, members, 50)) {
       await sql.query(stmt);
     }
