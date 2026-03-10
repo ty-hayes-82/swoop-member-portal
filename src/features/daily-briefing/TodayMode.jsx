@@ -410,7 +410,7 @@ export default function TodayMode({ onNavigate }) {
             <strong>Recommended:</strong> Membership Director to call top 3 at-risk members by end of day.
           </div>
         </div>
-      ))
+      ))}
     </div>
   );
 }
