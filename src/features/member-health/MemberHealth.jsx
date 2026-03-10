@@ -9,6 +9,7 @@ import { sourceSystems } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
 import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
+import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 
 const TABS = [
   { key: 'health',       label: 'Health Overview' },
@@ -84,6 +85,13 @@ export default function MemberHealth() {
         {activeTab === 'resignations' && <ResignationTimeline />}
         {activeTab === 'playbooks'    && <MemberPlaybooks />}
       </Panel>
+
+      <ActionRecommendation
+        action="Call top 3 Critical members before end of business today"
+        owner="Membership Director"
+        dueBy="5:00 PM today"
+        proofMetric="3 personal conversations, retention gestures offered, notes logged in CRM"
+      />
     </div>
   );
 }

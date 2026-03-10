@@ -16,6 +16,7 @@ import { useNavigation } from '@/context/NavigationContext.jsx';
 import { theme } from '@/config/theme.js';
 import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
 import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
+import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 
 export default function DailyBriefing() {
   const { navigate, viewMode, setViewMode } = useNavigation();
@@ -145,6 +146,13 @@ export default function DailyBriefing() {
               <strong style={{ color: theme.colors.textPrimary }}>What happened: </strong>
               Grill Room short-staffed Jan 16 → 40-minute wait for James's lunch → He filed a complaint that evening → We acknowledged it, no one followed up → He hasn't been back in 6 days → <strong style={{ color: theme.colors.urgent }}>At risk of resigning by Jan 22</strong>
             </div>
+            <ActionRecommendation
+              action="Personal call from GM + complimentary round offer + F&B recovery gesture"
+              owner="General Manager"
+              dueBy="By end of day Jan 17"
+              proofMetric="$18K/yr dues retained, satisfaction confirmed"
+              variant="inline"
+            />
           </div>
 
           <Panel title="Yesterday's Results" subtitle="How did January 16th perform vs. expectations?">
@@ -153,6 +161,13 @@ export default function DailyBriefing() {
 
           <Panel title="Today's Watch List" subtitle="What could affect today's operation?">
             <TodayRiskFactors data={briefing.todayRisks} onNavigate={navigate} />
+            <ActionRecommendation
+              action="Review at-risk member status and schedule outreach calls"
+              owner="Membership Director"
+              dueBy="Before 12:00 PM today"
+              proofMetric="2-3 personal calls completed, retention notes logged"
+              variant="subtle"
+            />
           </Panel>
 
           <PipelineSnapshot onNavigate={navigate} />
