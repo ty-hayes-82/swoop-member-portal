@@ -1,113 +1,143 @@
 import { theme } from '@/config/theme';
 
-// navItems — canonical navigation definitions + grouping
+// navItems - canonical navigation definitions + grouping (Layer 3 Intelligence Framework)
+// Organized around the three critical questions that define Layer 3 value
 export const navItems = [
+  // ============================================
+  // SEE IT - The Three Critical Questions
+  // ============================================
   {
     key: 'daily-briefing',
-    label: 'Daily Briefing',
-    section: 'YOUR CLUB TODAY',
-    icon: '📋',
+    label: 'Real-Time Cockpit',
+    section: 'SEE IT',
+    icon: '🎯',
     color: theme.colors.navBriefing,
-    subtitle: 'What needs my attention today?',
-    sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling'],
+    subtitle: 'Where is today breaking - before members feel it?',
+    sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
+    badge: 'Operator\'s Lens',
+  },
+  {
+    key: 'member-health',
+    label: 'Member Risk',
+    section: 'SEE IT',
+    icon: '⚠️',
+    color: theme.colors.navMembers,
+    subtitle: 'Early Warning System - who\'s disengaging across multiple touchpoints?',
+    sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
+    badge: 'Wedge Product',
+  },
+  {
+    key: 'revenue-leakage',
+    label: 'Revenue Leakage',
+    section: 'SEE IT',
+    icon: '💰',
+    color: theme.colors.navFb,
+    subtitle: 'Which operational failures are costing you F&B spend?',
+    sourceSystems: ['POS', 'Tee Sheet', 'Scheduling', 'Weather'],
+    badge: 'NEW',
   },
   {
     key: 'waitlist-demand',
-    label: 'Tee Sheet & Demand',
-    section: 'YOUR CLUB TODAY',
+    label: 'Tee Sheet Demand',
+    section: 'SEE IT',
     icon: '⟳',
     color: theme.colors.navWaitlist,
     subtitle: 'Who is waiting, who will cancel, and what does it cost?',
     sourceSystems: ['Tee Sheet', 'Member CRM', 'POS', 'Weather API'],
   },
   {
-    key: 'operations',
-    label: 'Operations',
-    section: 'YOUR CLUB TODAY',
-    icon: '⌘',
-    color: theme.colors.navOperations,
-    subtitle: 'How is the golf operation running?',
-    sourceSystems: ['Tee Sheet', 'Weather API'],
-  },
-  {
     key: 'location-intelligence',
     label: 'On-Property',
-    section: 'YOUR CLUB TODAY',
+    section: 'SEE IT',
     icon: '📍',
     color: theme.colors.navOperations,
-    subtitle: 'GPS behavior your tee sheet cannot see — know if members finish their round.',
+    subtitle: 'GPS behavior your tee sheet cannot see - know if members finish their round.',
     sourceSystems: ['Swoop App', 'Member CRM'],
     hidden: false,
   },
-  {
-    key: 'member-health',
-    label: 'Member Health',
-    section: 'SERVICE & REVENUE',
-    icon: '◉',
-    color: theme.colors.navMembers,
-    subtitle: 'Who is at risk and what do we do?',
-    sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet'],
-},
-  {
-    key: 'member-profile',
-    label: 'Member Profiles',
-    section: 'SERVICE & REVENUE',
-    icon: '👤',
-    color: theme.colors.navMembers,
-    subtitle: 'Full member dossier with history, family, preferences, and invoices.',
-    sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Analytics'],
-    hidden: false,
-  },
-  {
-    key: 'fb-performance',
-    label: 'F&B & Dining',
-    section: 'SERVICE & REVENUE',
-    icon: '◆',
-    color: theme.colors.navFb,
-    subtitle: 'Where is money being made or lost?',
-    sourceSystems: ['POS', 'Tee Sheet', 'Weather API'],
-    hidden: false,
-  },
-  {
-    key: 'staffing-service',
-    label: 'Staffing & Service',
-    section: 'SERVICE & REVENUE',
-    icon: '⊞',
-    color: theme.colors.navStaffing,
-    subtitle: 'Are we staffed right and serving members well?',
-    sourceSystems: ['Scheduling', 'POS', 'Member CRM'],
-  },
-  {
-    key: 'growth-pipeline',
-    label: 'Revenue & Pipeline',
-    section: 'SERVICE & REVENUE',
-    icon: '◎',
-    color: theme.colors.navPipeline,
-    subtitle: 'Which guests are ready to become members?',
-    sourceSystems: ['Tee Sheet', 'Analytics'],
-  },
+
+  // ============================================
+  // FIX IT - Intelligent Actions
+  // ============================================
   {
     key: 'agent-command',
-    label: 'Agent Command',
-    section: 'ACTIONS & SETUP',
-    icon: '⬡',
+    label: 'Intelligent Actions',
+    section: 'FIX IT',
+    icon: '🤖',
     color: theme.colors.navAgents,
-    subtitle: 'Approve or assign high-impact actions before members feel the pain. Powered by AI Agents.',
+    subtitle: 'AI-recommended interventions with context - approve and track outcomes.',
     sourceSystems: ['All Systems'],
   },
   {
+    key: 'intervention-queue',
+    label: 'Intervention Queue',
+    section: 'FIX IT',
+    icon: '📋',
+    color: theme.colors.navAgents,
+    subtitle: 'Pending member outreach and recovery tasks.',
+    sourceSystems: ['Member CRM', 'Swoop App'],
+    hidden: true, // TODO: Implement this page
+  },
+  {
+    key: 'playbooks',
+    label: 'Response Playbooks',
+    section: 'FIX IT',
+    icon: '📚',
+    color: theme.colors.navAgents,
+    subtitle: 'Proven protocols for service recovery, staffing gaps, and demand optimization.',
+    sourceSystems: [],
+    hidden: true, // TODO: Implement this page (currently embedded in Operations)
+  },
+
+  // ============================================
+  // PROVE IT - Board-Ready Evidence
+  // ============================================
+  {
+    key: 'board-report',
+    label: 'Board Report',
+    section: 'PROVE IT',
+    icon: '📊',
+    color: theme.colors.navDemo,
+    subtitle: 'Monthly executive summary - retention, revenue, and operational saves.',
+    sourceSystems: ['All Systems'],
+  },
+  {
+    key: 'attribution',
+    label: 'Attribution',
+    section: 'PROVE IT',
+    icon: '💵',
+    color: theme.colors.navPipeline,
+    subtitle: 'Dollars saved, members retained, revenue protected - connected to actions.',
+    sourceSystems: ['All Systems'],
+    hidden: true, // TODO: Implement this page
+  },
+  {
+    key: 'historical-trends',
+    label: 'Historical Trends',
+    section: 'PROVE IT',
+    icon: '📈',
+    color: theme.colors.navOperations,
+    subtitle: '6-month performance comparisons across all metrics.',
+    sourceSystems: ['All Systems'],
+    hidden: true, // TODO: Implement this page
+  },
+
+  // ============================================
+  // SETUP - Configuration & Data
+  // ============================================
+  {
     key: 'integrations',
-    label: 'Integrations',
-    section: 'ACTIONS & SETUP',
+    label: 'Connected Systems',
+    section: 'SETUP',
     icon: '🔌',
     color: theme.colors.navIntegrations,
-    subtitle: 'Connect your systems. Unlock intelligence.',
+    subtitle: 'Connect your systems. Unlock Layer 3 intelligence.',
     sourceSystems: [],
   },
   {
     key: 'integrations/csv-import',
-    label: 'CSV Import Hub',
-    section: 'ACTIONS & SETUP',
+    label: 'Data Upload',
+    section: 'SETUP',
     icon: '⬇️',
     color: theme.colors.navIntegrations,
     subtitle: 'Upload CSV/XLSX when APIs are missing.',
@@ -115,18 +145,19 @@ export const navItems = [
     hidden: false,
   },
   {
-    key: 'board-report',
-    label: 'Board Report',
-    section: 'ACTIONS & SETUP',
-    icon: '📊',
-    color: theme.colors.navDemo,
-    subtitle: 'Prove It: board-ready retention and operational saves report.',
-    sourceSystems: [],
+    key: 'member-profile',
+    label: 'Member Profiles',
+    section: 'SETUP',
+    icon: '👤',
+    color: theme.colors.navMembers,
+    subtitle: 'Full member dossier with history, family, preferences, and invoices.',
+    sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Analytics'],
+    hidden: false,
   },
-    {
+  {
     key: 'demo-mode',
     label: 'Demo Mode',
-    section: 'ACTIONS & SETUP',
+    section: 'SETUP',
     icon: '▶',
     color: theme.colors.navDemo,
     subtitle: 'Guided walkthroughs for demos',
