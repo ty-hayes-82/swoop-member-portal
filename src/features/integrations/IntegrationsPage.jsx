@@ -5,6 +5,8 @@ import TwoLayerDiagram from '@/components/ui/TwoLayerDiagram.jsx';
 import DataSourceComparison from '@/components/ui/DataSourceComparison.jsx';
 import CollapsibleSection from '@/components/ui/CollapsibleSection.jsx';
 
+import PageTransition from '@/components/ui/PageTransition';
+
 const EMAIL_VENDOR_IDS = ['hubspot', 'mailchimp'];
 const ACCOUNTING_VENDOR_IDS = ['quickbooks', 'club-prophet'];
 
@@ -144,6 +146,7 @@ export function IntegrationsPage() {
   })).filter((category) => category.vendors.length > 0); // Hide empty categories
 
   return (
+    <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       {/* GMC-07: Reordered - diagram first, then What Swoop Adds, then comparison */}
       
@@ -422,5 +425,6 @@ export function IntegrationsPage() {
         ))}
       </section>
     </div>
+    </PageTransition>
     );
 }

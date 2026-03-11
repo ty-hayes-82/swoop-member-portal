@@ -8,6 +8,8 @@ import IntelligenceTab from './tabs/IntelligenceTab';
 import { useNavigation } from '@/context/NavigationContext';
 import {
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
+import PageTransition from '@/components/ui/PageTransition';
+
   sourceSystems,
   getWaitlistSummary,
   getCancellationSummary,
@@ -68,6 +70,7 @@ export default function WaitlistDemand() {
   };
 
   return (
+    <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <StoryHeadline
         variant="warning"
@@ -92,5 +95,6 @@ export default function WaitlistDemand() {
         {tabContent[activeTab]}
       </Panel>
     </div>
+    </PageTransition>
   );
 }

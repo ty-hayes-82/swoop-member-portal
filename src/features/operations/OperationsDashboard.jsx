@@ -9,6 +9,8 @@ import { getWaitlistSummary } from '@/services/pipelineService';
 import { theme } from '@/config/theme';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 
+import PageTransition from '@/components/ui/PageTransition';
+
 export default function OperationsDashboard() {
   // FP-P02: Loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +46,7 @@ export default function OperationsDashboard() {
   };
 
   return (
+    <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
 
       <div
@@ -107,5 +110,6 @@ export default function OperationsDashboard() {
         </Panel>
       </div>
     </div>
+    </PageTransition>
   );
 }

@@ -8,6 +8,8 @@ import { sourceSystems } from '@/services/staffingService';
 import { theme } from '@/config/theme';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 
+import PageTransition from '@/components/ui/PageTransition';
+
 const TABS = [
   { key: 'service',   label: 'Service Quality' },
   { key: 'staffing',  label: 'Staffing Impact' },
@@ -30,6 +32,7 @@ export default function StaffingService() {
   const [activeTab, setActiveTab] = useState('service');
 
   return (
+    <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <StoryHeadline
         variant="urgent"
@@ -56,5 +59,6 @@ export default function StaffingService() {
         {activeTab === 'playbooks' && <StaffingPlaybooks />}
       </Panel>
     </div>
+    </PageTransition>
   );
 }

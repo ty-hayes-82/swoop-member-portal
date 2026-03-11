@@ -7,6 +7,8 @@ import WeatherTab from './tabs/WeatherTab';
 import { sourceSystems } from '@/services/fbService';
 import { theme } from '@/config/theme';
 
+import PageTransition from '@/components/ui/PageTransition';
+
 const TABS = [
   { key: 'outlets',    label: 'Outlet Performance' },
   { key: 'conversion', label: 'Post-Round Conversion' },
@@ -24,6 +26,7 @@ export default function FBPerformance() {
   const [activeTab, setActiveTab] = useState('outlets');
 
   return (
+    <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <StoryHeadline
         variant="opportunity"
@@ -80,5 +83,6 @@ export default function FBPerformance() {
         {activeTab === 'weather'    && <WeatherTab />}
       </Panel>
     </div>
+    </PageTransition>
   );
 }
