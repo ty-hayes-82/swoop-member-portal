@@ -1,15 +1,15 @@
 import { theme } from '@/config/theme';
 
 export default function BottleneckChart({ holes }) {
-  // Calculate impact score (delay × rounds affected) and sort descending
-  const holesWithImpact = holes.map(hole => ({
-    ...hole,
-    impact: parseFloat(hole.avgDelay) * hole.roundsAffected,
-  })).sort((a, b) => b.impact - a.impact);
+  const holesWithImpact = holes
+    .map((hole) => ({
+      ...hole,
+      impact: parseFloat(hole.avgDelay) * hole.roundsAffected,
+    }))
+    .sort((a, b) => b.impact - a.impact);
 
-  const maxImpact = Math.max(...holesWithImpact.map(h => h.impact));
+  const maxImpact = Math.max(...holesWithImpact.map((hole) => hole.impact), 1);
 
-  // Color coding based on impact
   const getImpactColor = (impact) => {
     const ratio = impact / maxImpact;
     if (ratio > 0.8) return theme.colors.risk;
@@ -25,94 +25,130 @@ export default function BottleneckChart({ holes }) {
   };
 
   return (
-    <div style={{
-      background: theme.colors.cardBg,
-      border: `1px solid ${theme.colors.border}`,
-      borderRadius: 12,
-      padding: theme.spacing.lg,
-    }}>
-      <h3 style={{
-        fontSize: 16,
-        fontWeight: 600,
-        color: theme.colors.textPrimary,
-        marginBottom: theme.spacing.xs,
-      }}>
-        🎯 Bottleneck Holes by Impact
+    <div
+      style={{
+        background: theme.colors.cardBg,
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: 12,
+        padding: theme.spacing.lg,
+      }}
+    >
+      <h3
+        style={{
+          fontSize: 16,
+          fontWeight: 600,
+          color: theme.colors.textPrimary,
+          marginBottom: theme.spacing.xs,
+        }}
+      >
+        Bottleneck Holes by Impact
       </h3>
-      <p style={{
-        fontSize: 13,
-        color: theme.colors.textSecondary,
-        marginBottom: theme.spacing.md,
-      }}>
-        Compact view: prioritize highest impact first (delay x rounds affected).
+      <p
+        style={{
+          fontSize: 13,
+          color: theme.colors.textSecondary,
+          marginBottom: theme.spacing.md,
+        }}
+      >
+        Prioritize ranger coverage by impact score (avg delay x rounds affected).
       </p>
 
-      <div style={{
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: 8,
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '72px 1fr 1fr 1fr 120px',
-          gap: theme.spacing.sm,
-          padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-          background: theme.colors.bgSecondary,
-          borderBottom: `1px solid ${theme.colors.border}`,
-          fontSize: 11,
-          fontWeight: 600,
-          color: theme.colors.textSecondary,
-          textTransform: 'uppercase',
-          letterSpacing: 0.4,
-        }}>
-          <span>Rank</span>
-          <span>Hole</span>
-          <span>Avg Delay</span>
-          <span>Rounds</span>
-          <span>Impact</span>
-        </div>
+      <div style={{ display: 'grid', gap: theme.spacing.sm }}>
         {holesWithImpact.map((hole, index) => {
           const impactColor = getImpactColor(hole.impact);
           const impactLabel = getImpactLabel(hole.impact);
+          const barWidth = Math.max((hole.impact / maxImpact) * 100, 6);
           return (
             <div
               key={hole.hole}
               style={{
-                display: 'grid',
-                gridTemplateColumns: '72px 1fr 1fr 1fr 120px',
-                gap: theme.spacing.sm,
-                padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-                borderBottom: index === holesWithImpact.length - 1 ? 'none' : `1px solid ${theme.colors.borderLight}`,
-                alignItems: 'center',
-                fontSize: 13,
+                border: `1px solid ${theme.colors.border}`,
+                borderRadius: 10,
+                padding: theme.spacing.sm,
+                background: theme.colors.white,
               }}
             >
-              <span style={{ fontFamily: theme.fonts.mono, color: theme.colors.textSecondary, fontWeight: 700 }}>
-                #{index + 1}
-              </span>
-              <span style={{ color: theme.colors.textPrimary, fontWeight: 600 }}>
-                Hole {hole.hole}
-              </span>
-              <span style={{ color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>
-                {hole.avgDelay} min
-              </span>
-              <span style={{ color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>
-                {hole.roundsAffected.toLocaleString()}
-              </span>
-              <span style={{
-                justifySelf: 'start',
-                border: `1px solid ${impactColor}55`,
-                background: `${impactColor}18`,
-                color: impactColor,
-                borderRadius: 999,
-                padding: '2px 10px',
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: 0.3,
-                textTransform: 'uppercase',
-              }}>
-                {impactLabel}
-              </span>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: theme.spacing.sm,
+                  marginBottom: 8,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span
+                    style={{
+                      border: `1px solid ${theme.colors.border}`,
+                      borderRadius: 999,
+                      padding: '2px 8px',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: theme.colors.textSecondary,
+                      fontFamily: theme.fonts.mono,
+                    }}
+                  >
+                    #{index + 1}
+                  </span>
+                  <span style={{ fontWeight: 700, color: theme.colors.textPrimary }}>Hole {hole.hole}</span>
+                </div>
+                <span
+                  style={{
+                    border: `1px solid ${impactColor}55`,
+                    background: `${impactColor}14`,
+                    color: impactColor,
+                    borderRadius: 999,
+                    padding: '3px 10px',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: 0.3,
+                    textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {impactLabel} impact
+                </span>
+              </div>
+
+              <div
+                style={{
+                  height: 12,
+                  borderRadius: 999,
+                  background: theme.colors.bgSecondary,
+                  overflow: 'hidden',
+                  border: `1px solid ${theme.colors.borderLight}`,
+                }}
+              >
+                <div
+                  style={{
+                    width: `${barWidth}%`,
+                    height: '100%',
+                    background: `linear-gradient(90deg, ${impactColor}, ${impactColor}CC)`,
+                  }}
+                />
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px 14px',
+                  fontSize: 12,
+                  color: theme.colors.textSecondary,
+                }}
+              >
+                <span>
+                  Delay: <strong style={{ color: theme.colors.textPrimary, fontFamily: theme.fonts.mono }}>{hole.avgDelay} min</strong>
+                </span>
+                <span>
+                  Rounds: <strong style={{ color: theme.colors.textPrimary, fontFamily: theme.fonts.mono }}>{hole.roundsAffected.toLocaleString()}</strong>
+                </span>
+                <span>
+                  Score: <strong style={{ color: impactColor, fontFamily: theme.fonts.mono }}>{Math.round(hole.impact).toLocaleString()}</strong>
+                </span>
+              </div>
             </div>
           );
         })}
