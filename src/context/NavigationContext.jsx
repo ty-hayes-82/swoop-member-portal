@@ -6,10 +6,9 @@ const NavigationContext = createContext(null);
 // Valid route keys for hash routing
 const VALID_ROUTES = new Set([
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
-  'member-health', 'staffing-service', 'growth-pipeline', 'agent-command',
-  'location-intelligence', 'integrations', 'demo-mode', 'member-profile',
-  'integrations/csv-import',
-  'csv-import',
+  'member-health', 'revenue-leakage', 'staffing-service', 'growth-pipeline',
+  'agent-command', 'location-intelligence', 'integrations', 'demo-mode',
+  'board-report', 'member-profile', 'integrations/csv-import', 'csv-import',
 ]);
 
 function parseHash() {
