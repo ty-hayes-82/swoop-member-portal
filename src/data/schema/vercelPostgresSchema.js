@@ -1,299 +1,1849 @@
 export const vercelPostgresSchema = {
   tables: [
-    {
-      name: 'clubs',
-      description: 'Core club records for each customer instance.',
-      columns: [
-        { name: 'id', type: 'uuid', nullable: false },
-        { name: 'name', type: 'text', nullable: false },
-        { name: 'timezone', type: 'text', nullable: false },
-        { name: 'created_at', type: 'timestamptz', nullable: false },
-      ],
-      sampleRows: [
-        {
-          id: '11111111-1111-4111-8111-111111111111',
-          name: 'Swoop Ridge Country Club',
-          timezone: 'America/New_York',
-          created_at: '2025-01-08T14:32:10Z',
-        },
-        {
-          id: '22222222-2222-4222-8222-222222222222',
-          name: 'Harbor Point Golf & Beach',
-          timezone: 'America/Chicago',
-          created_at: '2025-02-16T09:11:54Z',
-        },
-        {
-          id: '33333333-3333-4333-8333-333333333333',
-          name: 'Desert Pines Athletic Club',
-          timezone: 'America/Phoenix',
-          created_at: '2025-03-03T19:45:01Z',
-        },
-      ],
-      relationships: [],
-    },
-    {
-      name: 'members',
-      description: 'Primary member profile and account metadata.',
-      columns: [
-        { name: 'id', type: 'uuid', nullable: false },
-        { name: 'club_id', type: 'uuid', nullable: false },
-        { name: 'member_number', type: 'text', nullable: false },
-        { name: 'status', type: 'text', nullable: false },
-        { name: 'created_at', type: 'timestamptz', nullable: false },
-      ],
-      sampleRows: [
-        {
-          id: '4f89d8f1-2b61-4704-89d8-88f11a72be11',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_number: 'M-10482',
-          status: 'active',
-          created_at: '2025-06-01T12:05:42Z',
-        },
-        {
-          id: '7032f0dd-2935-43fc-b5f1-84f8cf7f4012',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_number: 'M-10931',
-          status: 'at_risk',
-          created_at: '2025-06-18T08:22:09Z',
-        },
-        {
-          id: '2c7f9ea1-9d6c-4a7d-a011-8013fef0f313',
-          club_id: '22222222-2222-4222-8222-222222222222',
-          member_number: 'M-20944',
-          status: 'inactive',
-          created_at: '2025-07-02T16:44:30Z',
-        },
-      ],
-      relationships: [
-        { fromColumn: 'club_id', toTable: 'clubs', toColumn: 'id' },
-      ],
-    },
-    {
-      name: 'households',
-      description: 'Household grouping for family and dependent views.',
-      columns: [
-        { name: 'id', type: 'uuid', nullable: false },
-        { name: 'club_id', type: 'uuid', nullable: false },
-        { name: 'household_name', type: 'text', nullable: false },
-        { name: 'primary_member_id', type: 'uuid', nullable: true },
-      ],
-      sampleRows: [
-        {
-          id: '8d6b6cd0-0e52-4325-b6ba-fac39f1f3021',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          household_name: 'The Martin Family',
-          primary_member_id: '4f89d8f1-2b61-4704-89d8-88f11a72be11',
-        },
-        {
-          id: '1bbfd442-74e4-49df-a16b-c7e9cc80cf22',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          household_name: 'Lopez Household',
-          primary_member_id: '7032f0dd-2935-43fc-b5f1-84f8cf7f4012',
-        },
-        {
-          id: 'd4f59ab5-37b8-4c26-8a86-b8f5c0ca9023',
-          club_id: '33333333-3333-4333-8333-333333333333',
-          household_name: 'Chen Family',
-          primary_member_id: null,
-        },
-      ],
-      relationships: [
-        { fromColumn: 'club_id', toTable: 'clubs', toColumn: 'id' },
-        { fromColumn: 'primary_member_id', toTable: 'members', toColumn: 'id' },
-      ],
-    },
-    {
-      name: 'tee_times',
-      description: 'Bookings and attendance details for tee sheet analytics.',
-      columns: [
-        { name: 'id', type: 'uuid', nullable: false },
-        { name: 'club_id', type: 'uuid', nullable: false },
-        { name: 'member_id', type: 'uuid', nullable: true },
-        { name: 'start_time', type: 'timestamptz', nullable: false },
-        { name: 'status', type: 'text', nullable: false },
-      ],
-      sampleRows: [
-        {
-          id: '7be1e8d9-4a07-4e39-9cb3-cf6c8d8a1011',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_id: '4f89d8f1-2b61-4704-89d8-88f11a72be11',
-          start_time: '2026-03-09T13:10:00Z',
-          status: 'played',
-        },
-        {
-          id: 'ad0f5748-2837-4d7c-81f2-fcb27fb3f812',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_id: '7032f0dd-2935-43fc-b5f1-84f8cf7f4012',
-          start_time: '2026-03-10T15:00:00Z',
-          status: 'no_show',
-        },
-        {
-          id: 'be1d7e18-f3c7-47c2-8a95-9686f2ec4d13',
-          club_id: '22222222-2222-4222-8222-222222222222',
-          member_id: null,
-          start_time: '2026-03-12T08:20:00Z',
-          status: 'booked',
-        },
-      ],
-      relationships: [
-        { fromColumn: 'club_id', toTable: 'clubs', toColumn: 'id' },
-        { fromColumn: 'member_id', toTable: 'members', toColumn: 'id' },
-      ],
-    },
-    {
-      name: 'reservations',
-      description: 'Dining and amenity reservations tied to member behavior.',
-      columns: [
-        { name: 'id', type: 'uuid', nullable: false },
-        { name: 'club_id', type: 'uuid', nullable: false },
-        { name: 'member_id', type: 'uuid', nullable: true },
-        { name: 'venue', type: 'text', nullable: false },
-        { name: 'reservation_at', type: 'timestamptz', nullable: false },
-      ],
-      sampleRows: [
-        {
-          id: 'f24d17bf-8ac8-4b53-9bde-f50252c76031',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_id: '4f89d8f1-2b61-4704-89d8-88f11a72be11',
-          venue: 'Clubhouse Main Dining Room',
-          reservation_at: '2026-03-11T18:30:00Z',
-        },
-        {
-          id: '835523aa-8f15-47ad-a3b5-0e6a04063532',
-          club_id: '33333333-3333-4333-8333-333333333333',
-          member_id: null,
-          venue: 'Pool Bar Patio - Sunset Event Series',
-          reservation_at: '2026-03-12T00:15:00Z',
-        },
-        {
-          id: 'a4a9fba9-5a33-45a4-9f8e-a68d5d4abc33',
-          club_id: '22222222-2222-4222-8222-222222222222',
-          member_id: '2c7f9ea1-9d6c-4a7d-a011-8013fef0f313',
-          venue: '19th Hole Lounge',
-          reservation_at: '2026-03-12T19:45:00Z',
-        },
-      ],
-      relationships: [
-        { fromColumn: 'club_id', toTable: 'clubs', toColumn: 'id' },
-        { fromColumn: 'member_id', toTable: 'members', toColumn: 'id' },
-      ],
-    },
-    {
-      name: 'pos_checks',
-      description: 'Point-of-sale checks used for F&B and engagement signals.',
-      columns: [
-        { name: 'id', type: 'uuid', nullable: false },
-        { name: 'club_id', type: 'uuid', nullable: false },
-        { name: 'member_id', type: 'uuid', nullable: true },
-        { name: 'check_total_cents', type: 'integer', nullable: false },
-        { name: 'closed_at', type: 'timestamptz', nullable: false },
-      ],
-      sampleRows: [
-        {
-          id: 'd7f3687e-f96d-4f38-9e87-b3812bb2a041',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_id: '4f89d8f1-2b61-4704-89d8-88f11a72be11',
-          check_total_cents: 12850,
-          closed_at: '2026-03-10T21:07:34Z',
-        },
-        {
-          id: '64b7f63e-a0d4-4a7a-bec3-eae937f9d742',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_id: null,
-          check_total_cents: 4600,
-          closed_at: '2026-03-10T22:14:02Z',
-        },
-        {
-          id: '5acde943-96d8-4c68-9f57-b49d671fcf43',
-          club_id: '22222222-2222-4222-8222-222222222222',
-          member_id: '2c7f9ea1-9d6c-4a7d-a011-8013fef0f313',
-          check_total_cents: 9900,
-          closed_at: '2026-03-11T01:33:47Z',
-        },
-      ],
-      relationships: [
-        { fromColumn: 'club_id', toTable: 'clubs', toColumn: 'id' },
-        { fromColumn: 'member_id', toTable: 'members', toColumn: 'id' },
-      ],
-    },
-    {
-      name: 'member_events',
-      description: 'Behavioral events emitted by app and integrated systems.',
-      columns: [
-        { name: 'id', type: 'uuid', nullable: false },
-        { name: 'club_id', type: 'uuid', nullable: false },
-        { name: 'member_id', type: 'uuid', nullable: false },
-        { name: 'event_type', type: 'text', nullable: false },
-        { name: 'occurred_at', type: 'timestamptz', nullable: false },
-      ],
-      sampleRows: [
-        {
-          id: '7d6fd6c5-3589-49e8-b9bf-51e7b562dc51',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_id: '4f89d8f1-2b61-4704-89d8-88f11a72be11',
-          event_type: 'mobile_login',
-          occurred_at: '2026-03-10T06:14:55Z',
-        },
-        {
-          id: '2e2ddbf0-a231-49ab-b374-9485a4b67c52',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_id: '7032f0dd-2935-43fc-b5f1-84f8cf7f4012',
-          event_type: 'tee_time_cancelled_late',
-          occurred_at: '2026-03-10T14:42:09Z',
-        },
-        {
-          id: '95431d2e-52f2-43b1-b99e-45f3f832f253',
-          club_id: '33333333-3333-4333-8333-333333333333',
-          member_id: '2c7f9ea1-9d6c-4a7d-a011-8013fef0f313',
-          event_type: 'dining_reservation_created',
-          occurred_at: '2026-03-10T19:03:21Z',
-        },
-      ],
-      relationships: [
-        { fromColumn: 'club_id', toTable: 'clubs', toColumn: 'id' },
-        { fromColumn: 'member_id', toTable: 'members', toColumn: 'id' },
-      ],
-    },
-    {
-      name: 'action_recommendations',
-      description: 'AI-generated intervention recommendations and outcomes.',
-      columns: [
-        { name: 'id', type: 'uuid', nullable: false },
-        { name: 'club_id', type: 'uuid', nullable: false },
-        { name: 'member_id', type: 'uuid', nullable: true },
-        { name: 'source_event_id', type: 'uuid', nullable: true },
-        { name: 'status', type: 'text', nullable: false },
-      ],
-      sampleRows: [
-        {
-          id: 'ebed7023-c0a2-4d20-980a-0224449a1471',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_id: '7032f0dd-2935-43fc-b5f1-84f8cf7f4012',
-          source_event_id: '2e2ddbf0-a231-49ab-b374-9485a4b67c52',
-          status: 'queued',
-        },
-        {
-          id: '768918c0-91b0-4b89-a9bc-2f2180024e72',
-          club_id: '11111111-1111-4111-8111-111111111111',
-          member_id: '4f89d8f1-2b61-4704-89d8-88f11a72be11',
-          source_event_id: '7d6fd6c5-3589-49e8-b9bf-51e7b562dc51',
-          status: 'sent',
-        },
-        {
-          id: 'bb84f368-f9df-4021-9a2d-0918f6fd4873',
-          club_id: '33333333-3333-4333-8333-333333333333',
-          member_id: null,
-          source_event_id: null,
-          status: 'dismissed',
-        },
-      ],
-      relationships: [
-        { fromColumn: 'club_id', toTable: 'clubs', toColumn: 'id' },
-        { fromColumn: 'member_id', toTable: 'members', toColumn: 'id' },
-        { fromColumn: 'source_event_id', toTable: 'member_events', toColumn: 'id' },
-      ],
-    },
-  ],
+  {
+    "name": "club",
+    "description": "",
+    "columns": [
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "zip",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "founded_year",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "member_count",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "course_count",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "outlet_count",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "name": "courses",
+    "description": "",
+    "columns": [
+      {
+        "name": "course_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "holes",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "par",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "tee_interval_min",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "first_tee",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "last_tee",
+        "type": "text",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
+      }
+    ]
+  },
+  {
+    "name": "dining_outlets",
+    "description": "",
+    "columns": [
+      {
+        "name": "outlet_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "meal_periods",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "weekday_covers",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "weekend_covers",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
+      }
+    ]
+  },
+  {
+    "name": "membership_types",
+    "description": "",
+    "columns": [
+      {
+        "name": "type_code",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "annual_dues",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "fb_minimum",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "golf_eligible",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "name": "households",
+    "description": "",
+    "columns": [
+      {
+        "name": "household_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "primary_member_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "member_count",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "is_multi_member",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "name": "members",
+    "description": "",
+    "columns": [
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_number",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "email",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "phone",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "date_of_birth",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "gender",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "membership_type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "membership_status",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "join_date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "resigned_on",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "household_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "archetype",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "annual_dues",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "account_balance",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "ghin_number",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "communication_opt_in",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "membership_type",
+        "toTable": "membership_types",
+        "toColumn": "type_code"
+      },
+      {
+        "fromColumn": "household_id",
+        "toTable": "households",
+        "toColumn": "household_id"
+      }
+    ]
+  },
+  {
+    "name": "bookings",
+    "description": "",
+    "columns": [
+      {
+        "name": "booking_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "course_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "booking_date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "tee_time",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "player_count",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "has_guest",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "transportation",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "has_caddie",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "round_type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "check_in_time",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "round_start",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "round_end",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "duration_minutes",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
+      },
+      {
+        "fromColumn": "course_id",
+        "toTable": "courses",
+        "toColumn": "course_id"
+      }
+    ]
+  },
+  {
+    "name": "booking_players",
+    "description": "",
+    "columns": [
+      {
+        "name": "player_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "booking_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "guest_name",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "is_guest",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "is_warm_lead",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "position_in_group",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "booking_id",
+        "toTable": "bookings",
+        "toColumn": "booking_id"
+      }
+    ]
+  },
+  {
+    "name": "pace_of_play",
+    "description": "",
+    "columns": [
+      {
+        "name": "pace_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "booking_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "total_minutes",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "is_slow_round",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "groups_passed",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "ranger_interventions",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "booking_id",
+        "toTable": "bookings",
+        "toColumn": "booking_id"
+      }
+    ]
+  },
+  {
+    "name": "pace_hole_segments",
+    "description": "",
+    "columns": [
+      {
+        "name": "segment_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "pace_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "hole_number",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "tee_time",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "green_time",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "segment_minutes",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "is_bottleneck",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "pace_id",
+        "toTable": "pace_of_play",
+        "toColumn": "pace_id"
+      }
+    ]
+  },
+  {
+    "name": "waitlist_entries",
+    "description": "",
+    "columns": [
+      {
+        "name": "entry_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "course_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "requested_date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "requested_tee_time",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "waitlist_count",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "has_event_overlap",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "peak_slot",
+        "type": "text",
+        "nullable": true
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
+      },
+      {
+        "fromColumn": "course_id",
+        "toTable": "courses",
+        "toColumn": "course_id"
+      }
+    ]
+  },
+  {
+    "name": "pos_checks",
+    "description": "",
+    "columns": [
+      {
+        "name": "check_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "outlet_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "opened_at",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "closed_at",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "first_item_fired_at",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "last_item_fulfilled_at",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "subtotal",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "tax_amount",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "tip_amount",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "comp_amount",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "discount_amount",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "void_amount",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "total",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "payment_method",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "post_round_dining",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "linked_booking_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "event_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "is_understaffed_day",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "outlet_id",
+        "toTable": "dining_outlets",
+        "toColumn": "outlet_id"
+      },
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      },
+      {
+        "fromColumn": "linked_booking_id",
+        "toTable": "bookings",
+        "toColumn": "booking_id"
+      }
+    ]
+  },
+  {
+    "name": "pos_line_items",
+    "description": "",
+    "columns": [
+      {
+        "name": "line_item_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "check_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "item_name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "unit_price",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "quantity",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "line_total",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "is_comp",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "is_void",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "fired_at",
+        "type": "text",
+        "nullable": true
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "check_id",
+        "toTable": "pos_checks",
+        "toColumn": "check_id"
+      }
+    ]
+  },
+  {
+    "name": "pos_payments",
+    "description": "",
+    "columns": [
+      {
+        "name": "payment_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "check_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "payment_method",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "amount",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "processed_at",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "is_split",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "check_id",
+        "toTable": "pos_checks",
+        "toColumn": "check_id"
+      }
+    ]
+  },
+  {
+    "name": "event_definitions",
+    "description": "",
+    "columns": [
+      {
+        "name": "event_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "event_date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "capacity",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "registration_fee",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "nullable": true
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
+      }
+    ]
+  },
+  {
+    "name": "event_registrations",
+    "description": "",
+    "columns": [
+      {
+        "name": "registration_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "event_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "guest_count",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "fee_paid",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "registered_at",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "checked_in_at",
+        "type": "text",
+        "nullable": true
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "event_id",
+        "toTable": "event_definitions",
+        "toColumn": "event_id"
+      },
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      }
+    ]
+  },
+  {
+    "name": "email_campaigns",
+    "description": "",
+    "columns": [
+      {
+        "name": "campaign_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "subject",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "send_date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "recipient_count",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "html_content_url",
+        "type": "text",
+        "nullable": true
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
+      }
+    ]
+  },
+  {
+    "name": "email_events",
+    "description": "",
+    "columns": [
+      {
+        "name": "event_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "campaign_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "event_type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "occurred_at",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "link_clicked",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "device_type",
+        "type": "text",
+        "nullable": true
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "campaign_id",
+        "toTable": "email_campaigns",
+        "toColumn": "campaign_id"
+      },
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      }
+    ]
+  },
+  {
+    "name": "feedback",
+    "description": "",
+    "columns": [
+      {
+        "name": "feedback_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "submitted_at",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "sentiment_score",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "resolved_at",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "is_understaffed_day",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      },
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
+      }
+    ]
+  },
+  {
+    "name": "service_requests",
+    "description": "",
+    "columns": [
+      {
+        "name": "request_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "booking_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "request_type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "requested_at",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "response_time_min",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "resolved_at",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "resolution_notes",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "is_understaffed_day",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      },
+      {
+        "fromColumn": "booking_id",
+        "toTable": "bookings",
+        "toColumn": "booking_id"
+      }
+    ]
+  },
+  {
+    "name": "staff",
+    "description": "",
+    "columns": [
+      {
+        "name": "staff_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "department",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "role",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "hire_date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "hourly_rate",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "is_full_time",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
+      }
+    ]
+  },
+  {
+    "name": "staff_shifts",
+    "description": "",
+    "columns": [
+      {
+        "name": "shift_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "staff_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "shift_date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "outlet_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "start_time",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "end_time",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "hours_worked",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "is_understaffed_day",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "nullable": true
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "staff_id",
+        "toTable": "staff",
+        "toColumn": "staff_id"
+      }
+    ]
+  },
+  {
+    "name": "close_outs",
+    "description": "",
+    "columns": [
+      {
+        "name": "closeout_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "golf_revenue",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "fb_revenue",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "total_revenue",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "rounds_played",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "covers",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "weather",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "is_understaffed",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
+      }
+    ]
+  },
+  {
+    "name": "canonical_events",
+    "description": "",
+    "columns": [
+      {
+        "name": "event_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "entity_type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "entity_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "event_type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "event_timestamp",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "source_vendor",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "payload",
+        "type": "text",
+        "nullable": false
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "name": "member_engagement_daily",
+    "description": "",
+    "columns": [
+      {
+        "name": "row_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "rounds_played",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "dining_checks",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "dining_spend",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "events_attended",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "emails_opened",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "feedback_submitted",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "visit_flag",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      }
+    ]
+  },
+  {
+    "name": "member_engagement_weekly",
+    "description": "",
+    "columns": [
+      {
+        "name": "row_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "week_number",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "week_start",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "week_end",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "rounds_played",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "dining_visits",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "dining_spend",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "events_attended",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "email_open_rate",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "engagement_score",
+        "type": "real",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      }
+    ]
+  },
+  {
+    "name": "visit_sessions",
+    "description": "",
+    "columns": [
+      {
+        "name": "session_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "session_date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "anchor_type",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "arrival_time",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "departure_time",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "duration_minutes",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "touchpoints",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "total_spend",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "activities",
+        "type": "text",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      }
+    ]
+  },
+  {
+    "name": "weather_daily",
+    "description": "",
+    "columns": [
+      {
+        "name": "weather_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "condition",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "temp_high",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "temp_low",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "wind_mph",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "precipitation_in",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "golf_demand_modifier",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "fb_demand_modifier",
+        "type": "real",
+        "nullable": false
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "name": "member_waitlist",
+    "description": "",
+    "columns": [
+      {
+        "name": "waitlist_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "course_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "requested_date",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "requested_slot",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "alternatives_accepted",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "days_waiting",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "retention_priority",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "notified_at",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "filled_at",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "dining_incentive_attached",
+        "type": "integer",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      },
+      {
+        "fromColumn": "course_id",
+        "toTable": "courses",
+        "toColumn": "course_id"
+      }
+    ]
+  },
+  {
+    "name": "cancellation_risk",
+    "description": "",
+    "columns": [
+      {
+        "name": "risk_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "booking_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "scored_at",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "cancel_probability",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "drivers",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "recommended_action",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "estimated_revenue_lost",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "action_taken",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "outcome",
+        "type": "text",
+        "nullable": true
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "booking_id",
+        "toTable": "bookings",
+        "toColumn": "booking_id"
+      },
+      {
+        "fromColumn": "member_id",
+        "toTable": "members",
+        "toColumn": "member_id"
+      }
+    ]
+  },
+  {
+    "name": "demand_heatmap",
+    "description": "",
+    "columns": [
+      {
+        "name": "heatmap_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "course_id",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "day_of_week",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "time_block",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "fill_rate",
+        "type": "real",
+        "nullable": false
+      },
+      {
+        "name": "unmet_rounds",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "demand_level",
+        "type": "text",
+        "nullable": false
+      },
+      {
+        "name": "computed_for_month",
+        "type": "text",
+        "nullable": false
+      }
+    ],
+    "relationships": [
+      {
+        "fromColumn": "course_id",
+        "toTable": "courses",
+        "toColumn": "course_id"
+      }
+    ]
+  }
+]
 };
 
 export default vercelPostgresSchema;
