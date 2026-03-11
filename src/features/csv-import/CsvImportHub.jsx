@@ -150,7 +150,7 @@ export default function CsvImportHub() {
         color: theme.colors.white,
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          <span style={{ fontSize: theme.fontSize.xs, letterSpacing: '0.08em' }}>CSV IMPORT HUB</span>
+          <span style={{ fontSize: theme.fontSize.xs, letterSpacing: '0.08em' }}>DATA UPLOAD</span>
           <h1 style={{ margin: 0, fontSize: 32 }}>Connect any vendor — even without an API.</h1>
           <p style={{ margin: 0, maxWidth: 680, color: 'rgba(255,255,255,0.8)' }}>
             Drop exports from POS, tee sheet, staffing, or reservations and let Swoop normalize, validate, and load them into the intelligence layer.

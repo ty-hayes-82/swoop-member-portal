@@ -13,7 +13,7 @@ const SCENARIOS = [
     title: 'Taking Action — Fix It',
     icon: '⚡', color: theme.colors.success,
     description: 'The AI agents have recommendations ready. Approve, assign, and send recovery outreach via Swoop app.',
-    steps: ['Agent Command → review pending actions', 'Approve GM call to James Whitfield', 'Assign extra Grill Room server for wind day', 'Send personalized check-in to at-risk members via Swoop app'],
+    steps: ['Intelligent Actions → review pending actions', 'Approve GM call to James Whitfield', 'Assign extra Grill Room server for wind day', 'Send personalized check-in to at-risk members via Swoop app'],
   },
   {
     title: '30 Days Later — Prove It',
