@@ -15,6 +15,7 @@ import { getDailyBriefing } from '@/services/briefingService.js';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { theme } from '@/config/theme.js';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
+import RecentInterventions from '@/components/ui/RecentInterventions.jsx';
 
 export default function DailyBriefing() {
   const { navigate, viewMode, setViewMode } = useNavigation();
@@ -56,6 +57,8 @@ export default function DailyBriefing() {
         onApproveTop={() => topAction && approveAction(topAction.id)}
         onOpenInbox={() => navigate('agent-command')}
       />
+
+      <RecentInterventions />
 
       {/* Mode switcher + print action */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -159,10 +162,10 @@ export default function DailyBriefing() {
           <Panel title="Today's Watch List" subtitle="What could affect today's operation?">
             <TodayRiskFactors data={briefing.todayRisks} onNavigate={navigate} />
             <ActionRecommendation
-              action="Review at-risk member status and schedule outreach calls"
+              action="Review at-risk members and send recovery outreach via Swoop app"
               owner="Membership Director"
               dueBy="Before 12:00 PM today"
-              proofMetric="2-3 personal calls completed, retention notes logged"
+              proofMetric="2-3 recovery touches sent via Swoop app, response tracked"
               variant="subtle"
             />
           </Panel>

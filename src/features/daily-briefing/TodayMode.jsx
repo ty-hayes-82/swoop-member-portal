@@ -88,6 +88,7 @@ export default function TodayMode({ onNavigate }) {
       urgency: 'urgent',
       icon: '⚠',
       headline: 'James Whitfield filed a complaint 6 days ago. No one has followed up.',
+      recommendation: 'GM to call James personally with apology + complimentary round. Send recovery note via Swoop app within 2 hours.',
       bullets: [
         'Complaint acknowledged but unresolved — timer exceeded 6-day SLA.',
         'Average Grill Room check dropped from $47 → $28 since January 3.',
@@ -113,6 +114,7 @@ export default function TodayMode({ onNavigate }) {
       urgency: 'warning',
       icon: '☁',
       headline: 'Wind advisory today — 15+ mph gusts expected by noon.',
+      recommendation: 'Prep extra Grill Room staff for early lunch surge. Send proactive text to afternoon bookers offering reschedule or indoor alternatives.',
       bullets: [
         'Wind days reduce confirmations by 15% once forecast lock hits.',
         '28 tee times after noon × $312 revenue/slot = $8,736 at risk.',
@@ -135,6 +137,7 @@ export default function TodayMode({ onNavigate }) {
       urgency: 'neutral',
       icon: '👥',
       headline: '2 more at-risk members have tee times today.',
+      recommendation: 'Pro shop staff to greet by name on arrival. Schedule post-round check-in via Swoop app. Flag for Membership Director follow-up tomorrow.',
       members: [
         { name: 'Anne Jordan', memberId: 'mbr_089', score: 38, archetype: 'Weekend Warrior', risk: '3 rounds in 3 months, down from 12 in October', time: '8:14 AM' },
         { name: 'Robert Callahan', memberId: 'mbr_271', score: 41, archetype: 'Declining', risk: 'Dining only — hitting F&B minimum, nothing more', time: '10:40 AM' },
@@ -407,7 +410,7 @@ export default function TodayMode({ onNavigate }) {
               color: theme.colors.textPrimary,
             }}
           >
-            <strong>Recommended:</strong> Membership Director to call top 3 at-risk members by end of day.
+            <strong>Recommended:</strong> {item.recommendation}
           </div>
         </div>
       ))}
