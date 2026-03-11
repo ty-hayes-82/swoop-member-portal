@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { theme } from '@/config/theme';
 import { getConnectedSystems } from '@/services/integrationsService';
+import UnifiedExperienceMap from '@/components/ui/UnifiedExperienceMap.jsx';
 import TwoLayerDiagram from '@/components/ui/TwoLayerDiagram.jsx';
 import DataSourceComparison from '@/components/ui/DataSourceComparison.jsx';
 
@@ -118,6 +119,7 @@ export function IntegrationsPage() {
 
   return (
     <>
+      <UnifiedExperienceMap />
       <TwoLayerDiagram />
       <DataSourceComparison />
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
