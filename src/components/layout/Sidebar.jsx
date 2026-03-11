@@ -8,6 +8,7 @@ const SIDEBAR_BG    = theme.colors.bgSidebar;
 const SIDEBAR_CARD  = theme.colors.sidebarCard;
 const SIDEBAR_HOVER = theme.colors.sidebarHover;
 const SIDEBAR_BORDER= theme.colors.sidebarBorder;
+const SIDEBAR_ACTIVE_BG = 'rgba(255,255,255,0.08)';
 const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
@@ -163,9 +164,10 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                     padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
                     minHeight: '44px',
                     justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
-                    background: active ? '#3A3A3A' : 'none',
+                    background: active ? SIDEBAR_ACTIVE_BG : 'none',
                     borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
                     color: active ? TEXT_LIGHT : TEXT_DIM,
+                    boxShadow: active ? 'inset 0 0 0 1px rgba(255,255,255,0.06)' : 'none',
                     fontSize: '13px',
                     fontWeight: active ? 600 : inactiveWeight,
                     transition: 'all 0.12s',
