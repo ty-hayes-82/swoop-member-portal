@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
+import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import { theme } from '@/config/theme';
 import QueueTab from './tabs/QueueTab';
 import PredictionsTab from './tabs/PredictionsTab';
@@ -60,6 +61,12 @@ export default function WaitlistDemand() {
         headline={`${waitlistSummary.highPriority} retention-priority members are waiting while ${cancellationSummary.highRisk} bookings show high cancel risk.`}
         context={`${getWaitlistInsight()} Route them directly inside ${ROUTE_LABEL}.`}
       />
+
+      <EvidenceStrip signals={[
+        { source: 'Tee Sheet', detail: 'Booking patterns and cancellation history' },
+        { source: 'CRM', detail: 'Member health score and dues at risk' },
+        { source: 'POS', detail: 'Post-round spend correlation' },
+      ]} />
 
       <Panel
         title={ROUTE_LABEL}

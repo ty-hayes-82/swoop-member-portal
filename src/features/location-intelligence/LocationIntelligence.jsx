@@ -347,7 +347,7 @@ export default function LocationIntelligence() {
       </div>
 
       <SoWhatCallout variant="opportunity">
-        Location Intelligence converts passive GPS pings into immediate actions: identify who is on property, route staff proactively, and prove interventions in minutes instead of hours.
+        On-Property intelligence converts passive GPS pings into immediate actions: identify who is on property, route staff proactively, and prove interventions in minutes instead of hours.
       </SoWhatCallout>
       <style>{`
         @keyframes location-alert-pulse {

@@ -123,6 +123,19 @@ function MemberRow({ m, isExpanded, onToggle }) {
         <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, maxWidth: 260 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{m.topRisk}</span>
+            {m.score < 50 && (
+              <span style={{ display: 'inline-flex', gap: '4px', flexShrink: 0 }}>
+                {m.topRisk?.toLowerCase().includes('round') || m.topRisk?.toLowerCase().includes('visit') || m.topRisk?.toLowerCase().includes('golf') || m.score < 35 ? (
+                  <span title="Rounds declining" style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: theme.colors.urgent + '20', color: theme.colors.urgent, fontWeight: 700 }}>Rounds ↓</span>
+                ) : null}
+                {m.topRisk?.toLowerCase().includes('dining') || m.topRisk?.toLowerCase().includes('f&b') || m.topRisk?.toLowerCase().includes('spend') || m.score < 40 ? (
+                  <span title="Dining declining" style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: theme.colors.warning + '20', color: theme.colors.warning, fontWeight: 700 }}>Dining ↓</span>
+                ) : null}
+                {m.topRisk?.toLowerCase().includes('email') || m.topRisk?.toLowerCase().includes('engagement') || m.topRisk?.toLowerCase().includes('interaction') ? (
+                  <span title="Email engagement declining" style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: theme.colors.accent + '20', color: theme.colors.accent, fontWeight: 700 }}>Email ↓</span>
+                ) : null}
+              </span>
+            )}
             <span style={{
               color: isExpanded ? theme.colors.accent : theme.colors.textMuted,
               flexShrink: 0, fontSize: '14px', fontWeight: 600,

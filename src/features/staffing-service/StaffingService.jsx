@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
+import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import ServiceTab from './tabs/ServiceTab';
 import StaffingTab from './tabs/StaffingTab';
 import StaffingPlaybooks from './StaffingPlaybooks';
@@ -22,6 +23,12 @@ export default function StaffingService() {
         headline="The Jan 16 complaint was never resolved. James Whitfield resigned Jan 22 — $18K in annual dues lost."
         context="A scheduling gap caused slow service. The complaint was acknowledged but not acted on. Four days later, the member is gone. This is the cost of a staffing gap that no single system could see — until now."
       />
+      <EvidenceStrip signals={[
+        { source: 'Staffing', detail: 'Coverage gaps and shift patterns' },
+        { source: 'Complaint', detail: 'Service failure correlation' },
+        { source: 'CRM', detail: 'Member resignation risk from service gaps' },
+      ]} />
+
       <Panel
         title="Staffing & Service"
         subtitle="Are we staffed right and serving members well?"

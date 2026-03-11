@@ -154,6 +154,12 @@ export default function GrowthPipeline() {
         headline="Your guest list is carrying four dues tiers worth $180K+."
         context="David Chen has played 8 times and spent $1,240. He's a $36K premium-tier prospect. Line him up with Sarah Mitchell ($36K) and Lisa Yamamoto ($24K high-tier) and you have $96K in dues before spring."
       />
+      <EvidenceStrip signals={[
+        { source: 'CRM', detail: 'Guest visit frequency and sponsor history' },
+        { source: 'POS', detail: 'Guest spend per visit' },
+        { source: 'Events', detail: 'Event attendance and engagement' },
+      ]} />
+
       <Panel
         title="Growth Pipeline"
         subtitle="Which guests are ready to become members?"

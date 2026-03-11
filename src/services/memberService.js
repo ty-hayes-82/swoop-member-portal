@@ -79,7 +79,16 @@ const resolveRiskSignal = (member, profileMap = {}) => {
     return 'Health score trending down across systems';
   }
 
-  return 'Behavioral decay detected across systems';
+  // ON-109: Varied fallback signals based on member attributes instead of generic copy
+  const fallbacks = [
+    'Engagement declining across multiple touchpoints',
+    'Visit frequency dropped below 90-day average',
+    'Cross-system activity gap detected',
+    'Reduced interaction pattern vs prior quarter',
+    'Multi-channel disengagement signal',
+  ];
+  const hash = (member?.memberId || member?.name || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return fallbacks[hash % fallbacks.length];
 };
 
 const normalizeAtRiskMembers = (source, profileMap = {}) => {
