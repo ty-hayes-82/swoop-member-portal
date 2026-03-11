@@ -13,7 +13,7 @@ const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-const SECTION_ORDER = ['RIGHT NOW', 'INTELLIGENCE', 'SYSTEM'];
+const SECTION_ORDER = ['YOUR CLUB TODAY', 'SERVICE & REVENUE', 'ACTIONS & SETUP'];
 
 export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const { currentRoute, navigate, sidebarCollapsed, toggleSidebar } = useNavigation();
@@ -24,7 +24,7 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const sectionBuckets = new Map();
   const sectionOrderFromItems = [];
   visibleNavItems.forEach((item) => {
-    const label = item.section ?? 'INTELLIGENCE';
+    const label = item.section ?? 'SERVICE & REVENUE';
     if (!sectionBuckets.has(label)) {
       sectionBuckets.set(label, []);
       sectionOrderFromItems.push(label);
