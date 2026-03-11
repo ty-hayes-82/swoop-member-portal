@@ -8,35 +8,35 @@
 
 ## Priority 1: P2 Polish (2-3 hours)
 
-- [ ] **GMC-06**: Split marketing content from operational view (Integrations page)
-  - Make "Two-Layer Intelligence" diagram collapsible/expandable
-  - Make comparison table collapsible for returning users
-  - Add toggle: "Show marketing content" / "Hide marketing content"
-  - Default: collapsed for logged-in users (assume demo mode for now)
+- [x] **GMC-06**: Split marketing content from operational view (Integrations page)
+  - ✅ Make "Two-Layer Intelligence" diagram collapsible/expandable
+  - ✅ Make comparison table collapsible for returning users
+  - ✅ Add toggle via CollapsibleSection component
+  - ✅ Default: collapsed for logged-in users (demo mode)
 
-- [ ] **GMC-07**: Reorder Integrations page sections
-  - Current order: intro → comparison → diagram → cards
-  - New order: diagram → What Swoop Adds → comparison → cards
-  - Move most compelling content higher
+- [x] **GMC-07**: Reorder Integrations page sections
+  - ✅ Current order: intro → comparison → diagram → cards
+  - ✅ New order: diagram → What Swoop Adds → comparison → cards
+  - ✅ Move most compelling content higher
 
 ---
 
 ## Priority 2: Medium Improvements (20-30 hours)
 
-- [ ] **DES-P05**: Redesign data tables (Member Risk, other pages)
-  - Add hover states to table rows
-  - Implement zebra striping (alternating row colors)
-  - Make health scores color-coded (red/yellow/green)
-  - Add sortable headers with sort indicators
-  - Improve mobile table behavior (stack or horizontal scroll)
-  - Files: `src/features/member-health/` table components
+- [x] **DES-P05**: Redesign data tables (Member Risk, other pages)
+  - ✅ Add hover states to table rows (with transform effect)
+  - ✅ Implement zebra striping (alternating row colors)
+  - ✅ Health scores already color-coded (red/yellow/green)
+  - ✅ Sortable headers already implemented
+  - ✅ Improve mobile table behavior (overflow scroll enabled)
+  - Files: `src/features/member-health/tabs/AllMembersView.jsx`
 
-- [ ] **DES-P06**: Add loading & empty states
-  - Create skeleton screen components
-  - Add shimmer animations during data fetch
-  - Design empty state cards for "no data" scenarios
-  - Implement optimistic UI for actions
-  - Apply to: Daily Briefing, Member Health, Revenue Leakage, Board Report
+- [x] **DES-P06**: Add loading & empty states
+  - ✅ Create skeleton screen components (SkeletonLoader.jsx)
+  - ✅ Add shimmer animations during data fetch
+  - ✅ Design empty state cards for "no data" scenarios (EmptyState.jsx)
+  - ⏳ Implement optimistic UI for actions (TODO: integrate into pages)
+  - ⏳ Apply to: Daily Briefing, Member Health, Revenue Leakage, Board Report (components ready, need integration)
 
 - [ ] **DES-P07**: Alert card density optimization
   - Improve padding/spacing consistency
