@@ -468,14 +468,16 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
           <div style={sectionStyle}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 8 }}>Execution details</div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 8 }}>
-              Outcomes apply immediately when you click an action button.
+              You can approve different execution paths. All approvals are tracked in the Intervention Queue.
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Send:</strong> Sends the selected draft now and marks the action approved.</div>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Schedule:</strong> Marks the action approved and schedules outreach for later.</div>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Assign:</strong> Marks the action approved and routes it to an owner for follow-up.</div>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Snooze 2h:</strong> Hides this action for two hours, then re-surfaces it if still relevant.</div>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Dismiss:</strong> Removes this action from the queue and logs a required reason.</div>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Send:</strong> Sends a push to the member in the Swoop app and logs outreach in the Intervention Queue.</div>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Schedule:</strong> Schedules outreach for the next best window and re-checks engagement before sending.</div>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Assign:</strong> Assigns this outreach to a staff owner and tracks completion + member response.</div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 8 }}>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Snooze 2h:</strong> Hides for 2 hours, then resurfaces if still relevant.</div>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Dismiss:</strong> Marks as reviewed; no outreach is sent.</div>
             </div>
           </div>
 

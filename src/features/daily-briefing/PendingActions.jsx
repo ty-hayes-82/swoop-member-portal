@@ -38,7 +38,7 @@ export default function PendingActions({ actions, onNavigate }) {
               </div>
               {!isActive && (
                 <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: '2px' }}>
-                  Activate starts monitoring and queues agent actions in Intervention Queue.
+                  Activating starts monitoring + queues agent actions as signals change.
                 </div>
               )}
             </div>
@@ -63,11 +63,6 @@ export default function PendingActions({ actions, onNavigate }) {
                 >
                   {isActive ? 'Active' : 'Activate'}
                 </button>
-                {!isActive && (
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textAlign: 'right', maxWidth: 180 }}>
-                    Starts monitoring and queues agent actions.
-                  </div>
-                )}
               </div>
             </div>
           </div>
