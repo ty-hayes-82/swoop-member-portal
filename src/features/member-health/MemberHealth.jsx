@@ -5,12 +5,14 @@ import ArchetypeTab from './tabs/ArchetypeTab';
 import EmailTab from './tabs/EmailTab';
 import ResignationTimeline from './ResignationTimeline';
 import MemberPlaybooks from './MemberPlaybooks';
+import AllMembersView from './tabs/AllMembersView';
 import { sourceSystems } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 
 const TABS = [
   { key: 'health',       label: 'Health Overview' },
+  { key: 'all-members',  label: 'All Members' },
   { key: 'archetypes',   label: 'Archetypes' },
   { key: 'email',        label: 'Email Decay' },
   { key: 'resignations', label: 'Resignations' },
@@ -77,6 +79,7 @@ export default function MemberHealth() {
         sourceSystems={sourceSystems}
       >
         {activeTab === 'health'       && <HealthOverview />}
+        {activeTab === 'all-members'  && <AllMembersView />}
         {activeTab === 'archetypes'   && <ArchetypeTab />}
         {activeTab === 'email'        && <EmailTab />}
         {activeTab === 'resignations' && <ResignationTimeline />}
