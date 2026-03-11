@@ -152,7 +152,7 @@ export const navItems = [
     color: theme.colors.navMembers,
     subtitle: 'Full member dossier with history, family, preferences, and invoices.',
     sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Analytics'],
-    hidden: false,
+    hidden: true,
   },
   {
     key: 'demo-mode',
