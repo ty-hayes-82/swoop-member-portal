@@ -9,6 +9,7 @@ export const trends = {
   // December held flat at $228K so January's $204K shows a believable −10% swing
   fbRevenue:             [108000, 110000, 116000, 110000, 228000, 204000],
   golfRevenue:           [298000, 312000, 326000, 318000, 335000, 352400],
+  totalRevenue:          [280000, 296000, 312000, 325000, 274000, 307000],
   avgDiningCheck:        [36.2, 37.0, 38.4, 37.8, 38.0, 38.6],
   emailOpenRateAvg:      [0.42, 0.41, 0.40, 0.38, 0.37, 0.36],
   complaintsPerMonth:               [18,   20,   22,   24,   28,   34  ],

@@ -73,7 +73,7 @@ export default function RevenueTab() {
       {/* KPI strip */}
       <div className="grid-responsive-4">
         {[
-          { label: 'Monthly Total', value: `$${(summary.total / 1000).toFixed(0)}K`, metric: 'golfRevenue', format: 'currency' },
+          { label: 'Monthly Total', value: `$${(summary.total / 1000).toFixed(0)}K`, metric: 'totalRevenue', format: 'currency' },
           { label: 'Daily Average', value: `$${summary.dailyAvg.toLocaleString()}`, metric: null },
           { label: 'Weekend Avg', value: `$${summary.weekendAvg.toLocaleString()}`, metric: null },
           { label: 'Weekday Avg', value: `$${summary.weekdayAvg.toLocaleString()}`, metric: null },
