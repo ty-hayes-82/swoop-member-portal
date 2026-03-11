@@ -21,6 +21,34 @@
 
 ---
 
+## Final Polish Items (4-7 hours) ✅ COMPLETE
+
+- [x] **FP-P01**: Clarify Action Workflow Inline (P0 - 2-3 hours)
+  - ✅ Add tooltip or expandable section to action buttons
+  - ✅ Show workflow: "Approve → Sends push notification via Swoop app → Tracks in Intervention Queue → GM sees response status within 24h"
+  - ✅ Applied to AgentInboxStrip (Approve button)
+  - ✅ Applied to AgentActionCard (Approve/Dismiss buttons with "What happens next?" tooltip)
+  - ✅ Files updated: `src/components/ui/AgentInboxStrip.jsx`, `src/components/ui/AgentActionCard.jsx`
+
+- [x] **FP-P02**: Integrate Loading States (P1 - 1-2 hours)
+  - ✅ Import SkeletonLoader components (already exist from DES-P06)
+  - ✅ Add loading state to Daily Briefing (SkeletonDashboard, 600ms)
+  - ✅ Add loading state to Member Health (SkeletonMemberList, 650ms)
+  - ✅ Add loading state to Revenue Leakage (SkeletonGrid, 700ms)
+  - ✅ Add loading state to Board Report (SkeletonGrid, 750ms)
+  - ✅ Simulated 500-800ms load time (prepared for future API integration)
+
+- [x] **FP-P03**: Integrate Micro-Interactions (P2 - 2-3 hours)
+  - ✅ Import PageTransition, AnimatedNumber (already exist from DES-P10)
+  - ✅ Wrap Daily Briefing in PageTransition
+  - ✅ Wrap Member Health in PageTransition
+  - ✅ Wrap Revenue Leakage in PageTransition
+  - ✅ Wrap Board Report in PageTransition
+  - ✅ Use AnimatedNumber for KPI metrics in Board Report (1200ms duration)
+  - ✅ Smooth fade-in animations on page load (300ms default)
+
+---
+
 ## Priority 2: Medium Improvements (20-30 hours)
 
 - [x] **DES-P05**: Redesign data tables (Member Risk, other pages)
