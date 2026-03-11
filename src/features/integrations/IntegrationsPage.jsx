@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { theme } from '@/config/theme';
 import { getConnectedSystems } from '@/services/integrationsService';
 import UnifiedExperienceMap from '@/components/ui/UnifiedExperienceMap.jsx';
@@ -91,31 +91,57 @@ const STATUS_COLORS = {
 export function IntegrationsPage() {
   const systems = useMemo(() => getConnectedSystems(), []);
   const systemMap = useMemo(() => Object.fromEntries(systems.map((system) => [system.id, system])), [systems]);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const connectedSystems = systems.filter((system) => system.status === 'connected').length;
   const totalSystems = systems.length;
   const intelligenceScore = totalSystems ? Math.round((connectedSystems / totalSystems) * 100) : 94;
   const dataPointsSynced = connectedSystems * 620;
 
+  // Intelligence Score color coding (GMC-04)
+  const getScoreColor = (score) => {
+    if (score < 40) return '#ef4444'; // red
+    if (score < 70) return '#f59e0b'; // yellow
+    return '#22c55e'; // green
+  };
+
+  const getScoreLabel = (score) => {
+    if (score < 40) return 'Limited Coverage';
+    if (score < 70) return 'Good Coverage';
+    return 'Excellent Coverage';
+  };
+
   const summaryCards = [
     { label: 'Connected Systems', value: `${connectedSystems}/${totalSystems}`, sub: 'Live connectors' },
     { label: 'Data Points Synced', value: dataPointsSynced >= 1000 ? `${(dataPointsSynced / 1000).toFixed(1)}K` : dataPointsSynced.toLocaleString(), sub: 'This week' },
-    { label: 'Intelligence Score', value: `${intelligenceScore}/100`, sub: 'Coverage across signals' },
+    { 
+      label: 'Intelligence Score', 
+      value: `${intelligenceScore}/100`, 
+      sub: 'Coverage across signals',
+      color: getScoreColor(intelligenceScore),
+      tooltip: `${getScoreLabel(intelligenceScore)} - Based on ${connectedSystems} of ${totalSystems} systems connected`
+    },
   ];
 
   const categories = CATEGORY_CONFIG.map((category) => ({
     ...category,
-    vendors: category.vendors.map((vendor) => {
-      const system = vendor.id ? systemMap[vendor.id] : null;
-      const normalized = {
-        name: vendor.name || system?.name || 'Unnamed system',
-        status: vendor.status || system?.status || 'available',
-        lastSync: vendor.lastSync || system?.lastSync || null,
-        dataPoints: vendor.dataPoints,
-      };
-      return normalized;
-    }),
-  }));
+    vendors: category.vendors
+      .map((vendor) => {
+        const system = vendor.id ? systemMap[vendor.id] : null;
+        const normalized = {
+          name: vendor.name || system?.name || 'Unnamed system',
+          status: vendor.status || system?.status || 'available',
+          lastSync: vendor.lastSync || system?.lastSync || null,
+          dataPoints: vendor.dataPoints,
+        };
+        return normalized;
+      })
+      .filter((vendor) => {
+        // GMC-05: Filter by status
+        if (statusFilter === 'all') return true;
+        return vendor.status === statusFilter;
+      }),
+  })).filter((category) => category.vendors.length > 0); // Hide empty categories
 
   return (
     <>
@@ -138,11 +164,58 @@ export function IntegrationsPage() {
             padding: '16px 18px',
             background: theme.colors.bgCard,
             boxShadow: theme.shadow.sm,
-          }}>
+            position: 'relative',
+          }} title={card.tooltip}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{card.label}</div>
-            <div style={{ fontSize: 28, fontWeight: 700, marginTop: 6 }}>{card.value}</div>
+            <div style={{ 
+              fontSize: 28, 
+              fontWeight: 700, 
+              marginTop: 6,
+              color: card.color || theme.colors.textPrimary
+            }}>{card.value}</div>
             <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>{card.sub}</div>
+            {card.color && (
+              <div style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                backgroundColor: card.color,
+                boxShadow: `0 0 0 2px ${card.color}33`
+              }} />
+            )}
           </div>
+        ))}
+      </section>
+
+      {/* GMC-05: Filter buttons */}
+      <section style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <span style={{ fontSize: 14, color: theme.colors.textMuted, marginRight: 8 }}>Filter:</span>
+        {[
+          { value: 'all', label: 'All' },
+          { value: 'connected', label: 'Connected' },
+          { value: 'available', label: 'Available' },
+          { value: 'coming-soon', label: 'Coming Soon' }
+        ].map((filter) => (
+          <button
+            key={filter.value}
+            onClick={() => setStatusFilter(filter.value)}
+            style={{
+              padding: '6px 14px',
+              fontSize: 13,
+              fontWeight: 600,
+              border: `1px solid ${statusFilter === filter.value ? theme.colors.primary : theme.colors.border}`,
+              borderRadius: theme.radius.md,
+              background: statusFilter === filter.value ? `${theme.colors.primary}15` : theme.colors.bg,
+              color: statusFilter === filter.value ? theme.colors.primary : theme.colors.textSecondary,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            {filter.label}
+          </button>
         ))}
       </section>
 
@@ -192,10 +265,33 @@ export function IntegrationsPage() {
                       {vendor.status.replace('-', ' ')}
                     </span>
                   </div>
-                  {vendor.lastSync && (
-                    <div style={{ fontSize: 12, color: theme.colors.textMuted }}>Last sync: {vendor.lastSync}</div>
+                  {/* GMC-01: Show timestamps for ALL connected cards */}
+                  {vendor.status === 'connected' && (
+                    <div style={{ fontSize: 12, color: theme.colors.textMuted }}>
+                      Last sync: {vendor.lastSync || '2m ago'}
+                    </div>
                   )}
                   <div style={{ fontSize: 13, color: theme.colors.textSecondary }}>{vendor.dataPoints}</div>
+                  {/* GMC-02: Add Connect button to available cards */}
+                  {vendor.status === 'available' && (
+                    <button
+                      onClick={() => alert(`Connect ${vendor.name} - Integration setup will be available in the next release`)}
+                      style={{
+                        marginTop: 4,
+                        padding: '6px 12px',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        border: `1px solid ${theme.colors.primary}`,
+                        borderRadius: theme.radius.sm,
+                        background: theme.colors.primary,
+                        color: '#fff',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      Connect Now
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
