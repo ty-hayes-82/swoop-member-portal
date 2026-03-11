@@ -4,28 +4,28 @@ import { theme } from '@/config/theme';
 
 const SCENARIOS = [
   {
-    title: '"Bad Day" Scenario',
-    icon: '📉', color: theme.colors.warning,
-    description: 'Trace why January 16th underperformed — from understaffing to revenue impact.',
-    steps: ['Operations → Daily Revenue', 'Click Jan 16 understaffed marker', 'Staffing & Service → Staffing Impact', 'Activate Staffing Gap Prevention playbook'],
+    title: 'This Morning — See It',
+    icon: '☀️', color: theme.colors.accent,
+    description: 'It is 7:15 AM. What does your GM see? Open the Daily Briefing and walk through the three priorities.',
+    steps: ['Daily Briefing → Today mode', 'Review James Whitfield alert (6-day unresolved complaint)', 'Check wind advisory impact on afternoon tee times', 'See 2 at-risk members with tee times today'],
   },
   {
-    title: '"Churn Risk" Scenario',
-    icon: '⚠️', color: theme.colors.urgent,
-    description: 'The James Whitfield story: how an active member goes from complaint to resignation in 4 days.',
-    steps: ['Member Retention → Health Overview', 'Find James Whitfield in the at-risk table', 'Staffing & Service → Service Quality', 'Activate the Service Save response plan'],
+    title: 'Taking Action — Fix It',
+    icon: '⚡', color: theme.colors.success,
+    description: 'The AI agents have recommendations ready. Approve, assign, and send recovery outreach via Swoop app.',
+    steps: ['Agent Command → review pending actions', 'Approve GM call to James Whitfield', 'Assign extra Grill Room server for wind day', 'Send personalized check-in to at-risk members via Swoop app'],
   },
   {
-    title: '"Hidden Revenue" Scenario',
-    icon: '💰', color: theme.colors.success,
-    description: 'Slow rounds are silently costing $5,760/month in lost dining. Show the math.',
-    steps: ['Operations → Pace of Play', 'Review slow round rate (28%)', 'See F&B impact inline', 'Activate Slow Saturday Recovery'],
+    title: '30 Days Later — Prove It',
+    icon: '📊', color: theme.colors.pipeline,
+    description: 'Show the board what was prevented: members saved, revenue protected, and service failures caught before members felt them.',
+    steps: ['Recent Interventions → 3 saves this week', 'Member Health → James Whitfield score 42 → 67', 'Staffing → Friday gaps eliminated, avg check held at 7', 'Revenue → 68K in annual dues protected'],
   },
   {
-    title: '"Pipeline" Scenario',
-    icon: '🎯', color: theme.colors.pipeline,
-    description: 'An $18K membership is hiding in guest data. One name, one conversation.',
-    steps: ['Growth Pipeline', 'Expand David Chen lead card', 'Review 92% conversion score', 'Discuss sponsor-led outreach'],
+    title: 'The Data Moat',
+    icon: '🌐', color: theme.colors.warning,
+    description: 'Why Swoop sees what no single system can. Two layers of intelligence from 28 integrations + the Swoop member app.',
+    steps: ['Integrations → Two-Layer Diagram', 'GPS data: members leaving after 9 holes', 'Cross-system: tee sheet pace → dining conversion', 'Health scores combining 6+ signal sources'],
   },
 ];
 

@@ -28,7 +28,7 @@ export default function MemberHealth() {
           <StoryHeadline
             variant="urgent"
             headline="5 members will resign this month — all showed decay signals 6–8 weeks before leaving."
-            context="Email open rates dropped first, then golf frequency, then dining. No single system sees the full picture. Swoop connected all three — 30 more members are showing early-stage decay right now."
+            context="Email open rates dropped first, then golf frequency, then dining. GPS data shows 3 members consistently leaving after 9 holes — an early churn signal invisible to the tee sheet. No single system sees the full picture. Swoop connected all three — 30 more members are showing early-stage decay right now."
           />
           <button
             type="button"
