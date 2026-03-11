@@ -5,6 +5,7 @@ import MemberLink from '@/components/MemberLink.jsx';
 import { getMemberProfile } from '@/services/memberService';
 import { getAgentById } from '@/services/agentService';
 import { SourceBadgeRow } from '@/components/ui/SourceBadge';
+import InfoTooltip from '@/components/ui/InfoTooltip';
 
 function formatTime(timestamp) {
   return new Date(timestamp).toLocaleString('en-US', {
@@ -128,9 +129,10 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
 
       {!isDone && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {/* GMC-03: Clarify action workflow */}
-          <div style={{ fontSize: '10px', color: theme.colors.textMuted, lineHeight: 1.3 }}>
-            Approve → Sends via Swoop app → Track in Intervention Queue
+          {/* FP-P01: Enhanced workflow clarity with info tooltip */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '10px', color: theme.colors.textMuted, lineHeight: 1.3 }}>
+            <span>What happens next?</span>
+            <InfoTooltip text="Approve → Sends push notification via Swoop app → Tracks in Intervention Queue → GM sees response status within 24h. Dismiss → Marks as reviewed without sending." />
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button
