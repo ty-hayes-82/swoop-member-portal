@@ -17,6 +17,20 @@ const FOG          = '#EFEFEF';
 const PORCELAIN    = '#F8F9FA';
 const PAPER        = '#FFFFFF';
 
+// Semantic color scales (DES-P03)
+const SUCCESS_50   = '#F0FDF4';
+const SUCCESS_500  = '#22C55E';
+const SUCCESS_700  = '#15803D';
+const WARNING_50   = '#FFFBEB';
+const WARNING_500  = '#F59E0B';
+const WARNING_700  = '#B45309';
+const DANGER_50    = '#FEF2F2';
+const DANGER_500   = '#EF4444';
+const DANGER_700   = '#B91C1C';
+const INFO_50      = '#EFF6FF';
+const INFO_500     = '#3B82F6';
+const INFO_700     = '#1D4ED8';
+
 export const theme = {
   colors: {
     bg:           PORCELAIN,
@@ -40,10 +54,24 @@ export const theme = {
     pipeline:     ORANGE_MUTED,
     briefing:     GRAPHITE,
 
-    urgent:       '#C0392B',
-    warning:      ORANGE_DEEP,
-    success:      ORANGE,
-    info:         GRAPHITE,
+    // Semantic colors (DES-P03)
+    success50:    SUCCESS_50,
+    success500:   SUCCESS_500,
+    success700:   SUCCESS_700,
+    warning50:    WARNING_50,
+    warning500:   WARNING_500,
+    warning700:   WARNING_700,
+    danger50:     DANGER_50,
+    danger500:    DANGER_500,
+    danger700:    DANGER_700,
+    info50:       INFO_50,
+    info500:      INFO_500,
+    info700:      INFO_700,
+
+    urgent:       DANGER_700,
+    warning:      WARNING_700,
+    success:      SUCCESS_500,
+    info:         INFO_700,
     black:        BLACK,
     white:        PAPER,
 
