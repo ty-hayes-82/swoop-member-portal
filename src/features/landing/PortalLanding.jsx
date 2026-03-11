@@ -2,6 +2,7 @@
 import { theme } from '@/config/theme'
 
 const CTA_URL = 'https://swoop-member-intelligence-website.vercel.app/book-demo'
+const MARKETING_HOME = 'https://swoop-member-intelligence-website.vercel.app'
 
 const quickWins = [
   {
@@ -93,7 +94,7 @@ export default function PortalLanding() {
           The marketing site has complete capability deep dives, integration details, and implementation guides. Continue there when you're ready to brief your board or operations team.
         </p>
         <a
-          href={CTA_URL}
+          href={MARKETING_HOME}
           target="_blank"
           rel="noreferrer"
           style={{
