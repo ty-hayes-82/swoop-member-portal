@@ -26,7 +26,7 @@ export default function ComparisonCard({ fastData, slowData, delta }) {
         gridTemplateColumns: '1fr auto 1fr',
         gap: theme.spacing.lg,
         alignItems: 'center',
-      }}>
+      }} data-comparison-grid>
         {/* Fast Rounds Column */}
         <div style={{
           background: `linear-gradient(135deg, ${theme.colors.opportunity}10, ${theme.colors.opportunity}05)`,

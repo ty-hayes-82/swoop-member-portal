@@ -186,7 +186,7 @@ export default function RecoveryCTA({ recoverableAmount, totalLoss, onViewStaffi
               e.currentTarget.style.boxShadow = `0 4px 12px ${theme.colors.opportunity}40`;
             }}
             >
-              📋 See Recommended Ranger Plan
+              📋 Approve Ranger Schedule
             </button>
             <button style={{
               background: 'white',
@@ -207,7 +207,7 @@ export default function RecoveryCTA({ recoverableAmount, totalLoss, onViewStaffi
             }}
             onClick={onViewStaffingTab}
             >
-              👁️ Review Staffing Action Plan
+              👁️ View Staffing Tab
             </button>
           </div>
         </div>
