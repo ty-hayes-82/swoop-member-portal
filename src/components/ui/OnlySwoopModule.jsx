@@ -75,6 +75,7 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
                     fontSize: theme.fontSize.xs,
                     color: theme.colors.textMuted,
                     textTransform: 'uppercase',
+                  fontWeight: 600,
                     letterSpacing: '0.08em',
                   }}>
                     {icon ? `${icon} ${label}` : label}
@@ -142,6 +143,7 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
                   color: theme.colors.textMuted,
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',
+                  fontWeight: 600,
                 }}
               >
                 As of {resolvedTimestamp}
