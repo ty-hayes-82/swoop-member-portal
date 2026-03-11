@@ -13,8 +13,8 @@ export default function BottleneckChart({ holes }) {
   const getImpactColor = (impact) => {
     const ratio = impact / maxImpact;
     if (ratio > 0.8) return theme.colors.risk;
-    if (ratio > 0.5) return '#F59E0B'; // warning amber
-    return '#6BB8EF'; // info blue
+    if (ratio > 0.5) return theme.colors.warning;
+    return theme.colors.info;
   };
 
   const getImpactLabel = (impact) => {
