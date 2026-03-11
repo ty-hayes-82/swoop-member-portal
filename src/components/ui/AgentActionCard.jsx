@@ -4,6 +4,7 @@ import { AGENT_ACTION_TYPES } from '@/config/actionTypes';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getMemberProfile } from '@/services/memberService';
 import { getAgentById } from '@/services/agentService';
+import { SourceBadgeRow } from '@/components/ui/SourceBadge';
 
 function formatTime(timestamp) {
   return new Date(timestamp).toLocaleString('en-US', {
@@ -86,6 +87,12 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
           <MemberLink memberId={memberProfile.memberId} style={{ fontWeight: 700 }}>{memberProfile.name}</MemberLink>
           <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{memberProfile.tier}</span>
           <span style={{ fontSize: '11px', fontFamily: theme.fonts.mono, color: theme.colors.textSecondary }}>Score {memberProfile.healthScore}</span>
+        </div>
+      )}
+
+      {action.signals && action.signals.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          <SourceBadgeRow sources={action.signals} size="xs" />
         </div>
       )}
 
