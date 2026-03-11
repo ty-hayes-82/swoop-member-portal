@@ -16,6 +16,7 @@ import { useNavigation } from '@/context/NavigationContext.jsx';
 import { theme } from '@/config/theme.js';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 import RecentInterventions from '@/components/ui/RecentInterventions.jsx';
+import TwoLayerDiagram from '@/components/ui/TwoLayerDiagram.jsx';
 
 export default function DailyBriefing() {
   const { navigate, viewMode, setViewMode } = useNavigation();
@@ -48,7 +49,7 @@ export default function DailyBriefing() {
             {' '}filed a complaint Jan 18. It was never resolved. He resigned Jan 22 — $18K/year in dues lost.
           </>
         )}
-        context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. The Jan 9 and Jan 28 gaps follow the same pattern."
+        context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. What Swoop would have done: Alert surfaced Day 1 → GM sends recovery message via Swoop app → James responds same day → Health score monitored weekly → Retention confirmed."
       />
 
       <AgentInboxStrip
@@ -144,7 +145,7 @@ export default function DailyBriefing() {
             </div>
             <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6 }}>
               <strong style={{ color: theme.colors.textPrimary }}>What happened: </strong>
-              Grill Room short-staffed Jan 16 → 40-minute wait for James's lunch → He filed a complaint that evening → We acknowledged it, no one followed up → He hasn't been back in 6 days → <strong style={{ color: theme.colors.urgent }}>At risk of resigning by Jan 22</strong>
+              GPS showed James stopped visiting the Grill Room after Jan 12. Grill Room short-staffed Jan 16 → 40-minute wait for James's lunch → He filed a complaint that evening → We acknowledged it, no one followed up → He hasn't been back in 6 days → <strong style={{ color: theme.colors.urgent }}>At risk of resigning by Jan 22</strong>
             </div>
             <ActionRecommendation
               action="Personal call from GM + complimentary round offer + F&B recovery gesture"
@@ -177,6 +178,8 @@ export default function DailyBriefing() {
           </Panel>
 
           <DataQuality />
+
+          <TwoLayerDiagram variant="compact" />
 
           <ConnectedSystems />
         </>

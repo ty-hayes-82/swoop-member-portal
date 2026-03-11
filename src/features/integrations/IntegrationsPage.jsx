@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { theme } from '@/config/theme';
 import { getConnectedSystems } from '@/services/integrationsService';
+import TwoLayerDiagram from '@/components/ui/TwoLayerDiagram.jsx';
 
 const EMAIL_VENDOR_IDS = ['hubspot', 'mailchimp'];
 const ACCOUNTING_VENDOR_IDS = ['quickbooks', 'club-prophet'];
@@ -115,6 +116,8 @@ export function IntegrationsPage() {
   }));
 
   return (
+    <>
+      <TwoLayerDiagram />
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       <header style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <h1 style={{ margin: 0, fontSize: 28, color: theme.colors.textPrimary }}>Connected Systems</h1>
@@ -208,5 +211,7 @@ export function IntegrationsPage() {
         </ul>
       </section>
     </div>
-  );
+  
+    </>
+    );
 }
