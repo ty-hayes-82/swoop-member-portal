@@ -9,7 +9,7 @@ const VALID_ROUTES = new Set([
   'member-health', 'staffing-service', 'growth-pipeline', 'agent-command',
   'location-intelligence', 'integrations', 'demo-mode', 'member-profile',
   'integrations/csv-import',
-  'csv-import', 'landing',
+  'csv-import',
 ]);
 
 function parseHash() {
@@ -20,6 +20,11 @@ function parseHash() {
     return { route: 'member-profile', memberId: memberId || null };
   }
   const normalized = raw.replace(/\/+$/, '');
+  // Redirect legacy /landing route to daily-briefing
+  if (normalized === 'landing') {
+    window.history.replaceState(null, '', '#/daily-briefing');
+    return { route: 'daily-briefing', memberId: null };
+  }
   const safeRoute = normalized || 'daily-briefing';
   return { route: VALID_ROUTES.has(safeRoute) ? safeRoute : 'daily-briefing', memberId: null };
 }

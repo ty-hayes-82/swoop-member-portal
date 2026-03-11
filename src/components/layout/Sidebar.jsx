@@ -163,7 +163,7 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                     padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
                     minHeight: '44px',
                     justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
-                    background: active ? SIDEBAR_HOVER : 'none',
+                    background: active ? '#3A3A3A' : 'none',
                     borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
                     color: active ? TEXT_LIGHT : TEXT_DIM,
                     fontSize: '13px',

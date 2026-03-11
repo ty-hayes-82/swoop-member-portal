@@ -73,6 +73,11 @@ export const agentActions = [
     suggestedOwner: 'GM · Alice Monroe',
     recommendedChannel: 'Call',
     confidence: 0.93,
+    signals: [
+      { system: 'Complaint Log', signal: 'Unresolved complaint', timestamp: 'Jan 16' },
+      { system: 'Tee Sheet', signal: 'Tee time 9:20 AM', timestamp: 'Today' },
+      { system: 'Member CRM', signal: 'Health score 42', timestamp: 'Now' },
+    ],
     auditTrail: [
       { id: 'rec', status: 'Recommended', owner: 'Member Pulse', timestamp: '2026-01-17T06:02:00Z' },
     ],
@@ -92,6 +97,11 @@ export const agentActions = [
     suggestedOwner: 'Membership Director · Rafael Reyes',
     recommendedChannel: 'SMS',
     confidence: 0.88,
+    signals: [
+      { system: 'Tee Sheet', signal: 'Cancellation 7:00 AM Sat', timestamp: '6:03 AM' },
+      { system: 'Member CRM', signal: 'Health score 54', timestamp: 'Today' },
+      { system: 'Analytics', signal: 'Waitlist position #3', timestamp: 'Now' },
+    ],
     auditTrail: [
       { id: 'rec', status: 'Recommended', owner: 'Demand Optimizer', timestamp: '2026-01-17T06:04:00Z' },
     ],
@@ -111,6 +121,11 @@ export const agentActions = [
     suggestedOwner: 'Service Recovery · Maya Chen',
     recommendedChannel: 'Email',
     confidence: 0.82,
+    signals: [
+      { system: 'Complaint Log', signal: '40-min wait complaint', timestamp: 'Jan 14' },
+      { system: 'POS', signal: 'Lunch order #4721', timestamp: 'Jan 14 12:23 PM' },
+      { system: 'Scheduling', signal: 'Understaffed shift', timestamp: 'Jan 14' },
+    ],
     auditTrail: [
       { id: 'rec', status: 'Queued for drafting', owner: 'Labor Optimizer', timestamp: '2026-01-17T06:09:00Z' },
     ],
@@ -126,6 +141,11 @@ export const agentActions = [
     impactMetric: '$2.1K F&B revenue protected',
     priority: 'medium',
     memberId: 'mbr_146',
+    signals: [
+      { system: 'Weather API', signal: 'Wind gusts 15+ mph', timestamp: 'Noon forecast' },
+      { system: 'Tee Sheet', signal: '28 tee times at risk', timestamp: 'Today' },
+      { system: 'POS', signal: 'Lunch demand +34%', timestamp: 'Wind days avg' },
+    ],
   },
   {
     id: 'agx_005',
@@ -178,6 +198,11 @@ export const agentActions = [
     suggestedOwner: 'F&B Director · Maya Chen',
     recommendedChannel: 'Call',
     confidence: 0.9,
+    signals: [
+      { system: 'Complaint Log', signal: 'Unresolved 9 days', timestamp: 'Jan 8' },
+      { system: 'Member CRM', signal: 'Health score 47', timestamp: 'Today' },
+      { system: 'Email', signal: 'Zero follow-up sent', timestamp: 'Since Jan 8' },
+    ],
     auditTrail: [
       { id: 'rec', status: 'Escalated', owner: 'Service Recovery', timestamp: '2026-01-17T07:27:00Z' },
     ],
@@ -193,6 +218,11 @@ export const agentActions = [
     impactMetric: '$780 incremental weekly revenue',
     priority: 'low',
     memberId: 'mbr_312',
+    signals: [
+      { system: 'Tee Sheet', signal: '42% fill rate Tue PM', timestamp: '4-week avg' },
+      { system: 'Analytics', signal: 'Price elasticity 0.72', timestamp: 'Historical' },
+      { system: 'POS', signal: 'F&B add-on $47/round', timestamp: 'Twilight avg' },
+    ],
   },
   {
     id: 'agx_010',
@@ -221,6 +251,11 @@ export const agentActions = [
     suggestedOwner: 'GM · Alice Monroe',
     recommendedChannel: 'Call',
     confidence: 0.91,
+    signals: [
+      { system: 'Complaint Log', signal: 'SLA breach 6 days', timestamp: 'Jan 16' },
+      { system: 'Member CRM', signal: '$18K dues at risk', timestamp: 'Today' },
+      { system: 'Tee Sheet', signal: 'Tee time 9:20 AM', timestamp: 'Today' },
+    ],
     auditTrail: [
       { id: 'rec', status: 'Escalated', owner: 'Service Recovery', timestamp: '2026-01-17T08:43:00Z' },
     ],

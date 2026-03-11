@@ -37,7 +37,7 @@ export const navItems = [
     color: theme.colors.navOperations,
     subtitle: 'Where is everyone on property right now?',
     sourceSystems: ['Swoop App', 'Member CRM'],
-    hidden: true,
+    hidden: false,
   },
   {
     key: 'member-health',
@@ -56,7 +56,7 @@ export const navItems = [
     color: theme.colors.navMembers,
     subtitle: 'Full member dossier with history, family, preferences, and invoices.',
     sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Analytics'],
-    hidden: true,
+    hidden: false,
   },
   {
     key: 'fb-performance',
@@ -112,7 +112,7 @@ export const navItems = [
     color: theme.colors.navIntegrations,
     subtitle: 'Upload CSV/XLSX when APIs are missing.',
     sourceSystems: [],
-    hidden: true,
+    hidden: false,
   },
   {
     key: 'demo-mode',
