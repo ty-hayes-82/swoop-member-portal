@@ -1,6 +1,6 @@
 import { theme } from '@/config/theme';
 
-export default function RecoveryCTA({ recoverableAmount, totalLoss, staffingTabAmount }) {
+export default function RecoveryCTA({ recoverableAmount, totalLoss, onViewStaffingTab }) {
   const remainingGap = totalLoss - recoverableAmount;
   const recoverablePercent = ((recoverableAmount / totalLoss) * 100).toFixed(0);
   const remainingPercent = ((remainingGap / totalLoss) * 100).toFixed(0);
@@ -11,7 +11,7 @@ export default function RecoveryCTA({ recoverableAmount, totalLoss, staffingTabA
       border: `3px solid ${theme.colors.opportunity}`,
       borderRadius: 16,
       padding: theme.spacing.xl,
-      boxShadow: '0 8px 24px rgba(74, 222, 128, 0.15)',
+      boxShadow: theme.shadow.glow(theme.colors.opportunity),
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: theme.spacing.lg }}>
         {/* Icon */}
@@ -57,7 +57,7 @@ export default function RecoveryCTA({ recoverableAmount, totalLoss, staffingTabA
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#1F2F24',
+                color: theme.colors.textPrimary,
                 fontWeight: 700,
                 fontSize: 14,
                 fontFamily: theme.fonts.mono,
@@ -167,7 +167,7 @@ export default function RecoveryCTA({ recoverableAmount, totalLoss, staffingTabA
           }}>
             <button style={{
               background: `linear-gradient(135deg, ${theme.colors.opportunity}, ${theme.colors.opportunity}DD)`,
-              color: '#1F2F24',
+              color: theme.colors.textPrimary,
               fontWeight: 700,
               fontSize: 15,
               padding: `${theme.spacing.md} ${theme.spacing.xl}`,
@@ -205,6 +205,7 @@ export default function RecoveryCTA({ recoverableAmount, totalLoss, staffingTabA
             onMouseOut={(e) => {
               e.currentTarget.style.background = 'white';
             }}
+            onClick={onViewStaffingTab}
             >
               👁️ View Staffing Tab
             </button>

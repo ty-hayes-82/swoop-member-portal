@@ -87,6 +87,8 @@ export default function TodayMode({ onNavigate }) {
     {
       priority: 1,
       urgency: 'urgent',
+      questionDomain: 'Operational Command',
+      questionLabel: 'Where is today at risk of breaking?',
       icon: '⚠',
       headline: 'James Whitfield filed a complaint 6 days ago. No one has followed up.',
       recommendation: 'GM to call James personally with apology + complimentary round. Send recovery note via Swoop app within 2 hours.',
@@ -118,6 +120,8 @@ export default function TodayMode({ onNavigate }) {
     {
       priority: 2,
       urgency: 'warning',
+      questionDomain: 'Revenue at Risk',
+      questionLabel: 'Which ops failures are costing F&B spend?',
       icon: '☁',
       headline: 'Wind advisory today — 15+ mph gusts expected by noon.',
       recommendation: 'Prep extra Grill Room staff for early lunch surge. Send proactive text to afternoon bookers offering reschedule or indoor alternatives.',
@@ -146,6 +150,8 @@ export default function TodayMode({ onNavigate }) {
     {
       priority: 3,
       urgency: 'neutral',
+      questionDomain: 'Member Health',
+      questionLabel: 'Which members are one bad experience away?',
       icon: '👥',
       headline: '2 more at-risk members have tee times today.',
       recommendation: 'Pro shop staff to greet by name on arrival. Schedule post-round check-in via Swoop app. Flag for Membership Director follow-up tomorrow.',
@@ -360,6 +366,12 @@ export default function TodayMode({ onNavigate }) {
           onMouseEnter={(e) => e.currentTarget.style.boxShadow = theme.shadow.md}
           onMouseLeave={(e) => e.currentTarget.style.boxShadow = theme.shadow.sm}
         >
+          {item.questionDomain && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: theme.colors.accent, background: theme.colors.accent + '15', padding: '2px 8px', borderRadius: '4px' }}>{item.questionDomain}</span>
+              <span style={{ fontSize: '11px', fontStyle: 'italic', color: theme.colors.textMuted + 'aa' }}>{item.questionLabel}</span>
+            </div>
+          )}
           {item.meta && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
               <span>{item.meta.sourceIcon} {item.meta.source}</span>
