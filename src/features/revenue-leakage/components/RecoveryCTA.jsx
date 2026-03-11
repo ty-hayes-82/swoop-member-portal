@@ -186,7 +186,7 @@ export default function RecoveryCTA({ recoverableAmount, totalLoss, onViewStaffi
               e.currentTarget.style.boxShadow = `0 4px 12px ${theme.colors.opportunity}40`;
             }}
             >
-              📋 Approve Ranger Schedule
+              📋 See Recommended Ranger Plan
             </button>
             <button style={{
               background: 'white',

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
-import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import PaceImpactTab from './tabs/PaceImpactTab';
 import StaffingImpactTab from './tabs/StaffingImpactTab';
 import WeatherImpactTab from './tabs/WeatherImpactTab';
@@ -55,13 +54,6 @@ export default function RevenueLeakage() {
         totalLoss={PACE_LOSS}
         onViewStaffingTab={() => setActiveTab('staffing')}
       />
-      
-      <EvidenceStrip signals={[
-        { source: 'Tee Sheet', detail: 'Pace-of-play delays affect 28% of rounds' },
-        { source: 'Scheduling', detail: '3 understaffed days identified in January' },
-        { source: 'POS', detail: 'Post-round conversion drops 46% after slow rounds' },
-        { source: 'Weather API', detail: 'Rain days show 18% shift to indoor dining' },
-      ]} />
 
       {/* P1: Breakdown Chart - Shows how total breaks down across categories */}
       <BreakdownChart
