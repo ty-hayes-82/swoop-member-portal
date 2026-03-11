@@ -18,7 +18,7 @@ export default function OperationsDashboard() {
     { key: 'revenue',   label: 'Daily Revenue' },
     { key: 'pace',      label: 'Pace of Play' },
     { key: 'demand',    label: `Demand Intelligence${waitlistSummary.highPriority > 0 ? ` · ${waitlistSummary.highPriority} priority` : ''}` },
-    { key: 'playbooks', label: '▶ Response Plans' },
+    { key: 'playbooks', label: 'Response Plans' },
   ];
 
   const tabContent = {
