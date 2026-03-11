@@ -6,10 +6,9 @@ import QueueTab from './tabs/QueueTab';
 import PredictionsTab from './tabs/PredictionsTab';
 import IntelligenceTab from './tabs/IntelligenceTab';
 import { useNavigation } from '@/context/NavigationContext';
-import {
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
-
+import {
   sourceSystems,
   getWaitlistSummary,
   getCancellationSummary,
