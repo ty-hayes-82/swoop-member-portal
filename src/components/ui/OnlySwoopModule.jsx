@@ -7,6 +7,8 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
   if (!question) return null;
 
   const insightCount = insights.length;
+  const previewInsights = insights.slice(0, 2);
+  const remainingInsights = insights.slice(2);
 
   return (
     <section
@@ -131,45 +133,70 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
       </div>
 
       {insightCount > 0 && (
-        <div>
-          <button
-            type="button"
-            onClick={() => setShowSignals((prev) => !prev)}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              color: theme.colors.textMuted,
-              fontSize: theme.fontSize.sm,
-              fontWeight: 700,
-              textAlign: 'left',
-              padding: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              cursor: 'pointer',
-            }}
-          >
-            <span>{showSignals ? '▾' : '▸'}</span>
-            <span>{showSignals ? 'Hide signals' : `Signals (${insightCount})`}</span>
-          </button>
-
-          {showSignals && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+          {previewInsights.length > 0 && (
             <ul
               style={{
-                margin: `${theme.spacing.sm} 0 0`,
-                paddingLeft: theme.spacing.lg,
+                margin: 0,
+                paddingLeft: theme.spacing.md,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: theme.spacing.xs,
+                gap: 6,
                 color: theme.colors.textPrimary,
               }}
             >
-              {insights.map((insight) => (
-                <li key={insight} style={{ lineHeight: 1.5 }}>
+              {previewInsights.map((insight) => (
+                <li key={`preview-${insight}`} style={{ lineHeight: 1.4 }}>
                   {insight}
                 </li>
               ))}
             </ul>
+          )}
+
+          {remainingInsights.length > 0 && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowSignals((prev) => !prev)}
+                style={{
+                  border: '1px solid ' + theme.colors.border,
+                  background: showSignals ? theme.colors.bgDeep : `${theme.colors.operations}15`,
+                  color: showSignals ? theme.colors.textPrimary : theme.colors.operations,
+                  fontSize: theme.fontSize.sm,
+                  fontWeight: 700,
+                  padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+                  borderRadius: theme.radius.md,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  cursor: 'pointer',
+                }}
+              >
+                <span>{showSignals ? 'Hide' : 'View'} additional signals</span>
+                <span style={{ fontSize: theme.fontSize.xs, opacity: 0.8 }}>
+                  ({remainingInsights.length})
+                </span>
+              </button>
+
+              {showSignals && (
+                <ul
+                  style={{
+                    margin: `${theme.spacing.xs} 0 0`,
+                    paddingLeft: theme.spacing.md,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: theme.spacing.xs,
+                    color: theme.colors.textPrimary,
+                  }}
+                >
+                  {remainingInsights.map((insight) => (
+                    <li key={`extra-${insight}`} style={{ lineHeight: 1.4 }}>
+                      {insight}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
         </div>
       )}
