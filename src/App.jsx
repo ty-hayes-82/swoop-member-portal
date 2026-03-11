@@ -16,6 +16,7 @@ import { GrowthPipeline } from '@/features/growth-pipeline';
 import { AgentCommand } from '@/features/agent-command';
 import { DemoMode } from '@/features/demo-mode';
 import { IntegrationsPage } from '@/features/integrations';
+import { DataModelPage } from '@/features/data-model';
 import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
 import LocationIntelligence from '@/features/location-intelligence/LocationIntelligence.jsx';
 import { CsvImportHub } from '@/features/csv-import';
@@ -40,6 +41,7 @@ const ROUTES = {
   'board-report': BoardReport,
   'integrations/csv-import': CsvImportHub,
   'csv-import': CsvImportHub,
+  'data-model': DataModelPage,
   'member-profile': MemberProfilePage,
   landing: LandingRedirect,
 };

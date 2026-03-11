@@ -44,7 +44,6 @@ export const navItems = [
     color: theme.colors.navStaffing,
     subtitle: 'Where are staffing gaps creating service risk right now?',
     sourceSystems: ['Scheduling', 'POS', 'Member CRM', 'Complaints'],
-    hidden: true,
   },
   {
     key: 'waitlist-demand',
@@ -152,6 +151,16 @@ export const navItems = [
     color: theme.colors.navIntegrations,
     subtitle: 'Upload CSV/XLSX when APIs are missing.',
     sourceSystems: [],
+    hidden: false,
+  },
+  {
+    key: 'data-model',
+    label: 'Data Model',
+    section: 'SETUP',
+    icon: '🗂️',
+    color: theme.colors.navIntegrations,
+    subtitle: 'Browse tables, columns, and relationships in your Postgres schema.',
+    sourceSystems: ['Postgres'],
     hidden: false,
   },
   {
