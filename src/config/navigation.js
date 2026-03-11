@@ -115,6 +115,15 @@ export const navItems = [
     hidden: false,
   },
   {
+    key: 'board-report',
+    label: 'Board Report',
+    section: 'ACTIONS & SETUP',
+    icon: '📊',
+    color: theme.colors.navDemo,
+    subtitle: 'Prove It: board-ready retention and operational saves report.',
+    sourceSystems: [],
+  },
+    {
     key: 'demo-mode',
     label: 'Demo Mode',
     section: 'ACTIONS & SETUP',

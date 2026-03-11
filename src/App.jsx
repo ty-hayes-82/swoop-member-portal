@@ -20,6 +20,7 @@ import LocationIntelligence from '@/features/location-intelligence/LocationIntel
 import { CsvImportHub } from '@/features/csv-import';
 import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import LandingRedirect from '@/features/landing-redirect/LandingRedirect.jsx';
+import BoardReport from "@/features/board-report/BoardReport.jsx";
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -34,6 +35,7 @@ const ROUTES = {
   integrations: IntegrationsPage,
   'location-intelligence': LocationIntelligence,
   'demo-mode': DemoMode,
+  'board-report': BoardReport,
   'integrations/csv-import': CsvImportHub,
   'csv-import': CsvImportHub,
   'member-profile': MemberProfilePage,
