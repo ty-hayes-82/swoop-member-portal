@@ -150,5 +150,42 @@ a.button-link {
     box-shadow: none !important; max-height: none !important; border-radius: 0 !important;
   }
   button { display: none !important; }
+
+  /* Board Report print enhancements (SR-17) */
+  * { box-shadow: none !important; }
+  div[style*="background"] { background: white !important; }
+  div[style*="border-radius"] { border: 1px solid #ddd !important; }
+  h1, h2, h3, strong { color: #1a1a1a !important; }
+  p, div, span, li { color: #333 !important; }
+  div[style*="grid"] { break-inside: avoid; }
+
+  /* KPI cards: preserve layout, readable on paper */
+  div[style*="gridTemplateColumns: repeat(auto-fit"] > div {
+    border: 1px solid #ccc !important;
+    background: #f9f9f9 !important;
+    break-inside: avoid;
+  }
+  div[style*="gridTemplateColumns: repeat(auto-fit"] > div > div:first-child {
+    color: #1a1a1a !important;
+  }
+
+  /* Panel borders visible on paper */
+  [class*="Panel"], div[style*="borderRadius: 12"] {
+    border: 1px solid #ccc !important;
+    background: white !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Member save cards: page break avoidance */
+  div[style*="flexDirection: column"][style*="gap: 16px"] > div {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 0.75in;
+    size: letter;
+  }
 }
 .print-only { display: none; }
