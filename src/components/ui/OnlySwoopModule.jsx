@@ -4,7 +4,6 @@ import { DEMO_TIMESTAMP } from '@/config/constants.js';
 
 export default function OnlySwoopModule({ question, insights = [], action, context = [], timestamp }) {
   const [showSignals, setShowSignals] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   if (!question) return null;
 
@@ -13,68 +12,6 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
   const remainingInsights = insights.slice(2);
   const resolvedTimestamp = timestamp ?? DEMO_TIMESTAMP;
 
-  // Collapsed state: slim banner with just the question and expand arrow
-  if (!isExpanded) {
-    return (
-      <section
-        style={{
-          border: `1.5px solid ${theme.colors.borderStrong ?? theme.colors.border}`,
-          borderRadius: theme.radius.lg,
-          padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-          background: theme.colors.bgCard,
-          boxShadow: theme.shadow.xs,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: theme.spacing.md,
-          marginBottom: theme.spacing.md,
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-        }}
-        onClick={() => setIsExpanded(true)}
-        data-animate
-      >
-        <h3
-          style={{
-            fontSize: theme.fontSize.lg,
-            fontFamily: theme.fonts.serif,
-            color: theme.colors.textPrimary,
-            margin: 0,
-            lineHeight: 1.3,
-            flex: 1,
-          }}
-        >
-          {question}
-        </h3>
-        <button
-          type="button"
-          style={{
-            border: `1px solid ${theme.colors.border}`,
-            background: theme.colors.bgDeep,
-            color: theme.colors.textSecondary,
-            fontSize: theme.fontSize.sm,
-            fontWeight: 600,
-            padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-            borderRadius: theme.radius.md,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            cursor: 'pointer',
-            flexShrink: 0,
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsExpanded(true);
-          }}
-        >
-          <span>Expand</span>
-          <span style={{ fontSize: theme.fontSize.xs }}>▼</span>
-        </button>
-      </section>
-    );
-  }
-
-  // Expanded state: full card with all content
   return (
     <section
       style={{
@@ -86,7 +23,7 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.md,
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.xl,
       }}
       data-animate
     >
@@ -99,36 +36,17 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
         }}
       >
         <div style={{ flex: 1, minWidth: 240 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: theme.spacing.sm }}>
-            <h2
-              style={{
-                fontSize: theme.fontSize.xl,
-                fontFamily: theme.fonts.serif,
-                color: theme.colors.textPrimary,
-                margin: 0,
-                lineHeight: 1.25,
-                flex: 1,
-              }}
-            >
-              {question}
-            </h2>
-            <button
-              type="button"
-              onClick={() => setIsExpanded(false)}
-              style={{
-                border: `1px solid ${theme.colors.border}`,
-                background: 'transparent',
-                color: theme.colors.textMuted,
-                fontSize: theme.fontSize.xs,
-                padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-                borderRadius: theme.radius.md,
-                cursor: 'pointer',
-                flexShrink: 0,
-              }}
-            >
-              Collapse ▲
-            </button>
-          </div>
+          <h2
+            style={{
+              fontSize: theme.fontSize.xl,
+              fontFamily: theme.fonts.serif,
+              color: theme.colors.textPrimary,
+              margin: 0,
+              lineHeight: 1.25,
+            }}
+          >
+            {question}
+          </h2>
           {context.length > 0 && (
             <div
               style={{
@@ -212,10 +130,23 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
               <span style={{ color: theme.colors.textPrimary }}>{action.owner}</span>
               {action.dueBy && (
                 <span style={{ color: theme.colors.textMuted }}>
-                  · Due {action.dueBy} <span style={{ fontSize: theme.fontSize.xs, opacity: 0.7 }}>(as of {resolvedTimestamp})</span>
+                  · Due {action.dueBy}
                 </span>
               )}
             </div>
+            {resolvedTimestamp && (
+              <p
+                style={{
+                  margin: `${theme.spacing.xs} 0 0`,
+                  fontSize: theme.fontSize.xs,
+                  color: theme.colors.textMuted,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                As of {resolvedTimestamp}
+              </p>
+            )}
           </div>
         )}
       </div>

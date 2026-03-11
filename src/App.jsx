@@ -20,8 +20,6 @@ import LocationIntelligence from '@/features/location-intelligence/LocationIntel
 import { CsvImportHub } from '@/features/csv-import';
 import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import LandingRedirect from '@/features/landing-redirect/LandingRedirect.jsx';
-import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
-import { onlySwoopModules } from '@/config/onlySwoopModules.js';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -46,7 +44,6 @@ function AppShell() {
   const { currentRoute } = useNavigationContext();
   const { isDrawerOpen } = useMemberProfile();
   const PageComponent = ROUTES[currentRoute] ?? DailyBriefing;
-  const moduleConfig = onlySwoopModules[currentRoute];
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const drawerOffset = !isMobile && isDrawerOpen ? 700 : 0;
@@ -104,7 +101,6 @@ function AppShell() {
               minHeight: 0,
             }}
           >
-            {moduleConfig && <OnlySwoopModule {...moduleConfig} />}
             <PageComponent />
           </main>
           <footer
