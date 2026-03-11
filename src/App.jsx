@@ -19,6 +19,7 @@ import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.j
 import LocationIntelligence from '@/features/location-intelligence/LocationIntelligence.jsx';
 import { CsvImportHub } from '@/features/csv-import';
 import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
+import LandingRedirect from '@/features/landing-redirect/LandingRedirect.jsx';
 import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
 import { onlySwoopModules } from '@/config/onlySwoopModules.js';
 import { theme } from '@/config/theme';
@@ -38,6 +39,7 @@ const ROUTES = {
   'integrations/csv-import': CsvImportHub,
   'csv-import': CsvImportHub,
   'member-profile': MemberProfilePage,
+  landing: LandingRedirect,
 };
 
 function AppShell() {
