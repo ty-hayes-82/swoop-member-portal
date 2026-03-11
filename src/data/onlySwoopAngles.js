@@ -71,6 +71,11 @@ export const onlySwoopAngles = {
       'Staffing · Cart crew shortage adds 11-minute turnaround, compounding the delay',
       'Revenue · $8.7K in tee sheet + $3.1K in F&B at risk if golfers bail before lunch',
     ],
+    context: [
+      { label: 'Slots threatened', value: '28 tee times', icon: '📊' },
+      { label: 'Dining at risk', value: '$3.1K', icon: '🍽️' },
+      { label: 'Crew coverage', value: '−2 carts', icon: '🛺' },
+    ],
     action: {
       text: 'Head pro staggers tee starts by 8 minutes and texts on-course concierge to greet board members personally.',
       owner: 'Head Pro',

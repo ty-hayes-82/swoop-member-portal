@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme.js';
 
-export default function OnlySwoopModule({ question, insights = [], action }) {
+export default function OnlySwoopModule({ question, insights = [], action, context = [] }) {
   const [showSignals, setShowSignals] = useState(false);
 
   if (!question) return null;
@@ -43,6 +43,49 @@ export default function OnlySwoopModule({ question, insights = [], action }) {
           >
             {question}
           </h2>
+          {context.length > 0 && (
+            <div
+              style={{
+                marginTop: theme.spacing.sm,
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: theme.spacing.sm,
+              }}
+            >
+              {context.map(({ label, value, icon }) => (
+                <div
+                  key={`${label}-${value}`}
+                  style={{
+                    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+                    borderRadius: theme.radius.md,
+                    background: theme.colors.bgDeep,
+                    border: `1px solid ${theme.colors.border}`,
+                    minWidth: 150,
+                    flex: '0 1 auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                  }}
+                >
+                  <span style={{
+                    fontSize: theme.fontSize.xs,
+                    color: theme.colors.textMuted,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                  }}>
+                    {icon ? `${icon} ${label}` : label}
+                  </span>
+                  <span style={{
+                    fontSize: theme.fontSize.md,
+                    fontWeight: 600,
+                    color: theme.colors.textPrimary,
+                  }}>
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         {action && (
           <div

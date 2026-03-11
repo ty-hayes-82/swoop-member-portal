@@ -71,6 +71,11 @@ export const onlySwoopModules = {
       'Wind advisory at noon collides with two partially staffed tee blocks — forecasted $8.7K at risk.',
       'Caddie shortage on holes 10–18 already pushed last Friday’s pace beyond 4:45 — trend repeating without intervention.',
     ],
+    context: [
+      { label: 'Tee times at risk', value: '28 slots', icon: '⛳' },
+      { label: 'Revenue impact', value: '$11.8K', icon: '💵' },
+      { label: 'Wind advisory', value: '20 mph gusts', icon: '💨' },
+    ],
     action: {
       text: 'Shift starters to the back nine, notify members on pace risk, and publish a 1:30 p.m. update to operations staff.',
       owner: 'Director of Golf',
