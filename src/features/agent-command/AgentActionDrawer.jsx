@@ -467,6 +467,9 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
         <div style={footerStyle}>
           <div style={sectionStyle}>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 8 }}>Execution details</div>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 8 }}>
+              Outcomes apply immediately when you click an action button.
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
               <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Send:</strong> Sends the selected draft now and marks the action approved.</div>
               <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Schedule:</strong> Marks the action approved and schedules outreach for later.</div>

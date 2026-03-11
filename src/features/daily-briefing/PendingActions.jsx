@@ -45,24 +45,30 @@ export default function PendingActions({ actions, onNavigate }) {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
               {!isActive && <Badge text={meta.urgency === 'urgent' ? 'Urgent' : 'Recommended'} variant={meta.urgency} size="sm" />}
               {isActive && <Badge text="Active" variant="success" size="sm" />}
-              {/* GMC-03: Clarify action workflow */}
-              <button
-                onClick={() => isActive ? null : activatePlaybook(action.playbookId)}
-                title={isActive ? 'Playbook is currently active and running' : 'Activate → Triggers agent actions → Track in Intervention Queue'}
-                style={{
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  background: isActive ? 'transparent' : meta.color,
-                  color: isActive ? 'var(--text-muted)' : theme.colors.textPrimary,
-                  border: isActive ? '1px solid var(--border)' : 'none',
-                  cursor: isActive ? 'default' : 'pointer',
-                  transition: 'all 0.15s',
-                }}
-              >
-                {isActive ? 'Active' : 'Activate'}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                <button
+                  onClick={() => isActive ? null : activatePlaybook(action.playbookId)}
+                  title={isActive ? 'Playbook is currently active and running' : 'Activate → Triggers agent actions → Track in Intervention Queue'}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    background: isActive ? 'transparent' : meta.color,
+                    color: isActive ? 'var(--text-muted)' : theme.colors.textPrimary,
+                    border: isActive ? '1px solid var(--border)' : 'none',
+                    cursor: isActive ? 'default' : 'pointer',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {isActive ? 'Active' : 'Activate'}
+                </button>
+                {!isActive && (
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textAlign: 'right', maxWidth: 180 }}>
+                    Starts monitoring and queues agent actions.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
