@@ -53,7 +53,7 @@ export const navItems = [
     color: theme.colors.navOperations,
     subtitle: 'GPS behavior your tee sheet cannot see - know if members finish their round.',
     sourceSystems: ['Swoop App', 'Member CRM'],
-    hidden: false,
+    hidden: true,
   },
 
   // ============================================
