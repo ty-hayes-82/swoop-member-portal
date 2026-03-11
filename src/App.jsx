@@ -10,6 +10,7 @@ import { OperationsDashboard } from '@/features/operations';
 import { WaitlistDemand } from '@/features/waitlist-demand';
 import { FBPerformance } from '@/features/fb-performance';
 import { MemberHealth } from '@/features/member-health';
+import { RevenueLeakage } from '@/features/revenue-leakage';
 import { StaffingService } from '@/features/staffing-service';
 import { GrowthPipeline } from '@/features/growth-pipeline';
 import { AgentCommand } from '@/features/agent-command';
@@ -29,6 +30,7 @@ const ROUTES = {
   'waitlist-demand': WaitlistDemand,
   'fb-performance': FBPerformance,
   'member-health': MemberHealth,
+  'revenue-leakage': RevenueLeakage,
   'staffing-service': StaffingService,
   'growth-pipeline': GrowthPipeline,
   'agent-command': AgentCommand,
