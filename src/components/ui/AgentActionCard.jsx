@@ -127,43 +127,51 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
       {status === 'dismissed' && <div style={{ fontSize: '11px', color: theme.colors.textMuted, fontWeight: 700 }}>Dismissed</div>}
 
       {!isDone && (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={(event) => {
-              event.stopPropagation();
-              trigger(onApprove);
-            }}
-            style={{
-              flex: 1,
-              borderRadius: theme.radius.sm,
-              border: `1px solid ${theme.colors.agentApproved}4D`,
-              background: `${theme.colors.agentApproved}1F`,
-              color: theme.colors.agentApproved,
-              padding: '7px 0',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            Approve
-          </button>
-          <button
-            onClick={(event) => {
-              event.stopPropagation();
-              trigger(onDismiss);
-            }}
-            style={{
-              borderRadius: theme.radius.sm,
-              border: `1px solid ${theme.colors.border}`,
-              background: 'transparent',
-              color: theme.colors.textMuted,
-              padding: '7px 12px',
-              fontSize: '12px',
-              cursor: 'pointer',
-            }}
-          >
-            Dismiss
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {/* GMC-03: Clarify action workflow */}
+          <div style={{ fontSize: '10px', color: theme.colors.textMuted, lineHeight: 1.3 }}>
+            Approve → Sends via Swoop app → Track in Intervention Queue
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                trigger(onApprove);
+              }}
+              title="Approve this action and send via Swoop app. Track progress in Intervention Queue."
+              style={{
+                flex: 1,
+                borderRadius: theme.radius.sm,
+                border: `1px solid ${theme.colors.agentApproved}4D`,
+                background: `${theme.colors.agentApproved}1F`,
+                color: theme.colors.agentApproved,
+                padding: '7px 0',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Approve
+            </button>
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                trigger(onDismiss);
+              }}
+              title="Dismiss this action. It will be marked as reviewed but not executed."
+              style={{
+                borderRadius: theme.radius.sm,
+                border: `1px solid ${theme.colors.border}`,
+                background: 'transparent',
+                color: theme.colors.textMuted,
+                padding: '7px 12px',
+                fontSize: '12px',
+                cursor: 'pointer',
+              }}
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
     </div>

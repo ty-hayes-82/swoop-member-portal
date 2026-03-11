@@ -40,8 +40,10 @@ export default function PendingActions({ actions, onNavigate }) {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
               {!isActive && <Badge text={meta.urgency === 'urgent' ? 'Urgent' : 'Recommended'} variant={meta.urgency} size="sm" />}
               {isActive && <Badge text="Active" variant="success" size="sm" />}
+              {/* GMC-03: Clarify action workflow */}
               <button
                 onClick={() => isActive ? null : activatePlaybook(action.playbookId)}
+                title={isActive ? 'Playbook is currently active and running' : 'Activate → Triggers agent actions → Track in Intervention Queue'}
                 style={{
                   padding: '5px 12px',
                   borderRadius: '6px',
