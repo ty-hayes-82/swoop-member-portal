@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import PaceImpactTab from './tabs/PaceImpactTab';
@@ -8,6 +8,8 @@ import BreakdownChart from './components/BreakdownChart';
 import { theme } from '@/config/theme';
 import { paceFBImpact } from '@/data/pace';
 import { understaffedDays } from '@/data/staffing';
+import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
+import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 
 const TABS = [
   { key: 'pace', label: 'Pace-of-Play Impact' },
@@ -25,9 +27,23 @@ const TOTAL_LOSS = PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS; // $9,580
 
 export default function RevenueLeakage() {
   const [activeTab, setActiveTab] = useState('pace');
+  
+  // FP-P02: Loading state
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 700);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // FP-P02: Show loading skeleton
+  if (isLoading) {
+    return <SkeletonGrid cards={8} columns={4} cardHeight={200} />;
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <PageTransition>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <StoryHeadline
         variant="risk"
         headline={`Operational failures are costing you $${TOTAL_LOSS.toLocaleString()} in monthly F&B revenue.`}
@@ -62,6 +78,7 @@ export default function RevenueLeakage() {
         {activeTab === 'staffing' && <StaffingImpactTab />}
         {activeTab === 'weather' && <WeatherImpactTab />}
       </Panel>
-    </div>
+      </div>
+    </PageTransition>
   );
 }

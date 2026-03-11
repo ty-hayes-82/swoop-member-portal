@@ -1,5 +1,6 @@
 // DailyBriefing — Today mode: immediate priorities. Analytics mode: full briefing.
 // Critique Phase 4: two-mode experience.
+import { useState, useEffect } from 'react';
 import { Panel, ConnectedSystems, StoryHeadline, AgentInboxStrip } from '@/components/ui/index.js';
 import { useApp } from '@/context/AppContext.jsx';
 import { getTopPendingAction } from '@/services/agentService.js';
@@ -17,17 +18,34 @@ import { theme } from '@/config/theme.js';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 import RecentInterventions from '@/components/ui/RecentInterventions.jsx';
 import TwoLayerDiagram from '@/components/ui/TwoLayerDiagram.jsx';
+import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
+import PageTransition from '@/components/ui/PageTransition';
 
 export default function DailyBriefing() {
   const { navigate, viewMode, setViewMode } = useNavigation();
   const briefing = getDailyBriefing();
   const { pendingAgentCount, approveAction, inbox } = useApp();
   const topAction = getTopPendingAction();
+  
+  // FP-P02: Loading state
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    // Simulate initial load delay (prepare for future API)
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
 
+
+  // FP-P02: Show loading skeleton
+  if (isLoading) {
+    return <SkeletonDashboard />;
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+    <PageTransition>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
 
 
 
@@ -201,6 +219,7 @@ export default function DailyBriefing() {
           <ConnectedSystems />
         </>
       )}
-    </div>
+      </div>
+    </PageTransition>
   );
 }
