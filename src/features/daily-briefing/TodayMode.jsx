@@ -202,7 +202,26 @@ export default function TodayMode({ onNavigate }) {
         <div style={{ fontSize: '11px', color: theme.colors.textMuted, letterSpacing: '0.08em', fontWeight: 600, marginBottom: '6px' }}>
           {timeLabel.toUpperCase()} · SATURDAY, JANUARY 17, 2026 · OAKMONT HILLS CC
         </div>
-        <h2 style={{ fontFamily: theme.fonts.serif, fontSize: '26px', color: theme.colors.textPrimary, fontWeight: 400, lineHeight: 1.2 }}>{timeGreet}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+          <span style={{ 
+            fontSize: '11px', 
+            fontWeight: 700, 
+            color: theme.colors.operations, 
+            background: `${theme.colors.operations}12`, 
+            padding: '3px 10px', 
+            borderRadius: '999px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em'
+          }}>
+            ⚡ Real-Time Cockpit
+          </span>
+        </div>
+        <h2 style={{ fontFamily: theme.fonts.serif, fontSize: '26px', color: theme.colors.textPrimary, fontWeight: 400, lineHeight: 1.2, marginBottom: '4px' }}>
+          Where is today breaking?
+        </h2>
+        <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: 0 }}>
+          {timeGreet}
+        </p>
       </div>
 
       <AgentInboxStrip
