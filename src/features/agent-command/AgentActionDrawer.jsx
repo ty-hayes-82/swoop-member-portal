@@ -466,18 +466,18 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
 
         <div style={footerStyle}>
           <div style={sectionStyle}>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 8 }}>Execution details</div>
+            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 8 }}>Execution details</div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 8 }}>
               You can approve different execution paths. All approvals are tracked in the Intervention Queue.
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Send:</strong> Sends a push to the member in the Swoop app and logs outreach in the Intervention Queue.</div>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Schedule:</strong> Schedules outreach for the next best window and re-checks engagement before sending.</div>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Assign:</strong> Assigns this outreach to a staff owner and tracks completion + member response.</div>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Send</strong> → Sends a push to the member in the Swoop app and logs outreach in the Intervention Queue.</div>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Schedule</strong> → Schedules outreach for the next best window and re-checks engagement before sending.</div>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Approve & Assign</strong> → Assigns this outreach to a staff owner and tracks completion + member response.</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 8 }}>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Snooze 2h:</strong> Hides for 2 hours, then resurfaces if still relevant.</div>
-              <div><strong style={{ color: theme.colors.textPrimary }}>Dismiss:</strong> Marks as reviewed; no outreach is sent.</div>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Snooze 2h</strong> → Hides for 2 hours, then resurfaces if still relevant.</div>
+              <div><strong style={{ color: theme.colors.textPrimary }}>Dismiss</strong> → Marks as reviewed; no outreach is sent.</div>
             </div>
           </div>
 
