@@ -14,7 +14,7 @@ export const navItems = [
     color: theme.colors.navBriefing,
     subtitle: 'Where is today breaking - before members feel it?',
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
-    badge: 'Operator\'s Lens',
+    badge: 'Daily Action View',
   },
   {
     key: 'member-health',
@@ -35,6 +35,15 @@ export const navItems = [
     subtitle: 'Which operational failures are costing you F&B spend?',
     sourceSystems: ['POS', 'Tee Sheet', 'Scheduling', 'Weather'],
     badge: 'NEW',
+  },
+  {
+    key: 'staffing-service',
+    label: 'Staffing & Service',
+    section: 'SEE IT',
+    icon: '👥',
+    color: theme.colors.navStaffing,
+    subtitle: 'Where are staffing gaps creating service risk right now?',
+    sourceSystems: ['Scheduling', 'POS', 'Member CRM', 'Complaints'],
   },
   {
     key: 'waitlist-demand',

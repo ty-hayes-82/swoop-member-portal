@@ -512,24 +512,24 @@ section { padding: 104px 56px; }
   margin-left: 6px; vertical-align: middle;
 }
 
-/* ─── LENSES SECTION ───────────────────────────────────── */
-.lenses-section {
+/* ─── OUTCOMES SECTION ─────────────────────────────────── */
+.outcomes-section {
   background: var(--ivory);
 }
-.lenses-header { text-align: center; margin-bottom: 72px; }
-.lenses-header .section-sub { margin: 0 auto; }
+.outcomes-header { text-align: center; margin-bottom: 72px; }
+.outcomes-header .section-sub { margin: 0 auto; }
 
-.lenses-grid {
+.outcomes-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 24px; max-width: 1160px; margin: 0 auto;
 }
-.lens-card {
+.outcome-card {
   background: var(--white); border-radius: 16px;
   padding: 32px; border: 1px solid var(--border);
   transition: all 0.3s;
   position: relative; overflow: hidden;
 }
-.lens-card::before {
+.outcome-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 3px;
 }
@@ -540,11 +540,11 @@ section { padding: 104px 56px; }
 .lc-purple::before { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
 .lc-teal::before { background: linear-gradient(90deg, #0D9488, #2DD4BF); }
 
-.lens-card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.08); transform: translateY(-4px); border-color: transparent; }
-.lens-icon { font-size: 28px; margin-bottom: 16px; }
-.lens-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-.lens-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
-.lens-tag {
+.outcome-card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.08); transform: translateY(-4px); border-color: transparent; }
+.outcome-icon { font-size: 28px; margin-bottom: 16px; }
+.outcome-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.outcome-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+.outcome-tag {
   display: inline-block; margin-top: 14px;
   font-size: 11px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.08em;
@@ -736,7 +736,7 @@ footer {
 @media (max-width: 860px) {
   section { padding: 72px 28px; }
   .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
-  .lenses-grid { grid-template-columns: 1fr 1fr; }
+  .outcomes-grid { grid-template-columns: 1fr 1fr; }
   .how-steps { grid-template-columns: 1fr 1fr; }
   .quotes-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
   .section-title { font-size: 38px; }
@@ -755,6 +755,7 @@ footer {
   <div class="nav-center">
     <a href="#pricing">Pricing</a>
     <a href="#features">Platform</a>
+    <a href="#features">Staffing &amp; Service</a>
     <a href="#how-it-works">How It Works</a>
     <a href="#integrations">Integrations</a>
   </div>
@@ -1017,49 +1018,49 @@ footer {
   </div>
 </section>
 
-<!-- FEATURES / LENSES -->
-<section class="lenses-section" id="features">
-  <div class="lenses-header">
+<!-- FEATURES / OUTCOMES -->
+<section class="outcomes-section" id="features">
+  <div class="outcomes-header">
     <div class="section-eyebrow">Complete Intelligence Coverage</div>
     <h2 class="section-title">Everything you need to run your club.</h2>
     <p class="section-sub">Swoop connects your existing systems and surfaces insights that are invisible when they work in isolation.</p>
   </div>
-  <div class="lenses-grid">
-    <div class="lens-card lc-gold fade-up">
-      <div class="lens-icon">📋</div>
+  <div class="outcomes-grid">
+    <div class="outcome-card lc-gold fade-up">
+      <div class="outcome-icon">📋</div>
       <h3>Daily Briefing</h3>
       <p>Your morning command center. See who needs attention today, which at-risk members have tee times, and what's trending across the club.</p>
-      <span class="lens-tag tag-free">Free</span>
+      <span class="outcome-tag tag-free">Free</span>
     </div>
-    <div class="lens-card lc-green fade-up fade-up-delay-1">
-      <div class="lens-icon">📊</div>
+    <div class="outcome-card lc-green fade-up fade-up-delay-1">
+      <div class="outcome-icon">📊</div>
       <h3>Operations Intelligence</h3>
       <p>Daily revenue, pace of play, demand forecasting, and weather-adjusted staffing — all connected. See exactly how understaffing hits your bottom line.</p>
-      <span class="lens-tag tag-pro">Pro</span>
+      <span class="outcome-tag tag-pro">Pro</span>
     </div>
-    <div class="lens-card lc-red fade-up fade-up-delay-2">
-      <div class="lens-icon">🎯</div>
+    <div class="outcome-card lc-red fade-up fade-up-delay-2">
+      <div class="outcome-icon">🎯</div>
       <h3>Member Health & Retention</h3>
       <p>Health scores, behavioral archetypes, engagement decay tracking, and resignation prediction. Know who's leaving 6–8 weeks before they do.</p>
-      <span class="lens-tag tag-free">Free → Pro</span>
+      <span class="outcome-tag tag-free">Free → Pro</span>
     </div>
-    <div class="lens-card lc-blue fade-up">
-      <div class="lens-icon">👥</div>
+    <div class="outcome-card lc-blue fade-up">
+      <div class="outcome-icon">👥</div>
       <h3>Staffing & Service Quality</h3>
       <p>Connect complaints to staffing gaps automatically. Get AI-drafted personal recovery outreach for unhappy members — in one click.</p>
-      <span class="lens-tag tag-pro">Pro</span>
+      <span class="outcome-tag tag-pro">Pro</span>
     </div>
-    <div class="lens-card lc-purple fade-up fade-up-delay-1">
-      <div class="lens-icon">🤖</div>
+    <div class="outcome-card lc-purple fade-up fade-up-delay-1">
+      <div class="outcome-icon">🤖</div>
       <h3>AI Recovery Agents</h3>
       <p>When a member's health score drops, Swoop can automatically draft personal outreach, schedule a check-in call, or alert your team — without you lifting a finger.</p>
-      <span class="lens-tag tag-club">Club</span>
+      <span class="outcome-tag tag-club">Club</span>
     </div>
-    <div class="lens-card lc-teal fade-up fade-up-delay-2">
-      <div class="lens-icon">📈</div>
+    <div class="outcome-card lc-teal fade-up fade-up-delay-2">
+      <div class="outcome-icon">📈</div>
       <h3>Growth Pipeline & ROI Proof</h3>
       <p>Track prospects, measure conversions, and produce board-ready reports showing exactly how much dues revenue Swoop protected this quarter.</p>
-      <span class="lens-tag tag-club">Club</span>
+      <span class="outcome-tag tag-club">Club</span>
     </div>
   </div>
 </section>
