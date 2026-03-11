@@ -2,7 +2,6 @@ import { theme } from '@/config/theme';
 import { paceFBImpact, slowRoundStats, bottleneckHoles } from '@/data/pace';
 import ComparisonCard from '../components/ComparisonCard';
 import BottleneckChart from '../components/BottleneckChart';
-import RecoveryCTA from '../components/RecoveryCTA';
 
 export default function PaceImpactTab() {
   const {
@@ -17,7 +16,6 @@ export default function PaceImpactTab() {
   const conversionDrop = ((fastConversionRate - slowConversionRate) / fastConversionRate * 100).toFixed(0);
   const checkDrop = ((avgCheckFast - avgCheckSlow) / avgCheckFast * 100).toFixed(0);
   const revenuePerRoundDelta = (fastConversionRate * avgCheckFast * 4) - (slowConversionRate * avgCheckSlow * 4);
-  const recoverableAmount = Math.round(revenueLostPerMonth * 0.35);
 
   return (
     <div style={{ padding: theme.spacing.md, display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -82,12 +80,6 @@ export default function PaceImpactTab() {
       {/* P1: Bottleneck Holes Visual Chart */}
       <BottleneckChart holes={bottleneckHoles} />
 
-      {/* P0: Prominent Recovery CTA Card */}
-      <RecoveryCTA
-        recoverableAmount={recoverableAmount}
-        totalLoss={revenueLostPerMonth}
-        staffingTabAmount={3744}
-      />
     </div>
   );
 }

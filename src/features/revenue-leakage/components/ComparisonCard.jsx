@@ -1,6 +1,8 @@
 import { theme } from '@/config/theme';
 
 export default function ComparisonCard({ fastData, slowData, delta }) {
+  const roundedDelta = delta.toFixed(2);
+
   return (
     <div style={{
       background: theme.colors.cardBg,
@@ -89,28 +91,35 @@ export default function ComparisonCard({ fastData, slowData, delta }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: theme.spacing.sm,
+          gap: theme.spacing.xs,
+          padding: theme.spacing.sm,
+          border: `1px solid ${theme.colors.risk}40`,
+          borderRadius: theme.radius.md,
+          background: `${theme.colors.risk}08`,
         }}>
           <div style={{
-            fontSize: 32,
+            fontSize: 24,
             color: theme.colors.risk,
           }}>
             →
           </div>
           <div style={{
-            fontSize: 16,
+            fontSize: 11,
+            color: theme.colors.textSecondary,
+            textTransform: 'uppercase',
+            letterSpacing: 0.4,
+            textAlign: 'center',
+          }}>
+            Revenue lost per slow round
+          </div>
+          <div style={{
+            fontSize: 32,
             fontWeight: 700,
             color: theme.colors.risk,
             fontFamily: theme.fonts.mono,
+            lineHeight: 1.1,
           }}>
-            -${delta.toFixed(2)}
-          </div>
-          <div style={{
-            fontSize: 11,
-            color: theme.colors.textTertiary,
-            textAlign: 'center',
-          }}>
-            per round
+            ${roundedDelta}
           </div>
         </div>
 

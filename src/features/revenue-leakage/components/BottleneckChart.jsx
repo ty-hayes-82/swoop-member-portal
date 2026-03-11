@@ -35,180 +35,87 @@ export default function BottleneckChart({ holes }) {
         fontSize: 16,
         fontWeight: 600,
         color: theme.colors.textPrimary,
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.xs,
       }}>
-        🎯 Bottleneck Holes (Ranked by Impact)
+        🎯 Bottleneck Holes by Impact
       </h3>
       <p style={{
         fontSize: 13,
         color: theme.colors.textSecondary,
-        marginBottom: theme.spacing.lg,
+        marginBottom: theme.spacing.md,
       }}>
-        Impact score = delay time × rounds affected. Target high-impact holes first for maximum revenue recovery.
+        Compact view: prioritize highest impact first (delay x rounds affected).
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+      <div style={{
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: 8,
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '72px 1fr 1fr 1fr 120px',
+          gap: theme.spacing.sm,
+          padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+          background: theme.colors.bgSecondary,
+          borderBottom: `1px solid ${theme.colors.border}`,
+          fontSize: 11,
+          fontWeight: 600,
+          color: theme.colors.textSecondary,
+          textTransform: 'uppercase',
+          letterSpacing: 0.4,
+        }}>
+          <span>Rank</span>
+          <span>Hole</span>
+          <span>Avg Delay</span>
+          <span>Rounds</span>
+          <span>Impact</span>
+        </div>
         {holesWithImpact.map((hole, index) => {
-          const impactPercent = (hole.impact / maxImpact) * 100;
           const impactColor = getImpactColor(hole.impact);
           const impactLabel = getImpactLabel(hole.impact);
-
           return (
             <div
               key={hole.hole}
               style={{
-                background: 'white',
-                border: `1px solid ${theme.colors.border}`,
-                borderRadius: 8,
-                padding: theme.spacing.md,
-                transition: 'all 0.2s ease',
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(31, 47, 36, 0.08)';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.transform = 'translateY(0)';
+                display: 'grid',
+                gridTemplateColumns: '72px 1fr 1fr 1fr 120px',
+                gap: theme.spacing.sm,
+                padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+                borderBottom: index === holesWithImpact.length - 1 ? 'none' : `1px solid ${theme.colors.borderLight}`,
+                alignItems: 'center',
+                fontSize: 13,
               }}
             >
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: theme.spacing.sm,
+              <span style={{ fontFamily: theme.fonts.mono, color: theme.colors.textSecondary, fontWeight: 700 }}>
+                #{index + 1}
+              </span>
+              <span style={{ color: theme.colors.textPrimary, fontWeight: 600 }}>
+                Hole {hole.hole}
+              </span>
+              <span style={{ color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>
+                {hole.avgDelay} min
+              </span>
+              <span style={{ color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>
+                {hole.roundsAffected.toLocaleString()}
+              </span>
+              <span style={{
+                justifySelf: 'start',
+                border: `1px solid ${impactColor}55`,
+                background: `${impactColor}18`,
+                color: impactColor,
+                borderRadius: 999,
+                padding: '2px 10px',
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: 0.3,
+                textTransform: 'uppercase',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
-                  {/* Rank Badge */}
-                  <div style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 6,
-                    background: index === 0 ? impactColor : theme.colors.bgSecondary,
-                    color: index === 0 ? 'white' : theme.colors.textSecondary,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    fontSize: 14,
-                    fontFamily: theme.fonts.mono,
-                  }}>
-                    #{index + 1}
-                  </div>
-
-                  {/* Hole Info */}
-                  <div>
-                    <div style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: theme.colors.textPrimary,
-                    }}>
-                      Hole {hole.hole}
-                    </div>
-                    <div style={{
-                      fontSize: 12,
-                      color: theme.colors.textSecondary,
-                    }}>
-                      {hole.course}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Impact Badge */}
-                <div style={{
-                  padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-                  borderRadius: 6,
-                  background: `${impactColor}20`,
-                  border: `1px solid ${impactColor}40`,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: impactColor,
-                  letterSpacing: 0.5,
-                }}>
-                  {impactLabel} IMPACT
-                </div>
-              </div>
-
-              {/* Metrics */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: theme.spacing.md,
-                marginBottom: theme.spacing.sm,
-              }}>
-                <Metric label="Avg Delay" value={`${hole.avgDelay} min`} />
-                <Metric label="Rounds Affected" value={hole.roundsAffected.toLocaleString()} />
-                <Metric 
-                  label="Impact Score" 
-                  value={Math.round(hole.impact).toLocaleString()} 
-                  highlight 
-                />
-              </div>
-
-              {/* Visual Bar */}
-              <div style={{
-                height: 24,
-                background: theme.colors.bgSecondary,
-                borderRadius: 6,
-                overflow: 'hidden',
-                position: 'relative',
-              }}>
-                <div style={{
-                  width: `${impactPercent}%`,
-                  height: '100%',
-                  background: `linear-gradient(90deg, ${impactColor}, ${impactColor}CC)`,
-                  transition: 'width 0.5s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  paddingRight: theme.spacing.sm,
-                }}>
-                  <span style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: 'white',
-                    fontFamily: theme.fonts.mono,
-                  }}>
-                    {impactPercent.toFixed(0)}%
-                  </span>
-                </div>
-              </div>
+                {impactLabel}
+              </span>
             </div>
           );
         })}
-      </div>
-
-      {/* Mobile responsive */}
-      <style>{`
-        @media (max-width: 768px) {
-          [data-metrics-grid] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function Metric({ label, value, highlight }) {
-  return (
-    <div data-metrics-grid>
-      <div style={{
-        fontSize: 11,
-        color: theme.colors.textTertiary,
-        marginBottom: 2,
-        textTransform: 'uppercase',
-        letterSpacing: 0.3,
-      }}>
-        {label}
-      </div>
-      <div style={{
-        fontSize: 15,
-        fontWeight: highlight ? 700 : 600,
-        color: highlight ? theme.colors.textPrimary : theme.colors.textSecondary,
-        fontFamily: theme.fonts.mono,
-      }}>
-        {value}
       </div>
     </div>
   );

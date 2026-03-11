@@ -1,6 +1,7 @@
 import { theme } from '@/config/theme';
 
 export default function BreakdownChart({ totalLoss, paceAmount, staffingAmount, weatherAmount }) {
+  const MIN_SEGMENT_PERCENT = 10;
   const categories = [
     {
       key: 'pace',
@@ -13,7 +14,7 @@ export default function BreakdownChart({ totalLoss, paceAmount, staffingAmount, 
       key: 'staffing',
       label: 'Staffing Gaps',
       amount: staffingAmount,
-      color: '#F59E0B', // amber for staffing
+      color: theme.colors.staffing,
       icon: '👥',
     },
     {
@@ -24,6 +25,11 @@ export default function BreakdownChart({ totalLoss, paceAmount, staffingAmount, 
       icon: '🌦️',
     },
   ].sort((a, b) => b.amount - a.amount); // Sort by amount descending
+
+  const rawPercents = categories.map((cat) => (cat.amount / totalLoss) * 100);
+  const boostedPercents = rawPercents.map((percent) => Math.max(percent, MIN_SEGMENT_PERCENT));
+  const boostedTotal = boostedPercents.reduce((sum, value) => sum + value, 0);
+  const normalizedPercents = boostedPercents.map((percent) => (percent / boostedTotal) * 100);
 
   return (
     <div style={{
@@ -77,7 +83,8 @@ export default function BreakdownChart({ totalLoss, paceAmount, staffingAmount, 
         border: `1px solid ${theme.colors.border}`,
       }}>
         {categories.map((cat, index) => {
-          const widthPercent = (cat.amount / totalLoss) * 100;
+          const widthPercent = normalizedPercents[index];
+          const actualPercent = (cat.amount / totalLoss) * 100;
           return (
             <div
               key={cat.key}
@@ -89,9 +96,10 @@ export default function BreakdownChart({ totalLoss, paceAmount, staffingAmount, 
                 alignItems: 'center',
                 justifyContent: 'center',
                 position: 'relative',
-                borderLeft: index > 0 ? '2px solid white' : 'none',
+                borderLeft: index > 0 ? `2px solid ${theme.colors.white}` : 'none',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
+                minWidth: cat.key === 'weather' ? 72 : undefined,
               }}
               onMouseOver={(e) => {
                 e.currentTarget.style.filter = 'brightness(1.1)';
@@ -109,11 +117,20 @@ export default function BreakdownChart({ totalLoss, paceAmount, staffingAmount, 
               <span style={{
                 fontSize: 14,
                 fontWeight: 700,
-                color: 'white',
+                color: theme.colors.white,
                 fontFamily: theme.fonts.mono,
                 textShadow: '0 1px 2px rgba(0,0,0,0.2)',
               }}>
                 ${cat.amount.toLocaleString()}
+              </span>
+              <span style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: theme.colors.white,
+                fontFamily: theme.fonts.mono,
+                opacity: 0.9,
+              }}>
+                {actualPercent.toFixed(0)}%
               </span>
             </div>
           );
