@@ -9,6 +9,31 @@ const cardStyle = {
   boxShadow: theme.shadow.sm,
 };
 
+function truncateValue(value, maxLength = 32) {
+  if (value == null) return '—';
+  const text = String(value);
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1)}…`;
+}
+
+function isMonospaceField(columnName, value) {
+  const normalizedColumnName = String(columnName || '').toLowerCase();
+  if (
+    normalizedColumnName.endsWith('_id') ||
+    normalizedColumnName === 'id' ||
+    normalizedColumnName.includes('date') ||
+    normalizedColumnName.endsWith('_at') ||
+    normalizedColumnName.endsWith('_time')
+  ) {
+    return true;
+  }
+
+  if (typeof value !== 'string') return false;
+  const looksLikeUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+  const looksLikeIsoTimestamp = /^\d{4}-\d{2}-\d{2}T/.test(value);
+  return looksLikeUuid || looksLikeIsoTimestamp;
+}
+
 function TableListItem({ table, isActive, onSelect }) {
   return (
     <button
@@ -199,6 +224,59 @@ export default function DataModelPage() {
                 ) : (
                   <p style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
                     No foreign key relationships from this table.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <h4 style={{ marginBottom: 10, fontSize: theme.fontSize.md }}>Sample Rows</h4>
+                {selectedTable.sampleRows?.length ? (
+                  <div
+                    style={{
+                      overflow: 'auto',
+                      maxHeight: 220,
+                      border: `1px solid ${theme.colors.border}`,
+                      borderRadius: theme.radius.sm,
+                    }}
+                  >
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
+                      <thead>
+                        <tr style={{ background: theme.colors.bgDeep }}>
+                          {selectedTable.columns.map((column) => (
+                            <th key={column.name} style={thStyle}>
+                              {column.name}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedTable.sampleRows.slice(0, 5).map((row, rowIndex) => (
+                          <tr key={`${selectedTable.name}-sample-row-${rowIndex}`}>
+                            {selectedTable.columns.map((column) => {
+                              const rawValue = row[column.name];
+                              return (
+                                <td
+                                  key={`${rowIndex}-${column.name}`}
+                                  title={rawValue == null ? '' : String(rawValue)}
+                                  style={{
+                                    ...tdStyle,
+                                    fontFamily: isMonospaceField(column.name, rawValue)
+                                      ? theme.fonts.mono
+                                      : theme.fonts.body,
+                                  }}
+                                >
+                                  {truncateValue(rawValue)}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
+                    No sample rows are defined for this table yet.
                   </p>
                 )}
               </div>
