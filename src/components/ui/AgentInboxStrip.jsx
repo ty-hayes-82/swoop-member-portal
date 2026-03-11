@@ -1,4 +1,5 @@
 import { theme } from '@/config/theme';
+import InfoTooltip from '@/components/ui/InfoTooltip';
 
 export default function AgentInboxStrip({ pendingCount = 0, topAction, onApproveTop, onOpenInbox }) {
   if (pendingCount < 1) return null;
@@ -39,23 +40,26 @@ export default function AgentInboxStrip({ pendingCount = 0, topAction, onApprove
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
         {topAction && (
-          <button
-            onClick={onApproveTop}
-            style={{
-              borderRadius: theme.radius.sm,
-              border: `1px solid ${theme.colors.agentApproved}4D`,
-              background: `${theme.colors.agentApproved}1F`,
-              color: theme.colors.agentApproved,
-              padding: '5px 10px',
-              fontSize: '11px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            Approve top
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <button
+              onClick={onApproveTop}
+              style={{
+                borderRadius: theme.radius.sm,
+                border: `1px solid ${theme.colors.agentApproved}4D`,
+                background: `${theme.colors.agentApproved}1F`,
+                color: theme.colors.agentApproved,
+                padding: '5px 10px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Approve top
+            </button>
+            <InfoTooltip text="Approve → Sends push notification via Swoop app → Tracks in Intervention Queue → GM sees response status within 24h" />
+          </div>
         )}
         <button
           onClick={onOpenInbox}

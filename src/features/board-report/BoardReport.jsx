@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { theme } from '@/config/theme';
 import { Panel } from '@/components/ui';
+import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
+import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 
 const kpis = [
   { label: 'Members Saved', value: 14, prefix: '', suffix: '', color: 'green' },
@@ -127,7 +129,22 @@ function KPIStrip() {
           }}
         >
           <div style={{ fontSize: '28px', fontWeight: 700, color: colors[kpi.color] || colors.green }}>
-            {kpi.prefix}{typeof kpi.value === 'number' && kpi.value >= 1000 ? kpi.value.toLocaleString() : kpi.value}{kpi.suffix}
+            {/* FP-P03: Animated numbers for large metrics */}
+            {kpi.prefix}
+            {typeof kpi.value === 'number' && kpi.value >= 1000 ? (
+              <AnimatedNumber 
+                value={kpi.value} 
+                duration={1200}
+                decimals={kpi.value % 1 !== 0 ? 1 : 0}
+              />
+            ) : (
+              <AnimatedNumber 
+                value={kpi.value} 
+                duration={1200}
+                decimals={kpi.value % 1 !== 0 ? 1 : 0}
+              />
+            )}
+            {kpi.suffix}
           </div>
           <div style={{ fontSize: '12px', color: colors.textMuted, marginTop: '4px' }}>
             {kpi.label}
@@ -151,9 +168,27 @@ export default function BoardReport() {
   const [activeTab, setActiveTab] = useState(0);
   const totalDues = memberSaves.reduce((sum, m) => sum + m.duesAtRisk, 0);
   const totalOpsRevenue = operationalSaves.reduce((sum, o) => sum + o.revenueProtected, 0);
+  
+  // FP-P02: Loading state
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 750);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // FP-P02: Show loading skeleton
+  if (isLoading) {
+    return (
+      <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+        <SkeletonGrid cards={6} columns={3} cardHeight={120} />
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+    <PageTransition>
+      <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: colors.white }}>
@@ -279,6 +314,7 @@ export default function BoardReport() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </PageTransition>
   );
 }

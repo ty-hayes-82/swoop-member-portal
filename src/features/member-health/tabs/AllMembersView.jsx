@@ -65,7 +65,7 @@ function FilterChip({ label, onRemove, color }) {
   );
 }
 
-function MemberRow({ member, isExpanded, onToggle }) {
+function MemberRow({ member, isExpanded, onToggle, index }) {
   const [hovered, setHovered] = useState(false);
   const healthLevel = getHealthLevel(member.score);
   const healthColor = member.score >= 70 
@@ -76,6 +76,10 @@ function MemberRow({ member, isExpanded, onToggle }) {
     ? theme.colors.riskAtRiskAlt 
     : theme.colors.urgent;
 
+  // DES-P05: Zebra striping with improved hover states
+  const zebraBackground = index % 2 === 0 ? theme.colors.bg : theme.colors.bgDeep;
+  const hoverBackground = hovered ? theme.colors.bgCardHover : zebraBackground;
+
   return (
     <>
       <tr
@@ -85,8 +89,9 @@ function MemberRow({ member, isExpanded, onToggle }) {
         style={{
           borderTop: `1px solid ${theme.colors.border}`,
           cursor: 'pointer',
-          background: hovered ? theme.colors.bgCardHover : 'transparent',
-          transition: 'background 0.12s ease',
+          background: hoverBackground,
+          transition: 'background 0.15s ease, transform 0.15s ease',
+          transform: hovered ? 'translateX(2px)' : 'translateX(0)',
         }}
       >
         <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
@@ -491,13 +496,14 @@ export default function AllMembersView() {
             Showing {sortedMembers.length} of {allMembers.length} members
           </span>
         </div>
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ 
             width: '100%', 
             minWidth: 900, 
             borderCollapse: 'collapse', 
             fontSize: theme.fontSize.sm,
-          }}>
+          }}
+          className="member-table">
             <thead>
               <tr style={{ background: theme.colors.bg }}>
                 {columns.map((col) => (
@@ -549,10 +555,11 @@ export default function AllMembersView() {
                   </td>
                 </tr>
               ) : (
-                sortedMembers.map((member) => (
+                sortedMembers.map((member, index) => (
                   <MemberRow
                     key={member.memberId}
                     member={member}
+                    index={index}
                     isExpanded={expandedMember === member.memberId}
                     onToggle={() => setExpandedMember(expandedMember === member.memberId ? null : member.memberId)}
                   />

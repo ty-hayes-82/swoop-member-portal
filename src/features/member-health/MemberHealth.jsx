@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
 import HealthOverview from './tabs/HealthOverview';
 import ArchetypeTab from './tabs/ArchetypeTab';
@@ -9,6 +9,8 @@ import AllMembersView from './tabs/AllMembersView';
 import { sourceSystems } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
+import { SkeletonMemberList } from '@/components/ui/SkeletonLoader';
+import PageTransition from '@/components/ui/PageTransition';
 
 const TABS = [
   { key: 'health',       label: 'Health Overview' },
@@ -22,9 +24,23 @@ const TABS = [
 export default function MemberHealth() {
   const [activeTab, setActiveTab] = useState('health');
   const [showInsight, setShowInsight] = useState(true);
+  
+  // FP-P02: Loading state
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 650);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // FP-P02: Show loading skeleton
+  if (isLoading) {
+    return <SkeletonMemberList />;
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <PageTransition>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       {showInsight ? (
         <div style={{ position: 'relative' }}>
           <StoryHeadline
@@ -92,6 +108,7 @@ export default function MemberHealth() {
         dueBy="5:00 PM today"
         proofMetric="3 personal conversations, retention gestures offered, notes logged in CRM"
       />
-    </div>
+      </div>
+    </PageTransition>
   );
 }

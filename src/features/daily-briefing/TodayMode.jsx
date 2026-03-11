@@ -341,19 +341,24 @@ export default function TodayMode({ onNavigate }) {
         </div>
       )}
 
+      {/* DES-P07: Improved alert card spacing and padding */}
       {items.map((item) => (
         <div
           key={item.priority}
           style={{
             background: urgencyBg[item.urgency],
             border: `1px solid ${urgencyBorder[item.urgency]}50`,
-            borderRadius: theme.radius.md,
-            padding: theme.spacing.lg,
-            borderLeft: `4px solid ${urgencyBorder[item.urgency]}`,
+            borderRadius: theme.radius.lg,
+            padding: '20px 24px',
+            borderLeft: `5px solid ${urgencyBorder[item.urgency]}`,
             display: 'flex',
             flexDirection: 'column',
-            gap: theme.spacing.sm,
+            gap: '16px',
+            boxShadow: theme.shadow.sm,
+            transition: 'box-shadow 0.2s ease',
           }}
+          onMouseEnter={(e) => e.currentTarget.style.boxShadow = theme.shadow.md}
+          onMouseLeave={(e) => e.currentTarget.style.boxShadow = theme.shadow.sm}
         >
           {item.meta && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
@@ -410,42 +415,93 @@ export default function TodayMode({ onNavigate }) {
               )}
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: theme.spacing.sm }}>
+          {/* DES-P07: Improved action buttons with better hierarchy */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            flexWrap: 'wrap', 
+            gap: theme.spacing.sm,
+            paddingTop: theme.spacing.sm,
+            borderTop: `1px solid ${urgencyBorder[item.urgency]}20`,
+          }}>
             <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap', alignItems: 'center' }}>
               {item.memberName && <QuickActions memberName={item.memberName} memberId={item.memberId} context={item.context} />}
               <button
                 onClick={() => onNavigate(item.linkKey)}
                 style={{
-                  padding: '6px 12px',
+                  padding: '8px 16px',
                   fontSize: theme.fontSize.sm,
-                  fontWeight: 600,
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  borderRadius: theme.radius.sm,
-                  border: 'none',
+                  borderRadius: theme.radius.md,
+                  border: `2px solid ${theme.colors.accent}`,
                   background: theme.colors.white,
-                  color: theme.colors.textPrimary,
-                  boxShadow: theme.shadow.xs,
+                  color: theme.colors.accent,
+                  boxShadow: theme.shadow.sm,
+                  transition: 'all 0.2s ease',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = theme.colors.accent;
+                  e.currentTarget.style.color = theme.colors.white;
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = theme.shadow.md;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = theme.colors.white;
+                  e.currentTarget.style.color = theme.colors.accent;
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = theme.shadow.sm;
                 }}
               >
                 {item.linkLabel}
               </button>
             </div>
             {item.meta?.confidence && (
-              <span style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.textPrimary, background: `${theme.colors.textPrimary}12`, padding: '4px 12px', borderRadius: '999px' }}>{item.meta.confidence}</span>
+              <span style={{ 
+                fontSize: '11px', 
+                fontWeight: 700, 
+                color: theme.colors.textPrimary, 
+                background: `${theme.colors.textPrimary}12`, 
+                padding: '5px 14px', 
+                borderRadius: '999px',
+                border: `1px solid ${theme.colors.textPrimary}20`,
+              }}>
+                {item.meta.confidence}
+              </span>
             )}
           </div>
+          {/* DES-P07: Improved recommendation box with better visual hierarchy */}
           <div
             style={{
-              marginTop: theme.spacing.sm,
-              borderLeft: `3px solid ${theme.colors.success}`,
-              background: `${theme.colors.success}0F`,
-              padding: '10px 12px',
+              marginTop: theme.spacing.md,
+              borderLeft: `4px solid ${theme.colors.success}`,
+              background: `linear-gradient(135deg, ${theme.colors.success}0F 0%, ${theme.colors.success}08 100%)`,
+              padding: theme.spacing.md,
+              borderRadius: theme.radius.sm,
+              boxShadow: `0 1px 3px ${theme.colors.success}15`,
+            }}
+          >
+            <div style={{ 
+              fontSize: theme.fontSize.xs, 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.08em',
+              color: theme.colors.success,
+              fontWeight: 700,
+              marginBottom: '6px',
+            }}>
+              💡 Recommended Action
+            </div>
+            <div style={{
               fontSize: theme.fontSize.sm,
               fontWeight: 600,
               color: theme.colors.textPrimary,
-            }}
-          >
-            <strong>Recommended:</strong> {item.recommendation}
+              lineHeight: 1.5,
+            }}>
+              {item.recommendation}
+            </div>
           </div>
           {item.evidenceSignals && <EvidenceStrip signals={item.evidenceSignals} compact />}
         </div>
