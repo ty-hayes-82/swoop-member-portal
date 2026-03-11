@@ -2,6 +2,7 @@ export const CLUB_NAME = 'Oakmont Hills CC';
 export const CLUB_LOCATION = 'Scottsdale, AZ';
 export const DEMO_DATE = '2026-01-17';
 export const DEMO_MONTH = 'January 2026';
+export const DEMO_TIME = '7:00 AM';
 
 export const SLOW_ROUND_THRESHOLD_MIN = 270;
 export const POST_ROUND_WINDOW_MIN = 90;

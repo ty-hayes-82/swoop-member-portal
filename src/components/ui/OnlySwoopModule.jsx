@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme.js';
+import { DEMO_TIME } from '@/config/constants.js';
 
 export default function OnlySwoopModule({ question, insights = [], action, context = [] }) {
   const [showSignals, setShowSignals] = useState(false);
@@ -126,7 +127,11 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
               }}
             >
               <span style={{ color: theme.colors.textPrimary }}>{action.owner}</span>
-              {action.dueBy && <span style={{ color: theme.colors.textMuted }}>· Due {action.dueBy}</span>}
+              {action.dueBy && (
+                <span style={{ color: theme.colors.textMuted }}>
+                  · Due {action.dueBy} <span style={{ fontSize: theme.fontSize.xs, opacity: 0.7 }}>(as of {DEMO_TIME})</span>
+                </span>
+              )}
             </div>
           </div>
         )}
