@@ -35,7 +35,7 @@ export const navItems = [
     section: 'YOUR CLUB TODAY',
     icon: '📍',
     color: theme.colors.navOperations,
-    subtitle: 'Where is everyone on property right now?',
+    subtitle: 'GPS behavior your tee sheet cannot see — know if members finish their round.',
     sourceSystems: ['Swoop App', 'Member CRM'],
     hidden: false,
   },
@@ -92,7 +92,7 @@ export const navItems = [
     section: 'ACTIONS & SETUP',
     icon: '⬡',
     color: theme.colors.navAgents,
-    subtitle: 'Approve or assign high-impact actions before members feel the pain.',
+    subtitle: 'Approve or assign high-impact actions before members feel the pain. Powered by AI Agents.',
     sourceSystems: ['All Systems'],
   },
   {
