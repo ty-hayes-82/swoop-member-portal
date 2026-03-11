@@ -17,8 +17,12 @@ export default function OperationsDashboard() {
   const TABS = [
     { key: 'revenue',   label: 'Daily Revenue' },
     { key: 'pace',      label: 'Pace of Play' },
-    { key: 'demand',    label: `Demand Intelligence${waitlistSummary.highPriority > 0 ? ` · ${waitlistSummary.highPriority} priority` : ''}` },
-    { key: 'playbooks', label: 'Response Plans' },
+    {
+      key: 'demand',
+      label: 'Demand Intelligence',
+      badge: waitlistSummary.highPriority > 0 ? `${waitlistSummary.highPriority} priority` : null,
+    },
+    { key: 'playbooks', label: 'Response Plans', badge: '2 playbooks' },
   ];
 
   const tabContent = {

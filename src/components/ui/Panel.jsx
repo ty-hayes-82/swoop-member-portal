@@ -64,9 +64,27 @@ export default function Panel({
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     flex: '0 1 auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                   }}
                 >
-                  {tab.label}
+                  <span>{tab.label}</span>
+                  {tab.badge && (
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: active ? 'var(--accent)' : 'var(--text-muted)',
+                        background: active ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${active ? 'var(--accent)' : 'rgba(255,255,255,0.12)'}`,
+                        borderRadius: '999px',
+                        padding: '2px 8px',
+                      }}
+                    >
+                      {tab.badge}
+                    </span>
+                  )}
                 </button>
               );
             })}
