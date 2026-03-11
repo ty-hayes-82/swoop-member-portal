@@ -155,6 +155,16 @@ export const navItems = [
     hidden: false,
   },
   {
+    key: 'data-model',
+    label: 'Data Model',
+    section: 'SETUP',
+    icon: '🗂️',
+    color: theme.colors.navIntegrations,
+    subtitle: 'Browse tables, columns, and relationships in your Postgres schema.',
+    sourceSystems: ['Postgres'],
+    hidden: false,
+  },
+  {
     key: 'member-profile',
     label: 'Member Profiles',
     section: 'SETUP',
