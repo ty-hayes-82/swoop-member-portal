@@ -191,12 +191,12 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                   {(!sidebarCollapsed || isMobile) && (
                     <span
                       style={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
+                        display: 'flex',
+                        flexDirection: item.key === 'daily-briefing' ? 'column' : 'row',
+                        alignItems: item.key === 'daily-briefing' ? 'flex-start' : 'center',
+                        gap: item.key === 'daily-briefing' ? '4px' : '8px',
+                        flex: 1,
+                        minWidth: 0,
                       }}
                     >
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
@@ -205,19 +205,19 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                           style={{
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '10px',
+                            gap: '3px',
+                            fontSize: '9px',
                             letterSpacing: '0.08em',
                             textTransform: 'uppercase',
                             fontWeight: 700,
                             color: theme.colors.success,
                             background: `${theme.colors.success}12`,
-                            padding: '2px 8px',
+                            padding: '2px 6px',
                             borderRadius: '999px',
                             border: `1px solid ${theme.colors.success}40`,
                           }}
                         >
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: theme.colors.success, boxShadow: `0 0 6px ${theme.colors.success}` }} />
+                          <span style={{ width: 5, height: 5, borderRadius: '50%', background: theme.colors.success, boxShadow: `0 0 6px ${theme.colors.success}` }} />
                           Start Here
                         </span>
                       )}
