@@ -1,4 +1,5 @@
 // Header — light bar above the main content
+import { useState, useEffect } from 'react';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
 import { CLUB_NAME, DEMO_MONTH, DEMO_TIMESTAMP } from '@/config/constants.js';
@@ -12,10 +13,24 @@ const getGreeting = () => {
   return 'Good evening';
 };
 
+
+const DEMO_BANNERS = [
+  'James Whitfield complained Jan 16. You had 6 days. Did you see it in time?',
+  'Your tee sheet shows bookings. Swoop shows who is about to leave.',
+  '3 at-risk members on course right now. GPS shows declining engagement.',
+  '8/10 clubs run F&B at negative margins. Swoop shows you why.',
+  'A single resignation costs $15K-$50K. Swoop catches it 6 weeks early.',
+];
+
 export default function Header({ onMobileMenuToggle, isMobile = false }) {
   const { currentRoute, toggleSidebar } = useNavigation();
   const page = NAV_ITEMS.find((n) => n.key === currentRoute) || NAV_ITEMS[0];
   const handleMenuClick = onMobileMenuToggle || toggleSidebar;
+  const [bannerIdx, setBannerIdx] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setBannerIdx((i) => (i + 1) % DEMO_BANNERS.length), 8000);
+    return () => clearInterval(timer);
+  }, []);
   const padding = isMobile ? '12px 16px' : '0 24px';
   const showGreeting = page?.key === 'daily-briefing';
 
@@ -32,6 +47,7 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
         boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}
     >
+      <div style={{ width: '100%', padding: '4px 12px', background: theme.colors.accent + '0A', borderBottom: '1px solid ' + theme.colors.accent + '20', fontSize: '12px', color: theme.colors.accent, fontWeight: 600, textAlign: 'center', transition: 'opacity 0.3s' }}>{DEMO_BANNERS[bannerIdx]}</div>
       <div
         style={{
           display: 'flex',
