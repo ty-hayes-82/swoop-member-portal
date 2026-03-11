@@ -4,6 +4,7 @@ import { DEMO_TIMESTAMP } from '@/config/constants.js';
 
 export default function OnlySwoopModule({ question, insights = [], action, context = [], timestamp }) {
   const [showSignals, setShowSignals] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   if (!question) return null;
 
@@ -11,6 +12,11 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
   const previewInsights = insights.slice(0, 2);
   const remainingInsights = insights.slice(2);
   const resolvedTimestamp = timestamp ?? DEMO_TIMESTAMP;
+  const collapsedSummary = action
+    ? `${action.owner}${action.dueBy ? ` · Due ${action.dueBy}` : ''}`
+    : insightCount > 0
+      ? `${insightCount} supporting signal${insightCount === 1 ? '' : 's'}`
+      : '';
 
   return (
     <section
@@ -31,195 +37,271 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
         style={{
           display: 'flex',
           flexWrap: 'wrap',
-          alignItems: 'stretch',
-          gap: theme.spacing.md,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: theme.spacing.sm,
         }}
       >
-        <div style={{ flex: 1, minWidth: 240 }}>
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: theme.fontSize.xs,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: theme.colors.textMuted,
+              fontWeight: 700,
+            }}
+          >
+            Only Swoop can answer
+          </p>
           <h2
             style={{
-              fontSize: theme.fontSize.xl,
+              fontSize: theme.fontSize.lg,
               fontFamily: theme.fonts.serif,
               color: theme.colors.textPrimary,
-              margin: 0,
-              lineHeight: 1.25,
+              margin: `${theme.spacing.xs} 0 0`,
+              lineHeight: 1.3,
             }}
           >
             {question}
           </h2>
-          {context.length > 0 && (
+          {!expanded && collapsedSummary && (
             <div
               style={{
-                marginTop: theme.spacing.sm,
+                marginTop: theme.spacing.xs,
+                fontSize: theme.fontSize.sm,
+                color: theme.colors.textSecondary,
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: theme.spacing.sm,
+                gap: 6,
               }}
             >
-              {context.map(({ label, value, icon }) => (
-                <div
-                  key={`${label}-${value}`}
-                  style={{
-                    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-                    borderRadius: theme.radius.md,
-                    background: theme.colors.bgDeep,
-                    border: `1px solid ${theme.colors.border}`,
-                    minWidth: 150,
-                    flex: '0 1 auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
-                  }}
-                >
-                  <span style={{
-                    fontSize: theme.fontSize.xs,
-                    color: theme.colors.textMuted,
-                    textTransform: 'uppercase',
-                  fontWeight: 600,
-                    letterSpacing: '0.08em',
-                  }}>
-                    {icon ? `${icon} ${label}` : label}
-                  </span>
-                  <span style={{
-                    fontSize: theme.fontSize.md,
-                    fontWeight: 600,
-                    color: theme.colors.textPrimary,
-                  }}>
-                    {value}
-                  </span>
-                </div>
-              ))}
+              <span>{collapsedSummary}</span>
             </div>
           )}
         </div>
-        {action && (
-          <div
-            style={{
-              flexBasis: 320,
-              flexShrink: 0,
-              borderRadius: theme.radius.lg,
-              background: theme.colors.bgDeep,
-              border: `1px solid ${theme.colors.border}`,
-              padding: theme.spacing.md,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.xs,
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                fontSize: theme.fontSize.sm,
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: theme.colors.textMuted,
-              }}
-            >
-              Immediate action
-            </p>
-            <p style={{ margin: 0, fontSize: theme.fontSize.md, lineHeight: 1.4 }}>{action.text}</p>
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: theme.spacing.xs,
-                fontSize: theme.fontSize.sm,
-                color: theme.colors.textSecondary,
-                fontWeight: 600,
-              }}
-            >
-              <span style={{ color: theme.colors.textPrimary }}>{action.owner}</span>
-              {action.dueBy && (
-                <span style={{ color: theme.colors.textMuted }}>
-                  · Due {action.dueBy}
-                </span>
-              )}
-            </div>
-            {resolvedTimestamp && (
-              <p
-                style={{
-                  margin: `${theme.spacing.xs} 0 0`,
-                  fontSize: theme.fontSize.xs,
-                  color: theme.colors.textMuted,
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                  fontWeight: 600,
-                }}
-              >
-                As of {resolvedTimestamp}
-              </p>
-            )}
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          aria-expanded={expanded}
+          style={{
+            border: `1px solid ${theme.colors.border}`,
+            background: expanded ? theme.colors.bgDeep : theme.colors.bg,
+            color: theme.colors.textPrimary,
+            fontSize: theme.fontSize.sm,
+            fontWeight: 600,
+            padding: `${theme.spacing.xs} ${theme.spacing.md}`,
+            borderRadius: theme.radius.md,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            cursor: 'pointer',
+          }}
+        >
+          <span>{expanded ? 'Hide details' : 'View details'}</span>
+          <span>{expanded ? '▴' : '▾'}</span>
+        </button>
       </div>
 
-      {insightCount > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-          {previewInsights.length > 0 && (
-            <ul
-              style={{
-                margin: 0,
-                paddingLeft: theme.spacing.md,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6,
-                color: theme.colors.textPrimary,
-              }}
-            >
-              {previewInsights.map((insight) => (
-                <li key={`preview-${insight}`} style={{ lineHeight: 1.4 }}>
-                  {insight}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {remainingInsights.length > 0 && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowSignals((prev) => !prev)}
+      {expanded && (
+        <>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'stretch',
+              gap: theme.spacing.md,
+              marginTop: theme.spacing.md,
+            }}
+          >
+            {context.length > 0 && (
+              <div style={{ flex: 1, minWidth: 240 }}>
+                <div
+                  style={{
+                    marginTop: theme.spacing.xs,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: theme.spacing.sm,
+                  }}
+                >
+                  {context.map(({ label, value, icon }) => (
+                    <div
+                      key={`${label}-${value}`}
+                      style={{
+                        padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+                        borderRadius: theme.radius.md,
+                        background: theme.colors.bgDeep,
+                        border: `1px solid ${theme.colors.border}`,
+                        minWidth: 150,
+                        flex: '0 1 auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: theme.fontSize.xs,
+                          color: theme.colors.textMuted,
+                          textTransform: 'uppercase',
+                          fontWeight: 600,
+                          letterSpacing: '0.08em',
+                        }}
+                      >
+                        {icon ? `${icon} ${label}` : label}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: theme.fontSize.md,
+                          fontWeight: 600,
+                          color: theme.colors.textPrimary,
+                        }}
+                      >
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {action && (
+              <div
                 style={{
-                  border: '1px solid ' + theme.colors.border,
-                  background: showSignals ? theme.colors.bgDeep : `${theme.colors.operations}15`,
-                  color: showSignals ? theme.colors.textPrimary : theme.colors.operations,
-                  fontSize: theme.fontSize.sm,
-                  fontWeight: 700,
-                  padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-                  borderRadius: theme.radius.md,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  cursor: 'pointer',
+                  flexBasis: 320,
+                  flexShrink: 0,
+                  borderRadius: theme.radius.lg,
+                  background: theme.colors.bgDeep,
+                  border: `1px solid ${theme.colors.border}`,
+                  padding: theme.spacing.md,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: theme.spacing.xs,
                 }}
               >
-                <span>{showSignals ? 'Hide' : 'View'} additional signals</span>
-                <span style={{ fontSize: theme.fontSize.xs, opacity: 0.8 }}>
-                  ({remainingInsights.length})
-                </span>
-              </button>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: theme.fontSize.sm,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    color: theme.colors.textMuted,
+                  }}
+                >
+                  Immediate action
+                </p>
+                <p style={{ margin: 0, fontSize: theme.fontSize.md, lineHeight: 1.4 }}>{action.text}</p>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: theme.spacing.xs,
+                    fontSize: theme.fontSize.sm,
+                    color: theme.colors.textSecondary,
+                    fontWeight: 600,
+                  }}
+                >
+                  <span style={{ color: theme.colors.textPrimary }}>{action.owner}</span>
+                  {action.dueBy && (
+                    <span style={{ color: theme.colors.textMuted }}>
+                      · Due {action.dueBy}
+                    </span>
+                  )}
+                </div>
+                {resolvedTimestamp && (
+                  <p
+                    style={{
+                      margin: `${theme.spacing.xs} 0 0`,
+                      fontSize: theme.fontSize.xs,
+                      color: theme.colors.textMuted,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      fontWeight: 600,
+                    }}
+                  >
+                    As of {resolvedTimestamp}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
 
-              {showSignals && (
+          {insightCount > 0 && (
+            <div
+              style={{
+                marginTop: theme.spacing.md,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.xs,
+              }}
+            >
+              {previewInsights.length > 0 && (
                 <ul
                   style={{
-                    margin: `${theme.spacing.xs} 0 0`,
+                    margin: 0,
                     paddingLeft: theme.spacing.md,
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: theme.spacing.xs,
+                    gap: 6,
                     color: theme.colors.textPrimary,
                   }}
                 >
-                  {remainingInsights.map((insight) => (
-                    <li key={`extra-${insight}`} style={{ lineHeight: 1.4 }}>
+                  {previewInsights.map((insight) => (
+                    <li key={`preview-${insight}`} style={{ lineHeight: 1.4 }}>
                       {insight}
                     </li>
                   ))}
                 </ul>
               )}
+
+              {remainingInsights.length > 0 && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowSignals((prev) => !prev)}
+                    style={{
+                      border: '1px solid ' + theme.colors.border,
+                      background: showSignals ? theme.colors.bgDeep : `${theme.colors.operations}15`,
+                      color: showSignals ? theme.colors.textPrimary : theme.colors.operations,
+                      fontSize: theme.fontSize.sm,
+                      fontWeight: 700,
+                      padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+                      borderRadius: theme.radius.md,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <span>{showSignals ? 'Hide' : 'View'} additional signals</span>
+                    <span style={{ fontSize: theme.fontSize.xs, opacity: 0.8 }}>
+                      ({remainingInsights.length})
+                    </span>
+                  </button>
+
+                  {showSignals && (
+                    <ul
+                      style={{
+                        margin: `${theme.spacing.xs} 0 0`,
+                        paddingLeft: theme.spacing.md,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: theme.spacing.xs,
+                        color: theme.colors.textPrimary,
+                      }}
+                    >
+                      {remainingInsights.map((insight) => (
+                        <li key={`extra-${insight}`} style={{ lineHeight: 1.4 }}>
+                          {insight}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </>
       )}
     </section>
   );
