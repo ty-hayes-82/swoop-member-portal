@@ -36,6 +36,11 @@ export default function PendingActions({ actions, onNavigate }) {
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                 {isActive ? `Active${action.measuredImpact ? ` · +$${action.measuredImpact.toLocaleString()} measured` : ''}` : 'Ready to activate'}
               </div>
+              {!isActive && (
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: '2px' }}>
+                  Activate starts monitoring and queues agent actions in Intervention Queue.
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
               {!isActive && <Badge text={meta.urgency === 'urgent' ? 'Urgent' : 'Recommended'} variant={meta.urgency} size="sm" />}
