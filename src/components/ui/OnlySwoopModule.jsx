@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme.js';
-import { DEMO_TIME } from '@/config/constants.js';
+import { DEMO_TIMESTAMP } from '@/config/constants.js';
 
-export default function OnlySwoopModule({ question, insights = [], action, context = [] }) {
+export default function OnlySwoopModule({ question, insights = [], action, context = [], timestamp }) {
   const [showSignals, setShowSignals] = useState(false);
 
   if (!question) return null;
@@ -10,6 +10,7 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
   const insightCount = insights.length;
   const previewInsights = insights.slice(0, 2);
   const remainingInsights = insights.slice(2);
+  const resolvedTimestamp = timestamp ?? DEMO_TIMESTAMP;
 
   return (
     <section

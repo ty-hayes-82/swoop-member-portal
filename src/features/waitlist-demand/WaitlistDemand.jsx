@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
 import { theme } from '@/config/theme';
-import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
-import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
 import QueueTab from './tabs/QueueTab';
 import PredictionsTab from './tabs/PredictionsTab';
 import IntelligenceTab from './tabs/IntelligenceTab';
@@ -57,7 +55,6 @@ export default function WaitlistDemand() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-      <OnlySwoopModule {...onlySwoopAngles.waitlistDemand} />
       <StoryHeadline
         variant="warning"
         headline={`${waitlistSummary.highPriority} retention-priority members are waiting while ${cancellationSummary.highRisk} bookings show high cancel risk.`}

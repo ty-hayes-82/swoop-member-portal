@@ -5,8 +5,6 @@ import StaffingTab from './tabs/StaffingTab';
 import StaffingPlaybooks from './StaffingPlaybooks';
 import { sourceSystems } from '@/services/staffingService';
 import { theme } from '@/config/theme';
-import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
-import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
 
 const TABS = [
   { key: 'service',   label: 'Service Quality' },
@@ -19,7 +17,6 @@ export default function StaffingService() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-      <OnlySwoopModule {...onlySwoopAngles.staffingService} />
       <StoryHeadline
         variant="urgent"
         headline="The Jan 16 complaint was never resolved. James Whitfield resigned Jan 22 — $18K in annual dues lost."

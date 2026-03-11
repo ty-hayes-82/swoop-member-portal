@@ -7,8 +7,6 @@ import OperationsPlaybooks from './OperationsPlaybooks';
 import { sourceSystems } from '@/services/operationsService';
 import { getWaitlistSummary } from '@/services/pipelineService';
 import { theme } from '@/config/theme';
-import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
-import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
 
 export default function OperationsDashboard() {
   const [activeTab, setActiveTab] = useState('revenue');
@@ -34,7 +32,6 @@ export default function OperationsDashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-      <OnlySwoopModule {...onlySwoopAngles.operations} />
 
       <div
         style={{

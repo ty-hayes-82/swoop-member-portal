@@ -1,7 +1,7 @@
 // Header — light bar above the main content
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
-import { CLUB_NAME, DEMO_MONTH } from '@/config/constants.js';
+import { CLUB_NAME, DEMO_MONTH, DEMO_TIMESTAMP } from '@/config/constants.js';
 import { theme } from '@/config/theme';
 
 // Greeting changes by time of day (simulated — based on 7am for demo morning mode)
@@ -180,7 +180,7 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
                 flexShrink: 0,
               }}
             >
-              · Demo data: Jan 17, 2026 7:00 AM
+              · Demo data: {DEMO_TIMESTAMP}
             </span>
           </div>
         </div>

@@ -1,7 +1,5 @@
 import { useMemo, useState } from 'react';
 import { theme } from '@/config/theme';
-import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
-import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
 import ClubMap from './ClubMap.jsx';
 import { getLiveMemberLocations, getServiceRecoveryAlerts, getStaffLocations, getZoneDensity } from '@/services/locationService';
 import { StoryHeadline, SoWhatCallout } from '@/components/ui';
@@ -127,7 +125,6 @@ export default function LocationIntelligence() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-      <OnlySwoopModule {...onlySwoopAngles.locationIntelligence} />
       <StoryHeadline
         variant="insight"
         headline="Know who is on property right now — and who needs attention before they leave."

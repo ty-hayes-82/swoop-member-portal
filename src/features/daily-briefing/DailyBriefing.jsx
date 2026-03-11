@@ -14,8 +14,6 @@ import MemberLink from '@/components/MemberLink.jsx';
 import { getDailyBriefing } from '@/services/briefingService.js';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { theme } from '@/config/theme.js';
-import OnlySwoopModule from '@/components/ui/OnlySwoopModule.jsx';
-import { onlySwoopAngles } from '@/data/onlySwoopAngles.js';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 
 export default function DailyBriefing() {
@@ -30,7 +28,6 @@ export default function DailyBriefing() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
 
 
-      <OnlySwoopModule {...onlySwoopAngles.dailyBriefing} />
 
       <StoryHeadline
         variant="urgent"
