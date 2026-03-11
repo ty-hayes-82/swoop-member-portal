@@ -199,7 +199,15 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                         minWidth: 0,
                       }}
                     >
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
+                      <span
+                        style={{
+                          overflow: item.key === 'daily-briefing' ? 'visible' : 'hidden',
+                          textOverflow: item.key === 'daily-briefing' ? 'unset' : 'ellipsis',
+                          whiteSpace: item.key === 'daily-briefing' ? 'normal' : 'nowrap',
+                        }}
+                      >
+                        {item.label}
+                      </span>
                       {item.key === 'daily-briefing' && (
                         <span
                           style={{
