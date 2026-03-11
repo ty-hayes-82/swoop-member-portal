@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
 import RevenueTab from './tabs/RevenueTab';
 import PaceTab from './tabs/PaceTab';
@@ -7,8 +7,21 @@ import OperationsPlaybooks from './OperationsPlaybooks';
 import { sourceSystems } from '@/services/operationsService';
 import { getWaitlistSummary } from '@/services/pipelineService';
 import { theme } from '@/config/theme';
+import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 
 export default function OperationsDashboard() {
+  // FP-P02: Loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <SkeletonGrid cards={6} columns={3} cardHeight={160} />;
+  }
+
   const [activeTab, setActiveTab] = useState('revenue');
   const waitlistSummary = getWaitlistSummary();
 

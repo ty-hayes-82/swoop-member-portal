@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import ServiceTab from './tabs/ServiceTab';
@@ -6,6 +6,7 @@ import StaffingTab from './tabs/StaffingTab';
 import StaffingPlaybooks from './StaffingPlaybooks';
 import { sourceSystems } from '@/services/staffingService';
 import { theme } from '@/config/theme';
+import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 
 const TABS = [
   { key: 'service',   label: 'Service Quality' },
@@ -14,6 +15,18 @@ const TABS = [
 ];
 
 export default function StaffingService() {
+  // FP-P02: Loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <SkeletonGrid cards={6} columns={3} cardHeight={160} />;
+  }
+
   const [activeTab, setActiveTab] = useState('service');
 
   return (

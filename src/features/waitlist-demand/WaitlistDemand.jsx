@@ -7,6 +7,7 @@ import PredictionsTab from './tabs/PredictionsTab';
 import IntelligenceTab from './tabs/IntelligenceTab';
 import { useNavigation } from '@/context/NavigationContext';
 import {
+import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
   sourceSystems,
   getWaitlistSummary,
   getCancellationSummary,
@@ -22,6 +23,18 @@ const TABS = [
 const ROUTE_LABEL = 'Tee Sheet & Demand';
 
 export default function WaitlistDemand() {
+  // FP-P02: Loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <SkeletonGrid cards={6} columns={3} cardHeight={160} />;
+  }
+
   const { routeIntent, clearRouteIntent } = useNavigation();
   const [activeTab, setActiveTab] = useState('queue');
   const waitlistSummary = getWaitlistSummary() ?? {
