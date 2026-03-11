@@ -44,6 +44,7 @@ export const navItems = [
     color: theme.colors.navStaffing,
     subtitle: 'Where are staffing gaps creating service risk right now?',
     sourceSystems: ['Scheduling', 'POS', 'Member CRM', 'Complaints'],
+    hidden: true,
   },
   {
     key: 'waitlist-demand',
