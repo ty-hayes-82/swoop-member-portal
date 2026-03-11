@@ -68,8 +68,8 @@ export default function MemberHealth() {
         </button>
       )}
       <Panel
-        title="Member Retention"
-        subtitle="Who's at risk and what do we do about it?"
+        title="Member Risk: Early Warning System"
+        subtitle="90% of clubs value a daily Health Score — catch disengagement before members walk"
         tabs={TABS}
         activeTab={activeTab}
         onTabChange={setActiveTab}
