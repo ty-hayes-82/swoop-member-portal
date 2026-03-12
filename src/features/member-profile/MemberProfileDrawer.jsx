@@ -66,9 +66,10 @@ const Section = ({ title, description, children }) => (
 );
 
 // Member Journey — longitudinal cross-domain timeline showing engagement decay sequence
+// P6 "First Domino": shows per-member decay chain (Email dropped → Golf dropped → Dining dropped)
 function MemberJourneyTimeline({ profile }) {
   // Build journey from activity + risk signals + static demo events
-  const journeyEvents = useMemo(() => {
+  const { journeyEvents, decayChain } = useMemo(() => {
     const events = [];
 
     // Add activity items
@@ -98,17 +99,32 @@ function MemberJourneyTimeline({ profile }) {
     // If few events, add demo journey points based on member scenario
     if (events.length < 4) {
       const demoEvents = [
+        { date: 'Oct 2025', domain: 'Email', label: 'Newsletter open rate dropped below 20%', type: 'warning', decayOrder: 1 },
         { date: 'Oct 2025', domain: 'Golf', label: 'Regular rounds: 3-4x/month', type: 'positive' },
-        { date: 'Nov 2025', domain: 'Golf', label: 'Rounds dropped to 2x/month', type: 'warning' },
-        { date: 'Nov 2025', domain: 'Dining', label: 'Post-round dining stopped', type: 'warning' },
-        { date: 'Dec 2025', domain: 'Email', label: 'Newsletter open rate below 15%', type: 'risk' },
+        { date: 'Nov 2025', domain: 'Golf', label: 'Rounds dropped to 2x/month', type: 'warning', decayOrder: 2 },
+        { date: 'Nov 2025', domain: 'Dining', label: 'Post-round dining stopped', type: 'warning', decayOrder: 3 },
+        { date: 'Dec 2025', domain: 'Email', label: 'Newsletter open rate below 10%', type: 'risk' },
         { date: 'Dec 2025', domain: 'Golf', label: 'Only 1 round played', type: 'risk' },
-        { date: 'Jan 2026', domain: 'Events', label: 'Skipped member-guest invite', type: 'risk' },
+        { date: 'Jan 2026', domain: 'Events', label: 'Skipped member-guest invite', type: 'risk', decayOrder: 4 },
+        { date: 'Jan 2026', domain: 'Risk', label: 'Resignation risk: high', type: 'risk' },
       ];
       events.push(...demoEvents);
     }
 
-    return events;
+    // Build decay chain from warning/risk events in chronological domain order
+    const decayDomains = [];
+    const seen = new Set();
+    const decayItems = events
+      .filter(e => (e.type === 'warning' || e.type === 'risk') && e.domain !== 'Risk' && e.domain !== 'Activity')
+      .sort((a, b) => (a.decayOrder ?? 99) - (b.decayOrder ?? 99));
+    for (const evt of decayItems) {
+      if (!seen.has(evt.domain)) {
+        seen.add(evt.domain);
+        decayDomains.push({ domain: evt.domain, date: evt.date, label: evt.label });
+      }
+    }
+
+    return { journeyEvents: events, decayChain: decayDomains };
   }, [profile]);
 
   const domainColors = {
@@ -132,6 +148,44 @@ function MemberJourneyTimeline({ profile }) {
   }
 
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {/* Decay Chain — "First Domino" visualization */}
+      {decayChain.length >= 2 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap',
+          padding: '10px 14px', marginBottom: 14,
+          background: `${theme.colors.urgent}06`,
+          border: `1px solid ${theme.colors.urgent}25`,
+          borderRadius: theme.radius.md,
+        }}>
+          <div style={{ width: '100%', marginBottom: 8 }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.colors.urgent }}>
+              Engagement Decay Sequence
+            </span>
+          </div>
+          {decayChain.map((step, i) => {
+            const color = domainColors[step.domain] ?? theme.colors.textMuted;
+            return (
+              <div key={step.domain} style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  background: color + '16',
+                  border: `1px solid ${color}40`,
+                }}>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {step.domain} dropped
+                  </div>
+                  <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>{step.date}</div>
+                </div>
+                {i < decayChain.length - 1 && (
+                  <span style={{ margin: '0 6px', fontSize: '14px', color: theme.colors.textMuted, fontWeight: 700 }}>&rarr;</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', paddingLeft: 20 }}>
       {/* Vertical timeline line */}
       <div style={{
@@ -187,6 +241,7 @@ function MemberJourneyTimeline({ profile }) {
           </div>
         );
       })}
+    </div>
     </div>
   );
 }

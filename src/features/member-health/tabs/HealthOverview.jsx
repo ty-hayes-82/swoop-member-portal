@@ -335,6 +335,7 @@ export default function HealthOverview() {
       {/* Full trend chart #3 — 6-month member health trajectory */}
       <TrendChart
         title="Member Health Trend — avg score + at-risk count"
+        subtitle="6–8 week outlook drives intervention timing"
         seriesKeys={[
           { key: 'memberHealthAvg',   color: theme.colors.textPrimary, label: 'Avg Health Score' },
           { key: 'atRiskMemberCount', color: theme.colors.urgent,  label: 'At-Risk Members' },

@@ -42,13 +42,15 @@ export default function MorningBriefing() {
       <button
         onClick={() => setOpen(true)}
         style={{
-          padding: '8px 16px', borderRadius: theme.radius.md, fontSize: theme.fontSize.sm,
-          fontWeight: 600, cursor: 'pointer',
-          border: `1px solid ${theme.colors.border}`,
-          background: theme.colors.bgCard, color: theme.colors.textSecondary,
-          display: 'flex', alignItems: 'center', gap: '6px',
+          padding: '10px 20px', borderRadius: theme.radius.md, fontSize: theme.fontSize.sm,
+          fontWeight: 700, cursor: 'pointer',
+          border: 'none',
+          background: theme.colors.operations, color: '#fff',
+          display: 'flex', alignItems: 'center', gap: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+          transition: 'opacity 0.15s',
         }}>
-        🖨 Morning Briefing Sheet
+        🖨 Print Today's Briefing
       </button>
 
       {open && (

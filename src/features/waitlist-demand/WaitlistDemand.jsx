@@ -6,6 +6,7 @@ import QueueTab from './tabs/QueueTab';
 import PredictionsTab from './tabs/PredictionsTab';
 import IntelligenceTab from './tabs/IntelligenceTab';
 import { useNavigation } from '@/context/NavigationContext';
+import PipelineSnapshot from '@/features/daily-briefing/PipelineSnapshot.jsx';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import {
@@ -25,7 +26,7 @@ const ROUTE_LABEL = 'Tee Sheet & Demand';
 
 export default function WaitlistDemand() {
   const [isLoading, setIsLoading] = useState(true);
-  const { routeIntent, clearRouteIntent } = useNavigation();
+  const { navigate, routeIntent, clearRouteIntent } = useNavigation();
   const [activeTab, setActiveTab] = useState('queue');
 
   useEffect(() => {
@@ -81,6 +82,8 @@ export default function WaitlistDemand() {
         { source: 'CRM', detail: 'Member health score and dues at risk' },
         { source: 'POS', detail: 'Post-round spend correlation' },
       ]} />
+
+      <PipelineSnapshot onNavigate={navigate} />
 
       <Panel
         title={ROUTE_LABEL}

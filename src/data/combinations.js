@@ -104,7 +104,7 @@ const raw = [
       'Trigger a personal call from the pro when a daily golfer misses two consecutive weeks',
       'Generate monthly "Member Health" scorecards for the GM with trending retention metrics',
     ],
-    example: 'Members who play fewer than 2 rounds in any 30-day window are 4x more likely to resign within 6 months.',
+    example: 'Members who play fewer than 2 rounds in any 30-day window are 4x more likely to resign within 6–8 weeks.',
   },
   {
     key: 'teesheet+weather',

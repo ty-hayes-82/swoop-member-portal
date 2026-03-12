@@ -6,7 +6,6 @@ import { useApp } from '@/context/AppContext.jsx';
 import TodayMode from './TodayMode.jsx';
 import YesterdayRecap from './YesterdayRecap.jsx';
 import TodayRiskFactors from './TodayRiskFactors.jsx';
-import PipelineSnapshot from './PipelineSnapshot.jsx';
 import MorningBriefing from '@/components/ui/MorningBriefing.jsx';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getDailyBriefing } from '@/services/briefingService.js';
@@ -233,7 +232,6 @@ export default function DailyBriefing() {
             />
           </Panel>
 
-          <PipelineSnapshot onNavigate={navigate} />
         </>
       )}
       </div>

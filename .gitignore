@@ -11,3 +11,4 @@ oakmont_hills_jan2026.db
 .npm-cache/
 
 dist.locked-*
+.env*.local
