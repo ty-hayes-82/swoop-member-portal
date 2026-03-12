@@ -173,6 +173,76 @@ export default function CsvImportHub() {
         </div>
       </section>
 
+
+      {/* Onboarding Progress — shows what's connected and what unlocks next */}
+      <section style={{
+        borderRadius: theme.radius.lg,
+        padding: theme.spacing.lg,
+        background: theme.colors.bgCard,
+        border: '1px solid ' + theme.colors.border,
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.md }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary }}>
+              Your Connection Progress
+            </h3>
+            <p style={{ margin: '4px 0 0', fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+              Connecting your systems takes minutes, not months. Here's where you stand.
+            </p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '28px', fontWeight: 700, color: theme.colors.accent, fontFamily: theme.fonts.mono }}>57%</div>
+            <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase' }}>insights unlocked</div>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div style={{ height: 8, background: theme.colors.border + '40', borderRadius: 4, marginBottom: theme.spacing.md, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: '57%', background: 'linear-gradient(90deg, ' + theme.colors.accent + ', ' + theme.colors.success + ')', borderRadius: 4, transition: 'width 0.5s ease' }} />
+        </div>
+
+        {/* Category checklist */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: theme.spacing.sm }}>
+          {[
+            { category: 'Tee Sheet', connected: true, impact: 'Pace of play + demand intelligence' },
+            { category: 'POS / F&B', connected: true, impact: 'Revenue leakage + dining patterns' },
+            { category: 'Member CRM', connected: true, impact: 'Health scores + archetype engine' },
+            { category: 'Email Marketing', connected: true, impact: 'Engagement decay detection' },
+            { category: 'Complaints', connected: true, impact: 'Service recovery triggers' },
+            { category: 'Staffing / HR', connected: false, impact: 'Labor optimization + gap alerts' },
+            { category: 'Reservations', connected: false, impact: 'Event ROI + dining demand' },
+            { category: 'Course GPS', connected: false, impact: 'Pace analytics by hole' },
+            { category: 'Surveys / NPS', connected: false, impact: 'Sentiment layer for health scores' },
+            { category: 'Weather', connected: true, impact: 'Proactive scheduling alerts' },
+          ].map(({ category, connected, impact }) => (
+            <div key={category} style={{
+              display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
+              padding: '8px 12px', borderRadius: theme.radius.sm,
+              background: connected ? theme.colors.success + '08' : theme.colors.bgDeep,
+              border: '1px solid ' + (connected ? theme.colors.success + '30' : theme.colors.border),
+            }}>
+              <span style={{ fontSize: '14px', flexShrink: 0 }}>{connected ? '\u2705' : '\u2B55'}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: theme.fontSize.xs, fontWeight: 600, color: connected ? theme.colors.success : theme.colors.textPrimary }}>{category}</div>
+                <div style={{ fontSize: '10px', color: theme.colors.textMuted, lineHeight: 1.3 }}>{connected ? 'Connected' : 'Unlocks: ' + impact}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{
+          marginTop: theme.spacing.md,
+          padding: theme.spacing.sm + ' ' + theme.spacing.md,
+          background: theme.colors.accent + '08',
+          border: '1px solid ' + theme.colors.accent + '20',
+          borderRadius: theme.radius.sm,
+          fontSize: theme.fontSize.xs,
+          color: theme.colors.textSecondary,
+          lineHeight: 1.5,
+        }}>
+          <strong style={{ color: theme.colors.accent }}>Next unlock:</strong> Connect <strong>Staffing / HR</strong> data to enable Labor Optimization alerts. Upload a shift schedule CSV above, or connect via API on the Connected Systems page.
+        </div>
+      </section>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.1fr)', gap: theme.spacing.xl, alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
           <section
