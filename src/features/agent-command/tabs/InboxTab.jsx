@@ -5,6 +5,27 @@ import { useApp } from '@/context/AppContext';
 import { theme } from '@/config/theme';
 import { AgentActionDrawer } from '../AgentActionDrawer';
 
+
+const CATEGORY_CONFIG = {
+  retention: { label: 'Retention', color: '#ef4444', icon: '\u2764' },
+  revenue: { label: 'Revenue', color: '#22c55e', icon: '\ud83d\udcb0' },
+  staffing: { label: 'Staffing', color: '#f59e0b', icon: '\ud83d\udc65' },
+  demand: { label: 'Demand', color: '#3b82f6', icon: '\ud83d\udcc8' },
+  engagement: { label: 'Engagement', color: '#8b5cf6', icon: '\u2728' },
+};
+
+const getActionCategory = (action) => {
+  const src = (action.source || '').toLowerCase();
+  const desc = (action.description || '').toLowerCase();
+  if (src.includes('pulse') || src.includes('recovery') || desc.includes('churn') || desc.includes('resign') || desc.includes('retention')) return 'retention';
+  if (src.includes('revenue') || desc.includes('revenue') || desc.includes('f&b') || desc.includes('uplift')) return 'revenue';
+  if (src.includes('labor') || desc.includes('staff') || desc.includes('labor')) return 'staffing';
+  if (src.includes('demand') || desc.includes('demand') || desc.includes('waitlist') || desc.includes('tee')) return 'demand';
+  return 'engagement';
+};
+
+const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+
 export default function InboxTab() {
   const { inbox, pendingCount, approveAction, dismissAction, showToast } = useApp();
   const [filterAgent, setFilterAgent] = useState('all');
@@ -17,9 +38,21 @@ export default function InboxTab() {
   );
 
   const visible = useMemo(() => {
-    if (filterAgent === 'all') return pendingActions;
-    return pendingActions.filter((item) => item.agentId === filterAgent);
+    let filtered = filterAgent === 'all' ? pendingActions : pendingActions.filter((item) => item.agentId === filterAgent);
+    return [...filtered].sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2));
   }, [pendingActions, filterAgent]);
+
+  const [groupByCategory, setGroupByCategory] = useState(false);
+  const groupedActions = useMemo(() => {
+    if (!groupByCategory) return null;
+    const groups = {};
+    visible.forEach(action => {
+      const cat = getActionCategory(action);
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(action);
+    });
+    return groups;
+  }, [visible, groupByCategory]);
 
   useEffect(() => {
     if (drawerAction && !visible.some((item) => item.id === drawerAction.id)) {
@@ -88,7 +121,7 @@ export default function InboxTab() {
           flexWrap: 'wrap',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Filter by agent</span>
           <select
             value={filterAgent}
@@ -109,6 +142,21 @@ export default function InboxTab() {
               </option>
             ))}
           </select>
+          <button
+            onClick={() => setGroupByCategory(!groupByCategory)}
+            style={{
+              borderRadius: theme.radius.sm,
+              border: '1px solid ' + (groupByCategory ? theme.colors.accent + '60' : theme.colors.border),
+              background: groupByCategory ? theme.colors.accent + '15' : 'transparent',
+              color: groupByCategory ? theme.colors.accent : theme.colors.textMuted,
+              padding: '6px 10px',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            {groupByCategory ? '\u2713 Grouped' : 'Group by category'}
+          </button>
         </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
@@ -149,17 +197,45 @@ export default function InboxTab() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-        {visible.map((action) => (
-          <AgentActionCard
-            key={action.id}
-            action={action}
-            onApprove={() => handleApprove(action)}
-            onDismiss={() => handleDismiss(action)}
-            onSelect={() => setDrawerAction(action)}
-          />
-        ))}
-      </div>
+      {groupByCategory && groupedActions ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+          {Object.entries(groupedActions).sort(([,a],[,b]) => (PRIORITY_ORDER[a[0]?.priority] ?? 2) - (PRIORITY_ORDER[b[0]?.priority] ?? 2)).map(([cat, actions]) => {
+            const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.engagement;
+            return (
+              <div key={cat}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: theme.spacing.sm, paddingBottom: theme.spacing.xs, borderBottom: '1px solid ' + cfg.color + '30' }}>
+                  <span style={{ fontSize: '14px' }}>{cfg.icon}</span>
+                  <span style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{cfg.label}</span>
+                  <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginLeft: 'auto' }}>{actions.length} action{actions.length !== 1 ? 's' : ''}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+                  {actions.map((action) => (
+                    <AgentActionCard
+                      key={action.id}
+                      action={action}
+                      onApprove={() => handleApprove(action)}
+                      onDismiss={() => handleDismiss(action)}
+                      onSelect={() => setDrawerAction(action)}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+          {visible.map((action) => (
+            <AgentActionCard
+              key={action.id}
+              action={action}
+              onApprove={() => handleApprove(action)}
+              onDismiss={() => handleDismiss(action)}
+              onSelect={() => setDrawerAction(action)}
+            />
+          ))}
+        </div>
+      )}
 
       {visible.length === 0 && (
         <SoWhatCallout variant="insight">
