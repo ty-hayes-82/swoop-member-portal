@@ -1,23 +1,21 @@
 // DailyBriefing — Today mode: immediate priorities. Analytics mode: full briefing.
 // Critique Phase 4: two-mode experience.
 import { useState, useEffect } from 'react';
-import { Panel, ConnectedSystems, StoryHeadline, AgentInboxStrip } from '@/components/ui/index.js';
+import { Panel, StoryHeadline, AgentInboxStrip } from '@/components/ui/index.js';
 import { useApp } from '@/context/AppContext.jsx';
 import { getTopPendingAction } from '@/services/agentService.js';
 import TodayMode from './TodayMode.jsx';
 import YesterdayRecap from './YesterdayRecap.jsx';
 import TodayRiskFactors from './TodayRiskFactors.jsx';
-import PendingActions from './PendingActions.jsx';
 import PipelineSnapshot from './PipelineSnapshot.jsx';
 import MorningBriefing from '@/components/ui/MorningBriefing.jsx';
-import DataQuality from '@/components/ui/DataQuality.jsx';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getDailyBriefing } from '@/services/briefingService.js';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { theme } from '@/config/theme.js';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 import RecentInterventions from '@/components/ui/RecentInterventions.jsx';
-import TwoLayerDiagram from '@/components/ui/TwoLayerDiagram.jsx';
+
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 
@@ -207,16 +205,6 @@ export default function DailyBriefing() {
           </Panel>
 
           <PipelineSnapshot onNavigate={navigate} />
-
-          <Panel title="Active Response Plans" subtitle="Pre-assembled actions for known operational patterns">
-            <PendingActions actions={briefing.pendingActions} onNavigate={navigate} />
-          </Panel>
-
-          <DataQuality />
-
-          <TwoLayerDiagram variant="compact" />
-
-          <ConnectedSystems />
         </>
       )}
       </div>
