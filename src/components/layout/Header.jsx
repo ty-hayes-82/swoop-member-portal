@@ -53,6 +53,7 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
   const page = NAV_ITEMS.find((n) => n.key === currentRoute) || NAV_ITEMS[0];
   const handleMenuClick = onMobileMenuToggle || toggleSidebar;
   const [bannerIdx, setBannerIdx] = useState(0);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const [nudges] = useState(() => getDataNudges());
   useEffect(() => {
     if (nudges.length <= 1) return;
@@ -75,7 +76,12 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
         boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}
     >
-      <div style={{ width: '100%', padding: '4px 12px', background: theme.colors.accent + '0A', borderBottom: '1px solid ' + theme.colors.accent + '20', fontSize: '12px', color: theme.colors.accent, fontWeight: 600, textAlign: 'center', transition: 'opacity 0.3s' }}>{nudges[bannerIdx]}</div>
+      {!bannerDismissed && (
+        <div style={{ width: '100%', padding: '4px 12px', background: theme.colors.accent + '0A', borderBottom: '1px solid ' + theme.colors.accent + '20', fontSize: '12px', color: theme.colors.accent, fontWeight: 600, textAlign: 'center', transition: 'opacity 0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <span style={{ flex: 1 }}>{nudges[bannerIdx]}</span>
+          <button onClick={() => setBannerDismissed(true)} style={{ background: 'none', border: 'none', color: theme.colors.accent, cursor: 'pointer', fontSize: '14px', padding: '0 4px', opacity: 0.6, lineHeight: 1 }} title='Dismiss'>×</button>
+        </div>
+      )}
       <div
         style={{
           display: 'flex',

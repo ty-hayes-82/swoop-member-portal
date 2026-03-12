@@ -105,7 +105,7 @@ export default function DailyBriefing() {
 
       <RecentInterventions />
 
-      {/* Mode switcher + print action */}
+      {/* Mode switcher + actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', background: theme.colors.bgDeep, borderRadius: theme.radius.md, padding: '3px', border: `1px solid ${theme.colors.border}` }}>
           {[['today', 'Today'], ['analytics', 'Analytics']].map(([mode, label]) => (
@@ -149,72 +149,11 @@ export default function DailyBriefing() {
               </span>
             </div>
             <h2 style={{ fontFamily: theme.fonts.serif, fontSize: '26px', color: theme.colors.textPrimary, fontWeight: 400, lineHeight: 1.1, marginBottom: '4px' }}>
-              Where is today breaking?
+              How did yesterday perform?
             </h2>
             <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: 0 }}>
-              Full operational picture
+              Retrospective analysis and trend context
             </p>
-          </div>
-
-          {/* James Whitfield live alert */}
-          <div
-            onClick={() => navigate('staffing-service')}
-            style={{
-              background: `${theme.colors.urgent}06`,
-              border: `1.5px solid ${theme.colors.urgent}50`,
-              borderRadius: theme.radius.md,
-              padding: theme.spacing.lg,
-              cursor: 'pointer',
-            }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
-              <div>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
-                  ⚠ Member Needs Attention — Preventable Resignation In Progress
-                </div>
-                <div style={{ fontFamily: theme.fonts.serif, fontSize: theme.fontSize.xl, color: theme.colors.textPrimary, marginTop: 4 }}>
-                  <MemberLink
-                    mode="drawer"
-                    memberId="mbr_203"
-                    style={{
-                      fontWeight: 600,
-                      color: theme.colors.textPrimary,
-                      textDecorationColor: `${theme.colors.urgent}80`,
-                    }}
-                  >
-                    James Whitfield
-                  </MemberLink>
-                  {' '}· Balanced Active · $18,000/yr in dues ($90K lifetime value)
-                </div>
-              </div>
-              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, textAlign: 'right', flexShrink: 0, fontWeight: 500 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>Full case →</div>
-                <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>Staffing & Service</div>
-              </div>
-            </div>
-            <div className="grid-responsive-4" style={{ marginBottom: theme.spacing.md }}>
-              {[
-                { label: 'Complaint filed', value: 'Jan 16', color: theme.colors.urgent },
-                { label: 'Follow-up status', value: 'Not resolved', color: theme.colors.warning },
-                { label: 'How unhappy', value: 'Very unhappy', color: theme.colors.urgent },
-                { label: 'Resign risk by', value: 'Jan 22', color: theme.colors.urgent },
-              ].map(({ label, value, color }) => (
-                <div key={label} style={{ background: theme.colors.bgCard, borderRadius: theme.radius.sm, padding: theme.spacing.sm }}>
-                  <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginBottom: 2 }}>{label}</div>
-                  <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color }}>{value}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6 }}>
-              <strong style={{ color: theme.colors.textPrimary }}>What happened: </strong>
-              GPS showed James stopped visiting the Grill Room after Jan 12. Grill Room short-staffed Jan 16 → 40-minute wait for James's lunch → He filed a complaint that evening → We acknowledged it, no one followed up → He hasn't been back in 6 days → <strong style={{ color: theme.colors.urgent }}>At risk of resigning by Jan 22</strong>
-            </div>
-            <ActionRecommendation
-              action="Personal call from GM + complimentary round offer + F&B recovery gesture"
-              owner="General Manager"
-              dueBy="By end of day Jan 17"
-              proofMetric="$18K/yr dues retained, satisfaction confirmed"
-              variant="inline"
-            />
           </div>
 
           <Panel title="Yesterday's Results" subtitle="How did January 16th perform vs. expectations?">
