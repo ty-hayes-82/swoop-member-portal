@@ -23,6 +23,7 @@ import { CsvImportHub } from '@/features/csv-import';
 import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import LandingRedirect from '@/features/landing-redirect/LandingRedirect.jsx';
 import BoardReport from "@/features/board-report/BoardReport.jsx";
+import ExperienceInsights from '@/features/experience-insights/ExperienceInsights.jsx';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -41,6 +42,7 @@ const ROUTES = {
   'board-report': BoardReport,
   'integrations/csv-import': CsvImportHub,
   'csv-import': CsvImportHub,
+  'experience-insights': ExperienceInsights,
   'data-model': DataModelPage,
   'member-profile': MemberProfilePage,
   landing: LandingRedirect,

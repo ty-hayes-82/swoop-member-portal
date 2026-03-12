@@ -37,6 +37,16 @@ export const navItems = [
     badge: 'NEW',
   },
   {
+    key: 'experience-insights',
+    label: 'Experience Insights',
+    section: 'SEE IT',
+    icon: '🔗',
+    color: theme.colors.navMembers,
+    subtitle: 'Which experiences drive retention — and which ones cost you members?',
+    sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Email', 'Complaints', 'Events'],
+    badge: 'NEW',
+  },
+  {
     key: 'staffing-service',
     label: 'Staffing & Service',
     section: 'SEE IT',
