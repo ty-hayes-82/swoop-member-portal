@@ -95,7 +95,7 @@ const operationalSaves = [
   },
 ];
 
-const tabNames = ['Summary', 'Member Saves', 'Operational Saves'];
+const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned'];
 
 function formatCurrency(val) {
   return '$' + val.toLocaleString();
@@ -312,6 +312,86 @@ export default function BoardReport() {
               </div>
             </Panel>
           ))}
+        </div>
+      )}
+
+      {activeTab === 3 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <Panel>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: colors.white }}>
+              What We Learned This Quarter
+            </h2>
+            <p style={{ color: colors.text, lineHeight: 1.7, marginBottom: '20px' }}>
+              Cross-domain correlations discovered through Swoop&rsquo;s connected intelligence.
+              These aren&rsquo;t hypotheses &mdash; they&rsquo;re patterns proven by your club&rsquo;s own data.
+            </p>
+          </Panel>
+
+          {[
+            {
+              insight: 'Members who received a personal GM call after a complaint renewed at 95% vs. 72% for those who didn\u2019t',
+              evidence: 'Of 14 members who received GM personal outreach, 13 renewed. Of 18 members with standard email follow-up, 13 renewed.',
+              implication: 'GM personal calls are 3.4x more effective than email for at-risk retention. Worth the 15-minute investment.',
+              domains: ['Service', 'Retention'],
+            },
+            {
+              insight: 'Post-round dining dropped 34% on days with pace-of-play issues',
+              evidence: '8 days with avg round time >4:30 showed 34% lower Grill Room covers in the 12-2 PM window vs. days at 4:10 or under.',
+              implication: 'Pace of play isn\u2019t just a golf problem \u2014 it\u2019s an F&B revenue problem. Every slow round costs ~$47 in lost dining.',
+              domains: ['Golf', 'F&B'],
+            },
+            {
+              insight: 'Event attendees who also golf regularly are the most loyal segment (97% renewal)',
+              evidence: 'Members active in both golf (3+ rounds/mo) AND events (2+ events/qtr) renewed at 97%. Members active in only one domain: 81%.',
+              implication: 'Cross-domain engagement is the strongest retention signal. The goal isn\u2019t more golf or more events \u2014 it\u2019s both.',
+              domains: ['Golf', 'Events', 'Retention'],
+            },
+            {
+              insight: 'Email open rate is the earliest predictor of disengagement \u2014 6-8 weeks before activity drops',
+              evidence: 'In 9 of 11 resignations, email engagement dropped below 15% at least 6 weeks before golf or dining changed.',
+              implication: 'Email is the canary in the coal mine. A weekly email decay alert would have caught 82% of at-risk members earlier.',
+              domains: ['Email', 'Retention'],
+            },
+            {
+              insight: 'Friday understaffing creates a compounding loss: $1,133 direct + $18,000 in resignation risk',
+              evidence: 'Jan 16 understaffing \u2192 James Whitfield complaint \u2192 unresolved \u2192 resignation. The F&B loss was $1,280. The membership loss was $18,000.',
+              implication: 'Staffing decisions have downstream consequences invisible to scheduling software. Swoop connects the staffing gap to the resignation.',
+              domains: ['Staffing', 'F&B', 'Retention'],
+            },
+          ].map((item, i) => (
+            <Panel key={i}>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                {item.domains.map(d => (
+                  <span key={d} style={{
+                    fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
+                    padding: '2px 8px', borderRadius: '4px',
+                    background: colors.brand + '22', color: colors.brand,
+                  }}>{d}</span>
+                ))}
+              </div>
+              <h3 style={{ fontSize: '15px', fontWeight: 700, color: colors.white, margin: '0 0 8px', lineHeight: 1.4 }}>
+                {item.insight}
+              </h3>
+              <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.text }}>
+                <div style={{ marginBottom: '6px' }}><strong>Evidence:</strong> {item.evidence}</div>
+                <div style={{ color: colors.green }}><strong>So what:</strong> {item.implication}</div>
+              </div>
+            </Panel>
+          ))}
+
+          <div style={{
+            background: colors.bg,
+            border: '1px solid ' + colors.border,
+            borderRadius: '12px',
+            padding: '16px',
+            fontSize: '13px',
+            color: colors.textMuted,
+            lineHeight: 1.6,
+            textAlign: 'center',
+          }}>
+            These correlations are unique to Oakmont Hills &mdash; they come from connecting your specific systems.
+            No industry benchmark or consultant report can tell you that <em>your</em> Friday understaffing caused <em>your</em> member&rsquo;s resignation.
+          </div>
         </div>
       )}
       </div>
