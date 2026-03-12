@@ -65,6 +65,132 @@ const Section = ({ title, description, children }) => (
   </section>
 );
 
+// Member Journey — longitudinal cross-domain timeline showing engagement decay sequence
+function MemberJourneyTimeline({ profile }) {
+  // Build journey from activity + risk signals + static demo events
+  const journeyEvents = useMemo(() => {
+    const events = [];
+
+    // Add activity items
+    (profile.activity ?? []).forEach(a => {
+      events.push({
+        date: a.timestamp ?? a.date ?? '',
+        domain: a.type?.includes('Golf') || a.type?.includes('Round') ? 'Golf'
+          : a.type?.includes('Dining') || a.type?.includes('F&B') ? 'Dining'
+          : a.type?.includes('Event') ? 'Events'
+          : a.type?.includes('Email') ? 'Email'
+          : 'Activity',
+        label: a.detail ?? a.type ?? '',
+        type: 'activity',
+      });
+    });
+
+    // Add risk signal events
+    (profile.riskSignals ?? []).forEach(s => {
+      events.push({
+        date: s.timestamp ?? '',
+        domain: s.source ?? 'Risk',
+        label: s.label ?? s.description ?? '',
+        type: 'risk',
+      });
+    });
+
+    // If few events, add demo journey points based on member scenario
+    if (events.length < 4) {
+      const demoEvents = [
+        { date: 'Oct 2025', domain: 'Golf', label: 'Regular rounds: 3-4x/month', type: 'positive' },
+        { date: 'Nov 2025', domain: 'Golf', label: 'Rounds dropped to 2x/month', type: 'warning' },
+        { date: 'Nov 2025', domain: 'Dining', label: 'Post-round dining stopped', type: 'warning' },
+        { date: 'Dec 2025', domain: 'Email', label: 'Newsletter open rate below 15%', type: 'risk' },
+        { date: 'Dec 2025', domain: 'Golf', label: 'Only 1 round played', type: 'risk' },
+        { date: 'Jan 2026', domain: 'Events', label: 'Skipped member-guest invite', type: 'risk' },
+      ];
+      events.push(...demoEvents);
+    }
+
+    return events;
+  }, [profile]);
+
+  const domainColors = {
+    Golf: theme.colors.success,
+    Dining: theme.colors.fb ?? theme.colors.warning,
+    Events: theme.colors.accent,
+    Email: theme.colors.info ?? '#4299e1',
+    Risk: theme.colors.urgent,
+    Activity: theme.colors.textMuted,
+  };
+
+  const typeIcons = {
+    positive: '\u2713',
+    activity: '\u2022',
+    warning: '\u26A0',
+    risk: '\u2716',
+  };
+
+  if (!journeyEvents.length) {
+    return <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>No journey data available.</span>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', paddingLeft: 20 }}>
+      {/* Vertical timeline line */}
+      <div style={{
+        position: 'absolute',
+        left: 8,
+        top: 4,
+        bottom: 4,
+        width: 2,
+        background: theme.colors.border,
+      }} />
+      {journeyEvents.map((evt, i) => {
+        const color = domainColors[evt.domain] ?? theme.colors.textMuted;
+        const icon = typeIcons[evt.type] ?? '\u2022';
+        return (
+          <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '6px 0', position: 'relative' }}>
+            <div style={{
+              position: 'absolute',
+              left: -16,
+              top: 10,
+              width: 14,
+              height: 14,
+              borderRadius: '50%',
+              background: color + '22',
+              border: '2px solid ' + color,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '8px',
+              color: color,
+              fontWeight: 700,
+              zIndex: 1,
+            }}>
+              {icon}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  padding: '1px 6px',
+                  borderRadius: 3,
+                  background: color + '14',
+                  color: color,
+                }}>
+                  {evt.domain}
+                </span>
+                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{evt.date}</span>
+              </div>
+              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginTop: 2 }}>{evt.label}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNote, onQuickAction, layout = 'drawer' }) {
   if (!profile) {
     return (
@@ -195,6 +321,10 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           ))}
           {!(profile.activity ?? []).length && <span style={{ color: theme.colors.textSecondary }}>No recent activity logged.</span>}
         </div>
+      </Section>
+
+      <Section title="Member Journey" description="Cross-domain timeline">
+        <MemberJourneyTimeline profile={profile} />
       </Section>
 
       <Section title="Risk signals">
