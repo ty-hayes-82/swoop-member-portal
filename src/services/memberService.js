@@ -350,3 +350,19 @@ export const getMemberProfile = (memberId) => {
 
 export const sourceSystems = ['Member CRM', 'Analytics', 'Tee Sheet'];
 
+// LTV calculation - average tenure 5 years for private club members
+export const DEFAULT_LTV_MULTIPLIER = 5;
+
+export const calculateLTV = (annualDues, multiplier = DEFAULT_LTV_MULTIPLIER) => {
+  const dues = Number(annualDues);
+  if (!Number.isFinite(dues) || dues <= 0) return 0;
+  return dues * multiplier;
+};
+
+export const formatLTV = (annualDues, multiplier = DEFAULT_LTV_MULTIPLIER) => {
+  const ltv = calculateLTV(annualDues, multiplier);
+  if (ltv <= 0) return null;
+  if (ltv >= 1000000) return "$" + (ltv / 1000000).toFixed(1) + "M";
+  if (ltv >= 1000) return "$" + Math.round(ltv / 1000) + "K";
+  return "$" + ltv.toLocaleString();
+};
