@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
 import PaceImpactTab from './tabs/PaceImpactTab';
 import StaffingImpactTab from './tabs/StaffingImpactTab';
@@ -10,6 +10,7 @@ import { paceFBImpact } from '@/data/pace';
 import { understaffedDays } from '@/data/staffing';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
+import ScenarioModeling from './components/ScenarioModeling';
 
 const TABS = [
   { key: 'pace', label: 'Pace-of-Play Impact' },
@@ -105,6 +106,12 @@ export default function RevenueLeakage() {
           />
         </div>
       </div>
+
+      <ScenarioModeling
+        paceLoss={PACE_LOSS}
+        staffingLoss={STAFFING_LOSS}
+        weatherLoss={WEATHER_LOSS}
+      />
 
       <Panel
         title="Deep Dive by Category"
