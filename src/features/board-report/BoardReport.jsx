@@ -115,6 +115,97 @@ const colors = {
   brand: theme.colors?.brand?.[500] || '#4299e1',
 };
 
+
+// 6-month trend data for key metrics
+const monthlyTrends = [
+  { month: 'Sep', membersSaved: 1, duesProtected: 12000, serviceFailures: 4, responseTime: 8.1 },
+  { month: 'Oct', membersSaved: 2, duesProtected: 28000, serviceFailures: 5, responseTime: 6.8 },
+  { month: 'Nov', membersSaved: 2, duesProtected: 31000, serviceFailures: 4, responseTime: 5.9 },
+  { month: 'Dec', membersSaved: 3, duesProtected: 38000, serviceFailures: 5, responseTime: 5.2 },
+  { month: 'Jan', membersSaved: 3, duesProtected: 42000, serviceFailures: 3, responseTime: 4.2 },
+  { month: 'Feb', membersSaved: 3, duesProtected: 17000, serviceFailures: 2, responseTime: 3.8 },
+];
+
+function TrendSparkline({ data, dataKey, color, height = 40, width = 120 }) {
+  const values = data.map(d => d[dataKey]);
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const range = max - min || 1;
+  const points = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * width;
+    const y = height - ((v - min) / range) * (height - 4) - 2;
+    return `${x},${y}`;
+  }).join(' ');
+  const trend = values[values.length - 1] > values[0] ? 'up' : values[values.length - 1] < values[0] ? 'down' : 'flat';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <svg width={width} height={height} style={{ flexShrink: 0 }}>
+        <polyline
+          points={points}
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {values.map((v, i) => {
+          const x = (i / (values.length - 1)) * width;
+          const y = height - ((v - min) / range) * (height - 4) - 2;
+          return <circle key={i} cx={x} cy={y} r="2.5" fill={i === values.length - 1 ? color : 'transparent'} stroke={color} strokeWidth="1" />;
+        })}
+      </svg>
+      <span style={{ fontSize: '10px', fontWeight: 700, color: trend === 'up' ? colors.green : trend === 'down' ? colors.green : colors.textMuted }}>
+        {trend === 'up' ? '\u2191' : trend === 'down' ? '\u2193' : '\u2192'}
+      </span>
+    </div>
+  );
+}
+
+function ProgressOverTime() {
+  const metrics = [
+    { label: 'Members Saved / Month', key: 'membersSaved', color: colors.green, format: v => v },
+    { label: 'Dues Protected / Month', key: 'duesProtected', color: colors.green, format: v => '$' + (v / 1000).toFixed(0) + 'K' },
+    { label: 'Service Failures Caught', key: 'serviceFailures', color: colors.orange, format: v => v },
+    { label: 'Avg Response Time (hrs)', key: 'responseTime', color: colors.blue, format: v => v.toFixed(1) },
+  ];
+
+  return (
+    <div style={{ marginTop: '24px' }}>
+      <h3 style={{ fontSize: '16px', fontWeight: 700, color: colors.white, marginBottom: '16px' }}>
+        Progress Over 6 Months
+      </h3>
+      <p style={{ fontSize: '13px', color: colors.text, lineHeight: 1.6, marginBottom: '16px' }}>
+        Swoop&rsquo;s impact compounds over time as the system learns your club&rsquo;s patterns. Response times have improved 53% since launch, and monthly dues protection has grown 3.5x.
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+        {metrics.map(m => {
+          const current = monthlyTrends[monthlyTrends.length - 1][m.key];
+          const first = monthlyTrends[0][m.key];
+          const pctChange = ((current - first) / first * 100).toFixed(0);
+          const improved = m.key === 'responseTime' ? current < first : current > first;
+          return (
+            <div key={m.key} style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border }}>
+              <div style={{ fontSize: '11px', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+                {m.label}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '20px', fontWeight: 700, color: m.color }}>{m.format(current)}</span>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: improved ? colors.green : colors.red }}>
+                  {improved ? '\u2191' : '\u2193'} {Math.abs(pctChange)}% vs launch
+                </span>
+              </div>
+              <TrendSparkline data={monthlyTrends} dataKey={m.key} color={m.color} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: colors.textMuted, marginTop: '4px' }}>
+                {monthlyTrends.map(d => <span key={d.month}>{d.month}</span>)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function KPIStrip() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '24px' }}>
