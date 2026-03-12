@@ -174,6 +174,137 @@ function MemberRow({ m, isExpanded, onToggle }) {
   );
 }
 
+
+// Churn Anatomy — average decay sequence with timing data
+function ChurnDecaySequence() {
+  const stages = [
+    { domain: 'Email', icon: '\u2709', label: 'Email engagement drops', avgWeeks: 0, detail: 'Open rates fall below 15%. First detectable signal.', color: theme.colors.accent },
+    { domain: 'Golf', icon: '\u26f3', label: 'Round frequency declines', avgWeeks: 3, detail: 'From 3+ rounds/month to <1. Cancellations rise.', color: theme.colors.success },
+    { domain: 'Dining', icon: '\ud83c\udf7d', label: 'F&B visits cease', avgWeeks: 5, detail: 'Post-round dining stops. Grill Room visits drop to zero.', color: theme.colors.warning },
+    { domain: 'Events', icon: '\ud83c\udf89', label: 'Event participation ends', avgWeeks: 6, detail: 'No RSVPs, no attendance. Social ties severed.', color: theme.colors.info || theme.colors.accent },
+    { domain: 'Resign', icon: '\ud83d\udeaa', label: 'Resignation submitted', avgWeeks: 8, detail: 'Average 6\u20138 weeks from first email decay signal.', color: theme.colors.urgent },
+  ];
+
+  const totalWeeks = stages[stages.length - 1].avgWeeks;
+
+  return (
+    <div style={{
+      background: theme.colors.bgCard,
+      borderRadius: theme.radius.lg,
+      border: '1px solid ' + theme.colors.border,
+      padding: theme.spacing.lg,
+      boxShadow: theme.shadow.sm,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
+        <div>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.urgent, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>
+            Churn Anatomy
+          </div>
+          <h3 style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary, margin: 0, lineHeight: 1.3 }}>
+            The Resignation Sequence
+          </h3>
+          <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
+            Average decay timeline from first signal to resignation. Based on 11 resignations over the past 12 months.
+          </p>
+        </div>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <div style={{ fontSize: '28px', fontWeight: 700, color: theme.colors.urgent, fontFamily: theme.fonts.mono }}>6\u20138</div>
+          <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>weeks to act</div>
+        </div>
+      </div>
+
+      {/* Timeline visualization */}
+      <div style={{ position: 'relative', padding: '16px 0 8px' }}>
+        {/* Progress bar background */}
+        <div style={{ position: 'absolute', top: '28px', left: '20px', right: '20px', height: '4px', background: theme.colors.border, borderRadius: '2px' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', background: 'linear-gradient(90deg, ' + theme.colors.accent + ', ' + theme.colors.warning + ', ' + theme.colors.urgent + ')', borderRadius: '2px', opacity: 0.6 }} />
+        </div>
+
+        {/* Stage nodes */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
+          {stages.map((stage, i) => (
+            <div key={stage.domain} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative' }}>
+              {/* Node circle */}
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: stage.color + '18',
+                border: '2.5px solid ' + stage.color,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '14px', zIndex: 1, position: 'relative',
+              }}>
+                {stage.icon}
+              </div>
+
+              {/* Week label */}
+              <div style={{
+                fontSize: '11px', fontWeight: 700, color: stage.color,
+                fontFamily: theme.fonts.mono, marginTop: '8px',
+              }}>
+                {stage.avgWeeks === 0 ? 'Week 0' : 'Week ' + stage.avgWeeks}
+              </div>
+
+              {/* Domain label */}
+              <div style={{
+                fontSize: theme.fontSize.xs, fontWeight: 600,
+                color: theme.colors.textPrimary, marginTop: '4px', textAlign: 'center',
+              }}>
+                {stage.domain}
+              </div>
+
+              {/* Detail text */}
+              <div style={{
+                fontSize: '10px', color: theme.colors.textMuted,
+                textAlign: 'center', marginTop: '2px', lineHeight: 1.4,
+                maxWidth: '120px',
+              }}>
+                {stage.detail}
+              </div>
+
+              {/* Arrow between nodes */}
+              {i < stages.length - 1 && (
+                <div style={{
+                  position: 'absolute', top: '12px', right: '-50%',
+                  fontSize: '14px', color: theme.colors.textMuted + '60',
+                  zIndex: 0,
+                }}>
+                  \u2192
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Intervention window callout */}
+      <div style={{
+        marginTop: theme.spacing.lg,
+        padding: theme.spacing.md,
+        background: theme.colors.success + '0A',
+        border: '1px solid ' + theme.colors.success + '30',
+        borderRadius: theme.radius.md,
+        display: 'flex', alignItems: 'center', gap: theme.spacing.md,
+      }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: '50%',
+          background: theme.colors.success + '18',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '18px', flexShrink: 0,
+        }}>
+          \u2705
+        </div>
+        <div>
+          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.success, marginBottom: '2px' }}>
+            Swoop detects at Week 0 — you have 6\u20138 weeks to intervene
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
+            In 9 of 11 resignations this year, email decay was the first domino. Swoop monitors this signal daily and alerts you before golf or dining metrics even begin to decline. The GM personal call at Week 1 has a 95% retention success rate.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HealthOverview() {
   const dist = getHealthDistribution();
   const atRisk = getAtRiskMembers();
@@ -264,6 +395,9 @@ export default function HealthOverview() {
           );
         })}
       </div>
+
+      {/* Churn Anatomy — decay sequence visualization */}
+      <ChurnDecaySequence />
 
       {/* At-risk member table */}
       <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
