@@ -3,7 +3,7 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
-import { getHealthDistribution, getAtRiskMembers } from '@/services/memberService';
+import { getHealthDistribution, getAtRiskMembers, calculateLTV, formatLTV, DEFAULT_LTV_MULTIPLIER } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 
@@ -206,7 +206,9 @@ export default function HealthOverview() {
       return { compact: '—', full: '—' };
     }
     const total = dues.reduce((sum, value) => sum + value, 0);
-    return { compact: formatCompactCurrency(total), full: formatFullCurrency(total) };
+    const ltv = total * DEFAULT_LTV_MULTIPLIER;
+    const ltvCompact = formatCompactCurrency(ltv);
+    return { compact: formatCompactCurrency(total), full: formatFullCurrency(total), ltvCompact, ltvFull: formatFullCurrency(ltv) };
   }, [atRisk]);
 
   const toggleSort = (column) => {
@@ -275,7 +277,7 @@ export default function HealthOverview() {
             style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent }}
             title={atRiskDuesDisplay.full}
           >
-            {atRiskDuesDisplay.compact} dues at risk
+            {atRiskDuesDisplay.compact} dues at risk — {atRiskDuesDisplay.ltvCompact} lifetime value at stake
           </span>
         </div>
         <div style={{ overflowX: 'auto' }}>

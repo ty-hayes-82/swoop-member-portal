@@ -102,7 +102,7 @@ export default function TodayMode({ onNavigate }) {
         'Average Grill Room check dropped from $47 → $28 since January 3.',
         'Health score fell 78 → 42 once the third complaint hit.',
       ],
-      stakes: '$18,000/yr in dues',
+      stakes: '$18,000/yr in dues ($90K lifetime value)',
       memberName: 'James Whitfield',
       memberId: 'mbr_203',
       context: 'Slow service complaint at Grill Room — felt ignored after acknowledging.',
@@ -166,9 +166,9 @@ export default function TodayMode({ onNavigate }) {
       ],
       bullets: [
         'Both members are in the bottom quartile of engagement.',
-        'Combined dues at risk: $36K + secondary spend.',
+        'Combined dues at risk: $36K annual ($180K lifetime value) + secondary spend.',
       ],
-      stakes: '$36K annual dues',
+      stakes: '$36K annual dues ($180K lifetime value)',
       linkLabel: 'Member Retention →',
       linkKey: 'member-health',
       meta: {
@@ -177,7 +177,7 @@ export default function TodayMode({ onNavigate }) {
         freshness: 'Scores refreshed 9 min ago',
         confidence: '90% confidence',
         why: 'Health scores <45 + tee times today',
-        metric: { value: '$36K', label: 'dues at stake today' },
+        metric: { value: '$180K', label: 'lifetime value at stake' },
       },
     },
   ];

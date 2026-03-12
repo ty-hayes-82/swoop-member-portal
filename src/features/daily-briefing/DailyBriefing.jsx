@@ -64,7 +64,7 @@ export default function DailyBriefing() {
             >
               James Whitfield
             </MemberLink>
-            {' '}filed a complaint Jan 18. It was never resolved. He resigned Jan 22 — $18K/year in dues lost.
+            {' '}filed a complaint Jan 18. It was never resolved. He resigned Jan 22 — $18K/year in dues lost ($90K lifetime value).
           </>
         )}
         context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. What Swoop would have done: Alert surfaced Day 1 → GM sends recovery message via Swoop app → James responds same day → Health score monitored weekly → Retention confirmed."
@@ -157,7 +157,7 @@ export default function DailyBriefing() {
                   >
                     James Whitfield
                   </MemberLink>
-                  {' '}· Balanced Active · $18,000/yr in dues
+                  {' '}· Balanced Active · $18,000/yr in dues ($90K lifetime value)
                 </div>
               </div>
               <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, textAlign: 'right', flexShrink: 0, fontWeight: 500 }}>

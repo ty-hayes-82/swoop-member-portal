@@ -7,6 +7,7 @@ import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 const kpis = [
   { label: 'Members Saved', value: 14, prefix: '', suffix: '', color: 'green' },
   { label: 'Dues Protected', value: 168000, prefix: '$', suffix: '', color: 'green' },
+  { label: 'Lifetime Value Protected', value: 840000, prefix: '$', suffix: '', color: 'green' },
   { label: 'Revenue Recovered', value: 42500, prefix: '$', suffix: '', color: 'blue' },
   { label: 'Service Failures Caught', value: 23, prefix: '', suffix: '', color: 'orange' },
   { label: 'Avg Response Time', value: 4.2, prefix: '', suffix: ' hrs', color: 'blue' },
@@ -246,8 +247,7 @@ export default function BoardReport() {
           <p style={{ color: colors.text, lineHeight: 1.7, marginBottom: '16px' }}>
             Over the last 90 days, Swoop identified <strong>14 members</strong> showing early disengagement signals
             that would have been invisible to traditional club systems. Through GM-approved interventions delivered
-            via the Swoop app, all 14 were retained — protecting <strong>{formatCurrency(totalDues)}</strong> in
-            annual dues revenue.
+            via the Swoop app, all 14 were retained — protecting <strong>{formatCurrency(totalDues)}</strong> in annual dues revenue (<strong>{formatCurrency(totalDues * 5)}</strong> in lifetime value).
           </p>
           <p style={{ color: colors.text, lineHeight: 1.7, marginBottom: '16px' }}>
             Simultaneously, Swoop caught <strong>23 operational service failures</strong> before members experienced them,
@@ -271,7 +271,7 @@ export default function BoardReport() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: colors.white }}>{m.name}</h3>
                 <div style={{ fontSize: '13px', color: colors.textMuted }}>
-                  Dues at risk: <strong style={{ color: colors.red }}>{formatCurrency(m.duesAtRisk)}</strong>
+                  Dues at risk: <strong style={{ color: colors.red }}>{formatCurrency(m.duesAtRisk)}</strong> <span style={{ color: colors.textMuted, fontSize: '12px' }}>({formatCurrency(m.duesAtRisk * 5)} LTV)</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
