@@ -24,26 +24,14 @@ const TABS = [
 const ROUTE_LABEL = 'Tee Sheet & Demand';
 
 export default function WaitlistDemand() {
-  // FP-P02: Loading state
   const [isLoading, setIsLoading] = useState(true);
+  const { routeIntent, clearRouteIntent } = useNavigation();
+  const [activeTab, setActiveTab] = useState('queue');
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
-
-  if (isLoading) {
-    return <SkeletonGrid cards={6} columns={3} cardHeight={160} />;
-  }
-
-  const { routeIntent, clearRouteIntent } = useNavigation();
-  const [activeTab, setActiveTab] = useState('queue');
-  const waitlistSummary = getWaitlistSummary() ?? {
-    total: 0, highPriority: 0, atRisk: 0, avgDaysWaiting: 0,
-  };
-  const cancellationSummary = getCancellationSummary() ?? {
-    total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: 'Insufficient data',
-  };
 
   useEffect(() => {
     if (routeIntent?.waitlistTab && TABS.some((tab) => tab.key === routeIntent.waitlistTab)) {
@@ -51,6 +39,17 @@ export default function WaitlistDemand() {
       clearRouteIntent();
     }
   }, [routeIntent, clearRouteIntent]);
+
+  if (isLoading) {
+    return <SkeletonGrid cards={6} columns={3} cardHeight={160} />;
+  }
+
+  const waitlistSummary = getWaitlistSummary() ?? {
+    total: 0, highPriority: 0, atRisk: 0, avgDaysWaiting: 0,
+  };
+  const cancellationSummary = getCancellationSummary() ?? {
+    total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: 'Insufficient data',
+  };
 
   const tabsWithBadges = TABS.map((tab) => {
     if (tab.key === 'queue' && waitlistSummary?.highPriority > 0) {

@@ -17,8 +17,8 @@ const TABS = [
 ];
 
 export default function StaffingService() {
-  // FP-P02: Loading state
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('service');
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
@@ -28,8 +28,6 @@ export default function StaffingService() {
   if (isLoading) {
     return <SkeletonGrid cards={6} columns={3} cardHeight={160} />;
   }
-
-  const [activeTab, setActiveTab] = useState('service');
 
   return (
     <PageTransition>
