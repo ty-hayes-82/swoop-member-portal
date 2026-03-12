@@ -1,9 +1,8 @@
 // DailyBriefing — Today mode: immediate priorities. Analytics mode: full briefing.
 // Critique Phase 4: two-mode experience.
 import { useState, useEffect } from 'react';
-import { Panel, StoryHeadline, AgentInboxStrip } from '@/components/ui/index.js';
+import { Panel, StoryHeadline } from '@/components/ui/index.js';
 import { useApp } from '@/context/AppContext.jsx';
-import { getTopPendingAction } from '@/services/agentService.js';
 import TodayMode from './TodayMode.jsx';
 import YesterdayRecap from './YesterdayRecap.jsx';
 import TodayRiskFactors from './TodayRiskFactors.jsx';
@@ -22,8 +21,7 @@ import PageTransition from '@/components/ui/PageTransition';
 export default function DailyBriefing() {
   const { navigate, viewMode, setViewMode } = useNavigation();
   const briefing = getDailyBriefing();
-  const { pendingAgentCount, approveAction, inbox } = useApp();
-  const topAction = getTopPendingAction();
+  const { pendingAgentCount } = useApp();
   
   // FP-P02: Loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -68,12 +66,43 @@ export default function DailyBriefing() {
         context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. What Swoop would have done: Alert surfaced Day 1 → GM sends recovery message via Swoop app → James responds same day → Health score monitored weekly → Retention confirmed."
       />
 
-      <AgentInboxStrip
-        pendingCount={pendingAgentCount}
-        topAction={topAction}
-        onApproveTop={() => topAction && approveAction(topAction.id)}
-        onOpenInbox={() => navigate('agent-command')}
-      />
+      {/* Agent actions badge — full inbox lives on Intelligent Actions page */}
+      {pendingAgentCount > 0 && (
+        <div
+          onClick={() => navigate('agent-command')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '10px 16px',
+            background: `${theme.colors.agents ?? theme.colors.accent}08`,
+            border: `1px solid ${theme.colors.agents ?? theme.colors.accent}30`,
+            borderRadius: theme.radius.md,
+            cursor: 'pointer',
+          }}
+        >
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 24,
+            height: 24,
+            borderRadius: '50%',
+            background: theme.colors.agents ?? theme.colors.accent,
+            color: '#fff',
+            fontSize: '12px',
+            fontWeight: 700,
+          }}>
+            {pendingAgentCount}
+          </span>
+          <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
+            actions pending review
+          </span>
+          <span style={{ marginLeft: 'auto', fontSize: theme.fontSize.xs, color: theme.colors.agents ?? theme.colors.accent, fontWeight: 600 }}>
+            Open Intelligent Actions &rarr;
+          </span>
+        </div>
+      )}
 
       <RecentInterventions />
 
