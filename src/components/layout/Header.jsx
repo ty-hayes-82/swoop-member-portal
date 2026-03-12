@@ -26,7 +26,7 @@ const getDataNudges = () => {
       : '$' + totalDuesAtRisk.toLocaleString();
     const nudges = [];
     if (atRiskCount > 0) {
-      nudges.push(atRiskCount + ' members showing risk signals \u2014 ' + formattedDues + '/yr in dues need attention today.');
+      nudges.push(atRiskCount + ' members at risk or critical \u2014 ' + formattedDues + '/yr in dues need attention today.');
     }
     if (briefing?.yesterdayRecap?.revenue) {
       const vsLastWeek = briefing.yesterdayRecap.revenueVsLastWeek;

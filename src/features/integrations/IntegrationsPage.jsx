@@ -108,20 +108,20 @@ export function IntegrationsPage() {
   };
 
   const getScoreLabel = (score) => {
-    if (score < 40) return 'Limited Coverage';
-    if (score < 70) return 'Good Coverage';
-    return 'Excellent Coverage';
+    if (score < 40) return 'Getting Started';
+    if (score < 70) return 'Growing Intelligence';
+    return 'Full Intelligence';
   };
 
   const summaryCards = [
     { label: 'Connected Systems', value: `${connectedSystems}/${totalSystems}`, sub: 'Live connectors' },
     { label: 'Data Points Synced', value: dataPointsSynced >= 1000 ? `${(dataPointsSynced / 1000).toFixed(1)}K` : dataPointsSynced.toLocaleString(), sub: 'This week' },
     { 
-      label: 'Intelligence Score', 
-      value: `${intelligenceScore}/100`, 
-      sub: 'Coverage across signals',
+      label: 'Insights Unlocked', 
+      value: `${intelligenceScore}%`, 
+      sub: 'Connect more systems to unlock more insights',
       color: getScoreColor(intelligenceScore),
-      tooltip: `${getScoreLabel(intelligenceScore)} - Based on ${connectedSystems} of ${totalSystems} systems connected`
+      tooltip: `${intelligenceScore}% of possible insights available. Connect ${totalSystems - connectedSystems} more systems to unlock the full picture.`
     },
   ];
 
