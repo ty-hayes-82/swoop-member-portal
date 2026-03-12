@@ -20,7 +20,7 @@ const getDataNudges = () => {
     const summary = getMemberSummary();
     const briefing = getDailyBriefing();
     const atRiskCount = atRisk?.length ?? 0;
-    const totalDuesAtRisk = atRisk?.reduce((sum, m) => sum + (m.annualDues ?? m.dues ?? 0), 0) ?? 0;
+    const totalDuesAtRisk = atRisk?.reduce((sum, m) => sum + (m.duesAnnual ?? m.annualDues ?? m.dues ?? 0), 0) ?? 0;
     const formattedDues = totalDuesAtRisk > 1000
       ? '$' + Math.round(totalDuesAtRisk / 1000) + 'K'
       : '$' + totalDuesAtRisk.toLocaleString();
