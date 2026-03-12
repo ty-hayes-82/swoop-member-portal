@@ -4,8 +4,9 @@ import { useNavigation } from '@/context/NavigationContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
 import { CLUB_NAME, DEMO_MONTH, DEMO_TIMESTAMP } from '@/config/constants.js';
 import { theme } from '@/config/theme';
+import { getAtRiskMembers, getMemberSummary } from '@/services/memberService.js';
+import { getDailyBriefing } from '@/services/briefingService.js';
 
-// Greeting changes by time of day (simulated — based on 7am for demo morning mode)
 const getGreeting = () => {
   const h = new Date().getHours();
   if (h < 12) return 'Good morning';
@@ -13,24 +14,51 @@ const getGreeting = () => {
   return 'Good evening';
 };
 
-
-const DEMO_BANNERS = [
-  'James Whitfield complained Jan 16. You had 6 days. Did you see it in time?',
-  'Your tee sheet shows bookings. Swoop shows who is about to leave.',
-  '3 at-risk members on course right now. GPS shows declining engagement.',
-  '8/10 clubs run F&B at negative margins. Swoop shows you why.',
-  'A single resignation costs $15K-$50K. Swoop catches it 6 weeks early.',
-];
+const getDataNudges = () => {
+  try {
+    const atRisk = getAtRiskMembers();
+    const summary = getMemberSummary();
+    const briefing = getDailyBriefing();
+    const atRiskCount = atRisk?.length ?? 0;
+    const totalDuesAtRisk = atRisk?.reduce((sum, m) => sum + (m.annualDues ?? m.dues ?? 0), 0) ?? 0;
+    const formattedDues = totalDuesAtRisk > 1000
+      ? '$' + Math.round(totalDuesAtRisk / 1000) + 'K'
+      : '$' + totalDuesAtRisk.toLocaleString();
+    const nudges = [];
+    if (atRiskCount > 0) {
+      nudges.push(atRiskCount + ' members showing risk signals \u2014 ' + formattedDues + '/yr in dues need attention today.');
+    }
+    if (briefing?.yesterdayRecap?.revenue) {
+      const vsLastWeek = briefing.yesterdayRecap.revenueVsLastWeek;
+      if (vsLastWeek !== undefined && vsLastWeek !== null) {
+        const direction = vsLastWeek >= 0 ? 'up' : 'down';
+        nudges.push("Yesterday's revenue was " + direction + ' ' + Math.abs(vsLastWeek) + '% vs. last week. ' + (vsLastWeek < 0 ? 'Check Revenue Leakage for drivers.' : 'Strong day.'));
+      }
+    }
+    if (summary?.healthDistribution) {
+      const declining = summary.healthDistribution.declining ?? summary.healthDistribution.atRisk ?? 0;
+      if (declining > 0) {
+        nudges.push(declining + ' members in declining health \u2014 early outreach can prevent ' + (declining > 3 ? 'multiple' : 'a') + ' resignation' + (declining > 1 ? 's' : '') + '.');
+      }
+    }
+    nudges.push('Swoop connects 6 systems to show you what no single tool can \u2014 the full member picture.');
+    return nudges.length > 1 ? nudges : ['All systems connected. Monitoring member health, revenue, and operations in real time.'];
+  } catch (e) {
+    return ['All systems connected. Monitoring member health, revenue, and operations in real time.'];
+  }
+};
 
 export default function Header({ onMobileMenuToggle, isMobile = false }) {
   const { currentRoute, toggleSidebar } = useNavigation();
   const page = NAV_ITEMS.find((n) => n.key === currentRoute) || NAV_ITEMS[0];
   const handleMenuClick = onMobileMenuToggle || toggleSidebar;
   const [bannerIdx, setBannerIdx] = useState(0);
+  const [nudges] = useState(() => getDataNudges());
   useEffect(() => {
-    const timer = setInterval(() => setBannerIdx((i) => (i + 1) % DEMO_BANNERS.length), 8000);
+    if (nudges.length <= 1) return;
+    const timer = setInterval(() => setBannerIdx((i) => (i + 1) % nudges.length), 8000);
     return () => clearInterval(timer);
-  }, []);
+  }, [nudges.length]);
   const padding = isMobile ? '12px 16px' : '0 24px';
   const showGreeting = page?.key === 'daily-briefing';
 
@@ -47,7 +75,7 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
         boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}
     >
-      <div style={{ width: '100%', padding: '4px 12px', background: theme.colors.accent + '0A', borderBottom: '1px solid ' + theme.colors.accent + '20', fontSize: '12px', color: theme.colors.accent, fontWeight: 600, textAlign: 'center', transition: 'opacity 0.3s' }}>{DEMO_BANNERS[bannerIdx]}</div>
+      <div style={{ width: '100%', padding: '4px 12px', background: theme.colors.accent + '0A', borderBottom: '1px solid ' + theme.colors.accent + '20', fontSize: '12px', color: theme.colors.accent, fontWeight: 600, textAlign: 'center', transition: 'opacity 0.3s' }}>{nudges[bannerIdx]}</div>
       <div
         style={{
           display: 'flex',
@@ -83,12 +111,9 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
               flexShrink: 0,
             }}
           >
-            ☰
+            &#9776;
           </button>
-
-          {/* Accent line */}
           <div style={{ width: 3, height: 28, borderRadius: 2, background: page.color, flexShrink: 0 }} />
-
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.1 }}>
               {page.label}
@@ -108,7 +133,6 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
             </p>
           </div>
         </div>
-
         <div
           style={{
             display: 'flex',
@@ -130,30 +154,14 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
             }}
           >
             {showGreeting && (
-              <span
-                style={{
-                  fontSize: isMobile ? '11px' : '12px',
-                  color: 'var(--text-muted)',
-                  lineHeight: 1.2,
-                  fontWeight: 600,
-                }}
-              >
+              <span style={{ fontSize: isMobile ? '11px' : '12px', color: 'var(--text-muted)', lineHeight: 1.2, fontWeight: 600 }}>
                 {getGreeting()}
               </span>
             )}
-            <span
-              style={{
-                fontSize: isMobile ? '11px' : '12px',
-                color: 'var(--text-muted)',
-                lineHeight: 1.2,
-                whiteSpace: 'normal',
-              }}
-            >
-              {CLUB_NAME} · {DEMO_MONTH}
+            <span style={{ fontSize: isMobile ? '11px' : '12px', color: 'var(--text-muted)', lineHeight: 1.2, whiteSpace: 'normal' }}>
+              {CLUB_NAME} &middot; {DEMO_MONTH}
             </span>
           </div>
-
-          {/* Data freshness indicator */}
           <div
             style={{
               display: 'flex',
@@ -161,43 +169,17 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
               gap: '5px',
               padding: isMobile ? '4px 10px' : '3px 10px',
               borderRadius: '12px',
-              background: `${theme.colors.accent}12`,
-              border: `1px solid ${theme.colors.accent}30`,
+              background: theme.colors.accent + '12',
+              border: '1px solid ' + theme.colors.accent + '30',
               width: isMobile ? '100%' : 'auto',
               flexWrap: isMobile ? 'wrap' : 'nowrap',
               rowGap: '4px',
               justifyContent: isMobile ? 'space-between' : 'flex-start',
             }}
           >
-            <div
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                background: theme.colors.accent,
-                animation: 'pulse 2s infinite',
-                flexShrink: 0,
-              }}
-            />
-            <span
-              style={{
-                fontSize: '10px',
-                color: theme.colors.accent,
-                fontWeight: 600,
-                letterSpacing: '0.04em',
-              }}
-            >
-              LIVE
-            </span>
-            <span
-              style={{
-                fontSize: '10px',
-                color: theme.colors.textMuted,
-                flexShrink: 0,
-              }}
-            >
-              · Demo data: {DEMO_TIMESTAMP}
-            </span>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: theme.colors.accent, animation: 'pulse 2s infinite', flexShrink: 0 }} />
+            <span style={{ fontSize: '10px', color: theme.colors.accent, fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
+            <span style={{ fontSize: '10px', color: theme.colors.textMuted, flexShrink: 0 }}>&middot; Demo data: {DEMO_TIMESTAMP}</span>
           </div>
         </div>
       </div>
