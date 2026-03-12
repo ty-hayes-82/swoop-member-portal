@@ -3,6 +3,7 @@
 // Now: "What this means for retention" — plain English for each type.
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { getArchetypeProfiles } from '@/services/memberService';
+import { getArchetypeSpendPatterns } from '@/services/experienceInsightsService';
 import { theme } from '@/config/theme';
 import { useState } from 'react';
 
@@ -104,6 +105,119 @@ export default function ArchetypeTab() {
           )}
         </div>
       </div>
+
+      {/* Spend potential breakdown for selected archetype */}
+      <SpendPotentialCard archetype={profile.archetype} />
+    </div>
+  );
+}
+
+function SpendPotentialCard({ archetype }) {
+  const patterns = getArchetypeSpendPatterns();
+  const current = patterns.find(p => p.archetype === archetype);
+  if (!current) return null;
+
+  const categories = [
+    { key: 'golf', label: 'Golf', engagement: current.engagement.golf, color: theme.colors.success },
+    { key: 'dining', label: 'Dining', engagement: current.engagement.dining, color: theme.colors.fb ?? theme.colors.warning },
+    { key: 'events', label: 'Events', engagement: current.engagement.events, color: theme.colors.accent },
+    { key: 'email', label: 'Email', engagement: current.engagement.email, color: theme.colors.info ?? theme.colors.textMuted },
+  ];
+
+  const avgAll = patterns.reduce((sum, p) => sum + p.avgAnnualSpend, 0) / patterns.length;
+
+  return (
+    <div style={{
+      background: theme.colors.bgCard,
+      borderRadius: theme.radius.md,
+      border: '1px solid ' + theme.colors.border,
+      padding: theme.spacing.lg,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.md }}>
+        <div>
+          <div style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.accent, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            Spend Potential
+          </div>
+          <div style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary }}>
+            {archetype} &mdash; {current.count} members
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Avg annual spend</div>
+          <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>
+            ${current.avgAnnualSpend.toLocaleString()}
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: current.avgAnnualSpend >= avgAll ? theme.colors.success : theme.colors.warning }}>
+            {current.avgAnnualSpend >= avgAll ? 'Above' : 'Below'} club avg (${Math.round(avgAll).toLocaleString()})
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.sm }}>
+        {categories.map(cat => {
+          const potential = 100 - cat.engagement;
+          return (
+            <div key={cat.key} style={{
+              background: theme.colors.bgDeep,
+              borderRadius: theme.radius.sm,
+              padding: theme.spacing.sm,
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: '4px' }}>{cat.label}</div>
+              <div style={{
+                height: 6,
+                background: theme.colors.border + '60',
+                borderRadius: 3,
+                overflow: 'hidden',
+                marginBottom: '6px',
+              }}>
+                <div style={{
+                  height: '100%',
+                  width: cat.engagement + '%',
+                  background: cat.color,
+                  borderRadius: 3,
+                }} />
+              </div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: cat.color, fontFamily: theme.fonts.mono }}>
+                {cat.engagement}%
+              </div>
+              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>engaged</div>
+              {potential > 30 && (
+                <div style={{
+                  marginTop: '4px',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  color: theme.colors.success,
+                  background: theme.colors.success + '12',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  display: 'inline-block',
+                }}>
+                  {potential}% untapped
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {current.spendPotential > 0 && (
+        <div style={{
+          marginTop: theme.spacing.md,
+          padding: theme.spacing.sm,
+          background: theme.colors.success + '08',
+          border: '1px solid ' + theme.colors.success + '20',
+          borderRadius: theme.radius.sm,
+          fontSize: theme.fontSize.xs,
+          color: theme.colors.textSecondary,
+          lineHeight: 1.5,
+        }}>
+          <strong style={{ color: theme.colors.success }}>Untapped potential:</strong>{' '}
+          ${current.spendPotential.toLocaleString()}/member/year in dining and events.{' '}
+          Across {current.count} {archetype} members, that&rsquo;s{' '}
+          <strong>${(current.spendPotential * current.count).toLocaleString()}</strong> in annual opportunity.
+        </div>
+      )}
     </div>
   );
 }
