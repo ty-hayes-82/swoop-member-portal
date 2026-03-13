@@ -80,15 +80,6 @@ export const navItems = [
   // FIX IT - Intelligent Actions
   // ============================================
   {
-    key: 'agent-command',
-    label: 'Intelligent Actions',
-    section: 'FIX IT',
-    icon: '🤖',
-    color: theme.colors.navAgents,
-    subtitle: 'AI-recommended interventions with context - approve and track outcomes.',
-    sourceSystems: ['All Systems'],
-  },
-  {
     key: 'intervention-queue',
     label: 'Intervention Queue',
     section: 'FIX IT',
@@ -115,6 +106,15 @@ export const navItems = [
     color: theme.colors.navAgents,
     subtitle: 'Step-by-step playbooks for service recovery, retention saves, and proactive outreach.',
     sourceSystems: ['Member CRM', 'Analytics'],
+  },
+  {
+    key: 'agent-command',
+    label: 'AI Agents',
+    section: 'FIX IT',
+    icon: '🤖',
+    color: theme.colors.navAgents,
+    subtitle: 'AI-recommended interventions with context - approve and track outcomes.',
+    sourceSystems: ['All Systems'],
   },
 
   // ============================================
