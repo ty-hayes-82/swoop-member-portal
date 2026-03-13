@@ -11,6 +11,7 @@ const VALID_ROUTES = new Set([
   'board-report', 'member-profile', 'integrations/csv-import', 'csv-import',
   'data-model',
   'experience-insights',
+  'playbooks',
 ]);
 
 function parseHash() {
