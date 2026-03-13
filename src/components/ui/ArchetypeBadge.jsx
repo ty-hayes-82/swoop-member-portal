@@ -20,7 +20,6 @@ export default function ArchetypeBadge({ archetype, size = 'sm' }) {
 
   return (
     <span
-      title={`Member archetype: ${archetype}`}
       style={{
         display:       'inline-flex',
         alignItems:    'center',

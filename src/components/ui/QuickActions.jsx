@@ -242,7 +242,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
               transition: 'all 0.15s',
             }}
           >
-            <span>\D83DDCE8 Outreach Playbook for {archetype}</span>
+            <span>📨 Outreach Playbook for {archetype}</span>
             <span style={{ fontSize: '12px', color: '#a1a1aa' }}>{showOutreach ? '\u25B2' : '\u25BC'} {outreachActions.length} actions</span>
           </button>
           {showOutreach && (
