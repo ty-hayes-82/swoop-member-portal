@@ -6,6 +6,7 @@ import TrendChart from '@/components/charts/TrendChart.jsx';
 import { getHealthDistribution, getAtRiskMembers, calculateLTV, formatLTV, DEFAULT_LTV_MULTIPLIER } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
+import { useApp } from '@/context/AppContext';
 
 const fullCurrencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -77,103 +78,109 @@ const getActionStatus = (member) => {
   };
 };
 
-// MemberRow — interactive row with hover state + expand chevron
-function MemberRow({ m, isExpanded, onToggle }) {
-  const [hovered, setHovered] = useState(false);
-  const actionStatus = getActionStatus(m);
+// Simulated action statuses (in prod, would come from backend)
+const ACTION_STATUSES = {};
+function getSimulatedActionStatus(memberId, score) {
+  if (ACTION_STATUSES[memberId]) return ACTION_STATUSES[memberId];
+  // Simulate realistic statuses
+  if (score < 25) return { status: 'Overdue', color: '#dc2626', bg: 'rgba(220,38,38,0.08)', detail: 'GM call overdue by 3 days' };
+  if (score < 35) return { status: 'Not started', color: '#b45309', bg: 'rgba(180,83,9,0.08)', detail: 'Awaiting GM outreach' };
+  if (score < 42) return { status: 'Scheduled', color: '#2563eb', bg: 'rgba(37,99,235,0.08)', detail: 'Call scheduled for tomorrow' };
+  return { status: 'Not started', color: '#6b7280', bg: 'rgba(107,114,128,0.08)', detail: 'Concierge touch recommended' };
+}
 
+// Determine if risk signal is "unusual" (complaint, specific event) vs common (generic decline)
+function isUnusualSignal(risk) {
+  if (!risk) return false;
+  const lower = risk.toLowerCase();
+  return lower.includes('complaint') || lower.includes('unresolved') || lower.includes('exact f&b minimum') ||
+    lower.includes('slow-play') || lower.includes('since december') || lower.includes('since november') ||
+    lower.includes('dues-only');
+}
+
+// MemberRow — redesigned: no redundant tags, action status shows progress
+function MemberRow({ m, isExpanded, onToggle, isSelected, onSelect }) {
   const scoreBg = m.score >= 70 ? 'rgba(34,197,94,0.08)' : m.score >= 50 ? 'rgba(234,179,8,0.08)' : m.score >= 30 ? 'rgba(234,88,12,0.08)' : 'rgba(185,28,28,0.08)';
   const scoreColor = m.score >= 70 ? '#16a34a' : m.score >= 50 ? '#ca8a04' : m.score >= 30 ? '#ea580c' : '#b91c1c';
-  const archetypeLabel = m.archetype ? ('★' + m.archetype) : '';
   const riskPrimary = summarizeRisk(m.topRisk) || m.topRisk || '';
   const channel = archetypeChannel[m.archetype] ?? (m.score < 40 ? 'GM call' : 'Concierge touch');
+  const actionProgress = getSimulatedActionStatus(m.memberId, m.score);
+  const unusual = isUnusualSignal(m.topRisk);
 
   return (
     <>
       <tr
         onClick={onToggle}
         onMouseOver={(e) => { e.currentTarget.style.background = '#f5f5ff'; }}
-        onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; }}
+        onMouseOut={(e) => { e.currentTarget.style.background = isSelected ? 'rgba(37,99,235,0.04)' : '#fff'; }}
         style={{
-          background: '#fff',
+          background: isSelected ? 'rgba(37,99,235,0.04)' : '#fff',
           borderBottom: '1px solid #f0f0f0',
           cursor: 'pointer',
           transition: 'background 0.15s',
         }}
       >
-        <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
+        {/* Checkbox */}
+        <td style={{ padding: '10px 8px 10px 14px', verticalAlign: 'middle', width: 36 }}>
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onClick={(e) => { e.stopPropagation(); onSelect(m.memberId); }}
+            onChange={() => {}}
+            style={{ cursor: 'pointer', accentColor: '#2563eb' }}
+          />
+        </td>
+        {/* Member name */}
+        <td style={{ padding: '10px 8px', verticalAlign: 'middle' }}>
           <MemberLink
             mode="drawer"
             memberId={m.memberId}
             style={{
-              background: 'none',
-              border: 'none',
-              color: '#2563eb',
-              fontWeight: 600,
-              fontSize: '13px',
-              cursor: 'pointer',
-              padding: 0,
-              textAlign: 'left',
-              textDecoration: 'none',
+              background: 'none', border: 'none', color: '#2563eb',
+              fontWeight: 600, fontSize: '13px', cursor: 'pointer',
+              padding: 0, textAlign: 'left', textDecoration: 'none',
             }}
-          >
-            {m.name}
-          </MemberLink>
+          >{m.name}</MemberLink>
         </td>
+        {/* Score */}
         <td style={{ padding: '10px 8px', verticalAlign: 'middle', textAlign: 'center' }}>
           <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: '32px',
-            padding: '3px 8px',
-            borderRadius: '8px',
-            background: scoreBg,
-            color: scoreColor,
-            fontWeight: 700,
-            fontSize: '13px',
-            fontFamily: "'JetBrains Mono', monospace",
-          }}
-            title="Composite health score (0-100)"
-          >
-            {m.score}
-          </span>
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            minWidth: '32px', padding: '3px 8px', borderRadius: '8px',
+            background: scoreBg, color: scoreColor,
+            fontWeight: 700, fontSize: '13px', fontFamily: "'JetBrains Mono', monospace",
+          }} title="Composite health score (0-100)">{m.score}</span>
         </td>
+        {/* Archetype + Channel */}
         <td style={{ padding: '10px 8px', verticalAlign: 'middle' }}>
-          <span style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap' }}>
-            {archetypeLabel}
-          </span>
-        </td>
-        <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ color: '#3f3f46', fontSize: '12px', lineHeight: 1.5 }}>
-              {riskPrimary}
-            </span>
-            {m.score < 50 && (
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                {(m.topRisk?.toLowerCase().includes('round') || m.topRisk?.toLowerCase().includes('visit') || m.topRisk?.toLowerCase().includes('golf') || m.score < 35) && (
-                  <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(185,28,28,0.08)', color: '#b91c1c', fontWeight: 600, whiteSpace: 'nowrap' }}>Rounds ↓</span>
-                )}
-                {(m.topRisk?.toLowerCase().includes('dining') || m.topRisk?.toLowerCase().includes('f&b') || m.topRisk?.toLowerCase().includes('spend') || m.score < 40) && (
-                  <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(180,83,9,0.08)', color: '#b45309', fontWeight: 600, whiteSpace: 'nowrap' }}>Dining ↓</span>
-                )}
-                {(m.topRisk?.toLowerCase().includes('email') || m.topRisk?.toLowerCase().includes('engagement') || m.topRisk?.toLowerCase().includes('interaction')) && (
-                  <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(37,99,235,0.08)', color: '#2563eb', fontWeight: 600, whiteSpace: 'nowrap' }}>Email ↓</span>
-                )}
-              </div>
-            )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{ fontSize: '12px', color: '#3f3f46', fontWeight: 500 }}>{m.archetype}</span>
+            <span style={{ fontSize: '11px', color: '#2563eb', fontWeight: 600 }}>{channel}</span>
           </div>
         </td>
+        {/* Risk Signal */}
         <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: '#1d4ed8' }}>{channel}</span>
-            <span style={{ fontSize: '11px', color: '#6b7280', lineHeight: 1.3 }}>{riskPrimary}</span>
+          <span style={{
+            color: unusual ? '#b91c1c' : '#3f3f46',
+            fontSize: '12px', lineHeight: 1.5,
+            fontWeight: unusual ? 600 : 400,
+          }}>{unusual ? '\u26A0 ' : ''}{riskPrimary}</span>
+        </td>
+        {/* Action Status (progress, not redundant signal) */}
+        <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{
+              fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px',
+              background: actionProgress.bg, color: actionProgress.color,
+              whiteSpace: 'nowrap',
+            }}>{actionProgress.status}</span>
           </div>
+          <div style={{ fontSize: '10px', color: '#6b7280', marginTop: 2 }}>{actionProgress.detail}</div>
         </td>
       </tr>
       {isExpanded && (
         <tr style={{ background: theme.colors.bgDeep }}>
-          <td colSpan={5} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
+          <td colSpan={6} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
             <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk} archetype={m.archetype} />
           </td>
         </tr>
@@ -336,13 +343,96 @@ export default function HealthOverview() {
     }
   };
 
+  const [selectedMembers, setSelectedMembers] = useState(new Set());
+  const [showAtRisk, setShowAtRisk] = useState(true);
+  const { showToast } = useApp();
+
+  const criticalMembers = useMemo(() => sortedMembers.filter(m => m.score < 35), [sortedMembers]);
+  const atRiskOnly = useMemo(() => sortedMembers.filter(m => m.score >= 35), [sortedMembers]);
+
+  // Aggregate common risk patterns
+  const riskPatterns = useMemo(() => {
+    const patterns = {};
+    sortedMembers.forEach(m => {
+      const risk = m.topRisk?.toLowerCase() || '';
+      if (risk.includes('zero') && risk.includes('golf')) patterns.zeroGolf = (patterns.zeroGolf || 0) + 1;
+      if (risk.includes('complaint') || risk.includes('unresolved')) patterns.complaints = (patterns.complaints || 0) + 1;
+      if (risk.includes('dining') || risk.includes('f&b')) patterns.dining = (patterns.dining || 0) + 1;
+      if (risk.includes('email') || risk.includes('decay')) patterns.email = (patterns.email || 0) + 1;
+    });
+    return patterns;
+  }, [sortedMembers]);
+
+  const toggleSelect = (id) => {
+    setSelectedMembers(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const selectAll = (members) => {
+    setSelectedMembers(prev => {
+      const next = new Set(prev);
+      const allSelected = members.every(m => next.has(m.memberId));
+      members.forEach(m => allSelected ? next.delete(m.memberId) : next.add(m.memberId));
+      return next;
+    });
+  };
+
   const columns = [
+    { key: 'checkbox', label: '', sortable: false },
     { key: 'name', label: 'Member' },
-    { key: 'score', label: 'Health Score' },
-    { key: 'archetype', label: 'Archetype' },
-    { key: 'risk', label: 'Primary Risk Signal' },
+    { key: 'score', label: 'Score' },
+    { key: 'archetype', label: 'Archetype / Channel' },
+    { key: 'risk', label: 'Risk Signal' },
     { key: 'action', label: 'Action Status', sortable: false },
   ];
+
+  const renderTable = (members, tier) => (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
+        <thead>
+          <tr style={{ background: theme.colors.bg }}>
+            {columns.map((col) => (
+              <th key={col.key} style={{
+                padding: `${theme.spacing.sm} ${col.key === 'checkbox' ? '8px' : theme.spacing.md}`,
+                textAlign: 'left', color: theme.colors.textMuted, fontSize: theme.fontSize.xs,
+                textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500,
+                width: col.key === 'checkbox' ? 36 : col.key === 'score' ? 70 : 'auto',
+              }}>
+                {col.key === 'checkbox' ? (
+                  <input type="checkbox" onChange={() => selectAll(members)}
+                    checked={members.length > 0 && members.every(m => selectedMembers.has(m.memberId))}
+                    style={{ cursor: 'pointer', accentColor: '#2563eb' }} />
+                ) : col.sortable === false ? (
+                  <span>{col.label}</span>
+                ) : (
+                  <button onClick={() => toggleSort(col.key)}
+                    style={{ background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    {col.label}
+                    {sortColumn === col.key && <span style={{ fontSize: '11px' }}>{sortDir === 'asc' ? '\u25B2' : '\u25BC'}</span>}
+                  </button>
+                )}
+                {col.key === 'score' && (
+                  <span title="Composite score (0-100)" style={{ cursor: 'help', marginLeft: '4px', fontSize: '11px', opacity: 0.7 }}>{'\u24D8'}</span>
+                )}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {members.map((m) => (
+            <MemberRow key={m.memberId} m={m}
+              isExpanded={expanded === m.memberId}
+              onToggle={() => setExpanded(expanded === m.memberId ? null : m.memberId)}
+              isSelected={selectedMembers.has(m.memberId)}
+              onSelect={toggleSelect}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -381,88 +471,147 @@ export default function HealthOverview() {
         })}
       </div>
 
-      {/* Churn Anatomy — decay sequence visualization */}
+      {/* Churn Anatomy */}
       <ChurnDecaySequence />
 
-      {/* At-risk member table */}
+      {/* Risk pattern summary */}
+      {(riskPatterns.zeroGolf > 2 || riskPatterns.complaints > 0) && (
+        <div style={{
+          display: 'flex', gap: 10, flexWrap: 'wrap', padding: '12px 16px',
+          background: '#fafafa', borderRadius: 10, border: '1px solid #e4e4e7',
+        }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#3f3f46' }}>Common patterns:</span>
+          {riskPatterns.zeroGolf > 2 && (
+            <span style={{ fontSize: 11, color: '#6b7280', background: '#f4f4f5', padding: '2px 8px', borderRadius: 4 }}>
+              {riskPatterns.zeroGolf} members with zero golf activity
+            </span>
+          )}
+          {riskPatterns.dining > 0 && (
+            <span style={{ fontSize: 11, color: '#6b7280', background: '#f4f4f5', padding: '2px 8px', borderRadius: 4 }}>
+              {riskPatterns.dining} with dining decline
+            </span>
+          )}
+          {riskPatterns.complaints > 0 && (
+            <span style={{ fontSize: 11, color: '#dc2626', background: 'rgba(220,38,38,0.06)', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>
+              {'\u26A0'} {riskPatterns.complaints} with unresolved complaints
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Bulk action bar (when members selected) */}
+      {selectedMembers.size > 0 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 16px', background: 'rgba(37,99,235,0.04)',
+          border: '1px solid rgba(37,99,235,0.2)', borderRadius: 10, flexWrap: 'wrap', gap: 8,
+        }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#2563eb' }}>
+            {selectedMembers.size} member{selectedMembers.size > 1 ? 's' : ''} selected
+          </span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => { showToast(`Personal notes drafted for ${selectedMembers.size} members`, 'success'); setSelectedMembers(new Set()); }}
+              style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none', background: '#e8772e', color: 'white' }}>
+              Draft personal notes
+            </button>
+            <button onClick={() => { showToast(`Calls scheduled for ${selectedMembers.size} members`, 'success'); setSelectedMembers(new Set()); }}
+              style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1.5px solid #d4d4d8', background: 'white', color: '#3f3f46' }}>
+              Schedule calls
+            </button>
+            <button onClick={() => setSelectedMembers(new Set())}
+              style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer', border: 'none', background: 'transparent', color: '#6b7280' }}>
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* CRITICAL section — always visible */}
       <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
-        border: `1px solid ${theme.colors.urgent}30`, overflow: 'hidden' }}>
-        <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}`,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
-            At Risk & Critical Members
-          </span>
-          <span
-            style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent }}
-            title={atRiskDuesDisplay.full}
-          >
-            {atRiskDuesDisplay.compact} dues at risk — {atRiskDuesDisplay.ltvCompact} lifetime value at stake
+        border: `1px solid ${theme.colors.urgent}40`, overflow: 'hidden' }}>
+        <div style={{
+          padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          background: 'rgba(185,28,28,0.03)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{
+              fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 4,
+              background: 'rgba(185,28,28,0.1)', color: '#b91c1c', textTransform: 'uppercase', letterSpacing: '1px',
+            }}>Critical</span>
+            <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
+              {criticalMembers.length} members require immediate outreach
+            </span>
+          </div>
+          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent }} title={atRiskDuesDisplay.full}>
+            {atRiskDuesDisplay.compact} total at risk
           </span>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse', fontSize: theme.fontSize.sm, tableLayout: 'fixed' }}>
-          <thead>
-            <tr style={{ background: theme.colors.bg }}>
-              {columns.map((col) => (
-                <th key={col.key} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'left',
-                  color: theme.colors.textMuted, fontSize: theme.fontSize.xs, textTransform: 'uppercase',
-                  letterSpacing: '0.06em', fontWeight: 500 }}>
-                  {col.sortable === false ? (
-                    <span>{col.label}</span>
-                  ) : (
-                    <button
-                      onClick={() => toggleSort(col.key)}
-                      style={{ background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                    >
-                      {col.label}
-                      {sortColumn === col.key && (
-                        <span style={{ fontSize: '11px' }}>{sortDir === 'asc' ? '▲' : '▼'}</span>
-                      )}
-                    </button>
-                  )}
-                  {col.key === 'score' && (
-                    <span title="Composite score (0–100) based on: visit frequency, F&B spend trends, email engagement, complaint history, tenure length, and event participation. Updated daily."
-                      style={{ cursor: 'help', marginLeft: '4px', fontSize: '11px', opacity: 0.7 }}>ⓘ</span>
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedMembers.map((m) => (
-              <MemberRow
-                key={m.memberId}
-                m={m}
-                isExpanded={expanded === m.memberId}
-                onToggle={() => setExpanded(expanded === m.memberId ? null : m.memberId)}
-              />
-            ))}
-          </tbody>
-        </table>
+
+        {/* Action escalation guide */}
+        <div style={{
+          padding: '8px 16px', background: '#fefce8', borderBottom: '1px solid #fef3c7',
+          display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 11, color: '#92400e',
+        }}>
+          <span style={{ fontWeight: 600 }}>Action channel guide:</span>
+          <span>Score &lt;30 = <strong>GM call</strong></span>
+          <span>Score 30-39 = <strong>Outreach this week</strong></span>
+          <span>Weekend Warrior = <strong>Pro shop call</strong></span>
+          <span>Social Member = <strong>Concierge text</strong></span>
         </div>
+
+        {renderTable(criticalMembers, 'critical')}
       </div>
 
-      <SoWhatCallout variant="warning">
-        <strong>{atRisk.length} members</strong> are At Risk or Critical —
-        representing <strong title={atRiskDuesDisplay.full}>
-          {atRiskDuesDisplay.compact}
-        </strong> in annual dues.
-        James Whitfield is the most urgent: an unresolved service complaint is the only thing standing between
-        an active member and a resignation that should never happen. Tap his name to take action.
-      </SoWhatCallout>
+      {/* AT RISK section — collapsible */}
+      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
+        border: `1px solid ${theme.colors.warning}30`, overflow: 'hidden' }}>
+        <div
+          onClick={() => setShowAtRisk(!showAtRisk)}
+          style={{
+            padding: theme.spacing.md, borderBottom: showAtRisk ? `1px solid ${theme.colors.border}` : 'none',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{
+              fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 4,
+              background: 'rgba(234,88,12,0.1)', color: '#ea580c', textTransform: 'uppercase', letterSpacing: '1px',
+            }}>At Risk</span>
+            <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
+              {atRiskOnly.length} members trending down
+            </span>
+          </div>
+          <span style={{ fontSize: 14, color: '#6b7280', transition: 'transform 0.2s', transform: showAtRisk ? 'rotate(180deg)' : 'rotate(0)' }}>{'\u25BC'}</span>
+        </div>
+        {showAtRisk && renderTable(atRiskOnly, 'at-risk')}
+      </div>
 
-      <PlaybookActionCard
-        icon={'\uD83D\uDCDE'}
-        label="CRITICAL OUTREACH"
-        title={`${atRisk.filter(m => m.score < 40).length} members require immediate outreach \u2014 start sequence now`}
-        description="Call the top 3 Critical members before end of business today. Each saved member protects $18K+ in annual dues."
-        playbookName="Service Save Protocol"
-        impact={atRiskDuesDisplay.compact + ' at risk'}
-        memberCount={atRisk.filter(m => m.score < 40).length}
-        buttonLabel="Start Outreach Sequence"
-        buttonColor="#dc2626"
-        variant="urgent"
-      />
+      {/* Single consolidated CTA */}
+      <div style={{
+        background: 'rgba(220,38,38,0.03)', borderLeft: '4px solid #dc2626',
+        borderRadius: 10, padding: '16px 20px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 12,
+      }}>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#0f0f0f', marginBottom: 2 }}>
+            Call the top {Math.min(3, criticalMembers.length)} Critical members before end of business today
+          </div>
+          <div style={{ fontSize: 12, color: '#666' }}>
+            Each saved member protects $18K+ in annual dues. {atRiskDuesDisplay.ltvCompact} lifetime value at stake.
+          </div>
+        </div>
+        <button
+          onClick={() => showToast('Outreach sequence started for Critical members', 'success')}
+          style={{
+            padding: '10px 24px', borderRadius: 8, fontSize: 14, fontWeight: 700,
+            cursor: 'pointer', border: 'none', background: '#dc2626', color: 'white',
+            whiteSpace: 'nowrap',
+          }}
+        >Start Outreach Sequence</button>
+      </div>
 
       {/* Full trend chart #3 — 6-month member health trajectory */}
       <TrendChart
