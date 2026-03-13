@@ -638,27 +638,36 @@ export default function PlaybooksPage() {
           ))}
         </div>
 
-        {/* Playbook Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
-          {filtered.map(pb => (
-            <PlaybookCard
-              key={pb.id}
-              playbook={pb}
-              onSelect={(id) => setSelectedId(id)}
-              isSelected={effectiveSelected?.id === pb.id}
-            />
-          ))}
-        </div>
-
-        {/* Selected Playbook Detail */}
-        {effectiveSelected && (
+        {/* Two-column layout: cards left, detail right */}
+        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+          {/* Left: Playbook Cards */}
           <div style={{
-            background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14,
-            padding: '32px 40px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            flex: '0 0 380px', maxHeight: 'calc(100vh - 220px)', overflowY: 'auto',
+            display: 'flex', flexDirection: 'column', gap: 12,
+            paddingRight: 4,
           }}>
-            <PlaybookDetail playbook={effectiveSelected} />
+            {filtered.map(pb => (
+              <PlaybookCard
+                key={pb.id}
+                playbook={pb}
+                onSelect={(id) => setSelectedId(id)}
+                isSelected={effectiveSelected?.id === pb.id}
+              />
+            ))}
           </div>
-        )}
+
+          {/* Right: Selected Playbook Detail */}
+          {effectiveSelected && (
+            <div style={{
+              flex: 1, minWidth: 0,
+              background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14,
+              padding: '32px 40px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              maxHeight: 'calc(100vh - 220px)', overflowY: 'auto',
+            }}>
+              <PlaybookDetail playbook={effectiveSelected} />
+            </div>
+          )}
+        </div>
       </div>
     </PageTransition>
   );
