@@ -6,9 +6,9 @@ import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 
 const kpis = [
   { label: 'Members Saved', value: 14, prefix: '', suffix: '', color: 'green' },
-  { label: 'Dues Protected', value: 168000, prefix: '$', suffix: '', color: 'green' },
-  { label: 'Lifetime Value Protected', value: 840000, prefix: '$', suffix: '', color: 'green' },
-  { label: 'Revenue Recovered', value: 42500, prefix: '$', suffix: '', color: 'blue' },
+  { label: 'Dues Protected', value: 168, prefix: '$', suffix: 'K', color: 'green' },
+  { label: 'Lifetime Value Protected', value: 840, prefix: '$', suffix: 'K', color: 'green' },
+  { label: 'Revenue Recovered', value: 42.5, prefix: '$', suffix: 'K', color: 'blue' },
   { label: 'Service Failures Caught', value: 23, prefix: '', suffix: '', color: 'orange' },
   { label: 'Avg Response Time', value: 4.2, prefix: '', suffix: ' hrs', color: 'blue' },
   { label: 'Board Confidence Score', value: 94, prefix: '', suffix: '%', color: 'green' },
@@ -349,6 +349,7 @@ export default function BoardReport() {
             industry average of 6+ weeks (typically after a resignation letter). This is the difference between
             retention and replacement.
           </p>
+          <ProgressOverTime />
         </Panel>
       )}
 

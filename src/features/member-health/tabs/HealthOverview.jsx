@@ -178,11 +178,11 @@ function MemberRow({ m, isExpanded, onToggle }) {
 // Churn Anatomy — average decay sequence with timing data
 function ChurnDecaySequence() {
   const stages = [
-    { domain: 'Email', icon: '\u2709', label: 'Email engagement drops', avgWeeks: 0, detail: 'Open rates fall below 15%. First detectable signal.', color: theme.colors.accent },
-    { domain: 'Golf', icon: '\u26f3', label: 'Round frequency declines', avgWeeks: 3, detail: 'From 3+ rounds/month to <1. Cancellations rise.', color: theme.colors.success },
-    { domain: 'Dining', icon: '\ud83c\udf7d', label: 'F&B visits cease', avgWeeks: 5, detail: 'Post-round dining stops. Grill Room visits drop to zero.', color: theme.colors.warning },
-    { domain: 'Events', icon: '\ud83c\udf89', label: 'Event participation ends', avgWeeks: 6, detail: 'No RSVPs, no attendance. Social ties severed.', color: theme.colors.info || theme.colors.accent },
-    { domain: 'Resign', icon: '\ud83d\udeaa', label: 'Resignation submitted', avgWeeks: 8, detail: 'Average 6\u20138 weeks from first email decay signal.', color: theme.colors.urgent },
+    { domain: 'Email', icon: '✉', label: 'Email engagement drops', avgWeeks: 0, detail: 'Open rates fall below 15%. First detectable signal.', color: theme.colors.accent },
+    { domain: 'Golf', icon: '⛳', label: 'Round frequency declines', avgWeeks: 3, detail: 'From 3+ rounds/month to <1. Cancellations rise.', color: theme.colors.success },
+    { domain: 'Dining', icon: '🍽', label: 'F&B visits cease', avgWeeks: 5, detail: 'Post-round dining stops. Grill Room visits drop to zero.', color: theme.colors.warning },
+    { domain: 'Events', icon: '🎉', label: 'Event participation ends', avgWeeks: 6, detail: 'No RSVPs, no attendance. Social ties severed.', color: theme.colors.info || theme.colors.accent },
+    { domain: 'Resign', icon: '🚪', label: 'Resignation submitted', avgWeeks: 8, detail: 'Average 6–8 weeks from first email decay signal.', color: theme.colors.urgent },
   ];
 
   const totalWeeks = stages[stages.length - 1].avgWeeks;
@@ -208,7 +208,7 @@ function ChurnDecaySequence() {
           </p>
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontSize: '28px', fontWeight: 700, color: theme.colors.urgent, fontFamily: theme.fonts.mono }}>6\u20138</div>
+          <div style={{ fontSize: '28px', fontWeight: 700, color: theme.colors.urgent, fontFamily: theme.fonts.mono }}>6–8</div>
           <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>weeks to act</div>
         </div>
       </div>
@@ -267,7 +267,7 @@ function ChurnDecaySequence() {
                   fontSize: '14px', color: theme.colors.textMuted + '60',
                   zIndex: 0,
                 }}>
-                  \u2192
+                  →
                 </div>
               )}
             </div>
@@ -290,11 +290,11 @@ function ChurnDecaySequence() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '18px', flexShrink: 0,
         }}>
-          \u2705
+          ✅
         </div>
         <div>
           <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.success, marginBottom: '2px' }}>
-            Swoop detects at Week 0 — you have 6\u20138 weeks to intervene
+            Swoop detects at Week 0 — you have 6–8 weeks to intervene
           </div>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
             In 9 of 11 resignations this year, email decay was the first domino. Swoop monitors this signal daily and alerts you before golf or dining metrics even begin to decline. The GM personal call at Week 1 has a 95% retention success rate.

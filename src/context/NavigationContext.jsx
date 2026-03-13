@@ -10,6 +10,7 @@ const VALID_ROUTES = new Set([
   'agent-command', 'location-intelligence', 'integrations', 'demo-mode',
   'board-report', 'member-profile', 'integrations/csv-import', 'csv-import',
   'data-model',
+  'experience-insights',
 ]);
 
 function parseHash() {
