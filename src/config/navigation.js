@@ -100,7 +100,7 @@ export const navItems = [
   },
   {
     key: 'outreach-playbooks',
-    label: 'Outreach Playbooks',
+    label: 'Member Outreach',
     section: 'FIX IT',
     icon: '\uD83D\uDCE8',
     color: theme.colors.navAgents,
@@ -109,13 +109,12 @@ export const navItems = [
   },
   {
     key: 'playbooks',
-    label: 'Response Playbooks',
+    label: 'Outreach Playbooks',
     section: 'FIX IT',
     icon: '📚',
     color: theme.colors.navAgents,
-    subtitle: 'Proven protocols for service recovery, staffing gaps, and demand optimization.',
-    sourceSystems: [],
-    hidden: true, // TODO: Implement this page (currently embedded in Operations)
+    subtitle: 'Step-by-step playbooks for service recovery, retention saves, and proactive outreach.',
+    sourceSystems: ['Member CRM', 'Analytics'],
   },
 
   // ============================================

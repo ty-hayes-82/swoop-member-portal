@@ -25,6 +25,7 @@ import LandingRedirect from '@/features/landing-redirect/LandingRedirect.jsx';
 import BoardReport from "@/features/board-report/BoardReport.jsx";
 import ExperienceInsights from '@/features/experience-insights/ExperienceInsights.jsx';
 import { OutreachPlaybooks } from '@/features/outreach-playbooks';
+import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -45,6 +46,7 @@ const ROUTES = {
   'csv-import': CsvImportHub,
   'experience-insights': ExperienceInsights,
   'outreach-playbooks': OutreachPlaybooks,
+  'playbooks': PlaybooksPage,
   'data-model': DataModelPage,
   'member-profile': MemberProfilePage,
   landing: LandingRedirect,
