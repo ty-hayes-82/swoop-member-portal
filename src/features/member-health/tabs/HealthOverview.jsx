@@ -174,7 +174,7 @@ function MemberRow({ m, isExpanded, onToggle }) {
       {isExpanded && (
         <tr style={{ background: theme.colors.bgDeep }}>
           <td colSpan={5} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
-            <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk} />
+            <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk} archetype={m.archetype} />
           </td>
         </tr>
       )}

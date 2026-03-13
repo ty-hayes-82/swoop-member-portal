@@ -2,11 +2,12 @@
 // Phase A: Button hierarchy — Draft/Call are primary (filled), Assign is secondary (tinted outline).
 import { useState } from 'react';
 import { theme } from '@/config/theme';
+import { getActionsForArchetype, outreachCategories } from '@/data/outreach';
 import { useApp } from '@/context/AppContext';
 
 const STAFF = ['F&B Director', 'Head Golf Professional', 'Membership Director', 'Grill Room Manager', 'Club Manager'];
 
-export default function QuickActions({ memberName, memberId, context = '' }) {
+export default function QuickActions({ memberName, memberId, context = '', archetype = '' }) {
   const { showToast } = useApp();
   const [mode, setMode]   = useState(null);
   const [note, setNote]   = useState('');
@@ -14,6 +15,8 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
   const [staff, setStaff] = useState(STAFF[0]);
   const [sent, setSent]   = useState(null);
   const [actionLog, setActionLog] = useState([]);
+  const [showOutreach, setShowOutreach] = useState(false);
+  const outreachActions = archetype ? getActionsForArchetype(archetype) : [];
 
   const ACTION_META = {
     note: { label: 'Personal note', icon: '✉', color: theme.colors.accent },
@@ -222,6 +225,64 @@ export default function QuickActions({ memberName, memberId, context = '' }) {
               cursor: 'pointer', border: 'none', background: 'none',
               color: theme.colors.textMuted, fontWeight: 500 }}>Dismiss</button>
           </div>
+        </div>
+      )}
+
+
+      {/* Archetype-specific outreach suggestions */}
+      {outreachActions.length > 0 && (
+        <div style={{ marginTop: theme.spacing.md }}>
+          <button
+            onClick={() => setShowOutreach(!showOutreach)}
+            style={{
+              width: '100%', padding: '10px 14px', borderRadius: theme.radius.md,
+              border: '1px solid rgba(37,99,235,0.2)', background: showOutreach ? 'rgba(37,99,235,0.04)' : '#fafbff',
+              color: '#2563eb', fontSize: theme.fontSize.sm, fontWeight: 600,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              transition: 'all 0.15s',
+            }}
+          >
+            <span>\D83DDCE8 Outreach Playbook for {archetype}</span>
+            <span style={{ fontSize: '12px', color: '#a1a1aa' }}>{showOutreach ? '\u25B2' : '\u25BC'} {outreachActions.length} actions</span>
+          </button>
+          {showOutreach && (
+            <div style={{ marginTop: theme.spacing.sm, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {outreachActions.map((action, idx) => {
+                const cat = outreachCategories.find(c => c.key === action.category);
+                return (
+                  <div key={action.id} style={{
+                    padding: '12px 14px', borderRadius: theme.radius.md,
+                    border: idx < 2 ? '1px solid rgba(37,99,235,0.2)' : '1px solid ' + theme.colors.border,
+                    background: idx < 2 ? 'rgba(37,99,235,0.03)' : theme.colors.bgCard,
+                    display: 'flex', alignItems: 'flex-start', gap: '10px',
+                  }}>
+                    <span style={{ fontSize: '16px', marginTop: '2px' }}>{cat?.icon || '\u2728'}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: '2px' }}>
+                        {action.label}
+                        {idx < 2 && <span style={{ fontSize: '10px', fontWeight: 700, color: '#2563eb', marginLeft: '6px', background: 'rgba(37,99,235,0.08)', padding: '1px 6px', borderRadius: '3px' }}>TOP</span>}
+                      </div>
+                      <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, lineHeight: 1.4 }}>{action.description}</div>
+                      <div style={{ marginTop: '6px', fontSize: '11px', color: '#a1a1aa' }}>Owner: {action.defaultOwner}</div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addActionEntry('note');
+                        showToast(action.label + ' triggered for ' + memberName, 'info');
+                      }}
+                      style={{
+                        padding: '5px 12px', borderRadius: theme.radius.sm, fontSize: '11px',
+                        fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(37,99,235,0.3)',
+                        background: 'rgba(37,99,235,0.06)', color: '#2563eb', whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                      }}
+                    >Deploy</button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

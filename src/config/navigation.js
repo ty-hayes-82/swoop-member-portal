@@ -99,6 +99,15 @@ export const navItems = [
     hidden: true, // TODO: Implement this page
   },
   {
+    key: 'outreach-playbooks',
+    label: 'Outreach Playbooks',
+    section: 'FIX IT',
+    icon: '\uD83D\uDCE8',
+    color: theme.colors.navAgents,
+    subtitle: 'Archetype-specific retention actions \u2014 personalized outreach the GM can customize.',
+    sourceSystems: ['Member CRM', 'Analytics'],
+  },
+  {
     key: 'playbooks',
     label: 'Response Playbooks',
     section: 'FIX IT',
