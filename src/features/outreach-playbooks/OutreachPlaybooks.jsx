@@ -1,15 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { theme } from '@/config/theme';
 import { memberArchetypes } from '@/data/members';
 import {
   outreachCategories,
   defaultOutreachActions,
   archetypePlaybooks,
-  getActionsForArchetype,
   getAllActionsForArchetype,
 } from '@/data/outreach';
 import PageTransition from '@/components/ui/PageTransition';
 import { StoryHeadline } from '@/components/ui';
+import { useApp } from '@/context/AppContext';
+
+const STORAGE_KEY = 'swoop_outreach_playbooks';
 
 const EFFORT_BADGE = {
   low: { label: 'Low Effort', color: '#16a34a', bg: 'rgba(22,163,74,0.08)' },
@@ -22,82 +24,108 @@ const IMPACT_BADGE = {
   'very-high': { label: 'Very High', color: '#7c3aed', bg: 'rgba(124,58,237,0.08)' },
 };
 
-function ActionCard({ action, isRecommended, onDeploy }) {
-  const [hovered, setHovered] = useState(false);
-  const category = outreachCategories.find(c => c.key === action.category);
-  const effort = EFFORT_BADGE[action.effort] || EFFORT_BADGE.medium;
-  const impact = IMPACT_BADGE[action.impact] || IMPACT_BADGE.medium;
+// Load saved playbooks from localStorage, falling back to defaults
+function loadPlaybooks() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch (e) { /* ignore */ }
+  // Build defaults from archetypePlaybooks
+  const defaults = {};
+  Object.entries(archetypePlaybooks).forEach(([arch, pb]) => {
+    const allForArch = getAllActionsForArchetype(arch);
+    defaults[arch] = {
+      enabled: pb.topActions, // IDs of enabled actions (ordered)
+      disabled: allForArch.filter(a => !pb.topActions.includes(a.id)).map(a => a.id),
+    };
+  });
+  return defaults;
+}
 
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered ? '#fafbff' : '#fff',
-        border: isRecommended ? '1px solid rgba(37,99,235,0.25)' : '1px solid #e4e4e7',
-        borderRadius: '12px',
-        padding: '20px',
-        transition: 'all 0.2s',
-        boxShadow: hovered ? '0 4px 12px rgba(0,0,0,0.06)' : '0 1px 3px rgba(0,0,0,0.04)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {isRecommended && (
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-          background: 'linear-gradient(90deg, #2563eb, #7c3aed)',
-        }} />
-      )}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-        <div style={{
-          width: '40px', height: '40px', borderRadius: '10px',
-          background: category ? category.color + '12' : '#f4f4f5',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '18px', flexShrink: 0,
-          border: `1px solid ${category ? category.color + '25' : '#e4e4e7'}`,
-        }}>
-          {category?.icon || '\u2728'}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '14px', fontWeight: 700, color: '#0f0f0f' }}>{action.label}</span>
-            {isRecommended && (
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#2563eb', background: 'rgba(37,99,235,0.08)', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Recommended
-              </span>
-            )}
-          </div>
-          <p style={{ fontSize: '13px', color: '#6b7280', lineHeight: 1.5, margin: '0 0 12px' }}>
-            {action.description}
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: effort.color, background: effort.bg, padding: '3px 8px', borderRadius: '4px' }}>
-              {effort.label}
-            </span>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: impact.color, background: impact.bg, padding: '3px 8px', borderRadius: '4px' }}>
-              {impact.label}
-            </span>
-            <span style={{ fontSize: '11px', color: '#a1a1aa' }}>{'\u2022'} {action.defaultOwner}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+function savePlaybooks(playbooks) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(playbooks));
+  } catch (e) { /* ignore */ }
 }
 
 export default function OutreachPlaybooks() {
+  const { showToast } = useApp();
   const [selectedArchetype, setSelectedArchetype] = useState('Die-Hard Golfer');
-  const [showAll, setShowAll] = useState(false);
+  const [playbooks, setPlaybooks] = useState(loadPlaybooks);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
-  const playbook = archetypePlaybooks[selectedArchetype];
-  const recommended = useMemo(() => getActionsForArchetype(selectedArchetype), [selectedArchetype]);
-  const allActions = useMemo(() => getAllActionsForArchetype(selectedArchetype), [selectedArchetype]);
-  const additionalActions = useMemo(
-    () => allActions.filter(a => !recommended.find(r => r.id === a.id)),
-    [allActions, recommended]
-  );
   const archData = memberArchetypes.find(a => a.archetype === selectedArchetype);
+  const playbook = archetypePlaybooks[selectedArchetype];
+
+  // Ensure every archetype has an entry
+  useEffect(() => {
+    if (!playbooks[selectedArchetype]) {
+      const allForArch = getAllActionsForArchetype(selectedArchetype);
+      const defaults = archetypePlaybooks[selectedArchetype];
+      const enabled = defaults ? defaults.topActions : allForArch.slice(0, 5).map(a => a.id);
+      const disabled = allForArch.filter(a => !enabled.includes(a.id)).map(a => a.id);
+      setPlaybooks(prev => ({ ...prev, [selectedArchetype]: { enabled, disabled } }));
+    }
+  }, [selectedArchetype, playbooks]);
+
+  const current = playbooks[selectedArchetype] || { enabled: [], disabled: [] };
+  const enabledActions = useMemo(
+    () => current.enabled.map(id => defaultOutreachActions.find(a => a.id === id)).filter(Boolean),
+    [current.enabled]
+  );
+  const disabledActions = useMemo(
+    () => current.disabled.map(id => defaultOutreachActions.find(a => a.id === id)).filter(Boolean),
+    [current.disabled]
+  );
+
+  const updatePlaybook = useCallback((enabled, disabled) => {
+    setPlaybooks(prev => ({
+      ...prev,
+      [selectedArchetype]: { enabled, disabled },
+    }));
+    setHasChanges(true);
+  }, [selectedArchetype]);
+
+  const toggleAction = useCallback((actionId) => {
+    const isEnabled = current.enabled.includes(actionId);
+    if (isEnabled) {
+      updatePlaybook(
+        current.enabled.filter(id => id !== actionId),
+        [...current.disabled, actionId]
+      );
+    } else {
+      updatePlaybook(
+        [...current.enabled, actionId],
+        current.disabled.filter(id => id !== actionId)
+      );
+    }
+  }, [current, updatePlaybook]);
+
+  const moveAction = useCallback((actionId, direction) => {
+    const list = [...current.enabled];
+    const idx = list.indexOf(actionId);
+    if (idx < 0) return;
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= list.length) return;
+    [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
+    updatePlaybook(list, current.disabled);
+  }, [current, updatePlaybook]);
+
+  const handleSave = () => {
+    savePlaybooks(playbooks);
+    setHasChanges(false);
+    showToast(`Playbook saved for ${selectedArchetype}`, 'info');
+  };
+
+  const handleReset = () => {
+    const allForArch = getAllActionsForArchetype(selectedArchetype);
+    const defaults = archetypePlaybooks[selectedArchetype];
+    const enabled = defaults ? defaults.topActions : allForArch.slice(0, 5).map(a => a.id);
+    const disabled = allForArch.filter(a => !enabled.includes(a.id)).map(a => a.id);
+    updatePlaybook(enabled, disabled);
+    showToast(`Reset to defaults for ${selectedArchetype}`, 'info');
+  };
 
   return (
     <PageTransition>
@@ -105,7 +133,7 @@ export default function OutreachPlaybooks() {
         <StoryHeadline
           variant="info"
           headline="Every archetype needs a different playbook. Choose the right touch for the right member."
-          context="Outreach actions are prioritized by archetype based on engagement patterns. Customize the playbook for your club's culture."
+          context="Select actions, reorder priorities, and save per archetype. Your customizations persist across sessions."
         />
 
         {/* Archetype Selector */}
@@ -119,13 +147,16 @@ export default function OutreachPlaybooks() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {memberArchetypes.map(arch => {
               const isActive = selectedArchetype === arch.archetype;
+              const hasSaved = playbooks[arch.archetype] &&
+                JSON.stringify(playbooks[arch.archetype]) !==
+                JSON.stringify(loadPlaybooks()[arch.archetype]);
               return (
                 <button
                   key={arch.archetype}
-                  onClick={() => { setSelectedArchetype(arch.archetype); setShowAll(false); }}
+                  onClick={() => { setSelectedArchetype(arch.archetype); setEditMode(false); }}
                   style={{
                     padding: '8px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
-                    cursor: 'pointer', transition: 'all 0.15s',
+                    cursor: 'pointer', transition: 'all 0.15s', position: 'relative',
                     border: isActive ? '2px solid #2563eb' : '1px solid #e4e4e7',
                     background: isActive ? 'rgba(37,99,235,0.06)' : '#fafafa',
                     color: isActive ? '#2563eb' : '#3f3f46',
@@ -142,12 +173,11 @@ export default function OutreachPlaybooks() {
           </div>
         </div>
 
-        {/* Archetype Profile + Playbook */}
+        {/* Archetype Profile */}
         <div style={{
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: '14px',
           overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
         }}>
-          {/* Profile Header */}
           <div style={{
             padding: '24px 28px', borderBottom: '1px solid #e4e4e7',
             background: 'linear-gradient(135deg, rgba(37,99,235,0.03), rgba(124,58,237,0.02))',
@@ -158,7 +188,7 @@ export default function OutreachPlaybooks() {
                   {selectedArchetype}
                 </h2>
                 <p style={{ fontSize: '14px', color: '#6b7280', margin: 0, lineHeight: 1.5 }}>
-                  {playbook?.description || 'Select an archetype to see the recommended playbook.'}
+                  {playbook?.description || 'Configure the outreach playbook for this archetype.'}
                 </p>
               </div>
               {archData && (
@@ -201,96 +231,172 @@ export default function OutreachPlaybooks() {
             )}
           </div>
 
-          {/* Recommended Actions */}
+          {/* Action Bar */}
+          <div style={{
+            padding: '16px 28px', borderBottom: '1px solid #e4e4e7',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            background: hasChanges ? 'rgba(37,99,235,0.02)' : '#fafafa',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button
+                onClick={() => setEditMode(!editMode)}
+                style={{
+                  padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                  cursor: 'pointer', transition: 'all 0.15s',
+                  border: editMode ? '1.5px solid #2563eb' : '1.5px solid #d4d4d8',
+                  background: editMode ? 'rgba(37,99,235,0.06)' : '#fff',
+                  color: editMode ? '#2563eb' : '#3f3f46',
+                }}
+              >
+                {editMode ? '\u2713 Editing' : '\u270E Edit Playbook'}
+              </button>
+              {editMode && (
+                <button
+                  onClick={handleReset}
+                  style={{
+                    padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600,
+                    cursor: 'pointer', border: '1px solid #e4e4e7', background: '#fff', color: '#6b7280',
+                  }}
+                >
+                  Reset to Defaults
+                </button>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {hasChanges && (
+                <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 600 }}>
+                  Unsaved changes
+                </span>
+              )}
+              <button
+                onClick={handleSave}
+                disabled={!hasChanges}
+                style={{
+                  padding: '8px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 700,
+                  cursor: hasChanges ? 'pointer' : 'default',
+                  border: 'none',
+                  background: hasChanges
+                    ? 'linear-gradient(135deg, #22c55e, #16a34a)'
+                    : '#e4e4e7',
+                  color: hasChanges ? '#fff' : '#a1a1aa',
+                  boxShadow: hasChanges ? '0 2px 8px rgba(34,197,94,0.3)' : 'none',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Save Playbook
+              </button>
+            </div>
+          </div>
+
+          {/* Active Actions */}
           <div style={{ padding: '24px 28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
                 <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0f0f0f', margin: '0 0 4px' }}>
-                  Recommended Playbook
+                  Active Playbook
                 </h3>
                 <p style={{ fontSize: '12px', color: '#a1a1aa', margin: 0 }}>
-                  Top {recommended.length} actions for {selectedArchetype} members, ordered by effectiveness
+                  {enabledActions.length} actions enabled for {selectedArchetype} members
+                  {editMode && ' \u2014 click to remove, use arrows to reorder'}
                 </p>
               </div>
-              <span style={{ fontSize: '12px', fontWeight: 600, color: '#2563eb', background: 'rgba(37,99,235,0.06)', padding: '4px 12px', borderRadius: '6px' }}>
-                {recommended.length} actions
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#16a34a', background: 'rgba(22,163,74,0.06)', padding: '4px 12px', borderRadius: '6px' }}>
+                {enabledActions.length} active
               </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {recommended.map((action, idx) => (
-                <div key={action.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <div style={{
-                    width: '24px', height: '24px', borderRadius: '50%',
-                    background: idx === 0 ? '#2563eb' : idx === 1 ? '#7c3aed' : '#e4e4e7',
-                    color: idx < 2 ? '#fff' : '#6b7280',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '11px', fontWeight: 700, flexShrink: 0, marginTop: '8px',
-                  }}>
-                    {idx + 1}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <ActionCard action={action} isRecommended={idx < 2} />
-                  </div>
-                </div>
-              ))}
-            </div>
 
-            {/* Additional Actions Toggle */}
-            {additionalActions.length > 0 && (
-              <div style={{ marginTop: '20px' }}>
-                <button
-                  onClick={() => setShowAll(!showAll)}
-                  style={{
-                    width: '100%', padding: '12px', borderRadius: '10px',
-                    border: '1px dashed #d4d4d8', background: showAll ? '#fafafa' : '#fff',
-                    color: '#6b7280', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  {showAll ? 'Hide' : 'Show'} {additionalActions.length} more available actions
-                </button>
-                {showAll && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
-                    {additionalActions.map(action => (
-                      <ActionCard key={action.id} action={action} />
-                    ))}
-                  </div>
-                )}
+            {enabledActions.length === 0 ? (
+              <div style={{ padding: '32px', textAlign: 'center', color: '#a1a1aa', fontSize: '13px', border: '1px dashed #e4e4e7', borderRadius: '10px' }}>
+                No actions enabled. Click Edit Playbook and add actions below.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {enabledActions.map((action, idx) => (
+                  <PlaybookActionRow
+                    key={action.id}
+                    action={action}
+                    index={idx}
+                    total={enabledActions.length}
+                    editMode={editMode}
+                    isEnabled={true}
+                    onToggle={() => toggleAction(action.id)}
+                    onMoveUp={() => moveAction(action.id, -1)}
+                    onMoveDown={() => moveAction(action.id, 1)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Available (disabled) actions */}
+            {editMode && disabledActions.length > 0 && (
+              <div style={{ marginTop: '24px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#6b7280', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  Available Actions
+                  <span style={{ fontSize: '11px', fontWeight: 500, color: '#a1a1aa' }}>
+                    Click + to add to playbook
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {disabledActions.map(action => (
+                    <PlaybookActionRow
+                      key={action.id}
+                      action={action}
+                      editMode={true}
+                      isEnabled={false}
+                      onToggle={() => toggleAction(action.id)}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* All Actions Reference */}
+        {/* Quick reference of all categories */}
         <div style={{
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: '14px',
           padding: '24px 28px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
         }}>
           <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0f0f0f', margin: '0 0 4px' }}>
-            All Outreach Actions
+            Action Library
           </h3>
           <p style={{ fontSize: '12px', color: '#a1a1aa', margin: '0 0 16px' }}>
-            Full library of {defaultOutreachActions.length} actions across all categories. Customize per archetype above.
+            {defaultOutreachActions.length} actions across {outreachCategories.length} categories
           </p>
           <div style={{ display: 'grid', gap: '8px' }}>
             {outreachCategories.map(cat => {
               const catActions = defaultOutreachActions.filter(a => a.category === cat.key);
+              const enabledCount = catActions.filter(a => current.enabled.includes(a.id)).length;
               return (
-                <div key={cat.key} style={{ borderRadius: '10px', border: '1px solid #f4f4f5', padding: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                <div key={cat.key} style={{ borderRadius: '10px', border: '1px solid #f4f4f5', padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                     <span style={{ fontSize: '16px' }}>{cat.icon}</span>
                     <span style={{ fontSize: '13px', fontWeight: 700, color: cat.color }}>{cat.label}</span>
-                    <span style={{ fontSize: '11px', color: '#a1a1aa' }}>({catActions.length})</span>
+                    <span style={{ fontSize: '11px', color: '#a1a1aa' }}>
+                      {enabledCount}/{catActions.length} active
+                    </span>
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                    {catActions.map(a => (
-                      <span key={a.id} style={{
-                        fontSize: '12px', padding: '4px 10px', borderRadius: '6px',
-                        background: '#f4f4f5', color: '#3f3f46', fontWeight: 500,
-                      }}>
-                        {a.label}
-                      </span>
-                    ))}
+                    {catActions.map(a => {
+                      const isActive = current.enabled.includes(a.id);
+                      return (
+                        <span
+                          key={a.id}
+                          onClick={editMode ? () => toggleAction(a.id) : undefined}
+                          style={{
+                            fontSize: '12px', padding: '4px 10px', borderRadius: '6px',
+                            fontWeight: 500, transition: 'all 0.15s',
+                            cursor: editMode ? 'pointer' : 'default',
+                            background: isActive ? 'rgba(22,163,74,0.08)' : '#f4f4f5',
+                            color: isActive ? '#16a34a' : '#a1a1aa',
+                            border: isActive ? '1px solid rgba(22,163,74,0.2)' : '1px solid transparent',
+                            textDecoration: isActive ? 'none' : 'line-through',
+                          }}
+                        >
+                          {isActive && '\u2713 '}{a.label}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -299,5 +405,127 @@ export default function OutreachPlaybooks() {
         </div>
       </div>
     </PageTransition>
+  );
+}
+
+function PlaybookActionRow({ action, index, total, editMode, isEnabled, onToggle, onMoveUp, onMoveDown }) {
+  const [hovered, setHovered] = useState(false);
+  const category = outreachCategories.find(c => c.key === action.category);
+  const effort = EFFORT_BADGE[action.effort] || EFFORT_BADGE.medium;
+  const impact = IMPACT_BADGE[action.impact] || IMPACT_BADGE.medium;
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: '10px',
+        padding: isEnabled ? '14px 16px' : '10px 14px',
+        borderRadius: '10px',
+        border: isEnabled
+          ? (index != null && index < 2 ? '1px solid rgba(37,99,235,0.2)' : '1px solid #e4e4e7')
+          : '1px dashed #e4e4e7',
+        background: hovered
+          ? (isEnabled ? '#fafbff' : '#f9fafb')
+          : (isEnabled ? '#fff' : '#fafafa'),
+        transition: 'all 0.15s',
+        opacity: isEnabled ? 1 : 0.7,
+      }}
+    >
+      {/* Priority number or add button */}
+      {isEnabled && index != null ? (
+        <div style={{
+          width: '28px', height: '28px', borderRadius: '50%',
+          background: index === 0 ? '#2563eb' : index === 1 ? '#7c3aed' : '#f4f4f5',
+          color: index < 2 ? '#fff' : '#6b7280',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '12px', fontWeight: 700, flexShrink: 0,
+        }}>
+          {index + 1}
+        </div>
+      ) : (
+        <button
+          onClick={onToggle}
+          style={{
+            width: '28px', height: '28px', borderRadius: '50%',
+            background: '#f0fdf4', border: '1px solid #bbf7d0',
+            color: '#16a34a', fontSize: '16px', fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', flexShrink: 0, lineHeight: 1,
+          }}
+        >+</button>
+      )}
+
+      {/* Category icon */}
+      <div style={{
+        width: '36px', height: '36px', borderRadius: '8px',
+        background: category ? category.color + '12' : '#f4f4f5',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '16px', flexShrink: 0,
+        border: `1px solid ${category ? category.color + '20' : '#e4e4e7'}`,
+      }}>
+        {category?.icon || '\u2728'}
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f0f0f', marginBottom: '3px' }}>
+          {action.label}
+        </div>
+        <div style={{ fontSize: '12px', color: '#6b7280', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {action.description}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '10px', fontWeight: 600, color: effort.color, background: effort.bg, padding: '2px 6px', borderRadius: '3px' }}>
+            {effort.label}
+          </span>
+          <span style={{ fontSize: '10px', fontWeight: 600, color: impact.color, background: impact.bg, padding: '2px 6px', borderRadius: '3px' }}>
+            {impact.label}
+          </span>
+          <span style={{ fontSize: '10px', color: '#a1a1aa' }}>{action.defaultOwner}</span>
+        </div>
+      </div>
+
+      {/* Edit controls */}
+      {editMode && isEnabled && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
+          <button
+            onClick={onMoveUp}
+            disabled={index === 0}
+            style={{
+              width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #e4e4e7',
+              background: index === 0 ? '#f9f9f9' : '#fff', color: index === 0 ? '#d4d4d8' : '#3f3f46',
+              cursor: index === 0 ? 'default' : 'pointer', fontSize: '11px', fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >{'\u25B2'}</button>
+          <button
+            onClick={onMoveDown}
+            disabled={index === total - 1}
+            style={{
+              width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #e4e4e7',
+              background: index === total - 1 ? '#f9f9f9' : '#fff', color: index === total - 1 ? '#d4d4d8' : '#3f3f46',
+              cursor: index === total - 1 ? 'default' : 'pointer', fontSize: '11px', fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >{'\u25BC'}</button>
+        </div>
+      )}
+
+      {/* Remove button */}
+      {editMode && isEnabled && (
+        <button
+          onClick={onToggle}
+          style={{
+            width: '28px', height: '28px', borderRadius: '50%',
+            background: hovered ? '#fef2f2' : '#fff', border: '1px solid #fecaca',
+            color: '#dc2626', fontSize: '14px', fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', flexShrink: 0, lineHeight: 1,
+            transition: 'all 0.15s',
+          }}
+        >{'\u00D7'}</button>
+      )}
+    </div>
   );
 }

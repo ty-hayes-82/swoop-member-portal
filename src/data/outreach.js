@@ -199,8 +199,21 @@ export const archetypePlaybooks = {
   },
 };
 
-// Get recommended actions for a specific archetype
+// Get recommended actions for a specific archetype (checks localStorage for GM customizations)
 export function getActionsForArchetype(archetype) {
+  // Check for GM-customized playbook in localStorage
+  try {
+    const saved = localStorage.getItem('swoop_outreach_playbooks');
+    if (saved) {
+      const playbooks = JSON.parse(saved);
+      if (playbooks[archetype]?.enabled?.length > 0) {
+        return playbooks[archetype].enabled
+          .map(id => defaultOutreachActions.find(a => a.id === id))
+          .filter(Boolean);
+      }
+    }
+  } catch (e) { /* ignore */ }
+  // Fall back to defaults
   const playbook = archetypePlaybooks[archetype];
   if (!playbook) return defaultOutreachActions.slice(0, 5);
   return playbook.topActions.map(id => defaultOutreachActions.find(a => a.id === id)).filter(Boolean);
