@@ -188,9 +188,9 @@ function ChurnDecaySequence() {
   const stages = [
     { domain: 'Email', icon: '\u2709\uFE0F', weeks: 0, detail: 'Open rates fall below 15%. First detectable signal.', border: '#f59e0b', shadow: 'rgba(245,158,11,0.2)' },
     { domain: 'Golf', icon: '\u26f3', weeks: 3, detail: 'From 3+ rounds/month to <1. Cancellations rise.', border: '#ea580c', shadow: 'rgba(234,88,12,0.2)' },
-    { domain: 'Dining', icon: '\U0001f37d\uFE0F', weeks: 5, detail: 'Post-round dining stops. Grill Room visits drop to zero.', border: '#dc2626', shadow: 'rgba(220,38,38,0.2)' },
-    { domain: 'Events', icon: '\U0001f389', weeks: 6, detail: 'No RSVPs, no attendance. Social ties severed.', border: '#b91c1c', shadow: 'rgba(185,28,28,0.2)' },
-    { domain: 'Resign', icon: '\U0001f6aa', weeks: 8, detail: 'Average 6\u20138 weeks from first email decay signal.', border: '#7f1d1d', shadow: 'rgba(127,29,29,0.3)', filled: true },
+    { domain: 'Dining', icon: '🍽️', weeks: 5, detail: 'Post-round dining stops. Grill Room visits drop to zero.', border: '#dc2626', shadow: 'rgba(220,38,38,0.2)' },
+    { domain: 'Events', icon: '🎉', weeks: 6, detail: 'No RSVPs, no attendance. Social ties severed.', border: '#b91c1c', shadow: 'rgba(185,28,28,0.2)' },
+    { domain: 'Resign', icon: '🚪', weeks: 8, detail: 'Average 6\u20138 weeks from first email decay signal.', border: '#7f1d1d', shadow: 'rgba(127,29,29,0.3)', filled: true },
   ];
 
   return (
