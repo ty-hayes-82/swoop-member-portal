@@ -1,6 +1,6 @@
 // ExperienceInsights — correlations between experience inputs and business outcomes
 import { useState, useEffect } from 'react';
-import { Panel, SoWhatCallout } from '@/components/ui';
+import { Panel, SoWhatCallout, PlaybookActionCard } from '@/components/ui';
 import { theme } from '@/config/theme';
 import {
   touchpointCorrelations,
@@ -11,6 +11,7 @@ import {
 } from '@/services/experienceInsightsService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
+import { useApp } from '@/context/AppContext';
 
 const TABS = [
   { key: 'correlations', label: 'Correlation Insights' },
@@ -88,6 +89,48 @@ function CorrelationsTab() {
           </p>
         </div>
       ))}
+
+      {/* Contextual playbook actions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: theme.spacing.md }}>
+        <PlaybookActionCard
+          icon={'\uD83C\uDF7D\uFE0F'}
+          title="98 members never dine post-round. Activate Dining Dormancy Recovery."
+          description="Members who dine after rounds renew at 92% vs. 61%. Close this gap with a targeted dining incentive."
+          playbookName="Dining Dormancy Recovery"
+          impact="$11K/mo"
+          memberCount={98}
+          buttonColor="#ea580c"
+        />
+        <PlaybookActionCard
+          icon={'\uD83D\uDEA8'}
+          title="5 open complaints unresolved >24hrs \u2014 activate rapid response."
+          description="Each complaint resolved within 24hrs improves renewal by 18%. These 5 are past the window."
+          playbookName="Service Failure Rapid Response"
+          impact="$24K/mo"
+          memberCount={5}
+          buttonColor="#dc2626"
+          variant="urgent"
+        />
+        <PlaybookActionCard
+          icon={'\uD83C\uDFAB'}
+          title="24 Ghost members, 0 events in 8 weeks \u2014 send event invitations."
+          description="Event attendance is the 2nd strongest retention predictor. These members haven't attended any."
+          playbookName="Post-Event Engagement Capture"
+          impact="$6K/mo"
+          memberCount={24}
+          buttonColor="#22c55e"
+        />
+        <PlaybookActionCard
+          icon={'\uD83D\uDCC9'}
+          title="30 members in multi-domain decline, $540K at risk."
+          description="When golf, dining, and email all decline simultaneously, resignation follows within 60 days."
+          playbookName="Declining Member Intervention"
+          impact="$24K/mo"
+          memberCount={30}
+          buttonColor="#dc2626"
+          variant="urgent"
+        />
+      </div>
     </div>
   );
 }
@@ -164,6 +207,13 @@ function TouchpointsTab() {
           </p>
         ))}
       </div>
+
+      {/* Playbook links per top touchpoint */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: theme.spacing.md }}>
+        <PlaybookActionCard variant="compact" icon={'\uD83C\uDFCC\uFE0F'} title="Round Frequency \u2192 Declining Member Intervention" impact="$24K/mo" memberCount={30} playbookName="Declining Member Intervention" buttonLabel="See Playbook" buttonColor="#dc2626" />
+        <PlaybookActionCard variant="compact" icon={'\uD83D\uDEA8'} title="Complaint Resolution \u2192 Service Save Protocol" impact="$18K/mo" memberCount={5} playbookName="Service Save Protocol" buttonLabel="See Playbook" buttonColor="#c0392b" />
+        <PlaybookActionCard variant="compact" icon={'\uD83C\uDF7D\uFE0F'} title="Post-Round Dining \u2192 Dining Dormancy Recovery" impact="$11K/mo" memberCount={98} playbookName="Dining Dormancy Recovery" buttonLabel="See Playbook" buttonColor="#ea580c" />
+      </div>
     </div>
   );
 }
@@ -231,6 +281,20 @@ function ComplaintsTab() {
           </tbody>
         </table>
       </Panel>
+
+      {/* Unresolved complaints action */}
+      <PlaybookActionCard
+        icon={'\uD83D\uDEA8'}
+        label="UNRESOLVED COMPLAINTS"
+        title="16 complaints unresolved \u2014 Review & Assign"
+        description="Service Speed complaints have the highest retention impact (-12%). 5 are unresolved >24hrs."
+        playbookName="Service Failure Rapid Response"
+        impact="$24K/mo at risk"
+        memberCount={16}
+        buttonLabel="Review & Assign"
+        buttonColor="#dc2626"
+        variant="urgent"
+      />
     </div>
   );
 }
@@ -286,12 +350,25 @@ function EventsTab() {
         Member-Guest Tournaments deliver the best balance of scale and retention (48 attendees, 96% renewal, 4.2x ROI).
         <strong> Events are provably your second-best retention tool after golf itself.</strong>
       </SoWhatCallout>
+
+      {/* Invite at-risk members action */}
+      <PlaybookActionCard
+        icon={'\uD83C\uDF1F'}
+        title="Invite 24 Ghost + Declining members to upcoming Chef's Table"
+        description="Chef's Table has 5.1x ROI. 24 disengaged members haven't attended an event in 8+ weeks. A personal invite could re-engage them."
+        playbookName="Social Butterfly Event Amplifier"
+        impact="$6K/mo"
+        memberCount={24}
+        buttonLabel="Create Invitations"
+        buttonColor="#22c55e"
+      />
     </div>
   );
 }
 
 
 function SpendPotentialTab() {
+  const { showToast } = useApp();
   const totalUntapped = archetypeSpendGaps.reduce((sum, a) => sum + a.totalUntapped, 0);
   const totalMembers = archetypeSpendGaps.reduce((sum, a) => sum + a.count, 0);
   const sorted = [...archetypeSpendGaps].sort((a, b) => b.totalUntapped - a.totalUntapped);
@@ -363,9 +440,39 @@ function SpendPotentialTab() {
               ))}
             </div>
 
-            {/* Campaign recommendation */}
-            <div style={{ padding: theme.spacing.sm + ' ' + theme.spacing.md, background: theme.colors.success + '08', border: '1px solid ' + theme.colors.success + '20', borderRadius: theme.radius.sm, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
-              <strong style={{ color: theme.colors.success }}>Campaign:</strong> {arch.campaign}
+            {/* Campaign recommendation with Launch button */}
+            <div style={{
+              padding: theme.spacing.sm + ' ' + theme.spacing.md,
+              background: theme.colors.success + '08',
+              border: '1px solid ' + theme.colors.success + '20',
+              borderRadius: theme.radius.sm,
+              fontSize: theme.fontSize.xs,
+              color: theme.colors.textSecondary,
+              lineHeight: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              flexWrap: 'wrap',
+            }}>
+              <div>
+                <strong style={{ color: theme.colors.success }}>Campaign:</strong> {arch.campaign}
+              </div>
+              <button
+                onClick={() => showToast(`Campaign launched for ${arch.count} ${arch.archetype} members`, 'success')}
+                style={{
+                  padding: '6px 16px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: '#e8772e',
+                  color: 'white',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >Launch Campaign</button>
             </div>
           </div>
         );

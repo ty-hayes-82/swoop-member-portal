@@ -3,6 +3,7 @@ import { theme } from '@/config/theme';
 import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
+import { PlaybookActionCard } from '@/components/ui';
 import { memberProfiles, atRiskMembers, healthDistribution, memberArchetypes } from '@/data/members';
 
 // Generate full member list from all available profiles

@@ -1,4 +1,4 @@
-import { SoWhatCallout } from '@/components/ui';
+import { SoWhatCallout, PlaybookActionCard } from '@/components/ui';
 import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
@@ -450,6 +450,19 @@ export default function HealthOverview() {
         James Whitfield is the most urgent: an unresolved service complaint is the only thing standing between
         an active member and a resignation that should never happen. Tap his name to take action.
       </SoWhatCallout>
+
+      <PlaybookActionCard
+        icon={'\uD83D\uDCDE'}
+        label="CRITICAL OUTREACH"
+        title={`${atRisk.filter(m => m.score < 40).length} members require immediate outreach \u2014 start sequence now`}
+        description="Call the top 3 Critical members before end of business today. Each saved member protects $18K+ in annual dues."
+        playbookName="Service Save Protocol"
+        impact={atRiskDuesDisplay.compact + ' at risk'}
+        memberCount={atRisk.filter(m => m.score < 40).length}
+        buttonLabel="Start Outreach Sequence"
+        buttonColor="#dc2626"
+        variant="urgent"
+      />
 
       {/* Full trend chart #3 — 6-month member health trajectory */}
       <TrendChart

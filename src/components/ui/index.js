@@ -32,3 +32,4 @@ export { default as WaitlistRow } from './WaitlistRow.jsx';
 export { Toast, useToast } from './Toast.jsx';
 export { default as InfoTooltip } from './InfoTooltip.jsx';
 export { default as EvidenceStrip } from './EvidenceStrip.jsx';
+export { default as PlaybookActionCard } from './PlaybookActionCard';

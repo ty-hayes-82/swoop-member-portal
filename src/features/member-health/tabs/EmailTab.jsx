@@ -1,4 +1,5 @@
-import { SoWhatCallout } from '@/components/ui';
+import { SoWhatCallout, PlaybookActionCard } from '@/components/ui';
+import QuickActions from '@/components/ui/QuickActions.jsx';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getEmailHeatmap, getDecayingMembers } from '@/services/memberService';
 import { theme } from '@/config/theme';
@@ -91,14 +92,19 @@ export default function EmailTab() {
               <span style={{ color: theme.colors.urgent, fontFamily: theme.fonts.mono,
                 fontSize: theme.fontSize.sm }}>{formatTrend(m.trend)}</span>
             </div>
-            <div style={{ display: 'flex', gap: theme.spacing.md, marginTop: 4 }}>
-              {[['Nov', m.nov], ['Dec', m.dec], ['Jan', m.jan]].map(([label, val]) => (
-                <span key={label} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-                  {label}: <span style={{ color: heatColor(Number.isFinite(val) ? val : 0), fontFamily: theme.fonts.mono }}>
-                    {formatPercent(val)}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', gap: theme.spacing.md }}>
+                {[['Nov', m.nov], ['Dec', m.dec], ['Jan', m.jan]].map(([label, val]) => (
+                  <span key={label} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                    {label}: <span style={{ color: heatColor(Number.isFinite(val) ? val : 0), fontFamily: theme.fonts.mono }}>
+                      {formatPercent(val)}
+                    </span>
                   </span>
-                </span>
-              ))}
+                ))}
+              </div>
+              <div onClick={e => e.stopPropagation()}>
+                <QuickActions memberName={m.name} memberId={m.memberId} context="Email decay — pre-departure window" />
+              </div>
             </div>
           </div>
         ))}
@@ -109,6 +115,19 @@ export default function EmailTab() {
         by 4–6 weeks. These {decaying.length} members are in the pre-departure window where personal outreach
         still works.
       </SoWhatCallout>
+
+      <PlaybookActionCard
+        icon={'\uD83D\uDEA8'}
+        label="ENGAGEMENT DECAY DETECTED"
+        title={`${decaying.length} members in the pre-departure window \u2014 activate intervention now`}
+        description="These members are showing the same email decay pattern that preceded 9 of 11 resignations this year. Personal outreach within 2 weeks has a 67% save rate."
+        playbookName="Declining Member Intervention"
+        impact="$24K/mo"
+        memberCount={decaying.length}
+        buttonLabel="Activate Engagement Decay Intervention"
+        buttonColor="#dc2626"
+        variant="urgent"
+      />
     </div>
   );
 }

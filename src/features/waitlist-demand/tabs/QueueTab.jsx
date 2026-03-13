@@ -8,6 +8,7 @@ import {
   getWaitlistDemandSparkline,
 } from '@/services/waitlistService';
 import { theme } from '@/config/theme';
+import { useApp } from '@/context/AppContext';
 
 const SLOT_WINDOWS = ['Sat 7:00', 'Sat 7:08', 'Sat 7:16', 'Sat 7:24', 'Sun 7:00', 'Sun 7:08'];
 
@@ -57,7 +58,45 @@ function buildQueueStats(summary, queue) {
   ];
 }
 
+function QueuePlaybookBanner({ showToast }) {
+  return (
+    <div style={{
+      background: 'rgba(220,38,38,0.03)',
+      borderLeft: '4px solid #dc2626',
+      borderRadius: 10,
+      padding: '14px 18px',
+      marginBottom: 16,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      flexWrap: 'wrap',
+      gap: 10,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 14 }}>{'⚡'}</span>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f0f0f' }}>
+            Critical members waiting 7+ days need priority outreach
+          </div>
+          <div style={{ fontSize: 12, color: '#666' }}>
+            $307K in at-risk dues exposed. Send a priority booking confirmation or GM personal note.
+          </div>
+        </div>
+      </div>
+      <button
+        onClick={() => showToast('Priority notes sent to 5 critical members', 'success')}
+        style={{
+          padding: '7px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+          cursor: 'pointer', border: 'none', background: '#dc2626', color: 'white',
+          whiteSpace: 'nowrap',
+        }}
+      >Send Priority Notes</button>
+    </div>
+  );
+}
+
 export default function QueueTab() {
+  const { showToast } = useApp();
   const queue = getWaitlistQueue();
   const summary = getWaitlistSummary();
   const stats = buildQueueStats(summary, queue);

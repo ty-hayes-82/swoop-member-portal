@@ -71,8 +71,13 @@ function MiniMemberRow({ member, onNavigate }) {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
         <span style={{ fontSize: theme.fontSize.xs, fontFamily: theme.fonts.mono, color: theme.colors.textSecondary }}>{member.time}</span>
-        <span style={{ fontSize: '14px', color: hovered ? theme.colors.accent : theme.colors.textMuted, transition: 'color 0.12s ease' }}>›</span>
+        <span style={{ fontSize: '14px', color: hovered ? theme.colors.accent : theme.colors.textMuted, transition: 'color 0.12s ease' }}>{'\u203A'}</span>
       </div>
+      {hovered && (
+        <div style={{ width: '100%', paddingTop: '6px', display: 'flex', gap: '6px' }} onClick={e => e.stopPropagation()}>
+          <QuickActions memberName={member.name} memberId={member.memberId} context={member.risk} archetype={member.archetype} />
+        </div>
+      )}
     </div>
   );
 }

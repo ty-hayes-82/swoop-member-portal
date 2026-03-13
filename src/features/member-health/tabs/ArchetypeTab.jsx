@@ -5,6 +5,7 @@ import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tool
 import { getArchetypeProfiles } from '@/services/memberService';
 import { getArchetypeSpendPatterns } from '@/services/experienceInsightsService';
 import { theme } from '@/config/theme';
+import { useNavigationContext } from '@/context/NavigationContext';
 import { useState } from 'react';
 
 const DIMS = ['golf', 'dining', 'events', 'email', 'trend'];
@@ -23,6 +24,7 @@ const ARCHETYPE_INTEL = {
 };
 
 export default function ArchetypeTab() {
+  const { navigate } = useNavigationContext();
   const profiles = getArchetypeProfiles();
   const [selected, setSelected] = useState('Balanced Active');
   const profile = profiles.find(p => p.archetype === selected) ?? profiles[0];
@@ -218,6 +220,41 @@ function SpendPotentialCard({ archetype }) {
           <strong>${(current.spendPotential * current.count).toLocaleString()}</strong> in annual opportunity.
         </div>
       )}
+
+      {/* View outreach playbook for this archetype */}
+      <div style={{
+        marginTop: theme.spacing.md,
+        display: 'flex',
+        gap: 10,
+        flexWrap: 'wrap',
+      }}>
+        <button
+          onClick={() => navigate('outreach-playbooks')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            border: '1.5px solid #e8772e',
+            background: 'rgba(232,119,46,0.06)',
+            color: '#e8772e',
+          }}
+        >View Outreach Playbook for {archetype}</button>
+        <button
+          onClick={() => navigate('playbooks')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            border: '1.5px solid #d4d4d8',
+            background: '#fff',
+            color: '#3f3f46',
+          }}
+        >View All Playbooks</button>
+      </div>
     </div>
   );
 }

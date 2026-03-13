@@ -11,6 +11,7 @@ const PLAYBOOKS = [
   // ── RETENTION ──────────────────────────────────
   {
     id: 'service-save',
+    triggeredCount: 3,
     name: 'Service Save Protocol',
     category: 'Retention',
     categoryColor: '#c0392b',
@@ -40,6 +41,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'new-member-90day',
+    triggeredCount: 8,
     name: 'New Member 90-Day Integration',
     category: 'Retention',
     categoryColor: '#0ea5e9',
@@ -70,6 +72,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'ghost-reactivation',
+    triggeredCount: 6,
     name: 'Ghost Member Reactivation',
     category: 'Retention',
     categoryColor: '#6b7280',
@@ -100,6 +103,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'declining-intervention',
+    triggeredCount: 12,
     name: 'Declining Member Intervention',
     category: 'Retention',
     categoryColor: '#dc2626',
@@ -130,6 +134,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'service-failure-rapid',
+    triggeredCount: 5,
     name: 'Service Failure Rapid Response',
     category: 'Retention',
     categoryColor: '#b91c1c',
@@ -160,6 +165,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'post-event',
+    triggeredCount: 14,
     name: 'Post-Event Engagement Capture',
     category: 'Retention',
     categoryColor: '#8b5cf6',
@@ -190,6 +196,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'anniversary',
+    triggeredCount: 4,
     name: 'Membership Anniversary Celebration',
     category: 'Retention',
     categoryColor: '#d97706',
@@ -222,6 +229,7 @@ const PLAYBOOKS = [
   // ── REVENUE ────────────────────────────────────
   {
     id: 'demand-surge',
+    triggeredCount: 2,
     name: 'Demand Surge Playbook',
     category: 'Revenue',
     categoryColor: '#2563eb',
@@ -251,6 +259,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'snowbird-opener',
+    triggeredCount: 0,
     name: 'Snowbird Season-Opener',
     category: 'Revenue',
     categoryColor: '#0891b2',
@@ -281,6 +290,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'event-amplifier',
+    triggeredCount: 3,
     name: 'Social Butterfly Event Amplifier',
     category: 'Revenue',
     categoryColor: '#ec4899',
@@ -310,6 +320,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'weather-window',
+    triggeredCount: 1,
     name: 'Weekend Warrior Weather Window',
     category: 'Revenue',
     categoryColor: '#f59e0b',
@@ -339,6 +350,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'dining-dormancy',
+    triggeredCount: 18,
     name: 'Dining Dormancy Recovery',
     category: 'Revenue',
     categoryColor: '#ea580c',
@@ -370,6 +382,7 @@ const PLAYBOOKS = [
   // ── OPERATIONS ─────────────────────────────────
   {
     id: 'staffing-gap',
+    triggeredCount: 2,
     name: 'Staffing Gap Protocol',
     category: 'Operations',
     categoryColor: '#7c3aed',
@@ -431,7 +444,15 @@ function PlaybookCard({ playbook, onSelect, isSelected }) {
         }}>
           {playbook.category}
         </span>
-        <span style={{ fontSize: 11, color: '#999' }}>{stepCount} steps</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {playbook.triggeredCount > 0 && (
+            <span style={{
+              fontSize: 10, fontWeight: 700, color: '#e8772e',
+              background: 'rgba(232,119,46,0.1)', padding: '2px 7px', borderRadius: 4,
+            }}>{playbook.triggeredCount} triggered</span>
+          )}
+          <span style={{ fontSize: 11, color: '#999' }}>{stepCount} steps</span>
+        </div>
       </div>
       <div style={{ fontSize: 16, fontWeight: 700, color: '#0f0f0f', lineHeight: 1.3 }}>{playbook.name}</div>
       <div style={{
@@ -458,6 +479,11 @@ function PlaybookDetail({ playbook }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.5px', color: '#e8772e', textTransform: 'uppercase' }}>Playbook</span>
           <span style={{ background: '#e8772e', color: 'white', fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10 }}>TRIGGERED</span>
+          {playbook.triggeredCount > 0 && (
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#e8772e', background: 'rgba(232,119,46,0.08)', padding: '3px 10px', borderRadius: 6 }}>
+              Currently triggered for {playbook.triggeredCount} members
+            </span>
+          )}
         </div>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: '#0f0f0f', margin: '0 0 8px 0', fontFamily: 'inherit' }}>{playbook.name}</h2>
         <p style={{ color: '#666', fontSize: 14, lineHeight: 1.6, maxWidth: 700, margin: 0 }}>{playbook.description}</p>

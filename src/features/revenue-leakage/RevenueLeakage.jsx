@@ -4,6 +4,7 @@ import PaceImpactTab from './tabs/PaceImpactTab';
 import StaffingImpactTab from './tabs/StaffingImpactTab';
 import WeatherImpactTab from './tabs/WeatherImpactTab';
 import { theme } from '@/config/theme';
+import { useApp } from '@/context/AppContext';
 import { paceFBImpact } from '@/data/pace';
 import { understaffedDays } from '@/data/staffing';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
@@ -333,12 +334,19 @@ function BreakdownChart({ totalLoss, paceAmount, staffingAmount, weatherAmount }
 }
 
 function ActionPath({ label, amount, color, action }) {
+  const { showToast } = useApp();
+  const playbookMap = {
+    'Pace of Play': 'Deploy Rangers',
+    'Staffing': 'Activate Staffing Protocol',
+    'Weather': 'Activate Weather Playbook',
+  };
+  const btnLabel = playbookMap[label] || 'Activate';
   return (
     <div style={{
-      display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px', alignItems: 'start',
-      padding: '8px', borderRadius: '6px', border: '1px solid #e4e4e7', background: '#f8f9fa',
+      display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: '8px', alignItems: 'center',
+      padding: '10px 12px', borderRadius: '6px', border: '1px solid #e4e4e7', background: '#f8f9fa',
     }}>
-      <div style={{ width: 10, height: 10, borderRadius: 999, background: color, marginTop: 6 }} />
+      <div style={{ width: 10, height: 10, borderRadius: 999, background: color, marginTop: 2 }} />
       <div style={{ display: 'grid', gap: '2px' }}>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '14px', color: '#0f0f0f', fontWeight: 600 }}>{label}</span>
@@ -346,6 +354,14 @@ function ActionPath({ label, amount, color, action }) {
         </div>
         <p style={{ fontSize: '12px', color: '#3f3f46', margin: 0 }}>{action}</p>
       </div>
+      <button
+        onClick={() => showToast(btnLabel + ' activated', 'success')}
+        style={{
+          padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+          cursor: 'pointer', border: 'none', background: '#e8772e', color: 'white',
+          whiteSpace: 'nowrap', alignSelf: 'center',
+        }}
+      >{btnLabel}</button>
     </div>
   );
 }
