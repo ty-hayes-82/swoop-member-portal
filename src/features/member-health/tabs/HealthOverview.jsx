@@ -80,87 +80,95 @@ const getActionStatus = (member) => {
 // MemberRow — interactive row with hover state + expand chevron
 function MemberRow({ m, isExpanded, onToggle }) {
   const [hovered, setHovered] = useState(false);
-  const riskColor = m.score < 30 ? theme.colors.urgent : theme.colors.warning;
   const actionStatus = getActionStatus(m);
+
+  const scoreBg = m.score >= 70 ? 'rgba(34,197,94,0.08)' : m.score >= 50 ? 'rgba(234,179,8,0.08)' : m.score >= 30 ? 'rgba(234,88,12,0.08)' : 'rgba(185,28,28,0.08)';
+  const scoreColor = m.score >= 70 ? '#16a34a' : m.score >= 50 ? '#ca8a04' : m.score >= 30 ? '#ea580c' : '#b91c1c';
+  const archetypeLabel = m.archetype ? ('★' + m.archetype) : '';
+  const riskPrimary = summarizeRisk(m.topRisk) || m.topRisk || '';
+  const channel = archetypeChannel[m.archetype] ?? (m.score < 40 ? 'GM call' : 'Concierge touch');
 
   return (
     <>
       <tr
         onClick={onToggle}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseOver={(e) => { e.currentTarget.style.background = '#f5f5ff'; }}
+        onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; }}
         style={{
-          borderTop: `1px solid ${theme.colors.border}`,
+          background: '#fff',
+          borderBottom: '1px solid #f0f0f0',
           cursor: 'pointer',
-          background: hovered ? theme.colors.bgCardHover : 'transparent',
-          transition: 'background 0.12s ease',
+          transition: 'background 0.15s',
         }}
       >
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+        <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
           <MemberLink
             mode="drawer"
             memberId={m.memberId}
             style={{
+              background: 'none',
+              border: 'none',
+              color: '#2563eb',
               fontWeight: 600,
-              color: hovered ? theme.colors.accent : theme.colors.textPrimary,
-              textDecoration: hovered ? 'underline' : 'none',
-              textDecorationColor: `${theme.colors.accent}50`,
-              transition: 'color 0.12s ease',
+              fontSize: '13px',
+              cursor: 'pointer',
+              padding: 0,
+              textAlign: 'left',
+              textDecoration: 'none',
             }}
           >
             {m.name}
           </MemberLink>
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-          <span
-            title="Composite health score (0–100) blending tee sheet activity, F&B spend, complaint history, email engagement, and tenure length. Lower scores = higher churn risk."
-            style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: riskColor }}
-          >{m.score}</span>
+        <td style={{ padding: '10px 8px', verticalAlign: 'middle', textAlign: 'center' }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: '32px',
+            padding: '3px 8px',
+            borderRadius: '8px',
+            background: scoreBg,
+            color: scoreColor,
+            fontWeight: 700,
+            fontSize: '13px',
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+            title="Composite health score (0-100)"
+          >
+            {m.score}
+          </span>
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-          <ArchetypeBadge archetype={m.archetype} size="xs" />
+        <td style={{ padding: '10px 8px', verticalAlign: 'middle' }}>
+          <span style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap' }}>
+            {archetypeLabel}
+          </span>
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, maxWidth: 260 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{m.topRisk}</span>
+        <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span style={{ color: '#3f3f46', fontSize: '12px', lineHeight: 1.5 }}>
+              {riskPrimary}
+            </span>
             {m.score < 50 && (
-              <span style={{ display: 'inline-flex', gap: '4px', flexShrink: 0 }}>
-                {m.topRisk?.toLowerCase().includes('round') || m.topRisk?.toLowerCase().includes('visit') || m.topRisk?.toLowerCase().includes('golf') || m.score < 35 ? (
-                  <span title="Rounds declining" style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: theme.colors.urgent + '20', color: theme.colors.urgent, fontWeight: 700 }}>Rounds ↓</span>
-                ) : null}
-                {m.topRisk?.toLowerCase().includes('dining') || m.topRisk?.toLowerCase().includes('f&b') || m.topRisk?.toLowerCase().includes('spend') || m.score < 40 ? (
-                  <span title="Dining declining" style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: theme.colors.warning + '20', color: theme.colors.warning, fontWeight: 700 }}>Dining ↓</span>
-                ) : null}
-                {m.topRisk?.toLowerCase().includes('email') || m.topRisk?.toLowerCase().includes('engagement') || m.topRisk?.toLowerCase().includes('interaction') ? (
-                  <span title="Email engagement declining" style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: theme.colors.accent + '20', color: theme.colors.accent, fontWeight: 700 }}>Email ↓</span>
-                ) : null}
-              </span>
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                {(m.topRisk?.toLowerCase().includes('round') || m.topRisk?.toLowerCase().includes('visit') || m.topRisk?.toLowerCase().includes('golf') || m.score < 35) && (
+                  <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(185,28,28,0.08)', color: '#b91c1c', fontWeight: 600, whiteSpace: 'nowrap' }}>Rounds ↓</span>
+                )}
+                {(m.topRisk?.toLowerCase().includes('dining') || m.topRisk?.toLowerCase().includes('f&b') || m.topRisk?.toLowerCase().includes('spend') || m.score < 40) && (
+                  <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(180,83,9,0.08)', color: '#b45309', fontWeight: 600, whiteSpace: 'nowrap' }}>Dining ↓</span>
+                )}
+                {(m.topRisk?.toLowerCase().includes('email') || m.topRisk?.toLowerCase().includes('engagement') || m.topRisk?.toLowerCase().includes('interaction')) && (
+                  <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(37,99,235,0.08)', color: '#2563eb', fontWeight: 600, whiteSpace: 'nowrap' }}>Email ↓</span>
+                )}
+              </div>
             )}
-            <span style={{
-              color: isExpanded ? theme.colors.accent : theme.colors.textMuted,
-              flexShrink: 0, fontSize: '14px', fontWeight: 600,
-              transition: 'transform 0.15s ease, color 0.12s ease',
-              display: 'inline-block',
-              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-            }}>›</span>
           </div>
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-          <span
-            title={actionStatus.description}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '2px 10px',
-              borderRadius: 999,
-              fontSize: theme.fontSize.xs,
-              fontWeight: 600,
-              color: actionStatus.color,
-              background: actionStatus.background,
-            }}
-          >
-            {actionStatus.label}
-          </span>
+        <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: '#1d4ed8' }}>{channel}</span>
+            <span style={{ fontSize: '11px', color: '#6b7280', lineHeight: 1.3 }}>{riskPrimary}</span>
+          </div>
         </td>
       </tr>
       {isExpanded && (
