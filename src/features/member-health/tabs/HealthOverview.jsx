@@ -178,125 +178,102 @@ function MemberRow({ m, isExpanded, onToggle }) {
 // Churn Anatomy — average decay sequence with timing data
 function ChurnDecaySequence() {
   const stages = [
-    { domain: 'Email', icon: '✉', label: 'Email engagement drops', avgWeeks: 0, detail: 'Open rates fall below 15%. First detectable signal.', color: theme.colors.accent },
-    { domain: 'Golf', icon: '⛳', label: 'Round frequency declines', avgWeeks: 3, detail: 'From 3+ rounds/month to <1. Cancellations rise.', color: theme.colors.success },
-    { domain: 'Dining', icon: '🍽', label: 'F&B visits cease', avgWeeks: 5, detail: 'Post-round dining stops. Grill Room visits drop to zero.', color: theme.colors.warning },
-    { domain: 'Events', icon: '🎉', label: 'Event participation ends', avgWeeks: 6, detail: 'No RSVPs, no attendance. Social ties severed.', color: theme.colors.info || theme.colors.accent },
-    { domain: 'Resign', icon: '🚪', label: 'Resignation submitted', avgWeeks: 8, detail: 'Average 6–8 weeks from first email decay signal.', color: theme.colors.urgent },
+    { domain: 'Email', icon: '\u2709\uFE0F', weeks: 0, detail: 'Open rates fall below 15%. First detectable signal.', border: '#f59e0b', shadow: 'rgba(245,158,11,0.2)' },
+    { domain: 'Golf', icon: '\u26f3', weeks: 3, detail: 'From 3+ rounds/month to <1. Cancellations rise.', border: '#ea580c', shadow: 'rgba(234,88,12,0.2)' },
+    { domain: 'Dining', icon: '\U0001f37d\uFE0F', weeks: 5, detail: 'Post-round dining stops. Grill Room visits drop to zero.', border: '#dc2626', shadow: 'rgba(220,38,38,0.2)' },
+    { domain: 'Events', icon: '\U0001f389', weeks: 6, detail: 'No RSVPs, no attendance. Social ties severed.', border: '#b91c1c', shadow: 'rgba(185,28,28,0.2)' },
+    { domain: 'Resign', icon: '\U0001f6aa', weeks: 8, detail: 'Average 6\u20138 weeks from first email decay signal.', border: '#7f1d1d', shadow: 'rgba(127,29,29,0.3)', filled: true },
   ];
-
-  const totalWeeks = stages[stages.length - 1].avgWeeks;
 
   return (
     <div style={{
-      background: theme.colors.bgCard,
-      borderRadius: theme.radius.lg,
-      border: '1px solid ' + theme.colors.border,
-      padding: theme.spacing.lg,
-      boxShadow: theme.shadow.sm,
+      background: '#ffffff',
+      borderRadius: '16px',
+      border: '1px solid #e4e4e7',
+      padding: '24px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
         <div>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.urgent, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>
             Churn Anatomy
           </div>
-          <h3 style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary, margin: 0, lineHeight: 1.3 }}>
+          <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#0f0f0f', margin: 0, lineHeight: 1.3 }}>
             The Resignation Sequence
           </h3>
-          <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
+          <p style={{ fontSize: '12px', color: '#71717a', margin: '6px 0 0' }}>
             Average decay timeline from first signal to resignation. Based on 11 resignations over the past 12 months.
           </p>
         </div>
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontSize: '28px', fontWeight: 700, color: theme.colors.urgent, fontFamily: theme.fonts.mono }}>6–8</div>
-          <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>weeks to act</div>
+        <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '24px' }}>
+          <div style={{ fontSize: '32px', fontWeight: 800, color: '#b91c1c', fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}>6–8</div>
+          <div style={{ fontSize: '10px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px' }}>weeks to act</div>
         </div>
       </div>
 
-      {/* Timeline visualization */}
-      <div style={{ position: 'relative', padding: '16px 0 8px' }}>
-        {/* Progress bar background */}
-        <div style={{ position: 'absolute', top: '28px', left: '20px', right: '20px', height: '4px', background: theme.colors.border, borderRadius: '2px' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', background: 'linear-gradient(90deg, ' + theme.colors.accent + ', ' + theme.colors.warning + ', ' + theme.colors.urgent + ')', borderRadius: '2px', opacity: 0.6 }} />
+      {/* Timeline */}
+      <div style={{ position: 'relative', padding: 0 }}>
+        {/* Track line */}
+        <div style={{ position: 'absolute', top: '24px', left: '48px', right: '48px', height: '3px', background: '#e4e4e7', borderRadius: '2px' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', background: 'linear-gradient(90deg, #f9a825, #ef6c00, #c62828)', borderRadius: '2px' }} />
         </div>
 
-        {/* Stage nodes */}
+        {/* Steps */}
         <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
-          {stages.map((stage, i) => (
+          {stages.map((stage) => (
             <div key={stage.domain} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative' }}>
-              {/* Node circle */}
               <div style={{
-                width: 32, height: 32, borderRadius: '50%',
-                background: stage.color + '18',
-                border: '2.5px solid ' + stage.color,
+                width: 48, height: 48, borderRadius: '50%',
+                background: stage.filled ? stage.border : '#fff',
+                border: `3px solid ${stage.border}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '14px', zIndex: 1, position: 'relative',
+                fontSize: '20px', zIndex: 1,
+                boxShadow: `0 2px 8px ${stage.shadow}`,
               }}>
-                {stage.icon}
+                {stage.filled
+                  ? <span style={{ filter: 'brightness(0) invert(1)', fontSize: '20px' }}>{stage.icon}</span>
+                  : stage.icon
+                }
               </div>
-
-              {/* Week label */}
-              <div style={{
-                fontSize: '11px', fontWeight: 700, color: stage.color,
-                fontFamily: theme.fonts.mono, marginTop: '8px',
-              }}>
-                {stage.avgWeeks === 0 ? 'Week 0' : 'Week ' + stage.avgWeeks}
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', fontWeight: 700, color: stage.border, marginTop: '10px' }}>
+                Week {stage.weeks}
               </div>
-
-              {/* Domain label */}
-              <div style={{
-                fontSize: theme.fontSize.xs, fontWeight: 600,
-                color: theme.colors.textPrimary, marginTop: '4px', textAlign: 'center',
-              }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#18181b', marginTop: '4px' }}>
                 {stage.domain}
               </div>
-
-              {/* Detail text */}
-              <div style={{
-                fontSize: '10px', color: theme.colors.textMuted,
-                textAlign: 'center', marginTop: '2px', lineHeight: 1.4,
-                maxWidth: '120px',
-              }}>
+              <div style={{ fontSize: '10px', color: '#71717a', textAlign: 'center', marginTop: '3px', lineHeight: 1.4, maxWidth: '120px' }}>
                 {stage.detail}
               </div>
-
-              {/* Arrow between nodes */}
-              {i < stages.length - 1 && (
-                <div style={{
-                  position: 'absolute', top: '12px', right: '-50%',
-                  fontSize: '14px', color: theme.colors.textMuted + '60',
-                  zIndex: 0,
-                }}>
-                  →
-                </div>
-              )}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Intervention window callout */}
+      {/* Callout */}
       <div style={{
-        marginTop: theme.spacing.lg,
-        padding: theme.spacing.md,
-        background: theme.colors.success + '0A',
-        border: '1px solid ' + theme.colors.success + '30',
-        borderRadius: theme.radius.md,
-        display: 'flex', alignItems: 'center', gap: theme.spacing.md,
+        marginTop: '28px',
+        padding: '16px 20px',
+        background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02))',
+        border: '1px solid rgba(34,197,94,0.2)',
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '14px',
       }}>
         <div style={{
           width: 40, height: 40, borderRadius: '50%',
-          background: theme.colors.success + '18',
+          background: 'rgba(34,197,94,0.12)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '18px', flexShrink: 0,
         }}>
-          ✅
+          {'\u2705'}
         </div>
         <div>
-          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.success, marginBottom: '2px' }}>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: '#16a34a', marginBottom: '4px' }}>
             Swoop detects at Week 0 — you have 6–8 weeks to intervene
           </div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
+          <div style={{ fontSize: '12px', color: '#3f3f46', lineHeight: 1.6 }}>
             In 9 of 11 resignations this year, email decay was the first domino. Swoop monitors this signal daily and alerts you before golf or dining metrics even begin to decline. The GM personal call at Week 1 has a 95% retention success rate.
           </div>
         </div>
