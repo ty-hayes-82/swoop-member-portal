@@ -26,6 +26,7 @@ import BoardReport from "@/features/board-report/BoardReport.jsx";
 import ExperienceInsights from '@/features/experience-insights/ExperienceInsights.jsx';
 import { OutreachPlaybooks } from '@/features/outreach-playbooks';
 import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
+import { StoryboardFlows } from '@/features/storyboard-flows';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -47,6 +48,7 @@ const ROUTES = {
   'experience-insights': ExperienceInsights,
   'outreach-playbooks': OutreachPlaybooks,
   'playbooks': PlaybooksPage,
+  'storyboard-flows': StoryboardFlows,
   'data-model': DataModelPage,
   'member-profile': MemberProfilePage,
   landing: LandingRedirect,

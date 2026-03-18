@@ -121,6 +121,15 @@ export const navItems = [
   // PROVE IT - Board-Ready Evidence
   // ============================================
   {
+    key: 'storyboard-flows',
+    label: 'Storyboard Flows',
+    section: 'PROVE IT',
+    icon: '\u26A1',
+    color: theme.colors.navOperations,
+    subtitle: 'Persona-driven intelligence journeys from signal to action to proof.',
+    sourceSystems: ['All Systems'],
+  },
+  {
     key: 'board-report',
     label: 'Board Report',
     section: 'PROVE IT',
