@@ -5,6 +5,8 @@ import { theme } from '@/config/theme';
 import QueueTab from './tabs/QueueTab';
 import PredictionsTab from './tabs/PredictionsTab';
 import IntelligenceTab from './tabs/IntelligenceTab';
+import OperationsTab from './tabs/OperationsTab';
+import ReportingTab from './tabs/ReportingTab';
 import { useNavigation } from '@/context/NavigationContext';
 import PipelineSnapshot from '@/features/daily-briefing/PipelineSnapshot.jsx';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
@@ -16,11 +18,14 @@ import {
   getCancellationSummary,
   getWaitlistInsight,
 } from '@/services/waitlistService';
+import { getConfirmationSummary, getFillReport } from '@/services/teeSheetOpsService';
 
 const TABS = [
   { key: 'queue', label: 'Member Queue' },
   { key: 'predictions', label: 'Cancellation Risk' },
   { key: 'intelligence', label: 'Demand Intelligence' },
+  { key: 'operations', label: 'Confirmation & Fills' },
+  { key: 'reporting', label: 'Fill Reporting' },
 ];
 
 const ROUTE_LABEL = 'Tee Sheet & Demand';
@@ -53,12 +58,21 @@ export default function WaitlistDemand() {
     total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: 'Insufficient data',
   };
 
+  const confirmSummary = getConfirmationSummary();
+  const fillReport = getFillReport();
+
   const tabsWithBadges = TABS.map((tab) => {
     if (tab.key === 'queue' && waitlistSummary?.highPriority > 0) {
       return { ...tab, label: `${tab.label} · ${waitlistSummary.highPriority} priority` };
     }
     if (tab.key === 'predictions' && cancellationSummary?.highRisk > 0) {
       return { ...tab, label: `${tab.label} · ${cancellationSummary.highRisk} high-risk` };
+    }
+    if (tab.key === 'operations' && (confirmSummary.pending + confirmSummary.contacted) > 0) {
+      return { ...tab, label: `${tab.label} · ${confirmSummary.pending + confirmSummary.contacted} pending` };
+    }
+    if (tab.key === 'reporting' && fillReport.totalFills > 0) {
+      return { ...tab, label: `${tab.label} · ${fillReport.totalFills} fills` };
     }
     return tab;
   });
@@ -67,6 +81,8 @@ export default function WaitlistDemand() {
     queue: <QueueTab />,
     predictions: <PredictionsTab />,
     intelligence: <IntelligenceTab />,
+    operations: <OperationsTab />,
+    reporting: <ReportingTab />,
   };
 
   return (

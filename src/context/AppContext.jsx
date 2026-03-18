@@ -1,5 +1,14 @@
 import { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { getAgents, getAllActions, getPendingActions, approveAction as approveAgentServiceAction, dismissAction as dismissAgentServiceAction } from '@/services/agentService';
+import {
+  getConfirmations as getTSOConfirmations,
+  updateConfirmation as updateTSOConfirmation,
+  getReassignments as getTSOReassignments,
+  createReassignment as createTSOReassignment,
+  updateReassignment as updateTSOReassignment,
+  getWaitlistConfig as getTSOConfig,
+  updateWaitlistConfig as updateTSOConfig,
+} from '@/services/teeSheetOpsService';
 import { useToast } from '@/components/ui/Toast.jsx';
 
 const PLAYBOOK_DEFS = {
@@ -41,6 +50,11 @@ const initialState = {
   pendingCount: getPendingActions().length,
   agentStatuses: defaultStatuses,
   agentConfigs: {},
+  teeSheetOps: {
+    confirmations: getTSOConfirmations(),
+    reassignments: getTSOReassignments(),
+    config: getTSOConfig(),
+  },
 };
 
 function computePendingCount(inbox) {
@@ -119,6 +133,46 @@ function reducer(state, action) {
         ...state,
         agentConfigs: { ...state.agentConfigs, [action.id]: action.config },
       };
+    case 'UPDATE_CONFIRMATION': {
+      const updated = updateTSOConfirmation(action.id, action.updates);
+      return {
+        ...state,
+        teeSheetOps: {
+          ...state.teeSheetOps,
+          confirmations: getTSOConfirmations(),
+        },
+      };
+    }
+    case 'CREATE_REASSIGNMENT': {
+      const newRa = createTSOReassignment(action.data);
+      return {
+        ...state,
+        teeSheetOps: {
+          ...state.teeSheetOps,
+          reassignments: getTSOReassignments(),
+        },
+      };
+    }
+    case 'UPDATE_REASSIGNMENT': {
+      const updatedRa = updateTSOReassignment(action.id, action.updates);
+      return {
+        ...state,
+        teeSheetOps: {
+          ...state.teeSheetOps,
+          reassignments: getTSOReassignments(),
+        },
+      };
+    }
+    case 'UPDATE_WAITLIST_CONFIG': {
+      const newConfig = updateTSOConfig(action.updates);
+      return {
+        ...state,
+        teeSheetOps: {
+          ...state.teeSheetOps,
+          config: newConfig,
+        },
+      };
+    }
     default:
       return state;
   }
@@ -204,6 +258,11 @@ export function AppProvider({ children }) {
         getAgentConfig: (id) => state.agentConfigs[id] ?? null,
         pendingAgentCount: state.pendingCount,
         getAllActions: () => state.inbox,
+        teeSheetOps: state.teeSheetOps,
+        updateConfirmation: (id, updates) => dispatch({ type: 'UPDATE_CONFIRMATION', id, updates }),
+        createReassignment: (data) => dispatch({ type: 'CREATE_REASSIGNMENT', data }),
+        updateReassignment: (id, updates) => dispatch({ type: 'UPDATE_REASSIGNMENT', id, updates }),
+        updateWaitlistConfig: (updates) => dispatch({ type: 'UPDATE_WAITLIST_CONFIG', updates }),
         showToast,
       }}
     >

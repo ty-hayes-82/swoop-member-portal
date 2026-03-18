@@ -22,6 +22,7 @@ export default function CancellationRiskRow({
   daysUntilCancellation,
   lastActivityDate,
   trend = [],
+  actions,
 }) {
   const risk = probabilityStyle(cancelProbability);
   const probabilityPct = Math.round((cancelProbability ?? 0) * 100);
@@ -72,6 +73,7 @@ export default function CancellationRiskRow({
           </ResponsiveContainer>
         )}
       </td>
+      {actions}
     </tr>
   );
 }

@@ -1,9 +1,11 @@
-import { useMemo } from 'react';
-import { Badge, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
+import { useMemo, useState } from 'react';
+import { Badge, Btn, SoWhatCallout, Sparkline, StatCard } from '@/components/ui';
 import CancellationRiskRow from '@/features/pipeline/components/CancellationRiskRow';
 import MemberLink from '@/components/MemberLink.jsx';
 import { theme } from '@/config/theme';
-import { getCancellationPredictions, getCancellationSummary } from '@/services/waitlistService';
+import { useApp } from '@/context/AppContext';
+import { getCancellationPredictions, getCancellationSummary, getWaitlistQueue } from '@/services/waitlistService';
+import { createReassignment } from '@/services/teeSheetOpsService';
 
 const FORECAST_WINDOWS = [
   { key: '30d', label: '30 Days', multiplier: 1.0, weight: 0.52 },
@@ -47,10 +49,15 @@ function buildCountdown(index) {
 }
 
 export default function PredictionsTab() {
+  const { showToast, createReassignment: dispatchCreateRa } = useApp();
+  const [expandedId, setExpandedId] = useState(null);
+
   const predictions = useMemo(
     () => [...getCancellationPredictions()].sort((a, b) => b.cancelProbability - a.cancelProbability),
     [],
   );
+
+  const queue = useMemo(() => getWaitlistQueue(), []);
 
   const summary = useMemo(() => {
     const base = getCancellationSummary();
@@ -132,7 +139,7 @@ export default function PredictionsTab() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: theme.colors.bg }}>
-                {['Member', 'Cancel Risk', 'Countdown', 'Last Activity', 'Trend'].map((heading) => (
+                {['Member', 'Cancel Risk', 'Countdown', 'Last Activity', 'Trend', 'Actions'].map((heading) => (
                   <th
                     key={heading}
                     style={{
@@ -160,6 +167,63 @@ export default function PredictionsTab() {
                   daysUntilCancellation={buildCountdown(index)}
                   lastActivityDate={prediction.drivers?.[0] ?? 'Unknown'}
                   trend={buildTrend(prediction)}
+                  actions={
+                    <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                        <Btn variant="ghost" size="xs"
+                          onClick={() => showToast(`Flagged ${prediction.memberName} for GM follow-up`, 'success')}>
+                          Flag GM
+                        </Btn>
+                        <Btn variant="ghost" size="xs"
+                          onClick={() => setExpandedId(expandedId === prediction.bookingId ? null : prediction.bookingId)}>
+                          Outreach
+                        </Btn>
+                        {prediction.cancelProbability >= 0.5 && (
+                          <Btn variant="ghost" size="xs" accent={theme.colors.warning}
+                            onClick={() => {
+                              const candidate = queue.find((m) => m.memberId !== prediction.memberId) ?? queue[0];
+                              if (candidate) {
+                                dispatchCreateRa({
+                                  sourceBookingId: prediction.bookingId,
+                                  sourceSlot: prediction.teeTime,
+                                  sourceMemberId: prediction.memberId,
+                                  sourceMemberName: prediction.memberName,
+                                  cancelReason: 'Pre-staged from cancellation risk tab',
+                                  recommendedFillMemberId: candidate.memberId,
+                                  recommendedFillMemberName: candidate.memberName,
+                                  recommendedFillHealthScore: candidate.healthScore,
+                                  recommendedFillRiskLevel: candidate.riskLevel,
+                                  recommendedFillDuesAtRisk: candidate.memberValueAnnual,
+                                  recommendedFillDaysWaiting: candidate.daysWaiting,
+                                  retentionRationale: `Health ${candidate.healthScore}, ${candidate.riskLevel}, $${(candidate.memberValueAnnual ?? 0).toLocaleString()}/yr dues.`,
+                                });
+                                showToast(`Pre-staged ${prediction.teeTime} for re-assignment if ${prediction.memberName} cancels`, 'warning');
+                              }
+                            }}>
+                            Pre-Stage
+                          </Btn>
+                        )}
+                      </div>
+                      {expandedId === prediction.bookingId && (
+                        <div style={{
+                          marginTop: 6,
+                          padding: '8px 10px',
+                          background: `${theme.colors.info}08`,
+                          border: `1px solid ${theme.colors.info}30`,
+                          borderRadius: theme.radius.sm,
+                          fontSize: 11,
+                          lineHeight: 1.5,
+                          color: theme.colors.textSecondary,
+                        }}>
+                          <div style={{ fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 4 }}>Talking Points</div>
+                          <div style={{ marginBottom: 4 }}>{prediction.recommendedAction}</div>
+                          <div style={{ color: theme.colors.textMuted }}>
+                            Drivers: {(prediction.drivers ?? []).join(' · ')}
+                          </div>
+                        </div>
+                      )}
+                    </td>
+                  }
                 />
               ))}
             </tbody>

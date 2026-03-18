@@ -79,4 +79,26 @@ export const getWaitlistInsight = () => {
     'Swoop fills slots with the right members first — and proves the retention impact of every slot.';
 };
 
+export const getConfirmationCandidates = () => {
+  const preds = getCancellationPredictions();
+  return preds
+    .filter((p) => p.cancelProbability >= 0.4)
+    .map((p) => ({
+      ...p,
+      outreachWindow: p.cancelProbability >= 0.7 ? '24h' : p.cancelProbability >= 0.55 ? '48h' : '72h',
+      urgency: p.cancelProbability >= 0.7 ? 'high' : p.cancelProbability >= 0.55 ? 'medium' : 'low',
+    }));
+};
+
+export const getMembersForSlot = (slotPattern) => {
+  const queue = getWaitlistQueue();
+  if (!slotPattern) return queue;
+  const pattern = slotPattern.toLowerCase();
+  return queue.filter((m) => {
+    const requested = (m.requestedSlot ?? '').toLowerCase();
+    const alts = (m.alternatesAccepted ?? []).map((a) => a.toLowerCase());
+    return requested.includes(pattern) || alts.some((a) => a.includes(pattern));
+  });
+};
+
 export const sourceSystems = ['Tee Sheet', 'Member CRM', 'POS', 'Weather API'];

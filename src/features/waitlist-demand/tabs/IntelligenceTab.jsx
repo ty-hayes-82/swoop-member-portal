@@ -1,8 +1,12 @@
+import { useState, useMemo } from 'react';
 import TrendChart from '@/components/charts/TrendChart';
-import { Badge, SoWhatCallout, Sparkline, StatCard, InfoTooltip } from '@/components/ui';
-import { demandHeatmap } from '@/data/pipeline';
+import { Badge, Btn, SoWhatCallout, Sparkline, StatCard, InfoTooltip } from '@/components/ui';
+import MemberLink from '@/components/MemberLink.jsx';
+import { demandHeatmap, memberWaitlistEntries } from '@/data/pipeline';
 import { revenuePerSlot } from '@/data/revenue';
 import { getDemandInsight } from '@/services/waitlistService';
+import { getDemandSteeringStats, recordRedirection } from '@/services/teeSheetOpsService';
+import { useApp } from '@/context/AppContext';
 import { theme } from '@/config/theme';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -68,10 +72,30 @@ function estimateRevenueOpportunity(unmetRounds) {
   return unmetRounds * (revenuePerSlot.retentionPriority - revenuePerSlot.reactive);
 }
 
+// Identify underutilized alternative slots for demand steering
+function findAlternatives(heatmap) {
+  return heatmap
+    .filter((c) => c.level === 'underutilized' || (c.level === 'normal' && c.fillRate < 0.75))
+    .sort((a, b) => a.fillRate - b.fillRate)
+    .slice(0, 5);
+}
+
 export default function IntelligenceTab() {
+  const { showToast } = useApp();
+  const [steeringOpen, setSteeringOpen] = useState(false);
+  const [steeringStats, setSteeringStats] = useState(() => getDemandSteeringStats());
+
   const heatmap = demandHeatmap;
   const { unmetWeekendRounds, weekendFill, weekdayFill, peakCell } = summarizeDemand(heatmap);
   const opportunity = estimateRevenueOpportunity(unmetWeekendRounds);
+
+  const alternatives = useMemo(() => findAlternatives(heatmap), [heatmap]);
+  const oversubscribedMembers = useMemo(() =>
+    memberWaitlistEntries.filter((m) => {
+      const slot = (m.requestedSlot ?? '').toLowerCase();
+      return slot.includes('sat') && (slot.includes('7:00') || slot.includes('7:08') || slot.includes('7:16') || slot.includes('8:00'));
+    }),
+  []);
 
   const stats = [
     {
@@ -227,8 +251,119 @@ export default function IntelligenceTab() {
         />
       </div>
 
+      {/* Demand Steering Actions */}
+      <div style={{
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: theme.radius.md,
+        background: theme.colors.bgCard,
+        boxShadow: theme.shadow.sm,
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          padding: theme.spacing.md,
+          borderBottom: `1px solid ${theme.colors.border}`,
+          background: theme.colors.bgDeep,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <div>
+            <div style={{ fontWeight: 700, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm, display: 'flex', alignItems: 'center', gap: 6 }}>
+              Demand Steering
+              <InfoTooltip text="Generate targeted outreach to members waiting for oversubscribed slots, suggesting underutilized alternatives with a personalized pitch." />
+            </div>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+              Redirect overflow demand into underused weekday capacity.
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ fontSize: 11, color: theme.colors.textMuted, textAlign: 'right' }}>
+              <span style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.info }}>{steeringStats.redirectionsSent}</span> sent
+              <span style={{ margin: '0 4px', opacity: 0.4 }}>·</span>
+              <span style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.success }}>{steeringStats.redirectionsConverted}</span> converted
+            </div>
+            <Btn variant="primary" size="sm" accent={theme.colors.info}
+              onClick={() => setSteeringOpen(!steeringOpen)}>
+              {steeringOpen ? 'Close List' : 'Generate Outreach List'}
+            </Btn>
+          </div>
+        </div>
+
+        {steeringOpen && (
+          <div style={{ padding: theme.spacing.md }}>
+            {/* Column headers */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1.2fr 1fr 1fr 100px',
+              gap: theme.spacing.sm,
+              padding: '0 8px 8px',
+              fontSize: 11,
+              fontWeight: 600,
+              color: theme.colors.textMuted,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}>
+              <span>Member</span>
+              <span>Current Request</span>
+              <span>Suggested Alternative</span>
+              <span style={{ textAlign: 'right' }}>Action</span>
+            </div>
+
+            {oversubscribedMembers.map((member, i) => {
+              const alt = alternatives[i % alternatives.length];
+              return (
+                <div key={member.memberId} style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1.2fr 1fr 1fr 100px',
+                  gap: theme.spacing.sm,
+                  alignItems: 'center',
+                  padding: '8px',
+                  border: `1px solid ${theme.colors.border}`,
+                  borderRadius: theme.radius.sm,
+                  marginBottom: 4,
+                }}>
+                  <div>
+                    <MemberLink memberId={member.memberId} style={{ fontWeight: 600, fontSize: theme.fontSize.xs }}>
+                      {member.memberName}
+                    </MemberLink>
+                    <div style={{ fontSize: 11, color: theme.colors.textMuted }}>
+                      Health {member.healthScore} · {member.retentionPriority}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 11, color: theme.colors.textSecondary }}>
+                    {member.requestedSlot}
+                  </div>
+                  <div style={{ fontSize: 11, color: theme.colors.info, fontWeight: 600 }}>
+                    {alt ? `${alt.day} ${alt.block}` : 'Thu 7–8 AM'}
+                    <div style={{ fontSize: 10, color: theme.colors.textMuted, fontWeight: 400 }}>
+                      {alt ? `${Math.round(alt.fillRate * 100)}% fill rate` : '58% fill rate'}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <Btn variant="ghost" size="xs"
+                      onClick={() => {
+                        const updated = recordRedirection();
+                        setSteeringStats(updated);
+                        showToast(`Redirect suggestion sent to ${member.memberName}`, 'success');
+                      }}>
+                      Send Redirect
+                    </Btn>
+                  </div>
+                </div>
+              );
+            })}
+
+            {oversubscribedMembers.length === 0 && (
+              <div style={{ padding: theme.spacing.md, textAlign: 'center', color: theme.colors.textMuted, fontSize: theme.fontSize.xs }}>
+                No members currently waiting for oversubscribed slots.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       <SoWhatCallout variant="opportunity">
-        <strong>GM decision:</strong> shift overflow messaging into Tuesday-Thursday mornings and reserve the next weekend
+        <strong>GM decision:</strong> shift overflow messaging into Tuesday–Thursday mornings and reserve the next weekend
         cancellation for high-priority members. That captures dormant weekday capacity while preserving peak-weekend
         experience and improving per-slot yield. {getDemandInsight()}
       </SoWhatCallout>

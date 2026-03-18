@@ -7,6 +7,7 @@ import {
   getWaitlistInsight,
   getWaitlistDemandSparkline,
 } from '@/services/waitlistService';
+import { getWaitlistConfig, updateWaitlistConfig } from '@/services/teeSheetOpsService';
 import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
 
@@ -96,7 +97,7 @@ function QueuePlaybookBanner({ showToast }) {
 }
 
 export default function QueueTab() {
-  const { showToast } = useApp();
+  const { showToast, createReassignment } = useApp();
   const queue = getWaitlistQueue();
   const summary = getWaitlistSummary();
   const stats = buildQueueStats(summary, queue);
@@ -105,6 +106,8 @@ export default function QueueTab() {
   const [selectedSlot, setSelectedSlot] = useState(SLOT_WINDOWS[0]);
   const [sortKey, setSortKey] = useState('priority');
   const [sortDir, setSortDir] = useState('desc');
+  const [showConfig, setShowConfig] = useState(false);
+  const [config, setConfig] = useState(() => getWaitlistConfig());
 
   const sortedQueue = useMemo(() => {
     const score = {
@@ -233,9 +236,106 @@ export default function QueueTab() {
 
         <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.sm }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <strong style={{ color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>Queue Management</strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <strong style={{ color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>Queue Management</strong>
+              <button
+                onClick={() => setShowConfig(!showConfig)}
+                style={{
+                  width: 24, height: 24, borderRadius: 6, border: `1px solid ${theme.colors.border}`,
+                  background: showConfig ? `${theme.colors.info}12` : 'transparent',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, color: theme.colors.textMuted,
+                }}
+                title="Queue Configuration"
+              >⚙</button>
+            </div>
             <Badge text={selectedMember?.retentionPriority === 'HIGH' ? 'Priority' : 'Standard'} variant="effort" size="sm" />
           </div>
+
+          {/* Configuration panel */}
+          {showConfig && (
+            <div style={{
+              background: theme.colors.bgDeep,
+              border: `1px solid ${theme.colors.border}`,
+              borderRadius: theme.radius.sm,
+              padding: theme.spacing.sm,
+              marginBottom: theme.spacing.sm,
+              fontSize: theme.fontSize.xs,
+            }}>
+              <div style={{ fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 8 }}>Waitlist Configuration</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div>
+                  <div style={{ color: theme.colors.textMuted, marginBottom: 4 }}>Hold time before cascade</div>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {[15, 30, 60].map((min) => (
+                      <button key={min}
+                        onClick={() => { const updated = { ...config, holdTimeMinutes: min }; setConfig(updated); updateWaitlistConfig(updated); }}
+                        style={{
+                          padding: '3px 8px', borderRadius: 4, fontSize: 11, cursor: 'pointer',
+                          border: `1px solid ${config.holdTimeMinutes === min ? theme.colors.info : theme.colors.border}`,
+                          background: config.holdTimeMinutes === min ? `${theme.colors.info}12` : 'transparent',
+                          color: config.holdTimeMinutes === min ? theme.colors.info : theme.colors.textSecondary,
+                        }}>
+                        {min}m
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: theme.colors.textMuted, marginBottom: 4 }}>Max offers before deprioritize</div>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button key={n}
+                        onClick={() => { const updated = { ...config, maxOffersBeforeDeprioritize: n }; setConfig(updated); updateWaitlistConfig(updated); }}
+                        style={{
+                          padding: '3px 8px', borderRadius: 4, fontSize: 11, cursor: 'pointer',
+                          border: `1px solid ${config.maxOffersBeforeDeprioritize === n ? theme.colors.info : theme.colors.border}`,
+                          background: config.maxOffersBeforeDeprioritize === n ? `${theme.colors.info}12` : 'transparent',
+                          color: config.maxOffersBeforeDeprioritize === n ? theme.colors.info : theme.colors.textSecondary,
+                        }}>
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: theme.colors.textMuted, marginBottom: 4 }}>Notifications per member/day</div>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button key={n}
+                        onClick={() => { const updated = { ...config, notificationLimitPerDay: n }; setConfig(updated); updateWaitlistConfig(updated); }}
+                        style={{
+                          padding: '3px 8px', borderRadius: 4, fontSize: 11, cursor: 'pointer',
+                          border: `1px solid ${config.notificationLimitPerDay === n ? theme.colors.info : theme.colors.border}`,
+                          background: config.notificationLimitPerDay === n ? `${theme.colors.info}12` : 'transparent',
+                          color: config.notificationLimitPerDay === n ? theme.colors.info : theme.colors.textSecondary,
+                        }}>
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: theme.colors.textMuted, marginBottom: 4 }}>Auto-offer threshold</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <input
+                      type="range" min="50" max="100" step="5"
+                      value={Math.round(config.autoOfferThreshold * 100)}
+                      onChange={(e) => {
+                        const updated = { ...config, autoOfferThreshold: Number(e.target.value) / 100 };
+                        setConfig(updated);
+                        updateWaitlistConfig(updated);
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                    <span style={{ fontFamily: theme.fonts.mono, fontSize: 11, color: theme.colors.info, minWidth: 36 }}>
+                      {Math.round(config.autoOfferThreshold * 100)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginBottom: 8 }}>
             Next candidate:{' '}
@@ -273,9 +373,36 @@ export default function QueueTab() {
           </div>
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Btn variant="primary" size="sm" accent={theme.colors.info}>Assign Slot</Btn>
-            <Btn variant="ghost" size="sm">Notify Concierge</Btn>
-            <Btn variant="ghost" size="sm">Escalate to GM</Btn>
+            <Btn variant="primary" size="sm" accent={theme.colors.info}
+              onClick={() => {
+                if (selectedMember) {
+                  createReassignment({
+                    sourceBookingId: `manual_${Date.now()}`,
+                    sourceSlot: selectedSlot,
+                    sourceMemberId: 'manual',
+                    sourceMemberName: 'Manual Assignment',
+                    cancelReason: 'Direct slot assignment from queue',
+                    recommendedFillMemberId: selectedMember.memberId,
+                    recommendedFillMemberName: selectedMember.memberName,
+                    recommendedFillHealthScore: selectedMember.healthScore,
+                    recommendedFillRiskLevel: selectedMember.riskLevel,
+                    recommendedFillDuesAtRisk: selectedMember.memberValueAnnual,
+                    recommendedFillDaysWaiting: selectedMember.daysWaiting,
+                    retentionRationale: `Direct assignment: Health ${selectedMember.healthScore}, ${selectedMember.riskLevel}, $${(selectedMember.memberValueAnnual ?? 0).toLocaleString()}/yr.`,
+                  });
+                  showToast(`${selectedSlot} assigned to ${selectedMember.memberName}`, 'success');
+                }
+              }}>
+              Assign Slot
+            </Btn>
+            <Btn variant="ghost" size="sm"
+              onClick={() => showToast(`Concierge notified for ${selectedMember?.memberName ?? 'member'}`, 'success')}>
+              Notify Concierge
+            </Btn>
+            <Btn variant="ghost" size="sm"
+              onClick={() => showToast(`Escalated to GM for ${selectedMember?.memberName ?? 'member'}`, 'warning')}>
+              Escalate to GM
+            </Btn>
           </div>
         </div>
       </div>
