@@ -12,6 +12,7 @@ const VALID_ROUTES = new Set([
   'data-model',
   'experience-insights',
   'playbooks',
+  'storyboard-flows',
 ]);
 
 function parseHash() {
