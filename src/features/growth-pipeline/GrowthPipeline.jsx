@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from 'react';
 import { Panel, SoWhatCallout, StoryHeadline } from '@/components/ui';
+import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import { getWarmLeads, getPipelineSummary, getConversionInsights, sourceSystems } from '@/services/pipelineService';
 import { theme } from '@/config/theme';
 

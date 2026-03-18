@@ -5,6 +5,7 @@ import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import GrowthPipeline from '@/features/growth-pipeline/GrowthPipeline';
 import FlowLink from '@/components/ui/FlowLink';
+import { industryBenchmarks } from '@/data/benchmarks';
 
 const kpis = [
   { label: 'Members Saved', value: 14, prefix: '', suffix: '', color: 'green' },
@@ -396,6 +397,62 @@ export default function BoardReport() {
             retention and replacement.
           </p>
           <ProgressOverTime />
+        </Panel>
+
+        {/* Competitive Benchmarks */}
+        <Panel>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.white }}>
+            Your Club vs. Industry
+          </h2>
+          <p style={{ fontSize: '12px', color: colors.textMuted, marginBottom: '16px' }}>
+            How your Swoop-powered metrics compare to private club industry averages.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            {Object.values(industryBenchmarks).map((b) => {
+              const isBetter = b.direction === 'lower-better'
+                ? b.yourClub < b.industry
+                : b.yourClub > b.industry;
+              const formatVal = (v) => b.unit === '$' ? `$${(v / 1000).toFixed(0)}K` : b.unit === 'hrs' ? `${v}${b.unit}` : `${v}${b.unit}`;
+              return (
+                <div key={b.label} style={{
+                  background: colors.bg,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '10px',
+                  padding: '14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}>
+                  <div style={{ fontSize: '11px', color: colors.textMuted, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {b.label}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                    <span style={{ fontSize: '22px', fontWeight: 700, fontFamily: theme.fonts.mono, color: isBetter ? colors.green : colors.red }}>
+                      {formatVal(b.yourClub)}
+                    </span>
+                    <span style={{ fontSize: '11px', color: colors.textMuted }}>your club</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '12px', color: colors.textMuted, fontFamily: theme.fonts.mono }}>
+                      {formatVal(b.industry)}
+                    </span>
+                    <span style={{ fontSize: '11px', color: colors.textMuted }}>industry avg</span>
+                  </div>
+                  <div style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: isBetter ? colors.green : colors.red,
+                    background: (isBetter ? colors.green : colors.red) + '18',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    alignSelf: 'flex-start',
+                  }}>
+                    {b.comparison}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </Panel>
         </>
       )}

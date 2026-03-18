@@ -5,11 +5,15 @@ import { theme } from '@/config/theme';
 import {
   touchpointCorrelations,
   touchpointCorrelationsAtRisk,
+  touchpointCorrelationsByArchetype,
   correlationInsights,
+  correlationInsightsByArchetype,
   eventROI,
   complaintLoyaltyStats,
   archetypeSpendGaps,
 } from '@/services/experienceInsightsService';
+import { getArchetypeProfiles } from '@/services/memberService';
+import ArchetypeBadge from '@/components/ui/ArchetypeBadge';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import FlowLink from '@/components/ui/FlowLink';
@@ -61,10 +65,68 @@ function SegmentFilter({ segment, onChange }) {
   );
 }
 
-function CorrelationsTab({ segment }) {
+function ArchetypeFilter({ archetype, onChange }) {
+  const profiles = getArchetypeProfiles();
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: theme.spacing.md }}>
+      <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, fontWeight: 600 }}>Filter by archetype:</span>
+      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+        {profiles.map((p) => {
+          const isActive = archetype === p.archetype;
+          return (
+            <button
+              key={p.archetype}
+              onClick={() => onChange(isActive ? null : p.archetype)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: `1px solid ${isActive ? theme.colors.accent : theme.colors.border}`,
+                background: isActive ? `${theme.colors.accent}12` : 'transparent',
+                cursor: 'pointer',
+                fontSize: 11,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? theme.colors.accent : theme.colors.textSecondary,
+                transition: 'all 0.15s',
+              }}
+            >
+              <ArchetypeBadge archetype={p.archetype} size="xs" />
+              <span>{p.archetype}</span>
+              <span style={{ fontSize: 10, color: theme.colors.textMuted }}>({p.count})</span>
+            </button>
+          );
+        })}
+        {archetype && (
+          <button
+            onClick={() => onChange(null)}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '6px',
+              border: `1px solid ${theme.colors.border}`,
+              background: 'transparent',
+              cursor: 'pointer',
+              fontSize: 11,
+              color: theme.colors.textMuted,
+            }}
+          >
+            Clear ×
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CorrelationsTab({ segment, archetype }) {
+  const insights = archetype && correlationInsightsByArchetype[archetype]
+    ? correlationInsightsByArchetype[archetype]
+    : correlationInsights;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-      {segment !== 'all' && (
+      {(segment !== 'all' || archetype) && (
         <div style={{
           padding: '8px 14px',
           background: theme.colors.accent + '08',
@@ -73,10 +135,10 @@ function CorrelationsTab({ segment }) {
           fontSize: theme.fontSize.xs,
           color: theme.colors.textSecondary,
         }}>
-          Showing correlations for <strong>{segment}</strong> members — some patterns differ from the full population.
+          Showing correlations for <strong>{archetype ?? segment}</strong> members — some patterns differ from the full population.
         </div>
       )}
-      {correlationInsights.map((insight) => (
+      {insights.map((insight) => (
         <div
           key={insight.id}
           style={{
@@ -181,8 +243,10 @@ function CorrelationsTab({ segment }) {
   );
 }
 
-function TouchpointsTab({ segment }) {
-  const source = segment === 'at-risk' ? touchpointCorrelationsAtRisk : touchpointCorrelations;
+function TouchpointsTab({ segment, archetype }) {
+  const source = archetype && touchpointCorrelationsByArchetype[archetype]
+    ? touchpointCorrelationsByArchetype[archetype]
+    : segment === 'at-risk' ? touchpointCorrelationsAtRisk : touchpointCorrelations;
   const sorted = [...source].sort((a, b) => b.retentionImpact - a.retentionImpact);
   const maxImpact = sorted[0]?.retentionImpact ?? 1;
 
@@ -414,11 +478,12 @@ function EventsTab() {
 }
 
 
-function SpendPotentialTab() {
+function SpendPotentialTab({ archetype }) {
   const { showToast } = useApp();
-  const totalUntapped = archetypeSpendGaps.reduce((sum, a) => sum + a.totalUntapped, 0);
-  const totalMembers = archetypeSpendGaps.reduce((sum, a) => sum + a.count, 0);
-  const sorted = [...archetypeSpendGaps].sort((a, b) => b.totalUntapped - a.totalUntapped);
+  const filtered = archetype ? archetypeSpendGaps.filter((a) => a.archetype === archetype) : archetypeSpendGaps;
+  const totalUntapped = filtered.reduce((sum, a) => sum + a.totalUntapped, 0);
+  const totalMembers = filtered.reduce((sum, a) => sum + a.count, 0);
+  const sorted = [...filtered].sort((a, b) => b.totalUntapped - a.totalUntapped);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
@@ -531,6 +596,7 @@ function SpendPotentialTab() {
 export default function ExperienceInsights() {
   const [activeTab, setActiveTab] = useState('correlations');
   const [segment, setSegment] = useState('all');
+  const [archetype, setArchetype] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -542,12 +608,17 @@ export default function ExperienceInsights() {
     return <SkeletonGrid cards={6} columns={2} cardHeight={140} />;
   }
 
+  const archetypeCount = archetype
+    ? (getArchetypeProfiles().find((p) => p.archetype === archetype)?.count ?? 0)
+    : null;
+  const effectiveCount = archetype ? archetypeCount : SEGMENT_COUNTS[segment];
+
   const tabContent = {
-    correlations: <CorrelationsTab segment={segment} />,
-    touchpoints: <TouchpointsTab segment={segment} />,
+    correlations: <CorrelationsTab segment={segment} archetype={archetype} />,
+    touchpoints: <TouchpointsTab segment={segment} archetype={archetype} />,
     complaints: <ComplaintsTab />,
     events: <EventsTab />,
-    spend: <SpendPotentialTab />,
+    spend: <SpendPotentialTab archetype={archetype} />,
   };
 
   return (
@@ -581,8 +652,11 @@ export default function ExperienceInsights() {
 
         <FlowLink flowNum="04" persona="Chef Marco" />
 
-        {(activeTab === 'correlations' || activeTab === 'touchpoints') && (
-          <SegmentFilter segment={segment} onChange={setSegment} />
+        {(activeTab === 'correlations' || activeTab === 'touchpoints' || activeTab === 'spend') && (
+          <>
+            <SegmentFilter segment={segment} onChange={setSegment} />
+            <ArchetypeFilter archetype={archetype} onChange={setArchetype} />
+          </>
         )}
 
         <Panel
