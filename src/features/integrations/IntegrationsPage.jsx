@@ -1,10 +1,6 @@
 import { useMemo, useState } from 'react';
 import { theme } from '@/config/theme';
 import { getConnectedSystems } from '@/services/integrationsService';
-import TwoLayerDiagram from '@/components/ui/TwoLayerDiagram.jsx';
-import DataSourceComparison from '@/components/ui/DataSourceComparison.jsx';
-import CollapsibleSection from '@/components/ui/CollapsibleSection.jsx';
-
 import PageTransition from '@/components/ui/PageTransition';
 
 const EMAIL_VENDOR_IDS = ['hubspot', 'mailchimp'];
@@ -77,13 +73,6 @@ const CATEGORY_CONFIG = [
   },
 ];
 
-const ADDED_INTELLIGENCE = [
-  'Correlates dining spend with round frequency to predict churn before resignations hit the desk.',
-  'Flags slow-round windows where grill revenue collapses so staffing can adjust proactively.',
-  'Ranks waitlist fills by retention value rather than first-come order.',
-  'Shows which members visit the property yet skip key amenities, signaling disengagement.',
-];
-
 const STATUS_COLORS = {
   connected: '#16a34a',
   available: '#475569',
@@ -148,133 +137,6 @@ export function IntegrationsPage() {
   return (
     <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-      {/* GMC-07: Reordered - diagram first, then What Swoop Adds, then comparison */}
-      
-      {/* GMC-06: Two-Layer Intelligence diagram - collapsible, default collapsed */}
-      <CollapsibleSection 
-        title="Why Swoop sees what others miss — Two layers of intelligence" 
-        icon="🔍"
-        defaultExpanded={false}
-      >
-        <div style={{ marginTop: theme.spacing.md }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-            {[
-              {
-                label: 'Layer 1 — Swoop Member App',
-                color: theme.colors.accent,
-                description: 'Real-time behavioral data your existing systems cannot capture.',
-                signals: ['GPS on-course tracking', 'In-app ordering and requests', 'Push notification engagement', 'Social activity and preferences'],
-                tagline: 'The Swoop app captures what happens between transactions.',
-              },
-              {
-                label: 'Layer 2 — Club System Integrations',
-                color: theme.colors.success,
-                description: '28 integrations with your existing tee sheet, POS, CRM, and scheduling systems.',
-                signals: ['Tee times and rounds played', 'F&B spend and dining frequency', 'Dues payments and member status', 'Staff schedules and event calendars'],
-                tagline: 'Your existing systems tell us what happened. The app tells us what is happening now.',
-              },
-            ].map((layer, i) => (
-              <div key={i} style={{
-                borderLeft: '4px solid ' + layer.color,
-                background: layer.color + '08',
-                borderRadius: theme.radius.sm,
-                padding: theme.spacing.md,
-              }}>
-                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: layer.color, marginBottom: '4px' }}>
-                  {layer.label}
-                </div>
-                <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: '8px' }}>
-                  {layer.description}
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '6px' }}>
-                  {layer.signals.map((signal) => (
-                    <div key={signal} style={{
-                      fontSize: theme.fontSize.xs,
-                      color: theme.colors.textPrimary,
-                      background: theme.colors.bgCard,
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid ' + theme.colors.border,
-                    }}>
-                      {signal}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ fontSize: theme.fontSize.xs, fontStyle: 'italic', color: theme.colors.textMuted, marginTop: '8px' }}>
-                  {layer.tagline}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div style={{
-            marginTop: theme.spacing.md,
-            textAlign: 'center',
-            fontSize: theme.fontSize.sm,
-            fontWeight: 700,
-            color: theme.colors.textPrimary,
-            padding: '10px',
-            background: theme.colors.bgDeep,
-            borderRadius: theme.radius.sm,
-          }}>
-            Together: cross-domain intelligence that catches churn signals competitors miss.
-          </div>
-        </div>
-      </CollapsibleSection>
-
-      {/* What Swoop Adds section - moved up per GMC-07 */}
-      <section style={{ 
-        borderRadius: theme.radius.lg, 
-        border: `1px solid ${theme.colors.border}`, 
-        padding: 24, 
-        background: theme.colors.bgCard,
-        boxShadow: theme.shadow.sm,
-      }}>
-        <h2 style={{ margin: '0 0 10px', fontSize: 22, fontWeight: 700 }}>What Swoop Adds</h2>
-        <p style={{ margin: '0 0 14px', color: theme.colors.textSecondary }}>
-          Combining systems creates intelligence no single vendor provides:
-        </p>
-        <ul style={{ margin: 0, paddingLeft: 18, color: theme.colors.textPrimary, lineHeight: 1.6 }}>
-          {ADDED_INTELLIGENCE.map((point) => (
-            <li key={point} style={{ marginBottom: 8 }}>{point}</li>
-          ))}
-        </ul>
-      </section>
-
-      {/* GMC-06: Data comparison table - collapsible, default collapsed */}
-      <CollapsibleSection 
-        title="Data depth comparison — Same data source. Deeper intelligence." 
-        icon="📊"
-        defaultExpanded={false}
-      >
-        <div style={{ overflowX: 'auto', marginTop: theme.spacing.md }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
-            <thead>
-              <tr style={{ background: theme.colors.bgDeep }}>
-                <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textPrimary, borderBottom: '1px solid ' + theme.colors.border }}>Data Type</th>
-                <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textMuted, borderBottom: '1px solid ' + theme.colors.border }}>Single-System View</th>
-                <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.accent, borderBottom: '1px solid ' + theme.colors.border }}>Swoop Intelligence</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { dataType: 'Tee time bookings', competitors: 'Rounds played, no-shows', swoop: 'Rounds + GPS pace tracking + post-round behavior' },
-                { dataType: 'Dining activity', competitors: 'Check totals, covers', swoop: 'Checks + wait times + turn-stand-to-table conversion' },
-                { dataType: 'Member engagement', competitors: 'Last visit date, dues status', swoop: 'Multi-signal decay curve across 6+ touchpoints' },
-                { dataType: 'Staffing coverage', competitors: 'Scheduled shifts', swoop: 'Demand-driven gaps + service quality correlation' },
-                { dataType: 'On-course behavior', competitors: 'Not captured', swoop: 'GPS tracking: pace, 9-hole exits, practice range visits' },
-                { dataType: 'Churn prediction', competitors: 'Manual review or none', swoop: 'AI health scores with 6-8 week early warning' },
-              ].map((row, i) => (
-                <tr key={i}>
-                  <td style={{ padding: '10px 12px', fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, borderBottom: '1px solid ' + theme.colors.borderLight }}>{row.dataType}</td>
-                  <td style={{ padding: '10px 12px', fontSize: theme.fontSize.sm, color: theme.colors.textMuted, borderBottom: '1px solid ' + theme.colors.borderLight }}>{row.competitors}</td>
-                  <td style={{ padding: '10px 12px', fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, fontWeight: 500, borderBottom: '1px solid ' + theme.colors.borderLight }}>{row.swoop}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CollapsibleSection>
-
       <header style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <h1 style={{ margin: 0, fontSize: 28, color: theme.colors.textPrimary }}>Connected Systems</h1>
         <p style={{ margin: 0, maxWidth: 600, color: theme.colors.textSecondary }}>

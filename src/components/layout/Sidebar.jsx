@@ -1,4 +1,5 @@
 // Sidebar — dark sidebar, light body. Classic club aesthetic.
+import { useState } from 'react';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { useApp } from '@/context/AppContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
@@ -13,18 +14,25 @@ const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-const SECTION_ORDER = ['YOUR CLUB TODAY', 'SERVICE & REVENUE', 'ACTIONS & SETUP'];
+const SECTION_ORDER = ['INTELLIGENCE', 'REPORTING', 'SETTINGS'];
+
+const SETTINGS_KEYS = new Set(
+  NAV_ITEMS.filter((n) => n.section === 'SETTINGS' && !n.hidden).map((n) => n.key)
+);
 
 export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const { currentRoute, navigate, sidebarCollapsed, toggleSidebar } = useNavigation();
   const { activeCount, totalRevenueImpact } = useApp();
   const w = isMobile ? 280 : sidebarCollapsed ? 52 : 240;
 
+  // Settings section: collapsed by default, auto-expands when on a settings page
+  const [settingsExpanded, setSettingsExpanded] = useState(SETTINGS_KEYS.has(currentRoute));
+
   const visibleNavItems = NAV_ITEMS.filter((n) => !n.hidden);
   const sectionBuckets = new Map();
   const sectionOrderFromItems = [];
   visibleNavItems.forEach((item) => {
-    const label = item.section ?? 'SERVICE & REVENUE';
+    const label = item.section ?? 'INTELLIGENCE';
     if (!sectionBuckets.has(label)) {
       sectionBuckets.set(label, []);
       sectionOrderFromItems.push(label);
@@ -36,21 +44,13 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const addedSections = new Set();
   SECTION_ORDER.forEach((label) => {
     if (sectionBuckets.has(label)) {
-      navSections.push({
-        label,
-        items: sectionBuckets.get(label),
-        emphasis: label === 'RIGHT NOW',
-      });
+      navSections.push({ label, items: sectionBuckets.get(label) });
       addedSections.add(label);
     }
   });
   sectionOrderFromItems.forEach((label) => {
     if (!addedSections.has(label) && sectionBuckets.has(label)) {
-      navSections.push({
-        label,
-        items: sectionBuckets.get(label),
-        emphasis: false,
-      });
+      navSections.push({ label, items: sectionBuckets.get(label) });
       addedSections.add(label);
     }
   });
@@ -70,6 +70,8 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
         top: 0,
         zIndex: 10,
       };
+
+  const isSettingsOpen = settingsExpanded || SETTINGS_KEYS.has(currentRoute);
 
   return (
     <aside style={{
@@ -130,114 +132,153 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
 
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-        {navSections.map((section) => (
-          <div key={section.label}>
-            {(!sidebarCollapsed || isMobile) && (
-              <div
-                style={{
-                  marginTop: 8,
-                  padding: '8px 14px 4px',
-                  fontSize: 10,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: TEXT_MUTED,
-                  fontWeight: 700,
-                }}
-              >
-                {section.label}
-              </div>
-            )}
-            {section.items.map((item) => {
-              const active = currentRoute === item.key;
-              const isIntelligence = section.label === 'INTELLIGENCE';
-              const inactiveWeight = section.emphasis ? 500 : isIntelligence ? 350 : 400;
-              return (
-                <button
-                  key={item.key}
-                  onClick={() => navigate(item.key)}
-                  title={sidebarCollapsed && !isMobile ? item.label : undefined}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
-                    minHeight: '44px',
-                    justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
-                    background: active ? SIDEBAR_ACTIVE_BG : 'none',
-                    borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
-                    color: active ? TEXT_LIGHT : TEXT_DIM,
-                    boxShadow: active ? 'inset 0 0 0 1px rgba(255,255,255,0.06)' : 'none',
-                    fontSize: '13px',
-                    fontWeight: active ? 600 : inactiveWeight,
-                    transition: 'all 0.12s',
-                    cursor: 'pointer',
-                    borderRight: 'none',
-                    borderTop: 'none',
-                    borderBottom: 'none',
-                  }}
-                  onMouseEnter={e => {
-                    if (!active) {
-                      e.currentTarget.style.background = theme.colors.sidebarTint;
-                      e.currentTarget.style.color = TEXT_LIGHT;
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'none';
-                      e.currentTarget.style.color = TEXT_DIM;
-                    }
-                  }}
-                >
-                  <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
-                  {(!sidebarCollapsed || isMobile) && (
-                    <span
+        {navSections.map((section) => {
+          const isSettings = section.label === 'SETTINGS';
+
+          return (
+            <div key={section.label}>
+              {/* Section separator + header */}
+              {(!sidebarCollapsed || isMobile) && (
+                <>
+                  {isSettings && (
+                    <div style={{
+                      margin: '12px 14px 0',
+                      borderTop: `1px solid ${SIDEBAR_BORDER}`,
+                    }} />
+                  )}
+                  {isSettings ? (
+                    <button
+                      onClick={() => setSettingsExpanded((v) => !v)}
                       style={{
+                        width: '100%',
                         display: 'flex',
-                        flexDirection: item.key === 'daily-briefing' ? 'column' : 'row',
-                        alignItems: item.key === 'daily-briefing' ? 'flex-start' : 'center',
-                        gap: item.key === 'daily-briefing' ? '4px' : '8px',
-                        flex: 1,
-                        minWidth: 0,
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 8,
+                        padding: '8px 14px 4px',
+                        fontSize: 10,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        color: TEXT_MUTED,
+                        fontWeight: 700,
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
                       }}
                     >
+                      <span>{section.label}</span>
+                      <span style={{ fontSize: 12, transition: 'transform 0.15s', transform: isSettingsOpen ? 'rotate(90deg)' : 'none' }}>›</span>
+                    </button>
+                  ) : (
+                    <div
+                      style={{
+                        marginTop: 8,
+                        padding: '8px 14px 4px',
+                        fontSize: 10,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        color: TEXT_MUTED,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {section.label}
+                    </div>
+                  )}
+                </>
+              )}
+              {/* Nav items — hide Settings items when collapsed */}
+              {(!isSettings || isSettingsOpen || (sidebarCollapsed && !isMobile)) && section.items.map((item) => {
+                const active = currentRoute === item.key;
+                const isIntelligence = section.label === 'INTELLIGENCE';
+                const inactiveWeight = isIntelligence ? 350 : 400;
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => navigate(item.key)}
+                    title={sidebarCollapsed && !isMobile ? item.label : undefined}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
+                      minHeight: '44px',
+                      justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
+                      background: active ? SIDEBAR_ACTIVE_BG : 'none',
+                      borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
+                      color: active ? TEXT_LIGHT : TEXT_DIM,
+                      boxShadow: active ? 'inset 0 0 0 1px rgba(255,255,255,0.06)' : 'none',
+                      fontSize: '13px',
+                      fontWeight: active ? 600 : inactiveWeight,
+                      transition: 'all 0.12s',
+                      cursor: 'pointer',
+                      borderRight: 'none',
+                      borderTop: 'none',
+                      borderBottom: 'none',
+                    }}
+                    onMouseEnter={e => {
+                      if (!active) {
+                        e.currentTarget.style.background = theme.colors.sidebarTint;
+                        e.currentTarget.style.color = TEXT_LIGHT;
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!active) {
+                        e.currentTarget.style.background = 'none';
+                        e.currentTarget.style.color = TEXT_DIM;
+                      }
+                    }}
+                  >
+                    <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
+                    {(!sidebarCollapsed || isMobile) && (
                       <span
                         style={{
-                          overflow: item.key === 'daily-briefing' ? 'visible' : 'hidden',
-                          textOverflow: item.key === 'daily-briefing' ? 'unset' : 'ellipsis',
-                          whiteSpace: item.key === 'daily-briefing' ? 'normal' : 'nowrap',
+                          display: 'flex',
+                          flexDirection: item.key === 'daily-briefing' ? 'column' : 'row',
+                          alignItems: item.key === 'daily-briefing' ? 'flex-start' : 'center',
+                          gap: item.key === 'daily-briefing' ? '4px' : '8px',
+                          flex: 1,
+                          minWidth: 0,
                         }}
                       >
-                        {item.label}
-                      </span>
-                      {item.key === 'daily-briefing' && (
                         <span
                           style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '3px',
-                            fontSize: '9px',
-                            letterSpacing: '0.08em',
-                            textTransform: 'uppercase',
-                            fontWeight: 700,
-                            color: theme.colors.success,
-                            background: `${theme.colors.success}12`,
-                            padding: '2px 6px',
-                            borderRadius: '999px',
-                            border: `1px solid ${theme.colors.success}40`,
+                            overflow: item.key === 'daily-briefing' ? 'visible' : 'hidden',
+                            textOverflow: item.key === 'daily-briefing' ? 'unset' : 'ellipsis',
+                            whiteSpace: item.key === 'daily-briefing' ? 'normal' : 'nowrap',
                           }}
                         >
-                          <span style={{ width: 5, height: 5, borderRadius: '50%', background: theme.colors.success, boxShadow: `0 0 6px ${theme.colors.success}` }} />
-                          Start Here
+                          {item.label}
                         </span>
-                      )}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        ))}
+                        {item.key === 'daily-briefing' && (
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              fontSize: '9px',
+                              letterSpacing: '0.08em',
+                              textTransform: 'uppercase',
+                              fontWeight: 700,
+                              color: theme.colors.success,
+                              background: `${theme.colors.success}12`,
+                              padding: '2px 6px',
+                              borderRadius: '999px',
+                              border: `1px solid ${theme.colors.success}40`,
+                            }}
+                          >
+                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: theme.colors.success, boxShadow: `0 0 6px ${theme.colors.success}` }} />
+                            Start Here
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
       </nav>
 
       {/* Demo Environment badge */}

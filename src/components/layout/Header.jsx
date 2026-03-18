@@ -26,7 +26,7 @@ const getDataNudges = () => {
       : '$' + totalDuesAtRisk.toLocaleString();
     const nudges = [];
     if (atRiskCount > 0) {
-      nudges.push(atRiskCount + ' members at risk or critical \u2014 ' + formattedDues + '/yr in dues need attention today.');
+      nudges.push(atRiskCount + ' members at risk or critical — ' + formattedDues + '/yr in dues need attention today.');
     }
     if (briefing?.yesterdayRecap?.revenue) {
       const vsLastWeek = briefing.yesterdayRecap.revenueVsLastWeek;
@@ -38,11 +38,10 @@ const getDataNudges = () => {
     if (summary?.healthDistribution) {
       const declining = summary.healthDistribution.declining ?? summary.healthDistribution.atRisk ?? 0;
       if (declining > 0) {
-        nudges.push(declining + ' members in declining health \u2014 early outreach can prevent ' + (declining > 3 ? 'multiple' : 'a') + ' resignation' + (declining > 1 ? 's' : '') + '.');
+        nudges.push(declining + ' members in declining health — early outreach can prevent ' + (declining > 3 ? 'multiple' : 'a') + ' resignation' + (declining > 1 ? 's' : '') + '.');
       }
     }
-    nudges.push('Swoop connects 6 systems to show you what no single tool can \u2014 the full member picture.');
-    return nudges.length > 1 ? nudges : ['All systems connected. Monitoring member health, revenue, and operations in real time.'];
+    return nudges.length > 0 ? nudges : ['All systems connected. Monitoring member health, revenue, and operations in real time.'];
   } catch (e) {
     return ['All systems connected. Monitoring member health, revenue, and operations in real time.'];
   }

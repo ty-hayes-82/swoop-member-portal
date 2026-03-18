@@ -4,7 +4,6 @@ import HealthOverview from './tabs/HealthOverview';
 import ArchetypeTab from './tabs/ArchetypeTab';
 import EmailTab from './tabs/EmailTab';
 import ResignationTimeline from './ResignationTimeline';
-import MemberPlaybooks from './MemberPlaybooks';
 import AllMembersView from './tabs/AllMembersView';
 import { sourceSystems } from '@/services/memberService';
 import { theme } from '@/config/theme';
@@ -18,7 +17,6 @@ const TABS = [
   { key: 'archetypes',   label: 'Archetypes' },
   { key: 'email',        label: 'Email Decay' },
   { key: 'resignations', label: 'Resignations' },
-  { key: 'playbooks',    label: '▶ Response Plans' },
 ];
 
 export default function MemberHealth() {
@@ -99,7 +97,6 @@ export default function MemberHealth() {
         {activeTab === 'archetypes'   && <ArchetypeTab />}
         {activeTab === 'email'        && <EmailTab />}
         {activeTab === 'resignations' && <ResignationTimeline />}
-        {activeTab === 'playbooks'    && <MemberPlaybooks />}
       </Panel>
 
       <ActionRecommendation
