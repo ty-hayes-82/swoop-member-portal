@@ -9,6 +9,7 @@ import { useNavigation } from '@/context/NavigationContext';
 import PipelineSnapshot from '@/features/daily-briefing/PipelineSnapshot.jsx';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
+import FlowLink from '@/components/ui/FlowLink';
 import {
   sourceSystems,
   getWaitlistSummary,
@@ -76,6 +77,8 @@ export default function WaitlistDemand() {
         headline={`${waitlistSummary.highPriority} retention-priority members are waiting while ${cancellationSummary.highRisk} bookings show high cancel risk.`}
         context={`${getWaitlistInsight()} Route them directly inside ${ROUTE_LABEL}.`}
       />
+
+      <FlowLink flowNum="03" persona="Mike" />
 
       <EvidenceStrip signals={[
         { source: 'Tee Sheet', detail: 'Booking patterns and cancellation history' },

@@ -195,13 +195,12 @@ export const navItems = [
   },
   {
     key: 'storyboard-flows',
-    label: 'Storyboard Flows',
-    section: 'SETTINGS',
-    icon: '⚡',
+    label: 'Playbook Guides',
+    section: 'REPORTING',
+    icon: '📖',
     color: theme.colors.navOperations,
-    subtitle: 'Persona-driven intelligence journeys from signal to action to proof.',
+    subtitle: 'How your team uses Swoop — interactive guides from signal to action to proof.',
     sourceSystems: ['All Systems'],
-    hidden: true,
   },
   // Hidden settings/admin pages
   {

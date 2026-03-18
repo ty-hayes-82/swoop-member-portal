@@ -10,6 +10,7 @@ import { theme } from '@/config/theme';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 import { SkeletonMemberList } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
+import FlowLink from '@/components/ui/FlowLink';
 
 const TABS = [
   { key: 'health',       label: 'Health Overview' },
@@ -83,6 +84,7 @@ export default function MemberHealth() {
           Show AI insight
         </button>
       )}
+      <FlowLink flowNum="01" persona="Sarah" />
       <Panel
         title="Member Risk: Early Warning System"
         subtitle="90% of clubs value a daily Health Score — catch disengagement before members walk"

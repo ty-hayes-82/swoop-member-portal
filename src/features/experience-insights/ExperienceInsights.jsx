@@ -12,6 +12,7 @@ import {
 } from '@/services/experienceInsightsService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
+import FlowLink from '@/components/ui/FlowLink';
 import { useApp } from '@/context/AppContext';
 
 const TABS = [
@@ -577,6 +578,8 @@ export default function ExperienceInsights() {
             Cross-domain correlations between touchpoints and business outcomes. Data from 6 connected systems.
           </p>
         </div>
+
+        <FlowLink flowNum="04" persona="Chef Marco" />
 
         {(activeTab === 'correlations' || activeTab === 'touchpoints') && (
           <SegmentFilter segment={segment} onChange={setSegment} />

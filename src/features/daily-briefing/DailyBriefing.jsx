@@ -13,6 +13,7 @@ import { useNavigation } from '@/context/NavigationContext.jsx';
 import { theme } from '@/config/theme.js';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 import RecentInterventions from '@/components/ui/RecentInterventions.jsx';
+import FlowLink from '@/components/ui/FlowLink';
 
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
@@ -64,6 +65,8 @@ export default function DailyBriefing() {
         )}
         context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. What Swoop would have done: Alert surfaced Day 1 → GM sends recovery message via Swoop app → James responds same day → Health score monitored weekly → Retention confirmed."
       />
+
+      <FlowLink flowNum="01" persona="Sarah" />
 
       {/* Agent actions badge — full inbox lives on Actions page */}
       {pendingAgentCount > 0 && (

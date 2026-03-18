@@ -4,6 +4,7 @@ import { Panel } from '@/components/ui';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import GrowthPipeline from '@/features/growth-pipeline/GrowthPipeline';
+import FlowLink from '@/components/ui/FlowLink';
 
 const kpis = [
   { label: 'Members Saved', value: 14, prefix: '', suffix: '', color: 'green' },
@@ -309,6 +310,7 @@ export default function BoardReport() {
       </div>
 
       <KPIStrip />
+      <FlowLink flowNum="08" persona="Sarah" />
 
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
         {tabNames.map((tab, i) => (

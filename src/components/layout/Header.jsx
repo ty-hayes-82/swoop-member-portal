@@ -48,7 +48,7 @@ const getDataNudges = () => {
 };
 
 export default function Header({ onMobileMenuToggle, isMobile = false }) {
-  const { currentRoute, toggleSidebar } = useNavigation();
+  const { currentRoute, toggleSidebar, navigate } = useNavigation();
   const page = NAV_ITEMS.find((n) => n.key === currentRoute) || NAV_ITEMS[0];
   const handleMenuClick = onMobileMenuToggle || toggleSidebar;
   const [bannerIdx, setBannerIdx] = useState(0);
@@ -137,6 +137,28 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
               {page.subtitle}
             </p>
           </div>
+          {currentRoute !== 'storyboard-flows' && (
+            <button
+              onClick={() => navigate('storyboard-flows')}
+              title="Playbook Guides — see how your team uses Swoop"
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 6,
+                background: 'var(--bg-deep)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-muted)',
+                fontSize: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              📖
+            </button>
+          )}
         </div>
         <div
           style={{

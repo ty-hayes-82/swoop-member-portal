@@ -10,6 +10,7 @@ import { understaffedDays } from '@/data/staffing';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import ScenarioModeling from './components/ScenarioModeling';
+import FlowLink from '@/components/ui/FlowLink';
 
 const TABS = [
   { key: 'pace', label: 'Pace-of-Play Impact' },
@@ -388,6 +389,8 @@ export default function RevenueLeakage() {
           headline={`Operational failures are costing you $${TOTAL_LOSS.toLocaleString()} in monthly F&B revenue.`}
           context="Revenue leakage happens when service breakdowns (slow rounds, understaffing, weather impacts) interrupt member dining patterns. Most clubs see the symptom (lower covers) but miss the operational cause."
         />
+
+        <FlowLink flowNum="03" persona="Mike" />
 
         <RecoveryCTA
           recoverableAmount={recoverableAmount}

@@ -1,134 +1,164 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { theme } from '@/config/theme';
+import { useNavigationContext } from '@/context/NavigationContext';
+import { getMemberSummary, getArchetypeProfiles } from '@/services/memberService';
 
-/* ───────── Flow Data ───────── */
+/* ───────── Route & Action Maps ───────── */
 
-const SECTIONS = [
-  {
-    id: 'retention',
-    title: 'Member Retention & Risk',
-    accent: theme.colors.members,
-    flows: [
-      {
-        num: '01',
-        persona: 'Sarah (GM)',
-        desc: 'Detect & Act on Attrition Risk',
-        steps: [
-          { tag: 'REAL-TIME COCKPIT', tagColor: theme.colors.operations, icon: '\u{1F6A8}', title: 'Risk Alert', subtitle: 'Morning Briefing', desc: 'Sarah opens Swoop and sees 53 members flagged at-risk \u2014 $733K in annual dues need attention today.' },
-          { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '\u{1F4C9}', title: 'Risk Deep-Dive', subtitle: 'Archetype \xB7 Engagement', desc: 'She drills into the \u201CGhost\u201D segment: 24 members with zero visits in 90+ days. Revenue exposure is $198K/yr.' },
-          { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '\u{1F4CB}', title: 'Select Playbook', subtitle: 'Ghost Archetype', desc: 'Swoop recommends the Ghost playbook: personal GM call, \u201CWe Miss You\u201D tee-time hold, and a guest pass offer.', gap: '#1' },
-          { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '\u{1F916}', title: 'Auto-Draft Outreach', subtitle: 'Personalized Messages', desc: 'Swoop AI drafts 24 personalized emails referencing each member\u2019s last round, favorite holes, and dining history.', gap: '#2' },
-          { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '\u2705', title: 'Execute & Track', subtitle: 'Outreach Sent', desc: 'Sarah approves and sends. Swoop tracks opens, tee-time bookings, and re-engagement within 14 days. 9 of 24 ghosts return.' },
-        ],
-      },
-      {
-        num: '02',
-        persona: 'Lisa (Membership Director)',
-        desc: 'Understand & Nurture New Members',
-        steps: [
-          { tag: 'EXPERIENCE INSIGHTS', tagColor: theme.colors.info500, icon: '\u{1F50D}', title: 'Engagement Scan', subtitle: 'New Member Cohort', desc: 'Lisa checks the New Member segment: 24 members joined in 6 months. 8 have golfed only once. 5 have never dined at the club.' },
-          { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '\u26A0\uFE0F', title: 'Early Warning', subtitle: '90-Day Drop-Off', desc: 'Swoop flags 6 new members trending toward \u201CGhost\u201D archetype \u2014 engagement fell sharply after month two. Classic early attrition.', gap: '#3' },
-          { tag: 'MEMBER OUTREACH', tagColor: theme.colors.pipeline, icon: '\u{1F48C}', title: 'Nurture Playbook', subtitle: 'New Member Specific', desc: 'Activates the New Member playbook: buddy program match, spouse welcome experience, complimentary dining, and a GM dinner invite.' },
-          { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '\u{1F4AC}', title: 'Personalized Nudges', subtitle: 'Multi-Channel Drip', desc: 'AI agent schedules a 30-day drip: welcome text from the pro, event invite email, and a \u201CHow\u2019s your first season?\u201D call from Lisa.', gap: '#4' },
-          { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '\u{1F389}', title: 'Retention Wins', subtitle: 'Cohort Health', desc: 'After 60 days, 5 of 6 at-risk new members are multi-facility users. First-year retention projects at 91% \u2014 up from 74% last year.', gap: '#5' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'revenue',
-    title: 'Revenue & F&B',
-    accent: theme.colors.fb,
-    flows: [
-      {
-        num: '03',
-        persona: 'Mike (Head Golf Pro)',
-        desc: 'Quantify Revenue Leakage & Retain',
-        steps: [
-          { tag: 'REVENUE LEAKAGE', tagColor: theme.colors.warning500, icon: '\u{1F4B0}', title: 'Leakage Dashboard', subtitle: 'Tee Sheet \xB7 F&B \xB7 Events', desc: 'Mike sees $42K/mo in empty prime tee times. Die-Hard Golfers are booking less \u2014 down 18% this quarter.' },
-          { tag: 'TEE SHEET DEMAND', tagColor: theme.colors.operations, icon: '\u{1F4CA}', title: 'Demand Heatmap', subtitle: 'Peak vs. Off-Peak', desc: 'Tee sheet analysis shows Saturday 7\u20139 AM at 94% booked, but weekday afternoons sit at 31%. Die-Hards could fill the gap.', gap: '#6' },
-          { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '\u{1F3AF}', title: 'Targeted Action', subtitle: 'Die-Hard Golfer Plays', desc: 'Playbook suggests: complimentary lesson, paired round with a compatible handicap partner, and a \u201Cbest conditions\u201D text alert.' },
-          { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '\u26A1', title: 'Smart Scheduling', subtitle: 'Proactive Tee Holds', desc: 'AI agent reserves preferred weekday slots for 12 Die-Hards and sends \u201CConditions look perfect Wednesday\u201D texts.', gap: '#7' },
-          { tag: 'BOARD REPORT', tagColor: theme.colors.info700, icon: '\u{1F4C8}', title: 'Prove the Impact', subtitle: 'Revenue Recovered', desc: 'Board report shows $28K in recovered tee-time revenue and 22% increase in weekday utilization. Data-backed proof for the board.' },
-        ],
-      },
-      {
-        num: '04',
-        persona: 'Chef Marco (F&B Director)',
-        desc: 'Convert Golfers into Diners',
-        steps: [
-          { tag: 'REVENUE LEAKAGE', tagColor: theme.colors.warning500, icon: '\u{1F37D}\uFE0F', title: 'Dining Gap Alert', subtitle: '$0 F&B from Golfers', desc: 'Swoop flags 98 Die-Hards and Weekend Warriors who play 4+ times/month but spend $0 in dining. They leave within 22 minutes of their round.' },
-          { tag: 'EXPERIENCE INSIGHTS', tagColor: theme.colors.info500, icon: '\u{1F50E}', title: 'Behavioral Pattern', subtitle: 'Post-Round Timing', desc: 'Data shows these members finish rounds at peak lunch hours but bypass the clubhouse. The bridge from course to kitchen doesn\u2019t exist yet.', gap: '#8' },
-          { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '\u{1F468}\u200D\u{1F373}', title: 'Dining Recovery', subtitle: 'Chef\u2019s Table \xB7 Locker Surprise', desc: 'Playbook triggers a 3-touch sequence: Chef\u2019s Table invite on Day 1, family dining on Day 3, and a wine bottle in the locker after next round.' },
-          { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '\u{1F4E8}', title: 'Personalized Invites', subtitle: 'Member-Specific Menus', desc: 'AI drafts invitations referencing each member\u2019s round schedule: \u201CTom \u2014 you\u2019ve been on the course all month. Let us treat you to Thursday\u2019s Chef\u2019s Table.\u201D' },
-          { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '\u{1F4B5}', title: 'F&B Revenue Lift', subtitle: '$0 \u2192 $94/mo Avg', desc: '12 of 18 targeted members begin dining within 2 weeks. Post-round dining conversion jumps from 11% to 38%. $14K/mo in new F&B revenue.', gap: '#9' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'service',
-    title: 'Service & Operations',
-    accent: theme.colors.staffing,
-    flows: [
-      {
-        num: '05',
-        persona: 'Sarah (GM)',
-        desc: 'Service Failure Crisis Response',
-        steps: [
-          { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '\u{1F6A9}', title: 'Complaint Detected', subtitle: 'High-Value Member', desc: 'James Whitfield \u2014 6-year member, $18K/yr dues \u2014 files a complaint about slow lunch service. Sentiment is negative. Swoop auto-escalates.' },
-          { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '\u{1F4CB}', title: 'Service Save Protocol', subtitle: 'Auto-Triggered', desc: 'Within 1 hour: complaint routes to F&B Director with full member profile. Within 2 hours: GM gets a personal alert with context and call recommendation.', gap: '#10' },
-          { tag: 'MEMBER OUTREACH', tagColor: theme.colors.pipeline, icon: '\u{1F4DE}', title: 'GM Personal Call', subtitle: 'Same-Day Recovery', desc: 'Sarah calls James with full context: member since 2019, $18K/yr, complaint unresolved 4 days. She apologizes, offers a complimentary dinner for his family.' },
-          { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '\u{1F4DD}', title: 'Follow-Up Sequence', subtitle: 'Automated Check-Ins', desc: 'AI schedules a follow-up survey at Day 7 and a \u201CHow was your dinner?\u201D note at Day 14. Tracks sentiment recovery over 30 days.' },
-          { tag: 'BOARD REPORT', tagColor: theme.colors.info700, icon: '\u{1F6E1}\uFE0F', title: 'Save Documented', subtitle: '$216K/yr Protected', desc: 'One saved resignation protects $18K\u2013$22K in dues plus $3K\u2013$5K ancillary. Board report logs the save with full timeline and ROI.' },
-        ],
-      },
-      {
-        num: '06',
-        persona: 'Dan (Operations Manager)',
-        desc: 'Staffing Gap Before Peak Weekend',
-        steps: [
-          { tag: 'OPERATIONS', tagColor: theme.colors.operations, icon: '\u{1F6A8}', title: 'Coverage Alert', subtitle: 'Saturday Understaffed', desc: 'Two servers call out Friday afternoon. Saturday has a tournament plus a private event. Swoop detects coverage has dropped below the service threshold.' },
-          { tag: 'TEE SHEET DEMAND', tagColor: theme.colors.operations, icon: '\u{1F4CA}', title: 'Demand Forecast', subtitle: '142 Rounds + 60 Event', desc: 'Tee sheet shows 142 rounds booked plus a 60-person event. Current staffing can handle 120 covers. Gap: 80+ members risk poor experience.', gap: '#11' },
-          { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '\u{1F527}', title: 'Staffing Protocol', subtitle: 'Auto-Triggered', desc: 'Staffing Gap Protocol fires: cross-training recalls sent to 4 eligible staff, pacing adjusted on tee sheet (12-min \u2192 14-min), beverage cart doubled.' },
-          { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '\u{1F4CB}', title: 'Service Pacing', subtitle: 'Dynamic Adjustments', desc: 'AI adjusts kitchen prep timeline, extends turn times by 10 minutes, and pre-stages grab-and-go options at the turn. Quality maintained with fewer hands.' },
-          { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '\u2705', title: 'Crisis Averted', subtitle: 'Zero Complaints Filed', desc: 'Saturday runs smoothly. Post-event survey scores 4.6/5. Zero service complaints despite being 2 servers short. Dan avoided a $24K service failure event.' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'growth',
-    title: 'Growth & Strategy',
-    accent: theme.colors.pipeline,
-    flows: [
-      {
-        num: '07',
-        persona: 'Rachel (Events Manager)',
-        desc: 'Fill Events with Social Butterflies',
-        steps: [
-          { tag: 'EXPERIENCE INSIGHTS', tagColor: theme.colors.info500, icon: '\u{1F4C5}', title: 'Low Registration', subtitle: 'Wine Dinner at 42%', desc: 'The Spring Wine Dinner is 10 days out and only at 42% capacity. Revenue target at risk. Rachel needs to fill 35 seats fast.' },
-          { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '\u{1F3AF}', title: 'Identify Amplifiers', subtitle: 'Social Butterfly Archetype', desc: 'Swoop identifies 44 Social Butterflies \u2014 members who thrive on events, bring guests, and drive organic word-of-mouth. They\u2019re the event-fill engine.' },
-          { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '\u{1F37E}', title: 'Butterfly Amplifier', subtitle: 'VIP Early Access', desc: 'Playbook activates: exclusive early access for Butterflies, \u201CBring 2 guests free\u201D incentive, and a personal invite from Rachel highlighting the chef lineup.', gap: '#12' },
-          { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '\u{1F4E3}', title: 'Targeted Blitz', subtitle: '44 Personalized Invites', desc: 'AI crafts 44 invitations tailored to each Butterfly\u2019s event history: \u201CYou loved the Harvest Dinner \u2014 this Spring Wine Dinner features the same sommelier.\u201D' },
-          { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '\u{1F389}', title: 'Event Sold Out', subtitle: '42% \u2192 100% in 6 Days', desc: '22 Butterflies register within 48 hours, bringing 18 guests. Event sells out 4 days early. $9K in incremental event revenue.' },
-        ],
-      },
-      {
-        num: '08',
-        persona: 'Sarah (GM)',
-        desc: 'Board Meeting Prep \u2014 Prove ROI',
-        steps: [
-          { tag: 'REAL-TIME COCKPIT', tagColor: theme.colors.operations, icon: '\u{1F4CA}', title: 'Monthly Snapshot', subtitle: 'January 2026 Health', desc: 'Board meeting is Friday. Sarah opens the cockpit: 300 members, 53 at-risk, $733K exposed. She needs a data story, not a spreadsheet.' },
-          { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '\u{1F4C9}', title: 'Risk Trends', subtitle: 'Quarter-over-Quarter', desc: 'Risk module shows attrition risk dropped 12% from Q3 after playbook adoption. Ghost segment shrank from 31 to 24. She screenshots the trend chart.' },
-          { tag: 'REVENUE LEAKAGE', tagColor: theme.colors.warning500, icon: '\u{1F4B0}', title: 'Revenue Proof', subtitle: 'Recovered vs. Leaking', desc: 'Revenue Leakage dashboard shows $68K recovered this quarter through outreach playbooks. Dining recovery alone added $14K/mo. Hard numbers the board wants.', gap: '#13' },
-          { tag: 'BOARD REPORT', tagColor: theme.colors.info700, icon: '\u{1F4D1}', title: 'Auto-Generate Report', subtitle: 'One-Click Export', desc: 'Swoop auto-generates a board-ready PDF: member health score, archetype breakdown, revenue impact, playbook ROI, and YoY retention delta. Zero manual work.', gap: '#14' },
-          { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '\u{1F3E2}', title: 'Board Confidence', subtitle: 'Data-Backed Strategy', desc: 'Sarah presents with confidence. Board sees retention up 8%, $68K recovered, and clear before/after metrics. First standing ovation in 3 years.' },
-        ],
-      },
-    ],
-  },
-];
+const TAG_ROUTES = {
+  'REAL-TIME COCKPIT': { route: 'daily-briefing' },
+  'MEMBER RISK': { route: 'member-health' },
+  'OUTREACH PLAYBOOK': { route: 'actions', intent: { tab: 'playbooks' } },
+  'AI AGENT': { route: 'actions', intent: { tab: 'agents' } },
+  'MEMBER OUTREACH': { route: 'actions', intent: { tab: 'outreach' } },
+  'EXPERIENCE INSIGHTS': { route: 'experience-insights' },
+  'TEE SHEET DEMAND': { route: 'waitlist-demand' },
+  'REVENUE LEAKAGE': { route: 'revenue-leakage' },
+  'BOARD REPORT': { route: 'board-report' },
+  'OPERATIONS': { route: 'daily-briefing' },
+};
+
+const FLOW_ACTIONS = {
+  '01': { route: 'actions', intent: { tab: 'outreach' }, label: 'Activate Ghost Recovery Playbook' },
+  '02': { route: 'actions', intent: { tab: 'playbooks' }, label: 'Activate New Member Nurture' },
+  '03': { route: 'actions', intent: { tab: 'outreach' }, label: 'Activate Die-Hard Re-Engagement' },
+  '04': { route: 'actions', intent: { tab: 'playbooks' }, label: 'Activate Dining Recovery Campaign' },
+  '05': { route: 'actions', intent: { tab: 'playbooks' }, label: 'Activate Service Save Protocol' },
+  '06': { route: 'actions', intent: { tab: 'agents' }, label: 'Review Staffing Protocol' },
+  '07': { route: 'actions', intent: { tab: 'outreach' }, label: 'Activate Event Fill Campaign' },
+  '08': { route: 'board-report', intent: null, label: 'Open Board Report' },
+};
+
+/* ───────── Flow Data Builder ───────── */
+
+function buildSections(data) {
+  return [
+    {
+      id: 'retention',
+      title: 'Member Retention & Risk',
+      accent: theme.colors.members,
+      flows: [
+        {
+          num: '01',
+          persona: 'Sarah (GM)',
+          desc: 'Detect & Act on Attrition Risk',
+          steps: [
+            { tag: 'REAL-TIME COCKPIT', tagColor: theme.colors.operations, icon: '🚨', title: 'Risk Alert', subtitle: 'Morning Briefing', desc: `Sarah opens Swoop and sees ${data.atRiskCount} members flagged at-risk — ${data.duesAtRisk} in annual dues need attention today.` },
+            { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '📉', title: 'Risk Deep-Dive', subtitle: 'Archetype · Engagement', desc: `She drills into the "Ghost" segment: ${data.ghostCount} members with zero visits in 90+ days. Revenue exposure is $198K/yr.` },
+            { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '📋', title: 'Select Playbook', subtitle: 'Ghost Archetype', desc: 'Swoop recommends the Ghost playbook: personal GM call, "We Miss You" tee-time hold, and a guest pass offer.', gap: '#1' },
+            { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '🤖', title: 'Auto-Draft Outreach', subtitle: 'Personalized Messages', desc: "Swoop AI drafts 24 personalized emails referencing each member's last round, favorite holes, and dining history.", gap: '#2' },
+            { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '✅', title: 'Execute & Track', subtitle: 'Outreach Sent', desc: 'Sarah approves and sends. Swoop tracks opens, tee-time bookings, and re-engagement within 14 days. 9 of 24 ghosts return.' },
+          ],
+        },
+        {
+          num: '02',
+          persona: 'Lisa (Membership Director)',
+          desc: 'Understand & Nurture New Members',
+          steps: [
+            { tag: 'EXPERIENCE INSIGHTS', tagColor: theme.colors.info500, icon: '🔍', title: 'Engagement Scan', subtitle: 'New Member Cohort', desc: 'Lisa checks the New Member segment: 24 members joined in 6 months. 8 have golfed only once. 5 have never dined at the club.' },
+            { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '⚠️', title: 'Early Warning', subtitle: '90-Day Drop-Off', desc: 'Swoop flags 6 new members trending toward "Ghost" archetype — engagement fell sharply after month two. Classic early attrition.', gap: '#3' },
+            { tag: 'MEMBER OUTREACH', tagColor: theme.colors.pipeline, icon: '💌', title: 'Nurture Playbook', subtitle: 'New Member Specific', desc: 'Activates the New Member playbook: buddy program match, spouse welcome experience, complimentary dining, and a GM dinner invite.' },
+            { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '💬', title: 'Personalized Nudges', subtitle: 'Multi-Channel Drip', desc: 'AI agent schedules a 30-day drip: welcome text from the pro, event invite email, and a "How\'s your first season?" call from Lisa.', gap: '#4' },
+            { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '🎉', title: 'Retention Wins', subtitle: 'Cohort Health', desc: 'After 60 days, 5 of 6 at-risk new members are multi-facility users. First-year retention projects at 91% — up from 74% last year.', gap: '#5' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'revenue',
+      title: 'Revenue & F&B',
+      accent: theme.colors.fb,
+      flows: [
+        {
+          num: '03',
+          persona: 'Mike (Head Golf Pro)',
+          desc: 'Quantify Revenue Leakage & Retain',
+          steps: [
+            { tag: 'REVENUE LEAKAGE', tagColor: theme.colors.warning500, icon: '💰', title: 'Leakage Dashboard', subtitle: 'Tee Sheet · F&B · Events', desc: 'Mike sees $42K/mo in empty prime tee times. Die-Hard Golfers are booking less — down 18% this quarter.' },
+            { tag: 'TEE SHEET DEMAND', tagColor: theme.colors.operations, icon: '📊', title: 'Demand Heatmap', subtitle: 'Peak vs. Off-Peak', desc: 'Tee sheet analysis shows Saturday 7–9 AM at 94% booked, but weekday afternoons sit at 31%. Die-Hards could fill the gap.', gap: '#6' },
+            { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '🎯', title: 'Targeted Action', subtitle: 'Die-Hard Golfer Plays', desc: 'Playbook suggests: complimentary lesson, paired round with a compatible handicap partner, and a "best conditions" text alert.' },
+            { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '⚡', title: 'Smart Scheduling', subtitle: 'Proactive Tee Holds', desc: 'AI agent reserves preferred weekday slots for 12 Die-Hards and sends "Conditions look perfect Wednesday" texts.', gap: '#7' },
+            { tag: 'BOARD REPORT', tagColor: theme.colors.info700, icon: '📈', title: 'Prove the Impact', subtitle: 'Revenue Recovered', desc: 'Board report shows $28K in recovered tee-time revenue and 22% increase in weekday utilization. Data-backed proof for the board.' },
+          ],
+        },
+        {
+          num: '04',
+          persona: 'Chef Marco (F&B Director)',
+          desc: 'Convert Golfers into Diners',
+          steps: [
+            { tag: 'REVENUE LEAKAGE', tagColor: theme.colors.warning500, icon: '🍽️', title: 'Dining Gap Alert', subtitle: '$0 F&B from Golfers', desc: 'Swoop flags 98 Die-Hards and Weekend Warriors who play 4+ times/month but spend $0 in dining. They leave within 22 minutes of their round.' },
+            { tag: 'EXPERIENCE INSIGHTS', tagColor: theme.colors.info500, icon: '🔎', title: 'Behavioral Pattern', subtitle: 'Post-Round Timing', desc: 'Data shows these members finish rounds at peak lunch hours but bypass the clubhouse. The bridge from course to kitchen doesn\'t exist yet.', gap: '#8' },
+            { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '👨‍🍳', title: 'Dining Recovery', subtitle: 'Chef\'s Table · Locker Surprise', desc: 'Playbook triggers a 3-touch sequence: Chef\'s Table invite on Day 1, family dining on Day 3, and a wine bottle in the locker after next round.' },
+            { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '📨', title: 'Personalized Invites', subtitle: 'Member-Specific Menus', desc: 'AI drafts invitations referencing each member\'s round schedule: "Tom — you\'ve been on the course all month. Let us treat you to Thursday\'s Chef\'s Table."' },
+            { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '💵', title: 'F&B Revenue Lift', subtitle: '$0 → $94/mo Avg', desc: '12 of 18 targeted members begin dining within 2 weeks. Post-round dining conversion jumps from 11% to 38%. $14K/mo in new F&B revenue.', gap: '#9' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'service',
+      title: 'Service & Operations',
+      accent: theme.colors.staffing,
+      flows: [
+        {
+          num: '05',
+          persona: 'Sarah (GM)',
+          desc: 'Service Failure Crisis Response',
+          steps: [
+            { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '🚩', title: 'Complaint Detected', subtitle: 'High-Value Member', desc: 'James Whitfield — 6-year member, $18K/yr dues — files a complaint about slow lunch service. Sentiment is negative. Swoop auto-escalates.' },
+            { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '📋', title: 'Service Save Protocol', subtitle: 'Auto-Triggered', desc: 'Within 1 hour: complaint routes to F&B Director with full member profile. Within 2 hours: GM gets a personal alert with context and call recommendation.', gap: '#10' },
+            { tag: 'MEMBER OUTREACH', tagColor: theme.colors.pipeline, icon: '📞', title: 'GM Personal Call', subtitle: 'Same-Day Recovery', desc: 'Sarah calls James with full context: member since 2019, $18K/yr, complaint unresolved 4 days. She apologizes, offers a complimentary dinner for his family.' },
+            { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '📝', title: 'Follow-Up Sequence', subtitle: 'Automated Check-Ins', desc: 'AI schedules a follow-up survey at Day 7 and a "How was your dinner?" note at Day 14. Tracks sentiment recovery over 30 days.' },
+            { tag: 'BOARD REPORT', tagColor: theme.colors.info700, icon: '🛡️', title: 'Save Documented', subtitle: '$216K/yr Protected', desc: 'One saved resignation protects $18K–$22K in dues plus $3K–$5K ancillary. Board report logs the save with full timeline and ROI.' },
+          ],
+        },
+        {
+          num: '06',
+          persona: 'Dan (Operations Manager)',
+          desc: 'Staffing Gap Before Peak Weekend',
+          steps: [
+            { tag: 'OPERATIONS', tagColor: theme.colors.operations, icon: '🚨', title: 'Coverage Alert', subtitle: 'Saturday Understaffed', desc: 'Two servers call out Friday afternoon. Saturday has a tournament plus a private event. Swoop detects coverage has dropped below the service threshold.' },
+            { tag: 'TEE SHEET DEMAND', tagColor: theme.colors.operations, icon: '📊', title: 'Demand Forecast', subtitle: '142 Rounds + 60 Event', desc: 'Tee sheet shows 142 rounds booked plus a 60-person event. Current staffing can handle 120 covers. Gap: 80+ members risk poor experience.', gap: '#11' },
+            { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '🔧', title: 'Staffing Protocol', subtitle: 'Auto-Triggered', desc: 'Staffing Gap Protocol fires: cross-training recalls sent to 4 eligible staff, pacing adjusted on tee sheet (12-min → 14-min), beverage cart doubled.' },
+            { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '📋', title: 'Service Pacing', subtitle: 'Dynamic Adjustments', desc: 'AI adjusts kitchen prep timeline, extends turn times by 10 minutes, and pre-stages grab-and-go options at the turn. Quality maintained with fewer hands.' },
+            { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '✅', title: 'Crisis Averted', subtitle: 'Zero Complaints Filed', desc: 'Saturday runs smoothly. Post-event survey scores 4.6/5. Zero service complaints despite being 2 servers short. Dan avoided a $24K service failure event.' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'growth',
+      title: 'Growth & Strategy',
+      accent: theme.colors.pipeline,
+      flows: [
+        {
+          num: '07',
+          persona: 'Rachel (Events Manager)',
+          desc: 'Fill Events with Social Butterflies',
+          steps: [
+            { tag: 'EXPERIENCE INSIGHTS', tagColor: theme.colors.info500, icon: '📅', title: 'Low Registration', subtitle: 'Wine Dinner at 42%', desc: 'The Spring Wine Dinner is 10 days out and only at 42% capacity. Revenue target at risk. Rachel needs to fill 35 seats fast.' },
+            { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '🎯', title: 'Identify Amplifiers', subtitle: 'Social Butterfly Archetype', desc: 'Swoop identifies 44 Social Butterflies — members who thrive on events, bring guests, and drive organic word-of-mouth. They\'re the event-fill engine.' },
+            { tag: 'OUTREACH PLAYBOOK', tagColor: theme.colors.info500, icon: '🍾', title: 'Butterfly Amplifier', subtitle: 'VIP Early Access', desc: 'Playbook activates: exclusive early access for Butterflies, "Bring 2 guests free" incentive, and a personal invite from Rachel highlighting the chef lineup.', gap: '#12' },
+            { tag: 'AI AGENT', tagColor: theme.colors.accent, icon: '📣', title: 'Targeted Blitz', subtitle: '44 Personalized Invites', desc: 'AI crafts 44 invitations tailored to each Butterfly\'s event history: "You loved the Harvest Dinner — this Spring Wine Dinner features the same sommelier."' },
+            { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '🎉', title: 'Event Sold Out', subtitle: '42% → 100% in 6 Days', desc: '22 Butterflies register within 48 hours, bringing 18 guests. Event sells out 4 days early. $9K in incremental event revenue.' },
+          ],
+        },
+        {
+          num: '08',
+          persona: 'Sarah (GM)',
+          desc: 'Board Meeting Prep — Prove ROI',
+          steps: [
+            { tag: 'REAL-TIME COCKPIT', tagColor: theme.colors.operations, icon: '📊', title: 'Monthly Snapshot', subtitle: 'January 2026 Health', desc: `Board meeting is Friday. Sarah opens the cockpit: ${data.totalMembers} members, ${data.atRiskCount} at-risk, ${data.duesAtRisk} exposed. She needs a data story, not a spreadsheet.` },
+            { tag: 'MEMBER RISK', tagColor: theme.colors.danger500, icon: '📉', title: 'Risk Trends', subtitle: 'Quarter-over-Quarter', desc: 'Risk module shows attrition risk dropped 12% from Q3 after playbook adoption. Ghost segment shrank from 31 to 24. She screenshots the trend chart.' },
+            { tag: 'REVENUE LEAKAGE', tagColor: theme.colors.warning500, icon: '💰', title: 'Revenue Proof', subtitle: 'Recovered vs. Leaking', desc: 'Revenue Leakage dashboard shows $68K recovered this quarter through outreach playbooks. Dining recovery alone added $14K/mo. Hard numbers the board wants.', gap: '#13' },
+            { tag: 'BOARD REPORT', tagColor: theme.colors.info700, icon: '📑', title: 'Auto-Generate Report', subtitle: 'One-Click Export', desc: 'Swoop auto-generates a board-ready PDF: member health score, archetype breakdown, revenue impact, playbook ROI, and YoY retention delta. Zero manual work.', gap: '#14' },
+            { tag: 'LIVE ACTION', tagColor: theme.colors.success500, icon: '🏢', title: 'Board Confidence', subtitle: 'Data-Backed Strategy', desc: 'Sarah presents with confidence. Board sees retention up 8%, $68K recovered, and clear before/after metrics. First standing ovation in 3 years.' },
+          ],
+        },
+      ],
+    },
+  ];
+}
 
 const OPPORTUNITIES = [
   { num: '#1', text: 'AI-recommended playbook per archetype with one-click activation', ref: 'Sarah 01' },
@@ -139,7 +169,7 @@ const OPPORTUNITIES = [
   { num: '#6', text: 'Tee sheet demand intelligence linked to member archetypes', ref: 'Mike 03' },
   { num: '#7', text: 'Proactive smart scheduling with AI-driven tee-time holds', ref: 'Mike 03' },
   { num: '#8', text: 'Post-round behavioral analysis to identify F&B conversion gaps', ref: 'Marco 04' },
-  { num: '#9', text: 'Cross-facility revenue lift tracking (golf \u2192 dining pipeline)', ref: 'Marco 04' },
+  { num: '#9', text: 'Cross-facility revenue lift tracking (golf → dining pipeline)', ref: 'Marco 04' },
   { num: '#10', text: 'Real-time complaint escalation with value-weighted prioritization', ref: 'Sarah 05' },
   { num: '#11', text: 'Demand-aware staffing gap detection with auto-pacing adjustments', ref: 'Dan 06' },
   { num: '#12', text: 'Archetype-targeted event fill campaigns with guest multiplier', ref: 'Rachel 07' },
@@ -210,40 +240,91 @@ const s = {
 
 /* ───────── Components ───────── */
 
-function StepCard({ step }) {
+function StepCard({ step, navigate }) {
+  const [hovered, setHovered] = useState(false);
+  const mapping = TAG_ROUTES[step.tag];
+  const isClickable = mapping && step.tag !== 'LIVE ACTION';
+
+  const stepStyle = {
+    ...s.step,
+    ...(isClickable ? { cursor: 'pointer' } : {}),
+    ...(isClickable && hovered ? { borderColor: step.tagColor } : {}),
+  };
+
+  const handleClick = () => {
+    if (isClickable && navigate) {
+      navigate(mapping.route, mapping.intent || null);
+    }
+  };
+
   return (
-    <div style={s.step}>
+    <div
+      style={stepStyle}
+      onClick={handleClick}
+      onMouseEnter={() => isClickable && setHovered(true)}
+      onMouseLeave={() => isClickable && setHovered(false)}
+    >
       <div style={s.stepTag(step.tagColor)}>{step.tag}</div>
       <div style={s.stepIcon(step.tagColor)}>{step.icon}</div>
       <div style={s.stepTitle}>{step.title}</div>
       <div style={s.stepSubtitle}>{step.subtitle}</div>
       <div style={s.stepDesc}>{step.desc}</div>
       {step.gap && <div style={s.gap}>{step.gap}</div>}
+      {isClickable && (
+        <div style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 10, color: theme.colors.textMuted }}>
+          Open →
+        </div>
+      )}
     </div>
   );
 }
 
-function FlowRow({ flow }) {
+function FlowRow({ flow, navigate }) {
+  const action = FLOW_ACTIONS[flow.num];
+
   return (
     <div style={s.flow}>
       <div style={s.flowHeader}>
         <span style={s.flowNum}>{flow.num}</span>
         <span style={s.flowPersona}>{flow.persona}</span>
-        <span style={s.flowDesc}> \u2014 {flow.desc}</span>
+        <span style={s.flowDesc}> — {flow.desc}</span>
       </div>
       <div style={s.stepsRow}>
         {flow.steps.map((step, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'stretch' }}>
-            <StepCard step={step} />
-            {i < flow.steps.length - 1 && <div style={s.arrow}>\u203A</div>}
+            <StepCard step={step} navigate={navigate} />
+            {i < flow.steps.length - 1 && <div style={s.arrow}>›</div>}
           </div>
         ))}
       </div>
+      {action && (
+        <button
+          onClick={() => navigate(action.route, action.intent)}
+          style={{
+            width: '100%',
+            marginTop: 12,
+            padding: '10px 20px',
+            borderRadius: 8,
+            border: 'none',
+            background: theme.colors.accent,
+            color: '#fff',
+            fontSize: theme.fontSize.sm,
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          ⚡ {action.label}
+        </button>
+      )}
     </div>
   );
 }
 
-function SectionGroup({ section }) {
+function SectionGroup({ section, navigate }) {
   return (
     <div style={s.section}>
       <div style={s.sectionHeader}>
@@ -252,7 +333,7 @@ function SectionGroup({ section }) {
         <span style={s.sectionCount}>{section.flows.length} flows</span>
       </div>
       {section.flows.map((flow) => (
-        <FlowRow key={flow.num} flow={flow} />
+        <FlowRow key={flow.num} flow={flow} navigate={navigate} />
       ))}
     </div>
   );
@@ -261,17 +342,35 @@ function SectionGroup({ section }) {
 /* ───────── Main ───────── */
 
 export default function StoryboardFlows() {
+  const { navigate } = useNavigationContext();
   const [activeFilter, setActiveFilter] = useState('all');
-  const filtered = activeFilter === 'all' ? SECTIONS : SECTIONS.filter((sec) => sec.id === activeFilter);
-  const totalFlows = SECTIONS.reduce((sum, sec) => sum + sec.flows.length, 0);
-  const personas = new Set(SECTIONS.flatMap((sec) => sec.flows.map((f) => f.persona.split(' (')[0])));
+
+  const data = useMemo(() => {
+    const summary = getMemberSummary();
+    const archetypes = getArchetypeProfiles();
+    const ghostCount = archetypes.find(a => a.archetype === 'Ghost')?.count ?? 24;
+    const dieHardCount = archetypes.find(a => a.archetype === 'Die-Hard Golfer')?.count ?? 52;
+    const weekendWarriorCount = archetypes.find(a => a.archetype === 'Weekend Warrior')?.count ?? 46;
+    const atRiskCount = (summary.atRisk ?? 0) + (summary.critical ?? 0);
+    const rawDues = summary.potentialDuesAtRisk;
+    const duesAtRisk = typeof rawDues === 'number' && rawDues > 1000
+      ? '$' + Math.round(rawDues / 1000) + 'K'
+      : rawDues || '$733K';
+    return { atRiskCount: atRiskCount || 53, duesAtRisk, ghostCount, totalMembers: summary.total || 300, dieHardCount, weekendWarriorCount };
+  }, []);
+
+  const sections = useMemo(() => buildSections(data), [data]);
+
+  const filtered = activeFilter === 'all' ? sections : sections.filter((sec) => sec.id === activeFilter);
+  const totalFlows = sections.reduce((sum, sec) => sum + sec.flows.length, 0);
+  const personas = new Set(sections.flatMap((sec) => sec.flows.map((f) => f.persona.split(' (')[0])));
 
   return (
     <div style={s.page}>
       <div style={s.header}>
         <div>
-          <h2 style={s.title}>Member Intelligence Storyboard Flows</h2>
-          <p style={s.subtitle}>Persona-driven journeys from signal to action to proof</p>
+          <h2 style={s.title}>Playbook Guides</h2>
+          <p style={s.subtitle}>How your team uses Swoop — interactive guides from signal to action to proof</p>
         </div>
         <div style={s.badgeRow}>
           <span style={s.badge}>{personas.size} Personas</span>
@@ -289,7 +388,7 @@ export default function StoryboardFlows() {
       </div>
 
       {filtered.map((section) => (
-        <SectionGroup key={section.id} section={section} />
+        <SectionGroup key={section.id} section={section} navigate={navigate} />
       ))}
 
       <div style={s.legend}>
@@ -299,11 +398,11 @@ export default function StoryboardFlows() {
             <span>{l.label}</span>
           </div>
         ))}
-        <div style={s.legendBrand}>Swoop Golf \xB7 Member Intelligence Storyboard Flows</div>
+        <div style={s.legendBrand}>Swoop Golf · Member Intelligence Storyboard Flows</div>
       </div>
 
       <div style={s.opps}>
-        <div style={s.oppsTitle}>\u26A1 OPPORTUNITIES SUMMARY</div>
+        <div style={s.oppsTitle}>⚡ OPPORTUNITIES SUMMARY</div>
         <div style={s.oppsGrid}>
           {OPPORTUNITIES.map((o) => (
             <div key={o.num} style={s.oppsItem}>

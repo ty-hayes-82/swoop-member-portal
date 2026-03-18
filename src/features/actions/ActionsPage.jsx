@@ -9,6 +9,7 @@ import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
 import MemberPlaybooks from '@/features/member-health/MemberPlaybooks';
 import { OutreachPlaybooks } from '@/features/outreach-playbooks';
 import PageTransition from '@/components/ui/PageTransition';
+import FlowLink from '@/components/ui/FlowLink';
 
 const TABS = [
   { key: 'inbox',     label: 'Inbox' },
@@ -131,6 +132,8 @@ export default function ActionsPage() {
             </div>
           </div>
         </div>
+
+        <FlowLink flowNum="01" persona="Sarah" />
 
         {/* Tab switcher */}
         <div style={{ display: 'flex', background: theme.colors.bgDeep, borderRadius: theme.radius.md, padding: '3px', border: `1px solid ${theme.colors.border}`, alignSelf: 'flex-start' }}>
