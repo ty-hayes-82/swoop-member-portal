@@ -4,6 +4,7 @@ import { Panel, SoWhatCallout, PlaybookActionCard } from '@/components/ui';
 import { theme } from '@/config/theme';
 import {
   touchpointCorrelations,
+  touchpointCorrelationsAtRisk,
   correlationInsights,
   eventROI,
   complaintLoyaltyStats,
@@ -27,9 +28,53 @@ const impactColors = {
   low: theme.colors.textMuted,
 };
 
-function CorrelationsTab() {
+const SEGMENT_LABELS = { all: 'all', 'at-risk': 'at-risk', healthy: 'healthy' };
+const SEGMENT_COUNTS = { all: 300, 'at-risk': 47, healthy: 218 };
+
+function SegmentFilter({ segment, onChange }) {
+  const options = [
+    { key: 'all', label: 'All Members' },
+    { key: 'at-risk', label: 'At-Risk Only' },
+    { key: 'healthy', label: 'Healthy Only' },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: theme.spacing.md }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, fontWeight: 600 }}>Showing:</span>
+        <div style={{ display: 'flex', background: theme.colors.bgDeep, borderRadius: theme.radius.md, padding: '3px', border: `1px solid ${theme.colors.border}` }}>
+          {options.map(({ key, label }) => (
+            <button key={key} onClick={() => onChange(key)} style={{
+              padding: '5px 14px', borderRadius: '6px', fontSize: theme.fontSize.xs, fontWeight: 600,
+              cursor: 'pointer', border: 'none', transition: 'all 0.15s',
+              background: segment === key ? theme.colors.bgCard : 'transparent',
+              color: segment === key ? theme.colors.textPrimary : theme.colors.textMuted,
+              boxShadow: segment === key ? theme.shadow.sm : 'none',
+            }}>{label}</button>
+          ))}
+        </div>
+      </div>
+      <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+        Based on your club's data: last 12 months, {SEGMENT_COUNTS[segment]} members
+      </div>
+    </div>
+  );
+}
+
+function CorrelationsTab({ segment }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+      {segment !== 'all' && (
+        <div style={{
+          padding: '8px 14px',
+          background: theme.colors.accent + '08',
+          border: '1px solid ' + theme.colors.accent + '20',
+          borderRadius: theme.radius.sm,
+          fontSize: theme.fontSize.xs,
+          color: theme.colors.textSecondary,
+        }}>
+          Showing correlations for <strong>{segment}</strong> members — some patterns differ from the full population.
+        </div>
+      )}
       {correlationInsights.map((insight) => (
         <div
           key={insight.id}
@@ -93,7 +138,7 @@ function CorrelationsTab() {
       {/* Contextual playbook actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: theme.spacing.md }}>
         <PlaybookActionCard
-          icon={'\uD83C\uDF7D\uFE0F'}
+          icon={'🍽️'}
           title="98 members never dine post-round. Activate Dining Dormancy Recovery."
           description="Members who dine after rounds renew at 92% vs. 61%. Close this gap with a targeted dining incentive."
           playbookName="Dining Dormancy Recovery"
@@ -102,8 +147,8 @@ function CorrelationsTab() {
           buttonColor="#ea580c"
         />
         <PlaybookActionCard
-          icon={'\uD83D\uDEA8'}
-          title="5 open complaints unresolved >24hrs \u2014 activate rapid response."
+          icon={'🚨'}
+          title="5 open complaints unresolved >24hrs — activate rapid response."
           description="Each complaint resolved within 24hrs improves renewal by 18%. These 5 are past the window."
           playbookName="Service Failure Rapid Response"
           impact="$24K/mo"
@@ -112,8 +157,8 @@ function CorrelationsTab() {
           variant="urgent"
         />
         <PlaybookActionCard
-          icon={'\uD83C\uDFAB'}
-          title="24 Ghost members, 0 events in 8 weeks \u2014 send event invitations."
+          icon={'🎫'}
+          title="24 Ghost members, 0 events in 8 weeks — send event invitations."
           description="Event attendance is the 2nd strongest retention predictor. These members haven't attended any."
           playbookName="Post-Event Engagement Capture"
           impact="$6K/mo"
@@ -121,7 +166,7 @@ function CorrelationsTab() {
           buttonColor="#22c55e"
         />
         <PlaybookActionCard
-          icon={'\uD83D\uDCC9'}
+          icon={'📉'}
           title="30 members in multi-domain decline, $540K at risk."
           description="When golf, dining, and email all decline simultaneously, resignation follows within 60 days."
           playbookName="Declining Member Intervention"
@@ -135,8 +180,9 @@ function CorrelationsTab() {
   );
 }
 
-function TouchpointsTab() {
-  const sorted = [...touchpointCorrelations].sort((a, b) => b.retentionImpact - a.retentionImpact);
+function TouchpointsTab({ segment }) {
+  const source = segment === 'at-risk' ? touchpointCorrelationsAtRisk : touchpointCorrelations;
+  const sorted = [...source].sort((a, b) => b.retentionImpact - a.retentionImpact);
   const maxImpact = sorted[0]?.retentionImpact ?? 1;
 
   return (
@@ -210,9 +256,9 @@ function TouchpointsTab() {
 
       {/* Playbook links per top touchpoint */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: theme.spacing.md }}>
-        <PlaybookActionCard variant="compact" icon={'\uD83C\uDFCC\uFE0F'} title="Round Frequency \u2192 Declining Member Intervention" impact="$24K/mo" memberCount={30} playbookName="Declining Member Intervention" buttonLabel="See Playbook" buttonColor="#dc2626" />
-        <PlaybookActionCard variant="compact" icon={'\uD83D\uDEA8'} title="Complaint Resolution \u2192 Service Save Protocol" impact="$18K/mo" memberCount={5} playbookName="Service Save Protocol" buttonLabel="See Playbook" buttonColor="#c0392b" />
-        <PlaybookActionCard variant="compact" icon={'\uD83C\uDF7D\uFE0F'} title="Post-Round Dining \u2192 Dining Dormancy Recovery" impact="$11K/mo" memberCount={98} playbookName="Dining Dormancy Recovery" buttonLabel="See Playbook" buttonColor="#ea580c" />
+        <PlaybookActionCard variant="compact" icon={'🏌️'} title="Round Frequency → Declining Member Intervention" impact="$24K/mo" memberCount={30} playbookName="Declining Member Intervention" buttonLabel="See Playbook" buttonColor="#dc2626" />
+        <PlaybookActionCard variant="compact" icon={'🚨'} title="Complaint Resolution → Service Save Protocol" impact="$18K/mo" memberCount={5} playbookName="Service Save Protocol" buttonLabel="See Playbook" buttonColor="#c0392b" />
+        <PlaybookActionCard variant="compact" icon={'🍽️'} title="Post-Round Dining → Dining Dormancy Recovery" impact="$11K/mo" memberCount={98} playbookName="Dining Dormancy Recovery" buttonLabel="See Playbook" buttonColor="#ea580c" />
       </div>
     </div>
   );
@@ -284,9 +330,9 @@ function ComplaintsTab() {
 
       {/* Unresolved complaints action */}
       <PlaybookActionCard
-        icon={'\uD83D\uDEA8'}
+        icon={'🚨'}
         label="UNRESOLVED COMPLAINTS"
-        title="16 complaints unresolved \u2014 Review & Assign"
+        title="16 complaints unresolved — Review & Assign"
         description="Service Speed complaints have the highest retention impact (-12%). 5 are unresolved >24hrs."
         playbookName="Service Failure Rapid Response"
         impact="$24K/mo at risk"
@@ -353,7 +399,7 @@ function EventsTab() {
 
       {/* Invite at-risk members action */}
       <PlaybookActionCard
-        icon={'\uD83C\uDF1F'}
+        icon={'🌟'}
         title="Invite 24 Ghost + Declining members to upcoming Chef's Table"
         description="Chef's Table has 5.1x ROI. 24 disengaged members haven't attended an event in 8+ weeks. A personal invite could re-engage them."
         playbookName="Social Butterfly Event Amplifier"
@@ -483,6 +529,7 @@ function SpendPotentialTab() {
 
 export default function ExperienceInsights() {
   const [activeTab, setActiveTab] = useState('correlations');
+  const [segment, setSegment] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -495,8 +542,8 @@ export default function ExperienceInsights() {
   }
 
   const tabContent = {
-    correlations: <CorrelationsTab />,
-    touchpoints: <TouchpointsTab />,
+    correlations: <CorrelationsTab segment={segment} />,
+    touchpoints: <TouchpointsTab segment={segment} />,
     complaints: <ComplaintsTab />,
     events: <EventsTab />,
     spend: <SpendPotentialTab />,
@@ -524,12 +571,16 @@ export default function ExperienceInsights() {
             margin: 0,
             lineHeight: 1.2,
           }}>
-            Which experiences drive retention &mdash; and which ones cost you members?
+            Which experiences drive retention — and which ones cost you members?
           </h2>
           <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '6px 0 0' }}>
             Cross-domain correlations between touchpoints and business outcomes. Data from 6 connected systems.
           </p>
         </div>
+
+        {(activeTab === 'correlations' || activeTab === 'touchpoints') && (
+          <SegmentFilter segment={segment} onChange={setSegment} />
+        )}
 
         <Panel
           tabs={TABS}

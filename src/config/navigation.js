@@ -191,6 +191,7 @@ export const navItems = [
     color: theme.colors.navIntegrations,
     subtitle: 'Browse tables, columns, and relationships in your Postgres schema.',
     sourceSystems: ['Postgres'],
+    hidden: true,
   },
   {
     key: 'storyboard-flows',
@@ -200,6 +201,7 @@ export const navItems = [
     color: theme.colors.navOperations,
     subtitle: 'Persona-driven intelligence journeys from signal to action to proof.',
     sourceSystems: ['All Systems'],
+    hidden: true,
   },
   // Hidden settings/admin pages
   {

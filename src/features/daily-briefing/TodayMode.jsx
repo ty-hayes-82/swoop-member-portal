@@ -3,7 +3,6 @@ import { theme } from '@/config/theme';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import MemberLink from '@/components/MemberLink.jsx';
-import { AgentInboxStrip } from '@/components/ui';
 import { getTopPendingAction } from '@/services/agentService';
 import { useApp } from '@/context/AppContext';
 import { getDailyBriefing } from '@/services/briefingService';
@@ -235,12 +234,6 @@ export default function TodayMode({ onNavigate }) {
         </p>
       </div>
 
-      <AgentInboxStrip
-        pendingCount={pendingAgentCount}
-        topAction={topAction}
-        onApproveTop={() => topAction && approveAction(topAction.id)}
-        onOpenInbox={() => onNavigate?.('agent-command')}
-      />
 
       {/* Quick Wins — Immediate Revenue Opportunities */}
       {quickWins.length > 0 && (

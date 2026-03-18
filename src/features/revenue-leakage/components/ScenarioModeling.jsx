@@ -76,14 +76,14 @@ function Slider({ value, min, max, step, onChange }) {
   );
 }
 
+const RECOMMENDED = { pace: 25, complaints: 24, staffing: 1 };
+
 export default function ScenarioModeling({ paceLoss, staffingLoss, weatherLoss }) {
-  const [values, setValues] = useState({
-    pace: 0,
-    complaints: 72,
-    staffing: 0,
-  });
+  const [values, setValues] = useState({ ...RECOMMENDED });
 
   const updateValue = (key, val) => setValues((prev) => ({ ...prev, [key]: val }));
+  const isDefault = values.pace === RECOMMENDED.pace && values.complaints === RECOMMENDED.complaints && values.staffing === RECOMMENDED.staffing;
+  const isZero = values.pace === 0 && values.complaints === 72 && values.staffing === 0;
 
   const recoveries = scenarios.map((s) => ({
     key: s.key,
@@ -119,8 +119,26 @@ export default function ScenarioModeling({ paceLoss, staffingLoss, weatherLoss }
             What if you took action?
           </h3>
           <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
-            Adjust the sliders to see projected monthly recovery.
+            {isDefault ? 'Swoop recommends this scenario based on your club\'s data.' : 'Adjust the sliders to see projected monthly recovery.'}
           </p>
+          {!isDefault && (
+            <button
+              onClick={() => setValues({ ...RECOMMENDED })}
+              style={{
+                marginTop: '6px',
+                padding: '4px 10px',
+                fontSize: theme.fontSize.xs,
+                fontWeight: 600,
+                color: theme.colors.accent,
+                background: 'none',
+                border: `1px solid ${theme.colors.accent}40`,
+                borderRadius: theme.radius.sm,
+                cursor: 'pointer',
+              }}
+            >
+              Reset to Swoop recommendation
+            </button>
+          )}
         </div>
         <div style={{
           textAlign: 'center',

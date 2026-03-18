@@ -3,6 +3,7 @@ import { theme } from '@/config/theme';
 import { Panel } from '@/components/ui';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
+import GrowthPipeline from '@/features/growth-pipeline/GrowthPipeline';
 
 const kpis = [
   { label: 'Members Saved', value: 14, prefix: '', suffix: '', color: 'green' },
@@ -95,7 +96,7 @@ const operationalSaves = [
   },
 ];
 
-const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned'];
+const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned', 'Growth Pipeline'];
 
 function formatCurrency(val) {
   return '$' + val.toLocaleString();
@@ -155,7 +156,7 @@ function TrendSparkline({ data, dataKey, color, height = 40, width = 120 }) {
         })}
       </svg>
       <span style={{ fontSize: '10px', fontWeight: 700, color: trend === 'up' ? colors.green : trend === 'down' ? colors.green : colors.textMuted }}>
-        {trend === 'up' ? '\u2191' : trend === 'down' ? '\u2193' : '\u2192'}
+        {trend === 'up' ? '\u2191' : trend === 'down' ? '\u2193' : '→'}
       </span>
     </div>
   );
@@ -331,6 +332,49 @@ export default function BoardReport() {
       </div>
 
       {activeTab === 0 && (
+        <>
+        {/* ROI Calculation */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          gap: '20px',
+          alignItems: 'center',
+          background: colors.bg,
+          border: '1px solid ' + colors.border,
+          borderRadius: '12px',
+          padding: '24px',
+          marginBottom: '16px',
+        }}>
+          <div>
+            <div style={{ fontSize: '12px', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Annual Investment</div>
+            <div style={{ fontSize: '13px', color: colors.text, lineHeight: 1.8 }}>
+              <div>Swoop Pro subscription: <strong style={{ fontFamily: theme.fonts.mono }}>$5,988</strong></div>
+              <div>Staff time (12 hrs/mo × $50/hr): <strong style={{ fontFamily: theme.fonts.mono }}>$7,200</strong></div>
+              <div style={{ borderTop: '1px solid ' + colors.border, paddingTop: '6px', marginTop: '6px' }}>
+                Total: <strong style={{ fontFamily: theme.fonts.mono, color: colors.orange }}>$13,188</strong>
+              </div>
+            </div>
+          </div>
+          <div style={{ fontSize: '24px', color: colors.textMuted }}>→</div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Annual Return</div>
+            <div style={{ fontSize: '13px', color: colors.text, lineHeight: 1.8 }}>
+              <div>Dues protected: <strong style={{ fontFamily: theme.fonts.mono }}>$168,000</strong></div>
+              <div>Revenue recovered: <strong style={{ fontFamily: theme.fonts.mono }}>$42,500</strong></div>
+              <div style={{ borderTop: '1px solid ' + colors.border, paddingTop: '6px', marginTop: '6px' }}>
+                Total: <strong style={{ fontFamily: theme.fonts.mono, color: colors.green }}>$210,500</strong>
+              </div>
+            </div>
+            <div style={{ marginTop: '12px' }}>
+              <span style={{ fontSize: '32px', fontWeight: 700, fontFamily: theme.fonts.mono, color: colors.green }}>16:1</span>
+              <span style={{ fontSize: '13px', color: colors.textMuted, marginLeft: '8px' }}>return on investment</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ fontSize: '12px', color: colors.textMuted, textAlign: 'center', marginBottom: '20px', fontStyle: 'italic' }}>
+          For every $1 invested in Swoop, your club protected $16 in member revenue.
+        </div>
+
         <Panel>
           <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: colors.white }}>
             Executive Summary
@@ -351,6 +395,7 @@ export default function BoardReport() {
           </p>
           <ProgressOverTime />
         </Panel>
+        </>
       )}
 
       {activeTab === 1 && (
@@ -369,7 +414,7 @@ export default function BoardReport() {
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
                 <span style={{ fontSize: '13px', color: colors.textMuted }}>Health:</span>
                 <HealthBadge value={m.healthBefore} />
-                <span style={{ color: colors.textMuted }}>{'\u2192'}</span>
+                <span style={{ color: colors.textMuted }}>{'→'}</span>
                 <HealthBadge value={m.healthAfter} />
               </div>
               <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.text }}>
@@ -421,7 +466,7 @@ export default function BoardReport() {
 
           {[
             {
-              insight: 'Members who received a personal GM call after a complaint renewed at 95% vs. 72% for those who didn\u2019t',
+              insight: 'Members who received a personal GM call after a complaint renewed at 95% vs. 72% for those who didn\'t',
               evidence: 'Of 14 members who received GM personal outreach, 13 renewed. Of 18 members with standard email follow-up, 13 renewed.',
               implication: 'GM personal calls are 3.4x more effective than email for at-risk retention. Worth the 15-minute investment.',
               domains: ['Service', 'Retention'],
@@ -429,24 +474,24 @@ export default function BoardReport() {
             {
               insight: 'Post-round dining dropped 34% on days with pace-of-play issues',
               evidence: '8 days with avg round time >4:30 showed 34% lower Grill Room covers in the 12-2 PM window vs. days at 4:10 or under.',
-              implication: 'Pace of play isn\u2019t just a golf problem \u2014 it\u2019s an F&B revenue problem. Every slow round costs ~$47 in lost dining.',
+              implication: 'Pace of play isn\'t just a golf problem — it\'s an F&B revenue problem. Every slow round costs ~$47 in lost dining.',
               domains: ['Golf', 'F&B'],
             },
             {
               insight: 'Event attendees who also golf regularly are the most loyal segment (97% renewal)',
               evidence: 'Members active in both golf (3+ rounds/mo) AND events (2+ events/qtr) renewed at 97%. Members active in only one domain: 81%.',
-              implication: 'Cross-domain engagement is the strongest retention signal. The goal isn\u2019t more golf or more events \u2014 it\u2019s both.',
+              implication: 'Cross-domain engagement is the strongest retention signal. The goal isn\'t more golf or more events — it\'s both.',
               domains: ['Golf', 'Events', 'Retention'],
             },
             {
-              insight: 'Email open rate is the earliest predictor of disengagement \u2014 6-8 weeks before activity drops',
+              insight: 'Email open rate is the earliest predictor of disengagement — 6-8 weeks before activity drops',
               evidence: 'In 9 of 11 resignations, email engagement dropped below 15% at least 6 weeks before golf or dining changed.',
               implication: 'Email is the canary in the coal mine. A weekly email decay alert would have caught 82% of at-risk members earlier.',
               domains: ['Email', 'Retention'],
             },
             {
               insight: 'Friday understaffing creates a compounding loss: $1,133 direct + $18,000 in resignation risk',
-              evidence: 'Jan 16 understaffing \u2192 James Whitfield complaint \u2192 unresolved \u2192 resignation. The F&B loss was $1,280. The membership loss was $18,000.',
+              evidence: 'Jan 16 understaffing → James Whitfield complaint → unresolved → resignation. The F&B loss was $1,280. The membership loss was $18,000.',
               implication: 'Staffing decisions have downstream consequences invisible to scheduling software. Swoop connects the staffing gap to the resignation.',
               domains: ['Staffing', 'F&B', 'Retention'],
             },
@@ -481,10 +526,14 @@ export default function BoardReport() {
             lineHeight: 1.6,
             textAlign: 'center',
           }}>
-            These correlations are unique to Oakmont Hills &mdash; they come from connecting your specific systems.
-            No industry benchmark or consultant report can tell you that <em>your</em> Friday understaffing caused <em>your</em> member&rsquo;s resignation.
+            These correlations are unique to Oakmont Hills — they come from connecting your specific systems.
+            No industry benchmark or consultant report can tell you that <em>your</em> Friday understaffing caused <em>your</em> member's resignation.
           </div>
         </div>
+      )}
+
+      {activeTab === 4 && (
+        <GrowthPipeline />
       )}
       </div>
     </PageTransition>

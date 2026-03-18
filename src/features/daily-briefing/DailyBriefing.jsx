@@ -65,10 +65,10 @@ export default function DailyBriefing() {
         context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. What Swoop would have done: Alert surfaced Day 1 → GM sends recovery message via Swoop app → James responds same day → Health score monitored weekly → Retention confirmed."
       />
 
-      {/* Agent actions badge — full inbox lives on Intelligent Actions page */}
+      {/* Agent actions badge — full inbox lives on Actions page */}
       {pendingAgentCount > 0 && (
         <div
-          onClick={() => navigate('agent-command')}
+          onClick={() => navigate('actions')}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -98,7 +98,7 @@ export default function DailyBriefing() {
             actions pending review
           </span>
           <span style={{ marginLeft: 'auto', fontSize: theme.fontSize.xs, color: theme.colors.agents ?? theme.colors.accent, fontWeight: 600 }}>
-            Open Intelligent Actions &rarr;
+            Open Actions →
           </span>
         </div>
       )}

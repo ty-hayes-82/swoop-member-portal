@@ -14,6 +14,18 @@ export const touchpointCorrelations = [
   { touchpoint: 'Complaint Resolution', retentionImpact: 0.82, category: 'service', description: 'Each complaint resolved within 24hrs improves renewal probability by 18%. Unresolved complaints are the #1 resignation accelerator.' },
 ];
 
+// At-risk member touchpoint correlations — reordered for recovery context
+export const touchpointCorrelationsAtRisk = [
+  { touchpoint: 'Complaint Resolution', retentionImpact: 0.91, category: 'service', description: 'The #1 recovery lever. At-risk members whose complaints are resolved same-day recover at 74% vs. 31% for delayed resolution.' },
+  { touchpoint: 'Round Frequency', retentionImpact: 0.85, category: 'golf', description: 'Re-engaging at-risk members with even 1 round/month improves recovery probability by 40%.' },
+  { touchpoint: 'Staff Interactions', retentionImpact: 0.79, category: 'service', description: 'Personal GM outreach is 3.4x more effective than email for at-risk members. Name recognition matters most when members feel invisible.' },
+  { touchpoint: 'Event Attendance', retentionImpact: 0.74, category: 'events', description: 'A single event attendance can reset a declining member. Social reconnection breaks the isolation-resignation cycle.' },
+  { touchpoint: 'Post-Round Dining', retentionImpact: 0.68, category: 'dining', description: 'At-risk members who dine post-round are signaling they still value the club experience. Protect this behavior.' },
+  { touchpoint: 'Email Engagement', retentionImpact: 0.52, category: 'email', description: 'Email re-engagement is a weak recovery signal for at-risk members — by the time they stop opening emails, the decline is advanced.' },
+  { touchpoint: 'Pro Shop Visits', retentionImpact: 0.41, category: 'proshop', description: 'Pro shop spend drops last in the decay sequence. Low predictive value for at-risk recovery.' },
+  { touchpoint: 'Course Condition Rating', retentionImpact: 0.38, category: 'course', description: 'Course conditions are a hygiene factor, not a recovery lever. Fixing conditions alone won\'t save an at-risk member.' },
+];
+
 // Experience-to-outcome correlation cards
 export const correlationInsights = [
   {
