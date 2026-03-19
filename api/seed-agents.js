@@ -13,6 +13,7 @@ export default async function handler(req, res) {
       source_systems TEXT[],
       last_run TIMESTAMPTZ
     )`;
+    await sql`ALTER TABLE agent_definitions ALTER COLUMN avatar TYPE VARCHAR(100)`;
     await sql`CREATE TABLE IF NOT EXISTS agent_actions (
       action_id VARCHAR(50) PRIMARY KEY,
       agent_id VARCHAR(50) REFERENCES agent_definitions(agent_id),
