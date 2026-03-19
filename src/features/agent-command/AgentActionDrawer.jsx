@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { theme } from '@/config/theme';
 import { AGENT_ACTION_TYPES } from '@/config/actionTypes';
 import { getMemberProfile } from '@/services/memberService';
+import { trackAction } from '@/services/activityService';
 import { useApp } from '@/context/AppContext';
 
 const PRIORITY_BADGES = {
@@ -131,6 +132,7 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
 
   const performApprove = (label) => {
     onApprove?.(label);
+    trackAction({ actionType: 'approve', actionSubtype: label?.toLowerCase(), referenceId: action.id, referenceType: 'agent_action', agentId: action.agentId, description: action.description, memberId: action.memberId, memberName: action.memberName, meta: { priority: action.priority } });
     handleClose();
   };
 
@@ -141,11 +143,13 @@ export function AgentActionDrawer({ action, onClose, onApprove, onDismiss }) {
       return;
     }
     onDismiss?.(`${label} · ${reason.trim()}`);
+    trackAction({ actionType: 'dismiss', referenceId: action.id, referenceType: 'agent_action', agentId: action.agentId, description: action.description, memberId: action.memberId, memberName: action.memberName, meta: { reason } });
     handleClose();
   };
 
   const handleSnooze = () => {
     showToast('Snoozed for 2 hours. The agent will re-surface this if still relevant.', 'info');
+    trackAction({ actionType: 'snooze', referenceId: action.id, referenceType: 'agent_action', agentId: action.agentId, description: action.description });
     handleClose();
   };
 

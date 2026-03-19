@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { getMemberProfile } from '@/services/memberService';
 import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 
 const MemberProfileContext = createContext(null);
 
@@ -146,6 +147,7 @@ export function MemberProfileProvider({ children }) {
         ],
       }));
       showToast?.('Staff note added', 'success');
+      trackAction({ actionType: 'note', actionSubtype: 'staff', memberId, memberName: null, description: note.text });
     },
     [showToast]
   );
@@ -165,6 +167,7 @@ export function MemberProfileProvider({ children }) {
           ? 'Comp offer logged'
           : 'Action captured';
       showToast?.(`${label} for ${memberName}`, 'success');
+      trackAction({ actionType: actionType, memberId, memberName });
     },
     [showToast, profile]
   );

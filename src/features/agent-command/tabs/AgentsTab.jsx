@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AgentStatusCard, AgentThoughtLog } from "@/components/ui";
 import AgentConfigDrawer from "../AgentConfigDrawer";
 import { getAgents, getThoughtLog } from "@/services/agentService";
+import { trackAction } from '@/services/activityService';
 import { useApp } from "@/context/AppContext";
 import { theme } from "@/config/theme";
 
@@ -47,7 +48,11 @@ export default function AgentsTab() {
             <AgentStatusCard
               agent={agent}
               overrideStatus={getAgentStatus(agent.id, agent.status)}
-              onToggle={() => toggleAgent(agent.id, getAgentStatus(agent.id, agent.status))}
+              onToggle={() => {
+                const currentStatus = getAgentStatus(agent.id, agent.status);
+                toggleAgent(agent.id, currentStatus);
+                trackAction({ actionType: 'toggle_agent', actionSubtype: currentStatus === 'active' ? 'deactivate' : 'activate', agentId: agent.id, description: agent.name });
+              }}
               onViewLog={() => setExpandedLog((current) => (current === agent.id ? null : agent.id))}
               onConfigure={() => setConfigAgent((current) => (current === agent.id ? null : agent.id))}
             />
@@ -84,6 +89,7 @@ export default function AgentsTab() {
                 initialConfig={{}}
                 onSave={(cfg) => {
                   console.log("Agent config saved:", agent.id, cfg);
+                  trackAction({ actionType: 'config_agent', actionSubtype: 'save', agentId: agent.id, description: agent.name, meta: cfg });
                   setConfigAgent(null);
                 }}
                 onClose={() => setConfigAgent(null)}

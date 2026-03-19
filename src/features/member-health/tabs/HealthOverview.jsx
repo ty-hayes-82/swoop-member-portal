@@ -8,6 +8,7 @@ import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getDecayingMe
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 
 const fullCurrencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -575,11 +576,11 @@ export default function HealthOverview() {
             {selectedMembers.size} member{selectedMembers.size > 1 ? 's' : ''} selected
           </span>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => { showToast(`Personal notes drafted for ${selectedMembers.size} members`, 'success'); setSelectedMembers(new Set()); }}
+            <button onClick={() => { showToast(`Personal notes drafted for ${selectedMembers.size} members`, 'success'); trackAction({ actionType: 'note', actionSubtype: 'bulk', meta: { count: selectedMembers.size } }); setSelectedMembers(new Set()); }}
               style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none', background: '#e8772e', color: 'white' }}>
               Draft personal notes
             </button>
-            <button onClick={() => { showToast(`Calls scheduled for ${selectedMembers.size} members`, 'success'); setSelectedMembers(new Set()); }}
+            <button onClick={() => { showToast(`Calls scheduled for ${selectedMembers.size} members`, 'success'); trackAction({ actionType: 'call', actionSubtype: 'bulk', meta: { count: selectedMembers.size } }); setSelectedMembers(new Set()); }}
               style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1.5px solid #d4d4d8', background: 'white', color: '#3f3f46' }}>
               Schedule calls
             </button>
@@ -714,7 +715,7 @@ export default function HealthOverview() {
           </div>
         </div>
         <button
-          onClick={() => showToast('Outreach sequence started for Critical members', 'success')}
+          onClick={() => { showToast('Outreach sequence started for Critical members', 'success'); trackAction({ actionType: 'email', actionSubtype: 'outreach', description: 'Outreach sequence for Critical members' }); }}
           style={{
             padding: '10px 24px', borderRadius: 8, fontSize: 14, fontWeight: 700,
             cursor: 'pointer', border: 'none', background: '#dc2626', color: 'white',

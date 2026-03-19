@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { getActionsForArchetype, outreachCategories } from '@/data/outreach';
 import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 
 const STAFF = ['F&B Director', 'Head Golf Professional', 'Membership Director', 'Grill Room Manager', 'Club Manager'];
 
@@ -76,6 +77,9 @@ export default function QuickActions({ memberName, memberId, context = '', arche
         ? `Call scheduled for ${memberName}`
         : `Task assigned to ${staff}`;
     showToast(message, 'info');
+    if (type === 'note') trackAction({ actionType: 'note', actionSubtype: 'personal', memberId, memberName, description: note || defaultNote });
+    if (type === 'call') trackAction({ actionType: 'call', actionSubtype: 'schedule', memberId, memberName });
+    if (type === 'task') trackAction({ actionType: 'task', actionSubtype: 'assign', memberId, memberName, meta: { assignedTo: staff } });
     setTimeout(() => setSent(null), 4000);
   };
 
@@ -270,6 +274,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
                         e.stopPropagation();
                         addActionEntry('note');
                         showToast(action.label + ' triggered for ' + memberName, 'info');
+                        trackAction({ actionType: 'email', actionSubtype: 'outreach', memberId, memberName, description: action.label });
                       }}
                       style={{
                         padding: '5px 12px', borderRadius: theme.radius.sm, fontSize: '11px',

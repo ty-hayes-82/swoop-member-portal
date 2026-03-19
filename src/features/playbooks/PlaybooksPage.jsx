@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { theme } from '@/config/theme';
 import PageTransition from '@/components/ui/PageTransition';
 import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 
 // ────────────────────────────────────────────────
 // Playbook data
@@ -582,7 +583,10 @@ function PlaybookDetail({ playbook }) {
       {/* Activate Button */}
       <div style={{ marginTop: 32 }}>
         <button
-          onClick={() => showToast(`${playbook.name} activated`, 'success')}
+          onClick={() => {
+            showToast(`${playbook.name} activated`, 'success');
+            trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: playbook.name });
+          }}
           style={{
             width: '100%', background: playbook.categoryColor || '#c0392b', color: 'white', border: 'none',
             padding: 16, borderRadius: 10, fontSize: 16, fontWeight: 600, cursor: 'pointer',

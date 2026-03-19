@@ -3,6 +3,7 @@
 import { theme } from '@/config/theme';
 import { useFixItActions } from '@/hooks/useFixItActions';
 import { useAppContext } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 import { useState } from 'react';
 import PlaybookStep from './PlaybookStep';
 import BeforeAfter from './BeforeAfter';
@@ -25,6 +26,7 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
   const handleActivate = () => {
     if (!confirming) { setConfirming(true); return; }
     activatePlaybook(id);
+    trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: title, referenceId: id, referenceType: 'playbook' });
     setConfirming(false);
   };
 
@@ -149,7 +151,14 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
         {/* Activate button */}
         {!confirming && (
           <button
-            onClick={() => active ? deactivatePlaybook(id) : handleActivate()}
+            onClick={() => {
+              if (active) {
+                deactivatePlaybook(id);
+                trackAction({ actionType: 'playbook', actionSubtype: 'deactivate', description: title, referenceId: id, referenceType: 'playbook' });
+              } else {
+                handleActivate();
+              }
+            }}
             style={{
               width: '100%', marginTop: theme.spacing.md,
               padding: `${theme.spacing.sm} ${theme.spacing.md}`, borderRadius: theme.radius.md,

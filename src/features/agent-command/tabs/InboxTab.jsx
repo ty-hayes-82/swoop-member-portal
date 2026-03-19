@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AgentActionCard, SoWhatCallout, StoryHeadline } from '@/components/ui';
 import { getAgents } from '@/services/agentService';
+import { trackAction } from '@/services/activityService';
 import { useApp } from '@/context/AppContext';
 import { theme } from '@/config/theme';
 import { AgentActionDrawer } from '../AgentActionDrawer';
@@ -67,10 +68,12 @@ export default function InboxTab() {
   const handleApprove = (item, contextLabel) => {
     approveAction(item.id, { approvalAction: contextLabel ?? 'Approve' });
     showToast(`Approved ${item.description}${contextLabel ? ` — ${contextLabel}` : ''}`, 'success');
+    trackAction({ actionType: 'approve', memberId: item.memberId, memberName: item.memberName, description: item.description, referenceId: item.id, referenceType: 'agent_action', agentId: item.agentId, meta: { priority: item.priority, impact: item.impactMetric, contextLabel: contextLabel } });
   };
   const handleDismiss = (item, contextLabel) => {
     dismissAction(item.id, { reason: contextLabel ?? 'No reason provided' });
     showToast(`Dismissed ${item.description}${contextLabel ? ` — ${contextLabel}` : ''}`, 'warning');
+    trackAction({ actionType: 'dismiss', memberId: item.memberId, memberName: item.memberName, description: item.description, referenceId: item.id, referenceType: 'agent_action', agentId: item.agentId, meta: { reason: contextLabel ?? 'No reason provided' } });
   };
   const bulkApprove = () => visible.forEach((item) => handleApprove(item));
   const bulkDismiss = () => visible.forEach((item) => handleDismiss(item));

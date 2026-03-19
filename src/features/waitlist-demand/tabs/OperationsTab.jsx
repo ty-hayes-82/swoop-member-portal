@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { StatCard, SoWhatCallout, InfoTooltip } from '@/components/ui';
 import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 import { getConfirmations, getConfirmationSummary, getReassignments, getFillReport } from '@/services/teeSheetOpsService';
 import { getWaitlistQueue } from '@/services/waitlistService';
 import ConfirmationRow from '../components/ConfirmationRow';
@@ -25,6 +26,7 @@ export default function OperationsTab() {
 
     if (newStatus === 'confirmed') {
       showToast(`${conf?.memberName ?? 'Member'} confirmed for ${conf?.teeTime ?? 'slot'}`, 'success');
+      trackAction({ actionType: 'confirm', actionSubtype: newStatus, memberId: conf?.memberId, memberName: conf?.memberName, referenceId: id, referenceType: 'confirmation', description: conf?.teeTime });
     } else if (newStatus === 'cancelled' || newStatus === 'no_response') {
       showToast(
         newStatus === 'cancelled'
@@ -32,6 +34,7 @@ export default function OperationsTab() {
           : `No response from ${conf?.memberName ?? 'member'} — slot released to pipeline`,
         'warning',
       );
+      trackAction({ actionType: 'confirm', actionSubtype: newStatus, memberId: conf?.memberId, memberName: conf?.memberName, referenceId: id, referenceType: 'confirmation', description: conf?.teeTime });
       // Auto-create re-assignment entry
       if (conf) {
         const topCandidate = queue.find((m) => m.memberId !== conf.memberId) ?? queue[0];
@@ -54,12 +57,14 @@ export default function OperationsTab() {
       }
     } else {
       showToast(`${conf?.memberName ?? 'Member'} marked as ${newStatus}`, 'info');
+      trackAction({ actionType: 'confirm', actionSubtype: newStatus, memberId: conf?.memberId, memberName: conf?.memberName, referenceId: id, referenceType: 'confirmation', description: conf?.teeTime });
     }
   }
 
   function handleAddNotes(id, notes) {
     updateConfirmation(id, { staffNotes: notes });
     showToast('Notes saved', 'success');
+    trackAction({ actionType: 'note', actionSubtype: 'staff', referenceId: id, referenceType: 'confirmation', description: notes });
   }
 
   function handleApproveFill(id) {
@@ -70,6 +75,8 @@ export default function OperationsTab() {
       staffId: 'staff_proshop',
     });
     showToast('Fill approved — member notified', 'success');
+    const ra = reassignments.find((r) => r.id === id);
+    trackAction({ actionType: 'reassign', actionSubtype: 'approve_fill', referenceId: id, referenceType: 'reassignment', memberId: ra?.recommendedFillMemberId, memberName: ra?.recommendedFillMemberName });
   }
 
   function handleOverride(id, member) {
@@ -82,6 +89,7 @@ export default function OperationsTab() {
       staffId: 'staff_proshop',
     });
     showToast(`Override: ${member.memberName} assigned to slot`, 'success');
+    trackAction({ actionType: 'reassign', actionSubtype: 'override', referenceId: id, referenceType: 'reassignment', memberId: member.memberId, memberName: member.memberName });
   }
 
   function handleSkip(id, reason) {
@@ -91,6 +99,7 @@ export default function OperationsTab() {
       staffId: 'staff_proshop',
     });
     showToast('Slot skipped — will cascade to next candidate', 'warning');
+    trackAction({ actionType: 'reassign', actionSubtype: 'skip', referenceId: id, referenceType: 'reassignment' });
   }
 
   const stats = [

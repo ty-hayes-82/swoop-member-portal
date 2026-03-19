@@ -4,6 +4,7 @@ import CancellationRiskRow from '@/features/pipeline/components/CancellationRisk
 import MemberLink from '@/components/MemberLink.jsx';
 import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 import { getCancellationPredictions, getCancellationSummary, getWaitlistQueue } from '@/services/waitlistService';
 import { createReassignment } from '@/services/teeSheetOpsService';
 
@@ -171,7 +172,10 @@ export default function PredictionsTab() {
                     <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                         <Btn variant="ghost" size="xs"
-                          onClick={() => showToast(`Flagged ${prediction.memberName} for GM follow-up`, 'success')}>
+                          onClick={() => {
+                            showToast(`Flagged ${prediction.memberName} for GM follow-up`, 'success');
+                            trackAction({ actionType: 'flag', actionSubtype: 'gm', memberId: prediction.memberId, memberName: prediction.memberName });
+                          }}>
                           Flag GM
                         </Btn>
                         <Btn variant="ghost" size="xs"
@@ -198,6 +202,7 @@ export default function PredictionsTab() {
                                   retentionRationale: `Health ${candidate.healthScore}, ${candidate.riskLevel}, $${(candidate.memberValueAnnual ?? 0).toLocaleString()}/yr dues.`,
                                 });
                                 showToast(`Pre-staged ${prediction.teeTime} for re-assignment if ${prediction.memberName} cancels`, 'warning');
+                                trackAction({ actionType: 'reassign', actionSubtype: 'pre_stage', memberId: prediction.memberId, memberName: prediction.memberName, meta: { teeTime: prediction.teeTime, cancelProbability: prediction.cancelProbability } });
                               }
                             }}>
                             Pre-Stage

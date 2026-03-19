@@ -10,6 +10,7 @@ import {
 import { getWaitlistConfig, updateWaitlistConfig } from '@/services/teeSheetOpsService';
 import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 
 const SLOT_WINDOWS = ['Sat 7:00', 'Sat 7:08', 'Sat 7:16', 'Sat 7:24', 'Sun 7:00', 'Sun 7:08'];
 
@@ -85,7 +86,10 @@ function QueuePlaybookBanner({ showToast }) {
         </div>
       </div>
       <button
-        onClick={() => showToast('Priority notes sent to 5 critical members', 'success')}
+        onClick={() => {
+          showToast('Priority notes sent to 5 critical members', 'success');
+          trackAction({ actionType: 'note', actionSubtype: 'priority', description: 'Priority notes sent to critical members', meta: { count: 5 } });
+        }}
         style={{
           padding: '7px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600,
           cursor: 'pointer', border: 'none', background: '#dc2626', color: 'white',
@@ -391,16 +395,23 @@ export default function QueueTab() {
                     retentionRationale: `Direct assignment: Health ${selectedMember.healthScore}, ${selectedMember.riskLevel}, $${(selectedMember.memberValueAnnual ?? 0).toLocaleString()}/yr.`,
                   });
                   showToast(`${selectedSlot} assigned to ${selectedMember.memberName}`, 'success');
+                  trackAction({ actionType: 'reassign', actionSubtype: 'assign', memberId: selectedMember.memberId, memberName: selectedMember.memberName });
                 }
               }}>
               Assign Slot
             </Btn>
             <Btn variant="ghost" size="sm"
-              onClick={() => showToast(`Concierge notified for ${selectedMember?.memberName ?? 'member'}`, 'success')}>
+              onClick={() => {
+                showToast(`Concierge notified for ${selectedMember?.memberName ?? 'member'}`, 'success');
+                trackAction({ actionType: 'escalate', actionSubtype: 'concierge', memberId: selectedMember?.memberId, memberName: selectedMember?.memberName });
+              }}>
               Notify Concierge
             </Btn>
             <Btn variant="ghost" size="sm"
-              onClick={() => showToast(`Escalated to GM for ${selectedMember?.memberName ?? 'member'}`, 'warning')}>
+              onClick={() => {
+                showToast(`Escalated to GM for ${selectedMember?.memberName ?? 'member'}`, 'warning');
+                trackAction({ actionType: 'escalate', actionSubtype: 'gm', memberId: selectedMember?.memberId, memberName: selectedMember?.memberName });
+              }}>
               Escalate to GM
             </Btn>
           </div>

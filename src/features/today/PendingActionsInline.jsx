@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { AgentActionCard } from '@/components/ui';
+import { trackAction } from '@/services/activityService';
 import { useApp } from '@/context/AppContext';
 import { useNavigation } from '@/context/NavigationContext';
 import { theme } from '@/config/theme';
@@ -22,10 +23,12 @@ export default function PendingActionsInline() {
   const handleApprove = (item) => {
     approveAction(item.id, { approvalAction: 'Approve' });
     showToast(`Approved ${item.description}`, 'success');
+    trackAction({ actionType: 'approve', memberId: item.memberId, memberName: item.memberName, description: item.description, referenceId: item.id, referenceType: 'agent_action', agentId: item.agentId });
   };
   const handleDismiss = (item) => {
     dismissAction(item.id, { reason: 'Dismissed from Today view' });
     showToast(`Dismissed ${item.description}`, 'warning');
+    trackAction({ actionType: 'dismiss', memberId: item.memberId, memberName: item.memberName, description: item.description, referenceId: item.id, referenceType: 'agent_action', agentId: item.agentId });
   };
 
   return (

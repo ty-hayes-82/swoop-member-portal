@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
 import { useNavigationContext } from '@/context/NavigationContext';
+import { trackAction } from '@/services/activityService';
 
 export default function PlaybookActionCard({
   icon = '\u26A1',
@@ -29,6 +30,7 @@ export default function PlaybookActionCard({
 
   const handleActivate = () => {
     showToast(`${playbookName || title} activated for ${memberCount || 'targeted'} members`, 'success');
+    trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: playbookName || title, meta: { memberCount, impact } });
   };
 
   const handleViewPlaybook = () => {

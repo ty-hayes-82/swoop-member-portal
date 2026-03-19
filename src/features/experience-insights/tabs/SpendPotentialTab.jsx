@@ -1,6 +1,7 @@
 import { theme } from '@/config/theme';
 import { SoWhatCallout } from '@/components/ui';
 import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 import { archetypeSpendGaps } from '@/services/experienceInsightsService';
 
 export default function SpendPotentialTab({ archetype }) {
@@ -96,7 +97,7 @@ export default function SpendPotentialTab({ archetype }) {
                 <strong style={{ color: theme.colors.success }}>Campaign:</strong> {arch.campaign}
               </div>
               <button
-                onClick={() => showToast(`Campaign launched for ${arch.count} ${arch.archetype} members`, 'success')}
+                onClick={() => { showToast(`Campaign launched for ${arch.count} ${arch.archetype} members`, 'success'); trackAction({ actionType: 'campaign', actionSubtype: 'launch', description: arch.campaign, meta: { archetype: arch.archetype, count: arch.count, untapped: arch.totalUntapped } }); }}
                 style={{
                   padding: '6px 16px',
                   borderRadius: '8px',

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 
 const TYPES = ['Complaint', 'Compliment', 'Observation', 'Request'];
 
@@ -24,6 +25,7 @@ export default function LogFeedbackButton() {
     });
     localStorage.setItem('swoop_manual_feedback', JSON.stringify(feedback));
     showToast(`${type} logged for ${memberName.trim()}`, 'success');
+    trackAction({ actionType: 'feedback', actionSubtype: type.toLowerCase(), memberName: memberName.trim(), description: note.trim(), meta: { type } });
     setOpen(false);
     setMemberName('');
     setNote('');

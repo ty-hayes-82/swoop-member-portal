@@ -728,6 +728,31 @@ CREATE TABLE IF NOT EXISTS industry_benchmarks (
   direction           VARCHAR(20)
 );
 
+-- ---------------------------------------------------------------------------
+-- 4.7 ACTIVITY LOG — Universal action tracking
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS activity_log (
+  id              SERIAL PRIMARY KEY,
+  action_type     VARCHAR(50) NOT NULL,
+  action_subtype  VARCHAR(50),
+  actor           VARCHAR(50) DEFAULT 'gm_default',
+  member_id       VARCHAR(20),
+  member_name     VARCHAR(100),
+  agent_id        VARCHAR(50),
+  reference_id    VARCHAR(100),
+  reference_type  VARCHAR(50),
+  description     TEXT,
+  meta            JSONB DEFAULT '{}',
+  status          VARCHAR(20) DEFAULT 'logged',
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_log_type ON activity_log(action_type);
+CREATE INDEX IF NOT EXISTS idx_activity_log_member ON activity_log(member_id);
+CREATE INDEX IF NOT EXISTS idx_activity_log_created ON activity_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activity_log_reference ON activity_log(reference_id, reference_type);
+
 -- =============================================================================
 -- End of schema
 -- =============================================================================
