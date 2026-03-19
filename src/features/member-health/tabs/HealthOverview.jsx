@@ -3,7 +3,8 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
-import { getHealthDistribution, getAtRiskMembers, getWatchMembers, calculateLTV, formatLTV, DEFAULT_LTV_MULTIPLIER } from '@/services/memberService';
+import { Sparkline } from '@/components/ui';
+import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getDecayingMembers, calculateLTV, formatLTV, DEFAULT_LTV_MULTIPLIER } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
@@ -301,8 +302,26 @@ export default function HealthOverview() {
   const dist = getHealthDistribution();
   const atRisk = getAtRiskMembers();
   const watchList = getWatchMembers();
+  const decaying = getDecayingMembers();
   const [expanded, setExpanded] = useState(null);
   const [showWatch, setShowWatch] = useState(false);
+
+  // First Domino: members with email open rate < 20% (jan field is 0-1 decimal)
+  const firstDominoMembers = useMemo(() => {
+    return (decaying ?? [])
+      .filter((m) => m.jan != null && m.jan < 0.20)
+      .map((m) => {
+        const atRiskMatch = atRisk.find((a) => a.memberId === m.memberId);
+        return {
+          ...m,
+          archetype: atRiskMatch?.archetype ?? 'Unknown',
+          novPct: Math.round((m.nov ?? 0) * 100),
+          decPct: Math.round((m.dec ?? 0) * 100),
+          janPct: Math.round((m.jan ?? 0) * 100),
+          sparkline: [Math.round((m.nov ?? 0) * 100), Math.round((m.dec ?? 0) * 100), Math.round((m.jan ?? 0) * 100)],
+        };
+      });
+  }, [decaying, atRisk]);
   const [sortColumn, setSortColumn] = useState('score');
   const [sortDir, setSortDir] = useState('desc');
 
@@ -438,6 +457,52 @@ export default function HealthOverview() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      {/* First Domino Alert */}
+      {firstDominoMembers.length > 0 && (
+        <div style={{
+          background: 'rgba(220,38,38,0.03)',
+          borderLeft: `4px solid ${theme.colors.urgent}`,
+          borderRadius: theme.radius.md,
+          padding: theme.spacing.md,
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.sm }}>
+            <div>
+              <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>
+                🚨 First Domino Alert — {firstDominoMembers.length} members showing earliest decay signal
+              </div>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                Email engagement declined while golf and dining remain normal. This is the 6–8 week early warning window before visible disengagement.
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {firstDominoMembers.map((m) => (
+              <div key={m.memberId ?? m.name} style={{
+                display: 'grid', gridTemplateColumns: '1.2fr 80px 1.5fr 1fr',
+                gap: theme.spacing.sm, alignItems: 'center',
+                padding: '6px 8px', background: theme.colors.bgCard,
+                border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm,
+                fontSize: theme.fontSize.xs,
+              }}>
+                <div>
+                  <span style={{ fontWeight: 700 }}>{m.name}</span>
+                  <div style={{ fontSize: 10, color: theme.colors.textMuted }}>{m.archetype}</div>
+                </div>
+                <div style={{ height: 20, width: 60 }}>
+                  <Sparkline data={m.sparkline} color={theme.colors.urgent} height={20} />
+                </div>
+                <div style={{ color: theme.colors.textSecondary }}>
+                  Open rate: {m.novPct}% → {m.decPct}% → <strong style={{ color: theme.colors.urgent }}>{m.janPct}%</strong>
+                </div>
+                <div style={{ color: theme.colors.info, fontWeight: 600, fontSize: 11 }}>
+                  Week 1: Personal check-in call
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Health distribution bars */}
       <div className="grid-responsive-4">
         {dist.map((d) => {

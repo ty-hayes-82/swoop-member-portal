@@ -139,6 +139,7 @@ export const navItems = [
     color: theme.colors.navDemo,
     subtitle: 'Monthly executive summary — retention, revenue, and operational saves.',
     sourceSystems: ['All Systems'],
+    badge: '16:1 ROI',
   },
   // Hidden reporting pages
   {

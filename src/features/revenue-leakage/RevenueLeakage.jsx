@@ -5,8 +5,11 @@ import StaffingImpactTab from './tabs/StaffingImpactTab';
 import WeatherImpactTab from './tabs/WeatherImpactTab';
 import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
+import { useNavigation } from '@/context/NavigationContext';
 import { paceFBImpact } from '@/data/pace';
 import { understaffedDays } from '@/data/staffing';
+import { archetypeSpendGaps } from '@/services/experienceInsightsService';
+import { getMemberSummary } from '@/services/memberService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import ScenarioModeling from './components/ScenarioModeling';
@@ -368,8 +371,17 @@ function ActionPath({ label, amount, color, action }) {
 }
 
 export default function RevenueLeakage() {
+  const { navigate: nav } = useNavigation();
   const [activeTab, setActiveTab] = useState('pace');
   const recoverableAmount = Math.round(PACE_LOSS * 0.35);
+
+  // Unified revenue opportunity data
+  const spendTotal = archetypeSpendGaps.reduce((s, a) => s + a.totalUntapped, 0);
+  const spendMonthly = Math.round(spendTotal / 12);
+  const memberSummary = getMemberSummary();
+  const duesAtRisk = memberSummary.potentialDuesAtRisk || 533000;
+  const duesMonthly = Math.round(duesAtRisk / 12);
+  const totalOpportunity = TOTAL_LOSS + spendMonthly + duesMonthly;
 
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -391,6 +403,51 @@ export default function RevenueLeakage() {
         />
 
         <FlowLink flowNum="03" persona="Mike" />
+
+        {/* Unified Revenue Opportunity */}
+        <div style={{
+          background: theme.colors.bgCard,
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.lg,
+          padding: theme.spacing.lg,
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: theme.spacing.sm }}>
+            Total Revenue Opportunity
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: theme.spacing.md, marginBottom: theme.spacing.md }}>
+            {[
+              { label: 'Revenue Leakage', sub: 'Recoverable', value: TOTAL_LOSS, color: theme.colors.urgent, link: null },
+              { label: 'Spend Potential', sub: 'Growable', value: spendMonthly, color: theme.colors.success, link: () => nav('experience-insights') },
+              { label: 'Dues at Risk', sub: 'Protectable', value: duesMonthly, color: theme.colors.warning, link: () => nav('member-health') },
+            ].map((p) => (
+              <div
+                key={p.label}
+                onClick={p.link ?? undefined}
+                style={{
+                  background: `${p.color}08`,
+                  border: `1px solid ${p.color}25`,
+                  borderRadius: theme.radius.md,
+                  padding: theme.spacing.md,
+                  textAlign: 'center',
+                  cursor: p.link ? 'pointer' : 'default',
+                }}
+              >
+                <div style={{ fontSize: 10, color: theme.colors.textMuted, fontWeight: 600, textTransform: 'uppercase' }}>{p.sub}</div>
+                <div style={{ fontFamily: mono, fontSize: theme.fontSize.xl, fontWeight: 700, color: p.color }}>
+                  ${p.value.toLocaleString()}<span style={{ fontSize: theme.fontSize.xs, fontWeight: 400 }}>/mo</span>
+                </div>
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>{p.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', borderTop: `1px solid ${theme.colors.border}`, paddingTop: theme.spacing.sm }}>
+            <span style={{ fontSize: 11, color: theme.colors.textMuted }}>Combined addressable opportunity: </span>
+            <span style={{ fontFamily: mono, fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary }}>
+              ${totalOpportunity.toLocaleString()}/mo
+            </span>
+            <span style={{ fontSize: 11, color: theme.colors.textMuted }}> (${(totalOpportunity * 12).toLocaleString()}/yr)</span>
+          </div>
+        </div>
 
         <RecoveryCTA
           recoverableAmount={recoverableAmount}
