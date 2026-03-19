@@ -8,6 +8,7 @@ import { sourceSystems } from '@/services/fbService';
 import { theme } from '@/config/theme';
 
 import PageTransition from '@/components/ui/PageTransition';
+import BackLink from '@/components/ui/BackLink';
 
 const TABS = [
   { key: 'outlets',    label: 'Outlet Performance' },
@@ -28,6 +29,7 @@ export default function FBPerformance() {
   return (
     <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <BackLink />
       <StoryHeadline
         variant="opportunity"
         headline="Slow rounds are leaving $5,700/month in dining revenue on the table."

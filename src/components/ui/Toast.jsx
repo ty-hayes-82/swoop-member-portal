@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { theme } from '@/config/theme';
 
-export function Toast({ message, variant = 'success', duration = 3000, onClose }) {
+export function Toast({ message, variant = 'success', duration = 4000, onClose }) {
   const [isVisible, setIsVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
 
@@ -36,9 +36,10 @@ export function Toast({ message, variant = 'success', duration = 3000, onClose }
         zIndex: 9999,
         background: config.bg,
         color: theme.colors.white,
-        padding: '12px 20px',
+        padding: '14px 24px',
         borderRadius: theme.radius.md,
-        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+        border: '1px solid rgba(255,255,255,0.15)',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',

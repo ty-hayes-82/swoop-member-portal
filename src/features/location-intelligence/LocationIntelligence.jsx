@@ -4,6 +4,7 @@ import ClubMap from './ClubMap.jsx';
 import { getLiveMemberLocations, getServiceRecoveryAlerts, getStaffLocations, getZoneDensity } from '@/services/locationService';
 import { StoryHeadline, SoWhatCallout } from '@/components/ui';
 import MemberLink from '@/components/MemberLink.jsx';
+import BackLink from '@/components/ui/BackLink';
 import { useApp } from '@/context/AppContext';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 
@@ -125,6 +126,7 @@ export default function LocationIntelligence() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <BackLink />
       <StoryHeadline
         variant="insight"
         headline="Know who is on property right now — and who needs attention before they leave."

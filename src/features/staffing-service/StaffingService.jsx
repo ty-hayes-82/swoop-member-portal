@@ -9,6 +9,7 @@ import { theme } from '@/config/theme';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 
 import PageTransition from '@/components/ui/PageTransition';
+import BackLink from '@/components/ui/BackLink';
 
 const TABS = [
   { key: 'service',   label: 'Service Quality' },
@@ -32,6 +33,7 @@ export default function StaffingService() {
   return (
     <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <BackLink />
       <StoryHeadline
         variant="urgent"
         headline="The Jan 16 complaint was never resolved. James Whitfield resigned Jan 22 — $18K in annual dues lost."

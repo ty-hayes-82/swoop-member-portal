@@ -41,11 +41,13 @@ export default function Panel({
         {tabs && (
           <div style={{
             display: 'flex',
-            flexWrap: 'wrap',
+            flexWrap: 'nowrap',
             columnGap: 0,
-            rowGap: '8px',
             marginTop: '16px',
             maxWidth: '100%',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'thin',
           }}>
             {tabs.map(tab => {
               const active = tab.key === activeTab;

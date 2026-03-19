@@ -10,6 +10,7 @@ import { theme } from '@/config/theme';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 
 import PageTransition from '@/components/ui/PageTransition';
+import BackLink from '@/components/ui/BackLink';
 
 export default function OperationsDashboard() {
   // FP-P02: Loading state
@@ -49,6 +50,7 @@ export default function OperationsDashboard() {
   return (
     <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <BackLink />
 
       <div
         style={{

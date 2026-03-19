@@ -1,6 +1,8 @@
 import { theme } from '@/config/theme';
+import { useApp } from '@/context/AppContext';
 
 export default function RecoveryCTA({ recoverableAmount, totalLoss, onViewStaffingTab }) {
+  const { showToast } = useApp();
   const remainingGap = totalLoss - recoverableAmount;
   const recoverablePercent = ((recoverableAmount / totalLoss) * 100).toFixed(0);
   const remainingPercent = ((remainingGap / totalLoss) * 100).toFixed(0);
@@ -185,6 +187,7 @@ export default function RecoveryCTA({ recoverableAmount, totalLoss, onViewStaffi
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = `0 4px 12px ${theme.colors.opportunity}40`;
             }}
+            onClick={() => showToast('Ranger plan: Deploy 2 rangers to holes 4, 8, 12 at 10-minute intervals during Sat 7–9 AM peak. Estimated recovery: 12 min/round improvement.', 'info')}
             >
               📋 See Recommended Ranger Plan
             </button>
