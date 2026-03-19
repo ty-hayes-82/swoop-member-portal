@@ -326,8 +326,6 @@ export const archetypeSpendGaps = [
   },
 ];
 
-export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email', 'Complaints'];
-
 // Archetype spend patterns for spend potential analysis
 export const getArchetypeSpendPatterns = () => {
   return memberArchetypes.map(a => ({
