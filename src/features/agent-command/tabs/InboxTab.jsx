@@ -43,6 +43,7 @@ export default function InboxTab() {
   }, [pendingActions, filterAgent]);
 
   const [groupByCategory, setGroupByCategory] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const groupedActions = useMemo(() => {
     if (!groupByCategory) return null;
     const groups = {};
@@ -225,7 +226,12 @@ export default function InboxTab() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-          {visible.map((action) => (
+          {!showAll && visible.length > 3 && (
+            <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.accent, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Today's Priority · ~35 min for top 3 actions
+            </div>
+          )}
+          {(showAll ? visible : visible.slice(0, 3)).map((action) => (
             <AgentActionCard
               key={action.id}
               action={action}
@@ -234,6 +240,24 @@ export default function InboxTab() {
               onSelect={() => setDrawerAction(action)}
             />
           ))}
+          {!showAll && visible.length > 3 && (
+            <button
+              onClick={() => setShowAll(true)}
+              style={{
+                padding: '8px 16px',
+                fontSize: theme.fontSize.xs,
+                fontWeight: 600,
+                color: theme.colors.accent,
+                background: `${theme.colors.accent}08`,
+                border: `1px solid ${theme.colors.accent}30`,
+                borderRadius: theme.radius.md,
+                cursor: 'pointer',
+                textAlign: 'center',
+              }}
+            >
+              Show all {visible.length} actions
+            </button>
+          )}
         </div>
       )}
 

@@ -35,6 +35,7 @@ export const correlationInsights = [
     domains: ['Golf', 'Dining'],
     impact: 'high',
     metric: { value: '2.3x', label: 'renewal rate multiplier' },
+    trend: [86, 87, 89, 90, 91, 92], delta: '+6pp', deltaDirection: 'up',
   },
   {
     id: 'complaint-resolution',
@@ -43,6 +44,7 @@ export const correlationInsights = [
     domains: ['Service', 'Retention'],
     impact: 'high',
     metric: { value: '+18%', label: 'renewal improvement' },
+    trend: [71, 74, 78, 82, 86, 89], delta: '+18pp', deltaDirection: 'up',
   },
   {
     id: 'event-retention',
@@ -51,6 +53,7 @@ export const correlationInsights = [
     domains: ['Events', 'Retention'],
     impact: 'high',
     metric: { value: '91%', label: 'renewal rate (2+ events/qtr)' },
+    trend: [84, 86, 87, 89, 90, 91], delta: '+7pp', deltaDirection: 'up',
   },
   {
     id: 'email-decay-warning',
@@ -59,6 +62,7 @@ export const correlationInsights = [
     domains: ['Email', 'Retention'],
     impact: 'medium',
     metric: { value: '6-8 wks', label: 'early warning window' },
+    trend: [10, 9, 8, 7, 7, 6], delta: '-4 wks', deltaDirection: 'down',
   },
   {
     id: 'staffing-experience',
@@ -67,6 +71,7 @@ export const correlationInsights = [
     domains: ['Staffing', 'F&B', 'Service'],
     impact: 'high',
     metric: { value: '2.1x', label: 'complaint rate on understaffed days' },
+    trend: [2.8, 2.5, 2.3, 2.2, 2.1, 2.1], delta: '-0.7x', deltaDirection: 'down',
   },
   {
     id: 'multi-domain-decay',
@@ -75,6 +80,7 @@ export const correlationInsights = [
     domains: ['Golf', 'Dining', 'Email'],
     impact: 'high',
     metric: { value: '60 days', label: 'avg time to resignation' },
+    trend: [75, 70, 66, 63, 61, 60], delta: '-15 days', deltaDirection: 'down',
   },
 ];
 

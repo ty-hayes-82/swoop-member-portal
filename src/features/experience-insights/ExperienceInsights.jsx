@@ -1,6 +1,6 @@
 // ExperienceInsights — correlations between experience inputs and business outcomes
 import { useState, useEffect } from 'react';
-import { Panel, SoWhatCallout, PlaybookActionCard } from '@/components/ui';
+import { Panel, SoWhatCallout, PlaybookActionCard, Sparkline } from '@/components/ui';
 import { theme } from '@/config/theme';
 import {
   touchpointCorrelations,
@@ -190,6 +190,18 @@ function CorrelationsTab({ segment, archetype }) {
               <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: '2px' }}>
                 {insight.metric.label}
               </div>
+              {insight.trend && (
+                <div style={{ marginTop: 6 }}>
+                  <div style={{ height: 20, width: 60, margin: '0 auto' }}>
+                    <Sparkline data={insight.trend} color={insight.deltaDirection === 'up' ? theme.colors.success : theme.colors.info} height={20} />
+                  </div>
+                  {insight.delta && (
+                    <div style={{ fontSize: 10, fontWeight: 700, color: theme.colors.success, marginTop: 2 }}>
+                      {insight.deltaDirection === 'up' ? '↑' : '↓'} {insight.delta}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6, margin: 0 }}>

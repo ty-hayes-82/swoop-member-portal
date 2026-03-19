@@ -121,24 +121,62 @@ export default function ScenarioModeling({ paceLoss, staffingLoss, weatherLoss }
           <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
             {isDefault ? 'Swoop recommends this scenario based on your club\'s data.' : 'Adjust the sliders to see projected monthly recovery.'}
           </p>
-          {!isDefault && (
-            <button
-              onClick={() => setValues({ ...RECOMMENDED })}
-              style={{
-                marginTop: '6px',
-                padding: '4px 10px',
-                fontSize: theme.fontSize.xs,
-                fontWeight: 600,
-                color: theme.colors.accent,
-                background: 'none',
-                border: `1px solid ${theme.colors.accent}40`,
-                borderRadius: theme.radius.sm,
-                cursor: 'pointer',
-              }}
-            >
-              Reset to Swoop recommendation
-            </button>
-          )}
+          {/* Preset benchmark buttons */}
+          <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+            {[
+              { label: 'Conservative (10%)', pace: 10 },
+              { label: 'Moderate (25%)', pace: 25 },
+              { label: 'Aggressive (50%)', pace: 50 },
+            ].map((preset) => {
+              const isActive = values.pace === preset.pace && values.complaints === RECOMMENDED.complaints && values.staffing === RECOMMENDED.staffing;
+              return (
+                <button
+                  key={preset.label}
+                  onClick={() => setValues({ pace: preset.pace, complaints: RECOMMENDED.complaints, staffing: RECOMMENDED.staffing })}
+                  style={{
+                    padding: '4px 12px',
+                    fontSize: theme.fontSize.xs,
+                    fontWeight: 600,
+                    color: isActive ? theme.colors.accent : theme.colors.textSecondary,
+                    background: isActive ? `${theme.colors.accent}12` : 'transparent',
+                    border: `1px solid ${isActive ? theme.colors.accent : theme.colors.border}`,
+                    borderRadius: theme.radius.sm,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+            {!isDefault && (
+              <button
+                onClick={() => setValues({ ...RECOMMENDED })}
+                style={{
+                  padding: '4px 10px',
+                  fontSize: theme.fontSize.xs,
+                  fontWeight: 600,
+                  color: theme.colors.accent,
+                  background: 'none',
+                  border: `1px solid ${theme.colors.accent}40`,
+                  borderRadius: theme.radius.sm,
+                  cursor: 'pointer',
+                }}
+              >
+                Reset
+              </button>
+            )}
+          </div>
+          {/* Quick comparison */}
+          <div style={{ display: 'flex', gap: theme.spacing.sm, marginTop: 8 }}>
+            {[10, 25, 50].map((pct) => {
+              const recovery = scenarios[0].calcRecovery(pct, paceLoss);
+              return (
+                <span key={pct} style={{ fontSize: 11, color: theme.colors.textMuted }}>
+                  {pct}% = <strong style={{ color: theme.colors.success, fontFamily: theme.fonts.mono }}>+${recovery.toLocaleString()}/mo</strong>
+                </span>
+              );
+            })}
+          </div>
         </div>
         <div style={{
           textAlign: 'center',
