@@ -6,7 +6,7 @@ const NavigationContext = createContext(null);
 // Valid route keys for hash routing
 const VALID_ROUTES = new Set([
   // New primary views
-  'today', 'members', 'revenue', 'playbooks-automation',
+  'today', 'members', 'revenue', 'playbooks-automation', 'activity-history',
   // Legacy routes (still valid, redirect to new views)
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
   'member-health', 'revenue-leakage', 'outreach-playbooks', 'staffing-service', 'growth-pipeline',

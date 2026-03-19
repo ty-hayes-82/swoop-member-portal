@@ -79,6 +79,15 @@ export const navItems = [
     sourceSystems: [],
   },
   {
+    key: 'activity-history',
+    label: 'Activity History',
+    section: 'SETTINGS',
+    icon: '📜',
+    color: theme.colors.navOperations,
+    subtitle: 'Every action taken in the dashboard — approve, dismiss, call, deploy, and more.',
+    sourceSystems: ['Postgres'],
+  },
+  {
     key: 'storyboard-flows',
     label: 'Playbook Guides',
     section: 'SETTINGS',

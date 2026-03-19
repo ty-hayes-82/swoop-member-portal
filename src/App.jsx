@@ -31,6 +31,7 @@ import { ActionsPage } from '@/features/actions';
 import { TodayView } from '@/features/today';
 import { MembersView } from '@/features/members';
 import { RevenueView } from '@/features/revenue';
+import ActivityHistoryPage from '@/features/activity-history/ActivityHistoryPage';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -39,6 +40,7 @@ const ROUTES = {
   'members': MembersView,
   'revenue': RevenueView,
   'playbooks-automation': ActionsPage,
+  'activity-history': ActivityHistoryPage,
   // Legacy routes (backward compat — redirects in NavigationContext handle most traffic)
   'daily-briefing': DailyBriefing,
   operations: OperationsDashboard,

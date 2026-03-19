@@ -17,6 +17,11 @@ export default async function handler(req, res) {
       return res.status(201).json({ success: true });
     }
 
+    if (req.method === 'DELETE') {
+      await sql`DELETE FROM activity_log`;
+      return res.status(200).json({ success: true, message: 'All activity history cleared' });
+    }
+
     // GET — fetch activity feed
     const limit = Math.min(parseInt(req.query.limit) || 100, 500);
     const type = req.query.type;
