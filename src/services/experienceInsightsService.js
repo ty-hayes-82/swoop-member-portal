@@ -248,7 +248,7 @@ export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'E
 export const archetypeSpendGaps = [
   {
     archetype: 'Balanced Active',
-    count: 64,
+    count: 55,
     currentDining: 62,
     potentialDining: 100,
     currentEvents: 54,
@@ -261,7 +261,7 @@ export const archetypeSpendGaps = [
   },
   {
     archetype: 'Social Butterfly',
-    count: 38,
+    count: 45,
     currentDining: 78,
     potentialDining: 100,
     currentEvents: 85,
@@ -274,7 +274,7 @@ export const archetypeSpendGaps = [
   },
   {
     archetype: 'Die-Hard Golfer',
-    count: 52,
+    count: 60,
     currentDining: 34,
     potentialDining: 100,
     currentEvents: 22,
@@ -300,7 +300,7 @@ export const archetypeSpendGaps = [
   },
   {
     archetype: 'Declining',
-    count: 26,
+    count: 25,
     currentDining: 18,
     potentialDining: 100,
     currentEvents: 12,
@@ -313,7 +313,7 @@ export const archetypeSpendGaps = [
   },
   {
     archetype: 'New Member',
-    count: 18,
+    count: 30,
     currentDining: 45,
     potentialDining: 100,
     currentEvents: 35,

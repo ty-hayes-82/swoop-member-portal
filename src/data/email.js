@@ -37,9 +37,12 @@ export const emailHeatmap = [
 ];
 
 export const decayingMembers = [
-  { memberId: 'mbr_042', name: 'Kevin Hurst',  nov: 0.41, dec: 0.22, jan: 0.08, trend: -80 },
-  { memberId: 'mbr_089', name: 'Anne Jordan',  nov: 0.38, dec: 0.24, jan: 0.14, trend: -63 },
-  { memberId: 'mbr_271', name: 'Robert Callahan',   nov: 0.44, dec: 0.28, jan: 0.12, trend: -73 },
-  { memberId: 'mbr_156', name: 'Priya Brock',   nov: 0.52, dec: 0.38, jan: 0.22, trend: -58 },
-  { memberId: 'mbr_198', name: 'Marcus Flynn',  nov: 0.48, dec: 0.34, jan: 0.18, trend: -63 },
+  { memberId: 'mbr_042', name: 'Kevin Hurst', archetype: 'Declining', nov: 0.32, dec: 0.14, jan: 0.03, trend: -91 },
+  { memberId: 'mbr_089', name: 'Anne Jordan', archetype: 'Weekend Warrior', nov: 0.40, dec: 0.28, jan: 0.11, trend: -73 },
+  { memberId: 'mbr_271', name: 'Robert Callahan', archetype: 'Declining', nov: 0.26, dec: 0.18, jan: 0.06, trend: -77 },
+  { memberId: 'mbr_156', name: 'Priya Brock', archetype: 'Balanced Active', nov: 0.58, dec: 0.41, jan: 0.19, trend: -67 },
+  { memberId: 'mbr_198', name: 'Marcus Flynn', archetype: 'New Member', nov: 0.72, dec: 0.45, jan: 0.16, trend: -78 },
+  { memberId: 'mbr_304', name: 'Greg Holloway', archetype: 'Die-Hard Golfer', nov: 0.35, dec: 0.22, jan: 0.09, trend: -74 },
+  { memberId: 'mbr_311', name: 'Lisa Yamamoto', archetype: 'Snowbird', nov: 0.48, dec: 0.31, jan: 0.14, trend: -71 },
+  { memberId: 'mbr_303', name: 'Evelyn Park', archetype: 'Social Butterfly', nov: 0.75, dec: 0.52, jan: 0.18, trend: -76 },
 ];

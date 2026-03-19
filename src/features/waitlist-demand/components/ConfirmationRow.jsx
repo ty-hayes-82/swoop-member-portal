@@ -20,7 +20,7 @@ const probabilityStyle = (p) => {
 export default function ConfirmationRow({ confirmation, onUpdateStatus, onAddNotes }) {
   const [showNotes, setShowNotes] = useState(false);
   const [noteText, setNoteText] = useState(confirmation.staffNotes ?? '');
-  const risk = probabilityStyle(confirmation.cancelProbability);
+  const risk = probabilityStyle(confirmation.cancelProbability ?? 0);
   const statusInfo = STATUS_STYLES[confirmation.outreachStatus] ?? STATUS_STYLES.pending;
   const isResolved = ['confirmed', 'cancelled', 'no_response'].includes(confirmation.outreachStatus);
 
@@ -63,7 +63,7 @@ export default function ConfirmationRow({ confirmation, onUpdateStatus, onAddNot
         borderRadius: '999px',
         padding: '2px 8px',
       }}>
-        {Math.round(confirmation.cancelProbability * 100)}%
+        {Math.round((confirmation.cancelProbability ?? 0) * 100)}%
       </span>
 
       {/* Outreach status */}

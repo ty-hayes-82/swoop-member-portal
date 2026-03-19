@@ -3,32 +3,32 @@
 import { theme } from '@/config/theme';
 
 export const memberArchetypes = [
-  { archetype: 'Die-Hard Golfer',  count: 52, golf: 88, dining: 42, events: 28, email: 32, trend: +4  },
-  { archetype: 'Social Butterfly', count: 44, golf: 18, dining: 82, events: 78, email: 72, trend: +6  },
-  { archetype: 'Balanced Active',  count: 64, golf: 68, dining: 62, events: 54, email: 55, trend: -2  },
-  { archetype: 'Weekend Warrior',  count: 46, golf: 52, dining: 44, events: 32, email: 28, trend: -8  },
-  { archetype: 'Declining',        count: 30, golf: 24, dining: 18, events: 8,  email: 22, trend: -18 },
-  { archetype: 'New Member',       count: 24, golf: 42, dining: 48, events: 38, email: 68, trend: +14 },
-  { archetype: 'Ghost',            count: 24, golf: 4,  dining: 6,  events: 2,  email: 8,  trend: -4  },
-  { archetype: 'Snowbird',         count: 16, golf: 62, dining: 52, events: 34, email: 44, trend: +2  },
+  { archetype: 'Die-Hard Golfer',  count: 60, golf: 88, dining: 42, events: 28, email: 32, trend: +4  },
+  { archetype: 'Social Butterfly', count: 45, golf: 18, dining: 82, events: 78, email: 72, trend: +6  },
+  { archetype: 'Balanced Active',  count: 55, golf: 68, dining: 62, events: 54, email: 55, trend: -2  },
+  { archetype: 'Weekend Warrior',  count: 45, golf: 52, dining: 44, events: 32, email: 28, trend: -8  },
+  { archetype: 'Declining',        count: 25, golf: 24, dining: 18, events: 8,  email: 22, trend: -18 },
+  { archetype: 'New Member',       count: 30, golf: 42, dining: 48, events: 38, email: 68, trend: +14 },
+  { archetype: 'Ghost',            count: 15, golf: 4,  dining: 6,  events: 2,  email: 8,  trend: -4  },
+  { archetype: 'Snowbird',         count: 25, golf: 62, dining: 52, events: 34, email: 44, trend: +2  },
 ];
 
 export const healthDistribution = [
-  { level: 'Healthy',  min: 70,  count: 242, percentage: 0.807, color: theme.colors.success, delta: -4 },
-  { level: 'Watch',    min: 50,  count: 12,  percentage: 0.04,  color: theme.colors.warning, delta: 5 },
-  { level: 'At Risk',  min: 30,  count: 34,  percentage: 0.113, color: theme.colors.riskAtRiskAlt, delta: 6 },
-  { level: 'Critical', min: 0,   count: 12,  percentage: 0.04,  color: theme.colors.urgent, delta: 3 },
+  { level: 'Healthy',  min: 70,  count: 200, percentage: 0.667, color: theme.colors.success, delta: -4 },
+  { level: 'Watch',    min: 50,  count: 35,  percentage: 0.117, color: theme.colors.warning, delta: 5 },
+  { level: 'At Risk',  min: 30,  count: 39,  percentage: 0.130, color: theme.colors.riskAtRiskAlt, delta: 6 },
+  { level: 'Critical', min: 0,   count: 26,  percentage: 0.087, color: theme.colors.urgent, delta: 3 },
 ];
 
 export const memberSummary = {
   total: 300,
-  healthy: 242,
-  watch: 12,
-  atRisk: 34,
-  critical: 12,
-  riskCount: 46,
-  avgHealthScore: 74,
-  potentialDuesAtRisk: 533000,
+  healthy: 200,
+  watch: 35,
+  atRisk: 39,
+  critical: 26,
+  riskCount: 65,
+  avgHealthScore: 68,
+  potentialDuesAtRisk: 733000,
 };
 
 // Watch tier members — early-stage decay signals, not yet At Risk

@@ -188,10 +188,11 @@ function RecoveryCTA({ recoverableAmount, totalLoss, onViewStaffingTab }) {
   );
 }
 
-function BreakdownChart({ totalLoss, paceAmount, staffingAmount, weatherAmount }) {
+function BreakdownChart({ totalLoss, paceAmount, staffingAmount, weatherAmount, proshopAmount }) {
   const pacePct = ((paceAmount / totalLoss) * 100).toFixed(0);
   const staffPct = ((staffingAmount / totalLoss) * 100).toFixed(0);
   const weatherPct = ((weatherAmount / totalLoss) * 100).toFixed(0);
+  const proshopPct = ((proshopAmount / totalLoss) * 100).toFixed(0);
 
   const segments = [
     { icon: '\u26A1', amount: paceAmount, pct: pacePct, label: 'Pace-of-Play Impact',
@@ -212,6 +213,12 @@ function BreakdownChart({ totalLoss, paceAmount, staffingAmount, weatherAmount }
       iconBg: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(37, 99, 235, 0.08))',
       iconBorder: 'rgba(59, 130, 246, 0.15)', dotColor: 'rgb(59, 130, 246)',
       textColor: 'rgb(59, 130, 246)', width: Math.max(weatherAmount / totalLoss * 100, 5), minWidth: '65px' },
+    { icon: '\uD83D\uDECD\uFE0F', amount: proshopAmount, pct: proshopPct, label: 'Pro Shop & Lessons',
+      gradient: 'linear-gradient(135deg, rgb(139, 92, 246), rgb(109, 40, 217))',
+      cardBg: 'rgba(139, 92, 246, 0.06)', cardBorder: 'rgba(139, 92, 246, 0.15)',
+      iconBg: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(109, 40, 217, 0.08))',
+      iconBorder: 'rgba(139, 92, 246, 0.15)', dotColor: 'rgb(139, 92, 246)',
+      textColor: 'rgb(139, 92, 246)', width: (proshopAmount / totalLoss * 100) },
   ];
 
   return (
@@ -228,7 +235,7 @@ function BreakdownChart({ totalLoss, paceAmount, staffingAmount, weatherAmount }
       {/* Top accent bar */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-        background: 'linear-gradient(90deg, rgb(249, 115, 22) 60%, rgb(217, 119, 6) 85%, rgb(59, 130, 246) 100%)',
+        background: 'linear-gradient(90deg, rgb(249, 115, 22) 40%, rgb(217, 119, 6) 60%, rgb(59, 130, 246) 75%, rgb(139, 92, 246) 100%)',
         borderRadius: '16px 16px 0 0',
       }} />
 
@@ -300,7 +307,7 @@ function BreakdownChart({ totalLoss, paceAmount, staffingAmount, weatherAmount }
       </div>
 
       {/* Category cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
         {segments.map((seg) => (
           <div key={seg.label} style={{
             display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px',
@@ -585,6 +592,7 @@ export default function RevenueLeakage() {
           paceAmount={PACE_LOSS}
           staffingAmount={STAFFING_LOSS}
           weatherAmount={WEATHER_LOSS}
+          proshopAmount={PROSHOP_LOSS}
         />
 
         <div style={{ background: '#fff', border: '1px solid #e4e4e7', borderRadius: '10px', padding: '24px' }}>
