@@ -182,6 +182,7 @@ const normalizeDecayingMembers = (source) => {
     return {
       memberId: member?.memberId ?? `decay-${index + 1}`,
       name: member?.name ?? `Member ${index + 1}`,
+      archetype: member?.archetype ?? 'Unknown',
       nov,
       dec,
       jan,

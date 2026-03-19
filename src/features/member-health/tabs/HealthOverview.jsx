@@ -488,8 +488,16 @@ export default function HealthOverview() {
                   <span style={{ fontWeight: 700 }}>{m.name}</span>
                   <div style={{ fontSize: 10, color: theme.colors.textMuted }}>{m.archetype}</div>
                 </div>
-                <div style={{ height: 20, width: 60 }}>
-                  <Sparkline data={m.sparkline} color={theme.colors.urgent} height={20} />
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 24, width: 60 }}>
+                  {[m.novPct, m.decPct, m.janPct].map((pct, i) => (
+                    <div key={i} style={{
+                      width: 16,
+                      height: `${Math.max(2, pct)}%`,
+                      background: i === 2 ? theme.colors.urgent : i === 1 ? theme.colors.warning : theme.colors.textMuted,
+                      borderRadius: 2,
+                      opacity: i === 2 ? 1 : 0.7,
+                    }} />
+                  ))}
                 </div>
                 <div style={{ color: theme.colors.textSecondary }}>
                   Open rate: {m.novPct}% → {m.decPct}% → <strong style={{ color: theme.colors.urgent }}>{m.janPct}%</strong>
