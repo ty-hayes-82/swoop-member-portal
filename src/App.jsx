@@ -28,9 +28,18 @@ import { OutreachPlaybooks } from '@/features/outreach-playbooks';
 import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
 import { StoryboardFlows } from '@/features/storyboard-flows';
 import { ActionsPage } from '@/features/actions';
+import { TodayView } from '@/features/today';
+import { MembersView } from '@/features/members';
+import { RevenueView } from '@/features/revenue';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
+  // New primary views (Sprint 1: aliases, later sprints: replace with composite views)
+  'today': TodayView,
+  'members': MembersView,
+  'revenue': RevenueView,
+  'playbooks-automation': ActionsPage,
+  // Legacy routes (backward compat — redirects in NavigationContext handle most traffic)
   'daily-briefing': DailyBriefing,
   operations: OperationsDashboard,
   'waitlist-demand': WaitlistDemand,

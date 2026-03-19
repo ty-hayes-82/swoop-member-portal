@@ -1,9 +1,9 @@
+// RevenueView — consolidated revenue intelligence
+// Combines Revenue Leakage + Spend Potential + Scenario Modeling
 import { useState, useEffect } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
-import PaceImpactTab from './tabs/PaceImpactTab';
-import StaffingImpactTab from './tabs/StaffingImpactTab';
-import WeatherImpactTab from './tabs/WeatherImpactTab';
 import { theme } from '@/config/theme';
+import { useApp } from '@/context/AppContext';
 import { useNavigation } from '@/context/NavigationContext';
 import { paceFBImpact } from '@/data/pace';
 import { understaffedDays } from '@/data/staffing';
@@ -11,34 +11,44 @@ import { archetypeSpendGaps } from '@/services/experienceInsightsService';
 import { getMemberSummary } from '@/services/memberService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
-import ScenarioModeling from './components/ScenarioModeling';
-import FlowLink from '@/components/ui/FlowLink';
-import RecoveryCTA from './components/RecoveryCTA';
-import BreakdownChart from './components/BreakdownChart';
-import ActionPath from './components/ActionPath';
-import ProShopTab from './components/ProShopTab';
+import EvidenceStrip from '@/components/ui/EvidenceStrip';
 
-const TABS = [
+// Extracted components from RevenueLeakage
+import RecoveryCTA from '@/features/revenue-leakage/components/RecoveryCTA';
+import BreakdownChart from '@/features/revenue-leakage/components/BreakdownChart';
+import ActionPath from '@/features/revenue-leakage/components/ActionPath';
+import ProShopTab from '@/features/revenue-leakage/components/ProShopTab';
+import ScenarioModeling from '@/features/revenue-leakage/components/ScenarioModeling';
+
+// Existing tab components
+import PaceImpactTab from '@/features/revenue-leakage/tabs/PaceImpactTab';
+import StaffingImpactTab from '@/features/revenue-leakage/tabs/StaffingImpactTab';
+import WeatherImpactTab from '@/features/revenue-leakage/tabs/WeatherImpactTab';
+
+// Spend Potential from Experience Insights
+import SpendPotentialTab from '@/features/experience-insights/tabs/SpendPotentialTab';
+
+const PACE_LOSS = paceFBImpact.revenueLostPerMonth;
+const STAFFING_LOSS = understaffedDays.reduce((sum, day) => sum + day.revenueLoss, 0);
+const WEATHER_LOSS = 420;
+const PROSHOP_LOSS = Math.round((72000 + 45000) / 12);
+const TOTAL_LOSS = PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS + PROSHOP_LOSS;
+
+const DEEP_TABS = [
   { key: 'pace', label: 'Pace-of-Play Impact' },
   { key: 'staffing', label: 'Staffing Gaps' },
   { key: 'weather', label: 'Weather Shifts' },
   { key: 'proshop', label: 'Pro Shop & Lessons' },
 ];
 
-const PACE_LOSS = paceFBImpact.revenueLostPerMonth;
-const STAFFING_LOSS = understaffedDays.reduce((sum, day) => sum + day.revenueLoss, 0);
-const WEATHER_LOSS = 420;
-const PROSHOP_LOSS = Math.round((72000 + 45000) / 12); // $72K pro shop gap + $45K lesson conversion, annualized to monthly
-const TOTAL_LOSS = PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS + PROSHOP_LOSS;
-
 const mono = "'JetBrains Mono', monospace";
 
-export default function RevenueLeakage() {
+export default function RevenueView() {
   const { navigate: nav } = useNavigation();
   const [activeTab, setActiveTab] = useState('pace');
+  const [archetype, setArchetype] = useState(null);
   const recoverableAmount = Math.round(PACE_LOSS * 0.35);
 
-  // Unified revenue opportunity data
   const spendTotal = archetypeSpendGaps.reduce((s, a) => s + a.totalUntapped, 0);
   const spendMonthly = Math.round(spendTotal / 12);
   const memberSummary = getMemberSummary();
@@ -61,11 +71,11 @@ export default function RevenueLeakage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <StoryHeadline
           variant="risk"
-          headline={`Operational failures are costing you $${TOTAL_LOSS.toLocaleString()} in monthly F&B revenue.`}
-          context="Revenue leakage happens when service breakdowns (slow rounds, understaffing, weather impacts) interrupt member dining patterns. Most clubs see the symptom (lower covers) but miss the operational cause."
+          headline={`$${totalOpportunity.toLocaleString()}/month in addressable revenue opportunity across operations, spend gaps, and at-risk dues.`}
+          context="Revenue leakage happens when service breakdowns interrupt member dining patterns. Spend gaps represent untapped wallet share. At-risk dues are protectable with early intervention."
         />
 
-        <FlowLink flowNum="03" persona="Mike" />
+        <EvidenceStrip systems={['POS', 'Tee Sheet', 'Scheduling', 'Weather', 'Member CRM']} />
 
         {/* Unified Revenue Opportunity */}
         <div style={{
@@ -79,10 +89,10 @@ export default function RevenueLeakage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md, marginBottom: theme.spacing.md }}>
             {[
-              { label: 'Revenue Leakage', sub: 'Recoverable', value: TOTAL_LOSS, color: theme.colors.urgent, link: null },
-              { label: 'Pro Shop & Lessons', sub: 'Growable', value: PROSHOP_LOSS, color: 'rgb(139,92,246)', link: () => setActiveTab('proshop') },
-              { label: 'Spend Potential', sub: 'Growable', value: spendMonthly, color: theme.colors.success, link: () => nav('experience-insights') },
-              { label: 'Dues at Risk', sub: 'Protectable', value: duesMonthly, color: theme.colors.warning, link: () => nav('member-health') },
+              { label: 'Revenue Leakage', sub: 'Recoverable', value: TOTAL_LOSS, color: theme.colors.urgent },
+              { label: 'Pro Shop & Lessons', sub: 'Growable', value: PROSHOP_LOSS, color: 'rgb(139,92,246)' },
+              { label: 'Spend Potential', sub: 'Growable', value: spendMonthly, color: theme.colors.success },
+              { label: 'Dues at Risk', sub: 'Protectable', value: duesMonthly, color: theme.colors.warning, link: () => nav('members') },
             ].map((p) => (
               <div
                 key={p.label}
@@ -147,10 +157,16 @@ export default function RevenueLeakage() {
           weatherLoss={WEATHER_LOSS}
         />
 
+        {/* Spend Potential by Archetype */}
+        <Panel title="Spend Potential by Archetype" subtitle="Where is untapped wallet share across your member base?">
+          <SpendPotentialTab archetype={archetype} />
+        </Panel>
+
+        {/* Deep Dive by Category */}
         <Panel
           title="Deep Dive by Category"
           subtitle="Which operational failures are costing you F&B spend?"
-          tabs={TABS}
+          tabs={DEEP_TABS}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           accentColor={theme.colors.fb}

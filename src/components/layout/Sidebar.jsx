@@ -14,7 +14,7 @@ const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-const SECTION_ORDER = ['INTELLIGENCE', 'REPORTING', 'SETTINGS'];
+const SECTION_ORDER = ['PRIMARY', 'SETTINGS'];
 
 const SETTINGS_KEYS = new Set(
   NAV_ITEMS.filter((n) => n.section === 'SETTINGS' && !n.hidden).map((n) => n.key)
@@ -22,7 +22,7 @@ const SETTINGS_KEYS = new Set(
 
 export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const { currentRoute, navigate, sidebarCollapsed, toggleSidebar } = useNavigation();
-  const { activeCount, totalRevenueImpact } = useApp();
+  const { activeCount, totalRevenueImpact, pendingAgentCount } = useApp();
   const w = isMobile ? 280 : sidebarCollapsed ? 52 : 240;
 
   // Settings section: collapsed by default, auto-expands when on a settings page
@@ -32,7 +32,7 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const sectionBuckets = new Map();
   const sectionOrderFromItems = [];
   visibleNavItems.forEach((item) => {
-    const label = item.section ?? 'INTELLIGENCE';
+    const label = item.section ?? 'PRIMARY';
     if (!sectionBuckets.has(label)) {
       sectionBuckets.set(label, []);
       sectionOrderFromItems.push(label);
@@ -72,6 +72,12 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
       };
 
   const isSettingsOpen = settingsExpanded || SETTINGS_KEYS.has(currentRoute);
+
+  // Separate primary items and board report
+  const primarySection = navSections.find((s) => s.label === 'PRIMARY');
+  const primaryItems = primarySection ? primarySection.items.filter((i) => !i.topLevel) : [];
+  const boardReport = primarySection ? primarySection.items.find((i) => i.topLevel) : null;
+  const settingsSection = navSections.find((s) => s.label === 'SETTINGS');
 
   return (
     <aside style={{
@@ -132,153 +138,221 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
 
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-        {navSections.map((section) => {
-          const isSettings = section.label === 'SETTINGS';
-
+        {/* Primary nav items — no section header */}
+        {primaryItems.map((item) => {
+          const active = currentRoute === item.key;
           return (
-            <div key={section.label}>
-              {/* Section separator + header */}
+            <button
+              key={item.key}
+              onClick={() => navigate(item.key)}
+              title={sidebarCollapsed && !isMobile ? item.label : undefined}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
+                minHeight: '44px',
+                justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
+                background: active ? SIDEBAR_ACTIVE_BG : 'none',
+                borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
+                color: active ? TEXT_LIGHT : TEXT_DIM,
+                boxShadow: active ? 'inset 0 0 0 1px rgba(255,255,255,0.06)' : 'none',
+                fontSize: '13px',
+                fontWeight: active ? 600 : 350,
+                transition: 'all 0.12s',
+                cursor: 'pointer',
+                borderRight: 'none',
+                borderTop: 'none',
+                borderBottom: 'none',
+              }}
+              onMouseEnter={e => {
+                if (!active) {
+                  e.currentTarget.style.background = theme.colors.sidebarTint;
+                  e.currentTarget.style.color = TEXT_LIGHT;
+                }
+              }}
+              onMouseLeave={e => {
+                if (!active) {
+                  e.currentTarget.style.background = 'none';
+                  e.currentTarget.style.color = TEXT_DIM;
+                }
+              }}
+            >
+              <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
               {(!sidebarCollapsed || isMobile) && (
-                <>
-                  {isSettings && (
-                    <div style={{
-                      margin: '12px 14px 0',
-                      borderTop: `1px solid ${SIDEBAR_BORDER}`,
-                    }} />
-                  )}
-                  {isSettings ? (
-                    <button
-                      onClick={() => setSettingsExpanded((v) => !v)}
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: 8,
-                        padding: '8px 14px 4px',
-                        fontSize: 10,
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                        color: TEXT_MUTED,
-                        fontWeight: 700,
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <span>{section.label}</span>
-                      <span style={{ fontSize: 12, transition: 'transform 0.15s', transform: isSettingsOpen ? 'rotate(90deg)' : 'none' }}>›</span>
-                    </button>
-                  ) : (
-                    <div
-                      style={{
-                        marginTop: 8,
-                        padding: '8px 14px 4px',
-                        fontSize: 10,
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                        color: TEXT_MUTED,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {section.label}
-                    </div>
-                  )}
-                </>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                  {item.label}
+                </span>
               )}
-              {/* Nav items — hide Settings items when collapsed */}
-              {(!isSettings || isSettingsOpen || (sidebarCollapsed && !isMobile)) && section.items.map((item) => {
-                const active = currentRoute === item.key;
-                const isIntelligence = section.label === 'INTELLIGENCE';
-                const inactiveWeight = isIntelligence ? 350 : 400;
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => navigate(item.key)}
-                    title={sidebarCollapsed && !isMobile ? item.label : undefined}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
-                      minHeight: '44px',
-                      justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
-                      background: active ? SIDEBAR_ACTIVE_BG : 'none',
-                      borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
-                      color: active ? TEXT_LIGHT : TEXT_DIM,
-                      boxShadow: active ? 'inset 0 0 0 1px rgba(255,255,255,0.06)' : 'none',
-                      fontSize: '13px',
-                      fontWeight: active ? 600 : inactiveWeight,
-                      transition: 'all 0.12s',
-                      cursor: 'pointer',
-                      borderRight: 'none',
-                      borderTop: 'none',
-                      borderBottom: 'none',
-                    }}
-                    onMouseEnter={e => {
-                      if (!active) {
-                        e.currentTarget.style.background = theme.colors.sidebarTint;
-                        e.currentTarget.style.color = TEXT_LIGHT;
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      if (!active) {
-                        e.currentTarget.style.background = 'none';
-                        e.currentTarget.style.color = TEXT_DIM;
-                      }
-                    }}
-                  >
-                    <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
-                    {(!sidebarCollapsed || isMobile) && (
-                      <span
-                        style={{
-                          display: 'flex',
-                          flexDirection: item.key === 'daily-briefing' ? 'column' : 'row',
-                          alignItems: item.key === 'daily-briefing' ? 'flex-start' : 'center',
-                          gap: item.key === 'daily-briefing' ? '4px' : '8px',
-                          flex: 1,
-                          minWidth: 0,
-                        }}
-                      >
-                        <span
-                          style={{
-                            overflow: item.key === 'daily-briefing' ? 'visible' : 'hidden',
-                            textOverflow: item.key === 'daily-briefing' ? 'unset' : 'ellipsis',
-                            whiteSpace: item.key === 'daily-briefing' ? 'normal' : 'nowrap',
-                          }}
-                        >
-                          {item.label}
-                        </span>
-                        {item.key === 'daily-briefing' && (
-                          <span
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '3px',
-                              fontSize: '9px',
-                              letterSpacing: '0.08em',
-                              textTransform: 'uppercase',
-                              fontWeight: 700,
-                              color: theme.colors.success,
-                              background: `${theme.colors.success}12`,
-                              padding: '2px 6px',
-                              borderRadius: '999px',
-                              border: `1px solid ${theme.colors.success}40`,
-                            }}
-                          >
-                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: theme.colors.success, boxShadow: `0 0 6px ${theme.colors.success}` }} />
-                            Start Here
-                          </span>
-                        )}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+              {/* Badge for pending actions on Playbooks & Automation */}
+              {item.key === 'playbooks-automation' && pendingAgentCount > 0 && (!sidebarCollapsed || isMobile) && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: 18,
+                  height: 18,
+                  borderRadius: '999px',
+                  background: theme.colors.accent,
+                  color: '#fff',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '0 5px',
+                  flexShrink: 0,
+                }}>
+                  {pendingAgentCount}
+                </span>
+              )}
+            </button>
           );
         })}
+
+        {/* Board Report — compact icon button */}
+        {boardReport && (
+          <>
+            <div style={{ margin: '8px 14px', borderTop: `1px solid ${SIDEBAR_BORDER}` }} />
+            <button
+              onClick={() => navigate(boardReport.key)}
+              title={sidebarCollapsed && !isMobile ? boardReport.label : undefined}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: sidebarCollapsed && !isMobile ? '12px 0' : '10px 14px',
+                minHeight: '40px',
+                justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
+                background: currentRoute === boardReport.key ? SIDEBAR_ACTIVE_BG : 'none',
+                borderLeft: currentRoute === boardReport.key ? `3px solid ${boardReport.color}` : '3px solid transparent',
+                color: currentRoute === boardReport.key ? TEXT_LIGHT : TEXT_DIM,
+                fontSize: '12px',
+                fontWeight: currentRoute === boardReport.key ? 600 : 400,
+                transition: 'all 0.12s',
+                cursor: 'pointer',
+                borderRight: 'none',
+                borderTop: 'none',
+                borderBottom: 'none',
+              }}
+              onMouseEnter={e => {
+                if (currentRoute !== boardReport.key) {
+                  e.currentTarget.style.background = theme.colors.sidebarTint;
+                  e.currentTarget.style.color = TEXT_LIGHT;
+                }
+              }}
+              onMouseLeave={e => {
+                if (currentRoute !== boardReport.key) {
+                  e.currentTarget.style.background = 'none';
+                  e.currentTarget.style.color = TEXT_DIM;
+                }
+              }}
+            >
+              <span style={{ fontSize: '14px', flexShrink: 0, opacity: currentRoute === boardReport.key ? 1 : 0.6 }}>{boardReport.icon}</span>
+              {(!sidebarCollapsed || isMobile) && (
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                  {boardReport.label}
+                </span>
+              )}
+              {(!sidebarCollapsed || isMobile) && boardReport.badge && (
+                <span style={{
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  color: theme.colors.success,
+                  background: `${theme.colors.success}12`,
+                  padding: '2px 6px',
+                  borderRadius: '999px',
+                  border: `1px solid ${theme.colors.success}40`,
+                  letterSpacing: '0.04em',
+                  flexShrink: 0,
+                }}>
+                  {boardReport.badge}
+                </span>
+              )}
+            </button>
+          </>
+        )}
+
+        {/* Settings section */}
+        {settingsSection && (
+          <div>
+            {(!sidebarCollapsed || isMobile) && (
+              <>
+                <div style={{ margin: '8px 14px 0', borderTop: `1px solid ${SIDEBAR_BORDER}` }} />
+                <button
+                  onClick={() => setSettingsExpanded((v) => !v)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginTop: 8,
+                    padding: '8px 14px 4px',
+                    fontSize: 10,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    color: TEXT_MUTED,
+                    fontWeight: 700,
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span>{settingsSection.label}</span>
+                  <span style={{ fontSize: 12, transition: 'transform 0.15s', transform: isSettingsOpen ? 'rotate(90deg)' : 'none' }}>›</span>
+                </button>
+              </>
+            )}
+            {(isSettingsOpen || (sidebarCollapsed && !isMobile)) && settingsSection.items.map((item) => {
+              const active = currentRoute === item.key;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => navigate(item.key)}
+                  title={sidebarCollapsed && !isMobile ? item.label : undefined}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
+                    minHeight: '44px',
+                    justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
+                    background: active ? SIDEBAR_ACTIVE_BG : 'none',
+                    borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
+                    color: active ? TEXT_LIGHT : TEXT_DIM,
+                    boxShadow: active ? 'inset 0 0 0 1px rgba(255,255,255,0.06)' : 'none',
+                    fontSize: '13px',
+                    fontWeight: active ? 600 : 400,
+                    transition: 'all 0.12s',
+                    cursor: 'pointer',
+                    borderRight: 'none',
+                    borderTop: 'none',
+                    borderBottom: 'none',
+                  }}
+                  onMouseEnter={e => {
+                    if (!active) {
+                      e.currentTarget.style.background = theme.colors.sidebarTint;
+                      e.currentTarget.style.color = TEXT_LIGHT;
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) {
+                      e.currentTarget.style.background = 'none';
+                      e.currentTarget.style.color = TEXT_DIM;
+                    }
+                  }}
+                >
+                  <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
+                  {(!sidebarCollapsed || isMobile) && (
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.label}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </nav>
 
       {/* Demo Environment badge */}

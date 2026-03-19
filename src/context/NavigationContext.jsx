@@ -5,6 +5,9 @@ const NavigationContext = createContext(null);
 
 // Valid route keys for hash routing
 const VALID_ROUTES = new Set([
+  // New primary views
+  'today', 'members', 'revenue', 'playbooks-automation',
+  // Legacy routes (still valid, redirect to new views)
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
   'member-health', 'revenue-leakage', 'outreach-playbooks', 'staffing-service', 'growth-pipeline',
   'agent-command', 'location-intelligence', 'integrations', 'demo-mode',
@@ -16,21 +19,35 @@ const VALID_ROUTES = new Set([
   'actions',
 ]);
 
+// Redirect map: old route → new route
+const ROUTE_REDIRECTS = {
+  'daily-briefing': 'today',
+  'member-health': 'members',
+  'revenue-leakage': 'revenue',
+  'experience-insights': 'members',
+  'waitlist-demand': 'members',
+  'actions': 'playbooks-automation',
+  'landing': 'today',
+};
+
+const DEFAULT_ROUTE = 'today';
+
 function parseHash() {
   const raw = window.location.hash.replace(/^#\/?/, '');
-  if (!raw) return { route: 'daily-briefing', memberId: null };
+  if (!raw) return { route: DEFAULT_ROUTE, memberId: null };
   if (raw.startsWith('members/')) {
     const [, memberId] = raw.split('/');
     return { route: 'member-profile', memberId: memberId || null };
   }
   const normalized = raw.replace(/\/+$/, '');
-  // Redirect legacy /landing route to daily-briefing
-  if (normalized === 'landing') {
-    window.history.replaceState(null, '', '#/daily-briefing');
-    return { route: 'daily-briefing', memberId: null };
+  // Apply redirects
+  if (ROUTE_REDIRECTS[normalized]) {
+    const newRoute = ROUTE_REDIRECTS[normalized];
+    window.history.replaceState(null, '', `#/${newRoute}`);
+    return { route: newRoute, memberId: null };
   }
-  const safeRoute = normalized || 'daily-briefing';
-  return { route: VALID_ROUTES.has(safeRoute) ? safeRoute : 'daily-briefing', memberId: null };
+  const safeRoute = normalized || DEFAULT_ROUTE;
+  return { route: VALID_ROUTES.has(safeRoute) ? safeRoute : DEFAULT_ROUTE, memberId: null };
 }
 
 function setHashPath(path) {
@@ -64,7 +81,9 @@ export function NavigationProvider({ children }) {
       setHashPath(`members/${targetMemberId}`);
       return;
     }
-    const safeRoute = VALID_ROUTES.has(routeKey) ? routeKey : 'daily-briefing';
+    // Apply redirects for navigate() calls too
+    const redirected = ROUTE_REDIRECTS[routeKey] ?? routeKey;
+    const safeRoute = VALID_ROUTES.has(redirected) ? redirected : DEFAULT_ROUTE;
     setRouteState({ route: safeRoute, memberId: null });
     setRouteIntent(intent);
     setHashPath(safeRoute);
@@ -78,7 +97,7 @@ export function NavigationProvider({ children }) {
     }
     window.addEventListener('popstate', onPopState);
     // Set initial hash if none present
-    if (!window.location.hash) setHashPath('daily-briefing');
+    if (!window.location.hash) setHashPath(DEFAULT_ROUTE);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 

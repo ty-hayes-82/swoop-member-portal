@@ -1,10 +1,95 @@
 import { theme } from '@/config/theme';
 
 // navItems — canonical navigation definitions + grouping
-// Simplified architecture: INTELLIGENCE → REPORTING → SETTINGS
+// Simplified 3-view architecture: PRIMARY → SETTINGS
+// All old route keys kept as hidden entries for backward compat + Header metadata
 export const navItems = [
   // ============================================
-  // INTELLIGENCE — Daily + Weekly Use (Tier 1 & 2)
+  // PRIMARY — The 3 core views
+  // ============================================
+  {
+    key: 'today',
+    label: 'Today',
+    section: 'PRIMARY',
+    icon: '🎯',
+    color: theme.colors.navBriefing,
+    subtitle: 'Morning briefing, pending actions, and recent proof.',
+    sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
+  },
+  {
+    key: 'members',
+    label: 'Members',
+    section: 'PRIMARY',
+    icon: '👥',
+    color: theme.colors.navMembers,
+    subtitle: 'At-risk members, health scores, tee sheet demand, and cross-domain insights.',
+    sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
+  },
+  {
+    key: 'revenue',
+    label: 'Revenue & Operations',
+    section: 'PRIMARY',
+    icon: '💰',
+    color: theme.colors.navFb,
+    subtitle: 'Revenue leakage, spend potential, and operational recovery paths.',
+    sourceSystems: ['POS', 'Tee Sheet', 'Scheduling', 'Weather'],
+  },
+
+  // Board Report — rendered as a compact icon between PRIMARY and SETTINGS
+  {
+    key: 'board-report',
+    label: 'Board Report',
+    section: 'PRIMARY',
+    icon: '📊',
+    color: theme.colors.navDemo,
+    subtitle: 'Monthly executive summary — retention, revenue, and operational saves.',
+    sourceSystems: ['All Systems'],
+    badge: '16:1 ROI',
+    topLevel: true, // Rendered as a compact icon, not a full nav row
+  },
+
+  // ============================================
+  // SETTINGS — Configuration, playbooks, admin
+  // ============================================
+  {
+    key: 'playbooks-automation',
+    label: 'Playbooks & Automation',
+    section: 'SETTINGS',
+    icon: '⚡',
+    color: theme.colors.navAgents,
+    subtitle: 'AI inbox, playbooks, agents, and outreach — one decision center.',
+    sourceSystems: ['All Systems'],
+  },
+  {
+    key: 'integrations',
+    label: 'Connected Systems',
+    section: 'SETTINGS',
+    icon: '🔌',
+    color: theme.colors.navIntegrations,
+    subtitle: 'Connect your systems. Unlock Layer 3 intelligence.',
+    sourceSystems: [],
+  },
+  {
+    key: 'integrations/csv-import',
+    label: 'Data Upload',
+    section: 'SETTINGS',
+    icon: '⬇️',
+    color: theme.colors.navIntegrations,
+    subtitle: 'Upload CSV/XLSX when APIs are missing.',
+    sourceSystems: [],
+  },
+  {
+    key: 'storyboard-flows',
+    label: 'Playbook Guides',
+    section: 'SETTINGS',
+    icon: '📖',
+    color: theme.colors.navOperations,
+    subtitle: 'How your team uses Swoop — interactive guides from signal to action to proof.',
+    sourceSystems: ['All Systems'],
+  },
+
+  // ============================================
+  // HIDDEN — Old routes kept for backward compat + Header metadata
   // ============================================
   {
     key: 'daily-briefing',
@@ -14,7 +99,7 @@ export const navItems = [
     color: theme.colors.navBriefing,
     subtitle: 'Where is today breaking — before members feel it?',
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
-    badge: 'Daily Action View',
+    hidden: true,
   },
   {
     key: 'actions',
@@ -24,6 +109,7 @@ export const navItems = [
     color: theme.colors.navAgents,
     subtitle: 'AI inbox, playbooks, agents, and outreach — one decision center.',
     sourceSystems: ['All Systems'],
+    hidden: true,
   },
   {
     key: 'member-health',
@@ -33,7 +119,7 @@ export const navItems = [
     color: theme.colors.navMembers,
     subtitle: 'Early Warning System — who\'s disengaging across multiple touchpoints?',
     sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
-    badge: 'Wedge Product',
+    hidden: true,
   },
   {
     key: 'revenue-leakage',
@@ -43,6 +129,7 @@ export const navItems = [
     color: theme.colors.navFb,
     subtitle: 'Which operational failures are costing you F&B spend?',
     sourceSystems: ['POS', 'Tee Sheet', 'Scheduling', 'Weather'],
+    hidden: true,
   },
   {
     key: 'experience-insights',
@@ -52,6 +139,7 @@ export const navItems = [
     color: theme.colors.navMembers,
     subtitle: 'Which experiences drive retention — and which ones cost you members?',
     sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Email', 'Complaints', 'Events'],
+    hidden: true,
   },
   {
     key: 'waitlist-demand',
@@ -61,8 +149,8 @@ export const navItems = [
     color: theme.colors.navWaitlist,
     subtitle: 'Who is waiting, who will cancel, and what does it cost?',
     sourceSystems: ['Tee Sheet', 'Member CRM', 'POS', 'Weather API'],
+    hidden: true,
   },
-  // Hidden intelligence pages
   {
     key: 'staffing-service',
     label: 'Staffing & Service',
@@ -83,10 +171,6 @@ export const navItems = [
     sourceSystems: ['Swoop App', 'Member CRM'],
     hidden: true,
   },
-
-  // ============================================
-  // FIX IT — Legacy (hidden, kept for backward compat)
-  // ============================================
   {
     key: 'intervention-queue',
     label: 'Intervention Queue',
@@ -127,21 +211,6 @@ export const navItems = [
     sourceSystems: ['All Systems'],
     hidden: true,
   },
-
-  // ============================================
-  // REPORTING — Board-Ready Evidence (Tier 3)
-  // ============================================
-  {
-    key: 'board-report',
-    label: 'Board Report',
-    section: 'REPORTING',
-    icon: '📊',
-    color: theme.colors.navDemo,
-    subtitle: 'Monthly executive summary — retention, revenue, and operational saves.',
-    sourceSystems: ['All Systems'],
-    badge: '16:1 ROI',
-  },
-  // Hidden reporting pages
   {
     key: 'attribution',
     label: 'Attribution',
@@ -162,28 +231,6 @@ export const navItems = [
     sourceSystems: ['All Systems'],
     hidden: true,
   },
-
-  // ============================================
-  // SETTINGS — Admin & Configuration (Tier 4, collapsed)
-  // ============================================
-  {
-    key: 'integrations',
-    label: 'Connected Systems',
-    section: 'SETTINGS',
-    icon: '🔌',
-    color: theme.colors.navIntegrations,
-    subtitle: 'Connect your systems. Unlock Layer 3 intelligence.',
-    sourceSystems: [],
-  },
-  {
-    key: 'integrations/csv-import',
-    label: 'Data Upload',
-    section: 'SETTINGS',
-    icon: '⬇️',
-    color: theme.colors.navIntegrations,
-    subtitle: 'Upload CSV/XLSX when APIs are missing.',
-    sourceSystems: [],
-  },
   {
     key: 'data-model',
     label: 'Data Model',
@@ -194,16 +241,6 @@ export const navItems = [
     sourceSystems: ['Postgres'],
     hidden: true,
   },
-  {
-    key: 'storyboard-flows',
-    label: 'Playbook Guides',
-    section: 'SETTINGS',
-    icon: '📖',
-    color: theme.colors.navOperations,
-    subtitle: 'How your team uses Swoop — interactive guides from signal to action to proof.',
-    sourceSystems: ['All Systems'],
-  },
-  // Hidden settings/admin pages
   {
     key: 'member-profile',
     label: 'Member Profiles',
