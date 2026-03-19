@@ -89,6 +89,7 @@ export default function TodayMode({ onNavigate }) {
   const quickWins = briefing.quickWins || [];
 
   const items = getPriorityItems();
+  const [expandedItem, setExpandedItem] = useState(null);
 
   const urgencyBorder = { urgent: theme.colors.urgent, warning: theme.colors.warning, neutral: theme.colors.border };
   const urgencyBg = { urgent: `${theme.colors.urgent}06`, warning: `${theme.colors.warning}06`, neutral: theme.colors.bgCard };
@@ -275,177 +276,208 @@ export default function TodayMode({ onNavigate }) {
         </div>
       )}
 
-      {/* DES-P07: Improved alert card spacing and padding */}
-      {items.map((item) => (
-        <div
-          key={item.priority}
-          style={{
-            background: urgencyBg[item.urgency],
-            border: `1px solid ${urgencyBorder[item.urgency]}50`,
-            borderRadius: theme.radius.lg,
-            padding: '20px 24px',
-            borderLeft: `5px solid ${urgencyBorder[item.urgency]}`,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            boxShadow: theme.shadow.sm,
-            transition: 'box-shadow 0.2s ease',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.boxShadow = theme.shadow.md}
-          onMouseLeave={(e) => e.currentTarget.style.boxShadow = theme.shadow.sm}
-        >
-          {item.questionDomain && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: theme.colors.accent, background: theme.colors.accent + '15', padding: '2px 8px', borderRadius: '4px' }}>{item.questionDomain}</span>
-              <span style={{ fontSize: '11px', fontStyle: 'italic', color: theme.colors.textMuted + 'aa' }}>{item.questionLabel}</span>
-            </div>
-          )}
-          {item.meta && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
-              <span>{item.meta.sourceIcon} {item.meta.source}</span>
-              <span>Updated {item.meta.freshness}</span>
-            </div>
-          )}
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '22px', flexShrink: 0, marginTop: 2 }}>{item.icon}</span>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-                <div style={{ fontSize: '20px', fontWeight: 700, color: theme.colors.textPrimary, lineHeight: 1.3 }}>{renderHeadline(item)}</div>
+      {/* Priority Items — Accordion */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {items.map((item) => {
+          const isExpanded = expandedItem === item.priority;
+          const borderColor = urgencyBorder[item.urgency];
+          return (
+            <div
+              key={item.priority}
+              style={{
+                background: isExpanded ? urgencyBg[item.urgency] : theme.colors.bgCard,
+                border: `1px solid ${isExpanded ? borderColor + '50' : theme.colors.border}`,
+                borderRadius: theme.radius.md,
+                borderLeft: `4px solid ${borderColor}`,
+                boxShadow: isExpanded ? theme.shadow.md : theme.shadow.sm,
+                transition: 'all 0.2s ease',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Compact summary row — always visible */}
+              <div
+                onClick={() => setExpandedItem(isExpanded ? null : item.priority)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 16px',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                }}
+                onMouseEnter={(e) => { if (!isExpanded) e.currentTarget.style.background = `${borderColor}08`; }}
+                onMouseLeave={(e) => { if (!isExpanded) e.currentTarget.style.background = 'transparent'; }}
+              >
+                <span style={{ fontSize: '18px', flexShrink: 0 }}>{item.icon}</span>
+                <div style={{ flex: 1, minWidth: 0, fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {renderHeadline(item)}
+                </div>
                 {item.stakes && (
+                  <span style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    color: borderColor,
+                    background: `${borderColor}12`,
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {item.stakes}
+                  </span>
+                )}
+                {item.meta?.urgency && (
+                  <span style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    color: item.meta.urgencyColor ?? theme.colors.urgent,
+                    background: `${item.meta.urgencyColor ?? theme.colors.urgent}14`,
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                    border: `1px solid ${item.meta.urgencyColor ?? theme.colors.urgent}33`,
+                  }}>
+                    {item.meta.urgency === 'Act Now' ? '\uD83D\uDD34' : item.meta.urgency === 'Review Today' ? '\uD83D\uDFE1' : '\uD83D\uDFE2'} {item.meta.urgency}
+                  </span>
+                )}
+                <span style={{ fontSize: '14px', color: theme.colors.textMuted, flexShrink: 0, transition: 'transform 0.2s ease', transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>{'\u25B8'}</span>
+              </div>
+
+              {/* Expanded detail — full content */}
+              {isExpanded && (
+                <div style={{ padding: '0 16px 16px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {item.questionDomain && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: theme.colors.accent, background: theme.colors.accent + '15', padding: '2px 8px', borderRadius: '4px' }}>{item.questionDomain}</span>
+                      <span style={{ fontSize: '11px', fontStyle: 'italic', color: theme.colors.textMuted + 'aa' }}>{item.questionLabel}</span>
+                    </div>
+                  )}
+                  {item.meta && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
+                      <span>{item.meta.sourceIcon} {item.meta.source}</span>
+                      <span>Updated {item.meta.freshness}</span>
+                    </div>
+                  )}
+                  {item.bullets?.length > 0 && (
+                    <ul style={{ margin: 0, paddingLeft: '18px', color: theme.colors.textSecondary, fontSize: theme.fontSize.sm, lineHeight: 1.5 }}>
+                      {item.bullets.map((point) => (
+                        <li key={point} style={{ marginBottom: '4px' }}>{point}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {item.members && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {item.members.map((member) => (
+                        <MiniMemberRow key={member.name} member={member} onNavigate={onNavigate} />
+                      ))}
+                    </div>
+                  )}
+                  {item.meta?.why && (
+                    <div style={{ fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
+                      Why this surfaced
+                      <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>{item.meta.why}</div>
+                    </div>
+                  )}
+                  {item.meta?.metric && (
+                    <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '10px 12px', display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+                      <span style={{ fontSize: '22px', fontFamily: theme.fonts.mono, fontWeight: 700 }}>{item.meta.metric.value}</span>
+                      <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{item.meta.metric.label}</span>
+                    </div>
+                  )}
+                  {item.evidenceSignals && <EvidenceStrip signals={item.evidenceSignals} compact />}
+                  {/* Recommendation box */}
                   <div
                     style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: urgencyBorder[item.urgency],
-                      background: `${urgencyBorder[item.urgency]}12`,
-                      padding: '3px 10px',
-                      borderRadius: '999px',
-                      flexShrink: 0,
+                      borderLeft: `4px solid ${theme.colors.success}`,
+                      background: `linear-gradient(135deg, ${theme.colors.success}0F 0%, ${theme.colors.success}08 100%)`,
+                      padding: theme.spacing.md,
+                      borderRadius: theme.radius.sm,
+                      boxShadow: `0 1px 3px ${theme.colors.success}15`,
                     }}
                   >
-                    {item.stakes}
+                    <div style={{ fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.success, fontWeight: 700, marginBottom: '6px' }}>
+                      Recommended Action
+                    </div>
+                    <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, lineHeight: 1.5 }}>
+                      {item.recommendation}
+                    </div>
                   </div>
-                )}
-              </div>
-              {item.bullets?.length > 0 && (
-                <ul style={{ margin: 0, paddingLeft: '18px', color: theme.colors.textSecondary, fontSize: theme.fontSize.sm, lineHeight: 1.5 }}>
-                  {item.bullets.map((point) => (
-                    <li key={point} style={{ marginBottom: '4px' }}>{point}</li>
-                  ))}
-                </ul>
-              )}
-              {item.members && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {item.members.map((member) => (
-                    <MiniMemberRow key={member.name} member={member} onNavigate={onNavigate} />
-                  ))}
+                  {/* Action buttons */}
+                  <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap', alignItems: 'center' }}>
+                    {item.memberName && <QuickActions memberName={item.memberName} memberId={item.memberId} context={item.context} />}
+                    <button
+                      onClick={() => onNavigate(item.linkKey)}
+                      style={{
+                        padding: '8px 16px',
+                        fontSize: theme.fontSize.sm,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        borderRadius: theme.radius.md,
+                        border: `2px solid ${theme.colors.accent}`,
+                        background: theme.colors.white,
+                        color: theme.colors.accent,
+                        boxShadow: theme.shadow.sm,
+                        transition: 'all 0.2s ease',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.03em',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = theme.colors.accent;
+                        e.currentTarget.style.color = theme.colors.white;
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = theme.shadow.md;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = theme.colors.white;
+                        e.currentTarget.style.color = theme.colors.accent;
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = theme.shadow.sm;
+                      }}
+                    >
+                      {item.linkLabel}
+                    </button>
+                  </div>
                 </div>
               )}
-              {item.meta?.why && (
-                <div style={{ fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
-                  Why this surfaced
-                  <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>{item.meta.why}</div>
-                </div>
-              )}
-              {item.meta?.metric && (
-                <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '10px 12px', display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
-                  <span style={{ fontSize: '22px', fontFamily: theme.fonts.mono, fontWeight: 700 }}>{item.meta.metric.value}</span>
-                  <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{item.meta.metric.label}</span>
-                </div>
-              )}
             </div>
+          );
+        })}
+
+        {/* Prove It: Board Report CTA */}
+        <div
+          onClick={() => onNavigate('board-report')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '14px 16px',
+            marginTop: '4px',
+            background: `linear-gradient(135deg, ${theme.colors.accent}08 0%, ${theme.colors.success}08 100%)`,
+            border: `1.5px solid ${theme.colors.accent}30`,
+            borderRadius: theme.radius.md,
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = theme.colors.accent;
+            e.currentTarget.style.boxShadow = theme.shadow.md;
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = `${theme.colors.accent}30`;
+            e.currentTarget.style.boxShadow = 'none';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <span style={{ fontSize: '20px' }}>{'\uD83D\uDCCA'}</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>Prove It: What Was Prevented</div>
+            <div style={{ fontSize: '12px', color: theme.colors.textMuted }}>Board-ready report — 14 members saved, $168K protected</div>
           </div>
-          {/* DES-P07: Improved action buttons with better hierarchy */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            flexWrap: 'wrap', 
-            gap: theme.spacing.sm,
-            paddingTop: theme.spacing.sm,
-            borderTop: `1px solid ${urgencyBorder[item.urgency]}20`,
-          }}>
-            <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap', alignItems: 'center' }}>
-              {item.memberName && <QuickActions memberName={item.memberName} memberId={item.memberId} context={item.context} />}
-              <button
-                onClick={() => onNavigate(item.linkKey)}
-                style={{
-                  padding: '8px 16px',
-                  fontSize: theme.fontSize.sm,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  borderRadius: theme.radius.md,
-                  border: `2px solid ${theme.colors.accent}`,
-                  background: theme.colors.white,
-                  color: theme.colors.accent,
-                  boxShadow: theme.shadow.sm,
-                  transition: 'all 0.2s ease',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.03em',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = theme.colors.accent;
-                  e.currentTarget.style.color = theme.colors.white;
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = theme.shadow.md;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = theme.colors.white;
-                  e.currentTarget.style.color = theme.colors.accent;
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = theme.shadow.sm;
-                }}
-              >
-                {item.linkLabel}
-              </button>
-            </div>
-            {item.meta?.urgency && (
-              <span style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                color: item.meta.urgencyColor ?? theme.colors.urgent,
-                background: `${item.meta.urgencyColor ?? theme.colors.urgent}14`,
-                padding: '5px 14px',
-                borderRadius: '999px',
-                border: `1px solid ${item.meta.urgencyColor ?? theme.colors.urgent}33`,
-              }}>
-                {item.meta.urgency === 'Act Now' ? '🔴' : item.meta.urgency === 'Review Today' ? '🟡' : '🟢'} {item.meta.urgency}
-              </span>
-            )}
-          </div>
-          {/* DES-P07: Improved recommendation box with better visual hierarchy */}
-          <div
-            style={{
-              marginTop: theme.spacing.md,
-              borderLeft: `4px solid ${theme.colors.success}`,
-              background: `linear-gradient(135deg, ${theme.colors.success}0F 0%, ${theme.colors.success}08 100%)`,
-              padding: theme.spacing.md,
-              borderRadius: theme.radius.sm,
-              boxShadow: `0 1px 3px ${theme.colors.success}15`,
-            }}
-          >
-            <div style={{ 
-              fontSize: theme.fontSize.xs, 
-              textTransform: 'uppercase', 
-              letterSpacing: '0.08em',
-              color: theme.colors.success,
-              fontWeight: 700,
-              marginBottom: '6px',
-            }}>
-              💡 Recommended Action
-            </div>
-            <div style={{
-              fontSize: theme.fontSize.sm,
-              fontWeight: 600,
-              color: theme.colors.textPrimary,
-              lineHeight: 1.5,
-            }}>
-              {item.recommendation}
-            </div>
-          </div>
-          {item.evidenceSignals && <EvidenceStrip signals={item.evidenceSignals} compact />}
+          <span style={{ fontSize: '18px', color: theme.colors.accent, fontWeight: 700 }}>{'\u2192'}</span>
         </div>
-      ))}
+      </div>
     </div>
   );
 }

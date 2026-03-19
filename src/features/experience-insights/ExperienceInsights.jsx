@@ -419,7 +419,171 @@ function ComplaintsTab() {
         buttonColor="#dc2626"
         variant="urgent"
       />
+
+      {/* Staffing-Complaint Correlation Heatmap */}
+      <StaffingComplaintHeatmap />
     </div>
+  );
+}
+
+function StaffingComplaintHeatmap() {
+  const shiftData = [
+    { day: 'Mon', morning: { complaints: 1, understaffed: false }, lunch: { complaints: 2, understaffed: false }, evening: { complaints: 1, understaffed: false } },
+    { day: 'Tue', morning: { complaints: 0, understaffed: false }, lunch: { complaints: 1, understaffed: false }, evening: { complaints: 2, understaffed: true } },
+    { day: 'Wed', morning: { complaints: 1, understaffed: false }, lunch: { complaints: 3, understaffed: true }, evening: { complaints: 1, understaffed: false } },
+    { day: 'Thu', morning: { complaints: 0, understaffed: false }, lunch: { complaints: 2, understaffed: false }, evening: { complaints: 2, understaffed: false } },
+    { day: 'Fri', morning: { complaints: 2, understaffed: true }, lunch: { complaints: 5, understaffed: true }, evening: { complaints: 3, understaffed: true } },
+    { day: 'Sat', morning: { complaints: 1, understaffed: false }, lunch: { complaints: 4, understaffed: true }, evening: { complaints: 2, understaffed: false } },
+    { day: 'Sun', morning: { complaints: 0, understaffed: false }, lunch: { complaints: 2, understaffed: false }, evening: { complaints: 1, understaffed: false } },
+  ];
+
+  const shifts = ['morning', 'lunch', 'evening'];
+  const shiftLabels = { morning: 'Morning', lunch: 'Lunch', evening: 'Evening' };
+
+  const getCellColor = (count) => {
+    if (count === 0) return theme.colors.success;
+    if (count <= 2) return theme.colors.warning;
+    if (count <= 4) return '#ea580c';
+    return theme.colors.urgent;
+  };
+
+  const getCellBg = (count) => {
+    if (count === 0) return theme.colors.success + '18';
+    if (count <= 2) return theme.colors.warning + '22';
+    if (count <= 4) return '#ea580c' + '28';
+    return theme.colors.urgent + '30';
+  };
+
+  return (
+    <Panel title="Staffing-Complaint Correlation" subtitle="How understaffing correlates with complaint spikes by day and shift">
+      <div style={{ overflowX: 'auto' }}>
+        {/* Heatmap grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '80px repeat(7, 1fr)',
+          gap: '4px',
+          marginBottom: theme.spacing.md,
+        }}>
+          {/* Header row */}
+          <div />
+          {shiftData.map((d) => (
+            <div key={d.day} style={{
+              textAlign: 'center',
+              fontSize: theme.fontSize.xs,
+              fontWeight: 700,
+              color: theme.colors.textMuted,
+              padding: '6px 0',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+            }}>
+              {d.day}
+            </div>
+          ))}
+
+          {/* Data rows */}
+          {shifts.map((shift) => (
+            <>
+              <div key={shift + '-label'} style={{
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: theme.fontSize.xs,
+                fontWeight: 600,
+                color: theme.colors.textSecondary,
+                paddingRight: '8px',
+              }}>
+                {shiftLabels[shift]}
+              </div>
+              {shiftData.map((d) => {
+                const cell = d[shift];
+                return (
+                  <div
+                    key={d.day + '-' + shift}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minHeight: '44px',
+                      borderRadius: theme.radius.sm,
+                      background: getCellBg(cell.complaints),
+                      border: cell.understaffed
+                        ? `2px solid ${theme.colors.urgent}`
+                        : `1px solid ${theme.colors.border}`,
+                      fontFamily: theme.fonts.mono,
+                      fontSize: '14px',
+                      fontWeight: 700,
+                      color: getCellColor(cell.complaints),
+                      position: 'relative',
+                      cursor: 'default',
+                    }}
+                    title={`${d.day} ${shiftLabels[shift]}: ${cell.complaints} complaint${cell.complaints !== 1 ? 's' : ''}${cell.understaffed ? ' (understaffed)' : ''}`}
+                  >
+                    {cell.complaints}
+                    {cell.understaffed && (
+                      <span style={{
+                        position: 'absolute',
+                        top: '2px',
+                        right: '4px',
+                        fontSize: '8px',
+                        color: theme.colors.urgent,
+                        fontWeight: 700,
+                      }}>
+                        !
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          ))}
+        </div>
+
+        {/* Legend */}
+        <div style={{
+          display: 'flex',
+          gap: '16px',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          marginBottom: theme.spacing.md,
+          padding: '8px 0',
+          borderTop: `1px solid ${theme.colors.border}`,
+          borderBottom: `1px solid ${theme.colors.border}`,
+        }}>
+          {[
+            { label: '0 complaints', color: theme.colors.success, bg: theme.colors.success + '18' },
+            { label: '1-2 complaints', color: theme.colors.warning, bg: theme.colors.warning + '22' },
+            { label: '3-4 complaints', color: '#ea580c', bg: '#ea580c' + '28' },
+            { label: '5+ complaints', color: theme.colors.urgent, bg: theme.colors.urgent + '30' },
+          ].map((item) => (
+            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{
+                width: 14,
+                height: 14,
+                borderRadius: '3px',
+                background: item.bg,
+                border: `1px solid ${item.color}40`,
+              }} />
+              <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{item.label}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{
+              width: 14,
+              height: 14,
+              borderRadius: '3px',
+              background: 'transparent',
+              border: `2px solid ${theme.colors.urgent}`,
+            }} />
+            <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>Understaffed shift</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Key Insight callout */}
+      <SoWhatCallout>
+        <strong>Friday lunch is the #1 complaint hotspot</strong> — 5 complaints on understaffed shifts vs 1.2 avg on fully-staffed shifts.
+        Adding one server on Fridays would reduce complaints 60% and protect <strong>$18K in at-risk dues</strong>.
+      </SoWhatCallout>
+    </Panel>
   );
 }
 

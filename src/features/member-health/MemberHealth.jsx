@@ -4,6 +4,7 @@ import HealthOverview from './tabs/HealthOverview';
 import ArchetypeTab from './tabs/ArchetypeTab';
 import EmailTab from './tabs/EmailTab';
 import ResignationTimeline from './ResignationTimeline';
+import RecoveryTab from './tabs/RecoveryTab';
 import AllMembersView from './tabs/AllMembersView';
 import { sourceSystems } from '@/services/memberService';
 import { theme } from '@/config/theme';
@@ -11,6 +12,7 @@ import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 import { SkeletonMemberList } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import FlowLink from '@/components/ui/FlowLink';
+import CohortTab from './tabs/CohortTab';
 
 const TABS = [
   { key: 'health',       label: 'Health Overview' },
@@ -18,6 +20,8 @@ const TABS = [
   { key: 'archetypes',   label: 'Archetypes' },
   { key: 'email',        label: 'Email Decay' },
   { key: 'resignations', label: 'Resignations' },
+  { key: 'recovery',     label: 'Recovery' },
+  { key: 'cohorts',      label: 'Cohort Analysis' },
 ];
 
 export default function MemberHealth() {
@@ -99,6 +103,8 @@ export default function MemberHealth() {
         {activeTab === 'archetypes'   && <ArchetypeTab />}
         {activeTab === 'email'        && <EmailTab />}
         {activeTab === 'resignations' && <ResignationTimeline />}
+        {activeTab === 'recovery'     && <RecoveryTab />}
+        {activeTab === 'cohorts'      && <CohortTab />}
       </Panel>
 
       <ActionRecommendation
