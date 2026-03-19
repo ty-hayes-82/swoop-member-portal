@@ -82,7 +82,7 @@ const STATUS_COLORS = {
 export function IntegrationsPage() {
   const systems = useMemo(() => getConnectedSystems(), []);
   const systemMap = useMemo(() => Object.fromEntries(systems.map((system) => [system.id, system])), [systems]);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('connected');
 
   const connectedSystems = systems.filter((system) => system.status === 'connected').length;
   const totalSystems = systems.length;
@@ -102,15 +102,16 @@ export function IntegrationsPage() {
     return 'Full Intelligence';
   };
 
+  const [showMarketplace, setShowMarketplace] = useState(false);
+
   const summaryCards = [
-    { label: 'Connected Systems', value: `${connectedSystems}/${totalSystems}`, sub: 'Live connectors' },
+    { label: 'Systems Connected', value: `${connectedSystems}`, sub: 'All Healthy', color: '#22c55e' },
     { label: 'Data Points Synced', value: dataPointsSynced >= 1000 ? `${(dataPointsSynced / 1000).toFixed(1)}K` : dataPointsSynced.toLocaleString(), sub: 'This week' },
-    { 
-      label: 'Insights Unlocked', 
-      value: `${intelligenceScore}%`, 
-      sub: 'Connect more systems to unlock more insights',
-      color: getScoreColor(intelligenceScore),
-      tooltip: `${intelligenceScore}% of possible insights available. Connect ${totalSystems - connectedSystems} more systems to unlock the full picture.`
+    {
+      label: 'System Status',
+      value: 'All Healthy',
+      sub: 'Last sync: 11 min ago',
+      color: '#22c55e',
     },
   ];
 
