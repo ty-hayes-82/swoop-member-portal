@@ -488,21 +488,7 @@ export default function HealthOverview() {
                   <span style={{ fontWeight: 700 }}>{m.name}</span>
                   <div style={{ fontSize: 10, color: theme.colors.textMuted }}>{m.archetype}</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 28, width: 64 }}>
-                  {[m.novPct, m.decPct, m.janPct].map((pct, i) => {
-                    const maxPct = Math.max(m.novPct, m.decPct, m.janPct, 1);
-                    const scaled = Math.max(3, Math.round((pct / maxPct) * 100));
-                    return (
-                      <div key={i} style={{
-                        width: 18,
-                        height: `${scaled}%`,
-                        background: i === 2 ? theme.colors.urgent : i === 1 ? theme.colors.warning : theme.colors.success,
-                        borderRadius: 2,
-                        transition: 'height 0.3s ease',
-                      }} />
-                    );
-                  })}
-                </div>
+                <div style={{ width: 60 }} />
                 <div style={{ color: theme.colors.textSecondary }}>
                   Open rate: {m.novPct}% → {m.decPct}% → <strong style={{ color: theme.colors.urgent }}>{m.janPct}%</strong>
                 </div>
