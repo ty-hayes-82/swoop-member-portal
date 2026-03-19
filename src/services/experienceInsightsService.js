@@ -326,18 +326,6 @@ export const archetypeSpendGaps = [
   },
 ];
 
-// Archetype spend patterns for spend potential analysis
-export const getArchetypeSpendPatterns = () => {
-  return memberArchetypes.map(a => ({
-    archetype: a.archetype,
-    count: a.count,
-    engagement: { golf: a.golf, dining: a.dining, events: a.events, email: a.email },
-    trend: a.trend,
-    avgAnnualSpend: Math.round((a.golf * 120 + a.dining * 80 + a.events * 45) / 100),
-    spendPotential: Math.round(((100 - a.dining) * 80 + (100 - a.events) * 45) / 100),
-  }));
-};
-
 // ─── Live data hydration ────────────────────────────────────────────────────
 let _d = null;
 
