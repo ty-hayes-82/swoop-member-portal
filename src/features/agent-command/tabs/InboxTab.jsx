@@ -86,7 +86,7 @@ export default function InboxTab() {
       <div className="grid-responsive-4">
         {[
           { label: 'Pending', value: pendingCount, accent: theme.colors.agentCyan },
-          { label: 'Visible', value: visible.length, accent: theme.colors.textSecondary },
+          { label: 'High Priority', value: visible.filter(a => a.priority === 'high').length, accent: theme.colors.urgent },
           { label: 'Approved', value: approvedToday, accent: theme.colors.agentApproved },
           { label: 'Dismissed', value: dismissedToday, accent: theme.colors.agentDismissed },
         ].map((stat) => (

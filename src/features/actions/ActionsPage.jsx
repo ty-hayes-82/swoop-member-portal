@@ -13,9 +13,9 @@ import FlowLink from '@/components/ui/FlowLink';
 
 const TABS = [
   { key: 'inbox',     label: 'Inbox' },
-  { key: 'playbooks', label: 'Playbooks' },
-  { key: 'agents',    label: 'Agents' },
   { key: 'outreach',  label: 'Outreach' },
+  { key: 'playbooks', label: 'Playbooks' },
+  { key: 'agents',    label: 'AI Agents' },
 ];
 
 function ActionsBadge() {
@@ -126,9 +126,9 @@ export default function ActionsPage() {
                 flexWrap: 'wrap',
               }}
             >
-              <span>{summary.active} playbooks monitoring</span>
+              <span>{summary.active} agents active</span>
               <MetricSeparator />
-              <span>{summary.total} total</span>
+              <span>{summary.total} agents deployed</span>
             </div>
           </div>
         </div>

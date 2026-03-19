@@ -33,7 +33,7 @@ export default function AgentsTab() {
           </div>
         </div>
         <div style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.sm, color: theme.colors.agentCyan, fontWeight: 700 }}>
-          {Math.round(agents.reduce((sum, agent) => sum + agent.accuracy, 0) / agents.length)}% avg accuracy
+          {agents.length > 0 ? Math.round(agents.reduce((sum, a) => sum + (a.accuracy || 0), 0) / agents.length) : '—'}% avg accuracy
         </div>
       </div>
 
