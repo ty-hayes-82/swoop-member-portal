@@ -196,7 +196,7 @@ export const navItems = [
   {
     key: 'storyboard-flows',
     label: 'Playbook Guides',
-    section: 'REPORTING',
+    section: 'SETTINGS',
     icon: '📖',
     color: theme.colors.navOperations,
     subtitle: 'How your team uses Swoop — interactive guides from signal to action to proof.',
