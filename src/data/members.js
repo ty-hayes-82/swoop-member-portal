@@ -14,21 +14,38 @@ export const memberArchetypes = [
 ];
 
 export const healthDistribution = [
-  { level: 'Healthy',  min: 70,  count: 254, percentage: 0.846, color: theme.colors.success, delta: -4 },
-  { level: 'Watch',    min: 50,  count: 0,   percentage: 0,     color: theme.colors.warning, delta: 0 },
+  { level: 'Healthy',  min: 70,  count: 242, percentage: 0.807, color: theme.colors.success, delta: -4 },
+  { level: 'Watch',    min: 50,  count: 12,  percentage: 0.04,  color: theme.colors.warning, delta: 5 },
   { level: 'At Risk',  min: 30,  count: 34,  percentage: 0.113, color: theme.colors.riskAtRiskAlt, delta: 6 },
   { level: 'Critical', min: 0,   count: 12,  percentage: 0.04,  color: theme.colors.urgent, delta: 3 },
 ];
 
 export const memberSummary = {
   total: 300,
-  healthy: 254,
+  healthy: 242,
+  watch: 12,
   atRisk: 34,
   critical: 12,
   riskCount: 46,
   avgHealthScore: 74,
   potentialDuesAtRisk: 533000,
 };
+
+// Watch tier members — early-stage decay signals, not yet At Risk
+export const watchMembers = [
+  { memberId: 'mbr_301', name: 'Diane Prescott', score: 62, archetype: 'Balanced Active', signal: 'Email open rate declined 22% over 6 weeks', action: 'Concierge check-in', duesAnnual: 15000 },
+  { memberId: 'mbr_302', name: 'Tom Gallagher', score: 58, archetype: 'Weekend Warrior', signal: 'Round frequency down from 3→2/month', action: 'Pro shop greeting + tee time suggestion', duesAnnual: 12000 },
+  { memberId: 'mbr_303', name: 'Evelyn Park', score: 64, archetype: 'Social Butterfly', signal: 'Skipped last 2 member events', action: 'Personal event invitation from Membership Director', duesAnnual: 18000 },
+  { memberId: 'mbr_304', name: 'Greg Holloway', score: 55, archetype: 'Die-Hard Golfer', signal: 'Post-round dining stopped 3 weeks ago', action: 'Grill Room staff greeting on next visit', duesAnnual: 22000 },
+  { memberId: 'mbr_305', name: 'Rita Vasquez', score: 61, archetype: 'Balanced Active', signal: 'Newsletter open rate dropped from 65% to 38%', action: 'Personalized event email', duesAnnual: 14000 },
+  { memberId: 'mbr_306', name: 'Nathan Burke', score: 53, archetype: 'Weekend Warrior', signal: 'Cancelled last 2 Saturday tee times', action: 'Pro shop call with preferred time offer', duesAnnual: 16000 },
+  { memberId: 'mbr_307', name: 'Claire Donovan', score: 65, archetype: 'Social Butterfly', signal: 'Dining visits down 30% in January', action: 'Chef\'s Table invitation', duesAnnual: 20000 },
+  { memberId: 'mbr_308', name: 'Paul Serrano', score: 56, archetype: 'Declining', signal: 'Email and golf both showing 2-week decline', action: 'Membership Director outreach', duesAnnual: 11000 },
+  { memberId: 'mbr_309', name: 'Jennifer Walsh', score: 60, archetype: 'New Member', signal: 'No events attended in first 60 days', action: 'New member welcome event invitation', duesAnnual: 28000 },
+  { memberId: 'mbr_310', name: 'David Chen', score: 57, archetype: 'Balanced Active', signal: 'Pro shop spend dropped to zero this month', action: 'Equipment recommendation from pro', duesAnnual: 15000 },
+  { memberId: 'mbr_311', name: 'Lisa Yamamoto', score: 63, archetype: 'Snowbird', signal: 'In-season activity 40% below expected', action: 'Welcome-back personal call', duesAnnual: 24000 },
+  { memberId: 'mbr_313', name: 'Mark Patterson', score: 54, archetype: 'Weekend Warrior', signal: 'Golf frequency and email engagement both declining', action: 'Saturday morning tee time hold + personal invite', duesAnnual: 16000 },
+];
 
 export const atRiskMembers = [
   // ON-41 data model note: include duesAnnual on at-risk rows so UI can derive totals from row data.

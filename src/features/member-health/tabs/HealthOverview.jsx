@@ -3,7 +3,7 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
-import { getHealthDistribution, getAtRiskMembers, calculateLTV, formatLTV, DEFAULT_LTV_MULTIPLIER } from '@/services/memberService';
+import { getHealthDistribution, getAtRiskMembers, getWatchMembers, calculateLTV, formatLTV, DEFAULT_LTV_MULTIPLIER } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
@@ -300,7 +300,9 @@ function ChurnDecaySequence() {
 export default function HealthOverview() {
   const dist = getHealthDistribution();
   const atRisk = getAtRiskMembers();
+  const watchList = getWatchMembers();
   const [expanded, setExpanded] = useState(null);
+  const [showWatch, setShowWatch] = useState(false);
   const [sortColumn, setSortColumn] = useState('score');
   const [sortDir, setSortDir] = useState('desc');
 
@@ -587,6 +589,51 @@ export default function HealthOverview() {
         </div>
         {showAtRisk && renderTable(atRiskOnly, 'at-risk')}
       </div>
+
+      {/* Watch tier members */}
+      {watchList.length > 0 && (
+        <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, overflow: 'hidden', background: theme.colors.bgCard }}>
+          <div
+            onClick={() => setShowWatch(!showWatch)}
+            style={{
+              cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: theme.spacing.md, borderBottom: showWatch ? `1px solid ${theme.colors.border}` : 'none',
+              background: `${theme.colors.warning}06`,
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 700, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}>
+                Watch List — {watchList.length} members need monitoring
+              </div>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                Subtle signals detected before full risk. Low-intensity actions recommended.
+              </div>
+            </div>
+            <span style={{ fontSize: 14, color: '#6b7280', transition: 'transform 0.2s', transform: showWatch ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
+          </div>
+          {showWatch && (
+            <div style={{ padding: theme.spacing.md, display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+              {watchList.map((m) => (
+                <div key={m.memberId} style={{
+                  display: 'grid', gridTemplateColumns: '1.2fr 1.5fr 1fr 1fr',
+                  gap: theme.spacing.sm, alignItems: 'center',
+                  padding: '8px 10px', border: `1px solid ${theme.colors.border}`,
+                  borderRadius: theme.radius.sm, background: theme.colors.bgCard,
+                  fontSize: theme.fontSize.xs,
+                }}>
+                  <div>
+                    <MemberLink memberId={m.memberId} style={{ fontWeight: 700, fontSize: theme.fontSize.xs }}>{m.name}</MemberLink>
+                    <div style={{ color: theme.colors.textMuted, fontSize: 11 }}>{m.archetype}</div>
+                  </div>
+                  <div style={{ color: theme.colors.textSecondary }}>{m.signal}</div>
+                  <div style={{ color: theme.colors.warning, fontWeight: 600 }}>Score {m.score}</div>
+                  <div style={{ color: theme.colors.info, fontWeight: 500 }}>{m.action}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Single consolidated CTA */}
       <div style={{

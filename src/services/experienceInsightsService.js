@@ -39,7 +39,7 @@ export const correlationInsights = [
   {
     id: 'complaint-resolution',
     headline: 'Complaints resolved within 24hrs improve renewal probability by 18%',
-    detail: 'Across all 47 complaints this quarter, members whose issues were resolved same-day renewed at 89% vs. 71% for delayed resolution. James Whitfield is the proof case: unresolved complaint led to resignation within 4 days.',
+    detail: 'Across all 47 complaints this quarter, members whose issues were resolved same-day renewed at 89% vs. 71% for delayed resolution. Kevin Hurst is the proof case: multi-domain decline accelerated after an unresolved service event.',
     domains: ['Service', 'Retention'],
     impact: 'high',
     metric: { value: '+18%', label: 'renewal improvement' },

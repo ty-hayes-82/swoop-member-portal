@@ -4,6 +4,7 @@ import {
   memberArchetypes as staticArchetypes,
   healthDistribution as staticHealthDistribution,
   atRiskMembers as staticAtRiskMembers,
+  watchMembers as staticWatchMembers,
   resignationScenarios as staticResignationScenarios,
   memberProfiles as staticMemberProfiles,
   memberSummary as staticMemberSummary,
@@ -319,12 +320,21 @@ export const getMemberSummary = () => {
   return {
     total: Math.max(0, Math.round(toNumber(summary.total, 0))),
     healthy: Math.max(0, Math.round(toNumber(summary.healthy, 0))),
+    watch: Math.max(0, Math.round(toNumber(summary.watch, 0))),
     atRisk: Math.max(0, Math.round(toNumber(summary.atRisk, 0))),
     critical: Math.max(0, Math.round(toNumber(summary.critical, 0))),
     riskCount: Math.max(0, Math.round(toNumber(summary.riskCount, 0))),
     avgHealthScore: formatMaybeNumber(summary.avgHealthScore, 0),
     potentialDuesAtRisk: formatMaybeNumber(summary.potentialDuesAtRisk, 0),
   };
+};
+
+export const getWatchMembers = () => {
+  return (staticWatchMembers ?? []).map((m) => ({
+    ...m,
+    trend: 'watch',
+    riskLevel: 'Watch',
+  }));
 };
 
 

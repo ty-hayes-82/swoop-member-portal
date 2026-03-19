@@ -116,7 +116,8 @@ export default function TodayMode({ onNavigate }) {
         sourceIcon: '🗂',
         source: 'CRM + POS + Complaints',
         freshness: 'Updated 11 min ago',
-        confidence: '93% confidence',
+        urgency: 'Act Now',
+        urgencyColor: theme.colors.urgent,
         why: 'Complaint aging 6d & spend down 42%',
         metric: { value: '6-day', label: 'warning lead time' },
       },
@@ -146,7 +147,8 @@ export default function TodayMode({ onNavigate }) {
         sourceIcon: '🌤',
         source: 'Weather + Tee Sheet',
         freshness: 'Forecast updated 18 min ago',
-        confidence: '87% confidence',
+        urgency: 'Review Today',
+        urgencyColor: theme.colors.warning,
         why: 'High-risk bookings overlap gust window',
         metric: { value: '$8.7K', label: 'revenue at risk' },
       },
@@ -179,7 +181,8 @@ export default function TodayMode({ onNavigate }) {
         sourceIcon: '📊',
         source: 'Member Pulse',
         freshness: 'Scores refreshed 9 min ago',
-        confidence: '90% confidence',
+        urgency: 'Act Now',
+        urgencyColor: theme.colors.urgent,
         why: 'Health scores <45 + tee times today',
         metric: { value: '$180K', label: 'lifetime value at stake' },
       },
@@ -232,6 +235,32 @@ export default function TodayMode({ onNavigate }) {
         <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: 0 }}>
           {timeGreet}
         </p>
+      </div>
+
+      {/* Since Last Login */}
+      <div style={{
+        background: `${theme.colors.accent}08`,
+        border: `1px solid ${theme.colors.accent}25`,
+        borderRadius: theme.radius.md,
+        padding: theme.spacing.md,
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+          Since your last visit (18 hours ago)
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.sm }}>
+          {[
+            { label: 'New at-risk members', value: '+2', detail: '$36K exposure', color: theme.colors.urgent },
+            { label: 'New complaints', value: '+1', detail: 'unresolved', color: theme.colors.warning },
+            { label: 'Actions completed', value: '3', detail: 'by your team', color: theme.colors.success },
+            { label: 'Health movements', value: '2↑ 1↓', detail: 'net improving', color: theme.colors.info },
+          ].map((d) => (
+            <div key={d.label} style={{ textAlign: 'center' }}>
+              <div style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.lg, fontWeight: 700, color: d.color }}>{d.value}</div>
+              <div style={{ fontSize: 11, color: theme.colors.textSecondary, lineHeight: 1.3 }}>{d.label}</div>
+              <div style={{ fontSize: 10, color: theme.colors.textMuted }}>{d.detail}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
 
@@ -469,17 +498,17 @@ export default function TodayMode({ onNavigate }) {
                 {item.linkLabel}
               </button>
             </div>
-            {item.meta?.confidence && (
-              <span style={{ 
-                fontSize: '11px', 
-                fontWeight: 700, 
-                color: theme.colors.textPrimary, 
-                background: `${theme.colors.textPrimary}12`, 
-                padding: '5px 14px', 
+            {item.meta?.urgency && (
+              <span style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                color: item.meta.urgencyColor ?? theme.colors.urgent,
+                background: `${item.meta.urgencyColor ?? theme.colors.urgent}14`,
+                padding: '5px 14px',
                 borderRadius: '999px',
-                border: `1px solid ${theme.colors.textPrimary}20`,
+                border: `1px solid ${item.meta.urgencyColor ?? theme.colors.urgent}33`,
               }}>
-                {item.meta.confidence}
+                {item.meta.urgency === 'Act Now' ? '🔴' : item.meta.urgency === 'Review Today' ? '🟡' : '🟢'} {item.meta.urgency}
               </span>
             )}
           </div>
