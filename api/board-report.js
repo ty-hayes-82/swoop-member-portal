@@ -11,7 +11,8 @@ export default async function handler(req, res) {
         LIMIT 1
       `,
       sql`
-        SELECT mi.member_id, m.full_name,
+        SELECT mi.member_id,
+               COALESCE(TRIM(m.first_name || ' ' || m.last_name), 'Member ' || mi.member_id) AS name,
                mi.health_before, mi.health_after,
                mi.trigger, mi.action, mi.outcome, mi.dues_at_risk
         FROM member_interventions mi
@@ -49,7 +50,7 @@ export default async function handler(req, res) {
 
     // Map member interventions
     const memberSaves = interventions.rows.map((r) => ({
-      name: r.full_name ?? `Member ${r.member_id}`,
+      name: r.name ?? `Member ${r.member_id}`,
       healthBefore: Number(r.health_before),
       healthAfter: Number(r.health_after),
       trigger: r.trigger,
