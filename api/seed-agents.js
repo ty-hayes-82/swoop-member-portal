@@ -9,7 +9,7 @@ export default async function handler(req, res) {
       description TEXT,
       status VARCHAR(20) DEFAULT 'active',
       model VARCHAR(50),
-      avatar VARCHAR(10),
+      avatar VARCHAR(100),
       source_systems TEXT[],
       last_run TIMESTAMPTZ
     )`;

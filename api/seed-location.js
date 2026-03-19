@@ -5,9 +5,9 @@ export default async function handler(req, res) {
     // Create tables if not exists
     await sql`CREATE TABLE IF NOT EXISTS member_location_current (
       member_id TEXT PRIMARY KEY,
-      zone VARCHAR(50),
+      zone VARCHAR(100),
       sub_location VARCHAR(100),
-      check_in_time TIMESTAMPTZ,
+      check_in_time TIMESTAMPTZ DEFAULT NOW(),
       health_status VARCHAR(20),
       activity_type VARCHAR(50)
     )`;
@@ -32,34 +32,33 @@ export default async function handler(req, res) {
     )`;
 
     // Seed member_location_current
-    await sql`INSERT INTO member_location_current (member_id, lat, lng, zone, zone_id, status, health_score, time_in_zone, needs_attention, recommended_action)
+    await sql`INSERT INTO member_location_current (member_id, zone, sub_location, check_in_time, health_status, activity_type)
       VALUES
-        ('mbr_101', 34.0412, -84.5995, 'Course, Hole 14', 'golf', 'at-risk', 48, '2h 10m', true, 'Greet at turn — offer beverage credit.'),
-        ('mbr_205', 34.0399, -84.5978, 'Grill Room', 'dining', 'at-risk', 51, '35m', true, 'Table visit by F&B manager recommended.'),
-        ('mbr_188', 34.0405, -84.5960, 'Driving Range', 'range', 'at-risk', 55, '45m', true, 'First visit in 3 weeks — welcome back personally.'),
-        ('mbr_102', 34.0415, -84.5988, 'Course, Hole 7', 'golf', 'healthy', 82, '1h 20m', false, 'No action needed.'),
-        ('mbr_201', 34.0398, -84.5976, 'Grill Room', 'dining', 'healthy', 78, '50m', false, 'No action needed.')
+        ('mbr_101', 'Course - Hole 14', 'Back 9', NOW() - INTERVAL '2 hours', 'at-risk', 'golf'),
+        ('mbr_205', 'Grill Room', 'Main Floor', NOW() - INTERVAL '35 minutes', 'at-risk', 'dining'),
+        ('mbr_188', 'Driving Range', 'Bay 4', NOW() - INTERVAL '45 minutes', 'at-risk', 'range'),
+        ('mbr_102', 'Course - Hole 7', 'Front 9', NOW() - INTERVAL '80 minutes', 'healthy', 'golf'),
+        ('mbr_201', 'Grill Room', 'Patio', NOW() - INTERVAL '50 minutes', 'healthy', 'dining')
       ON CONFLICT (member_id) DO NOTHING`;
 
     // Seed staff_location_current
-    await sql`INSERT INTO staff_location_current (staff_id, name, role, lat, lng, zone, status, eta_text)
+    await sql`INSERT INTO staff_location_current (staff_id, name, zone, status, eta_minutes, department)
       VALUES
-        ('stf_01', 'Maya Patel', 'F&B', 34.0399, -84.5978, 'Grill Room', 'Available', 'ETA 2 min'),
-        ('stf_02', 'Jordan Lee', 'Member Services', 34.0401, -84.5982, 'Clubhouse', 'With member', 'ETA 5 min'),
-        ('stf_03', 'Noah Bennett', 'Golf Operations', 34.0405, -84.5960, 'Driving Range', 'Available', 'ETA 3 min'),
-        ('stf_04', 'Elena Ruiz', 'Pool', 34.0393, -84.5970, 'Pool Deck', 'Available', 'ETA 4 min'),
-        ('stf_05', 'Caleb Wright', 'Pro Shop', 34.0402, -84.5980, 'Pro Shop', 'On radio', 'ETA 3 min')
+        ('stf_01', 'Maya Patel', 'Grill Room', 'Available', 2, 'F&B'),
+        ('stf_02', 'Jordan Lee', 'Clubhouse', 'With member', 5, 'Member Services'),
+        ('stf_03', 'Noah Bennett', 'Driving Range', 'Available', 3, 'Golf Operations'),
+        ('stf_04', 'Elena Ruiz', 'Pool Deck', 'Available', 4, 'Pool'),
+        ('stf_05', 'Caleb Wright', 'Pro Shop', 'On radio', 3, 'Pro Shop')
       ON CONFLICT (staff_id) DO NOTHING`;
 
     // Seed service_recovery_alerts
-    await sql`INSERT INTO service_recovery_alerts (alert_id, member_id, severity, zone, title, detail, created_at)
+    await sql`INSERT INTO service_recovery_alerts (member_id, member_name, severity, zone, detail, recommended_action, created_at)
       VALUES
-        ('sra_001', 'mbr_101', 'high', 'Course - Hole 14', 'At-risk member finishing round', 'Health score 48. Completing back 9 — intercept at turn or clubhouse.', NOW() - INTERVAL '15 minutes'),
-        ('sra_002', 'mbr_205', 'high', 'Grill Room', 'Filed complaint last week', 'Noise complaint 6/1, no follow-up. Currently dining — F&B manager table visit recommended.', NOW() - INTERVAL '10 minutes'),
-        ('sra_003', 'mbr_188', 'medium', 'Driving Range', 'First visit in 3 weeks', 'Was weekly visitor. Gap detected — personal welcome back and check-in suggested.', NOW() - INTERVAL '25 minutes')
-      ON CONFLICT (alert_id) DO NOTHING`;
+        ('mbr_101', 'James Whitfield', 'high', 'Course - Hole 14', 'At-risk member (score 42) finishing round. Has not dined in 6 weeks.', 'F&B manager greet at Grill Room with usual order when he finishes.', NOW() - INTERVAL '15 minutes'),
+        ('mbr_205', 'Sandra Chen', 'high', 'Grill Room', 'Filed complaint last week about slow service. Currently dining.', 'GM should stop by table for personal recovery check-in.', NOW() - INTERVAL '10 minutes'),
+        ('mbr_188', 'Robert Mills', 'medium', 'Driving Range', 'First visit in 3 weeks. Positive re-engagement signal.', 'Pro shop should offer complimentary lesson.', NOW() - INTERVAL '25 minutes')`;
 
-    res.status(200).json({ ok: true, message: 'Location seed data inserted.' });
+    res.status(200).json({ success: true, seeded: { member_location_current: 5, staff_location_current: 5, service_recovery_alerts: 3 } });
   } catch (err) {
     console.error('/api/seed-location error:', err);
     res.status(500).json({ error: err.message });
