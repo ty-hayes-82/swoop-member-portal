@@ -2,6 +2,45 @@ import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   try {
+    // Create tables if not exists
+    await sql`CREATE TABLE IF NOT EXISTS booking_confirmations (
+      confirmation_id VARCHAR(50) PRIMARY KEY,
+      booking_id VARCHAR(50),
+      member_id VARCHAR(20),
+      member_name VARCHAR(100),
+      tee_time VARCHAR(100),
+      cancel_probability NUMERIC(3,2),
+      outreach_status VARCHAR(20) DEFAULT 'pending',
+      outreach_channel VARCHAR(20),
+      staff_notes TEXT,
+      contacted_at TIMESTAMPTZ,
+      responded_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`;
+    await sql`CREATE TABLE IF NOT EXISTS slot_reassignments (
+      reassignment_id VARCHAR(50) PRIMARY KEY,
+      source_booking_id VARCHAR(50),
+      source_slot VARCHAR(100),
+      source_member_id VARCHAR(20),
+      source_member_name VARCHAR(100),
+      recommended_fill_member_id VARCHAR(20),
+      recommended_fill_member_name VARCHAR(100),
+      status VARCHAR(20) DEFAULT 'pending',
+      staff_decision TEXT,
+      revenue_recovered NUMERIC(8,2),
+      health_before INT,
+      health_after INT,
+      decided_at TIMESTAMPTZ,
+      audit_trail JSONB DEFAULT '[]'
+    )`;
+    await sql`CREATE TABLE IF NOT EXISTS waitlist_config (
+      club_id VARCHAR(20) PRIMARY KEY DEFAULT 'oakmont',
+      hold_time_minutes INT DEFAULT 30,
+      auto_offer_threshold NUMERIC(3,2) DEFAULT 0.80,
+      max_offers INT DEFAULT 3,
+      notification_limit INT DEFAULT 2
+    )`;
+
     // Seed booking_confirmations
     await sql`INSERT INTO booking_confirmations (confirmation_id, member_id, member_name, booking_id, tee_time, cancel_probability, outreach_status, outreach_channel, staff_notes, created_at)
       VALUES

@@ -2,6 +2,34 @@ import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   try {
+    // Create tables if not exists
+    await sql`CREATE TABLE IF NOT EXISTS agent_definitions (
+      agent_id VARCHAR(50) PRIMARY KEY,
+      name VARCHAR(100),
+      description TEXT,
+      status VARCHAR(20) DEFAULT 'active',
+      model VARCHAR(50),
+      avatar VARCHAR(10),
+      source_systems TEXT[],
+      last_run TIMESTAMPTZ
+    )`;
+    await sql`CREATE TABLE IF NOT EXISTS agent_actions (
+      action_id VARCHAR(50) PRIMARY KEY,
+      agent_id VARCHAR(50) REFERENCES agent_definitions(agent_id),
+      action_type VARCHAR(50),
+      priority VARCHAR(20),
+      source VARCHAR(100),
+      description TEXT,
+      impact_metric VARCHAR(100),
+      member_id VARCHAR(20),
+      status VARCHAR(20) DEFAULT 'pending',
+      approval_action TEXT,
+      dismissal_reason TEXT,
+      timestamp TIMESTAMPTZ DEFAULT NOW(),
+      approved_at TIMESTAMPTZ,
+      dismissed_at TIMESTAMPTZ
+    )`;
+
     // Seed agent_definitions
     await sql`INSERT INTO agent_definitions (agent_id, name, description, status, model, avatar, source_systems, last_run)
       VALUES

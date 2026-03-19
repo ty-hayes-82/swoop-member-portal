@@ -2,6 +2,17 @@ import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   try {
+    // Create table if not exists
+    await sql`CREATE TABLE IF NOT EXISTS industry_benchmarks (
+      metric_key VARCHAR(50) PRIMARY KEY,
+      club_value NUMERIC(12,2),
+      industry_value NUMERIC(12,2),
+      unit VARCHAR(10),
+      label VARCHAR(100),
+      comparison_text VARCHAR(50),
+      direction VARCHAR(20)
+    )`;
+
     await sql`
       INSERT INTO industry_benchmarks (metric_key, club_value, industry_value, unit, label, comparison_text, direction) VALUES
         ('member_retention', 94.2, 88.5, '%', 'Member Retention Rate', '5.7 pts above average', 'up'),

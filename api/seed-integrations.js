@@ -2,6 +2,17 @@ import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   try {
+    // Create table if not exists
+    await sql`CREATE TABLE IF NOT EXISTS connected_systems (
+      system_id VARCHAR(50) PRIMARY KEY,
+      vendor_name VARCHAR(100),
+      category VARCHAR(50),
+      status VARCHAR(20) DEFAULT 'available',
+      last_sync TIMESTAMPTZ,
+      data_points_synced INT DEFAULT 0,
+      config JSONB
+    )`;
+
     await sql`
       INSERT INTO connected_systems (system_id, vendor_name, category, status, last_sync, data_points_synced, config) VALUES
         ('tee-sheet', 'ForeTees Tee Sheet', 'tee-sheet', 'connected', NOW() - INTERVAL '2 minutes', 14500, '{"endpoints":["teeTimes","pacing","playerRoster"]}'),

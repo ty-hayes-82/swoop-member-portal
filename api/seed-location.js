@@ -2,6 +2,35 @@ import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   try {
+    // Create tables if not exists
+    await sql`CREATE TABLE IF NOT EXISTS member_location_current (
+      member_id TEXT PRIMARY KEY,
+      zone VARCHAR(50),
+      sub_location VARCHAR(100),
+      check_in_time TIMESTAMPTZ,
+      health_status VARCHAR(20),
+      activity_type VARCHAR(50)
+    )`;
+    await sql`CREATE TABLE IF NOT EXISTS staff_location_current (
+      staff_id VARCHAR(20) PRIMARY KEY,
+      name VARCHAR(100),
+      zone VARCHAR(50),
+      status VARCHAR(20),
+      eta_minutes INT,
+      department VARCHAR(50)
+    )`;
+    await sql`CREATE TABLE IF NOT EXISTS service_recovery_alerts (
+      alert_id SERIAL PRIMARY KEY,
+      member_id VARCHAR(20),
+      member_name VARCHAR(100),
+      severity VARCHAR(20),
+      zone VARCHAR(50),
+      detail TEXT,
+      recommended_action TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      resolved_at TIMESTAMPTZ
+    )`;
+
     // Seed member_location_current
     await sql`INSERT INTO member_location_current (member_id, lat, lng, zone, zone_id, status, health_score, time_in_zone, needs_attention, recommended_action)
       VALUES
