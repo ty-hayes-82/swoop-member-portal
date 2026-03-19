@@ -1,5 +1,5 @@
-// Fix: Randomize email_open_rate for ALL members in member_engagement_weekly
-// so decay detection produces diverse, realistic curves.
+// Fix: Ensure decaying members have clear, diverse decay curves
+// that the detection SQL (25% drop over 3 weeks) will find.
 // Run once via: /api/fix-decay-curves
 
 import { sql } from '@vercel/postgres';
@@ -9,81 +9,88 @@ export default async function handler(req, res) {
     const maxWeekResult = await sql`SELECT MAX(week_number) AS mw FROM member_engagement_weekly`;
     const maxWeek = Number(maxWeekResult.rows[0]?.mw ?? 12);
 
-    // Get all distinct members
+    // Get all active members with archetypes
     const membersResult = await sql`
       SELECT DISTINCT mew.member_id, m.archetype
       FROM member_engagement_weekly mew
       JOIN members m ON m.member_id = mew.member_id
       WHERE m.membership_status = 'active'
     `;
-
-    // Archetype baseline open rates (realistic ranges)
-    const archetypeBaselines = {
-      'Social Butterfly': { base: 0.68, variance: 0.12 },
-      'Balanced Active':  { base: 0.52, variance: 0.10 },
-      'Die-Hard Golfer':  { base: 0.38, variance: 0.08 },
-      'Weekend Warrior':  { base: 0.34, variance: 0.10 },
-      'New Member':       { base: 0.58, variance: 0.15 },
-      'Snowbird':         { base: 0.44, variance: 0.12 },
-      'Declining':        { base: 0.24, variance: 0.08 },
-      'Ghost':            { base: 0.12, variance: 0.06 },
-    };
-
-    // Simple seeded random based on member_id string
-    function seededRandom(seed, i) {
-      let h = 0;
-      const s = seed + String(i);
-      for (let c = 0; c < s.length; c++) {
-        h = ((h << 5) - h + s.charCodeAt(c)) | 0;
-      }
-      return (Math.abs(h) % 1000) / 1000;
-    }
-
-    let updated = 0;
     const members = membersResult.rows;
 
-    // Pick ~15 members to have a clear decay pattern (these become the "decaying" members)
-    const decayCount = Math.min(15, Math.floor(members.length * 0.05));
-    const decayIndices = new Set();
-    for (let i = 0; i < decayCount; i++) {
-      decayIndices.add(Math.floor(seededRandom('decay', i) * members.length));
+    const archetypeBaselines = {
+      'Social Butterfly': 0.68, 'Balanced Active': 0.52, 'Die-Hard Golfer': 0.38,
+      'Weekend Warrior': 0.34, 'New Member': 0.58, 'Snowbird': 0.44,
+      'Declining': 0.24, 'Ghost': 0.12,
+    };
+
+    function hash(s, i) {
+      let h = 0;
+      const str = s + String(i);
+      for (let c = 0; c < str.length; c++) h = ((h << 5) - h + str.charCodeAt(c)) | 0;
+      return (Math.abs(h) % 10000) / 10000;
     }
 
-    for (let mi = 0; mi < members.length; mi++) {
-      const member = members[mi];
-      const archConfig = archetypeBaselines[member.archetype] ?? { base: 0.40, variance: 0.10 };
-      const isDecaying = decayIndices.has(mi);
+    // Pick 8 members for decay — spread across archetypes
+    const archetypeGroups = {};
+    members.forEach((m, i) => {
+      if (!archetypeGroups[m.archetype]) archetypeGroups[m.archetype] = [];
+      archetypeGroups[m.archetype].push({ ...m, idx: i });
+    });
 
-      // Generate a unique per-member offset
-      const memberOffset = (seededRandom(member.member_id, 0) - 0.5) * archConfig.variance * 2;
+    const decayMembers = [];
+    const targetArchetypes = ['Social Butterfly', 'Balanced Active', 'Die-Hard Golfer', 'Weekend Warrior', 'New Member', 'Snowbird', 'Declining', 'Ghost'];
+    for (const arch of targetArchetypes) {
+      const group = archetypeGroups[arch];
+      if (group && group.length > 0) {
+        const pick = group[Math.floor(hash(arch, 42) * group.length)];
+        decayMembers.push(pick);
+      }
+    }
+
+    const decayMemberIds = new Set(decayMembers.map(m => m.member_id));
+    let updated = 0;
+
+    // Define unique decay curves per archetype — last 3 weeks MUST drop 25%+
+    const decayCurves = {
+      'Social Butterfly': [0.76, 0.72, 0.68, 0.65, 0.61, 0.58, 0.54, 0.49, 0.42, 0.31, 0.18, 0.06],
+      'Balanced Active':  [0.55, 0.53, 0.50, 0.48, 0.46, 0.43, 0.40, 0.36, 0.30, 0.22, 0.13, 0.04],
+      'Die-Hard Golfer':  [0.40, 0.38, 0.37, 0.35, 0.34, 0.32, 0.30, 0.27, 0.22, 0.16, 0.09, 0.03],
+      'Weekend Warrior':  [0.38, 0.36, 0.34, 0.33, 0.31, 0.29, 0.27, 0.24, 0.20, 0.14, 0.07, 0.02],
+      'New Member':       [0.72, 0.68, 0.63, 0.58, 0.52, 0.46, 0.39, 0.31, 0.22, 0.14, 0.08, 0.03],
+      'Snowbird':         [0.48, 0.46, 0.44, 0.42, 0.39, 0.36, 0.32, 0.27, 0.20, 0.13, 0.07, 0.02],
+      'Declining':        [0.28, 0.26, 0.24, 0.22, 0.20, 0.18, 0.15, 0.12, 0.09, 0.06, 0.03, 0.01],
+      'Ghost':            [0.14, 0.13, 0.12, 0.11, 0.10, 0.09, 0.08, 0.06, 0.05, 0.03, 0.02, 0.01],
+    };
+
+    // Update ALL members
+    for (const member of members) {
+      const base = archetypeBaselines[member.archetype] ?? 0.40;
+      const isDecaying = decayMemberIds.has(member.member_id);
 
       for (let week = 1; week <= maxWeek; week++) {
         let rate;
 
         if (isDecaying) {
-          // Decaying members: start at archetype baseline, decline steadily
-          const decayProgress = week / maxWeek;
-          const startRate = archConfig.base + memberOffset;
-          // Each decaying member has a unique decay speed
-          const decaySpeed = 0.6 + seededRandom(member.member_id, 99) * 0.35;
-          rate = startRate * Math.pow(1 - decaySpeed, decayProgress * 3);
-          // Add small noise
-          rate += (seededRandom(member.member_id, week) - 0.5) * 0.04;
+          // Use the archetype-specific decay curve
+          const curve = decayCurves[member.archetype] ?? decayCurves['Balanced Active'];
+          const curveIdx = Math.min(week - 1, curve.length - 1);
+          rate = curve[curveIdx];
+          // Add tiny per-member noise so even same-archetype decayers differ slightly
+          rate += (hash(member.member_id, week) - 0.5) * 0.03;
         } else {
-          // Stable members: fluctuate around their archetype baseline
-          const weekNoise = (seededRandom(member.member_id, week) - 0.5) * archConfig.variance;
-          rate = archConfig.base + memberOffset + weekNoise;
+          // Stable: fluctuate naturally around archetype baseline
+          const offset = (hash(member.member_id, 0) - 0.5) * 0.15;
+          const noise = (hash(member.member_id, week) - 0.5) * 0.08;
+          rate = base + offset + noise;
         }
 
-        // Clamp to 0.01 - 0.95
-        rate = Math.max(0.01, Math.min(0.95, rate));
-        rate = Math.round(rate * 100) / 100;
+        rate = Math.max(0.01, Math.min(0.95, Math.round(rate * 100) / 100));
 
         await sql`
           UPDATE member_engagement_weekly
           SET email_open_rate = ${rate}
-          WHERE member_id = ${member.member_id}
-            AND week_number = ${week}
+          WHERE member_id = ${member.member_id} AND week_number = ${week}
         `;
         updated++;
       }
@@ -91,10 +98,9 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       success: true,
-      message: `Updated ${updated} rows across ${members.length} members (${decayCount} decaying)`,
-      maxWeek,
+      updated,
       totalMembers: members.length,
-      decayingCount: decayCount,
+      decayingMembers: decayMembers.map(m => ({ id: m.member_id, archetype: m.archetype })),
     });
   } catch (err) {
     console.error('/api/fix-decay-curves error:', err);
