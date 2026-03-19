@@ -6,6 +6,7 @@ import MemberLink from '@/components/MemberLink.jsx';
 import { getTopPendingAction } from '@/services/agentService';
 import { useApp } from '@/context/AppContext';
 import { getDailyBriefing } from '@/services/briefingService';
+import { getPriorityItems } from '@/services/cockpitService';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
 
 const HOUR = new Date().getHours();
@@ -87,107 +88,7 @@ export default function TodayMode({ onNavigate }) {
   const briefing = getDailyBriefing();
   const quickWins = briefing.quickWins || [];
 
-  const items = [
-    {
-      priority: 1,
-      urgency: 'urgent',
-      questionDomain: 'Operational Command',
-      questionLabel: 'Where is today at risk of breaking?',
-      icon: '⚠',
-      headline: 'James Whitfield filed a complaint 6 days ago. No one has followed up.',
-      recommendation: 'GM to call James personally with apology + complimentary round. Send recovery note via Swoop app within 2 hours.',
-      evidenceSignals: [
-        { source: 'Complaint', detail: 'Jan 16 pace-of-play complaint' },
-        { source: 'Tee Sheet', detail: '3 cancellations in 10 days' },
-        { source: 'POS', detail: 'Grill Room visits dropped to zero' },
-      ],
-      bullets: [
-        'Complaint acknowledged but unresolved — timer exceeded 6-day SLA.',
-        'Average Grill Room check dropped from $47 → $28 since January 3.',
-        'Health score fell 78 → 42 once the third complaint hit.',
-      ],
-      stakes: '$18,000/yr in dues ($90K lifetime value)',
-      memberName: 'James Whitfield',
-      memberId: 'mbr_203',
-      context: 'Slow service complaint at Grill Room — felt ignored after acknowledging.',
-      linkLabel: 'Full case → Staffing & Service',
-      linkKey: 'staffing-service',
-      meta: {
-        sourceIcon: '🗂',
-        source: 'CRM + POS + Complaints',
-        freshness: 'Updated 11 min ago',
-        urgency: 'Act Now',
-        urgencyColor: theme.colors.urgent,
-        why: 'Complaint aging 6d & spend down 42%',
-        metric: { value: '6-day', label: 'warning lead time' },
-      },
-    },
-    {
-      priority: 2,
-      urgency: 'warning',
-      questionDomain: 'Revenue at Risk',
-      questionLabel: 'Which ops failures are costing F&B spend?',
-      icon: '☁',
-      headline: 'Wind advisory today — 15+ mph gusts expected by noon.',
-      recommendation: 'Prep extra Grill Room staff for early lunch surge. Send proactive text to afternoon bookers offering reschedule or indoor alternatives.',
-      evidenceSignals: [
-        { source: 'Weather', detail: '25mph gusts forecast 1-5 PM' },
-        { source: 'Tee Sheet', detail: '18 afternoon bookings at risk' },
-        { source: 'Staffing', detail: 'Grill Room understaffed for surge' },
-      ],
-      bullets: [
-        'Wind days reduce confirmations by 15% once forecast lock hits.',
-        '28 tee times after noon × $312 revenue/slot = $8,736 at risk.',
-        'Grill Room sees 20–30% lunch spike when golfers stay inside.',
-      ],
-      stakes: 'Prepare F&B staff',
-      linkLabel: 'Operations →',
-      linkKey: 'operations',
-      meta: {
-        sourceIcon: '🌤',
-        source: 'Weather + Tee Sheet',
-        freshness: 'Forecast updated 18 min ago',
-        urgency: 'Review Today',
-        urgencyColor: theme.colors.warning,
-        why: 'High-risk bookings overlap gust window',
-        metric: { value: '$8.7K', label: 'revenue at risk' },
-      },
-    },
-    {
-      priority: 3,
-      urgency: 'neutral',
-      questionDomain: 'Member Health',
-      questionLabel: 'Which members are one bad experience away?',
-      icon: '👥',
-      headline: '2 more at-risk members have tee times today.',
-      recommendation: 'Pro shop staff to greet by name on arrival. Schedule post-round check-in via Swoop app. Flag for Membership Director follow-up tomorrow.',
-      evidenceSignals: [
-        { source: 'GPS', detail: '9-hole exits 3 of last 4 rounds' },
-        { source: 'Dining', detail: 'Post-round F&B spend down 70%' },
-        { source: 'Email', detail: 'Newsletter open rate dropped to 0%' },
-      ],
-      members: [
-        { name: 'Anne Jordan', memberId: 'mbr_089', score: 38, archetype: 'Weekend Warrior', risk: '3 rounds in 3 months, down from 12 in October', time: '8:14 AM' },
-        { name: 'Robert Callahan', memberId: 'mbr_271', score: 41, archetype: 'Declining', risk: 'Dining only — hitting F&B minimum, nothing more', time: '10:40 AM' },
-      ],
-      bullets: [
-        'Both members are in the bottom quartile of engagement.',
-        'Combined dues at risk: $36K annual ($180K lifetime value) + secondary spend.',
-      ],
-      stakes: '$36K annual dues ($180K lifetime value)',
-      linkLabel: 'Member Retention →',
-      linkKey: 'member-health',
-      meta: {
-        sourceIcon: '📊',
-        source: 'Member Pulse',
-        freshness: 'Scores refreshed 9 min ago',
-        urgency: 'Act Now',
-        urgencyColor: theme.colors.urgent,
-        why: 'Health scores <45 + tee times today',
-        metric: { value: '$180K', label: 'lifetime value at stake' },
-      },
-    },
-  ];
+  const items = getPriorityItems();
 
   const urgencyBorder = { urgent: theme.colors.urgent, warning: theme.colors.warning, neutral: theme.colors.border };
   const urgencyBg = { urgent: `${theme.colors.urgent}06`, warning: `${theme.colors.warning}06`, neutral: theme.colors.bgCard };

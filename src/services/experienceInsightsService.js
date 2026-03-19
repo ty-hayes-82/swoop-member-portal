@@ -1,6 +1,6 @@
 // experienceInsightsService.js — correlation calculations from existing data
+// _init() hydrates from Postgres; arrays/objects are mutated in-place so imports stay current.
 import { memberArchetypes } from '@/data/members';
-import { feedbackRecords } from '@/data/staffing';
 
 // Touchpoint correlations with retention — derived from cross-domain analysis
 export const touchpointCorrelations = [
@@ -325,3 +325,50 @@ export const archetypeSpendGaps = [
     campaign: '90-day onboarding program: intro golf clinic, new member mixer, dining tour. Set cross-domain habits early.',
   },
 ];
+
+export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email', 'Complaints'];
+
+// Archetype spend patterns for spend potential analysis
+export const getArchetypeSpendPatterns = () => {
+  return memberArchetypes.map(a => ({
+    archetype: a.archetype,
+    count: a.count,
+    engagement: { golf: a.golf, dining: a.dining, events: a.events, email: a.email },
+    trend: a.trend,
+    avgAnnualSpend: Math.round((a.golf * 120 + a.dining * 80 + a.events * 45) / 100),
+    spendPotential: Math.round(((100 - a.dining) * 80 + (100 - a.events) * 45) / 100),
+  }));
+};
+
+// ─── Live data hydration ────────────────────────────────────────────────────
+let _d = null;
+
+export const _init = async () => {
+  try {
+    const res = await fetch('/api/experience-insights');
+    if (!res.ok) return;
+    _d = await res.json();
+
+    if (Array.isArray(_d.touchpointCorrelations)) {
+      touchpointCorrelations.length = 0;
+      touchpointCorrelations.push(..._d.touchpointCorrelations);
+    }
+    if (Array.isArray(_d.correlationInsights)) {
+      correlationInsights.length = 0;
+      correlationInsights.push(..._d.correlationInsights);
+    }
+    if (Array.isArray(_d.eventROI)) {
+      eventROI.length = 0;
+      eventROI.push(..._d.eventROI);
+    }
+    if (_d.complaintLoyaltyStats) {
+      Object.assign(complaintLoyaltyStats, _d.complaintLoyaltyStats);
+    }
+    if (Array.isArray(_d.archetypeSpendGaps)) {
+      archetypeSpendGaps.length = 0;
+      archetypeSpendGaps.push(..._d.archetypeSpendGaps);
+    }
+  } catch {
+    /* keep static fallback */
+  }
+};

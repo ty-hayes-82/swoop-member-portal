@@ -5,6 +5,15 @@ const defaultStaff = staffOnDuty;
 const defaultAlerts = alertsFeed;
 const defaultZones = zoneAnalytics;
 
+let _d = null;
+
+export const _init = async () => {
+  try {
+    const res = await fetch('/api/location');
+    if (res.ok) _d = await res.json();
+  } catch { /* static fallback */ }
+};
+
 const toNumber = (value, fallback = 0) => {
   const next = Number(value);
   return Number.isFinite(next) ? next : fallback;
@@ -48,11 +57,11 @@ const normalizeStaff = (source) => {
   }));
 };
 
-export const getLiveMemberLocations = (payload = null) => normalizeMembers(payload?.members ?? payload?.locationMembers);
-export const getStaffLocations = (payload = null) => normalizeStaff(payload?.staff ?? payload?.staffOnDuty);
+export const getLiveMemberLocations = (payload = null) => normalizeMembers(payload?.members ?? _d?.members ?? payload?.locationMembers);
+export const getStaffLocations = (payload = null) => normalizeStaff(payload?.staff ?? _d?.staff ?? payload?.staffOnDuty);
 
 export const getServiceRecoveryAlerts = (payload = null) => {
-  const source = payload?.alerts ?? payload?.alertsFeed;
+  const source = payload?.alerts ?? _d?.alerts ?? payload?.alertsFeed;
   const list = Array.isArray(source) && source.length ? source : defaultAlerts;
   return list.map((alert, index) => ({
     id: alert?.id ?? `alert_${index + 1}`,

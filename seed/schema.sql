@@ -489,6 +489,245 @@ CREATE TABLE IF NOT EXISTS demand_heatmap (
 CREATE INDEX IF NOT EXISTS idx_heatmap_course           ON demand_heatmap(course_id);
 CREATE INDEX IF NOT EXISTS idx_heatmap_day_time         ON demand_heatmap(day_of_week, time_block);
 
+-- ---------------------------------------------------------------------------
+-- 4.1 BOARD REPORT & COCKPIT DOMAIN (Sprint 1)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS board_report_snapshots (
+  snapshot_id         SERIAL PRIMARY KEY,
+  snapshot_date       DATE NOT NULL,
+  members_saved       INT DEFAULT 0,
+  dues_protected      NUMERIC(12,2) DEFAULT 0,
+  ltv_protected       NUMERIC(12,2) DEFAULT 0,
+  revenue_recovered   NUMERIC(12,2) DEFAULT 0,
+  service_failures_caught INT DEFAULT 0,
+  avg_response_time_hrs NUMERIC(5,1) DEFAULT 0,
+  board_confidence_pct INT DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS member_interventions (
+  intervention_id     SERIAL PRIMARY KEY,
+  member_id           TEXT REFERENCES members(member_id),
+  trigger_type        VARCHAR(50),
+  trigger_detail      TEXT,
+  action_taken        TEXT,
+  outcome             TEXT,
+  health_before       INT,
+  health_after        INT,
+  dues_at_risk        NUMERIC(12,2),
+  intervention_date   DATE,
+  resolved_date       DATE
+);
+
+CREATE TABLE IF NOT EXISTS operational_interventions (
+  intervention_id     SERIAL PRIMARY KEY,
+  event_type          VARCHAR(100),
+  event_date          DATE,
+  detection_method    TEXT,
+  action_taken        TEXT,
+  outcome             TEXT,
+  revenue_protected   NUMERIC(12,2),
+  members_affected    INT
+);
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+  session_id          SERIAL PRIMARY KEY,
+  user_id             VARCHAR(50) DEFAULT 'gm_default',
+  login_at            TIMESTAMPTZ DEFAULT NOW(),
+  snapshot            JSONB
+);
+
+-- ---------------------------------------------------------------------------
+-- 4.2 EXPERIENCE INSIGHTS DOMAIN (Sprint 2)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS experience_correlations (
+  correlation_id      SERIAL PRIMARY KEY,
+  touchpoint          VARCHAR(100),
+  retention_impact    NUMERIC(4,2),
+  category            VARCHAR(50),
+  description         TEXT,
+  segment             VARCHAR(20) DEFAULT 'all',
+  archetype           VARCHAR(50) DEFAULT NULL,
+  trend_data          JSONB,
+  delta               VARCHAR(20),
+  delta_direction     VARCHAR(10)
+);
+
+CREATE TABLE IF NOT EXISTS correlation_insights (
+  insight_id          VARCHAR(50) PRIMARY KEY,
+  headline            TEXT,
+  detail              TEXT,
+  domains             TEXT[],
+  impact              VARCHAR(20),
+  metric_value        VARCHAR(20),
+  metric_label        VARCHAR(100),
+  trend_data          JSONB,
+  delta               VARCHAR(20),
+  delta_direction     VARCHAR(10),
+  archetype           VARCHAR(50) DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS event_roi_metrics (
+  event_type          VARCHAR(100) PRIMARY KEY,
+  attendance_avg      INT,
+  retention_rate      NUMERIC(5,2),
+  avg_spend           NUMERIC(8,2),
+  roi_score           NUMERIC(4,1),
+  frequency           VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS archetype_spend_gaps (
+  archetype           VARCHAR(50) PRIMARY KEY,
+  member_count        INT,
+  current_dining      INT,
+  potential_dining     INT,
+  current_events      INT,
+  potential_events    INT,
+  avg_annual_spend    NUMERIC(10,2),
+  untapped_dining     NUMERIC(10,2),
+  untapped_events     NUMERIC(10,2),
+  total_untapped      NUMERIC(10,2),
+  campaign            TEXT
+);
+
+-- ---------------------------------------------------------------------------
+-- 4.3 AGENTS DOMAIN (Sprint 3)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS agent_definitions (
+  agent_id            VARCHAR(50) PRIMARY KEY,
+  name                VARCHAR(100),
+  description         TEXT,
+  status              VARCHAR(20) DEFAULT 'active',
+  model               VARCHAR(50),
+  avatar              VARCHAR(10),
+  source_systems      TEXT[],
+  last_run            TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS agent_actions (
+  action_id           VARCHAR(50) PRIMARY KEY,
+  agent_id            VARCHAR(50) REFERENCES agent_definitions(agent_id),
+  action_type         VARCHAR(50),
+  priority            VARCHAR(20),
+  source              VARCHAR(100),
+  description         TEXT,
+  impact_metric       VARCHAR(100),
+  member_id           VARCHAR(20),
+  status              VARCHAR(20) DEFAULT 'pending',
+  approval_action     TEXT,
+  dismissal_reason    TEXT,
+  timestamp           TIMESTAMPTZ DEFAULT NOW(),
+  approved_at         TIMESTAMPTZ,
+  dismissed_at        TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_actions_status ON agent_actions(status);
+CREATE INDEX IF NOT EXISTS idx_agent_actions_agent  ON agent_actions(agent_id);
+
+-- ---------------------------------------------------------------------------
+-- 4.4 LOCATION INTELLIGENCE DOMAIN (Sprint 3)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS member_location_current (
+  member_id           TEXT PRIMARY KEY REFERENCES members(member_id),
+  zone                VARCHAR(50),
+  sub_location        VARCHAR(100),
+  check_in_time       TIMESTAMPTZ,
+  health_status       VARCHAR(20),
+  activity_type       VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS staff_location_current (
+  staff_id            VARCHAR(20) PRIMARY KEY,
+  name                VARCHAR(100),
+  zone                VARCHAR(50),
+  status              VARCHAR(20),
+  eta_minutes         INT,
+  department          VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS service_recovery_alerts (
+  alert_id            SERIAL PRIMARY KEY,
+  member_id           VARCHAR(20),
+  member_name         VARCHAR(100),
+  severity            VARCHAR(20),
+  zone                VARCHAR(50),
+  detail              TEXT,
+  recommended_action  TEXT,
+  created_at          TIMESTAMPTZ DEFAULT NOW(),
+  resolved_at         TIMESTAMPTZ
+);
+
+-- ---------------------------------------------------------------------------
+-- 4.5 TEE SHEET OPERATIONS DOMAIN (Sprint 3)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS booking_confirmations (
+  confirmation_id     VARCHAR(50) PRIMARY KEY,
+  booking_id          VARCHAR(50),
+  member_id           VARCHAR(20),
+  member_name         VARCHAR(100),
+  tee_time            VARCHAR(100),
+  cancel_probability  NUMERIC(3,2),
+  outreach_status     VARCHAR(20) DEFAULT 'pending',
+  outreach_channel    VARCHAR(20),
+  staff_notes         TEXT,
+  contacted_at        TIMESTAMPTZ,
+  responded_at        TIMESTAMPTZ,
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS slot_reassignments (
+  reassignment_id     VARCHAR(50) PRIMARY KEY,
+  source_booking_id   VARCHAR(50),
+  source_slot         VARCHAR(100),
+  source_member_id    VARCHAR(20),
+  source_member_name  VARCHAR(100),
+  recommended_fill_member_id   VARCHAR(20),
+  recommended_fill_member_name VARCHAR(100),
+  status              VARCHAR(20) DEFAULT 'pending',
+  staff_decision      TEXT,
+  revenue_recovered   NUMERIC(8,2),
+  health_before       INT,
+  health_after        INT,
+  decided_at          TIMESTAMPTZ,
+  audit_trail         JSONB DEFAULT '[]'
+);
+
+CREATE TABLE IF NOT EXISTS waitlist_config (
+  club_id             VARCHAR(20) PRIMARY KEY DEFAULT 'oakmont',
+  hold_time_minutes   INT DEFAULT 30,
+  auto_offer_threshold NUMERIC(3,2) DEFAULT 0.80,
+  max_offers          INT DEFAULT 3,
+  notification_limit  INT DEFAULT 2
+);
+
+-- ---------------------------------------------------------------------------
+-- 4.6 INTEGRATIONS & BENCHMARKS DOMAIN (Sprint 4)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS connected_systems (
+  system_id           VARCHAR(50) PRIMARY KEY,
+  vendor_name         VARCHAR(100),
+  category            VARCHAR(50),
+  status              VARCHAR(20) DEFAULT 'available',
+  last_sync           TIMESTAMPTZ,
+  data_points_synced  INT DEFAULT 0,
+  config              JSONB
+);
+
+CREATE TABLE IF NOT EXISTS industry_benchmarks (
+  metric_key          VARCHAR(50) PRIMARY KEY,
+  club_value          NUMERIC(12,2),
+  industry_value      NUMERIC(12,2),
+  unit                VARCHAR(10),
+  label               VARCHAR(100),
+  comparison_text     VARCHAR(50),
+  direction           VARCHAR(20)
+);
+
 -- =============================================================================
 -- End of schema
 -- =============================================================================

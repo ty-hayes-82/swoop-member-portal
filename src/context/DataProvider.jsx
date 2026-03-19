@@ -13,6 +13,13 @@ import { _init as initPipeline } from '@/services/pipelineService';
 import { _init as initTrends }   from '@/services/trendsService';
 import { _init as initWaitlist } from '@/services/waitlistService';
 import { _init as initBriefing } from '@/services/briefingService';
+import { _init as initBoardReport } from '@/services/boardReportService';
+import { _init as initCockpit }     from '@/services/cockpitService';
+import { _init as initExperience }  from '@/services/experienceInsightsService';
+import { _init as initAgents }      from '@/services/agentService';
+import { _init as initLocation }    from '@/services/locationService';
+import { _init as initTeeSheetOps } from '@/services/teeSheetOpsService';
+import { _init as initIntegrations } from '@/services/integrationsService';
 
 const DataCtx = createContext({ phase: 1 });
 export const useDataContext = () => useContext(DataCtx);
@@ -43,6 +50,8 @@ export function DataProvider({ children }) {
       Promise.allSettled([
         initOps(), initFB(), initMembers(), initStaffing(),
         initPipeline(), initTrends(), initWaitlist(), initBriefing(),
+        initBoardReport(), initCockpit(), initExperience(),
+        initAgents(), initLocation(), initTeeSheetOps(), initIntegrations(),
       ]),
       timeout,
     ]).then(results => {

@@ -6,97 +6,7 @@ import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import GrowthPipeline from '@/features/growth-pipeline/GrowthPipeline';
 import FlowLink from '@/components/ui/FlowLink';
 import { industryBenchmarks } from '@/data/benchmarks';
-
-const kpis = [
-  { label: 'Members Saved', value: 14, prefix: '', suffix: '', color: 'green' },
-  { label: 'Dues Protected', value: 168, prefix: '$', suffix: 'K', color: 'green' },
-  { label: 'Lifetime Value Protected', value: 840, prefix: '$', suffix: 'K', color: 'green' },
-  { label: 'Revenue Recovered', value: 42.5, prefix: '$', suffix: 'K', color: 'blue' },
-  { label: 'Service Failures Caught', value: 23, prefix: '', suffix: '', color: 'orange' },
-  { label: 'Avg Response Time', value: 4.2, prefix: '', suffix: ' hrs', color: 'blue' },
-  { label: 'Board Confidence Score', value: 94, prefix: '', suffix: '%', color: 'green' },
-];
-
-const memberSaves = [
-  {
-    name: 'James Whitfield',
-    healthBefore: 34,
-    healthAfter: 71,
-    trigger: 'Pace-of-play complaint + GPS showed skipped Grill Room visits',
-    action: 'GM personal call + complimentary round + service recovery via Swoop app',
-    outcome: 'Retained — renewed annual membership',
-    duesAtRisk: 18500,
-  },
-  {
-    name: 'Catherine Morales',
-    healthBefore: 41,
-    healthAfter: 68,
-    trigger: 'Dining frequency dropped 60% over 3 weeks',
-    action: 'F&B director invited to chef tasting event',
-    outcome: 'Retained — dining spend up 40% following month',
-    duesAtRisk: 14200,
-  },
-  {
-    name: 'Robert & Linda Chen',
-    healthBefore: 28,
-    healthAfter: 62,
-    trigger: 'Both members flagged — simultaneous disengagement across golf, dining, fitness',
-    action: 'Membership Director family meeting + upgraded social membership benefits',
-    outcome: 'Retained — both renewed, added junior membership for son',
-    duesAtRisk: 31000,
-  },
-  {
-    name: 'David Harrington',
-    healthBefore: 38,
-    healthAfter: 74,
-    trigger: 'GPS showed consistent 9-hole exits, tee time cancellations rising',
-    action: 'Pro shop staff greeted by name, invited to member-guest tournament',
-    outcome: 'Retained — returned to 18-hole rounds, joined men\'s league',
-    duesAtRisk: 16800,
-  },
-  {
-    name: 'Patricia Nguyen',
-    healthBefore: 45,
-    healthAfter: 77,
-    trigger: 'Spa and dining visits ceased after billing dispute',
-    action: 'Billing correction + personal apology from GM + spa credit',
-    outcome: 'Retained — became Net Promoter, referred 2 new members',
-    duesAtRisk: 12500,
-  },
-  {
-    name: 'Michael Torres',
-    healthBefore: 31,
-    healthAfter: 65,
-    trigger: 'Event attendance dropped to zero, no F&B activity for 6 weeks',
-    action: 'Engagement Autopilot triggered personalized event invitations',
-    outcome: 'Retained — attended 3 events in following month',
-    duesAtRisk: 15000,
-  },
-];
-
-const operationalSaves = [
-  {
-    event: 'Wind Advisory — Feb 8',
-    detection: 'Weather + tee sheet correlation flagged 40% cancellation risk',
-    action: 'Proactive text to afternoon bookers offering reschedule; extra Grill Room staff deployed',
-    outcome: 'Zero complaints, F&B revenue up 22% vs typical weather day',
-    revenueProtected: 8400,
-  },
-  {
-    event: 'Starter No-Show — Jan 22',
-    detection: 'Staffing gap detected at 6:45 AM, 32 tee times at risk',
-    action: 'Service Recovery agent alerted assistant pro, covered first 3 groups',
-    outcome: 'No member-facing impact, pace-of-play maintained',
-    revenueProtected: 0,
-  },
-  {
-    event: 'Valentine Dinner Overbook — Feb 14',
-    detection: 'Reservation system showed 120% capacity, F&B margin risk flagged',
-    action: 'Demand Optimizer suggested overflow seating in terrace, adjusted staffing',
-    outcome: 'All members seated within 10 min, food cost held at 31%',
-    revenueProtected: 12600,
-  },
-];
+import { getKPIs, getMemberSaves, getOperationalSaves, getMonthlyTrends } from '@/services/boardReportService';
 
 const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned', 'Growth Pipeline'];
 
@@ -119,15 +29,7 @@ const colors = {
 };
 
 
-// 6-month trend data for key metrics
-const monthlyTrends = [
-  { month: 'Sep', membersSaved: 1, duesProtected: 12000, serviceFailures: 4, responseTime: 8.1 },
-  { month: 'Oct', membersSaved: 2, duesProtected: 28000, serviceFailures: 5, responseTime: 6.8 },
-  { month: 'Nov', membersSaved: 2, duesProtected: 31000, serviceFailures: 4, responseTime: 5.9 },
-  { month: 'Dec', membersSaved: 3, duesProtected: 38000, serviceFailures: 5, responseTime: 5.2 },
-  { month: 'Jan', membersSaved: 3, duesProtected: 42000, serviceFailures: 3, responseTime: 4.2 },
-  { month: 'Feb', membersSaved: 3, duesProtected: 17000, serviceFailures: 2, responseTime: 3.8 },
-];
+// 6-month trend data — sourced from boardReportService (live DB or static fallback)
 
 function TrendSparkline({ data, dataKey, color, height = 40, width = 120 }) {
   const values = data.map(d => d[dataKey]);
@@ -164,7 +66,7 @@ function TrendSparkline({ data, dataKey, color, height = 40, width = 120 }) {
   );
 }
 
-function ProgressOverTime() {
+function ProgressOverTime({ monthlyTrends }) {
   const metrics = [
     { label: 'Members Saved / Month', key: 'membersSaved', color: colors.green, format: v => v },
     { label: 'Dues Protected / Month', key: 'duesProtected', color: colors.green, format: v => '$' + (v / 1000).toFixed(0) + 'K' },
@@ -209,7 +111,7 @@ function ProgressOverTime() {
   );
 }
 
-function KPIStrip() {
+function KPIStrip({ kpis }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '24px' }}>
       {kpis.map((kpi) => (
@@ -261,6 +163,10 @@ function HealthBadge({ value }) {
 
 export default function BoardReport() {
   const [activeTab, setActiveTab] = useState(0);
+  const kpis = getKPIs();
+  const memberSaves = getMemberSaves();
+  const operationalSaves = getOperationalSaves();
+  const monthlyTrends = getMonthlyTrends();
   const totalDues = memberSaves.reduce((sum, m) => sum + m.duesAtRisk, 0);
   const totalOpsRevenue = operationalSaves.reduce((sum, o) => sum + o.revenueProtected, 0);
   
@@ -310,7 +216,7 @@ export default function BoardReport() {
         </button>
       </div>
 
-      <KPIStrip />
+      <KPIStrip kpis={kpis} />
       <FlowLink flowNum="08" persona="Sarah" />
 
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
@@ -396,7 +302,7 @@ export default function BoardReport() {
             industry average of 6+ weeks (typically after a resignation letter). This is the difference between
             retention and replacement.
           </p>
-          <ProgressOverTime />
+          <ProgressOverTime monthlyTrends={monthlyTrends} />
         </Panel>
 
         {/* Competitive Benchmarks */}

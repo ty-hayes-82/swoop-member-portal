@@ -9,6 +9,7 @@ import TodayRiskFactors from './TodayRiskFactors.jsx';
 import MorningBriefing from '@/components/ui/MorningBriefing.jsx';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getDailyBriefing } from '@/services/briefingService.js';
+import { getPriorityItems } from '@/services/cockpitService.js';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { theme } from '@/config/theme.js';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
@@ -22,6 +23,8 @@ export default function DailyBriefing() {
   const { navigate, viewMode, setViewMode } = useNavigation();
   const briefing = getDailyBriefing();
   const { pendingAgentCount } = useApp();
+  const priorities = getPriorityItems();
+  const topPriority = priorities[0];
   
   // FP-P02: Loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -47,23 +50,25 @@ export default function DailyBriefing() {
 
       <StoryHeadline
         variant="urgent"
-        headline={(
+        headline={topPriority?.memberName ? (
           <>
             <MemberLink
               mode="drawer"
-              memberId="mbr_203"
+              memberId={topPriority.memberId}
               style={{
                 fontWeight: 700,
                 color: theme.colors.textPrimary,
                 textDecorationColor: `${theme.colors.urgent}80`,
               }}
             >
-              James Whitfield
+              {topPriority.memberName}
             </MemberLink>
-            {' '}filed a complaint Jan 18. It was never resolved. He resigned Jan 22 — $18K/year in dues lost ($90K lifetime value).
+            {' '}{topPriority.headline.replace(topPriority.memberName, '').trim()}
           </>
+        ) : (
+          topPriority?.headline ?? 'No active priority items.'
         )}
-        context="An understaffed Friday caused a 40-minute lunch. The complaint was acknowledged but no one followed up. Four days later, he was gone. What Swoop would have done: Alert surfaced Day 1 → GM sends recovery message via Swoop app → James responds same day → Health score monitored weekly → Retention confirmed."
+        context={topPriority?.recommendation ?? ''}
       />
 
       <FlowLink flowNum="01" persona="Sarah" />

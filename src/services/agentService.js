@@ -2,10 +2,23 @@ import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents'
 
 let actionStore = agentActions.map((action) => ({ ...action }));
 
+let _d = null;
+
+export const _init = async () => {
+  try {
+    const res = await fetch('/api/agents');
+    if (!res.ok) return;
+    _d = await res.json();
+    if (Array.isArray(_d.actions)) {
+      actionStore = _d.actions.map(a => ({ ...a }));
+    }
+  } catch { /* keep static fallback */ }
+};
+
 const byNewest = (a, b) => b.timestamp.localeCompare(a.timestamp);
 
 export function getAgents() {
-  return agentDefinitions;
+  return _d?.agents ?? agentDefinitions;
 }
 
 export function getAgentDefinitions() {
@@ -13,7 +26,8 @@ export function getAgentDefinitions() {
 }
 
 export function getAgentById(id) {
-  return agentDefinitions.find((agent) => agent.id === id) ?? null;
+  const agents = getAgents();
+  return agents.find((agent) => agent.id === id) ?? null;
 }
 
 export function getAllActions() {
@@ -35,6 +49,12 @@ export function approveAction(id, meta = {}) {
         }
       : action
   );
+  // Fire-and-forget POST to persist
+  fetch('/api/agents', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ actionId: id, operation: 'approve', meta }),
+  }).catch(() => {});
   return actionStore.find((action) => action.id === id) ?? null;
 }
 
@@ -49,6 +69,12 @@ export function dismissAction(id, meta = {}) {
         }
       : action
   );
+  // Fire-and-forget POST to persist
+  fetch('/api/agents', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ actionId: id, operation: 'dismiss', meta }),
+  }).catch(() => {});
   return actionStore.find((action) => action.id === id) ?? null;
 }
 

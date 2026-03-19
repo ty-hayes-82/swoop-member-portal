@@ -12,6 +12,25 @@ import {
 } from '@/data/teeSheetOps';
 import { revenuePerSlot } from '@/data/revenue';
 
+let _d = null;
+
+export const _init = async () => {
+  try {
+    const res = await fetch('/api/tee-sheet-ops');
+    if (!res.ok) return;
+    _d = await res.json();
+    if (Array.isArray(_d.confirmations)) {
+      confirmationStore = _d.confirmations.map((c) => ({ ...c }));
+    }
+    if (Array.isArray(_d.reassignments)) {
+      reassignmentStore = _d.reassignments.map((r) => ({ ...r, auditTrail: [...(r.auditTrail || [])] }));
+    }
+    if (_d.config) {
+      Object.assign(waitlistConfig, _d.config);
+    }
+  } catch { /* keep static fallback */ }
+};
+
 let confirmationStore = confirmationSeeds.map((c) => ({ ...c }));
 let reassignmentStore = reassignmentSeeds.map((r) => ({ ...r, auditTrail: [...r.auditTrail] }));
 let waitlistConfig = { ...defaultWaitlistConfig };

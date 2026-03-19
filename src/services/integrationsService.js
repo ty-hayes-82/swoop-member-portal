@@ -1,7 +1,21 @@
 import { COMBOS, SYSTEMS, INTEGRATION_CATEGORY_SECTIONS, VENDOR_INTELLIGENCE_DETAILS } from '@/data/integrations';
 
+let _d = null;
+
+export const _init = async () => {
+  try {
+    const res = await fetch('/api/integrations');
+    if (res.ok) _d = await res.json();
+  } catch { /* keep static fallback */ }
+};
+
 export function getConnectedSystems() {
-  return SYSTEMS;
+  if (!_d?.systems) return SYSTEMS;
+  // Merge: use DB status/lastSync for systems that exist in both
+  return SYSTEMS.map(s => {
+    const live = _d.systems.find(ls => ls.id === s.id);
+    return live ? { ...s, status: live.status, lastSync: live.lastSync } : s;
+  });
 }
 
 export function getSystemById(id) {
