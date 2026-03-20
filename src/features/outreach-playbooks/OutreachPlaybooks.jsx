@@ -268,23 +268,26 @@ export default function OutreachPlaybooks() {
                   Unsaved changes
                 </span>
               )}
-              <button
-                onClick={handleSave}
-                disabled={!hasChanges}
-                style={{
-                  padding: '8px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 700,
-                  cursor: hasChanges ? 'pointer' : 'default',
-                  border: 'none',
-                  background: hasChanges
-                    ? 'linear-gradient(135deg, #22c55e, #16a34a)'
-                    : '#e4e4e7',
-                  color: hasChanges ? '#fff' : '#a1a1aa',
-                  boxShadow: hasChanges ? '0 2px 8px rgba(34,197,94,0.3)' : 'none',
-                  transition: 'all 0.2s',
-                }}
-              >
-                Save Playbook
-              </button>
+              {(editMode || hasChanges) && (
+                <button
+                  onClick={handleSave}
+                  disabled={!hasChanges}
+                  title={!hasChanges ? 'Make changes to enable saving' : undefined}
+                  style={{
+                    padding: '8px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 700,
+                    cursor: hasChanges ? 'pointer' : 'default',
+                    border: 'none',
+                    background: hasChanges
+                      ? 'linear-gradient(135deg, #22c55e, #16a34a)'
+                      : '#e4e4e7',
+                    color: hasChanges ? '#fff' : '#a1a1aa',
+                    boxShadow: hasChanges ? '0 2px 8px rgba(34,197,94,0.3)' : 'none',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  Save Playbook
+                </button>
+              )}
             </div>
           </div>
 

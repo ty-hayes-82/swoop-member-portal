@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { theme } from '@/config/theme';
 import { getAgentSummary } from '@/services/agentService';
+import { getIntegrationSummary } from '@/services/integrationsService';
 import { useApp } from '@/context/AppContext';
 import { useNavigationContext } from '@/context/NavigationContext';
 import InboxTab from '@/features/agent-command/tabs/InboxTab';
@@ -10,12 +11,14 @@ import MemberPlaybooks from '@/features/member-health/MemberPlaybooks';
 import { OutreachPlaybooks } from '@/features/outreach-playbooks';
 import PageTransition from '@/components/ui/PageTransition';
 import FlowLink from '@/components/ui/FlowLink';
+import { AgentActionCard } from '@/components/ui';
 
 const TABS = [
   { key: 'inbox',     label: 'Inbox' },
   { key: 'outreach',  label: 'Outreach' },
   { key: 'playbooks', label: 'Playbooks' },
   { key: 'agents',    label: 'AI Agents' },
+  { key: 'history',   label: 'History' },
 ];
 
 function ActionsBadge() {
@@ -58,10 +61,80 @@ function MetricSeparator() {
   );
 }
 
+function HistoryTab({ searchTerm }) {
+  const { inbox } = useApp();
+  const completedActions = useMemo(() => {
+    let items = inbox.filter(i => i.status === 'approved' || i.status === 'dismissed');
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      items = items.filter(i => (i.description || '').toLowerCase().includes(q) || (i.source || '').toLowerCase().includes(q));
+    }
+    return items.sort((a, b) => new Date(b.approvedAt || b.dismissedAt || b.timestamp) - new Date(a.approvedAt || a.dismissedAt || a.timestamp));
+  }, [inbox, searchTerm]);
+
+  if (completedActions.length === 0) {
+    return (
+      <div style={{ padding: theme.spacing.xl, textAlign: 'center', color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
+        No completed actions yet. Approved and dismissed actions will appear here.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+      <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        {completedActions.length} completed action{completedActions.length !== 1 ? 's' : ''}
+      </div>
+      {completedActions.map(action => (
+        <div key={action.id} style={{
+          background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md,
+          borderLeft: `3px solid ${action.status === 'approved' ? theme.colors.success500 : theme.colors.danger500}`,
+          padding: theme.spacing.md, opacity: 0.9,
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: 12,
+                background: action.status === 'approved' ? `${theme.colors.success500}1F` : `${theme.colors.danger500}1F`,
+                color: action.status === 'approved' ? theme.colors.success500 : theme.colors.danger500,
+                textTransform: 'uppercase',
+              }}>
+                {action.status}
+              </span>
+              <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{action.source}</span>
+            </div>
+            <span style={{ fontSize: '11px', fontFamily: theme.fonts.mono, color: theme.colors.textMuted }}>
+              {new Date(action.approvedAt || action.dismissedAt || action.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+            </span>
+          </div>
+          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: 4 }}>
+            {action.description}
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+            {action.impactMetric}
+          </div>
+          {action.approvalAction && (
+            <div style={{ marginTop: 8, fontSize: '11px', color: theme.colors.success700, background: `${theme.colors.success500}0A`, padding: '4px 8px', borderRadius: 4, display: 'inline-block' }}>
+              {action.approvalAction}
+            </div>
+          )}
+          {action.dismissalReason && action.dismissalReason !== 'No reason provided' && (
+            <div style={{ marginTop: 8, fontSize: '11px', color: theme.colors.danger700, background: `${theme.colors.danger500}0A`, padding: '4px 8px', borderRadius: 4, display: 'inline-block' }}>
+              Reason: {action.dismissalReason}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ActionsPage() {
   const summary = getAgentSummary();
+  const integrationStatus = getIntegrationSummary();
   const { pendingAgentCount } = useApp();
   const { routeIntent, clearRouteIntent } = useNavigationContext();
+  const [searchTerm, setSearchTerm] = useState('');
   // Eagerly read routeIntent during initial render to prevent tab flash
   const [activeTab, setActiveTab] = useState(() => {
     if (routeIntent?.tab && TABS.some((t) => t.key === routeIntent.tab)) {
@@ -144,6 +217,35 @@ export default function ActionsPage() {
           </div>
         </div>
 
+        {/* Integration health + search */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{
+              fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: 12,
+              background: integrationStatus.syncStatus === 'Healthy' ? `${theme.colors.success500}12` : `${theme.colors.warning500}12`,
+              color: integrationStatus.syncStatus === 'Healthy' ? theme.colors.success500 : theme.colors.warning500,
+              border: `1px solid ${integrationStatus.syncStatus === 'Healthy' ? theme.colors.success500 + '30' : theme.colors.warning500 + '30'}`,
+            }}>
+              {integrationStatus.connected} systems connected {integrationStatus.syncStatus === 'Healthy' ? '— all healthy' : '— monitoring'}
+            </span>
+            <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>
+              Last sync: {integrationStatus.dataFreshness} ago
+            </span>
+          </div>
+          <input
+            type="text"
+            placeholder="Search actions, playbooks, agents..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              padding: '7px 14px', fontSize: theme.fontSize.xs, fontFamily: theme.fonts.sans,
+              background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
+              borderRadius: theme.radius.sm, color: theme.colors.textPrimary,
+              outline: 'none', minWidth: 220,
+            }}
+          />
+        </div>
+
         <FlowLink flowNum="01" persona="Sarah" />
 
         {/* Tab switcher */}
@@ -185,6 +287,7 @@ export default function ActionsPage() {
         )}
         {activeTab === 'agents' && <AgentsTab />}
         {activeTab === 'outreach' && <OutreachPlaybooks />}
+        {activeTab === 'history' && <HistoryTab searchTerm={searchTerm} />}
       </div>
     </PageTransition>
   );

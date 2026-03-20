@@ -26,19 +26,23 @@ const PRIORITY_COLOR = {
 export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, onSelect }) {
   const [pulse, setPulse] = useState(false);
   const [exiting, setExiting] = useState(false);
+  const [feedback, setFeedback] = useState(null); // 'approved' | 'dismissed'
   const status = overrideStatus ?? action.status;
   const isDone = status !== 'pending';
   const typeMeta = AGENT_ACTION_TYPES[action.actionType] ?? { icon: '⬡', label: action.actionType, color: theme.colors.agentCyan };
   const agent = getAgentById(action.agentId);
   const memberProfile = action.memberId ? getMemberProfile(action.memberId) : null;
 
-  const trigger = (handler) => {
+  const trigger = (handler, feedbackType) => {
+    setFeedback(feedbackType);
     setPulse(true);
-    setExiting(true);
     window.setTimeout(() => {
-      handler?.();
-      setPulse(false);
-    }, 140);
+      setExiting(true);
+      window.setTimeout(() => {
+        handler?.();
+        setPulse(false);
+      }, 200);
+    }, 250);
   };
 
   const handleSelect = () => {
@@ -50,16 +54,16 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
       onClick={handleSelect}
       role={onSelect ? 'button' : undefined}
       style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderLeft: `3px solid ${PRIORITY_COLOR[action.priority] ?? theme.colors.agentCyan}`,
+        background: feedback === 'approved' ? '#f0fdf4' : feedback === 'dismissed' ? '#fef2f2' : theme.colors.bgCard,
+        border: `1px solid ${feedback === 'approved' ? '#22c55e40' : feedback === 'dismissed' ? '#ef444440' : theme.colors.border}`,
+        borderLeft: `3px solid ${feedback === 'approved' ? '#22c55e' : feedback === 'dismissed' ? '#ef4444' : PRIORITY_COLOR[action.priority] ?? theme.colors.agentCyan}`,
         borderRadius: theme.radius.md,
         padding: theme.spacing.md,
         opacity: exiting ? 0 : isDone ? 0.68 : 1,
         transform: pulse ? 'scale(0.992)' : 'scale(1)',
         maxHeight: exiting ? 0 : 500,
         overflow: 'hidden',
-        transition: 'transform 0.14s ease, opacity 0.2s ease, max-height 0.25s ease',
+        transition: 'all 0.25s ease',
         cursor: onSelect ? 'pointer' : 'default',
       }}
     >
@@ -138,7 +142,7 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
             <button
               onClick={(event) => {
                 event.stopPropagation();
-                trigger(onApprove);
+                trigger(onApprove, 'approved');
               }}
               title="Approve this action and send via Swoop app. Track progress in Intervention Queue."
               style={{
@@ -158,7 +162,7 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
             <button
               onClick={(event) => {
                 event.stopPropagation();
-                trigger(onDismiss);
+                trigger(onDismiss, 'dismissed');
               }}
               title="Dismiss this action. It will be marked as reviewed but not executed."
               style={{
