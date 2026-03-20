@@ -54,7 +54,7 @@ export const navItems = [
   {
     key: 'playbooks-automation',
     label: 'Playbooks & Automation',
-    section: 'SETTINGS',
+    section: 'PRIMARY',
     icon: '⚡',
     color: theme.colors.navAgents,
     subtitle: 'AI inbox, playbooks, agents, and outreach — one decision center.',

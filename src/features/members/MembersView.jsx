@@ -162,6 +162,21 @@ export default function MembersView() {
             <CollapsibleSection title="Correlations" icon="🔗" defaultExpanded>
               <CorrelationsTab segment={segment} archetype={archetype} />
             </CollapsibleSection>
+            {/* Deep Dives divider */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: theme.spacing.md,
+              margin: `${theme.spacing.sm} 0`,
+            }}>
+              <div style={{ flex: 1, height: 1, background: theme.colors.border }} />
+              <span style={{
+                fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textMuted,
+                textTransform: 'uppercase', letterSpacing: '0.12em', whiteSpace: 'nowrap',
+              }}>
+                Deep Dives
+              </span>
+              <div style={{ flex: 1, height: 1, background: theme.colors.border }} />
+            </div>
+
             <CollapsibleSection title="Touchpoints" icon="🎯">
               <TouchpointsTab segment={segment} archetype={archetype} />
             </CollapsibleSection>

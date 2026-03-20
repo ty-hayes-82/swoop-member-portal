@@ -13,6 +13,7 @@ import TodayMode from '@/features/daily-briefing/TodayMode.jsx';
 import YesterdayRecap from '@/features/daily-briefing/YesterdayRecap.jsx';
 import SinceLastVisit from './SinceLastVisit.jsx';
 import PendingActionsInline from './PendingActionsInline.jsx';
+import RevenueSummaryCard from './RevenueSummaryCard.jsx';
 import LogFeedbackButton from './LogFeedbackButton.jsx';
 import WeekOverWeekGrid from './WeekOverWeekGrid.jsx';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
@@ -63,8 +64,8 @@ export default function TodayView() {
           context={topPriority?.recommendation ?? ''}
         />
 
-        {/* Since last visit badge */}
-        <SinceLastVisit />
+        {/* Since last visit badge — includes yesterday's metrics when away >12h */}
+        <SinceLastVisit yesterdayData={briefing.yesterdayRecap} />
 
         {/* Morning context */}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -74,8 +75,11 @@ export default function TodayView() {
         {/* Today's 3 priorities */}
         <TodayMode onNavigate={navigate} />
 
-        {/* Pending agent actions inline */}
-        <PendingActionsInline />
+        {/* Pending agent actions inline — exclude top priority to avoid duplication */}
+        <PendingActionsInline excludeId={topPriority?.id} />
+
+        {/* Revenue snapshot */}
+        <RevenueSummaryCard />
 
         {/* Proof of recent wins */}
         <RecentInterventions />
@@ -104,11 +108,6 @@ export default function TodayView() {
             Performance Review
           </span>
         </div>
-
-        {/* Yesterday's results */}
-        <Panel title="Yesterday's Results" subtitle="How did January 16th perform vs. expectations?">
-          <YesterdayRecap data={briefing.yesterdayRecap} />
-        </Panel>
 
         {/* Week-over-week trends */}
         <Panel title="Week-Over-Week Trends" subtitle="How this week compares to last week">

@@ -33,12 +33,19 @@ export default function AgentsTab() {
             {activeCount} active · {agents.length - activeCount} idle/learning
           </div>
         </div>
-        <div style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.sm, color: theme.colors.agentCyan, fontWeight: 700 }}>
-          {(() => {
-            if (agents.length === 0) return '— avg accuracy';
-            const avg = Math.round(agents.reduce((sum, a) => sum + (a.accuracy || 0), 0) / agents.length);
-            return avg > 0 ? `${avg}% avg accuracy` : 'Monitoring 6 data domains';
-          })()}
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.sm, color: theme.colors.agentCyan, fontWeight: 700 }}>
+            {(() => {
+              if (agents.length === 0) return '— avg accuracy';
+              const avg = Math.round(agents.reduce((sum, a) => sum + (a.accuracy || 0), 0) / agents.length);
+              return avg > 0 ? `${avg}% avg accuracy` : 'Learning — collecting baseline';
+            })()}
+          </div>
+          {agents.length > 0 && agents.reduce((sum, a) => sum + (a.accuracy || 0), 0) === 0 && (
+            <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: 2 }}>
+              Agents build accuracy over 30 days of approved actions
+            </div>
+          )}
         </div>
       </div>
 

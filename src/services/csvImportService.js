@@ -1,5 +1,32 @@
 import * as XLSX from 'xlsx';
 
+// Maps integration categories (from SYSTEMS data) to CSV template keys
+export const CATEGORY_TEMPLATE_MAP = {
+  'tee-sheet': ['tee-times', 'golf-rounds'],
+  'pos':       ['fnb-transactions', 'reservations'],
+  'crm':       ['members'],
+  'staffing':  ['staffing'],
+  'email':     ['email-engagement'],
+  'events':    ['events'],
+  'feedback':  ['complaints'],
+  'fitness':   ['fitness-pool'],
+  'waitlist':  ['reservations'],
+};
+
+// Vendor-specific column aliases for better auto-mapping
+export const VENDOR_COLUMN_ALIASES = {
+  'ForeTees':    { 'Booking Time': 'tee_time', 'Player Name': 'member_id', 'Tee Date': 'date', 'Course Name': 'course' },
+  'Toast':       { 'Check #': 'transaction_id', 'Opened': 'date', 'Server Name': 'server', 'Total Due': 'total' },
+  'ADP':         { 'Employee': 'employee_name', 'Dept': 'department', 'Sched Hrs': 'scheduled_hours', 'Act Hrs': 'actual_hours' },
+  'Jonas':       { 'Member #': 'member_id', 'Acct Balance': 'annual_dues', 'Join Dt': 'join_date', 'Last Name': 'last_name' },
+  'Mailchimp':   { 'Campaign Name': 'campaign_id', 'Email Address': 'email', 'Opens': 'opened', 'Clicks': 'clicked' },
+  'Lightspeed':  { 'Receipt #': 'transaction_id', 'Sale Total': 'total', 'Tender': 'payment_method', 'Sale Date': 'date' },
+  'Square':      { 'Transaction ID': 'transaction_id', 'Net Total': 'total', 'Tip Amount': 'tip', 'Date': 'date' },
+  'Chronogolf':  { 'Reservation Time': 'tee_time', 'Player': 'member_id', 'Course': 'course' },
+  'ForeUP':      { 'Tee Time': 'tee_time', 'Golfer': 'member_id', 'Holes': 'holes_played' },
+  '7shifts':     { 'Staff': 'employee_name', 'Role': 'role', 'Shift Start': 'shift_start', 'Shift End': 'shift_end' },
+};
+
 const templateLibrary = [
   {
     key: 'members',
@@ -366,8 +393,21 @@ const initialHistory = [
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const scoreMatch = (header, field) => {
+const scoreMatch = (header, field, vendorHint = null) => {
   if (!header) return 0;
+
+  // Check vendor-specific aliases first for highest confidence
+  if (vendorHint && VENDOR_COLUMN_ALIASES[vendorHint]) {
+    const aliases = VENDOR_COLUMN_ALIASES[vendorHint];
+    if (aliases[header] === field.key) return 1;
+    // Also try case-insensitive alias match
+    const lowerHeader = header.toLowerCase().trim();
+    const match = Object.entries(aliases).find(
+      ([alias]) => alias.toLowerCase() === lowerHeader
+    );
+    if (match && match[1] === field.key) return 0.98;
+  }
+
   const normalizedHeader = header.toLowerCase().trim();
   const tokens = normalizedHeader.replace(/[_-]/g, ' ');
   if (tokens === field.key.toLowerCase()) return 1;
@@ -441,11 +481,11 @@ export const parseCSV = async (file) => {
   };
 };
 
-export const autoMapFields = (headers = [], template) => {
+export const autoMapFields = (headers = [], template, vendorHint = null) => {
   if (!template) return [];
   return headers.map((header) => {
     const bestMatch = template.fields.reduce((acc, field) => {
-      const score = scoreMatch(header, field);
+      const score = scoreMatch(header, field, vendorHint);
       return score > acc.score ? { field, score } : acc;
     }, { field: null, score: 0 });
 

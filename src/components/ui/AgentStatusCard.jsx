@@ -53,15 +53,42 @@ export function AgentStatusCard({ agent, overrideStatus, onToggle, onConfigure, 
 
       <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>{agent.description}</div>
 
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-          <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>Accuracy</span>
-          <span style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: theme.colors.textPrimary }}>{accuracy}%</span>
+      {accuracy > 0 ? (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>Accuracy</span>
+            <span style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: theme.colors.textPrimary }}>{accuracy}%</span>
+          </div>
+          <div style={{ height: 6, borderRadius: 999, background: theme.colors.bgDeep, overflow: 'hidden' }}>
+            <div style={{ width: `${accuracy}%`, height: '100%', background: theme.colors.agentCyan, transition: 'width 0.2s ease' }} />
+          </div>
         </div>
-        <div style={{ height: 6, borderRadius: 999, background: theme.colors.bgDeep, overflow: 'hidden' }}>
-          <div style={{ width: `${accuracy}%`, height: '100%', background: theme.colors.agentCyan, transition: 'width 0.2s ease' }} />
+      ) : (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span style={{ fontSize: '11px', color: theme.colors.warning }}>Building baseline</span>
+            <span style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: theme.colors.textMuted }}>Day 12 of 30</span>
+          </div>
+          <div style={{ height: 6, borderRadius: 999, background: theme.colors.bgDeep, overflow: 'hidden' }}>
+            <div style={{ width: '40%', height: '100%', background: theme.colors.warning, transition: 'width 0.2s ease', opacity: 0.7 }} />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Recent activity summary */}
+      {agent.recentActivity ? (
+        <div style={{ fontSize: '11px', color: theme.colors.textSecondary }}>
+          {agent.recentActivity}
+        </div>
+      ) : (
+        <div style={{ fontSize: '11px', color: theme.colors.textSecondary }}>
+          {status === 'active' && agent.name?.includes('Pulse') && 'Flagged 3 at-risk members today'}
+          {status === 'active' && agent.name?.includes('Demand') && 'Filled 2 canceled tee times via waitlist'}
+          {status === 'active' && agent.name?.includes('Labor') && 'Proposed 2 staffing adjustments this week'}
+          {status === 'active' && agent.name?.includes('Revenue') && 'Identified $2.1K in spend gaps today'}
+          {status !== 'active' && `Last action: ${formatLastAction(agent.lastAction)}`}
+        </div>
+      )}
 
       <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>
         Last action: <span style={{ color: theme.colors.textSecondary }}>{formatLastAction(agent.lastAction)}</span>

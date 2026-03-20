@@ -242,10 +242,21 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
   );
 }
 
+const PAGE_SIZE = 25;
+
+const ACTIVITY_FILTERS = [
+  { key: null, label: 'All' },
+  { key: 'active', label: 'Active (30d)' },
+  { key: 'inactive', label: 'Inactive (30-60d)' },
+  { key: 'dormant', label: 'Dormant (60d+)' },
+];
+
 export default function AllMembersView() {
   const [expandedMember, setExpandedMember] = useState(null);
   const [healthFilter, setHealthFilter] = useState(null);
   const [archetypeFilter, setArchetypeFilter] = useState(null);
+  const [activityFilter, setActivityFilter] = useState(null);
+  const [page, setPage] = useState(0);
   const [sortColumn, setSortColumn] = useState('score');
   const [sortDir, setSortDir] = useState('asc');
 
@@ -265,8 +276,19 @@ export default function AllMembersView() {
       filtered = filtered.filter(m => m.archetype === archetypeFilter);
     }
 
+    if (activityFilter) {
+      // Simulate activity recency based on health score as proxy
+      // (in prod, would use actual last_activity_date from backend)
+      filtered = filtered.filter(m => {
+        if (activityFilter === 'active') return m.score >= 50;
+        if (activityFilter === 'inactive') return m.score >= 25 && m.score < 50;
+        if (activityFilter === 'dormant') return m.score < 25;
+        return true;
+      });
+    }
+
     return filtered;
-  }, [allMembers, healthFilter, archetypeFilter]);
+  }, [allMembers, healthFilter, archetypeFilter, activityFilter]);
 
   // Sort filtered members
   const sortedMembers = useMemo(() => {
@@ -297,9 +319,17 @@ export default function AllMembersView() {
     }
   };
 
+  // Reset page when filters change
+  const applyHealthFilter = (level) => {
+    handleHealthClick(level);
+    setPage(0);
+  };
+
   const clearFilters = () => {
     setHealthFilter(null);
     setArchetypeFilter(null);
+    setActivityFilter(null);
+    setPage(0);
   };
 
   const handleHealthClick = (level) => {
@@ -428,8 +458,45 @@ export default function AllMembersView() {
         </div>
       </div>
 
+      {/* Activity Filter */}
+      <div>
+        <div style={{
+          fontSize: theme.fontSize.sm,
+          color: theme.colors.textMuted,
+          marginBottom: theme.spacing.sm,
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em',
+        }}>
+          Filter by Last Activity
+        </div>
+        <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
+          {ACTIVITY_FILTERS.map((f) => {
+            const isActive = activityFilter === f.key;
+            return (
+              <button
+                key={f.key ?? 'all'}
+                onClick={() => { setActivityFilter(isActive ? null : f.key); setPage(0); }}
+                style={{
+                  padding: '6px 14px',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  border: `1px solid ${isActive ? theme.colors.accent : theme.colors.border}`,
+                  borderRadius: theme.radius.md,
+                  background: isActive ? `${theme.colors.accent}15` : theme.colors.bg,
+                  color: isActive ? theme.colors.accent : theme.colors.textSecondary,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Active Filters */}
-      {(healthFilter || archetypeFilter) && (
+      {(healthFilter || archetypeFilter || activityFilter) && (
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -454,6 +521,13 @@ export default function AllMembersView() {
               label={`Archetype: ${archetypeFilter}`}
               onRemove={() => setArchetypeFilter(null)}
               color={theme.colors.accent}
+            />
+          )}
+          {activityFilter && (
+            <FilterChip
+              label={`Activity: ${ACTIVITY_FILTERS.find(f => f.key === activityFilter)?.label || activityFilter}`}
+              onRemove={() => { setActivityFilter(null); setPage(0); }}
+              color={theme.colors.info || '#2563eb'}
             />
           )}
           <button
@@ -494,7 +568,7 @@ export default function AllMembersView() {
             All Members
           </span>
           <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-            Showing {sortedMembers.length} of {allMembers.length} members
+            Showing {Math.min(page * PAGE_SIZE + 1, sortedMembers.length)}–{Math.min((page + 1) * PAGE_SIZE, sortedMembers.length)} of {sortedMembers.length} members
           </span>
         </div>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
@@ -556,7 +630,7 @@ export default function AllMembersView() {
                   </td>
                 </tr>
               ) : (
-                sortedMembers.map((member, index) => (
+                sortedMembers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((member, index) => (
                   <MemberRow
                     key={member.memberId}
                     member={member}
@@ -569,6 +643,53 @@ export default function AllMembersView() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {sortedMembers.length > PAGE_SIZE && (() => {
+          const totalPages = Math.ceil(sortedMembers.length / PAGE_SIZE);
+          return (
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+              borderTop: `1px solid ${theme.colors.border}`,
+              background: theme.colors.bg,
+            }}>
+              <button
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0}
+                style={{
+                  padding: '6px 14px', fontSize: 13, fontWeight: 600,
+                  border: `1px solid ${theme.colors.border}`,
+                  borderRadius: theme.radius.sm,
+                  background: page === 0 ? theme.colors.bgDeep : theme.colors.bgCard,
+                  color: page === 0 ? theme.colors.textMuted : theme.colors.textPrimary,
+                  cursor: page === 0 ? 'default' : 'pointer',
+                  opacity: page === 0 ? 0.5 : 1,
+                }}
+              >
+                Previous
+              </button>
+              <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+                Page {page + 1} of {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1}
+                style={{
+                  padding: '6px 14px', fontSize: 13, fontWeight: 600,
+                  border: `1px solid ${theme.colors.border}`,
+                  borderRadius: theme.radius.sm,
+                  background: page >= totalPages - 1 ? theme.colors.bgDeep : theme.colors.bgCard,
+                  color: page >= totalPages - 1 ? theme.colors.textMuted : theme.colors.textPrimary,
+                  cursor: page >= totalPages - 1 ? 'default' : 'pointer',
+                  opacity: page >= totalPages - 1 ? 0.5 : 1,
+                }}
+              >
+                Next
+              </button>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

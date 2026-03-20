@@ -121,6 +121,60 @@ export default function RevenueView() {
             </span>
             <span style={{ fontSize: 11, color: theme.colors.textMuted }}> (${(totalOpportunity * 12).toLocaleString()}/yr)</span>
           </div>
+
+          {/* Top 5 Actions to Capture Revenue */}
+          <div style={{ marginTop: theme.spacing.md, borderTop: `1px solid ${theme.colors.border}`, paddingTop: theme.spacing.md }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: theme.spacing.sm }}>
+              Top 5 Actions to Capture Revenue
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {[
+                { rank: 1, action: 'Call top 3 Critical members today', impact: duesMonthly, source: 'Dues at Risk', color: theme.colors.warning, link: () => nav('members') },
+                { rank: 2, action: 'Deploy rangers to holes 4, 8, 12, 16 (weekends)', impact: PACE_LOSS, source: 'Pace of Play', color: theme.colors.urgent },
+                { rank: 3, action: 'Launch "Dine After Your Round" campaign for Die-Hard Golfers', impact: Math.round(spendMonthly * 0.4), source: 'Spend Potential', color: theme.colors.success },
+                { rank: 4, action: 'Hold 4-server minimum on high-demand lunch shifts', impact: STAFFING_LOSS, source: 'Staffing Gaps', color: 'rgb(217,119,6)' },
+                { rank: 5, action: 'Cross-sell fitting services to lesson-takers', impact: Math.round(PROSHOP_LOSS * 0.3), source: 'Pro Shop', color: 'rgb(139,92,246)' },
+              ].map((item) => (
+                <div
+                  key={item.rank}
+                  onClick={item.link ?? undefined}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '8px 12px',
+                    background: theme.colors.bg,
+                    border: `1px solid ${theme.colors.border}`,
+                    borderRadius: theme.radius.sm,
+                    cursor: item.link ? 'pointer' : 'default',
+                  }}
+                >
+                  <span style={{
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: `${item.color}15`, color: item.color,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 700, flexShrink: 0,
+                  }}>
+                    {item.rank}
+                  </span>
+                  <div style={{ flex: 1, fontSize: theme.fontSize.xs, color: theme.colors.textPrimary }}>
+                    {item.action}
+                  </div>
+                  <span style={{
+                    fontSize: 10, color: theme.colors.textMuted,
+                    background: theme.colors.bgDeep, padding: '2px 6px', borderRadius: 4,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {item.source}
+                  </span>
+                  <span style={{
+                    fontFamily: mono, fontSize: theme.fontSize.xs, fontWeight: 700,
+                    color: item.color, whiteSpace: 'nowrap',
+                  }}>
+                    +${item.impact.toLocaleString()}/mo
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <RecoveryCTA

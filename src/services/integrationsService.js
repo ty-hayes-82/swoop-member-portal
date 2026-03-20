@@ -1,4 +1,5 @@
 import { COMBOS, SYSTEMS, INTEGRATION_CATEGORY_SECTIONS, VENDOR_INTELLIGENCE_DETAILS } from '@/data/integrations';
+import { CATEGORY_TEMPLATE_MAP } from '@/services/csvImportService';
 
 let _d = null;
 
@@ -103,4 +104,73 @@ export function getCombosByQuestion() {
 
 export function getQuestionReadiness() {
   return { connected: 0, required: 0, ready: false };
+}
+
+export const CATEGORY_UNLOCKS = {
+  'tee-sheet': 'Booking patterns, cancellation risk, pace-of-play impact',
+  'pos': 'Revenue leakage, post-round dining conversion, spend gaps',
+  'crm': 'Member health scores, churn prediction, archetype assignment',
+  'staffing': 'Labor optimization alerts, understaffing-complaint correlation',
+  'email': 'Email decay detection, engagement-based churn signals',
+  'events': 'Event ROI analysis, attendance-retention correlation',
+  'feedback': 'Complaint resolution tracking, service recovery workflows',
+  'fitness': 'Facility utilization, cross-amenity engagement',
+  'waitlist': 'Demand signals, fill-rate optimization, member prioritization',
+  'analytics': 'Benchmarking, forecast accuracy, performance alerts',
+};
+
+const CATEGORY_LABELS = {
+  'tee-sheet': 'Tee Sheet',
+  'pos': 'POS / F&B',
+  'crm': 'CRM & Membership',
+  'staffing': 'Staffing / HR',
+  'email': 'Email Marketing',
+  'events': 'Events',
+  'feedback': 'Complaints & Feedback',
+  'fitness': 'Fitness & Pool',
+  'waitlist': 'Waitlist & Reservations',
+  'analytics': 'Analytics',
+};
+
+const CATEGORY_ICONS = {
+  'tee-sheet': '\u26F3',
+  'pos': '\uD83E\uDDFE',
+  'crm': '\uD83D\uDC65',
+  'staffing': '\uD83D\uDCC5',
+  'email': '\u2709\uFE0F',
+  'events': '\uD83C\uDF9F',
+  'feedback': '\uD83D\uDECE',
+  'fitness': '\uD83C\uDFCA',
+  'waitlist': '\uD83D\uDCCB',
+  'analytics': '\uD83D\uDCCA',
+};
+
+export function getDataGaps() {
+  const systems = getConnectedSystems();
+  const connectedCategories = new Set(
+    systems.filter(s => s.status === 'connected').map(s => s.category)
+  );
+  const gaps = [];
+  for (const [category, templates] of Object.entries(CATEGORY_TEMPLATE_MAP)) {
+    if (!connectedCategories.has(category)) {
+      const categoryVendors = systems.filter(s => s.category === category);
+      gaps.push({
+        category,
+        label: CATEGORY_LABELS[category] || category,
+        icon: CATEGORY_ICONS[category] || '\uD83D\uDCCA',
+        templates,
+        vendors: categoryVendors,
+        unlocks: CATEGORY_UNLOCKS[category] || '',
+      });
+    }
+  }
+  return gaps;
+}
+
+export function getLiveProgress() {
+  const systems = getConnectedSystems();
+  const total = systems.length;
+  const connected = systems.filter(s => s.status === 'connected').length;
+  const pct = total > 0 ? Math.round((connected / total) * 100) : 0;
+  return { connected, total, pct };
 }

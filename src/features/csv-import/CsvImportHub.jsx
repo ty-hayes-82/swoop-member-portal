@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { theme } from '@/config/theme';
 import {
   getTemplates,
@@ -10,7 +10,14 @@ import {
   getImportHistory,
   generateTemplate,
   formatBytes,
+  CATEGORY_TEMPLATE_MAP,
 } from '@/services/csvImportService';
+import {
+  getDataGaps,
+  getLiveProgress,
+  CATEGORY_UNLOCKS,
+} from '@/services/integrationsService';
+import { useNavigationContext } from '@/context/NavigationContext';
 import TemplateLibrary from './TemplateLibrary.jsx';
 import FieldMapper from './FieldMapper.jsx';
 import ValidationPreview from './ValidationPreview.jsx';
@@ -18,14 +25,24 @@ import ImportHistory from './ImportHistory.jsx';
 
 const templates = getTemplates();
 
-const heroStats = [
-  { label: 'Vendors without APIs', value: '11', detail: 'CSV-ready today' },
-  { label: 'Avg. setup time', value: '35 min', detail: 'per data category' },
-  { label: 'Clubs onboarding via CSV', value: '6', detail: 'this quarter' },
-];
+// Map template keys to vendor names they work with
+const TEMPLATE_VENDOR_CONTEXT = {
+  'tee-times': 'ForeTees, Chronogolf, ForeUP, EZLinks',
+  'golf-rounds': 'ForeTees, Chronogolf, ForeUP',
+  'fnb-transactions': 'Toast, Lightspeed, Square, Clubessential POS',
+  'reservations': 'SevenRooms, Noteefy, Clubessential',
+  'members': 'Jonas, Clubessential CMS, Northstar CRM',
+  'staffing': 'ADP, 7shifts, Paylocity, HotSchedules',
+  'email-engagement': 'Mailchimp, HubSpot, Constant Contact',
+  'events': 'Clubessential, Jonas',
+  'complaints': 'Clubessential, Jonas',
+  'fitness-pool': 'ClubReady, Jonas',
+};
 
 export default function CsvImportHub() {
+  const { routeIntent, clearRouteIntent, navigate } = useNavigationContext();
   const [selectedTemplateKey, setSelectedTemplateKey] = useState(templates[0].key);
+  const [vendorHint, setVendorHint] = useState(null);
   const [fileMeta, setFileMeta] = useState(null);
   const [parsedData, setParsedData] = useState(null);
   const [mappings, setMappings] = useState([]);
@@ -38,6 +55,29 @@ export default function CsvImportHub() {
 
   const template = useMemo(() => getTemplateByKey(selectedTemplateKey), [selectedTemplateKey]);
   const fileInputRef = useRef(null);
+  const uploadRef = useRef(null);
+
+  // Live progress from actual connected systems
+  const progress = useMemo(() => getLiveProgress(), []);
+  const dataGaps = useMemo(() => getDataGaps(), []);
+
+  // Handle route intent (pre-select template from gap card or integrations page)
+  useEffect(() => {
+    if (!routeIntent) return;
+    const { category, vendor } = routeIntent;
+    if (category && CATEGORY_TEMPLATE_MAP[category]) {
+      const templateKey = CATEGORY_TEMPLATE_MAP[category][0];
+      if (templateKey) {
+        setSelectedTemplateKey(templateKey);
+        if (vendor) setVendorHint(vendor);
+      }
+      // Scroll to upload zone after a tick
+      setTimeout(() => {
+        uploadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+    }
+    clearRouteIntent();
+  }, [routeIntent, clearRouteIntent]);
 
   const resetFlow = () => {
     setFileMeta(null);
@@ -54,12 +94,20 @@ export default function CsvImportHub() {
 
   const handleTemplateChange = (key) => {
     setSelectedTemplateKey(key);
+    setVendorHint(null);
     if (parsedData) {
       const nextTemplate = getTemplateByKey(key);
       const nextMappings = autoMapFields(parsedData.headers, nextTemplate);
       setMappings(nextMappings);
       runValidation(parsedData.rows, nextMappings, nextTemplate);
     }
+  };
+
+  const handleGapUpload = (category, templateKey) => {
+    setSelectedTemplateKey(templateKey);
+    setTimeout(() => {
+      uploadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
   };
 
   const handleFileSelected = async (file) => {
@@ -70,7 +118,7 @@ export default function CsvImportHub() {
       const result = await parseCSV(file);
       setParsedData(result);
       setFileMeta({ name: file.name, size: file.size });
-      const nextMappings = autoMapFields(result.headers, template);
+      const nextMappings = autoMapFields(result.headers, template, vendorHint);
       setMappings(nextMappings);
       runValidation(result.rows, nextMappings, template);
       setUploadState('ready');
@@ -138,11 +186,14 @@ export default function CsvImportHub() {
   };
 
   const uploadDescription = fileMeta && parsedData
-    ? `${fileMeta.name} · ${formatBytes(fileMeta.size)} · ${parsedData.rows.length.toLocaleString()} rows`
+    ? `${fileMeta.name} \u00B7 ${formatBytes(fileMeta.size)} \u00B7 ${parsedData.rows.length.toLocaleString()} rows`
     : 'Drag a CSV/XLSX here or browse to upload';
+
+  const vendorContext = TEMPLATE_VENDOR_CONTEXT[selectedTemplateKey];
 
   return (
     <div style={{ padding: theme.spacing.xl, display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      {/* A. Header + Live Progress Bar */}
       <section style={{
         borderRadius: theme.radius.lg,
         padding: theme.spacing.xl,
@@ -154,98 +205,146 @@ export default function CsvImportHub() {
           <h1 style={{ margin: 0, fontSize: 32 }}>Connect any vendor — even without an API.</h1>
           <p style={{ margin: 0, maxWidth: 680, color: 'rgba(255,255,255,0.8)' }}>
             Drop exports from POS, tee sheet, staffing, or reservations and let Swoop normalize, validate, and load them into the intelligence layer.
-            CSV support keeps onboarding fast for every club, regardless of vendor sophistication.
           </p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: theme.spacing.md, marginTop: theme.spacing.lg }}>
-          {heroStats.map((stat) => (
-            <div key={stat.label} style={{
-              borderRadius: theme.radius.md,
-              padding: theme.spacing.md,
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
-            }}>
-              <div style={{ fontSize: 28, fontFamily: theme.fonts.mono, fontWeight: 600 }}>{stat.value}</div>
-              <div style={{ fontSize: theme.fontSize.xs, letterSpacing: '0.04em', opacity: 0.8 }}>{stat.label}</div>
-              <div style={{ fontSize: theme.fontSize.xs, opacity: 0.7 }}>{stat.detail}</div>
-            </div>
-          ))}
+
+        {/* Live progress stats */}
+        <div style={{ marginTop: theme.spacing.lg }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+            <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600 }}>
+              {progress.connected}/{progress.total} systems connected
+            </span>
+            <span style={{ fontSize: 24, fontWeight: 700, fontFamily: theme.fonts.mono }}>
+              {progress.pct}%
+            </span>
+          </div>
+          <div style={{ height: 8, background: 'rgba(255,255,255,0.15)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{
+              height: '100%',
+              width: `${progress.pct}%`,
+              background: 'linear-gradient(90deg, #F5B97A, #22c55e)',
+              borderRadius: 4,
+              transition: 'width 0.5s ease',
+            }} />
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, opacity: 0.7, marginTop: 4 }}>
+            intelligence unlocked
+          </div>
         </div>
       </section>
 
-
-      {/* Onboarding Progress — shows what's connected and what unlocks next */}
-      <section style={{
-        borderRadius: theme.radius.lg,
-        padding: theme.spacing.lg,
-        background: theme.colors.bgCard,
-        border: '1px solid ' + theme.colors.border,
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.md }}>
-          <div>
+      {/* B. "Your Data Gaps" Section */}
+      {dataGaps.length > 0 ? (
+        <section style={{
+          borderRadius: theme.radius.lg,
+          padding: theme.spacing.lg,
+          background: theme.colors.bgCard,
+          border: '1px solid ' + theme.colors.border,
+        }}>
+          <div style={{ marginBottom: theme.spacing.md }}>
             <h3 style={{ margin: 0, fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary }}>
-              Your Connection Progress
+              Your Data Gaps
             </h3>
             <p style={{ margin: '4px 0 0', fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
-              Connecting your systems takes minutes, not months. Here's where you stand.
+              These categories have no connected system yet. Upload a CSV or connect via API to unlock their intelligence.
             </p>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '28px', fontWeight: 700, color: theme.colors.accent, fontFamily: theme.fonts.mono }}>57%</div>
-            <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase' }}>insights unlocked</div>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div style={{ height: 8, background: theme.colors.border + '40', borderRadius: 4, marginBottom: theme.spacing.md, overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: '57%', background: 'linear-gradient(90deg, ' + theme.colors.accent + ', ' + theme.colors.success + ')', borderRadius: 4, transition: 'width 0.5s ease' }} />
-        </div>
-
-        {/* Category checklist */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: theme.spacing.sm }}>
-          {[
-            { category: 'Tee Sheet', connected: true, impact: 'Pace of play + demand intelligence' },
-            { category: 'POS / F&B', connected: true, impact: 'Revenue leakage + dining patterns' },
-            { category: 'Member CRM', connected: true, impact: 'Health scores + archetype engine' },
-            { category: 'Email Marketing', connected: true, impact: 'Engagement decay detection' },
-            { category: 'Complaints', connected: true, impact: 'Service recovery triggers' },
-            { category: 'Staffing / HR', connected: false, impact: 'Labor optimization + gap alerts' },
-            { category: 'Reservations', connected: false, impact: 'Event ROI + dining demand' },
-            { category: 'Course GPS', connected: false, impact: 'Pace analytics by hole' },
-            { category: 'Surveys / NPS', connected: false, impact: 'Sentiment layer for health scores' },
-            { category: 'Weather', connected: true, impact: 'Proactive scheduling alerts' },
-          ].map(({ category, connected, impact }) => (
-            <div key={category} style={{
-              display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
-              padding: '8px 12px', borderRadius: theme.radius.sm,
-              background: connected ? theme.colors.success + '08' : theme.colors.bgDeep,
-              border: '1px solid ' + (connected ? theme.colors.success + '30' : theme.colors.border),
-            }}>
-              <span style={{ fontSize: '14px', flexShrink: 0 }}>{connected ? '\u2705' : '\u2B55'}</span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: theme.fontSize.xs, fontWeight: 600, color: connected ? theme.colors.success : theme.colors.textPrimary }}>{category}</div>
-                <div style={{ fontSize: '10px', color: theme.colors.textMuted, lineHeight: 1.3 }}>{connected ? 'Connected' : 'Unlocks: ' + impact}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: theme.spacing.md }}>
+            {dataGaps.map((gap) => (
+              <div key={gap.category} style={{
+                border: '1px solid ' + theme.colors.border,
+                borderRadius: theme.radius.md,
+                padding: theme.spacing.md,
+                background: theme.colors.bgDeep,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 20 }}>{gap.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
+                      {gap.label}
+                    </div>
+                    <span style={{
+                      fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
+                      letterSpacing: '0.08em', padding: '1px 6px', borderRadius: 999,
+                      color: '#c2410c', background: '#c2410c15',
+                    }}>
+                      Not Connected
+                    </span>
+                  </div>
+                </div>
+                {gap.vendors.length > 0 && (
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                    Vendors: {gap.vendors.map(v => v.name).join(', ')}
+                  </div>
+                )}
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+                  Unlocks: {gap.unlocks}
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleGapUpload(gap.category, gap.templates[0])}
+                    style={{
+                      flex: 1,
+                      padding: '6px 12px',
+                      borderRadius: theme.radius.sm,
+                      border: 'none',
+                      background: theme.colors.accent,
+                      color: theme.colors.white,
+                      fontSize: theme.fontSize.xs,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Upload CSV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('integrations')}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: theme.radius.sm,
+                      border: '1px solid ' + theme.colors.border,
+                      background: 'transparent',
+                      color: theme.colors.textSecondary,
+                      fontSize: theme.fontSize.xs,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Connect via API
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{
-          marginTop: theme.spacing.md,
-          padding: theme.spacing.sm + ' ' + theme.spacing.md,
-          background: theme.colors.accent + '08',
-          border: '1px solid ' + theme.colors.accent + '20',
-          borderRadius: theme.radius.sm,
-          fontSize: theme.fontSize.xs,
-          color: theme.colors.textSecondary,
-          lineHeight: 1.5,
+            ))}
+          </div>
+        </section>
+      ) : (
+        <section style={{
+          borderRadius: theme.radius.lg,
+          padding: theme.spacing.lg,
+          background: theme.colors.bgCard,
+          border: '1px solid ' + theme.colors.success + '30',
+          textAlign: 'center',
         }}>
-          <strong style={{ color: theme.colors.accent }}>Next unlock:</strong> Connect <strong>Staffing / HR</strong> data to enable Labor Optimization alerts. Upload a shift schedule CSV above, or connect via API on the Connected Systems page.
-        </div>
-      </section>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>{'\u2705'}</div>
+          <h3 style={{ margin: 0, color: theme.colors.success, fontSize: theme.fontSize.md }}>
+            All data categories connected
+          </h3>
+          <p style={{ margin: '4px 0 0', color: theme.colors.textSecondary, fontSize: theme.fontSize.sm }}>
+            Every integration category has at least one system feeding data into Swoop.
+          </p>
+        </section>
+      )}
+
+      {/* C. Upload Zone + Template Selector */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.1fr)', gap: theme.spacing.xl, alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
           <section
+            ref={uploadRef}
             onDragOver={(event) => {
               event.preventDefault();
               setDragActive(true);
@@ -271,9 +370,29 @@ export default function CsvImportHub() {
               style={{ display: 'none' }}
               onChange={(event) => handleFileSelected(event.target.files?.[0])}
             />
-            <div style={{ fontSize: 24, marginBottom: theme.spacing.sm }}>⬇️</div>
+            <div style={{ fontSize: 24, marginBottom: theme.spacing.sm }}>{'\u2B07\uFE0F'}</div>
             <h3 style={{ margin: 0 }}>Upload data</h3>
+            {vendorHint && (
+              <div style={{
+                display: 'inline-block',
+                margin: '6px 0',
+                padding: '2px 10px',
+                borderRadius: theme.radius.sm,
+                background: theme.colors.accent + '12',
+                border: '1px solid ' + theme.colors.accent + '30',
+                fontSize: theme.fontSize.xs,
+                color: theme.colors.accent,
+                fontWeight: 600,
+              }}>
+                Optimized for {vendorHint} exports
+              </div>
+            )}
             <p style={{ margin: '6px 0 12px', color: theme.colors.textMuted }}>{uploadDescription}</p>
+            {vendorContext && !vendorHint && (
+              <p style={{ margin: '0 0 12px', fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                Works with: {vendorContext}
+              </p>
+            )}
             <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
               <button
                 type="button"
@@ -310,7 +429,7 @@ export default function CsvImportHub() {
             </div>
             {error && <p style={{ color: theme.colors.urgent, marginTop: theme.spacing.sm }}>{error}</p>}
             {uploadState === 'processing' && (
-              <p style={{ color: theme.colors.textSecondary, marginTop: theme.spacing.sm }}>Parsing file…</p>
+              <p style={{ color: theme.colors.textSecondary, marginTop: theme.spacing.sm }}>Parsing file...</p>
             )}
           </section>
 

@@ -592,6 +592,44 @@ export default function HealthOverview() {
         </div>
       )}
 
+      {/* Priority CTA — top of page so GM sees it first */}
+      {criticalMembers.length > 0 && (
+        <div style={{
+          background: 'rgba(220,38,38,0.03)', borderLeft: '4px solid #dc2626',
+          borderRadius: 10, padding: '16px 20px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: 12,
+        }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#0f0f0f', marginBottom: 2 }}>
+              Call the top {Math.min(3, criticalMembers.length)} Critical members before end of business today
+            </div>
+            <div style={{ fontSize: 13, color: '#18181b', margin: '4px 0' }}>
+              {criticalMembers.slice(0, 3).map((m, i) => (
+                <span key={m.memberId}>
+                  {i > 0 && ' · '}
+                  <MemberLink mode="drawer" memberId={m.memberId} style={{ fontWeight: 700, color: '#dc2626', textDecoration: 'none' }}>
+                    {m.name}
+                  </MemberLink>
+                  <span style={{ fontSize: 11, color: '#6b7280' }}> ({formatCompactCurrency(m.duesAnnual)})</span>
+                </span>
+              ))}
+            </div>
+            <div style={{ fontSize: 12, color: '#666' }}>
+              Each saved member protects $18K+ in annual dues. {atRiskDuesDisplay.ltvCompact} lifetime value at stake.
+            </div>
+          </div>
+          <button
+            onClick={() => { showToast('Outreach sequence started for Critical members', 'success'); trackAction({ actionType: 'email', actionSubtype: 'outreach', description: 'Outreach sequence for Critical members' }); }}
+            style={{
+              padding: '10px 24px', borderRadius: 8, fontSize: 14, fontWeight: 700,
+              cursor: 'pointer', border: 'none', background: '#dc2626', color: 'white',
+              whiteSpace: 'nowrap',
+            }}
+          >Start Outreach Sequence</button>
+        </div>
+      )}
+
       {/* CRITICAL section — always visible */}
       <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         border: `1px solid ${theme.colors.urgent}40`, overflow: 'hidden' }}>
@@ -699,30 +737,7 @@ export default function HealthOverview() {
         </div>
       )}
 
-      {/* Single consolidated CTA */}
-      <div style={{
-        background: 'rgba(220,38,38,0.03)', borderLeft: '4px solid #dc2626',
-        borderRadius: 10, padding: '16px 20px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: 12,
-      }}>
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#0f0f0f', marginBottom: 2 }}>
-            Call the top {Math.min(3, criticalMembers.length)} Critical members before end of business today
-          </div>
-          <div style={{ fontSize: 12, color: '#666' }}>
-            Each saved member protects $18K+ in annual dues. {atRiskDuesDisplay.ltvCompact} lifetime value at stake.
-          </div>
-        </div>
-        <button
-          onClick={() => { showToast('Outreach sequence started for Critical members', 'success'); trackAction({ actionType: 'email', actionSubtype: 'outreach', description: 'Outreach sequence for Critical members' }); }}
-          style={{
-            padding: '10px 24px', borderRadius: 8, fontSize: 14, fontWeight: 700,
-            cursor: 'pointer', border: 'none', background: '#dc2626', color: 'white',
-            whiteSpace: 'nowrap',
-          }}
-        >Start Outreach Sequence</button>
-      </div>
+      {/* CTA moved to top of page — see "Priority CTA" section above */}
 
       {/* Full trend chart #3 — 6-month member health trajectory */}
       <TrendChart

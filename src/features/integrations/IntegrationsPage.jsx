@@ -1,10 +1,21 @@
 import { useMemo, useState } from 'react';
 import { theme } from '@/config/theme';
 import { getConnectedSystems } from '@/services/integrationsService';
+import { useNavigationContext } from '@/context/NavigationContext';
 import PageTransition from '@/components/ui/PageTransition';
 
 const EMAIL_VENDOR_IDS = ['hubspot', 'mailchimp'];
 const ACCOUNTING_VENDOR_IDS = ['quickbooks', 'club-prophet'];
+
+// Maps category labels to SYSTEMS category keys for CSV import routing
+const CATEGORY_CSV_MAP = {
+  'Tee Sheet Systems': 'tee-sheet',
+  'POS / F&B': 'pos',
+  'CRM & Membership Management': 'crm',
+  'Email Marketing': 'email',
+  'Scheduling & Labor': 'staffing',
+  'Accounting & Finance': 'pos',
+};
 
 const CATEGORY_CONFIG = [
   {
@@ -73,6 +84,31 @@ const CATEGORY_CONFIG = [
   },
 ];
 
+// What intelligence each connected vendor powers — transforms status board into value surface
+const VENDOR_POWERS = {
+  'ForeTees': 'Pace-of-play, demand patterns, cancellation risk',
+  'Club Caddie': 'Tee time demand, public/member mix',
+  'Clubessential POS': 'Dining conversion, cover counts, promo tracking',
+  'Northstar POS': 'Dining frequency, average check size',
+  'Toast': 'Post-round dining, kitchen efficiency, server performance',
+  'Clubessential CMS': 'Member profiles, dues ledger, household data',
+  'Jonas Club': 'Member statements, event attendance, profile data',
+  'Northstar Member CRM': 'Health scores, segments, balance tracking',
+  'ADP Workforce': 'Staffing coverage, labor cost, overtime alerts',
+  '7shifts': 'Shift coverage, swap tracking, role compliance',
+  'HubSpot': 'Email workflows, form conversion, lead scoring',
+  'Mailchimp': 'Campaign metrics, audience decay, engagement trends',
+  'QuickBooks Online': 'GL entries, receivables, class reporting',
+  'Chronogolf by Lightspeed': 'Tee time demand, cancellation patterns',
+  'ForeUP Tee Sheet': 'Booking pace, package utilization',
+  'Square POS': 'Transaction mix, tip analysis, tender breakdown',
+  'Toast Restaurant POS': 'Check detail, modifier analysis, kitchen state',
+  'Teesnap': 'Booking conversion, marketing attribution',
+  'Stripe Payments': 'Payment flow, refund patterns, payout tracking',
+  'Salesforce': 'Lead pipeline, opportunity tracking, task management',
+  'GGA PerformanceAI': 'Benchmarks, forecast accuracy, alerts',
+};
+
 const STATUS_COLORS = {
   connected: '#16a34a',
   available: '#475569',
@@ -80,6 +116,7 @@ const STATUS_COLORS = {
 };
 
 export function IntegrationsPage() {
+  const { navigate } = useNavigationContext();
   const systems = useMemo(() => getConnectedSystems(), []);
   const systemMap = useMemo(() => Object.fromEntries(systems.map((system) => [system.id, system])), [systems]);
   const [statusFilter, setStatusFilter] = useState('connected');
@@ -117,6 +154,7 @@ export function IntegrationsPage() {
 
   const categories = CATEGORY_CONFIG.map((category) => ({
     ...category,
+    csvCategory: CATEGORY_CSV_MAP[category.label] || null,
     vendors: category.vendors
       .map((vendor) => {
         const system = vendor.id ? systemMap[vendor.id] : null;
@@ -260,25 +298,65 @@ export function IntegrationsPage() {
                       Last sync: {vendor.lastSync || '2m ago'}
                     </div>
                   )}
+                  {vendor.status === 'connected' && VENDOR_POWERS[vendor.name] && (
+                    <div style={{ fontSize: 11, color: theme.colors.accent, opacity: 0.85 }}>
+                      Powers: {VENDOR_POWERS[vendor.name]}
+                    </div>
+                  )}
                   <div style={{ fontSize: 13, color: theme.colors.textSecondary }}>{vendor.dataPoints}</div>
                   {/* GMC-02: Add Connect button to available cards */}
                   {vendor.status === 'available' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
+                      <button
+                        onClick={() => alert(`Connect ${vendor.name} - Integration setup will be available in the next release`)}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          border: `1px solid ${theme.colors.primary}`,
+                          borderRadius: theme.radius.sm,
+                          background: theme.colors.primary,
+                          color: '#fff',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        Connect Now
+                      </button>
+                      {category.csvCategory && (
+                        <button
+                          onClick={() => navigate('integrations/csv-import', { category: category.csvCategory, vendor: vendor.name })}
+                          style={{
+                            padding: 0,
+                            border: 'none',
+                            background: 'none',
+                            color: theme.colors.accent,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                          }}
+                        >
+                          or upload CSV →
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {vendor.status === 'coming-soon' && category.csvCategory && (
                     <button
-                      onClick={() => alert(`Connect ${vendor.name} - Integration setup will be available in the next release`)}
+                      onClick={() => navigate('integrations/csv-import', { category: category.csvCategory, vendor: vendor.name })}
                       style={{
                         marginTop: 4,
-                        padding: '6px 12px',
-                        fontSize: 12,
+                        padding: 0,
+                        border: 'none',
+                        background: 'none',
+                        color: theme.colors.accent,
+                        fontSize: 11,
                         fontWeight: 600,
-                        border: `1px solid ${theme.colors.primary}`,
-                        borderRadius: theme.radius.sm,
-                        background: theme.colors.primary,
-                        color: '#fff',
                         cursor: 'pointer',
-                        transition: 'all 0.15s ease',
                       }}
                     >
-                      Connect Now
+                      upload CSV instead →
                     </button>
                   )}
                 </div>

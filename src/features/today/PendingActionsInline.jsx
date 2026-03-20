@@ -7,16 +7,16 @@ import { theme } from '@/config/theme';
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 
-export default function PendingActionsInline() {
+export default function PendingActionsInline({ excludeId = null }) {
   const { inbox, pendingAgentCount, approveAction, dismissAction, showToast } = useApp();
   const { navigate } = useNavigation();
 
   const topActions = useMemo(() => {
-    const pending = inbox.filter((item) => item.status === 'pending');
+    const pending = inbox.filter((item) => item.status === 'pending' && item.id !== excludeId);
     return [...pending]
       .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2))
       .slice(0, 5);
-  }, [inbox]);
+  }, [inbox, excludeId]);
 
   if (pendingAgentCount === 0) return null;
 
