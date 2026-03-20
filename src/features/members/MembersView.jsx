@@ -4,7 +4,7 @@ import { StoryHeadline } from '@/components/ui';
 import CollapsibleSection from '@/components/ui/CollapsibleSection';
 import { theme } from '@/config/theme';
 import { useNavigationContext } from '@/context/NavigationContext';
-import { getHealthDistribution, getMemberSummary } from '@/services/memberService';
+import { getMemberSummary } from '@/services/memberService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
@@ -41,9 +41,8 @@ const MODES = [
 
 const HEADLINES = {
   'at-risk': () => {
-    const dist = getHealthDistribution();
-    const atRisk = (dist.atRisk ?? 0) + (dist.critical ?? 0);
     const summary = getMemberSummary();
+    const atRisk = (summary.atRisk ?? 0) + (summary.critical ?? 0);
     return {
       variant: 'warning',
       headline: `${atRisk} members at risk — $${((summary.potentialDuesAtRisk || 733000) / 1000).toFixed(0)}K/yr in dues need attention.`,

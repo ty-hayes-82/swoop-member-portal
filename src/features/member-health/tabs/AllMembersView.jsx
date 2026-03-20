@@ -4,22 +4,62 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import { PlaybookActionCard } from '@/components/ui';
-import { memberProfiles, atRiskMembers, healthDistribution, memberArchetypes } from '@/data/members';
+import { memberProfiles, atRiskMembers, watchMembers, healthDistribution, memberArchetypes } from '@/data/members';
 
-// Generate full member list from all available profiles
-const allMembers = Object.values(memberProfiles).map(profile => ({
-  memberId: profile.memberId,
-  name: profile.name,
-  score: profile.healthScore,
-  archetype: profile.archetype,
-  duesAnnual: profile.duesAnnual,
-  memberValueAnnual: profile.memberValueAnnual,
-  tier: profile.tier,
-  joinDate: profile.joinDate,
-  trend: profile.trend,
-  topRisk: profile.riskSignals?.[0]?.label || 'No current risks',
-  lastSeenLocation: profile.lastSeenLocation,
-}));
+// Generate full 300-member roster from all available data sources
+const FIRST_NAMES = ['James','Robert','John','Michael','David','William','Richard','Joseph','Thomas','Christopher','Charles','Daniel','Matthew','Anthony','Mark','Steven','Paul','Andrew','Joshua','Kenneth','Kevin','Brian','George','Timothy','Ronald','Edward','Jason','Jeffrey','Ryan','Jacob','Gary','Nicholas','Eric','Jonathan','Stephen','Larry','Justin','Scott','Brandon','Benjamin','Samuel','Patrick','Alexander','Frank','Raymond','Jack','Dennis','Jerry','Tyler','Aaron','Jose','Nathan','Henry','Douglas','Peter','Zachary','Kyle','Noah','Ethan','Jeremy','Walter','Christian','Keith','Roger','Terry','Harry','Ralph','Sean','Jesse','Roy','Louis','Alan','Eugene','Russell','Randy','Philip','Howard','Vincent','Bobby','Dylan','Johnny','Phillip','Victor','Clarence','Travis','Austin','Martha','Donna','Sandra','Gloria','Teresa','Sara','Debra','Alice','Rachel','Emma','Lisa','Nancy','Betty','Margaret','Dorothy','Kimberly','Emily','Donna','Michelle','Carol','Amanda','Melissa','Deborah','Stephanie','Rebecca','Sharon','Laura','Cynthia','Kathleen','Amy','Angela','Shirley','Anna','Brenda','Pamela','Nicole','Samantha','Katherine','Christine','Helen','Debbie','Janet','Catherine','Maria','Heather','Diane','Olivia','Julie','Joyce','Virginia','Victoria','Kelly','Lauren','Christina','Joan','Evelyn','Judith','Andrea','Hannah','Megan','Cheryl','Jacqueline','Martha','Gloria','Teresa','Ann','Sara','Madison','Frances','Kathryn','Janice','Jean','Abigail','Julia','Grace','Judy'];
+const LAST_NAMES = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Hernandez','Lopez','Gonzalez','Wilson','Anderson','Thomas','Taylor','Moore','Jackson','Martin','Lee','Perez','Thompson','White','Harris','Sanchez','Clark','Ramirez','Lewis','Robinson','Walker','Young','Allen','King','Wright','Scott','Torres','Nguyen','Hill','Flores','Green','Adams','Nelson','Baker','Hall','Rivera','Campbell','Mitchell','Carter','Roberts','Gomez','Phillips','Evans','Turner','Diaz','Parker','Cruz','Edwards','Collins','Reyes','Stewart','Morris','Morales','Murphy','Cook','Rogers','Gutierrez','Ortiz','Morgan','Cooper','Peterson','Bailey','Reed','Kelly','Howard','Ramos','Kim','Cox','Ward','Richardson','Watson','Brooks','Chavez','Wood','James','Bennett','Gray','Mendoza','Ruiz','Hughes','Price','Alvarez','Castillo','Sanders','Patel','Myers','Long','Ross','Foster','Jimenez','Powell','Jenkins','Perry','Russell','Sullivan','Bell','Coleman','Butler','Henderson','Barnes','Gonzales','Fisher','Vasquez','Simmons','Marks','Fox','Dean','Walsh','Burke'];
+const ARCHETYPES = ['Die-Hard Golfer','Social Butterfly','Balanced Active','Weekend Warrior','Declining','New Member','Ghost','Snowbird'];
+const ARCHETYPE_WEIGHTS = [60, 45, 55, 45, 25, 30, 15, 25]; // matches memberArchetypes counts
+const TRENDS = ['up','down','stable','stable','up','stable','down','stable'];
+const LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
+
+function generateRoster() {
+  const roster = [];
+  // Include real profiles first
+  Object.values(memberProfiles).forEach(p => {
+    roster.push({ memberId: p.memberId, name: p.name, score: p.healthScore, archetype: p.archetype, duesAnnual: p.duesAnnual, memberValueAnnual: p.memberValueAnnual, tier: p.tier, joinDate: p.joinDate, trend: p.trend, topRisk: p.riskSignals?.[0]?.label || 'No current risks', lastSeenLocation: p.lastSeenLocation });
+  });
+  // Include at-risk and watch members
+  (atRiskMembers || []).forEach(m => {
+    if (!roster.find(r => r.memberId === m.memberId)) {
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: m.score < 30 ? 'Critical' : 'At Risk', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || 'Engagement declining' });
+    }
+  });
+  (watchMembers || []).forEach(m => {
+    if (!roster.find(r => r.memberId === m.memberId)) {
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: 'Watch', joinDate: '2021-06-01', trend: 'stable', topRisk: m.signal || 'Minor engagement shift' });
+    }
+  });
+  // Generate remaining to reach 300
+  let id = 400;
+  while (roster.length < 300) {
+    const archIdx = Math.floor(Math.random() * ARCHETYPES.length);
+    const arch = ARCHETYPES[archIdx];
+    const isHealthy = roster.length < 200; // first 200-ish get healthy scores
+    const score = isHealthy ? 70 + Math.floor(Math.random() * 28) : (arch === 'Ghost' ? 10 + Math.floor(Math.random() * 25) : arch === 'Declining' ? 25 + Math.floor(Math.random() * 30) : 50 + Math.floor(Math.random() * 30));
+    const fn = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+    const ln = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+    const dues = [12000, 14000, 15000, 16000, 18000, 20000, 22000, 25000, 28000, 31000][Math.floor(Math.random() * 10)];
+    const yr = 2015 + Math.floor(Math.random() * 10);
+    const mo = String(1 + Math.floor(Math.random() * 12)).padStart(2, '0');
+    roster.push({
+      memberId: `mbr_${id++}`,
+      name: `${fn} ${ln}`,
+      score,
+      archetype: arch,
+      duesAnnual: dues,
+      tier: score >= 70 ? 'Healthy' : score >= 50 ? 'Watch' : score >= 30 ? 'At Risk' : 'Critical',
+      joinDate: `${yr}-${mo}-01`,
+      trend: TRENDS[archIdx],
+      topRisk: score >= 70 ? 'No current risks' : score >= 50 ? 'Minor engagement shift' : 'Engagement declining',
+      lastSeenLocation: LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)],
+    });
+  }
+  return roster;
+}
+
+const allMembers = generateRoster();
 
 function getHealthLevel(score) {
   if (score >= 70) return 'Healthy';

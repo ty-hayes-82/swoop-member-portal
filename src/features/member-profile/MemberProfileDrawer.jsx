@@ -371,7 +371,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                 <div style={{ fontWeight: 600 }}>{activity.type}</div>
                 <div style={{ color: theme.colors.textSecondary }}>{activity.detail}</div>
               </div>
-              <div style={{ color: theme.colors.textMuted }}>{activity.timestamp}</div>
+              <div style={{ color: theme.colors.textMuted }}>{formatDateTime(activity.timestamp)}</div>
             </div>
           ))}
           {!(profile.activity ?? []).length && <span style={{ color: theme.colors.textSecondary }}>No recent activity logged.</span>}

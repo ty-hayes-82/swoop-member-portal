@@ -118,6 +118,24 @@ function reducer(state, action) {
       ));
       return { ...state, inbox, pendingCount: computePendingCount(inbox) };
     }
+    case 'ADD_ACTION': {
+      const newAction = {
+        id: `agx_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        agentId: action.agentId || 'member-pulse',
+        source: action.source || 'Manual Action',
+        actionType: action.actionType || 'RETENTION_OUTREACH',
+        description: action.description,
+        status: 'pending',
+        impactMetric: action.impactMetric || '',
+        priority: action.priority || 'medium',
+        memberId: action.memberId,
+        memberName: action.memberName,
+        auditTrail: [{ id: 'rec', status: 'Created', owner: action.owner || 'Sarah Mitchell (GM)', timestamp: new Date().toISOString() }],
+      };
+      const inbox = [newAction, ...state.inbox];
+      return { ...state, inbox, pendingCount: computePendingCount(inbox) };
+    }
     case 'TOGGLE_AGENT_STATUS': {
       const current = state.agentStatuses[action.id] ?? action.currentStatus ?? 'idle';
       return {
@@ -186,7 +204,11 @@ function loadPersistedState(base) {
     const agentStatuses = JSON.parse(localStorage.getItem('swoop_agent_statuses') || 'null');
     const agentConfigs = JSON.parse(localStorage.getItem('swoop_agent_configs') || 'null');
 
-    const nextInbox = Array.isArray(inbox) ? inbox : base.inbox;
+    let nextInbox = Array.isArray(inbox) ? inbox : base.inbox;
+    // If persisted inbox has 0 pending items, reset to defaults so demo stays populated
+    if (computePendingCount(nextInbox) === 0 && computePendingCount(base.inbox) > 0) {
+      nextInbox = base.inbox;
+    }
     return {
       ...base,
       inbox: nextInbox,
@@ -253,6 +275,7 @@ export function AppProvider({ children }) {
         getAgentStatus: (id, fallback) => state.agentStatuses[id] ?? fallback,
         approveAction,
         dismissAction,
+        addAction: (data) => dispatch({ type: 'ADD_ACTION', ...data }),
         toggleAgent: (id, currentStatus) => dispatch({ type: 'TOGGLE_AGENT_STATUS', id, currentStatus }),
         saveAgentConfig: (id, config) => dispatch({ type: 'SAVE_AGENT_CONFIG', id, config }),
         getAgentConfig: (id) => state.agentConfigs[id] ?? null,
