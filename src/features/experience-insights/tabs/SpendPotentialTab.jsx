@@ -5,7 +5,7 @@ import { trackAction } from '@/services/activityService';
 import { archetypeSpendGaps } from '@/services/experienceInsightsService';
 
 export default function SpendPotentialTab({ archetype }) {
-  const { showToast } = useApp();
+  const { showToast, addAction } = useApp();
   const filtered = archetype ? archetypeSpendGaps.filter((a) => a.archetype === archetype) : archetypeSpendGaps;
   const totalUntapped = filtered.reduce((sum, a) => sum + a.totalUntapped, 0);
   const totalMembers = filtered.reduce((sum, a) => sum + a.count, 0);
@@ -97,7 +97,7 @@ export default function SpendPotentialTab({ archetype }) {
                 <strong style={{ color: theme.colors.success }}>Campaign:</strong> {arch.campaign}
               </div>
               <button
-                onClick={() => { showToast(`Campaign launched for ${arch.count} ${arch.archetype} members`, 'success'); trackAction({ actionType: 'campaign', actionSubtype: 'launch', description: arch.campaign, meta: { archetype: arch.archetype, count: arch.count, untapped: arch.totalUntapped } }); }}
+                onClick={() => { showToast(`Campaign launched for ${arch.count} ${arch.archetype} members`, 'success'); trackAction({ actionType: 'campaign', actionSubtype: 'launch', description: arch.campaign, meta: { archetype: arch.archetype, count: arch.count, untapped: arch.totalUntapped } }); addAction({ description: `Campaign: ${arch.campaign} — ${arch.count} ${arch.archetype} members`, actionType: 'REVENUE_CAPTURE', source: 'Revenue Analyst', priority: 'medium', impactMetric: `$${Math.round(arch.totalUntapped / 1000)}K untapped spend` }); }}
                 style={{
                   padding: '6px 16px',
                   borderRadius: '8px',

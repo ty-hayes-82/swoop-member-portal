@@ -238,6 +238,30 @@ export default function BoardReport() {
 
       <KPIStrip kpis={kpis} />
 
+      {/* Board Confidence Score Methodology — expandable */}
+      <details style={{ marginBottom: '16px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm, padding: '12px 16px' }}>
+        <summary style={{ fontSize: '12px', fontWeight: 600, color: theme.colors.textMuted, cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '14px' }}>&#9432;</span> How is the Board Confidence Score calculated?
+        </summary>
+        <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+          {[
+            { label: 'Retention Rate', weight: '30%', value: '96.2%', benchmark: '94% avg', color: '#22c55e' },
+            { label: 'Financial Performance', weight: '25%', value: 'On budget', benchmark: 'Dues + F&B vs plan', color: '#3b82f6' },
+            { label: 'Member Satisfaction', weight: '25%', value: 'Trending up', benchmark: 'Health scores + resolution', color: '#f59e0b' },
+            { label: 'Operational Response', weight: '20%', value: '4.2 hrs avg', benchmark: 'Detection to action', color: '#8b5cf6' },
+          ].map(m => (
+            <div key={m.label} style={{ padding: '10px', borderRadius: '8px', background: theme.colors.bgDeep, border: '1px solid ' + theme.colors.border }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: m.color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{m.label} ({m.weight})</div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: theme.colors.textPrimary, marginTop: '4px' }}>{m.value}</div>
+              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>{m.benchmark}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '8px' }}>
+          The composite score weights these four dimensions to produce a single metric that reflects overall club health from the board's perspective. Updated monthly.
+        </div>
+      </details>
+
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
         {tabNames.map((tab, i) => (
           <button
@@ -412,6 +436,26 @@ export default function BoardReport() {
                 <div><strong>Trigger:</strong> {m.trigger}</div>
                 <div><strong>Action:</strong> {m.action}</div>
                 <div><strong>Outcome:</strong> <span style={{ color: colors.green }}>{m.outcome}</span></div>
+              </div>
+              {/* Evidence chain timeline */}
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid ' + theme.colors.border }}>
+                <div style={{ fontSize: '11px', fontWeight: 600, color: colors.panelMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Evidence Chain</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0', flexWrap: 'wrap' }}>
+                  {[
+                    { label: 'Signal detected', color: '#ef4444' },
+                    { label: 'GM alerted', color: '#f59e0b' },
+                    { label: 'Action taken', color: '#3b82f6' },
+                    { label: 'Member retained', color: '#22c55e' },
+                  ].map((step, i) => (
+                    <div key={step.label} style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: step.color }} />
+                        <span style={{ fontSize: '11px', color: colors.panelText, whiteSpace: 'nowrap' }}>{step.label}</span>
+                      </div>
+                      {i < 3 && <span style={{ margin: '0 6px', color: colors.panelMuted, fontSize: '10px' }}>{'-->'}</span>}
+                    </div>
+                  ))}
+                </div>
               </div>
             </Panel>
           ))}

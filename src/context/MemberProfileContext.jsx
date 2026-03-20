@@ -65,7 +65,7 @@ function normalizeApiProfile(data) {
 }
 
 export function MemberProfileProvider({ children }) {
-  const { showToast } = useApp();
+  const { showToast, addAction } = useApp();
   const [drawerMemberId, setDrawerMemberId] = useState(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [staffNotes, setStaffNotes] = useState({});
@@ -168,8 +168,9 @@ export function MemberProfileProvider({ children }) {
           : 'Action captured';
       showToast?.(`${label} for ${memberName}`, 'success');
       trackAction({ actionType: actionType, memberId, memberName });
+      addAction?.({ description: `${label} — ${memberName}`, memberId, memberName, actionType: 'RETENTION_OUTREACH', source: 'Quick Action', priority: 'medium', impactMetric: label });
     },
-    [showToast, profile]
+    [showToast, profile, addAction]
   );
 
   return (

@@ -4,7 +4,7 @@ import { trackAction } from '@/services/activityService';
 const mono = "'JetBrains Mono', monospace";
 
 export default function ActionPath({ label, amount, color, action }) {
-  const { showToast } = useApp();
+  const { showToast, addAction } = useApp();
   const playbookMap = {
     'Pace of Play': 'Deploy Rangers',
     'Staffing': 'Activate Staffing Protocol',
@@ -25,7 +25,7 @@ export default function ActionPath({ label, amount, color, action }) {
         <p style={{ fontSize: '12px', color: '#3f3f46', margin: 0 }}>{action}</p>
       </div>
       <button
-        onClick={() => { showToast(btnLabel + ' activated', 'success'); trackAction({ actionType: 'deploy', actionSubtype: label.toLowerCase().replace(/ /g, '_'), description: `${btnLabel} activated`, meta: { amount, action } }); }}
+        onClick={() => { showToast(btnLabel + ' activated', 'success'); trackAction({ actionType: 'deploy', actionSubtype: label.toLowerCase().replace(/ /g, '_'), description: `${btnLabel} activated`, meta: { amount, action } }); addAction({ description: `${btnLabel} — $${amount.toLocaleString()}/mo recoverable`, actionType: 'STAFFING_ALERT', source: 'Revenue Analyst', priority: 'medium', impactMetric: `$${amount.toLocaleString()}/mo` }); }}
         style={{
           padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 600,
           cursor: 'pointer', border: 'none', background: '#e8772e', color: 'white',

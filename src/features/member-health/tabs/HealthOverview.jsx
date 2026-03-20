@@ -367,7 +367,7 @@ export default function HealthOverview() {
 
   const [selectedMembers, setSelectedMembers] = useState(new Set());
   const [showAtRisk, setShowAtRisk] = useState(true);
-  const { showToast } = useApp();
+  const { showToast, addAction } = useApp();
 
   const criticalMembers = useMemo(() => sortedMembers.filter(m => m.score < 35), [sortedMembers]);
   const atRiskOnly = useMemo(() => sortedMembers.filter(m => m.score >= 35), [sortedMembers]);
@@ -576,11 +576,11 @@ export default function HealthOverview() {
             {selectedMembers.size} member{selectedMembers.size > 1 ? 's' : ''} selected
           </span>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => { showToast(`Personal notes drafted for ${selectedMembers.size} members`, 'success'); trackAction({ actionType: 'note', actionSubtype: 'bulk', meta: { count: selectedMembers.size } }); setSelectedMembers(new Set()); }}
+            <button onClick={() => { showToast(`Personal notes drafted for ${selectedMembers.size} members`, 'success'); trackAction({ actionType: 'note', actionSubtype: 'bulk', meta: { count: selectedMembers.size } }); addAction({ description: `Personal notes drafted for ${selectedMembers.size} at-risk members`, actionType: 'RETENTION_OUTREACH', source: 'Member Pulse', priority: 'medium', impactMetric: `${selectedMembers.size} members` }); setSelectedMembers(new Set()); }}
               style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none', background: '#e8772e', color: 'white' }}>
               Draft personal notes
             </button>
-            <button onClick={() => { showToast(`Calls scheduled for ${selectedMembers.size} members`, 'success'); trackAction({ actionType: 'call', actionSubtype: 'bulk', meta: { count: selectedMembers.size } }); setSelectedMembers(new Set()); }}
+            <button onClick={() => { showToast(`Calls scheduled for ${selectedMembers.size} members`, 'success'); trackAction({ actionType: 'call', actionSubtype: 'bulk', meta: { count: selectedMembers.size } }); addAction({ description: `Calls scheduled for ${selectedMembers.size} at-risk members`, actionType: 'RETENTION_OUTREACH', source: 'Member Pulse', priority: 'high', impactMetric: `${selectedMembers.size} members` }); setSelectedMembers(new Set()); }}
               style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1.5px solid #d4d4d8', background: 'white', color: '#3f3f46' }}>
               Schedule calls
             </button>
@@ -620,7 +620,7 @@ export default function HealthOverview() {
             </div>
           </div>
           <button
-            onClick={() => { showToast('Outreach sequence started for Critical members', 'success'); trackAction({ actionType: 'email', actionSubtype: 'outreach', description: 'Outreach sequence for Critical members' }); }}
+            onClick={() => { showToast('Outreach sequence started for Critical members', 'success'); trackAction({ actionType: 'email', actionSubtype: 'outreach', description: 'Outreach sequence for Critical members' }); addAction({ description: 'Outreach sequence started for Critical members', actionType: 'RETENTION_OUTREACH', source: 'Member Pulse', priority: 'high', impactMetric: 'Critical member retention' }); }}
             style={{
               padding: '10px 24px', borderRadius: 8, fontSize: 14, fontWeight: 700,
               cursor: 'pointer', border: 'none', background: '#dc2626', color: 'white',

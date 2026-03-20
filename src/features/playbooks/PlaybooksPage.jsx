@@ -471,7 +471,7 @@ function PlaybookCard({ playbook, onSelect, isSelected }) {
 }
 
 function PlaybookDetail({ playbook }) {
-  const { showToast } = useApp();
+  const { showToast, addAction } = useApp();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -586,6 +586,7 @@ function PlaybookDetail({ playbook }) {
           onClick={() => {
             showToast(`${playbook.name} activated`, 'success');
             trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: playbook.name });
+            addAction({ description: `${playbook.name} activated — ${playbook.triggeredCount || 0} members triggered`, actionType: 'RETENTION_OUTREACH', source: 'Playbook Engine', priority: 'high', impactMetric: playbook.impact || '' });
           }}
           style={{
             width: '100%', background: playbook.categoryColor || '#c0392b', color: 'white', border: 'none',
