@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { getMemberProfile } from '@/services/memberService';
 import { useApp } from '@/context/AppContext';
+import { useNavigationContext } from '@/context/NavigationContext';
 import { trackAction } from '@/services/activityService';
 
 const MemberProfileContext = createContext(null);
@@ -66,6 +67,7 @@ function normalizeApiProfile(data) {
 
 export function MemberProfileProvider({ children }) {
   const { showToast, addAction } = useApp();
+  const { navigate } = useNavigationContext();
   const [drawerMemberId, setDrawerMemberId] = useState(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [staffNotes, setStaffNotes] = useState({});
@@ -181,7 +183,10 @@ export function MemberProfileProvider({ children }) {
         isDrawerOpen,
         loading,
         openProfile,
-        openProfilePage: (memberId) => openProfile(memberId),
+        openProfilePage: (memberId) => {
+          closeDrawer();
+          navigate('member-profile', { memberId: memberId || activeMemberId });
+        },
         closeDrawer,
         addStaffNote,
         triggerQuickAction,

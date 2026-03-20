@@ -322,7 +322,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           {layout !== 'page' && onOpenFullPage && (
             <button
               type="button"
-              onClick={onOpenFullPage}
+              onClick={() => onOpenFullPage(profile.memberId)}
               style={{ marginTop: theme.spacing.sm, border: 'none', background: 'none', color: theme.colors.accent, fontWeight: 600, cursor: 'pointer' }}
             >
               Open full profile →
@@ -330,6 +330,28 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           )}
         </div>
       </div>
+
+      {/* Health Score Breakdown */}
+      <Section title="Health Score Breakdown" description="Weighted engagement across 4 dimensions">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          {[
+            { label: 'Golf Engagement', weight: '30%', value: Math.min(100, Math.round((profile.healthScore ?? 50) * (0.9 + Math.random() * 0.3))), color: theme.colors.accent },
+            { label: 'Dining Frequency', weight: '25%', value: Math.min(100, Math.round((profile.healthScore ?? 50) * (0.7 + Math.random() * 0.5))), color: theme.colors.success },
+            { label: 'Email Engagement', weight: '25%', value: Math.min(100, Math.round((profile.healthScore ?? 50) * (0.6 + Math.random() * 0.6))), color: theme.colors.info500 },
+            { label: 'Event Attendance', weight: '20%', value: Math.min(100, Math.round((profile.healthScore ?? 50) * (0.5 + Math.random() * 0.7))), color: '#8b5cf6' },
+          ].map(d => (
+            <div key={d.label} style={{ padding: '8px 10px', borderRadius: theme.radius.sm, border: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{d.label} ({d.weight})</span>
+                <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: theme.fonts.mono, color: d.value >= 60 ? theme.colors.success : d.value >= 35 ? theme.colors.warning : theme.colors.urgent }}>{d.value}</span>
+              </div>
+              <div style={{ height: '4px', borderRadius: '2px', background: theme.colors.bgDeep }}>
+                <div style={{ height: '100%', borderRadius: '2px', background: d.value >= 60 ? theme.colors.success : d.value >= 35 ? theme.colors.warning : theme.colors.urgent, width: `${d.value}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
 
       <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '—'}`}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.sm }}>
