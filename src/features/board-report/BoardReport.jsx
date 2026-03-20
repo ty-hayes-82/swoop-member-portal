@@ -22,9 +22,9 @@ const colors = {
   yellow: theme.colors?.yellow?.[400] || '#ecc94b',
   bg: theme.colors?.gray?.[800] || '#1a1a2e',
   border: theme.colors?.gray?.[700] || '#2d2d44',
-  textMuted: theme.colors?.gray?.[400] || '#a0a0b8',
-  text: theme.colors?.gray?.[300] || '#cbd5e0',
-  white: theme.colors?.white || '#fff',
+  textMuted: theme.colors?.textMuted || '#6B7280',
+  text: theme.colors?.textSecondary || '#3F3F46',
+  white: theme.colors?.textPrimary || '#0F0F0F',
   brand: theme.colors?.brand?.[500] || '#4299e1',
 };
 
