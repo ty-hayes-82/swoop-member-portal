@@ -204,3 +204,24 @@
 > — QA Tester, March 20, 2026
 
 **Estimated total effort to reach all A's: ~21 hours of focused development.**
+
+---
+
+## Completion Log
+
+### Sprint 1 — P0 + Quick P1 Wins (Completed March 20, 2026)
+- [x] P0-1: Member profile name mismatch — added 3-tier fallback in getMemberProfile + roster cache
+- [x] P0-2: Critical filter count — deterministic roster generation matching healthDistribution
+- [x] P1-4: Search on All Members table — name search with result count
+- [x] P1-7: Banner/headline count harmonized — both use getMemberSummary (65 members)
+
+### Sprint 2 — P1 Profile Improvements (Completed March 20, 2026)
+- [x] P1-5: Health Score Breakdown — 4-dimension display (Golf/Dining/Email/Events) with progress bars
+- [x] P1-6: "Open full profile →" — fixed to navigate to member-profile page instead of reopening drawer
+
+### Sprint 3 — P2 Closed-Loop Feedback (Completed March 20, 2026)
+- [x] P2-8: 3 follow-up cards seeded (30-day success, 14-day monitoring, 60-day escalation)
+
+### Remaining
+- [ ] P2-9: Retention Call Prep one-pager
+- [ ] P2-10: Multi-select batch actions on All Members table
