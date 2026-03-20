@@ -4,6 +4,27 @@ import { getConnectedSystems } from '@/services/integrationsService';
 import { useNavigationContext } from '@/context/NavigationContext';
 import PageTransition from '@/components/ui/PageTransition';
 
+function timeAgo(val) {
+  if (!val) return 'Never';
+  // Already relative like "2m ago"
+  if (typeof val === 'string' && /\d+[mhd]\s*ago/i.test(val)) return val;
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) return val;
+  const mins = Math.round((Date.now() - d.getTime()) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1440) return `${Math.round(mins / 60)}h ago`;
+  return `${Math.round(mins / 1440)}d ago`;
+}
+
+const SYNC_DETAILS = {
+  'ForeTees': { freq: 'Every 15 min', todayRecords: 142, history: [{ time: '11m ago', records: 142, ok: true }, { time: '26m ago', records: 138, ok: true }, { time: '41m ago', records: 145, ok: true }, { time: '56m ago', records: 140, ok: true }, { time: '1h ago', records: 136, ok: true }] },
+  'Northstar POS': { freq: 'Every 30 min', todayRecords: 89, history: [{ time: '8m ago', records: 89, ok: true }, { time: '38m ago', records: 84, ok: true }, { time: '1h ago', records: 91, ok: true }, { time: '2h ago', records: 78, ok: true }, { time: '2h ago', records: 82, ok: true }] },
+  'Clubessential CMS': { freq: 'Every 4 hours', todayRecords: 487, history: [{ time: '1h ago', records: 487, ok: true }, { time: '5h ago', records: 487, ok: true }, { time: '9h ago', records: 486, ok: true }] },
+  'ADP Workforce': { freq: 'Every 6 hours', todayRecords: 24, history: [{ time: '2h ago', records: 24, ok: true }, { time: '8h ago', records: 24, ok: true }] },
+  'Northstar Member CRM': { freq: 'Every 2 hours', todayRecords: 312, history: [{ time: '45m ago', records: 312, ok: true }, { time: '3h ago', records: 310, ok: true }] },
+};
+
 const EMAIL_VENDOR_IDS = ['hubspot', 'mailchimp'];
 const ACCOUNTING_VENDOR_IDS = ['quickbooks', 'club-prophet'];
 
@@ -140,6 +161,7 @@ export function IntegrationsPage() {
   };
 
   const [showMarketplace, setShowMarketplace] = useState(false);
+  const [expandedVendor, setExpandedVendor] = useState(null);
 
   const summaryCards = [
     { label: 'Systems Connected', value: `${connectedSystems}`, sub: 'All Healthy', color: '#22c55e' },
@@ -267,16 +289,22 @@ export function IntegrationsPage() {
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-              {category.vendors.map((vendor) => (
+              {category.vendors.map((vendor) => {
+                const isConnected = vendor.status === 'connected';
+                const isExpanded = expandedVendor === vendor.name;
+                const syncInfo = SYNC_DETAILS[vendor.name];
+                return (
                 <div key={vendor.name} style={{
-                  border: `1px solid ${theme.colors.border}`,
+                  border: `1px solid ${isExpanded ? theme.colors.accent + '50' : theme.colors.border}`,
                   borderRadius: theme.radius.md,
                   padding: '12px 14px',
                   background: theme.colors.bg,
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 6,
-                }}>
+                  cursor: isConnected ? 'pointer' : 'default',
+                  transition: 'border-color 0.15s',
+                }} onClick={() => isConnected && setExpandedVendor(isExpanded ? null : vendor.name)}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                     <div style={{ fontWeight: 600 }}>{vendor.name}</div>
                     <span style={{
@@ -292,18 +320,51 @@ export function IntegrationsPage() {
                       {vendor.status.replace('-', ' ')}
                     </span>
                   </div>
-                  {/* GMC-01: Show timestamps for ALL connected cards */}
-                  {vendor.status === 'connected' && (
+                  {isConnected && (
                     <div style={{ fontSize: 12, color: theme.colors.textMuted }}>
-                      Last sync: {vendor.lastSync || '2m ago'}
+                      Last sync: {timeAgo(vendor.lastSync) || '2m ago'}
                     </div>
                   )}
-                  {vendor.status === 'connected' && VENDOR_POWERS[vendor.name] && (
+                  {isConnected && VENDOR_POWERS[vendor.name] && (
                     <div style={{ fontSize: 11, color: theme.colors.accent, opacity: 0.85 }}>
                       Powers: {VENDOR_POWERS[vendor.name]}
                     </div>
                   )}
                   <div style={{ fontSize: 13, color: theme.colors.textSecondary }}>{vendor.dataPoints}</div>
+
+                  {/* Sync detail panel for connected systems */}
+                  {isConnected && isExpanded && syncInfo && (
+                    <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: `1px solid ${theme.colors.border}` }} onClick={e => e.stopPropagation()}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                        <div style={{ padding: '6px 8px', background: theme.colors.bgCard, borderRadius: '6px', border: `1px solid ${theme.colors.border}` }}>
+                          <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase' }}>Frequency</div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: theme.colors.textPrimary }}>{syncInfo.freq}</div>
+                        </div>
+                        <div style={{ padding: '6px 8px', background: theme.colors.bgCard, borderRadius: '6px', border: `1px solid ${theme.colors.border}` }}>
+                          <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase' }}>Records Today</div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: theme.colors.textPrimary }}>{syncInfo.todayRecords.toLocaleString()}</div>
+                        </div>
+                        <div style={{ padding: '6px 8px', background: theme.colors.bgCard, borderRadius: '6px', border: `1px solid ${theme.colors.border}` }}>
+                          <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase' }}>Data Quality</div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#22c55e' }}>98.5%</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: theme.colors.textMuted, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Recent Syncs</div>
+                      {syncInfo.history.map((h, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px', borderBottom: i < syncInfo.history.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
+                          <span style={{ color: theme.colors.textMuted }}>{h.time}</span>
+                          <span style={{ fontFamily: theme.fonts?.mono, color: theme.colors.textSecondary }}>{h.records} records</span>
+                          <span style={{ color: h.ok ? '#22c55e' : theme.colors.urgent, fontWeight: 600 }}>{h.ok ? 'OK' : 'Error'}</span>
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
+                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${theme.colors.accent}40`, background: `${theme.colors.accent}12`, color: theme.colors.accent, cursor: 'pointer' }}>Force Sync</button>
+                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${theme.colors.border}`, background: 'transparent', color: theme.colors.textSecondary, cursor: 'pointer' }}>View Logs</button>
+                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${theme.colors.border}`, background: 'transparent', color: theme.colors.textSecondary, cursor: 'pointer' }}>Configure</button>
+                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${theme.colors.urgent}40`, background: 'transparent', color: theme.colors.urgent, cursor: 'pointer', marginLeft: 'auto' }}>Disconnect</button>
+                      </div>
+                    </div>
+                  )}
                   {/* GMC-02: Add Connect button to available cards */}
                   {vendor.status === 'available' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
@@ -368,7 +429,8 @@ export function IntegrationsPage() {
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}
