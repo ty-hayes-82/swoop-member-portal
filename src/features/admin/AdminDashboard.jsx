@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { Panel } from '@/components/ui';
 import PageTransition from '@/components/ui/PageTransition';
+import { useNavigationContext } from '@/context/NavigationContext';
 
 // ── Tab definitions ──────────────────────────────────────────────────
 const TABS = [
+  { key: 'onboarding', label: 'Setup Guide', icon: '🚀' },
   { key: 'users', label: 'Users & Roles', icon: '👥' },
-  { key: 'integrations', label: 'Integrations', icon: '🔌' },
+  { key: 'channels', label: 'Action Channels', icon: '📤' },
   { key: 'notifications', label: 'Notifications', icon: '🔔' },
   { key: 'club', label: 'Club Profile', icon: '🏌️' },
   { key: 'billing', label: 'Billing', icon: '💳' },
@@ -200,14 +202,14 @@ function UsersTab() {
 // ═══════════════════════════════════════════════════════════════════════
 // INTEGRATIONS TAB
 // ═══════════════════════════════════════════════════════════════════════
+// Action Channels — outbound integrations only (data sources are in Connected Systems)
 const INTEGRATION_CATEGORIES = [
   {
     category: 'Communication',
     icon: '💬',
-    description: 'Connect communication channels for member outreach, alerts, and GM notifications.',
+    description: 'Outbound channels for member outreach, alerts, and team notifications.',
     integrations: [
       { name: 'Gmail', icon: '📧', status: 'available', description: 'Send personalized member outreach emails directly from Swoop.', features: ['Send/receive emails', 'Email templates', 'Thread tracking', 'Attachment support'] },
-      { name: 'Google Calendar', icon: '📅', status: 'available', description: 'Sync club events, tee times, and GM meetings.', features: ['Event sync', 'Availability checking', 'Meeting scheduling', 'Reminders'] },
       { name: 'Twilio SMS', icon: '📱', status: 'available', description: 'Send text alerts to members for tee time changes, weather updates, and outreach.', features: ['SMS notifications', 'Two-way messaging', 'Bulk alerts', 'Delivery tracking'] },
       { name: 'Twilio Voice', icon: '📞', status: 'coming-soon', description: 'Automated call reminders and voice alerts for high-priority member outreach.', features: ['Outbound calls', 'Voicemail drops', 'Call logging', 'IVR flows'] },
       { name: 'SendGrid', icon: '✉️', status: 'available', description: 'Transactional and marketing email delivery with analytics.', features: ['Bulk email', 'Template engine', 'Bounce handling', 'Analytics'] },
@@ -226,41 +228,6 @@ const INTEGRATION_CATEGORIES = [
     ],
   },
   {
-    category: 'Tee Sheet & Golf',
-    icon: '⛳',
-    description: 'Connect tee sheet systems for demand intelligence, pace-of-play, and booking optimization.',
-    integrations: [
-      { name: 'ForeTees', icon: '⛳', status: 'connected', description: 'Primary tee sheet — rounds, tee times, no-shows, and pace data.', features: ['Tee time sync', 'No-show tracking', 'Pace of play', 'Booking analytics'] },
-      { name: 'Club Caddie', icon: '🏌️', status: 'available', description: 'Public and member tee data for mixed-access clubs.', features: ['Booking sync', 'Member/public split', 'Revenue tracking', 'Dynamic pricing'] },
-      { name: 'EZLinks', icon: '🔗', status: 'available', description: 'Booking pace, pricing rules, and yield management.', features: ['Price optimization', 'Channel management', 'Package tracking', 'Utilization'] },
-      { name: 'Golf Genius', icon: '🏆', status: 'coming-soon', description: 'Tournament pairings, scorecards, and event management.', features: ['Event scoring', 'Handicap sync', 'Pairing sheets', 'Leaderboards'] },
-      { name: 'Chronogolf', icon: '⏱️', status: 'coming-soon', description: 'Lightspeed-powered tee time management and analytics.', features: ['Booking flow', 'Cancellation patterns', 'Revenue analytics', 'Member profiles'] },
-    ],
-  },
-  {
-    category: 'POS & Dining',
-    icon: '🧾',
-    description: 'Point-of-sale integrations for F&B spend tracking, dining patterns, and revenue analysis.',
-    integrations: [
-      { name: 'Northstar POS', icon: '🧾', status: 'connected', description: 'Primary POS — dining frequency, average check, outlet tracking.', features: ['Check sync', 'Cover counts', 'Outlet breakdown', 'Spend trends'] },
-      { name: 'Clubessential POS', icon: '🏢', status: 'available', description: 'Checks, covers, promo usage tracking across outlets.', features: ['Transaction sync', 'Promo tracking', 'Tab management', 'Reporting'] },
-      { name: 'Toast', icon: '🍞', status: 'available', description: 'Restaurant-grade POS with kitchen and server analytics.', features: ['Modifier analysis', 'Kitchen timing', 'Server performance', 'Menu mix'] },
-      { name: 'Square POS', icon: '◻️', status: 'coming-soon', description: 'Transaction mix, tender breakdown, and tip analytics.', features: ['Payment sync', 'Tip analysis', 'Refund tracking', 'Tender types'] },
-    ],
-  },
-  {
-    category: 'CRM & Membership',
-    icon: '👥',
-    description: 'Member database systems for profiles, tenure, dues, health scores, and lifecycle management.',
-    integrations: [
-      { name: 'Clubessential CMS', icon: '🏢', status: 'connected', description: 'Primary CRM — members, dues ledger, households.', features: ['Member sync', 'Dues tracking', 'Household linking', 'Lifecycle events'] },
-      { name: 'Jonas Club', icon: '🏛️', status: 'available', description: 'Profiles, statements, events, and club accounting.', features: ['Statement sync', 'Event attendance', 'Profile data', 'Committee tracking'] },
-      { name: 'Northstar CRM', icon: '⭐', status: 'available', description: 'Health scores, segments, and balance tracking.', features: ['Scoring models', 'Segmentation', 'Balance alerts', 'Engagement tracking'] },
-      { name: 'Salesforce', icon: '☁️', status: 'coming-soon', description: 'Enterprise CRM for prospect pipeline and lead management.', features: ['Lead tracking', 'Opportunity management', 'Task automation', 'Report builder'] },
-      { name: 'HubSpot CRM', icon: '🟠', status: 'coming-soon', description: 'Contact management, deal pipeline, and marketing automation.', features: ['Contact sync', 'Deal stages', 'Email sequences', 'Form capture'] },
-    ],
-  },
-  {
     category: 'Email & Marketing',
     icon: '✉️',
     description: 'Email marketing platforms for campaign analytics, open rates, and engagement decay tracking.',
@@ -269,38 +236,6 @@ const INTEGRATION_CATEGORIES = [
       { name: 'Mailchimp', icon: '🐵', status: 'available', description: 'Audiences, campaign metrics, and engagement trends.', features: ['Audience sync', 'Automation triggers', 'A/B testing', 'Revenue attribution'] },
       { name: 'HubSpot Marketing', icon: '🟠', status: 'available', description: 'Email workflows, form conversion, and lead scoring.', features: ['Workflow sync', 'Lead scoring', 'Form tracking', 'Attribution'] },
       { name: 'Campaign Monitor', icon: '📊', status: 'coming-soon', description: 'Automation journeys and behavioral email triggers.', features: ['Journey builder', 'Segmentation', 'Analytics', 'Transactional email'] },
-    ],
-  },
-  {
-    category: 'Staffing & Labor',
-    icon: '🕐',
-    description: 'Workforce management for coverage optimization, labor cost tracking, and schedule alignment.',
-    integrations: [
-      { name: 'ADP Workforce', icon: '📋', status: 'connected', description: 'Schedules, clock events, overtime, and compliance.', features: ['Schedule sync', 'Clock events', 'Overtime alerts', 'Compliance tracking'] },
-      { name: '7shifts', icon: '📅', status: 'available', description: 'Coverage plans, shift swaps, and role compliance.', features: ['Shift management', 'Swap tracking', 'Labor forecasts', 'Tip pooling'] },
-      { name: 'HotSchedules', icon: '🔥', status: 'available', description: 'Labor forecasts, punches, and scheduling optimization.', features: ['Forecast sync', 'Punch data', 'Compliance', 'Manager tools'] },
-      { name: 'Deputy', icon: '⏰', status: 'coming-soon', description: 'Timesheets, compliance alerts, and task management.', features: ['Timesheet sync', 'Compliance alerts', 'Task tracking', 'News feed'] },
-      { name: 'Paycom', icon: '💰', status: 'coming-soon', description: 'Payroll integration with labor cost allocation.', features: ['Payroll sync', 'Labor costing', 'Benefits tracking', 'Tax compliance'] },
-    ],
-  },
-  {
-    category: 'Accounting & Finance',
-    icon: '📊',
-    description: 'Financial systems for revenue tracking, dues reconciliation, and ROI calculations.',
-    integrations: [
-      { name: 'QuickBooks Online', icon: '📗', status: 'available', description: 'Journal entries, receivables, and class reporting.', features: ['GL sync', 'Receivables', 'Class tracking', 'P&L reports'] },
-      { name: 'Sage Intacct', icon: '📊', status: 'available', description: 'Enterprise accounting with dimensional reporting.', features: ['GL entries', 'Dimensions', 'Budgets', 'Custom reports'] },
-      { name: 'Club Prophet', icon: '📈', status: 'available', description: 'Member spend tracking and inventory management.', features: ['Spend sync', 'Inventory', 'Variance reports', 'Budget vs actual'] },
-      { name: 'Xero', icon: '🔵', status: 'coming-soon', description: 'Cloud accounting for smaller club operations.', features: ['Invoice sync', 'Bank feeds', 'Payroll', 'Reporting'] },
-    ],
-  },
-  {
-    category: 'Weather & External Data',
-    icon: '🌤️',
-    description: 'External data feeds for demand prediction, event planning, and operational adjustments.',
-    integrations: [
-      { name: 'Weather API', icon: '🌤️', status: 'connected', description: 'Real-time and forecast weather data for demand prediction.', features: ['Current conditions', '10-day forecast', 'Severe alerts', 'Historical data'] },
-      { name: 'Google Maps', icon: '🗺️', status: 'coming-soon', description: 'Location intelligence and drive-time analysis.', features: ['Geocoding', 'Drive times', 'Nearby amenities', 'Traffic patterns'] },
     ],
   },
   {
@@ -410,7 +345,7 @@ function IntegrationCard({ integration }) {
   );
 }
 
-function IntegrationsTab() {
+function IntegrationsTab({ onNavigate }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
 
@@ -429,10 +364,16 @@ function IntegrationsTab() {
 
   return (
     <div>
+      <div style={{ padding: '12px 16px', background: theme.colors.info50, border: `1px solid ${theme.colors.info500}30`, borderRadius: theme.radius.sm, marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.info700 }}>
+          These are <strong>outbound action channels</strong> Swoop uses to send alerts, emails, and notifications. For data source connections (tee sheet, POS, CRM), visit Connected Systems.
+        </div>
+        <button onClick={() => onNavigate('integrations')} style={{ ...s.btn('ghost'), padding: '4px 12px', fontSize: '12px', whiteSpace: 'nowrap', marginLeft: '12px' }}>Go to Connected Systems</button>
+      </div>
       <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
         <input
           style={{ ...s.input, maxWidth: '280px' }}
-          placeholder="Search integrations..."
+          placeholder="Search action channels..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -470,6 +411,79 @@ function IntegrationsTab() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// ONBOARDING / SETUP GUIDE TAB
+// ═══════════════════════════════════════════════════════════════════════
+const ONBOARDING_STEPS = [
+  { id: 'tee', label: 'Connect tee sheet system', desc: 'ForeTees connected — tee time data flowing into demand intelligence.', done: true, target: 'integrations' },
+  { id: 'pos', label: 'Connect POS system', desc: 'Northstar POS connected — dining frequency and spend data active.', done: true, target: 'integrations' },
+  { id: 'crm', label: 'Connect member CRM', desc: 'Clubessential CMS connected — member profiles, dues, and households syncing.', done: true, target: 'integrations' },
+  { id: 'members', label: 'Upload member roster', desc: '487 members imported with health scores and engagement history.', done: true, target: 'integrations/csv-import' },
+  { id: 'team', label: 'Invite your department heads', desc: '4 of 6 team members have accepted invitations.', done: false, progress: '4/6' },
+  { id: 'notifications', label: 'Configure notification channels', desc: 'Set up email, SMS, push, and Slack alerts for your team.', done: false },
+  { id: 'profile', label: 'Review club profile & brand voice', desc: 'Club name, amenities, and communication tone configured.', done: true },
+  { id: 'billing', label: 'Confirm billing plan', desc: 'Pro plan ($499/mo) active since January 2026.', done: true },
+];
+
+function OnboardingTab({ setActiveTab, navigate }) {
+  const completedCount = ONBOARDING_STEPS.filter(s => s.done).length;
+  const pct = Math.round((completedCount / ONBOARDING_STEPS.length) * 100);
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px', padding: '20px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.md }}>
+        <div style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="30" fill="none" stroke={theme.colors.bgDeep} strokeWidth="6" />
+            <circle cx="36" cy="36" r="30" fill="none" stroke={theme.colors.accent} strokeWidth="6"
+              strokeDasharray={`${pct * 1.885} 188.5`} strokeLinecap="round"
+              transform="rotate(-90 36 36)" style={{ transition: 'stroke-dasharray 0.3s' }} />
+          </svg>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '16px', fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>{pct}%</div>
+        </div>
+        <div>
+          <div style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textPrimary }}>{completedCount} of {ONBOARDING_STEPS.length} steps complete</div>
+          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, marginTop: '4px' }}>Complete all steps to unlock full Swoop intelligence. Estimated time remaining: ~15 minutes.</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {ONBOARDING_STEPS.map(step => (
+          <div key={step.id} style={{
+            display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px',
+            background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm,
+            borderLeft: `3px solid ${step.done ? theme.colors.success500 : theme.colors.warning500}`,
+          }}>
+            <div style={{
+              width: 24, height: 24, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: step.done ? theme.colors.success500 : theme.colors.bgDeep, color: step.done ? '#fff' : theme.colors.textMuted,
+              fontSize: '12px', fontWeight: 700,
+            }}>
+              {step.done ? '\u2713' : '\u2022'}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{step.label}</div>
+              <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '2px' }}>
+                {step.desc}
+                {step.progress && <span style={{ marginLeft: '6px', fontWeight: 700, color: theme.colors.warning500 }}>({step.progress})</span>}
+              </div>
+            </div>
+            {!step.done && (
+              <button
+                onClick={() => step.target ? navigate(step.target) : setActiveTab(step.id === 'notifications' ? 'notifications' : step.id === 'team' ? 'users' : 'club')}
+                style={s.btn('primary')}
+              >
+                {step.target ? 'Go' : 'Configure'}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -532,12 +546,28 @@ function ToggleSwitch({ checked, onChange }) {
   );
 }
 
+const ROLE_DEFAULTS = {
+  member_at_risk: ['Membership Director'], member_save: ['Membership Director', 'General Manager'],
+  resignation_risk: ['General Manager', 'Membership Director'], health_score_change: ['Membership Director'],
+  service_failure: ['F&B Director', 'General Manager'], weather_alert: ['Head Golf Pro', 'Events Manager'],
+  staffing_gap: ['F&B Director'], capacity_alert: ['Events Manager'],
+  revenue_anomaly: ['Controller', 'General Manager'], spend_drop: ['Membership Director'],
+  integration_down: ['General Manager'], data_sync: [], report_ready: ['General Manager'],
+};
+
 function NotificationsTab() {
   const [settings, setSettings] = useState(() => {
     const map = {};
     NOTIFICATION_SETTINGS.forEach(sec => sec.items.forEach(item => { map[item.key] = { ...item.channels }; }));
     return map;
   });
+  const [testStatus, setTestStatus] = useState({});
+
+  const sendTest = (channel) => {
+    setTestStatus(prev => ({ ...prev, [channel]: 'sending' }));
+    setTimeout(() => setTestStatus(prev => ({ ...prev, [channel]: 'sent' })), 1500);
+    setTimeout(() => setTestStatus(prev => ({ ...prev, [channel]: 'idle' })), 4000);
+  };
 
   const toggle = (key, channel) => {
     setSettings(prev => ({
@@ -547,15 +577,44 @@ function NotificationsTab() {
   };
 
   const CHANNELS = [
-    { key: 'email', label: 'Email' },
-    { key: 'sms', label: 'SMS' },
-    { key: 'push', label: 'Push' },
-    { key: 'slack', label: 'Slack' },
+    { key: 'email', label: 'Email', icon: '📧', configured: true, detail: 'sarah@oakmonthills.com' },
+    { key: 'sms', label: 'SMS', icon: '📱', configured: true, detail: '(908) 555-0142' },
+    { key: 'push', label: 'Push', icon: '🔔', configured: true, detail: 'Swoop mobile app' },
+    { key: 'slack', label: 'Slack', icon: '💬', configured: false, detail: 'Not connected' },
   ];
 
   return (
     <div>
-      <div style={s.sectionDesc}>Configure how and when your team receives alerts from Swoop. Each notification can be enabled per channel.</div>
+      {/* Channel Status & Test */}
+      <div style={s.sectionTitle}>Channel Status</div>
+      <div style={{ ...s.sectionDesc, marginBottom: '12px' }}>Verify your notification channels are working before relying on them for critical alerts.</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '24px' }}>
+        {CHANNELS.map(ch => (
+          <div key={ch.key} style={{ padding: '12px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm, textAlign: 'center' }}>
+            <div style={{ fontSize: '20px', marginBottom: '6px' }}>{ch.icon}</div>
+            <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{ch.label}</div>
+            <div style={{ fontSize: '10px', color: ch.configured ? theme.colors.success500 : theme.colors.textMuted, marginTop: '2px' }}>
+              {ch.configured ? ch.detail : 'Not configured'}
+            </div>
+            <button
+              onClick={() => sendTest(ch.key)}
+              disabled={!ch.configured || testStatus[ch.key] === 'sending'}
+              style={{
+                marginTop: '8px', padding: '4px 12px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', cursor: ch.configured ? 'pointer' : 'default',
+                border: 'none', fontFamily: theme.fonts.sans,
+                background: testStatus[ch.key] === 'sent' ? theme.colors.success50 : ch.configured ? `${theme.colors.accent}15` : theme.colors.bgDeep,
+                color: testStatus[ch.key] === 'sent' ? theme.colors.success500 : ch.configured ? theme.colors.accent : theme.colors.textMuted,
+              }}
+            >
+              {testStatus[ch.key] === 'sending' ? 'Sending...' : testStatus[ch.key] === 'sent' ? 'Sent!' : 'Send Test'}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div style={s.divider} />
+      <div style={s.sectionTitle}>Alert Routing</div>
+      <div style={s.sectionDesc}>Configure which channels and roles receive each alert type.</div>
 
       {NOTIFICATION_SETTINGS.map(sec => (
         <div key={sec.section} style={{ marginBottom: '24px' }}>
@@ -563,25 +622,31 @@ function NotificationsTab() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {sec.items.map(item => (
               <div key={item.key} style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr repeat(4, 60px)',
-                gap: '8px',
-                alignItems: 'center',
                 padding: '12px 16px',
                 background: theme.colors.bgCard,
                 border: '1px solid ' + theme.colors.border,
                 borderRadius: theme.radius.sm,
               }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{item.label}</div>
-                  <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>{item.description}</div>
-                </div>
-                {CHANNELS.map(ch => (
-                  <div key={ch.key} style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '9px', color: theme.colors.textMuted, marginBottom: '4px', textTransform: 'uppercase' }}>{ch.label}</div>
-                    <ToggleSwitch checked={settings[item.key][ch.key]} onChange={() => toggle(item.key, ch.key)} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(4, 60px)', gap: '8px', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{item.label}</div>
+                    <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>{item.description}</div>
                   </div>
-                ))}
+                  {CHANNELS.map(ch => (
+                    <div key={ch.key} style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '9px', color: theme.colors.textMuted, marginBottom: '4px', textTransform: 'uppercase' }}>{ch.label}</div>
+                      <ToggleSwitch checked={settings[item.key][ch.key]} onChange={() => toggle(item.key, ch.key)} />
+                    </div>
+                  ))}
+                </div>
+                {ROLE_DEFAULTS[item.key]?.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid ' + theme.colors.border }}>
+                    <span style={{ fontSize: '10px', color: theme.colors.textMuted, flexShrink: 0 }}>Routes to:</span>
+                    {ROLE_DEFAULTS[item.key].map(role => (
+                      <span key={role} style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '10px', background: `${theme.colors.accent}12`, color: theme.colors.accent, fontWeight: 600 }}>{role}</span>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -721,6 +786,55 @@ function ClubProfileTab() {
         ))}
       </div>
 
+      <div style={s.divider} />
+      <div style={s.sectionTitle}>Brand & Voice</div>
+      <div style={s.sectionDesc}>These settings shape how Swoop's AI agents communicate on behalf of your club. All AI-generated outreach will follow these guidelines.</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <Panel>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Communication Tone</label>
+            <select style={s.input}>
+              <option>Warm & Personal</option>
+              <option>Professional & Formal</option>
+              <option>Casual & Friendly</option>
+            </select>
+          </div>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Preferred GM Signoff</label>
+            <input style={s.input} defaultValue="Best regards, Sarah Mitchell" />
+          </div>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Club Tagline</label>
+            <input style={s.input} defaultValue="Where Tradition Meets Tomorrow" />
+          </div>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Brand Colors</label>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#1B4332', border: '1px solid ' + theme.colors.border }} />
+                <input style={{ ...s.input, width: '90px' }} defaultValue="#1B4332" />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#C9A84C', border: '1px solid ' + theme.colors.border }} />
+                <input style={{ ...s.input, width: '90px' }} defaultValue="#C9A84C" />
+              </div>
+            </div>
+          </div>
+        </Panel>
+        <Panel>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>AI Writing Style Notes</label>
+            <textarea style={{ ...s.input, height: '120px', resize: 'vertical', lineHeight: 1.5 }} defaultValue={"Avoid overly casual language. Reference club traditions when appropriate. Always use member's preferred name. Sign emails from the GM unless delegated to department head."} />
+          </div>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Brand Guidelines (Upload)</label>
+            <div style={{ padding: '16px', border: '2px dashed ' + theme.colors.border, borderRadius: theme.radius.sm, textAlign: 'center', color: theme.colors.textMuted, fontSize: theme.fontSize.xs, cursor: 'pointer' }}>
+              Drop PDF or image here (brand guide, logo usage, letterhead)
+            </div>
+          </div>
+        </Panel>
+      </div>
+
       <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
         <button style={s.btn('primary')}>Save Changes</button>
       </div>
@@ -770,6 +884,39 @@ function BillingTab() {
             ))}
           </div>
         </Panel>
+      </div>
+
+      <div style={s.sectionTitle}>Usage Trends</div>
+      <div style={s.sectionDesc}>6-month consumption with projected month-end estimates.</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+        {[
+          { label: 'AI Agent Actions', data: [89, 102, 118, 127, 135, 142], limit: 500, unit: '' },
+          { label: 'SMS Sent', data: [22, 28, 31, 38, 42, 47], limit: 200, unit: '', alert: 'SMS: 47 of 200 (24% consumed, 8 days in — projected under limit)' },
+          { label: 'Email Sends', data: [180, 210, 245, 270, 295, 312], limit: 2000, unit: '' },
+          { label: 'API Calls', data: [4200, 5100, 5800, 6700, 7500, 8291], limit: 50000, unit: '' },
+        ].map(metric => {
+          const current = metric.data[metric.data.length - 1];
+          const pctUsed = Math.round((current / metric.limit) * 100);
+          const max = Math.max(...metric.data) * 1.2;
+          const points = metric.data.map((v, i) => `${(i / 5) * 100},${40 - (v / max) * 36}`).join(' ');
+          return (
+            <div key={metric.label} style={{ padding: '14px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm }}>
+              <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginBottom: '4px' }}>{metric.label}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                <span style={{ fontSize: '18px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>{current.toLocaleString()}</span>
+                <span style={{ fontSize: '10px', color: theme.colors.textMuted }}>/ {metric.limit.toLocaleString()}</span>
+              </div>
+              <svg width="100%" height="40" viewBox="0 0 100 40" preserveAspectRatio="none" style={{ marginTop: '6px' }}>
+                <polyline points={points} fill="none" stroke={theme.colors.accent} strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              <div style={{ height: '4px', borderRadius: '2px', background: theme.colors.bgDeep, marginTop: '4px' }}>
+                <div style={{ height: '100%', borderRadius: '2px', background: pctUsed > 80 ? theme.colors.danger500 : theme.colors.accent, width: `${Math.min(pctUsed, 100)}%`, transition: 'width 0.3s' }} />
+              </div>
+              <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: '4px' }}>{pctUsed}% consumed</div>
+              {metric.alert && <div style={{ fontSize: '10px', color: theme.colors.success500, marginTop: '2px' }}>{metric.alert}</div>}
+            </div>
+          );
+        })}
       </div>
 
       <div style={s.sectionTitle}>Billing History</div>
@@ -920,18 +1067,21 @@ function SecurityTab() {
 // MAIN ADMIN DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState('users');
+  const { navigate } = useNavigationContext();
+  const [activeTab, setActiveTab] = useState('onboarding');
 
-  const TAB_COMPONENTS = {
-    users: UsersTab,
-    integrations: IntegrationsTab,
-    notifications: NotificationsTab,
-    club: ClubProfileTab,
-    billing: BillingTab,
-    security: SecurityTab,
+  const renderTab = () => {
+    switch (activeTab) {
+      case 'onboarding': return <OnboardingTab setActiveTab={setActiveTab} navigate={navigate} />;
+      case 'users': return <UsersTab />;
+      case 'channels': return <IntegrationsTab onNavigate={navigate} />;
+      case 'notifications': return <NotificationsTab />;
+      case 'club': return <ClubProfileTab />;
+      case 'billing': return <BillingTab />;
+      case 'security': return <SecurityTab />;
+      default: return <OnboardingTab setActiveTab={setActiveTab} navigate={navigate} />;
+    }
   };
-
-  const ActiveComponent = TAB_COMPONENTS[activeTab];
 
   return (
     <PageTransition>
@@ -939,7 +1089,7 @@ export default function AdminDashboard() {
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: theme.colors.textPrimary }}>Admin Settings</h1>
           <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, margin: '4px 0 0 0' }}>
-            Manage users, integrations, notifications, and club configuration.
+            Manage users, action channels, notifications, and club configuration.
           </p>
         </div>
 
@@ -974,7 +1124,7 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        <ActiveComponent />
+        {renderTab()}
       </div>
     </PageTransition>
   );

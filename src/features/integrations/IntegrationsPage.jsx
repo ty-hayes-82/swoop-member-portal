@@ -342,22 +342,30 @@ export function IntegrationsPage() {
                       )}
                     </div>
                   )}
-                  {vendor.status === 'coming-soon' && category.csvCategory && (
-                    <button
-                      onClick={() => navigate('integrations/csv-import', { category: category.csvCategory, vendor: vendor.name })}
-                      style={{
-                        marginTop: 4,
-                        padding: 0,
-                        border: 'none',
-                        background: 'none',
-                        color: theme.colors.accent,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      upload CSV instead →
-                    </button>
+                  {vendor.status === 'coming-soon' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
+                      <button
+                        onClick={() => alert(`Request submitted! We'll notify you when ${vendor.name} integration is available.`)}
+                        style={{
+                          padding: '5px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                          border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm,
+                          background: 'transparent', color: theme.colors.textSecondary,
+                        }}
+                      >
+                        Request This Integration
+                      </button>
+                      {category.csvCategory && (
+                        <button
+                          onClick={() => navigate('integrations/csv-import', { category: category.csvCategory, vendor: vendor.name })}
+                          style={{
+                            padding: 0, border: 'none', background: 'none',
+                            color: theme.colors.accent, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                          }}
+                        >
+                          upload CSV instead →
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
