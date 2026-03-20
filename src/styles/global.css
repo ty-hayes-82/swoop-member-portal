@@ -160,14 +160,20 @@ a.button-link {
   div[style*="grid"] { break-inside: avoid; }
 
   /* KPI cards: preserve layout, readable on paper */
+  div[style*="gridTemplateColumns: repeat(4"] > div,
   div[style*="gridTemplateColumns: repeat(auto-fit"] > div {
     border: 1px solid #ccc !important;
     background: #f9f9f9 !important;
     break-inside: avoid;
   }
+  div[style*="gridTemplateColumns: repeat(4"] > div > div:first-child,
   div[style*="gridTemplateColumns: repeat(auto-fit"] > div > div:first-child {
     color: #1a1a1a !important;
   }
+
+  /* SVG sparklines: darken for print */
+  svg polyline { stroke: #333 !important; }
+  svg circle { fill: #333 !important; stroke: #333 !important; }
 
   /* Panel borders visible on paper */
   [class*="Panel"], div[style*="borderRadius: 12"] {

@@ -4,7 +4,6 @@ import { Panel } from '@/components/ui';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import GrowthPipeline from '@/features/growth-pipeline/GrowthPipeline';
-import FlowLink from '@/components/ui/FlowLink';
 import { industryBenchmarks } from '@/data/benchmarks';
 import { getKPIs, getMemberSaves, getOperationalSaves, getMonthlyTrends } from '@/services/boardReportService';
 
@@ -15,17 +14,23 @@ function formatCurrency(val) {
 }
 
 const colors = {
-  green: theme.colors?.green?.[400] || '#48bb78',
-  blue: theme.colors?.blue?.[400] || '#4299e1',
-  orange: theme.colors?.orange?.[400] || '#ed8936',
-  red: theme.colors?.red?.[400] || '#fc8181',
-  yellow: theme.colors?.yellow?.[400] || '#ecc94b',
-  bg: theme.colors?.gray?.[800] || '#1a1a2e',
-  border: theme.colors?.gray?.[700] || '#2d2d44',
-  textMuted: theme.colors?.textMuted || '#6B7280',
-  text: theme.colors?.textSecondary || '#3F3F46',
-  white: theme.colors?.textPrimary || '#0F0F0F',
-  brand: theme.colors?.brand?.[500] || '#4299e1',
+  green: '#48bb78',
+  blue: '#63b3ed',
+  orange: '#ed8936',
+  red: '#fc8181',
+  yellow: '#ecc94b',
+  bg: '#1a1a2e',
+  border: '#2d2d44',
+  // Dark-background text (ROI box, KPI cards, trend cards, benchmarks)
+  textMuted: '#BCC3CF',   // labels on dark bg — bumped for readability (7.2:1)
+  text: '#D8DCE3',        // body text on dark bg (9.8:1)
+  white: '#F0F0F5',       // headings on dark bg (13.5:1)
+  // Light-background text (inside Panel components with white bg)
+  panelHeading: '#1a1a2e',
+  panelText: '#3F3F46',
+  panelMuted: '#6B7280',
+  brand: theme.colors?.accent || '#F3922D',
+  tabInactive: '#8890A0', // inactive tab text (4.1:1 on #2d2d44)
 };
 
 
@@ -76,10 +81,10 @@ function ProgressOverTime({ monthlyTrends }) {
 
   return (
     <div style={{ marginTop: '24px' }}>
-      <h3 style={{ fontSize: '16px', fontWeight: 700, color: colors.white, marginBottom: '16px' }}>
+      <h3 style={{ fontSize: '16px', fontWeight: 700, color: colors.panelHeading, marginBottom: '16px' }}>
         Progress Over 6 Months
       </h3>
-      <p style={{ fontSize: '13px', color: colors.text, lineHeight: 1.6, marginBottom: '16px' }}>
+      <p style={{ fontSize: '13px', color: colors.panelText, lineHeight: 1.6, marginBottom: '16px' }}>
         Swoop&rsquo;s impact compounds over time as the system learns your club&rsquo;s patterns. Response times have improved 53% since launch, and monthly dues protection has grown 3.5x.
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
@@ -99,8 +104,8 @@ function ProgressOverTime({ monthlyTrends }) {
                   {improved ? '\u2191' : '\u2193'} {Math.abs(pctChange)}% vs launch
                 </span>
               </div>
-              <TrendSparkline data={monthlyTrends} dataKey={m.key} color={m.color} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: colors.textMuted, marginTop: '4px' }}>
+              <TrendSparkline data={monthlyTrends} dataKey={m.key} color={m.color} height={50} width={160} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: colors.textMuted, marginTop: '4px' }}>
                 {monthlyTrends.map(d => <span key={d.month}>{d.month}</span>)}
               </div>
             </div>
@@ -113,7 +118,7 @@ function ProgressOverTime({ monthlyTrends }) {
 
 function KPIStrip({ kpis }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
       {kpis.map((kpi) => (
         <div
           key={kpi.label}
@@ -143,8 +148,9 @@ function KPIStrip({ kpis }) {
             )}
             {kpi.suffix}
           </div>
-          <div style={{ fontSize: '12px', color: colors.textMuted, marginTop: '4px' }}>
+          <div style={{ fontSize: '12px', color: colors.textMuted, marginTop: '4px' }} title={kpi.label === 'Board Confidence Score' ? 'Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.' : undefined}>
             {kpi.label}
+            {kpi.label === 'Board Confidence Score' && <span style={{ marginLeft: '4px', cursor: 'help', opacity: 0.6 }} title="Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.">&#9432;</span>}
           </div>
         </div>
       ))}
@@ -193,10 +199,10 @@ export default function BoardReport() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: colors.white }}>
-            Prove It: What Was Prevented
+            Retention & Revenue Protection Report
           </h1>
           <p style={{ fontSize: '14px', color: colors.textMuted, margin: '4px 0 0 0' }}>
-            Board-ready report — Last 90 days
+            Executive summary — Last 90 days
           </p>
         </div>
         <button
@@ -217,7 +223,6 @@ export default function BoardReport() {
       </div>
 
       <KPIStrip kpis={kpis} />
-      <FlowLink flowNum="08" persona="Sarah" />
 
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
         {tabNames.map((tab, i) => (
@@ -227,12 +232,13 @@ export default function BoardReport() {
             style={{
               padding: '8px 18px',
               borderRadius: '8px',
-              border: 'none',
+              border: activeTab === i ? 'none' : '1px solid ' + colors.tabInactive + '40',
               cursor: 'pointer',
               fontWeight: 600,
               fontSize: '14px',
-              background: activeTab === i ? colors.brand : colors.border,
-              color: activeTab === i ? '#fff' : colors.text,
+              background: activeTab === i ? colors.brand : 'transparent',
+              color: activeTab === i ? '#fff' : colors.tabInactive,
+              transition: 'all 0.15s',
             }}
           >
             {tab}
@@ -264,11 +270,14 @@ export default function BoardReport() {
               </div>
             </div>
           </div>
-          <div style={{ fontSize: '24px', color: colors.textMuted }}>→</div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+            <div style={{ fontSize: '24px', color: colors.textMuted }}>→</div>
+            <div style={{ fontSize: '10px', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>yields</div>
+          </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '12px', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Annual Return</div>
             <div style={{ fontSize: '13px', color: colors.text, lineHeight: 1.8 }}>
-              <div>Dues protected: <strong style={{ fontFamily: theme.fonts.mono }}>$168,000</strong></div>
+              <div>Estimated dues at risk (prevented loss)*: <strong style={{ fontFamily: theme.fonts.mono }}>$168,000</strong></div>
               <div>Revenue recovered: <strong style={{ fontFamily: theme.fonts.mono }}>$42,500</strong></div>
               <div style={{ borderTop: '1px solid ' + colors.border, paddingTop: '6px', marginTop: '6px' }}>
                 Total: <strong style={{ fontFamily: theme.fonts.mono, color: colors.green }}>$210,500</strong>
@@ -280,24 +289,27 @@ export default function BoardReport() {
             </div>
           </div>
         </div>
-        <div style={{ fontSize: '12px', color: colors.textMuted, textAlign: 'center', marginBottom: '20px', fontStyle: 'italic' }}>
+        <div style={{ fontSize: '12px', color: colors.textMuted, textAlign: 'center', marginBottom: '12px', fontStyle: 'italic' }}>
           For every $1 invested in Swoop, your club protected $16 in member revenue.
+        </div>
+        <div style={{ fontSize: '11px', color: colors.textMuted, textAlign: 'center', marginBottom: '20px', opacity: 0.8 }}>
+          *Dues-at-risk figures are annualized estimates based on member health scores and historical churn patterns at comparable clubs. Revenue recovered reflects confirmed operational saves. See Member Saves tab for individual case details.
         </div>
 
         <Panel>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: colors.white }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: colors.panelHeading }}>
             Executive Summary
           </h2>
-          <p style={{ color: colors.text, lineHeight: 1.7, marginBottom: '16px' }}>
+          <p style={{ color: colors.panelText, lineHeight: 1.7, marginBottom: '16px' }}>
             Over the last 90 days, Swoop identified <strong>14 members</strong> showing early disengagement signals
             that would have been invisible to traditional club systems. Through GM-approved interventions delivered
-            via the Swoop app, all 14 were retained — protecting <strong>{formatCurrency(totalDues)}</strong> in annual dues revenue (<strong>{formatCurrency(totalDues * 5)}</strong> in lifetime value).
+            via the Swoop app, all 14 were retained — protecting an estimated <strong>{formatCurrency(totalDues)}</strong> in annual dues ({formatCurrency(totalDues * 5)} lifetime value) across confirmed at-risk cases. The annualized projection, including pattern-matched risk detection, is <strong>$168,000</strong>.
           </p>
-          <p style={{ color: colors.text, lineHeight: 1.7, marginBottom: '16px' }}>
+          <p style={{ color: colors.panelText, lineHeight: 1.7, marginBottom: '16px' }}>
             Simultaneously, Swoop caught <strong>23 operational service failures</strong> before members experienced them,
-            recovering an additional <strong>{formatCurrency(totalOpsRevenue)}</strong> in protected F&amp;B and event revenue.
+            protecting <strong>{formatCurrency(totalOpsRevenue)}</strong> in confirmed F&amp;B and event revenue over 90 days (<strong>$42,500</strong> annualized).
           </p>
-          <p style={{ color: colors.text, lineHeight: 1.7 }}>
+          <p style={{ color: colors.panelText, lineHeight: 1.7 }}>
             The average response time from detection to GM action was <strong>4.2 hours</strong> — compared to the
             industry average of 6+ weeks (typically after a resignation letter). This is the difference between
             retention and replacement.
@@ -307,10 +319,10 @@ export default function BoardReport() {
 
         {/* Competitive Benchmarks */}
         <Panel>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.white }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>
             Your Club vs. Industry
           </h2>
-          <p style={{ fontSize: '12px', color: colors.textMuted, marginBottom: '16px' }}>
+          <p style={{ fontSize: '12px', color: colors.panelMuted, marginBottom: '16px' }}>
             How your Swoop-powered metrics compare to private club industry averages.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
@@ -371,18 +383,18 @@ export default function BoardReport() {
           {memberSaves.map((m) => (
             <Panel key={m.name}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: colors.white }}>{m.name}</h3>
-                <div style={{ fontSize: '13px', color: colors.textMuted }}>
-                  Dues at risk: <strong style={{ color: colors.red }}>{formatCurrency(m.duesAtRisk)}</strong> <span style={{ color: colors.textMuted, fontSize: '12px' }}>({formatCurrency(m.duesAtRisk * 5)} LTV)</span>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: colors.panelHeading }}>{m.name}</h3>
+                <div style={{ fontSize: '13px', color: colors.panelMuted }}>
+                  Dues at risk: <strong style={{ color: colors.red }}>{formatCurrency(m.duesAtRisk)}</strong> <span style={{ color: colors.panelMuted, fontSize: '12px' }}>({formatCurrency(m.duesAtRisk * 5)} LTV)</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', color: colors.textMuted }}>Health:</span>
+                <span style={{ fontSize: '13px', color: colors.panelMuted }}>Health:</span>
                 <HealthBadge value={m.healthBefore} />
-                <span style={{ color: colors.textMuted }}>{'→'}</span>
+                <span style={{ color: colors.panelMuted }}>{'→'}</span>
                 <HealthBadge value={m.healthAfter} />
               </div>
-              <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.text }}>
+              <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.panelText }}>
                 <div><strong>Trigger:</strong> {m.trigger}</div>
                 <div><strong>Action:</strong> {m.action}</div>
                 <div><strong>Outcome:</strong> <span style={{ color: colors.green }}>{m.outcome}</span></div>
@@ -400,14 +412,14 @@ export default function BoardReport() {
           {operationalSaves.map((o) => (
             <Panel key={o.event}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: colors.white }}>{o.event}</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: colors.panelHeading }}>{o.event}</h3>
                 {o.revenueProtected > 0 && (
                   <div style={{ fontSize: '13px', color: colors.green }}>
                     +{formatCurrency(o.revenueProtected)} protected
                   </div>
                 )}
               </div>
-              <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.text }}>
+              <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.panelText }}>
                 <div><strong>Detection:</strong> {o.detection}</div>
                 <div><strong>Action:</strong> {o.action}</div>
                 <div><strong>Outcome:</strong> <span style={{ color: colors.green }}>{o.outcome}</span></div>
@@ -420,10 +432,10 @@ export default function BoardReport() {
       {activeTab === 3 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Panel>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: colors.white }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: colors.panelHeading }}>
               What We Learned This Quarter
             </h2>
-            <p style={{ color: colors.text, lineHeight: 1.7, marginBottom: '20px' }}>
+            <p style={{ color: colors.panelText, lineHeight: 1.7, marginBottom: '20px' }}>
               Cross-domain correlations discovered through Swoop&rsquo;s connected intelligence.
               These aren&rsquo;t hypotheses &mdash; they&rsquo;re patterns proven by your club&rsquo;s own data.
             </p>
@@ -471,10 +483,10 @@ export default function BoardReport() {
                   }}>{d}</span>
                 ))}
               </div>
-              <h3 style={{ fontSize: '15px', fontWeight: 700, color: colors.white, margin: '0 0 8px', lineHeight: 1.4 }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 700, color: colors.panelHeading, margin: '0 0 8px', lineHeight: 1.4 }}>
                 {item.insight}
               </h3>
-              <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.text }}>
+              <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.panelText }}>
                 <div style={{ marginBottom: '6px' }}><strong>Evidence:</strong> {item.evidence}</div>
                 <div style={{ color: colors.green }}><strong>So what:</strong> {item.implication}</div>
               </div>
