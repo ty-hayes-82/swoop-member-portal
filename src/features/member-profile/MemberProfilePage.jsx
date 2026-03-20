@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { theme } from '@/config/theme';
 import { StoryHeadline } from '@/components/ui';
 import { useMemberProfile } from '@/context/MemberProfileContext';
+import { useNavigationContext } from '@/context/NavigationContext';
 import { getMemberProfile } from '@/services/memberService';
 import {
   AreaChart, Area,
@@ -66,17 +67,22 @@ function Section({ title, children, cols }) {
 
 // --- Main component ---
 export default function MemberProfilePage() {
+  const { memberRouteId } = useNavigationContext();
   const [memberId, setMemberId] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const { openProfile } = useMemberProfile();
 
-  // Check URL hash for member ID
+  // Get member ID from NavigationContext (primary) or URL hash (fallback)
   useEffect(() => {
+    if (memberRouteId) {
+      setMemberId(memberRouteId);
+      return;
+    }
     const hash = window.location.hash;
-    const match = hash.match(/member[=/]([^&/]+)/i);
+    const match = hash.match(/members?\/([^&/]+)/i);
     if (match) setMemberId(match[1]);
-  }, []);
+  }, [memberRouteId]);
 
   // Seed profile IDs — use static data to avoid DB mismatch
   const SEED_IDS = new Set(['mbr_203', 'mbr_089', 'mbr_271', 'mbr_146', 'mbr_312']);

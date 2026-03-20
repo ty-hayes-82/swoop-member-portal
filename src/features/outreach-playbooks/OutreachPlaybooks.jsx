@@ -565,18 +565,22 @@ export default function OutreachPlaybooks() {
                       onEdit={() => handleEditAction(action)}
                     />
                   ))}
-                  <button
-                    onClick={() => setShowCreateModal(true)}
-                    style={{
-                      padding: '12px 16px', borderRadius: '10px', border: '2px dashed #d4d4d8',
-                      background: '#fafafa', color: '#6b7280', fontSize: '13px', fontWeight: 600,
-                      cursor: 'pointer', textAlign: 'center', transition: 'all 0.15s',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                    }}
-                  >
-                    + Create Custom Action
-                  </button>
                 </div>
+              </div>
+            )}
+            {editMode && (
+              <div style={{ marginTop: disabledActions.length > 0 ? '12px' : '24px' }}>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  style={{
+                    width: '100%', padding: '12px 16px', borderRadius: '10px', border: '2px dashed #d4d4d8',
+                    background: '#fafafa', color: '#6b7280', fontSize: '13px', fontWeight: 600,
+                    cursor: 'pointer', textAlign: 'center', transition: 'all 0.15s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  }}
+                >
+                  + Create Custom Action
+                </button>
               </div>
             )}
           </div>

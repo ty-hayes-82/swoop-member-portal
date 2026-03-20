@@ -293,7 +293,17 @@ let _d = {
 export const _init = async () => {
   try {
     const res = await fetch('/api/members');
-    if (res.ok) _d = await res.json();
+    if (res.ok) {
+      const apiData = await res.json();
+      // Merge API data with static defaults — keep static healthDistribution
+      // and memberProfiles as authoritative sources
+      _d = {
+        ..._d,
+        ...apiData,
+        healthDistribution: _d.healthDistribution, // always use static 4-level distribution
+        memberProfiles: _d.memberProfiles,          // always use static seed profiles
+      };
+    }
   } catch { /* keep static fallback */ }
 };
 

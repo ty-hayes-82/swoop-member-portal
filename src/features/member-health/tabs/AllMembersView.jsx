@@ -407,7 +407,13 @@ export default function AllMembersView() {
       'At Risk': { min: 30, max: 50 },
       'Critical': { min: 0, max: 30 },
     };
-    setHealthFilter(ranges[level]);
+    // Toggle: clicking active filter clears it
+    const target = ranges[level];
+    if (healthFilter?.min === target.min) {
+      setHealthFilter(null);
+    } else {
+      setHealthFilter(target);
+    }
   };
 
   const columns = [
@@ -439,7 +445,7 @@ export default function AllMembersView() {
             return (
               <div
                 key={d.level}
-                onClick={() => handleHealthClick(d.level)}
+                onClick={() => applyHealthFilter(d.level)}
                 style={{
                   background: theme.colors.bgCard,
                   boxShadow: isActive ? theme.shadow.md : theme.shadow.sm,

@@ -17,7 +17,8 @@ export const _init = async () => {
 };
 
 export const getKPIs = () => _d?.kpis ?? staticKpis;
-export const getMemberSaves = () => _d?.memberSaves ?? staticMemberSaves;
+// Always use static member saves — API/DB may have mismatched member names
+export const getMemberSaves = () => staticMemberSaves;
 export const getOperationalSaves = () => _d?.operationalSaves ?? staticOperationalSaves;
 export const getMonthlyTrends = () => _d?.monthlyTrends ?? staticMonthlyTrends;
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
