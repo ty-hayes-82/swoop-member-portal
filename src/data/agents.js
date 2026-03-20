@@ -298,6 +298,73 @@ export const agentActions = [
       { id: 'dis', status: 'Dismissed — Slot already filled manually', owner: 'Tom Bradford (Asst GM)', timestamp: '2026-01-17T09:15:00Z' },
     ],
   },
+  // Closed-loop follow-up cards — show outcomes of previously approved actions
+  {
+    id: 'agx_followup_001',
+    timestamp: '2026-01-17T10:00:00Z',
+    agentId: 'member-pulse',
+    source: 'Member Pulse — Follow-Up',
+    actionType: 'FOLLOW_UP',
+    description: '30-day check-in: James Whitfield — health score recovered 34 → 71 after GM personal call. Re-engaged with 3 rounds and 2 dining visits.',
+    status: 'pending',
+    impactMetric: '$18K dues protected — intervention successful',
+    priority: 'low',
+    memberId: 'mbr_203',
+    memberName: 'James Whitfield',
+    signals: [
+      { system: 'Member CRM', signal: 'Health score: 34 → 71', timestamp: '30 days post-action' },
+      { system: 'Tee Sheet', signal: '3 rounds booked since intervention', timestamp: 'Last 30 days' },
+      { system: 'POS', signal: '2 dining visits ($142 total)', timestamp: 'Last 30 days' },
+    ],
+    auditTrail: [
+      { id: 'rec', status: 'Original action approved', owner: 'Sarah Mitchell (GM)', timestamp: '2025-12-18T09:30:00Z' },
+      { id: 'fup', status: '30-day follow-up — Intervention successful', owner: 'Member Pulse', timestamp: '2026-01-17T10:00:00Z' },
+    ],
+  },
+  {
+    id: 'agx_followup_002',
+    timestamp: '2026-01-17T10:05:00Z',
+    agentId: 'service-recovery',
+    source: 'Service Recovery — Follow-Up',
+    actionType: 'FOLLOW_UP',
+    description: '14-day check-in: Robert Callahan — complaint resolved, health score improved 47 → 63. Dined twice since resolution. Monitoring.',
+    status: 'pending',
+    impactMetric: '$9.6K renewal risk mitigated',
+    priority: 'low',
+    memberId: 'mbr_271',
+    memberName: 'Robert Callahan',
+    signals: [
+      { system: 'Complaint Log', signal: 'Complaint marked resolved', timestamp: '14 days ago' },
+      { system: 'Member CRM', signal: 'Health score: 47 → 63', timestamp: '14 days post-action' },
+      { system: 'POS', signal: '2 dining visits since resolution', timestamp: 'Last 14 days' },
+    ],
+    auditTrail: [
+      { id: 'rec', status: 'Original action approved', owner: 'Sarah Mitchell (GM)', timestamp: '2026-01-03T11:00:00Z' },
+      { id: 'fup', status: '14-day follow-up — Monitoring recovery', owner: 'Service Recovery', timestamp: '2026-01-17T10:05:00Z' },
+    ],
+  },
+  {
+    id: 'agx_followup_003',
+    timestamp: '2026-01-17T10:10:00Z',
+    agentId: 'engagement-autopilot',
+    source: 'Engagement Autopilot — Follow-Up',
+    actionType: 'FOLLOW_UP',
+    description: '60-day check-in: Anne Jordan — no re-engagement after win-back campaign. Health score 28 → 22. Recommend escalation to GM personal call.',
+    status: 'pending',
+    impactMetric: '$14K dues at risk — escalation recommended',
+    priority: 'high',
+    memberId: 'mbr_089',
+    memberName: 'Anne Jordan',
+    signals: [
+      { system: 'Email', signal: 'Win-back email: 0 opens', timestamp: '60 days post-action' },
+      { system: 'Tee Sheet', signal: '0 rounds since campaign', timestamp: 'Last 60 days' },
+      { system: 'Member CRM', signal: 'Health score: 28 → 22', timestamp: 'Declining' },
+    ],
+    auditTrail: [
+      { id: 'rec', status: 'Win-back campaign approved', owner: 'Lisa Park (Membership Dir)', timestamp: '2025-11-18T14:00:00Z' },
+      { id: 'fup', status: '60-day follow-up — No response, escalation recommended', owner: 'Engagement Autopilot', timestamp: '2026-01-17T10:10:00Z' },
+    ],
+  },
 ];
 
 export const agentThoughtLogs = {
