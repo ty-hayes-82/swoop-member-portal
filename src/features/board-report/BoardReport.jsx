@@ -26,7 +26,9 @@ const colors = {
   textMuted: '#BCC3CF',   // labels on dark bg — bumped for readability (7.2:1)
   text: '#D8DCE3',        // body text on dark bg (9.8:1)
   white: '#F0F0F5',       // headings on dark bg (13.5:1)
-  // Light-background text (inside Panel components with white bg)
+  // Light-background text (page bg, inside Panel components with white bg)
+  pageHeading: '#1a1a2e',  // page title on light bg
+  pageSubtext: '#6B7280',  // subtitle, tagline, disclaimer on light bg
   panelHeading: '#1a1a2e',
   panelText: '#3F3F46',
   panelMuted: '#6B7280',
@@ -76,8 +78,8 @@ function ProgressOverTime({ monthlyTrends }) {
   const metrics = [
     { label: 'Members Saved / Month', key: 'membersSaved', color: colors.green, format: v => v },
     { label: 'Dues Protected / Month', key: 'duesProtected', color: colors.green, format: v => '$' + (v / 1000).toFixed(0) + 'K' },
-    { label: 'Service Failures Caught', key: 'serviceFailures', color: colors.orange, format: v => v },
-    { label: 'Avg Response Time (hrs)', key: 'responseTime', color: colors.blue, format: v => v.toFixed(1) },
+    { label: 'Service Failures Caught', key: 'serviceFailures', color: colors.green, format: v => v },
+    { label: 'Avg Response Time (hrs)', key: 'responseTime', color: colors.green, format: v => v.toFixed(1) },
   ];
 
   return (
@@ -93,7 +95,8 @@ function ProgressOverTime({ monthlyTrends }) {
           const current = monthlyTrends[monthlyTrends.length - 1][m.key];
           const first = monthlyTrends[0][m.key];
           const pctChange = ((current - first) / first * 100).toFixed(0);
-          const improved = m.key === 'responseTime' ? current < first : current > first;
+          const lowerIsBetter = m.key === 'responseTime' || m.key === 'serviceFailures';
+          const improved = lowerIsBetter ? current < first : current > first;
           return (
             <div key={m.key} style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border }}>
               <div style={{ fontSize: '11px', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
@@ -209,10 +212,10 @@ export default function BoardReport() {
       <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: colors.white }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: colors.pageHeading }}>
             Retention & Revenue Protection Report
           </h1>
-          <p style={{ fontSize: '14px', color: colors.textMuted, margin: '4px 0 0 0' }}>
+          <p style={{ fontSize: '14px', color: colors.pageSubtext, margin: '4px 0 0 0' }}>
             Executive summary — Last 90 days
           </p>
         </div>
@@ -300,10 +303,10 @@ export default function BoardReport() {
             </div>
           </div>
         </div>
-        <div style={{ fontSize: '12px', color: colors.textMuted, textAlign: 'center', marginBottom: '12px', fontStyle: 'italic' }}>
+        <div style={{ fontSize: '12px', color: colors.pageSubtext, textAlign: 'center', marginBottom: '12px', fontStyle: 'italic' }}>
           For every $1 invested in Swoop, your club protected $16 in member revenue.
         </div>
-        <div style={{ fontSize: '11px', color: colors.textMuted, textAlign: 'center', marginBottom: '20px', opacity: 0.8 }}>
+        <div style={{ fontSize: '11px', color: colors.pageSubtext, textAlign: 'center', marginBottom: '20px' }}>
           *Dues-at-risk figures are annualized estimates based on member health scores and historical churn patterns at comparable clubs. Revenue recovered reflects confirmed operational saves. See Member Saves tab for individual case details.
         </div>
 
