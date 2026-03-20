@@ -44,7 +44,7 @@ const DEEP_TABS = [
 const mono = "'JetBrains Mono', monospace";
 
 export default function RevenueView() {
-  const { navigate: nav } = useNavigation();
+  const { navigate: nav, routeIntent, clearRouteIntent } = useNavigation();
   const [activeTab, setActiveTab] = useState('pace');
   const [archetype, setArchetype] = useState(null);
   const recoverableAmount = Math.round(PACE_LOSS * 0.35);
@@ -55,6 +55,16 @@ export default function RevenueView() {
   const duesAtRisk = memberSummary.potentialDuesAtRisk || 533000;
   const duesMonthly = Math.round(duesAtRisk / 12);
   const totalOpportunity = TOTAL_LOSS + spendMonthly + duesMonthly;
+
+  // Accept navigation intent for tab and archetype filters
+  useEffect(() => {
+    if (!routeIntent) return;
+    if (routeIntent.tab && DEEP_TABS.some(t => t.key === routeIntent.tab)) {
+      setActiveTab(routeIntent.tab);
+    }
+    if (routeIntent.archetype) setArchetype(routeIntent.archetype);
+    clearRouteIntent();
+  }, [routeIntent, clearRouteIntent]);
 
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {

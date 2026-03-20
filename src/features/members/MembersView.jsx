@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { StoryHeadline } from '@/components/ui';
 import CollapsibleSection from '@/components/ui/CollapsibleSection';
 import { theme } from '@/config/theme';
+import { useNavigationContext } from '@/context/NavigationContext';
 import { getHealthDistribution, getMemberSummary } from '@/services/memberService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
@@ -67,10 +68,22 @@ const HEADLINES = {
 };
 
 export default function MembersView() {
+  const { routeIntent, clearRouteIntent } = useNavigationContext();
   const [mode, setMode] = useState('at-risk');
   const [segment, setSegment] = useState('all');
   const [archetype, setArchetype] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Accept navigation intent for mode, segment, and archetype filters
+  useEffect(() => {
+    if (!routeIntent) return;
+    if (routeIntent.mode && MODES.some(m => m.key === routeIntent.mode)) {
+      setMode(routeIntent.mode);
+    }
+    if (routeIntent.segment) setSegment(routeIntent.segment);
+    if (routeIntent.archetype) setArchetype(routeIntent.archetype);
+    clearRouteIntent();
+  }, [routeIntent, clearRouteIntent]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
