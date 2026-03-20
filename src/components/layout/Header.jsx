@@ -4,7 +4,7 @@ import { useNavigation } from '@/context/NavigationContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
 import { CLUB_NAME, DEMO_MONTH, DEMO_TIMESTAMP } from '@/config/constants.js';
 import { theme } from '@/config/theme';
-import { getAtRiskMembers, getMemberSummary } from '@/services/memberService.js';
+import { getMemberSummary } from '@/services/memberService.js';
 import { getDailyBriefing } from '@/services/briefingService.js';
 
 const getGreeting = () => {
@@ -16,14 +16,12 @@ const getGreeting = () => {
 
 const getDataNudges = () => {
   try {
-    const atRisk = getAtRiskMembers();
     const summary = getMemberSummary();
     const briefing = getDailyBriefing();
-    const atRiskCount = atRisk?.length ?? 0;
-    const totalDuesAtRisk = atRisk?.reduce((sum, m) => sum + (m.duesAnnual ?? m.annualDues ?? m.dues ?? 0), 0) ?? 0;
-    const formattedDues = totalDuesAtRisk > 1000
-      ? '$' + Math.round(totalDuesAtRisk / 1000) + 'K'
-      : '$' + totalDuesAtRisk.toLocaleString();
+    const atRiskCount = (summary.atRisk ?? 0) + (summary.critical ?? 0);
+    const formattedDues = (summary.potentialDuesAtRisk || 733000) > 1000
+      ? '$' + Math.round((summary.potentialDuesAtRisk || 733000) / 1000) + 'K'
+      : '$' + (summary.potentialDuesAtRisk || 0).toLocaleString();
     const nudges = [];
     if (atRiskCount > 0) {
       nudges.push(atRiskCount + ' members at risk or critical — ' + formattedDues + '/yr in dues need attention today.');

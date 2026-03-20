@@ -339,10 +339,14 @@ export const getWatchMembers = () => {
 };
 
 
+// Shared roster cache for generated members — populated by AllMembersView
+let _rosterCache = [];
+export const setRosterCache = (roster) => { _rosterCache = roster; };
+
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
   if (_d?.memberProfiles?.[memberId]) return normalizeMemberProfile(_d.memberProfiles[memberId]);
-  // Fallback: build basic profile from at-risk member data
+  // Fallback 1: build basic profile from at-risk member data
   const allAtRisk = normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? []);
   const found = allAtRisk.find(m => m.memberId === memberId);
   if (found) {
@@ -354,6 +358,43 @@ export const getMemberProfile = (memberId) => {
       contact: { phone: '—', email: '—', preferredChannel: '—' },
       riskSignals: found.topRisk && found.topRisk !== 'Monitoring' ? [{ id: 'primary', label: found.topRisk, source: 'Analytics', confidence: '—' }] : [],
       activity: [], staffNotes: [], preferences: {}, family: [],
+    });
+  }
+  // Fallback 2: check watch members
+  const allWatch = (staticWatchMembers ?? []);
+  const watchFound = allWatch.find(m => m.memberId === memberId);
+  if (watchFound) {
+    return normalizeMemberProfile({
+      memberId: watchFound.memberId, name: watchFound.name,
+      tier: 'Full Golf', archetype: watchFound.archetype,
+      healthScore: watchFound.score, duesAnnual: watchFound.duesAnnual || 15000,
+      trend: [watchFound.score + 10, watchFound.score + 8, watchFound.score + 5, watchFound.score + 2, watchFound.score],
+      contact: { phone: '—', email: '—', preferredChannel: '—' },
+      riskSignals: watchFound.signal ? [{ id: 'primary', label: watchFound.signal, source: 'Analytics', confidence: '—' }] : [],
+      activity: [], staffNotes: [], preferences: {}, family: [],
+    });
+  }
+  // Fallback 3: check generated roster cache
+  const rosterMember = _rosterCache.find(m => m.memberId === memberId);
+  if (rosterMember) {
+    const s = rosterMember.score ?? 70;
+    return normalizeMemberProfile({
+      memberId: rosterMember.memberId, name: rosterMember.name,
+      tier: rosterMember.tier || 'Full Golf', archetype: rosterMember.archetype,
+      healthScore: s, duesAnnual: rosterMember.duesAnnual || 15000,
+      memberValueAnnual: (rosterMember.duesAnnual || 15000) * 1.3,
+      joinDate: rosterMember.joinDate,
+      trend: [Math.min(100, s + 12), Math.min(100, s + 8), Math.min(100, s + 4), Math.min(100, s + 1), s],
+      contact: { phone: '—', email: '—', preferredChannel: '—' },
+      riskSignals: rosterMember.topRisk && rosterMember.topRisk !== 'No current risks'
+        ? [{ id: 'primary', label: rosterMember.topRisk, source: 'Analytics', confidence: '—' }] : [],
+      activity: s < 50 ? [
+        { type: 'Engagement alert', detail: 'Health score trending below threshold', timestamp: '2026-01-15T09:00:00Z' },
+        { type: 'System flag', detail: 'Added to watch list', timestamp: '2026-01-10T08:00:00Z' },
+      ] : [
+        { type: 'Check-in', detail: 'Regular engagement pattern', timestamp: '2026-01-16T14:30:00Z' },
+      ],
+      staffNotes: [], preferences: {}, family: [],
     });
   }
   return null;

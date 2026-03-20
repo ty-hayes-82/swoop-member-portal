@@ -5,6 +5,7 @@ import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import { PlaybookActionCard } from '@/components/ui';
 import { memberProfiles, atRiskMembers, watchMembers, healthDistribution, memberArchetypes } from '@/data/members';
+import { setRosterCache } from '@/services/memberService';
 
 // Generate full 300-member roster from all available data sources
 const FIRST_NAMES = ['James','Robert','John','Michael','David','William','Richard','Joseph','Thomas','Christopher','Charles','Daniel','Matthew','Anthony','Mark','Steven','Paul','Andrew','Joshua','Kenneth','Kevin','Brian','George','Timothy','Ronald','Edward','Jason','Jeffrey','Ryan','Jacob','Gary','Nicholas','Eric','Jonathan','Stephen','Larry','Justin','Scott','Brandon','Benjamin','Samuel','Patrick','Alexander','Frank','Raymond','Jack','Dennis','Jerry','Tyler','Aaron','Jose','Nathan','Henry','Douglas','Peter','Zachary','Kyle','Noah','Ethan','Jeremy','Walter','Christian','Keith','Roger','Terry','Harry','Ralph','Sean','Jesse','Roy','Louis','Alan','Eugene','Russell','Randy','Philip','Howard','Vincent','Bobby','Dylan','Johnny','Phillip','Victor','Clarence','Travis','Austin','Martha','Donna','Sandra','Gloria','Teresa','Sara','Debra','Alice','Rachel','Emma','Lisa','Nancy','Betty','Margaret','Dorothy','Kimberly','Emily','Donna','Michelle','Carol','Amanda','Melissa','Deborah','Stephanie','Rebecca','Sharon','Laura','Cynthia','Kathleen','Amy','Angela','Shirley','Anna','Brenda','Pamela','Nicole','Samantha','Katherine','Christine','Helen','Debbie','Janet','Catherine','Maria','Heather','Diane','Olivia','Julie','Joyce','Virginia','Victoria','Kelly','Lauren','Christina','Joan','Evelyn','Judith','Andrea','Hannah','Megan','Cheryl','Jacqueline','Martha','Gloria','Teresa','Ann','Sara','Madison','Frances','Kathryn','Janice','Jean','Abigail','Julia','Grace','Judy'];
@@ -31,35 +32,56 @@ function generateRoster() {
       roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: 'Watch', joinDate: '2021-06-01', trend: 'stable', topRisk: m.signal || 'Minor engagement shift' });
     }
   });
-  // Generate remaining to reach 300
+  // Generate remaining to reach 300, matching healthDistribution exactly
+  // Target: 200 Healthy, 35 Watch, 39 At Risk, 26 Critical = 300 total
+  const currentCounts = { Healthy: 0, Watch: 0, 'At Risk': 0, Critical: 0 };
+  roster.forEach(m => {
+    const lvl = (m.score ?? m.healthScore ?? 70) >= 70 ? 'Healthy' : (m.score ?? 70) >= 50 ? 'Watch' : (m.score ?? 70) >= 30 ? 'At Risk' : 'Critical';
+    currentCounts[lvl] = (currentCounts[lvl] || 0) + 1;
+  });
+  const targets = { Healthy: 200, Watch: 35, 'At Risk': 39, Critical: 26 };
+  const needed = {
+    Healthy: Math.max(0, targets.Healthy - currentCounts.Healthy),
+    Watch: Math.max(0, targets.Watch - currentCounts.Watch),
+    'At Risk': Math.max(0, targets['At Risk'] - currentCounts['At Risk']),
+    Critical: Math.max(0, targets.Critical - currentCounts.Critical),
+  };
+
+  // Deterministic pseudo-random using index as seed
   let id = 400;
-  while (roster.length < 300) {
-    const archIdx = Math.floor(Math.random() * ARCHETYPES.length);
-    const arch = ARCHETYPES[archIdx];
-    const isHealthy = roster.length < 200; // first 200-ish get healthy scores
-    const score = isHealthy ? 70 + Math.floor(Math.random() * 28) : (arch === 'Ghost' ? 10 + Math.floor(Math.random() * 25) : arch === 'Declining' ? 25 + Math.floor(Math.random() * 30) : 50 + Math.floor(Math.random() * 30));
-    const fn = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
-    const ln = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-    const dues = [12000, 14000, 15000, 16000, 18000, 20000, 22000, 25000, 28000, 31000][Math.floor(Math.random() * 10)];
-    const yr = 2015 + Math.floor(Math.random() * 10);
-    const mo = String(1 + Math.floor(Math.random() * 12)).padStart(2, '0');
-    roster.push({
-      memberId: `mbr_${id++}`,
-      name: `${fn} ${ln}`,
-      score,
-      archetype: arch,
-      duesAnnual: dues,
-      tier: score >= 70 ? 'Healthy' : score >= 50 ? 'Watch' : score >= 30 ? 'At Risk' : 'Critical',
-      joinDate: `${yr}-${mo}-01`,
-      trend: TRENDS[archIdx],
-      topRisk: score >= 70 ? 'No current risks' : score >= 50 ? 'Minor engagement shift' : 'Engagement declining',
-      lastSeenLocation: LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)],
-    });
+  const scoreRanges = { Healthy: [70, 98], Watch: [50, 69], 'At Risk': [30, 49], Critical: [5, 29] };
+  const levelOrder = ['Healthy', 'Watch', 'At Risk', 'Critical'];
+
+  for (const level of levelOrder) {
+    for (let i = 0; i < needed[level]; i++) {
+      const idx = id - 400;
+      const [lo, hi] = scoreRanges[level];
+      const score = lo + (((idx * 7 + 13) % (hi - lo + 1)));
+      const archIdx = ((idx * 3 + 5) % ARCHETYPES.length);
+      const fn = FIRST_NAMES[((idx * 11 + 3) % FIRST_NAMES.length)];
+      const ln = LAST_NAMES[((idx * 7 + 1) % LAST_NAMES.length)];
+      const dues = [12000, 14000, 15000, 16000, 18000, 20000, 22000, 25000, 28000, 31000][idx % 10];
+      const yr = 2015 + (idx % 10);
+      const mo = String(1 + (idx % 12)).padStart(2, '0');
+      roster.push({
+        memberId: `mbr_${id++}`,
+        name: `${fn} ${ln}`,
+        score,
+        archetype: ARCHETYPES[archIdx],
+        duesAnnual: dues,
+        tier: level,
+        joinDate: `${yr}-${mo}-01`,
+        trend: level === 'Healthy' ? 'stable' : level === 'Watch' ? 'stable' : 'down',
+        topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Minor engagement shift' : 'Engagement declining',
+        lastSeenLocation: LOCATIONS[idx % LOCATIONS.length],
+      });
+    }
   }
   return roster;
 }
 
 const allMembers = generateRoster();
+setRosterCache(allMembers);
 
 function getHealthLevel(score) {
   if (score >= 70) return 'Healthy';
@@ -296,6 +318,7 @@ export default function AllMembersView() {
   const [healthFilter, setHealthFilter] = useState(null);
   const [archetypeFilter, setArchetypeFilter] = useState(null);
   const [activityFilter, setActivityFilter] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
   const [sortColumn, setSortColumn] = useState('score');
   const [sortDir, setSortDir] = useState('asc');
@@ -303,6 +326,11 @@ export default function AllMembersView() {
   // Filter members based on selected filters
   const filteredMembers = useMemo(() => {
     let filtered = [...allMembers];
+
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      filtered = filtered.filter(m => m.name.toLowerCase().includes(q));
+    }
 
     if (healthFilter) {
       const { min, max } = healthFilter;
@@ -328,7 +356,7 @@ export default function AllMembersView() {
     }
 
     return filtered;
-  }, [allMembers, healthFilter, archetypeFilter, activityFilter]);
+  }, [allMembers, healthFilter, archetypeFilter, activityFilter, searchTerm]);
 
   // Sort filtered members
   const sortedMembers = useMemo(() => {
@@ -604,11 +632,25 @@ export default function AllMembersView() {
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-          <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
-            All Members
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
+            <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
+              All Members
+            </span>
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={searchTerm}
+              onChange={e => { setSearchTerm(e.target.value); setPage(0); }}
+              style={{
+                padding: '6px 12px', fontSize: theme.fontSize.xs, fontFamily: theme.fonts.sans,
+                background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
+                borderRadius: theme.radius.sm, color: theme.colors.textPrimary, outline: 'none',
+                minWidth: 180,
+              }}
+            />
+          </div>
           <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-            Showing {Math.min(page * PAGE_SIZE + 1, sortedMembers.length)}–{Math.min((page + 1) * PAGE_SIZE, sortedMembers.length)} of {sortedMembers.length} members
+            Showing {Math.min(page * PAGE_SIZE + 1, sortedMembers.length)}–{Math.min((page + 1) * PAGE_SIZE, sortedMembers.length)} of {sortedMembers.length} members{searchTerm && ` matching "${searchTerm}"`}
           </span>
         </div>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
