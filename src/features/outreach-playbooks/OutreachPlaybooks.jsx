@@ -48,12 +48,187 @@ function savePlaybooks(playbooks) {
   } catch (e) { /* ignore */ }
 }
 
+const OWNER_OPTIONS = ['GM', 'Membership Director', 'Head Golf Professional', 'F&B Director', 'Club Manager', 'Events Director', 'Assistant GM', 'Controller'];
+
+const CUSTOM_ACTIONS_KEY = 'swoop_custom_actions';
+const CUSTOMIZATIONS_KEY = 'swoop_action_customizations';
+
+function loadCustomActions() {
+  try { const s = localStorage.getItem(CUSTOM_ACTIONS_KEY); return s ? JSON.parse(s) : []; } catch { return []; }
+}
+function saveCustomActions(actions) {
+  try { localStorage.setItem(CUSTOM_ACTIONS_KEY, JSON.stringify(actions)); } catch {}
+}
+function loadCustomizations() {
+  try { const s = localStorage.getItem(CUSTOMIZATIONS_KEY); return s ? JSON.parse(s) : {}; } catch { return {}; }
+}
+function saveCustomizations(c) {
+  try { localStorage.setItem(CUSTOMIZATIONS_KEY, JSON.stringify(c)); } catch {}
+}
+
+// Merge base action with per-archetype customizations
+function getCustomizedAction(action, archetype, customizations) {
+  const key = `${archetype}::${action.id}`;
+  const overrides = customizations[key];
+  if (!overrides) return action;
+  return { ...action, ...overrides };
+}
+
+function ActionEditModal({ action, archetype, onSave, onClose }) {
+  const [form, setForm] = useState({
+    label: action.label,
+    description: action.description,
+    effort: action.effort,
+    impact: action.impact,
+    defaultOwner: action.defaultOwner,
+  });
+
+  const update = (field, val) => setForm(prev => ({ ...prev, [field]: val }));
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }} />
+      <div style={{
+        position: 'relative', background: '#fff', borderRadius: '16px', width: '480px', maxWidth: '95vw',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.15)', padding: '28px', zIndex: 1,
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#0f0f0f' }}>Edit Action</div>
+            <div style={{ fontSize: '12px', color: '#a1a1aa', marginTop: '2px' }}>Customizing for {archetype}</div>
+          </div>
+          <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: '20px', cursor: 'pointer', color: '#6b7280', padding: '4px' }}>{'\u00D7'}</button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Action Title</label>
+            <input value={form.label} onChange={e => update('label', e.target.value)} style={{ width: '100%', padding: '8px 12px', fontSize: '14px', border: '1px solid #e4e4e7', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', fontFamily: theme.fonts.sans }} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Description</label>
+            <textarea value={form.description} onChange={e => update('description', e.target.value)} rows={3} style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid #e4e4e7', borderRadius: '8px', outline: 'none', resize: 'vertical', lineHeight: 1.5, boxSizing: 'border-box', fontFamily: theme.fonts.sans }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Effort Level</label>
+              <select value={form.effort} onChange={e => update('effort', e.target.value)} style={{ width: '100%', padding: '8px', fontSize: '13px', border: '1px solid #e4e4e7', borderRadius: '8px', background: '#fff', fontFamily: theme.fonts.sans }}>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Impact</label>
+              <select value={form.impact} onChange={e => update('impact', e.target.value)} style={{ width: '100%', padding: '8px', fontSize: '13px', border: '1px solid #e4e4e7', borderRadius: '8px', background: '#fff', fontFamily: theme.fonts.sans }}>
+                <option value="medium">Medium Impact</option>
+                <option value="high">High Impact</option>
+                <option value="very-high">Very High</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Assigned To</label>
+              <select value={form.defaultOwner} onChange={e => update('defaultOwner', e.target.value)} style={{ width: '100%', padding: '8px', fontSize: '13px', border: '1px solid #e4e4e7', borderRadius: '8px', background: '#fff', fontFamily: theme.fonts.sans }}>
+                {OWNER_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f4f4f5' }}>
+          <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e4e4e7', background: '#fff', color: '#6b7280', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={() => onSave(form)} style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(37,99,235,0.3)' }}>Save Changes</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CreateActionModal({ archetype, onSave, onClose }) {
+  const [form, setForm] = useState({
+    label: '',
+    description: '',
+    category: 'personal',
+    effort: 'medium',
+    impact: 'high',
+    defaultOwner: 'Membership Director',
+  });
+
+  const update = (field, val) => setForm(prev => ({ ...prev, [field]: val }));
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }} />
+      <div style={{
+        position: 'relative', background: '#fff', borderRadius: '16px', width: '480px', maxWidth: '95vw',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.15)', padding: '28px', zIndex: 1,
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#0f0f0f' }}>Create Custom Action</div>
+            <div style={{ fontSize: '12px', color: '#a1a1aa', marginTop: '2px' }}>Add a new action unique to your club</div>
+          </div>
+          <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: '20px', cursor: 'pointer', color: '#6b7280', padding: '4px' }}>{'\u00D7'}</button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Action Title</label>
+            <input value={form.label} onChange={e => update('label', e.target.value)} placeholder="e.g., Club Anniversary Celebration" style={{ width: '100%', padding: '8px 12px', fontSize: '14px', border: '1px solid #e4e4e7', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', fontFamily: theme.fonts.sans }} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Description</label>
+            <textarea value={form.description} onChange={e => update('description', e.target.value)} rows={3} placeholder="Describe what this action does and when to use it..." style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid #e4e4e7', borderRadius: '8px', outline: 'none', resize: 'vertical', lineHeight: 1.5, boxSizing: 'border-box', fontFamily: theme.fonts.sans }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Category</label>
+              <select value={form.category} onChange={e => update('category', e.target.value)} style={{ width: '100%', padding: '8px', fontSize: '13px', border: '1px solid #e4e4e7', borderRadius: '8px', background: '#fff', fontFamily: theme.fonts.sans }}>
+                {outreachCategories.map(c => <option key={c.key} value={c.key}>{c.icon} {c.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Assigned To</label>
+              <select value={form.defaultOwner} onChange={e => update('defaultOwner', e.target.value)} style={{ width: '100%', padding: '8px', fontSize: '13px', border: '1px solid #e4e4e7', borderRadius: '8px', background: '#fff', fontFamily: theme.fonts.sans }}>
+                {OWNER_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Effort Level</label>
+              <select value={form.effort} onChange={e => update('effort', e.target.value)} style={{ width: '100%', padding: '8px', fontSize: '13px', border: '1px solid #e4e4e7', borderRadius: '8px', background: '#fff', fontFamily: theme.fonts.sans }}>
+                <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#3f3f46', marginBottom: '4px' }}>Impact</label>
+              <select value={form.impact} onChange={e => update('impact', e.target.value)} style={{ width: '100%', padding: '8px', fontSize: '13px', border: '1px solid #e4e4e7', borderRadius: '8px', background: '#fff', fontFamily: theme.fonts.sans }}>
+                <option value="medium">Medium</option><option value="high">High</option><option value="very-high">Very High</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f4f4f5' }}>
+          <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e4e4e7', background: '#fff', color: '#6b7280', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={() => { if (!form.label.trim()) return; onSave(form); }} disabled={!form.label.trim()} style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', background: form.label.trim() ? 'linear-gradient(135deg, #22c55e, #16a34a)' : '#e4e4e7', color: form.label.trim() ? '#fff' : '#a1a1aa', fontSize: '13px', fontWeight: 700, cursor: form.label.trim() ? 'pointer' : 'default' }}>Create Action</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OutreachPlaybooks() {
   const { showToast } = useApp();
   const [selectedArchetype, setSelectedArchetype] = useState('Die-Hard Golfer');
   const [playbooks, setPlaybooks] = useState(loadPlaybooks);
   const [hasChanges, setHasChanges] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [editingAction, setEditingAction] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [customActions, setCustomActions] = useState(loadCustomActions);
+  const [customizations, setCustomizations] = useState(loadCustomizations);
 
   const archData = memberArchetypes.find(a => a.archetype === selectedArchetype);
   const playbook = archetypePlaybooks[selectedArchetype];
@@ -69,14 +244,22 @@ export default function OutreachPlaybooks() {
     }
   }, [selectedArchetype, playbooks]);
 
+  const allActions = useMemo(() => [...defaultOutreachActions, ...customActions], [customActions]);
+
   const current = playbooks[selectedArchetype] || { enabled: [], disabled: [] };
   const enabledActions = useMemo(
-    () => current.enabled.map(id => defaultOutreachActions.find(a => a.id === id)).filter(Boolean),
-    [current.enabled]
+    () => current.enabled.map(id => {
+      const base = allActions.find(a => a.id === id);
+      return base ? getCustomizedAction(base, selectedArchetype, customizations) : null;
+    }).filter(Boolean),
+    [current.enabled, allActions, selectedArchetype, customizations]
   );
   const disabledActions = useMemo(
-    () => current.disabled.map(id => defaultOutreachActions.find(a => a.id === id)).filter(Boolean),
-    [current.disabled]
+    () => current.disabled.map(id => {
+      const base = allActions.find(a => a.id === id);
+      return base ? getCustomizedAction(base, selectedArchetype, customizations) : null;
+    }).filter(Boolean),
+    [current.disabled, allActions, selectedArchetype, customizations]
   );
 
   const updatePlaybook = useCallback((enabled, disabled) => {
@@ -114,8 +297,39 @@ export default function OutreachPlaybooks() {
 
   const handleSave = () => {
     savePlaybooks(playbooks);
+    saveCustomActions(customActions);
+    saveCustomizations(customizations);
     setHasChanges(false);
     showToast(`Playbook saved for ${selectedArchetype}`, 'info');
+  };
+
+  const handleEditAction = (action) => {
+    if (editMode) setEditingAction(action);
+  };
+
+  const handleSaveEdit = (formData) => {
+    const key = `${selectedArchetype}::${editingAction.id}`;
+    setCustomizations(prev => ({ ...prev, [key]: formData }));
+    setHasChanges(true);
+    setEditingAction(null);
+    showToast(`Updated "${formData.label}" for ${selectedArchetype}`, 'info');
+  };
+
+  const handleCreateAction = (formData) => {
+    const newAction = {
+      id: `custom-${Date.now()}`,
+      category: formData.category,
+      label: formData.label,
+      description: formData.description,
+      defaultOwner: formData.defaultOwner,
+      effort: formData.effort,
+      impact: formData.impact,
+      applicableArchetypes: ['all'],
+    };
+    setCustomActions(prev => [...prev, newAction]);
+    updatePlaybook([...current.enabled, newAction.id], current.disabled);
+    setShowCreateModal(false);
+    showToast(`Created "${newAction.label}" and added to playbook`, 'success');
   };
 
   const handleReset = () => {
@@ -300,7 +514,7 @@ export default function OutreachPlaybooks() {
                 </h3>
                 <p style={{ fontSize: '12px', color: '#a1a1aa', margin: 0 }}>
                   {enabledActions.length} actions enabled for {selectedArchetype} members
-                  {editMode && ' \u2014 click to remove, use arrows to reorder'}
+                  {editMode && ' \u2014 click action to edit, arrows to reorder, \u00D7 to remove'}
                 </p>
               </div>
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#16a34a', background: 'rgba(22,163,74,0.06)', padding: '4px 12px', borderRadius: '6px' }}>
@@ -325,6 +539,7 @@ export default function OutreachPlaybooks() {
                     onToggle={() => toggleAction(action.id)}
                     onMoveUp={() => moveAction(action.id, -1)}
                     onMoveDown={() => moveAction(action.id, 1)}
+                    onEdit={() => handleEditAction(action)}
                   />
                 ))}
               </div>
@@ -347,8 +562,20 @@ export default function OutreachPlaybooks() {
                       editMode={true}
                       isEnabled={false}
                       onToggle={() => toggleAction(action.id)}
+                      onEdit={() => handleEditAction(action)}
                     />
                   ))}
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    style={{
+                      padding: '12px 16px', borderRadius: '10px', border: '2px dashed #d4d4d8',
+                      background: '#fafafa', color: '#6b7280', fontSize: '13px', fontWeight: 600,
+                      cursor: 'pointer', textAlign: 'center', transition: 'all 0.15s',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    }}
+                  >
+                    + Create Custom Action
+                  </button>
                 </div>
               </div>
             )}
@@ -407,11 +634,26 @@ export default function OutreachPlaybooks() {
           </div>
         </div>
       </div>
+      {editingAction && (
+        <ActionEditModal
+          action={editingAction}
+          archetype={selectedArchetype}
+          onSave={handleSaveEdit}
+          onClose={() => setEditingAction(null)}
+        />
+      )}
+      {showCreateModal && (
+        <CreateActionModal
+          archetype={selectedArchetype}
+          onSave={handleCreateAction}
+          onClose={() => setShowCreateModal(false)}
+        />
+      )}
     </PageTransition>
   );
 }
 
-function PlaybookActionRow({ action, index, total, editMode, isEnabled, onToggle, onMoveUp, onMoveDown }) {
+function PlaybookActionRow({ action, index, total, editMode, isEnabled, onToggle, onMoveUp, onMoveDown, onEdit }) {
   const [hovered, setHovered] = useState(false);
   const category = outreachCategories.find(c => c.key === action.category);
   const effort = EFFORT_BADGE[action.effort] || EFFORT_BADGE.medium;
@@ -470,10 +712,15 @@ function PlaybookActionRow({ action, index, total, editMode, isEnabled, onToggle
         {category?.icon || '\u2728'}
       </div>
 
-      {/* Content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f0f0f', marginBottom: '3px' }}>
+      {/* Content — click to edit in edit mode */}
+      <div
+        onClick={editMode && onEdit ? (e) => { e.stopPropagation(); onEdit(); } : undefined}
+        style={{ flex: 1, minWidth: 0, cursor: editMode && onEdit ? 'pointer' : 'default' }}
+        title={editMode ? 'Click to edit this action' : undefined}
+      >
+        <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f0f0f', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           {action.label}
+          {editMode && onEdit && <span style={{ fontSize: '10px', color: '#a1a1aa' }}>&#9998;</span>}
         </div>
         <div style={{ fontSize: '12px', color: '#6b7280', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {action.description}
