@@ -90,9 +90,11 @@ export function AgentStatusCard({ agent, overrideStatus, onToggle, onConfigure, 
         </div>
       )}
 
-      <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>
-        Last action: <span style={{ color: theme.colors.textSecondary }}>{formatLastAction(agent.lastAction)}</span>
-      </div>
+      {status === 'active' && (
+        <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>
+          Last action: <span style={{ color: theme.colors.textSecondary }}>{formatLastAction(agent.lastAction)}</span>
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: 8 }}>
         <button

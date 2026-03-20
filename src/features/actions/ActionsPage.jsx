@@ -62,9 +62,15 @@ export default function ActionsPage() {
   const summary = getAgentSummary();
   const { pendingAgentCount } = useApp();
   const { routeIntent, clearRouteIntent } = useNavigationContext();
-  const [activeTab, setActiveTab] = useState('inbox');
+  // Eagerly read routeIntent during initial render to prevent tab flash
+  const [activeTab, setActiveTab] = useState(() => {
+    if (routeIntent?.tab && TABS.some((t) => t.key === routeIntent.tab)) {
+      return routeIntent.tab;
+    }
+    return 'inbox';
+  });
 
-  // Allow navigation intent to set initial tab (e.g., from Cockpit "Open Actions" link)
+  // Handle subsequent navigation intents while component is already mounted
   useEffect(() => {
     if (routeIntent?.tab && TABS.some((t) => t.key === routeIntent.tab)) {
       setActiveTab(routeIntent.tab);
@@ -111,8 +117,13 @@ export default function ActionsPage() {
               <span>{summary.approved} approved / {summary.dismissed} dismissed today</span>
             </div>
           </div>
-          <div style={{ textAlign: 'right', minWidth: 220 }}>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Impact summary</div>
+          <div
+            onClick={() => setActiveTab('agents')}
+            style={{ textAlign: 'right', minWidth: 220, cursor: 'pointer' }}
+            role="button"
+            title="View AI Agents"
+          >
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Impact summary →</div>
             <div
               style={{
                 fontFamily: theme.fonts.mono,

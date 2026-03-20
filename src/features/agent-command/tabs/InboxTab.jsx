@@ -30,6 +30,7 @@ const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 export default function InboxTab() {
   const { inbox, pendingCount, approveAction, dismissAction, showToast } = useApp();
   const [filterAgent, setFilterAgent] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('pending');
   const [drawerAction, setDrawerAction] = useState(null);
   const agents = getAgents();
 
@@ -39,9 +40,16 @@ export default function InboxTab() {
   );
 
   const visible = useMemo(() => {
-    let filtered = filterAgent === 'all' ? pendingActions : pendingActions.filter((item) => item.agentId === filterAgent);
-    return [...filtered].sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2));
-  }, [pendingActions, filterAgent]);
+    let base = inbox;
+    // Apply status filter
+    if (filterStatus === 'pending') base = base.filter(i => i.status === 'pending');
+    else if (filterStatus === 'high') base = base.filter(i => i.status === 'pending' && i.priority === 'high');
+    else if (filterStatus === 'approved') base = base.filter(i => i.status === 'approved');
+    else if (filterStatus === 'dismissed') base = base.filter(i => i.status === 'dismissed');
+    // Apply agent filter
+    if (filterAgent !== 'all') base = base.filter(i => i.agentId === filterAgent);
+    return [...base].sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2));
+  }, [inbox, filterAgent, filterStatus]);
 
   const [groupByCategory, setGroupByCategory] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -88,21 +96,26 @@ export default function InboxTab() {
 
       <div className="grid-responsive-4">
         {[
-          { label: 'Pending', value: pendingCount, accent: theme.colors.agentCyan },
-          { label: 'High Priority', value: visible.filter(a => a.priority === 'high').length, accent: theme.colors.urgent },
-          { label: 'Approved', value: approvedToday, accent: theme.colors.agentApproved },
-          { label: 'Dismissed', value: dismissedToday, accent: theme.colors.agentDismissed },
+          { label: 'Pending', value: pendingCount, accent: theme.colors.agentCyan, filterKey: 'pending' },
+          { label: 'High Priority', value: pendingActions.filter(a => a.priority === 'high').length, accent: theme.colors.urgent, filterKey: 'high' },
+          { label: 'Approved', value: approvedToday, accent: theme.colors.agentApproved, filterKey: 'approved' },
+          { label: 'Dismissed', value: dismissedToday, accent: theme.colors.agentDismissed, filterKey: 'dismissed' },
         ].map((stat) => (
           <div
             key={stat.label}
+            onClick={() => setFilterStatus(stat.filterKey)}
+            role="button"
+            tabIndex={0}
             style={{
-              background: theme.colors.bgCard,
-              border: `1px solid ${theme.colors.border}`,
+              background: filterStatus === stat.filterKey ? `${stat.accent}0A` : theme.colors.bgCard,
+              border: `1px solid ${filterStatus === stat.filterKey ? stat.accent + '60' : theme.colors.border}`,
               borderRadius: theme.radius.md,
               padding: theme.spacing.md,
+              cursor: 'pointer',
+              transition: 'all 0.15s',
             }}
           >
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <div style={{ fontSize: theme.fontSize.xs, color: filterStatus === stat.filterKey ? stat.accent : theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: filterStatus === stat.filterKey ? 700 : 400 }}>
               {stat.label}
             </div>
             <div style={{ marginTop: 2, fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xl, fontWeight: 700, color: stat.accent }}>

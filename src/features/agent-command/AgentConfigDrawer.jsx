@@ -140,7 +140,7 @@ export default function AgentConfigDrawer({ agent, initialConfig, onSave, onClos
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Toggle checked={cfg.notifications.app} onChange={() => update('notifications.app', !cfg.notifications.app)} label="App inbox" />
           <Toggle checked={cfg.notifications.email} onChange={() => update('notifications.email', !cfg.notifications.email)} label="Email" />
-          <Toggle checked={cfg.notifications.sms} onChange={() => update('notifications.sms', !cfg.notifications.sms)} label="SMS (Phase D)" />
+          <Toggle checked={cfg.notifications.sms} onChange={() => update('notifications.sms', !cfg.notifications.sms)} label="SMS (Coming Soon)" />
         </div>
       </div>
 

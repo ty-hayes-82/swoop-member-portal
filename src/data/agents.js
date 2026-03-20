@@ -146,6 +146,9 @@ export const agentActions = [
       { system: 'Tee Sheet', signal: '28 tee times at risk', timestamp: 'Today' },
       { system: 'POS', signal: 'Lunch demand +34%', timestamp: 'Wind days avg' },
     ],
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Demand Optimizer', timestamp: '2026-01-17T06:11:00Z' },
+    ],
   },
   {
     id: 'agx_005',
@@ -158,6 +161,10 @@ export const agentActions = [
     impactMetric: '+$1.4K projected same-day uplift',
     priority: 'medium',
     memberId: 'mbr_312',
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Revenue Analyst', timestamp: '2026-01-17T06:18:00Z' },
+      { id: 'apr', status: 'Approved — Send', owner: 'Sarah Mitchell (GM)', timestamp: '2026-01-17T07:45:00Z' },
+    ],
   },
   {
     id: 'agx_006',
@@ -170,6 +177,10 @@ export const agentActions = [
     impactMetric: '$18K new-member opportunity',
     priority: 'low',
     memberId: 'mbr_146',
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Labor Optimizer', timestamp: '2026-01-17T06:21:00Z' },
+      { id: 'apr', status: 'Approved — Assign to Lisa Park', owner: 'Sarah Mitchell (GM)', timestamp: '2026-01-17T08:12:00Z' },
+    ],
   },
   {
     id: 'agx_007',
@@ -182,6 +193,10 @@ export const agentActions = [
     impactMetric: '2 members flagged in watch-to-risk window',
     priority: 'low',
     memberId: 'mbr_089',
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Engagement Autopilot', timestamp: '2026-01-17T07:02:00Z' },
+      { id: 'dis', status: 'Dismissed — Low priority this week', owner: 'Sarah Mitchell (GM)', timestamp: '2026-01-17T09:30:00Z' },
+    ],
   },
   {
     id: 'agx_008',
@@ -223,6 +238,9 @@ export const agentActions = [
       { system: 'Analytics', signal: 'Price elasticity 0.72', timestamp: 'Historical' },
       { system: 'POS', signal: 'F&B add-on $47/round', timestamp: 'Twilight avg' },
     ],
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Revenue Analyst', timestamp: '2026-01-17T07:55:00Z' },
+    ],
   },
   {
     id: 'agx_010',
@@ -235,6 +253,10 @@ export const agentActions = [
     impactMetric: 'Prevents second-chance drop-off',
     priority: 'medium',
     memberId: 'mbr_203',
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Member Pulse', timestamp: '2026-01-17T08:05:00Z' },
+      { id: 'apr', status: 'Approved — Schedule for 48h', owner: 'Sarah Mitchell (GM)', timestamp: '2026-01-17T08:35:00Z' },
+    ],
   },
   {
     id: 'agx_011',
@@ -271,6 +293,10 @@ export const agentActions = [
     impactMetric: '+$312 projected slot value',
     priority: 'low',
     memberId: 'mbr_089',
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Demand Optimizer', timestamp: '2026-01-17T08:58:00Z' },
+      { id: 'dis', status: 'Dismissed — Slot already filled manually', owner: 'Tom Bradford (Asst GM)', timestamp: '2026-01-17T09:15:00Z' },
+    ],
   },
 ];
 
