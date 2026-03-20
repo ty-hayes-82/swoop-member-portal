@@ -32,6 +32,7 @@ import { TodayView } from '@/features/today';
 import { MembersView } from '@/features/members';
 import { RevenueView } from '@/features/revenue';
 import ActivityHistoryPage from '@/features/activity-history/ActivityHistoryPage';
+import { AdminDashboard } from '@/features/admin';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -64,6 +65,7 @@ const ROUTES = {
   'actions': ActionsPage,
   'data-model': DataModelPage,
   'member-profile': MemberProfilePage,
+  'admin': AdminDashboard,
   landing: LandingRedirect,
 };
 

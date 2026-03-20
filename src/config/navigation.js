@@ -96,6 +96,15 @@ export const navItems = [
     subtitle: 'How your team uses Swoop — interactive guides from signal to action to proof.',
     sourceSystems: ['All Systems'],
   },
+  {
+    key: 'admin',
+    label: 'Admin',
+    section: 'SETTINGS',
+    icon: '⚙️',
+    color: theme.colors.navIntegrations,
+    subtitle: 'Users, integrations, notifications, billing, and club settings.',
+    sourceSystems: ['Postgres'],
+  },
 
   // ============================================
   // HIDDEN — Old routes kept for backward compat + Header metadata

@@ -12,7 +12,7 @@ const VALID_ROUTES = new Set([
   'member-health', 'revenue-leakage', 'outreach-playbooks', 'staffing-service', 'growth-pipeline',
   'agent-command', 'location-intelligence', 'integrations', 'demo-mode',
   'board-report', 'member-profile', 'integrations/csv-import', 'csv-import',
-  'data-model',
+  'data-model', 'admin',
   'experience-insights',
   'playbooks',
   'storyboard-flows',
