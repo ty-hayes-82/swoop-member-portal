@@ -209,6 +209,14 @@ function loadPersistedState(base) {
     if (computePendingCount(nextInbox) === 0 && computePendingCount(base.inbox) > 0) {
       nextInbox = base.inbox;
     }
+    // Merge any new default actions not present in persisted inbox (e.g., follow-up cards)
+    if (Array.isArray(inbox)) {
+      const existingIds = new Set(nextInbox.map(i => i.id));
+      const newActions = base.inbox.filter(a => !existingIds.has(a.id));
+      if (newActions.length > 0) {
+        nextInbox = [...nextInbox, ...newActions];
+      }
+    }
     return {
       ...base,
       inbox: nextInbox,

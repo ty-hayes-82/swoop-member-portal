@@ -108,11 +108,18 @@ export function MemberProfileProvider({ children }) {
     return () => { cancelled = true; };
   }, [activeMemberId]);
 
+  // Known seed profile IDs — static data is authoritative for these
+  const SEED_IDS = new Set(['mbr_203', 'mbr_089', 'mbr_271', 'mbr_146', 'mbr_312']);
+
   const profile = useMemo(() => {
     if (!activeMemberId) return null;
 
-    // Use API profile if available, else fall back to static service
-    const base = apiProfile ?? getMemberProfile(activeMemberId);
+    // For seed profiles, always prefer static data (DB may have stale/mismatched records)
+    // For all others, try API first, then fall back to static service
+    const staticProfile = getMemberProfile(activeMemberId);
+    const base = SEED_IDS.has(activeMemberId) && staticProfile
+      ? staticProfile
+      : (apiProfile ?? staticProfile);
     if (!base) return null;
 
     const appendedNotes = staffNotes[activeMemberId] ?? [];
