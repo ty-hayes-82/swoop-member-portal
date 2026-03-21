@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '@/context/AppContext';
 import { NavigationProvider, useNavigationContext } from '@/context/NavigationContext';
 import { MemberProfileProvider, useMemberProfile } from '@/context/MemberProfileContext';
+
+// Mobile app — lazy loaded, zero bundle impact on desktop
+const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 import { DataProvider } from '@/context/DataProvider';
 import { Sidebar, Header, MobileConversionBar } from '@/components/layout';
 import { DailyBriefing } from '@/features/daily-briefing';
@@ -162,6 +165,16 @@ function PortalApplication() {
 }
 
 function RouterViews() {
+  const isMobileRoute = window.location.hash.startsWith('#/m');
+
+  if (isMobileRoute) {
+    return (
+      <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'system-ui', color: '#6B7280' }}>Loading Swoop Mobile...</div>}>
+        <MobileApp />
+      </Suspense>
+    );
+  }
+
   return (
     <Routes>
       <Route path="*" element={<PortalApplication />} />
