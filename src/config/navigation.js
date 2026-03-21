@@ -95,6 +95,7 @@ export const navItems = [
     color: theme.colors.navOperations,
     subtitle: 'How your team uses Swoop — interactive guides from signal to action to proof.',
     sourceSystems: ['All Systems'],
+    hidden: true, // Moved: guides now embedded contextually within Playbooks tab
   },
   {
     key: 'admin',
