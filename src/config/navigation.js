@@ -258,7 +258,6 @@ export const navItems = [
     color: theme.colors.navIntegrations,
     subtitle: 'Browse tables, columns, and relationships in your Postgres schema.',
     sourceSystems: ['Postgres'],
-    hidden: true,
   },
   {
     key: 'member-profile',
