@@ -61,6 +61,16 @@ export const navItems = [
     sourceSystems: ['All Systems'],
   },
   {
+    key: 'automation-dashboard',
+    label: 'Automation Dashboard',
+    section: 'PRIMARY',
+    icon: '📈',
+    color: theme.colors.navAgents,
+    subtitle: 'Board-ready summary of playbook and agent performance, coverage, and ROI.',
+    sourceSystems: ['All Systems'],
+    topLevel: true,
+  },
+  {
     key: 'integrations',
     label: 'Connected Systems',
     section: 'SETTINGS',

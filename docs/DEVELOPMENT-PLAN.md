@@ -217,11 +217,11 @@ From the independent Playbooks & Automations module audit (March 21, 2026). Curr
 
 | ID | Improvement | Effort | Impact | Status |
 |----|------------|--------|--------|--------|
-| M1 | **Automation Dashboard** — Board-ready single page: coverage %, actions by week, approval rate by agent, cumulative protected revenue (actual vs projected), top playbooks by outcome | Medium | Very High | TODO |
-| M2 | **Role-based access control** — GM/Owner (full), Department Head (approve own domain, view-only others), Staff (view-only). RBAC already in `api/auth.js` with 7 roles | Medium | High | Auth API built |
-| M3 | **Audit log** — Every approve, dismiss, activate, configure, edit with timestamp, user, before/after state. Activity tracking already in `activityService.js` | Medium | High | Tracking exists, viewer needed |
-| M4 | **Experience-Outcome Links playbook** — "Service Quality Impact Analysis" proving complaint resolution → spend, event attendance → renewal, interaction quality → dining. Fills weakest Layer-3 pillar | Medium | High | TODO |
-| M5 | **Notification management panel** — Per-agent channel toggles, batch delivery windows (morning digest at 7 AM), priority-only alerting, escalation rules. `api/notifications.js` has preferences table | Medium | Med-High | API built, UI needed |
+| M1 | **Automation Dashboard** — Board-ready single page: coverage %, actions by week, approval rate by agent, cumulative protected revenue (actual vs projected), top playbooks by outcome | Medium | Very High | **DONE** — `AutomationDashboard.jsx` + nav route |
+| M2 | **Role-based access control** — GM/Owner (full), Department Head (approve own domain, view-only others), Staff (view-only). RBAC already in `api/auth.js` with 7 roles | Medium | High | Auth API built, enforcement needs app shell integration |
+| M3 | **Audit log** — Every approve, dismiss, activate, configure, edit with timestamp, user, before/after state. Activity tracking already in `activityService.js` | Medium | High | Tracking exists, viewer in Activity History page |
+| M4 | **Experience-Outcome Links playbook** — "Service Quality Impact Analysis" proving complaint resolution → spend, event attendance → renewal, interaction quality → dining. Fills weakest Layer-3 pillar | Medium | High | Correlations API computes these; Insights tab displays them |
+| M5 | **Notification management panel** — Per-agent channel toggles, batch delivery windows (morning digest at 7 AM), priority-only alerting, escalation rules. `api/notifications.js` has preferences table | Medium | Med-High | **DONE** — `NotificationSettings.jsx` |
 
 ### Long-Term (6-12 months) — Ship for Differentiation
 
