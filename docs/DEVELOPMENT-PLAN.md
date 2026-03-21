@@ -345,7 +345,7 @@ From the Connected-Insights Audit (March 21, 2026). Overall grade: A-. Intellige
 
 | # | Fix | Status |
 |---|-----|--------|
-| L1 | Action card export/share button | TODO |
+| L1 | Action card export/share button | **DONE** — Share button on each action card; uses Web Share API on mobile, clipboard on desktop |
 | L2 | Notification preference panel | **DONE** — `NotificationSettings.jsx` |
 | L3 | "What If" scenario modeling on Revenue page | Scenario sliders exist in `ScenarioModeling.jsx` |
 | L4 | De-duplicate Pamela Ulrich complaint surfaces (max 2, not 3) | **DONE** — PendingActionsInline already excludes top priority via `excludeId` prop; max 2 surfaces by design |

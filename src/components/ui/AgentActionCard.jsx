@@ -177,6 +177,33 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
             >
               Dismiss
             </button>
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                const shareText = `Action: ${action.description}\nMember: ${memberProfile?.name || action.memberName || '—'}\nImpact: ${action.impactMetric || '—'}\nSource: ${agent?.name || action.source || '—'}\nPriority: ${action.priority || 'medium'}`;
+                if (navigator.share) {
+                  navigator.share({ title: 'Swoop Golf Action', text: shareText }).catch(() => {});
+                } else if (navigator.clipboard) {
+                  navigator.clipboard.writeText(shareText).then(() => {
+                    const btn = event.currentTarget;
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => { btn.textContent = 'Share'; }, 1500);
+                  });
+                }
+              }}
+              title="Copy action details to clipboard or share"
+              style={{
+                borderRadius: theme.radius.sm,
+                border: `1px solid ${theme.colors.border}`,
+                background: 'transparent',
+                color: theme.colors.textMuted,
+                padding: '7px 10px',
+                fontSize: '11px',
+                cursor: 'pointer',
+              }}
+            >
+              Share
+            </button>
           </div>
         </div>
       )}
