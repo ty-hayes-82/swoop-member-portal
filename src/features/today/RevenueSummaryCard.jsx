@@ -21,13 +21,6 @@ export default function RevenueSummaryCard() {
   const duesMonthly = Math.round(duesAtRisk / 12);
   const totalOpportunity = TOTAL_LEAKAGE + spendMonthly + duesMonthly;
 
-  const categories = [
-    { label: 'Revenue Leakage', value: TOTAL_LEAKAGE, color: theme.colors.urgent },
-    { label: 'Spend Potential', value: spendMonthly, color: theme.colors.accent },
-    { label: 'Dues at Risk', value: duesMonthly, color: theme.colors.warning },
-    { label: 'Pro Shop & Lessons', value: PROSHOP_LOSS, color: 'rgb(139,92,246)' },
-  ];
-
   // Top action — pace of play is typically the biggest lever
   const topAction = {
     label: 'Deploy rangers to holes 4, 8, 12, 16 on weekends',
@@ -54,20 +47,6 @@ export default function RevenueSummaryCard() {
         }}>
           Revenue Snapshot
         </div>
-        <button
-          onClick={() => navigate('revenue')}
-          style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            color: theme.colors.accent,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 0,
-          }}
-        >
-          See full breakdown →
-        </button>
       </div>
 
       <div style={{
@@ -79,7 +58,7 @@ export default function RevenueSummaryCard() {
         flexDirection: 'column',
         gap: theme.spacing.sm,
       }}>
-        {/* Total opportunity */}
+        {/* Total opportunity — summary only */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Total addressable opportunity</div>
@@ -97,24 +76,6 @@ export default function RevenueSummaryCard() {
           </div>
         </div>
 
-        {/* Mini breakdown */}
-        <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
-          {categories.map((cat) => (
-            <div key={cat.label} style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              fontSize: '11px', color: theme.colors.textSecondary,
-            }}>
-              <span style={{
-                width: 8, height: 8, borderRadius: '50%',
-                background: cat.color, flexShrink: 0,
-              }} />
-              {cat.label}: <span style={{ fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
-                ${cat.value.toLocaleString()}
-              </span>
-            </div>
-          ))}
-        </div>
-
         {/* Top action */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -127,22 +88,25 @@ export default function RevenueSummaryCard() {
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
             Top action: <span style={{ color: theme.colors.textPrimary, fontWeight: 600 }}>{topAction.label}</span>
           </div>
-          <button
-            onClick={() => navigate('revenue')}
-            style={{
-              padding: '4px 12px', fontSize: 11, fontWeight: 600,
-              border: `1px solid ${theme.colors.success}`,
-              borderRadius: theme.radius.sm,
-              background: theme.colors.success,
-              color: '#fff',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            Act
-          </button>
         </div>
+
+        {/* Explore CTA */}
+        <button
+          onClick={() => navigate('revenue')}
+          style={{
+            padding: '8px 16px',
+            fontSize: theme.fontSize.xs,
+            fontWeight: 700,
+            color: theme.colors.accent,
+            background: `${theme.colors.accent}08`,
+            border: `1px solid ${theme.colors.accent}30`,
+            borderRadius: theme.radius.md,
+            cursor: 'pointer',
+            textAlign: 'center',
+          }}
+        >
+          Explore full breakdown in Revenue & Operations →
+        </button>
       </div>
     </div>
   );

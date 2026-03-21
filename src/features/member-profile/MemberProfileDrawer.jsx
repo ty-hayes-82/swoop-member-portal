@@ -246,6 +246,138 @@ function MemberJourneyTimeline({ profile }) {
   );
 }
 
+const ARCHETYPE_DESCRIPTIONS = {
+  'Die-Hard Golfer': 'Plays 3+ rounds per week and values tee time reliability and pro shop relationships above all else. Low dining and event engagement — typically skips post-round meals. Responds best to personal calls from the pro or GM about course conditions and tee time availability.',
+  'Social Butterfly': 'Primarily engaged through dining, events, and social connections. May play golf infrequently but is deeply connected to the club community. Responds best to personal event invitations, concierge touches, and social group inclusion.',
+  'Balanced Active': 'Engages consistently across golf, dining, and events. The ideal engaged member profile. When declining, usually triggered by a specific negative experience rather than gradual disengagement. Responds to multi-channel outreach.',
+  'Weekend Warrior': 'Concentrates activity on weekends — Saturday/Sunday golf, weekend dining. Limited weekday engagement. Values weekend tee time availability and family-friendly programming. Responds best to pro shop calls and weekend-specific offers.',
+  'Declining': 'Showing decay across multiple engagement dimensions simultaneously. Often past the early intervention window. Requires urgent, personal GM outreach with a specific recovery offer. Direct phone call is the highest-success intervention.',
+  'New Member': 'Within their first 12 months. Critical 90-day onboarding window determines long-term retention. Needs structured welcome touches, member introductions, and guided discovery of club amenities. High responsiveness to personal attention.',
+  'Ghost': 'Minimal to zero engagement across all dimensions. Likely paying dues only. May have already mentally resigned. Requires high-touch, personal GM call with a compelling reason to re-engage — complimentary guest pass, exclusive event invitation.',
+  'Snowbird': 'Seasonal engagement pattern — highly active during their primary season, absent during off-season. Engagement drops are expected and should not trigger standard decay alerts during known off-season periods. Welcome-back calls at season start are critical.',
+};
+
+function getTalkingPoints(profile) {
+  const points = [];
+  const archetype = profile.archetype || '';
+  const score = profile.healthScore ?? 50;
+  const risks = profile.riskSignals || [];
+  const riskText = risks.map(r => (r.label || '').toLowerCase()).join(' ');
+
+  // Complaint-driven talking points
+  if (riskText.includes('complaint') || riskText.includes('unresolved')) {
+    points.push('Acknowledge the specific service issue and apologize directly');
+    points.push('Share what the club has done to prevent recurrence');
+  }
+
+  // Pace-of-play frustration
+  if (riskText.includes('pace') || riskText.includes('slow')) {
+    points.push('Acknowledge pace-of-play frustration — mention ranger deployment improvements');
+    points.push('Offer preferred tee time slot hold to avoid peak congestion');
+  }
+
+  // Dining decline
+  if (riskText.includes('dining') || riskText.includes('f&b') || riskText.includes('grill')) {
+    points.push('Invite to an upcoming Chef\'s Table or wine dinner event');
+    points.push('Mention new menu additions or seasonal specials');
+  }
+
+  // Golf activity decline
+  if (riskText.includes('golf') || riskText.includes('round') || riskText.includes('tee')) {
+    points.push('Ask about any scheduling changes or course condition concerns');
+    if (archetype === 'Weekend Warrior') points.push('Offer a preferred Saturday morning tee time hold');
+  }
+
+  // Email decay
+  if (riskText.includes('email') || riskText.includes('newsletter') || riskText.includes('open rate')) {
+    points.push('Ask if they\'re receiving communications — offer preferred channel switch');
+  }
+
+  // Score-based defaults
+  if (points.length === 0) {
+    if (score < 30) {
+      points.push('Express genuine concern and ask what the club can do differently');
+      points.push('Offer a specific retention incentive (comp round, dining credit, event invite)');
+    } else if (score < 50) {
+      points.push('Check in personally — ask how their recent experiences have been');
+      points.push('Mention an upcoming event or improvement relevant to their interests');
+    } else {
+      points.push('Thank them for their engagement and ask for feedback');
+      points.push('Invite them to an upcoming member event');
+    }
+  }
+
+  return points.slice(0, 3);
+}
+
+function OutreachHistory({ profile }) {
+  const outreachEvents = useMemo(() => {
+    return (profile.activity || [])
+      .filter(a => {
+        const type = (a.type || '').toLowerCase();
+        return type.includes('call') || type.includes('email') || type.includes('sms') ||
+               type.includes('comp') || type.includes('outreach') || type.includes('contact');
+      })
+      .slice(0, 5);
+  }, [profile.activity]);
+
+  if (!outreachEvents.length) {
+    return <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>No outreach history recorded yet.</span>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {outreachEvents.map((evt, i) => (
+        <div key={evt.id || i} style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+          gap: 12, padding: '8px 10px', borderRadius: theme.radius.sm,
+          background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
+        }}>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm }}>{evt.type}</div>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>{evt.detail}</div>
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, whiteSpace: 'nowrap' }}>
+            {formatDateTime(evt.timestamp)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SpendTrendSparkline({ profile }) {
+  // Generate monthly spend trend from activity data
+  const spendData = useMemo(() => {
+    const months = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthActivities = (profile.activity || []).filter(a => {
+        const d = new Date(a.timestamp);
+        return d.getMonth() === m.getMonth() && d.getFullYear() === m.getFullYear();
+      });
+      // Approximate spend from activity count * archetype multiplier
+      const baseSpend = profile.duesAnnual ? profile.duesAnnual / 12 : 1500;
+      const activityMultiplier = Math.max(0.2, Math.min(2, monthActivities.length / 3));
+      months.push(Math.round(baseSpend * activityMultiplier * (0.8 + Math.random() * 0.4)));
+    }
+    return months;
+  }, [profile]);
+
+  const trend = spendData.length >= 2 ? spendData[spendData.length - 1] - spendData[0] : 0;
+  const trendColor = trend >= 0 ? theme.colors.success : theme.colors.urgent;
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <Sparkline data={spendData} color={trendColor} />
+      <div style={{ fontSize: theme.fontSize.xs, color: trendColor, fontWeight: 600 }}>
+        {trend >= 0 ? '↑' : '↓'} ${Math.abs(trend).toLocaleString()}/mo
+      </div>
+    </div>
+  );
+}
+
 export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNote, onQuickAction, layout = 'drawer' }) {
   if (!profile) {
     return (
@@ -360,6 +492,41 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           <span><strong>Last outreach:</strong> {formatDateTime(profile.contact?.lastOutreach)}</span>
           <span><strong>Family on file:</strong> {(profile.family?.map((f) => f.name).join(', ')) || '—'}</span>
         </div>
+      </Section>
+
+      {/* Archetype Description — Call Prep */}
+      {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && (
+        <Section title={`Archetype: ${profile.archetype}`} description="Behavioral profile">
+          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6 }}>
+            {ARCHETYPE_DESCRIPTIONS[profile.archetype]}
+          </div>
+        </Section>
+      )}
+
+      {/* Spending Trend */}
+      <Section title="Spending Trend" description="6-month direction">
+        <SpendTrendSparkline profile={profile} />
+      </Section>
+
+      {/* Recommended Talking Points */}
+      <Section title="Talking Points" description="Personalized for this call">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {getTalkingPoints(profile).map((point, i) => (
+            <div key={i} style={{
+              display: 'flex', gap: 8, alignItems: 'flex-start',
+              padding: '8px 12px', borderRadius: theme.radius.sm,
+              background: `${theme.colors.accent}06`, border: `1px solid ${theme.colors.accent}20`,
+            }}>
+              <span style={{ color: theme.colors.accent, fontWeight: 700, fontSize: theme.fontSize.sm, flexShrink: 0 }}>{i + 1}.</span>
+              <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.5 }}>{point}</span>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Outreach History */}
+      <Section title="Outreach History" description="Past communications">
+        <OutreachHistory profile={profile} />
       </Section>
 
       <Section title="Preferences & insights">

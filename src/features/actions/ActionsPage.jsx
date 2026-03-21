@@ -226,7 +226,7 @@ export default function ActionsPage() {
               color: integrationStatus.syncStatus === 'Healthy' ? theme.colors.success500 : theme.colors.warning500,
               border: `1px solid ${integrationStatus.syncStatus === 'Healthy' ? theme.colors.success500 + '30' : theme.colors.warning500 + '30'}`,
             }}>
-              {integrationStatus.connected} systems connected {integrationStatus.syncStatus === 'Healthy' ? '— all healthy' : '— monitoring'}
+              Monitoring 300 members across golf, dining, events, and email {integrationStatus.syncStatus === 'Healthy' ? '— all healthy' : ''}
             </span>
             <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>
               Last sync: {integrationStatus.dataFreshness} ago

@@ -548,6 +548,9 @@ export default function BoardReport() {
                 <div style={{ marginBottom: '6px' }}><strong>Evidence:</strong> {item.evidence}</div>
                 <div style={{ color: colors.green }}><strong>So what:</strong> {item.implication}</div>
               </div>
+              <div style={{ marginTop: '10px', fontSize: '11px', color: colors.textMuted }}>
+                Source: <button onClick={() => { if (typeof window !== 'undefined') window.location.hash = '#/members'; }} style={{ background: 'none', border: 'none', color: colors.brand, cursor: 'pointer', fontSize: '11px', fontWeight: 600, padding: 0 }}>Member Insights →</button>
+              </div>
             </Panel>
           ))}
 

@@ -4,7 +4,7 @@ import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
 import { Sparkline } from '@/components/ui';
-import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getDecayingMembers, calculateLTV, formatLTV, DEFAULT_LTV_MULTIPLIER } from '@/services/memberService';
+import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getDecayingMembers, getVolatileMembers, calculateLTV, formatLTV, DEFAULT_LTV_MULTIPLIER } from '@/services/memberService';
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
@@ -304,6 +304,7 @@ export default function HealthOverview() {
   const atRisk = getAtRiskMembers();
   const watchList = getWatchMembers();
   const decaying = getDecayingMembers();
+  const volatileMembers = getVolatileMembers();
   const [expanded, setExpanded] = useState(null);
   const [showWatch, setShowWatch] = useState(false);
 
@@ -499,6 +500,79 @@ export default function HealthOverview() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Volatile Members — One Bad Experience Away */}
+      {volatileMembers.length > 0 && (
+        <div style={{
+          background: 'rgba(245,158,11,0.04)',
+          borderLeft: `4px solid ${theme.colors.warning}`,
+          borderRadius: theme.radius.md,
+          padding: theme.spacing.md,
+        }}>
+          <div style={{ marginBottom: theme.spacing.sm }}>
+            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>
+              ⚠ Volatile — {volatileMembers.length} members one bad experience away
+            </div>
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+              Watch or At-Risk members with active complaints or unresolved issues. These members are the most likely to flip to Critical after one more negative touchpoint.
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {volatileMembers.slice(0, 5).map((m) => {
+              const scoreColor = m.score < 40 ? theme.colors.urgent : theme.colors.warning;
+              const duesDisplay = Number.isFinite(Number(m.duesAnnual)) ? `$${Number(m.duesAnnual).toLocaleString()}/yr` : '—';
+              return (
+                <div key={m.memberId ?? m.name} style={{
+                  display: 'grid', gridTemplateColumns: '1.2fr 80px 1.5fr auto',
+                  gap: theme.spacing.sm, alignItems: 'center',
+                  padding: '8px 12px', background: theme.colors.bgCard,
+                  border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm,
+                  fontSize: theme.fontSize.xs,
+                }}>
+                  <div>
+                    <MemberLink mode="drawer" memberId={m.memberId} style={{
+                      background: 'none', border: 'none', color: '#2563eb',
+                      fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+                      padding: 0, textAlign: 'left', textDecoration: 'none',
+                    }}>{m.name}</MemberLink>
+                    <div style={{ fontSize: 10, color: theme.colors.textMuted }}>{m.archetype} · {duesDisplay}</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      minWidth: '32px', padding: '3px 8px', borderRadius: '8px',
+                      background: `${scoreColor}16`, color: scoreColor,
+                      fontWeight: 700, fontSize: '13px', fontFamily: "'JetBrains Mono', monospace",
+                    }}>{m.score}</span>
+                  </div>
+                  <div style={{ color: theme.colors.urgent, fontSize: '12px', fontWeight: 500 }}>
+                    {m.topRisk || m.signal || 'Active complaint'}
+                  </div>
+                  <button
+                    onClick={() => {
+                      showToast?.(`Call scheduled for ${m.name}`, 'success');
+                      trackAction({ actionType: 'call', memberId: m.memberId, memberName: m.name });
+                    }}
+                    style={{
+                      padding: '6px 14px', borderRadius: theme.radius.sm,
+                      border: 'none', background: theme.colors.warning,
+                      color: '#fff', fontWeight: 700, fontSize: '11px',
+                      cursor: 'pointer', whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Call Now
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          {volatileMembers.length > 5 && (
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: theme.spacing.sm }}>
+              + {volatileMembers.length - 5} more volatile members
+            </div>
+          )}
         </div>
       )}
 

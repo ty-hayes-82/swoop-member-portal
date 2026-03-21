@@ -349,6 +349,18 @@ export const getWatchMembers = () => {
 };
 
 
+// Volatile Members: Watch/At-Risk tier (30-69) with active complaint or unresolved issue
+export const getVolatileMembers = () => {
+  const atRisk = getAtRiskMembers();
+  const watch = getWatchMembers();
+  const all = [...atRisk, ...watch];
+  return all.filter((m) => {
+    if (m.score < 30 || m.score >= 70) return false;
+    const risk = (m.topRisk || m.signal || '').toLowerCase();
+    return risk.includes('complaint') || risk.includes('unresolved') || risk.includes('slow-play');
+  }).sort((a, b) => a.score - b.score);
+};
+
 // Shared roster cache for generated members — populated by AllMembersView
 let _rosterCache = [];
 export const setRosterCache = (roster) => { _rosterCache = roster; };
