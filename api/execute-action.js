@@ -45,7 +45,7 @@ export default async function handler(req, res) {
 
   const {
     actionId, clubId, executionType, memberId, memberEmail, memberPhone,
-    staffEmail, staffName, templateId, customMessage, senderName, senderTitle,
+    staffEmail, staffName, templateId, customMessage, senderName, senderTitle, senderEmail,
   } = req.body;
 
   if (!actionId || !clubId || !executionType) {
@@ -92,12 +92,34 @@ export default async function handler(req, res) {
       const subject = renderTemplate(template.subject, templateVars);
       const body = renderTemplate(template.body, templateVars);
 
-      // TODO Sprint 4: Wire to SendGrid/Postmark
-      // For now, log the email to the database
+      // Send via SendGrid if API key is configured
+      const toEmail = memberEmail || (await getMemberEmail(memberId || action.member_id));
+      let emailSent = false;
+      if (process.env.SENDGRID_API_KEY && toEmail) {
+        try {
+          const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              personalizations: [{ to: [{ email: toEmail, name: memberName }] }],
+              from: { email: senderEmail || 'noreply@swoopgolf.com', name: `${senderName || 'Swoop Golf'} - ${clubName}` },
+              subject,
+              content: [{ type: 'text/plain', value: body }],
+            }),
+          });
+          emailSent = sgRes.status >= 200 && sgRes.status < 300;
+        } catch (e) {
+          // SendGrid failed — still log the intervention
+        }
+      }
+
       await sql`
         INSERT INTO interventions (club_id, member_id, action_id, intervention_type, description, initiated_by, health_score_before)
         VALUES (${clubId}, ${memberId || action.member_id}, ${actionId}, 'email',
-                ${`Email sent: "${subject}" to ${memberEmail || 'member email'}`},
+                ${`Email ${emailSent ? 'sent' : 'queued'}: "${subject}" to ${toEmail || 'member email'}`},
                 ${senderName || 'System'},
                 (SELECT health_score FROM members WHERE member_id = ${memberId || action.member_id}))
       `;
@@ -175,4 +197,12 @@ export default async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+}
+
+async function getMemberEmail(memberId) {
+  if (!memberId) return null;
+  try {
+    const result = await sql`SELECT email FROM members WHERE member_id = ${memberId}`;
+    return result.rows[0]?.email || null;
+  } catch { return null; }
 }

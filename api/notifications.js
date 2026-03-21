@@ -90,9 +90,27 @@ export default async function handler(req, res) {
       VALUES (${clubId}, ${userId || null}, ${channel || 'in_app'}, ${type}, ${title}, ${body || null}, ${priority || 'normal'}, ${relatedMemberId || null}, ${relatedActionId || null})
     `;
 
-    // TODO Sprint 7: If channel is 'email', send via SendGrid
-    // TODO Sprint 7: If channel is 'sms', send via Twilio
-    // TODO Sprint 7: If channel is 'slack', send via webhook
+    // Send via SendGrid if channel is email
+    if ((channel === 'email') && process.env.SENDGRID_API_KEY && userId) {
+      try {
+        const userResult = await sql`SELECT email, name FROM users WHERE user_id = ${userId}`;
+        const userEmail = userResult.rows[0]?.email;
+        if (userEmail) {
+          await fetch('https://api.sendgrid.com/v3/mail/send', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              personalizations: [{ to: [{ email: userEmail }] }],
+              from: { email: 'noreply@swoopgolf.com', name: 'Swoop Golf' },
+              subject: title,
+              content: [{ type: 'text/plain', value: body || title }],
+            }),
+          });
+        }
+      } catch {}
+    }
+    // TODO: If channel is 'sms', send via Twilio
+    // TODO: If channel is 'slack', send via webhook
 
     return res.status(200).json({ ok: true, message: `Notification created: ${title}` });
   }
@@ -162,7 +180,26 @@ async function generateMorningDigest(req, res) {
       VALUES (${clubId}, 'email', 'morning_digest', ${digestTitle}, ${digestBody}, 'normal')
     `;
 
-    // TODO: Actually send email via SendGrid
+    // Send digest via SendGrid to all GMs
+    if (process.env.SENDGRID_API_KEY) {
+      try {
+        const gms = await sql`SELECT email, name FROM users WHERE club_id = ${clubId} AND role = 'gm' AND active = TRUE`;
+        for (const gm of gms.rows) {
+          if (gm.email) {
+            await fetch('https://api.sendgrid.com/v3/mail/send', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                personalizations: [{ to: [{ email: gm.email, name: gm.name }] }],
+                from: { email: 'noreply@swoopgolf.com', name: 'Swoop Golf' },
+                subject: digestTitle,
+                content: [{ type: 'text/plain', value: digestBody }],
+              }),
+            });
+          }
+        }
+      } catch {}
+    }
 
     res.status(200).json({
       digest: { title: digestTitle, body: digestBody },
