@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     // Health tier counts
     const tierCounts = await sql`
       SELECT health_tier, COUNT(*) as count
-      FROM members WHERE club_id = ${clubId} AND status = 'active'
+      FROM members WHERE club_id = ${clubId} AND (status = 'active' OR membership_status = 'active' OR status IS NULL)
       GROUP BY health_tier
     `;
     const tiers = {};
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     const duesAtRisk = await sql`
       SELECT COALESCE(SUM(annual_dues), 0) as total
       FROM members
-      WHERE club_id = ${clubId} AND status = 'active' AND health_tier IN ('At Risk', 'Critical')
+      WHERE club_id = ${clubId} AND (status = 'active' OR membership_status = 'active' OR status IS NULL) AND health_tier IN ('At Risk', 'Critical')
     `;
 
     // Open complaints
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     const lastWeekRounds = await sql`
       SELECT COUNT(*) as count FROM rounds
       WHERE club_id = ${clubId} AND cancelled = FALSE AND no_show = FALSE
-        AND round_date >= DATE_TRUNC('week', CURRENT_DATE) - 7
+        AND round_date >= DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days'
         AND round_date < DATE_TRUNC('week', CURRENT_DATE)
     `;
 
