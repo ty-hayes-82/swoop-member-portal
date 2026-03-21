@@ -1,7 +1,17 @@
 import { useState } from 'react';
+import { useApp } from '@/context/AppContext';
 
 export default function SettingsScreen() {
-  const [pushEnabled, setPushEnabled] = useState(false);
+  const { showToast } = useApp();
+  const [notifyRequested, setNotifyRequested] = useState(() => {
+    try { return localStorage.getItem('swoop_push_notify_requested') === 'true'; } catch { return false; }
+  });
+
+  const handleNotifyMe = () => {
+    setNotifyRequested(true);
+    try { localStorage.setItem('swoop_push_notify_requested', 'true'); } catch {}
+    showToast('You\'ll be notified when push notifications are available', 'success');
+  };
 
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -11,23 +21,20 @@ export default function SettingsScreen() {
         <SettingsRow
           icon="🔔"
           label="Push Notifications"
-          sub={pushEnabled ? 'Enabled — service alerts, health thresholds' : 'Coming soon'}
+          sub={notifyRequested ? 'We\'ll notify you when available' : 'Coming soon'}
           action={
-            <button
-              onClick={() => setPushEnabled(!pushEnabled)}
-              style={{
-                width: '48px', height: '28px', borderRadius: '14px', border: 'none',
-                background: pushEnabled ? '#F3922D' : '#E5E7EB', cursor: 'pointer',
-                position: 'relative', transition: 'background 0.2s',
-              }}
-            >
-              <div style={{
-                width: '22px', height: '22px', borderRadius: '50%', background: '#fff',
-                position: 'absolute', top: '3px', transition: 'left 0.2s',
-                left: pushEnabled ? '23px' : '3px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-              }} />
-            </button>
+            notifyRequested ? (
+              <span style={{ fontSize: '12px', color: '#22C55E', fontWeight: 600 }}>Requested</span>
+            ) : (
+              <button
+                onClick={handleNotifyMe}
+                style={{
+                  padding: '6px 12px', borderRadius: '8px', border: '1px solid #F3922D',
+                  background: '#fff', color: '#F3922D', fontSize: '12px', fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >Notify me</button>
+            )
           }
         />
         <SettingsRow icon="🖥️" label="Open Desktop Version" sub="Full analytics, board reports, AI agents" action={

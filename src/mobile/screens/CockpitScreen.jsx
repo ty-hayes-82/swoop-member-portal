@@ -8,6 +8,7 @@ export default function CockpitScreen() {
   const { pendingAgentCount, inbox } = useApp();
   const { navigateTab, openMember } = useMobileNav();
   const [loaded, setLoaded] = useState(false);
+  const [lastUpdated] = useState(() => new Date());
 
   const summary = getMemberSummary();
   const agentSummary = getAgentSummary();
@@ -21,13 +22,11 @@ export default function CockpitScreen() {
   const atRiskCount = (summary.atRisk ?? 0) + (summary.critical ?? 0);
   const duesAtRisk = summary.potentialDuesAtRisk || 733000;
 
-  // Top priority member
   const topPriority = useMemo(() => {
     const critical = atRisk.filter(m => m.score < 30).sort((a, b) => a.score - b.score);
     return critical[0] || atRisk[0] || null;
   }, [atRisk]);
 
-  // Highest-impact action
   const topAction = useMemo(() => {
     const pending = inbox.filter(i => i.status === 'pending').sort((a, b) => {
       const pa = a.priority === 'high' ? 0 : a.priority === 'medium' ? 1 : 2;
@@ -38,6 +37,14 @@ export default function CockpitScreen() {
   }, [inbox]);
 
   const complaints = atRisk.filter(m => m.topRisk?.toLowerCase().includes('complaint') || m.topRisk?.toLowerCase().includes('unresolved')).length;
+
+  // Format last updated
+  const updatedText = useMemo(() => {
+    const diff = Math.floor((Date.now() - lastUpdated.getTime()) / 60000);
+    if (diff < 1) return 'Updated just now';
+    if (diff < 60) return `Updated ${diff} min ago`;
+    return `Updated ${Math.floor(diff / 60)}h ago`;
+  }, [lastUpdated]);
 
   if (!loaded) {
     return (
@@ -55,41 +62,38 @@ export default function CockpitScreen() {
     );
   }
 
+  const duesDisplay = topPriority?.duesAnnual
+    ? ` · $${topPriority.duesAnnual.toLocaleString()}/yr`
+    : '';
+
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {/* Critical alert */}
       {topPriority && topPriority.score < 30 && (
-        <div
-          onClick={() => openMember(topPriority.memberId)}
-          style={{
-            padding: '14px 16px', borderRadius: '16px',
-            background: '#FEE2E2', border: '2px solid #FECACA',
-            cursor: 'pointer',
-          }}
-        >
+        <PressableCard onClick={() => openMember(topPriority.memberId)} style={{
+          padding: '14px 16px', borderRadius: '16px',
+          background: '#FEE2E2', border: '2px solid #FECACA',
+        }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '12px', fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Critical — Needs Attention</div>
               <div style={{ fontSize: '16px', fontWeight: 700, color: '#0F0F0F', marginTop: '4px' }}>{topPriority.name}</div>
               <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '2px' }}>
-                Health {topPriority.score} · ${(topPriority.duesAnnual || 0).toLocaleString()}/yr
+                Health {topPriority.score}{duesDisplay}
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <a
-                href={`tel:`}
-                onClick={e => e.stopPropagation()}
-                style={{
-                  width: '44px', height: '44px', borderRadius: '50%',
-                  background: '#DC2626', color: '#fff', fontSize: '20px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  textDecoration: 'none',
-                }}
-              >📞</a>
-              <span style={{ fontSize: '18px', color: '#9CA3AF' }}>›</span>
-            </div>
+            <a
+              href={`tel:`}
+              onClick={e => e.stopPropagation()}
+              style={{
+                width: '44px', height: '44px', borderRadius: '50%',
+                background: '#DC2626', color: '#fff', fontSize: '20px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                textDecoration: 'none',
+              }}
+            >📞</a>
           </div>
-        </div>
+        </PressableCard>
       )}
 
       {/* KPI tiles 2x2 */}
@@ -124,33 +128,60 @@ export default function CockpitScreen() {
         </div>
       )}
 
-      {/* Quick stats */}
+      {/* Quick stats + last updated */}
       <div style={{
         padding: '12px 16px', borderRadius: '12px',
         background: '#F9FAFB', border: '1px solid #E5E7EB',
         fontSize: '13px', color: '#6B7280', lineHeight: 1.6,
       }}>
         <strong style={{ color: '#0F0F0F' }}>{agentSummary.active} AI agents</strong> active · {agentSummary.approved} actions approved today · {atRisk.length} members in watch list
+        <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px' }}>
+          {updatedText}
+        </div>
       </div>
     </div>
   );
 }
 
-function KpiTile({ label, value, sub, color, onClick }) {
+function PressableCard({ onClick, style, children }) {
+  const [pressed, setPressed] = useState(false);
   return (
     <div
       onClick={onClick}
+      onTouchStart={() => setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      onTouchCancel={() => setPressed(false)}
       style={{
-        padding: '14px', borderRadius: '16px',
-        background: '#FFFFFF', border: '1px solid #E5E7EB',
-        cursor: onClick ? 'pointer' : 'default',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-        position: 'relative',
+        ...style,
+        cursor: 'pointer',
+        transform: pressed ? 'scale(0.98)' : 'scale(1)',
+        transition: 'transform 0.15s ease, background 0.15s ease',
+        background: pressed ? '#FCD5D5' : (style?.background || '#fff'),
       }}
     >
-      {onClick && (
-        <span style={{ position: 'absolute', top: '10px', right: '12px', fontSize: '14px', color: '#D1D5DB' }}>→</span>
-      )}
+      {children}
+    </div>
+  );
+}
+
+function KpiTile({ label, value, sub, color, onClick }) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <div
+      onClick={onClick}
+      onTouchStart={() => onClick && setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      onTouchCancel={() => setPressed(false)}
+      style={{
+        padding: '14px', borderRadius: '16px',
+        background: pressed ? '#F3F4F6' : '#FFFFFF',
+        border: '1px solid #E5E7EB',
+        cursor: onClick ? 'pointer' : 'default',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        transform: pressed ? 'scale(0.98)' : 'scale(1)',
+        transition: 'transform 0.15s ease, background 0.15s ease',
+      }}
+    >
       <div style={{ fontSize: '12px', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
       <div style={{ fontSize: '28px', fontWeight: 700, color, marginTop: '4px', fontFamily: "'JetBrains Mono', monospace" }}>{value}</div>
       <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '2px' }}>{sub}</div>

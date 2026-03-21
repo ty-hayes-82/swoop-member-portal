@@ -148,6 +148,7 @@ export default function MemberLookupScreen() {
   }, [atRisk]);
 
   const [archetypeFilter, setArchetypeFilter] = useState(null);
+  const [showArchetypes, setShowArchetypes] = useState(false);
 
   const filtered = useMemo(() => {
     let items = atRisk;
@@ -198,8 +199,8 @@ export default function MemberLookupScreen() {
         }}
       />
 
-      {/* Filter chips — horizontal scroll */}
-      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '4px' }}>
+      {/* Row 1: Health filters — always visible */}
+      <div style={{ display: 'flex', gap: '8px' }}>
         {HEALTH_FILTERS.map(f => (
           <FilterChip
             key={f.key}
@@ -209,16 +210,45 @@ export default function MemberLookupScreen() {
             onClick={() => setHealthFilter(healthFilter === f.key ? null : f.key)}
           />
         ))}
-        {archetypes.slice(0, 4).map(arch => (
-          <FilterChip
-            key={arch}
-            label={arch}
-            active={archetypeFilter === arch}
-            color="#6366F1"
-            onClick={() => setArchetypeFilter(archetypeFilter === arch ? null : arch)}
-          />
-        ))}
+        <FilterChip
+          label={archetypeFilter ? `Type: ${archetypeFilter}` : 'Type ▾'}
+          active={!!archetypeFilter || showArchetypes}
+          color="#6366F1"
+          onClick={() => setShowArchetypes(!showArchetypes)}
+        />
       </div>
+
+      {/* Row 2: Archetype dropdown — shown when "Type" is tapped */}
+      {showArchetypes && (
+        <div style={{
+          position: 'relative',
+        }}>
+          <div style={{
+            display: 'flex', gap: '6px', overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch', paddingBottom: '4px',
+            scrollbarWidth: 'none', msOverflowStyle: 'none',
+          }}>
+            {archetypes.map(arch => (
+              <FilterChip
+                key={arch}
+                label={arch}
+                active={archetypeFilter === arch}
+                color="#6366F1"
+                onClick={() => {
+                  setArchetypeFilter(archetypeFilter === arch ? null : arch);
+                  setShowArchetypes(false);
+                }}
+              />
+            ))}
+          </div>
+          {/* Fade gradient on right edge */}
+          <div style={{
+            position: 'absolute', top: 0, right: 0, bottom: '4px', width: '40px',
+            background: 'linear-gradient(to right, transparent, #F8F9FA)',
+            pointerEvents: 'none',
+          }} />
+        </div>
+      )}
 
       {/* Sort + count row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -234,7 +264,7 @@ export default function MemberLookupScreen() {
                 padding: '4px 10px', borderRadius: '8px', border: 'none',
                 background: sortBy === opt.key ? '#0F0F0F' : '#F3F4F6',
                 color: sortBy === opt.key ? '#fff' : '#6B7280',
-                fontSize: '11px', fontWeight: 600, cursor: 'pointer',
+                fontSize: '12px', fontWeight: 600, cursor: 'pointer',
               }}
             >{opt.label}</button>
           ))}

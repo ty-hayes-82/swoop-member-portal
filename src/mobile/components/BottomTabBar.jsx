@@ -30,12 +30,12 @@ export default function BottomTabBar() {
             style={{
               flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
               padding: '8px 0', border: 'none', background: 'none', cursor: 'pointer',
-              color: isActive ? '#F3922D' : '#9CA3AF', transition: 'color 0.15s',
+              color: isActive ? '#F3922D' : '#6B7280', transition: 'color 0.15s',
               position: 'relative',
             }}
           >
             <span style={{ fontSize: '22px', lineHeight: 1 }}>{tab.icon}</span>
-            <span style={{ fontSize: '11px', fontWeight: isActive ? 700 : 500, letterSpacing: '0.02em' }}>{tab.label}</span>
+            <span style={{ fontSize: '12px', fontWeight: isActive ? 700 : 500, letterSpacing: '0.02em' }}>{tab.label}</span>
             {badge && (
               <span style={{
                 position: 'absolute', top: '4px', right: 'calc(50% - 18px)',

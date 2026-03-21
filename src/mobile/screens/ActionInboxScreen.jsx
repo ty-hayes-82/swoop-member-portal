@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
 import useSwipeGesture from '../hooks/useSwipeGesture';
@@ -8,66 +8,101 @@ const PRIORITY_COLORS = { high: '#EF4444', medium: '#F59E0B', low: '#6B7280' };
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 
 function SwipeableActionCard({ action, onApprove, onDismiss, showHint }) {
-  const { elRef, onTouchStart, onTouchMove, onTouchEnd } = useSwipeGesture({
-    onSwipeRight: () => onApprove(action),
-    onSwipeLeft: () => onDismiss(action),
+  const cardRef = useRef(null);
+  const [exiting, setExiting] = useState(null); // 'approve' | 'dismiss' | null
+
+  const { elRef, onTouchStart, onTouchMove, onTouchEnd, isSwiping } = useSwipeGesture({
+    onSwipeRight: () => handleApprove(),
+    onSwipeLeft: () => handleDismiss(),
   });
 
+  const handleApprove = () => {
+    if (exiting) return;
+    setExiting('approve');
+    if (navigator.vibrate) navigator.vibrate(50);
+    setTimeout(() => onApprove(action), 350);
+  };
+
+  const handleDismiss = () => {
+    if (exiting) return;
+    setExiting('dismiss');
+    setTimeout(() => onDismiss(action), 350);
+  };
+
   return (
-    <div
-      ref={elRef}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      style={{
-        padding: '14px 16px', borderRadius: '16px',
-        background: '#FFFFFF', border: '1px solid #E5E7EB',
-        borderLeft: `4px solid ${PRIORITY_COLORS[action.priority] || '#F3922D'}`,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-        transition: 'transform 0.15s ease, opacity 0.15s ease, background 0.15s ease',
-        touchAction: 'pan-y',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span style={{
-          fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-          padding: '2px 8px', borderRadius: '10px',
-          background: `${PRIORITY_COLORS[action.priority]}15`,
-          color: PRIORITY_COLORS[action.priority],
-        }}>
-          {action.priority}
-        </span>
-      </div>
-      <div style={{ fontSize: '14px', fontWeight: 600, color: '#0F0F0F', marginBottom: '4px', lineHeight: 1.4 }}>
-        {action.description}
-      </div>
-      <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px' }}>
-        {action.impactMetric}
-      </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <button
-          onClick={() => onApprove(action)}
-          style={{
-            flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
-            background: '#22C55E', color: '#fff', fontSize: '13px', fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >Approve</button>
-        <button
-          onClick={() => onDismiss(action)}
-          style={{
-            flex: 1, padding: '10px', borderRadius: '10px',
-            border: '1px solid #E5E7EB', background: '#fff',
-            color: '#6B7280', fontSize: '13px', fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >Dismiss</button>
-      </div>
-      {showHint && (
-        <div style={{ marginTop: '8px', fontSize: '12px', color: '#9CA3AF', textAlign: 'center' }}>
-          Swipe right to approve · left to dismiss
+    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
+      {/* Swipe reveal backgrounds */}
+      <div style={{
+        position: 'absolute', inset: 0, display: 'flex',
+        borderRadius: '16px', overflow: 'hidden',
+      }}>
+        <div style={{ flex: 1, background: '#DCFCE7', display: 'flex', alignItems: 'center', paddingLeft: '20px' }}>
+          <span style={{ fontSize: '24px' }}>✓</span>
         </div>
-      )}
+        <div style={{ flex: 1, background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '20px' }}>
+          <span style={{ fontSize: '24px' }}>✗</span>
+        </div>
+      </div>
+
+      <div
+        ref={elRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{
+          padding: '14px 16px', borderRadius: '16px',
+          background: exiting === 'approve' ? '#DCFCE7' : exiting === 'dismiss' ? '#FEE2E2' : '#FFFFFF',
+          border: '1px solid #E5E7EB',
+          borderLeft: `4px solid ${PRIORITY_COLORS[action.priority] || '#F3922D'}`,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+          position: 'relative', zIndex: 1,
+          touchAction: isSwiping ? 'none' : 'pan-y',
+          transition: exiting ? 'transform 0.3s ease, opacity 0.3s ease, background 0.3s ease' : 'none',
+          transform: exiting === 'approve' ? 'translateX(400px)' : exiting === 'dismiss' ? 'translateX(-400px)' : undefined,
+          opacity: exiting ? 0 : undefined,
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <span style={{
+            fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
+            padding: '2px 8px', borderRadius: '10px',
+            background: `${PRIORITY_COLORS[action.priority]}15`,
+            color: PRIORITY_COLORS[action.priority],
+          }}>
+            {action.priority}
+          </span>
+        </div>
+        <div style={{ fontSize: '14px', fontWeight: 600, color: '#0F0F0F', marginBottom: '4px', lineHeight: 1.4 }}>
+          {action.description}
+        </div>
+        <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px' }}>
+          {action.impactMetric}
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={handleApprove}
+            style={{
+              flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
+              background: '#22C55E', color: '#fff', fontSize: '13px', fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >Approve</button>
+          <button
+            onClick={handleDismiss}
+            style={{
+              flex: 1, padding: '10px', borderRadius: '10px',
+              border: '1px solid #E5E7EB', background: '#fff',
+              color: '#6B7280', fontSize: '13px', fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >Dismiss</button>
+        </div>
+        {showHint && (
+          <div style={{ marginTop: '8px', fontSize: '12px', color: '#9CA3AF', textAlign: 'center' }}>
+            Swipe right to approve · left to dismiss
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -78,18 +113,31 @@ function CompletedCard({ action, expanded, onToggle }) {
       onClick={onToggle}
       style={{
         padding: '10px 16px', borderRadius: '12px', background: '#F9FAFB',
-        border: '1px solid #E5E7EB', opacity: 0.8, cursor: 'pointer',
+        border: '1px solid #E5E7EB', cursor: 'pointer',
         borderLeft: `3px solid ${action.status === 'approved' ? '#22C55E' : '#EF4444'}`,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ fontSize: '14px' }}>{action.status === 'approved' ? '✓' : '✗'}</span>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+        <span style={{ fontSize: '14px', flexShrink: 0, marginTop: '2px' }}>{action.status === 'approved' ? '✓' : '✗'}</span>
         <span style={{
           fontSize: '13px', fontWeight: 600, color: '#374151',
-          flex: 1, overflow: 'hidden', textOverflow: 'ellipsis',
-          whiteSpace: expanded ? 'normal' : 'nowrap',
+          flex: 1, overflow: 'hidden',
+          ...(expanded ? {} : {
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+          }),
         }}>{action.description}</span>
-        <span style={{ fontSize: '12px', color: '#9CA3AF', flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggle(); }}
+          style={{
+            width: '44px', height: '44px', display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '12px', color: '#9CA3AF', flexShrink: 0,
+            margin: '-10px -8px -10px 0',
+          }}
+        >{expanded ? '▲' : '▼'}</button>
       </div>
       {expanded && (
         <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #E5E7EB' }}>
@@ -97,47 +145,114 @@ function CompletedCard({ action, expanded, onToggle }) {
             <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: action.status === 'approved' ? '#22C55E' : '#EF4444' }}>{action.status}</span>
             <span style={{ fontSize: '12px', color: '#9CA3AF' }}>{action.source}</span>
           </div>
-          <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>{action.impactMetric}</div>
+          {action.impactMetric && (
+            <div style={{ fontSize: '12px', color: '#22C55E', marginTop: '4px', fontWeight: 500 }}>{action.impactMetric}</div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-function PriorityGroup({ priority, actions, onApprove, onDismiss, hintShown }) {
+function PriorityGroup({ priority, actions, onApprove, onDismiss, onApproveAll, hintShown }) {
   const [collapsed, setCollapsed] = useState(priority !== 'high');
+  const [showAll, setShowAll] = useState(false);
   const color = PRIORITY_COLORS[priority] || '#6B7280';
   const count = actions.length;
 
   if (count === 0) return null;
 
-  // HIGH always expanded, MEDIUM/LOW collapsible
+  // Group duplicate member actions
+  const grouped = useMemo(() => {
+    const memberCounts = {};
+    actions.forEach(a => {
+      const key = a.memberName || a.description;
+      if (!memberCounts[key]) memberCounts[key] = [];
+      memberCounts[key].push(a);
+    });
+    const result = [];
+    const seen = new Set();
+    actions.forEach(a => {
+      const key = a.memberName || a.description;
+      if (seen.has(key)) return;
+      seen.add(key);
+      const group = memberCounts[key];
+      if (group.length >= 3) {
+        result.push({ type: 'batch', memberName: key, actions: group, count: group.length });
+      } else {
+        group.forEach(act => result.push({ type: 'single', action: act }));
+      }
+    });
+    return result;
+  }, [actions]);
+
+  const displayLimit = showAll ? grouped.length : 5;
+
   if (priority === 'high' || !collapsed) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {priority !== 'high' && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              onClick={() => setCollapsed(true)}
+              style={{
+                flex: 1, display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '8px 12px', borderRadius: '10px',
+                background: `${color}10`, border: `1px solid ${color}30`,
+                cursor: 'pointer', fontSize: '13px', fontWeight: 600, color,
+              }}
+            >
+              <span style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>{priority}</span>
+              <span style={{ color: '#6B7280', fontWeight: 400 }}>({count})</span>
+            </button>
+            {count >= 2 && (
+              <button
+                onClick={() => onApproveAll(priority)}
+                style={{
+                  padding: '8px 14px', borderRadius: '10px', border: 'none',
+                  background: '#22C55E', color: '#fff', fontSize: '12px',
+                  fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+                }}
+              >
+                Approve all ({count})
+              </button>
+            )}
+          </div>
+        )}
+        {grouped.slice(0, displayLimit).map((item, idx) => {
+          if (item.type === 'batch') {
+            return (
+              <BatchCard
+                key={`batch-${item.memberName}`}
+                memberName={item.memberName}
+                actions={item.actions}
+                onApproveAll={() => item.actions.forEach(a => onApprove(a))}
+                onDismissAll={() => item.actions.forEach(a => onDismiss(a))}
+              />
+            );
+          }
+          return (
+            <SwipeableActionCard
+              key={item.action.id}
+              action={item.action}
+              onApprove={onApprove}
+              onDismiss={onDismiss}
+              showHint={!hintShown && idx === 0 && priority === 'high'}
+            />
+          );
+        })}
+        {grouped.length > 5 && !showAll && (
           <button
-            onClick={() => setCollapsed(true)}
+            onClick={() => setShowAll(true)}
             style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '8px 12px', borderRadius: '10px',
-              background: `${color}10`, border: `1px solid ${color}30`,
-              cursor: 'pointer', fontSize: '13px', fontWeight: 600, color,
+              padding: '10px', borderRadius: '10px', border: '1px solid #E5E7EB',
+              background: '#F9FAFB', cursor: 'pointer', fontSize: '13px',
+              fontWeight: 600, color: '#6B7280', textAlign: 'center',
             }}
           >
-            <span style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>{priority}</span>
-            <span style={{ color: '#6B7280', fontWeight: 400 }}>({count}) — tap to collapse</span>
+            Show remaining {grouped.length - 5} actions
           </button>
         )}
-        {actions.map((action, idx) => (
-          <SwipeableActionCard
-            key={action.id}
-            action={action}
-            onApprove={onApprove}
-            onDismiss={onDismiss}
-            showHint={!hintShown && idx === 0 && priority === 'high'}
-          />
-        ))}
       </div>
     );
   }
@@ -167,6 +282,49 @@ function PriorityGroup({ priority, actions, onApprove, onDismiss, hintShown }) {
   );
 }
 
+function BatchCard({ memberName, actions, onApproveAll, onDismissAll }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div style={{
+      padding: '14px 16px', borderRadius: '16px',
+      background: '#FFFFFF', border: '1px solid #E5E7EB',
+      borderLeft: `4px solid ${PRIORITY_COLORS[actions[0]?.priority] || '#F59E0B'}`,
+      boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+        <span style={{ fontSize: '14px', fontWeight: 700, color: '#0F0F0F' }}>
+          {actions.length} actions for {memberName}
+        </span>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#9CA3AF', padding: '4px 8px' }}
+        >{expanded ? '▲' : '▼'}</button>
+      </div>
+      {expanded && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
+          {actions.map(a => (
+            <div key={a.id} style={{ fontSize: '12px', color: '#6B7280', padding: '4px 0', borderBottom: '1px solid #F3F4F6' }}>
+              {a.description}
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button onClick={onApproveAll} style={{
+          flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
+          background: '#22C55E', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+        }}>Approve All</button>
+        <button onClick={onDismissAll} style={{
+          flex: 1, padding: '10px', borderRadius: '10px',
+          border: '1px solid #E5E7EB', background: '#fff',
+          color: '#6B7280', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+        }}>Dismiss All</button>
+      </div>
+    </div>
+  );
+}
+
 export default function ActionInboxScreen() {
   const { inbox, approveAction, dismissAction, showToast } = useApp();
   const [filter, setFilter] = useState('pending');
@@ -177,15 +335,13 @@ export default function ActionInboxScreen() {
   const pendingByPriority = useMemo(() => {
     const pending = inbox.filter(i => i.status === 'pending');
     return {
-      high: pending.filter(a => a.priority === 'high').sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2)),
+      high: pending.filter(a => a.priority === 'high'),
       medium: pending.filter(a => a.priority === 'medium'),
       low: pending.filter(a => !a.priority || a.priority === 'low'),
     };
   }, [inbox]);
 
-  const completedActions = useMemo(() => {
-    return inbox.filter(i => i.status !== 'pending');
-  }, [inbox]);
+  const completedActions = useMemo(() => inbox.filter(i => i.status !== 'pending'), [inbox]);
 
   const handleApprove = useCallback((action) => {
     approveAction(action.id, { approvalAction: 'Mobile Approve' });
@@ -208,14 +364,14 @@ export default function ActionInboxScreen() {
       trackAction({ actionType: 'approve', description: action.description, referenceId: action.id });
     });
     showToast(`Approved ${actions.length} ${priority} priority actions`, 'success');
+    if (navigator.vibrate) navigator.vibrate(50);
   }, [pendingByPriority, approveAction, showToast]);
 
   const pendingCount = inbox.filter(i => i.status === 'pending').length;
-  const doneCount = inbox.filter(i => i.status !== 'pending').length;
+  const doneCount = completedActions.length;
 
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {/* Filter tabs */}
       <div style={{ display: 'flex', gap: '8px', background: '#F3F4F6', borderRadius: '12px', padding: '3px' }}>
         <button onClick={() => setFilter('pending')} style={{
           flex: 1, padding: '8px', borderRadius: '10px', border: 'none', fontSize: '13px', fontWeight: 600,
@@ -235,7 +391,6 @@ export default function ActionInboxScreen() {
 
       {filter === 'pending' && (
         <>
-          {/* Batch approve button */}
           {pendingCount >= 3 && (
             <button
               onClick={() => handleApproveAll('low')}
@@ -257,9 +412,9 @@ export default function ActionInboxScreen() {
             </div>
           )}
 
-          <PriorityGroup priority="high" actions={pendingByPriority.high} onApprove={handleApprove} onDismiss={handleDismiss} hintShown={hintShown} />
-          <PriorityGroup priority="medium" actions={pendingByPriority.medium} onApprove={handleApprove} onDismiss={handleDismiss} hintShown={hintShown} />
-          <PriorityGroup priority="low" actions={pendingByPriority.low} onApprove={handleApprove} onDismiss={handleDismiss} hintShown={hintShown} />
+          <PriorityGroup priority="high" actions={pendingByPriority.high} onApprove={handleApprove} onDismiss={handleDismiss} onApproveAll={handleApproveAll} hintShown={hintShown} />
+          <PriorityGroup priority="medium" actions={pendingByPriority.medium} onApprove={handleApprove} onDismiss={handleDismiss} onApproveAll={handleApproveAll} hintShown={hintShown} />
+          <PriorityGroup priority="low" actions={pendingByPriority.low} onApprove={handleApprove} onDismiss={handleDismiss} onApproveAll={handleApproveAll} hintShown={hintShown} />
         </>
       )}
 

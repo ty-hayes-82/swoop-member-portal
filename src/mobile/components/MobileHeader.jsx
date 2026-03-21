@@ -27,15 +27,6 @@ export default function MobileHeader() {
         }}
       >
         <span style={{ fontSize: '24px' }}>🔔</span>
-        {pendingAgentCount > 0 && (
-          <span style={{
-            position: 'absolute', top: '2px', right: '0px',
-            background: '#EF4444', color: '#fff', fontSize: '11px', fontWeight: 700,
-            minWidth: '18px', height: '18px', borderRadius: '9px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '0 4px',
-          }}>{pendingAgentCount}</span>
-        )}
       </button>
     </header>
   );
