@@ -3,7 +3,7 @@
 **From Current State to Market-Ready Product**
 
 Last Updated: March 21, 2026
-Status: Backend APIs + frontend wiring in progress. Vendor integrations and pilot launch remaining.
+Status: Backend APIs + frontend wiring COMPLETE (12/12). Vendor integrations and pilot launch remaining.
 
 ---
 
@@ -162,19 +162,19 @@ Switch the frontend from static fallback data to live API responses. The service
 | # | Frontend Change | Status |
 |---|----------------|--------|
 | 1 | **Members page → real health scores** | **DONE** — `memberService._init()` fetches `/api/dashboard-live`, overrides static summary with live data |
-| 2 | **Today dashboard → real data** | **WIRED** — memberService feeds live data when `swoop_club_id` is in localStorage. Remaining: wire `WeekOverWeekGrid` and `RecentInterventions` to consume `getLiveDashboard()` |
+| 2 | **Today dashboard → real data** | **DONE** — WeekOverWeekGrid and RecentInterventions now consume `getLiveDashboard()` with static fallback |
 | 3 | **Health score breakdown → real dimensions** | **DONE** — `HealthDimensionGrid` uses real `golfScore/diningScore/emailScore/eventScore` from profile, falls back to archetype-weighted deterministic values (no more Math.random) |
 | 4 | **Actions → real execution** | **DONE** — `AppContext.approveAction()` now fires `POST /api/execute-action` alongside localStorage dispatch |
-| 5 | **Insights → real correlations** | Remaining — wire `CorrelationsTab` to fetch from `api/compute-correlations.js` |
-| 6 | **Board Report → real outcomes** | Remaining — wire `boardReportService` to fetch from `api/track-outcomes.js` + `api/benchmarks-live.js` |
-| 7 | **Playbooks → real execution** | Remaining — wire "Activate" buttons to `api/execute-playbook.js` |
-| 8 | **Notifications → real delivery** | Remaining — build notification feed UI consuming `api/notifications.js` |
+| 5 | **Insights → real correlations** | **DONE** — `experienceInsightsService._init()` fetches from `/api/compute-correlations`, overrides static correlation data |
+| 6 | **Board Report → real outcomes** | **DONE** — `boardReportService` fetches from `/api/dashboard-live` + `/api/benchmarks-live`, exports `getLiveBenchmarks()` and `getLiveROI()` |
+| 7 | **Playbooks → real execution** | **DONE** — Activate button fires `POST /api/execute-playbook` with playbook steps, owners, and due dates |
+| 8 | **Notifications → real delivery** | **DONE** — `NotificationFeed.jsx` component consuming `/api/notifications`, with mark-read, mark-all-read, priority badges, time-ago |
 | 9 | **Churn predictions → member profile** | **DONE** — `ChurnPredictionBadge` component fetches from `/api/predict-churn`, shows 30/60/90 day risk with factors |
-| 10 | **Agent config → real settings** | Remaining — wire `AgentsTab` Configure button to `api/agent-autonomous.js` |
+| 10 | **Agent config → real settings** | **DONE** — AgentsTab Configure fires `POST /api/agent-autonomous` with threshold and auto-approve settings |
 | 11 | **Onboarding wizard UI** | **DONE** — `OnboardingWizard.jsx` with 9-step progress, consuming `api/onboard-club.js` |
 | 12 | **Auth → real login** | **DONE** — `AuthContext.jsx` with login/logout/session validation, `useAuth()` hook |
 
-**6 of 12 done. Remaining 6 can continue without blockers.**
+**12 of 12 COMPLETE.** All frontend components are wired to live APIs with static fallbacks. The product will automatically switch from demo data to real data when `swoop_club_id` is set in localStorage and the APIs return data.
 
 ---
 

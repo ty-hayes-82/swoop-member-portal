@@ -95,8 +95,25 @@ export default function AgentsTab() {
                 agent={agent}
                 initialConfig={{}}
                 onSave={(cfg) => {
-                  console.log("Agent config saved:", agent.id, cfg);
                   trackAction({ actionType: 'config_agent', actionSubtype: 'save', agentId: agent.id, description: agent.name, meta: cfg });
+                  // Wire to real agent config API
+                  const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+                  if (clubId) {
+                    fetch('/api/agent-autonomous', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'update_config',
+                        clubId,
+                        agentId: agent.id,
+                        config: {
+                          enabled: cfg.enabled !== false,
+                          auto_approve_threshold: cfg.confidenceThreshold || 0.80,
+                          auto_approve_enabled: cfg.autoApprove || false,
+                        },
+                      }),
+                    }).catch(() => {});
+                  }
                   setConfigAgent(null);
                 }}
                 onClose={() => setConfigAgent(null)}

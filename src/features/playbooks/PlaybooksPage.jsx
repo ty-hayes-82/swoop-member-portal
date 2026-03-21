@@ -587,6 +587,29 @@ function PlaybookDetail({ playbook }) {
             showToast(`${playbook.name} activated`, 'success');
             trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: playbook.name });
             addAction({ description: `${playbook.name} activated — ${playbook.triggeredCount || 0} members triggered`, actionType: 'RETENTION_OUTREACH', source: 'Playbook Engine', priority: 'high', impactMetric: playbook.impact || '' });
+
+            // Wire to real playbook execution API
+            const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+            if (clubId && playbook.triggeredFor?.memberId) {
+              fetch('/api/execute-playbook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  clubId,
+                  playbookId: playbook.id,
+                  playbookName: playbook.name,
+                  memberId: playbook.triggeredFor.memberId,
+                  triggeredBy: 'GM',
+                  triggerReason: playbook.description,
+                  steps: (playbook.steps || []).map((s, i) => ({
+                    title: s.title,
+                    description: s.detail,
+                    assignedTo: s.owner || null,
+                    dueDays: i * 3 + 1,
+                  })),
+                }),
+              }).catch(() => {});
+            }
           }}
           style={{
             width: '100%', background: playbook.categoryColor || '#c0392b', color: 'white', border: 'none',

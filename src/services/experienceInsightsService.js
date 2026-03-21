@@ -357,4 +357,38 @@ export const _init = async () => {
   } catch {
     /* keep static fallback */
   }
+
+  // Also try live computed correlations from compute-correlations API
+  try {
+    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    if (clubId) {
+      const res = await fetch(`/api/compute-correlations?clubId=${clubId}&mode=get`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.correlations) && data.correlations.length > 0) {
+          correlationInsights.length = 0;
+          correlationInsights.push(...data.correlations.map(c => ({
+            id: c.key || c.correlation_key,
+            headline: c.headline,
+            detail: c.detail,
+            domains: c.domains || [],
+            impact: c.impact || 'medium',
+            metric: { value: c.metricValue || c.metric_value, label: c.metricLabel || c.metric_label },
+            trend: c.trend || null,
+            delta: c.delta || null,
+            deltaDirection: c.deltaDirection || c.delta_direction || null,
+          })));
+        }
+        if (Array.isArray(data.touchpointRankings) && data.touchpointRankings.length > 0) {
+          // Merge live touchpoint rankings
+          data.touchpointRankings.forEach(tp => {
+            const existing = touchpointCorrelations.find(t => t.touchpoint === tp.touchpoint);
+            if (existing && tp.correlation !== '—') {
+              existing.retentionImpact = Number(tp.correlation) || existing.retentionImpact;
+            }
+          });
+        }
+      }
+    }
+  } catch { /* live correlations not available yet */ }
 };
