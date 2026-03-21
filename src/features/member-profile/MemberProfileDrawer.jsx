@@ -4,6 +4,7 @@ import { theme } from '@/config/theme';
 import SourceBadge from '@/components/ui/SourceBadge.jsx';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { getOutreachHistory } from '@/services/activityService';
+import { getMemberChurnPrediction } from '@/services/memberService';
 
 const formatDate = (value) => {
   if (!value) return '—';
@@ -247,6 +248,97 @@ function MemberJourneyTimeline({ profile }) {
   );
 }
 
+// Health score dimensions — uses real data from health_scores table when available,
+// falls back to deterministic approximations based on archetype patterns
+function HealthDimensionGrid({ profile }) {
+  const score = profile.healthScore ?? 50;
+  const arch = profile.archetype || '';
+
+  // Archetype-based dimension weights for deterministic fallback (no Math.random)
+  const archetypeWeights = {
+    'Die-Hard Golfer': { golf: 1.3, dining: 0.6, email: 0.5, events: 0.4 },
+    'Social Butterfly': { golf: 0.4, dining: 1.2, email: 1.0, events: 1.3 },
+    'Balanced Active': { golf: 1.0, dining: 0.9, email: 0.8, events: 0.8 },
+    'Weekend Warrior': { golf: 0.9, dining: 0.7, email: 0.5, events: 0.5 },
+    'Declining': { golf: 0.5, dining: 0.4, email: 0.4, events: 0.3 },
+    'New Member': { golf: 0.7, dining: 0.7, email: 1.1, events: 0.6 },
+    'Ghost': { golf: 0.1, dining: 0.1, email: 0.2, events: 0.1 },
+    'Snowbird': { golf: 1.0, dining: 0.8, email: 0.7, events: 0.5 },
+  };
+  const w = archetypeWeights[arch] || { golf: 0.9, dining: 0.8, email: 0.7, events: 0.6 };
+
+  // Use real dimensions from profile if available (populated by health_scores API), else approximate
+  const dimensions = [
+    { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: theme.colors.accent },
+    { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: theme.colors.success },
+    { label: 'Email Engagement', weight: '25%', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: theme.colors.info500 },
+    { label: 'Event Attendance', weight: '20%', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
+  ];
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+      {dimensions.map(d => (
+        <div key={d.label} style={{ padding: '8px 10px', borderRadius: theme.radius.sm, border: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+            <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{d.label} ({d.weight})</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: theme.fonts.mono, color: d.value >= 60 ? theme.colors.success : d.value >= 35 ? theme.colors.warning : theme.colors.urgent }}>{d.value}</span>
+          </div>
+          <div style={{ height: '4px', borderRadius: '2px', background: theme.colors.bgDeep }}>
+            <div style={{ height: '100%', borderRadius: '2px', background: d.value >= 60 ? theme.colors.success : d.value >= 35 ? theme.colors.warning : theme.colors.urgent, width: `${d.value}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Churn prediction badge — fetches from predict-churn API
+function ChurnPredictionBadge({ profile }) {
+  const [prediction, setPrediction] = useState(null);
+  useEffect(() => {
+    if (!profile?.memberId) return;
+    getMemberChurnPrediction(profile.memberId).then(p => { if (p) setPrediction(p); });
+  }, [profile?.memberId]);
+
+  if (!prediction || !prediction.prob_90d) return null;
+
+  const prob = prediction.prob_90d;
+  const color = prob >= 60 ? theme.colors.urgent : prob >= 30 ? theme.colors.warning : theme.colors.success;
+  const factors = prediction.risk_factors || [];
+
+  return (
+    <Section title="Churn Prediction" description="AI-powered resignation risk">
+      <div style={{ display: 'flex', gap: theme.spacing.md, marginBottom: theme.spacing.sm }}>
+        <div style={{ textAlign: 'center', padding: '8px 16px', borderRadius: theme.radius.md, background: `${color}10`, border: `1px solid ${color}30` }}>
+          <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: theme.fonts.mono, color }}>{prob}%</div>
+          <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>90-day risk</div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ textAlign: 'center', padding: '8px 12px', borderRadius: theme.radius.sm, background: theme.colors.bgDeep }}>
+            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, fontFamily: theme.fonts.mono }}>{prediction.prob_30d}%</div>
+            <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>30-day</div>
+          </div>
+          <div style={{ textAlign: 'center', padding: '8px 12px', borderRadius: theme.radius.sm, background: theme.colors.bgDeep }}>
+            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, fontFamily: theme.fonts.mono }}>{prediction.prob_60d}%</div>
+            <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>60-day</div>
+          </div>
+        </div>
+      </div>
+      {factors.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contributing factors</div>
+          {factors.slice(0, 3).map((f, i) => (
+            <div key={i} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+              <span style={{ color, fontWeight: 700, flexShrink: 0 }}>{Math.round(f.weight * 100)}%</span>
+              <span>{f.factor} — {f.detail}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </Section>
+  );
+}
+
 const ARCHETYPE_DESCRIPTIONS = {
   'Die-Hard Golfer': 'Plays 3+ rounds per week and values tee time reliability and pro shop relationships above all else. Low dining and event engagement — typically skips post-round meals. Responds best to personal calls from the pro or GM about course conditions and tee time availability.',
   'Social Butterfly': 'Primarily engaged through dining, events, and social connections. May play golf infrequently but is deeply connected to the club community. Responds best to personal event invitations, concierge touches, and social group inclusion.',
@@ -471,27 +563,13 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
       </div>
 
-      {/* Health Score Breakdown */}
+      {/* Health Score Breakdown — uses real dimensions from health_scores table when available */}
       <Section title="Health Score Breakdown" description="Weighted engagement across 4 dimensions">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          {[
-            { label: 'Golf Engagement', weight: '30%', value: Math.min(100, Math.round((profile.healthScore ?? 50) * (0.9 + Math.random() * 0.3))), color: theme.colors.accent },
-            { label: 'Dining Frequency', weight: '25%', value: Math.min(100, Math.round((profile.healthScore ?? 50) * (0.7 + Math.random() * 0.5))), color: theme.colors.success },
-            { label: 'Email Engagement', weight: '25%', value: Math.min(100, Math.round((profile.healthScore ?? 50) * (0.6 + Math.random() * 0.6))), color: theme.colors.info500 },
-            { label: 'Event Attendance', weight: '20%', value: Math.min(100, Math.round((profile.healthScore ?? 50) * (0.5 + Math.random() * 0.7))), color: '#8b5cf6' },
-          ].map(d => (
-            <div key={d.label} style={{ padding: '8px 10px', borderRadius: theme.radius.sm, border: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{d.label} ({d.weight})</span>
-                <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: theme.fonts.mono, color: d.value >= 60 ? theme.colors.success : d.value >= 35 ? theme.colors.warning : theme.colors.urgent }}>{d.value}</span>
-              </div>
-              <div style={{ height: '4px', borderRadius: '2px', background: theme.colors.bgDeep }}>
-                <div style={{ height: '100%', borderRadius: '2px', background: d.value >= 60 ? theme.colors.success : d.value >= 35 ? theme.colors.warning : theme.colors.urgent, width: `${d.value}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
+        <HealthDimensionGrid profile={profile} />
       </Section>
+
+      {/* Churn Prediction — from predict-churn API */}
+      <ChurnPredictionBadge profile={profile} />
 
       <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '—'}`}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.sm }}>

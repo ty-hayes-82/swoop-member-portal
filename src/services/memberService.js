@@ -290,22 +290,49 @@ let _d = {
   decayingMembers: staticDecayingMembers,
 };
 
+// Live dashboard data cache — populated by _init from /api/dashboard-live
+let _live = null;
+
 export const _init = async () => {
   try {
     const res = await fetch('/api/members');
     if (res.ok) {
       const apiData = await res.json();
-      // Merge API data with static defaults — keep static healthDistribution
-      // and memberProfiles as authoritative sources
       _d = {
         ..._d,
         ...apiData,
-        healthDistribution: _d.healthDistribution, // always use static 4-level distribution
-        memberProfiles: _d.memberProfiles,          // always use static seed profiles
+        // Use API health distribution if available, otherwise static
+        healthDistribution: apiData.healthDistribution || _d.healthDistribution,
+        memberProfiles: apiData.memberProfiles || _d.memberProfiles,
       };
     }
   } catch { /* keep static fallback */ }
+
+  // Also fetch live dashboard data if available
+  try {
+    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    if (clubId) {
+      const liveRes = await fetch(`/api/dashboard-live?clubId=${clubId}`);
+      if (liveRes.ok) {
+        _live = await liveRes.json();
+        // Override summary with live computed data
+        if (_live.healthTiers) {
+          _d.memberSummary = {
+            ..._d.memberSummary,
+            total: _live.totalMembers,
+            healthy: _live.healthTiers.Healthy,
+            watch: _live.healthTiers.Watch,
+            atRisk: _live.healthTiers['At Risk'],
+            critical: _live.healthTiers.Critical,
+            potentialDuesAtRisk: _live.duesAtRisk,
+          };
+        }
+      }
+    }
+  } catch { /* live data not available yet — static fallback continues */ }
 };
+
+export const getLiveDashboard = () => _live;
 
 export const getHealthDistribution = () => {
   const archetypes = normalizeArchetypes(_d?.memberArchetypes);
@@ -359,6 +386,31 @@ export const getVolatileMembers = () => {
     const risk = (m.topRisk || m.signal || '').toLowerCase();
     return risk.includes('complaint') || risk.includes('unresolved') || risk.includes('slow-play');
   }).sort((a, b) => a.score - b.score);
+};
+
+// Fetch real health score dimensions for a member from the health_scores table
+export const getMemberHealthDimensions = async (memberId) => {
+  try {
+    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    if (!clubId || !memberId) return null;
+    const res = await fetch(`/api/compute-health-scores?clubId=${clubId}&memberId=${memberId}&mode=get`);
+    if (res.ok) {
+      const data = await res.json();
+      return data; // { golf_score, dining_score, email_score, event_score }
+    }
+  } catch {}
+  return null;
+};
+
+// Fetch churn prediction for a member
+export const getMemberChurnPrediction = async (memberId) => {
+  try {
+    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    if (!clubId || !memberId) return null;
+    const res = await fetch(`/api/predict-churn?clubId=${clubId}&memberId=${memberId}`);
+    if (res.ok) return await res.json();
+  } catch {}
+  return null;
 };
 
 // Shared roster cache for generated members — populated by AllMembersView

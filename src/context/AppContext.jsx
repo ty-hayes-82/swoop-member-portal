@@ -262,6 +262,21 @@ export function AppProvider({ children }) {
   function approveAction(id, meta = {}) {
     approveAgentServiceAction(id, meta);
     dispatch({ type: 'APPROVE_ACTION', id, meta });
+
+    // Wire to real execution API if club is configured
+    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    if (clubId) {
+      fetch('/api/execute-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actionId: id, clubId,
+          executionType: meta.executionType || 'staff_task',
+          memberId: meta.memberId || null,
+          senderName: meta.approvalAction || 'GM',
+        }),
+      }).catch(() => {});
+    }
   }
 
   function dismissAction(id, meta = {}) {
