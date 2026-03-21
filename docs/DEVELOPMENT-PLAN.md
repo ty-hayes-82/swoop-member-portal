@@ -252,6 +252,72 @@ From the independent Playbooks & Automations module audit (March 21, 2026). Curr
 
 ---
 
+## PARTIAL-DATA RESILIENCE — From Resilience Audit (March 21, 2026)
+
+Current grade: B-. The product works well with all data connected but has no degradation logic for partial data states. This is critical for pilot clubs that will onboard with 1-3 data sources before reaching full connectivity.
+
+### Core Problem
+No feature auto-detects missing data domains. Agents generate actions referencing non-existent data. ROI claims persist regardless of data availability. No guidance on what to connect next.
+
+### Database Changes Needed
+
+| Table | Purpose | Status |
+|-------|---------|--------|
+| `data_source_status` | Real-time registry of domain connectivity per club (CRM, Tee Sheet, POS, Email, Labor) | Add to migration |
+| `feature_dependency` | Maps which features require which domains (hard/soft/none) with fallback modes | Add to migration |
+| `feature_state_log` | Audit trail of feature enable/disable/downgrade events | Add to migration |
+| `club_feature_availability` view | Runtime query for "is this feature available for this club?" | Add to migration |
+
+### Phase 1 — Immediate (Week 1-2)
+
+| Action | Effort | Status |
+|--------|--------|--------|
+| Create `data_source_status` table and populate from Connected Systems sync metadata | 3 days | TODO — add to `api/migrations/001-core-tables.js` |
+| Seed `feature_dependency` table with all 6 agents, 13 playbooks, 15 actions | 2 days | TODO |
+| Add "data domain" badges to AI Agent cards (requires: Tee Sheet, CRM, etc.) | 1 day | TODO |
+| Hide agent "Set Active" button when hard dependencies unmet; show "Connect [Domain]" link | 0.5 days | TODO |
+
+### Phase 2 — 30-Day Sprint
+
+| Action | Effort | Status |
+|--------|--------|--------|
+| Inbox action pre-generation validation — `check_dependencies()` before agent inserts action | 5 days | TODO |
+| Signal-chip degradation — grey out chips when source domain disconnected with "Source unavailable" | 3 days | TODO |
+| "Connect Next Data Source" contextual prompt — inline card showing missing domain + value unlock | 3 days | TODO |
+| ROI decomposition by data domain in Board Report — show per-domain contribution | 5 days | TODO |
+| Playbook template lock overlay — unmet hard deps show lock icon + "Requires [Domain]" | 2 days | TODO |
+
+### Phase 3 — 90-Day Horizon
+
+| Action | Effort | Status |
+|--------|--------|--------|
+| Data Health Dashboard in Settings — domain status, row counts, freshness, dependent features | 8 days | TODO |
+| Progressive onboarding flow — guided wizard recommending CRM → Tee Sheet → POS with projected ROI | 5 days | Onboarding wizard API + UI built; needs data-source gating |
+| Agent "dry run" mode — simulate actions with partial data to show buyer potential | 10 days | TODO |
+| Automated staleness alerts — banner when domain data exceeds freshness threshold | 3 days | TODO |
+| Feature-toggle audit log visible to GM in Activity History | 2 days | TODO |
+
+### Resilience KPIs
+
+| Metric | Current | 30-Day Target | 90-Day Target |
+|--------|---------|---------------|---------------|
+| Error-free session rate with partial data | Unknown | 95% | 99.5% |
+| Inbox actions generated with missing hard dependencies | ~15-20% | <2% | 0% |
+| Features correctly hidden/downgraded when domain missing | 0% | 80% | 100% |
+| Additional dataset connections per club per month | Unknown | +0.5 | +1.0 |
+| Time from first login to second data source connected | Unknown | <14 days | <7 days |
+| ROI attribution completeness (% backed by connected data) | 0% | 60% | 90% |
+
+### Data Domain Value Stack
+When a club connects data sources in this order, cumulative value increases:
+1. **CRM only** → ~40% of full value (member profiles, health scores from CRM signals, basic retention)
+2. **+ Tee Sheet** → ~65% (round frequency, cancellation patterns, waitlist, pace-of-play)
+3. **+ POS** → ~85% (dining correlation, spend potential, post-round dining, revenue leakage)
+4. **+ Email** → ~95% (email decay as early warning, engagement scoring, campaign effectiveness)
+5. **+ Labor** → 100% (staffing optimization, service quality correlation)
+
+---
+
 ## POST-LAUNCH REMAINING ITEMS
 
 Items that enhance the product but are not required for pilot launch:
