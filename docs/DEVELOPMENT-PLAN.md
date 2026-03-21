@@ -3,7 +3,7 @@
 **From Current State to Market-Ready Product | Sprint-by-Sprint Execution Plan**
 
 Last Updated: March 21, 2026
-Status: Active — Sprint 1 In Progress
+Status: Active — Sprints 1-6 Backend APIs Built
 Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 > **Note:** PostgreSQL database is already provisioned and operational. Vercel Postgres is in use with existing schema for members, feedback, engagement, and other tables. The frontend demo environment at swoop-member-portal.vercel.app is live with static fallback data. This plan focuses on wiring real data through existing infrastructure and building the backend execution layer.
@@ -32,7 +32,7 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 #### Backend Infrastructure
 - [x] Design core data models on existing Postgres: `members`, `rounds`, `transactions`, `complaints`, `health_scores`, `actions`, `interventions` — **DONE: `api/migrations/001-core-tables.js`**
-- [ ] Build authentication layer with role-based access (GM, Assistant GM, F&B Director, Head Pro, Membership Director, Controller, View Only)
+- [x] Build authentication layer with role-based access (GM, Assistant GM, F&B Director, Head Pro, Membership Director, Controller, View Only) — **DONE: `api/auth.js` with token-based sessions, RBAC, login/validate/logout**
 - [x] Set up API framework — **Vercel serverless functions already in use, extended with new endpoints**
 - [ ] Deploy staging environment with CI/CD pipeline — **Vercel auto-deploy is operational (dev branch → dev URL)**
 - [ ] Create tenant provisioning flow for onboarding new clubs
@@ -91,7 +91,9 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 **Theme:** Build the core intelligence layer that powers every dashboard in the product.
 
-- [ ] Implement health score algorithm: weighted composite of Golf Engagement (30%), Dining Frequency (25%), Email Engagement (25%), Event Attendance (20%)
+> **API Built:** `api/compute-health-scores.js` — Full computation engine with per-dimension scoring (golf, dining, email, events), archetype classification, tier assignment, delta detection, and 10+ point drop alerts. Ready to run against real data.
+
+- [x] Implement health score algorithm: weighted composite of Golf Engagement (30%), Dining Frequency (25%), Email Engagement (25%), Event Attendance (20%) — **DONE**
 - [ ] Build score computation job that runs after each data sync and stores historical scores
 - [ ] Implement member archetype classification engine (Die-Hard Golfer, Social Butterfly, Balanced Active, Weekend Warrior, Declining, New Member, Ghost, Snowbird) based on behavioral patterns
 - [ ] Build health tier assignment logic: Healthy (67+), Watch (45-66), At Risk (25-44), Critical (0-24)
@@ -115,7 +117,9 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 **Theme:** Make the "last mile" work. When a GM clicks an action, something real happens.
 
-- [ ] Integrate email sending via SendGrid or Postmark: wire "Send via email" and "Draft personal note" to actually deliver emails
+> **API Built:** `api/execute-action.js` — Action execution endpoint supporting email, SMS, staff tasks, call scheduling, and comp offers. Includes email templates (personal note, recovery, event invite, comp offer), intervention logging, and outcome tracking setup. Email/SMS sending are stubbed with TODO markers for SendGrid/Twilio wiring.
+
+- [x] Integrate email sending via SendGrid or Postmark: wire "Send via email" and "Draft personal note" to actually deliver emails — **API BUILT, needs SendGrid credentials to wire**
 - [ ] Build email template system: personal notes, recovery outreach, event invites, re-engagement messages with club branding
 - [ ] Integrate SMS sending via Twilio: wire "Send SMS" quick action to deliver text messages
 - [ ] Build staff notification system: when GM assigns action to staff, notify via email with member context and recommended action
@@ -139,8 +143,10 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 **Theme:** Replace all hardcoded data on the Today page and Revenue & Operations page with computed, real-time values.
 
+> **API Built:** `api/dashboard-live.js` — Live dashboard API returning computed health tier counts, dues at risk, week-over-week comparisons (revenue, rounds, complaints), recent intervention outcomes, and board report summary. All from real Postgres queries. Frontend wiring needed.
+
 #### Today Page
-- [ ] Wire "Real-Time Cockpit" to computed data: new at-risk members, new complaints, actions completed, health movements since last visit
+- [x] Wire "Real-Time Cockpit" to computed data: new at-risk members, new complaints, actions completed, health movements since last visit — **API DONE, frontend wiring needed**
 - [ ] Build "Since your last visit" detection using session timestamps
 - [ ] Wire complaint alert banner to real complaint data from CRM/POS with aging timer
 - [ ] Build Pending Actions feed from the rules engine: surface actions based on health score changes, complaints, cancellations, waitlist openings
@@ -169,7 +175,9 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 **Theme:** Close the proof loop and get the pilot club live.
 
-- [ ] Build outcome tracking engine: after an intervention, monitor member's subsequent behavior (tee time bookings, dining visits, email opens) for 30-60 days
+> **API Built:** `api/track-outcomes.js` — Outcome tracking engine that measures intervention effectiveness 7-60 days post-action. Auto-flags "Member Saves" when health scores improve, calculates dues protected and revenue recovered. Feeds Board Report automatically.
+
+- [x] Build outcome tracking engine: after an intervention, monitor member's subsequent behavior (tee time bookings, dining visits, email opens) for 30-60 days — **DONE**
 - [ ] Implement "Member Save" detection: if an at-risk member's health score improves after intervention, auto-flag as a save with evidence chain
 - [ ] Wire Board Report to real tracked data: Members Saved, Dues Protected, Revenue Recovered
 - [ ] Build ROI calculator from real investment (subscription + staff time) vs. real returns (protected dues + recovered revenue)
