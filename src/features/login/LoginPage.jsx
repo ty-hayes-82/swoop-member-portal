@@ -42,11 +42,26 @@ export default function LoginPage({ onLogin }) {
     setLoading(false);
   };
 
-  // Quick demo login — bypasses auth for the demo environment
+  // Demo mode state
+  const [showDemoSetup, setShowDemoSetup] = useState(false);
+  const [demoEmail, setDemoEmail] = useState('');
+  const [demoPhone, setDemoPhone] = useState('');
+
   const handleDemoLogin = () => {
-    const demoUser = { userId: 'demo', clubId: 'demo', name: 'Sarah Mitchell', email: 'sarah@demo.com', role: 'gm', title: 'General Manager' };
+    if (!showDemoSetup) {
+      setShowDemoSetup(true);
+      return;
+    }
+    const demoUser = {
+      userId: 'demo', clubId: 'demo', name: 'Demo User',
+      email: demoEmail || 'demo@swoopgolf.com',
+      phone: demoPhone || '',
+      role: 'gm', title: 'General Manager',
+    };
     localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
-    localStorage.removeItem('swoop_club_id'); // No club = static fallback data
+    if (demoEmail) localStorage.setItem('swoop_demo_email', demoEmail);
+    if (demoPhone) localStorage.setItem('swoop_demo_phone', demoPhone);
+    localStorage.removeItem('swoop_club_id');
     onLogin?.(demoUser);
   };
 
@@ -132,6 +147,36 @@ export default function LoginPage({ onLogin }) {
         </div>
 
         {/* Demo mode */}
+        {showDemoSetup && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '12px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+              Enter your contact info to receive test emails and SMS during demo:
+            </div>
+            <input
+              type="email"
+              value={demoEmail}
+              onChange={e => setDemoEmail(e.target.value)}
+              placeholder="Your email (for test emails)"
+              style={{
+                width: '100%', padding: '10px 14px', fontSize: '14px',
+                border: '1px solid #E5E7EB', borderRadius: '10px',
+                outline: 'none', boxSizing: 'border-box', background: '#F9FAFB',
+              }}
+            />
+            <input
+              type="tel"
+              value={demoPhone}
+              onChange={e => setDemoPhone(e.target.value)}
+              placeholder="Your phone +1XXXXXXXXXX (for test SMS)"
+              style={{
+                width: '100%', padding: '10px 14px', fontSize: '14px',
+                border: '1px solid #E5E7EB', borderRadius: '10px',
+                outline: 'none', boxSizing: 'border-box', background: '#F9FAFB',
+              }}
+            />
+          </div>
+        )}
+
         <button
           onClick={handleDemoLogin}
           style={{
@@ -141,7 +186,7 @@ export default function LoginPage({ onLogin }) {
             cursor: 'pointer',
           }}
         >
-          Enter Demo Mode (Oakmont Hills CC)
+          {showDemoSetup ? 'Start Demo' : 'Enter Demo Mode (Oakmont Hills CC)'}
         </button>
 
         {/* Test account hint */}
@@ -152,7 +197,7 @@ export default function LoginPage({ onLogin }) {
         }}>
           <strong>Test account:</strong> sarah@oakmonthills.com / any password
           <br />
-          <strong>Demo mode:</strong> Uses static sample data (no login required)
+          <strong>Demo mode:</strong> Uses static sample data — enter your email/phone to receive test notifications
         </div>
       </div>
     </div>
