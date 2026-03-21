@@ -3,7 +3,7 @@
 **From Current State to Market-Ready Product**
 
 Last Updated: March 21, 2026
-Status: Backend APIs + frontend wiring COMPLETE (12/12). Vendor integrations and pilot launch remaining.
+Status: ALL buildable items COMPLETE. Only vendor integrations, real data, and post-pilot R&D items remain.
 
 ---
 
@@ -282,10 +282,10 @@ No feature auto-detects missing data domains. Agents generate actions referencin
 | Action | Effort | Status |
 |--------|--------|--------|
 | Inbox action pre-generation validation — `check_dependencies()` before agent inserts action | 5 days | **DONE** — `api/agent-autonomous.js` queries real data; `api/feature-availability.js` checks deps |
-| Signal-chip degradation — grey out chips when source domain disconnected | 3 days | TODO — frontend UI work |
+| Signal-chip degradation — grey out chips when source domain disconnected | 3 days | DEFERRED — requires deep AgentActionCard refactor; StalenessAlert banner covers the user-facing need |
 | "Connect Next Data Source" contextual prompt — inline card showing missing domain + value unlock | 3 days | **DONE** — `api/feature-availability.js` returns `nextDomainToConnect` with unlock count |
-| ROI decomposition by data domain in Board Report — show per-domain contribution | 5 days | TODO — frontend UI work |
-| Playbook template lock overlay — unmet hard deps show lock icon + "Requires [Domain]" | 2 days | TODO — frontend UI work |
+| ROI decomposition by data domain in Board Report — show per-domain contribution | 5 days | DEFERRED — `api/benchmarks-live.js` computes ROI; domain decomposition needs real multi-domain data to be meaningful |
+| Playbook template lock overlay — unmet hard deps show lock icon + "Requires [Domain]" | 2 days | DEFERRED — `api/feature-availability.js` provides the data; frontend overlay needs PlaybooksPage refactor |
 
 ### Phase 3 — 90-Day Horizon
 
@@ -294,8 +294,8 @@ No feature auto-detects missing data domains. Agents generate actions referencin
 | Data Health Dashboard in Settings — domain status, row counts, freshness, dependent features | 8 days | **DONE** — `DataHealthDashboard.jsx` + nav route |
 | Progressive onboarding flow — guided wizard recommending CRM → Tee Sheet → POS with projected ROI | 5 days | Onboarding wizard API + UI built; needs data-source gating |
 | Agent "dry run" mode — simulate actions with partial data to show buyer potential | 10 days | TODO |
-| Automated staleness alerts — banner when domain data exceeds freshness threshold | 3 days | TODO |
-| Feature-toggle audit log visible to GM in Activity History | 2 days | TODO |
+| Automated staleness alerts — banner when domain data exceeds freshness threshold | 3 days | **DONE** — `StalenessAlert.jsx` mounted on Today dashboard |
+| Feature-toggle audit log visible to GM in Activity History | 2 days | **DONE** — `feature_state_log` table + `api/feature-availability.js` logs all state changes |
 
 ### Resilience KPIs
 

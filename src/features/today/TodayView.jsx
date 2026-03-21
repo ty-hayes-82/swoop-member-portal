@@ -20,6 +20,7 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { theme } from '@/config/theme.js';
 import { useProductMaturity } from '@/hooks/useProductMaturity.js';
+import StalenessAlert from '@/components/ui/StalenessAlert';
 
 export default function TodayView() {
   const { navigate } = useNavigation();
@@ -41,6 +42,9 @@ export default function TodayView() {
   return (
     <PageTransition>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+
+        {/* Staleness alert — shows when data sources are stale */}
+        <StalenessAlert />
 
         {/* Top priority alert */}
         <StoryHeadline
