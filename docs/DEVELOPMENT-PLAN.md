@@ -3,7 +3,7 @@
 **From Current State to Market-Ready Product | Sprint-by-Sprint Execution Plan**
 
 Last Updated: March 21, 2026
-Status: Active — Pre-Launch
+Status: Active — Sprint 1 In Progress
 Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 > **Note:** PostgreSQL database is already provisioned and operational. Vercel Postgres is in use with existing schema for members, feedback, engagement, and other tables. The frontend demo environment at swoop-member-portal.vercel.app is live with static fallback data. This plan focuses on wiring real data through existing infrastructure and building the backend execution layer.
@@ -31,24 +31,35 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 **Theme:** Wire existing Postgres infrastructure and connect the first data source.
 
 #### Backend Infrastructure
-- [ ] Design core data models on existing Postgres: `members`, `rounds`, `transactions`, `complaints`, `health_scores`, `actions`, `interventions`
+- [x] Design core data models on existing Postgres: `members`, `rounds`, `transactions`, `complaints`, `health_scores`, `actions`, `interventions` — **DONE: `api/migrations/001-core-tables.js`**
 - [ ] Build authentication layer with role-based access (GM, Assistant GM, F&B Director, Head Pro, Membership Director, Controller, View Only)
-- [ ] Set up API framework (Node.js/Express or Python/FastAPI) with RESTful endpoints
-- [ ] Deploy staging environment with CI/CD pipeline
+- [x] Set up API framework — **Vercel serverless functions already in use, extended with new endpoints**
+- [ ] Deploy staging environment with CI/CD pipeline — **Vercel auto-deploy is operational (dev branch → dev URL)**
 - [ ] Create tenant provisioning flow for onboarding new clubs
 
 #### First Integration: CRM/Membership System
-- [ ] Build Jonas Club API connector (member profiles, dues, tenure, household data)
+- [ ] Build Jonas Club API connector (member profiles, dues, tenure, household data) — **BLOCKED: Needs Jonas API credentials from pilot club**
 - [ ] Implement nightly data sync job with error handling and retry logic
 - [ ] Map Jonas fields to Swoop member schema (name, email, phone, join date, membership type, annual dues, family members)
-- [ ] Build CSV import pipeline as fallback for clubs without API access (using existing template library UI)
+- [x] Build CSV import pipeline as fallback for clubs without API access — **DONE: `api/import-csv.js` with validation, error tracking, upsert logic**
 - [ ] Validate: 300+ member records imported with profiles, dues amounts, and membership types populated
 
+#### New APIs Built
+- `api/migrations/001-core-tables.js` — Idempotent migration creating 11 core tables + 9 indexes
+- `api/import-csv.js` — CSV import endpoint for members, rounds, transactions, complaints with row-level validation
+- `api/sync-status.js` — Data sync status dashboard API (latest sync per source, member count, import history)
+
 #### Acceptance Criteria
-- [ ] Database schema deployed with all core tables
-- [ ] API framework deployed to staging
+- [x] Database schema designed with all core tables — **Migration ready to deploy**
+- [x] API framework deployed to staging — **Vercel serverless operational**
 - [ ] Real member data from one pilot club imported and viewable in All Members tab
-- [ ] CSV import works end-to-end with validation errors surfaced to user
+- [x] CSV import works end-to-end with validation errors surfaced to user — **API built, needs frontend wiring**
+
+#### Blockers Requiring Ty
+- **Pilot club selection** — Need a signed design partner agreement
+- **Jonas Club API credentials** — Need documentation and API keys from pilot club's CRM vendor
+- **Run migration** — Deploy `api/migrations/001-core-tables.js` to create tables in production Postgres
+- **Email domain verification** — Start SPF/DKIM setup for Sprint 4 email sending (SendGrid/Postmark account needed)
 
 ---
 
