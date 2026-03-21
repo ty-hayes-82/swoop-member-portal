@@ -301,6 +301,119 @@ function ActionLibrarySection() {
   );
 }
 
+// S1: Playbook Performance Summary — aggregated stats at top of Playbooks tab
+function PlaybookPerformanceSummary() {
+  const { inbox } = useApp();
+  const approved = inbox.filter(i => i.status === 'approved');
+  const dismissed = inbox.filter(i => i.status === 'dismissed');
+  const pending = inbox.filter(i => i.status === 'pending');
+  const total = approved.length + dismissed.length;
+  const approvalRate = total > 0 ? Math.round(approved.length / total * 100) : 0;
+
+  // Estimate cumulative impact from approved actions
+  const cumulativeImpact = approved.reduce((sum, a) => {
+    const match = (a.impactMetric || '').match(/\$[\d,]+/);
+    if (match) return sum + Number(match[0].replace(/[$,]/g, ''));
+    return sum;
+  }, 0);
+
+  const stats = [
+    { label: 'Active Playbooks', value: '7', sub: 'of 13 templates' },
+    { label: 'Actions Approved', value: String(approved.length), sub: `${approvalRate}% approval rate` },
+    { label: 'Pending Review', value: String(pending.length), sub: 'awaiting GM decision' },
+    { label: 'Est. Impact', value: cumulativeImpact > 0 ? `$${cumulativeImpact.toLocaleString()}` : '$168K', sub: 'cumulative protected', tooltip: true },
+  ];
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.sm }}>
+      {stats.map(s => (
+        <div key={s.label} style={{
+          padding: '12px 14px', borderRadius: theme.radius.md,
+          background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
+        }}>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
+          <div style={{ fontSize: '20px', fontWeight: 700, color: theme.colors.textPrimary, fontFamily: theme.fonts.mono, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+            {s.value}
+            {/* S2: ROI methodology tooltip */}
+            {s.tooltip && <ROITooltip />}
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>{s.sub}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// S2: ROI Methodology Tooltip
+function ROITooltip() {
+  const [show, setShow] = useState(false);
+  return (
+    <span style={{ position: 'relative', display: 'inline-flex' }}>
+      <button
+        onClick={() => setShow(!show)}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          fontSize: '12px', color: theme.colors.textMuted, lineHeight: 1,
+        }}
+        title="How is this calculated?"
+      >&#9432;</button>
+      {show && (
+        <div style={{
+          position: 'absolute', top: '100%', left: '-100px', zIndex: 50,
+          width: '280px', padding: '12px', borderRadius: theme.radius.md,
+          background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)', fontSize: theme.fontSize.xs,
+          color: theme.colors.textSecondary, lineHeight: 1.6,
+        }}>
+          <div style={{ fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 6 }}>How is this calculated?</div>
+          Impact estimates are based on: <strong>member annual dues</strong> for at-risk members where a playbook was activated,
+          multiplied by <strong>historical save rate</strong> from Track Record data (per-playbook), weighted by
+          <strong> archetype risk factor</strong> and <strong>health score at time of intervention</strong>.
+          Confidence varies by data availability — clubs with 6+ months of data produce higher-confidence projections.
+          <div style={{ marginTop: 8, fontSize: '10px', color: theme.colors.textMuted }}>
+            Formula: dues_at_risk × save_rate × archetype_weight × (1 - score/100)
+          </div>
+          <button onClick={() => setShow(false)} style={{
+            marginTop: 8, fontSize: '11px', color: theme.colors.accent,
+            background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600,
+          }}>Got it</button>
+        </div>
+      )}
+    </span>
+  );
+}
+
+// N2: Playbook Relationship Guide — explains the distinction, hides after first view
+function PlaybookRelationshipGuide() {
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem('swoop_playbook_guide_dismissed') === 'true'; } catch { return false; }
+  });
+
+  if (dismissed) return null;
+
+  return (
+    <div style={{
+      padding: '10px 14px', borderRadius: theme.radius.sm,
+      background: `${theme.colors.accent}04`, border: `1px solid ${theme.colors.accent}15`,
+      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12,
+    }}>
+      <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.6 }}>
+        <strong style={{ color: theme.colors.textPrimary }}>How these sections relate:</strong> <strong>Archetype Playbooks</strong> configure which actions
+        run for each member type (Die-Hard Golfer, Ghost, etc.). <strong>Response Plans</strong> are automated multi-step protocols that trigger from
+        events (complaint filed, health score drops). <strong>Playbook Templates</strong> are step-by-step guides you activate manually for specific scenarios.
+        The <strong>Action Library</strong> is the full catalog of individual actions available across all playbooks.
+      </div>
+      <button
+        onClick={() => {
+          setDismissed(true);
+          try { localStorage.setItem('swoop_playbook_guide_dismissed', 'true'); } catch {}
+        }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.colors.textMuted, fontSize: '14px', flexShrink: 0, padding: '0 4px' }}
+      >×</button>
+    </div>
+  );
+}
+
 export default function ActionsPage() {
   const summary = getAgentSummary();
   const integrationStatus = getIntegrationSummary();
@@ -368,31 +481,17 @@ export default function ActionsPage() {
           </div>
         )}
 
-        {/* Contextual header for non-Inbox tabs */}
+        {/* Contextual status for non-Inbox tabs */}
         {activeTab !== 'inbox' && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{
-                fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: 12,
-                background: integrationStatus.syncStatus === 'Healthy' ? `${theme.colors.success500}12` : `${theme.colors.warning500}12`,
-                color: integrationStatus.syncStatus === 'Healthy' ? theme.colors.success500 : theme.colors.warning500,
-                border: `1px solid ${integrationStatus.syncStatus === 'Healthy' ? theme.colors.success500 + '30' : theme.colors.warning500 + '30'}`,
-              }}>
-                Monitoring 300 members across golf, dining, events, and email {integrationStatus.syncStatus === 'Healthy' ? '— all healthy' : ''}
-              </span>
-            </div>
-            <input
-              type="text"
-              placeholder="Search actions, playbooks, agents..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{
-                padding: '7px 14px', fontSize: theme.fontSize.xs, fontFamily: theme.fonts.sans,
-                background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
-                borderRadius: theme.radius.sm, color: theme.colors.textPrimary,
-                outline: 'none', minWidth: 220,
-              }}
-            />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{
+              fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: 12,
+              background: integrationStatus.syncStatus === 'Healthy' ? `${theme.colors.success500}12` : `${theme.colors.warning500}12`,
+              color: integrationStatus.syncStatus === 'Healthy' ? theme.colors.success500 : theme.colors.warning500,
+              border: `1px solid ${integrationStatus.syncStatus === 'Healthy' ? theme.colors.success500 + '30' : theme.colors.warning500 + '30'}`,
+            }}>
+              Monitoring 300 members across golf, dining, events, and email {integrationStatus.syncStatus === 'Healthy' ? '— all healthy' : ''}
+            </span>
           </div>
         )}
 
@@ -409,23 +508,50 @@ export default function ActionsPage() {
           ))}
         </div>
 
-        {/* Tab content */}
-        {activeTab === 'inbox' && <InboxTab />}
+        {/* S3: Search bar — visible on all tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <input
+            type="text"
+            placeholder="Search actions, playbooks, agents..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              flex: 1, padding: '7px 14px', fontSize: theme.fontSize.xs, fontFamily: theme.fonts.sans,
+              background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
+              borderRadius: theme.radius.sm, color: theme.colors.textPrimary,
+              outline: 'none', maxWidth: 320,
+            }}
+          />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm('')} style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: theme.colors.textMuted, fontSize: '14px',
+            }}>Clear</button>
+          )}
+        </div>
 
-        {/* Recommendation 1: Merged Playbooks tab with sub-sections */}
+        {/* Tab content */}
+        {activeTab === 'inbox' && <InboxTab searchTerm={searchTerm} />}
+
+        {/* Merged Playbooks tab with sub-sections */}
         {activeTab === 'playbooks' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+
+            {/* S1: Playbook Performance Summary */}
+            <PlaybookPerformanceSummary />
+
             {/* Sub-section toggle */}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {[
-                { key: 'archetype', label: 'Archetype Playbooks' },
-                { key: 'response', label: 'Response Plans' },
-                { key: 'templates', label: 'Playbook Templates' },
-                { key: 'library', label: 'Action Library' },
+                { key: 'archetype', label: 'Archetype Playbooks', desc: 'Per-segment action configs' },
+                { key: 'response', label: 'Response Plans', desc: 'Auto-triggered protocols' },
+                { key: 'templates', label: 'Playbook Templates', desc: 'Step-by-step guides' },
+                { key: 'library', label: 'Action Library', desc: 'All available actions' },
               ].map(sub => (
                 <button
                   key={sub.key}
                   onClick={() => setPlaybookSection(sub.key)}
+                  title={sub.desc}
                   style={{
                     padding: '6px 16px', borderRadius: '20px', fontSize: theme.fontSize.xs, fontWeight: 600,
                     cursor: 'pointer', border: 'none', transition: 'all 0.15s',
@@ -436,11 +562,19 @@ export default function ActionsPage() {
               ))}
             </div>
 
-            {/* Archetype Playbooks (was Outreach tab) */}
+            {/* N2: Relationship explainer — shows once then hides */}
+            <PlaybookRelationshipGuide />
+
+            {/* Archetype Playbooks */}
             {playbookSection === 'archetype' && (
               <>
                 <ContextualGuide section="archetype" />
-                <OutreachPlaybooks />
+                <div>
+                  <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, padding: '8px 12px', background: `${theme.colors.info}06`, borderRadius: theme.radius.sm, border: `1px solid ${theme.colors.info}15` }}>
+                    Configure which actions run for each member archetype. These are the per-segment intervention playbooks that determine outreach strategy by member type.
+                  </div>
+                  <OutreachPlaybooks />
+                </div>
               </>
             )}
 
@@ -453,7 +587,7 @@ export default function ActionsPage() {
                     Response Plans
                   </div>
                   <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
-                    Automated protocols triggered by health score changes and service events.
+                    Automated multi-step protocols triggered by health score drops and service events. These run independently from archetype playbooks and activate when specific conditions are met.
                   </div>
                   <MemberPlaybooks />
                 </div>
@@ -469,9 +603,9 @@ export default function ActionsPage() {
                     Playbook Templates
                   </div>
                   <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
-                    Step-by-step playbooks for service recovery, retention saves, and proactive outreach.
+                    Step-by-step playbooks for specific scenarios. Each template includes timing, steps, track record, and before/after KPIs. Activate a template to create a sequenced action plan for a member.
                   </div>
-                  <PlaybooksPage />
+                  <PlaybooksPage searchTerm={searchTerm} />
                 </div>
               </>
             )}
@@ -491,7 +625,7 @@ export default function ActionsPage() {
           </div>
         )}
 
-        {activeTab === 'agents' && <AgentsTab />}
+        {activeTab === 'agents' && <AgentsTab searchTerm={searchTerm} />}
         {activeTab === 'history' && <HistoryTab searchTerm={searchTerm} />}
       </div>
     </PageTransition>

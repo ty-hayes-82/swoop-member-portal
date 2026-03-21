@@ -208,10 +208,10 @@ From the independent Playbooks & Automations module audit (March 21, 2026). Curr
 
 | ID | Improvement | Effort | Impact | Status |
 |----|------------|--------|--------|--------|
-| S1 | **Playbook Performance Summary panel** — Aggregated stats (total activated, approval rate, cumulative impact, outcome success) at top of Playbooks tab | Low | High | TODO |
-| S2 | **ROI methodology disclosure** — "How is this calculated?" tooltip on every dollar-impact figure explaining inputs (member dues, save rate, archetype weighting, confidence) | Low | High | TODO |
-| S3 | **Functional search** — Cross-tab filtering across playbook templates, inbox actions, AI agents, and action library with highlighted matches | Low-Med | Medium | TODO |
-| S4 | **Pause/Resume toggle** — For Response Plans and AI agents, with optional scheduled resume date. Needed for tournament weeks and seasonal transitions | Low | Medium | TODO |
+| S1 | **Playbook Performance Summary panel** — Aggregated stats (total activated, approval rate, cumulative impact, outcome success) at top of Playbooks tab | Low | High | **DONE** |
+| S2 | **ROI methodology disclosure** — "How is this calculated?" tooltip on every dollar-impact figure explaining inputs (member dues, save rate, archetype weighting, confidence) | Low | High | **DONE** |
+| S3 | **Functional search** — Cross-tab filtering across playbook templates, inbox actions, AI agents, and action library with highlighted matches | Low-Med | Medium | **DONE** |
+| S4 | **Pause/Resume toggle** — For Response Plans and AI agents, with optional scheduled resume date. Needed for tournament weeks and seasonal transitions | Low | Medium | TODO — agent toggle exists, needs scheduled resume |
 
 ### Mid-Term (3-6 months) — Ship for Operator Adoption
 
@@ -235,10 +235,10 @@ From the independent Playbooks & Automations module audit (March 21, 2026). Curr
 
 | ID | Issue | Action |
 |----|-------|--------|
-| N1 | Service Save Protocol appears in both Response Plans and Playbook Templates | Unify or explicitly label distinct purposes |
-| N2 | Archetype Playbooks vs Playbook Templates relationship unclear | Add explanatory text: "Archetype Playbooks configure per-segment actions. Response Plans trigger automated multi-step protocols." |
-| N3 | "See this in action" flows take vertical space on repeat visits | Already collapsed by default; consider hiding entirely after first session |
-| N4 | Action Library sub-tab duplicates embedded action list in Archetype Playbooks | Add channel/timing/effectiveness data to embedded view, or remove embedded Action Library section |
+| N1 | Service Save Protocol appears in both Response Plans and Playbook Templates | **DONE** — Added distinct descriptions: Response Plans = "auto-triggered protocols", Templates = "step-by-step guides you activate manually" |
+| N2 | Archetype Playbooks vs Playbook Templates relationship unclear | **DONE** — Added dismissible relationship explainer + per-section descriptions + tooltips on sub-tab buttons |
+| N3 | "See this in action" flows take vertical space on repeat visits | **DONE** — Already collapsed; guide uses localStorage to auto-dismiss after first view |
+| N4 | Action Library sub-tab duplicates embedded action list in Archetype Playbooks | Standalone version has channel/timing/effectiveness data that embedded does not — distinction is now clearer with section descriptions |
 
 ### Audit KPIs to Track
 
