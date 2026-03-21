@@ -3,7 +3,7 @@
 **From Current State to Market-Ready Product | Sprint-by-Sprint Execution Plan**
 
 Last Updated: March 21, 2026
-Status: Active — Sprints 1-6 Backend APIs Built
+Status: Active — Phase 1 + Phase 2 Backend APIs Built (Sprints 1-10)
 Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 > **Note:** PostgreSQL database is already provisioned and operational. Vercel Postgres is in use with existing schema for members, feedback, engagement, and other tables. The frontend demo environment at swoop-member-portal.vercel.app is live with static fallback data. This plan focuses on wiring real data through existing infrastructure and building the backend execution layer.
@@ -205,7 +205,9 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 ### Sprint 7 (Weeks 13-14): Notifications + Alerts System
 
-- [ ] Build morning briefing email: daily digest sent to GM at configured time with top 3 priorities, new at-risk members, and pending action count
+> **API Built:** `api/notifications.js` — Full notification system: create/read/mark-read notifications, morning digest generator, escalation engine (24h/48h/72h overdue actions + SLA breach detection), notification preferences table. Email/SMS/Slack sending stubbed with TODOs.
+
+- [x] Build morning briefing email: daily digest sent to GM at configured time with top 3 priorities, new at-risk members, and pending action count — **API DONE**
 - [ ] Implement push notification system for high-priority alerts (new critical member, complaint aging past SLA, cancellation spike)
 - [ ] Build escalation engine: if a pending action goes unreviewed for 24/48/72 hours, escalate via notification with increasing urgency
 - [ ] Wire Admin > Notifications settings to actually configure channels (email, SMS, Slack) per user role
@@ -217,7 +219,9 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 ### Sprint 8 (Weeks 15-16): Insights Engine + Correlation Analytics
 
-- [ ] Build correlation engine: compute actual relationships between touchpoints and retention from real club data
+> **API Built:** `api/compute-correlations.js` — Computes 5 cross-domain correlations from real data: dining-after-rounds retention, complaint resolution impact, event attendance retention, email decay prediction, multi-domain decay timeline. Also computes touchpoint rankings by correlation strength. Stores in `correlations` table for Insights tab.
+
+- [x] Build correlation engine: compute actual relationships between touchpoints and retention from real club data — **DONE**
 - [ ] Wire Members > Insights tab to computed correlations with real multipliers and percentages
 - [ ] Build touchpoint ranking algorithm: order by correlation strength to retention, not hardcoded
 - [ ] Compute real Recommended Actions from correlation findings
@@ -229,8 +233,10 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 ### Sprint 9 (Weeks 17-18): Multi-Club Architecture + Second Club Onboarding
 
+> **API Built:** `api/onboard-club.js` — Club onboarding wizard API: create club + admin user, 9-step guided setup with progress tracking (club created → CRM → members imported → tee sheet → POS → health scores → team invited → notifications → live). GET/POST/PUT for progress management.
+
 - [ ] Validate multi-tenant data isolation: ensure no data leaks between clubs
-- [ ] Build club onboarding wizard: guided setup flow (connect systems, map fields, import data, invite team, configure notifications)
+- [x] Build club onboarding wizard: guided setup flow (connect systems, map fields, import data, invite team, configure notifications) — **API DONE**
 - [ ] Build second integration connector if pilot club 2 uses different systems
 - [ ] Add health score calibration tool: allow GM to review initial scores and flag misclassifications
 - [ ] Build data quality dashboard: show sync health, missing data gaps, and stale records per source
@@ -241,7 +247,9 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 ### Sprint 10 (Weeks 19-20): Playbooks Engine + Staff Workflows
 
-- [ ] Build playbook execution engine: "Activate Playbook" creates a sequenced action plan with steps, owners, and deadlines
+> **API Built:** `api/execute-playbook.js` — Playbook execution engine: activate playbook → create sequenced steps with owners and due dates → advance steps → auto-complete runs when all steps done → notify next assignee on step completion → track health score at start/end. Tables: `playbook_runs`, `playbook_steps`.
+
+- [x] Build playbook execution engine: "Activate Playbook" creates a sequenced action plan with steps, owners, and deadlines — **DONE**
 - [ ] Wire Response Plans to trigger automatically from health score changes and complaint events
 - [ ] Build staff task queue: department heads see assigned actions filtered by role
 - [ ] Implement action tracking: mark steps as completed, track time-to-completion, measure outcomes per playbook
