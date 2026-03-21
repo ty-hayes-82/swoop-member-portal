@@ -35,12 +35,12 @@ export default function BottomTabBar() {
             }}
           >
             <span style={{ fontSize: '22px', lineHeight: 1 }}>{tab.icon}</span>
-            <span style={{ fontSize: '10px', fontWeight: isActive ? 700 : 500, letterSpacing: '0.02em' }}>{tab.label}</span>
+            <span style={{ fontSize: '11px', fontWeight: isActive ? 700 : 500, letterSpacing: '0.02em' }}>{tab.label}</span>
             {badge && (
               <span style={{
                 position: 'absolute', top: '4px', right: 'calc(50% - 18px)',
-                background: '#EF4444', color: '#fff', fontSize: '9px', fontWeight: 700,
-                minWidth: '16px', height: '16px', borderRadius: '8px',
+                background: '#EF4444', color: '#fff', fontSize: '11px', fontWeight: 700,
+                minWidth: '18px', height: '18px', borderRadius: '9px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 padding: '0 4px',
               }}>{badge}</span>
