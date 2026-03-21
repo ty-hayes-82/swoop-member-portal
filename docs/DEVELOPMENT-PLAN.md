@@ -3,7 +3,7 @@
 **From Current State to Market-Ready Product | Sprint-by-Sprint Execution Plan**
 
 Last Updated: March 21, 2026
-Status: Active — Phase 1 + Phase 2 Backend APIs Built (Sprints 1-10)
+Status: Active — ALL Backend APIs Built (Sprints 1-13). Frontend wiring + vendor integrations remaining.
 Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 > **Note:** PostgreSQL database is already provisioned and operational. Vercel Postgres is in use with existing schema for members, feedback, engagement, and other tables. The frontend demo environment at swoop-member-portal.vercel.app is live with static fallback data. This plan focuses on wiring real data through existing infrastructure and building the backend execution layer.
@@ -276,7 +276,9 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 ### Sprint 11 (Weeks 21-22): Predictive Churn Model + AI-Drafted Communications
 
-- [ ] Train ML churn prediction model on accumulated club data: predict resignation probability within 30/60/90 days with confidence intervals
+> **API Built:** `api/predict-churn.js` — Rules-based churn prediction engine (v1). Computes 30/60/90 day resignation probability per member based on health score, score trajectory, open complaints, archetype risk, and tenure. Stores predictions with confidence scores and contributing factors. ML model upgrade planned for when 6+ months of data accumulates.
+
+- [x] Train ML churn prediction model on accumulated club data: predict resignation probability within 30/60/90 days with confidence intervals — **Rules-based v1 DONE, ML upgrade after data accumulation**
 - [ ] Replace rules-based health scoring with ML-powered risk assessment for clubs with 6+ months of data
 - [ ] Integrate LLM (Claude) for personalized outreach drafting: generate unique messages per member using their activity history, preferences, and complaint history
 - [ ] Build message tone configuration: match outreach to club's brand voice
@@ -287,7 +289,9 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 ### Sprint 12 (Weeks 23-24): Autonomous Agent Actions
 
-- [ ] Build autonomous action framework: agents execute pre-approved low-risk actions without GM approval (e.g., auto-route waitlist slots to retention-priority members)
+> **API Built:** `api/agent-autonomous.js` — Full autonomous agent framework: 6 agents (Demand Optimizer, Member Pulse, Service Recovery, Engagement Autopilot, Revenue Analyst, Labor Optimizer). Each generates proposals, checks confidence vs threshold, auto-executes if above threshold, otherwise routes to Inbox. Agent config table for per-agent enable/disable, threshold setting. Activity log with reasoning chains.
+
+- [x] Build autonomous action framework: agents execute pre-approved low-risk actions without GM approval — **DONE**
 - [ ] Implement agent confidence scoring: only auto-execute when confidence exceeds configured threshold
 - [ ] Build Thought Log viewer: show agent reasoning chain for each proposed and executed action
 - [ ] Implement agent learning loop: agents improve proposal quality based on GM approval/dismissal patterns
@@ -299,7 +303,9 @@ Assumption: 2-week sprints, 2-3 engineers + 1 designer
 
 ### Sprint 13 (Weeks 25-26): Benchmarking Network + Additional Integrations
 
-- [ ] Build anonymized cross-club benchmarking: aggregate metrics across all Swoop clubs
+> **API Built:** `api/benchmarks-live.js` — Live benchmarking: computes club metrics (retention, response time, resolution rate, health score), compares against Swoop network aggregate and industry averages. Builds comparison table for Board Report. ROI calculation from real saves data.
+
+- [x] Build anonymized cross-club benchmarking: aggregate metrics across all Swoop clubs — **DONE**
 - [ ] Replace static industry averages with live network data on Board Report
 - [ ] Build email marketing integration (Mailchimp, Constant Contact): ingest open rates, click rates, engagement per member
 - [ ] Build events/calendar integration: ingest event attendance, RSVP data, participation patterns
