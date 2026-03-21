@@ -78,6 +78,7 @@ export const navItems = [
     color: theme.colors.navIntegrations,
     subtitle: 'Connection status, data freshness, and feature availability across all domains.',
     sourceSystems: ['All Systems'],
+    hidden: true, // Consolidated into Admin Hub > Health & Quality
   },
   {
     key: 'integrations',
@@ -96,6 +97,7 @@ export const navItems = [
     color: theme.colors.navIntegrations,
     subtitle: 'Upload CSV/XLSX when APIs are missing.',
     sourceSystems: [],
+    hidden: true, // Consolidated into Admin Hub > Data Hub
   },
   {
     key: 'activity-history',
@@ -105,6 +107,7 @@ export const navItems = [
     color: theme.colors.navOperations,
     subtitle: 'Every action taken in the dashboard — approve, dismiss, call, deploy, and more.',
     sourceSystems: ['Postgres'],
+    hidden: true, // Consolidated into Admin Hub > Activity Log
   },
   {
     key: 'storyboard-flows',

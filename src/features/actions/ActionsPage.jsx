@@ -11,6 +11,7 @@ import MemberPlaybooks from '@/features/member-health/MemberPlaybooks';
 import { OutreachPlaybooks } from '@/features/outreach-playbooks';
 import PageTransition from '@/components/ui/PageTransition';
 import { AgentActionCard } from '@/components/ui';
+import TeamWorkloadPanel from '@/components/ui/TeamWorkloadPanel';
 
 // Recommendation 1: Merge Outreach + Playbooks into single "Playbooks" tab
 // Recommendation 3: Actions summary only shows on Inbox tab
@@ -543,7 +544,12 @@ export default function ActionsPage() {
         </div>
 
         {/* Tab content */}
-        {activeTab === 'inbox' && <InboxTab searchTerm={searchTerm} />}
+        {activeTab === 'inbox' && (
+          <>
+            <InboxTab searchTerm={searchTerm} />
+            <TeamWorkloadPanel />
+          </>
+        )}
 
         {/* Merged Playbooks tab with sub-sections */}
         {activeTab === 'playbooks' && (

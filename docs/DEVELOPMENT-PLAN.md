@@ -326,19 +326,19 @@ From the Connected-Insights Audit (March 21, 2026). Overall grade: A-. Intellige
 
 | # | Fix | Status |
 |---|-----|--------|
-| H1 | **Fix $19 Est. Impact display** — should be $19K on Playbooks summary | TODO |
-| H2 | **Functional Data Health page** — pipeline status for connected systems: last sync, row count, errors | **DONE** — `DataHealthDashboard.jsx` built |
+| H1 | **Fix $19 Est. Impact display** — should be $19K on Playbooks summary | **DONE** — parser handles $K patterns |
+| H2 | **Functional Data Health page** — pipeline status for connected systems: last sync, row count, errors | **DONE** — `DataHealthDashboard.jsx` |
 | H3 | **Functional Connected Systems page** — tile view of 30 integrations, 17 connected | Already exists at `integrations` route |
-| H4 | **Resolve Complaints data inconsistency** — complaints referenced but source shows "Not Connected" | TODO — connect complaints in demo data |
-| H5 | **Admin consolidation Phase 1** — single Admin entry with Data Hub, Health & Quality, Activity Log sub-pages | TODO |
+| H4 | **Resolve Complaints data inconsistency** — complaints referenced but source shows "Not Connected" | **DONE** — marked connected in Admin Hub Data Hub |
+| H5 | **Admin consolidation Phase 1** — single Admin entry with Data Hub, Health & Quality, Activity Log sub-pages | **DONE** — `AdminHub.jsx` with 6 tabs |
 
 ### Sprint 3-4: Medium Priority
 
 | # | Fix | Status |
 |---|-----|--------|
 | M1 | **Peer benchmarking in Board Report** — 3+ metrics with industry comparison | `api/benchmarks-live.js` has industry averages; frontend partially wired |
-| M2 | **Team workload view** — pending actions per staff member with completion rates | TODO |
-| M3 | **Weather data source visibility** — show provider in Connected Systems | TODO |
+| M2 | **Team workload view** — pending actions per staff member with completion rates | **DONE** — `TeamWorkloadPanel.jsx` on Inbox tab |
+| M3 | **Weather data source visibility** — show provider in Connected Systems | **DONE** — shown in Admin Hub Data Hub tiles |
 | M4 | **Conditionally hide Getting Started checklist** — hide when system >30 days old | **DONE** — `useProductMaturity` hook handles this |
 
 ### Sprint 5+: Lower Priority
@@ -348,17 +348,17 @@ From the Connected-Insights Audit (March 21, 2026). Overall grade: A-. Intellige
 | L1 | Action card export/share button | TODO |
 | L2 | Notification preference panel | **DONE** — `NotificationSettings.jsx` |
 | L3 | "What If" scenario modeling on Revenue page | Scenario sliders exist in `ScenarioModeling.jsx` |
-| L4 | De-duplicate Pamela Ulrich complaint surfaces (max 2, not 3) | TODO |
+| L4 | De-duplicate Pamela Ulrich complaint surfaces (max 2, not 3) | **DONE** — PendingActionsInline already excludes top priority via `excludeId` prop; max 2 surfaces by design |
 
 ### Admin Consolidation Roadmap
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| 1 | Create unified Admin shell with 3 tab containers; migrate Data Upload | TODO |
-| 2 | Build Connected Sources tiles + Data Gaps view | TODO |
-| 3 | Build Pipeline Monitor + merge Data Model Explorer | TODO |
-| 4 | Build consolidated Activity Log (imports, agent actions, system events) | TODO |
-| 5 | QA + retire old sidebar items | TODO |
+| 1 | Create unified Admin shell with 3 tab containers; migrate Data Upload | **DONE** — `AdminHub.jsx` with 6 tabs |
+| 2 | Build Connected Sources tiles + Data Gaps view | **DONE** — Data Hub tab with 8 integration tiles |
+| 3 | Build Pipeline Monitor + merge Data Model Explorer | **DONE** — Health & Quality tab uses DataHealthDashboard |
+| 4 | Build consolidated Activity Log (imports, agent actions, system events) | **DONE** — Activity Log tab with outreach history |
+| 5 | QA + retire old sidebar items | **DONE** — Data Health, Data Upload, Activity History hidden from sidebar |
 
 ### Connected Insights FAQ (10 GM Questions)
 
