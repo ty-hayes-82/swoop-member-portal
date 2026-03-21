@@ -36,6 +36,7 @@ import { MembersView } from '@/features/members';
 import { RevenueView } from '@/features/revenue';
 import ActivityHistoryPage from '@/features/activity-history/ActivityHistoryPage';
 import AutomationDashboard from '@/features/automation-dashboard/AutomationDashboard';
+import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 import { AdminDashboard } from '@/features/admin';
 import { theme } from '@/config/theme';
 
@@ -46,6 +47,7 @@ const ROUTES = {
   'revenue': RevenueView,
   'playbooks-automation': ActionsPage,
   'automation-dashboard': AutomationDashboard,
+  'data-health': DataHealthDashboard,
   'activity-history': ActivityHistoryPage,
   // Legacy routes (backward compat — redirects in NavigationContext handle most traffic)
   'daily-briefing': DailyBriefing,

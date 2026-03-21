@@ -71,6 +71,15 @@ export const navItems = [
     topLevel: true,
   },
   {
+    key: 'data-health',
+    label: 'Data Health',
+    section: 'SETTINGS',
+    icon: '🩺',
+    color: theme.colors.navIntegrations,
+    subtitle: 'Connection status, data freshness, and feature availability across all domains.',
+    sourceSystems: ['All Systems'],
+  },
+  {
     key: 'integrations',
     label: 'Connected Systems',
     section: 'SETTINGS',

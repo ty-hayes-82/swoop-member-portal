@@ -291,7 +291,7 @@ No feature auto-detects missing data domains. Agents generate actions referencin
 
 | Action | Effort | Status |
 |--------|--------|--------|
-| Data Health Dashboard in Settings — domain status, row counts, freshness, dependent features | 8 days | TODO |
+| Data Health Dashboard in Settings — domain status, row counts, freshness, dependent features | 8 days | **DONE** — `DataHealthDashboard.jsx` + nav route |
 | Progressive onboarding flow — guided wizard recommending CRM → Tee Sheet → POS with projected ROI | 5 days | Onboarding wizard API + UI built; needs data-source gating |
 | Agent "dry run" mode — simulate actions with partial data to show buyer potential | 10 days | TODO |
 | Automated staleness alerts — banner when domain data exceeds freshness threshold | 3 days | TODO |
