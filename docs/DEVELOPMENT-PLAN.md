@@ -200,6 +200,58 @@ Once real data is flowing (Tracks 1-2 complete), execute this sequence to go liv
 
 ---
 
+## PLAYBOOKS & AUTOMATION — AUDIT ROADMAP
+
+From the independent Playbooks & Automations module audit (March 21, 2026). Current ratings: Layer-3 Alignment B+, ROI Story A-, Buyer Confidence B.
+
+### Short-Term (0-3 months) — Ship Before or During Pilot
+
+| ID | Improvement | Effort | Impact | Status |
+|----|------------|--------|--------|--------|
+| S1 | **Playbook Performance Summary panel** — Aggregated stats (total activated, approval rate, cumulative impact, outcome success) at top of Playbooks tab | Low | High | TODO |
+| S2 | **ROI methodology disclosure** — "How is this calculated?" tooltip on every dollar-impact figure explaining inputs (member dues, save rate, archetype weighting, confidence) | Low | High | TODO |
+| S3 | **Functional search** — Cross-tab filtering across playbook templates, inbox actions, AI agents, and action library with highlighted matches | Low-Med | Medium | TODO |
+| S4 | **Pause/Resume toggle** — For Response Plans and AI agents, with optional scheduled resume date. Needed for tournament weeks and seasonal transitions | Low | Medium | TODO |
+
+### Mid-Term (3-6 months) — Ship for Operator Adoption
+
+| ID | Improvement | Effort | Impact | Status |
+|----|------------|--------|--------|--------|
+| M1 | **Automation Dashboard** — Board-ready single page: coverage %, actions by week, approval rate by agent, cumulative protected revenue (actual vs projected), top playbooks by outcome | Medium | Very High | TODO |
+| M2 | **Role-based access control** — GM/Owner (full), Department Head (approve own domain, view-only others), Staff (view-only). RBAC already in `api/auth.js` with 7 roles | Medium | High | Auth API built |
+| M3 | **Audit log** — Every approve, dismiss, activate, configure, edit with timestamp, user, before/after state. Activity tracking already in `activityService.js` | Medium | High | Tracking exists, viewer needed |
+| M4 | **Experience-Outcome Links playbook** — "Service Quality Impact Analysis" proving complaint resolution → spend, event attendance → renewal, interaction quality → dining. Fills weakest Layer-3 pillar | Medium | High | TODO |
+| M5 | **Notification management panel** — Per-agent channel toggles, batch delivery windows (morning digest at 7 AM), priority-only alerting, escalation rules. `api/notifications.js` has preferences table | Medium | Med-High | API built, UI needed |
+
+### Long-Term (6-12 months) — Ship for Differentiation
+
+| ID | Improvement | Effort | Impact | Status |
+|----|------------|--------|--------|--------|
+| L1 | **A/B testing for playbooks** — Treatment/control group split, run for N weeks, statistically valid results. Converts observational track records into causal evidence | High | Very High | TODO |
+| L2 | **Playbook versioning + rollback** — Version history for every archetype playbook, response plan, and agent config. Diff view + "Restore this version" | Med-High | Medium | TODO |
+| L3 | **Pace-of-Play Revenue Playbook** — Integrates round-time data with tee-sheet utilization and F&B capture to model revenue impact of pace improvements. Addresses explicit Layer-3 gap | High | Medium | TODO |
+
+### Noise to Address
+
+| ID | Issue | Action |
+|----|-------|--------|
+| N1 | Service Save Protocol appears in both Response Plans and Playbook Templates | Unify or explicitly label distinct purposes |
+| N2 | Archetype Playbooks vs Playbook Templates relationship unclear | Add explanatory text: "Archetype Playbooks configure per-segment actions. Response Plans trigger automated multi-step protocols." |
+| N3 | "See this in action" flows take vertical space on repeat visits | Already collapsed by default; consider hiding entirely after first session |
+| N4 | Action Library sub-tab duplicates embedded action list in Archetype Playbooks | Add channel/timing/effectiveness data to embedded view, or remove embedded Action Library section |
+
+### Audit KPIs to Track
+
+**Operational Efficiency:** Time from signal detection to GM decision (<4 hrs target), inbox processing time (<15 min target), actions processed within 24 hrs (90%+ target)
+
+**Retention Impact:** At-risk members retained per quarter, annualized dues protected, churn rate with vs without playbook coverage
+
+**Revenue Impact:** Incremental revenue from revenue playbooks, dining capture rate from Dormancy Recovery (0% → 15%+ target), tee-sheet utilization on active playbook days
+
+**Adoption & Trust:** Approve-to-dismiss ratio by agent (3:1+ target), active playbooks as % of templates, agent active-vs-idle ratio trending up, repeat activation rate
+
+---
+
 ## POST-LAUNCH REMAINING ITEMS
 
 Items that enhance the product but are not required for pilot launch:
