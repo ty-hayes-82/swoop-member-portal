@@ -38,6 +38,7 @@ import ActivityHistoryPage from '@/features/activity-history/ActivityHistoryPage
 import AutomationDashboard from '@/features/automation-dashboard/AutomationDashboard';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 import { AdminDashboard } from '@/features/admin';
+import LoginPage from '@/features/login/LoginPage';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
@@ -148,7 +149,23 @@ function AppShell() {
               textAlign: 'center',
             }}
           >
-            Swoop Golf · Integrated Intelligence for Private Clubs · Demo Environment · Oakmont Hills CC · January 2026
+            Swoop Golf · Integrated Intelligence for Private Clubs
+            {(() => {
+              try {
+                const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+                const clubId = localStorage.getItem('swoop_club_id');
+                return (
+                  <span>
+                    {user.name ? ` · ${user.name}` : ''}
+                    {clubId && clubId !== 'demo' ? ` · ${clubId}` : ' · Demo Environment'}
+                    <button
+                      onClick={() => { localStorage.removeItem('swoop_auth_user'); localStorage.removeItem('swoop_auth_token'); localStorage.removeItem('swoop_club_id'); window.location.reload(); }}
+                      style={{ marginLeft: 12, background: 'none', border: 'none', color: theme.colors.accent, cursor: 'pointer', fontSize: theme.fontSize.xs, fontWeight: 600 }}
+                    >Sign Out</button>
+                  </span>
+                );
+              } catch { return ' · Demo Environment'; }
+            })()}
           </footer>
         </div>
       </div>
@@ -187,6 +204,14 @@ function RouterViews() {
 }
 
 export default function App() {
+  const [authed, setAuthed] = useState(() => {
+    try { return !!localStorage.getItem('swoop_auth_user'); } catch { return false; }
+  });
+
+  if (!authed) {
+    return <LoginPage onLogin={() => { setAuthed(true); window.location.reload(); }} />;
+  }
+
   return (
     <BrowserRouter>
       <DataProvider>
