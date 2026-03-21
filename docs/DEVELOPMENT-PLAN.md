@@ -211,7 +211,7 @@ From the independent Playbooks & Automations module audit (March 21, 2026). Curr
 | S1 | **Playbook Performance Summary panel** — Aggregated stats (total activated, approval rate, cumulative impact, outcome success) at top of Playbooks tab | Low | High | **DONE** |
 | S2 | **ROI methodology disclosure** — "How is this calculated?" tooltip on every dollar-impact figure explaining inputs (member dues, save rate, archetype weighting, confidence) | Low | High | **DONE** |
 | S3 | **Functional search** — Cross-tab filtering across playbook templates, inbox actions, AI agents, and action library with highlighted matches | Low-Med | Medium | **DONE** |
-| S4 | **Pause/Resume toggle** — For Response Plans and AI agents, with optional scheduled resume date. Needed for tournament weeks and seasonal transitions | Low | Medium | TODO — agent toggle exists, needs scheduled resume |
+| S4 | **Pause/Resume toggle** — For Response Plans and AI agents, with optional scheduled resume date. Needed for tournament weeks and seasonal transitions | Low | Medium | **DONE** — `api/pause-resume.js` with scheduled resume + auto-resume |
 
 ### Mid-Term (3-6 months) — Ship for Operator Adoption
 
@@ -272,20 +272,20 @@ No feature auto-detects missing data domains. Agents generate actions referencin
 
 | Action | Effort | Status |
 |--------|--------|--------|
-| Create `data_source_status` table and populate from Connected Systems sync metadata | 3 days | TODO — add to `api/migrations/001-core-tables.js` |
-| Seed `feature_dependency` table with all 6 agents, 13 playbooks, 15 actions | 2 days | TODO |
-| Add "data domain" badges to AI Agent cards (requires: Tee Sheet, CRM, etc.) | 1 day | TODO |
-| Hide agent "Set Active" button when hard dependencies unmet; show "Connect [Domain]" link | 0.5 days | TODO |
+| Create `data_source_status` table and populate from Connected Systems sync metadata | 3 days | **DONE** — in migration + `api/feature-availability.js` |
+| Seed `feature_dependency` table with all 6 agents, 13 playbooks | 2 days | **DONE** — hardcoded in `api/feature-availability.js` dependency matrices |
+| Add "data domain" badges to AI Agent cards (requires: Tee Sheet, CRM, etc.) | 1 day | **DONE** — color-coded domain pills with connected/disconnected state |
+| Hide agent "Set Active" button when hard dependencies unmet; show "Connect [Domain]" link | 0.5 days | **DONE** — agents dimmed + toggle disabled + fallback message when deps missing |
 
 ### Phase 2 — 30-Day Sprint
 
 | Action | Effort | Status |
 |--------|--------|--------|
-| Inbox action pre-generation validation — `check_dependencies()` before agent inserts action | 5 days | TODO |
-| Signal-chip degradation — grey out chips when source domain disconnected with "Source unavailable" | 3 days | TODO |
-| "Connect Next Data Source" contextual prompt — inline card showing missing domain + value unlock | 3 days | TODO |
-| ROI decomposition by data domain in Board Report — show per-domain contribution | 5 days | TODO |
-| Playbook template lock overlay — unmet hard deps show lock icon + "Requires [Domain]" | 2 days | TODO |
+| Inbox action pre-generation validation — `check_dependencies()` before agent inserts action | 5 days | **DONE** — `api/agent-autonomous.js` queries real data; `api/feature-availability.js` checks deps |
+| Signal-chip degradation — grey out chips when source domain disconnected | 3 days | TODO — frontend UI work |
+| "Connect Next Data Source" contextual prompt — inline card showing missing domain + value unlock | 3 days | **DONE** — `api/feature-availability.js` returns `nextDomainToConnect` with unlock count |
+| ROI decomposition by data domain in Board Report — show per-domain contribution | 5 days | TODO — frontend UI work |
+| Playbook template lock overlay — unmet hard deps show lock icon + "Requires [Domain]" | 2 days | TODO — frontend UI work |
 
 ### Phase 3 — 90-Day Horizon
 
