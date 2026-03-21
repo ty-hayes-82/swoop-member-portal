@@ -312,16 +312,28 @@ function PlaybookPerformanceSummary() {
 
   // Estimate cumulative impact from approved actions
   const cumulativeImpact = approved.reduce((sum, a) => {
-    const match = (a.impactMetric || '').match(/\$[\d,]+/);
-    if (match) return sum + Number(match[0].replace(/[$,]/g, ''));
+    const metric = a.impactMetric || '';
+    // Match $XXK, $XX,XXX, $X.XK patterns
+    const kMatch = metric.match(/\$([\d.]+)\s*K/i);
+    if (kMatch) return sum + Number(kMatch[1]) * 1000;
+    const fullMatch = metric.match(/\$([\d,]+)/);
+    if (fullMatch) {
+      const val = Number(fullMatch[1].replace(/,/g, ''));
+      return sum + (val < 100 ? val * 1000 : val); // Assume small numbers are in thousands
+    }
     return sum;
   }, 0);
+
+  // Format as $XXK for display
+  const impactDisplay = cumulativeImpact > 0
+    ? (cumulativeImpact >= 1000 ? `$${Math.round(cumulativeImpact / 1000)}K` : `$${cumulativeImpact.toLocaleString()}`)
+    : '$168K';
 
   const stats = [
     { label: 'Active Playbooks', value: '7', sub: 'of 13 templates' },
     { label: 'Actions Approved', value: String(approved.length), sub: `${approvalRate}% approval rate` },
     { label: 'Pending Review', value: String(pending.length), sub: 'awaiting GM decision' },
-    { label: 'Est. Impact', value: cumulativeImpact > 0 ? `$${cumulativeImpact.toLocaleString()}` : '$168K', sub: 'cumulative protected', tooltip: true },
+    { label: 'Est. Impact', value: impactDisplay, sub: 'cumulative protected', tooltip: true },
   ];
 
   return (

@@ -38,6 +38,7 @@ import ActivityHistoryPage from '@/features/activity-history/ActivityHistoryPage
 import AutomationDashboard from '@/features/automation-dashboard/AutomationDashboard';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 import { AdminDashboard } from '@/features/admin';
+import AdminHub from '@/features/admin/AdminHub';
 import LoginPage from '@/features/login/LoginPage';
 import { theme } from '@/config/theme';
 
@@ -73,7 +74,8 @@ const ROUTES = {
   'actions': ActionsPage,
   'data-model': DataModelPage,
   'member-profile': MemberProfilePage,
-  'admin': AdminDashboard,
+  'admin': AdminHub,
+  'admin-legacy': AdminDashboard,
   landing: LandingRedirect,
 };
 

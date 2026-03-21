@@ -318,6 +318,65 @@ When a club connects data sources in this order, cumulative value increases:
 
 ---
 
+## CONNECTED-INSIGHTS AUDIT — HIGH PRIORITY FIXES
+
+From the Connected-Insights Audit (March 21, 2026). Overall grade: A-. Intelligence layer exceptional; data-infrastructure pages need work.
+
+### Sprint 1-2: High Priority
+
+| # | Fix | Status |
+|---|-----|--------|
+| H1 | **Fix $19 Est. Impact display** — should be $19K on Playbooks summary | TODO |
+| H2 | **Functional Data Health page** — pipeline status for connected systems: last sync, row count, errors | **DONE** — `DataHealthDashboard.jsx` built |
+| H3 | **Functional Connected Systems page** — tile view of 30 integrations, 17 connected | Already exists at `integrations` route |
+| H4 | **Resolve Complaints data inconsistency** — complaints referenced but source shows "Not Connected" | TODO — connect complaints in demo data |
+| H5 | **Admin consolidation Phase 1** — single Admin entry with Data Hub, Health & Quality, Activity Log sub-pages | TODO |
+
+### Sprint 3-4: Medium Priority
+
+| # | Fix | Status |
+|---|-----|--------|
+| M1 | **Peer benchmarking in Board Report** — 3+ metrics with industry comparison | `api/benchmarks-live.js` has industry averages; frontend partially wired |
+| M2 | **Team workload view** — pending actions per staff member with completion rates | TODO |
+| M3 | **Weather data source visibility** — show provider in Connected Systems | TODO |
+| M4 | **Conditionally hide Getting Started checklist** — hide when system >30 days old | **DONE** — `useProductMaturity` hook handles this |
+
+### Sprint 5+: Lower Priority
+
+| # | Fix | Status |
+|---|-----|--------|
+| L1 | Action card export/share button | TODO |
+| L2 | Notification preference panel | **DONE** — `NotificationSettings.jsx` |
+| L3 | "What If" scenario modeling on Revenue page | Scenario sliders exist in `ScenarioModeling.jsx` |
+| L4 | De-duplicate Pamela Ulrich complaint surfaces (max 2, not 3) | TODO |
+
+### Admin Consolidation Roadmap
+
+| Phase | Scope | Status |
+|-------|-------|--------|
+| 1 | Create unified Admin shell with 3 tab containers; migrate Data Upload | TODO |
+| 2 | Build Connected Sources tiles + Data Gaps view | TODO |
+| 3 | Build Pipeline Monitor + merge Data Model Explorer | TODO |
+| 4 | Build consolidated Activity Log (imports, agent actions, system events) | TODO |
+| 5 | QA + retire old sidebar items | TODO |
+
+### Connected Insights FAQ (10 GM Questions)
+
+These 10 questions and their data-source requirements are documented in the full audit. Each maps to specific Swoop features:
+
+1. "Which members are quietly disengaging?" → First Domino Alert
+2. "A member filed a complaint — what's at stake?" → Service Escalation action
+3. "Saturday cancellation — who from waitlist?" → Waitlist Priority action
+4. "Windy weekend — Grill Room staffing?" → Staffing Alert action
+5. "98 golfers never eat — capture that spend?" → Dining Dormancy Recovery
+6. "Prove Swoop is worth it to the board?" → Board Report 16:1 ROI
+7. "30 new members — building habits or drifting?" → New Member 90-Day Integration
+8. "Biggest revenue opportunity right now?" → Revenue cockpit $30K/mo
+9. "16 Snowbirds returning — welcoming them?" → Snowbird Season-Opener
+10. "Amplify Social Butterfly members?" → Social Butterfly Event Amplifier
+
+---
+
 ## POST-LAUNCH REMAINING ITEMS
 
 Items that enhance the product but are not required for pilot launch:
