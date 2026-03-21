@@ -87,13 +87,11 @@ export default async function handler(req, res) {
     try {
       if (importType === 'members') {
         const memberId = row.external_id || `mbr_${Date.now()}_${i}`;
-        const memberName = `${row.first_name} ${row.last_name}`;
         await sql`
-          INSERT INTO members (member_id, club_id, external_id, first_name, last_name, name, member_number, email, phone, membership_type, annual_dues, join_date, household_id, data_source, status)
-          VALUES (${memberId}, ${clubId}, ${row.external_id || null}, ${row.first_name}, ${row.last_name}, ${memberName}, ${row.external_id || memberId}, ${row.email || null}, ${row.phone || null}, ${row.membership_type || null}, ${row.annual_dues ? Number(row.annual_dues) : null}, ${row.join_date || null}, ${row.household_id || null}, 'csv_import', 'active')
+          INSERT INTO members (member_id, club_id, external_id, first_name, last_name, email, phone, membership_type, annual_dues, join_date, household_id, data_source, status)
+          VALUES (${memberId}, ${clubId}, ${row.external_id || null}, ${row.first_name}, ${row.last_name}, ${row.email || null}, ${row.phone || null}, ${row.membership_type || null}, ${row.annual_dues ? Number(row.annual_dues) : null}, ${row.join_date || null}, ${row.household_id || null}, 'csv_import', 'active')
           ON CONFLICT (member_id) DO UPDATE SET
             first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
-            name = EXCLUDED.name,
             email = COALESCE(EXCLUDED.email, members.email),
             phone = COALESCE(EXCLUDED.phone, members.phone),
             membership_type = COALESCE(EXCLUDED.membership_type, members.membership_type),
