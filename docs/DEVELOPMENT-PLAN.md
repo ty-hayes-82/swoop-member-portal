@@ -1,412 +1,158 @@
-# SWOOP GOLF — PHASED DEVELOPMENT PLAN
+# SWOOP GOLF — DEVELOPMENT PLAN
 
-**From Current State to Market-Ready Product | Sprint-by-Sprint Execution Plan**
+**From Current State to Market-Ready Product**
 
 Last Updated: March 21, 2026
-Status: Active — ALL Backend APIs Built (Sprints 1-13). Frontend wiring + vendor integrations remaining.
-Assumption: 2-week sprints, 2-3 engineers + 1 designer
-
-> **Note:** PostgreSQL database is already provisioned and operational. Vercel Postgres is in use with existing schema for members, feedback, engagement, and other tables. The frontend demo environment at swoop-member-portal.vercel.app is live with static fallback data. This plan focuses on wiring real data through existing infrastructure and building the backend execution layer.
+Status: Backend APIs complete. Frontend wiring, vendor integrations, and pilot launch remaining.
 
 ---
 
-## PLAN OVERVIEW
+## WHAT'S BUILT
 
-| Phase | Sprints | Weeks | Goal |
-|-------|---------|-------|------|
-| **Phase 1 — Launch Blockers** | 1-6 | 1-12 | Real data flowing, real health scores computing, real actions executing. One pilot club live. |
-| **Phase 2 — Operator Adoption** | 7-10 | 13-20 | Daily GM usage, team adoption, retention after first sale. |
-| **Phase 3 — Differentiation** | 11-14 | 21-28 | Category-defining. Competitive moat. Expansion revenue. |
+All 15 backend API endpoints are built and deployed to dev. The frontend demo environment is live with static fallback data. The mobile experience is polished to A-grade.
 
----
+### Backend APIs (Complete)
 
-## PHASE 1 — LAUNCH BLOCKERS (Sprints 1-6)
+| API | Purpose |
+|-----|---------|
+| `api/migrations/001-core-tables.js` | 11 core tables + 9 indexes (ready to deploy) |
+| `api/auth.js` | Token-based auth with 7-role RBAC |
+| `api/import-csv.js` | CSV import for members, rounds, transactions, complaints |
+| `api/sync-status.js` | Data sync monitoring dashboard |
+| `api/compute-health-scores.js` | 4-dimension health scoring + archetype classification |
+| `api/execute-action.js` | Email/SMS/task/call/comp execution with templates |
+| `api/dashboard-live.js` | Live dashboard data replacing all hardcoded values |
+| `api/track-outcomes.js` | Intervention outcome tracking + Member Save detection |
+| `api/notifications.js` | Morning digest, escalation engine, SLA breach detection |
+| `api/compute-correlations.js` | 5 cross-domain correlations from real data |
+| `api/onboard-club.js` | 9-step club onboarding wizard |
+| `api/execute-playbook.js` | Sequenced playbook execution with step tracking |
+| `api/predict-churn.js` | 30/60/90 day churn probability with risk factors |
+| `api/agent-autonomous.js` | 6 autonomous agents with auto-execute framework |
+| `api/benchmarks-live.js` | Live club vs network vs industry benchmarking |
 
-**Goal:** Real data flowing, real health scores computing, real actions executing. One pilot club live.
-
----
-
-### Sprint 1 (Weeks 1-2): Database Foundation & First Integration
-
-**Theme:** Wire existing Postgres infrastructure and connect the first data source.
-
-#### Backend Infrastructure
-- [x] Design core data models on existing Postgres: `members`, `rounds`, `transactions`, `complaints`, `health_scores`, `actions`, `interventions` — **DONE: `api/migrations/001-core-tables.js`**
-- [x] Build authentication layer with role-based access (GM, Assistant GM, F&B Director, Head Pro, Membership Director, Controller, View Only) — **DONE: `api/auth.js` with token-based sessions, RBAC, login/validate/logout**
-- [x] Set up API framework — **Vercel serverless functions already in use, extended with new endpoints**
-- [ ] Deploy staging environment with CI/CD pipeline — **Vercel auto-deploy is operational (dev branch → dev URL)**
-- [ ] Create tenant provisioning flow for onboarding new clubs
-
-#### First Integration: CRM/Membership System
-- [ ] Build Jonas Club API connector (member profiles, dues, tenure, household data) — **BLOCKED: Needs Jonas API credentials from pilot club**
-- [ ] Implement nightly data sync job with error handling and retry logic
-- [ ] Map Jonas fields to Swoop member schema (name, email, phone, join date, membership type, annual dues, family members)
-- [x] Build CSV import pipeline as fallback for clubs without API access — **DONE: `api/import-csv.js` with validation, error tracking, upsert logic**
-- [ ] Validate: 300+ member records imported with profiles, dues amounts, and membership types populated
-
-#### New APIs Built
-- `api/migrations/001-core-tables.js` — Idempotent migration creating 11 core tables + 9 indexes
-- `api/import-csv.js` — CSV import endpoint for members, rounds, transactions, complaints with row-level validation
-- `api/sync-status.js` — Data sync status dashboard API (latest sync per source, member count, import history)
-
-#### Acceptance Criteria
-- [x] Database schema designed with all core tables — **Migration ready to deploy**
-- [x] API framework deployed to staging — **Vercel serverless operational**
-- [ ] Real member data from one pilot club imported and viewable in All Members tab
-- [x] CSV import works end-to-end with validation errors surfaced to user — **API built, needs frontend wiring**
-
-#### Blockers Requiring Ty
-- **Pilot club selection** — Need a signed design partner agreement
-- **Jonas Club API credentials** — Need documentation and API keys from pilot club's CRM vendor
-- **Run migration** — Deploy `api/migrations/001-core-tables.js` to create tables in production Postgres
-- **Email domain verification** — Start SPF/DKIM setup for Sprint 4 email sending (SendGrid/Postmark account needed)
+### Frontend (Complete)
+- Desktop: Today, Members, Revenue, Playbooks (restructured), Board Report, Admin
+- Mobile (`/#/m`): Today, Actions, Members, Settings — all A-grade
+- Playbooks & Automation: merged tabs, contextual guides, action library, outcome indicators
 
 ---
 
-### Sprint 2 (Weeks 3-4): Tee Sheet + POS Integrations
+## WHAT REMAINS
 
-**Theme:** Connect the two remaining critical data sources to enable cross-domain intelligence.
-
-#### Tee Sheet Integration (ForeTees)
-- [ ] Build ForeTees API connector (rounds, tee times, cancellations, no-shows, pace data)
-- [ ] Implement data sync: booking history, cancellation patterns, round frequency per member
-- [ ] Map tee sheet data to member activity model (`rounds_played`, `last_round_date`, `preferred_times`, `cancellation_rate`, `pace_of_play`)
-- [ ] Build waitlist data ingestion for the Waitlist & Tee Sheet tab
-
-#### POS Integration (Jonas/Northstar/Toast)
-- [ ] Build POS API connector for pilot club's system (checks, covers, item-level detail, staff attribution)
-- [ ] Map POS data to member spend model (`dining_frequency`, `avg_check`, `post_round_dining_rate`, `outlet_mix`)
-- [ ] Build F&B transaction ingestion with member attribution (match POS ticket to member via account number)
-- [ ] Implement CSV fallback for POS data import using existing template
-
-#### Acceptance Criteria
-- [ ] Three data sources connected for pilot club (CRM + Tee Sheet + POS)
-- [ ] Member records enriched with round history and dining spend
-- [ ] Data syncs nightly without manual intervention
-- [ ] Connected Systems page shows real sync timestamps
+Work is organized into 4 tracks that can run in parallel.
 
 ---
 
-### Sprint 3 (Weeks 5-6): Health Score Engine
+### TRACK 1: Infrastructure (Ty-Dependent)
 
-**Theme:** Build the core intelligence layer that powers every dashboard in the product.
+These items require external accounts, credentials, or decisions. Nothing else can proceed to "real data" without them.
 
-> **API Built:** `api/compute-health-scores.js` — Full computation engine with per-dimension scoring (golf, dining, email, events), archetype classification, tier assignment, delta detection, and 10+ point drop alerts. Ready to run against real data.
+| # | Item | What's Needed | Who |
+|---|------|---------------|-----|
+| 1 | **Run database migration** | Hit `POST /api/migrations/001-core-tables` on production to create tables | Ty |
+| 2 | **Secure pilot club** | Signed design partner agreement with one club willing to share data | Ty |
+| 3 | **Jonas Club API credentials** | API docs + keys from pilot club's CRM vendor | Ty + Pilot Club |
+| 4 | **ForeTees API credentials** | API docs + keys for tee sheet integration | Ty + Pilot Club |
+| 5 | **POS system API credentials** | API docs + keys (Jonas POS, Northstar, or Toast) | Ty + Pilot Club |
+| 6 | **SendGrid or Postmark account** | For sending emails on behalf of clubs. Start domain verification (SPF/DKIM) immediately — takes 1-2 weeks to warm up | Ty |
+| 7 | **Twilio account** | For sending SMS from quick actions and notifications | Ty |
+| 8 | **Stripe account** | For billing integration (Sprint 14, but setup takes time) | Ty |
 
-- [x] Implement health score algorithm: weighted composite of Golf Engagement (30%), Dining Frequency (25%), Email Engagement (25%), Event Attendance (20%) — **DONE**
-- [ ] Build score computation job that runs after each data sync and stores historical scores
-- [ ] Implement member archetype classification engine (Die-Hard Golfer, Social Butterfly, Balanced Active, Weekend Warrior, Declining, New Member, Ghost, Snowbird) based on behavioral patterns
-- [ ] Build health tier assignment logic: Healthy (67+), Watch (45-66), At Risk (25-44), Critical (0-24)
-- [ ] Create health score change detection: flag members whose score dropped 10+ points in 30 days
-- [ ] Build the "First Domino Alert" detection: identify members showing earliest decay signal across email open rates declining while other metrics hold
-- [ ] Wire health scores to Members > At-Risk tab with real computed data
-- [ ] Wire health tier counts to the dashboard cards
-- [ ] Build archetype filter logic for All Members and Insights tabs
-- [ ] Implement the Resignation Sequence model: average timeline from first signal to resignation based on historical club data
-
-#### Acceptance Criteria
-- [ ] Every member has a computed health score based on real data
-- [ ] Scores update when new data syncs
-- [ ] Members page shows real names, real scores, real archetypes
-- [ ] At-Risk tab ranks members by actual risk
-- [ ] Health score breakdown (4 dimensions) reflects real engagement data in member snapshot sidebar
+**Critical path:** Items 1-2 are the gate. Once the migration runs and a pilot club is secured, everything else unblocks.
 
 ---
 
-### Sprint 4 (Weeks 7-8): Action Execution Layer
+### TRACK 2: Vendor Integration Connectors
 
-**Theme:** Make the "last mile" work. When a GM clicks an action, something real happens.
+Build once pilot club credentials are available. Each connector follows the same pattern: authenticate → fetch data → map to Swoop schema → upsert into Postgres → log sync status.
 
-> **API Built:** `api/execute-action.js` — Action execution endpoint supporting email, SMS, staff tasks, call scheduling, and comp offers. Includes email templates (personal note, recovery, event invite, comp offer), intervention logging, and outcome tracking setup. Email/SMS sending are stubbed with TODO markers for SendGrid/Twilio wiring.
+| # | Connector | Data It Provides | Blocked On |
+|---|-----------|-----------------|------------|
+| 1 | **Jonas Club CRM** | Member profiles, dues, tenure, household data, complaints | Jonas API credentials |
+| 2 | **ForeTees Tee Sheet** | Rounds, tee times, cancellations, no-shows, pace data, waitlist | ForeTees API credentials |
+| 3 | **POS (Jonas/Northstar/Toast)** | Dining transactions, covers, item-level detail, staff attribution | POS API credentials |
+| 4 | **Nightly sync scheduler** | Cron job that runs all connectors + triggers health score recomputation | Connectors 1-3 built |
+| 5 | **SendGrid email sending** | Wire `api/execute-action.js` email execution to actually deliver | SendGrid account |
+| 6 | **Twilio SMS sending** | Wire `api/execute-action.js` SMS execution to actually deliver | Twilio account |
 
-- [x] Integrate email sending via SendGrid or Postmark: wire "Send via email" and "Draft personal note" to actually deliver emails — **API BUILT, needs SendGrid credentials to wire**
-- [ ] Build email template system: personal notes, recovery outreach, event invites, re-engagement messages with club branding
-- [ ] Integrate SMS sending via Twilio: wire "Send SMS" quick action to deliver text messages
-- [ ] Build staff notification system: when GM assigns action to staff, notify via email with member context and recommended action
-- [ ] Wire "Schedule a call" to create a tracked task assigned to specific staff member with due date and member profile link
-- [ ] Wire "Approve" button on pending actions to execute the proposed action (send email, create task, flag record)
-- [ ] Wire "Dismiss" button to log the dismissal with optional reason in Activity History
-- [ ] Build action confirmation dialogs: show member name, action type, and impact estimate before executing
-- [ ] Implement toast notifications for all completed actions
-- [ ] Wire all action executions to Activity History with timestamps, actor, and action type
-
-#### Acceptance Criteria
-- [ ] GM clicks "Send via email" and member receives the email within 2 minutes
-- [ ] GM clicks "Approve" on a pending action and the assigned staff member receives a notification
-- [ ] Every action logs to Activity History with real timestamps
-- [ ] Confirmation dialogs appear before irreversible actions
-- [ ] Toast notifications confirm completion
+**Fallback:** CSV import (`api/import-csv.js`) is already built and works for any data source. If API access is slow, the pilot club can go live on CSV imports while connectors are built.
 
 ---
 
-### Sprint 5 (Weeks 9-10): Today Page + Revenue Dashboards Wired to Real Data
+### TRACK 3: Frontend Wiring
 
-**Theme:** Replace all hardcoded data on the Today page and Revenue & Operations page with computed, real-time values.
+Switch the frontend from static fallback data to live API responses. The service layer (`src/services/`) already has an `_init()` hydration pattern — each service fetches from `/api/*` and falls back to static data. The APIs are built; the services need to consume them.
 
-> **API Built:** `api/dashboard-live.js` — Live dashboard API returning computed health tier counts, dues at risk, week-over-week comparisons (revenue, rounds, complaints), recent intervention outcomes, and board report summary. All from real Postgres queries. Frontend wiring needed.
+| # | Frontend Change | Files | API It Consumes |
+|---|----------------|-------|-----------------|
+| 1 | **Members page → real health scores** | `memberService.js`, `HealthOverview.jsx`, `MembersView.jsx` | `api/dashboard-live.js`, `api/compute-health-scores.js` |
+| 2 | **Today dashboard → real data** | `TodayView.jsx`, `RevenueSummaryCard.jsx`, `WeekOverWeekGrid.jsx`, `RecentInterventions.jsx` | `api/dashboard-live.js` |
+| 3 | **Health score breakdown → real dimensions** | `MemberProfileDrawer.jsx` (lines 474-494) | Replace random Math with real `golf_score`, `dining_score`, `email_score`, `event_score` from `health_scores` table |
+| 4 | **Actions → real execution** | `AgentActionCard.jsx`, `InboxTab.jsx` | Wire Approve button to `api/execute-action.js` instead of just updating localStorage |
+| 5 | **Insights → real correlations** | `CorrelationsTab.jsx`, `TouchpointsTab.jsx` | `api/compute-correlations.js` |
+| 6 | **Board Report → real outcomes** | `BoardReport.jsx`, `boardReportService.js` | `api/track-outcomes.js`, `api/benchmarks-live.js` |
+| 7 | **Playbooks → real execution** | `PlaybooksPage.jsx`, `MemberPlaybooks.jsx` | Wire "Activate" to `api/execute-playbook.js` |
+| 8 | **Notifications → real delivery** | New: notification bell feed, morning digest display | `api/notifications.js` |
+| 9 | **Churn predictions → member profile** | `MemberProfileDrawer.jsx` | Add "73% resignation risk" from `api/predict-churn.js` |
+| 10 | **Agent config → real settings** | `AgentsTab.jsx`, `AgentConfigDrawer` | Wire Configure to `api/agent-autonomous.js` agent_configs |
+| 11 | **Onboarding wizard UI** | New component in Admin section | `api/onboard-club.js` |
+| 12 | **Auth → real login** | New login page, session context provider | `api/auth.js` |
 
-#### Today Page
-- [x] Wire "Real-Time Cockpit" to computed data: new at-risk members, new complaints, actions completed, health movements since last visit — **API DONE, frontend wiring needed**
-- [ ] Build "Since your last visit" detection using session timestamps
-- [ ] Wire complaint alert banner to real complaint data from CRM/POS with aging timer
-- [ ] Build Pending Actions feed from the rules engine: surface actions based on health score changes, complaints, cancellations, waitlist openings
-- [ ] Wire Revenue Snapshot to computed totals from real data
-- [ ] Wire Week-Over-Week Trends to computed comparisons from real transaction and round data
-- [ ] Build "Prove It: Recent Interventions" section from tracked action outcomes
-
-#### Revenue & Operations Page
-- [ ] Wire Total Revenue Opportunity to computed values from real data across all four categories
-- [ ] Build revenue leakage detection: identify pace-of-play impact on post-round dining using real tee sheet + POS data
-- [ ] Wire Scenario Modeling sliders to recalculate projections based on actual club baselines (not hardcoded)
-- [ ] Wire Spend Potential by Archetype to real member spend data with computed untapped revenue
-- [ ] Wire Bottleneck Holes analysis to real pace-of-play data from tee sheet
-- [ ] Build Top 5 Actions to Capture Revenue from rules engine based on actual opportunity sizing
-
-#### Acceptance Criteria
-- [ ] Today page loads with real data reflecting overnight changes
-- [ ] Revenue page shows computed opportunity from real club data
-- [ ] Scenario sliders recalculate from actual baselines
-- [ ] No hardcoded values remain on either page
-- [ ] GM can open the product in the morning and see what actually changed since yesterday
+**No blockers.** This track can start immediately and run in parallel with vendor integrations.
 
 ---
 
-### Sprint 6 (Weeks 11-12): Outcome Tracking + Mobile + Pilot Launch
+### TRACK 4: Pilot Club Launch Sequence
 
-**Theme:** Close the proof loop and get the pilot club live.
+Once real data is flowing (Tracks 1-2 complete), execute this sequence to go live:
 
-> **API Built:** `api/track-outcomes.js` — Outcome tracking engine that measures intervention effectiveness 7-60 days post-action. Auto-flags "Member Saves" when health scores improve, calculates dues protected and revenue recovered. Feeds Board Report automatically.
-
-- [x] Build outcome tracking engine: after an intervention, monitor member's subsequent behavior (tee time bookings, dining visits, email opens) for 30-60 days — **DONE**
-- [ ] Implement "Member Save" detection: if an at-risk member's health score improves after intervention, auto-flag as a save with evidence chain
-- [ ] Wire Board Report to real tracked data: Members Saved, Dues Protected, Revenue Recovered
-- [ ] Build ROI calculator from real investment (subscription + staff time) vs. real returns (protected dues + recovered revenue)
-- [ ] Verify mobile experience at `/#/m` works with real data (already built, needs data validation)
-- [ ] Implement Print/Export for Today's Briefing and Board Report as clean PDFs
-- [ ] QA full end-to-end flow: data ingestion → health score computation → risk alert surfaced → action approved → email sent → outcome tracked → board report updated
-- [ ] Deploy production environment for pilot club
-- [ ] Conduct pilot club onboarding: connect systems, import data, calibrate health scores, train GM and department heads
-
-#### Acceptance Criteria (Phase 1 Exit)
-- [ ] Pilot club is live with real data on all pages
-- [ ] Full signal-to-proof loop works end-to-end
-- [ ] Board Report generates from real tracked outcomes
-- [ ] Today page is usable on mobile with real data
-- [ ] Product is demonstrable to prospects using a real live club (with permission) instead of demo environment
-- [ ] **Product is sellable**
+| Step | Action | Duration | Acceptance |
+|------|--------|----------|------------|
+| 1 | Import member data (CSV or API) | 1 day | 300+ members visible in All Members tab |
+| 2 | Import round history (CSV or API) | 1 day | Round frequency visible per member |
+| 3 | Import dining transactions (CSV or API) | 1 day | Dining spend visible per member |
+| 4 | Run health score computation | 1 hour | Every member has a score, tier, and archetype |
+| 5 | GM reviews initial scores | 2-3 days | GM flags obvious misclassifications; recalibrate thresholds if needed |
+| 6 | Run churn predictions | 1 hour | Every member has 30/60/90 day resignation probability |
+| 7 | Run correlation engine | 1 hour | Insights tab shows real computed correlations |
+| 8 | Invite GM + department heads | 1 day | Users created with appropriate roles |
+| 9 | Configure notifications | 1 hour | Morning digest time, channels, escalation preferences |
+| 10 | Run autonomous agent cycle | 1 hour | Inbox populated with AI-generated actions from real data |
+| 11 | GM approves first actions | 1 day | First emails/tasks sent; interventions logged |
+| 12 | Monitor outcomes for 7+ days | 7 days | At least 1 "Member Save" detected and surfaced in Board Report |
+| 13 | **Declare pilot live** | — | Full signal-to-proof loop working end-to-end |
 
 ---
 
-## PHASE 2 — OPERATOR ADOPTION (Sprints 7-10)
+## POST-LAUNCH REMAINING ITEMS
 
-**Goal:** Make the product reliable enough that the GM and their team use it daily without prompting. Drive retention after the first sale.
+Items that enhance the product but are not required for pilot launch:
 
----
-
-### Sprint 7 (Weeks 13-14): Notifications + Alerts System
-
-> **API Built:** `api/notifications.js` — Full notification system: create/read/mark-read notifications, morning digest generator, escalation engine (24h/48h/72h overdue actions + SLA breach detection), notification preferences table. Email/SMS/Slack sending stubbed with TODOs.
-
-- [x] Build morning briefing email: daily digest sent to GM at configured time with top 3 priorities, new at-risk members, and pending action count — **API DONE**
-- [ ] Implement push notification system for high-priority alerts (new critical member, complaint aging past SLA, cancellation spike)
-- [ ] Build escalation engine: if a pending action goes unreviewed for 24/48/72 hours, escalate via notification with increasing urgency
-- [ ] Wire Admin > Notifications settings to actually configure channels (email, SMS, Slack) per user role
-- [ ] Build complaint SLA tracking: timer starts when complaint is logged, alerts when approaching and exceeding response window
-- [ ] Implement digest frequency settings: daily, twice-daily, or real-time per user preference
-- [ ] Build Slack integration for clubs that use Slack (incoming webhook for alerts and action notifications)
-
----
-
-### Sprint 8 (Weeks 15-16): Insights Engine + Correlation Analytics
-
-> **API Built:** `api/compute-correlations.js` — Computes 5 cross-domain correlations from real data: dining-after-rounds retention, complaint resolution impact, event attendance retention, email decay prediction, multi-domain decay timeline. Also computes touchpoint rankings by correlation strength. Stores in `correlations` table for Insights tab.
-
-- [x] Build correlation engine: compute actual relationships between touchpoints and retention from real club data — **DONE**
-- [ ] Wire Members > Insights tab to computed correlations with real multipliers and percentages
-- [ ] Build touchpoint ranking algorithm: order by correlation strength to retention, not hardcoded
-- [ ] Compute real Recommended Actions from correlation findings
-- [ ] Wire Deep Dive sections (Touchpoints, Complaints, Event ROI) to real analytics
-- [ ] Build "Your Club vs. Industry" benchmarks using available industry data
-- [ ] Implement Insights filter by archetype and health tier using real data
+| Item | Priority | Notes |
+|------|----------|-------|
+| ML churn model upgrade (replace rules-based v1) | After 6 months data | `api/predict-churn.js` already supports `model_version` field for switchover |
+| LLM-drafted communications (Claude integration) | Post-pilot | Wire to `api/execute-action.js` email templates — generate personalized messages per member |
+| A/B testing for outreach messages | Post-pilot | Track open/click rates per template variant |
+| Agent learning loop (improve from GM approval patterns) | Post-pilot | Log approval/dismissal patterns, adjust proposal weights |
+| Slack integration for notifications | When requested | `api/notifications.js` has slack_webhook field ready |
+| Email marketing integration (Mailchimp/Constant Contact) | Sprint 13+ | Ingest open rates per member for email health score dimension |
+| Events/calendar integration | Sprint 13+ | Ingest attendance for event health score dimension |
+| ADP/labor integration | Sprint 13+ | Staffing data for labor optimization features |
+| Weather API integration | Sprint 13+ | Cancellation risk correlation |
+| Self-serve onboarding UI | Pre-GA | `api/onboard-club.js` API is built; needs frontend wizard |
+| Stripe billing integration | Pre-GA | Wire Admin > Billing to Stripe subscription management |
+| SOC 2 audit prep | Pre-GA | Audit logging, access controls, data encryption review |
+| Sales enablement package | Pre-GA | Case studies from pilot, demo script, ROI calculator |
 
 ---
 
-### Sprint 9 (Weeks 17-18): Multi-Club Architecture + Second Club Onboarding
+## KEY RISKS
 
-> **API Built:** `api/onboard-club.js` — Club onboarding wizard API: create club + admin user, 9-step guided setup with progress tracking (club created → CRM → members imported → tee sheet → POS → health scores → team invited → notifications → live). GET/POST/PUT for progress management.
-
-- [ ] Validate multi-tenant data isolation: ensure no data leaks between clubs
-- [x] Build club onboarding wizard: guided setup flow (connect systems, map fields, import data, invite team, configure notifications) — **API DONE**
-- [ ] Build second integration connector if pilot club 2 uses different systems
-- [ ] Add health score calibration tool: allow GM to review initial scores and flag misclassifications
-- [ ] Build data quality dashboard: show sync health, missing data gaps, and stale records per source
-- [ ] Onboard second pilot club end-to-end
-- [ ] Implement club profile and brand voice configuration: club name, logo, communication tone
-
----
-
-### Sprint 10 (Weeks 19-20): Playbooks Engine + Staff Workflows
-
-> **API Built:** `api/execute-playbook.js` — Playbook execution engine: activate playbook → create sequenced steps with owners and due dates → advance steps → auto-complete runs when all steps done → notify next assignee on step completion → track health score at start/end. Tables: `playbook_runs`, `playbook_steps`.
-
-- [x] Build playbook execution engine: "Activate Playbook" creates a sequenced action plan with steps, owners, and deadlines — **DONE**
-- [ ] Wire Response Plans to trigger automatically from health score changes and complaint events
-- [ ] Build staff task queue: department heads see assigned actions filtered by role
-- [ ] Implement action tracking: mark steps as completed, track time-to-completion, measure outcomes per playbook
-- [ ] Build playbook effectiveness tracking: which playbooks have the highest save rate and ROI
-- [ ] Implement search functionality for actions, playbooks, and agent proposals
-- [ ] Build staff notes persistence: wire "Add a quick staff note" in member snapshot to save and display
-
-#### Phase 2 Exit Criteria
-- [ ] Two clubs live and using the product daily
-- [ ] GM receives morning briefing without logging in
-- [ ] Staff members receive and act on assigned tasks
-- [ ] Playbooks execute as multi-step sequences
-- [ ] Insights tab shows real computed correlations
-- [ ] All notification channels configured and working
-- [ ] Product drives daily engagement without sales team prompting usage
-
----
-
-## PHASE 3 — DIFFERENTIATION (Sprints 11-14)
-
-**Goal:** Elevate the product to category-defining. Build competitive moats that make Swoop irreplaceable.
-
----
-
-### Sprint 11 (Weeks 21-22): Predictive Churn Model + AI-Drafted Communications
-
-> **API Built:** `api/predict-churn.js` — Rules-based churn prediction engine (v1). Computes 30/60/90 day resignation probability per member based on health score, score trajectory, open complaints, archetype risk, and tenure. Stores predictions with confidence scores and contributing factors. ML model upgrade planned for when 6+ months of data accumulates.
-
-- [x] Train ML churn prediction model on accumulated club data: predict resignation probability within 30/60/90 days with confidence intervals — **Rules-based v1 DONE, ML upgrade after data accumulation**
-- [ ] Replace rules-based health scoring with ML-powered risk assessment for clubs with 6+ months of data
-- [ ] Integrate LLM (Claude) for personalized outreach drafting: generate unique messages per member using their activity history, preferences, and complaint history
-- [ ] Build message tone configuration: match outreach to club's brand voice
-- [ ] Implement A/B testing framework for outreach messages: track which approaches drive highest re-engagement
-- [ ] Build churn probability display in member snapshot: "73% probability of resignation within 90 days" with contributing factors
-
----
-
-### Sprint 12 (Weeks 23-24): Autonomous Agent Actions
-
-> **API Built:** `api/agent-autonomous.js` — Full autonomous agent framework: 6 agents (Demand Optimizer, Member Pulse, Service Recovery, Engagement Autopilot, Revenue Analyst, Labor Optimizer). Each generates proposals, checks confidence vs threshold, auto-executes if above threshold, otherwise routes to Inbox. Agent config table for per-agent enable/disable, threshold setting. Activity log with reasoning chains.
-
-- [x] Build autonomous action framework: agents execute pre-approved low-risk actions without GM approval — **DONE**
-- [ ] Implement agent confidence scoring: only auto-execute when confidence exceeds configured threshold
-- [ ] Build Thought Log viewer: show agent reasoning chain for each proposed and executed action
-- [ ] Implement agent learning loop: agents improve proposal quality based on GM approval/dismissal patterns
-- [ ] Build agent configuration UI: set boundaries, confidence thresholds, and auto-approval rules per agent
-- [ ] Wire Demand Optimizer agent to real tee sheet data
-- [ ] Wire Member Pulse agent to real health score data
-
----
-
-### Sprint 13 (Weeks 25-26): Benchmarking Network + Additional Integrations
-
-> **API Built:** `api/benchmarks-live.js` — Live benchmarking: computes club metrics (retention, response time, resolution rate, health score), compares against Swoop network aggregate and industry averages. Builds comparison table for Board Report. ROI calculation from real saves data.
-
-- [x] Build anonymized cross-club benchmarking: aggregate metrics across all Swoop clubs — **DONE**
-- [ ] Replace static industry averages with live network data on Board Report
-- [ ] Build email marketing integration (Mailchimp, Constant Contact): ingest open rates, click rates, engagement per member
-- [ ] Build events/calendar integration: ingest event attendance, RSVP data, participation patterns
-- [ ] Build ADP/labor integration: ingest staffing schedules and clock data for labor optimization
-- [ ] Build weather API integration: correlate weather patterns with cancellation risk and dining behavior
-
----
-
-### Sprint 14 (Weeks 27-28): Polish, Scale Prep + GA Launch
-
-- [ ] Build self-serve onboarding: new clubs sign up, connect systems, and go live without engineering involvement
-- [ ] Performance optimization: all pages load in under 2 seconds, data syncs complete within 30 minutes
-- [ ] Build audit logging and security compliance for enterprise sales (SOC 2 prep)
-- [ ] Implement billing system integration: wire Admin > Billing to Stripe subscription management
-- [ ] Build customer success tooling: internal dashboard showing club health, feature adoption, and churn risk per customer
-- [ ] Stress test with 10+ clubs running simultaneously
-- [ ] Create sales enablement package: case studies from pilot clubs, demo script, ROI calculator, objection handling guide
-- [ ] Simplify AI Agents UI: consolidate 6 agents into single "Swoop Intelligence" engine for v1 GA unless agent-level granularity is requested
-- [ ] Remove or gate features that add complexity without near-term value: Demand Intelligence sub-tab, Fill Reporting sub-tab, customizable outreach priority ordering
-- [ ] Final QA pass across all pages, all roles, all device sizes
-
-#### Phase 3 Exit Criteria
-- [ ] Product is generally available
-- [ ] New clubs can onboard without engineering
-- [ ] AI agents running autonomously for low-risk actions
-- [ ] Churn prediction model outperforms rules-based scoring
-- [ ] Benchmarking network is live across all clubs
-- [ ] Sales team has case studies, ROI proof, and a repeatable demo
-- [ ] **Product is category-defining**
-
----
-
-## SPRINT SUMMARY
-
-### Phase 1 — LAUNCH BLOCKERS (12 weeks)
-
-| Sprint | Weeks | Focus | Milestone |
-|--------|-------|-------|-----------|
-| 1 | 1-2 | Database Foundation + CRM Integration | Real member data in system |
-| 2 | 3-4 | Tee Sheet + POS Integrations | Three data sources connected |
-| 3 | 5-6 | Health Score Engine | Real health scores computing |
-| 4 | 7-8 | Action Execution Layer | Actions send real emails/notifications |
-| 5 | 9-10 | Today + Revenue Dashboards Wired | No hardcoded data remains |
-| 6 | 11-12 | Outcome Tracking + Mobile + Pilot Launch | **First club LIVE** |
-
-### Phase 2 — OPERATOR ADOPTION (8 weeks)
-
-| Sprint | Weeks | Focus | Milestone |
-|--------|-------|-------|-----------|
-| 7 | 13-14 | Notifications + Alerts | Morning briefing emails, escalation engine |
-| 8 | 15-16 | Insights Engine + Correlations | Real computed analytics |
-| 9 | 17-18 | Multi-Club + Second Onboarding | Two clubs live |
-| 10 | 19-20 | Playbooks Engine + Staff Workflows | Playbooks execute as sequences |
-
-### Phase 3 — DIFFERENTIATION (8 weeks)
-
-| Sprint | Weeks | Focus | Milestone |
-|--------|-------|-------|-----------|
-| 11 | 21-22 | Predictive Churn + AI Comms | ML-powered predictions, LLM drafts |
-| 12 | 23-24 | Autonomous Agents | Agents auto-execute low-risk actions |
-| 13 | 25-26 | Benchmarking Network + Integrations | Cross-club benchmarks live |
-| 14 | 27-28 | Polish + GA Launch | Self-serve onboarding, **product GA** |
-
----
-
-## KEY DEPENDENCIES & RISKS
-
-### Pre-Sprint 1
-- **Pilot Club Secured:** Must have a signed design partner agreement with a club willing to provide API access or CSV exports. Without real data, none of this plan works.
-
-### Sprint 1-2 Blockers
-- **API Access from Vendors:** ForeTees, Jonas Club, and the club's POS system must provide API documentation and credentials. CSV import path is the critical fallback — already designed in the product UI but needs backend pipeline.
-
-### Sprint 4 Dependency
-- **Email/SMS Deliverability:** Sending emails on behalf of a club requires domain verification, SPF/DKIM setup, and warm-up to avoid spam filters. Start this process in Sprint 1 even though email sending ships in Sprint 4.
-
-### Sprint 3 Risk
-- **Health Score Validation:** The health score algorithm will produce initial scores that may not match the GM's intuition. Plan for a 1-2 week calibration period where the GM reviews scores and provides feedback before going live.
-
-### Sprint 6 Consideration
-- **Mobile Readiness:** The mobile experience at `/#/m` is already built and recently polished to A-grade quality. Verify it works correctly with real data during Sprint 6 QA. If responsive web is insufficient for daily GM use, evaluate native mobile app timeline.
-
----
-
-## CURRENT STATE REFERENCE
-
-### What Already Exists (Frontend — Demo Environment)
-- Full desktop dashboard with Today, Members, Revenue, Playbooks, Board Report
-- Mobile experience at `/#/m` with Today, Actions, Members, Settings
-- Static fallback data for all features
-- API hydration layer that attempts real Postgres → falls back to static
-- Vercel deployment (prod: `main` branch, dev: `dev` branch)
-- Existing Postgres tables: `members`, `feedback`, `member_engagement_weekly`, and others
-
-### What Needs to Be Built (This Plan)
-- Real vendor integrations (CRM, Tee Sheet, POS)
-- Health score computation engine (currently procedural/random)
-- Action execution layer (emails, SMS, notifications)
-- Outcome tracking and ROI measurement
-- Multi-tenant architecture for multiple clubs
-- Notification/alerting system
-- Playbook execution engine
-- ML churn prediction
-- Autonomous agent framework
+| Risk | Mitigation |
+|------|-----------|
+| Pilot club vendor denies API access | CSV import fallback is built and operational |
+| Health scores don't match GM intuition | 2-3 day calibration period built into launch sequence; threshold adjustment tools planned |
+| Email deliverability issues (spam) | Start domain verification and warm-up immediately — 2 week lead time |
+| Mobile experience breaks with real data | Mobile is built with the same service layer; verify during launch Step 5 |
+| Scale issues with 300+ members | Health score computation is per-member sequential; batch if needed for 1000+ |
