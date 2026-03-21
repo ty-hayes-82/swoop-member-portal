@@ -3,7 +3,7 @@
 **From Current State to Market-Ready Product**
 
 Last Updated: March 21, 2026
-Status: Backend APIs complete. Frontend wiring, vendor integrations, and pilot launch remaining.
+Status: Backend APIs + frontend wiring in progress. Vendor integrations and pilot launch remaining.
 
 ---
 
@@ -61,6 +61,81 @@ These items require external accounts, credentials, or decisions. Nothing else c
 
 **Critical path:** Items 1-2 are the gate. Once the migration runs and a pilot club is secured, everything else unblocks.
 
+### Ty's Step-by-Step Todo List
+
+**Do these in order. Each step unlocks the next.**
+
+#### Step 1: Run the database migration (5 minutes)
+1. Open browser to `https://swoop-member-portal-dev.vercel.app/api/migrations/001-core-tables`
+2. Use a REST client (Postman, curl, or browser extension) to send a `POST` request to that URL
+3. Verify response shows `"status": "ok"` for all 11 tables and 9 indexes
+4. If any errors, screenshot and share — likely a permissions issue
+
+#### Step 2: Create a SendGrid account (15 minutes)
+1. Go to https://sendgrid.com and create a free account (100 emails/day free tier)
+2. In SendGrid dashboard: Settings → API Keys → Create API Key (Full Access)
+3. Copy the API key — save it securely
+4. In Vercel project settings (https://vercel.com/tyhayesswoopgolfcos-projects/swoop-member-portal/settings/environment-variables):
+   - Add environment variable: `SENDGRID_API_KEY` = your API key
+   - Add for both Production and Preview environments
+5. Settings → Sender Authentication → Authenticate a domain
+   - Add the domain you want to send from (e.g., `swoopgolf.com` or the pilot club's domain)
+   - Follow the DNS record instructions (add CNAME records)
+   - This takes 24-48 hours to verify — **start this now**
+
+#### Step 3: Create a Twilio account (15 minutes)
+1. Go to https://twilio.com and create a free trial account
+2. Get a phone number (Twilio will assign one during setup)
+3. In Twilio console, note your: Account SID, Auth Token, and Phone Number
+4. In Vercel project settings, add environment variables:
+   - `TWILIO_ACCOUNT_SID` = your Account SID
+   - `TWILIO_AUTH_TOKEN` = your Auth Token
+   - `TWILIO_PHONE_NUMBER` = your Twilio phone number (e.g., +1234567890)
+
+#### Step 4: Secure a pilot club (timeline varies)
+1. Reach out to your best candidate club — ideally one you have a relationship with
+2. What you need from them:
+   - Permission to connect their CRM, tee sheet, and POS data
+   - A primary contact (GM or IT person) who can provide system access
+   - Their CRM vendor name (Jonas Club Software? Clubessential? Other?)
+   - Their tee sheet vendor name (ForeTees? Club Prophet? Other?)
+   - Their POS vendor name (Jonas? Northstar? Toast? Other?)
+3. Offer: "We'll set up everything for free during the pilot. You get the full platform at no cost for 90 days."
+4. Get a simple email confirmation — doesn't need to be a formal contract for a design partner
+
+#### Step 5: Get vendor API credentials (depends on pilot club)
+For each vendor (CRM, Tee Sheet, POS):
+1. Ask the pilot club's GM to contact their vendor and request API access for Swoop Golf
+2. Alternatively, ask the club's IT contact to provide:
+   - API documentation URL
+   - API key or OAuth client credentials
+   - Sandbox/test environment access (if available)
+3. **If API access is slow or denied:** Ask the club to export CSV files instead:
+   - Member roster (name, email, phone, membership type, dues, join date)
+   - Round history (member name/ID, date, tee time, course)
+   - Dining transactions (member name/ID, date, amount, outlet)
+   - The CSV import API is already built and will handle this
+
+#### Step 6: Create a Stripe account (15 minutes, not urgent)
+1. Go to https://stripe.com and create an account
+2. In Stripe dashboard, get your API keys (test mode first)
+3. Add to Vercel environment variables:
+   - `STRIPE_SECRET_KEY` = your secret key
+   - `STRIPE_PUBLISHABLE_KEY` = your publishable key
+4. This is for billing integration — not needed until closer to GA
+
+#### Step 7: First data import (once pilot club is secured)
+1. If CSV route: Upload member CSV to `POST /api/import-csv` with `importType: "members"` and `clubId` from Step 4
+2. If API route: Share vendor credentials with Claude to build the connector
+3. Verify: Navigate to All Members tab — you should see real member names and data
+
+#### Step 8: Go live
+1. Run health scores: `POST /api/compute-health-scores?clubId=YOUR_CLUB_ID`
+2. Run churn predictions: `POST /api/predict-churn?clubId=YOUR_CLUB_ID`
+3. Run correlations: `POST /api/compute-correlations?clubId=YOUR_CLUB_ID`
+4. Review the product — every page should show real data
+5. Invite the GM and train them on the morning workflow
+
 ---
 
 ### TRACK 2: Vendor Integration Connectors
@@ -84,22 +159,22 @@ Build once pilot club credentials are available. Each connector follows the same
 
 Switch the frontend from static fallback data to live API responses. The service layer (`src/services/`) already has an `_init()` hydration pattern — each service fetches from `/api/*` and falls back to static data. The APIs are built; the services need to consume them.
 
-| # | Frontend Change | Files | API It Consumes |
-|---|----------------|-------|-----------------|
-| 1 | **Members page → real health scores** | `memberService.js`, `HealthOverview.jsx`, `MembersView.jsx` | `api/dashboard-live.js`, `api/compute-health-scores.js` |
-| 2 | **Today dashboard → real data** | `TodayView.jsx`, `RevenueSummaryCard.jsx`, `WeekOverWeekGrid.jsx`, `RecentInterventions.jsx` | `api/dashboard-live.js` |
-| 3 | **Health score breakdown → real dimensions** | `MemberProfileDrawer.jsx` (lines 474-494) | Replace random Math with real `golf_score`, `dining_score`, `email_score`, `event_score` from `health_scores` table |
-| 4 | **Actions → real execution** | `AgentActionCard.jsx`, `InboxTab.jsx` | Wire Approve button to `api/execute-action.js` instead of just updating localStorage |
-| 5 | **Insights → real correlations** | `CorrelationsTab.jsx`, `TouchpointsTab.jsx` | `api/compute-correlations.js` |
-| 6 | **Board Report → real outcomes** | `BoardReport.jsx`, `boardReportService.js` | `api/track-outcomes.js`, `api/benchmarks-live.js` |
-| 7 | **Playbooks → real execution** | `PlaybooksPage.jsx`, `MemberPlaybooks.jsx` | Wire "Activate" to `api/execute-playbook.js` |
-| 8 | **Notifications → real delivery** | New: notification bell feed, morning digest display | `api/notifications.js` |
-| 9 | **Churn predictions → member profile** | `MemberProfileDrawer.jsx` | Add "73% resignation risk" from `api/predict-churn.js` |
-| 10 | **Agent config → real settings** | `AgentsTab.jsx`, `AgentConfigDrawer` | Wire Configure to `api/agent-autonomous.js` agent_configs |
-| 11 | **Onboarding wizard UI** | New component in Admin section | `api/onboard-club.js` |
-| 12 | **Auth → real login** | New login page, session context provider | `api/auth.js` |
+| # | Frontend Change | Status |
+|---|----------------|--------|
+| 1 | **Members page → real health scores** | **DONE** — `memberService._init()` fetches `/api/dashboard-live`, overrides static summary with live data |
+| 2 | **Today dashboard → real data** | **WIRED** — memberService feeds live data when `swoop_club_id` is in localStorage. Remaining: wire `WeekOverWeekGrid` and `RecentInterventions` to consume `getLiveDashboard()` |
+| 3 | **Health score breakdown → real dimensions** | **DONE** — `HealthDimensionGrid` uses real `golfScore/diningScore/emailScore/eventScore` from profile, falls back to archetype-weighted deterministic values (no more Math.random) |
+| 4 | **Actions → real execution** | **DONE** — `AppContext.approveAction()` now fires `POST /api/execute-action` alongside localStorage dispatch |
+| 5 | **Insights → real correlations** | Remaining — wire `CorrelationsTab` to fetch from `api/compute-correlations.js` |
+| 6 | **Board Report → real outcomes** | Remaining — wire `boardReportService` to fetch from `api/track-outcomes.js` + `api/benchmarks-live.js` |
+| 7 | **Playbooks → real execution** | Remaining — wire "Activate" buttons to `api/execute-playbook.js` |
+| 8 | **Notifications → real delivery** | Remaining — build notification feed UI consuming `api/notifications.js` |
+| 9 | **Churn predictions → member profile** | **DONE** — `ChurnPredictionBadge` component fetches from `/api/predict-churn`, shows 30/60/90 day risk with factors |
+| 10 | **Agent config → real settings** | Remaining — wire `AgentsTab` Configure button to `api/agent-autonomous.js` |
+| 11 | **Onboarding wizard UI** | **DONE** — `OnboardingWizard.jsx` with 9-step progress, consuming `api/onboard-club.js` |
+| 12 | **Auth → real login** | **DONE** — `AuthContext.jsx` with login/logout/session validation, `useAuth()` hook |
 
-**No blockers.** This track can start immediately and run in parallel with vendor integrations.
+**6 of 12 done. Remaining 6 can continue without blockers.**
 
 ---
 
