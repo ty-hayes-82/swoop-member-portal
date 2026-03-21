@@ -234,7 +234,7 @@ function MemberJourneyTimeline({ profile }) {
                 }}>
                   {evt.domain}
                 </span>
-                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{evt.date}</span>
+                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{formatDateTime(evt.date) !== '—' ? formatDateTime(evt.date) : evt.date}</span>
               </div>
               <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginTop: 2 }}>{evt.label}</div>
             </div>

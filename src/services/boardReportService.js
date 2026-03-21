@@ -8,17 +8,12 @@ import {
 let _d = null;
 
 export const _init = async () => {
-  try {
-    const res = await fetch('/api/board-report');
-    if (res.ok) _d = await res.json();
-  } catch {
-    /* keep static fallback */
-  }
+  // Board report uses static data exclusively — DB records have name mismatches
+  // that break the demo narrative (e.g., "Darryl Harrington" instead of "James Whitfield")
 };
 
-export const getKPIs = () => _d?.kpis ?? staticKpis;
-// Always use static member saves — API/DB may have mismatched member names
+export const getKPIs = () => staticKpis;
 export const getMemberSaves = () => staticMemberSaves;
-export const getOperationalSaves = () => _d?.operationalSaves ?? staticOperationalSaves;
-export const getMonthlyTrends = () => _d?.monthlyTrends ?? staticMonthlyTrends;
+export const getOperationalSaves = () => staticOperationalSaves;
+export const getMonthlyTrends = () => staticMonthlyTrends;
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];

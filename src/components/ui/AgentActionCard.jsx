@@ -54,8 +54,8 @@ export function AgentActionCard({ action, onApprove, onDismiss, overrideStatus, 
       onClick={handleSelect}
       role={onSelect ? 'button' : undefined}
       style={{
-        background: feedback === 'approved' ? '#f0fdf4' : feedback === 'dismissed' ? '#fef2f2' : theme.colors.bgCard,
-        border: `1px solid ${feedback === 'approved' ? '#22c55e40' : feedback === 'dismissed' ? '#ef444440' : theme.colors.border}`,
+        background: feedback === 'approved' ? '#dcfce7' : feedback === 'dismissed' ? '#fee2e2' : theme.colors.bgCard,
+        border: `1px solid ${feedback === 'approved' ? '#22c55e' : feedback === 'dismissed' ? '#ef4444' : theme.colors.border}`,
         borderLeft: `3px solid ${feedback === 'approved' ? '#22c55e' : feedback === 'dismissed' ? '#ef4444' : PRIORITY_COLOR[action.priority] ?? theme.colors.agentCyan}`,
         borderRadius: theme.radius.md,
         padding: theme.spacing.md,

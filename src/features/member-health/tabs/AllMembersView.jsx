@@ -395,10 +395,13 @@ export default function AllMembersView() {
 
   const clearFilters = () => {
     setHealthFilter(null);
+    setActiveHealthLevel(null);
     setArchetypeFilter(null);
     setActivityFilter(null);
     setPage(0);
   };
+
+  const [activeHealthLevel, setActiveHealthLevel] = useState(null);
 
   const handleHealthClick = (level) => {
     const ranges = {
@@ -408,11 +411,12 @@ export default function AllMembersView() {
       'Critical': { min: 0, max: 30 },
     };
     // Toggle: clicking active filter clears it
-    const target = ranges[level];
-    if (healthFilter?.min === target.min) {
+    if (activeHealthLevel === level) {
       setHealthFilter(null);
+      setActiveHealthLevel(null);
     } else {
       setHealthFilter(target);
+      setActiveHealthLevel(level);
     }
   };
 
@@ -441,7 +445,7 @@ export default function AllMembersView() {
         </div>
         <div className="grid-responsive-4">
           {healthDistribution.map((d) => {
-            const isActive = healthFilter?.min === d.min;
+            const isActive = activeHealthLevel === d.level;
             return (
               <div
                 key={d.level}
