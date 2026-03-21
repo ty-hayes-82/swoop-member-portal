@@ -171,7 +171,7 @@ export default async function handler(req, res) {
   try {
     // Get all members for this club
     const members = await sql`
-      SELECT member_id, join_date FROM members WHERE club_id = ${clubId} AND status = 'active'
+      SELECT member_id, join_date FROM members WHERE club_id = ${clubId} AND (status = 'active' OR membership_status = 'active' OR status IS NULL)
     `;
 
     if (members.rows.length === 0) {
@@ -184,10 +184,12 @@ export default async function handler(req, res) {
 
     for (const member of members.rows) {
       try {
-        const golf = await computeGolfScore(member.member_id, clubId);
-        const dining = await computeDiningScore(member.member_id, clubId);
-        const email = await computeEmailScore(member.member_id, clubId);
-        const events = await computeEventScore(member.member_id, clubId);
+        // Each dimension defaults to 50 (neutral) if its data source isn't available
+        let golf = 50, dining = 50, email = 50, events = 50;
+        try { golf = await computeGolfScore(member.member_id, clubId); } catch { /* no rounds data */ }
+        try { dining = await computeDiningScore(member.member_id, clubId); } catch { /* no POS data */ }
+        try { email = await computeEmailScore(member.member_id, clubId); } catch { /* no email data */ }
+        try { events = await computeEventScore(member.member_id, clubId); } catch { /* no event data */ }
 
         const score = Math.round(
           golf * WEIGHTS.golf +
