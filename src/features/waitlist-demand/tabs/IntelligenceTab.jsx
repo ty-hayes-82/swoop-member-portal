@@ -362,6 +362,66 @@ export default function IntelligenceTab() {
         )}
       </div>
 
+      {/* Prescriptive Recommendations */}
+      {alternatives.length > 0 && (
+        <div style={{
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.md,
+          background: theme.colors.bgCard,
+          padding: theme.spacing.md,
+          boxShadow: theme.shadow.sm,
+        }}>
+          <div style={{ fontWeight: 700, color: theme.colors.textPrimary, fontSize: theme.fontSize.sm, marginBottom: theme.spacing.sm }}>
+            Recommended Moves
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: theme.spacing.md }}>
+            Specific actions to rebalance demand based on current heatmap data.
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {alternatives.slice(0, 3).map((alt, i) => {
+              const waitingCount = oversubscribedMembers.length > 0 ? Math.min(oversubscribedMembers.length, 4) : 3;
+              return (
+                <div key={`rec-${i}`} style={{
+                  padding: '10px 14px', borderRadius: theme.radius.sm,
+                  background: `${theme.colors.info}06`, border: `1px solid ${theme.colors.info}20`,
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                }}>
+                  <div>
+                    <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
+                      Move {waitingCount} waitlisted members to {alt.day} {alt.block}
+                    </div>
+                    <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 2 }}>
+                      Currently {Math.round(alt.fillRate * 100)}% fill rate — these members have weekday availability based on booking history.
+                    </div>
+                  </div>
+                  <Btn variant="primary" size="sm" accent={theme.colors.info}
+                    onClick={() => {
+                      const updated = recordRedirection();
+                      setSteeringStats(updated);
+                      showToast(`Redirect suggestions sent for ${alt.day} ${alt.block}`, 'success');
+                    }}>
+                    Activate
+                  </Btn>
+                </div>
+              );
+            })}
+            {weekdayFill < 65 && (
+              <div style={{
+                padding: '10px 14px', borderRadius: theme.radius.sm,
+                background: `${theme.colors.success}06`, border: `1px solid ${theme.colors.success}20`,
+              }}>
+                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
+                  Launch a Wednesday afternoon league to fill the {weekdayFill}% utilization gap
+                </div>
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 2 }}>
+                  Weekday afternoons have the most available capacity. A recurring league creates predictable demand and member engagement.
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <SoWhatCallout variant="opportunity">
         <strong>GM decision:</strong> shift overflow messaging into Tuesday–Thursday mornings and reserve the next weekend
         cancellation for high-priority members. That captures dormant weekday capacity while preserving peak-weekend

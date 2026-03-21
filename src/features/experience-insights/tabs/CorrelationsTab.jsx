@@ -85,7 +85,7 @@ export default function CorrelationsTab({ segment, archetype }) {
                     <Sparkline data={insight.trend} color={insight.deltaDirection === 'up' ? theme.colors.success : theme.colors.info} height={20} />
                   </div>
                   {insight.delta && (
-                    <div style={{ fontSize: 10, fontWeight: 700, color: theme.colors.success, marginTop: 2 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: insight.deltaDirection === 'up' ? theme.colors.success : theme.colors.warning, marginTop: 2 }}>
                       {insight.deltaDirection === 'up' ? '↑' : '↓'} {insight.delta}
                     </div>
                   )}
@@ -96,6 +96,17 @@ export default function CorrelationsTab({ segment, archetype }) {
           <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6, margin: 0 }}>
             {insight.detail}
           </p>
+          {insight.deltaDirection === 'down' && insight.delta && (
+            <div style={{
+              marginTop: theme.spacing.sm, padding: '8px 12px',
+              background: `${theme.colors.warning}08`, border: `1px solid ${theme.colors.warning}25`,
+              borderRadius: theme.radius.sm, fontSize: theme.fontSize.xs,
+              color: theme.colors.warning, fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              ⚠ Investigate: this correlation is weakening ({insight.delta} vs. prior quarter). Check for operational changes, seasonal patterns, or data shifts.
+            </div>
+          )}
         </div>
       ))}
 

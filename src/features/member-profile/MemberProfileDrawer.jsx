@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { theme } from '@/config/theme';
 import SourceBadge from '@/components/ui/SourceBadge.jsx';
 import { useMemberProfile } from '@/context/MemberProfileContext';
+import { getOutreachHistory } from '@/services/activityService';
 
 const formatDate = (value) => {
   if (!value) return '—';
@@ -312,14 +313,21 @@ function getTalkingPoints(profile) {
 
 function OutreachHistory({ profile }) {
   const outreachEvents = useMemo(() => {
-    return (profile.activity || [])
+    // Merge activity timeline outreach with local outreach log
+    const fromActivity = (profile.activity || [])
       .filter(a => {
         const type = (a.type || '').toLowerCase();
         return type.includes('call') || type.includes('email') || type.includes('sms') ||
                type.includes('comp') || type.includes('outreach') || type.includes('contact');
-      })
-      .slice(0, 5);
-  }, [profile.activity]);
+      });
+    const fromLog = getOutreachHistory(profile.memberId).map(entry => ({
+      type: entry.type, detail: entry.description, timestamp: entry.timestamp,
+      id: `log-${entry.timestamp}`, initiatedBy: entry.initiatedBy,
+    }));
+    // Deduplicate by timestamp proximity and merge
+    const merged = [...fromLog, ...fromActivity];
+    return merged.slice(0, 8);
+  }, [profile.activity, profile.memberId]);
 
   if (!outreachEvents.length) {
     return <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>No outreach history recorded yet.</span>;
@@ -490,9 +498,56 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           <span><strong>Phone:</strong> {profile.contact?.phone ?? '—'}</span>
           <span><strong>Email:</strong> {profile.contact?.email ?? '—'}</span>
           <span><strong>Last outreach:</strong> {formatDateTime(profile.contact?.lastOutreach)}</span>
-          <span><strong>Family on file:</strong> {(profile.family?.map((f) => f.name).join(', ')) || '—'}</span>
         </div>
       </Section>
+
+      {/* Household / Family Unit View */}
+      {profile.family && profile.family.length > 0 && (
+        <Section title="Household" description={`${profile.family.length + 1} members`}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {/* Aggregate household value */}
+            <div style={{
+              display: 'flex', gap: theme.spacing.md, padding: '8px 12px',
+              background: theme.colors.bgDeep, borderRadius: theme.radius.sm,
+              border: `1px solid ${theme.colors.border}`,
+            }}>
+              <div>
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Household value</div>
+                <div style={{ fontSize: theme.fontSize.md, fontWeight: 700, fontFamily: theme.fonts.mono }}>
+                  ${((profile.duesAnnual || 0) * (1 + profile.family.length * 0.6)).toLocaleString()}/yr
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Health (lowest)</div>
+                <div style={{
+                  fontSize: theme.fontSize.md, fontWeight: 700, fontFamily: theme.fonts.mono,
+                  color: (profile.healthScore ?? 50) > 69 ? theme.colors.success : (profile.healthScore ?? 50) > 40 ? theme.colors.warning : theme.colors.urgent,
+                }}>
+                  {profile.healthScore ?? '—'}
+                </div>
+              </div>
+            </div>
+            {/* Family members */}
+            {profile.family.map((f, i) => (
+              <div key={i} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '8px 12px', borderRadius: theme.radius.sm,
+                border: `1px solid ${theme.colors.border}`,
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm }}>{f.name}</div>
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{f.relation}</div>
+                </div>
+                {f.notes && (
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, maxWidth: '50%', textAlign: 'right' }}>
+                    {f.notes}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* Archetype Description — Call Prep */}
       {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && (

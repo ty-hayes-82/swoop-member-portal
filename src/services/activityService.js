@@ -29,4 +29,34 @@ export function trackAction({
       meta: meta ?? {},
     }),
   }).catch(() => {});
+
+  // Also log outreach events to localStorage for member profile display
+  if (memberId && ['call', 'email', 'sms', 'comp', 'outreach'].includes(actionType)) {
+    try {
+      const key = 'swoop_outreach_log';
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      existing.unshift({
+        memberId,
+        memberName: memberName ?? '',
+        type: actionType,
+        description: description ?? `${actionType} for ${memberName ?? memberId}`,
+        timestamp: new Date().toISOString(),
+        initiatedBy: 'Sarah Mitchell',
+      });
+      // Keep last 100 entries
+      localStorage.setItem(key, JSON.stringify(existing.slice(0, 100)));
+    } catch {}
+  }
+}
+
+/**
+ * Get outreach history for a specific member from local log
+ */
+export function getOutreachHistory(memberId) {
+  try {
+    const log = JSON.parse(localStorage.getItem('swoop_outreach_log') || '[]');
+    return log.filter(entry => entry.memberId === memberId);
+  } catch {
+    return [];
+  }
 }

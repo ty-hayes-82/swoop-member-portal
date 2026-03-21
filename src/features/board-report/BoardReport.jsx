@@ -219,21 +219,42 @@ export default function BoardReport() {
             Executive summary — Last 90 days
           </p>
         </div>
-        <button
-          onClick={() => window.print()}
-          style={{
-            background: colors.brand,
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '8px 20px',
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: '14px',
-          }}
-        >
-          Export / Print
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => {
+              // Switch to Summary tab for a clean export, then print
+              setActiveTab(0);
+              setTimeout(() => window.print(), 100);
+            }}
+            style={{
+              background: colors.brand,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '8px 20px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '14px',
+            }}
+          >
+            Export as PDF
+          </button>
+          <button
+            onClick={() => window.print()}
+            style={{
+              background: 'transparent',
+              color: colors.brand,
+              border: `1px solid ${colors.brand}`,
+              borderRadius: '8px',
+              padding: '8px 20px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '14px',
+            }}
+          >
+            Print
+          </button>
+        </div>
       </div>
 
       <KPIStrip kpis={kpis} />
