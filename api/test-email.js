@@ -5,7 +5,7 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  const { to, subject, body } = req.body;
+  const { to, from, subject, body } = req.body;
   if (!to) return res.status(400).json({ error: 'to email required' });
 
   if (!process.env.SENDGRID_API_KEY) {
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         personalizations: [{ to: [{ email: to }] }],
-        from: { email: 'noreply@swoopgolf.com', name: 'Swoop Golf' },
+        from: { email: from || 'ty.hayes@swoopgolf.com', name: 'Swoop Golf' },
         subject: subject || 'Swoop Golf — Test Email',
         content: [{ type: 'text/plain', value: body || 'This is a test email from Swoop Golf. SendGrid integration is working.' }],
       }),

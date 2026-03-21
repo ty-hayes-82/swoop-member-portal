@@ -101,7 +101,7 @@ export default async function handler(req, res) {
             headers: { 'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
               personalizations: [{ to: [{ email: userEmail }] }],
-              from: { email: 'noreply@swoopgolf.com', name: 'Swoop Golf' },
+              from: { email: 'ty.hayes@swoopgolf.com', name: 'Swoop Golf' },
               subject: title,
               content: [{ type: 'text/plain', value: body || title }],
             }),
@@ -191,7 +191,7 @@ async function generateMorningDigest(req, res) {
               headers: { 'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`, 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 personalizations: [{ to: [{ email: gm.email, name: gm.name }] }],
-                from: { email: 'noreply@swoopgolf.com', name: 'Swoop Golf' },
+                from: { email: 'ty.hayes@swoopgolf.com', name: 'Swoop Golf' },
                 subject: digestTitle,
                 content: [{ type: 'text/plain', value: digestBody }],
               }),

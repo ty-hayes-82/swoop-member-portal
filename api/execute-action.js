@@ -105,7 +105,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
               personalizations: [{ to: [{ email: toEmail, name: memberName }] }],
-              from: { email: senderEmail || 'noreply@swoopgolf.com', name: `${senderName || 'Swoop Golf'} - ${clubName}` },
+              from: { email: senderEmail || 'ty.hayes@swoopgolf.com', name: `${senderName || 'Swoop Golf'} - ${clubName}` },
               subject,
               content: [{ type: 'text/plain', value: body }],
             }),
@@ -129,17 +129,44 @@ export default async function handler(req, res) {
       results.message = `Email queued for ${memberName || 'member'}`;
 
     } else if (executionType === 'sms') {
-      // TODO Sprint 4: Wire to Twilio
+      // Send via Twilio
+      const toPhone = memberPhone || (await getMemberPhone(memberId || action.member_id));
+      let smsSent = false;
+      const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+      const twilioAuth = process.env.TWILIO_API_KEY_SECRET || process.env.TWILIO_AUTH_TOKEN;
+      const twilioUser = process.env.TWILIO_API_KEY_SID || twilioSid;
+      const msgSvcSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+
+      if (twilioSid && twilioAuth && toPhone) {
+        try {
+          const params = new URLSearchParams();
+          params.append('To', toPhone);
+          params.append('Body', customMessage || action.description || 'Message from your club');
+          if (msgSvcSid) params.append('MessagingServiceSid', msgSvcSid);
+          else if (process.env.TWILIO_PHONE_NUMBER) params.append('From', process.env.TWILIO_PHONE_NUMBER);
+
+          const twRes = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Basic ' + Buffer.from(`${twilioUser}:${twilioAuth}`).toString('base64'),
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString(),
+          });
+          smsSent = twRes.ok;
+        } catch {}
+      }
+
       await sql`
         INSERT INTO interventions (club_id, member_id, action_id, intervention_type, description, initiated_by, health_score_before)
         VALUES (${clubId}, ${memberId || action.member_id}, ${actionId}, 'sms',
-                ${`SMS sent to ${memberPhone || 'member phone'}: ${customMessage || action.description}`},
+                ${`SMS ${smsSent ? 'sent' : 'queued'} to ${toPhone || 'member phone'}: ${customMessage || action.description}`},
                 ${senderName || 'System'},
                 (SELECT health_score FROM members WHERE member_id = ${memberId || action.member_id}))
       `;
 
-      results.status = 'sent';
-      results.message = `SMS queued for ${memberName || 'member'}`;
+      results.status = smsSent ? 'sent' : 'queued';
+      results.message = `SMS ${smsSent ? 'sent' : 'queued'} for ${memberName || 'member'}`;
 
     } else if (executionType === 'staff_task') {
       // Create a task for a staff member
@@ -204,5 +231,13 @@ async function getMemberEmail(memberId) {
   try {
     const result = await sql`SELECT email FROM members WHERE member_id = ${memberId}`;
     return result.rows[0]?.email || null;
+  } catch { return null; }
+}
+
+async function getMemberPhone(memberId) {
+  if (!memberId) return null;
+  try {
+    const result = await sql`SELECT phone FROM members WHERE member_id = ${memberId}`;
+    return result.rows[0]?.phone || null;
   } catch { return null; }
 }
