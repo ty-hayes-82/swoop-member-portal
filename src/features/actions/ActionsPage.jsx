@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { theme } from '@/config/theme';
 import { getAgentSummary } from '@/services/agentService';
 import { getIntegrationSummary } from '@/services/integrationsService';
@@ -206,58 +206,306 @@ function ContextualGuide({ section }) {
   );
 }
 
-// Recommendation 4: Action Library — interactive table with triggers, CRUD, search, filters
+// --- Action Library constants ---
+const AL_CHANNELS = ['Phone', 'Email', 'SMS', 'In-person', 'Email + SMS', 'Email + Pro Shop', 'Email + POS Flag', 'Email + Front Desk Flag', 'Email + Front Desk + Dining', 'In-person + Social Media', 'Email sequence (3-touch)'];
+const AL_OWNERS = ['GM', 'Club Manager', 'Membership Director', 'Head Golf Professional', 'Events Director', 'F&B Director'];
+const AL_EFFORTS = ['low', 'medium', 'high'];
+const AL_ARCHETYPE_OPTIONS = ['all', 'Die-Hard Golfer', 'Social Butterfly', 'Balanced Active', 'Weekend Warrior', 'Declining', 'New Member', 'Ghost', 'Snowbird'];
+const AL_TRIGGER_FIELDS = ['Health Score', 'Rounds (last 30d)', 'Days Since Last Visit', 'Days Since Last Activity', 'Membership Tenure (days)', 'Rounds Trend (30d)', 'Birthday', 'Anniversary', 'Event Proximity (days)', 'Complaint Filed', 'F&B Complaint', 'Course Complaint', 'Preferred Time Available'];
+const AL_TRIGGER_OPS = ['<', '>', '=', '<=', '>=', 'within'];
+
 const AL_INITIAL_CATEGORIES = [
   {
     key: 'personal-touch', name: 'Personal Touch', color: '#2563eb',
     actions: [
-      { id: 'gm-call', name: 'GM Personal Call', channel: 'Phone', timing: 'Within 48hrs of health drop', owner: 'GM', effort: 'medium', archetypes: ['all'], description: 'Direct call from the GM to check in, address concerns, or simply reinforce the relationship.', triggers: [{ field: 'Health Score', op: '<', value: '30' }] },
-      { id: 'concierge', name: 'Concierge Check-In', channel: 'In-person', timing: 'Next visit', owner: 'Club Manager', effort: 'low', archetypes: ['all'], description: 'Personal outreach from the concierge or club manager — a warm check-in call or handwritten note.', triggers: [{ field: 'Days Since Last Visit', op: '>', value: '21' }] },
-      { id: 'birthday', name: 'Birthday/Anniversary Outreach', channel: 'Email + Front Desk Flag', timing: 'Day-of', owner: 'Membership Director', effort: 'low', archetypes: ['all'], description: 'Flag approaching milestones and schedule a celebration touch — complimentary dinner, cake, or a personal card from the GM.', triggers: [{ field: 'Birthday', op: 'within', value: '7 days' }] },
+      { id: 'gm-call', name: 'GM Personal Call', channel: 'Phone', timing: 'Within 48hrs of health drop', owner: 'GM', effort: 'medium', archetypes: ['all'], active: true, description: 'Direct call from the GM to check in, address concerns, or simply reinforce the relationship.', triggers: [{ field: 'Health Score', op: '<', value: '30' }] },
+      { id: 'concierge', name: 'Concierge Check-In', channel: 'In-person', timing: 'Next visit', owner: 'Club Manager', effort: 'low', archetypes: ['all'], active: true, description: 'Personal outreach from the concierge or club manager \u2014 a warm check-in call or handwritten note.', triggers: [{ field: 'Days Since Last Visit', op: '>', value: '21' }] },
+      { id: 'birthday', name: 'Birthday/Anniversary Outreach', channel: 'Email + Front Desk Flag', timing: 'Day-of', owner: 'Membership Director', effort: 'low', archetypes: ['all'], active: true, description: 'Flag approaching milestones and schedule a celebration touch \u2014 complimentary dinner, cake, or a personal card from the GM.', triggers: [{ field: 'Birthday', op: 'within', value: '7 days' }] },
     ],
   },
   {
     key: 'social-community', name: 'Social & Community', color: '#7c3aed',
     actions: [
-      { id: 'guest-pass', name: 'Complimentary Guest Pass', channel: 'Email', timing: 'Within 7 days of decline', owner: 'Membership Director', effort: 'low', archetypes: ['all'], description: 'Offer a guest pass to encourage the member to bring a friend and re-engage.', triggers: [{ field: 'Rounds (last 30d)', op: '<', value: '2' }, { field: 'Health Score', op: '<', value: '50' }] },
-      { id: 'member-intro', name: 'Introduce to Other Members', channel: 'In-person', timing: 'Next visit', owner: 'Membership Director', effort: 'low', archetypes: ['New Member', 'Social Butterfly', 'Snowbird'], description: 'Connect the member with others who share similar interests.', triggers: [{ field: 'Membership Tenure (days)', op: '<', value: '90' }] },
-      { id: 'vip-event', name: 'VIP / Exclusive Event Invite', channel: 'Email + SMS', timing: '14 days before event', owner: 'Events Director', effort: 'low', archetypes: ['all'], description: 'Invite to a members-only wine dinner, pro-am event, or exclusive tournament.', triggers: [{ field: 'Event Proximity (days)', op: '<', value: '14' }] },
-      { id: 'family-invite', name: 'Family & Kids Event Invite', channel: 'Email', timing: '21 days before event', owner: 'Events Director', effort: 'low', archetypes: ['Social Butterfly', 'Balanced Active', 'New Member'], description: 'Invite the member and their family to an upcoming family event, kids clinic, or themed dinner night.', triggers: null },
+      { id: 'guest-pass', name: 'Complimentary Guest Pass', channel: 'Email', timing: 'Within 7 days of decline', owner: 'Membership Director', effort: 'low', archetypes: ['all'], active: true, description: 'Offer a guest pass to encourage the member to bring a friend and re-engage.', triggers: [{ field: 'Rounds (last 30d)', op: '<', value: '2' }, { field: 'Health Score', op: '<', value: '50' }] },
+      { id: 'member-intro', name: 'Introduce to Other Members', channel: 'In-person', timing: 'Next visit', owner: 'Membership Director', effort: 'low', archetypes: ['New Member', 'Social Butterfly', 'Snowbird'], active: true, description: 'Connect the member with others who share similar interests.', triggers: [{ field: 'Membership Tenure (days)', op: '<', value: '90' }] },
+      { id: 'vip-event', name: 'VIP / Exclusive Event Invite', channel: 'Email + SMS', timing: '14 days before event', owner: 'Events Director', effort: 'low', archetypes: ['all'], active: true, description: 'Invite to a members-only wine dinner, pro-am event, or exclusive tournament.', triggers: [{ field: 'Event Proximity (days)', op: '<', value: '14' }] },
+      { id: 'family-invite', name: 'Family & Kids Event Invite', channel: 'Email', timing: '21 days before event', owner: 'Events Director', effort: 'low', archetypes: ['Social Butterfly', 'Balanced Active', 'New Member'], active: true, description: 'Invite the member and their family to an upcoming family event, kids clinic, or themed dinner night.', triggers: null },
     ],
   },
   {
     key: 're-engagement', name: 'Re-Engagement', color: '#ea580c',
     actions: [
-      { id: 'tee-time', name: 'Reserve a Preferred Tee Time', channel: 'SMS', timing: 'When preferred slot opens', owner: 'Head Golf Professional', effort: 'low', archetypes: ['Die-Hard Golfer', 'Weekend Warrior'], description: 'Proactively hold a prime weekend tee time and send a "we saved this for you" message.', triggers: [{ field: 'Rounds (last 30d)', op: '<', value: '3' }, { field: 'Preferred Time Available', op: '=', value: 'true' }] },
-      { id: 'lesson', name: 'Complimentary Lesson or Clinic', channel: 'Email + Pro Shop', timing: 'Within 14 days of golf decline', owner: 'Head Golf Professional', effort: 'medium', archetypes: ['Die-Hard Golfer', 'Weekend Warrior', 'New Member'], description: 'Offer a free lesson with the pro or invite to an upcoming golf clinic.', triggers: [{ field: 'Rounds Trend (30d)', op: '<', value: '-30%' }] },
-      { id: 'win-back', name: 'Trigger Win-Back Campaign', channel: 'Email sequence (3-touch)', timing: 'After 30 days of inactivity', owner: 'Membership Director', effort: 'high', archetypes: ['Declining', 'Ghost'], description: 'A multi-touch sequence (personal note, call, in-person invite, gift) that runs automatically over 2-3 weeks.', triggers: [{ field: 'Days Since Last Activity', op: '>', value: '30' }] },
+      { id: 'tee-time', name: 'Reserve a Preferred Tee Time', channel: 'SMS', timing: 'When preferred slot opens', owner: 'Head Golf Professional', effort: 'low', archetypes: ['Die-Hard Golfer', 'Weekend Warrior'], active: true, description: 'Proactively hold a prime weekend tee time and send a "we saved this for you" message.', triggers: [{ field: 'Rounds (last 30d)', op: '<', value: '3' }, { field: 'Preferred Time Available', op: '=', value: 'true' }] },
+      { id: 'lesson', name: 'Complimentary Lesson or Clinic', channel: 'Email + Pro Shop', timing: 'Within 14 days of golf decline', owner: 'Head Golf Professional', effort: 'medium', archetypes: ['Die-Hard Golfer', 'Weekend Warrior', 'New Member'], active: true, description: 'Offer a free lesson with the pro or invite to an upcoming golf clinic.', triggers: [{ field: 'Rounds Trend (30d)', op: '<', value: '-30%' }] },
+      { id: 'win-back', name: 'Trigger Win-Back Campaign', channel: 'Email sequence (3-touch)', timing: 'After 30 days of inactivity', owner: 'Membership Director', effort: 'high', archetypes: ['Declining', 'Ghost'], active: true, description: 'A multi-touch sequence (personal note, call, in-person invite, gift) that runs automatically over 2\u20133 weeks.', triggers: [{ field: 'Days Since Last Activity', op: '>', value: '30' }] },
     ],
   },
   {
     key: 'service-recovery', name: 'Service Recovery', color: '#dc2626',
     actions: [
-      { id: 'comp-round', name: 'Complimentary Round', channel: 'Email + Pro Shop', timing: 'Within 24hrs of complaint', owner: 'Club Manager', effort: 'medium', archetypes: ['all'], description: 'Offer a complimentary round as a goodwill gesture after a service issue.', triggers: [{ field: 'Complaint Filed', op: '=', value: 'true' }] },
-      { id: 'dining-credit', name: 'Dining Credit', channel: 'Email + POS Flag', timing: 'Within 24hrs', owner: 'Club Manager', effort: 'medium', archetypes: ['all'], description: 'Issue a dining credit to recover from a service failure in the F&B area.', triggers: [{ field: 'F&B Complaint', op: '=', value: 'true' }] },
-      { id: 'pro-shop-credit', name: 'Pro Shop Credit', channel: 'Email + Pro Shop', timing: 'Within 48hrs', owner: 'Head Golf Professional', effort: 'medium', archetypes: ['all'], description: 'Issue a pro shop credit as a recovery gesture for golf operations issues.', triggers: [{ field: 'Course Complaint', op: '=', value: 'true' }] },
+      { id: 'comp-round', name: 'Complimentary Round', channel: 'Email + Pro Shop', timing: 'Within 24hrs of complaint', owner: 'Club Manager', effort: 'medium', archetypes: ['all'], active: true, description: 'Offer a complimentary round as a goodwill gesture after a service issue.', triggers: [{ field: 'Complaint Filed', op: '=', value: 'true' }] },
+      { id: 'dining-credit', name: 'Dining Credit', channel: 'Email + POS Flag', timing: 'Within 24hrs', owner: 'Club Manager', effort: 'medium', archetypes: ['all'], active: true, description: 'Issue a dining credit to recover from a service failure in the F&B area.', triggers: [{ field: 'F&B Complaint', op: '=', value: 'true' }] },
+      { id: 'pro-shop-credit', name: 'Pro Shop Credit', channel: 'Email + Pro Shop', timing: 'Within 48hrs', owner: 'Head Golf Professional', effort: 'medium', archetypes: ['all'], active: true, description: 'Issue a pro shop credit as a recovery gesture for golf operations issues.', triggers: [{ field: 'Course Complaint', op: '=', value: 'true' }] },
     ],
   },
   {
     key: 'milestones', name: 'Milestones & Celebrations', color: '#16a34a',
     actions: [
-      { id: 'anniversary', name: 'Membership Anniversary Celebration', channel: 'Email + Front Desk + Dining', timing: 'Anniversary week', owner: 'Membership Director', effort: 'medium', archetypes: ['all'], description: 'Celebrate the member\'s anniversary with a multi-touch recognition — email, front desk greeting, and complimentary dessert at dining.', triggers: [{ field: 'Anniversary', op: 'within', value: '7 days' }] },
-      { id: 'achievement', name: 'Achievement Recognition', channel: 'In-person + Social Media', timing: 'Same day', owner: 'Club Manager', effort: 'low', archetypes: ['all'], description: 'Recognize notable achievements — hole-in-one, tournament win, or personal best — with in-person congratulations and social media shoutout.', triggers: null },
+      { id: 'anniversary', name: 'Membership Anniversary Celebration', channel: 'Email + Front Desk + Dining', timing: 'Anniversary week', owner: 'Membership Director', effort: 'medium', archetypes: ['all'], active: true, description: 'Celebrate the member\'s anniversary with a multi-touch recognition \u2014 email, front desk greeting, and complimentary dessert at dining.', triggers: [{ field: 'Anniversary', op: 'within', value: '7 days' }] },
+      { id: 'achievement', name: 'Achievement Recognition', channel: 'In-person + Social Media', timing: 'Same day', owner: 'Club Manager', effort: 'low', archetypes: ['all'], active: true, description: 'Recognize notable achievements \u2014 hole-in-one, tournament win, or personal best \u2014 with in-person congratulations and social media shoutout.', triggers: null },
     ],
   },
 ];
 
+// --- Confirmation Dialog ---
+function ConfirmDialog({ title, message, onConfirm, onCancel }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }} onClick={onCancel}>
+      <div onClick={e => e.stopPropagation()} style={{ background: theme.colors.bgCard, borderRadius: 12, padding: '24px 28px', maxWidth: 400, width: '90%', boxShadow: '0 16px 48px rgba(0,0,0,0.18)', border: `1px solid ${theme.colors.border}` }}>
+        <div style={{ fontSize: '15px', fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 8 }}>{title}</div>
+        <div style={{ fontSize: '13px', color: theme.colors.textSecondary, lineHeight: 1.5, marginBottom: 20 }}>{message}</div>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button onClick={onCancel} style={{ padding: '7px 16px', borderRadius: 8, fontSize: '13px', fontWeight: 600, cursor: 'pointer', background: 'none', border: `1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>Cancel</button>
+          <button onClick={onConfirm} style={{ padding: '7px 16px', borderRadius: 8, fontSize: '13px', fontWeight: 600, cursor: 'pointer', background: '#dc2626', border: 'none', color: '#fff' }}>Delete</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Action Edit/Create Modal ---
+function ActionModal({ action, categoryKey, categories, onSave, onCancel, isNew }) {
+  const [form, setForm] = useState(() => ({
+    name: action?.name || '',
+    description: action?.description || '',
+    channel: action?.channel || 'Email',
+    timing: action?.timing || '',
+    owner: action?.owner || 'GM',
+    effort: action?.effort || 'low',
+    archetypes: action?.archetypes || ['all'],
+    active: action?.active !== false,
+    categoryKey: categoryKey || (categories[0]?.key || ''),
+    triggers: action?.triggers ? action.triggers.map(t => ({ ...t })) : [],
+  }));
+
+  const setField = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
+
+  const toggleArchetype = (arch) => {
+    setForm(prev => {
+      let next = prev.archetypes.includes(arch)
+        ? prev.archetypes.filter(a => a !== arch)
+        : [...prev.archetypes.filter(a => a !== 'all'), arch];
+      if (arch === 'all') next = ['all'];
+      if (next.length === 0) next = ['all'];
+      return { ...prev, archetypes: next };
+    });
+  };
+
+  const addTrigger = () => setForm(prev => ({ ...prev, triggers: [...prev.triggers, { field: 'Health Score', op: '<', value: '' }] }));
+  const removeTrigger = (i) => setForm(prev => ({ ...prev, triggers: prev.triggers.filter((_, idx) => idx !== i) }));
+  const updateTrigger = (i, k, v) => setForm(prev => ({ ...prev, triggers: prev.triggers.map((t, idx) => idx === i ? { ...t, [k]: v } : t) }));
+
+  const handleSubmit = () => {
+    if (!form.name.trim()) return;
+    onSave({ ...form, triggers: form.triggers.length > 0 ? form.triggers : null });
+  };
+
+  const fieldLabel = { fontSize: '11px', fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 };
+  const fieldInput = { width: '100%', padding: '7px 10px', fontSize: '13px', background: theme.colors.bg, border: `1px solid ${theme.colors.border}`, borderRadius: 6, color: theme.colors.textPrimary, outline: 'none', fontFamily: theme.fonts.sans };
+  const fieldSelect = { ...fieldInput, cursor: 'pointer' };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9998, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', background: 'rgba(0,0,0,0.35)', paddingTop: 60, overflowY: 'auto' }} onClick={onCancel}>
+      <div onClick={e => e.stopPropagation()} style={{ background: theme.colors.bgCard, borderRadius: 12, padding: '24px 28px', maxWidth: 560, width: '94%', boxShadow: '0 16px 48px rgba(0,0,0,0.18)', border: `1px solid ${theme.colors.border}`, marginBottom: 40 }}>
+        <div style={{ fontSize: '17px', fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 20 }}>
+          {isNew ? 'New Action' : `Edit: ${action?.name}`}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Name */}
+          <div>
+            <div style={fieldLabel}>Action Name *</div>
+            <input value={form.name} onChange={e => setField('name', e.target.value)} style={fieldInput} placeholder="e.g., GM Personal Call" autoFocus />
+          </div>
+
+          {/* Description */}
+          <div>
+            <div style={fieldLabel}>Description</div>
+            <textarea value={form.description} onChange={e => setField('description', e.target.value)} rows={2} style={{ ...fieldInput, resize: 'vertical', minHeight: 48 }} placeholder="What does this action accomplish?" />
+          </div>
+
+          {/* Category (only for new) */}
+          {isNew && (
+            <div>
+              <div style={fieldLabel}>Category</div>
+              <select value={form.categoryKey} onChange={e => setField('categoryKey', e.target.value)} style={fieldSelect}>
+                {categories.map(c => <option key={c.key} value={c.key}>{c.name}</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* Channel + Timing row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <div style={fieldLabel}>Channel</div>
+              <select value={form.channel} onChange={e => setField('channel', e.target.value)} style={fieldSelect}>
+                {AL_CHANNELS.map(ch => <option key={ch} value={ch}>{ch}</option>)}
+              </select>
+            </div>
+            <div>
+              <div style={fieldLabel}>Timing</div>
+              <input value={form.timing} onChange={e => setField('timing', e.target.value)} style={fieldInput} placeholder="e.g., Within 48hrs" />
+            </div>
+          </div>
+
+          {/* Owner + Effort row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <div style={fieldLabel}>Owner</div>
+              <select value={form.owner} onChange={e => setField('owner', e.target.value)} style={fieldSelect}>
+                {AL_OWNERS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+            <div>
+              <div style={fieldLabel}>Effort Level</div>
+              <select value={form.effort} onChange={e => setField('effort', e.target.value)} style={fieldSelect}>
+                {AL_EFFORTS.map(e => <option key={e} value={e}>{e.charAt(0).toUpperCase() + e.slice(1)}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Active toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button
+              onClick={() => setField('active', !form.active)}
+              style={{
+                width: 38, height: 20, borderRadius: 10, border: 'none', cursor: 'pointer', position: 'relative',
+                background: form.active ? theme.colors.success500 : theme.colors.border, transition: 'background 0.15s',
+              }}
+            >
+              <span style={{
+                position: 'absolute', top: 2, width: 16, height: 16, borderRadius: '50%', background: '#fff',
+                transition: 'left 0.15s', left: form.active ? 20 : 2, boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              }} />
+            </button>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: form.active ? theme.colors.success700 : theme.colors.textMuted }}>
+              {form.active ? 'Active' : 'Inactive'}
+            </span>
+          </div>
+
+          {/* Archetypes */}
+          <div>
+            <div style={fieldLabel}>Applicable Archetypes</div>
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+              {AL_ARCHETYPE_OPTIONS.map(arch => {
+                const sel = form.archetypes.includes(arch);
+                return (
+                  <button key={arch} onClick={() => toggleArchetype(arch)} style={{
+                    padding: '3px 10px', borderRadius: 12, fontSize: '11px', fontWeight: 600, cursor: 'pointer',
+                    background: sel ? theme.colors.textPrimary : theme.colors.bg, color: sel ? '#fff' : theme.colors.textMuted,
+                    border: `1px solid ${sel ? theme.colors.textPrimary : theme.colors.border}`, transition: 'all 0.1s',
+                  }}>{arch}</button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Trigger Conditions */}
+          <div>
+            <div style={{ ...fieldLabel, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Trigger Conditions</span>
+              <button onClick={addTrigger} style={{ fontSize: '11px', fontWeight: 600, color: theme.colors.accent, background: 'none', border: 'none', cursor: 'pointer' }}>+ Add Condition</button>
+            </div>
+            {form.triggers.length === 0 && (
+              <div style={{ fontSize: '12px', color: theme.colors.textMuted, fontStyle: 'italic', padding: '6px 0' }}>No trigger conditions. This action will be manual only.</div>
+            )}
+            {form.triggers.map((t, i) => (
+              <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
+                {i > 0 && <div style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.accent, width: 30, textAlign: 'center', flexShrink: 0 }}>AND</div>}
+                {i === 0 && <div style={{ width: 30, flexShrink: 0 }} />}
+                <select value={t.field} onChange={e => updateTrigger(i, 'field', e.target.value)} style={{ ...fieldSelect, flex: 2 }}>
+                  {AL_TRIGGER_FIELDS.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+                <select value={t.op} onChange={e => updateTrigger(i, 'op', e.target.value)} style={{ ...fieldSelect, flex: 0, width: 56 }}>
+                  {AL_TRIGGER_OPS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+                <input value={t.value} onChange={e => updateTrigger(i, 'value', e.target.value)} style={{ ...fieldInput, flex: 1 }} placeholder="Value" />
+                <button onClick={() => removeTrigger(i)} aria-label="Remove condition" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: '16px', padding: '0 4px', flexShrink: 0 }}>&times;</button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 22, paddingTop: 16, borderTop: `1px solid ${theme.colors.border}` }}>
+          <button onClick={onCancel} style={{ padding: '8px 18px', borderRadius: 8, fontSize: '13px', fontWeight: 600, cursor: 'pointer', background: 'none', border: `1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>Cancel</button>
+          <button onClick={handleSubmit} disabled={!form.name.trim()} style={{ padding: '8px 18px', borderRadius: 8, fontSize: '13px', fontWeight: 600, cursor: 'pointer', background: form.name.trim() ? theme.colors.textPrimary : theme.colors.border, border: 'none', color: '#fff', opacity: form.name.trim() ? 1 : 0.5 }}>
+            {isNew ? 'Create Action' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Category Create Modal ---
+function CategoryModal({ onSave, onCancel, existingKeys }) {
+  const [name, setName] = useState('');
+  const [color, setColor] = useState('#2563eb');
+  const colors = ['#2563eb', '#7c3aed', '#ea580c', '#dc2626', '#16a34a', '#0891b2', '#9333ea', '#be185d'];
+
+  const handleSubmit = () => {
+    if (!name.trim()) return;
+    const key = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    if (existingKeys.includes(key)) return;
+    onSave({ key, name: name.trim(), color, actions: [] });
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }} onClick={onCancel}>
+      <div onClick={e => e.stopPropagation()} style={{ background: theme.colors.bgCard, borderRadius: 12, padding: '24px 28px', maxWidth: 400, width: '90%', boxShadow: '0 16px 48px rgba(0,0,0,0.18)', border: `1px solid ${theme.colors.border}` }}>
+        <div style={{ fontSize: '17px', fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 16 }}>New Category</div>
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>Category Name *</div>
+          <input value={name} onChange={e => setName(e.target.value)} autoFocus placeholder="e.g., Seasonal Outreach" style={{ width: '100%', padding: '7px 10px', fontSize: '13px', background: theme.colors.bg, border: `1px solid ${theme.colors.border}`, borderRadius: 6, color: theme.colors.textPrimary, outline: 'none', fontFamily: theme.fonts.sans }} />
+        </div>
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', marginBottom: 6 }}>Color</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {colors.map(c => (
+              <button key={c} onClick={() => setColor(c)} style={{
+                width: 24, height: 24, borderRadius: '50%', background: c, border: color === c ? '2px solid #000' : '2px solid transparent', cursor: 'pointer', padding: 0,
+              }} />
+            ))}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button onClick={onCancel} style={{ padding: '7px 16px', borderRadius: 8, fontSize: '13px', fontWeight: 600, cursor: 'pointer', background: 'none', border: `1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>Cancel</button>
+          <button onClick={handleSubmit} disabled={!name.trim()} style={{ padding: '7px 16px', borderRadius: 8, fontSize: '13px', fontWeight: 600, cursor: 'pointer', background: name.trim() ? theme.colors.textPrimary : theme.colors.border, border: 'none', color: '#fff', opacity: name.trim() ? 1 : 0.5 }}>Create Category</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Main Action Library ---
 function ActionLibrarySection() {
   const [categories, setCategories] = useState(AL_INITIAL_CATEGORIES);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [collapsedCats, setCollapsedCats] = useState({});
   const [expandedAction, setExpandedAction] = useState(null);
+  const [hoveredRow, setHoveredRow] = useState(null);
+
+  // Modal state
+  const [editModal, setEditModal] = useState(null);   // { catKey, action } or { catKey, action: null, isNew: true }
+  const [catModal, setCatModal] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState(null); // { title, message, onConfirm }
+
+  const stickyRef = useRef(null);
 
   const totalActions = categories.reduce((sum, c) => sum + c.actions.length, 0);
+  const activeCount = categories.reduce((sum, c) => sum + c.actions.filter(a => a.active !== false).length, 0);
 
   const filteredCategories = useMemo(() => {
     let cats = filter === 'all' ? categories : categories.filter(c => c.key === filter);
@@ -277,30 +525,26 @@ function ActionLibrarySection() {
   const toggleCat = (key) => setCollapsedCats(prev => ({ ...prev, [key]: !prev[key] }));
   const toggleAction = (id) => setExpandedAction(prev => prev === id ? null : id);
 
-  const handleAddCategory = () => {
-    const name = prompt('Category name:');
-    if (!name) return;
-    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const colors = ['#2563eb', '#7c3aed', '#ea580c', '#dc2626', '#16a34a', '#0891b2', '#9333ea'];
-    setCategories(prev => [...prev, { key, name, color: colors[prev.length % colors.length], actions: [] }]);
-  };
-
-  const handleAddAction = (catKey) => {
-    const name = prompt('Action name:');
-    if (!name) return;
-    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const toggleActive = useCallback((catKey, actionId) => {
     setCategories(prev => prev.map(c => c.key === catKey
-      ? { ...c, actions: [...c.actions, { id, name, channel: 'Email', timing: 'TBD', owner: 'TBD', effort: 'low', archetypes: ['all'], description: '', triggers: null }] }
+      ? { ...c, actions: c.actions.map(a => a.id === actionId ? { ...a, active: !a.active } : a) }
       : c
     ));
-  };
+  }, []);
 
-  const handleDeleteAction = (catKey, actionId) => {
-    if (!confirm('Delete this action?')) return;
-    setCategories(prev => prev.map(c => c.key === catKey
-      ? { ...c, actions: c.actions.filter(a => a.id !== actionId) }
-      : c
-    ));
+  const handleDeleteAction = (catKey, actionId, actionName) => {
+    setConfirmDialog({
+      title: `Delete "${actionName}"?`,
+      message: 'This action will be permanently removed from the library. This cannot be undone.',
+      onConfirm: () => {
+        setCategories(prev => prev.map(c => c.key === catKey
+          ? { ...c, actions: c.actions.filter(a => a.id !== actionId) }
+          : c
+        ));
+        setConfirmDialog(null);
+        if (expandedAction === actionId) setExpandedAction(null);
+      },
+    });
   };
 
   const handleDuplicateAction = (catKey, actionId) => {
@@ -308,7 +552,7 @@ function ActionLibrarySection() {
       if (c.key !== catKey) return c;
       const src = c.actions.find(a => a.id === actionId);
       if (!src) return c;
-      const dup = { ...src, id: src.id + '-copy', name: src.name + ' (Copy)', triggers: src.triggers ? [...src.triggers] : null };
+      const dup = { ...src, id: src.id + '-copy-' + Date.now(), name: src.name + ' (Copy)', triggers: src.triggers ? src.triggers.map(t => ({ ...t })) : null, active: true };
       const idx = c.actions.findIndex(a => a.id === actionId);
       const newActions = [...c.actions];
       newActions.splice(idx + 1, 0, dup);
@@ -318,8 +562,42 @@ function ActionLibrarySection() {
 
   const handleDeleteCategory = (catKey) => {
     const cat = categories.find(c => c.key === catKey);
-    if (!confirm(`Delete category "${cat?.name}" and all its actions?`)) return;
-    setCategories(prev => prev.filter(c => c.key !== catKey));
+    if (!cat) return;
+    const count = cat.actions.length;
+    setConfirmDialog({
+      title: `Delete "${cat.name}"?`,
+      message: `This will permanently remove the category and ${count > 0 ? `all ${count} action${count !== 1 ? 's' : ''} inside it` : 'its empty container'}. This cannot be undone.`,
+      onConfirm: () => {
+        setCategories(prev => prev.filter(c => c.key !== catKey));
+        setConfirmDialog(null);
+        if (filter === catKey) setFilter('all');
+      },
+    });
+  };
+
+  const handleSaveAction = (formData) => {
+    const { categoryKey, ...actionData } = formData;
+    const id = editModal.isNew
+      ? (actionData.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now()
+      : editModal.action.id;
+
+    if (editModal.isNew) {
+      setCategories(prev => prev.map(c => c.key === categoryKey
+        ? { ...c, actions: [...c.actions, { ...actionData, id }] }
+        : c
+      ));
+    } else {
+      setCategories(prev => prev.map(c => c.key === editModal.catKey
+        ? { ...c, actions: c.actions.map(a => a.id === id ? { ...a, ...actionData } : a) }
+        : c
+      ));
+    }
+    setEditModal(null);
+  };
+
+  const handleSaveCategory = (newCat) => {
+    setCategories(prev => [...prev, newCat]);
+    setCatModal(false);
   };
 
   const effortStyles = { low: { bg: '#dcfce7', color: '#166534' }, medium: { bg: '#fef3c7', color: '#92400e' }, high: { bg: '#fecaca', color: '#991b1b' } };
@@ -328,7 +606,18 @@ function ActionLibrarySection() {
   const chipActive = { background: theme.colors.textPrimary, color: '#fff', borderColor: theme.colors.textPrimary };
   const chipInactive = { background: theme.colors.bgDeep, color: theme.colors.textMuted, borderColor: theme.colors.border };
 
-  const iconBtn = { background: 'none', border: `1px solid ${theme.colors.border}`, borderRadius: 6, cursor: 'pointer', width: 26, height: 26, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: theme.colors.textMuted, padding: 0 };
+  // Higher-contrast icon buttons
+  const iconBtnBase = {
+    background: 'none', borderRadius: 6, cursor: 'pointer', width: 28, height: 28,
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', padding: 0,
+    border: `1px solid transparent`, transition: 'all 0.15s', opacity: 0,
+  };
+  const iconBtnVisible = { ...iconBtnBase, opacity: 1, color: '#52525B', border: `1px solid ${theme.colors.border}` };
+  const iconBtnDanger = { ...iconBtnVisible, color: '#dc2626' };
+  // Category-level buttons are always visible
+  const catIconBtn = { background: 'none', borderRadius: 6, cursor: 'pointer', width: 28, height: 28, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', padding: 0, border: `1px solid ${theme.colors.border}`, color: '#52525B', transition: 'all 0.12s' };
+
+  const GRID_COLS = '1.6fr 1.1fr 1.3fr 1fr 44px 90px';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -337,39 +626,43 @@ function ActionLibrarySection() {
         <div>
           <div style={{ fontSize: '20px', fontWeight: 700, color: theme.colors.textPrimary }}>Action Library</div>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
-            {totalActions} actions across {categories.length} categories — click rows to see triggers & details
+            {totalActions} actions across {categories.length} categories ({activeCount} active) \u2014 click rows to see triggers & details
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleAddCategory} style={{ padding: '6px 14px', borderRadius: 8, fontSize: '12px', fontWeight: 600, cursor: 'pointer', background: 'none', border: `1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>+ Category</button>
-          <button onClick={() => {
-            const catKey = categories.length > 0 ? categories[0].key : null;
-            if (catKey) handleAddAction(catKey);
-          }} style={{ padding: '6px 14px', borderRadius: 8, fontSize: '12px', fontWeight: 600, cursor: 'pointer', background: theme.colors.textPrimary, border: 'none', color: '#fff' }}>+ New Action</button>
+          <button onClick={() => setCatModal(true)} style={{ padding: '6px 14px', borderRadius: 8, fontSize: '12px', fontWeight: 600, cursor: 'pointer', background: 'none', border: `1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>+ Category</button>
+          <button onClick={() => setEditModal({ catKey: categories[0]?.key, action: null, isNew: true })} style={{ padding: '6px 14px', borderRadius: 8, fontSize: '12px', fontWeight: 600, cursor: 'pointer', background: theme.colors.textPrimary, border: 'none', color: '#fff' }}>+ New Action</button>
         </div>
       </div>
 
-      {/* Search */}
-      <div style={{ position: 'relative', maxWidth: 400 }}>
-        <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: '14px', color: theme.colors.textMuted, pointerEvents: 'none' }}>&#128269;</span>
-        <input
-          type="text" placeholder="Search actions..." value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ width: '100%', padding: '8px 12px 8px 32px', fontSize: '13px', background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: 8, color: theme.colors.textPrimary, outline: 'none', fontFamily: theme.fonts.sans }}
-        />
-      </div>
+      {/* Sticky search + filter bar */}
+      <div ref={stickyRef} style={{ position: 'sticky', top: 0, zIndex: 20, background: theme.colors.bg, paddingBottom: 4, marginBottom: -4 }}>
+        {/* Search */}
+        <div style={{ position: 'relative', maxWidth: 400, marginBottom: 10 }}>
+          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: '14px', color: theme.colors.textMuted, pointerEvents: 'none' }}>&#128269;</span>
+          <input
+            type="text" placeholder="Search actions..." value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ width: '100%', padding: '8px 12px 8px 32px', fontSize: '13px', background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: 8, color: theme.colors.textPrimary, outline: 'none', fontFamily: theme.fonts.sans }}
+          />
+          {search && (
+            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: theme.colors.textMuted, fontSize: '16px' }}>&times;</button>
+          )}
+        </div>
 
-      {/* Filter chips */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <span onClick={() => setFilter('all')} style={{ ...chipBase, ...(filter === 'all' ? chipActive : chipInactive) }}>All</span>
-        {categories.map(c => (
-          <span key={c.key} onClick={() => setFilter(c.key)} style={{ ...chipBase, ...(filter === c.key ? chipActive : chipInactive) }}>{c.name}</span>
-        ))}
+        {/* Filter chips */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <span onClick={() => setFilter('all')} style={{ ...chipBase, ...(filter === 'all' ? chipActive : chipInactive) }}>All</span>
+          {categories.map(c => (
+            <span key={c.key} onClick={() => setFilter(c.key)} style={{ ...chipBase, ...(filter === c.key ? chipActive : chipInactive) }}>{c.name}</span>
+          ))}
+        </div>
       </div>
 
       {/* Categories */}
       {filteredCategories.map(cat => {
         const isOpen = !collapsedCats[cat.key];
+        const activeInCat = cat.actions.filter(a => a.active !== false).length;
         return (
           <div key={cat.key} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: 10, background: theme.colors.bgCard, overflow: 'hidden' }}>
             {/* Category header */}
@@ -380,62 +673,112 @@ function ActionLibrarySection() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: '13px', color: cat.color }}>
                 <span style={{ width: 7, height: 7, borderRadius: '50%', background: cat.color, display: 'inline-block', flexShrink: 0 }} />
                 {cat.name}
-                <span style={{ fontWeight: 400, fontSize: '11px', color: theme.colors.textMuted, marginLeft: 4 }}>{cat.actions.length}</span>
+                <span style={{ fontWeight: 400, fontSize: '11px', color: theme.colors.textMuted, marginLeft: 4 }}>{activeInCat}/{cat.actions.length} active</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <button onClick={e => { e.stopPropagation(); handleAddAction(cat.key); }} style={iconBtn} title="Add action">+</button>
-                <button onClick={e => { e.stopPropagation(); handleDeleteCategory(cat.key); }} style={{ ...iconBtn, color: theme.colors.danger500 }} title="Remove category">&times;</button>
-                <span style={{ fontSize: '12px', color: theme.colors.textMuted, marginLeft: 4 }}>{isOpen ? '\u25BC' : '\u25B6'}</span>
+                <button onClick={e => { e.stopPropagation(); setEditModal({ catKey: cat.key, action: null, isNew: true }); }} style={catIconBtn} title="Add action to this category">+</button>
+                <button onClick={e => { e.stopPropagation(); handleDeleteCategory(cat.key); }}
+                  style={{ ...catIconBtn, color: '#dc2626' }}
+                  title={`Remove "${cat.name}" category`}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                >&times;</button>
+                <span style={{ fontSize: '12px', color: theme.colors.textMuted, marginLeft: 4, transition: 'transform 0.15s', transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)', display: 'inline-block' }}>{'\u25BC'}</span>
               </div>
             </div>
 
             {isOpen && (
               <>
                 {/* Column headers */}
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.2fr 1fr 80px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em', borderTop: `1px solid ${theme.colors.border}`, borderBottom: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
-                  <div>Action</div><div>Channel</div><div>Timing</div><div>Owner</div><div></div>
+                <div style={{ display: 'grid', gridTemplateColumns: GRID_COLS, padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em', borderTop: `1px solid ${theme.colors.border}`, borderBottom: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
+                  <div>Action</div><div>Channel</div><div>Timing</div><div>Owner</div><div></div><div></div>
                 </div>
 
                 {/* Action rows */}
                 {cat.actions.map(action => {
                   const isExpanded = expandedAction === action.id;
+                  const isHovered = hoveredRow === action.id;
                   const hasTrigger = action.triggers && action.triggers.length > 0;
+                  const isActive = action.active !== false;
                   const eff = effortStyles[action.effort] || effortStyles.low;
+                  const rowId = action.id;
+
                   return (
-                    <div key={action.id}>
+                    <div key={rowId}>
                       <div
-                        onClick={() => toggleAction(action.id)}
+                        onClick={() => toggleAction(rowId)}
+                        onMouseEnter={() => setHoveredRow(rowId)}
+                        onMouseLeave={() => setHoveredRow(null)}
                         style={{
-                          display: 'grid', gridTemplateColumns: '2fr 1fr 1.2fr 1fr 80px', padding: '9px 14px',
+                          display: 'grid', gridTemplateColumns: GRID_COLS, padding: '9px 14px',
                           fontSize: '13px', cursor: 'pointer', alignItems: 'center',
                           borderBottom: `1px solid ${theme.colors.borderLight}`,
-                          background: isExpanded ? theme.colors.bg : 'transparent',
+                          background: isExpanded ? theme.colors.bg : (isHovered ? theme.colors.bg : 'transparent'),
                           transition: 'background 0.1s',
+                          opacity: isActive ? 1 : 0.5,
                         }}
-                        onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = theme.colors.bg; }}
-                        onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = 'transparent'; }}
                       >
-                        <div style={{ fontWeight: 600, color: theme.colors.textPrimary, display: 'flex', alignItems: 'center', gap: 4 }}>
-                          {hasTrigger && <span style={{ color: '#f97316', fontSize: '10px' }} title="Has trigger conditions">&#9889;</span>}
-                          {action.name}
+                        <div style={{ fontWeight: 600, color: theme.colors.textPrimary, display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
+                          {hasTrigger && <span style={{ color: '#f97316', fontSize: '11px', flexShrink: 0 }} title="Has trigger conditions (auto-fires)">&#9889;</span>}
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action.name}</span>
+                          {!isActive && <span style={{ fontSize: '10px', color: theme.colors.textMuted, fontWeight: 400, flexShrink: 0 }}>(off)</span>}
                         </div>
-                        <div style={{ color: theme.colors.textSecondary, fontSize: '12px' }}>{action.channel}</div>
-                        <div style={{ color: theme.colors.textMuted, fontSize: '12px' }}>{action.timing}</div>
+                        <div style={{ color: theme.colors.textSecondary, fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action.channel}</div>
+                        <div style={{ color: theme.colors.textMuted, fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action.timing}</div>
                         <div style={{ color: theme.colors.textSecondary, fontSize: '12px' }}>{action.owner}</div>
+                        {/* Active toggle */}
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          <button
+                            onClick={e => { e.stopPropagation(); toggleActive(cat.key, action.id); }}
+                            title={isActive ? 'Deactivate action' : 'Activate action'}
+                            aria-label={isActive ? 'Deactivate action' : 'Activate action'}
+                            style={{
+                              width: 32, height: 17, borderRadius: 9, border: 'none', cursor: 'pointer', position: 'relative',
+                              background: isActive ? theme.colors.success500 : theme.colors.border, transition: 'background 0.15s',
+                            }}
+                          >
+                            <span style={{
+                              position: 'absolute', top: 1.5, width: 14, height: 14, borderRadius: '50%', background: '#fff',
+                              transition: 'left 0.15s', left: isActive ? 16 : 2, boxShadow: '0 1px 2px rgba(0,0,0,0.18)',
+                            }} />
+                          </button>
+                        </div>
+                        {/* Row action buttons — visible on hover */}
                         <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-                          <button onClick={e => { e.stopPropagation(); toggleAction(action.id); }} style={{ ...iconBtn, fontSize: '14px' }} title="Edit">&#9998;</button>
-                          <button onClick={e => { e.stopPropagation(); handleDuplicateAction(cat.key, action.id); }} style={{ ...iconBtn, fontSize: '12px' }} title="Duplicate">&#10697;</button>
-                          <button onClick={e => { e.stopPropagation(); handleDeleteAction(cat.key, action.id); }} style={{ ...iconBtn, fontSize: '12px', color: theme.colors.danger500 }} title="Delete">&times;</button>
+                          <button
+                            onClick={e => { e.stopPropagation(); setEditModal({ catKey: cat.key, action, isNew: false }); }}
+                            style={isHovered || isExpanded ? iconBtnVisible : iconBtnBase}
+                            title="Edit action"
+                            aria-label="Edit action"
+                            onMouseEnter={e => { e.currentTarget.style.background = theme.colors.bgDeep; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                          >&#9998;</button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleDuplicateAction(cat.key, action.id); }}
+                            style={isHovered || isExpanded ? iconBtnVisible : iconBtnBase}
+                            title="Duplicate action"
+                            aria-label="Duplicate action"
+                            onMouseEnter={e => { e.currentTarget.style.background = theme.colors.bgDeep; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                          >&#10697;</button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleDeleteAction(cat.key, action.id, action.name); }}
+                            style={isHovered || isExpanded ? iconBtnDanger : iconBtnBase}
+                            title="Delete action"
+                            aria-label="Delete action"
+                            onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                          >&times;</button>
                         </div>
                       </div>
 
                       {/* Expanded detail */}
                       {isExpanded && (
-                        <div style={{ padding: '12px 14px 14px', borderBottom: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
+                        <div style={{ padding: '14px 14px 16px', borderBottom: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
                           {action.description && (
-                            <div style={{ fontSize: '13px', color: theme.colors.textSecondary, marginBottom: 10, lineHeight: 1.5 }}>{action.description}</div>
+                            <div style={{ fontSize: '13px', color: theme.colors.textSecondary, marginBottom: 12, lineHeight: 1.5 }}>{action.description}</div>
                           )}
-                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: hasTrigger ? 12 : 0 }}>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: hasTrigger ? 14 : 0 }}>
                             <span style={{ padding: '2px 10px', borderRadius: 12, fontSize: '11px', fontWeight: 600, background: eff.bg, color: eff.color }}>{action.effort} effort</span>
                             {(action.archetypes || []).map(a => (
                               <span key={a} style={{ padding: '2px 10px', borderRadius: 12, fontSize: '11px', fontWeight: 500, background: `${theme.colors.accent}10`, color: theme.colors.textSecondary, border: `1px solid ${theme.colors.accent}20` }}>{a}</span>
@@ -461,6 +804,11 @@ function ActionLibrarySection() {
                               ))}
                             </div>
                           )}
+                          {/* Quick edit link in expanded view */}
+                          <button
+                            onClick={e => { e.stopPropagation(); setEditModal({ catKey: cat.key, action, isNew: false }); }}
+                            style={{ marginTop: 12, fontSize: '12px', fontWeight: 600, color: theme.colors.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                          >Edit this action &rarr;</button>
                         </div>
                       )}
                     </div>
@@ -469,7 +817,8 @@ function ActionLibrarySection() {
 
                 {cat.actions.length === 0 && (
                   <div style={{ padding: '20px 14px', textAlign: 'center', fontSize: '12px', color: theme.colors.textMuted }}>
-                    No actions yet. Click + to add one.
+                    No actions yet.{' '}
+                    <button onClick={() => setEditModal({ catKey: cat.key, action: null, isNew: true })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.colors.accent, fontWeight: 600, fontSize: '12px' }}>Add one</button>
                   </div>
                 )}
               </>
@@ -482,6 +831,33 @@ function ActionLibrarySection() {
         <div style={{ padding: '24px', textAlign: 'center', fontSize: '13px', color: theme.colors.textMuted }}>
           No actions match your search.
         </div>
+      )}
+
+      {/* Modals */}
+      {editModal && (
+        <ActionModal
+          action={editModal.action}
+          categoryKey={editModal.catKey}
+          categories={categories}
+          isNew={editModal.isNew}
+          onSave={handleSaveAction}
+          onCancel={() => setEditModal(null)}
+        />
+      )}
+      {catModal && (
+        <CategoryModal
+          existingKeys={categories.map(c => c.key)}
+          onSave={handleSaveCategory}
+          onCancel={() => setCatModal(false)}
+        />
+      )}
+      {confirmDialog && (
+        <ConfirmDialog
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+        />
       )}
     </div>
   );
