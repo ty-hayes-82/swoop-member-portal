@@ -206,96 +206,281 @@ function ContextualGuide({ section }) {
   );
 }
 
-// Recommendation 4: Action Library as a prominent section
+// Recommendation 4: Action Library — interactive table with triggers, CRUD, search, filters
+const AL_INITIAL_CATEGORIES = [
+  {
+    key: 'personal-touch', name: 'Personal Touch', color: '#2563eb',
+    actions: [
+      { id: 'gm-call', name: 'GM Personal Call', channel: 'Phone', timing: 'Within 48hrs of health drop', owner: 'GM', effort: 'medium', archetypes: ['all'], description: 'Direct call from the GM to check in, address concerns, or simply reinforce the relationship.', triggers: [{ field: 'Health Score', op: '<', value: '30' }] },
+      { id: 'concierge', name: 'Concierge Check-In', channel: 'In-person', timing: 'Next visit', owner: 'Club Manager', effort: 'low', archetypes: ['all'], description: 'Personal outreach from the concierge or club manager — a warm check-in call or handwritten note.', triggers: [{ field: 'Days Since Last Visit', op: '>', value: '21' }] },
+      { id: 'birthday', name: 'Birthday/Anniversary Outreach', channel: 'Email + Front Desk Flag', timing: 'Day-of', owner: 'Membership Director', effort: 'low', archetypes: ['all'], description: 'Flag approaching milestones and schedule a celebration touch — complimentary dinner, cake, or a personal card from the GM.', triggers: [{ field: 'Birthday', op: 'within', value: '7 days' }] },
+    ],
+  },
+  {
+    key: 'social-community', name: 'Social & Community', color: '#7c3aed',
+    actions: [
+      { id: 'guest-pass', name: 'Complimentary Guest Pass', channel: 'Email', timing: 'Within 7 days of decline', owner: 'Membership Director', effort: 'low', archetypes: ['all'], description: 'Offer a guest pass to encourage the member to bring a friend and re-engage.', triggers: [{ field: 'Rounds (last 30d)', op: '<', value: '2' }, { field: 'Health Score', op: '<', value: '50' }] },
+      { id: 'member-intro', name: 'Introduce to Other Members', channel: 'In-person', timing: 'Next visit', owner: 'Membership Director', effort: 'low', archetypes: ['New Member', 'Social Butterfly', 'Snowbird'], description: 'Connect the member with others who share similar interests.', triggers: [{ field: 'Membership Tenure (days)', op: '<', value: '90' }] },
+      { id: 'vip-event', name: 'VIP / Exclusive Event Invite', channel: 'Email + SMS', timing: '14 days before event', owner: 'Events Director', effort: 'low', archetypes: ['all'], description: 'Invite to a members-only wine dinner, pro-am event, or exclusive tournament.', triggers: [{ field: 'Event Proximity (days)', op: '<', value: '14' }] },
+      { id: 'family-invite', name: 'Family & Kids Event Invite', channel: 'Email', timing: '21 days before event', owner: 'Events Director', effort: 'low', archetypes: ['Social Butterfly', 'Balanced Active', 'New Member'], description: 'Invite the member and their family to an upcoming family event, kids clinic, or themed dinner night.', triggers: null },
+    ],
+  },
+  {
+    key: 're-engagement', name: 'Re-Engagement', color: '#ea580c',
+    actions: [
+      { id: 'tee-time', name: 'Reserve a Preferred Tee Time', channel: 'SMS', timing: 'When preferred slot opens', owner: 'Head Golf Professional', effort: 'low', archetypes: ['Die-Hard Golfer', 'Weekend Warrior'], description: 'Proactively hold a prime weekend tee time and send a "we saved this for you" message.', triggers: [{ field: 'Rounds (last 30d)', op: '<', value: '3' }, { field: 'Preferred Time Available', op: '=', value: 'true' }] },
+      { id: 'lesson', name: 'Complimentary Lesson or Clinic', channel: 'Email + Pro Shop', timing: 'Within 14 days of golf decline', owner: 'Head Golf Professional', effort: 'medium', archetypes: ['Die-Hard Golfer', 'Weekend Warrior', 'New Member'], description: 'Offer a free lesson with the pro or invite to an upcoming golf clinic.', triggers: [{ field: 'Rounds Trend (30d)', op: '<', value: '-30%' }] },
+      { id: 'win-back', name: 'Trigger Win-Back Campaign', channel: 'Email sequence (3-touch)', timing: 'After 30 days of inactivity', owner: 'Membership Director', effort: 'high', archetypes: ['Declining', 'Ghost'], description: 'A multi-touch sequence (personal note, call, in-person invite, gift) that runs automatically over 2-3 weeks.', triggers: [{ field: 'Days Since Last Activity', op: '>', value: '30' }] },
+    ],
+  },
+  {
+    key: 'service-recovery', name: 'Service Recovery', color: '#dc2626',
+    actions: [
+      { id: 'comp-round', name: 'Complimentary Round', channel: 'Email + Pro Shop', timing: 'Within 24hrs of complaint', owner: 'Club Manager', effort: 'medium', archetypes: ['all'], description: 'Offer a complimentary round as a goodwill gesture after a service issue.', triggers: [{ field: 'Complaint Filed', op: '=', value: 'true' }] },
+      { id: 'dining-credit', name: 'Dining Credit', channel: 'Email + POS Flag', timing: 'Within 24hrs', owner: 'Club Manager', effort: 'medium', archetypes: ['all'], description: 'Issue a dining credit to recover from a service failure in the F&B area.', triggers: [{ field: 'F&B Complaint', op: '=', value: 'true' }] },
+      { id: 'pro-shop-credit', name: 'Pro Shop Credit', channel: 'Email + Pro Shop', timing: 'Within 48hrs', owner: 'Head Golf Professional', effort: 'medium', archetypes: ['all'], description: 'Issue a pro shop credit as a recovery gesture for golf operations issues.', triggers: [{ field: 'Course Complaint', op: '=', value: 'true' }] },
+    ],
+  },
+  {
+    key: 'milestones', name: 'Milestones & Celebrations', color: '#16a34a',
+    actions: [
+      { id: 'anniversary', name: 'Membership Anniversary Celebration', channel: 'Email + Front Desk + Dining', timing: 'Anniversary week', owner: 'Membership Director', effort: 'medium', archetypes: ['all'], description: 'Celebrate the member\'s anniversary with a multi-touch recognition — email, front desk greeting, and complimentary dessert at dining.', triggers: [{ field: 'Anniversary', op: 'within', value: '7 days' }] },
+      { id: 'achievement', name: 'Achievement Recognition', channel: 'In-person + Social Media', timing: 'Same day', owner: 'Club Manager', effort: 'low', archetypes: ['all'], description: 'Recognize notable achievements — hole-in-one, tournament win, or personal best — with in-person congratulations and social media shoutout.', triggers: null },
+    ],
+  },
+];
+
 function ActionLibrarySection() {
-  const [expanded, setExpanded] = useState(false);
-  const categories = [
-    {
-      name: 'Personal Touch', color: '#2563eb', actions: [
-        { name: 'GM Personal Call', channel: 'Phone', timing: 'Within 48hrs of health drop', effectiveness: '95% retention when score < 30' },
-        { name: 'Concierge Check-In', channel: 'In-person', timing: 'Next visit', effectiveness: '78% re-engagement rate' },
-        { name: 'Birthday/Anniversary Outreach', channel: 'Email + Front Desk Flag', timing: 'Day-of', effectiveness: '22% higher satisfaction scores' },
-      ],
-    },
-    {
-      name: 'Social & Community', color: '#7c3aed', actions: [
-        { name: 'Complimentary Guest Pass', channel: 'Email', timing: 'Within 7 days of decline', effectiveness: '3.2x visit frequency boost' },
-        { name: 'Introduce to Other Members', channel: 'In-person', timing: 'Next visit', effectiveness: '91% renewal for multi-connection members' },
-        { name: 'VIP / Exclusive Event Invite', channel: 'Email + SMS', timing: '14 days before event', effectiveness: '84% attendance, 96% renewal' },
-        { name: 'Family & Kids Event Invite', channel: 'Email', timing: '21 days before event', effectiveness: 'Household renewal +18%' },
-      ],
-    },
-    {
-      name: 'Re-Engagement', color: '#ea580c', actions: [
-        { name: 'Reserve a Preferred Tee Time', channel: 'SMS', timing: 'When preferred slot opens', effectiveness: '68% booking conversion' },
-        { name: 'Complimentary Lesson or Clinic', channel: 'Email + Pro Shop', timing: 'Within 14 days of golf decline', effectiveness: '45% round frequency recovery' },
-        { name: 'Trigger Win-Back Campaign', channel: 'Email sequence (3-touch)', timing: 'After 30 days of inactivity', effectiveness: '31% re-activation rate' },
-      ],
-    },
-    {
-      name: 'Service Recovery', color: '#dc2626', actions: [
-        { name: 'Complimentary Round', channel: 'Email + Pro Shop', timing: 'Within 24hrs of complaint', effectiveness: '89% complaint resolution satisfaction' },
-        { name: 'Dining Credit', channel: 'Email + POS Flag', timing: 'Within 24hrs', effectiveness: '74% post-recovery dining visit' },
-        { name: 'Pro Shop Credit', channel: 'Email + Pro Shop', timing: 'Within 48hrs', effectiveness: '62% spend recovery' },
-      ],
-    },
-    {
-      name: 'Milestones & Celebrations', color: '#16a34a', actions: [
-        { name: 'Membership Anniversary Celebration', channel: 'Email + Front Desk + Dining', timing: 'Anniversary week', effectiveness: '96% renewal rate for celebrated members' },
-        { name: 'Achievement Recognition', channel: 'In-person + Social Media', timing: 'Same day', effectiveness: 'Social sharing drives 2.1x referrals' },
-      ],
-    },
-  ];
+  const [categories, setCategories] = useState(AL_INITIAL_CATEGORIES);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [collapsedCats, setCollapsedCats] = useState({});
+  const [expandedAction, setExpandedAction] = useState(null);
+
+  const totalActions = categories.reduce((sum, c) => sum + c.actions.length, 0);
+
+  const filteredCategories = useMemo(() => {
+    let cats = filter === 'all' ? categories : categories.filter(c => c.key === filter);
+    if (search) {
+      const q = search.toLowerCase();
+      cats = cats.map(c => ({
+        ...c,
+        actions: c.actions.filter(a =>
+          a.name.toLowerCase().includes(q) || a.channel.toLowerCase().includes(q) ||
+          a.owner.toLowerCase().includes(q) || (a.description || '').toLowerCase().includes(q)
+        ),
+      })).filter(c => c.actions.length > 0);
+    }
+    return cats;
+  }, [categories, filter, search]);
+
+  const toggleCat = (key) => setCollapsedCats(prev => ({ ...prev, [key]: !prev[key] }));
+  const toggleAction = (id) => setExpandedAction(prev => prev === id ? null : id);
+
+  const handleAddCategory = () => {
+    const name = prompt('Category name:');
+    if (!name) return;
+    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const colors = ['#2563eb', '#7c3aed', '#ea580c', '#dc2626', '#16a34a', '#0891b2', '#9333ea'];
+    setCategories(prev => [...prev, { key, name, color: colors[prev.length % colors.length], actions: [] }]);
+  };
+
+  const handleAddAction = (catKey) => {
+    const name = prompt('Action name:');
+    if (!name) return;
+    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    setCategories(prev => prev.map(c => c.key === catKey
+      ? { ...c, actions: [...c.actions, { id, name, channel: 'Email', timing: 'TBD', owner: 'TBD', effort: 'low', archetypes: ['all'], description: '', triggers: null }] }
+      : c
+    ));
+  };
+
+  const handleDeleteAction = (catKey, actionId) => {
+    if (!confirm('Delete this action?')) return;
+    setCategories(prev => prev.map(c => c.key === catKey
+      ? { ...c, actions: c.actions.filter(a => a.id !== actionId) }
+      : c
+    ));
+  };
+
+  const handleDuplicateAction = (catKey, actionId) => {
+    setCategories(prev => prev.map(c => {
+      if (c.key !== catKey) return c;
+      const src = c.actions.find(a => a.id === actionId);
+      if (!src) return c;
+      const dup = { ...src, id: src.id + '-copy', name: src.name + ' (Copy)', triggers: src.triggers ? [...src.triggers] : null };
+      const idx = c.actions.findIndex(a => a.id === actionId);
+      const newActions = [...c.actions];
+      newActions.splice(idx + 1, 0, dup);
+      return { ...c, actions: newActions };
+    }));
+  };
+
+  const handleDeleteCategory = (catKey) => {
+    const cat = categories.find(c => c.key === catKey);
+    if (!confirm(`Delete category "${cat?.name}" and all its actions?`)) return;
+    setCategories(prev => prev.filter(c => c.key !== catKey));
+  };
+
+  const effortStyles = { low: { bg: '#dcfce7', color: '#166534' }, medium: { bg: '#fef3c7', color: '#92400e' }, high: { bg: '#fecaca', color: '#991b1b' } };
+
+  const chipBase = { padding: '5px 14px', borderRadius: 20, fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: '1px solid transparent', transition: 'all 0.15s' };
+  const chipActive = { background: theme.colors.textPrimary, color: '#fff', borderColor: theme.colors.textPrimary };
+  const chipInactive = { background: theme.colors.bgDeep, color: theme.colors.textMuted, borderColor: theme.colors.border };
+
+  const iconBtn = { background: 'none', border: `1px solid ${theme.colors.border}`, borderRadius: 6, cursor: 'pointer', width: 26, height: 26, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: theme.colors.textMuted, padding: 0 };
 
   return (
-    <div style={{
-      border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md,
-      background: theme.colors.bgCard, overflow: 'hidden',
-    }}>
-      <button
-        onClick={() => setExpanded(!expanded)}
-        style={{
-          width: '100%', padding: theme.spacing.md,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          background: theme.colors.bgDeep, border: 'none', cursor: 'pointer',
-          borderBottom: expanded ? `1px solid ${theme.colors.border}` : 'none',
-        }}
-      >
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, textAlign: 'left' }}>
-            Action Library — {categories.reduce((sum, c) => sum + c.actions.length, 0)} actions across {categories.length} categories
-          </div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textAlign: 'left', marginTop: 2 }}>
-            Browse all available intervention actions with channel, timing, and effectiveness data.
+          <div style={{ fontSize: '20px', fontWeight: 700, color: theme.colors.textPrimary }}>Action Library</div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
+            {totalActions} actions across {categories.length} categories — click rows to see triggers & details
           </div>
         </div>
-        <span style={{ fontSize: '14px', color: theme.colors.textMuted, flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
-      </button>
-      {expanded && (
-        <div style={{ padding: theme.spacing.md, display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-          {categories.map(cat => (
-            <div key={cat.name}>
-              <div style={{
-                fontSize: theme.fontSize.xs, fontWeight: 700, textTransform: 'uppercase',
-                letterSpacing: '0.06em', color: cat.color, marginBottom: 8,
-              }}>{cat.name}</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {cat.actions.map(action => (
-                  <div key={action.name} style={{
-                    padding: '8px 12px', borderRadius: theme.radius.sm,
-                    border: `1px solid ${theme.colors.border}`, background: theme.colors.bg,
-                    display: 'grid', gridTemplateColumns: '1.5fr 0.8fr 1fr 1.2fr', gap: 8, alignItems: 'center',
-                    fontSize: theme.fontSize.xs,
-                  }}>
-                    <div style={{ fontWeight: 600, color: theme.colors.textPrimary }}>{action.name}</div>
-                    <div style={{ color: theme.colors.info, fontWeight: 500 }}>{action.channel}</div>
-                    <div style={{ color: theme.colors.textMuted }}>{action.timing}</div>
-                    <div style={{ color: theme.colors.success, fontWeight: 500, fontSize: '11px' }}>{action.effectiveness}</div>
-                  </div>
-                ))}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleAddCategory} style={{ padding: '6px 14px', borderRadius: 8, fontSize: '12px', fontWeight: 600, cursor: 'pointer', background: 'none', border: `1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>+ Category</button>
+          <button onClick={() => {
+            const catKey = categories.length > 0 ? categories[0].key : null;
+            if (catKey) handleAddAction(catKey);
+          }} style={{ padding: '6px 14px', borderRadius: 8, fontSize: '12px', fontWeight: 600, cursor: 'pointer', background: theme.colors.textPrimary, border: 'none', color: '#fff' }}>+ New Action</button>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div style={{ position: 'relative', maxWidth: 400 }}>
+        <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: '14px', color: theme.colors.textMuted, pointerEvents: 'none' }}>&#128269;</span>
+        <input
+          type="text" placeholder="Search actions..." value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ width: '100%', padding: '8px 12px 8px 32px', fontSize: '13px', background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: 8, color: theme.colors.textPrimary, outline: 'none', fontFamily: theme.fonts.sans }}
+        />
+      </div>
+
+      {/* Filter chips */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <span onClick={() => setFilter('all')} style={{ ...chipBase, ...(filter === 'all' ? chipActive : chipInactive) }}>All</span>
+        {categories.map(c => (
+          <span key={c.key} onClick={() => setFilter(c.key)} style={{ ...chipBase, ...(filter === c.key ? chipActive : chipInactive) }}>{c.name}</span>
+        ))}
+      </div>
+
+      {/* Categories */}
+      {filteredCategories.map(cat => {
+        const isOpen = !collapsedCats[cat.key];
+        return (
+          <div key={cat.key} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: 10, background: theme.colors.bgCard, overflow: 'hidden' }}>
+            {/* Category header */}
+            <div
+              onClick={() => toggleCat(cat.key)}
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', cursor: 'pointer', userSelect: 'none' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: '13px', color: cat.color }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: cat.color, display: 'inline-block', flexShrink: 0 }} />
+                {cat.name}
+                <span style={{ fontWeight: 400, fontSize: '11px', color: theme.colors.textMuted, marginLeft: 4 }}>{cat.actions.length}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <button onClick={e => { e.stopPropagation(); handleAddAction(cat.key); }} style={iconBtn} title="Add action">+</button>
+                <button onClick={e => { e.stopPropagation(); handleDeleteCategory(cat.key); }} style={{ ...iconBtn, color: theme.colors.danger500 }} title="Remove category">&times;</button>
+                <span style={{ fontSize: '12px', color: theme.colors.textMuted, marginLeft: 4 }}>{isOpen ? '\u25BC' : '\u25B6'}</span>
               </div>
             </div>
-          ))}
+
+            {isOpen && (
+              <>
+                {/* Column headers */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.2fr 1fr 80px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em', borderTop: `1px solid ${theme.colors.border}`, borderBottom: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
+                  <div>Action</div><div>Channel</div><div>Timing</div><div>Owner</div><div></div>
+                </div>
+
+                {/* Action rows */}
+                {cat.actions.map(action => {
+                  const isExpanded = expandedAction === action.id;
+                  const hasTrigger = action.triggers && action.triggers.length > 0;
+                  const eff = effortStyles[action.effort] || effortStyles.low;
+                  return (
+                    <div key={action.id}>
+                      <div
+                        onClick={() => toggleAction(action.id)}
+                        style={{
+                          display: 'grid', gridTemplateColumns: '2fr 1fr 1.2fr 1fr 80px', padding: '9px 14px',
+                          fontSize: '13px', cursor: 'pointer', alignItems: 'center',
+                          borderBottom: `1px solid ${theme.colors.borderLight}`,
+                          background: isExpanded ? theme.colors.bg : 'transparent',
+                          transition: 'background 0.1s',
+                        }}
+                        onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = theme.colors.bg; }}
+                        onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <div style={{ fontWeight: 600, color: theme.colors.textPrimary, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          {hasTrigger && <span style={{ color: '#f97316', fontSize: '10px' }} title="Has trigger conditions">&#9889;</span>}
+                          {action.name}
+                        </div>
+                        <div style={{ color: theme.colors.textSecondary, fontSize: '12px' }}>{action.channel}</div>
+                        <div style={{ color: theme.colors.textMuted, fontSize: '12px' }}>{action.timing}</div>
+                        <div style={{ color: theme.colors.textSecondary, fontSize: '12px' }}>{action.owner}</div>
+                        <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                          <button onClick={e => { e.stopPropagation(); toggleAction(action.id); }} style={{ ...iconBtn, fontSize: '14px' }} title="Edit">&#9998;</button>
+                          <button onClick={e => { e.stopPropagation(); handleDuplicateAction(cat.key, action.id); }} style={{ ...iconBtn, fontSize: '12px' }} title="Duplicate">&#10697;</button>
+                          <button onClick={e => { e.stopPropagation(); handleDeleteAction(cat.key, action.id); }} style={{ ...iconBtn, fontSize: '12px', color: theme.colors.danger500 }} title="Delete">&times;</button>
+                        </div>
+                      </div>
+
+                      {/* Expanded detail */}
+                      {isExpanded && (
+                        <div style={{ padding: '12px 14px 14px', borderBottom: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
+                          {action.description && (
+                            <div style={{ fontSize: '13px', color: theme.colors.textSecondary, marginBottom: 10, lineHeight: 1.5 }}>{action.description}</div>
+                          )}
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: hasTrigger ? 12 : 0 }}>
+                            <span style={{ padding: '2px 10px', borderRadius: 12, fontSize: '11px', fontWeight: 600, background: eff.bg, color: eff.color }}>{action.effort} effort</span>
+                            {(action.archetypes || []).map(a => (
+                              <span key={a} style={{ padding: '2px 10px', borderRadius: 12, fontSize: '11px', fontWeight: 500, background: `${theme.colors.accent}10`, color: theme.colors.textSecondary, border: `1px solid ${theme.colors.accent}20` }}>{a}</span>
+                            ))}
+                          </div>
+                          {hasTrigger && (
+                            <div style={{ padding: '10px 12px', borderRadius: 8, background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}` }}>
+                              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#f97316', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                &#9889; Trigger Conditions
+                                <span style={{ fontWeight: 400, color: theme.colors.textMuted, textTransform: 'none', letterSpacing: 0 }}>(auto-fires when ALL conditions met)</span>
+                              </div>
+                              {action.triggers.map((t, i) => (
+                                <div key={i}>
+                                  {i > 0 && (
+                                    <div style={{ margin: '4px 0', fontSize: '11px', fontWeight: 700, color: theme.colors.accent }}>AND</div>
+                                  )}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px', borderRadius: 6, background: theme.colors.bg, fontSize: '12px' }}>
+                                    <span style={{ fontWeight: 600, color: theme.colors.textPrimary }}>{t.field}</span>
+                                    <span style={{ color: theme.colors.textMuted, fontWeight: 700 }}>{t.op}</span>
+                                    <span style={{ color: theme.colors.accent, fontWeight: 600 }}>{t.value}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {cat.actions.length === 0 && (
+                  <div style={{ padding: '20px 14px', textAlign: 'center', fontSize: '12px', color: theme.colors.textMuted }}>
+                    No actions yet. Click + to add one.
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })}
+
+      {filteredCategories.length === 0 && (
+        <div style={{ padding: '24px', textAlign: 'center', fontSize: '13px', color: theme.colors.textMuted }}>
+          No actions match your search.
         </div>
       )}
     </div>
@@ -630,15 +815,7 @@ export default function ActionsPage() {
 
             {/* Recommendation 4: Action Library as prominent section */}
             {playbookSection === 'library' && (
-              <div>
-                <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.sm }}>
-                  Action Library
-                </div>
-                <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
-                  All available intervention actions with channel, timing, and effectiveness data. Use these to build archetype playbooks and response plans.
-                </div>
-                <ActionLibrarySection />
-              </div>
+              <ActionLibrarySection />
             )}
           </div>
         )}
