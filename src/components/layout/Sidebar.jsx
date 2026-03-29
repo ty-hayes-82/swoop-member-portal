@@ -3,6 +3,7 @@ import { useNavigation } from '@/context/NavigationContext.jsx';
 import { useApp } from '@/context/AppContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
 import { theme } from '@/config/theme.js';
+import { getClubName, isRealClub } from '@/config/constants.js';
 
 const SIDEBAR_BG    = theme.colors.bgSidebar;
 const SIDEBAR_CARD  = theme.colors.sidebarCard;
@@ -160,8 +161,8 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                   {pendingAgentCount}
                 </span>
               )}
-              {/* ROI badge for Board Report */}
-              {item.badge && (!sidebarCollapsed || isMobile) && (
+              {/* ROI badge for Board Report — only show for demo/established clubs */}
+              {item.badge && !isRealClub() && (!sidebarCollapsed || isMobile) && (
                 <span style={{
                   fontSize: '9px',
                   fontWeight: 700,
@@ -181,7 +182,7 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
         })}
       </nav>
 
-      {/* Demo Environment badge */}
+      {/* Environment badge */}
       {(!sidebarCollapsed || isMobile) && (
         <div
           style={{
@@ -195,9 +196,9 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
             gap: '6px',
           }}
         >
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: theme.colors.accent, opacity: 0.6, flexShrink: 0 }} />
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: isRealClub() ? theme.colors.success : theme.colors.accent, opacity: 0.6, flexShrink: 0 }} />
           <span style={{ fontSize: '10px', color: TEXT_MUTED, letterSpacing: '0.04em' }}>
-            Demo Environment — Oakmont Hills CC simulated data Jan 2026
+            {isRealClub() ? getClubName() : 'Demo Environment — Oakmont Hills CC simulated data Jan 2026'}
           </span>
         </div>
       )}

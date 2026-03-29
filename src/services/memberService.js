@@ -278,17 +278,40 @@ const normalizeResignationScenarios = (raw) => {
   });
 };
 
-let _d = {
-  memberArchetypes: staticArchetypes,
-  healthDistribution: staticHealthDistribution,
-  atRiskMembers: staticAtRiskMembers,
-  membersAtRisk: staticAtRiskMembers,
-  resignationScenarios: staticResignationScenarios,
-  memberProfiles: staticMemberProfiles,
-  memberSummary: staticMemberSummary,
-  emailHeatmap: staticEmailHeatmap,
-  decayingMembers: staticDecayingMembers,
-};
+// For real clubs (non-demo), start with empty data — no Oakmont Hills fallback
+function getInitialData() {
+  try {
+    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    if (clubId && clubId !== 'demo') {
+      // Real club — start empty, populate from API only
+      return {
+        memberArchetypes: [],
+        healthDistribution: [],
+        atRiskMembers: [],
+        membersAtRisk: [],
+        resignationScenarios: [],
+        memberProfiles: {},
+        memberSummary: {},
+        emailHeatmap: [],
+        decayingMembers: [],
+      };
+    }
+  } catch {}
+  // Demo mode — use static Oakmont Hills data
+  return {
+    memberArchetypes: staticArchetypes,
+    healthDistribution: staticHealthDistribution,
+    atRiskMembers: staticAtRiskMembers,
+    membersAtRisk: staticAtRiskMembers,
+    resignationScenarios: staticResignationScenarios,
+    memberProfiles: staticMemberProfiles,
+    memberSummary: staticMemberSummary,
+    emailHeatmap: staticEmailHeatmap,
+    decayingMembers: staticDecayingMembers,
+  };
+}
+
+let _d = getInitialData();
 
 // Live dashboard data cache — populated by _init from /api/dashboard-live
 let _live = null;

@@ -82,7 +82,7 @@ export function DataProvider({ children }) {
           animation: 'spin 0.8s linear infinite',
         }} />
         <p style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm, fontFamily: theme.fonts.sans }}>
-          Loading Oakmont Hills…
+          Loading your club data…
         </p>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>

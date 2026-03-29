@@ -38,6 +38,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
   // Step 3 state
   const [uploadResults, setUploadResults] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState(null);
   const fileInputRef = useRef(null);
 
   // ─── Step 1: Create Club ───
@@ -91,8 +92,17 @@ export default function NewClubSetup({ onComplete, onBack }) {
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // File type validation
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (ext !== 'xlsx' && ext !== 'xls') {
+      setError(`Invalid file type ".${ext}" — please upload an .xlsx file. Download a template above to get the correct format.`);
+      return;
+    }
+
     setUploading(true);
     setError(null);
+    setUploadedFileName(file.name);
 
     try {
       const XLSX = await import('xlsx');
@@ -142,10 +152,12 @@ export default function NewClubSetup({ onComplete, onBack }) {
   const handleFinish = () => {
     const user = {
       userId: userId || 'admin', clubId, name: 'Club Admin',
+      clubName: clubName.trim(),
       email: `admin@club.com`, role: 'gm', title: 'General Manager',
     };
     localStorage.setItem('swoop_auth_user', JSON.stringify(user));
     localStorage.setItem('swoop_club_id', clubId);
+    localStorage.setItem('swoop_club_name', clubName.trim());
     onComplete?.(user);
   };
 
@@ -231,7 +243,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
             <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
               <button onClick={onBack} style={btnSecondary}>Back</button>
               <button onClick={handleCreateClub} disabled={loading} style={{ ...btnPrimary, flex: 1, opacity: loading ? 0.7 : 1 }}>
-                {loading ? 'Creating...' : 'Create Club'}
+                {loading ? 'Setting up...' : 'Next'}
               </button>
             </div>
           </div>
@@ -305,19 +317,26 @@ export default function NewClubSetup({ onComplete, onBack }) {
               onClick={() => fileInputRef.current?.click()}
               style={{
                 padding: '24px', borderRadius: '10px',
-                border: '2px dashed #D1D5DB', background: '#FAFAFA',
+                border: `2px dashed ${uploadedFileName ? '#16a34a40' : '#D1D5DB'}`,
+                background: uploadedFileName ? '#F0FDF408' : '#FAFAFA',
                 textAlign: 'center', cursor: 'pointer',
               }}
             >
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".xlsx,.csv"
+                accept=".xlsx,.xls"
                 onChange={handleFileUpload}
                 style={{ display: 'none' }}
               />
               {uploading ? (
                 <div style={{ fontSize: '14px', color: '#F3922D', fontWeight: 600 }}>Uploading and processing...</div>
+              ) : uploadedFileName ? (
+                <>
+                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>✅</div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#16a34a' }}>{uploadedFileName}</div>
+                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '4px' }}>Click to upload a different file</div>
+                </>
               ) : (
                 <>
                   <div style={{ fontSize: '24px', marginBottom: '8px' }}>📄</div>
@@ -341,12 +360,9 @@ export default function NewClubSetup({ onComplete, onBack }) {
             )}
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
-              <button onClick={() => setStep(3)} style={btnSecondary}>
+              <button onClick={() => setStep(3)} style={{ ...(uploadResults ? btnPrimary : btnSecondary), flex: 1 }}>
                 {uploadResults ? 'Continue' : 'Skip for Now'}
               </button>
-              {uploadResults && (
-                <button onClick={() => setStep(3)} style={{ ...btnPrimary, flex: 1 }}>Next</button>
-              )}
             </div>
           </div>
         )}

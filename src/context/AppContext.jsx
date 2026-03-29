@@ -30,8 +30,16 @@ const TRAIL_STEPS = {
 const defaultAgents = getAgents();
 const defaultStatuses = Object.fromEntries(defaultAgents.map((agent) => [agent.id, agent.status]));
 
+// For real clubs, start with empty inbox — no demo actions
+const _isReal = (() => {
+  try {
+    const id = localStorage.getItem('swoop_club_id');
+    return id && id !== 'demo';
+  } catch { return false; }
+})();
+
 const initialState = {
-  currentDate: '2026-01-17',
+  currentDate: new Date().toISOString().split('T')[0],
   playbooks: {
     'slow-saturday': { active: false, activatedAt: null },
     'service-save': { active: false, activatedAt: null },
@@ -46,13 +54,13 @@ const initialState = {
     'staffing-gap': 0,
     'peak-demand-capture': 0,
   },
-  inbox: getAllActions(),
-  pendingCount: getPendingActions().length,
+  inbox: _isReal ? [] : getAllActions(),
+  pendingCount: _isReal ? 0 : getPendingActions().length,
   agentStatuses: defaultStatuses,
   agentConfigs: {},
   teeSheetOps: {
-    confirmations: getTSOConfirmations(),
-    reassignments: getTSOReassignments(),
+    confirmations: _isReal ? [] : getTSOConfirmations(),
+    reassignments: _isReal ? [] : getTSOReassignments(),
     config: getTSOConfig(),
   },
 };
@@ -206,7 +214,8 @@ function loadPersistedState(base) {
 
     let nextInbox = Array.isArray(inbox) ? inbox : base.inbox;
     // If persisted inbox has 0 pending items, reset to defaults so demo stays populated
-    if (computePendingCount(nextInbox) === 0 && computePendingCount(base.inbox) > 0) {
+    // But NOT for real clubs — they should start empty
+    if (!_isReal && computePendingCount(nextInbox) === 0 && computePendingCount(base.inbox) > 0) {
       nextInbox = base.inbox;
     }
     // Merge any new default actions not present in persisted inbox (e.g., follow-up cards)

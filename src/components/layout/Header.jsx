@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
-import { CLUB_NAME, DEMO_MONTH, DEMO_TIMESTAMP } from '@/config/constants.js';
+import { getClubName, isRealClub, DEMO_MONTH, DEMO_TIMESTAMP } from '@/config/constants.js';
 import { theme } from '@/config/theme';
 import { getMemberSummary } from '@/services/memberService.js';
 import { getDailyBriefing } from '@/services/briefingService.js';
@@ -165,7 +165,7 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
               </span>
             )}
             <span style={{ fontSize: isMobile ? '11px' : '12px', color: 'var(--text-muted)', lineHeight: 1.2, whiteSpace: 'normal' }}>
-              {CLUB_NAME} &middot; {DEMO_MONTH}
+              {getClubName()}{!isRealClub() ? ` \u00B7 ${DEMO_MONTH}` : ''}
             </span>
           </div>
           <div
