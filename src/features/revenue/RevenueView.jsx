@@ -1,5 +1,5 @@
 // RevenueView — consolidated revenue intelligence
-// Combines Revenue Leakage + Spend Potential + Scenario Modeling
+// Revenue signals: service gaps, spend potential, scenario modeling
 import { useState, useEffect } from 'react';
 import { Panel, StoryHeadline } from '@/components/ui';
 import { theme } from '@/config/theme';
@@ -81,8 +81,8 @@ export default function RevenueView() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <StoryHeadline
           variant="risk"
-          headline={`$${totalOpportunity.toLocaleString()}/month in addressable revenue opportunity across operations, spend gaps, and at-risk dues.`}
-          context="Revenue leakage happens when service breakdowns interrupt member dining patterns. Spend gaps represent untapped wallet share. At-risk dues are protectable with early intervention."
+          headline={`$${totalOpportunity.toLocaleString()}/month in revenue signals across member spend patterns, service gaps, and retention risk.`}
+          context="Your F&B patterns reveal member satisfaction shifts before survey data does. Spend gaps represent untapped wallet share. At-risk dues are protectable with early intervention."
         />
 
         <EvidenceStrip systems={['POS', 'Tee Sheet', 'Scheduling', 'Weather', 'Member CRM']} />
@@ -99,7 +99,7 @@ export default function RevenueView() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md, marginBottom: theme.spacing.md }}>
             {[
-              { label: 'Revenue Leakage', sub: 'Recoverable', value: TOTAL_LOSS, color: theme.colors.urgent },
+              { label: 'Service Gap Impact', sub: 'Recoverable', value: TOTAL_LOSS, color: theme.colors.urgent },
               { label: 'Pro Shop & Lessons', sub: 'Growable', value: PROSHOP_LOSS, color: 'rgb(139,92,246)' },
               { label: 'Spend Potential', sub: 'Growable', value: spendMonthly, color: theme.colors.success },
               { label: 'Dues at Risk', sub: 'Protectable', value: duesMonthly, color: theme.colors.warning, link: () => nav('members') },
@@ -229,7 +229,7 @@ export default function RevenueView() {
         {/* Deep Dive by Category */}
         <Panel
           title="Deep Dive by Category"
-          subtitle="Which operational failures are costing you F&B spend?"
+          subtitle="How service patterns affect member satisfaction and spend"
           tabs={DEEP_TABS}
           activeTab={activeTab}
           onTabChange={setActiveTab}

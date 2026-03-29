@@ -13,13 +13,11 @@ import PageTransition from '@/components/ui/PageTransition';
 import { AgentActionCard } from '@/components/ui';
 import TeamWorkloadPanel from '@/components/ui/TeamWorkloadPanel';
 
-// Recommendation 1: Merge Outreach + Playbooks into single "Playbooks" tab
-// Recommendation 3: Actions summary only shows on Inbox tab
+// MVP: 2 tabs only — Inbox (manual approval queue) + Templates (playbook library)
+// AI Agents and History tabs deferred to post-pilot
 const TABS = [
   { key: 'inbox',     label: 'Inbox' },
-  { key: 'playbooks', label: 'Playbooks' },
-  { key: 'agents',    label: 'AI Agents' },
-  { key: 'history',   label: 'History' },
+  { key: 'playbooks', label: 'Templates' },
 ];
 
 function ActionsBadge() {

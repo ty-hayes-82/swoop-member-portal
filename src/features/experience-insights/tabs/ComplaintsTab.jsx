@@ -227,6 +227,77 @@ export default function ComplaintsTab() {
         </table>
       </Panel>
 
+      {/* Complaints to Watch — overdue tracking */}
+      <Panel title="Complaints to Watch" subtitle="Unresolved complaints requiring follow-up">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {[
+            { member: 'Dorothy Bell', category: 'Service Speed', daysSince: 38, owner: 'Unassigned', healthScore: 32, dues: 18000 },
+            { member: 'Warren Mitchell', category: 'Course Condition', daysSince: 34, owner: 'Head Pro', healthScore: 41, dues: 22000 },
+            { member: 'Patricia Simmons', category: 'Dining Quality', daysSince: 31, owner: 'F&B Director', healthScore: 45, dues: 15000 },
+            { member: 'Carl Henderson', category: 'Service Speed', daysSince: 22, owner: 'Unassigned', healthScore: 38, dues: 18000 },
+            { member: 'Margaret Liu', category: 'Billing Issue', daysSince: 15, owner: 'GM', healthScore: 55, dues: 25000 },
+          ].map((c) => {
+            const isOverdue = c.daysSince > 30;
+            return (
+              <div key={c.member} style={{
+                display: 'flex', alignItems: 'center', gap: '12px',
+                padding: '10px 14px', borderRadius: theme.radius.sm,
+                background: isOverdue ? 'rgba(220,38,38,0.04)' : theme.colors.bgCard,
+                border: `1px solid ${isOverdue ? 'rgba(220,38,38,0.2)' : theme.colors.border}`,
+              }}>
+                {/* Overdue indicator */}
+                <div style={{
+                  width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                  background: isOverdue ? '#dc2626' : c.daysSince > 14 ? '#d97706' : '#16a34a',
+                }} />
+                {/* Member + category */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>{c.member}</div>
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{c.category}</div>
+                </div>
+                {/* Days since */}
+                <div style={{
+                  textAlign: 'center', minWidth: 60,
+                  padding: '4px 8px', borderRadius: theme.radius.sm,
+                  background: isOverdue ? 'rgba(220,38,38,0.08)' : 'transparent',
+                }}>
+                  <div style={{
+                    fontFamily: theme.fonts.mono, fontSize: theme.fontSize.sm, fontWeight: 700,
+                    color: isOverdue ? '#dc2626' : c.daysSince > 14 ? '#d97706' : theme.colors.textSecondary,
+                  }}>
+                    {c.daysSince}d
+                  </div>
+                  <div style={{ fontSize: '9px', color: theme.colors.textMuted }}>open</div>
+                </div>
+                {/* Owner */}
+                <div style={{
+                  fontSize: theme.fontSize.xs, color: c.owner === 'Unassigned' ? '#dc2626' : theme.colors.textSecondary,
+                  fontWeight: c.owner === 'Unassigned' ? 600 : 400, minWidth: 80,
+                }}>
+                  {c.owner}
+                </div>
+                {/* Dollar exposure */}
+                <div style={{
+                  fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs, fontWeight: 600,
+                  color: '#b91c1c', minWidth: 50, textAlign: 'right',
+                }}>
+                  ${Math.round(c.dues / 1000)}K
+                </div>
+                {/* Action */}
+                {isOverdue && (
+                  <span style={{
+                    fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px',
+                    background: 'rgba(220,38,38,0.08)', color: '#dc2626', whiteSpace: 'nowrap',
+                  }}>
+                    Schedule GM call
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </Panel>
+
       {/* Unresolved complaints action */}
       <PlaybookActionCard
         icon={'🚨'}
