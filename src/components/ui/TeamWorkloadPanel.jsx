@@ -44,22 +44,8 @@ export default function TeamWorkloadPanel() {
       return { ...staff, ...data, completionRate };
     });
 
-    // Add agent-sourced actions as "AI Agents" row
-    const agentActions = Object.entries(byOwner).filter(([key]) =>
-      key.includes('Optimizer') || key.includes('Autopilot') || key.includes('Pulse') ||
-      key.includes('Analyst') || key.includes('Recovery') || key.includes('Agent')
-    );
-    if (agentActions.length > 0) {
-      const combined = agentActions.reduce((sum, [, d]) => ({
-        pending: sum.pending + d.pending, approved: sum.approved + d.approved,
-        dismissed: sum.dismissed + d.dismissed, total: sum.total + d.total,
-      }), { pending: 0, approved: 0, dismissed: 0, total: 0 });
-      result.push({
-        name: 'AI Agents', title: '6 agents', role: 'ai',
-        ...combined,
-        completionRate: combined.total > 0 ? Math.round((combined.approved + combined.dismissed) / combined.total * 100) : 0,
-      });
-    }
+    // AI Agents row removed from MVP — agent recommendations flow into
+    // the inbox as regular actions attributed to staff owners
 
     return result.filter(r => r.total > 0 || STAFF_ROLES.some(s => s.name === r.name));
   }, [inbox]);

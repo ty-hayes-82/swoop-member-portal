@@ -19,7 +19,7 @@ import ActionPath from './components/ActionPath';
 import ProShopTab from './components/ProShopTab';
 
 const TABS = [
-  { key: 'pace', label: 'Pace-of-Play Impact' },
+  { key: 'pace', label: 'Service Pace' },
   { key: 'staffing', label: 'Staffing Gaps' },
   { key: 'weather', label: 'Weather Shifts' },
   { key: 'proshop', label: 'Pro Shop & Lessons' },

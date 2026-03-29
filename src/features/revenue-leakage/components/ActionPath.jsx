@@ -8,7 +8,7 @@ export default function ActionPath({ label, amount, color, action }) {
   const playbookMap = {
     'Pace of Play': 'Deploy Rangers',
     'Staffing': 'Activate Staffing Protocol',
-    'Weather': 'Activate Weather Playbook',
+    'Weather': 'Activate Weather Protocol',
   };
   const btnLabel = playbookMap[label] || 'Activate';
   return (

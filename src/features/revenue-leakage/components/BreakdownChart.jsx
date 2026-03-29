@@ -5,7 +5,7 @@ export default function BreakdownChart({ totalLoss, paceAmount, staffingAmount, 
   const proshopPct = ((proshopAmount / totalLoss) * 100).toFixed(0);
 
   const segments = [
-    { icon: '\u26A1', amount: paceAmount, pct: pacePct, label: 'Pace-of-Play Impact',
+    { icon: '\u26A1', amount: paceAmount, pct: pacePct, label: 'Service Pace Impact',
       gradient: 'linear-gradient(135deg, rgb(245, 158, 11), rgb(249, 115, 22))',
       cardBg: 'rgba(249, 115, 22, 0.06)', cardBorder: 'rgba(249, 115, 22, 0.15)',
       iconBg: 'linear-gradient(135deg, rgba(249, 115, 22, 0.12), rgba(245, 158, 11, 0.08))',

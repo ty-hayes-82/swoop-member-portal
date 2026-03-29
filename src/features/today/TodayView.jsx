@@ -95,7 +95,7 @@ export default function TodayView() {
                 {healthLabel}
               </div>
               <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 2 }}>
-                {totalMembers} members tracked
+                {totalMembers} members scored
               </div>
             </div>
           </div>

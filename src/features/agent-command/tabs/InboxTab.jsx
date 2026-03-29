@@ -90,7 +90,7 @@ export default function InboxTab() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <StoryHeadline
         variant="insight"
-        headline={`${pendingCount} agent action${pendingCount !== 1 ? 's' : ''} waiting for approval.`}
+        headline={`${pendingCount} action${pendingCount !== 1 ? 's' : ''} waiting for approval.`}
         context="Each proposal includes source, impact estimate, and an approval path. Review individually or apply bulk decisions by filter."
       />
 
