@@ -3,7 +3,6 @@ import { theme } from '@/config/theme';
 import { Panel } from '@/components/ui';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
-import GrowthPipeline from '@/features/growth-pipeline/GrowthPipeline';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { industryBenchmarks } from '@/data/benchmarks';
 import { getKPIs, getMemberSaves, getOperationalSaves, getMonthlyTrends } from '@/services/boardReportService';
