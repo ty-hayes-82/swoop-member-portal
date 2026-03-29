@@ -1,5 +1,4 @@
 // Sidebar — dark sidebar, light body. Classic club aesthetic.
-import { useState } from 'react';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { useApp } from '@/context/AppContext.jsx';
 import { NAV_ITEMS } from '@/config/navigation.js';
@@ -7,53 +6,19 @@ import { theme } from '@/config/theme.js';
 
 const SIDEBAR_BG    = theme.colors.bgSidebar;
 const SIDEBAR_CARD  = theme.colors.sidebarCard;
-const SIDEBAR_HOVER = theme.colors.sidebarHover;
 const SIDEBAR_BORDER= theme.colors.sidebarBorder;
 const SIDEBAR_ACTIVE_BG = 'rgba(255,255,255,0.08)';
 const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-const SECTION_ORDER = ['PRIMARY', 'SETTINGS'];
-
-const SETTINGS_KEYS = new Set(
-  NAV_ITEMS.filter((n) => n.section === 'SETTINGS' && !n.hidden).map((n) => n.key)
-);
-
 export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
   const { currentRoute, navigate, sidebarCollapsed, toggleSidebar } = useNavigation();
   const { activeCount, totalRevenueImpact, pendingAgentCount } = useApp();
   const w = isMobile ? 280 : sidebarCollapsed ? 52 : 240;
 
-  // Settings section: collapsed by default, auto-expands when on a settings page
-  const [settingsExpanded, setSettingsExpanded] = useState(SETTINGS_KEYS.has(currentRoute));
-
-  const visibleNavItems = NAV_ITEMS.filter((n) => !n.hidden);
-  const sectionBuckets = new Map();
-  const sectionOrderFromItems = [];
-  visibleNavItems.forEach((item) => {
-    const label = item.section ?? 'PRIMARY';
-    if (!sectionBuckets.has(label)) {
-      sectionBuckets.set(label, []);
-      sectionOrderFromItems.push(label);
-    }
-    sectionBuckets.get(label).push(item);
-  });
-
-  const navSections = [];
-  const addedSections = new Set();
-  SECTION_ORDER.forEach((label) => {
-    if (sectionBuckets.has(label)) {
-      navSections.push({ label, items: sectionBuckets.get(label) });
-      addedSections.add(label);
-    }
-  });
-  sectionOrderFromItems.forEach((label) => {
-    if (!addedSections.has(label) && sectionBuckets.has(label)) {
-      navSections.push({ label, items: sectionBuckets.get(label) });
-      addedSections.add(label);
-    }
-  });
+  // MVP: exactly 7 primary nav items, no settings section
+  const primaryItems = NAV_ITEMS.filter((n) => !n.hidden && n.section === 'PRIMARY');
 
   const basePosition = isMobile
     ? {
@@ -70,14 +35,6 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
         top: 0,
         zIndex: 10,
       };
-
-  const isSettingsOpen = settingsExpanded || SETTINGS_KEYS.has(currentRoute);
-
-  // Separate primary items and board report
-  const primarySection = navSections.find((s) => s.label === 'PRIMARY');
-  const primaryItems = primarySection ? primarySection.items.filter((i) => !i.topLevel) : [];
-  const boardReport = primarySection ? primarySection.items.find((i) => i.topLevel) : null;
-  const settingsSection = navSections.find((s) => s.label === 'SETTINGS');
 
   return (
     <aside style={{
@@ -136,9 +93,8 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
         </div>
       )}
 
-      {/* Nav */}
+      {/* Nav — 7 primary items */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-        {/* Primary nav items — no section header */}
         {primaryItems.map((item) => {
           const active = currentRoute === item.key;
           return (
@@ -185,8 +141,8 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                   {item.label}
                 </span>
               )}
-              {/* Badge for pending actions on Playbooks & Automation */}
-              {item.key === 'playbooks-automation' && pendingAgentCount > 0 && (!sidebarCollapsed || isMobile) && (
+              {/* Badge for pending actions on Actions nav item */}
+              {item.key === 'actions' && pendingAgentCount > 0 && (!sidebarCollapsed || isMobile) && (
                 <span style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -204,56 +160,8 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                   {pendingAgentCount}
                 </span>
               )}
-            </button>
-          );
-        })}
-
-        {/* Board Report — compact icon button */}
-        {boardReport && (
-          <>
-            <div style={{ margin: '8px 14px', borderTop: `1px solid ${SIDEBAR_BORDER}` }} />
-            <button
-              onClick={() => navigate(boardReport.key)}
-              title={sidebarCollapsed && !isMobile ? boardReport.label : undefined}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: sidebarCollapsed && !isMobile ? '12px 0' : '10px 14px',
-                minHeight: '40px',
-                justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
-                background: currentRoute === boardReport.key ? SIDEBAR_ACTIVE_BG : 'none',
-                borderLeft: currentRoute === boardReport.key ? `3px solid ${boardReport.color}` : '3px solid transparent',
-                color: currentRoute === boardReport.key ? TEXT_LIGHT : TEXT_DIM,
-                fontSize: '12px',
-                fontWeight: currentRoute === boardReport.key ? 600 : 400,
-                transition: 'all 0.12s',
-                cursor: 'pointer',
-                borderRight: 'none',
-                borderTop: 'none',
-                borderBottom: 'none',
-              }}
-              onMouseEnter={e => {
-                if (currentRoute !== boardReport.key) {
-                  e.currentTarget.style.background = theme.colors.sidebarTint;
-                  e.currentTarget.style.color = TEXT_LIGHT;
-                }
-              }}
-              onMouseLeave={e => {
-                if (currentRoute !== boardReport.key) {
-                  e.currentTarget.style.background = 'none';
-                  e.currentTarget.style.color = TEXT_DIM;
-                }
-              }}
-            >
-              <span style={{ fontSize: '14px', flexShrink: 0, opacity: currentRoute === boardReport.key ? 1 : 0.6 }}>{boardReport.icon}</span>
-              {(!sidebarCollapsed || isMobile) && (
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                  {boardReport.label}
-                </span>
-              )}
-              {(!sidebarCollapsed || isMobile) && boardReport.badge && (
+              {/* ROI badge for Board Report */}
+              {item.badge && (!sidebarCollapsed || isMobile) && (
                 <span style={{
                   fontSize: '9px',
                   fontWeight: 700,
@@ -265,94 +173,12 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                   letterSpacing: '0.04em',
                   flexShrink: 0,
                 }}>
-                  {boardReport.badge}
+                  {item.badge}
                 </span>
               )}
             </button>
-          </>
-        )}
-
-        {/* Settings section */}
-        {settingsSection && (
-          <div>
-            {(!sidebarCollapsed || isMobile) && (
-              <>
-                <div style={{ margin: '8px 14px 0', borderTop: `1px solid ${SIDEBAR_BORDER}` }} />
-                <button
-                  onClick={() => setSettingsExpanded((v) => !v)}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginTop: 8,
-                    padding: '8px 14px 4px',
-                    fontSize: 10,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    color: TEXT_MUTED,
-                    fontWeight: 700,
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <span>{settingsSection.label}</span>
-                  <span style={{ fontSize: 12, transition: 'transform 0.15s', transform: isSettingsOpen ? 'rotate(90deg)' : 'none' }}>›</span>
-                </button>
-              </>
-            )}
-            {(isSettingsOpen || (sidebarCollapsed && !isMobile)) && settingsSection.items.map((item) => {
-              const active = currentRoute === item.key;
-              return (
-                <button
-                  key={item.key}
-                  onClick={() => navigate(item.key)}
-                  title={sidebarCollapsed && !isMobile ? item.label : undefined}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: sidebarCollapsed && !isMobile ? '15px 0' : '12px 14px',
-                    minHeight: '44px',
-                    justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
-                    background: active ? SIDEBAR_ACTIVE_BG : 'none',
-                    borderLeft: active ? `3px solid ${item.color}` : '3px solid transparent',
-                    color: active ? TEXT_LIGHT : TEXT_DIM,
-                    boxShadow: active ? 'inset 0 0 0 1px rgba(255,255,255,0.06)' : 'none',
-                    fontSize: '13px',
-                    fontWeight: active ? 600 : 400,
-                    transition: 'all 0.12s',
-                    cursor: 'pointer',
-                    borderRight: 'none',
-                    borderTop: 'none',
-                    borderBottom: 'none',
-                  }}
-                  onMouseEnter={e => {
-                    if (!active) {
-                      e.currentTarget.style.background = theme.colors.sidebarTint;
-                      e.currentTarget.style.color = TEXT_LIGHT;
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'none';
-                      e.currentTarget.style.color = TEXT_DIM;
-                    }
-                  }}
-                >
-                  <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
-                  {(!sidebarCollapsed || isMobile) && (
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.label}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
+          );
+        })}
       </nav>
 
       {/* Demo Environment badge */}

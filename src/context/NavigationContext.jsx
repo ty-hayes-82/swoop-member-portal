@@ -3,31 +3,58 @@ import { navItems } from '@/config/navigation';
 
 const NavigationContext = createContext(null);
 
-// Valid route keys for hash routing
+// Valid route keys for hash routing — MVP 7-item navigation
 const VALID_ROUTES = new Set([
-  // New primary views
-  'today', 'members', 'revenue', 'playbooks-automation', 'activity-history',
-  // Legacy routes (still valid, redirect to new views)
+  // Primary MVP views
+  'today', 'members', 'revenue', 'insights', 'actions', 'board-report', 'admin',
+  // Accessible via direct navigation (not in nav)
+  'member-profile', 'integrations',
+  // Legacy routes (redirect via ROUTE_REDIRECTS below)
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
   'member-health', 'revenue-leakage', 'outreach-playbooks', 'staffing-service', 'growth-pipeline',
-  'agent-command', 'location-intelligence', 'integrations', 'demo-mode',
-  'board-report', 'member-profile', 'integrations/csv-import', 'csv-import',
-  'data-model', 'admin',
-  'experience-insights',
-  'playbooks',
-  'storyboard-flows',
-  'actions',
+  'agent-command', 'location-intelligence', 'demo-mode',
+  'experience-insights', 'playbooks', 'storyboard-flows',
+  'playbooks-automation', 'automation-dashboard', 'activity-history',
+  'data-health', 'data-model', 'integrations/csv-import', 'csv-import',
+  'attribution', 'historical-trends', 'intervention-queue',
 ]);
 
-// Redirect map: old route → new route
+// Redirect map: old/hidden route → MVP route
 const ROUTE_REDIRECTS = {
+  // Legacy view redirects
   'daily-briefing': 'today',
-  'member-health': 'members',
-  'revenue-leakage': 'revenue',
-  'experience-insights': 'members',
-  'waitlist-demand': 'members',
-  'actions': 'playbooks-automation',
   'landing': 'today',
+  // Decommissioned features → nearest parent
+  'playbooks-automation': 'actions',
+  'automation-dashboard': 'actions',
+  'agent-command': 'actions',
+  'outreach-playbooks': 'actions',
+  'playbooks': 'actions',
+  'intervention-queue': 'actions',
+  // Members-related
+  'member-health': 'members',
+  'waitlist-demand': 'members',
+  'location-intelligence': 'members',
+  // Revenue-related
+  'revenue-leakage': 'revenue',
+  'fb-performance': 'revenue',
+  'operations': 'revenue',
+  'staffing-service': 'revenue',
+  // Insights-related
+  'experience-insights': 'insights',
+  // Board Report-related
+  'growth-pipeline': 'board-report',
+  'attribution': 'board-report',
+  'historical-trends': 'board-report',
+  // Admin-related
+  'data-health': 'admin',
+  'activity-history': 'admin',
+  'data-model': 'admin',
+  'integrations/csv-import': 'admin',
+  'csv-import': 'admin',
+  // Hidden features
+  'storyboard-flows': 'today',
+  'demo-mode': 'today',
 };
 
 const DEFAULT_ROUTE = 'today';

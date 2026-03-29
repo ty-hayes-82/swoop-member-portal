@@ -43,17 +43,24 @@ import LoginPage from '@/features/login/LoginPage';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
-  // New primary views (Sprint 1: aliases, later sprints: replace with composite views)
+  // MVP Primary views (7 nav items)
   'today': TodayView,
   'members': MembersView,
   'revenue': RevenueView,
+  'insights': ExperienceInsights,  // Sprint 5: replace with dedicated InsightsPage
+  'actions': ActionsPage,
+  'board-report': BoardReport,
+  'admin': AdminHub,
+  // Accessible via direct navigation
+  'member-profile': MemberProfilePage,
+  'integrations': IntegrationsPage,
+  // Legacy routes (most traffic redirected via NavigationContext ROUTE_REDIRECTS)
   'playbooks-automation': ActionsPage,
   'automation-dashboard': AutomationDashboard,
   'data-health': DataHealthDashboard,
   'activity-history': ActivityHistoryPage,
-  // Legacy routes (backward compat — redirects in NavigationContext handle most traffic)
   'daily-briefing': DailyBriefing,
-  operations: OperationsDashboard,
+  'operations': OperationsDashboard,
   'waitlist-demand': WaitlistDemand,
   'fb-performance': FBPerformance,
   'member-health': MemberHealth,
@@ -61,22 +68,17 @@ const ROUTES = {
   'staffing-service': StaffingService,
   'growth-pipeline': GrowthPipeline,
   'agent-command': AgentCommand,
-  integrations: IntegrationsPage,
   'location-intelligence': LocationIntelligence,
   'demo-mode': DemoMode,
-  'board-report': BoardReport,
   'integrations/csv-import': CsvImportHub,
   'csv-import': CsvImportHub,
   'experience-insights': ExperienceInsights,
   'outreach-playbooks': OutreachPlaybooks,
   'playbooks': PlaybooksPage,
   'storyboard-flows': StoryboardFlows,
-  'actions': ActionsPage,
   'data-model': DataModelPage,
-  'member-profile': MemberProfilePage,
-  'admin': AdminHub,
   'admin-legacy': AdminDashboard,
-  landing: LandingRedirect,
+  'landing': LandingRedirect,
 };
 
 function AppShell() {
