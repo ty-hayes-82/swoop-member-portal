@@ -6,6 +6,7 @@ import { useApp } from '@/context/AppContext.jsx';
 import { useNavigation } from '@/context/NavigationContext.jsx';
 import { getDailyBriefing } from '@/services/briefingService.js';
 import { getPriorityItems } from '@/services/cockpitService.js';
+import { getMemberSummary } from '@/services/memberService.js';
 import MemberLink from '@/components/MemberLink.jsx';
 import MorningBriefing from '@/components/ui/MorningBriefing.jsx';
 import RecentInterventions from '@/components/ui/RecentInterventions.jsx';
@@ -39,12 +40,79 @@ export default function TodayView() {
     return <SkeletonDashboard />;
   }
 
+  const summary = getMemberSummary();
+  const healthScore = summary.avgHealthScore ?? 72;
+  const healthColor = healthScore >= 70 ? '#16a34a' : healthScore >= 50 ? '#ca8a04' : healthScore >= 30 ? '#ea580c' : '#b91c1c';
+  const healthLabel = healthScore >= 70 ? 'Healthy' : healthScore >= 50 ? 'Watch' : healthScore >= 30 ? 'At Risk' : 'Critical';
+
   return (
     <PageTransition>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
 
         {/* Staleness alert — shows when data sources are stale */}
         <StalenessAlert />
+
+        {/* Health Score Hero — the first thing a GM sees */}
+        <div style={{
+          background: theme.colors.bgCard,
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.lg,
+          padding: theme.spacing.lg,
+          display: 'flex',
+          alignItems: 'center',
+          gap: theme.spacing.lg,
+          flexWrap: 'wrap',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, flex: '1 1 auto', minWidth: 200 }}>
+            <div style={{
+              width: 72, height: 72, borderRadius: '50%',
+              background: `conic-gradient(${healthColor} ${healthScore * 3.6}deg, ${theme.colors.border} 0deg)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <div style={{
+                width: 58, height: 58, borderRadius: '50%', background: theme.colors.bgCard,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <span style={{ fontFamily: theme.fonts.mono, fontSize: '22px', fontWeight: 800, color: healthColor, lineHeight: 1 }}>
+                  {Math.round(healthScore)}
+                </span>
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
+                Club Health Score
+              </div>
+              <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary }}>
+                {healthLabel}
+              </div>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 2 }}>
+                {summary.totalMembers || summary.total || 300} members tracked
+              </div>
+            </div>
+          </div>
+          <div style={{
+            display: 'flex', gap: theme.spacing.md, flexWrap: 'wrap',
+          }}>
+            {[
+              { label: 'Healthy', count: summary.healthy ?? 0, color: '#16a34a' },
+              { label: 'Watch', count: summary.watch ?? 0, color: '#ca8a04' },
+              { label: 'At Risk', count: summary.atRisk ?? 0, color: '#ea580c' },
+              { label: 'Critical', count: summary.critical ?? 0, color: '#b91c1c' },
+            ].map((tier) => (
+              <div key={tier.label} style={{
+                textAlign: 'center', minWidth: 56,
+                padding: '6px 10px', borderRadius: theme.radius.sm,
+                background: `${tier.color}08`, border: `1px solid ${tier.color}20`,
+              }}>
+                <div style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.lg, fontWeight: 700, color: tier.color }}>
+                  {tier.count}
+                </div>
+                <div style={{ fontSize: '10px', color: theme.colors.textMuted, fontWeight: 600 }}>{tier.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Top priority alert */}
         <StoryHeadline

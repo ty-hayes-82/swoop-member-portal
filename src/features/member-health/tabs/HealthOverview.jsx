@@ -168,6 +168,15 @@ function MemberRow({ m, isExpanded, onToggle, isSelected, onSelect }) {
             fontWeight: unusual ? 600 : 400,
           }}>{unusual ? '\u26A0 ' : ''}{riskPrimary}</span>
         </td>
+        {/* Dollar Exposure */}
+        <td style={{ padding: '10px 8px', verticalAlign: 'middle', textAlign: 'right' }}>
+          <span style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 600, color: '#b91c1c',
+          }}>
+            {m.duesAnnual ? `$${Math.round(m.duesAnnual / 1000)}K` : '—'}
+          </span>
+          <div style={{ fontSize: '9px', color: '#6b7280' }}>annual</div>
+        </td>
         {/* Action Status (progress, not redundant signal) */}
         <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -179,10 +188,27 @@ function MemberRow({ m, isExpanded, onToggle, isSelected, onSelect }) {
           </div>
           <div style={{ fontSize: '10px', color: '#6b7280', marginTop: 2 }}>{actionProgress.detail}</div>
         </td>
+        {/* Call button */}
+        <td style={{ padding: '10px 8px', verticalAlign: 'middle', textAlign: 'center' }}>
+          <a
+            href={`tel:+1${m.memberId}`}
+            onClick={(e) => e.stopPropagation()}
+            title={`Call ${m.name}`}
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: 36, height: 36, borderRadius: '50%',
+              background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)',
+              color: '#16a34a', fontSize: '16px', textDecoration: 'none',
+              cursor: 'pointer', transition: 'all 0.15s',
+            }}
+          >
+            {'\uD83D\uDCDE'}
+          </a>
+        </td>
       </tr>
       {isExpanded && (
         <tr style={{ background: theme.colors.bgDeep }}>
-          <td colSpan={6} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
+          <td colSpan={8} style={{ padding: `${theme.spacing.sm} ${theme.spacing.md} ${theme.spacing.md}` }}>
             <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk} archetype={m.archetype} />
           </td>
         </tr>
@@ -408,7 +434,9 @@ export default function HealthOverview() {
     { key: 'score', label: 'Score' },
     { key: 'archetype', label: 'Archetype / Channel' },
     { key: 'risk', label: 'Risk Signal' },
+    { key: 'exposure', label: 'Exposure', sortable: false },
     { key: 'action', label: 'Action Status', sortable: false },
+    { key: 'call', label: '', sortable: false },
   ];
 
   const renderTable = (members, tier) => (

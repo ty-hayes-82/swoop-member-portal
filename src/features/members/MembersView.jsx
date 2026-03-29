@@ -152,7 +152,7 @@ export default function MembersView() {
             <CollapsibleSection title="Recovery" icon="💚">
               <RecoveryTab />
             </CollapsibleSection>
-            <CollapsibleSection title="Cohort Analysis" icon="📊">
+            <CollapsibleSection title="First 90 Days" icon="📊">
               <CohortTab />
             </CollapsibleSection>
           </div>

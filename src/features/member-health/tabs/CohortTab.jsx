@@ -1,143 +1,198 @@
 import { theme } from '@/config/theme';
-import { Panel } from '@/components/ui';
 
 const mono = "'JetBrains Mono', monospace";
 
-const archetypeRetention = [
-  { name: 'Die-Hard Golfer',  rate: 96, trend: 'stable',    trendLabel: 'stable',         color: '#16a34a' },
-  { name: 'Social Butterfly',  rate: 93, trend: 'improving', trendLabel: 'improving +3pp', color: '#16a34a' },
-  { name: 'Balanced Active',   rate: 91, trend: 'stable',    trendLabel: 'stable',         color: '#16a34a' },
-  { name: 'Snowbird',          rate: 88, trend: 'seasonal',  trendLabel: 'seasonal variance', color: '#d97706' },
-  { name: 'Weekend Warrior',   rate: 84, trend: 'declining', trendLabel: '-2pp declining',  color: '#dc2626' },
-  { name: 'New Member',        rate: 82, trend: 'declining', trendLabel: 'first-year risk', color: '#dc2626' },
-  { name: 'Declining',         rate: 61, trend: 'declining', trendLabel: 'intervention priority', color: '#dc2626' },
-  { name: 'Ghost',             rate: 42, trend: 'declining', trendLabel: 'highest churn',   color: '#dc2626' },
+// Simulated new members within last 90 days
+const newMembers = [
+  { name: 'James Whitfield', joinDate: '2026-01-15', daysIn: 73, milestones: { firstRound: true, firstDining: true, firstEvent: false, emailOpen: true }, healthScore: 64, archetype: 'Balanced Active' },
+  { name: 'Sarah Chen', joinDate: '2026-01-28', daysIn: 60, milestones: { firstRound: true, firstDining: true, firstEvent: true, emailOpen: true }, healthScore: 81, archetype: 'Social Butterfly' },
+  { name: 'Michael Torres', joinDate: '2026-02-10', daysIn: 47, milestones: { firstRound: true, firstDining: false, firstEvent: false, emailOpen: true }, healthScore: 45, archetype: 'Weekend Warrior' },
+  { name: 'Lisa Park', joinDate: '2026-02-22', daysIn: 35, milestones: { firstRound: false, firstDining: true, firstEvent: false, emailOpen: false }, healthScore: 32, archetype: 'New Member' },
+  { name: 'Robert Kim', joinDate: '2026-03-05', daysIn: 24, milestones: { firstRound: true, firstDining: false, firstEvent: false, emailOpen: true }, healthScore: 58, archetype: 'Die-Hard Golfer' },
+  { name: 'Amanda Brooks', joinDate: '2026-03-12', daysIn: 17, milestones: { firstRound: false, firstDining: false, firstEvent: false, emailOpen: true }, healthScore: 40, archetype: 'New Member' },
 ];
 
-const tenureChurn = [
-  { label: 'Year 1',   churn: 18, note: 'Highest risk period' },
-  { label: 'Year 2-3', churn: 8,  note: 'Settling in' },
-  { label: 'Year 4-7', churn: 4,  note: 'Established' },
-  { label: 'Year 8+',  churn: 2,  note: 'Most loyal' },
+const MILESTONES = [
+  { key: 'firstRound', label: 'First Round', icon: '\u26F3', targetWeek: 2 },
+  { key: 'firstDining', label: 'First Dining', icon: '\uD83C\uDF7D\uFE0F', targetWeek: 3 },
+  { key: 'emailOpen', label: 'Email Engaged', icon: '\u2709\uFE0F', targetWeek: 1 },
+  { key: 'firstEvent', label: 'First Event', icon: '\uD83C\uDF89', targetWeek: 6 },
 ];
 
-function getRetentionBarColor(rate) {
-  if (rate >= 90) return theme.colors.success || '#16a34a';
-  if (rate >= 80) return theme.colors.warning || '#d97706';
-  if (rate >= 60) return '#f97316';
-  return theme.colors.urgent || '#dc2626';
+const PHASES = [
+  { label: 'Orientation', weeks: '1-4', color: '#3b82f6' },
+  { label: 'Habit Building', weeks: '5-8', color: '#8b5cf6' },
+  { label: 'Integration', weeks: '9-12', color: '#16a34a' },
+];
+
+function getPhase(daysIn) {
+  if (daysIn <= 28) return 0;
+  if (daysIn <= 56) return 1;
+  return 2;
 }
 
-function getTrendIcon(trend) {
-  if (trend === 'improving') return '\u2191';
-  if (trend === 'declining') return '\u2193';
-  if (trend === 'seasonal') return '\u223C';
-  return '\u2192';
+function getScoreColor(score) {
+  if (score >= 70) return '#16a34a';
+  if (score >= 50) return '#ca8a04';
+  if (score >= 30) return '#ea580c';
+  return '#b91c1c';
+}
+
+function getMilestoneStatus(member) {
+  const total = MILESTONES.length;
+  const completed = MILESTONES.filter(m => member.milestones[m.key]).length;
+  return { completed, total, pct: Math.round((completed / total) * 100) };
+}
+
+function getSuggestedAction(member) {
+  if (!member.milestones.firstRound) return 'Schedule welcome round with Head Pro';
+  if (!member.milestones.firstDining) return 'Send dining invitation with new member perk';
+  if (!member.milestones.firstEvent) return 'Personally invite to upcoming social event';
+  if (!member.milestones.emailOpen) return 'Verify email address and resend welcome series';
+  return 'On track - continue monitoring';
 }
 
 export default function CohortTab() {
+  const flaggedCount = newMembers.filter(m => getMilestoneStatus(m).pct < 75).length;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-      {/* Retention by Archetype */}
+      {/* Header */}
       <div style={{
         background: theme.colors.bgCard,
         border: `1px solid ${theme.colors.border}`,
         borderRadius: theme.radius.md,
         padding: theme.spacing.lg,
       }}>
-        <h4 style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary, margin: 0, marginBottom: '4px' }}>
-          Retention by Archetype
-        </h4>
-        <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, margin: 0, marginBottom: theme.spacing.md }}>
-          12-month retention rate per behavioral archetype
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {archetypeRetention.map((a) => (
-            <div key={a.name} style={{
-              display: 'grid',
-              gridTemplateColumns: '160px 1fr 80px 160px',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '10px 14px',
-              borderRadius: theme.radius.sm,
-              background: a.rate < 70 ? 'rgba(239,68,68,0.04)' : a.rate < 85 ? 'rgba(245,158,11,0.04)' : 'rgba(34,197,94,0.03)',
-              border: `1px solid ${a.rate < 70 ? 'rgba(239,68,68,0.1)' : a.rate < 85 ? 'rgba(245,158,11,0.1)' : 'rgba(34,197,94,0.08)'}`,
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: theme.spacing.md }}>
+          <div>
+            <h4 style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary, margin: 0, marginBottom: '4px' }}>
+              First 90 Days
+            </h4>
+            <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, margin: 0 }}>
+              New member integration tracking — are they building habits?
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+            <div style={{
+              textAlign: 'center', padding: '6px 14px', borderRadius: theme.radius.sm,
+              background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)',
             }}>
-              <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>{a.name}</span>
-              <div style={{ height: '10px', background: '#f1f5f9', borderRadius: '5px', overflow: 'hidden', position: 'relative' }}>
-                <div style={{
-                  width: a.rate + '%',
-                  height: '100%',
-                  background: getRetentionBarColor(a.rate),
-                  borderRadius: '5px',
-                  transition: 'width 0.6s ease',
-                }} />
-              </div>
-              <span style={{ fontFamily: mono, fontSize: theme.fontSize.sm, fontWeight: 700, color: getRetentionBarColor(a.rate), textAlign: 'right' }}>
-                {a.rate}%
-              </span>
-              <span style={{ fontSize: '12px', color: a.color, fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ fontSize: '14px' }}>{getTrendIcon(a.trend)}</span>
-                {a.trendLabel}
-              </span>
+              <div style={{ fontFamily: mono, fontSize: theme.fontSize.lg, fontWeight: 700, color: '#16a34a' }}>{newMembers.length}</div>
+              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>New Members</div>
+            </div>
+            <div style={{
+              textAlign: 'center', padding: '6px 14px', borderRadius: theme.radius.sm,
+              background: flaggedCount > 0 ? 'rgba(234,88,12,0.06)' : 'rgba(34,197,94,0.06)',
+              border: `1px solid ${flaggedCount > 0 ? 'rgba(234,88,12,0.15)' : 'rgba(34,197,94,0.15)'}`,
+            }}>
+              <div style={{ fontFamily: mono, fontSize: theme.fontSize.lg, fontWeight: 700, color: flaggedCount > 0 ? '#ea580c' : '#16a34a' }}>{flaggedCount}</div>
+              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Falling Behind</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Phase Timeline */}
+        <div style={{ marginTop: theme.spacing.md, display: 'flex', gap: 0, borderRadius: theme.radius.sm, overflow: 'hidden' }}>
+          {PHASES.map((phase, i) => (
+            <div key={phase.label} style={{
+              flex: 1, padding: '8px 12px', background: `${phase.color}10`,
+              borderRight: i < PHASES.length - 1 ? `2px solid ${theme.colors.bgCard}` : 'none',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: phase.color }}>{phase.label}</div>
+              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Weeks {phase.weeks}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Churn Risk by Tenure */}
-      <div style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md,
-        padding: theme.spacing.lg,
-      }}>
-        <h4 style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary, margin: 0, marginBottom: '4px' }}>
-          Churn Risk by Tenure
-        </h4>
-        <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, margin: 0, marginBottom: theme.spacing.md }}>
-          Annual churn rate by membership duration
-        </p>
+      {/* Member Cards */}
+      {newMembers.map((member) => {
+        const phase = getPhase(member.daysIn);
+        const status = getMilestoneStatus(member);
+        const isBehind = status.pct < 75;
+        const action = getSuggestedAction(member);
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.sm }}>
-          {tenureChurn.map((t) => {
-            const isHighRisk = t.churn >= 10;
-            const bgColor = isHighRisk ? 'rgba(239,68,68,0.06)' : t.churn >= 5 ? 'rgba(245,158,11,0.06)' : 'rgba(34,197,94,0.04)';
-            const borderColor = isHighRisk ? 'rgba(239,68,68,0.15)' : t.churn >= 5 ? 'rgba(245,158,11,0.15)' : 'rgba(34,197,94,0.1)';
-            const valueColor = isHighRisk ? (theme.colors.urgent || '#dc2626') : t.churn >= 5 ? (theme.colors.warning || '#d97706') : (theme.colors.success || '#16a34a');
-
-            return (
-              <div key={t.label} style={{
-                background: bgColor,
-                border: `1px solid ${borderColor}`,
-                borderRadius: theme.radius.md,
-                padding: theme.spacing.md,
-                textAlign: 'center',
-              }}>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, fontWeight: 600, textTransform: 'uppercase', marginBottom: '6px' }}>
-                  {t.label}
-                </div>
-                <div style={{ fontFamily: mono, fontSize: '28px', fontWeight: 800, color: valueColor, lineHeight: 1.1 }}>
-                  {t.churn}%
-                </div>
-                <div style={{ fontSize: '11px', color: theme.colors.textSecondary, marginTop: '6px', fontWeight: 500 }}>
-                  {t.note}
-                </div>
-                {/* Mini bar */}
-                <div style={{ height: '4px', background: '#f1f5f9', borderRadius: '2px', marginTop: '10px', overflow: 'hidden' }}>
-                  <div style={{
-                    width: Math.min(t.churn * 5, 100) + '%',
-                    height: '100%',
-                    background: valueColor,
-                    borderRadius: '2px',
-                  }} />
-                </div>
+        return (
+          <div key={member.name} style={{
+            background: theme.colors.bgCard,
+            border: `1px solid ${isBehind ? 'rgba(234,88,12,0.2)' : theme.colors.border}`,
+            borderRadius: theme.radius.md,
+            padding: theme.spacing.md,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: theme.spacing.sm }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+                <span style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{member.name}</span>
+                <span style={{
+                  fontSize: '10px', padding: '2px 8px', borderRadius: '999px',
+                  background: `${PHASES[phase].color}12`, color: PHASES[phase].color,
+                  fontWeight: 600,
+                }}>
+                  {PHASES[phase].label} - Day {member.daysIn}
+                </span>
               </div>
-            );
-          })}
-        </div>
-      </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+                <span style={{
+                  fontFamily: mono, fontSize: theme.fontSize.sm, fontWeight: 700,
+                  color: getScoreColor(member.healthScore),
+                  background: `${getScoreColor(member.healthScore)}10`,
+                  padding: '2px 8px', borderRadius: '6px',
+                }}>
+                  {member.healthScore}
+                </span>
+                <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{member.archetype}</span>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div style={{
+              height: 6, background: theme.colors.border, borderRadius: 3,
+              overflow: 'hidden', marginBottom: theme.spacing.sm,
+            }}>
+              <div style={{
+                width: `${Math.min(member.daysIn / 90 * 100, 100)}%`,
+                height: '100%', borderRadius: 3,
+                background: PHASES[phase].color,
+                transition: 'width 0.4s ease',
+              }} />
+            </div>
+
+            {/* Milestones */}
+            <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap', marginBottom: isBehind ? theme.spacing.sm : 0 }}>
+              {MILESTONES.map((ms) => {
+                const done = member.milestones[ms.key];
+                return (
+                  <div key={ms.key} style={{
+                    display: 'flex', alignItems: 'center', gap: '4px',
+                    padding: '3px 10px', borderRadius: '999px', fontSize: '11px',
+                    background: done ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.06)',
+                    border: `1px solid ${done ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.15)'}`,
+                    color: done ? '#16a34a' : '#dc2626',
+                    fontWeight: 600,
+                  }}>
+                    <span>{ms.icon}</span>
+                    <span>{ms.label}</span>
+                    <span>{done ? '\u2713' : '\u2717'}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Action suggestion for behind members */}
+            {isBehind && (
+              <div style={{
+                padding: '8px 12px', borderRadius: theme.radius.sm,
+                background: 'rgba(234,88,12,0.04)', border: '1px solid rgba(234,88,12,0.12)',
+                fontSize: theme.fontSize.xs, color: '#ea580c', fontWeight: 500,
+                display: 'flex', alignItems: 'center', gap: '6px',
+              }}>
+                <span style={{ fontWeight: 700 }}>Action:</span> {action}
+              </div>
+            )}
+          </div>
+        );
+      })}
 
       {/* Key Insight */}
       <div style={{
@@ -162,8 +217,9 @@ export default function CohortTab() {
             Key Insight
           </div>
           <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, margin: 0, lineHeight: 1.7, fontWeight: 500 }}>
-            New Members and Declining archetypes represent <strong>15% of membership</strong> but <strong>54% of churn</strong>.
-            Focusing retention efforts on these two groups would reduce overall churn by <strong>40%</strong>.
+            Members who complete all 4 milestones within 60 days have a <strong>94% Year-1 retention rate</strong>.
+            Members who miss 2+ milestones by Day 45 have only a <strong>58% retention rate</strong>.
+            The buddy assignment playbook increases milestone completion by <strong>35%</strong>.
           </p>
         </div>
       </div>
