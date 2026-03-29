@@ -25,8 +25,8 @@ import LocationIntelligence from '@/features/location-intelligence/LocationIntel
 import { CsvImportHub } from '@/features/csv-import';
 import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import LandingRedirect from '@/features/landing-redirect/LandingRedirect.jsx';
-import BoardReport from "@/features/board-report/BoardReport.jsx";
-import ExperienceInsights from '@/features/experience-insights/ExperienceInsights.jsx';
+const BoardReport = lazy(() => import("@/features/board-report/BoardReport.jsx"));
+const ExperienceInsights = lazy(() => import('@/features/experience-insights/ExperienceInsights.jsx'));
 import { OutreachPlaybooks } from '@/features/outreach-playbooks';
 import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
 import { StoryboardFlows } from '@/features/storyboard-flows';
@@ -142,7 +142,9 @@ function AppShell() {
               minHeight: 0,
             }}
           >
-            <PageComponent />
+            <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, color: theme.colors.textMuted }}>Loading...</div>}>
+              <PageComponent />
+            </Suspense>
           </main>
           <footer
             style={{
