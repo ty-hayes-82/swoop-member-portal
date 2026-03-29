@@ -4,6 +4,7 @@
  */
 import { useState } from 'react';
 import { theme } from '@/config/theme';
+import NewClubSetup from './NewClubSetup';
 
 export default function LoginPage({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -42,6 +43,9 @@ export default function LoginPage({ onLogin }) {
     setLoading(false);
   };
 
+  // New club setup mode
+  const [showNewClub, setShowNewClub] = useState(false);
+
   // Demo mode state
   const [showDemoSetup, setShowDemoSetup] = useState(false);
   const [demoEmail, setDemoEmail] = useState('');
@@ -64,6 +68,10 @@ export default function LoginPage({ onLogin }) {
     localStorage.removeItem('swoop_club_id');
     onLogin?.(demoUser);
   };
+
+  if (showNewClub) {
+    return <NewClubSetup onComplete={(user) => onLogin?.(user)} onBack={() => setShowNewClub(false)} />;
+  }
 
   return (
     <div style={{
@@ -187,6 +195,19 @@ export default function LoginPage({ onLogin }) {
           }}
         >
           {showDemoSetup ? 'Start Demo' : 'Enter Demo Mode (Oakmont Hills CC)'}
+        </button>
+
+        {/* Set up new club */}
+        <button
+          onClick={() => setShowNewClub(true)}
+          style={{
+            width: '100%', padding: '12px', borderRadius: '10px',
+            border: '1px solid #E5E7EB', background: '#fff',
+            color: '#374151', fontSize: '14px', fontWeight: 600,
+            cursor: 'pointer', marginTop: '8px',
+          }}
+        >
+          Set Up New Club
         </button>
 
         {/* Test account hint */}

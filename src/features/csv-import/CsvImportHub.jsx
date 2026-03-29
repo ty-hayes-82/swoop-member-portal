@@ -233,6 +233,40 @@ export default function CsvImportHub() {
         </div>
       </section>
 
+      {/* Quick Start Templates */}
+      <section style={{
+        borderRadius: theme.radius.lg, padding: theme.spacing.lg,
+        background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
+      }}>
+        <div style={{ marginBottom: theme.spacing.md }}>
+          <h2 style={{ margin: 0, fontSize: theme.fontSize.md, fontWeight: 700 }}>Quick Start Templates</h2>
+          <p style={{ margin: '4px 0 0', fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+            Download a pre-formatted template, fill in your data, and upload below.
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: theme.spacing.sm }}>
+          {[
+            { file: 'swoop-template-members-only.xlsx', label: 'Members Only', desc: '20 members', color: '#3b82f6' },
+            { file: 'swoop-template-members-rounds.xlsx', label: 'Members + Rounds', desc: '25 members, 80 rounds', color: '#8b5cf6' },
+            { file: 'swoop-template-members-rounds-fb.xlsx', label: 'Members + Rounds + F&B', desc: '30 members, 100+ txns', color: '#16a34a' },
+            { file: 'swoop-template-full.xlsx', label: 'Full Dataset', desc: '40 members, all data', color: '#E8740C' },
+          ].map((t) => (
+            <a key={t.file} href={`/templates/${t.file}`} download style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '10px 14px', borderRadius: theme.radius.sm,
+              border: `1px solid ${t.color}25`, background: `${t.color}06`,
+              textDecoration: 'none', color: theme.colors.textPrimary,
+            }}>
+              <span style={{ fontSize: '18px' }}>📥</span>
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: t.color }}>{t.label}</div>
+                <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>{t.desc}</div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
       {/* B. "Your Data Gaps" Section */}
       {dataGaps.length > 0 ? (
         <section style={{
