@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { theme } from '@/config/theme';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 import NotificationSettings from '@/features/notification-settings/NotificationSettings';
-import OnboardingWizard from '@/features/onboarding/OnboardingWizard';
+import { CsvImportHub } from '@/features/csv-import';
 
 const ADMIN_TABS = [
   { key: 'data-hub', label: 'Integrations', icon: '🔌' },
@@ -30,7 +30,7 @@ export default function AdminHub() {
       <div>
         <h1 style={{ fontSize: theme.fontSize.xl, fontWeight: 700, margin: 0 }}>Admin</h1>
         <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
-          Data connections, pipeline health, activity log, and system settings.
+          Integrations, data health, CSV imports, notifications, and user roles.
         </p>
       </div>
 
@@ -58,10 +58,9 @@ export default function AdminHub() {
       {/* Tab content */}
       {activeTab === 'data-hub' && <DataHubTab clubId={clubId} />}
       {activeTab === 'health' && <DataHealthDashboard />}
-      {activeTab === 'activity' && <ActivityLogTab clubId={clubId} />}
+      {activeTab === 'activity' && <CsvImportHub />}
       {activeTab === 'notifications' && <NotificationSettings />}
-      {activeTab === 'onboarding' && <OnboardingWizard clubId={clubId} />}
-      {activeTab === 'settings' && <SettingsTab />}
+      {activeTab === 'settings' && <UserRolesTab />}
     </div>
   );
 }
@@ -174,36 +173,105 @@ function ActivityLogTab({ clubId }) {
   );
 }
 
-function SettingsTab() {
+function UserRolesTab() {
   const user = (() => { try { return JSON.parse(localStorage.getItem('swoop_auth_user') || '{}'); } catch { return {}; } })();
+
+  const teamMembers = [
+    { name: user.name || 'Sarah Mitchell', email: user.email || 'sarah@oakmontcc.com', role: 'General Manager', status: 'Active', lastActive: 'Today' },
+    { name: 'James Crawford', email: 'james@oakmontcc.com', role: 'Head Golf Professional', status: 'Active', lastActive: '2 days ago' },
+    { name: 'Maria Santos', email: 'maria@oakmontcc.com', role: 'F&B Director', status: 'Active', lastActive: '1 day ago' },
+    { name: 'David Chen', email: 'david@oakmontcc.com', role: 'Membership Director', status: 'Invited', lastActive: '—' },
+  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-      <div>
-        <h2 style={{ fontSize: theme.fontSize.lg, fontWeight: 700, margin: 0 }}>Settings</h2>
-      </div>
-      <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, background: theme.colors.bgCard, padding: theme.spacing.lg }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: theme.fontSize.sm }}>
-          <div><strong>Signed in as:</strong> {user.name || '—'} ({user.role || '—'})</div>
-          <div><strong>Email:</strong> {user.email || '—'}</div>
-          <div><strong>Club ID:</strong> {user.clubId || 'Demo Mode'}</div>
-          <div><strong>Version:</strong> Swoop Golf Platform · March 2026</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: theme.fontSize.lg, fontWeight: 700, margin: 0 }}>User Roles</h2>
+          <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
+            Manage team access and role assignments.
+          </p>
         </div>
+        <button style={{
+          padding: '8px 16px', borderRadius: theme.radius.sm,
+          border: `1px solid ${theme.colors.accent}`, background: `${theme.colors.accent}08`,
+          color: theme.colors.accent, fontWeight: 700, fontSize: theme.fontSize.sm,
+          cursor: 'pointer',
+        }}>
+          + Invite User
+        </button>
       </div>
-      <button
-        onClick={() => {
-          localStorage.removeItem('swoop_auth_user');
-          localStorage.removeItem('swoop_auth_token');
-          localStorage.removeItem('swoop_club_id');
-          window.location.reload();
-        }}
-        style={{
-          padding: '10px 20px', borderRadius: theme.radius.md,
-          border: `1px solid ${theme.colors.urgent}30`, background: `${theme.colors.urgent}08`,
-          color: theme.colors.urgent, fontWeight: 700, fontSize: theme.fontSize.sm,
-          cursor: 'pointer', alignSelf: 'flex-start',
-        }}
-      >Sign Out</button>
+
+      <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
+          <thead>
+            <tr style={{ background: theme.colors.bgDeep, borderBottom: `1px solid ${theme.colors.border}` }}>
+              {['Name', 'Email', 'Role', 'Status', 'Last Active'].map(h => (
+                <th key={h} style={{
+                  padding: '10px 14px', textAlign: 'left', fontSize: theme.fontSize.xs,
+                  fontWeight: 600, color: theme.colors.textMuted, textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {teamMembers.map((m, i) => (
+              <tr key={m.email} style={{ borderBottom: i < teamMembers.length - 1 ? `1px solid ${theme.colors.border}` : 'none', background: theme.colors.bgCard }}>
+                <td style={{ padding: '12px 14px', fontWeight: 600, color: theme.colors.textPrimary }}>{m.name}</td>
+                <td style={{ padding: '12px 14px', color: theme.colors.textSecondary }}>{m.email}</td>
+                <td style={{ padding: '12px 14px' }}>
+                  <span style={{
+                    padding: '3px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: 600,
+                    background: m.role === 'General Manager' ? `${theme.colors.accent}12` : `${theme.colors.info}10`,
+                    color: m.role === 'General Manager' ? theme.colors.accent : theme.colors.info,
+                  }}>{m.role}</span>
+                </td>
+                <td style={{ padding: '12px 14px' }}>
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    color: m.status === 'Active' ? theme.colors.success : theme.colors.warning,
+                    fontSize: theme.fontSize.xs, fontWeight: 600,
+                  }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: m.status === 'Active' ? theme.colors.success : theme.colors.warning }} />
+                    {m.status}
+                  </span>
+                </td>
+                <td style={{ padding: '12px 14px', color: theme.colors.textMuted, fontSize: theme.fontSize.xs }}>{m.lastActive}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Account section */}
+      <div style={{ borderTop: `1px solid ${theme.colors.border}`, paddingTop: theme.spacing.md, marginTop: theme.spacing.sm }}>
+        <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: theme.spacing.sm }}>
+          Your Account
+        </div>
+        <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, background: theme.colors.bgCard, padding: theme.spacing.md }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: theme.fontSize.sm }}>
+            <div><strong>Signed in as:</strong> {user.name || '—'} ({user.role || '—'})</div>
+            <div><strong>Email:</strong> {user.email || '—'}</div>
+            <div><strong>Club ID:</strong> {user.clubId || 'Demo Mode'}</div>
+          </div>
+        </div>
+        <button
+          onClick={() => {
+            localStorage.removeItem('swoop_auth_user');
+            localStorage.removeItem('swoop_auth_token');
+            localStorage.removeItem('swoop_club_id');
+            window.location.reload();
+          }}
+          style={{
+            marginTop: theme.spacing.sm,
+            padding: '8px 16px', borderRadius: theme.radius.sm,
+            border: `1px solid ${theme.colors.urgent}30`, background: `${theme.colors.urgent}08`,
+            color: theme.colors.urgent, fontWeight: 600, fontSize: theme.fontSize.xs,
+            cursor: 'pointer',
+          }}
+        >Sign Out</button>
+      </div>
     </div>
   );
 }

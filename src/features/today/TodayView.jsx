@@ -44,6 +44,9 @@ export default function TodayView() {
   const healthScore = summary.avgHealthScore ?? 72;
   const healthColor = healthScore >= 70 ? '#16a34a' : healthScore >= 50 ? '#ca8a04' : healthScore >= 30 ? '#ea580c' : '#b91c1c';
   const healthLabel = healthScore >= 70 ? 'Healthy' : healthScore >= 50 ? 'Watch' : healthScore >= 30 ? 'At Risk' : 'Critical';
+  // Compute total from tier counts if summary.total is missing/zero
+  const tierSum = (summary.healthy || 0) + (summary.watch || 0) + (summary.atRisk || 0) + (summary.critical || 0);
+  const totalMembers = summary.total || tierSum || 300;
 
   return (
     <PageTransition>
@@ -87,7 +90,7 @@ export default function TodayView() {
                 {healthLabel}
               </div>
               <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 2 }}>
-                {summary.totalMembers || summary.total || 300} members tracked
+                {totalMembers} members tracked
               </div>
             </div>
           </div>

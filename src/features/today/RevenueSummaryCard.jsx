@@ -105,7 +105,7 @@ export default function RevenueSummaryCard() {
             textAlign: 'center',
           }}
         >
-          Explore full breakdown in Revenue & Operations →
+          Explore full breakdown in Revenue →
         </button>
       </div>
     </div>

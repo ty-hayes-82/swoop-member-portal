@@ -56,7 +56,7 @@ export default function BreakdownChart({ totalLoss, paceAmount, staffingAmount, 
       }}>
         <div>
           <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f0f0f', marginBottom: '6px', letterSpacing: '-0.02em' }}>
-            Revenue Leakage Breakdown
+            Service Gap Breakdown
           </h3>
           <p style={{ fontSize: '13px', color: '#71717a', margin: 0, fontStyle: 'normal' }}>
             How ${totalLoss.toLocaleString()}/month breaks down across operational categories
@@ -64,7 +64,7 @@ export default function BreakdownChart({ totalLoss, paceAmount, staffingAmount, 
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '10px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.08em', marginBottom: '4px', textAlign: 'right', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-            TOTAL MONTHLY LEAKAGE
+            TOTAL MONTHLY IMPACT
           </div>
           <div style={{ fontSize: '36px', fontWeight: 800, fontFamily: "'JetBrains Mono', monospace", color: '#0f0f0f', letterSpacing: '-0.03em', lineHeight: 1, position: 'relative' }}>
             ${totalLoss.toLocaleString()}
