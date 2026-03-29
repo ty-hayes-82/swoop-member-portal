@@ -180,6 +180,10 @@ async function generateMorningDigest(req, res) {
       VALUES (${clubId}, 'email', 'morning_digest', ${digestTitle}, ${digestBody}, 'normal')
     `;
 
+    // Build HTML digest email
+    const appUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://swoop-member-portal.vercel.app';
+    const digestHtml = buildDigestHtml({ pending, criticalMembers, complaints, saves, appUrl });
+
     // Send digest via SendGrid to all GMs
     if (process.env.SENDGRID_API_KEY) {
       try {
@@ -193,7 +197,10 @@ async function generateMorningDigest(req, res) {
                 personalizations: [{ to: [{ email: gm.email, name: gm.name }] }],
                 from: { email: 'ty.hayes@swoopgolf.com', name: 'Swoop Golf' },
                 subject: digestTitle,
-                content: [{ type: 'text/plain', value: digestBody }],
+                content: [
+                  { type: 'text/plain', value: digestBody },
+                  { type: 'text/html', value: digestHtml },
+                ],
               }),
             });
           }
@@ -208,6 +215,57 @@ async function generateMorningDigest(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+}
+
+function buildDigestHtml({ pending, criticalMembers, complaints, saves, appUrl }) {
+  const criticalRows = criticalMembers.map(m =>
+    `<tr><td style="padding:8px 12px;font-weight:600">${m.first_name} ${m.last_name}</td><td style="padding:8px 12px;color:#b91c1c;font-weight:700">${m.health_score}</td><td style="padding:8px 12px;color:#6b7280">$${Math.round((m.annual_dues || 0) / 1000)}K/yr</td></tr>`
+  ).join('');
+
+  const complaintRows = complaints.slice(0, 3).map(c => {
+    const hours = Math.round((Date.now() - new Date(c.reported_at).getTime()) / 3600000);
+    const isOverdue = hours > (c.sla_hours || 24);
+    return `<tr><td style="padding:8px 12px">${c.first_name || ''} ${c.last_name || ''}</td><td style="padding:8px 12px">${c.category}</td><td style="padding:8px 12px;color:${isOverdue ? '#dc2626' : '#6b7280'};font-weight:${isOverdue ? 700 : 400}">${hours}h${isOverdue ? ' (overdue)' : ''}</td></tr>`;
+  }).join('');
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;margin-top:24px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+  <div style="background:linear-gradient(135deg,#E8740C,#c45a00);padding:24px 32px;color:#fff">
+    <div style="font-size:12px;font-weight:700;letter-spacing:1.5px;opacity:0.8;margin-bottom:4px">SWOOP MORNING BRIEFING</div>
+    <div style="font-size:20px;font-weight:700">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+  </div>
+  <div style="padding:24px 32px">
+    <div style="display:flex;margin-bottom:24px">
+      <div style="text-align:center;flex:1;padding:12px;background:#f9fafb;border-radius:8px;margin-right:8px">
+        <div style="font-size:28px;font-weight:800;color:#E8740C">${pending}</div>
+        <div style="font-size:11px;color:#6b7280;font-weight:600">Actions Pending</div>
+      </div>
+      <div style="text-align:center;flex:1;padding:12px;background:#f9fafb;border-radius:8px;margin-right:8px">
+        <div style="font-size:28px;font-weight:800;color:#b91c1c">${criticalMembers.length}</div>
+        <div style="font-size:11px;color:#6b7280;font-weight:600">Critical Members</div>
+      </div>
+      <div style="text-align:center;flex:1;padding:12px;background:#f9fafb;border-radius:8px">
+        <div style="font-size:28px;font-weight:800;color:#16a34a">${saves}</div>
+        <div style="font-size:11px;color:#6b7280;font-weight:600">Saves This Week</div>
+      </div>
+    </div>
+    ${criticalMembers.length > 0 ? `
+    <div style="margin-bottom:24px">
+      <div style="font-size:13px;font-weight:700;color:#b91c1c;margin-bottom:8px">NEW CRITICAL MEMBERS</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px"><tbody>${criticalRows}</tbody></table>
+    </div>` : ''}
+    ${complaints.length > 0 ? `
+    <div style="margin-bottom:24px">
+      <div style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:8px">OPEN COMPLAINTS</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px"><tbody>${complaintRows}</tbody></table>
+    </div>` : ''}
+    <a href="${appUrl}/#/today" style="display:block;text-align:center;padding:14px 24px;background:#E8740C;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:14px">Open Today View</a>
+  </div>
+  <div style="padding:16px 32px;border-top:1px solid #e5e7eb;text-align:center;font-size:11px;color:#9ca3af">
+    Swoop Golf — Club Intelligence | <a href="${appUrl}/#/admin" style="color:#9ca3af">Manage notifications</a>
+  </div>
+</div></body></html>`;
 }
 
 async function checkEscalations(req, res) {

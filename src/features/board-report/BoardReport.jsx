@@ -8,7 +8,7 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { industryBenchmarks } from '@/data/benchmarks';
 import { getKPIs, getMemberSaves, getOperationalSaves, getMonthlyTrends } from '@/services/boardReportService';
 
-const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned', 'Growth Pipeline'];
+const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned'];
 
 function formatCurrency(val) {
   return '$' + val.toLocaleString();
@@ -591,9 +591,7 @@ export default function BoardReport() {
         </div>
       )}
 
-      {activeTab === 4 && (
-        <GrowthPipeline />
-      )}
+      {/* Growth Pipeline deferred to post-pilot */}
       </div>
     </PageTransition>
   );
