@@ -31,7 +31,9 @@ export default function EmailTab() {
       <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
         padding: theme.spacing.md, border: `1px solid ${theme.colors.border}`, overflowX: 'auto' }}>
         <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary,
-          marginBottom: theme.spacing.md }}>Email Open Rate Heatmap</div>
+          marginBottom: '4px' }}>Communication Health — Email Engagement</div>
+        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
+          marginBottom: theme.spacing.md }}>Email engagement is an early health score input — decay here precedes golf and dining disengagement by 6-8 weeks</div>
         <table style={{ borderCollapse: 'collapse', fontSize: theme.fontSize.xs, minWidth: 600 }}>
           <thead>
             <tr>
