@@ -60,7 +60,7 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
     return () => clearInterval(timer);
   }, [nudges.length]);
   const padding = isMobile ? '12px 16px' : '0 24px';
-  const showGreeting = page?.key === 'daily-briefing';
+  const showGreeting = page?.key === 'today';
 
   return (
     <header

@@ -82,7 +82,7 @@ export default function PendingActionsInline({ excludeId = null }) {
 
       {/* Always show the CTA to go to Inbox */}
       <button
-        onClick={() => navigate('playbooks-automation')}
+        onClick={() => navigate('actions')}
         style={{
           padding: '10px 16px',
           fontSize: theme.fontSize.sm,

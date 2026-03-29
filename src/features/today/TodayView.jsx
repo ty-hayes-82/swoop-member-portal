@@ -146,9 +146,9 @@ function GettingStartedChecklist({ onNavigate }) {
   };
 
   const steps = [
-    { key: 'review_action', label: 'Review and approve your first AI action', action: () => { markDone('review_action'); onNavigate('playbooks-automation'); } },
-    { key: 'review_member', label: 'Open a member profile and review their health', action: () => { markDone('review_member'); onNavigate('member-health'); } },
-    { key: 'explore_revenue', label: 'Explore the Revenue & Operations breakdown', action: () => { markDone('explore_revenue'); onNavigate('revenue'); } },
+    { key: 'review_action', label: 'Review and approve your first AI action', action: () => { markDone('review_action'); onNavigate('actions'); } },
+    { key: 'review_member', label: 'Open a member profile and review their health', action: () => { markDone('review_member'); onNavigate('members'); } },
+    { key: 'explore_revenue', label: 'Explore the Revenue breakdown', action: () => { markDone('explore_revenue'); onNavigate('revenue'); } },
     { key: 'view_board_report', label: 'Preview your Board Report', action: () => { markDone('view_board_report'); onNavigate('board-report'); } },
   ];
 
