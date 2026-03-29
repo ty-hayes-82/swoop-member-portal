@@ -1194,8 +1194,7 @@ export default function ActionsPage() {
           </div>
         )}
 
-        {activeTab === 'agents' && <AgentsTab searchTerm={searchTerm} />}
-        {activeTab === 'history' && <HistoryTab searchTerm={searchTerm} />}
+        {/* AI Agents and History tabs deferred to post-pilot */}
       </div>
     </PageTransition>
   );
