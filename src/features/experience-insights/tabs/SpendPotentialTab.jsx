@@ -110,7 +110,7 @@ export default function SpendPotentialTab({ archetype }) {
                   whiteSpace: 'nowrap',
                   flexShrink: 0,
                 }}
-              >Launch Campaign</button>
+              >Add to Actions</button>
             </div>
           </div>
         );

@@ -81,7 +81,7 @@ function DataHubTab({ clubId }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: theme.spacing.md }}>
           {[
             { name: 'Jonas Club CRM', status: 'connected', icon: '👥', tables: 'members, households, membership_types', rows: '300+' },
-            { name: 'ForeTees Tee Sheet', status: 'available', icon: '⛳', tables: 'bookings, pace_of_play, waitlist', rows: '—' },
+            { name: 'ForeTees Tee Sheet', status: 'available', icon: '⛳', tables: 'bookings, pace_of_play', rows: '—' },
             { name: 'POS System', status: 'available', icon: '🍽️', tables: 'pos_checks, pos_line_items, pos_payments', rows: '—' },
             { name: 'Email Marketing', status: 'available', icon: '📧', tables: 'email_campaigns, email_events', rows: '—' },
             { name: 'Staffing / Labor', status: 'available', icon: '👷', tables: 'staff, staff_shifts', rows: '—' },

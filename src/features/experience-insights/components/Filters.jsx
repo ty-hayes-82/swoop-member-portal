@@ -61,7 +61,6 @@ export function ArchetypeFilter({ archetype, onChange }) {
               }}
             >
               <ArchetypeBadge archetype={p.archetype} size="xs" />
-              <span>{p.archetype}</span>
               <span style={{ fontSize: 10, color: theme.colors.textMuted }}>({p.count})</span>
             </button>
           );

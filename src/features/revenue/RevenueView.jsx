@@ -35,7 +35,7 @@ const PROSHOP_LOSS = Math.round((72000 + 45000) / 12);
 const TOTAL_LOSS = PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS + PROSHOP_LOSS;
 
 const DEEP_TABS = [
-  { key: 'pace', label: 'Pace-of-Play Impact' },
+  { key: 'pace', label: 'Service Pace' },
   { key: 'staffing', label: 'Staffing Gaps' },
   { key: 'weather', label: 'Weather Shifts' },
   { key: 'proshop', label: 'Pro Shop & Lessons' },

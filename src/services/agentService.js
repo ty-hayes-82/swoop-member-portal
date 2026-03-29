@@ -1,6 +1,10 @@
 import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents';
 
-let actionStore = agentActions.map((action) => ({ ...action }));
+// Filter out decommissioned action types (waitlist removed from MVP)
+const MVP_EXCLUDED_ACTIONS = new Set(['WAITLIST_PRIORITY', 'WAITLIST_BACKFILL']);
+let actionStore = agentActions
+  .filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType))
+  .map((action) => ({ ...action }));
 
 let _d = null;
 

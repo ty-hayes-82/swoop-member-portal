@@ -1042,12 +1042,10 @@ export default function ActionsPage() {
                 <span>{summary.approved} approved / {summary.dismissed} dismissed today</span>
               </div>
             </div>
-            <div onClick={() => setActiveTab('agents')} style={{ textAlign: 'right', minWidth: 220, cursor: 'pointer' }} role="button" title="View AI Agents">
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Impact summary →</div>
-              <div style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.agentCyan, fontSize: theme.fontSize.md, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, flexWrap: 'wrap' }}>
-                <span>{summary.active} agents active</span>
-                <MetricSeparator />
-                <span>{summary.total} agents deployed</span>
+            <div style={{ textAlign: 'right', minWidth: 180 }}>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 4 }}>Action pipeline</div>
+              <div style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.agentCyan, fontSize: theme.fontSize.md }}>
+                {pendingAgentCount} pending review
               </div>
             </div>
           </div>
@@ -1084,7 +1082,7 @@ export default function ActionsPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <input
             type="text"
-            placeholder="Search actions, playbooks, agents..."
+            placeholder="Search actions and templates..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             style={{

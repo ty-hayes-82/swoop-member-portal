@@ -14,7 +14,7 @@ export default function PlaybookActionCard({
   playbookName,
   impact,
   memberCount,
-  buttonLabel = 'Activate Playbook',
+  buttonLabel = 'Take Action',
   buttonColor = '#e8772e',
   variant = 'standard', // 'standard' | 'compact' | 'urgent'
   linkTo,
@@ -116,7 +116,7 @@ export default function PlaybookActionCard({
             cursor: 'pointer', border: `1.5px solid ${buttonColor}40`,
             background: 'transparent', color: buttonColor,
           }}
-        >View Playbook</button>
+        >View Details</button>
         {impact && (
           <span style={{ fontSize: 12, fontWeight: 700, color: '#d9534f', marginLeft: 'auto' }}>{impact}</span>
         )}

@@ -20,7 +20,7 @@ const TABS = [
   { key: 'complaints', label: 'Complaints' },
   { key: 'events', label: 'Event ROI' },
   { key: 'spend', label: 'Spend Potential' },
-  { key: 'surveys', label: 'Survey Intelligence' },
+  // Survey Intelligence deferred — collection infrastructure (SMS, kiosk QR) does not exist
 ];
 
 const SEGMENT_COUNTS = { all: 300, 'at-risk': 47, healthy: 218 };
@@ -51,7 +51,7 @@ export default function ExperienceInsights() {
     complaints: <ComplaintsTab />,
     events: <EventsTab />,
     spend: <SpendPotentialTab archetype={archetype} />,
-    surveys: <SurveyTab />,
+    // surveys deferred to post-pilot
   };
 
   return (
@@ -82,8 +82,6 @@ export default function ExperienceInsights() {
             Cross-domain correlations between touchpoints and business outcomes. Data from 6 connected systems.
           </p>
         </div>
-
-        <FlowLink flowNum="04" persona="Chef Marco" />
 
         {(activeTab === 'correlations' || activeTab === 'touchpoints' || activeTab === 'spend') && (
           <>

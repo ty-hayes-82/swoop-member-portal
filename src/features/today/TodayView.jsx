@@ -41,12 +41,17 @@ export default function TodayView() {
   }
 
   const summary = getMemberSummary();
-  const healthScore = summary.avgHealthScore ?? 72;
-  const healthColor = healthScore >= 70 ? '#16a34a' : healthScore >= 50 ? '#ca8a04' : healthScore >= 30 ? '#ea580c' : '#b91c1c';
-  const healthLabel = healthScore >= 70 ? 'Healthy' : healthScore >= 50 ? 'Watch' : healthScore >= 30 ? 'At Risk' : 'Critical';
   // Compute total from tier counts if summary.total is missing/zero
   const tierSum = (summary.healthy || 0) + (summary.watch || 0) + (summary.atRisk || 0) + (summary.critical || 0);
   const totalMembers = summary.total || tierSum || 300;
+  // Derive health score from tier distribution when live data is available,
+  // to avoid showing static fallback score (72) alongside live tier counts (5 Critical)
+  const derivedScore = tierSum > 0
+    ? Math.round(((summary.healthy || 0) * 85 + (summary.watch || 0) * 57 + (summary.atRisk || 0) * 35 + (summary.critical || 0) * 15) / tierSum)
+    : null;
+  const healthScore = derivedScore ?? summary.avgHealthScore ?? 72;
+  const healthColor = healthScore >= 70 ? '#16a34a' : healthScore >= 50 ? '#ca8a04' : healthScore >= 30 ? '#ea580c' : '#b91c1c';
+  const healthLabel = healthScore >= 70 ? 'Healthy' : healthScore >= 50 ? 'Watch' : healthScore >= 30 ? 'At Risk' : 'Critical';
 
   return (
     <PageTransition>
@@ -217,7 +222,7 @@ function GettingStartedChecklist({ onNavigate }) {
   };
 
   const steps = [
-    { key: 'review_action', label: 'Review and approve your first AI action', action: () => { markDone('review_action'); onNavigate('actions'); } },
+    { key: 'review_action', label: 'Review and approve your first action', action: () => { markDone('review_action'); onNavigate('actions'); } },
     { key: 'review_member', label: 'Open a member profile and review their health', action: () => { markDone('review_member'); onNavigate('members'); } },
     { key: 'explore_revenue', label: 'Explore the Revenue breakdown', action: () => { markDone('explore_revenue'); onNavigate('revenue'); } },
     { key: 'view_board_report', label: 'Preview your Board Report', action: () => { markDone('view_board_report'); onNavigate('board-report'); } },

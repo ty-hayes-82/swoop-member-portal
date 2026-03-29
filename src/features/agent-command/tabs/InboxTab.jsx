@@ -139,7 +139,7 @@ export default function InboxTab() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Filter by agent</span>
+          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Filter by priority</span>
           <select
             value={filterAgent}
             onChange={(event) => setFilterAgent(event.target.value)}
@@ -152,12 +152,10 @@ export default function InboxTab() {
               padding: '6px 8px',
             }}
           >
-            <option value="all">All agents</option>
-            {agents.map((agent) => (
-              <option key={agent.id} value={agent.id}>
-                {agent.name}
-              </option>
-            ))}
+            <option value="all">All actions</option>
+            <option value="high">High priority</option>
+            <option value="medium">Medium priority</option>
+            <option value="low">Low priority</option>
           </select>
           <button
             onClick={() => setGroupByCategory(!groupByCategory)}

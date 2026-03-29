@@ -114,7 +114,7 @@ function AppShell() {
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 110 }}
         />
       )}
-      <div style={{ display: 'flex', minHeight: '100vh', position: 'relative', paddingRight: drawerOffset ? `${drawerOffset}px` : 0, transition: 'padding 0.25s ease' }}>        {(!isMobile || mobileMenuOpen) && (
+      <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>        {(!isMobile || mobileMenuOpen) && (
           <Sidebar isMobile={isMobile} mobileMenuOpen={mobileMenuOpen} />
         )}
         <div
@@ -127,7 +127,7 @@ function AppShell() {
             minHeight: '100vh',
             width: '100%',
             paddingLeft: isMobile ? 0 : 0,
-            paddingRight: drawerOffset ? `${Math.max(drawerOffset - 24, 0)}px` : 0,
+            paddingRight: 0,
           }}
         >
           <Header
@@ -192,7 +192,9 @@ function PortalApplication() {
 }
 
 function RouterViews() {
-  const isMobileRoute = window.location.hash.startsWith('#/m');
+  // Mobile routes: exactly #/m or #/m/... — NOT #/members, #/member-profile, etc.
+  const hash = window.location.hash;
+  const isMobileRoute = hash === '#/m' || hash.startsWith('#/m/');
 
   if (isMobileRoute) {
     return (

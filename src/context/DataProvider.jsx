@@ -9,17 +9,14 @@ import { _init as initOps }      from '@/services/operationsService';
 import { _init as initFB }       from '@/services/fbService';
 import { _init as initMembers }  from '@/services/memberService';
 import { _init as initStaffing } from '@/services/staffingService';
-import { _init as initPipeline } from '@/services/pipelineService';
 import { _init as initTrends }   from '@/services/trendsService';
-import { _init as initWaitlist } from '@/services/waitlistService';
 import { _init as initBriefing } from '@/services/briefingService';
 import { _init as initBoardReport } from '@/services/boardReportService';
 import { _init as initCockpit }     from '@/services/cockpitService';
 import { _init as initExperience }  from '@/services/experienceInsightsService';
 import { _init as initAgents }      from '@/services/agentService';
-import { _init as initLocation }    from '@/services/locationService';
-import { _init as initTeeSheetOps } from '@/services/teeSheetOpsService';
 import { _init as initIntegrations } from '@/services/integrationsService';
+// Removed from MVP init: pipeline, waitlist, location, teeSheetOps
 
 const DataCtx = createContext({ phase: 1 });
 export const useDataContext = () => useContext(DataCtx);
@@ -49,9 +46,9 @@ export function DataProvider({ children }) {
     Promise.race([
       Promise.allSettled([
         initOps(), initFB(), initMembers(), initStaffing(),
-        initPipeline(), initTrends(), initWaitlist(), initBriefing(),
+        initTrends(), initBriefing(),
         initBoardReport(), initCockpit(), initExperience(),
-        initAgents(), initLocation(), initTeeSheetOps(), initIntegrations(),
+        initAgents(), initIntegrations(),
       ]),
       timeout,
     ]).then(results => {
