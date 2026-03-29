@@ -18,25 +18,10 @@ import RecoveryTab from '@/features/member-health/tabs/RecoveryTab';
 import CohortTab from '@/features/member-health/tabs/CohortTab';
 import ResignationTimeline from '@/features/member-health/ResignationTimeline';
 
-// Experience Insights tabs (extracted)
-import CorrelationsTab from '@/features/experience-insights/tabs/CorrelationsTab';
-import TouchpointsTab from '@/features/experience-insights/tabs/TouchpointsTab';
-import ComplaintsTab from '@/features/experience-insights/tabs/ComplaintsTab';
-import EventsTab from '@/features/experience-insights/tabs/EventsTab';
-import SurveyTab from '@/features/experience-insights/tabs/SurveyTab';
-import { SegmentFilter, ArchetypeFilter } from '@/features/experience-insights/components/Filters';
-
-// Tee Sheet Demand (full component)
-import { WaitlistDemand } from '@/features/waitlist-demand';
-
-// Local components
-import InsightCards from './InsightCards';
 
 const MODES = [
   { key: 'at-risk', label: 'At-Risk' },
   { key: 'search', label: 'All Members' },
-  { key: 'insights', label: 'Insights' },
-  { key: 'tee-sheet', label: 'Waitlist & Tee Sheet' },
 ];
 
 const HEADLINES = {
@@ -53,16 +38,6 @@ const HEADLINES = {
     variant: 'insight',
     headline: `${getMemberSummary().totalMembers || 300} members — search, filter, and drill down.`,
     context: 'Complete member directory with health scores, archetypes, and engagement data.',
-  }),
-  'insights': () => ({
-    variant: 'opportunity',
-    headline: 'Which experiences drive retention — and which ones cost you members?',
-    context: 'Cross-domain correlations between touchpoints and business outcomes.',
-  }),
-  'tee-sheet': () => ({
-    variant: 'insight',
-    headline: 'Who is waiting, who will cancel, and what does it cost?',
-    context: 'Waitlist management, cancellation risk, and demand intelligence.',
   }),
 };
 
@@ -163,51 +138,8 @@ export default function MembersView() {
           <AllMembersView />
         )}
 
-        {/* Mode: Insights */}
-        {mode === 'insights' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-            <InsightCards onDeepDive={() => {}} />
-
-            <SegmentFilter segment={segment} onChange={setSegment} />
-            <ArchetypeFilter archetype={archetype} onChange={setArchetype} />
-
-            <CollapsibleSection title="Correlations" icon="🔗" defaultExpanded>
-              <CorrelationsTab segment={segment} archetype={archetype} />
-            </CollapsibleSection>
-            {/* Deep Dives divider */}
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: theme.spacing.md,
-              margin: `${theme.spacing.sm} 0`,
-            }}>
-              <div style={{ flex: 1, height: 1, background: theme.colors.border }} />
-              <span style={{
-                fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textMuted,
-                textTransform: 'uppercase', letterSpacing: '0.12em', whiteSpace: 'nowrap',
-              }}>
-                Deep Dives
-              </span>
-              <div style={{ flex: 1, height: 1, background: theme.colors.border }} />
-            </div>
-
-            <CollapsibleSection title="Touchpoints" icon="🎯">
-              <TouchpointsTab segment={segment} archetype={archetype} />
-            </CollapsibleSection>
-            <CollapsibleSection title="Complaints" icon="🚨">
-              <ComplaintsTab />
-            </CollapsibleSection>
-            <CollapsibleSection title="Event ROI" icon="🎫">
-              <EventsTab />
-            </CollapsibleSection>
-            <CollapsibleSection title="Survey Intelligence" icon="📋">
-              <SurveyTab />
-            </CollapsibleSection>
-          </div>
-        )}
-
-        {/* Mode: Tee Sheet */}
-        {mode === 'tee-sheet' && (
-          <WaitlistDemand />
-        )}
+        {/* Insights moved to top-level /insights route (Sprint 5) */}
+        {/* Waitlist & Tee Sheet decommissioned from MVP nav */}
       </div>
     </PageTransition>
   );

@@ -12,7 +12,7 @@ export default function EventsTab() {
         <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
           <thead>
             <tr style={{ borderBottom: '1px solid ' + theme.colors.border }}>
-              {['Event Type', 'Avg Attendance', 'Retention Rate', 'Avg Spend/Member', 'ROI Score', 'Frequency'].map((h) => (
+              {['Event Type', 'Avg Attendance', 'Retention Rate', 'Health Impact', 'Avg Spend/Member', 'ROI Score', 'Frequency'].map((h) => (
                 <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.06em', color: theme.colors.textMuted, fontWeight: 500 }}>{h}</th>
               ))}
             </tr>
@@ -26,6 +26,19 @@ export default function EventsTab() {
                   <span style={{ color: evt.retentionRate >= 93 ? theme.colors.success : theme.colors.warning, fontWeight: 600 }}>
                     {evt.retentionRate}%
                   </span>
+                </td>
+                <td style={{ padding: '8px 12px' }}>
+                  {(() => {
+                    const delta = Math.round((evt.retentionRate - 85) * 0.8);
+                    return (
+                      <span style={{
+                        color: delta > 0 ? '#16a34a' : '#dc2626',
+                        fontWeight: 600, fontFamily: theme.fonts.mono,
+                      }}>
+                        {delta > 0 ? '+' : ''}{delta} pts
+                      </span>
+                    );
+                  })()}
                 </td>
                 <td style={{ padding: '8px 12px', fontFamily: theme.fonts.mono }}>${evt.avgSpend}</td>
                 <td style={{ padding: '8px 12px' }}>
