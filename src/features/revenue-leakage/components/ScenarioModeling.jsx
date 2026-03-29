@@ -65,12 +65,14 @@ function Slider({ value, min, max, step, onChange }) {
       }}
       style={{
         width: '100%',
-        height: '6px',
-        borderRadius: '3px',
+        height: '8px',
+        borderRadius: '4px',
         appearance: 'none',
         background: `linear-gradient(to right, ${theme.colors.accent} 0%, ${theme.colors.accent} ${((isReversed ? actualMin + actualMax - value : value) - actualMin) / (actualMax - actualMin) * 100}%, ${theme.colors.border} ${((isReversed ? actualMin + actualMax - value : value) - actualMin) / (actualMax - actualMin) * 100}%, ${theme.colors.border} 100%)`,
         cursor: 'pointer',
         outline: 'none',
+        minHeight: '44px',
+        padding: '18px 0',
       }}
     />
   );
@@ -194,8 +196,17 @@ export default function ScenarioModeling({ paceLoss, staffingLoss, weatherLoss }
           }}>
             ${totalRecovery.toLocaleString()}
           </div>
-          <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>
+          <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginBottom: 6 }}>
             projected monthly recovery ({recoveryPct}%)
+          </div>
+          <div style={{
+            fontSize: '20px', fontWeight: 700, fontFamily: theme.fonts.mono,
+            color: totalRecovery > 0 ? theme.colors.info : theme.colors.textMuted,
+          }}>
+            {Math.round(totalRecovery / 1500)} members
+          </div>
+          <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>
+            protected from churn
           </div>
         </div>
       </div>

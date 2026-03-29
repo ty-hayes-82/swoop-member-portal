@@ -14,12 +14,11 @@ import NotificationSettings from '@/features/notification-settings/NotificationS
 import OnboardingWizard from '@/features/onboarding/OnboardingWizard';
 
 const ADMIN_TABS = [
-  { key: 'data-hub', label: 'Data Hub', icon: '🔌' },
-  { key: 'health', label: 'Health & Quality', icon: '🩺' },
-  { key: 'activity', label: 'Activity Log', icon: '📜' },
+  { key: 'data-hub', label: 'Integrations', icon: '🔌' },
+  { key: 'health', label: 'Data Health', icon: '🩺' },
+  { key: 'activity', label: 'CSV Import', icon: '📥' },
   { key: 'notifications', label: 'Notifications', icon: '🔔' },
-  { key: 'onboarding', label: 'Onboarding', icon: '🚀' },
-  { key: 'settings', label: 'Settings', icon: '⚙️' },
+  { key: 'settings', label: 'User Roles', icon: '👤' },
 ];
 
 export default function AdminHub() {
