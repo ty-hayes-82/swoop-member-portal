@@ -21,7 +21,7 @@ const TABS = [
   { key: 'email',        label: 'Email Decay' },
   { key: 'resignations', label: 'Resignations' },
   { key: 'recovery',     label: 'Recovery' },
-  { key: 'cohorts',      label: 'Cohort Analysis' },
+  { key: 'cohorts',      label: 'First 90 Days' },
 ];
 
 export default function MemberHealth() {
