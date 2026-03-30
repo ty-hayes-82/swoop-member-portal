@@ -1,5 +1,6 @@
 import { theme } from '@/config/theme';
 import { useNavigation } from '@/context/NavigationContext';
+import { isRealClub } from '@/config/constants';
 import { paceFBImpact } from '@/data/pace';
 import { understaffedDays } from '@/data/staffing';
 import { archetypeSpendGaps } from '@/services/experienceInsightsService';
@@ -13,6 +14,13 @@ const TOTAL_LEAKAGE = PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS + PROSHOP_LOSS;
 
 export default function RevenueSummaryCard() {
   const { navigate } = useNavigation();
+
+  // For real clubs, don't show demo revenue data
+  if (isRealClub()) {
+    const memberSummary = getMemberSummary();
+    const duesAtRisk = memberSummary.potentialDuesAtRisk || 0;
+    if (duesAtRisk === 0) return null; // No revenue data yet
+  }
 
   const spendTotal = archetypeSpendGaps.reduce((s, a) => s + a.totalUntapped, 0);
   const spendMonthly = Math.round(spendTotal / 12);

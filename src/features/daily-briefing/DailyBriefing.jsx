@@ -140,7 +140,7 @@ export default function DailyBriefing() {
           {/* Date header */}
           <div style={{ paddingBottom: '4px', borderBottom: `1px solid ${theme.colors.border}` }}>
             <div style={{ fontSize: '11px', color: theme.colors.textMuted, letterSpacing: '0.08em', fontWeight: 600, marginBottom: '4px' }}>
-              SATURDAY, JANUARY 17, 2026 · OAKMONT HILLS CC
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
               <span style={{ 

@@ -2,6 +2,7 @@ import {
   cockpitItems as staticItems,
   sinceLastLogin as staticSinceLastLogin,
 } from '@/data/cockpit';
+import { useStaticData } from '@/config/constants';
 
 let _d = null;
 
@@ -14,6 +15,6 @@ export const _init = async () => {
   }
 };
 
-export const getPriorityItems = () => _d?.priorities ?? staticItems;
-export const getSinceLastLogin = () => _d?.sinceLastLogin ?? staticSinceLastLogin;
+export const getPriorityItems = () => _d?.priorities ?? (useStaticData() ? staticItems : []);
+export const getSinceLastLogin = () => _d?.sinceLastLogin ?? (useStaticData() ? staticSinceLastLogin : {});
 export const sourceSystems = ['CRM', 'POS', 'Weather', 'Tee Sheet', 'Complaints'];

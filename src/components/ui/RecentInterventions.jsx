@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { theme } from '@/config/theme';
 import { getLiveDashboard } from '@/services/memberService';
+import { isRealClub } from '@/config/constants';
 
 // Static fallback
 const STATIC_INTERVENTIONS = [
@@ -19,7 +20,7 @@ export default function RecentInterventions() {
   const live = getLiveDashboard();
 
   const interventions = useMemo(() => {
-    if (!live?.recentInterventions?.length) return STATIC_INTERVENTIONS;
+    if (!live?.recentInterventions?.length) return isRealClub() ? [] : STATIC_INTERVENTIONS;
 
     return live.recentInterventions.map(r => {
       const scoreDelta = r.scoreBefore && r.scoreAfter

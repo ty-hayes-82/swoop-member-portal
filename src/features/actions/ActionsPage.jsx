@@ -1037,9 +1037,13 @@ export default function ActionsPage() {
                 </span>
               </div>
               <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <span>{pendingAgentCount} actions ready for review</span>
-                <MetricSeparator />
-                <span>{summary.approved} approved / {summary.dismissed} dismissed today</span>
+                <span>{pendingAgentCount} action{pendingAgentCount !== 1 ? 's' : ''} ready for review</span>
+                {(summary.approved > 0 || summary.dismissed > 0) && (
+                  <>
+                    <MetricSeparator />
+                    <span>{summary.approved} approved / {summary.dismissed} dismissed today</span>
+                  </>
+                )}
               </div>
             </div>
             <div style={{ textAlign: 'right', minWidth: 180 }}>

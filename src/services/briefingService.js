@@ -5,6 +5,7 @@ import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
 import { getCancellationSummary, getWaitlistSummary }  from './waitlistService';
 import { cancellationProbabilities } from '../data/pipeline';
+import { isRealClub } from '@/config/constants';
 
 let _d = null;
 
@@ -15,8 +16,18 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
+// Empty briefing for real clubs with no API data yet
+const EMPTY_BRIEFING = {
+  keyMetrics: { atRiskMembers: 0, openComplaints: 0 },
+  todayRisks: { atRiskTeetimes: [] },
+  yesterdayRecap: null,
+  comparisons: {},
+  topCancellationRiskMembers: [],
+};
+
 export const getDailyBriefing = (date = '2026-01-17') => {
   if (_d) return _d;
+  if (isRealClub()) return EMPTY_BRIEFING;
 
   // Phase 1 static fallback — identical shape to API response
   const revData    = getRevenueByDay();

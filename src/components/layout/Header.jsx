@@ -185,7 +185,7 @@ export default function Header({ onMobileMenuToggle, isMobile = false }) {
           >
             <div style={{ width: 6, height: 6, borderRadius: '50%', background: theme.colors.accent, animation: 'pulse 2s infinite', flexShrink: 0 }} />
             <span style={{ fontSize: '10px', color: theme.colors.accent, fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
-            <span style={{ fontSize: '10px', color: theme.colors.textMuted, flexShrink: 0 }}>&middot; Demo data: {DEMO_TIMESTAMP}</span>
+            {!isRealClub() && <span style={{ fontSize: '10px', color: theme.colors.textMuted, flexShrink: 0 }}>&middot; Demo data: {DEMO_TIMESTAMP}</span>}
           </div>
         </div>
       </div>

@@ -28,6 +28,11 @@ export function isRealClub() {
 // Backward compat — some files import CLUB_NAME
 export const CLUB_NAME = DEMO_CLUB_NAME;
 
+// Whether static demo data should be used (only in demo mode)
+export function useStaticData() {
+  return !isRealClub();
+}
+
 export const SLOW_ROUND_THRESHOLD_MIN = 270;
 export const POST_ROUND_WINDOW_MIN = 90;
 export const HEALTH_THRESHOLDS = {
