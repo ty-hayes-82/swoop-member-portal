@@ -217,7 +217,7 @@ function MemberRow({ m, isExpanded, onToggle, isSelected, onSelect }) {
 }
 
 
-// Churn Anatomy — average decay sequence with timing data
+// Disengagement Anatomy — average decay sequence with timing data
 function ChurnDecaySequence() {
   const stages = [
     { domain: 'Email', icon: '\u2709\uFE0F', weeks: 0, detail: 'Open rates fall below 15%. First detectable signal.', border: '#f59e0b', shadow: 'rgba(245,158,11,0.2)' },
@@ -239,7 +239,7 @@ function ChurnDecaySequence() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
         <div>
           <div style={{ fontSize: '11px', fontWeight: 700, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>
-            Churn Anatomy
+            Disengagement Anatomy
           </div>
           <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#0f0f0f', margin: 0, lineHeight: 1.3 }}>
             The Resignation Sequence

@@ -6,23 +6,23 @@ const MARKETING_HOME = 'https://swoop-member-intelligence-website.vercel.app'
 
 const quickWins = [
   {
-    label: 'Morning snapshot',
-    detail: 'See which members, tee sheets, and outlets need attention in under 90 seconds.'
+    label: "Today's cockpit",
+    detail: 'See where operations are at risk — staffing gaps, open complaints, and pace issues — in under 90 seconds.'
   },
   {
-    label: 'Action queue',
-    detail: 'Approve or assign the three highest-impact saves before noon.'
+    label: 'Service & Staffing',
+    detail: 'Is tomorrow staffed correctly? Which outlets had complaints this week? Where is service inconsistent?'
   },
   {
-    label: 'Board-ready notes',
-    detail: 'Download the Morning Briefing sheet and forward it to your team in one click.'
+    label: 'Members needing attention',
+    detail: 'Which members are quietly disengaging? Who should you call this week?'
   }
 ]
 
 const proofPoints = [
-  { metric: '+21%', description: 'Retention lift at Oakmont Hills after three weeks.' },
-  { metric: '$312', description: 'Average revenue per protected slot once retention routing is enabled.' },
-  { metric: '6 days', description: 'Early warning before a member stops visiting or dining.' }
+  { metric: '15%', description: 'Service consistency improvement at pilot clubs within the first month.' },
+  { metric: '12', description: 'Staffing adjustments that prevented service failures before members noticed.' },
+  { metric: '6 days', description: 'Early warning before a member disengages — across golf, dining, and events.' }
 ]
 
 export default function PortalLanding() {
@@ -30,9 +30,9 @@ export default function PortalLanding() {
     <div style={{ maxWidth: 960, margin: '0 auto', padding: theme.spacing.xl, display: 'flex', flexDirection: 'column', gap: theme.spacing.xl }}>
       <section style={{ background: theme.colors.card, borderRadius: theme.radius.xl, border: `1px solid ${theme.colors.border}`, padding: theme.spacing.xl }} data-animate>
         <p style={{ textTransform: 'uppercase', fontSize: theme.fontSize.sm, letterSpacing: '0.3em', color: theme.colors.textMuted }}>Demo Environment</p>
-        <h1 style={{ fontSize: theme.fontSize.display, marginTop: theme.spacing.md }}>Welcome to Swoop Member Intelligence</h1>
+        <h1 style={{ fontSize: theme.fontSize.display, marginTop: theme.spacing.md }}>See where today is breaking — before your members feel it.</h1>
         <p style={{ fontSize: theme.fontSize.lg, color: theme.colors.textMuted, marginTop: theme.spacing.md }}>
-          This route is a lightweight overview for prospects who land directly in the portal. If you're evaluating Swoop, start with the highlights below or jump straight to a live walkthrough.
+          Swoop connects your tee sheet, POS, CRM, and scheduling into one intelligence layer — so you can see where service is at risk, know which members need attention, and prove to your board that it's working.
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.md, marginTop: theme.spacing.lg }}>
           <a
@@ -52,7 +52,7 @@ export default function PortalLanding() {
           </a>
           <button
             type="button"
-            onClick={() => (window.location.hash = '#/daily-briefing')}
+            onClick={() => (window.location.hash = '#/today')}
             style={{
               padding: `${theme.spacing.md} ${theme.spacing.xl}`,
               borderRadius: theme.radius.lg,
@@ -62,7 +62,7 @@ export default function PortalLanding() {
               fontWeight: 600,
             }}
           >
-            View the Daily Briefing
+            View Today's Cockpit
           </button>
         </div>
       </section>
