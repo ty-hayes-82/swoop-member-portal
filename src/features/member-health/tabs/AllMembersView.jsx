@@ -364,6 +364,25 @@ export default function AllMembersView({ initialArchetype = null }) {
     return filtered;
   }, [allMembers, healthFilter, archetypeFilter, activityFilter, searchTerm]);
 
+  // Reactive health distribution — updates when any filter changes
+  const filteredHealthDist = useMemo(() => {
+    const counts = { Healthy: 0, Watch: 0, 'At Risk': 0, Critical: 0 };
+    filteredMembers.forEach(m => {
+      const s = m.score ?? 0;
+      if (s >= 70) counts.Healthy++;
+      else if (s >= 50) counts.Watch++;
+      else if (s >= 30) counts['At Risk']++;
+      else counts.Critical++;
+    });
+    const total = filteredMembers.length || 1;
+    return [
+      { level: 'Healthy', count: counts.Healthy, percentage: counts.Healthy / total, color: theme.colors.success, min: 70 },
+      { level: 'Watch', count: counts.Watch, percentage: counts.Watch / total, color: theme.colors.warning, min: 50 },
+      { level: 'At Risk', count: counts['At Risk'], percentage: counts['At Risk'] / total, color: theme.colors.riskAtRiskAlt || '#ea580c', min: 30 },
+      { level: 'Critical', count: counts.Critical, percentage: counts.Critical / total, color: theme.colors.urgent, min: 0 },
+    ];
+  }, [filteredMembers]);
+
   // Sort filtered members
   const sortedMembers = useMemo(() => {
     const mapKey = {
@@ -450,7 +469,7 @@ export default function AllMembersView({ initialArchetype = null }) {
           Filter by Health Level (click to filter)
         </div>
         <div className="grid-responsive-4">
-          {healthDistribution.map((d) => {
+          {filteredHealthDist.map((d) => {
             const isActive = activeHealthLevel === d.level;
             return (
               <div
