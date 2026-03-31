@@ -5,7 +5,7 @@ import { theme } from '@/config/theme';
 // All old route keys kept as hidden entries for backward compat + Header metadata
 export const navItems = [
   // ============================================
-  // PRIMARY — The 7 MVP nav items
+  // PRIMARY — The 5 MVP nav items (V3 realignment)
   // ============================================
   {
     key: 'today',
@@ -13,8 +13,17 @@ export const navItems = [
     section: 'PRIMARY',
     icon: '🎯',
     color: theme.colors.navBriefing,
-    subtitle: 'Morning briefing, pending actions, and recent proof.',
+    subtitle: 'Morning cockpit: risks, members, and pending actions.',
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
+  },
+  {
+    key: 'service',
+    label: 'Service',
+    section: 'PRIMARY',
+    icon: '⚙️',
+    color: theme.colors.navOperations,
+    subtitle: 'Service quality, staffing intelligence, and complaint patterns.',
+    sourceSystems: ['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather'],
   },
   {
     key: 'members',
@@ -22,35 +31,8 @@ export const navItems = [
     section: 'PRIMARY',
     icon: '👥',
     color: theme.colors.navMembers,
-    subtitle: 'At-risk members, health scores, and cross-domain insights.',
+    subtitle: 'At-risk members, health scores, and member directory.',
     sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
-  },
-  {
-    key: 'revenue',
-    label: 'Revenue',
-    section: 'PRIMARY',
-    icon: '💰',
-    color: theme.colors.navFb,
-    subtitle: 'Revenue signals, spend potential, and operational recovery paths.',
-    sourceSystems: ['POS', 'Tee Sheet', 'Scheduling', 'Weather'],
-  },
-  {
-    key: 'insights',
-    label: 'Insights',
-    section: 'PRIMARY',
-    icon: '🔗',
-    color: theme.colors.navMembers,
-    subtitle: 'Which experiences drive retention — and which ones cost you members?',
-    sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Email', 'Complaints', 'Events'],
-  },
-  {
-    key: 'actions',
-    label: 'Actions',
-    section: 'PRIMARY',
-    icon: '⚡',
-    color: theme.colors.navAgents,
-    subtitle: 'AI inbox, playbooks, and outreach — one decision center.',
-    sourceSystems: ['All Systems'],
   },
   {
     key: 'board-report',
@@ -58,9 +40,8 @@ export const navItems = [
     section: 'PRIMARY',
     icon: '📊',
     color: theme.colors.navDemo,
-    subtitle: 'Monthly executive summary — retention, revenue, and operational saves.',
+    subtitle: 'Monthly executive summary — service quality, member health, and impact.',
     sourceSystems: ['All Systems'],
-    badge: '16:1 ROI',
   },
   {
     key: 'admin',
@@ -68,8 +49,39 @@ export const navItems = [
     section: 'PRIMARY',
     icon: '⚙️',
     color: theme.colors.navIntegrations,
-    subtitle: 'Integrations, data health, users, notifications, and club settings.',
+    subtitle: 'Integrations and data health monitoring.',
     sourceSystems: ['Postgres'],
+  },
+  // Moved to HIDDEN (V3): revenue, insights, actions
+  {
+    key: 'revenue',
+    label: 'Revenue',
+    section: 'HIDDEN',
+    icon: '💰',
+    color: theme.colors.navFb,
+    subtitle: 'Revenue signals — redirects to Service.',
+    sourceSystems: ['POS', 'Tee Sheet', 'Scheduling', 'Weather'],
+    hidden: true,
+  },
+  {
+    key: 'insights',
+    label: 'Insights',
+    section: 'HIDDEN',
+    icon: '🔗',
+    color: theme.colors.navMembers,
+    subtitle: 'Experience insights — redirects to Service.',
+    sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Email', 'Complaints', 'Events'],
+    hidden: true,
+  },
+  {
+    key: 'actions',
+    label: 'Actions',
+    section: 'HIDDEN',
+    icon: '⚡',
+    color: theme.colors.navAgents,
+    subtitle: 'Pending actions — accessible via sidebar drawer.',
+    sourceSystems: ['All Systems'],
+    hidden: true,
   },
 
   // ============================================

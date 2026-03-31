@@ -34,6 +34,7 @@ import { ActionsPage } from '@/features/actions';
 import { TodayView } from '@/features/today';
 import { MembersView } from '@/features/members';
 import { RevenueView } from '@/features/revenue';
+import { ServiceView } from '@/features/service';
 import ActivityHistoryPage from '@/features/activity-history/ActivityHistoryPage';
 import AutomationDashboard from '@/features/automation-dashboard/AutomationDashboard';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
@@ -43,14 +44,16 @@ import LoginPage from '@/features/login/LoginPage';
 import { theme } from '@/config/theme';
 
 const ROUTES = {
-  // MVP Primary views (7 nav items)
+  // MVP Primary views (5 nav items — V3 realignment)
   'today': TodayView,
+  'service': ServiceView,
   'members': MembersView,
-  'revenue': RevenueView,
-  'insights': ExperienceInsights,  // Sprint 5: replace with dedicated InsightsPage
-  'actions': ActionsPage,
   'board-report': BoardReport,
   'admin': AdminHub,
+  // V3 HIDDEN: still routable for backward compat, redirected via NavigationContext
+  'revenue': RevenueView,
+  'insights': ExperienceInsights,
+  'actions': ActionsPage,
   // Accessible via direct navigation
   'member-profile': MemberProfilePage,
   'integrations': IntegrationsPage,

@@ -3,10 +3,12 @@ import { navItems } from '@/config/navigation';
 
 const NavigationContext = createContext(null);
 
-// Valid route keys for hash routing — MVP 7-item navigation
+// Valid route keys for hash routing — MVP 5-item navigation (V3 realignment)
 const VALID_ROUTES = new Set([
-  // Primary MVP views
-  'today', 'members', 'revenue', 'insights', 'actions', 'board-report', 'admin',
+  // Primary MVP views (V3)
+  'today', 'service', 'members', 'board-report', 'admin',
+  // V3 hidden but still routable for backward compat
+  'revenue', 'insights', 'actions',
   // Accessible via direct navigation (not in nav)
   'member-profile', 'integrations',
   // Legacy routes (redirect via ROUTE_REDIRECTS below)
@@ -24,24 +26,27 @@ const ROUTE_REDIRECTS = {
   // Legacy view redirects
   'daily-briefing': 'today',
   'landing': 'today',
-  // Decommissioned features → nearest parent
-  'playbooks-automation': 'actions',
-  'automation-dashboard': 'actions',
-  'agent-command': 'actions',
-  'outreach-playbooks': 'actions',
-  'playbooks': 'actions',
-  'intervention-queue': 'actions',
+  // Decommissioned features → Today (V3: actions is no longer standalone)
+  'actions': 'today',
+  'playbooks-automation': 'today',
+  'automation-dashboard': 'today',
+  'agent-command': 'today',
+  'outreach-playbooks': 'today',
+  'playbooks': 'today',
+  'intervention-queue': 'today',
   // Members-related
   'member-health': 'members',
   'waitlist-demand': 'members',
   'location-intelligence': 'members',
-  // Revenue-related
-  'revenue-leakage': 'revenue',
-  'fb-performance': 'revenue',
-  'operations': 'revenue',
-  'staffing-service': 'revenue',
-  // Insights-related
-  'experience-insights': 'insights',
+  // Revenue-related → Service (V3)
+  'revenue': 'service',
+  'revenue-leakage': 'service',
+  'fb-performance': 'service',
+  'operations': 'service',
+  'staffing-service': 'service',
+  // Insights-related → Service (V3)
+  'insights': 'service',
+  'experience-insights': 'service',
   // Board Report-related
   'growth-pipeline': 'board-report',
   'attribution': 'board-report',

@@ -82,19 +82,26 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
         )}
       </div>
 
-      {/* Revenue impact */}
-      {(!sidebarCollapsed || isMobile) && activeCount > 0 && (
-        <div style={{ margin: '0 12px 8px', padding: '10px 12px', background: theme.colors.sidebarAccent, border: `1px solid ${theme.colors.sidebarAccentBorder}`, borderRadius: '8px' }}>
-          <div style={{ fontSize: '10px', color: TEXT_MUTED, letterSpacing: '0.05em', marginBottom: '3px' }}>
-            {activeCount} PLAN{activeCount > 1 ? 'S' : ''} ACTIVE
-          </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', fontWeight: 600, color: theme.colors.accent }}>
-            +${(totalRevenueImpact.annual / 1000).toFixed(0)}K/yr
-          </div>
+      {/* Pending actions badge — V3: replaces revenue impact badge */}
+      {(!sidebarCollapsed || isMobile) && pendingAgentCount > 0 && (
+        <div
+          onClick={() => navigate('actions')}
+          style={{
+            margin: '0 12px 8px', padding: '10px 12px',
+            background: `${theme.colors.accent}12`,
+            border: `1px solid ${theme.colors.accent}30`,
+            borderRadius: '8px', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px',
+          }}
+        >
+          <span style={{ fontSize: '14px' }}>⚡</span>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: TEXT_LIGHT }}>
+            {pendingAgentCount} pending action{pendingAgentCount !== 1 ? 's' : ''}
+          </span>
         </div>
       )}
 
-      {/* Nav — 7 primary items */}
+      {/* Nav — 5 primary items (V3) */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
         {primaryItems.map((item) => {
           const active = currentRoute === item.key;
@@ -142,41 +149,7 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
                   {item.label}
                 </span>
               )}
-              {/* Badge for pending actions on Actions nav item */}
-              {item.key === 'actions' && pendingAgentCount > 0 && (!sidebarCollapsed || isMobile) && (
-                <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: 18,
-                  height: 18,
-                  borderRadius: '999px',
-                  background: theme.colors.accent,
-                  color: '#fff',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: '0 5px',
-                  flexShrink: 0,
-                }}>
-                  {pendingAgentCount}
-                </span>
-              )}
-              {/* ROI badge for Board Report — only show for demo/established clubs */}
-              {item.badge && !isRealClub() && (!sidebarCollapsed || isMobile) && (
-                <span style={{
-                  fontSize: '9px',
-                  fontWeight: 700,
-                  color: theme.colors.success,
-                  background: `${theme.colors.success}12`,
-                  padding: '2px 6px',
-                  borderRadius: '999px',
-                  border: `1px solid ${theme.colors.success}40`,
-                  letterSpacing: '0.04em',
-                  flexShrink: 0,
-                }}>
-                  {item.badge}
-                </span>
-              )}
+              {/* V3: ROI badge and actions badge removed from nav items — pending actions shown above nav */}
             </button>
           );
         })}
