@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:swoop-member-portal-dev.vercel.app)",
+      "WebFetch(domain:swoop-member-portal.vercel.app)",
+      "Bash(gh api:*)",
+      "mcp__claude_ai_Vercel__get_project",
+      "mcp__claude_ai_Vercel__list_deployments",
+      "Bash(git fetch:*)",
+      "Bash(git tag:*)",
+      "Bash(git checkout:*)",
+      "Bash(git reset:*)",
+      "Bash(git push:*)",
+      "Bash(grep -r \"^[[:space:]]*//[^/]\" src --include=\"*.jsx\" --include=\"*.js\")"
+    ]
+  }
+}
