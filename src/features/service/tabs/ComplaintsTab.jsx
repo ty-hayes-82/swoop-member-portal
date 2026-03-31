@@ -98,6 +98,59 @@ export default function ComplaintsTab() {
         )}
       </div>
 
+      {/* Recently Resolved — shows resolution tracking */}
+      {(() => {
+        const resolved = feedbackRecords.filter(f => f.status === 'resolved' && f.resolved_date);
+        if (resolved.length === 0) return null;
+        return (
+          <div style={{
+            background: theme.colors.bgCard,
+            border: `1px solid ${theme.colors.border}`,
+            borderRadius: theme.radius.lg,
+            padding: theme.spacing.lg,
+          }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.md }}>
+              Recently Resolved ({resolved.length})
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+              {resolved.map(complaint => (
+                <div key={complaint.id} style={{
+                  padding: theme.spacing.md,
+                  background: theme.colors.bgDeep,
+                  borderRadius: theme.radius.sm,
+                  border: `1px solid ${theme.colors.success}20`,
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  flexWrap: 'wrap', gap: theme.spacing.sm,
+                }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      {complaint.memberName ? (
+                        <MemberLink mode="drawer" memberId={complaint.memberId} style={{ fontWeight: 600, color: theme.colors.textPrimary, fontSize: 14 }}>
+                          {complaint.memberName}
+                        </MemberLink>
+                      ) : (
+                        <span style={{ fontWeight: 600, color: theme.colors.textPrimary, fontSize: 14 }}>Member {complaint.memberId}</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: theme.colors.textSecondary }}>
+                      {complaint.category} — Filed {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: theme.colors.success }}>
+                      Resolved {new Date(complaint.resolved_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                    <span style={{ fontSize: 11, color: theme.colors.textMuted }}>
+                      by {complaint.resolved_by}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Understaffed Day Correlation */}
       <div style={{
         background: theme.colors.bgCard,

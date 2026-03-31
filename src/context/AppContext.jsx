@@ -11,20 +11,18 @@ import {
 } from '@/services/teeSheetOpsService';
 import { useToast } from '@/components/ui/Toast.jsx';
 
+// V3: Only 3 core playbooks. Removed slow-saturday (renamed to staffing-gap),
+// engagement-decay, peak-demand-capture.
 const PLAYBOOK_DEFS = {
-  'slow-saturday': { monthly: 8400, annual: 100800 },
   'service-save': { monthly: 18000, annual: 216000 },
-  'engagement-decay': { monthly: 9200, annual: 110400 },
+  'new-member-90day': { monthly: 22000, annual: 264000 },
   'staffing-gap': { monthly: 2100, annual: 25200 },
-  'peak-demand-capture': { monthly: 6200, annual: 74400 },
 };
 
 const TRAIL_STEPS = {
-  'slow-saturday': ['📡 Ranger dispatch sent to holes 4, 8, 12, 16', '📋 Saturday tee intervals updated: 8 → 10 min', '✉ Recovery offer template activated for 4:30+ rounds'],
   'service-save': ['🚩 James Whitfield flagged at front desk', '📢 F&B Director alerted with complaint details', '✉ GM personal alert: James Whitfield — 8K member, 4-day unresolved complaint', '🎁 Comp appetizer offer queued for James Whitfield'],
-  'engagement-decay': ['📊 Weekly health scan scheduled (every Monday)', '✉ Personalized event invite campaign queued for 30 declining members', '🚩 Non-responder follow-up flagged for Week 3'],
+  'new-member-90day': ['🤝 Member matched with compatible golfers', '🎉 Family event invitation sent', '📞 Concierge check-in scheduled', '📋 90-day pulse survey queued'],
   'staffing-gap': ['📊 72-hour shift gap detection enabled', '📢 Flex pool (4 staff) notified for Grill Room backup', '📅 Post-day audit report scheduled daily'],
-  'peak-demand-capture': ['📊 5 at-risk members identified in Saturday AM waitlist', '📣 Priority cancellation alerts queued for retention-flagged members', '🎁 Post-round lunch reservation attached to waitlist notifications', '📢 F&B Director notified: prep for +15% Saturday covers', '📈 Visit session tracking enabled: tee fill → dining conversion → health delta'],
 };
 
 const defaultAgents = getAgents();
@@ -41,18 +39,14 @@ const _isReal = (() => {
 const initialState = {
   currentDate: new Date().toISOString().split('T')[0],
   playbooks: {
-    'slow-saturday': { active: false, activatedAt: null },
     'service-save': { active: false, activatedAt: null },
-    'engagement-decay': { active: false, activatedAt: null },
+    'new-member-90day': { active: false, activatedAt: null },
     'staffing-gap': { active: false, activatedAt: null },
-    'peak-demand-capture': { active: false, activatedAt: null },
   },
   trailProgress: {
-    'slow-saturday': 0,
     'service-save': 0,
-    'engagement-decay': 0,
+    'new-member-90day': 0,
     'staffing-gap': 0,
-    'peak-demand-capture': 0,
   },
   inbox: _isReal ? [] : getAllActions(),
   pendingCount: _isReal ? 0 : getPendingActions().length,

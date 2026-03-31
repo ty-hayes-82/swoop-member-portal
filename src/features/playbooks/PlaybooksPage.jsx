@@ -73,6 +73,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'ghost-reactivation',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 6,
     name: 'Ghost Member Reactivation',
     category: 'Retention',
@@ -104,6 +105,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'declining-intervention',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 12,
     name: 'Declining Member Intervention',
     category: 'Retention',
@@ -135,6 +137,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'service-failure-rapid',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 5,
     name: 'Service Failure Rapid Response',
     category: 'Retention',
@@ -166,6 +169,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'post-event',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 14,
     name: 'Post-Event Engagement Capture',
     category: 'Retention',
@@ -197,6 +201,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'anniversary',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 4,
     name: 'Membership Anniversary Celebration',
     category: 'Retention',
@@ -230,6 +235,7 @@ const PLAYBOOKS = [
   // ── REVENUE ────────────────────────────────────
   {
     id: 'demand-surge',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 2,
     name: 'Demand Surge Playbook',
     category: 'Revenue',
@@ -260,6 +266,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'snowbird-opener',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 0,
     name: 'Snowbird Season-Opener',
     category: 'Revenue',
@@ -291,6 +298,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'event-amplifier',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 3,
     name: 'Social Butterfly Event Amplifier',
     category: 'Revenue',
@@ -321,6 +329,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'weather-window',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 1,
     name: 'Weekend Warrior Weather Window',
     category: 'Revenue',
@@ -351,6 +360,7 @@ const PLAYBOOKS = [
   },
   {
     id: 'dining-dormancy',
+    hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 18,
     name: 'Dining Dormancy Recovery',
     category: 'Revenue',
@@ -384,13 +394,11 @@ const PLAYBOOKS = [
   {
     id: 'staffing-gap',
     triggeredCount: 2,
-    name: 'Staffing Gap Protocol',
+    name: 'Staffing Adjustment',
     category: 'Operations',
     categoryColor: '#7c3aed',
-    description: 'When staffing drops below service thresholds \u2014 call-outs, seasonal transitions, event overlap \u2014 member experience degrades fast. This playbook auto-detects coverage gaps, triggers cross-training recalls, and adjusts service pacing to maintain quality.',
+    description: 'When staffing doesn\u2019t match demand \u2014 call-outs, weather shifts, event overlap, or seasonal spikes \u2014 service quality drops. This playbook connects tee sheet bookings, event calendars, and weather forecasts to staffing schedules, then detects gaps before they become member complaints.',
     triggeredFor: { name: 'Saturday Brunch Service', note: '2 servers called out \u2014 dining room at 85% capacity with 60% staffing' },
-    monthlyImpact: '$8K',
-    yearlyImpact: '$96K/yr',
     steps: [
       { badge: { text: '\u26A0\uFE0F Coverage Gap', bg: '#fef3c7', color: '#92400e' }, title: 'Auto-detect staffing shortfall', detail: 'Saturday brunch: 2 of 5 servers unavailable. Current ratio 1:18 (threshold 1:12). F&B Director alerted with gap analysis.', timing: 'Hour -4' },
       { badge: { text: '\uD83D\uDCDE Recall Alert', bg: '#dbeafe', color: '#1e40af' }, title: 'Activate cross-trained staff', detail: '3 cross-trained staff contacted: 1 banquet server available, 1 host can cover tables. Updated floor plan sent to F&B Director.', timing: 'Hour -3' },
@@ -627,14 +635,16 @@ function PlaybookDetail({ playbook }) {
 }
 
 export default function PlaybooksPage() {
-  const [selectedId, setSelectedId] = useState(PLAYBOOKS[0].id);
+  // V3: Only show non-hidden playbooks (3 core: service-save, new-member-90day, staffing-gap)
+  const visiblePlaybooks = useMemo(() => PLAYBOOKS.filter(p => !p.hidden), []);
+  const [selectedId, setSelectedId] = useState(visiblePlaybooks[0]?.id);
   const [categoryFilter, setCategoryFilter] = useState('All');
-  const selected = PLAYBOOKS.find(p => p.id === selectedId);
+  const selected = visiblePlaybooks.find(p => p.id === selectedId);
 
   const filtered = useMemo(() => {
-    if (categoryFilter === 'All') return PLAYBOOKS;
-    return PLAYBOOKS.filter(p => p.category === categoryFilter);
-  }, [categoryFilter]);
+    if (categoryFilter === 'All') return visiblePlaybooks;
+    return visiblePlaybooks.filter(p => p.category === categoryFilter);
+  }, [categoryFilter, visiblePlaybooks]);
 
   // Auto-select first in filtered list if current selection is filtered out
   const effectiveSelected = filtered.find(p => p.id === selectedId) ? selected : filtered[0];
@@ -657,19 +667,19 @@ export default function PlaybooksPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#0f0f0f' }}>{PLAYBOOKS.length}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: '#0f0f0f' }}>{visiblePlaybooks.length}</div>
               <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Playbooks</div>
             </div>
             <div style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#27ae60' }}>{PLAYBOOKS.filter(p => p.category === 'Retention').length}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: '#27ae60' }}>{visiblePlaybooks.filter(p => p.category === 'Retention').length}</div>
               <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Retention</div>
             </div>
             <div style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#2563eb' }}>{PLAYBOOKS.filter(p => p.category === 'Revenue').length}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: '#2563eb' }}>{visiblePlaybooks.filter(p => p.category === 'Revenue').length}</div>
               <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Revenue</div>
             </div>
             <div style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#7c3aed' }}>{PLAYBOOKS.filter(p => p.category === 'Operations').length}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: '#7c3aed' }}>{visiblePlaybooks.filter(p => p.category === 'Operations').length}</div>
               <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Operations</div>
             </div>
           </div>
