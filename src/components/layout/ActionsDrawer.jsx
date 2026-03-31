@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
+import { useNavigationContext } from '@/context/NavigationContext';
 
 const DRAWER_TABS = [
   { key: 'inbox', label: 'Inbox' },
@@ -35,6 +36,7 @@ const CORE_PLAYBOOKS = [
 
 export default function ActionsDrawer({ isOpen, onClose }) {
   const { inbox, approveAction, dismissAction, playbooks, dispatch } = useApp();
+  const { navigate } = useNavigationContext();
   const pending = inbox.filter(i => i.status === 'pending');
   const [activeTab, setActiveTab] = useState('inbox');
 
@@ -230,12 +232,19 @@ export default function ActionsDrawer({ isOpen, onClose }) {
                     <div style={{ fontSize: 13, color: theme.colors.textSecondary, lineHeight: 1.5, marginBottom: 10 }}>
                       {pb.description}
                     </div>
-                    <div style={{
-                      fontSize: 12, color: theme.colors.success, fontWeight: 600, marginBottom: 12,
-                      padding: '6px 10px', background: `${theme.colors.success}08`,
-                      borderRadius: theme.radius.sm, border: `1px solid ${theme.colors.success}20`,
-                    }}>
-                      Track record: {pb.trackRecord}
+                    <div
+                      onClick={(e) => { e.stopPropagation(); onClose(); navigate('members'); }}
+                      style={{
+                        fontSize: 12, color: theme.colors.success, fontWeight: 600, marginBottom: 12,
+                        padding: '6px 10px', background: `${theme.colors.success}08`,
+                        borderRadius: theme.radius.sm, border: `1px solid ${theme.colors.success}20`,
+                        cursor: 'pointer', transition: 'background 0.12s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = `${theme.colors.success}15`; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = `${theme.colors.success}08`; }}
+                      title="View members"
+                    >
+                      Track record: {pb.trackRecord} →
                     </div>
                     <button
                       onClick={() => dispatch({ type: isActive ? 'DEACTIVATE_PLAYBOOK' : 'ACTIVATE_PLAYBOOK', id: pb.id })}

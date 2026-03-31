@@ -57,8 +57,8 @@ const Sparkline = ({ data = [], color = theme.colors.agentCyan }) => {
   );
 };
 
-const Section = ({ title, description, children }) => (
-  <section style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.md, background: theme.colors.bgCard }}>
+const Section = ({ title, description, children, ...rest }) => (
+  <section {...rest} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.md, background: theme.colors.bgCard }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: theme.spacing.sm }}>
       <h3 style={{ margin: 0, fontSize: theme.fontSize.md }}>{title}</h3>
       {description && <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{description}</span>}
@@ -696,7 +696,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
       </Section>
 
-      <Section title="Recent activity" description="Last 30 days">
+      <Section title="Recent activity" description="Last 30 days" data-section="recent-activity">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {(profile.activity ?? []).map((activity) => (
             <div key={activity.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: theme.fontSize.sm }}>
@@ -718,7 +718,18 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <Section title="Risk signals">
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
           {(profile.riskSignals ?? []).map((signal) => (
-            <div key={signal.id} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '10px 12px' }}>
+            <div
+              key={signal.id}
+              onClick={() => {
+                // Scroll to activity timeline in the drawer
+                const activitySection = document.querySelector('[data-section="recent-activity"]');
+                if (activitySection) activitySection.scrollIntoView({ behavior: 'smooth' });
+              }}
+              style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '10px 12px', cursor: 'pointer', transition: 'background 0.12s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = theme.colors.bgDeep; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              title="Click to view related activity"
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontWeight: 600 }}>{signal.label}</div>
                 <SourceBadge system={signal.source ?? 'Member CRM'} size="xs" />

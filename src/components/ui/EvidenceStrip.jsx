@@ -22,6 +22,20 @@ const SOURCE_ICONS = {
   'Postgres': '\uD83D\uDDC4\uFE0F',
 };
 
+const SOURCE_DESCRIPTIONS = {
+  'Tee Sheet': 'Round bookings, pace data, cancellation history',
+  'POS': 'Dining transactions, F&B revenue, check averages',
+  'Scheduling': 'Staff schedules, shift coverage, labor data',
+  'Complaints': 'Member feedback, service issues, resolution status',
+  'Weather': 'Daily forecasts, impact on demand and operations',
+  'Member CRM': 'Member profiles, tenure, contact info, dues',
+  'Email': 'Campaign opens, click rates, engagement decay',
+  'Analytics': 'Health scores, engagement trends, risk signals',
+  'Events': 'Event registrations, attendance, RSVPs',
+  'All Systems': 'Aggregated data across all connected sources',
+  'Postgres': 'Database tables, schemas, and relationships',
+};
+
 /**
  * EvidenceStrip — shows which data sources contributed to an insight.
  * Accepts either `signals` (array of {source, detail}) or `systems` (array of strings).
@@ -55,7 +69,7 @@ export default function EvidenceStrip({ signals = [], systems = [], compact = fa
             fontSize: compact ? '11px' : '12px',
             color: theme.colors?.textSecondary || '#a0a0b8',
           }}
-          title={sig.timestamp ? sig.source + ' — ' + sig.timestamp : sig.source}
+          title={SOURCE_DESCRIPTIONS[sig.source] || (sig.timestamp ? sig.source + ' — ' + sig.timestamp : sig.source)}
         >
           <span>{SOURCE_ICONS[sig.source] || '\uD83D\uDD17'}</span>
           <span style={{ fontWeight: 600, color: theme.colors?.textMuted || '#cbd5e0' }}>{sig.source}</span>

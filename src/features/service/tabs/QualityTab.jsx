@@ -1,9 +1,14 @@
 // QualityTab — service consistency by shift, outlet, and day of week
+import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { feedbackRecords, feedbackSummary, understaffedDays } from '@/data/staffing';
 import { slowRoundStats } from '@/data/pace';
+import { useNavigationContext } from '@/context/NavigationContext';
 
 export default function QualityTab() {
+  const { navigate } = useNavigationContext();
+  const [expandedOutlet, setExpandedOutlet] = useState(null);
+  const [hoveredBar, setHoveredBar] = useState(null);
   const totalComplaints = feedbackRecords.length;
   const resolvedCount = feedbackRecords.filter(f => f.status === 'resolved').length;
   const resolutionRate = totalComplaints > 0 ? Math.round((resolvedCount / totalComplaints) * 100) : 0;
@@ -101,13 +106,35 @@ export default function QualityTab() {
         <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.md }}>
           Complaints by Day of Week
         </h3>
-        <div style={{ display: 'flex', gap: theme.spacing.sm, alignItems: 'flex-end', height: 120 }}>
+        <div style={{ display: 'flex', gap: theme.spacing.sm, alignItems: 'flex-end', height: 120, position: 'relative' }}>
           {weekdays.map(day => {
             const count = dayOfWeekMap[day] || 0;
             const heightPct = maxDayCount > 0 ? (count / maxDayCount) * 100 : 0;
             const isWeekend = day === 'Sat' || day === 'Sun';
+            const isHovered = hoveredBar === day;
+            // Build tooltip detail
+            const dayComplaints = feedbackRecords.filter(r => new Date(r.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' }) === day);
+            const catBreakdown = {};
+            dayComplaints.forEach(c => { catBreakdown[c.category] = (catBreakdown[c.category] || 0) + 1; });
+            const tooltipText = count > 0 ? `${day}: ${count} complaint${count !== 1 ? 's' : ''}\n${Object.entries(catBreakdown).map(([k, v]) => `${v} ${k}`).join(', ')}` : `${day}: No complaints`;
             return (
-              <div key={day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div
+                key={day}
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, position: 'relative' }}
+                onMouseEnter={() => setHoveredBar(day)}
+                onMouseLeave={() => setHoveredBar(null)}
+              >
+                {isHovered && count > 0 && (
+                  <div style={{
+                    position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
+                    background: '#1a1a2e', color: '#fff', padding: '6px 10px', borderRadius: 6,
+                    fontSize: 11, whiteSpace: 'nowrap', zIndex: 10, marginBottom: 4,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                  }}>
+                    <div style={{ fontWeight: 700, marginBottom: 2 }}>{day}: {count} complaint{count !== 1 ? 's' : ''}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.7)' }}>{Object.entries(catBreakdown).map(([k, v]) => `${v} ${k}`).join(', ')}</div>
+                  </div>
+                )}
                 <span style={{ fontSize: '11px', fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.textPrimary }}>
                   {count || ''}
                 </span>
@@ -116,8 +143,9 @@ export default function QualityTab() {
                   height: `${Math.max(heightPct, 4)}%`,
                   background: isWeekend ? theme.colors.risk : theme.colors.operations,
                   borderRadius: '4px 4px 0 0',
-                  opacity: count > 0 ? 1 : 0.2,
-                  transition: 'height 0.3s',
+                  opacity: isHovered ? 1 : count > 0 ? 0.85 : 0.2,
+                  transition: 'height 0.3s, opacity 0.15s',
+                  cursor: count > 0 ? 'pointer' : 'default',
                 }} />
                 <span style={{ fontSize: '11px', color: theme.colors.textMuted, fontWeight: 600 }}>{day}</span>
               </div>
@@ -138,7 +166,18 @@ export default function QualityTab() {
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
           {feedbackSummary.map(cat => (
-            <div key={cat.category} style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
+            <div
+              key={cat.category}
+              onClick={() => navigate('service', { tab: 'complaints', category: cat.category })}
+              style={{
+                display: 'flex', alignItems: 'center', gap: theme.spacing.md,
+                cursor: 'pointer', padding: '4px 0', borderRadius: theme.radius.sm,
+                transition: 'background 0.12s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = theme.colors.bgDeep; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              title={`Click to view ${cat.category} complaints`}
+            >
               <div style={{ width: 130, fontSize: 13, fontWeight: 500, color: theme.colors.textPrimary, flexShrink: 0 }}>
                 {cat.category}
               </div>
@@ -152,7 +191,7 @@ export default function QualityTab() {
                   <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff' }}>{cat.count}</span>
                 </div>
               </div>
-              <div style={{ fontSize: 12, color: cat.unresolvedCount > 0 ? theme.colors.risk : theme.colors.success, fontWeight: 600, minWidth: 80, textAlign: 'right' }}>
+              <div style={{ fontSize: 12, color: cat.unresolvedCount > 0 ? theme.colors.risk : theme.colors.success, fontWeight: 600, minWidth: 80, textAlign: 'right', textDecoration: cat.unresolvedCount > 0 ? 'underline' : 'none' }}>
                 {cat.unresolvedCount} unresolved
               </div>
             </div>
@@ -195,12 +234,22 @@ export default function QualityTab() {
           const riskColors = { high: theme.colors.risk, medium: '#ca8a04', low: theme.colors.success };
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-              {allOutlets.map(o => (
-                <div key={o.name} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '10px 14px', borderRadius: theme.radius.sm,
-                  background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
-                }}>
+              {allOutlets.map(o => {
+                const isExpanded = expandedOutlet === o.name;
+                const outletComplaints = feedbackRecords.filter(r => r.isUnderstaffedDay ? o.name === 'Grill Room' : o.name === 'Other Outlets' || o.totalComplaints === 0);
+                return (
+                <div key={o.name}>
+                <div
+                  onClick={() => setExpandedOutlet(isExpanded ? null : o.name)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 14px', borderRadius: theme.radius.sm,
+                    background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
+                    cursor: 'pointer', transition: 'background 0.12s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = `${theme.colors.border}40`; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = theme.colors.bgDeep; }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{
                       width: 8, height: 8, borderRadius: '50%',
@@ -224,9 +273,21 @@ export default function QualityTab() {
                     }}>
                       {o.risk}
                     </span>
+                    <span style={{ color: theme.colors.textMuted, fontSize: 12 }}>{isExpanded ? '▾' : '▸'}</span>
                   </div>
                 </div>
-              ))}
+                {isExpanded && (
+                  <div style={{ padding: '8px 14px 12px', fontSize: 12, color: theme.colors.textSecondary, borderLeft: `3px solid ${riskColors[o.risk]}30`, marginLeft: 14 }}>
+                    {o.totalComplaints > 0 ? (
+                      <div>{o.totalComplaints} complaint{o.totalComplaints !== 1 ? 's' : ''} this month. {o.understaffedDays > 0 ? `${o.understaffedDays} understaffed day${o.understaffedDays !== 1 ? 's' : ''} drove service quality below threshold.` : 'No staffing issues detected.'}</div>
+                    ) : (
+                      <div>No issues this month.</div>
+                    )}
+                  </div>
+                )}
+                </div>
+                );
+              })}
             </div>
           );
         })()}

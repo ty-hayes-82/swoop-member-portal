@@ -119,19 +119,24 @@ function ProgressOverTime({ monthlyTrends }) {
   );
 }
 
-function KPIStrip({ kpis }) {
+function KPIStrip({ kpis, onDrillDown }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
       {kpis.map((kpi) => (
         <div
           key={kpi.label}
+          onClick={() => onDrillDown?.()}
           style={{
             background: colors.bg,
             borderRadius: '12px',
             padding: '16px',
             textAlign: 'center',
             border: '1px solid ' + colors.border,
+            cursor: 'pointer',
+            transition: 'box-shadow 0.15s, transform 0.15s',
           }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
         >
           <div style={{ fontSize: '28px', fontWeight: 700, color: colors[kpi.color] || colors.green }}>
             {/* FP-P03: Animated numbers for large metrics */}
@@ -256,7 +261,7 @@ export default function BoardReport() {
         </div>
       </div>
 
-      <KPIStrip kpis={kpis} />
+      <KPIStrip kpis={kpis} onDrillDown={() => setActiveTab(1)} />
 
       {/* Board Confidence Score Methodology — expandable */}
       <details style={{ marginBottom: '16px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm, padding: '12px 16px' }}>

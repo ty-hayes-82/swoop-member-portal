@@ -1,11 +1,14 @@
 // StaffingTab — staffing-to-demand intelligence
 // Addresses #2 survey demand: "Better staffing to match real demand" (60%)
 // 4/4 survey respondents would act on "Add server based on weather + demand"
+import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { understaffedDays, feedbackRecords } from '@/data/staffing';
 import { getDailyBriefing } from '@/services/briefingService';
+import MemberLink from '@/components/MemberLink';
 
 export default function StaffingTab() {
+  const [expandedDay, setExpandedDay] = useState(null);
   const briefing = getDailyBriefing();
   const totalComplaints = feedbackRecords.filter(f => f.isUnderstaffedDay).length;
   const avgComplaintMultiplier = (
@@ -76,17 +79,28 @@ export default function StaffingTab() {
           Understaffed Days — January 2026
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          {understaffedDays.map((day, idx) => (
-            <div key={idx} style={{
-              padding: theme.spacing.md,
-              background: theme.colors.bgDeep,
-              borderRadius: theme.radius.sm,
-              border: `1px solid ${theme.colors.border}`,
-            }}>
+          {understaffedDays.map((day, idx) => {
+            const isExpanded = expandedDay === day.date;
+            const dayComplaints = feedbackRecords.filter(f => f.date === day.date && f.isUnderstaffedDay);
+            return (
+            <div key={idx}>
+            <div
+              onClick={() => setExpandedDay(isExpanded ? null : day.date)}
+              style={{
+                padding: theme.spacing.md,
+                background: theme.colors.bgDeep,
+                borderRadius: theme.radius.sm,
+                border: `1px solid ${theme.colors.border}`,
+                cursor: 'pointer', transition: 'background 0.12s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = `${theme.colors.border}40`; }}
+              onMouseLeave={e => { e.currentTarget.style.background = theme.colors.bgDeep; }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.sm }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: 4 }}>
                     {new Date(day.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    <span style={{ color: theme.colors.textMuted, fontSize: 12, marginLeft: 8 }}>{isExpanded ? '▾' : '▸'}</span>
                   </div>
                   <div style={{ fontSize: 13, color: theme.colors.textSecondary }}>{day.outlet} Lunch</div>
                 </div>
@@ -109,7 +123,27 @@ export default function StaffingTab() {
                 </div>
               </div>
             </div>
-          ))}
+            {isExpanded && (
+              <div style={{ padding: '8px 14px 12px', borderLeft: `3px solid ${theme.colors.risk}30`, marginLeft: 14, fontSize: 13 }}>
+                <div style={{ fontWeight: 600, color: theme.colors.textPrimary, marginBottom: 6 }}>
+                  {dayComplaints.length} complaint{dayComplaints.length !== 1 ? 's' : ''} filed on this day:
+                </div>
+                {dayComplaints.length > 0 ? dayComplaints.map(c => (
+                  <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: `1px solid ${theme.colors.border}` }}>
+                    <span>
+                      <MemberLink mode="drawer" memberId={c.memberId} style={{ fontWeight: 600, color: theme.colors.accent, textDecoration: 'none' }}>
+                        {c.memberName || c.memberId}
+                      </MemberLink>
+                      <span style={{ color: theme.colors.textMuted }}> — {c.category}</span>
+                    </span>
+                    <span style={{ fontSize: 11, color: theme.colors.textMuted }}>{c.status}</span>
+                  </div>
+                )) : <div style={{ color: theme.colors.textMuted }}>No individual complaints recorded for this date.</div>}
+              </div>
+            )}
+            </div>
+            );
+          })}
         </div>
       </div>
 

@@ -1,5 +1,7 @@
 // ComplaintsTab — complaint patterns, resolution status, and understaffed-day correlation
+import { useState, useEffect } from 'react';
 import { theme } from '@/config/theme';
+import { useNavigationContext } from '@/context/NavigationContext';
 import { feedbackRecords, feedbackSummary } from '@/data/staffing';
 import { paceFBImpact } from '@/data/pace';
 import MemberLink from '@/components/MemberLink';
@@ -11,8 +13,32 @@ const STATUS_STYLES = {
   escalated: { bg: `${theme.colors.risk}12`, color: theme.colors.risk, label: 'Escalated' },
 };
 
+const STATUS_FILTERS = [
+  { key: null, label: 'All' },
+  { key: 'acknowledged', label: 'Acknowledged' },
+  { key: 'in_progress', label: 'In Progress' },
+  { key: 'escalated', label: 'Escalated' },
+  { key: 'resolved', label: 'Resolved' },
+];
+
 export default function ComplaintsTab() {
-  const openComplaints = feedbackRecords.filter(f => f.status !== 'resolved');
+  const { routeIntent, clearRouteIntent } = useNavigationContext();
+  const [statusFilter, setStatusFilter] = useState(null);
+  const [categoryFilter, setCategoryFilter] = useState(null);
+
+  // Accept category filter from Quality tab drill-down
+  useEffect(() => {
+    if (!routeIntent) return;
+    if (routeIntent.category) setCategoryFilter(routeIntent.category);
+    clearRouteIntent();
+  }, [routeIntent, clearRouteIntent]);
+
+  let filteredComplaints = feedbackRecords;
+  if (statusFilter) filteredComplaints = filteredComplaints.filter(f => f.status === statusFilter);
+  else filteredComplaints = filteredComplaints.filter(f => f.status !== 'resolved');
+  if (categoryFilter) filteredComplaints = filteredComplaints.filter(f => f.category === categoryFilter);
+
+  const openComplaints = filteredComplaints;
   const understaffedComplaints = feedbackRecords.filter(f => f.isUnderstaffedDay).length;
   const { fastConversionRate, slowConversionRate } = paceFBImpact;
   const conversionDrop = ((fastConversionRate - slowConversionRate) / fastConversionRate * 100).toFixed(0);
@@ -20,7 +46,26 @@ export default function ComplaintsTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
 
-      {/* Open Complaints */}
+      {/* Status + Category Filters */}
+      <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
+        {STATUS_FILTERS.map(f => (
+          <button key={f.label} onClick={() => setStatusFilter(f.key)} style={{
+            padding: '5px 14px', borderRadius: '999px', fontSize: 12, fontWeight: 600,
+            cursor: 'pointer', border: `1px solid ${statusFilter === f.key ? theme.colors.accent : theme.colors.border}`,
+            background: statusFilter === f.key ? `${theme.colors.accent}12` : 'transparent',
+            color: statusFilter === f.key ? theme.colors.accent : theme.colors.textMuted,
+          }}>{f.label} ({f.key ? feedbackRecords.filter(r => r.status === f.key).length : feedbackRecords.filter(r => r.status !== 'resolved').length})</button>
+        ))}
+        {categoryFilter && (
+          <button onClick={() => setCategoryFilter(null)} style={{
+            padding: '5px 14px', borderRadius: '999px', fontSize: 12, fontWeight: 600,
+            cursor: 'pointer', border: `1px solid ${theme.colors.accent}`,
+            background: `${theme.colors.accent}12`, color: theme.colors.accent,
+          }}>Category: {categoryFilter} ×</button>
+        )}
+      </div>
+
+      {/* Complaints List */}
       <div style={{
         background: theme.colors.bgCard,
         border: `1px solid ${theme.colors.border}`,
@@ -29,7 +74,7 @@ export default function ComplaintsTab() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.md }}>
           <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, margin: 0 }}>
-            Open Complaints ({openComplaints.length})
+            {statusFilter === 'resolved' ? 'Resolved' : 'Open'} Complaints ({openComplaints.length})
           </h3>
           <div style={{ fontSize: 12, color: theme.colors.textMuted }}>
             {feedbackRecords.length} total this month
