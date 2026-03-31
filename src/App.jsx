@@ -9,86 +9,35 @@ const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 import { DataProvider } from '@/context/DataProvider';
 import { Sidebar, Header, MobileConversionBar } from '@/components/layout';
 import ActionsDrawer from '@/components/layout/ActionsDrawer';
-import { DailyBriefing } from '@/features/daily-briefing';
-import { OperationsDashboard } from '@/features/operations';
-import { WaitlistDemand } from '@/features/waitlist-demand';
-import { FBPerformance } from '@/features/fb-performance';
-import { MemberHealth } from '@/features/member-health';
-import { RevenueLeakage } from '@/features/revenue-leakage';
-import { StaffingService } from '@/features/staffing-service';
-import { GrowthPipeline } from '@/features/growth-pipeline';
-import { AgentCommand } from '@/features/agent-command';
-import { DemoMode } from '@/features/demo-mode';
-import { IntegrationsPage } from '@/features/integrations';
-import { DataModelPage } from '@/features/data-model';
-import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
-import LocationIntelligence from '@/features/location-intelligence/LocationIntelligence.jsx';
-import { CsvImportHub } from '@/features/csv-import';
-import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
-import LandingRedirect from '@/features/landing-redirect/LandingRedirect.jsx';
-const BoardReport = lazy(() => import("@/features/board-report/BoardReport.jsx"));
-const ExperienceInsights = lazy(() => import('@/features/experience-insights/ExperienceInsights.jsx'));
-import { OutreachPlaybooks } from '@/features/outreach-playbooks';
-import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
-import { StoryboardFlows } from '@/features/storyboard-flows';
-import { ActionsPage } from '@/features/actions';
+
+// V3: Active features only — deleted features removed in Phase 5 cleanup
 import { TodayView } from '@/features/today';
-import { MembersView } from '@/features/members';
-import { RevenueView } from '@/features/revenue';
 import { ServiceView } from '@/features/service';
-import ActivityHistoryPage from '@/features/activity-history/ActivityHistoryPage';
-import AutomationDashboard from '@/features/automation-dashboard/AutomationDashboard';
-import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
-import { AdminDashboard } from '@/features/admin';
+import { MembersView } from '@/features/members';
+const BoardReport = lazy(() => import("@/features/board-report/BoardReport.jsx"));
 import AdminHub from '@/features/admin/AdminHub';
+import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
+import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
+import { IntegrationsPage } from '@/features/integrations';
 import LoginPage from '@/features/login/LoginPage';
 import { theme } from '@/config/theme';
 
+// V3 Phase 5: Clean route map — only active pages.
+// All legacy routes handled by ROUTE_REDIRECTS in NavigationContext.
 const ROUTES = {
-  // MVP Primary views (5 nav items — V3 realignment)
   'today': TodayView,
   'service': ServiceView,
   'members': MembersView,
   'board-report': BoardReport,
   'admin': AdminHub,
-  // V3 HIDDEN: still routable for backward compat, redirected via NavigationContext
-  'revenue': RevenueView,
-  'insights': ExperienceInsights,
-  'actions': ActionsPage,
-  // Accessible via direct navigation
   'member-profile': MemberProfilePage,
   'integrations': IntegrationsPage,
-  // Legacy routes (most traffic redirected via NavigationContext ROUTE_REDIRECTS)
-  'playbooks-automation': ActionsPage,
-  'automation-dashboard': AutomationDashboard,
-  'data-health': DataHealthDashboard,
-  'activity-history': ActivityHistoryPage,
-  'daily-briefing': DailyBriefing,
-  'operations': OperationsDashboard,
-  'waitlist-demand': WaitlistDemand,
-  'fb-performance': FBPerformance,
-  'member-health': MemberHealth,
-  'revenue-leakage': RevenueLeakage,
-  'staffing-service': StaffingService,
-  'growth-pipeline': GrowthPipeline,
-  'agent-command': AgentCommand,
-  'location-intelligence': LocationIntelligence,
-  'demo-mode': DemoMode,
-  'integrations/csv-import': CsvImportHub,
-  'csv-import': CsvImportHub,
-  'experience-insights': ExperienceInsights,
-  'outreach-playbooks': OutreachPlaybooks,
-  'playbooks': PlaybooksPage,
-  'storyboard-flows': StoryboardFlows,
-  'data-model': DataModelPage,
-  'admin-legacy': AdminDashboard,
-  'landing': LandingRedirect,
 };
 
 function AppShell() {
   const { currentRoute } = useNavigationContext();
   const { isDrawerOpen } = useMemberProfile();
-  const PageComponent = ROUTES[currentRoute] ?? DailyBriefing;
+  const PageComponent = ROUTES[currentRoute] ?? TodayView;
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [actionsDrawerOpen, setActionsDrawerOpen] = useState(false);
