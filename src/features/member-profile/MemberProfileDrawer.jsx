@@ -292,7 +292,7 @@ function HealthDimensionGrid({ profile }) {
   );
 }
 
-// Churn prediction badge — fetches from predict-churn API
+// Resignation risk badge — fetches from predict-churn API
 function ChurnPredictionBadge({ profile }) {
   const [prediction, setPrediction] = useState(null);
   useEffect(() => {
@@ -307,7 +307,7 @@ function ChurnPredictionBadge({ profile }) {
   const factors = prediction.risk_factors || [];
 
   return (
-    <Section title="Churn Prediction" description="AI-powered resignation risk">
+    <Section title="Resignation Risk" description="AI-powered early warning">
       <div style={{ display: 'flex', gap: theme.spacing.md, marginBottom: theme.spacing.sm }}>
         <div style={{ textAlign: 'center', padding: '8px 16px', borderRadius: theme.radius.md, background: `${color}10`, border: `1px solid ${color}30` }}>
           <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: theme.fonts.mono, color }}>{prob}%</div>
@@ -568,7 +568,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         <HealthDimensionGrid profile={profile} />
       </Section>
 
-      {/* Churn Prediction — from predict-churn API */}
+      {/* Resignation Risk — from predict-churn API */}
       <ChurnPredictionBadge profile={profile} />
 
       <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '—'}`}>
