@@ -66,7 +66,7 @@ export default function ResignationTimeline() {
                   {scenario.name}
                 </MemberLink>
                 <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
-                  {scenario.archetype} · Resigned {scenario.resignDate} · {formatDues(scenario.dues)} dues
+                  {scenario.archetype} · Resigned {scenario.resignDate}
                 </div>
               </div>
               <span style={{ color: theme.colors.textMuted }}>{isOpen ? '▾' : '▸'}</span>

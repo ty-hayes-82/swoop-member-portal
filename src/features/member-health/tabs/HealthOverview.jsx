@@ -168,14 +168,13 @@ function MemberRow({ m, isExpanded, onToggle, isSelected, onSelect }) {
             fontWeight: unusual ? 600 : 400,
           }}>{unusual ? '\u26A0 ' : ''}{riskPrimary}</span>
         </td>
-        {/* Dollar Exposure */}
+        {/* Member tenure (V3: replaces dollar exposure) */}
         <td style={{ padding: '10px 8px', verticalAlign: 'middle', textAlign: 'right' }}>
           <span style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 600, color: '#b91c1c',
+            fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 600, color: '#6b7280',
           }}>
-            {m.duesAnnual ? `$${Math.round(m.duesAnnual / 1000)}K` : '—'}
+            {m.archetype || '—'}
           </span>
-          <div style={{ fontSize: '9px', color: '#6b7280' }}>annual</div>
         </td>
         {/* Action Status (progress, not redundant signal) */}
         <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
@@ -434,7 +433,7 @@ export default function HealthOverview() {
     { key: 'score', label: 'Score' },
     { key: 'archetype', label: 'Archetype / Channel' },
     { key: 'risk', label: 'Risk Signal' },
-    { key: 'exposure', label: 'Exposure', sortable: false },
+    { key: 'archetype', label: 'Archetype', sortable: false },
     { key: 'action', label: 'Action Status', sortable: false },
     { key: 'call', label: '', sortable: false },
   ];
@@ -550,7 +549,7 @@ export default function HealthOverview() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {volatileMembers.slice(0, 5).map((m) => {
               const scoreColor = m.score < 40 ? theme.colors.urgent : theme.colors.warning;
-              const duesDisplay = Number.isFinite(Number(m.duesAnnual)) ? `$${Number(m.duesAnnual).toLocaleString()}/yr` : '—';
+              // V3: removed dollar display — show archetype instead
               return (
                 <div key={m.memberId ?? m.name} style={{
                   display: 'grid', gridTemplateColumns: '1.2fr 80px 1.5fr auto',
@@ -565,7 +564,7 @@ export default function HealthOverview() {
                       fontWeight: 700, fontSize: '13px', cursor: 'pointer',
                       padding: 0, textAlign: 'left', textDecoration: 'none',
                     }}>{m.name}</MemberLink>
-                    <div style={{ fontSize: 10, color: theme.colors.textMuted }}>{m.archetype} · {duesDisplay}</div>
+                    <div style={{ fontSize: 10, color: theme.colors.textMuted }}>{m.archetype}</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <span style={{
@@ -713,12 +712,12 @@ export default function HealthOverview() {
                   <MemberLink mode="drawer" memberId={m.memberId} style={{ fontWeight: 700, color: '#dc2626', textDecoration: 'none' }}>
                     {m.name}
                   </MemberLink>
-                  <span style={{ fontSize: 11, color: '#6b7280' }}> ({formatCompactCurrency(m.duesAnnual)})</span>
+                  <span style={{ fontSize: 11, color: '#6b7280' }}> ({m.archetype || 'Member'})</span>
                 </span>
               ))}
             </div>
             <div style={{ fontSize: 12, color: '#666' }}>
-              Each saved member protects $18K+ in annual dues. {atRiskDuesDisplay.ltvCompact} lifetime value at stake.
+              Early intervention prevents resignations. These members need personal outreach now.
             </div>
           </div>
           <button
@@ -749,8 +748,8 @@ export default function HealthOverview() {
               {criticalMembers.length} members require immediate outreach
             </span>
           </div>
-          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent }} title={atRiskDuesDisplay.full}>
-            {atRiskDuesDisplay.compact} total at risk
+          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent }}>
+            {(summary.atRisk || 0) + (summary.critical || 0)} members need attention
           </span>
         </div>
 
