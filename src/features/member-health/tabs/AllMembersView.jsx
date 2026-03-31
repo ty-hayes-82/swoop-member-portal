@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { theme } from '@/config/theme';
 import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
@@ -313,12 +313,18 @@ const ACTIVITY_FILTERS = [
   { key: 'dormant', label: 'Dormant (60d+)' },
 ];
 
-export default function AllMembersView() {
+export default function AllMembersView({ initialArchetype = null }) {
   const [expandedMember, setExpandedMember] = useState(null);
   const [healthFilter, setHealthFilter] = useState(null);
-  const [archetypeFilter, setArchetypeFilter] = useState(null);
+  const [archetypeFilter, setArchetypeFilter] = useState(initialArchetype);
   const [activityFilter, setActivityFilter] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Sync with parent archetype chip selection
+  useEffect(() => {
+    setArchetypeFilter(initialArchetype);
+    setPage(0);
+  }, [initialArchetype]);
   const [page, setPage] = useState(0);
   const [sortColumn, setSortColumn] = useState('score');
   const [sortDir, setSortDir] = useState('asc');

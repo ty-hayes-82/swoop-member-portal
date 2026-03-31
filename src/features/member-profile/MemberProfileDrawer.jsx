@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { theme } from '@/config/theme';
 import SourceBadge from '@/components/ui/SourceBadge.jsx';
@@ -813,8 +813,47 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
   );
 }
 
+// Error boundary to prevent white-screen crashes in member drawer
+class DrawerErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 32, textAlign: 'center', color: theme.colors.textMuted }}>
+          <div style={{ fontSize: 24, marginBottom: 12 }}>Something went wrong</div>
+          <div style={{ fontSize: 14, marginBottom: 16 }}>Unable to load this member profile.</div>
+          <button onClick={this.props.onClose} style={{
+            padding: '8px 20px', borderRadius: 6, border: `1px solid ${theme.colors.border}`,
+            background: theme.colors.bgCard, cursor: 'pointer', color: theme.colors.textPrimary,
+          }}>Close</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// Ensure profile has all expected fields to prevent slice/map crashes on sparse data
+function safeProfile(p) {
+  if (!p) return p;
+  return {
+    ...p,
+    activity: Array.isArray(p.activity) ? p.activity : [],
+    riskSignals: Array.isArray(p.riskSignals) ? p.riskSignals : [],
+    staffNotes: Array.isArray(p.staffNotes) ? p.staffNotes : [],
+    family: Array.isArray(p.family) ? p.family : [],
+    trend: Array.isArray(p.trend) ? p.trend : [],
+    healthTimeline: Array.isArray(p.healthTimeline) ? p.healthTimeline : [],
+    keyMetrics: Array.isArray(p.keyMetrics) ? p.keyMetrics : [],
+    preferences: p.preferences || {},
+    contact: p.contact || {},
+  };
+}
+
 export default function MemberProfileDrawer() {
-  const { profile, isDrawerOpen, closeDrawer, openProfilePage, triggerQuickAction, addStaffNote } = useMemberProfile();
+  const { profile: rawProfile, isDrawerOpen, closeDrawer, openProfilePage, triggerQuickAction, addStaffNote } = useMemberProfile();
+  const profile = safeProfile(rawProfile);
   const [isAnimating, setIsAnimating] = useState(false);
   const isMobile = useIsMobile();
 
@@ -871,14 +910,16 @@ export default function MemberProfileDrawer() {
     <>
       <div style={overlayStyle} onClick={handleClose} />
       <div style={panelStyle}>
-        <MemberProfileContent
-          profile={profile}
-          onClose={handleClose}
-          onOpenFullPage={openProfilePage}
-          onAddNote={addStaffNote}
-          onQuickAction={triggerQuickAction}
-          layout="drawer"
-        />
+        <DrawerErrorBoundary onClose={handleClose}>
+          <MemberProfileContent
+            profile={profile}
+            onClose={handleClose}
+            onOpenFullPage={openProfilePage}
+            onAddNote={addStaffNote}
+            onQuickAction={triggerQuickAction}
+            layout="drawer"
+          />
+        </DrawerErrorBoundary>
       </div>
     </>,
     document.body

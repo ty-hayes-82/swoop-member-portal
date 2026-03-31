@@ -109,35 +109,37 @@ export default function MembersView() {
           ))}
         </div>
 
-        {/* Archetype filter chips */}
-        <div style={{
-          display: 'flex', gap: '6px', flexWrap: 'wrap',
-          overflowX: 'auto', WebkitOverflowScrolling: 'touch',
-        }}>
-          <button
-            onClick={() => setArchetype(null)}
-            style={{
-              padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 600,
-              cursor: 'pointer', border: `1px solid ${!archetype ? theme.colors.accent : theme.colors.border}`,
-              background: !archetype ? `${theme.colors.accent}12` : 'transparent',
-              color: !archetype ? theme.colors.accent : theme.colors.textMuted,
-              whiteSpace: 'nowrap', transition: 'all 0.12s',
-            }}
-          >All Archetypes</button>
-          {['Die-Hard Golfer', 'Social Butterfly', 'Balanced Active', 'Weekend Warrior', 'Declining', 'New Member', 'Ghost', 'Snowbird'].map((a) => (
+        {/* Archetype filter chips — only in All Members mode (HealthOverview has its own filters) */}
+        {mode === 'search' && (
+          <div style={{
+            display: 'flex', gap: '6px', flexWrap: 'wrap',
+            overflowX: 'auto', WebkitOverflowScrolling: 'touch',
+          }}>
             <button
-              key={a}
-              onClick={() => setArchetype(archetype === a ? null : a)}
+              onClick={() => setArchetype(null)}
               style={{
                 padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 600,
-                cursor: 'pointer', border: `1px solid ${archetype === a ? theme.colors.accent : theme.colors.border}`,
-                background: archetype === a ? `${theme.colors.accent}12` : 'transparent',
-                color: archetype === a ? theme.colors.accent : theme.colors.textMuted,
+                cursor: 'pointer', border: `1px solid ${!archetype ? theme.colors.accent : theme.colors.border}`,
+                background: !archetype ? `${theme.colors.accent}12` : 'transparent',
+                color: !archetype ? theme.colors.accent : theme.colors.textMuted,
                 whiteSpace: 'nowrap', transition: 'all 0.12s',
               }}
-            >{a}</button>
-          ))}
-        </div>
+            >All Archetypes</button>
+            {['Die-Hard Golfer', 'Social Butterfly', 'Balanced Active', 'Weekend Warrior', 'Declining', 'New Member', 'Ghost', 'Snowbird'].map((a) => (
+              <button
+                key={a}
+                onClick={() => setArchetype(archetype === a ? null : a)}
+                style={{
+                  padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 600,
+                  cursor: 'pointer', border: `1px solid ${archetype === a ? theme.colors.accent : theme.colors.border}`,
+                  background: archetype === a ? `${theme.colors.accent}12` : 'transparent',
+                  color: archetype === a ? theme.colors.accent : theme.colors.textMuted,
+                  whiteSpace: 'nowrap', transition: 'all 0.12s',
+                }}
+              >{a}</button>
+            ))}
+          </div>
+        )}
 
         {/* Mode: At-Risk — V3: simplified to HealthOverview + ResignationTimeline */}
         {mode === 'at-risk' && (
@@ -149,7 +151,7 @@ export default function MembersView() {
 
         {/* Mode: Search */}
         {mode === 'search' && (
-          <AllMembersView />
+          <AllMembersView initialArchetype={archetype} />
         )}
 
         {/* Insights moved to top-level /insights route (Sprint 5) */}
