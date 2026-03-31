@@ -10,15 +10,11 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
-import NotificationSettings from '@/features/notification-settings/NotificationSettings';
-import { CsvImportHub } from '@/features/csv-import';
 
+// V3: Reduced from 5 tabs to 2. CSV Import, Notifications, User Roles deferred.
 const ADMIN_TABS = [
   { key: 'data-hub', label: 'Integrations', icon: '🔌' },
   { key: 'health', label: 'Data Health', icon: '🩺' },
-  { key: 'activity', label: 'CSV Import', icon: '📥' },
-  { key: 'notifications', label: 'Notifications', icon: '🔔' },
-  { key: 'settings', label: 'User Roles', icon: '👤' },
 ];
 
 export default function AdminHub() {
@@ -30,7 +26,7 @@ export default function AdminHub() {
       <div>
         <h1 style={{ fontSize: theme.fontSize.xl, fontWeight: 700, margin: 0 }}>Admin</h1>
         <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
-          Integrations, data health, CSV imports, notifications, and user roles.
+          Integrations and data health monitoring.
         </p>
       </div>
 
@@ -58,9 +54,7 @@ export default function AdminHub() {
       {/* Tab content */}
       {activeTab === 'data-hub' && <DataHubTab clubId={clubId} />}
       {activeTab === 'health' && <DataHealthDashboard />}
-      {activeTab === 'activity' && <CsvImportHub />}
-      {activeTab === 'notifications' && <NotificationSettings />}
-      {activeTab === 'settings' && <UserRolesTab />}
+      {/* V3: CSV Import, Notifications, User Roles removed — white-glove onboarding */}
     </div>
   );
 }

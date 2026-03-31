@@ -7,7 +7,7 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { industryBenchmarks } from '@/data/benchmarks';
 import { getKPIs, getMemberSaves, getOperationalSaves, getMonthlyTrends } from '@/services/boardReportService';
 
-const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned'];
+const tabNames = ['Summary', 'Details'];
 
 function formatCurrency(val) {
   return '$' + val.toLocaleString();
@@ -212,10 +212,10 @@ export default function BoardReport() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: colors.pageHeading }}>
-            Retention & Revenue Protection Report
+            Board Report
           </h1>
           <p style={{ fontSize: '14px', color: colors.pageSubtext, margin: '4px 0 0 0' }}>
-            Executive summary — Last 90 days
+            Monthly executive summary — service quality, member health, and impact
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -306,53 +306,7 @@ export default function BoardReport() {
 
       {activeTab === 0 && (
         <>
-        {/* ROI Calculation */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          gap: '20px',
-          alignItems: 'center',
-          background: colors.bg,
-          border: '1px solid ' + colors.border,
-          borderRadius: '12px',
-          padding: '24px',
-          marginBottom: '16px',
-        }}>
-          <div>
-            <div style={{ fontSize: '12px', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Annual Investment</div>
-            <div style={{ fontSize: '13px', color: colors.text, lineHeight: 1.8 }}>
-              <div>Swoop Pro subscription: <strong style={{ fontFamily: theme.fonts.mono }}>$5,988</strong></div>
-              <div>Staff time (12 hrs/mo × $50/hr): <strong style={{ fontFamily: theme.fonts.mono }}>$7,200</strong></div>
-              <div style={{ borderTop: '1px solid ' + colors.border, paddingTop: '6px', marginTop: '6px' }}>
-                Total: <strong style={{ fontFamily: theme.fonts.mono, color: colors.orange }}>$13,188</strong>
-              </div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <div style={{ fontSize: '24px', color: colors.textMuted }}>→</div>
-            <div style={{ fontSize: '10px', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>yields</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '12px', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Annual Return</div>
-            <div style={{ fontSize: '13px', color: colors.text, lineHeight: 1.8 }}>
-              <div>Estimated dues at risk (prevented loss)*: <strong style={{ fontFamily: theme.fonts.mono }}>$168,000</strong></div>
-              <div>Revenue recovered: <strong style={{ fontFamily: theme.fonts.mono }}>$42,500</strong></div>
-              <div style={{ borderTop: '1px solid ' + colors.border, paddingTop: '6px', marginTop: '6px' }}>
-                Total: <strong style={{ fontFamily: theme.fonts.mono, color: colors.green }}>$210,500</strong>
-              </div>
-            </div>
-            <div style={{ marginTop: '12px' }}>
-              <span style={{ fontSize: '32px', fontWeight: 700, fontFamily: theme.fonts.mono, color: colors.green }}>16:1</span>
-              <span style={{ fontSize: '13px', color: colors.textMuted, marginLeft: '8px' }}>return on investment</span>
-            </div>
-          </div>
-        </div>
-        <div style={{ fontSize: '12px', color: colors.pageSubtext, textAlign: 'center', marginBottom: '12px', fontStyle: 'italic' }}>
-          For every $1 invested in Swoop, your club protected $16 in member revenue.
-        </div>
-        <div style={{ fontSize: '11px', color: colors.pageSubtext, textAlign: 'center', marginBottom: '20px' }}>
-          *Dues-at-risk figures are annualized estimates based on member health scores and historical churn patterns at comparable clubs. Revenue recovered reflects confirmed operational saves. See Member Saves tab for individual case details.
-        </div>
+        {/* V3: ROI calculation box removed — replaced with actual tracked metrics only */}
 
         <Panel>
           <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: colors.panelHeading }}>
@@ -433,8 +387,11 @@ export default function BoardReport() {
         </>
       )}
 
+      {/* V3: Details tab merges Member Saves + Operational Saves */}
       {activeTab === 1 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Member Saves Section */}
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: colors.pageHeading, margin: '8px 0 0' }}>Member Saves</h2>
           <div style={{ fontSize: '14px', color: colors.textMuted, marginBottom: '4px' }}>
             {memberSaves.length} members saved — {formatCurrency(totalDues)} in dues protected
           </div>
@@ -457,7 +414,6 @@ export default function BoardReport() {
                 <div><strong>Action:</strong> {m.action}</div>
                 <div><strong>Outcome:</strong> <span style={{ color: colors.green }}>{m.outcome}</span></div>
               </div>
-              {/* Evidence chain timeline */}
               <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid ' + theme.colors.border }}>
                 <div style={{ fontSize: '11px', fontWeight: 600, color: colors.panelMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Evidence Chain</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0', flexWrap: 'wrap' }}>
@@ -479,11 +435,9 @@ export default function BoardReport() {
               </div>
             </Panel>
           ))}
-        </div>
-      )}
 
-      {activeTab === 2 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Operational Saves Section */}
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: colors.pageHeading, margin: '24px 0 0' }}>Operational Saves</h2>
           <div style={{ fontSize: '14px', color: colors.textMuted, marginBottom: '4px' }}>
             {operationalSaves.length} operational saves — {formatCurrency(totalOpsRevenue)} in revenue protected
           </div>
@@ -507,7 +461,8 @@ export default function BoardReport() {
         </div>
       )}
 
-      {activeTab === 3 && (
+      {/* V3: "What We Learned" removed — was activeTab === 3 */}
+      {false && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Panel>
             <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: colors.panelHeading }}>

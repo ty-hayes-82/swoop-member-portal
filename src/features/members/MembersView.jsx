@@ -1,7 +1,7 @@
 // MembersView — consolidated view combining Member Risk, Tee Sheet, and Experience Insights
 import { useState, useEffect } from 'react';
 import { StoryHeadline } from '@/components/ui';
-import CollapsibleSection from '@/components/ui/CollapsibleSection';
+// CollapsibleSection removed in V3 — At-Risk mode simplified
 import { theme } from '@/config/theme';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { getMemberSummary } from '@/services/memberService';
@@ -9,13 +9,9 @@ import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
 
-// Member Health tabs
+// Member Health tabs — V3: reduced to 2 (At-Risk uses HealthOverview, search uses AllMembersView)
 import HealthOverview from '@/features/member-health/tabs/HealthOverview';
 import AllMembersView from '@/features/member-health/tabs/AllMembersView';
-import ArchetypeTab from '@/features/member-health/tabs/ArchetypeTab';
-import EmailTab from '@/features/member-health/tabs/EmailTab';
-import RecoveryTab from '@/features/member-health/tabs/RecoveryTab';
-import CohortTab from '@/features/member-health/tabs/CohortTab';
 import ResignationTimeline from '@/features/member-health/ResignationTimeline';
 
 
@@ -30,8 +26,8 @@ const HEADLINES = {
     const atRisk = (summary.atRisk ?? 0) + (summary.critical ?? 0);
     return {
       variant: 'warning',
-      headline: `${atRisk} members at risk — $${((summary.potentialDuesAtRisk || 733000) / 1000).toFixed(0)}K/yr in dues need attention.`,
-      context: 'Early warning system: members showing multi-domain disengagement patterns.',
+      headline: `${atRisk} members need attention — here's what to do.`,
+      context: 'Members showing multi-domain disengagement patterns across golf, dining, and events.',
     };
   },
   'search': () => ({
@@ -143,23 +139,11 @@ export default function MembersView() {
           ))}
         </div>
 
-        {/* Mode: At-Risk */}
+        {/* Mode: At-Risk — V3: simplified to HealthOverview + ResignationTimeline */}
         {mode === 'at-risk' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
             <HealthOverview />
             <ResignationTimeline />
-            <CollapsibleSection title="Archetypes" icon="🧬">
-              <ArchetypeTab />
-            </CollapsibleSection>
-            <CollapsibleSection title="Email Decay" icon="📧">
-              <EmailTab />
-            </CollapsibleSection>
-            <CollapsibleSection title="Recovery" icon="💚">
-              <RecoveryTab />
-            </CollapsibleSection>
-            <CollapsibleSection title="First 90 Days" icon="📊">
-              <CohortTab />
-            </CollapsibleSection>
           </div>
         )}
 

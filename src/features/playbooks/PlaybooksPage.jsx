@@ -463,7 +463,7 @@ function PlaybookCard({ playbook, onSelect, isSelected }) {
         {playbook.description}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 6, borderTop: '1px solid #f4f4f5' }}>
-        <span style={{ fontSize: 15, fontWeight: 700, color: '#d9534f' }}>{playbook.monthlyImpact}<span style={{ fontSize: 11, fontWeight: 500, color: '#999' }}>/mo</span></span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: '#16a34a' }}>{playbook.trackRecord[0]?.result}</span>
         <span style={{ fontSize: 11, color: '#888', background: '#f9f9f9', padding: '2px 8px', borderRadius: 4 }}>{playbook.trackRecord[0]?.runs} last quarter</span>
       </div>
     </div>
@@ -500,9 +500,9 @@ function PlaybookDetail({ playbook }) {
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 12, color: '#999' }}>Monthly impact</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: '#d9534f' }}>{playbook.monthlyImpact}</div>
-          <div style={{ fontSize: 13, color: '#999' }}>{playbook.yearlyImpact}</div>
+          <div style={{ fontSize: 12, color: '#999' }}>Track record</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#16a34a' }}>{playbook.trackRecord[0]?.result}</div>
+          <div style={{ fontSize: 13, color: '#999' }}>{playbook.trackRecord[0]?.period}</div>
         </div>
       </div>
 
