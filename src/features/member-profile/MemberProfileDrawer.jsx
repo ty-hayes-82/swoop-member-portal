@@ -573,8 +573,12 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
       <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '—'}`}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.sm }}>
-          <span><strong>Phone:</strong> {profile.contact?.phone ?? '—'}</span>
-          <span><strong>Email:</strong> {profile.contact?.email ?? '—'}</span>
+          <span><strong>Phone:</strong> {profile.contact?.phone && profile.contact.phone !== '—'
+            ? <a href={`tel:${profile.contact.phone}`} style={{ color: theme.colors.accent, textDecoration: 'none' }}>{profile.contact.phone}</a>
+            : '—'}</span>
+          <span><strong>Email:</strong> {profile.contact?.email && profile.contact.email !== '—'
+            ? <a href={`mailto:${profile.contact.email}`} style={{ color: theme.colors.accent, textDecoration: 'none' }}>{profile.contact.email}</a>
+            : '—'}</span>
           <span><strong>Last outreach:</strong> {formatDateTime(profile.contact?.lastOutreach)}</span>
         </div>
       </Section>
@@ -607,13 +611,20 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             </div>
             {/* Family members */}
             {profile.family.map((f, i) => (
-              <div key={i} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '8px 12px', borderRadius: theme.radius.sm,
-                border: `1px solid ${theme.colors.border}`,
-              }}>
+              <div key={i}
+                onClick={() => f.memberId && onClose?.()}
+                style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '8px 12px', borderRadius: theme.radius.sm,
+                  border: `1px solid ${theme.colors.border}`,
+                  cursor: f.memberId ? 'pointer' : 'default',
+                  transition: 'background 0.12s',
+                }}
+                onMouseEnter={e => { if (f.memberId) e.currentTarget.style.background = theme.colors.bgDeep; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              >
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm }}>{f.name}</div>
+                  <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: f.memberId ? theme.colors.accent : theme.colors.textPrimary }}>{f.name}</div>
                   <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{f.relation}</div>
                 </div>
                 {f.notes && (

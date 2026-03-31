@@ -514,16 +514,18 @@ export default function HealthOverview() {
                 fontSize: theme.fontSize.xs,
               }}>
                 <div>
-                  <span style={{ fontWeight: 700 }}>{m.name}</span>
+                  <MemberLink mode="drawer" memberId={m.memberId} style={{ fontWeight: 700, color: theme.colors.textPrimary, textDecoration: 'none' }}>
+                    {m.name}
+                  </MemberLink>
                   <div style={{ fontSize: 10, color: theme.colors.textMuted }}>{m.archetype}</div>
                 </div>
                 <div style={{ width: 60 }} />
                 <div style={{ color: theme.colors.textSecondary }}>
                   Open rate: {m.novPct}% → {m.decPct}% → <strong style={{ color: theme.colors.urgent }}>{m.janPct}%</strong>
                 </div>
-                <div style={{ color: theme.colors.info, fontWeight: 600, fontSize: 11 }}>
-                  Week 1: Personal check-in call
-                </div>
+                <MemberLink mode="drawer" memberId={m.memberId} style={{ color: theme.colors.info, fontWeight: 600, fontSize: 11, textDecoration: 'none', cursor: 'pointer' }}>
+                  Week 1: Personal check-in call →
+                </MemberLink>
               </div>
             ))}
           </div>

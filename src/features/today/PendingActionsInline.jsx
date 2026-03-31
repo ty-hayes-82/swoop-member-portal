@@ -43,6 +43,7 @@ export default function PendingActionsInline({ excludeId = null }) {
         return (
           <div
             key={action.id}
+            onClick={() => window.dispatchEvent(new CustomEvent('swoop:open-actions'))}
             style={{
               padding: '12px 16px',
               borderRadius: theme.radius.md,
@@ -50,7 +51,11 @@ export default function PendingActionsInline({ excludeId = null }) {
               border: `1px solid ${theme.colors.border}`,
               borderLeft: `4px solid ${prioColor}`,
               boxShadow: theme.shadow.sm,
+              cursor: 'pointer',
+              transition: 'box-shadow 0.15s',
             }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow = theme.shadow.md; }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow = theme.shadow.sm; }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
               <span style={{
@@ -82,7 +87,7 @@ export default function PendingActionsInline({ excludeId = null }) {
 
       {/* Always show the CTA to go to Inbox */}
       <button
-        onClick={() => navigate('actions')}
+        onClick={() => window.dispatchEvent(new CustomEvent('swoop:open-actions'))}
         style={{
           padding: '10px 16px',
           fontSize: theme.fontSize.sm,

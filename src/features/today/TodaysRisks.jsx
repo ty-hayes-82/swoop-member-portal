@@ -1,10 +1,11 @@
 // TodaysRisks — operational risk cards for the morning cockpit
-// Replaces the Health Score hero + Revenue Summary with focused risk intelligence
 import { theme } from '@/config/theme';
 import { understaffedDays, feedbackRecords } from '@/data/staffing';
 import { getDailyBriefing } from '@/services/briefingService';
+import { useNavigation } from '@/context/NavigationContext';
 
 export default function TodaysRisks() {
+  const { navigate } = useNavigation();
   const briefing = getDailyBriefing();
   const unresolvedComplaints = feedbackRecords.filter(f => f.status !== 'resolved');
   const oldComplaints = unresolvedComplaints.filter(f => {
@@ -19,6 +20,7 @@ export default function TodaysRisks() {
       detail: 'Saturday: Grill Room needs 4 servers — 2 scheduled',
       sublabel: `Based on ${briefing?.teeSheet?.roundsToday || 220} rounds + event calendar`,
       severity: 'high',
+      onClick: () => navigate('service', { tab: 'staffing' }),
     },
     {
       icon: '⚠️',
@@ -28,6 +30,7 @@ export default function TodaysRisks() {
         ? `${oldComplaints.length} older than 7 days — needs follow-up`
         : 'All within response window',
       severity: oldComplaints.length > 0 ? 'medium' : 'low',
+      onClick: () => navigate('service', { tab: 'complaints' }),
     },
     {
       icon: '🏌️',
@@ -35,6 +38,7 @@ export default function TodaysRisks() {
       detail: `${understaffedDays.length} understaffed days this month`,
       sublabel: 'Understaffed days produce 2x complaint rate',
       severity: understaffedDays.length > 2 ? 'high' : 'medium',
+      onClick: () => navigate('service', { tab: 'quality' }),
     },
   ];
 
@@ -53,13 +57,21 @@ export default function TodaysRisks() {
       {risks.map((risk, idx) => {
         const borderColor = severityColors[risk.severity];
         return (
-          <div key={idx} style={{
-            background: theme.colors.bgCard,
-            border: `1px solid ${theme.colors.border}`,
-            borderLeft: `3px solid ${borderColor}`,
-            borderRadius: theme.radius.md,
-            padding: theme.spacing.md,
-          }}>
+          <div
+            key={idx}
+            onClick={risk.onClick}
+            style={{
+              background: theme.colors.bgCard,
+              border: `1px solid ${theme.colors.border}`,
+              borderLeft: `3px solid ${borderColor}`,
+              borderRadius: theme.radius.md,
+              padding: theme.spacing.md,
+              cursor: 'pointer',
+              transition: 'box-shadow 0.15s, transform 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow = theme.shadow.md; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <span style={{ fontSize: 18 }}>{risk.icon}</span>
               <span style={{

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { StoryHeadline } from '@/components/ui';
 import { theme } from '@/config/theme';
+import { useNavigationContext } from '@/context/NavigationContext';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
@@ -17,8 +18,17 @@ const TABS = [
 ];
 
 export default function ServiceView() {
+  const { routeIntent, clearRouteIntent } = useNavigationContext();
   const [activeTab, setActiveTab] = useState('quality');
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!routeIntent) return;
+    if (routeIntent.tab && TABS.some(t => t.key === routeIntent.tab)) {
+      setActiveTab(routeIntent.tab);
+    }
+    clearRouteIntent();
+  }, [routeIntent, clearRouteIntent]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);

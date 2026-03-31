@@ -50,16 +50,19 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false, onOp
       flexShrink: 0,
       ...basePosition,
     }}>
-      {/* Logo */}
-      <div style={{
-        padding: sidebarCollapsed && !isMobile ? '16px 0' : '20px 18px',
-        borderBottom: `1px solid ${SIDEBAR_BORDER}`,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        minHeight: '60px',
-        justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
-      }}>
+      {/* Logo — clicks to Today */}
+      <div
+        onClick={() => navigate('today')}
+        style={{
+          padding: sidebarCollapsed && !isMobile ? '16px 0' : '20px 18px',
+          borderBottom: `1px solid ${SIDEBAR_BORDER}`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          minHeight: '60px',
+          justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
+          cursor: 'pointer',
+        }}>
         <div style={{
           width: 28,
           height: 28,

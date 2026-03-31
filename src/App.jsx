@@ -53,6 +53,13 @@ function AppShell() {
     setMobileMenuOpen(false);
   }, [currentRoute]);
 
+  // Listen for custom event to open actions drawer from any component
+  useEffect(() => {
+    const handler = () => setActionsDrawerOpen(true);
+    window.addEventListener('swoop:open-actions', handler);
+    return () => window.removeEventListener('swoop:open-actions', handler);
+  }, []);
+
   return (
     <div
       style={{
