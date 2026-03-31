@@ -151,7 +151,7 @@ export default function MembersView() {
 
         {/* Mode: Search */}
         {mode === 'search' && (
-          <AllMembersView />
+          <AllMembersView initialArchetype={archetype} />
         )}
 
         {/* Insights moved to top-level /insights route (Sprint 5) */}
