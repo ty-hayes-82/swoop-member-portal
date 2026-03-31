@@ -13,7 +13,7 @@ const TEXT_LIGHT    = theme.colors.textOnDark;
 const TEXT_DIM      = 'rgba(255,255,255,0.42)';
 const TEXT_MUTED    = 'rgba(255,255,255,0.28)';
 
-export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
+export default function Sidebar({ isMobile = false, mobileMenuOpen = false, onOpenActions }) {
   const { currentRoute, navigate, sidebarCollapsed, toggleSidebar } = useNavigation();
   const { activeCount, totalRevenueImpact, pendingAgentCount } = useApp();
   const w = isMobile ? 280 : sidebarCollapsed ? 52 : 240;
@@ -82,22 +82,41 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false }) {
         )}
       </div>
 
-      {/* Pending actions badge — V3: replaces revenue impact badge */}
-      {(!sidebarCollapsed || isMobile) && pendingAgentCount > 0 && (
+      {/* Pending actions badge — V3: opens Actions drawer */}
+      {pendingAgentCount > 0 && (
         <div
-          onClick={() => navigate('actions')}
+          onClick={() => onOpenActions?.()}
+          title={sidebarCollapsed && !isMobile ? `${pendingAgentCount} pending actions` : undefined}
           style={{
-            margin: '0 12px 8px', padding: '10px 12px',
+            margin: sidebarCollapsed && !isMobile ? '8px 4px' : '8px 12px',
+            padding: sidebarCollapsed && !isMobile ? '10px 0' : '10px 12px',
             background: `${theme.colors.accent}12`,
             border: `1px solid ${theme.colors.accent}30`,
             borderRadius: '8px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '8px',
+            justifyContent: sidebarCollapsed && !isMobile ? 'center' : 'flex-start',
           }}
         >
-          <span style={{ fontSize: '14px' }}>⚡</span>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: TEXT_LIGHT }}>
-            {pendingAgentCount} pending action{pendingAgentCount !== 1 ? 's' : ''}
+          <span style={{ fontSize: '14px', position: 'relative' }}>
+            ⚡
+            {sidebarCollapsed && !isMobile && (
+              <span style={{
+                position: 'absolute', top: -6, right: -8,
+                minWidth: 14, height: 14, borderRadius: '999px',
+                background: theme.colors.accent, color: '#fff',
+                fontSize: '9px', fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '0 3px',
+              }}>
+                {pendingAgentCount}
+              </span>
+            )}
           </span>
+          {(!sidebarCollapsed || isMobile) && (
+            <span style={{ fontSize: '12px', fontWeight: 600, color: TEXT_LIGHT }}>
+              {pendingAgentCount} pending action{pendingAgentCount !== 1 ? 's' : ''}
+            </span>
+          )}
         </div>
       )}
 

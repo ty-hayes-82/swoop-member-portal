@@ -79,7 +79,11 @@ function parseHash() {
     return { route: newRoute, memberId: null };
   }
   const safeRoute = normalized || DEFAULT_ROUTE;
-  return { route: VALID_ROUTES.has(safeRoute) ? safeRoute : DEFAULT_ROUTE, memberId: null };
+  if (!VALID_ROUTES.has(safeRoute)) {
+    window.history.replaceState(null, '', `#/${DEFAULT_ROUTE}`);
+    return { route: DEFAULT_ROUTE, memberId: null };
+  }
+  return { route: safeRoute, memberId: null };
 }
 
 function setHashPath(path) {

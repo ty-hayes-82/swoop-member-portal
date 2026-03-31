@@ -8,6 +8,7 @@ import { MemberProfileProvider, useMemberProfile } from '@/context/MemberProfile
 const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 import { DataProvider } from '@/context/DataProvider';
 import { Sidebar, Header, MobileConversionBar } from '@/components/layout';
+import ActionsDrawer from '@/components/layout/ActionsDrawer';
 import { DailyBriefing } from '@/features/daily-briefing';
 import { OperationsDashboard } from '@/features/operations';
 import { WaitlistDemand } from '@/features/waitlist-demand';
@@ -90,6 +91,7 @@ function AppShell() {
   const PageComponent = ROUTES[currentRoute] ?? DailyBriefing;
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [actionsDrawerOpen, setActionsDrawerOpen] = useState(false);
   const drawerOffset = !isMobile && isDrawerOpen ? 700 : 0;
 
   useEffect(() => {
@@ -118,7 +120,7 @@ function AppShell() {
         />
       )}
       <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>        {(!isMobile || mobileMenuOpen) && (
-          <Sidebar isMobile={isMobile} mobileMenuOpen={mobileMenuOpen} />
+          <Sidebar isMobile={isMobile} mobileMenuOpen={mobileMenuOpen} onOpenActions={() => setActionsDrawerOpen(true)} />
         )}
         <div
           style={{
@@ -179,6 +181,7 @@ function AppShell() {
         </div>
       </div>
       {isMobile && <MobileConversionBar />}
+      <ActionsDrawer isOpen={actionsDrawerOpen} onClose={() => setActionsDrawerOpen(false)} />
     </div>
   );
 }

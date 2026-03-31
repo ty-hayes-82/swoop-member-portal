@@ -6,22 +6,32 @@ const SOURCE_ICONS = {
   'Email': '\u2709\uFE0F',
   'GPS': '\uD83D\uDCCD',
   'CRM': '\uD83D\uDCCB',
+  'Member CRM': '\uD83D\uDCCB',
   'Swoop App': '\uD83D\uDCF1',
   'Dining': '\uD83C\uDF7D\uFE0F',
   'Staffing': '\uD83D\uDC64',
+  'Scheduling': '\uD83D\uDCC5',
   'Events': '\uD83C\uDF89',
   'Weather': '\u26C5',
   'Complaint': '\u26A0\uFE0F',
+  'Complaints': '\u26A0\uFE0F',
+  'Analytics': '\uD83D\uDCCA',
   'Fitness': '\uD83C\uDFCB\uFE0F',
   'Spa': '\uD83D\uDC86',
+  'All Systems': '\uD83D\uDD17',
+  'Postgres': '\uD83D\uDDC4\uFE0F',
 };
 
 /**
  * EvidenceStrip — shows which data sources contributed to an insight.
- * @param {{ signals: Array<{ source: string, detail: string, timestamp?: string }>, compact?: boolean }} props
+ * Accepts either `signals` (array of {source, detail}) or `systems` (array of strings).
  */
-export default function EvidenceStrip({ signals = [], compact = false }) {
-  if (!signals.length) return null;
+export default function EvidenceStrip({ signals = [], systems = [], compact = false }) {
+  // Support string-array shorthand: systems={['POS', 'Tee Sheet']}
+  const items = signals.length > 0
+    ? signals
+    : systems.map(s => ({ source: s, detail: '' }));
+  if (!items.length) return null;
   return (
     <div style={{
       display: 'flex',
@@ -31,7 +41,7 @@ export default function EvidenceStrip({ signals = [], compact = false }) {
       borderTop: '1px solid ' + (theme.colors?.border || '#2d2d44'),
       marginTop: compact ? '6px' : '10px',
     }}>
-      {signals.map((sig, i) => (
+      {items.map((sig, i) => (
         <div
           key={i}
           style={{

@@ -160,6 +160,78 @@ export default function QualityTab() {
         </div>
       </div>
 
+      {/* By Outlet */}
+      <div style={{
+        background: theme.colors.bgCard,
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: theme.radius.lg,
+        padding: theme.spacing.lg,
+      }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.md }}>
+          Service Quality by Outlet
+        </h3>
+        {(() => {
+          // Group understaffed days and complaints by outlet
+          const outlets = {};
+          understaffedDays.forEach(d => {
+            if (!outlets[d.outlet]) outlets[d.outlet] = { understaffedDays: 0, complaints: 0, totalComplaints: 0 };
+            outlets[d.outlet].understaffedDays++;
+          });
+          feedbackRecords.forEach(r => {
+            // Most complaints are Grill Room related based on the data
+            const outlet = r.isUnderstaffedDay ? 'Grill Room' : 'Other Outlets';
+            if (!outlets[outlet]) outlets[outlet] = { understaffedDays: 0, complaints: 0, totalComplaints: 0 };
+            outlets[outlet].totalComplaints++;
+            if (r.status !== 'resolved') outlets[outlet].complaints++;
+          });
+          // Add other outlets for completeness
+          const allOutlets = [
+            { name: 'Grill Room', ...outlets['Grill Room'] || { understaffedDays: 0, complaints: 0, totalComplaints: 0 }, risk: 'high' },
+            { name: 'The Terrace', understaffedDays: 0, complaints: 0, totalComplaints: 1, risk: 'low' },
+            { name: 'Turn Stand (Hole 9)', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
+            { name: 'Banquet/Events', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
+            { name: 'Pool Bar', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
+          ];
+          const riskColors = { high: theme.colors.risk, medium: '#ca8a04', low: theme.colors.success };
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+              {allOutlets.map(o => (
+                <div key={o.name} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 14px', borderRadius: theme.radius.sm,
+                  background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{
+                      width: 8, height: 8, borderRadius: '50%',
+                      background: riskColors[o.risk], flexShrink: 0,
+                    }} />
+                    <span style={{ fontSize: 14, fontWeight: 600, color: theme.colors.textPrimary }}>{o.name}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 12 }}>
+                    {o.understaffedDays > 0 && (
+                      <span style={{ color: theme.colors.risk, fontWeight: 600 }}>
+                        {o.understaffedDays} understaffed day{o.understaffedDays !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                    <span style={{ color: theme.colors.textSecondary }}>
+                      {o.totalComplaints} complaint{o.totalComplaints !== 1 ? 's' : ''}
+                    </span>
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: '999px',
+                      background: `${riskColors[o.risk]}12`, color: riskColors[o.risk],
+                      textTransform: 'uppercase',
+                    }}>
+                      {o.risk}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+      </div>
+
       {/* Shift Comparison */}
       <div style={{
         background: theme.colors.bgCard,

@@ -59,13 +59,11 @@ export default function TodayView() {
           context={topPriority?.recommendation ?? ''}
         />
 
-        {/* Section 3: Pending actions */}
+        {/* Section 3: Pending actions — always visible */}
         <PendingActionsInline excludeId={topPriority?.id} />
 
-        {/* Getting Started checklist — onboarding users only */}
-        {isOnboarding && (
-          <GettingStartedChecklist onNavigate={navigate} />
-        )}
+        {/* Getting Started checklist — onboarding users only, below pending actions */}
+        {isOnboarding && <GettingStartedChecklist onNavigate={navigate} />}
 
       </div>
     </PageTransition>
