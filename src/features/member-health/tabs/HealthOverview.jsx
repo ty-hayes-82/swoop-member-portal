@@ -749,7 +749,7 @@ export default function HealthOverview() {
             </span>
           </div>
           <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.urgent }}>
-            {(summary.atRisk || 0) + (summary.critical || 0)} members need attention
+            {atRisk.length} members need attention
           </span>
         </div>
 
