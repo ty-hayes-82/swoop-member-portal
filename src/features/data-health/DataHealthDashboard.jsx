@@ -32,12 +32,16 @@ export default function DataHealthDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Fallback for demo mode
+  // Fallback for demo mode — reflect the 4 sources shown as connected in Integrations tab
+  const DEMO_CONNECTED = { CRM: true, EMAIL: true };
   const domains = data?.domains || Object.keys(DOMAIN_INFO).map(code => ({
-    code, connected: code === 'CRM', health_status: code === 'CRM' ? 'healthy' : 'disconnected',
-    row_count: code === 'CRM' ? 300 : 0, last_sync_at: code === 'CRM' ? new Date().toISOString() : null,
+    code,
+    connected: !!DEMO_CONNECTED[code],
+    health_status: DEMO_CONNECTED[code] ? 'healthy' : 'disconnected',
+    row_count: code === 'CRM' ? 300 : code === 'EMAIL' ? 120 : 0,
+    last_sync_at: DEMO_CONNECTED[code] ? new Date().toISOString() : null,
   }));
-  const valueScore = data?.valueScore ?? 40;
+  const valueScore = data?.valueScore ?? (Object.keys(DEMO_CONNECTED).reduce((sum, k) => sum + (VALUE_PCTS[k] || 0), 0));
   const features = data?.features || [];
   const nextDomain = data?.nextDomainToConnect;
 

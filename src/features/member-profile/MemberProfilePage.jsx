@@ -431,6 +431,34 @@ export default function MemberProfilePage() {
         </Section>
       </div>
 
+      {/* Quick Actions */}
+      <div style={{
+        display: 'flex', gap: theme.spacing.sm, padding: theme.spacing.md,
+        background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
+        borderRadius: theme.radius.md,
+      }}>
+        {[
+          { label: 'Schedule call', icon: '📞', color: '#16a34a' },
+          { label: 'Send email', icon: '✉️', color: theme.colors.info500 || '#3B82F6' },
+          { label: 'Send SMS', icon: '📱', color: theme.colors.accent },
+          { label: 'Offer comp', icon: '🎁', color: '#8b5cf6' },
+        ].map(action => (
+          <button
+            key={action.label}
+            onClick={() => {}}
+            style={{
+              flex: 1, padding: '10px 12px', borderRadius: theme.radius.sm,
+              border: `1px solid ${action.color}25`, background: `${action.color}06`,
+              color: action.color, fontSize: theme.fontSize.xs, fontWeight: 600,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}
+          >
+            <span style={{ fontSize: '14px' }}>{action.icon}</span>
+            {action.label}
+          </button>
+        ))}
+      </div>
+
       {/* Contact info */}
       <Section title="Contact Information" cols="repeat(auto-fit, minmax(200px, 1fr))">
         <div>

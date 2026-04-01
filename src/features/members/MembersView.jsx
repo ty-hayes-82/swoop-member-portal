@@ -12,12 +12,13 @@ import EvidenceStrip from '@/components/ui/EvidenceStrip';
 // Member Health tabs — V3: reduced to 2 (At-Risk uses HealthOverview, search uses AllMembersView)
 import HealthOverview from '@/features/member-health/tabs/HealthOverview';
 import AllMembersView from '@/features/member-health/tabs/AllMembersView';
-// ResignationTimeline removed in V4 — not operational
+import CohortTab from '@/features/member-health/tabs/CohortTab';
 
 
 const MODES = [
   { key: 'at-risk', label: 'At-Risk' },
   { key: 'search', label: 'All Members' },
+  { key: 'cohorts', label: 'First 90 Days' },
 ];
 
 const HEADLINES = {
@@ -36,6 +37,11 @@ const HEADLINES = {
     variant: 'insight',
     headline: `Member directory — search by name, archetype, or health level`,
     context: `${getMemberSummary().totalMembers || 300} members with health scores, archetypes, and engagement data.`,
+  }),
+  'cohorts': () => ({
+    variant: 'insight',
+    headline: `New member integration — track the first 90 days`,
+    context: `Monitor engagement milestones, habit formation, and onboarding progress for recent joins.`,
   }),
 };
 
@@ -155,8 +161,10 @@ export default function MembersView() {
           <AllMembersView initialArchetype={archetype} />
         )}
 
-        {/* Insights moved to top-level /insights route (Sprint 5) */}
-        {/* Waitlist & Tee Sheet decommissioned from MVP nav */}
+        {/* Mode: First 90 Days */}
+        {mode === 'cohorts' && (
+          <CohortTab />
+        )}
       </div>
     </PageTransition>
   );

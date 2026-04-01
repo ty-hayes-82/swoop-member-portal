@@ -52,13 +52,22 @@ export default function PendingActionsInline({ topPriority = null }) {
             onMouseLeave={e => { e.currentTarget.style.boxShadow = theme.shadow.sm; }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{
-                fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
-                letterSpacing: '0.06em', padding: '2px 8px', borderRadius: 10,
-                background: `${theme.colors.urgent}15`, color: theme.colors.urgent,
-              }}>
-                Priority
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{
+                  fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
+                  letterSpacing: '0.06em', padding: '2px 8px', borderRadius: 10,
+                  background: `${theme.colors.urgent}15`, color: theme.colors.urgent,
+                }}>
+                  Priority
+                </span>
+                <span style={{
+                  fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                  background: `${theme.colors.accent}10`, color: theme.colors.accent,
+                  textTransform: 'uppercase', letterSpacing: '0.04em',
+                }}>
+                  GM
+                </span>
+              </div>
               <span style={{
                 fontSize: '10px', fontWeight: 600, color: theme.colors.urgent,
                 padding: '2px 8px', borderRadius: 10,
@@ -120,15 +129,13 @@ export default function PendingActionsInline({ topPriority = null }) {
                   }}>
                     {action.priority}
                   </span>
-                  {(action.suggestedOwner || action.source) && (
-                    <span style={{
-                      fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                      background: `${theme.colors.accent}10`, color: theme.colors.accent,
-                      textTransform: 'uppercase', letterSpacing: '0.04em',
-                    }}>
-                      {(action.suggestedOwner || action.source || '').split('·')[0].trim()}
-                    </span>
-                  )}
+                  <span style={{
+                    fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                    background: `${theme.colors.accent}10`, color: theme.colors.accent,
+                    textTransform: 'uppercase', letterSpacing: '0.04em',
+                  }}>
+                    {(action.suggestedOwner || action.source || 'GM').split('·')[0].trim()}
+                  </span>
                 </div>
                 <span style={{
                   fontSize: '10px', fontWeight: 600, color: theme.colors.accent,

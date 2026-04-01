@@ -136,6 +136,22 @@ export default function ComplaintsTab() {
                           Understaffed day
                         </span>
                       )}
+                      {daysSince <= 3 && (
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, color: '#ca8a04',
+                          background: '#ca8a0412', padding: '2px 6px', borderRadius: '999px',
+                        }}>
+                          High-demand day
+                        </span>
+                      )}
+                      {complaint.category === 'Pace of Play' && (
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, color: theme.colors.info || '#3B82F6',
+                          background: `${theme.colors.info || '#3B82F6'}12`, padding: '2px 6px', borderRadius: '999px',
+                        }}>
+                          Weather impact
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: 12, color: theme.colors.textSecondary }}>
                       {complaint.category} — {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}

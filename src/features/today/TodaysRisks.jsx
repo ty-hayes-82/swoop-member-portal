@@ -140,6 +140,11 @@ export default function TodaysRisks() {
                   <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
                     {c.category}
                   </span>
+                  {c.isUnderstaffedDay && (
+                    <span style={{ fontSize: '9px', fontWeight: 700, color: theme.colors.urgent, background: `${theme.colors.urgent}12`, padding: '1px 5px', borderRadius: '999px' }}>
+                      Understaffed
+                    </span>
+                  )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                   <span style={{

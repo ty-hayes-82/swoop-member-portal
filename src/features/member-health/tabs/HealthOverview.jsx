@@ -367,6 +367,26 @@ export default function HealthOverview() {
       {(() => {
         const newMembers = allPriorityMembers.filter(m => m.archetype === 'New Member');
         if (newMembers.length === 0) return null;
+        // Simulated day counts and milestones for new members
+        const newMemberData = newMembers.map((m, i) => {
+          const dayIn = [35, 23, 60, 45, 17][i] || 30;
+          return {
+            ...m,
+            dayIn,
+            milestones: {
+              firstRound: m.score > 30,
+              firstDining: m.score > 40,
+              firstEvent: false,
+              metMembers: m.score > 50,
+            },
+          };
+        });
+        const MILESTONES = [
+          { key: 'firstRound', label: 'First round' },
+          { key: 'firstDining', label: 'First dining' },
+          { key: 'firstEvent', label: 'First event' },
+          { key: 'metMembers', label: 'Met 3+ members' },
+        ];
         return (
           <div style={{
             background: `${theme.colors.info}06`, border: `1px solid ${theme.colors.info}20`,
@@ -380,25 +400,42 @@ export default function HealthOverview() {
                 {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in integration window
               </span>
             </div>
-            {newMembers.map(m => (
-              <div key={m.memberId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderTop: `1px solid ${theme.colors.info}10` }}>
-                <MemberLink memberId={m.memberId} mode="drawer" style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
-                  {m.name}
-                </MemberLink>
-                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: `${scoreColor(m.score)}15`, color: scoreColor(m.score), fontFamily: theme.fonts.mono }}>
-                  {m.score}
-                </span>
-                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, flex: 1 }}>
-                  {m.reason}
-                </span>
-                <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: `${theme.colors.info}10`, color: theme.colors.info, textTransform: 'uppercase' }}>
-                  {m.owner || 'Membership Director'}
-                </span>
-              </div>
-            ))}
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.info, marginTop: 8, fontWeight: 600 }}>
-              See First 90 Days tab for full integration tracking with milestones →
-            </div>
+            {newMemberData.map(m => {
+              const completed = MILESTONES.filter(ms => m.milestones[ms.key]).length;
+              return (
+                <div key={m.memberId} style={{ padding: '8px 0', borderTop: `1px solid ${theme.colors.info}10` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                    <MemberLink memberId={m.memberId} mode="drawer" style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
+                      {m.name}
+                    </MemberLink>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: `${scoreColor(m.score)}15`, color: scoreColor(m.score), fontFamily: theme.fonts.mono }}>
+                      {m.score}
+                    </span>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: `${theme.colors.info}12`, color: theme.colors.info, fontFamily: theme.fonts.mono }}>
+                      Day {m.dayIn} of 90
+                    </span>
+                    <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: `${theme.colors.accent}10`, color: theme.colors.accent, textTransform: 'uppercase', marginLeft: 'auto' }}>
+                      {m.owner || 'Membership Director'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, paddingLeft: 2 }}>
+                    {MILESTONES.map(ms => (
+                      <span key={ms.key} style={{
+                        fontSize: '10px', padding: '2px 8px', borderRadius: 4,
+                        background: m.milestones[ms.key] ? `${theme.colors.success}12` : `${theme.colors.textMuted}08`,
+                        color: m.milestones[ms.key] ? theme.colors.success : theme.colors.textMuted,
+                        fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4,
+                      }}>
+                        {m.milestones[ms.key] ? '✓' : '○'} {ms.label}
+                      </span>
+                    ))}
+                    <span style={{ fontSize: '10px', color: theme.colors.textMuted, marginLeft: 'auto' }}>
+                      {completed}/4 milestones
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         );
       })()}
