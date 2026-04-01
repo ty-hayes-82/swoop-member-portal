@@ -112,13 +112,24 @@ export default function PendingActionsInline({ topPriority = null }) {
               onMouseLeave={e => { e.currentTarget.style.boxShadow = theme.shadow.sm; }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <span style={{
-                  fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
-                  letterSpacing: '0.06em', padding: '2px 8px', borderRadius: 10,
-                  background: `${prioColor}15`, color: prioColor,
-                }}>
-                  {action.priority}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{
+                    fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
+                    letterSpacing: '0.06em', padding: '2px 8px', borderRadius: 10,
+                    background: `${prioColor}15`, color: prioColor,
+                  }}>
+                    {action.priority}
+                  </span>
+                  {(action.suggestedOwner || action.source) && (
+                    <span style={{
+                      fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                      background: `${theme.colors.accent}10`, color: theme.colors.accent,
+                      textTransform: 'uppercase', letterSpacing: '0.04em',
+                    }}>
+                      {(action.suggestedOwner || action.source || '').split('·')[0].trim()}
+                    </span>
+                  )}
+                </div>
                 <span style={{
                   fontSize: '10px', fontWeight: 600, color: theme.colors.accent,
                   padding: '2px 8px', borderRadius: 10,

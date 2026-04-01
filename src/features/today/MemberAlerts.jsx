@@ -16,6 +16,17 @@ function getComplaintDays(memberId) {
   return { days, category: complaint.category };
 }
 
+const ACTION_OWNERS = {
+  'Ghost': 'GM',
+  'Declining': 'Membership Director',
+  'Weekend Warrior': 'Pro Shop',
+  'Die-Hard Golfer': 'Pro Shop',
+  'Social Butterfly': 'Events Coordinator',
+  'New Member': 'Membership Director',
+  'Snowbird': 'Front Desk',
+  'Balanced Active': 'Membership Director',
+};
+
 function buildPriorityList() {
   const all = [
     ...atRiskMembers.map(m => ({ ...m, tier: 'at-risk' })),
@@ -34,28 +45,46 @@ function buildPriorityList() {
         (score < 40 ? 15 : 0) +
         (isNewMember ? 10 : 0);
 
-      let reason, action;
+      let reason, action, owner;
       if (hasComplaint) {
         reason = `Complaint unresolved ${complaint.days} days (${complaint.category})`;
         action = `Schedule GM call — complaint unresolved ${complaint.days} days`;
-      } else if (m.archetype === 'Ghost' || m.archetype === 'Declining') {
-        reason = m.topRisk || m.signal || 'Engagement declining across all channels';
-        action = 'Membership Director outreach — re-engagement conversation';
-      } else if (m.archetype === 'Weekend Warrior' || m.archetype === 'Die-Hard Golfer') {
+        owner = complaint.days > 14 ? 'GM' : (ACTION_OWNERS[m.archetype] || 'GM');
+      } else if (m.archetype === 'Ghost') {
+        reason = m.topRisk || m.signal || 'Engagement fully lapsed';
+        action = 'GM personal call — re-engagement conversation';
+        owner = 'GM';
+      } else if (m.archetype === 'Declining') {
+        reason = m.topRisk || m.signal || 'Activity declining across golf + dining';
+        action = 'Membership Director outreach — identify root cause';
+        owner = 'Membership Director';
+      } else if (m.archetype === 'Weekend Warrior') {
+        reason = m.topRisk || m.signal || 'Weekend golf frequency declining';
+        action = 'Priority Saturday tee time offer';
+        owner = 'Pro Shop';
+      } else if (m.archetype === 'Die-Hard Golfer') {
         reason = m.topRisk || m.signal || 'Golf activity declining';
-        action = `Pro shop outreach — hasn't played recently`;
+        action = 'Pro shop outreach — check equipment/injury/schedule';
+        owner = 'Pro Shop';
       } else if (m.archetype === 'Social Butterfly') {
         reason = m.topRisk || m.signal || 'Dining and event engagement dropping';
         action = 'Invite to upcoming wine dinner or social event';
+        owner = 'Events Coordinator';
       } else if (isNewMember) {
         reason = m.topRisk || m.signal || 'No habits forming in first 60 days';
         action = 'New member integration check-in — identify engagement gaps';
+        owner = 'Membership Director';
+      } else if (m.archetype === 'Snowbird') {
+        reason = m.topRisk || m.signal || 'Seasonal return expected — no reactivation';
+        action = 'Send welcome-back package + tee time reservation';
+        owner = 'Front Desk';
       } else {
         reason = m.topRisk || m.signal || 'Health score declining';
         action = m.action || 'Personalized outreach based on engagement pattern';
+        owner = ACTION_OWNERS[m.archetype] || 'Membership Director';
       }
 
-      return { ...m, priorityScore, reason, action };
+      return { ...m, priorityScore, reason, action, owner };
     })
     .sort((a, b) => b.priorityScore - a.priorityScore)
     .slice(0, 3);
@@ -131,8 +160,17 @@ export default function MemberAlerts() {
               <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginBottom: 4, lineHeight: 1.4 }}>
                 {m.reason}
               </div>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.accent, fontWeight: 600 }}>
-                {m.action}
+              <div style={{ fontSize: theme.fontSize.xs, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                {m.owner && (
+                  <span style={{
+                    fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                    background: `${theme.colors.accent}10`, color: theme.colors.accent,
+                    textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0,
+                  }}>
+                    {m.owner}
+                  </span>
+                )}
+                <span style={{ color: theme.colors.accent }}>{m.action}</span>
               </div>
             </div>
           );

@@ -143,6 +143,13 @@ export default function TodaysRisks() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                   <span style={{
+                    fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                    background: `${theme.colors.accent}10`, color: theme.colors.accent,
+                    textTransform: 'uppercase', letterSpacing: '0.04em',
+                  }}>
+                    {c.daysOpen > 14 ? 'GM' : 'Dept Head'}
+                  </span>
+                  <span style={{
                     fontSize: theme.fontSize.xs, fontWeight: 700,
                     color: isOld ? theme.colors.urgent : theme.colors.textSecondary,
                   }}>
