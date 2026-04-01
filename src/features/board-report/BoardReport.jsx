@@ -6,7 +6,7 @@ import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { getKPIs, getMemberSaves, getOperationalSaves } from '@/services/boardReportService';
 import { getHealthDistribution } from '@/services/memberService';
-import { feedbackRecords, feedbackSummary } from '@/data/staffing';
+import { feedbackRecords, feedbackSummary, understaffedDays } from '@/data/staffing';
 import { isRealClub } from '@/config/constants';
 
 const tabNames = ['Summary', 'Details'];
@@ -337,6 +337,57 @@ export default function BoardReport() {
                 }}>
                   <span style={{ fontWeight: 600, color: theme.colors.textPrimary }}>{o.event}</span>
                   <span style={{ color: theme.colors.textMuted }}> — {o.outcome}</span>
+                </div>
+              ))}
+            </div>
+          </Panel>
+
+          {/* Staffing Efficiency */}
+          <Panel>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>
+              Staffing Efficiency
+            </h2>
+            <p style={{ fontSize: '12px', color: colors.panelMuted, marginBottom: '16px' }}>
+              Staffing alignment and proactive scheduling performance.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+              <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
+                <div style={{ fontSize: '28px', fontWeight: 700, color: colors.green }}>{Math.max(0, 30 - understaffedDays.length)}</div>
+                <div style={{ fontSize: '11px', color: colors.textMuted }}>Days Fully Staffed</div>
+              </div>
+              <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
+                <div style={{ fontSize: '28px', fontWeight: 700, color: understaffedDays.length > 3 ? colors.orange : colors.green }}>{understaffedDays.length}</div>
+                <div style={{ fontSize: '11px', color: colors.textMuted }}>Understaffed Days</div>
+              </div>
+              <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
+                <div style={{ fontSize: '28px', fontWeight: 700, color: colors.green }}>{Math.round(((30 - understaffedDays.length) / 30) * 100)}%</div>
+                <div style={{ fontSize: '11px', color: colors.textMuted }}>Staffing Alignment Rate</div>
+              </div>
+            </div>
+          </Panel>
+
+          {/* F&B Performance — Placeholder */}
+          <Panel>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>
+              F&B Performance
+            </h2>
+            <div style={{
+              padding: '8px 12px', marginBottom: '16px', borderRadius: '6px',
+              background: `${colors.yellow}12`, border: `1px solid ${colors.yellow}30`,
+              fontSize: '12px', color: colors.yellow, display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <span style={{ fontWeight: 700 }}>Coming soon</span>
+              <span style={{ color: colors.textMuted }}>— Requires POS integration. Connect your POS system in Admin to unlock F&B metrics.</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', opacity: 0.4 }}>
+              {[
+                { label: 'Revenue per Cover', value: '—' },
+                { label: 'Covers vs Capacity', value: '—' },
+                { label: 'Post-Round Dining Rate', value: '—' },
+              ].map(m => (
+                <div key={m.label} style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
+                  <div style={{ fontSize: '28px', fontWeight: 700, color: colors.textMuted }}>{m.value}</div>
+                  <div style={{ fontSize: '11px', color: colors.textMuted }}>{m.label}</div>
                 </div>
               ))}
             </div>
