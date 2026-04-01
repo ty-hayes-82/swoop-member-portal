@@ -1,55 +1,49 @@
+// PendingActionsInline — Action Queue: hero alert + pending actions merged
 import { useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
-import { useNavigation } from '@/context/NavigationContext';
 import { theme } from '@/config/theme';
+import MemberLink from '@/components/MemberLink';
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const PRIORITY_COLORS = { high: theme.colors.urgent, medium: theme.colors.warning, low: theme.colors.textMuted };
 
-export default function PendingActionsInline({ excludeId = null }) {
+export default function PendingActionsInline({ topPriority = null }) {
   const { inbox, pendingAgentCount } = useApp();
-  const { navigate } = useNavigation();
 
   const topActions = useMemo(() => {
-    const pending = inbox.filter((item) => item.status === 'pending' && item.id !== excludeId);
+    const pending = inbox.filter(
+      (item) => item.status === 'pending' && item.id !== topPriority?.id
+    );
     return [...pending]
       .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2))
       .slice(0, 3);
-  }, [inbox, excludeId]);
+  }, [inbox, topPriority?.id]);
 
-  if (pendingAgentCount === 0) return null;
+  const hasHero = !!topPriority;
+  const hasActions = pendingAgentCount > 0;
+
+  if (!hasHero && !hasActions) return null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+    <div>
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        fontSize: '11px', fontWeight: 700, color: theme.colors.accent,
+        textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12,
       }}>
-        <div style={{
-          fontSize: '11px',
-          fontWeight: 700,
-          color: theme.colors.accent,
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}>
-          Pending Actions ({pendingAgentCount})
-        </div>
+        Action Queue {hasActions ? `(${pendingAgentCount})` : ''}
       </div>
 
-      {/* Read-only preview cards */}
-      {topActions.map((action) => {
-        const prioColor = PRIORITY_COLORS[action.priority] ?? theme.colors.accent;
-        return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+        {/* Hero alert — top priority action card */}
+        {hasHero && (
           <div
-            key={action.id}
             onClick={() => window.dispatchEvent(new CustomEvent('swoop:open-actions'))}
             style={{
-              padding: '12px 16px',
+              padding: '14px 18px',
               borderRadius: theme.radius.md,
-              background: theme.colors.bgCard,
-              border: `1px solid ${theme.colors.border}`,
-              borderLeft: `4px solid ${prioColor}`,
+              background: `${theme.colors.urgent}06`,
+              border: `1px solid ${theme.colors.urgent}25`,
+              borderLeft: `4px solid ${theme.colors.urgent}`,
               boxShadow: theme.shadow.sm,
               cursor: 'pointer',
               transition: 'box-shadow 0.15s',
@@ -57,51 +51,114 @@ export default function PendingActionsInline({ excludeId = null }) {
             onMouseEnter={e => { e.currentTarget.style.boxShadow = theme.shadow.md; }}
             onMouseLeave={e => { e.currentTarget.style.boxShadow = theme.shadow.sm; }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <span style={{
                 fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
-                letterSpacing: '0.06em', padding: '2px 8px', borderRadius: '10px',
-                background: `${prioColor}15`, color: prioColor,
+                letterSpacing: '0.06em', padding: '2px 8px', borderRadius: 10,
+                background: `${theme.colors.urgent}15`, color: theme.colors.urgent,
               }}>
-                {action.priority}
+                Priority
               </span>
               <span style={{
-                fontSize: '10px', fontWeight: 600, color: theme.colors.accent,
-                padding: '2px 8px', borderRadius: '10px',
-                background: `${theme.colors.accent}10`,
+                fontSize: '10px', fontWeight: 600, color: theme.colors.urgent,
+                padding: '2px 8px', borderRadius: 10,
+                background: `${theme.colors.urgent}10`,
               }}>
-                Pending approval
+                Act Now
               </span>
             </div>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: '2px', lineHeight: 1.4 }}>
-              {action.description}
+            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: 4, lineHeight: 1.4 }}>
+              {topPriority.memberName ? (
+                <>
+                  <MemberLink
+                    mode="drawer"
+                    memberId={topPriority.memberId}
+                    style={{ fontWeight: 700, color: theme.colors.textPrimary }}
+                  >
+                    {topPriority.memberName}
+                  </MemberLink>
+                  {' '}{topPriority.headline.replace(topPriority.memberName, '').trim()}
+                </>
+              ) : (
+                topPriority.headline
+              )}
             </div>
-            {action.impactMetric && (
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.success, fontWeight: 500 }}>
-                {action.impactMetric}
+            {topPriority.recommendation && (
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.4 }}>
+                {topPriority.recommendation}
               </div>
             )}
           </div>
-        );
-      })}
+        )}
 
-      {/* Always show the CTA to go to Inbox */}
-      <button
-        onClick={() => window.dispatchEvent(new CustomEvent('swoop:open-actions'))}
-        style={{
-          padding: '10px 16px',
-          fontSize: theme.fontSize.sm,
-          fontWeight: 700,
-          color: '#fff',
-          background: theme.colors.accent,
-          border: 'none',
-          borderRadius: theme.radius.md,
-          cursor: 'pointer',
-          textAlign: 'center',
-        }}
-      >
-        Review & approve all {pendingAgentCount} actions in Inbox →
-      </button>
+        {/* Pending action cards */}
+        {topActions.map((action) => {
+          const prioColor = PRIORITY_COLORS[action.priority] ?? theme.colors.accent;
+          return (
+            <div
+              key={action.id}
+              onClick={() => window.dispatchEvent(new CustomEvent('swoop:open-actions'))}
+              style={{
+                padding: '12px 16px',
+                borderRadius: theme.radius.md,
+                background: theme.colors.bgCard,
+                border: `1px solid ${theme.colors.border}`,
+                borderLeft: `4px solid ${prioColor}`,
+                boxShadow: theme.shadow.sm,
+                cursor: 'pointer',
+                transition: 'box-shadow 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = theme.shadow.md; }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = theme.shadow.sm; }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                <span style={{
+                  fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
+                  letterSpacing: '0.06em', padding: '2px 8px', borderRadius: 10,
+                  background: `${prioColor}15`, color: prioColor,
+                }}>
+                  {action.priority}
+                </span>
+                <span style={{
+                  fontSize: '10px', fontWeight: 600, color: theme.colors.accent,
+                  padding: '2px 8px', borderRadius: 10,
+                  background: `${theme.colors.accent}10`,
+                }}>
+                  Pending approval
+                </span>
+              </div>
+              <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: 2, lineHeight: 1.4 }}>
+                {action.description}
+              </div>
+              {action.impactMetric && (
+                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.success, fontWeight: 500 }}>
+                  {action.impactMetric}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* CTA to review all */}
+        {hasActions && (
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('swoop:open-actions'))}
+            style={{
+              padding: '10px 16px',
+              fontSize: theme.fontSize.sm,
+              fontWeight: 700,
+              color: '#fff',
+              background: theme.colors.accent,
+              border: 'none',
+              borderRadius: theme.radius.md,
+              cursor: 'pointer',
+              textAlign: 'center',
+            }}
+          >
+            Review all {pendingAgentCount} actions in Inbox →
+          </button>
+        )}
+      </div>
     </div>
   );
 }
