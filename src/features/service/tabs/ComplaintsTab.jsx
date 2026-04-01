@@ -65,6 +65,24 @@ export default function ComplaintsTab() {
         )}
       </div>
 
+      {/* Root Cause Pattern Summary */}
+      {understaffedComplaints > 0 && (
+        <div style={{
+          background: `${theme.colors.risk}06`, border: `1px solid ${theme.colors.risk}20`,
+          borderRadius: theme.radius.md, padding: '14px 18px',
+        }}>
+          <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.risk, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+            Root Cause Pattern
+          </div>
+          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, marginBottom: 4 }}>
+            {understaffedComplaints} of {feedbackRecords.length} complaints occurred on understaffed days
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+            Service Speed complaints correlate with understaffed shifts — {conversionDrop}% lower dining conversion on slow-pace days
+          </div>
+        </div>
+      )}
+
       {/* Complaints List */}
       <div style={{
         background: theme.colors.bgCard,
