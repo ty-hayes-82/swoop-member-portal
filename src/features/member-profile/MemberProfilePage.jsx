@@ -53,14 +53,28 @@ function Stat({ label, value, accent, sub, mono }) {
 }
 
 // --- Section wrapper ---
-function Section({ title, children, cols }) {
+function Section({ title, children, cols, collapsible = false, defaultCollapsed = false, summary }) {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const isCollapsed = collapsible && collapsed;
+
   return (
     <div style={{
       background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
       borderRadius: theme.radius.lg, padding: theme.spacing.lg,
     }}>
-      {title && <h3 style={{ margin: 0, marginBottom: theme.spacing.md, fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary }}>{title}</h3>}
-      {cols ? <div style={{ display: 'grid', gridTemplateColumns: cols, gap: theme.spacing.md }}>{children}</div> : children}
+      {title && (
+        <div
+          onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isCollapsed ? 0 : theme.spacing.md, cursor: collapsible ? 'pointer' : 'default' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <h3 style={{ margin: 0, fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary }}>{title}</h3>
+            {isCollapsed && summary && <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{summary}</span>}
+          </div>
+          {collapsible && <span style={{ fontSize: 12, color: theme.colors.textMuted, transition: 'transform 0.2s', transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
+        </div>
+      )}
+      {!isCollapsed && (cols ? <div style={{ display: 'grid', gridTemplateColumns: cols, gap: theme.spacing.md }}>{children}</div> : children)}
     </div>
   );
 }
@@ -205,8 +219,26 @@ export default function MemberProfilePage() {
   const invoiceItems = Array.isArray(invoices.items) ? invoices.items : [];
   const contact = profile.contact || {};
 
+  const contextReason = riskSignals.length > 0 ? riskSignals[0]?.label : null;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      {/* Why am I looking at this member? — context banner */}
+      {contextReason && (
+        <div style={{
+          padding: '10px 14px',
+          borderRadius: theme.radius.sm,
+          background: `${theme.colors.urgent}06`,
+          border: `1px solid ${theme.colors.urgent}20`,
+          borderLeft: `3px solid ${theme.colors.urgent}`,
+          fontSize: theme.fontSize.sm,
+          color: theme.colors.textPrimary,
+        }}>
+          <span style={{ fontWeight: 700, color: theme.colors.urgent, marginRight: 6 }}>Flagged:</span>
+          {contextReason}
+        </div>
+      )}
+
       {/* Back button + header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: theme.spacing.md }}>
         <button onClick={() => setMemberId(null)} style={{
@@ -420,7 +452,7 @@ export default function MemberProfilePage() {
       </Section>
 
       {/* Invoices */}
-      <Section title="Invoice History">
+      <Section title="Invoice History" collapsible defaultCollapsed summary={`${invoiceItems.length} invoices`}>
         {invoiceItems.length > 0 ? (
           <>
             {invoices.summary && (
@@ -486,7 +518,7 @@ export default function MemberProfilePage() {
       </Section>
 
       {/* Activity timeline */}
-      <Section title="Activity Timeline">
+      <Section title="Activity Timeline" collapsible defaultCollapsed summary={`${(profile.activity || []).length} entries`}>
         {activity.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm, maxHeight: 400, overflowY: 'auto' }}>
             {activity.map((event, i) => (

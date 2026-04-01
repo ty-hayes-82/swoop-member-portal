@@ -57,15 +57,63 @@ const Sparkline = ({ data = [], color = theme.colors.agentCyan }) => {
   );
 };
 
-const Section = ({ title, description, children, ...rest }) => (
-  <section {...rest} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.md, background: theme.colors.bgCard }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: theme.spacing.sm }}>
-      <h3 style={{ margin: 0, fontSize: theme.fontSize.md }}>{title}</h3>
-      {description && <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{description}</span>}
+const Section = ({ title, description, children, defaultCollapsed = false, collapsible = false, summary, ...rest }) => {
+  const [collapsed, setCollapsed] = React.useState(defaultCollapsed);
+  const isCollapsed = collapsible && collapsed;
+
+  return (
+    <section {...rest} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.md, background: theme.colors.bgCard }}>
+      <div
+        onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: isCollapsed ? 0 : theme.spacing.sm, cursor: collapsible ? 'pointer' : 'default' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <h3 style={{ margin: 0, fontSize: theme.fontSize.md }}>{title}</h3>
+          {isCollapsed && summary && <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{summary}</span>}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {description && !isCollapsed && <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{description}</span>}
+          {collapsible && <span style={{ fontSize: 12, color: theme.colors.textMuted, transition: 'transform 0.2s', transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
+        </div>
+      </div>
+      {!isCollapsed && children}
+    </section>
+  );
+};
+
+// ActivityTimeline — shows 3 entries by default with expand
+function ActivityTimeline({ activity = [] }) {
+  const [showAll, setShowAll] = React.useState(false);
+  const visible = showAll ? activity : activity.slice(0, 3);
+
+  if (!activity.length) return <span style={{ color: theme.colors.textSecondary }}>No recent activity logged.</span>;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {visible.map((a) => (
+        <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: theme.fontSize.sm }}>
+          <div>
+            <div style={{ fontWeight: 600 }}>{a.type}</div>
+            <div style={{ color: theme.colors.textSecondary }}>{a.detail}</div>
+          </div>
+          <div style={{ color: theme.colors.textMuted }}>{formatDateTime(a.timestamp)}</div>
+        </div>
+      ))}
+      {activity.length > 3 && !showAll && (
+        <button
+          onClick={() => setShowAll(true)}
+          style={{
+            background: 'none', border: 'none', color: theme.colors.accent,
+            fontSize: theme.fontSize.xs, fontWeight: 600, cursor: 'pointer',
+            textAlign: 'left', padding: 0,
+          }}
+        >
+          Show all {activity.length} entries →
+        </button>
+      )}
     </div>
-    {children}
-  </section>
-);
+  );
+}
 
 // Member Journey — longitudinal cross-domain timeline showing engagement decay sequence
 // P6 "First Domino": shows per-member decay chain (Email dropped → Golf dropped → Dining dropped)
@@ -510,8 +558,31 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
     { key: 'comp', label: 'Offer comp', icon: '🎁' },
   ];
 
+  // Build context banner from risk signals
+  const contextReason = useMemo(() => {
+    if (!profile.riskSignals?.length) return null;
+    const topSignal = profile.riskSignals[0];
+    return topSignal?.label || null;
+  }, [profile.riskSignals]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+      {/* Why am I looking at this member? — context banner */}
+      {contextReason && (
+        <div style={{
+          padding: '10px 14px',
+          borderRadius: theme.radius.sm,
+          background: `${theme.colors.urgent}06`,
+          border: `1px solid ${theme.colors.urgent}20`,
+          borderLeft: `3px solid ${theme.colors.urgent}`,
+          fontSize: theme.fontSize.sm,
+          color: theme.colors.textPrimary,
+        }}>
+          <span style={{ fontWeight: 700, color: theme.colors.urgent, marginRight: 6 }}>Flagged:</span>
+          {contextReason}
+        </div>
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: theme.spacing.md, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: theme.spacing.md, alignItems: 'center' }}>
           <div style={{
@@ -696,22 +767,13 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
       </Section>
 
-      <Section title="Recent activity" description="Last 30 days" data-section="recent-activity">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {(profile.activity ?? []).map((activity) => (
-            <div key={activity.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: theme.fontSize.sm }}>
-              <div>
-                <div style={{ fontWeight: 600 }}>{activity.type}</div>
-                <div style={{ color: theme.colors.textSecondary }}>{activity.detail}</div>
-              </div>
-              <div style={{ color: theme.colors.textMuted }}>{formatDateTime(activity.timestamp)}</div>
-            </div>
-          ))}
-          {!(profile.activity ?? []).length && <span style={{ color: theme.colors.textSecondary }}>No recent activity logged.</span>}
-        </div>
+      <Section title="Recent activity" description="Last 30 days" data-section="recent-activity"
+        collapsible defaultCollapsed summary={`${(profile.activity ?? []).length} entries`}>
+        <ActivityTimeline activity={profile.activity} />
       </Section>
 
-      <Section title="Member Journey" description="Cross-domain timeline">
+      <Section title="Member Journey" description="Cross-domain timeline"
+        collapsible defaultCollapsed summary="Expand to view">
         <MemberJourneyTimeline profile={profile} />
       </Section>
 
