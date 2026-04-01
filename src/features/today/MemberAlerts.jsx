@@ -58,7 +58,7 @@ function buildPriorityList() {
       return { ...m, priorityScore, reason, action };
     })
     .sort((a, b) => b.priorityScore - a.priorityScore)
-    .slice(0, 5);
+    .slice(0, 3);
 }
 
 const ARCHETYPE_COLORS = {
@@ -82,7 +82,7 @@ export default function MemberAlerts() {
         fontSize: '11px', fontWeight: 700, color: theme.colors.urgent,
         textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12,
       }}>
-        Top 5 Member Alerts
+        Priority Member Alerts
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

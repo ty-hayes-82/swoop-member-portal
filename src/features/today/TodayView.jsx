@@ -77,16 +77,16 @@ export default function TodayView() {
           </div>
         </div>
 
-        {/* Section 2 & 3: Staffing vs Demand + Open Complaints with Aging */}
+        {/* Section 2: Staffing vs Demand + Top 3 Complaints */}
         <TodaysRisks />
 
-        {/* Section 4: Top 5 Member Alerts */}
-        <MemberAlerts />
-
-        {/* Section 5: Action Queue — hero alert merged with pending actions */}
+        {/* Section 3: Action Queue — hero alert merged with pending actions */}
         <PendingActionsInline topPriority={topPriority} />
 
-        {/* Section 6: Tomorrow's Forecast */}
+        {/* Section 4: Priority Member Alerts (top 3) */}
+        <MemberAlerts />
+
+        {/* Section 5: Tomorrow's Forecast */}
         <TomorrowForecast />
 
       </div>

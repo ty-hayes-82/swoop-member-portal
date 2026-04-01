@@ -37,7 +37,7 @@ export default function TodaysRisks() {
     })
     .sort((a, b) => b.daysOpen - a.daysOpen);
 
-  const displayComplaints = unresolvedComplaints.slice(0, 5);
+  const displayComplaints = unresolvedComplaints.slice(0, 3);
   const totalUnresolved = unresolvedComplaints.length;
 
   const statusColors = {
@@ -161,7 +161,7 @@ export default function TodaysRisks() {
           })}
         </div>
 
-        {totalUnresolved > 5 && (
+        {totalUnresolved > 3 && (
           <button
             onClick={() => navigate('service', { tab: 'complaints' })}
             style={{
