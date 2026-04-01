@@ -131,7 +131,7 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false, onOp
             <button
               key={item.key}
               onClick={() => navigate(item.key)}
-              title={sidebarCollapsed && !isMobile ? item.label : undefined}
+              title={item.subtitle || item.label}
               style={{
                 width: '100%',
                 display: 'flex',
