@@ -4,7 +4,7 @@ export const agentDefinitions = [
   {
     id: 'member-pulse',
     name: 'Member Pulse',
-    description: 'Detects early churn signals and proposes interventions before members disengage.',
+    description: 'Detects early disengagement signals and proposes interventions before members resign.',
     status: 'active',
     lastAction: '2026-01-17T06:04:00Z',
     accuracy: 91,
@@ -90,7 +90,7 @@ export const agentActions = [
     actionType: 'WAITLIST_PRIORITY',
     description: 'Route newly opened 7:00 AM Saturday slot to Anne Jordan before public release.',
     status: 'pending',
-    impactMetric: '68% churn-risk reduction for flagged member',
+    impactMetric: '68% resignation-risk reduction for flagged member',
     priority: 'high',
     memberId: 'mbr_089',
     dueBy: '2026-01-17T07:10:00Z',
@@ -377,7 +377,7 @@ export const agentThoughtLogs = {
   'demand-optimizer': [
     { timestamp: '06:03:40', text: 'Evaluating cancellations, weather impact, and waitlist urgency tiers.' },
     { timestamp: '06:03:51', text: 'Prime slot released: 7:00 AM Saturday. 8 members eligible.' },
-    { timestamp: '06:03:57', text: 'Anne Jordan ranked first by churn risk and retention value uplift.' },
+    { timestamp: '06:03:57', text: 'Anne Jordan ranked first by resignation risk and retention value uplift.' },
     { timestamp: '06:04:00', text: 'Proposed priority routing action for GM approval.' },
   ],
   'service-recovery': [

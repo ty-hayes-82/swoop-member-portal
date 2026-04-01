@@ -109,9 +109,9 @@ export function getQuestionReadiness() {
 export const CATEGORY_UNLOCKS = {
   'tee-sheet': 'Booking patterns, cancellation risk, pace-of-play impact',
   'pos': 'Revenue leakage, post-round dining conversion, spend gaps',
-  'crm': 'Member health scores, churn prediction, archetype assignment',
+  'crm': 'Member health scores, resignation prediction, archetype assignment',
   'staffing': 'Labor optimization alerts, understaffing-complaint correlation',
-  'email': 'Email decay detection, engagement-based churn signals',
+  'email': 'Email decay detection, engagement-based disengagement signals',
   'events': 'Event ROI analysis, attendance-retention correlation',
   'feedback': 'Complaint resolution tracking, service recovery workflows',
   'fitness': 'Facility utilization, cross-amenity engagement',

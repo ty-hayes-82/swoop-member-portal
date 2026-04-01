@@ -30,7 +30,7 @@ export const onlySwoopModules = {
     sources: ['Waitlist queue', 'Member health scores', 'Slot economics'],
     insights: [
       'Kenneth Williams (Health 16) carries $312 retention value and a sponsor request, outranking FIFO #1 who would cancel anyway.',
-      'Cancellation prediction shows 18% of today’s backlog will churn in 28 hours without intervention — queue reprioritized by dues impact.',
+      ‘Cancellation prediction shows 18% of today’s backlog will resign in 28 hours without intervention — queue reprioritized by dues impact.’,
     ],
     action: {
       text: 'Assign the 10:42 slot to Kenneth, notify his sponsor, and mark the save so the board sees the $312 protected revenue.',

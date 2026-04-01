@@ -90,8 +90,8 @@ export default function MemberHealth() {
       )}
       <FlowLink flowNum="01" persona="Sarah" />
       <Panel
-        title="Member Risk: Early Warning System"
-        subtitle="90% of clubs value a daily Health Score — catch disengagement before members walk"
+        title="Member Intelligence"
+        subtitle="Who needs attention, why, and what to do — catch disengagement before members walk"
         tabs={TABS}
         activeTab={activeTab}
         onTabChange={setActiveTab}

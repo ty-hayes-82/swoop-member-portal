@@ -221,7 +221,7 @@ export const correlationInsightsByArchetype = {
     { id: 'ba-decay', headline: 'Multi-domain decline in Balanced Active members signals resignation within 45 days', detail: 'When golf, dining, and email all decline simultaneously, these members are in a spiral. Intervene within 2 weeks.', domains: ['Golf', 'Dining', 'Email'], impact: 'high', metric: { value: '45d', label: 'avg time to resign' } },
   ],
   'Weekend Warrior': [
-    { id: 'ww-access', headline: 'Weekend Warriors denied Saturday tee times are 3.1x more likely to resign', detail: 'Tee time access is the single biggest retention factor. Prioritize weekend slots for this group during high-demand periods.', domains: ['Golf', 'Retention'], impact: 'high', metric: { value: '3.1x', label: 'churn risk when denied' } },
+    { id: 'ww-access', headline: 'Weekend Warriors denied Saturday tee times are 3.1x more likely to resign', detail: 'Tee time access is the single biggest retention factor. Prioritize weekend slots for this group during high-demand periods.', domains: ['Golf', 'Retention'], impact: 'high', metric: { value: '3.1x', label: 'resignation risk when denied' } },
     { id: 'ww-family', headline: 'Family brunch after golf drives 2.4x higher weekend dining conversion', detail: 'Make the club a weekend destination. Family-friendly post-round dining converts 65% of Weekend Warriors vs. 27% without.', domains: ['Dining', 'Events'], impact: 'medium', metric: { value: '2.4x', label: 'dining conversion' } },
   ],
   'Declining': [

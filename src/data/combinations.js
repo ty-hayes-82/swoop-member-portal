@@ -7,7 +7,7 @@ const raw = [
     insights: [
       'See exactly how much each member spends per visit — golf + dining + pro shop combined',
       'Identify which tee times drive the most F&B revenue downstream',
-      'Detect members who play frequently but never eat — hidden churn signals',
+      'Detect members who play frequently but never eat — hidden disengagement signals',
     ],
     automations: [
       "Alert GM when a high-value member's spend-per-round drops below their 90-day average",

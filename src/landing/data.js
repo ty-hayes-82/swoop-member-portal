@@ -122,7 +122,7 @@ export const coreCapabilities = [
 
 export const comparisonFeatures = [
   {
-    feature: 'Member churn prediction',
+    feature: 'Member health intelligence',
     swoop: true,
     waitlistTools: false,
     crm: 'partial',
@@ -169,7 +169,7 @@ export const agents = [
   {
     icon: 'UserRound',
     name: 'Member Pulse',
-    description: 'Detects early churn signals and proposes interventions before members disengage.',
+    description: 'Detects early disengagement signals and proposes interventions before members resign.',
   },
   {
     icon: 'Radar',

@@ -76,7 +76,7 @@ export const COMBOS = [
     id: 'club-mgmt-demand-optimizer',
     systems: ['club-mgmt'],
     insight: 'Swoop detects repeated waitlist misses and flags members with sharply lower 60-day engagement scores.',
-    kpi: { value: '2.1x', label: 'Churn risk after 3+ failed waitlists' },
+    kpi: { value: '2.1x', label: 'Resignation risk after 3+ failed waitlists' },
     preview: {
       type: 'sparkline',
       label: 'At-risk members after waitlist misses',
@@ -136,7 +136,7 @@ export const VENDOR_INTELLIGENCE_DETAILS = {
   },
   'member-crm': {
     reads: ['Member profile metadata', 'Dues and tenure', 'Lifecycle notes'],
-    adds: ['Churn risk trajectories', 'Action-ready retention segments'],
+    adds: ['Resignation risk trajectories', 'Action-ready retention segments'],
   },
   staffing: {
     reads: ['Shift templates', 'Coverage gaps', 'Overtime'],

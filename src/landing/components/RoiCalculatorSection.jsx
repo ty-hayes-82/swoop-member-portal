@@ -26,7 +26,7 @@ export default function RoiCalculatorSection() {
       }}
     >
       <h2 style={{ fontSize: 'clamp(30px, 4vw, 46px)', marginBottom: theme.spacing.md, textAlign: 'center' }}>
-        What is churn costing your club?
+        What is member turnover costing your club?
       </h2>
       <p
         style={{
@@ -76,7 +76,7 @@ export default function RoiCalculatorSection() {
           </div>
           <div>
             <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: theme.fontSize.sm, marginBottom: theme.spacing.sm, color: `${theme.colors.bgCard}B3` }}>
-              <span>Annual Churn Rate</span>
+              <span>Annual Turnover Rate</span>
               <span style={{ fontFamily: theme.fonts.mono, color: theme.colors.ctaGreen }}>{churn}%</span>
             </label>
             <input
