@@ -12,7 +12,7 @@ import EvidenceStrip from '@/components/ui/EvidenceStrip';
 // Member Health tabs — V3: reduced to 2 (At-Risk uses HealthOverview, search uses AllMembersView)
 import HealthOverview from '@/features/member-health/tabs/HealthOverview';
 import AllMembersView from '@/features/member-health/tabs/AllMembersView';
-import ResignationTimeline from '@/features/member-health/ResignationTimeline';
+// ResignationTimeline removed in V4 — not operational
 
 
 const MODES = [
@@ -26,14 +26,14 @@ const HEADLINES = {
     const atRisk = (summary.atRisk ?? 0) + (summary.critical ?? 0);
     return {
       variant: 'warning',
-      headline: `${atRisk} members need attention — here's what to do.`,
-      context: 'Members showing multi-domain disengagement patterns across golf, dining, and events.',
+      headline: `Which members need your attention this week — and what's the best action for each?`,
+      context: `${atRisk} members showing engagement changes across golf, dining, and events.`,
     };
   },
   'search': () => ({
     variant: 'insight',
-    headline: `${getMemberSummary().totalMembers || 300} members — search, filter, and drill down.`,
-    context: 'Complete member directory with health scores, archetypes, and engagement data.',
+    headline: `Member directory — search by name, archetype, or health level`,
+    context: `${getMemberSummary().totalMembers || 300} members with health scores, archetypes, and engagement data.`,
   }),
 };
 
@@ -145,7 +145,6 @@ export default function MembersView() {
         {mode === 'at-risk' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
             <HealthOverview />
-            <ResignationTimeline />
           </div>
         )}
 
