@@ -27,7 +27,9 @@ const HEADLINES = {
     return {
       variant: 'warning',
       headline: `Which members need your attention this week — and what's the best action for each?`,
-      context: `${atRisk} members showing engagement changes across golf, dining, and events.`,
+      context: atRisk > 0
+        ? `${atRisk} members showing engagement changes across golf, dining, and events.`
+        : 'No members currently flagged — last checked today.',
     };
   },
   'search': () => ({

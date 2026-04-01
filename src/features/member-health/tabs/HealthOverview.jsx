@@ -29,35 +29,53 @@ function getComplaintInfo(memberId) {
   return { days, category: complaint.category };
 }
 
+const ACTION_OWNERS = {
+  'Ghost': 'GM',
+  'Declining': 'Membership Director',
+  'Weekend Warrior': 'Pro Shop',
+  'Die-Hard Golfer': 'Pro Shop',
+  'Social Butterfly': 'Events Coordinator',
+  'New Member': 'Membership Director',
+  'Snowbird': 'Front Desk',
+  'Balanced Active': 'Membership Director',
+};
+
 function getDifferentiatedAction(member, complaint) {
+  const owner = ACTION_OWNERS[member.archetype] || 'Membership Director';
   if (complaint) {
-    return { action: `Resolve complaint — ${complaint.category}, ${complaint.days} days open`, type: 'complaint' };
+    return { action: `Resolve complaint — ${complaint.category}, ${complaint.days} days open`, type: 'complaint', owner: complaint.days > 14 ? 'GM' : owner };
   }
   const risk = (member.topRisk || member.signal || '').toLowerCase();
+  // Archetype-specific actions (differentiated per audit)
+  switch (member.archetype) {
+    case 'Ghost':
+      return { action: 'GM personal call — re-engagement conversation', type: 'ghost', owner: 'GM' };
+    case 'Declining':
+      return { action: `Membership Director outreach — identify root cause of declining activity`, type: 'declining', owner: 'Membership Director' };
+    case 'Weekend Warrior':
+      return { action: 'Priority Saturday tee time offer from Pro Shop', type: 'golf', owner: 'Pro Shop' };
+    case 'Die-Hard Golfer': {
+      const weeks = risk.match(/(\d+)\s*weeks?/)?.[1];
+      return { action: `Pro shop outreach — ${weeks ? `check in, last round ${weeks} weeks ago` : 'check equipment/injury/schedule'}`, type: 'golf', owner: 'Pro Shop' };
+    }
+    case 'Social Butterfly':
+      return { action: 'Invite to upcoming wine dinner or social event', type: 'social', owner: 'Events Coordinator' };
+    case 'New Member':
+      return { action: 'New member integration check-in — identify engagement gaps', type: 'new-member', owner: 'Membership Director' };
+    case 'Snowbird':
+      return { action: 'Send welcome-back package + tee time reservation', type: 'snowbird', owner: 'Front Desk' };
+    default:
+      break;
+  }
+  // Risk-signal-based fallbacks
   if (risk.includes('email') || risk.includes('open rate')) {
     const pct = risk.match(/(\d+)%/)?.[1] || '';
-    return { action: `Check-in call — email engagement dropped${pct ? ` ${pct}%` : ''}`, type: 'email' };
-  }
-  if (risk.includes('golf') || risk.includes('round') || risk.includes('tee')) {
-    const weeks = risk.match(/(\d+)\s*weeks?/)?.[1];
-    return { action: `Pro shop outreach — ${weeks ? `last round ${weeks} weeks ago` : 'golf activity declining'}`, type: 'golf' };
+    return { action: `Check-in call — email engagement dropped${pct ? ` ${pct}%` : ''}`, type: 'email', owner };
   }
   if (risk.includes('dining') || risk.includes('f&b')) {
-    return { action: 'Invite to upcoming dinner or dining event', type: 'dining' };
+    return { action: 'Invite to upcoming dinner or dining event', type: 'dining', owner: 'F&B Director' };
   }
-  if (member.archetype === 'New Member') {
-    return { action: `New member integration check — identify engagement gaps`, type: 'new-member' };
-  }
-  if (member.archetype === 'Ghost') {
-    return { action: 'Membership Director outreach — re-engagement conversation', type: 'ghost' };
-  }
-  if (member.archetype === 'Social Butterfly') {
-    return { action: 'Personal event invitation from Membership Director', type: 'social' };
-  }
-  if (member.archetype === 'Weekend Warrior' || member.archetype === 'Die-Hard Golfer') {
-    return { action: 'Pro shop call with preferred tee time offer', type: 'golf' };
-  }
-  return { action: member.action || 'Personalized outreach based on engagement pattern', type: 'general' };
+  return { action: member.action || 'Personalized outreach based on engagement pattern', type: 'general', owner };
 }
 
 function buildPriorityList(atRisk, watchList, volatileMembers) {
@@ -100,12 +118,11 @@ function buildPriorityList(atRisk, watchList, volatileMembers) {
       const reason = complaint
         ? `Complaint unresolved ${complaint.days} days (${complaint.category})`
         : m.topRisk || m.signal || 'Health score declining';
-      const { action, type } = getDifferentiatedAction(m, complaint);
+      const { action, type, owner } = getDifferentiatedAction(m, complaint);
 
-      return { ...m, priorityScore, reason, action, actionType: type };
+      return { ...m, priorityScore, reason, action, actionType: type, owner };
     })
-    .sort((a, b) => b.priorityScore - a.priorityScore)
-    .slice(0, 15);
+    .sort((a, b) => b.priorityScore - a.priorityScore);
 }
 
 const ACTION_TYPE_COLORS = {
@@ -115,7 +132,9 @@ const ACTION_TYPE_COLORS = {
   dining: theme.colors.info500,
   'new-member': theme.colors.info,
   ghost: theme.colors.textMuted,
+  declining: theme.colors.urgent,
   social: '#8b5cf6',
+  snowbird: theme.colors.info,
   general: theme.colors.accent,
 };
 
@@ -125,12 +144,14 @@ export default function HealthOverview() {
   const watchList = getWatchMembers();
   const volatileMembers = getVolatileMembers();
   const [expandedId, setExpandedId] = useState(null);
+  const [showAll, setShowAll] = useState(false);
   const { showToast, addAction } = useApp();
 
-  const priorityMembers = useMemo(
+  const allPriorityMembers = useMemo(
     () => buildPriorityList(atRisk, watchList, volatileMembers),
     [atRisk, watchList, volatileMembers]
   );
+  const priorityMembers = showAll ? allPriorityMembers : allPriorityMembers.slice(0, 5);
 
   const scoreColor = (score) =>
     score < 30 ? theme.colors.urgent
@@ -188,7 +209,7 @@ export default function HealthOverview() {
               Members Needing Attention
             </div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-              Priority-sorted by health score, complaints, and engagement signals — top {priorityMembers.length} members
+              Priority-sorted by health score, complaints, and engagement signals
             </div>
           </div>
         </div>
@@ -296,9 +317,18 @@ export default function HealthOverview() {
                     {m.reason}
                   </div>
 
-                  {/* Row 3: Differentiated action */}
-                  <div style={{ fontSize: theme.fontSize.xs, color: actionColor, fontWeight: 600, paddingLeft: 30 }}>
-                    {m.action}
+                  {/* Row 3: Owner + Differentiated action */}
+                  <div style={{ fontSize: theme.fontSize.xs, fontWeight: 600, paddingLeft: 30, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {m.owner && (
+                      <span style={{
+                        fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                        background: `${theme.colors.accent}10`, color: theme.colors.accent,
+                        textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0,
+                      }}>
+                        {m.owner}
+                      </span>
+                    )}
+                    <span style={{ color: actionColor }}>{m.action}</span>
                   </div>
                 </div>
 
@@ -317,6 +347,20 @@ export default function HealthOverview() {
             );
           })}
         </div>
+
+        {allPriorityMembers.length > 5 && (
+          <button
+            onClick={() => setShowAll(!showAll)}
+            style={{
+              marginTop: 10, padding: '8px 16px', fontSize: theme.fontSize.xs,
+              fontWeight: 600, color: theme.colors.accent, background: 'none',
+              border: `1px solid ${theme.colors.accent}30`, borderRadius: theme.radius.sm,
+              cursor: 'pointer', width: '100%', textAlign: 'center',
+            }}
+          >
+            {showAll ? 'Show top 5 only' : `View all ${allPriorityMembers.length} at-risk members →`}
+          </button>
+        )}
       </div>
 
       {/* Member Health Trend chart */}
