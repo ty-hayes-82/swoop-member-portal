@@ -7,6 +7,23 @@ import MemberLink from '@/components/MemberLink';
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const PRIORITY_COLORS = { high: theme.colors.urgent, medium: theme.colors.warning, low: theme.colors.textMuted };
 
+// Map agent/source names to role-based owners
+const SOURCE_TO_OWNER = {
+  'Member Pulse': 'Membership Director',
+  'Demand Optimizer': 'GM',
+  'Service Recovery': 'F&B Director',
+  'Revenue Analyst': 'GM',
+};
+
+function getActionOwner(action) {
+  if (action.suggestedOwner) return action.suggestedOwner.split('·')[0].trim();
+  if (action.source && SOURCE_TO_OWNER[action.source]) return SOURCE_TO_OWNER[action.source];
+  // Infer from action type
+  if (action.actionType === 'STAFFING_ADJUSTMENT') return 'F&B Director';
+  if (action.actionType === 'SERVICE_RECOVERY') return 'F&B Director';
+  return 'GM';
+}
+
 export default function PendingActionsInline({ topPriority = null }) {
   const { inbox, pendingAgentCount } = useApp();
 
@@ -134,7 +151,7 @@ export default function PendingActionsInline({ topPriority = null }) {
                     background: `${theme.colors.accent}10`, color: theme.colors.accent,
                     textTransform: 'uppercase', letterSpacing: '0.04em',
                   }}>
-                    {(action.suggestedOwner || action.source || 'GM').split('·')[0].trim()}
+                    {getActionOwner(action)}
                   </span>
                 </div>
                 <span style={{

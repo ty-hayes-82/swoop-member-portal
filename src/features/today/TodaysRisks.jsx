@@ -145,6 +145,16 @@ export default function TodaysRisks() {
                       Understaffed
                     </span>
                   )}
+                  {!c.isUnderstaffedDay && c.daysOpen <= 10 && (
+                    <span style={{ fontSize: '9px', fontWeight: 700, color: '#ca8a04', background: '#ca8a0412', padding: '1px 5px', borderRadius: '999px' }}>
+                      High-demand day
+                    </span>
+                  )}
+                  {c.category === 'Pace of Play' && (
+                    <span style={{ fontSize: '9px', fontWeight: 700, color: theme.colors.info500 || '#3B82F6', background: `${theme.colors.info500 || '#3B82F6'}12`, padding: '1px 5px', borderRadius: '999px' }}>
+                      Weather impact
+                    </span>
+                  )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                   <span style={{

@@ -21,7 +21,10 @@ export function getClubName() {
 export function isRealClub() {
   try {
     const clubId = localStorage.getItem('swoop_club_id');
-    return clubId && clubId !== 'demo';
+    if (!clubId || clubId === 'demo') return false;
+    // Seeded/test clubs are not "real" — check for production flag
+    const isProduction = localStorage.getItem('swoop_production') === 'true';
+    return isProduction;
   } catch { return false; }
 }
 
