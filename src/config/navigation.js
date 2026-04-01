@@ -13,7 +13,7 @@ export const navItems = [
     section: 'PRIMARY',
     icon: '🎯',
     color: theme.colors.navBriefing,
-    subtitle: 'Morning cockpit: risks, members, and pending actions.',
+    subtitle: 'Morning cockpit: operations, members, and actions.',
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
   },
   {
@@ -27,11 +27,11 @@ export const navItems = [
   },
   {
     key: 'members',
-    label: 'Member Health',
+    label: 'Members',
     section: 'PRIMARY',
     icon: '👥',
     color: theme.colors.navMembers,
-    subtitle: 'Members needing attention, health scores, and member directory.',
+    subtitle: 'Member intelligence: who needs attention, why, and what to do.',
     sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
   },
   {
@@ -96,6 +96,16 @@ export const navItems = [
     color: theme.colors.navMembers,
     subtitle: 'Full member dossier with history, family, preferences, and invoices.',
     sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Analytics'],
+    hidden: true,
+  },
+  {
+    key: 'playbooks',
+    label: 'Playbooks',
+    section: 'HIDDEN',
+    icon: '📋',
+    color: theme.colors.navAgents,
+    subtitle: 'Automated protocols for service recovery, engagement, and new member success.',
+    sourceSystems: ['Member CRM', 'Tee Sheet', 'Complaints'],
     hidden: true,
   },
 ];

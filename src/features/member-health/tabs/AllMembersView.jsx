@@ -440,7 +440,7 @@ export default function AllMembersView({ initialArchetype = null }) {
       setHealthFilter(null);
       setActiveHealthLevel(null);
     } else {
-      setHealthFilter(target);
+      setHealthFilter(ranges[level]);
       setActiveHealthLevel(level);
     }
   };

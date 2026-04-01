@@ -19,6 +19,7 @@ import AdminHub from '@/features/admin/AdminHub';
 import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
 import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
 import { IntegrationsPage } from '@/features/integrations';
+import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
 import LoginPage from '@/features/login/LoginPage';
 import { theme } from '@/config/theme';
 
@@ -32,6 +33,7 @@ const ROUTES = {
   'admin': AdminHub,
   'member-profile': MemberProfilePage,
   'integrations': IntegrationsPage,
+  'playbooks': PlaybooksPage,
 };
 
 function AppShell() {
