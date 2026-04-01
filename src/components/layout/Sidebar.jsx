@@ -165,9 +165,23 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false, onOp
                 }
               }}
             >
-              <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
+              <span style={{ fontSize: '14px', flexShrink: 0, opacity: active ? 1 : 0.6, position: 'relative' }}>
+                {item.icon}
+                {item.key === 'today' && pendingAgentCount > 0 && !active && (
+                  <span style={{
+                    position: 'absolute', top: -2, right: -4,
+                    width: 7, height: 7, borderRadius: '50%',
+                    background: theme.colors.accent,
+                    animation: 'pulse-dot 2s infinite',
+                  }} />
+                )}
+              </span>
               {(!sidebarCollapsed || isMobile) && (
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                <span style={{
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
+                  fontSize: item.key === 'today' ? '14px' : '13px',
+                  fontWeight: item.key === 'today' ? 700 : (active ? 600 : 350),
+                }}>
                   {item.label}
                 </span>
               )}
@@ -243,6 +257,13 @@ export default function Sidebar({ isMobile = false, mobileMenuOpen = false, onOp
           {sidebarCollapsed ? '›' : '‹'}
         </button>
       </div>
+
+      <style>{`
+        @keyframes pulse-dot {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.3); }
+        }
+      `}</style>
     </aside>
   );
 }

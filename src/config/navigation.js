@@ -27,11 +27,11 @@ export const navItems = [
   },
   {
     key: 'members',
-    label: 'Members',
+    label: 'Member Health',
     section: 'PRIMARY',
     icon: '👥',
     color: theme.colors.navMembers,
-    subtitle: 'At-risk members, health scores, and member directory.',
+    subtitle: 'Members needing attention, health scores, and member directory.',
     sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
   },
   {
