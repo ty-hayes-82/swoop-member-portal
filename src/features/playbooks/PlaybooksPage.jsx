@@ -635,8 +635,8 @@ function PlaybookDetail({ playbook }) {
 }
 
 export default function PlaybooksPage() {
-  // V3: Only show non-hidden playbooks (3 core: service-save, new-member-90day, staffing-gap)
-  const visiblePlaybooks = useMemo(() => PLAYBOOKS.filter(p => !p.hidden), []);
+  // V5: Show all playbooks (hidden flag removed — all are operational-category playbooks now)
+  const visiblePlaybooks = useMemo(() => PLAYBOOKS, []);
   const [selectedId, setSelectedId] = useState(visiblePlaybooks[0]?.id);
   const [categoryFilter, setCategoryFilter] = useState('All');
   const selected = visiblePlaybooks.find(p => p.id === selectedId);
@@ -666,22 +666,23 @@ export default function PlaybooksPage() {
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <div style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#0f0f0f' }}>{visiblePlaybooks.length}</div>
-              <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Playbooks</div>
-            </div>
-            <div style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#27ae60' }}>{visiblePlaybooks.filter(p => p.category === 'Retention').length}</div>
-              <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Retention</div>
-            </div>
-            <div style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#2563eb' }}>{visiblePlaybooks.filter(p => p.category === 'Revenue').length}</div>
-              <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Revenue</div>
-            </div>
-            <div style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#7c3aed' }}>{visiblePlaybooks.filter(p => p.category === 'Operations').length}</div>
-              <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Operations</div>
-            </div>
+            {[
+              { cat: 'Service Recovery', color: '#c0392b' },
+              { cat: 'New Member Success', color: '#0ea5e9' },
+              { cat: 'Member Engagement', color: '#6b7280' },
+              { cat: 'Events & Programming', color: '#8b5cf6' },
+              { cat: 'Revenue', color: '#2563eb' },
+              { cat: 'Operations', color: '#7c3aed' },
+            ].map(({ cat, color }) => {
+              const count = visiblePlaybooks.filter(p => p.category === cat).length;
+              if (count === 0) return null;
+              return (
+                <div key={cat} style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color }}>{count}</div>
+                  <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{cat}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
