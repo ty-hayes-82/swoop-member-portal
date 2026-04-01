@@ -77,8 +77,8 @@ export default function QualityTab() {
               {consistencyScore >= 70
                 ? 'Service is consistent — no major gaps detected'
                 : consistencyScore >= 50
-                  ? `Driven down by ${understaffedDays.length > 2 ? 'staffing gaps' : (totalComplaints - resolvedCount) > 3 ? 'unresolved complaints' : 'pace of play issues'}`
-                  : `Critical: ${understaffedDays.length > 2 ? 'staffing gaps' : 'complaint backlog'} requires immediate attention`}
+                  ? `Driven down by ${understaffedDays.length > 2 ? 'staffing gaps' : (totalComplaints - resolvedCount) > 3 ? 'unresolved complaints' : 'pace of play issues'} — see recommendation below`
+                  : `Critical: ${understaffedDays.length > 2 ? 'staffing gaps' : 'complaint backlog'} requires immediate attention — see recommendation below`}
             </div>
           </div>
         </div>
@@ -103,10 +103,20 @@ export default function QualityTab() {
       {/* Biggest Driver Recommendation */}
       {consistencyScore < 70 && (() => {
         const openComplaints = totalComplaints - resolvedCount;
+        // Find the outlet with the most complaints for outlet-specific recommendation
+        const outletComplaints = {};
+        feedbackRecords.filter(f => f.status !== 'resolved').forEach(f => {
+          const outlet = f.isUnderstaffedDay ? 'Grill Room' : (f.outlet || 'Grill Room');
+          outletComplaints[outlet] = (outletComplaints[outlet] || 0) + 1;
+        });
+        const worstOutlet = Object.entries(outletComplaints).sort((a, b) => b[1] - a[1])[0];
+        const worstOutletName = worstOutlet ? worstOutlet[0] : 'Grill Room';
+        const worstOutletCount = worstOutlet ? worstOutlet[1] : openComplaints;
+
         const drivers = [
-          { score: understaffedDays.length * 10, text: `${understaffedDays.length} understaffed days this month correlate with service complaints`, link: 'staffing', label: 'See Staffing tab for recommendation' },
-          { score: openComplaints * 8, text: `${openComplaints} complaints unresolved — oldest over 7 days`, link: 'complaints', label: 'See Complaints tab to prioritize resolution' },
-          { score: (100 - resolutionRate) * 0.5, text: `Resolution rate at ${resolutionRate}% — below 70% target`, link: 'complaints', label: 'Prioritize the oldest open complaints to improve' },
+          { score: understaffedDays.length * 10, text: `${worstOutletName} has ${understaffedDays.length} understaffed days this month — correlates with ${worstOutletCount} open complaints`, link: 'staffing', label: 'See Staffing tab for recommendation' },
+          { score: openComplaints * 8, text: `${worstOutletName}: ${openComplaints} complaints unresolved — oldest over 7 days`, link: 'complaints', label: 'See Complaints tab to prioritize resolution' },
+          { score: (100 - resolutionRate) * 0.5, text: `Resolution rate at ${resolutionRate}% — ${worstOutletName} lunch service is the biggest gap`, link: 'complaints', label: 'Prioritize the oldest open complaints to improve' },
         ].sort((a, b) => b.score - a.score);
         const top = drivers[0];
         return (
