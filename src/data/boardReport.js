@@ -1,13 +1,10 @@
 // Static fallback data for Board Report
-// Source of truth until live Postgres wiring is confirmed working
+// V4: Restructured KPIs — service quality leads, no dollar amounts on card faces
 
 export const kpis = [
-  { label: 'Members Saved', value: 14, prefix: '', suffix: '', color: 'green' },
-  { label: 'Dues Protected', value: 168, prefix: '$', suffix: 'K', color: 'green' },
-  { label: 'Lifetime Value Protected', value: 840, prefix: '$', suffix: 'K', color: 'green' },
-  { label: 'Revenue Recovered', value: 42.5, prefix: '$', suffix: 'K', color: 'green' },
-  { label: 'Service Failures Caught', value: 23, prefix: '', suffix: '', color: 'green' },
-  { label: 'Avg Response Time', value: 4.2, prefix: '', suffix: ' hrs', color: 'green' },
+  { label: 'Service Quality Score', value: 87, prefix: '', suffix: '%', color: 'green' },
+  { label: 'Members Retained', value: 14, prefix: '', suffix: '', color: 'green' },
+  { label: 'Operational Efficiency', value: 4.2, prefix: '', suffix: ' hrs', color: 'green' },
   { label: 'Board Confidence Score', value: 94, prefix: '', suffix: '%', color: 'green' },
 ];
 

@@ -39,11 +39,8 @@ export const getKPIs = () => {
   if (!_liveKpis) return staticKpis;
   // Merge live data into static structure
   return staticKpis.map(kpi => {
-    if (kpi.label === 'Members Saved' && _liveKpis.membersSaved > 0) {
+    if (kpi.label === 'Members Retained' && _liveKpis.membersSaved > 0) {
       return { ...kpi, value: _liveKpis.membersSaved };
-    }
-    if (kpi.label === 'Dues Protected' && _liveKpis.duesProtected > 0) {
-      return { ...kpi, value: `$${Number(_liveKpis.duesProtected).toLocaleString()}` };
     }
     return kpi;
   });
