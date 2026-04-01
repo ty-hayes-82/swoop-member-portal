@@ -74,7 +74,11 @@ export default function QualityTab() {
               {consistencyScore >= 70 ? 'Consistent' : consistencyScore >= 50 ? 'Needs Attention' : 'At Risk'}
             </div>
             <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 2 }}>
-              Based on resolution rate, staffing gaps, and pace data
+              {consistencyScore >= 70
+                ? 'Service is consistent — no major gaps detected'
+                : consistencyScore >= 50
+                  ? `Driven down by ${understaffedDays.length > 2 ? 'staffing gaps' : (totalComplaints - resolvedCount) > 3 ? 'unresolved complaints' : 'pace of play issues'}`
+                  : `Critical: ${understaffedDays.length > 2 ? 'staffing gaps' : 'complaint backlog'} requires immediate attention`}
             </div>
           </div>
         </div>
@@ -95,6 +99,40 @@ export default function QualityTab() {
           ))}
         </div>
       </div>
+
+      {/* Biggest Driver Recommendation */}
+      {consistencyScore < 70 && (() => {
+        const openComplaints = totalComplaints - resolvedCount;
+        const drivers = [
+          { score: understaffedDays.length * 10, text: `${understaffedDays.length} understaffed days this month correlate with service complaints`, link: 'staffing', label: 'See Staffing tab for recommendation' },
+          { score: openComplaints * 8, text: `${openComplaints} complaints unresolved — oldest over 7 days`, link: 'complaints', label: 'See Complaints tab to prioritize resolution' },
+          { score: (100 - resolutionRate) * 0.5, text: `Resolution rate at ${resolutionRate}% — below 70% target`, link: 'complaints', label: 'Prioritize the oldest open complaints to improve' },
+        ].sort((a, b) => b.score - a.score);
+        const top = drivers[0];
+        return (
+          <div style={{
+            background: `${scoreColor}06`, border: `1px solid ${scoreColor}20`,
+            borderRadius: theme.radius.md, padding: '14px 18px',
+          }}>
+            <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: scoreColor, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+              Biggest Driver
+            </div>
+            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, marginBottom: 4 }}>
+              {top.text}
+            </div>
+            <button
+              onClick={() => navigate('service', { tab: top.link })}
+              style={{
+                fontSize: theme.fontSize.xs, fontWeight: 600, color: theme.colors.accent,
+                background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                textDecoration: 'underline',
+              }}
+            >
+              {top.label} →
+            </button>
+          </div>
+        );
+      })()}
 
       {/* By Day of Week */}
       <div style={{
