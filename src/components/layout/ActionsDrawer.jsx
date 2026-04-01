@@ -9,19 +9,19 @@ const DRAWER_TABS = [
   { key: 'playbooks', label: 'Playbooks' },
 ];
 
-// The 3 V3 core playbooks — summary data for the drawer
+// V5: Core playbooks with operational categories (matching PlaybooksPage)
 const CORE_PLAYBOOKS = [
   {
     id: 'service-save',
     name: 'Service Save Protocol',
-    category: 'Retention',
+    category: 'Service Recovery',
     description: 'When an engaged member files an unresolved complaint, escalate to GM with full context and trigger a recovery sequence.',
     trackRecord: '3 of 4 at-risk members retained (Q4 2025)',
   },
   {
     id: 'new-member-90day',
     name: 'New Member 90-Day Integration',
-    category: 'Retention',
+    category: 'New Member Success',
     description: 'When new members aren\'t building habits by Day 30/60/90, trigger member matching, family events, and concierge outreach.',
     trackRecord: '7 of 8 new members integrated (Q4 2025)',
   },
@@ -31,6 +31,41 @@ const CORE_PLAYBOOKS = [
     category: 'Operations',
     description: 'When staffing doesn\'t match demand — call-outs, weather shifts, event overlap — detect gaps and adjust before service quality drops.',
     trackRecord: 'Zero service complaints during gaps (Q4 2025)',
+  },
+  {
+    id: 'ghost-reactivation',
+    name: 'Ghost Member Reactivation',
+    category: 'Member Engagement',
+    description: 'When members have zero activity for 60+ days, trigger GM call, surprise gift, and guest pass sequence to re-engage.',
+    trackRecord: '4 of 6 ghost members reactivated (Q4 2025)',
+  },
+  {
+    id: 'declining-intervention',
+    name: 'Declining Member Intervention',
+    category: 'Member Engagement',
+    description: 'When engagement drops below 30% of baseline, surface hidden dissatisfaction with pulse surveys and personal GM outreach.',
+    trackRecord: '8 of 12 declining members stabilized (Q4 2025)',
+  },
+  {
+    id: 'service-failure-rapid',
+    name: 'Service Failure Rapid Response',
+    category: 'Service Recovery',
+    description: 'When high-value members report negative experiences, shrink response window from hours to minutes with auto-escalation.',
+    trackRecord: '5 of 5 high-value members retained (Q4 2025)',
+  },
+  {
+    id: 'post-event',
+    name: 'Post-Event Engagement Capture',
+    category: 'Events & Programming',
+    description: 'After club events, convert peak engagement into sustained visits with thank-yous, introductions, and tee time holds.',
+    trackRecord: '11 of 14 event attendees returned within 10 days (Q4 2025)',
+  },
+  {
+    id: 'anniversary',
+    name: 'Membership Anniversary Celebration',
+    category: 'Member Engagement',
+    description: 'At membership milestones (1, 5, 10, 20 years), deliver personalized recognition to reinforce belonging.',
+    trackRecord: '11 of 11 milestone members renewed (Q4 2025)',
   },
 ];
 
@@ -198,8 +233,14 @@ export default function ActionsDrawer({ isOpen, onClose }) {
           {/* Playbooks tab */}
           {activeTab === 'playbooks' && (
             <>
-              <div style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 4 }}>
-                {CORE_PLAYBOOKS.length} active playbooks — activate to start automated response protocols.
+              <div style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{CORE_PLAYBOOKS.length} playbooks — activate to start automated response protocols.</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onClose(); navigate('playbooks'); }}
+                  style={{ fontSize: 11, fontWeight: 600, color: theme.colors.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                >
+                  View all →
+                </button>
               </div>
               {CORE_PLAYBOOKS.map(pb => {
                 const isActive = playbooks?.[pb.id]?.active;

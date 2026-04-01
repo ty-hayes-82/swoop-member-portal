@@ -28,11 +28,13 @@ const TRAIL_STEPS = {
 const defaultAgents = getAgents();
 const defaultStatuses = Object.fromEntries(defaultAgents.map((agent) => [agent.id, agent.status]));
 
-// For real clubs, start with empty inbox — no demo actions
+// For real production clubs, start with empty inbox — no demo actions
+// Must match isRealClub() from constants.js: requires swoop_production=true
 const _isReal = (() => {
   try {
     const id = localStorage.getItem('swoop_club_id');
-    return id && id !== 'demo';
+    if (!id || id === 'demo') return false;
+    return localStorage.getItem('swoop_production') === 'true';
   } catch { return false; }
 })();
 
@@ -207,6 +209,15 @@ function loadPersistedState(base) {
     const agentConfigs = JSON.parse(localStorage.getItem('swoop_agent_configs') || 'null');
 
     let nextInbox = Array.isArray(inbox) ? inbox : base.inbox;
+    // V5 migration: replace "churn" with "resignation" in persisted inbox items
+    if (Array.isArray(inbox)) {
+      nextInbox = nextInbox.map(item => {
+        if (item.impactMetric && item.impactMetric.includes('churn')) {
+          return { ...item, impactMetric: item.impactMetric.replace(/churn/gi, 'resignation') };
+        }
+        return item;
+      });
+    }
     // If persisted inbox has 0 pending items, reset to defaults so demo stays populated
     // But NOT for real clubs — they should start empty
     if (!_isReal && computePendingCount(nextInbox) === 0 && computePendingCount(base.inbox) > 0) {

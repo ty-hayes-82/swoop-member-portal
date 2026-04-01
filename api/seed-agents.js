@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     // Seed agent_definitions
     await sql`INSERT INTO agent_definitions (agent_id, name, description, status, model, avatar, source_systems, last_run)
       VALUES
-        ('member-pulse', 'Member Pulse', 'Detects early churn signals by correlating visit frequency, spend trends, and sentiment across dining, golf, and events.', 'active', 'swoop-core-v2', '/agents/member-pulse.svg', ARRAY['Member CRM','POS','Tee Sheet','Event RSVP'], NOW() - INTERVAL '2 hours'),
+        ('member-pulse', 'Member Pulse', 'Detects early disengagement signals by correlating visit frequency, spend trends, and sentiment across dining, golf, and events.', 'active', 'swoop-core-v2', '/agents/member-pulse.svg', ARRAY['Member CRM','POS','Tee Sheet','Event RSVP'], NOW() - INTERVAL '2 hours'),
         ('demand-optimizer', 'Demand Optimizer', 'Balances waitlist demand with cancellation probability to maximize tee-sheet utilization and member satisfaction.', 'active', 'swoop-core-v2', '/agents/demand-optimizer.svg', ARRAY['Tee Sheet','Waitlist','Weather API'], NOW() - INTERVAL '1 hour'),
         ('service-recovery', 'Service Recovery', 'Surfaces unresolved complaints and at-risk moments, recommending immediate staff action before members disengage.', 'learning', 'swoop-core-v2', '/agents/service-recovery.svg', ARRAY['Feedback System','POS','Staff Notes'], NOW() - INTERVAL '3 hours'),
         ('revenue-analyst', 'Revenue Analyst', 'Flags preventable revenue leakage from no-shows, underpriced slots, and declining ancillary spend per round.', 'active', 'swoop-core-v2', '/agents/revenue-analyst.svg', ARRAY['POS','Tee Sheet','Billing'], NOW() - INTERVAL '30 minutes'),
