@@ -363,6 +363,46 @@ export default function HealthOverview() {
         )}
       </div>
 
+      {/* New Members in 90-Day Window */}
+      {(() => {
+        const newMembers = allPriorityMembers.filter(m => m.archetype === 'New Member');
+        if (newMembers.length === 0) return null;
+        return (
+          <div style={{
+            background: `${theme.colors.info}06`, border: `1px solid ${theme.colors.info}20`,
+            borderRadius: theme.radius.md, padding: '14px 18px',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.info, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                New Members (First 90 Days)
+              </div>
+              <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in integration window
+              </span>
+            </div>
+            {newMembers.map(m => (
+              <div key={m.memberId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderTop: `1px solid ${theme.colors.info}10` }}>
+                <MemberLink memberId={m.memberId} mode="drawer" style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
+                  {m.name}
+                </MemberLink>
+                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: `${scoreColor(m.score)}15`, color: scoreColor(m.score), fontFamily: theme.fonts.mono }}>
+                  {m.score}
+                </span>
+                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, flex: 1 }}>
+                  {m.reason}
+                </span>
+                <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: `${theme.colors.info}10`, color: theme.colors.info, textTransform: 'uppercase' }}>
+                  {m.owner || 'Membership Director'}
+                </span>
+              </div>
+            ))}
+            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.info, marginTop: 8, fontWeight: 600 }}>
+              See First 90 Days tab for full integration tracking with milestones →
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Member Health Trend chart */}
       <TrendChart
         title="Member Health Trend — avg score + members needing attention"
