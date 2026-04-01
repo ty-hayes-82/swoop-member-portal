@@ -17,8 +17,7 @@ import { theme } from '@/config/theme';
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning — here's what needs your attention today";
-  if (hour < 17) return "Afternoon check-in — here's where things stand";
-  return "Evening update — here's where things stand";
+  return "Afternoon check-in — here's where things stand";
 }
 
 function formatDate() {

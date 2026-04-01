@@ -10,6 +10,7 @@ import {
   memberSummary as staticMemberSummary,
 } from '@/data/members';
 import { decayingMembers as staticDecayingMembers, emailHeatmap as staticEmailHeatmap } from '@/data/email';
+import { feedbackRecords } from '@/data/staffing';
 
 const toNumber = (value, fallback = 0) => {
   const num = Number(value);
@@ -471,7 +472,20 @@ export const getMemberProfile = (memberId) => {
       activity: [], staffNotes: [], preferences: {}, family: [],
     });
   }
-  // Fallback 3: check generated roster cache
+  // Fallback 3: check feedback/complaint records
+  const complaintMember = feedbackRecords.find(f => f.memberId === memberId);
+  if (complaintMember) {
+    return normalizeMemberProfile({
+      memberId: complaintMember.memberId, name: complaintMember.memberName,
+      tier: 'Full Golf', archetype: 'Unknown',
+      healthScore: 50, duesAnnual: 15000,
+      contact: { phone: '—', email: '—', preferredChannel: '—' },
+      riskSignals: [{ id: 'complaint', label: `${complaintMember.category} complaint — ${complaintMember.status}`, source: 'Complaints', confidence: '—' }],
+      activity: [{ id: `fb_${complaintMember.id}`, type: 'Complaint', detail: `${complaintMember.category} — ${complaintMember.status}`, timestamp: complaintMember.date }],
+      staffNotes: [], preferences: {}, family: [],
+    });
+  }
+  // Fallback 4: check generated roster cache
   const rosterMember = _rosterCache.find(m => m.memberId === memberId);
   if (rosterMember) {
     const s = rosterMember.score ?? 70;
