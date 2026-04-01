@@ -7,24 +7,36 @@
  * - Health & Quality (Pipeline Monitor + Data Model)
  * - Activity Log (Import History + Agent Actions + System Events)
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { theme } from '@/config/theme';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 
 // V3: Reduced from 5 tabs to 2. CSV Import, Notifications, User Roles deferred.
-// V5: Data Health tab hidden until 2+ sources connected (audit: "0% Platform Value" is demoralizing)
+// V5: Data Health tab hidden until 2+ live API sources connected
 const ALL_ADMIN_TABS = [
   { key: 'data-hub', label: 'Integrations', icon: '🔌' },
   { key: 'health', label: 'Data Health', icon: '🩺' },
 ];
 
-const CONNECTED_SOURCES = ['Jonas Club CRM', 'Weather API', 'Events System', 'Complaints & Feedback'];
-
 export default function AdminHub() {
-  const connectedCount = CONNECTED_SOURCES.length;
-  const ADMIN_TABS = connectedCount >= 2 ? ALL_ADMIN_TABS : ALL_ADMIN_TABS.filter(t => t.key !== 'health');
-  const [activeTab, setActiveTab] = useState('data-hub');
+  const [liveSourceCount, setLiveSourceCount] = useState(0);
   const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+
+  useEffect(() => {
+    if (!clubId) return;
+    fetch(`/api/feature-availability?clubId=${clubId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.domains) {
+          const connected = d.domains.filter(dm => dm.connected).length;
+          setLiveSourceCount(connected);
+        }
+      })
+      .catch(() => {});
+  }, [clubId]);
+
+  const ADMIN_TABS = liveSourceCount >= 2 ? ALL_ADMIN_TABS : ALL_ADMIN_TABS.filter(t => t.key !== 'health');
+  const [activeTab, setActiveTab] = useState('data-hub');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>

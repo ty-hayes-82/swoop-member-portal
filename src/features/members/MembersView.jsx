@@ -17,8 +17,8 @@ import CohortTab from '@/features/member-health/tabs/CohortTab';
 
 const MODES = [
   { key: 'at-risk', label: 'At-Risk' },
-  { key: 'search', label: 'All Members' },
   { key: 'cohorts', label: 'First 90 Days' },
+  { key: 'search', label: 'All Members' },
 ];
 
 const HEADLINES = {

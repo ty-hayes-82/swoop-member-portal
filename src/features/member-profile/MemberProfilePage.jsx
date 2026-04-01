@@ -120,6 +120,13 @@ export default function MemberProfilePage() {
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
         if (!cancelled) {
+          if (!data || (!data.member && !data.memberId)) {
+            // API returned empty — fall back to static service
+            const fallback = getMemberProfile(memberId);
+            setProfile(fallback);
+            setLoading(false);
+            return;
+          }
           if (data?.member) {
             const m = data.member;
             const f = data.financials ?? {};

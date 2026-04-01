@@ -9,6 +9,7 @@ import { feedbackRecords } from '@/data/staffing';
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { useNavigation } from '@/context/NavigationContext';
 import { trackAction } from '@/services/activityService';
 
 const REF_DATE = new Date('2026-01-31');
@@ -146,6 +147,7 @@ export default function HealthOverview() {
   const [expandedId, setExpandedId] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const { showToast, addAction } = useApp();
+  const { navigate } = useNavigation();
 
   const allPriorityMembers = useMemo(
     () => buildPriorityList(atRisk, watchList, volatileMembers),
@@ -396,9 +398,12 @@ export default function HealthOverview() {
               <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.info, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 New Members (First 90 Days)
               </div>
-              <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-                {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in integration window
-              </span>
+              <button
+                onClick={() => navigate('members', { mode: 'cohorts' })}
+                style={{ fontSize: theme.fontSize.xs, color: theme.colors.info, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, textDecoration: 'underline', padding: 0 }}
+              >
+                {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in integration window →
+              </button>
             </div>
             {newMemberData.map(m => {
               const completed = MILESTONES.filter(ms => m.milestones[ms.key]).length;

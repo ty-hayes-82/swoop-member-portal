@@ -13,7 +13,7 @@ export const navItems = [
     section: 'PRIMARY',
     icon: '🎯',
     color: theme.colors.navBriefing,
-    subtitle: 'Morning cockpit: operations, members, and actions.',
+    subtitle: 'Morning cockpit: operations, service, members, and what needs your attention.',
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
   },
   {
