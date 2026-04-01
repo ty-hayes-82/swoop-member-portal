@@ -9,12 +9,12 @@ import { trackAction } from '@/services/activityService';
 // ────────────────────────────────────────────────
 
 const PLAYBOOKS = [
-  // ── RETENTION ──────────────────────────────────
+  // ── SERVICE RECOVERY ──────────────────────────────────
   {
     id: 'service-save',
     triggeredCount: 3,
     name: 'Service Save Protocol',
-    category: 'Retention',
+    category: 'Service Recovery',
     categoryColor: '#c0392b',
     description: 'An engaged member files a complaint that goes unresolved, leading to resignation within days. One saved resignation protects $18K\u2013$22K in dues plus $3K\u2013$5K in ancillary revenue.',
     triggeredFor: { name: 'James Whitfield', note: '6-year member in good standing \u2014 complaint from this profile is a red flag' },
@@ -44,7 +44,7 @@ const PLAYBOOKS = [
     id: 'new-member-90day',
     triggeredCount: 8,
     name: 'New Member 90-Day Integration',
-    category: 'Retention',
+    category: 'New Member Success',
     categoryColor: '#0ea5e9',
     description: 'New members who don\u2019t build habits in the first 90 days are 4x more likely to resign by Year 2. This playbook triggers at Day 30, 60, and 90 when engagement thresholds aren\u2019t met \u2014 fewer than 3 rounds, zero dining visits, or zero events attended.',
     triggeredFor: { name: 'Rachel Simmons', note: 'Day 34 \u2014 1 round played, 0 dining, 0 events. Integration score: 18%' },
@@ -76,7 +76,7 @@ const PLAYBOOKS = [
     hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 6,
     name: 'Ghost Member Reactivation',
-    category: 'Retention',
+    category: 'Member Engagement',
     categoryColor: '#6b7280',
     description: '24 members currently have zero activity across golf, dining, and events for 60+ days. They\u2019re paying dues but getting no value \u2014 the most likely next step is a resignation letter. Saving even 5 Ghost members protects ~$90K/yr.',
     triggeredFor: { name: 'David Kowalski', note: '72 days inactive \u2014 was a 2x/week golfer through September. No visits since Oct 3.' },
@@ -108,7 +108,7 @@ const PLAYBOOKS = [
     hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 12,
     name: 'Declining Member Intervention',
-    category: 'Retention',
+    category: 'Member Engagement',
     categoryColor: '#dc2626',
     description: '30 members trending down with $733K at risk. When a member\u2019s 90-day engagement drops below 30% of their personal baseline \u2014 rounds halved, dining flatlined \u2014 it\u2019s a quiet signal that something is wrong. This playbook catches the decline before the resignation.',
     triggeredFor: { name: 'Robert Ashford', note: 'Rounds dropped from 8/mo to 2/mo. Dining visits from 6 to 1. Health score: 28 (was 74).' },
@@ -140,7 +140,7 @@ const PLAYBOOKS = [
     hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 5,
     name: 'Service Failure Rapid Response',
-    category: 'Retention',
+    category: 'Service Recovery',
     categoryColor: '#b91c1c',
     description: 'A more aggressive, value-weighted version of the Service Save Protocol. When negative sentiment is detected for any member paying $12K+ in annual dues \u2014 survey below 3, front desk complaint, or negative post-visit feedback \u2014 the response window shrinks from hours to minutes.',
     triggeredFor: { name: 'Catherine Mercer', note: '$24K/yr dues, 14-year member. Rated post-dinner experience 2/5 \u2014 "waited 40 minutes for entrees, server never checked back."' },
@@ -172,7 +172,7 @@ const PLAYBOOKS = [
     hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 14,
     name: 'Post-Event Engagement Capture',
-    category: 'Retention',
+    category: 'Events & Programming',
     categoryColor: '#8b5cf6',
     description: 'Members who attend a club event \u2014 tournament, wine dinner, holiday party \u2014 are at peak engagement. But if they don\u2019t return within 7 days, that momentum evaporates. This playbook converts event energy into sustained visits.',
     triggeredFor: { name: 'Mark & Lisa Chen', note: 'Attended Holiday Wine Dinner (Dec 14) \u2014 no visits in 8 days. Normally visit 2x/week.' },
@@ -204,7 +204,7 @@ const PLAYBOOKS = [
     hidden: true, // V3: Phase 2 — deferred
     triggeredCount: 4,
     name: 'Membership Anniversary Celebration',
-    category: 'Retention',
+    category: 'Member Engagement',
     categoryColor: '#d97706',
     description: 'Membership milestones \u2014 1 year, 5 years, 10 years, 20 years \u2014 are the moments members reflect on whether the club is still worth it. A proactive, personalized celebration reinforces belonging and dramatically reduces resignation risk at renewal time.',
     triggeredFor: { name: 'William & Diane Harris', note: '10-year anniversary on March 28. 847 rounds played, $192K lifetime dues. Health score: 71 (watch list).' },
@@ -421,7 +421,7 @@ const PLAYBOOKS = [
   },
 ];
 
-const CATEGORY_FILTERS = ['All', 'Retention', 'Revenue', 'Operations'];
+const CATEGORY_FILTERS = ['All', 'Service Recovery', 'New Member Success', 'Member Engagement', 'Events & Programming', 'Revenue', 'Operations'];
 
 // ────────────────────────────────────────────────
 // Components
