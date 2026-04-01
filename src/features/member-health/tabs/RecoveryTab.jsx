@@ -108,7 +108,7 @@ export default function RecoveryTab() {
             margin: '6px 0 0',
           }}>
             Each intervention below turned an at-risk member into a retained, re-engaged member.
-            Total dues protected: <strong style={{ color: theme.colors.success }}>{formatCurrency(kpis.totalDuesProtected)}</strong>
+            Total members retained: <strong style={{ color: theme.colors.success }}>{memberSaves.length}</strong>
           </p>
         </div>
 
@@ -168,15 +168,15 @@ export default function RecoveryTab() {
                   </div>
                 </div>
 
-                {/* Dues Protected */}
+                {/* Member Retained */}
                 <div style={{ textAlign: 'right' }}>
                   <div style={{
                     fontFamily: "'JetBrains Mono', monospace",
                     fontWeight: 700,
-                    fontSize: '16px',
+                    fontSize: '14px',
                     color: theme.colors.success,
-                  }}>{formatCurrency(save.duesAtRisk)}</div>
-                  <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: 2 }}>dues protected</div>
+                  }}>Retained</div>
+                  <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: 2 }}>member saved</div>
                 </div>
               </div>
             );

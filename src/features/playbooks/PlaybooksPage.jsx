@@ -26,8 +26,8 @@ const PLAYBOOKS = [
       { badge: { text: '\uD83C\uDF81 Comp Offer', bg: '#d4edda', color: '#155724' }, title: 'Personal GM follow-up + comp offer', detail: 'Comp offer queued: complimentary dinner for 2. Front desk flagged: greet James by name on next visit.', timing: 'Day 1\u20132' },
     ],
     trackRecord: [
-      { period: 'Q4 2025', runs: '4x run', result: '3 of 4 at-risk members retained', impact: '$54K dues protected' },
-      { period: 'Q3 2025', runs: '2x run', result: '2 of 2 at-risk members retained', impact: '$36K dues protected' },
+      { period: 'Q4 2025', runs: '4x run', result: '3 of 4 at-risk members retained', impact: '3 members retained' },
+      { period: 'Q3 2025', runs: '2x run', result: '2 of 2 at-risk members retained', impact: '2 members retained' },
     ],
     before: [
       { label: 'Avg response to negative feedback', value: '48+ hours' },
@@ -89,7 +89,7 @@ const PLAYBOOKS = [
       { badge: { text: '\uD83D\uDD04 Win-Back Sequence', bg: '#f8d7da', color: '#721c24' }, title: 'Escalate to full multi-touch campaign', detail: 'If no response after 14 days: 3-email sequence + text from membership director + offer to pause dues for 60 days rather than resign.', timing: 'Day 14' },
     ],
     trackRecord: [
-      { period: 'Q4 2025', runs: '6x run', result: '4 of 6 ghost members reactivated', impact: '$72K dues protected' },
+      { period: 'Q4 2025', runs: '6x run', result: '4 of 6 ghost members reactivated', impact: '4 members reactivated' },
       { period: 'Q3 2025', runs: '3x run', result: '2 of 3 reactivated', impact: '$36K protected' },
     ],
     before: [
@@ -121,7 +121,7 @@ const PLAYBOOKS = [
       { badge: { text: '\uD83C\uDFCC\uFE0F Fresh Experience', bg: '#d4edda', color: '#155724' }, title: 'Complimentary lesson or clinic to reignite interest', detail: 'Offer a free 30-min lesson with the head pro or invite to an upcoming clinic. Reintroduces the member to what they loved about the club.', timing: 'Day 7\u201310' },
     ],
     trackRecord: [
-      { period: 'Q4 2025', runs: '12x run', result: '8 of 12 declining members stabilized', impact: '$144K dues protected' },
+      { period: 'Q4 2025', runs: '12x run', result: '8 of 12 declining members stabilized', impact: '8 members stabilized' },
       { period: 'Q3 2025', runs: '9x run', result: '6 of 9 stabilized', impact: '$108K protected' },
     ],
     before: [
@@ -153,7 +153,7 @@ const PLAYBOOKS = [
       { badge: { text: '\u2705 Close the Loop', bg: '#dbeafe', color: '#1e40af' }, title: 'Follow-up confirmation 7 days later', detail: 'Automated follow-up: "Catherine, we wanted to confirm your recent experience met the standard you expect. Any remaining concerns?" Resolution logged to member profile.', timing: 'Day 7' },
     ],
     trackRecord: [
-      { period: 'Q4 2025', runs: '5x run', result: '5 of 5 high-value members retained', impact: '$96K dues protected' },
+      { period: 'Q4 2025', runs: '5x run', result: '5 of 5 high-value members retained', impact: '5 members retained' },
       { period: 'Q3 2025', runs: '3x run', result: '3 of 3 retained', impact: '$62K protected' },
     ],
     before: [

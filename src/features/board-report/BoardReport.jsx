@@ -7,6 +7,7 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { getKPIs, getMemberSaves, getOperationalSaves } from '@/services/boardReportService';
 import { getHealthDistribution } from '@/services/memberService';
 import { feedbackRecords, feedbackSummary } from '@/data/staffing';
+import { isRealClub } from '@/config/constants';
 
 const tabNames = ['Summary', 'Details'];
 
@@ -153,6 +154,21 @@ export default function BoardReport() {
           >Print</button>
         </div>
       </div>
+
+      {/* Demo data indicator */}
+      {!isRealClub() && (
+        <div style={{
+          padding: '8px 14px', marginBottom: '16px',
+          borderRadius: theme.radius.sm,
+          background: `${theme.colors.warning500}10`,
+          border: `1px solid ${theme.colors.warning500}30`,
+          fontSize: '12px', color: theme.colors.warning700,
+          display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          <span style={{ fontWeight: 700 }}>Demo data</span>
+          <span>— Real metrics will appear after 30 days of live data. All figures shown are simulated.</span>
+        </div>
+      )}
 
       <KPIStrip kpis={kpis} onDrillDown={() => setActiveTab(1)} />
 
