@@ -83,7 +83,7 @@ export default function TwoLayerDiagram({ variant = 'full' }) {
         background: theme.colors.bgDeep,
         borderRadius: theme.radius.sm,
       }}>
-        Together: cross-domain intelligence that catches churn signals competitors miss.
+        Together: cross-domain intelligence that catches disengagement signals competitors miss.
       </div>
     </div>
   );

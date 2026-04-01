@@ -140,7 +140,7 @@ export default function IntegrationsSection() {
                 Swoop Delivers
               </p>
               {[
-                { label: 'Member churn risk', color: theme.colors.lensMemberIntelligence },
+                { label: 'Member health intelligence', color: theme.colors.lensMemberIntelligence },
                 { label: 'Retention-prioritized waitlist', color: theme.colors.lensTeeSheetDemand },
                 { label: 'F&B demand prediction', color: theme.colors.lensFbOperations },
                 { label: 'Staffing gap alerts', color: theme.colors.lensStaffingLabor },

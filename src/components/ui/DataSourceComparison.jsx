@@ -6,7 +6,7 @@ const rows = [
   { dataType: 'Member engagement', competitors: 'Last visit date, dues status', swoop: 'Multi-signal decay curve across 6+ touchpoints' },
   { dataType: 'Staffing coverage', competitors: 'Scheduled shifts', swoop: 'Demand-driven gaps + service quality correlation' },
   { dataType: 'On-course behavior', competitors: 'Not captured', swoop: 'GPS tracking: pace, 9-hole exits, practice range visits' },
-  { dataType: 'Churn prediction', competitors: 'Manual review or none', swoop: 'AI health scores with 6-8 week early warning' },
+  { dataType: 'Resignation risk', competitors: 'Manual review or none', swoop: 'AI health scores with 6-8 week early warning' },
 ];
 
 export default function DataSourceComparison() {

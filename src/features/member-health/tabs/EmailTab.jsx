@@ -79,7 +79,7 @@ export default function EmailTab() {
             ⚠ Engagement Decay Watch List
           </span>
           <span style={{ marginLeft: theme.spacing.sm, fontSize: theme.fontSize.xs,
-            color: theme.colors.textMuted }}>Email decay precedes churn by 4–6 weeks</span>
+            color: theme.colors.textMuted }}>Email decay precedes disengagement by 4-6 weeks</span>
         </div>
         {decaying.map((m, i) => (
           <div key={i} style={{ padding: theme.spacing.md,
@@ -113,7 +113,7 @@ export default function EmailTab() {
       </div>
 
       <SoWhatCallout variant="warning">
-        Email decay is the <strong>earliest churn signal</strong> — preceding reduced golf and dining activity
+        Email decay is the <strong>earliest disengagement signal</strong> — preceding reduced golf and dining activity
         by 4–6 weeks. These {decaying.length} members are in the pre-departure window where personal outreach
         still works.
       </SoWhatCallout>

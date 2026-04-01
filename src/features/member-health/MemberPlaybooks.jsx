@@ -47,7 +47,7 @@ const DECAY_STEPS = [
   },
   {
     title: 'Re-engage — personalized email + events',
-    description: 'Personalized event invitations based on archetype. Members attending 2+ events/month have 60% lower churn probability.',
+    description: 'Personalized event invitations based on archetype. Members attending 2+ events/month have 60% lower resignation probability.',
     preview: '30 personalized emails queued. Die-Hard Golfers: pace clinic invite. Social Butterflies: wine dinner. Weekend Warriors: couples golf.',
     timeline: 'Week 1–2',
     actionType: 'email',
