@@ -16,12 +16,12 @@ import CohortTab from './tabs/CohortTab';
 
 const TABS = [
   { key: 'health',       label: 'Health Overview' },
-  { key: 'all-members',  label: 'All Members' },
   { key: 'archetypes',   label: 'Archetypes' },
   { key: 'email',        label: 'Email Decay' },
   { key: 'resignations', label: 'Resignations' },
   { key: 'recovery',     label: 'Recovery' },
   { key: 'cohorts',      label: 'First 90 Days' },
+  { key: 'all-members',  label: 'Directory' },
 ];
 
 export default function MemberHealth() {

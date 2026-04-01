@@ -12,12 +12,17 @@ import { theme } from '@/config/theme';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 
 // V3: Reduced from 5 tabs to 2. CSV Import, Notifications, User Roles deferred.
-const ADMIN_TABS = [
+// V5: Data Health tab hidden until 2+ sources connected (audit: "0% Platform Value" is demoralizing)
+const ALL_ADMIN_TABS = [
   { key: 'data-hub', label: 'Integrations', icon: '🔌' },
   { key: 'health', label: 'Data Health', icon: '🩺' },
 ];
 
+const CONNECTED_SOURCES = ['Jonas Club CRM', 'Weather API', 'Events System', 'Complaints & Feedback'];
+
 export default function AdminHub() {
+  const connectedCount = CONNECTED_SOURCES.length;
+  const ADMIN_TABS = connectedCount >= 2 ? ALL_ADMIN_TABS : ALL_ADMIN_TABS.filter(t => t.key !== 'health');
   const [activeTab, setActiveTab] = useState('data-hub');
   const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
 
