@@ -1,0 +1,83 @@
+// SWOOP — Feedback & Service Recovery: Complaints, Feedback, Service Requests
+// Core tables (club, members, bookings) included as stubs for relationship context.
+
+Table club {
+  club_id text [pk]
+  name text
+}
+
+Table members {
+  member_id text [pk]
+  first_name text
+  last_name text
+}
+
+Table bookings {
+  booking_id text [pk]
+}
+
+Table feedback {
+  feedback_id text [pk]
+  member_id text
+  club_id text
+  submitted_at text
+  category text
+  sentiment_score real
+  description text
+  status text
+  resolved_at text
+  is_understaffed_day integer
+}
+
+Table complaints {
+  complaint_id text [pk]
+  club_id text
+  member_id text
+  category text
+  description text
+  status text
+  priority text
+  reported_at timestamptz
+  resolved_at timestamptz
+  resolved_by text
+  resolution_notes text
+  sla_hours integer
+  data_source text
+}
+
+Table service_requests {
+  request_id text [pk]
+  member_id text
+  booking_id text
+  request_type text
+  requested_at text
+  response_time_min integer
+  resolved_at text
+  resolution_notes text
+  is_understaffed_day integer
+}
+
+Table service_recovery_alerts {
+  alert_id integer [pk]
+  member_id varchar(20)
+  member_name varchar(100)
+  severity varchar(20)
+  zone varchar(50)
+  detail text
+  recommended_action text
+  created_at timestamptz
+  resolved_at timestamptz
+}
+
+// --- Relationships ---
+
+// Explicit FKs
+Ref: feedback.club_id > club.club_id
+Ref: service_requests.booking_id > bookings.booking_id
+
+// Implicit FKs
+Ref: feedback.member_id > members.member_id
+Ref: complaints.club_id > club.club_id
+Ref: complaints.member_id > members.member_id
+Ref: service_requests.member_id > members.member_id
+Ref: service_recovery_alerts.member_id > members.member_id

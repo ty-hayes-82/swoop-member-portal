@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swoop Golf — GM Intelligence Survey Results</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #E8521A;
+  --orange-light: #F26C35;
+  --orange-pale: #FFF0E8;
+  --navy: #0D1B2A;
+  --navy-mid: #132234;
+  --navy-light: #1E3048;
+  --teal: #1E7B8C;
+  --teal-light: #26A0B5;
+  --cream: #FAF8F4;
+  --cream-dark: #F0ECE4;
+  --stone: #9A9588;
+  --charcoal: #2C2C2C;
+  --white: #FFFFFF;
+  --green: #10B981;
+  --red: #EF4444;
+  --blue: #3B82F6;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--cream);
+  color: var(--charcoal);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.survey-header {
+  background: var(--navy);
+  padding: 18px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.logo {
+  font-family: var(--serif);
+  color: var(--white);
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+.logo-dot { color: var(--orange); }
+.header-right {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+}
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 32px 80px;
+}
+.kicker {
+  text-align: center;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--orange);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+h1 {
+  font-family: var(--serif);
+  font-size: 2.6rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--charcoal);
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+h1 em {
+  font-family: var(--serif);
+  color: var(--orange);
+  font-style: italic;
+  font-weight: 400;
+}
+.subtitle {
+  text-align: center;
+  color: var(--stone);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto 32px;
+}
+.meta-row {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+}
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--stone);
+}
+.meta-dot {
+  width: 7px; height: 7px;
+  background: var(--orange);
+  border-radius: 50%;
+}
+
+/* Stat Cards Row */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 56px;
+}
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--cream-dark);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}
+.stat-number {
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-number.orange { color: var(--orange); }
+.stat-number.teal { color: var(--teal); }
+.stat-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--stone);
+  font-weight: 500;
+}
+
+/* Section styling */
+.section-divider {
+  margin: 56px 0 36px;
+  padding-top: 48px;
+  border-top: 1px solid var(--cream-dark);
+}
+.section-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--orange);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+h2 {
+  font-family: var(--serif);
+  font-size: 1.65rem;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--charcoal);
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+.section-desc {
+  color: var(--stone);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  max-width: 700px;
+}
+
+/* Chart containers */
+.chart-block {
+  background: var(--white);
+  border: 1px solid var(--cream-dark);
+  border-radius: 14px;
+  padding: 32px;
+  margin-bottom: 28px;
+}
+.chart-block h3 {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 4px;
+}
+.chart-block .q-label {
+  font-size: 0.78rem;
+  color: var(--stone);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  max-height: 350px;
+}
+.chart-wrapper canvas {
+  max-height: 350px;
+}
+
+/* Horizontal bar list (for text answers) */
+.bar-list { list-style: none; }
+.bar-list li {
+  margin-bottom: 14px;
+}
+.bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+  color: var(--charcoal);
+}
+.bar-label .count {
+  color: var(--stone);
+  font-weight: 500;
+}
+.bar-track {
+  height: 28px;
+  background: var(--cream-dark);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--orange), var(--orange-light));
+  transition: width 0.8s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+}
+.bar-fill.teal {
+  background: linear-gradient(90deg, var(--teal), var(--teal-light));
+}
+.bar-fill.navy {
+  background: linear-gradient(90deg, var(--navy), var(--navy-light));
+}
+.bar-pct {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+/* Quote cards */
+.quotes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+.quote-card {
+  background: var(--cream);
+  border-left: 3px solid var(--orange);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 0.88rem;
+  color: var(--charcoal);
+  line-height: 1.5;
+  font-style: italic;
+}
+.quote-card .source {
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--stone);
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Budget allocation */
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+.budget-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--stone);
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--cream-dark);
+  font-weight: 600;
+}
+.budget-table td {
+  padding: 12px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--cream-dark);
+  color: var(--charcoal);
+}
+.budget-table tr:last-child td { border-bottom: none; }
+
+/* Top 3 outcomes */
+.outcome-list { list-style: none; margin-top: 8px; }
+.outcome-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--cream-dark);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.outcome-list li:last-child { border-bottom: none; }
+.outcome-rank {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  background: var(--orange);
+  color: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.outcome-rank.secondary { background: var(--navy); }
+
+/* Key Insight callout */
+.insight-box {
+  background: var(--navy);
+  color: var(--white);
+  border-radius: 14px;
+  padding: 36px 40px;
+  margin: 48px 0;
+}
+.insight-box .label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--orange);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.insight-box h3 {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  color: var(--white);
+}
+.insight-box p {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+/* CTA */
+.cta-section {
+  text-align: center;
+  padding: 48px 0 0;
+  border-top: 1px solid var(--cream-dark);
+  margin-top: 56px;
+}
+.cta-section h2 {
+  text-align: center;
+  margin-bottom: 12px;
+}
+.cta-section p {
+  color: var(--stone);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 550px;
+  margin: 0 auto 28px;
+}
+.cta-btn {
+  display: inline-block;
+  background: var(--orange);
+  color: var(--white);
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 16px 40px;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: background 0.2s;
+  border: none;
+  cursor: pointer;
+}
+.cta-btn:hover { background: var(--orange-light); }
+
+footer {
+  text-align: center;
+  padding: 32px;
+  font-size: 0.75rem;
+  color: var(--stone);
+  border-top: 1px solid var(--cream-dark);
+  margin-top: 80px;
+}
+footer a { color: var(--orange); text-decoration: none; }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .stat-cards { grid-template-columns: repeat(2, 1fr); }
+  .quotes-grid { grid-template-columns: 1fr; }
+  h1 { font-size: 1.8rem; }
+  main { padding: 40px 20px 60px; }
+}
+</style>
+</head><body>
+<header class="survey-header" role="banner">
+  <div class="logo">swoop<span class="logo-dot">.</span></div>
+  <div class="header-right">GM Intelligence Survey · Results 2026</div>
+</header>
+
+<main>
+  <div class="kicker">Swoop Golf · Private Club Survey Results</div>
+  <h1>You told us where it hurts.<br><em>Here's what we heard.</em></h1>
+  <p class="subtitle">Anonymized results from 10 private club GMs across the United States. These findings shape our platform roadmap and validate the cross-domain intelligence gaps Swoop is built to close.</p>
+
+  <div class="meta-row">
+    <div class="meta-item"><div class="meta-dot"></div>10 clubs responded</div>
+    <div class="meta-item"><div class="meta-dot"></div>100% Private clubs</div>
+    <div class="meta-item"><div class="meta-dot"></div>All United States</div>
+  </div>
+
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-number orange">90%</div>
+      <div class="stat-label">Partially Connected Systems</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">80%</div>
+      <div class="stat-label">F&B Subsidized by Dues</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number teal">70%</div>
+      <div class="stat-label">Spend 2–5 hrs/wk on Manual Work</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number orange">0%</div>
+      <div class="stat-label">Have Full System Integration</div>
+    </div>
+  </div>
+
+  <!-- ═══════ SECTION 1: Member Experience ═══════ -->
+  <div class="section-divider">
+    <div class="section-label">Member Experience & Visibility</div>
+    <h2>How do you find out something is wrong?</h2>
+    <p class="section-desc">Most clubs are reactive — learning about issues after they surface through complaints or staff reports. Proactive detection remains rare.</p>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 1</div>
+    <h3>When a member experience issue occurs, how do you typically learn about it?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>After a member complains to me or a Dept. Head</span><span class="count">4 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%"><span class="bar-pct">40%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Proactively (warning signs before the member notices)</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>After staff reports it internally</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Staff and/or member</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--stone)"><span class="bar-pct">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 2</div>
+    <h3>Which best describes your ability to identify "quietly unhappy" members before they leave?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>We notice lagging signals (drop in spend/visits)</span><span class="count">4 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%"><span class="bar-pct">40%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Reliable early warning system across departments</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>We don't track this systematically (known blind spot)</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Not valuable / not needed</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--stone)"><span class="bar-pct">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="insight-box">
+    <div class="label">Key Finding</div>
+    <h3>70% of GMs are still reactive — learning about member issues only after complaints or staff reports.</h3>
+    <p>Only 3 out of 10 clubs have any form of proactive detection. The majority rely on lagging signals or don't track early warning signs at all — a clear opportunity for cross-domain intelligence.</p>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 3</div>
+    <h3>How valuable would a single "Member Health Score" (updated daily) be?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>Extremely valuable</span><span class="count">4 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%"><span class="bar-pct">40%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Moderately valuable</span><span class="count">4 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:40%"><span class="bar-pct">40%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Very valuable</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:10%"><span class="bar-pct">10%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Not valuable / not needed</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--stone)"><span class="bar-pct">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+  <!-- ═══════ SECTION 2: Systems & Operations ═══════ -->
+  <div class="section-divider">
+    <div class="section-label">Systems & Operations</div>
+    <h2>How connected is your stack — and how much time does it cost you?</h2>
+    <p class="section-desc">Clubs are running lean software stacks — but nearly all face integration gaps that force manual reconciliation and reporting.</p>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 4</div>
+    <h3>How connected are your core systems today (POS, tee sheet, CRM, accounting)?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>Partially connected; some manual work required</span><span class="count">8 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:80%"><span class="bar-pct">80%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Disconnected; each department has its own "truth"</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:10%"><span class="bar-pct">10%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Fully integrated; reporting is seamless</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:10%"><span class="bar-pct">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 5</div>
+    <h3>Roughly how many different software tools/products are used weekly?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>3 tools</span><span class="count">5 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:50%"><span class="bar-pct">50%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>2 tools</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>1 tool</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>4 tools</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--stone)"><span class="bar-pct">10%</span></div></div>
+      </li>
+    </ul>
+    <p style="margin-top:12px; font-size:0.85rem; color:var(--stone);">Average: 2.4 tools · Median: 3 tools</p>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 6</div>
+    <h3>Overall, how satisfied are you with your current software stack?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>Satisfied</span><span class="count">6 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:60%"><span class="bar-pct">60%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Neutral</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--stone)"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Very satisfied</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:10%"><span class="bar-pct">10%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Dissatisfied</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%"><span class="bar-pct">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 7</div>
+    <h3>Roughly how many hours/week does leadership spend on manual reconciliation, reporting, or follow-ups?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>2–5 hours</span><span class="count">7 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:70%"><span class="bar-pct">70%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>&lt;2 hours</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+    </ul>
+    <p style="margin-top:12px; font-size:0.85rem; color:var(--stone);">No respondents reported spending more than 5 hours/week, but 70% are still losing 2–5 hours weekly to manual work.</p>
+  </div>
+
+  <div class="insight-box">
+    <div class="label">Key Finding</div>
+    <h3>90% of clubs are stuck in "partially connected" — and 70% burn 2–5 hours a week just bridging the gaps.</h3>
+    <p>Despite most GMs reporting satisfaction with individual tools, the integration layer is almost universally broken. Only 1 in 10 clubs has fully integrated systems. The cost isn't in the software itself — it's in the manual work required to make disconnected systems tell a coherent story.</p>
+  </div>
+  <!-- ═══════ SECTION 3: Labor & Staffing ═══════ -->
+  <div class="section-divider">
+    <div class="section-label">Labor & Staffing</div>
+    <h2>Where does labor "chaos" hurt most — and how often are you mis-staffed?</h2>
+    <p class="section-desc">Staffing challenges are the operational theme across respondents — from demand volatility to inconsistent service delivery across shifts.</p>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 8</div>
+    <h3>Where does labor "chaos" hurt your operation most?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>Service quality varies widely by shift/season</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Over/under-staffing due to unpredictable demand spikes</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Managers spend too much time firefighting vs. leading</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Too much time lost to calls/texts for coordination</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--stone)"><span class="bar-pct">10%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Other</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--cream-dark);border:1px solid var(--stone)"><span class="bar-pct" style="color:var(--stone)">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 9</div>
+    <h3>How often are you over- or under-staffed relative to actual demand?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>Weekly</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Monthly</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Rarely</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Daily</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--red)"><span class="bar-pct">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ═══════ SECTION 4: F&B Performance ═══════ -->
+  <div class="section-divider">
+    <div class="section-label">F&B Performance</div>
+    <h2>Where is the money actually going?</h2>
+    <p class="section-desc">F&B is overwhelmingly a subsidized loss center. The biggest profit leakage sources vary — but labor mismatch and rising costs dominate the conversation.</p>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 10</div>
+    <h3>How would you describe F&B margin consistency over the last 12 months?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>Frequently negative / subsidized by dues</span><span class="count">8 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:80%"><span class="bar-pct">80%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Reliably profitable and predictable</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 11</div>
+    <h3>What is the biggest source of "profit leakage" in F&B today?</h3>
+    <p style="font-size:0.85rem; color:var(--stone); margin: 8px 0 16px;">Open-ended responses, categorized by theme</p>
+    <ul class="bar-list">
+      <li>
+        <div class="bar-label"><span>Labor inefficiency / staffing doesn't match demand</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Rising food &amp; labor costs vs. pricing constraints</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Intentional strategic subsidy / budget a loss</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Comps, voids, and service mistakes</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--stone)"><span class="bar-pct">10%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Revenue-to-service mismatch</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--stone)"><span class="bar-pct">10%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Not sure</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--cream-dark);border:1px solid var(--stone)"><span class="bar-pct" style="color:var(--stone)">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="insight-box">
+    <div class="label">Key Finding</div>
+    <h3>80% of clubs are running F&B at a loss — and the leakage comes from everywhere.</h3>
+    <p>Labor mismatch leads the pack, but rising costs, strategic subsidies, comps, and revenue mismatches all contribute. The common thread: no single system gives GMs the cross-domain visibility needed to diagnose and fix these issues in real time.</p>
+  </div>
+  <!-- ═══════ SECTION 5: Board-Level Priorities ═══════ -->
+  <div class="section-divider">
+    <div class="section-label">Board-Level Priorities</div>
+    <h2>What's keeping GMs up at night — and what are boards watching?</h2>
+    <p class="section-desc">Financial performance dominates board-level concerns, but the range of "next 12-month problems" reveals a fractured landscape of priorities — from tech debt to board dissent.</p>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 12</div>
+    <h3>Which issue is most likely to become a Board-level problem in the next 12 months?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>Financial performance (F&B margins, labor costs)</span><span class="count">4 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%"><span class="bar-pct">40%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Outdated tech and integration failures</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Other (board dissent, F&B staff, renovation, none)</span><span class="count">4 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:40%"><span class="bar-pct">40%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 13</div>
+    <h3>How likely are you to make a meaningful change to your core systems in the next 12 months?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>Neutral / depends on budget &amp; timing</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:30%"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Unlikely</span><span class="count">3 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:30%;background:var(--stone)"><span class="bar-pct">30%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Very unlikely</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Very likely</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:10%"><span class="bar-pct">10%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Not answered</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--cream-dark);border:1px solid var(--stone)"><span class="bar-pct" style="color:var(--stone)">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="insight-box">
+    <div class="label">Key Finding</div>
+    <h3>Only 10% are "very likely" to change systems — but 50% haven't ruled it out. The window is timing and proof.</h3>
+    <p>Most clubs are in a "show me" posture. They know the gaps exist. What they need is proof that a unified platform delivers measurable outcomes — without ripping and replacing what already works.</p>
+  </div>
+
+  <!-- ═══════ SECTION 6: Investment Priorities ═══════ -->
+  <div class="section-divider">
+    <div class="section-label">Investment Priorities</div>
+    <h2>If you had one unified platform tomorrow — what would justify it?</h2>
+    <p class="section-desc">When forced to choose a single outcome, GMs overwhelmingly want real-time control — a cockpit to see and fix service failures as they happen.</p>
+  </div>
+
+  <div class="chart-block">
+    <div class="q-label">Question 14</div>
+    <h3>If you were granted budget for one "Unified Platform" tomorrow, which outcome would justify the investment fastest?</h3>
+    <ul class="bar-list" style="margin-top:20px;">
+      <li>
+        <div class="bar-label"><span>Control: Real-time cockpit to spot/fix service failures as they happen</span><span class="count">5 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:50%"><span class="bar-pct">50%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Efficiency: Save 10+ hours/week of manager admin/reporting</span><span class="count">2 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:20%"><span class="bar-pct">20%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Retention: Identify at-risk members 6 months before they quit</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill navy" style="width:10%"><span class="bar-pct">10%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Revenue: Capture "lost spend" from golfers who skip dining</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--stone)"><span class="bar-pct">10%</span></div></div>
+      </li>
+      <li>
+        <div class="bar-label"><span>Not answered</span><span class="count">1 of 10</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--cream-dark);border:1px solid var(--stone)"><span class="bar-pct" style="color:var(--stone)">10%</span></div></div>
+      </li>
+    </ul>
+  </div>
+  <!-- Budget Gravity -->
+  <div class="chart-block">
+    <div class="q-label">Question 15 · Budget Gravity</div>
+    <h3>Allocate 100 points across improvement areas — where would you fund improvement?</h3>
+    <p style="font-size:0.85rem; color:var(--stone); margin: 8px 0 20px;">Averaged across all 10 respondents (points out of 100)</p>
+    <table class="budget-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th style="text-align:right;">Avg Points</th>
+          <th style="width:50%;">Distribution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Member Experience Visibility</strong></td>
+          <td style="text-align:right; font-weight:700; color:var(--orange);">43.5</td>
+          <td>
+            <div class="bar-track" style="height:22px;"><div class="bar-fill" style="width:43.5%"><span class="bar-pct">43.5</span></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Systems Integration & Consolidation</strong></td>
+          <td style="text-align:right; font-weight:700; color:var(--teal);">24.5</td>
+          <td>
+            <div class="bar-track" style="height:22px;"><div class="bar-fill teal" style="width:24.5%"><span class="bar-pct">24.5</span></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Labor & Staffing Efficiency</strong></td>
+          <td style="text-align:right; font-weight:700; color:var(--navy);">18.5</td>
+          <td>
+            <div class="bar-track" style="height:22px;"><div class="bar-fill navy" style="width:18.5%"><span class="bar-pct">18.5</span></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>F&B Profitability / Orchestration</strong></td>
+          <td style="text-align:right; font-weight:700; color:var(--stone);">14.5</td>
+          <td>
+            <div class="bar-track" style="height:22px;"><div class="bar-fill" style="width:14.5%;background:var(--stone)"><span class="bar-pct">14.5</span></div></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:16px; font-size:0.85rem; color:var(--stone);">Note: Two respondents allocated 100 points entirely to Member Experience Visibility — a strong signal about where the biggest perceived blind spot is.</p>
+  </div>
+
+  <div class="insight-box">
+    <div class="label">Key Finding</div>
+    <h3>Member Experience Visibility commands 43.5 out of 100 budget points — nearly double the next category.</h3>
+    <p>When GMs have to put real budget weight behind priorities, seeing what's happening with their members in real time wins by a wide margin. Systems integration comes second, followed by labor efficiency and F&B profitability. The message is clear: "Show me who's at risk, and show me now."</p>
+  </div>
+
+  <!-- Top 3 Outcomes -->
+  <div class="chart-block">
+    <div class="q-label">Question 16 · Top 3 Outcomes</div>
+    <h3>Most critical outcomes for club success in 2026</h3>
+    <p style="font-size:0.85rem; color:var(--stone); margin: 8px 0 20px;">Respondents selected up to 3 outcomes. Ranked by total selections across all respondents.</p>
+    <ol class="outcome-list">
+      <li>
+        <span class="outcome-rank">1</span>
+        <div>
+          <strong>Improve service consistency across shifts/seasons</strong>
+          <div style="font-size:0.82rem; color:var(--stone); margin-top:2px;">Selected by 7 of 10 respondents (70%)</div>
+        </div>
+      </li>
+      <li>
+        <span class="outcome-rank">2</span>
+        <div>
+          <strong>Better staffing to match real demand</strong>
+          <div style="font-size:0.82rem; color:var(--stone); margin-top:2px;">Selected by 6 of 10 respondents (60%)</div>
+        </div>
+      </li>
+      <li>
+        <span class="outcome-rank">3</span>
+        <div>
+          <strong>Real-time member risk visibility ("Member Health" / churn prevention)</strong>
+          <div style="font-size:0.82rem; color:var(--stone); margin-top:2px;">Selected by 5 of 10 respondents (50%)</div>
+        </div>
+      </li>
+      <li>
+        <span class="outcome-rank secondary">4</span>
+        <div>
+          <strong>Eliminate F&B profit leakage (comps, waste, errors, labor mismatch)</strong>
+          <div style="font-size:0.82rem; color:var(--stone); margin-top:2px;">Selected by 3 of 10 respondents (30%)</div>
+        </div>
+      </li>
+      <li>
+        <span class="outcome-rank secondary">5</span>
+        <div>
+          <strong>Consolidate disconnected tools into fewer systems</strong>
+          <div style="font-size:0.82rem; color:var(--stone); margin-top:2px;">Selected by 2 of 10 respondents (20%)</div>
+        </div>
+      </li>
+      <li>
+        <span class="outcome-rank secondary">6</span>
+        <div>
+          <strong>Reduce manual reporting/admin for leadership</strong>
+          <div style="font-size:0.82rem; color:var(--stone); margin-top:2px;">Selected by 1 of 10 respondents (10%)</div>
+        </div>
+      </li>
+      <li>
+        <span class="outcome-rank secondary">7</span>
+        <div>
+          <strong>General business growth</strong>
+          <div style="font-size:0.82rem; color:var(--stone); margin-top:2px;">Selected by 1 of 10 respondents (10%)</div>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- ═══════ FINAL INSIGHT ═══════ -->
+  <div class="insight-box" style="background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);">
+    <div class="label">The Bottom Line</div>
+    <h3>GMs are telling us three things at once:</h3>
+    <p style="margin-bottom: 16px;">"I need to see what's happening with my members in real time." — 43.5 average budget points to Member Experience Visibility.</p>
+    <p style="margin-bottom: 16px;">"I need consistent service regardless of who's working." — Service consistency ranked #1 outcome by 70% of respondents.</p>
+    <p>"I can't prove any of this to my board." — 80% of F&B runs at a loss, and most GMs can't connect the dots across their disconnected systems to show why.</p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Want to see what your systems are hiding?</h2>
+    <p>Book a 30-minute demo. We'll connect to your actual club data — tee sheet, POS, member records — and show you the cross-domain answers your current stack can't give you.</p>
+    <a class="cta-btn" href="mailto:demo@swoopgolf.com">Book a 30-Minute Demo &rarr;</a>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2026 <a href="https://swoopgolf.com">Swoop Golf</a> &middot; Club Intelligence Platform &middot; swoopgolf.com &middot; Survey data anonymized and aggregated.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+// SWOOP — Events & Communications: Events, Email, Notifications
+// Core tables (club, members) included as stubs for relationship context.
+
+Table club {
+  club_id text [pk]
+  name text
+}
+
+Table members {
+  member_id text [pk]
+  first_name text
+  last_name text
+}
+
+Table users {
+  user_id text [pk]
+  name text
+}
+
+Table event_definitions {
+  event_id text [pk]
+  club_id text
+  name text
+  type text
+  event_date text
+  capacity integer
+  registration_fee real
+  description text
+}
+
+Table event_registrations {
+  registration_id text [pk]
+  event_id text
+  member_id text
+  status text
+  guest_count integer
+  fee_paid real
+  registered_at text
+  checked_in_at text
+}
+
+Table event_roi_metrics {
+  id integer [pk]
+  event_type text
+  attendance_avg integer
+  retention_rate integer
+  avg_spend integer
+  roi_score numeric
+  frequency text
+}
+
+Table canonical_events {
+  event_id text [pk]
+  entity_type text
+  entity_id text
+  event_type text
+  event_timestamp text
+  source_vendor text
+  payload text
+}
+
+Table email_campaigns {
+  campaign_id text [pk]
+  club_id text
+  subject text
+  type text
+  send_date text
+  recipient_count integer
+  html_content_url text
+}
+
+Table email_events {
+  event_id text [pk]
+  campaign_id text
+  member_id text
+  event_type text
+  occurred_at text
+  link_clicked text
+  device_type text
+}
+
+Table notifications {
+  notification_id text [pk]
+  club_id text
+  user_id text
+  channel text
+  type text
+  title text
+  body text
+  priority text
+  related_member_id text
+  related_action_id text
+  read_at timestamptz
+  sent_at timestamptz
+  created_at timestamptz
+}
+
+Table notification_preferences {
+  user_id text [pk]
+  club_id text
+  morning_digest boolean
+  digest_time text
+  digest_channel text
+  high_priority_alerts boolean
+  alert_channel text
+  escalation_alerts boolean
+  slack_webhook text
+}
+
+// --- Relationships ---
+
+// Explicit FKs
+Ref: event_definitions.club_id > club.club_id
+Ref: event_registrations.event_id > event_definitions.event_id
+Ref: email_campaigns.club_id > club.club_id
+Ref: email_events.campaign_id > email_campaigns.campaign_id
+
+// Implicit FKs
+Ref: event_registrations.member_id > members.member_id
+Ref: email_events.member_id > members.member_id
+Ref: notifications.club_id > club.club_id
+Ref: notifications.user_id > users.user_id
+Ref: notification_preferences.user_id > users.user_id
+Ref: notification_preferences.club_id > club.club_id

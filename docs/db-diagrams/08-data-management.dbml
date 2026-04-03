@@ -1,0 +1,140 @@
+// SWOOP — Data Management: Syncs, Imports, Feature Flags, Onboarding
+// Core table (club) included as stub for relationship context.
+
+Table club {
+  club_id text [pk]
+  name text
+}
+
+Table dining_outlets {
+  outlet_id text [pk]
+  name text
+}
+
+Table staff {
+  staff_id text [pk]
+  club_id text
+  first_name text
+  last_name text
+  department text
+  role text
+  hire_date text
+  hourly_rate real
+  is_full_time integer
+}
+
+Table staff_shifts {
+  shift_id text [pk]
+  staff_id text
+  shift_date text
+  outlet_id text
+  start_time text
+  end_time text
+  hours_worked real
+  is_understaffed_day integer
+  notes text
+}
+
+Table staff_location_current {
+  staff_id varchar(20) [pk]
+  name varchar(100)
+  zone varchar(50)
+  status varchar(20)
+  eta_minutes integer
+  department varchar(50)
+}
+
+Table data_syncs {
+  sync_id text [pk]
+  club_id text
+  source_type text
+  status text
+  records_processed integer
+  records_failed integer
+  error_message text
+  started_at timestamptz
+  completed_at timestamptz
+}
+
+Table data_source_status {
+  status_id text [pk]
+  club_id text [unique]
+  domain_code text [unique]
+  is_connected boolean
+  source_vendor text
+  last_sync_at timestamptz
+  row_count integer
+  staleness_hours integer
+  health_status text
+  updated_at timestamptz
+}
+
+Table csv_imports {
+  import_id text [pk]
+  club_id text
+  uploaded_by text
+  file_name text
+  import_type text
+  status text
+  total_rows integer
+  success_rows integer
+  error_rows integer
+  errors jsonb
+  started_at timestamptz
+  completed_at timestamptz
+}
+
+Table connected_systems {
+  system_id varchar(50) [pk]
+  vendor_name varchar(100)
+  category varchar(50)
+  status varchar(20)
+  last_sync timestamptz
+  data_points_synced integer
+  config jsonb
+}
+
+Table feature_dependency {
+  dependency_id text [pk]
+  feature_type text
+  feature_key text
+  domain_code text
+  dependency_type text
+  fallback_mode text
+  user_message text
+  created_at timestamptz
+}
+
+Table feature_state_log {
+  log_id text [pk]
+  club_id text
+  feature_type text
+  feature_key text
+  previous_state text
+  new_state text
+  reason text
+  changed_at timestamptz
+}
+
+Table onboarding_progress {
+  club_id text [pk]
+  step_key text [pk]
+  completed boolean
+  completed_at timestamptz
+  notes text
+}
+
+// --- Relationships ---
+
+// Explicit FKs
+Ref: staff.club_id > club.club_id
+Ref: staff_shifts.staff_id > staff.staff_id
+Ref: staff_shifts.outlet_id > dining_outlets.outlet_id
+
+// Implicit FKs
+Ref: staff_location_current.staff_id > staff.staff_id
+Ref: data_syncs.club_id > club.club_id
+Ref: data_source_status.club_id > club.club_id
+Ref: csv_imports.club_id > club.club_id
+Ref: feature_state_log.club_id > club.club_id
+Ref: onboarding_progress.club_id > club.club_id

@@ -1,0 +1,198 @@
+// SWOOP — AI Agents, Actions, Playbooks & Interventions
+// Core tables (club, members) included as stubs for relationship context.
+
+Table club {
+  club_id text [pk]
+  name text
+}
+
+Table members {
+  member_id text [pk]
+  first_name text
+  last_name text
+}
+
+Table agent_definitions {
+  agent_id varchar(50) [pk]
+  name varchar(100)
+  description text
+  status varchar(20)
+  model varchar(50)
+  avatar varchar(100)
+  source_systems text[]
+  last_run timestamptz
+}
+
+Table agent_actions {
+  action_id varchar(50) [pk]
+  agent_id varchar(50)
+  action_type varchar(50)
+  priority varchar(20)
+  source varchar(100)
+  description text
+  impact_metric varchar(100)
+  member_id varchar(20)
+  status varchar(20)
+  approval_action text
+  dismissal_reason text
+  timestamp timestamptz
+  approved_at timestamptz
+  dismissed_at timestamptz
+}
+
+Table agent_activity {
+  activity_id text [pk]
+  club_id text
+  agent_id text
+  action_type text
+  description text
+  member_id text
+  confidence real
+  auto_executed boolean
+  reasoning text
+  created_at timestamptz
+}
+
+Table agent_configs {
+  club_id text [pk]
+  agent_id text [pk]
+  enabled boolean
+  auto_approve_threshold real
+  auto_approve_enabled boolean
+  last_run timestamptz
+  total_proposals integer
+  total_auto_executed integer
+  accuracy_score real
+}
+
+Table actions {
+  action_id text [pk]
+  club_id text
+  member_id text
+  action_type text
+  description text
+  status text
+  priority text
+  assigned_to text
+  source text
+  impact_metric text
+  approved_at timestamptz
+  approved_by text
+  executed_at timestamptz
+  dismissed_at timestamptz
+  dismiss_reason text
+  created_at timestamptz
+}
+
+Table interventions {
+  intervention_id text [pk]
+  club_id text
+  member_id text
+  action_id text
+  intervention_type text
+  description text
+  initiated_by text
+  initiated_at timestamptz
+  health_score_before real
+  health_score_after real
+  outcome text
+  outcome_measured_at timestamptz
+  dues_protected numeric
+  revenue_recovered numeric
+  is_member_save boolean
+}
+
+Table member_interventions {
+  id integer [pk]
+  member_id varchar(20)
+  health_before integer
+  health_after integer
+  trigger text
+  action text
+  outcome text
+  dues_at_risk numeric
+  created_at timestamptz
+}
+
+Table operational_interventions {
+  id integer [pk]
+  event varchar(100)
+  event_date date
+  detection text
+  action text
+  outcome text
+  revenue_protected numeric
+  created_at timestamptz
+}
+
+Table playbook_runs {
+  run_id text [pk]
+  club_id text
+  playbook_id text
+  playbook_name text
+  member_id text
+  triggered_by text
+  trigger_reason text
+  status text
+  started_at timestamptz
+  completed_at timestamptz
+  health_score_at_start real
+  health_score_at_end real
+  outcome text
+}
+
+Table playbook_steps {
+  step_id text [pk]
+  run_id text
+  club_id text
+  step_number integer
+  title text
+  description text
+  assigned_to text
+  due_date timestamptz
+  status text
+  completed_at timestamptz
+  completed_by text
+  notes text
+}
+
+Table activity_log {
+  id integer [pk]
+  action_type varchar(50)
+  action_subtype varchar(50)
+  actor varchar(50)
+  member_id varchar(20)
+  member_name varchar(100)
+  agent_id varchar(50)
+  reference_id varchar(100)
+  reference_type varchar(50)
+  description text
+  meta jsonb
+  status varchar(20)
+  created_at timestamptz
+}
+
+// --- Relationships ---
+
+// Explicit FKs
+Ref: agent_actions.agent_id > agent_definitions.agent_id
+
+// Implicit FKs
+Ref: agent_activity.club_id > club.club_id
+Ref: agent_activity.agent_id > agent_definitions.agent_id
+Ref: agent_activity.member_id > members.member_id
+Ref: agent_configs.club_id > club.club_id
+Ref: agent_configs.agent_id > agent_definitions.agent_id
+Ref: agent_actions.member_id > members.member_id
+Ref: actions.club_id > club.club_id
+Ref: actions.member_id > members.member_id
+Ref: interventions.club_id > club.club_id
+Ref: interventions.member_id > members.member_id
+Ref: interventions.action_id > actions.action_id
+Ref: member_interventions.member_id > members.member_id
+Ref: playbook_runs.club_id > club.club_id
+Ref: playbook_runs.member_id > members.member_id
+Ref: playbook_steps.run_id > playbook_runs.run_id
+Ref: playbook_steps.club_id > club.club_id
+Ref: activity_log.member_id > members.member_id
+Ref: activity_log.agent_id > agent_definitions.agent_id

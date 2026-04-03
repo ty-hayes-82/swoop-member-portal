@@ -1,0 +1,1254 @@
+// SWOOP Member Portal - Database Schema (DBML)
+// Auto-generated from schema-data.json
+// Total tables: 74
+// Explicit foreign keys: 28
+
+Table actions {
+  action_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  member_id text
+  action_type text [not null]
+  description text
+  status text [default: 'pending']
+  priority text [default: 'medium']
+  assigned_to text
+  source text [default: 'system']
+  impact_metric text
+  approved_at timestamptz
+  approved_by text
+  executed_at timestamptz
+  dismissed_at timestamptz
+  dismiss_reason text
+  created_at timestamptz [default: `now()`]
+}
+
+Table activity_log {
+  id integer [pk, default: `nextval('activity_log_id_seq'::regclass)`]
+  action_type varchar(50) [not null]
+  action_subtype varchar(50)
+  actor varchar(50) [default: 'gm_default']
+  member_id varchar(20)
+  member_name varchar(100)
+  agent_id varchar(50)
+  reference_id varchar(100)
+  reference_type varchar(50)
+  description text
+  meta jsonb [default: '{}']
+  status varchar(20) [default: 'logged']
+  created_at timestamptz [default: `now()`]
+}
+
+Table agent_actions {
+  action_id varchar(50) [pk]
+  agent_id varchar(50)
+  action_type varchar(50)
+  priority varchar(20)
+  source varchar(100)
+  description text
+  impact_metric varchar(100)
+  member_id varchar(20)
+  status varchar(20) [default: 'pending']
+  approval_action text
+  dismissal_reason text
+  timestamp timestamptz [default: `now()`]
+  approved_at timestamptz
+  dismissed_at timestamptz
+}
+
+Table agent_activity {
+  activity_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  agent_id text [not null]
+  action_type text [not null]
+  description text
+  member_id text
+  confidence real
+  auto_executed boolean [default: false]
+  reasoning text
+  created_at timestamptz [default: `now()`]
+}
+
+Table agent_configs {
+  club_id text [pk]
+  agent_id text [pk]
+  enabled boolean [default: true]
+  auto_approve_threshold real [default: 0.80]
+  auto_approve_enabled boolean [default: false]
+  last_run timestamptz
+  total_proposals integer [default: 0]
+  total_auto_executed integer [default: 0]
+  accuracy_score real [default: 0.75]
+}
+
+Table agent_definitions {
+  agent_id varchar(50) [pk]
+  name varchar(100)
+  description text
+  status varchar(20) [default: 'active']
+  model varchar(50)
+  avatar varchar(100)
+  source_systems text[]
+  last_run timestamptz
+}
+
+Table archetype_spend_gaps {
+  id integer [pk, default: `nextval('archetype_spend_gaps_id_seq'::regclass)`]
+  archetype text [not null]
+  count integer [not null]
+  current_dining integer [not null]
+  potential_dining integer [not null, default: 100]
+  current_events integer [not null]
+  potential_events integer [not null, default: 100]
+  avg_annual_spend integer [not null]
+  untapped_dining integer [not null]
+  untapped_events integer [not null]
+  total_untapped integer [not null]
+  campaign text
+}
+
+Table board_report_snapshots {
+  id integer [pk, default: `nextval('board_report_snapshots_id_seq'::regclass)`]
+  snapshot_date date [not null, default: `CURRENT_DATE`]
+  members_saved integer [not null, default: 0]
+  dues_protected numeric [not null, default: 0]
+  ltv_protected numeric [not null, default: 0]
+  revenue_recovered numeric [not null, default: 0]
+  service_failures_caught integer [not null, default: 0]
+  avg_response_time_hrs numeric [not null, default: 0]
+  board_confidence_pct integer [not null, default: 0]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table booking_confirmations {
+  confirmation_id varchar(50) [pk]
+  booking_id varchar(50)
+  member_id varchar(20)
+  member_name varchar(100)
+  tee_time varchar(100)
+  cancel_probability numeric
+  outreach_status varchar(20) [default: 'pending']
+  outreach_channel varchar(20)
+  staff_notes text
+  contacted_at timestamptz
+  responded_at timestamptz
+  created_at timestamptz [default: `now()`]
+}
+
+Table booking_players {
+  player_id text [pk]
+  booking_id text [not null]
+  member_id text
+  guest_name text
+  is_guest integer [not null, default: 0]
+  is_warm_lead integer [not null, default: 0]
+  position_in_group integer [not null, default: 1]
+}
+
+Table bookings {
+  booking_id text [pk]
+  club_id text [not null]
+  course_id text [not null]
+  booking_date text [not null]
+  tee_time text [not null]
+  player_count integer [not null, default: 1]
+  has_guest integer [not null, default: 0]
+  transportation text [not null, default: 'cart']
+  has_caddie integer [not null, default: 0]
+  round_type text [not null, default: '18']
+  status text [not null, default: 'confirmed']
+  check_in_time text
+  round_start text
+  round_end text
+  duration_minutes integer
+}
+
+Table cancellation_risk {
+  risk_id text [pk]
+  booking_id text [not null]
+  member_id text [not null]
+  scored_at text [not null]
+  cancel_probability real [not null]
+  drivers text [not null, default: '[]']
+  recommended_action text [not null]
+  estimated_revenue_lost real [not null, default: 0]
+  action_taken text
+  outcome text
+}
+
+Table canonical_events {
+  event_id text [pk]
+  entity_type text [not null]
+  entity_id text [not null]
+  event_type text [not null]
+  event_timestamp text [not null]
+  source_vendor text [not null]
+  payload text [not null]
+}
+
+Table churn_predictions {
+  prediction_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null, unique]
+  member_id text [not null, unique]
+  prob_30d real
+  prob_60d real
+  prob_90d real
+  confidence real
+  risk_factors jsonb [default: '[]']
+  model_version text [default: 'rules_v1']
+  computed_at timestamptz [default: `now()`]
+}
+
+Table close_outs {
+  closeout_id text [pk]
+  club_id text [not null]
+  date text [not null, unique]
+  golf_revenue real [not null, default: 0]
+  fb_revenue real [not null, default: 0]
+  total_revenue real [not null, default: 0]
+  rounds_played integer [not null, default: 0]
+  covers integer [not null, default: 0]
+  weather text [not null, default: 'sunny']
+  is_understaffed integer [not null, default: 0]
+}
+
+Table club {
+  club_id text [pk]
+  name text
+  city text
+  state text
+  zip text
+  founded_year integer
+  member_count integer
+  course_count integer
+  outlet_count integer
+}
+
+Table complaints {
+  complaint_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  member_id text
+  category text
+  description text
+  status text [default: 'open']
+  priority text [default: 'medium']
+  reported_at timestamptz [default: `now()`]
+  resolved_at timestamptz
+  resolved_by text
+  resolution_notes text
+  sla_hours integer [default: 24]
+  data_source text [default: 'manual']
+}
+
+Table connected_systems {
+  system_id varchar(50) [pk]
+  vendor_name varchar(100)
+  category varchar(50)
+  status varchar(20) [default: 'available']
+  last_sync timestamptz
+  data_points_synced integer [default: 0]
+  config jsonb
+}
+
+Table correlation_insights {
+  id text [pk]
+  headline text [not null]
+  detail text
+  domains text[] [not null]
+  impact text [not null]
+  metric_value text
+  metric_label text
+  archetype text
+  trend_data jsonb
+  delta numeric
+  delta_direction text
+}
+
+Table correlations {
+  correlation_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null, unique]
+  correlation_key text [not null, unique]
+  headline text [not null]
+  detail text
+  domains text[]
+  impact text [default: 'medium']
+  metric_value text
+  metric_label text
+  trend text[]
+  delta text
+  delta_direction text
+  computed_at timestamptz [default: `now()`]
+}
+
+Table courses {
+  course_id text [pk]
+  club_id text [not null]
+  name text [not null]
+  holes integer [not null]
+  par integer [not null]
+  tee_interval_min integer [not null]
+  first_tee text [not null]
+  last_tee text [not null]
+}
+
+Table csv_imports {
+  import_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  uploaded_by text
+  file_name text
+  import_type text [not null]
+  status text [default: 'processing']
+  total_rows integer
+  success_rows integer [default: 0]
+  error_rows integer [default: 0]
+  errors jsonb [default: '[]']
+  started_at timestamptz [default: `now()`]
+  completed_at timestamptz
+}
+
+Table data_source_status {
+  status_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null, unique]
+  domain_code text [not null, unique]
+  is_connected boolean [not null, default: false]
+  source_vendor text
+  last_sync_at timestamptz
+  row_count integer [default: 0]
+  staleness_hours integer
+  health_status text [default: 'unknown']
+  updated_at timestamptz [default: `now()`]
+}
+
+Table data_syncs {
+  sync_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  source_type text [not null]
+  status text [default: 'running']
+  records_processed integer [default: 0]
+  records_failed integer [default: 0]
+  error_message text
+  started_at timestamptz [default: `now()`]
+  completed_at timestamptz
+}
+
+Table demand_heatmap {
+  heatmap_id text [pk]
+  course_id text [not null]
+  day_of_week text [not null]
+  time_block text [not null]
+  fill_rate real [not null, default: 0]
+  unmet_rounds integer [not null, default: 0]
+  demand_level text [not null, default: 'normal']
+  computed_for_month text [not null]
+}
+
+Table dining_outlets {
+  outlet_id text [pk]
+  club_id text [not null]
+  name text [not null]
+  type text [not null]
+  meal_periods text [not null]
+  weekday_covers integer [not null]
+  weekend_covers integer [not null]
+}
+
+Table email_campaigns {
+  campaign_id text [pk]
+  club_id text [not null]
+  subject text [not null]
+  type text [not null]
+  send_date text [not null]
+  recipient_count integer [not null, default: 0]
+  html_content_url text
+}
+
+Table email_events {
+  event_id text [pk]
+  campaign_id text [not null]
+  member_id text [not null]
+  event_type text [not null]
+  occurred_at text [not null]
+  link_clicked text
+  device_type text
+}
+
+Table event_definitions {
+  event_id text [pk]
+  club_id text [not null]
+  name text [not null]
+  type text [not null]
+  event_date text [not null]
+  capacity integer [not null]
+  registration_fee real [not null, default: 0]
+  description text
+}
+
+Table event_registrations {
+  registration_id text [pk]
+  event_id text [not null]
+  member_id text [not null]
+  status text [not null, default: 'registered']
+  guest_count integer [not null, default: 0]
+  fee_paid real [not null, default: 0]
+  registered_at text [not null]
+  checked_in_at text
+}
+
+Table event_roi_metrics {
+  id integer [pk, default: `nextval('event_roi_metrics_id_seq'::regclass)`]
+  event_type text [not null]
+  attendance_avg integer [not null]
+  retention_rate integer [not null]
+  avg_spend integer [not null]
+  roi_score numeric [not null]
+  frequency text [not null]
+}
+
+Table experience_correlations {
+  id integer [pk, default: `nextval('experience_correlations_id_seq'::regclass)`]
+  touchpoint text [not null]
+  retention_impact numeric [not null]
+  category text [not null]
+  description text
+  segment text [not null, default: 'all']
+  archetype text
+  trend_data jsonb
+  delta numeric
+  delta_direction text
+}
+
+Table feature_dependency {
+  dependency_id text [pk, default: `gen_random_uuid()`]
+  feature_type text [not null]
+  feature_key text [not null]
+  domain_code text [not null]
+  dependency_type text [not null]
+  fallback_mode text
+  user_message text
+  created_at timestamptz [default: `now()`]
+}
+
+Table feature_state_log {
+  log_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  feature_type text [not null]
+  feature_key text [not null]
+  previous_state text
+  new_state text [not null]
+  reason text
+  changed_at timestamptz [default: `now()`]
+}
+
+Table feedback {
+  feedback_id text [pk]
+  member_id text
+  club_id text [not null]
+  submitted_at text [not null]
+  category text [not null]
+  sentiment_score real [not null]
+  description text
+  status text [not null, default: 'acknowledged']
+  resolved_at text
+  is_understaffed_day integer [not null, default: 0]
+}
+
+Table health_scores {
+  id text [pk, default: `gen_random_uuid()`]
+  member_id text [not null]
+  club_id text [not null]
+  score real [not null]
+  tier text [not null]
+  golf_score real
+  dining_score real
+  email_score real
+  event_score real
+  computed_at timestamptz [default: `now()`]
+  archetype text
+  score_delta real
+}
+
+Table households {
+  household_id text [pk]
+  primary_member_id text
+  member_count integer [not null, default: 1]
+  address text
+  is_multi_member integer [not null, default: 0]
+}
+
+Table industry_benchmarks {
+  metric_key varchar(50) [pk]
+  club_value numeric
+  industry_value numeric
+  unit varchar(10)
+  label varchar(100)
+  comparison_text varchar(50)
+  direction varchar(20)
+}
+
+Table interventions {
+  intervention_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  member_id text [not null]
+  action_id text
+  intervention_type text [not null]
+  description text
+  initiated_by text
+  initiated_at timestamptz [default: `now()`]
+  health_score_before real
+  health_score_after real
+  outcome text
+  outcome_measured_at timestamptz
+  dues_protected numeric
+  revenue_recovered numeric
+  is_member_save boolean [default: false]
+}
+
+Table member_engagement_daily {
+  row_id text [pk]
+  member_id text [not null, unique]
+  date text [not null, unique]
+  rounds_played integer [not null, default: 0]
+  dining_checks integer [not null, default: 0]
+  dining_spend real [not null, default: 0]
+  events_attended integer [not null, default: 0]
+  emails_opened integer [not null, default: 0]
+  feedback_submitted integer [not null, default: 0]
+  visit_flag integer [not null, default: 0]
+}
+
+Table member_engagement_weekly {
+  row_id text [pk]
+  member_id text [not null, unique]
+  week_number integer [not null, unique]
+  week_start text [not null]
+  week_end text [not null]
+  rounds_played integer [not null, default: 0]
+  dining_visits integer [not null, default: 0]
+  dining_spend real [not null, default: 0]
+  events_attended integer [not null, default: 0]
+  email_open_rate real [not null, default: 0]
+  engagement_score real [not null, default: 0]
+}
+
+Table member_interventions {
+  id integer [pk, default: `nextval('member_interventions_id_seq'::regclass)`]
+  member_id varchar(20) [not null]
+  health_before integer [not null]
+  health_after integer [not null]
+  trigger text [not null]
+  action text [not null]
+  outcome text [not null]
+  dues_at_risk numeric [not null, default: 0]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table member_invoices {
+  invoice_id text [pk]
+  member_id text [not null]
+  invoice_date text [not null]
+  due_date text [not null]
+  amount real [not null]
+  type text [not null, default: 'dues']
+  description text [not null]
+  status text [not null, default: 'paid']
+  paid_date text
+  paid_amount real [default: 0]
+  days_past_due integer [not null, default: 0]
+  late_fee real [default: 0]
+  collection_status text [default: 'none']
+}
+
+Table member_location_current {
+  member_id text [pk]
+  zone varchar(50)
+  sub_location varchar(100)
+  check_in_time timestamptz
+  health_status varchar(20)
+  activity_type varchar(50)
+}
+
+Table member_sentiment_ratings {
+  rating_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  member_id text [not null]
+  rating_type text [not null]
+  score real [not null]
+  comment text
+  context_id text
+  submitted_at timestamptz [default: `now()`]
+  source text [not null, default: 'manual']
+  archived boolean [default: false]
+}
+
+Table member_waitlist {
+  waitlist_id text [pk]
+  member_id text [not null]
+  course_id text [not null]
+  requested_date text [not null]
+  requested_slot text [not null]
+  alternatives_accepted text [not null, default: '[]']
+  days_waiting integer [not null, default: 0]
+  retention_priority text [not null, default: 'NORMAL']
+  notified_at text
+  filled_at text
+  dining_incentive_attached integer [not null, default: 0]
+}
+
+Table members {
+  member_id text [pk]
+  member_number integer [default: 0]
+  first_name text
+  last_name text
+  email text
+  phone text
+  date_of_birth text
+  gender text
+  membership_type text
+  membership_status text [default: 'active']
+  join_date text
+  resigned_on text
+  household_id text
+  archetype text
+  annual_dues real
+  account_balance real [default: 0]
+  ghin_number text
+  communication_opt_in integer [default: 1]
+  preferred_dining_spot text
+  tee_time_preference text
+  dining_preference text
+  member_notes text
+  family_members text
+  last_seen_location text
+  club_id text
+  external_id text
+  status text [default: 'active']
+  preferred_channel text [default: 'email']
+  health_score real
+  health_tier text
+  last_health_update timestamptz
+  data_source text [default: 'manual']
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table membership_types {
+  type_code text [pk]
+  name text [not null]
+  annual_dues real [not null]
+  fb_minimum real [not null, default: 0]
+  golf_eligible integer [not null, default: 1]
+}
+
+Table notification_preferences {
+  user_id text [pk]
+  club_id text [not null]
+  morning_digest boolean [default: true]
+  digest_time text [default: '07:00']
+  digest_channel text [default: 'email']
+  high_priority_alerts boolean [default: true]
+  alert_channel text [default: 'email']
+  escalation_alerts boolean [default: true]
+  slack_webhook text
+}
+
+Table notifications {
+  notification_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  user_id text
+  channel text [not null, default: 'in_app']
+  type text [not null]
+  title text [not null]
+  body text
+  priority text [default: 'normal']
+  related_member_id text
+  related_action_id text
+  read_at timestamptz
+  sent_at timestamptz [default: `now()`]
+  created_at timestamptz [default: `now()`]
+}
+
+Table onboarding_progress {
+  club_id text [pk]
+  step_key text [pk]
+  completed boolean [default: false]
+  completed_at timestamptz
+  notes text
+}
+
+Table operational_interventions {
+  id integer [pk, default: `nextval('operational_interventions_id_seq'::regclass)`]
+  event varchar(100) [not null]
+  event_date date [not null]
+  detection text [not null]
+  action text [not null]
+  outcome text [not null]
+  revenue_protected numeric [not null, default: 0]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table pace_hole_segments {
+  segment_id text [pk]
+  pace_id text [not null]
+  hole_number integer [not null]
+  tee_time text
+  green_time text
+  segment_minutes integer [not null]
+  is_bottleneck integer [not null, default: 0]
+}
+
+Table pace_of_play {
+  pace_id text [pk]
+  booking_id text [not null]
+  total_minutes integer [not null]
+  is_slow_round integer [not null, default: 0]
+  groups_passed integer [not null, default: 0]
+  ranger_interventions integer [not null, default: 0]
+}
+
+Table playbook_runs {
+  run_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  playbook_id text [not null]
+  playbook_name text [not null]
+  member_id text [not null]
+  triggered_by text
+  trigger_reason text
+  status text [default: 'active']
+  started_at timestamptz [default: `now()`]
+  completed_at timestamptz
+  health_score_at_start real
+  health_score_at_end real
+  outcome text
+}
+
+Table playbook_steps {
+  step_id text [pk, default: `gen_random_uuid()`]
+  run_id text [not null]
+  club_id text [not null]
+  step_number integer [not null]
+  title text [not null]
+  description text
+  assigned_to text
+  due_date timestamptz
+  status text [default: 'pending']
+  completed_at timestamptz
+  completed_by text
+  notes text
+}
+
+Table pos_checks {
+  check_id text [pk]
+  outlet_id text [not null]
+  member_id text
+  opened_at text [not null]
+  closed_at text
+  first_item_fired_at text
+  last_item_fulfilled_at text
+  subtotal real [not null, default: 0]
+  tax_amount real [not null, default: 0]
+  tip_amount real [not null, default: 0]
+  comp_amount real [not null, default: 0]
+  discount_amount real [not null, default: 0]
+  void_amount real [not null, default: 0]
+  total real [not null, default: 0]
+  payment_method text [not null, default: 'member_charge']
+  post_round_dining integer [not null, default: 0]
+  linked_booking_id text
+  event_id text
+  is_understaffed_day integer [not null, default: 0]
+}
+
+Table pos_line_items {
+  line_item_id text [pk]
+  check_id text [not null]
+  item_name text [not null]
+  category text [not null]
+  unit_price real [not null]
+  quantity integer [not null, default: 1]
+  line_total real [not null]
+  is_comp integer [not null, default: 0]
+  is_void integer [not null, default: 0]
+  fired_at text
+}
+
+Table pos_payments {
+  payment_id text [pk]
+  check_id text [not null]
+  payment_method text [not null]
+  amount real [not null]
+  processed_at text [not null]
+  is_split integer [not null, default: 0]
+}
+
+Table rounds {
+  round_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  member_id text [not null]
+  booking_id text
+  round_date date [not null]
+  tee_time time
+  course_id text
+  duration_minutes integer
+  pace_rating text
+  players integer [default: 1]
+  cancelled boolean [default: false]
+  no_show boolean [default: false]
+  data_source text [default: 'tee_sheet']
+  created_at timestamptz [default: `now()`]
+}
+
+Table service_recovery_alerts {
+  alert_id integer [pk, default: `nextval('service_recovery_alerts_alert_id_seq'::regclass)`]
+  member_id varchar(20)
+  member_name varchar(100)
+  severity varchar(20)
+  zone varchar(50)
+  detail text
+  recommended_action text
+  created_at timestamptz [default: `now()`]
+  resolved_at timestamptz
+}
+
+Table service_requests {
+  request_id text [pk]
+  member_id text
+  booking_id text
+  request_type text [not null]
+  requested_at text [not null]
+  response_time_min integer
+  resolved_at text
+  resolution_notes text
+  is_understaffed_day integer [not null, default: 0]
+}
+
+Table sessions {
+  token text [pk]
+  user_id text [not null]
+  club_id text [not null]
+  role text [not null]
+  expires_at timestamptz [not null]
+  created_at timestamptz [default: `now()`]
+}
+
+Table slot_reassignments {
+  reassignment_id varchar(50) [pk]
+  source_booking_id varchar(50)
+  source_slot varchar(100)
+  source_member_id varchar(20)
+  source_member_name varchar(100)
+  recommended_fill_member_id varchar(20)
+  recommended_fill_member_name varchar(100)
+  status varchar(20) [default: 'pending']
+  staff_decision text
+  revenue_recovered numeric
+  health_before integer
+  health_after integer
+  decided_at timestamptz
+  audit_trail jsonb [default: '[]']
+}
+
+Table staff {
+  staff_id text [pk]
+  club_id text [not null]
+  first_name text [not null]
+  last_name text [not null]
+  department text [not null]
+  role text [not null]
+  hire_date text [not null]
+  hourly_rate real [not null]
+  is_full_time integer [not null, default: 1]
+}
+
+Table staff_location_current {
+  staff_id varchar(20) [pk]
+  name varchar(100)
+  zone varchar(50)
+  status varchar(20)
+  eta_minutes integer
+  department varchar(50)
+}
+
+Table staff_shifts {
+  shift_id text [pk]
+  staff_id text [not null]
+  shift_date text [not null]
+  outlet_id text
+  start_time text [not null]
+  end_time text [not null]
+  hours_worked real [not null]
+  is_understaffed_day integer [not null, default: 0]
+  notes text
+}
+
+Table transactions {
+  transaction_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  member_id text
+  outlet_id text
+  outlet_name text
+  transaction_date timestamptz [not null]
+  total_amount numeric
+  item_count integer
+  category text
+  is_post_round boolean [default: false]
+  data_source text [default: 'pos']
+  created_at timestamptz [default: `now()`]
+}
+
+Table user_sessions {
+  id integer [pk, default: `nextval('user_sessions_id_seq'::regclass)`]
+  user_id varchar(50) [not null, default: 'gm_default']
+  last_login_at timestamptz [not null, default: `now()`]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table users {
+  user_id text [pk, default: `gen_random_uuid()`]
+  club_id text [not null]
+  email text [not null, unique]
+  name text [not null]
+  role text [not null, default: 'viewer']
+  title text
+  active boolean [default: true]
+  last_login timestamptz
+  created_at timestamptz [default: `now()`]
+  password_hash text
+  password_salt text
+}
+
+Table visit_sessions {
+  session_id text [pk]
+  member_id text [not null]
+  session_date text [not null]
+  anchor_type text [not null]
+  arrival_time text
+  departure_time text
+  duration_minutes integer
+  touchpoints integer [not null, default: 1]
+  total_spend real [not null, default: 0]
+  activities text [not null, default: '[]']
+}
+
+Table waitlist_config {
+  club_id varchar(20) [pk, default: 'oakmont']
+  hold_time_minutes integer [default: 30]
+  auto_offer_threshold numeric [default: 0.80]
+  max_offers integer [default: 3]
+  notification_limit integer [default: 2]
+}
+
+Table waitlist_entries {
+  entry_id text [pk]
+  club_id text [not null]
+  course_id text [not null]
+  requested_date text [not null]
+  requested_tee_time text [not null]
+  waitlist_count integer [not null, default: 1]
+  has_event_overlap integer [not null, default: 0]
+  peak_slot text
+}
+
+Table weather_daily {
+  weather_id text [pk]
+  date text [not null, unique]
+  condition text [not null]
+  temp_high integer [not null]
+  temp_low integer [not null]
+  wind_mph integer [not null, default: 0]
+  precipitation_in real [not null, default: 0]
+  golf_demand_modifier real [not null, default: 0]
+  fb_demand_modifier real [not null, default: 0]
+}
+
+// ============================================
+// EXPLICIT FOREIGN KEY RELATIONSHIPS (28)
+// ============================================
+
+Ref: courses.club_id > club.club_id
+Ref: dining_outlets.club_id > club.club_id
+Ref: bookings.club_id > club.club_id
+Ref: bookings.course_id > courses.course_id
+Ref: booking_players.booking_id > bookings.booking_id
+Ref: pace_of_play.booking_id > bookings.booking_id
+Ref: pace_hole_segments.pace_id > pace_of_play.pace_id
+Ref: waitlist_entries.club_id > club.club_id
+Ref: waitlist_entries.course_id > courses.course_id
+Ref: pos_checks.outlet_id > dining_outlets.outlet_id
+Ref: pos_checks.linked_booking_id > bookings.booking_id
+Ref: pos_line_items.check_id > pos_checks.check_id
+Ref: pos_payments.check_id > pos_checks.check_id
+Ref: event_definitions.club_id > club.club_id
+Ref: pos_checks.event_id > event_definitions.event_id
+Ref: event_registrations.event_id > event_definitions.event_id
+Ref: email_campaigns.club_id > club.club_id
+Ref: email_events.campaign_id > email_campaigns.campaign_id
+Ref: feedback.club_id > club.club_id
+Ref: service_requests.booking_id > bookings.booking_id
+Ref: close_outs.club_id > club.club_id
+Ref: staff.club_id > club.club_id
+Ref: staff_shifts.staff_id > staff.staff_id
+Ref: staff_shifts.outlet_id > dining_outlets.outlet_id
+Ref: member_waitlist.course_id > courses.course_id
+Ref: cancellation_risk.booking_id > bookings.booking_id
+Ref: demand_heatmap.course_id > courses.course_id
+Ref: agent_actions.agent_id > agent_definitions.agent_id
+
+// ============================================
+// IMPLICIT/CONVENTIONAL FOREIGN KEY RELATIONSHIPS
+// These are inferred from column naming conventions (_id suffix)
+// and are NOT enforced by database constraints.
+// ============================================
+
+// Implicit FK (by naming convention)
+Ref: actions.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: actions.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: activity_log.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: activity_log.agent_id > agent_definitions.agent_id
+// Implicit FK (by naming convention)
+Ref: agent_actions.action_id > actions.action_id
+// Implicit FK (by naming convention)
+Ref: agent_actions.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: agent_activity.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: agent_activity.agent_id > agent_definitions.agent_id
+// Implicit FK (by naming convention)
+Ref: agent_activity.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: agent_configs.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: agent_configs.agent_id > agent_definitions.agent_id
+// Implicit FK (by naming convention)
+Ref: booking_confirmations.booking_id > bookings.booking_id
+// Implicit FK (by naming convention)
+Ref: booking_confirmations.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: booking_players.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: cancellation_risk.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: churn_predictions.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: churn_predictions.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: complaints.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: complaints.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: correlations.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: csv_imports.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: data_source_status.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: data_syncs.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: email_events.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: event_registrations.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: feature_state_log.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: feedback.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: health_scores.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: health_scores.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: interventions.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: interventions.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: interventions.action_id > actions.action_id
+// Implicit FK (by naming convention)
+Ref: member_engagement_daily.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: member_engagement_weekly.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: member_interventions.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: member_invoices.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: member_location_current.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: member_sentiment_ratings.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: member_sentiment_ratings.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: member_waitlist.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: members.household_id > households.household_id
+// Implicit FK (by naming convention)
+Ref: members.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: notification_preferences.user_id > users.user_id
+// Implicit FK (by naming convention)
+Ref: notification_preferences.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: notifications.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: notifications.user_id > users.user_id
+// Implicit FK (by naming convention)
+Ref: onboarding_progress.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: playbook_runs.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: playbook_runs.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: playbook_steps.run_id > playbook_runs.run_id
+// Implicit FK (by naming convention)
+Ref: playbook_steps.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: pos_checks.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: rounds.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: rounds.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: rounds.booking_id > bookings.booking_id
+// Implicit FK (by naming convention)
+Ref: rounds.course_id > courses.course_id
+// Implicit FK (by naming convention)
+Ref: service_recovery_alerts.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: service_requests.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: sessions.user_id > users.user_id
+// Implicit FK (by naming convention)
+Ref: sessions.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: staff_location_current.staff_id > staff.staff_id
+// Implicit FK (by naming convention)
+Ref: transactions.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: transactions.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: transactions.outlet_id > dining_outlets.outlet_id
+// Implicit FK (by naming convention)
+Ref: user_sessions.user_id > users.user_id
+// Implicit FK (by naming convention)
+Ref: users.club_id > club.club_id
+// Implicit FK (by naming convention)
+Ref: visit_sessions.member_id > members.member_id
+// Implicit FK (by naming convention)
+Ref: waitlist_config.club_id > club.club_id
+
+// ============================================
+// TABLE GROUPS
+// ============================================
+
+TableGroup Core {
+  club
+  members
+  households
+  membership_types
+  users
+  sessions
+  user_sessions
+}
+
+TableGroup Golf_Operations {
+  bookings
+  booking_players
+  booking_confirmations
+  rounds
+  courses
+  pace_of_play
+  pace_hole_segments
+  slot_reassignments
+  waitlist_entries
+  waitlist_config
+  member_waitlist
+  cancellation_risk
+  demand_heatmap
+}
+
+TableGroup Dining_and_POS {
+  dining_outlets
+  pos_checks
+  pos_line_items
+  pos_payments
+  close_outs
+  transactions
+}
+
+TableGroup Events {
+  canonical_events
+  event_definitions
+  event_registrations
+  event_roi_metrics
+}
+
+TableGroup Communications {
+  email_campaigns
+  email_events
+  notifications
+  notification_preferences
+}
+
+TableGroup Feedback_and_Service {
+  feedback
+  service_requests
+  service_recovery_alerts
+  complaints
+}
+
+TableGroup Member_Analytics {
+  member_engagement_daily
+  member_engagement_weekly
+  health_scores
+  member_sentiment_ratings
+  churn_predictions
+  member_invoices
+  visit_sessions
+  member_location_current
+}
+
+TableGroup AI_Agents {
+  agent_definitions
+  agent_actions
+  agent_activity
+  agent_configs
+}
+
+TableGroup Actions_and_Interventions {
+  actions
+  interventions
+  member_interventions
+  operational_interventions
+  playbook_runs
+  playbook_steps
+}
+
+TableGroup Data_Management {
+  data_syncs
+  data_source_status
+  csv_imports
+  connected_systems
+  feature_dependency
+  feature_state_log
+  onboarding_progress
+}
+
+TableGroup Analytics_and_Insights {
+  archetype_spend_gaps
+  board_report_snapshots
+  correlations
+  correlation_insights
+  experience_correlations
+  industry_benchmarks
+  weather_daily
+}
+
+TableGroup Staff {
+  staff
+  staff_shifts
+  staff_location_current
+}
+
+TableGroup Activity {
+  activity_log
+}
+

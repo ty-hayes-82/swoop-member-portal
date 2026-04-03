@@ -12,3 +12,4 @@ oakmont_hills_jan2026.db
 
 dist.locked-*
 .env*.local
+.vercel

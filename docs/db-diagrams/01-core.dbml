@@ -1,0 +1,106 @@
+// SWOOP — Core: Club, Members, Households, Users & Auth
+// The foundational tables that most other domains reference.
+
+Table club {
+  club_id text [pk]
+  name text
+  city text
+  state text
+  zip text
+  founded_year integer
+  member_count integer
+  course_count integer
+  outlet_count integer
+}
+
+Table members {
+  member_id text [pk]
+  member_number integer
+  first_name text
+  last_name text
+  email text
+  phone text
+  date_of_birth text
+  gender text
+  membership_type text
+  membership_status text
+  join_date text
+  resigned_on text
+  household_id text
+  archetype text
+  annual_dues real
+  account_balance real
+  ghin_number text
+  communication_opt_in integer
+  preferred_dining_spot text
+  tee_time_preference text
+  dining_preference text
+  member_notes text
+  family_members text
+  last_seen_location text
+  club_id text
+  external_id text
+  status text
+  preferred_channel text
+  health_score real
+  health_tier text
+  last_health_update timestamptz
+  data_source text
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table households {
+  household_id text [pk]
+  primary_member_id text
+  member_count integer
+  address text
+  is_multi_member integer
+}
+
+Table membership_types {
+  type_code text [pk]
+  name text
+  annual_dues real
+  fb_minimum real
+  golf_eligible integer
+}
+
+Table users {
+  user_id text [pk]
+  club_id text
+  email text [unique]
+  name text
+  role text
+  title text
+  active boolean
+  last_login timestamptz
+  created_at timestamptz
+  password_hash text
+  password_salt text
+}
+
+Table sessions {
+  token text [pk]
+  user_id text
+  club_id text
+  role text
+  expires_at timestamptz
+  created_at timestamptz
+}
+
+Table user_sessions {
+  id integer [pk]
+  user_id varchar(50)
+  last_login_at timestamptz
+  created_at timestamptz
+}
+
+// --- Relationships ---
+
+Ref: members.club_id > club.club_id
+Ref: members.household_id > households.household_id
+Ref: users.club_id > club.club_id
+Ref: sessions.user_id > users.user_id
+Ref: sessions.club_id > club.club_id
+Ref: user_sessions.user_id > users.user_id

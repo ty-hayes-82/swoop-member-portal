@@ -1,0 +1,231 @@
+// SWOOP — Member Analytics: Health Scores, Engagement, Churn, Insights
+// Core tables (club, members) included as stubs for relationship context.
+
+Table club {
+  club_id text [pk]
+  name text
+}
+
+Table members {
+  member_id text [pk]
+  first_name text
+  last_name text
+  health_score real
+  health_tier text
+  archetype text
+}
+
+Table health_scores {
+  id text [pk]
+  member_id text
+  club_id text
+  score real
+  tier text
+  golf_score real
+  dining_score real
+  email_score real
+  event_score real
+  computed_at timestamptz
+  archetype text
+  score_delta real
+}
+
+Table churn_predictions {
+  prediction_id text [pk]
+  club_id text [unique]
+  member_id text [unique]
+  prob_30d real
+  prob_60d real
+  prob_90d real
+  confidence real
+  risk_factors jsonb
+  model_version text
+  computed_at timestamptz
+}
+
+Table member_engagement_daily {
+  row_id text [pk]
+  member_id text [unique]
+  date text [unique]
+  rounds_played integer
+  dining_checks integer
+  dining_spend real
+  events_attended integer
+  emails_opened integer
+  feedback_submitted integer
+  visit_flag integer
+}
+
+Table member_engagement_weekly {
+  row_id text [pk]
+  member_id text [unique]
+  week_number integer [unique]
+  week_start text
+  week_end text
+  rounds_played integer
+  dining_visits integer
+  dining_spend real
+  events_attended integer
+  email_open_rate real
+  engagement_score real
+}
+
+Table member_sentiment_ratings {
+  rating_id text [pk]
+  club_id text
+  member_id text
+  rating_type text
+  score real
+  comment text
+  context_id text
+  submitted_at timestamptz
+  source text
+  archived boolean
+}
+
+Table member_invoices {
+  invoice_id text [pk]
+  member_id text
+  invoice_date text
+  due_date text
+  amount real
+  type text
+  description text
+  status text
+  paid_date text
+  paid_amount real
+  days_past_due integer
+  late_fee real
+  collection_status text
+}
+
+Table visit_sessions {
+  session_id text [pk]
+  member_id text
+  session_date text
+  anchor_type text
+  arrival_time text
+  departure_time text
+  duration_minutes integer
+  touchpoints integer
+  total_spend real
+  activities text
+}
+
+Table member_location_current {
+  member_id text [pk]
+  zone varchar(50)
+  sub_location varchar(100)
+  check_in_time timestamptz
+  health_status varchar(20)
+  activity_type varchar(50)
+}
+
+Table archetype_spend_gaps {
+  id integer [pk]
+  archetype text
+  count integer
+  current_dining integer
+  potential_dining integer
+  current_events integer
+  potential_events integer
+  avg_annual_spend integer
+  untapped_dining integer
+  untapped_events integer
+  total_untapped integer
+  campaign text
+}
+
+Table experience_correlations {
+  id integer [pk]
+  touchpoint text
+  retention_impact numeric
+  category text
+  description text
+  segment text
+  archetype text
+  trend_data jsonb
+  delta numeric
+  delta_direction text
+}
+
+Table correlations {
+  correlation_id text [pk]
+  club_id text [unique]
+  correlation_key text [unique]
+  headline text
+  detail text
+  domains text[]
+  impact text
+  metric_value text
+  metric_label text
+  trend text[]
+  delta text
+  delta_direction text
+  computed_at timestamptz
+}
+
+Table correlation_insights {
+  id text [pk]
+  headline text
+  detail text
+  domains text[]
+  impact text
+  metric_value text
+  metric_label text
+  archetype text
+  trend_data jsonb
+  delta numeric
+  delta_direction text
+}
+
+Table industry_benchmarks {
+  metric_key varchar(50) [pk]
+  club_value numeric
+  industry_value numeric
+  unit varchar(10)
+  label varchar(100)
+  comparison_text varchar(50)
+  direction varchar(20)
+}
+
+Table board_report_snapshots {
+  id integer [pk]
+  snapshot_date date
+  members_saved integer
+  dues_protected numeric
+  ltv_protected numeric
+  revenue_recovered numeric
+  service_failures_caught integer
+  avg_response_time_hrs numeric
+  board_confidence_pct integer
+  created_at timestamptz
+}
+
+Table weather_daily {
+  weather_id text [pk]
+  date text [unique]
+  condition text
+  temp_high integer
+  temp_low integer
+  wind_mph integer
+  precipitation_in real
+  golf_demand_modifier real
+  fb_demand_modifier real
+}
+
+// --- Relationships ---
+
+// Implicit FKs
+Ref: health_scores.member_id > members.member_id
+Ref: health_scores.club_id > club.club_id
+Ref: churn_predictions.club_id > club.club_id
+Ref: churn_predictions.member_id > members.member_id
+Ref: member_engagement_daily.member_id > members.member_id
+Ref: member_engagement_weekly.member_id > members.member_id
+Ref: member_sentiment_ratings.club_id > club.club_id
+Ref: member_sentiment_ratings.member_id > members.member_id
+Ref: member_invoices.member_id > members.member_id
+Ref: visit_sessions.member_id > members.member_id
+Ref: member_location_current.member_id > members.member_id
+Ref: correlations.club_id > club.club_id

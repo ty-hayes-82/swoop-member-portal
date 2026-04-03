@@ -1,0 +1,204 @@
+// SWOOP — Golf Operations: Bookings, Rounds, Pace, Waitlists
+// Core tables (club, members) included as stubs for relationship context.
+
+Table club {
+  club_id text [pk]
+  name text
+}
+
+Table members {
+  member_id text [pk]
+  first_name text
+  last_name text
+  club_id text
+}
+
+Table courses {
+  course_id text [pk]
+  club_id text
+  name text
+  holes integer
+  par integer
+  tee_interval_min integer
+  first_tee text
+  last_tee text
+}
+
+Table bookings {
+  booking_id text [pk]
+  club_id text
+  course_id text
+  booking_date text
+  tee_time text
+  player_count integer
+  has_guest integer
+  transportation text
+  has_caddie integer
+  round_type text
+  status text
+  check_in_time text
+  round_start text
+  round_end text
+  duration_minutes integer
+}
+
+Table booking_players {
+  player_id text [pk]
+  booking_id text
+  member_id text
+  guest_name text
+  is_guest integer
+  is_warm_lead integer
+  position_in_group integer
+}
+
+Table booking_confirmations {
+  confirmation_id varchar(50) [pk]
+  booking_id varchar(50)
+  member_id varchar(20)
+  member_name varchar(100)
+  tee_time varchar(100)
+  cancel_probability numeric
+  outreach_status varchar(20)
+  outreach_channel varchar(20)
+  staff_notes text
+  contacted_at timestamptz
+  responded_at timestamptz
+  created_at timestamptz
+}
+
+Table rounds {
+  round_id text [pk]
+  club_id text
+  member_id text
+  booking_id text
+  round_date date
+  tee_time time
+  course_id text
+  duration_minutes integer
+  pace_rating text
+  players integer
+  cancelled boolean
+  no_show boolean
+  data_source text
+  created_at timestamptz
+}
+
+Table pace_of_play {
+  pace_id text [pk]
+  booking_id text
+  total_minutes integer
+  is_slow_round integer
+  groups_passed integer
+  ranger_interventions integer
+}
+
+Table pace_hole_segments {
+  segment_id text [pk]
+  pace_id text
+  hole_number integer
+  tee_time text
+  green_time text
+  segment_minutes integer
+  is_bottleneck integer
+}
+
+Table cancellation_risk {
+  risk_id text [pk]
+  booking_id text
+  member_id text
+  scored_at text
+  cancel_probability real
+  drivers text
+  recommended_action text
+  estimated_revenue_lost real
+  action_taken text
+  outcome text
+}
+
+Table slot_reassignments {
+  reassignment_id varchar(50) [pk]
+  source_booking_id varchar(50)
+  source_slot varchar(100)
+  source_member_id varchar(20)
+  source_member_name varchar(100)
+  recommended_fill_member_id varchar(20)
+  recommended_fill_member_name varchar(100)
+  status varchar(20)
+  staff_decision text
+  revenue_recovered numeric
+  health_before integer
+  health_after integer
+  decided_at timestamptz
+  audit_trail jsonb
+}
+
+Table demand_heatmap {
+  heatmap_id text [pk]
+  course_id text
+  day_of_week text
+  time_block text
+  fill_rate real
+  unmet_rounds integer
+  demand_level text
+  computed_for_month text
+}
+
+Table waitlist_entries {
+  entry_id text [pk]
+  club_id text
+  course_id text
+  requested_date text
+  requested_tee_time text
+  waitlist_count integer
+  has_event_overlap integer
+  peak_slot text
+}
+
+Table waitlist_config {
+  club_id varchar(20) [pk]
+  hold_time_minutes integer
+  auto_offer_threshold numeric
+  max_offers integer
+  notification_limit integer
+}
+
+Table member_waitlist {
+  waitlist_id text [pk]
+  member_id text
+  course_id text
+  requested_date text
+  requested_slot text
+  alternatives_accepted text
+  days_waiting integer
+  retention_priority text
+  notified_at text
+  filled_at text
+  dining_incentive_attached integer
+}
+
+// --- Relationships ---
+
+// Explicit FKs
+Ref: courses.club_id > club.club_id
+Ref: bookings.club_id > club.club_id
+Ref: bookings.course_id > courses.course_id
+Ref: booking_players.booking_id > bookings.booking_id
+Ref: pace_of_play.booking_id > bookings.booking_id
+Ref: pace_hole_segments.pace_id > pace_of_play.pace_id
+Ref: waitlist_entries.club_id > club.club_id
+Ref: waitlist_entries.course_id > courses.course_id
+Ref: cancellation_risk.booking_id > bookings.booking_id
+Ref: demand_heatmap.course_id > courses.course_id
+Ref: member_waitlist.course_id > courses.course_id
+
+// Implicit FKs
+Ref: booking_players.member_id > members.member_id
+Ref: booking_confirmations.booking_id > bookings.booking_id
+Ref: booking_confirmations.member_id > members.member_id
+Ref: rounds.club_id > club.club_id
+Ref: rounds.member_id > members.member_id
+Ref: rounds.booking_id > bookings.booking_id
+Ref: rounds.course_id > courses.course_id
+Ref: cancellation_risk.member_id > members.member_id
+Ref: member_waitlist.member_id > members.member_id

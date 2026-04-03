@@ -1,0 +1,123 @@
+// SWOOP — Dining & Point-of-Sale: Outlets, Checks, Payments, Revenue
+// Core tables (club, members) included as stubs for relationship context.
+
+Table club {
+  club_id text [pk]
+  name text
+}
+
+Table members {
+  member_id text [pk]
+  first_name text
+  last_name text
+  club_id text
+}
+
+Table bookings {
+  booking_id text [pk]
+  club_id text
+}
+
+Table event_definitions {
+  event_id text [pk]
+  name text
+}
+
+Table dining_outlets {
+  outlet_id text [pk]
+  club_id text
+  name text
+  type text
+  meal_periods text
+  weekday_covers integer
+  weekend_covers integer
+}
+
+Table pos_checks {
+  check_id text [pk]
+  outlet_id text
+  member_id text
+  opened_at text
+  closed_at text
+  first_item_fired_at text
+  last_item_fulfilled_at text
+  subtotal real
+  tax_amount real
+  tip_amount real
+  comp_amount real
+  discount_amount real
+  void_amount real
+  total real
+  payment_method text
+  post_round_dining integer
+  linked_booking_id text
+  event_id text
+  is_understaffed_day integer
+}
+
+Table pos_line_items {
+  line_item_id text [pk]
+  check_id text
+  item_name text
+  category text
+  unit_price real
+  quantity integer
+  line_total real
+  is_comp integer
+  is_void integer
+  fired_at text
+}
+
+Table pos_payments {
+  payment_id text [pk]
+  check_id text
+  payment_method text
+  amount real
+  processed_at text
+  is_split integer
+}
+
+Table close_outs {
+  closeout_id text [pk]
+  club_id text
+  date text [unique]
+  golf_revenue real
+  fb_revenue real
+  total_revenue real
+  rounds_played integer
+  covers integer
+  weather text
+  is_understaffed integer
+}
+
+Table transactions {
+  transaction_id text [pk]
+  club_id text
+  member_id text
+  outlet_id text
+  outlet_name text
+  transaction_date timestamptz
+  total_amount numeric
+  item_count integer
+  category text
+  is_post_round boolean
+  data_source text
+  created_at timestamptz
+}
+
+// --- Relationships ---
+
+// Explicit FKs
+Ref: dining_outlets.club_id > club.club_id
+Ref: pos_checks.outlet_id > dining_outlets.outlet_id
+Ref: pos_checks.linked_booking_id > bookings.booking_id
+Ref: pos_checks.event_id > event_definitions.event_id
+Ref: pos_line_items.check_id > pos_checks.check_id
+Ref: pos_payments.check_id > pos_checks.check_id
+Ref: close_outs.club_id > club.club_id
+
+// Implicit FKs
+Ref: pos_checks.member_id > members.member_id
+Ref: transactions.club_id > club.club_id
+Ref: transactions.member_id > members.member_id
+Ref: transactions.outlet_id > dining_outlets.outlet_id
