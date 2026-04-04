@@ -1,3 +1,4 @@
+import { apiFetch, getClubId } from './apiClient';
 import {
   kpis as staticKpis,
   memberSaves as staticMemberSaves,
@@ -9,29 +10,24 @@ let _liveKpis = null;
 let _liveBenchmarks = null;
 
 export const _init = async () => {
-  const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+  const clubId = getClubId();
   if (!clubId) return;
 
   // Fetch live outcomes from track-outcomes
   try {
-    const res = await fetch(`/api/dashboard-live?clubId=${clubId}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.boardReportSummary) {
-        _liveKpis = {
-          membersSaved: data.boardReportSummary.membersSaved,
-          duesProtected: data.boardReportSummary.duesProtected,
-        };
-      }
+    const data = await apiFetch(`/api/dashboard-live?clubId=${clubId}`);
+    if (data?.boardReportSummary) {
+      _liveKpis = {
+        membersSaved: data.boardReportSummary.membersSaved,
+        duesProtected: data.boardReportSummary.duesProtected,
+      };
     }
   } catch {}
 
   // Fetch live benchmarks
   try {
-    const res = await fetch(`/api/benchmarks-live?clubId=${clubId}`);
-    if (res.ok) {
-      _liveBenchmarks = await res.json();
-    }
+    const data = await apiFetch(`/api/benchmarks-live?clubId=${clubId}`);
+    if (data) _liveBenchmarks = data;
   } catch {}
 };
 

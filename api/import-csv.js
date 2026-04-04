@@ -7,6 +7,7 @@
  * and imports them into the appropriate table with validation.
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 const IMPORT_TYPES = {
   members: {
@@ -47,15 +48,16 @@ function validateRow(row, config, rowIndex) {
   return errors;
 }
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const { clubId, importType, rows, uploadedBy } = req.body;
+  const clubId = getClubId(req);
+  const { importType, rows, uploadedBy } = req.body;
 
-  if (!clubId || !importType || !rows || !Array.isArray(rows)) {
-    return res.status(400).json({ error: 'Missing required fields: clubId, importType, rows[]' });
+  if (!importType || !rows || !Array.isArray(rows)) {
+    return res.status(400).json({ error: 'Missing required fields: importType, rows[]' });
   }
 
   const config = IMPORT_TYPES[importType];
@@ -140,4 +142,4 @@ export default async function handler(req, res) {
     errorDetails: allErrors.slice(0, 20),
     status: errorCount === rows.length ? 'failed' : errorCount > 0 ? 'partial' : 'completed',
   });
-}
+}, { roles: ['gm', 'assistant_gm', 'swoop_admin'] });

@@ -9,6 +9,7 @@
  * executionType: 'email' | 'sms' | 'staff_task' | 'schedule_call' | 'comp_offer'
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 // Email templates — Phase 1 hardcoded, Phase 2 from database
 const EMAIL_TEMPLATES = {
@@ -38,13 +39,14 @@ function renderTemplate(template, vars) {
   return text;
 }
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
   }
 
+  const clubId = getClubId(req);
   const {
-    actionId, clubId, executionType, memberId, memberEmail, memberPhone,
+    actionId, executionType, memberId, memberEmail, memberPhone,
     staffEmail, staffName, templateId, customMessage, senderName, senderTitle, senderEmail,
   } = req.body;
 
@@ -224,7 +226,7 @@ export default async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+}, { allowDemo: true });
 
 async function getMemberEmail(memberId) {
   if (!memberId) return null;

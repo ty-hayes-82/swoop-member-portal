@@ -1,20 +1,22 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     if (req.method === 'POST') {
       const { actionId, operation, meta } = req.body;
       if (operation === 'approve') {
-        await sql`UPDATE agent_actions SET status = 'approved', approved_at = NOW(), approval_action = ${meta?.approvalAction ?? null} WHERE action_id = ${actionId}`;
+        await sql`UPDATE agent_actions SET status = 'approved', approved_at = NOW(), approval_action = ${meta?.approvalAction ?? null} WHERE action_id = ${actionId} AND club_id = ${clubId}`;
       } else if (operation === 'dismiss') {
-        await sql`UPDATE agent_actions SET status = 'dismissed', dismissed_at = NOW(), dismissal_reason = ${meta?.reason ?? ''} WHERE action_id = ${actionId}`;
+        await sql`UPDATE agent_actions SET status = 'dismissed', dismissed_at = NOW(), dismissal_reason = ${meta?.reason ?? ''} WHERE action_id = ${actionId} AND club_id = ${clubId}`;
       }
       return res.status(200).json({ ok: true });
     }
 
     const [agentsResult, actionsResult] = await Promise.all([
-      sql`SELECT * FROM agent_definitions ORDER BY name`,
-      sql`SELECT * FROM agent_actions ORDER BY timestamp DESC`,
+      sql`SELECT * FROM agent_definitions WHERE club_id = ${clubId} ORDER BY name`,
+      sql`SELECT * FROM agent_actions WHERE club_id = ${clubId} ORDER BY timestamp DESC`,
     ]);
 
     const agents = agentsResult.rows.map((r) => ({
@@ -50,4 +52,4 @@ export default async function handler(req, res) {
     console.error('/api/agents error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

@@ -16,10 +16,15 @@ export default defineConfig({
           if (id.includes('node_modules')) {
             if (
               id.includes('/react/') ||
-              id.includes('/react-dom/') ||
-              id.includes('/recharts/')
+              id.includes('/react-dom/')
             ) {
-              return 'vendor';
+              return 'vendor-react';
+            }
+            if (id.includes('/recharts/') || id.includes('/d3-')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('/xlsx/')) {
+              return 'vendor-xlsx';
             }
             return undefined;
           }
@@ -28,9 +33,14 @@ export default defineConfig({
             return 'landing';
           }
 
-          if (id.includes('/src/') && !id.includes('/src/main.jsx')) {
-            return 'dashboard';
-          }
+          // Split feature pages into separate chunks for lazy loading
+          if (id.includes('/src/features/board-report/')) return 'page-board-report';
+          if (id.includes('/src/features/admin/')) return 'page-admin';
+          if (id.includes('/src/features/playbooks/')) return 'page-playbooks';
+          if (id.includes('/src/features/integrations/')) return 'page-integrations';
+          if (id.includes('/src/features/member-profile/')) return 'page-member-profile';
+          if (id.includes('/src/features/member-health/')) return 'page-member-health';
+          if (id.includes('/src/mobile/')) return 'mobile';
 
           return undefined;
         },

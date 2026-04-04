@@ -1,6 +1,8 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     if (req.method === 'POST') {
       const { operation, confirmationId, reassignmentId, ...fields } = req.body;
@@ -9,21 +11,21 @@ export default async function handler(req, res) {
           SET outreach_status = ${fields.outreachStatus ?? null},
               staff_notes = ${fields.staffNotes ?? null},
               contacted_at = NOW()
-          WHERE confirmation_id = ${confirmationId}`;
+          WHERE confirmation_id = ${confirmationId} AND club_id = ${clubId}`;
       } else if (operation === 'decideReassignment') {
         await sql`UPDATE slot_reassignments
           SET status = ${fields.status ?? 'decided'},
               staff_decision = ${fields.staffDecision ?? null},
               decided_at = NOW()
-          WHERE reassignment_id = ${reassignmentId}`;
+          WHERE reassignment_id = ${reassignmentId} AND club_id = ${clubId}`;
       }
       return res.status(200).json({ ok: true });
     }
 
     const [confirmationsResult, reassignmentsResult, configResult] = await Promise.all([
-      sql`SELECT * FROM booking_confirmations ORDER BY created_at DESC`,
-      sql`SELECT * FROM slot_reassignments ORDER BY reassignment_id`,
-      sql`SELECT * FROM waitlist_config WHERE club_id = 'oakmont'`,
+      sql`SELECT * FROM booking_confirmations WHERE club_id = ${clubId} ORDER BY created_at DESC`,
+      sql`SELECT * FROM slot_reassignments WHERE club_id = ${clubId} ORDER BY reassignment_id`,
+      sql`SELECT * FROM waitlist_config WHERE club_id = ${clubId}`,
     ]);
 
     const confirmations = confirmationsResult.rows.map((r) => ({
@@ -84,4 +86,4 @@ export default async function handler(req, res) {
     console.error('/api/tee-sheet-ops error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

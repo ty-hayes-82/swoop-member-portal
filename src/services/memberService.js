@@ -1,5 +1,6 @@
 // memberService.js — live data via /api/members
 
+import { apiFetch, getClubId as getClientClubId } from './apiClient';
 import {
   memberArchetypes as staticArchetypes,
   healthDistribution as staticHealthDistribution,
@@ -319,9 +320,8 @@ let _live = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/members');
-    if (res.ok) {
-      const apiData = await res.json();
+    const apiData = await apiFetch('/api/members');
+    if (apiData) {
       _d = {
         ..._d,
         ...apiData,
@@ -334,11 +334,11 @@ export const _init = async () => {
 
   // Also fetch live dashboard data if available
   try {
-    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    const clubId = getClientClubId();
     if (clubId) {
-      const liveRes = await fetch(`/api/dashboard-live?clubId=${clubId}`);
-      if (liveRes.ok) {
-        _live = await liveRes.json();
+      const liveData = await apiFetch(`/api/dashboard-live?clubId=${clubId}`);
+      if (liveData) {
+        _live = liveData;
         // Override summary with live computed data
         if (_live.healthTiers) {
           _d.memberSummary = {

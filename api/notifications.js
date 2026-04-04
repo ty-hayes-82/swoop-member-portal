@@ -6,8 +6,10 @@
  * POST /api/notifications/escalate — check and escalate overdue actions
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   // Ensure notifications table exists
   try {
     await sql`
@@ -215,7 +217,7 @@ async function generateMorningDigest(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+});
 
 function buildDigestHtml({ pending, criticalMembers, complaints, saves, appUrl }) {
   const criticalRows = criticalMembers.map(m =>

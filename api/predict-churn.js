@@ -9,8 +9,10 @@
  * Returns: 30/60/90 day resignation probability + contributing factors.
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   // Ensure predictions table exists
   try {
     await sql`
@@ -31,8 +33,8 @@ export default async function handler(req, res) {
   } catch {}
 
   if (req.method === 'GET') {
-    const { clubId, memberId } = req.query;
-    if (!clubId || !memberId) return res.status(400).json({ error: 'clubId and memberId required' });
+    const { memberId } = req.query;
+    if (!memberId) return res.status(400).json({ error: 'memberId required' });
 
     const result = await sql`
       SELECT cp.*, m.first_name, m.last_name, m.health_score, m.archetype, m.annual_dues
@@ -44,9 +46,6 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST or GET only' });
-
-  const { clubId } = req.query;
-  if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
   try {
     const members = await sql`
@@ -129,4 +128,4 @@ export default async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+}, { allowDemo: true });

@@ -1,8 +1,10 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
-    const systems = await sql`SELECT * FROM connected_systems ORDER BY vendor_name`;
+    const systems = await sql`SELECT * FROM connected_systems WHERE club_id = ${clubId} ORDER BY vendor_name`;
 
     res.status(200).json({
       systems: systems.rows.map(s => ({
@@ -19,4 +21,4 @@ export default async function handler(req, res) {
     console.error('/api/integrations error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

@@ -1,3 +1,4 @@
+import { apiFetch } from './apiClient';
 import { COMBOS, SYSTEMS, INTEGRATION_CATEGORY_SECTIONS, VENDOR_INTELLIGENCE_DETAILS } from '@/data/integrations';
 import { CATEGORY_TEMPLATE_MAP } from '@/services/csvImportService';
 
@@ -5,8 +6,8 @@ let _d = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/integrations');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/integrations');
+    if (data) _d = data;
   } catch { /* keep static fallback */ }
 };
 

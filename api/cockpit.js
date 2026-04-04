@@ -1,8 +1,11 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
+import { getCurrentConditions } from './services/weather.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
-    const [complaints, weather, atRisk, sessions] = await Promise.all([
+    const [complaints, , atRisk, sessions] = await Promise.all([
       // Priority 1: Oldest unresolved complaint
       sql`
         SELECT f.feedback_id, f.member_id,
@@ -14,19 +17,12 @@ export default async function handler(req, res) {
         JOIN members m ON m.member_id = f.member_id
         LEFT JOIN member_engagement_weekly w ON w.member_id = f.member_id
           AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
-        WHERE f.status NOT IN ('resolved')
+        WHERE f.status NOT IN ('resolved') AND f.club_id = ${clubId}
         ORDER BY f.submitted_at ASC
         LIMIT 1
       `,
-      // Priority 2: Today's weather risk
-      sql`
-        SELECT date, condition, temp_high, wind_mph, golf_demand_modifier
-        FROM weather_daily
-        WHERE date = TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD')
-          OR date = (SELECT MAX(date) FROM weather_daily)
-        ORDER BY date DESC
-        LIMIT 1
-      `,
+      // Priority 2: placeholder (weather now fetched live below)
+      Promise.resolve({ rows: [] }),
       // Priority 3: At-risk members with tee times today
       sql`
         SELECT m.member_id,
@@ -42,6 +38,7 @@ export default async function handler(req, res) {
         WHERE b.booking_date = TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD')
           AND w.engagement_score < 50
           AND b.status = 'confirmed'
+          AND m.club_id = ${clubId}
         ORDER BY w.engagement_score ASC
         LIMIT 5
       `,
@@ -99,43 +96,86 @@ export default async function handler(req, res) {
       });
     }
 
-    // Priority 2 — Weather
-    const wx = weather.rows[0];
-    if (wx && (wx.wind_mph > 12 || wx.condition === 'rainy' || wx.condition === 'windy')) {
-      priorities.push({
-        priority: 2,
-        urgency: 'warning',
-        questionDomain: 'Weather & Course Ops',
-        questionLabel: 'What external factors could disrupt today?',
-        icon: '\uD83C\uDF2C\uFE0F',
-        headline: `${wx.condition === 'windy' ? 'Wind advisory' : wx.condition === 'rainy' ? 'Rain forecast' : 'Weather alert'} today \u2014 ${wx.wind_mph}mph winds, ${wx.temp_high}\u00B0F.`,
-        recommendation: 'Pre-notify afternoon tee times with reschedule options. Open simulator slots as backup. Alert F&B to shift capacity indoors.',
-        evidenceSignals: [
-          { source: 'Weather API', detail: `${wx.condition}, ${wx.wind_mph}mph winds` },
-          { source: 'Tee Sheet', detail: 'Afternoon bookings at risk' },
-          { source: 'Historical', detail: 'Proactive notification reduced complaints 91% during last event' },
-        ],
-        bullets: [
-          'Afternoon tee times may be disrupted by conditions.',
-          'Proactive notification reduced complaint rate 91% during last similar event.',
-          'Simulator availability can absorb ~6 groups if offered early.',
-        ],
-        stakes: 'Estimated $4,800+ in green fees + F&B at risk',
-        memberName: null,
-        memberId: null,
-        context: `Weather: ${wx.condition}, ${wx.wind_mph}mph winds, ${wx.temp_high}\u00B0F`,
-        linkLabel: 'View tee sheet \u2192 Operations',
-        linkKey: 'operations',
-        meta: {
-          sourceIcon: '\uD83C\uDF24\uFE0F',
-          source: 'Weather API + Tee Sheet',
-          freshness: 'Updated just now',
-          urgency: 'Review Today',
-          urgencyColor: '#f59e0b',
-          why: `${wx.condition} + afternoon bookings`,
-          metric: { value: `${wx.wind_mph}mph`, label: 'wind speed' },
-        },
-      });
+    // Priority 2 — Weather (live API)
+    try {
+      const wx = await getCurrentConditions(clubId);
+      const isAlert = (wx.gusts || 0) > 12 || (wx.wind || 0) > 12
+        || wx.conditions === 'rainy' || wx.conditions === 'thunderstorm'
+        || (wx.precipProbability || 0) > 40;
+
+      if (isAlert) {
+        const condLabel = wx.conditions === 'thunderstorm' ? 'Thunderstorm warning'
+          : (wx.gusts || 0) > 15 ? 'Wind advisory'
+          : wx.conditions === 'rainy' ? 'Rain forecast'
+          : 'Weather alert';
+        const windDisplay = (wx.gusts || 0) > wx.wind ? `${wx.wind}–${wx.gusts}mph gusts` : `${wx.wind}mph winds`;
+
+        priorities.push({
+          priority: 2,
+          urgency: 'warning',
+          questionDomain: 'Weather & Course Ops',
+          questionLabel: 'What external factors could disrupt today?',
+          icon: '\uD83C\uDF2C\uFE0F',
+          headline: `${condLabel} today \u2014 ${windDisplay}, ${Math.round(wx.temp || 72)}\u00B0F.${(wx.precipProbability || 0) > 30 ? ` ${wx.precipProbability}% rain chance.` : ''}`,
+          recommendation: 'Pre-notify afternoon tee times with reschedule options. Open simulator slots as backup. Alert F&B to shift capacity indoors.',
+          evidenceSignals: [
+            { source: 'Google Weather API', detail: `${wx.conditionsText || wx.conditions}, ${windDisplay}` },
+            { source: 'Tee Sheet', detail: 'Afternoon bookings at risk' },
+            { source: 'Historical', detail: 'Proactive notification reduced complaints 91% during last event' },
+          ],
+          bullets: [
+            'Afternoon tee times may be disrupted by conditions.',
+            'Proactive notification reduced complaint rate 91% during last similar event.',
+            'Simulator availability can absorb ~6 groups if offered early.',
+          ],
+          stakes: 'Estimated $4,800+ in green fees + F&B at risk',
+          memberName: null,
+          memberId: null,
+          context: `Weather: ${wx.conditionsText || wx.conditions}, ${windDisplay}, ${Math.round(wx.temp || 72)}\u00B0F`,
+          linkLabel: 'View tee sheet \u2192 Operations',
+          linkKey: 'operations',
+          meta: {
+            sourceIcon: '\uD83C\uDF24\uFE0F',
+            source: `Weather API (${wx.source || 'live'})`,
+            freshness: wx.stale ? 'Cached data' : 'Updated just now',
+            urgency: 'Review Today',
+            urgencyColor: '#f59e0b',
+            why: `${wx.conditionsText || wx.conditions} + afternoon bookings`,
+            metric: { value: `${wx.gusts || wx.wind}mph`, label: 'wind/gusts' },
+          },
+        });
+      }
+    } catch (e) {
+      console.warn('Cockpit: live weather unavailable:', e.message);
+      // Fall back to weather_daily table
+      try {
+        const wxFallback = await sql`
+          SELECT condition, temp_high, wind_mph FROM weather_daily
+          WHERE date = TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD')
+            OR date = (SELECT MAX(date) FROM weather_daily)
+          ORDER BY date DESC LIMIT 1
+        `;
+        const wx = wxFallback.rows[0];
+        if (wx && (wx.wind_mph > 12 || wx.condition === 'rainy' || wx.condition === 'windy')) {
+          priorities.push({
+            priority: 2, urgency: 'warning',
+            questionDomain: 'Weather & Course Ops',
+            questionLabel: 'What external factors could disrupt today?',
+            icon: '\uD83C\uDF2C\uFE0F',
+            headline: `${wx.condition === 'windy' ? 'Wind advisory' : 'Weather alert'} \u2014 ${wx.wind_mph}mph winds, ${wx.temp_high}\u00B0F.`,
+            recommendation: 'Pre-notify afternoon tee times with reschedule options.',
+            evidenceSignals: [{ source: 'Weather (cached)', detail: `${wx.condition}, ${wx.wind_mph}mph` }],
+            bullets: ['Weather conditions may affect afternoon play.'],
+            stakes: 'Monitor conditions',
+            memberName: null, memberId: null,
+            context: `Weather: ${wx.condition}`,
+            linkLabel: 'View tee sheet \u2192 Operations', linkKey: 'operations',
+            meta: { sourceIcon: '\uD83C\uDF24\uFE0F', source: 'Weather (cached)', freshness: 'From daily archive',
+              urgency: 'Review Today', urgencyColor: '#f59e0b',
+              why: wx.condition, metric: { value: `${wx.wind_mph}mph`, label: 'wind speed' } },
+          });
+        }
+      } catch { /* no weather data available at all */ }
     }
 
     // Priority 3 — At-risk members with tee times
@@ -195,4 +235,4 @@ export default async function handler(req, res) {
     console.error('/api/cockpit error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

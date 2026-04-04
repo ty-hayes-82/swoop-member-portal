@@ -1,5 +1,6 @@
 // api/pipeline.js — Phase 2 backend for pipelineService.js
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 const normalizeHealthScore = (value) => {
   const numeric = Number(value);
@@ -23,7 +24,8 @@ const inferPotentialDues = (visits, totalSpend) => {
   return 12000;
 };
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     const [leads, waitlist] = await Promise.all([
       sql`
@@ -39,7 +41,8 @@ export default async function handler(req, res) {
         JOIN booking_players bp_sponsor ON bp_sponsor.booking_id = b.booking_id AND bp_sponsor.is_guest = 0
         JOIN members m_sponsor ON bp_sponsor.member_id = m_sponsor.member_id
         LEFT JOIN pos_checks pc ON pc.member_id = m_sponsor.member_id AND pc.opened_at::date = b.booking_date::date
-        WHERE bp.is_guest = 1
+        WHERE b.club_id = ${clubId}
+          AND bp.is_guest = 1
           AND bp.is_warm_lead = 1
           AND bp.guest_name IS NOT NULL
           AND bp.guest_name <> ''
@@ -65,9 +68,10 @@ export default async function handler(req, res) {
            JOIN booking_players bp ON b.booking_id = bp.booking_id
            WHERE bp.member_id = mw.member_id AND b.status = 'completed') AS last_round
         FROM member_waitlist mw
-        JOIN members m ON mw.member_id = m.member_id
+        JOIN members m ON mw.member_id = m.member_id AND m.club_id = ${clubId}
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
-          AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
+          AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly WHERE club_id = ${clubId})
+        WHERE mw.club_id = ${clubId}
         ORDER BY
           CASE mw.retention_priority WHEN 'HIGH' THEN 0 ELSE 1 END,
           w.engagement_score ASC`,
@@ -134,4 +138,4 @@ export default async function handler(req, res) {
     console.error('/api/pipeline error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

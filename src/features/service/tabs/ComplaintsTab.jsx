@@ -144,7 +144,15 @@ export default function ComplaintsTab() {
                           High-demand day
                         </span>
                       )}
-                      {complaint.category === 'Pace of Play' && (
+                      {(complaint.weatherContext?.isWeatherImpacted || complaint.weatherContext?.is_weather_impacted) && (
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, color: theme.colors.info || '#3B82F6',
+                          background: `${theme.colors.info || '#3B82F6'}12`, padding: '2px 6px', borderRadius: '999px',
+                        }} title={complaint.weatherContext?.impactReason || complaint.weatherContext?.impact_reason || ''}>
+                          Weather: {complaint.weatherContext?.impactReason || complaint.weatherContext?.impact_reason || 'Weather impact'}
+                        </span>
+                      )}
+                      {!complaint.weatherContext && complaint.category === 'Pace of Play' && (
                         <span style={{
                           fontSize: 10, fontWeight: 700, color: theme.colors.info || '#3B82F6',
                           background: `${theme.colors.info || '#3B82F6'}12`, padding: '2px 6px', borderRadius: '999px',
@@ -287,6 +295,43 @@ export default function ComplaintsTab() {
           ))}
         </div>
       </div>
+
+      {/* Weather Conditions Breakdown */}
+      {(() => {
+        const weatherComplaints = feedbackRecords.filter(f => f.weatherContext?.isWeatherImpacted || f.weatherContext?.is_weather_impacted);
+        if (weatherComplaints.length === 0) return null;
+        const byCondition = weatherComplaints.reduce((acc, f) => {
+          const cond = f.weatherContext?.conditions || f.weatherContext?.impactReason || 'Unknown';
+          acc[cond] = (acc[cond] || 0) + 1;
+          return acc;
+        }, {});
+        return (
+          <div style={{
+            background: theme.colors.bgCard,
+            border: `1px solid ${theme.colors.border}`,
+            borderRadius: theme.radius.lg,
+            padding: theme.spacing.lg,
+          }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.md }}>
+              Complaints by Weather Condition
+            </h3>
+            <div style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
+              {weatherComplaints.length} of {feedbackRecords.length} complaints ({Math.round(weatherComplaints.length / feedbackRecords.length * 100)}%) occurred on weather-impacted days
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+              {Object.entries(byCondition).sort((a, b) => b[1] - a[1]).map(([cond, count]) => (
+                <div key={cond} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: theme.spacing.sm, background: theme.colors.bgDeep, borderRadius: theme.radius.sm, fontSize: 14,
+                }}>
+                  <div style={{ color: theme.colors.textPrimary, fontWeight: 500 }}>{cond}</div>
+                  <div style={{ fontSize: 13, color: theme.colors.textSecondary }}>{count} complaints</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Pace Impact on Dining */}
       <div style={{

@@ -161,7 +161,14 @@ export default function MorningBriefing() {
                 <SectionHeader label="Staffing & Weather" color={theme.colors.staffing} sectionKey="staffing" />
                 {!collapsed.staffing && (
                   <div style={{ background: theme.colors.briefingPaper, borderRadius: '8px', padding: '14px 16px', fontSize: '14px', color: theme.colors.briefingInk, lineHeight: 1.7 }}>
-                    <div>Weather: <strong>{briefing.todayRisks.weather}</strong></div>
+                    <div>Weather: <strong>{briefing.todayRisks.conditionsText || briefing.todayRisks.weather}</strong>
+                      {briefing.todayRisks.tempHigh && <> — {briefing.todayRisks.tempHigh}°F</>}
+                      {briefing.todayRisks.gusts > 0 && <>, {briefing.todayRisks.gusts > briefing.todayRisks.wind ? `${briefing.todayRisks.wind}–${briefing.todayRisks.gusts}` : briefing.todayRisks.wind} mph wind</>}
+                      {briefing.todayRisks.precipProb > 0 && <>, {briefing.todayRisks.precipProb}% rain</>}
+                    </div>
+                    {briefing.todayRisks.forecast && (
+                      <div style={{ marginTop: 4, fontSize: '13px', color: theme.colors.briefingMuted }}>{briefing.todayRisks.forecast}</div>
+                    )}
                     <div style={{ marginTop: 4 }}>
                       {briefing.todayRisks.staffingGaps.length === 0
                         ? <span style={{ color: theme.colors.success }}>✓ All positions fully staffed</span>

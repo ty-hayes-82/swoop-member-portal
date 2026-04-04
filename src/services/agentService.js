@@ -1,3 +1,4 @@
+import { apiFetch } from './apiClient';
 import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents';
 
 // Filter out decommissioned action types (waitlist removed from MVP)
@@ -10,9 +11,9 @@ let _d = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/agents');
-    if (!res.ok) return;
-    _d = await res.json();
+    const data = await apiFetch('/api/agents');
+    if (!data) return;
+    _d = data;
     if (Array.isArray(_d.actions)) {
       actionStore = _d.actions.map(a => ({ ...a }));
     }
@@ -54,7 +55,7 @@ export function approveAction(id, meta = {}) {
       : action
   );
   // Fire-and-forget POST to persist
-  fetch('/api/agents', {
+  apiFetch('/api/agents', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ actionId: id, operation: 'approve', meta }),
@@ -74,7 +75,7 @@ export function dismissAction(id, meta = {}) {
       : action
   );
   // Fire-and-forget POST to persist
-  fetch('/api/agents', {
+  apiFetch('/api/agents', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ actionId: id, operation: 'dismiss', meta }),

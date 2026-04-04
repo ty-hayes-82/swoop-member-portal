@@ -1,5 +1,6 @@
 // fbService.js — Phase 1 static · Phase 2 /api/fb
 
+import { apiFetch } from './apiClient';
 import { outlets, postRoundConversion, rainDayImpact, fbMonthComparison } from '@/data/outlets';
 import { dailyRevenue } from '@/data/revenue';
 
@@ -7,8 +8,8 @@ let _d = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/fb');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/fb');
+    if (data) _d = data;
   } catch { /* keep static fallback */ }
 };
 

@@ -6,16 +6,14 @@
  * Replaces all hardcoded values with live queries.
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'GET only' });
   }
 
-  const { clubId } = req.query;
-  if (!clubId) {
-    return res.status(400).json({ error: 'clubId required' });
-  }
+  const clubId = getClubId(req);
 
   try {
     // Health tier counts
@@ -165,8 +163,34 @@ export default async function handler(req, res) {
         membersSaved: Number(memberSaves.rows[0]?.count) || 0,
         duesProtected: Number(memberSaves.rows[0]?.total_protected) || 0,
       },
+
+      // Weather summary for board report
+      weatherSummary: await (async () => {
+        try {
+          const wxResult = await sql`
+            SELECT
+              COUNT(*) FILTER (WHERE wind_max_mph > 15 OR precip_total_in > 0.1 OR high_temp < 45) AS adverse_days,
+              COUNT(*) AS total_days
+            FROM weather_daily_log
+            WHERE club_id = ${clubId}
+              AND date >= DATE_TRUNC('month', CURRENT_DATE)
+          `;
+          const cwcResult = await sql`
+            SELECT COUNT(*) AS weather_complaints
+            FROM complaint_weather_context
+            WHERE club_id = ${clubId}
+              AND is_weather_impacted = true
+              AND date >= DATE_TRUNC('month', CURRENT_DATE)
+          `;
+          return {
+            adverseDays: Number(wxResult.rows[0]?.adverse_days || 0),
+            totalDays: Number(wxResult.rows[0]?.total_days || 0),
+            weatherComplaints: Number(cwcResult.rows[0]?.weather_complaints || 0),
+          };
+        } catch { return null; }
+      })(),
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+}, { allowDemo: true });

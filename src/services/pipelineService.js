@@ -1,5 +1,6 @@
 // pipelineService.js — live data via /api/pipeline with static Oakmont fallback
 
+import { apiFetch } from './apiClient';
 import { warmLeads, memberWaitlistEntries } from '@/data/pipeline';
 import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetrics';
 
@@ -206,8 +207,8 @@ const getPipelineSnapshot = () => {
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/pipeline');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/pipeline');
+    if (data) _d = data;
   } catch {
     // keep static fallback
   }

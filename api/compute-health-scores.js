@@ -15,6 +15,7 @@
  * Archetypes: Die-Hard Golfer, Social Butterfly, Balanced Active, Weekend Warrior, Declining, New Member, Ghost, Snowbird
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 const WEIGHTS = { golf: 0.30, dining: 0.25, email: 0.25, events: 0.20 };
 
@@ -158,15 +159,12 @@ async function computeEventScore(memberId, clubId) {
   }
 }
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const { clubId } = req.query;
-  if (!clubId) {
-    return res.status(400).json({ error: 'clubId query param required' });
-  }
+  const clubId = getClubId(req);
 
   try {
     // Get all members for this club
@@ -184,18 +182,41 @@ export default async function handler(req, res) {
 
     for (const member of members.rows) {
       try {
-        // Each dimension defaults to 50 (neutral) if its data source isn't available
-        let golf = 50, dining = 50, email = 50, events = 50;
+        // Each dimension defaults to null if its data source isn't available
+        let golf = null, dining = null, email = null, events = null;
         try { golf = await computeGolfScore(member.member_id, clubId); } catch { /* no rounds data */ }
         try { dining = await computeDiningScore(member.member_id, clubId); } catch { /* no POS data */ }
         try { email = await computeEmailScore(member.member_id, clubId); } catch { /* no email data */ }
         try { events = await computeEventScore(member.member_id, clubId); } catch { /* no event data */ }
 
+        // Data completeness gate: count how many dimensions have real data
+        const dimensions = [golf, dining, email, events];
+        const availableDimensions = dimensions.filter(d => d !== null);
+        const dataCompleteness = availableDimensions.length;
+
+        // If fewer than 2 dimensions have data, mark as "Insufficient Data"
+        if (dataCompleteness < 2) {
+          await sql`
+            UPDATE members
+            SET health_score = NULL, health_tier = 'Insufficient Data', archetype = 'New Member',
+                data_completeness = ${dataCompleteness}, last_health_update = NOW()
+            WHERE member_id = ${member.member_id}
+          `;
+          computed++;
+          continue;
+        }
+
+        // Use neutral score (50) for missing dimensions in computation
+        const golfScore = golf ?? 50;
+        const diningScore = dining ?? 50;
+        const emailScore = email ?? 50;
+        const eventScore = events ?? 50;
+
         const score = Math.round(
-          golf * WEIGHTS.golf +
-          dining * WEIGHTS.dining +
-          email * WEIGHTS.email +
-          events * WEIGHTS.events
+          golfScore * WEIGHTS.golf +
+          diningScore * WEIGHTS.dining +
+          emailScore * WEIGHTS.email +
+          eventScore * WEIGHTS.events
         );
         const tier = getTier(score);
 
@@ -213,7 +234,7 @@ export default async function handler(req, res) {
           ? Math.floor((Date.now() - new Date(lastRoundResult.rows[0].lr).getTime()) / 86400000)
           : 999;
 
-        const archetype = classifyArchetype(golf, dining, email, events, joinDaysAgo, lastRoundDaysAgo);
+        const archetype = classifyArchetype(golfScore, diningScore, emailScore, eventScore, joinDaysAgo, lastRoundDaysAgo);
 
         // Get previous score for delta detection
         const prevResult = await sql`
@@ -227,13 +248,14 @@ export default async function handler(req, res) {
         // Store historical score
         await sql`
           INSERT INTO health_scores (member_id, club_id, score, tier, golf_score, dining_score, email_score, event_score, archetype, score_delta)
-          VALUES (${member.member_id}, ${clubId}, ${score}, ${tier}, ${golf}, ${dining}, ${email}, ${events}, ${archetype}, ${delta})
+          VALUES (${member.member_id}, ${clubId}, ${score}, ${tier}, ${golfScore}, ${diningScore}, ${emailScore}, ${eventScore}, ${archetype}, ${delta})
         `;
 
         // Update member record
         await sql`
           UPDATE members
-          SET health_score = ${score}, health_tier = ${tier}, archetype = ${archetype}, last_health_update = NOW()
+          SET health_score = ${score}, health_tier = ${tier}, archetype = ${archetype},
+              data_completeness = ${dataCompleteness}, last_health_update = NOW()
           WHERE member_id = ${member.member_id}
         `;
 
@@ -273,4 +295,4 @@ export default async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+}, { roles: ['gm', 'assistant_gm', 'swoop_admin'] });

@@ -1,6 +1,7 @@
 // operationsService.js — Phase 1 static · Phase 2 /api/operations
 // Phase 2 swap: DataProvider calls _init() before render. All exports stay synchronous.
 
+import { apiFetch } from './apiClient';
 import { dailyRevenue } from '@/data/revenue';
 import { paceDistribution, slowRoundStats, bottleneckHoles, paceFBImpact } from '@/data/pace';
 import { waitlistEntries } from '@/data/pipeline';
@@ -49,8 +50,8 @@ const toBucket = (value, fallback) => (typeof value === 'string' && value.trim()
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/operations');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/operations');
+    if (data) _d = data;
   } catch { /* keep static fallback */ }
 };
 

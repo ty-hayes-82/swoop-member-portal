@@ -48,6 +48,31 @@ export const vercelPostgresSchema = {
         "name": "outlet_count",
         "type": "integer",
         "nullable": true
+      },
+      {
+        "name": "logo_url",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "brand_voice",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "timezone",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "created_at",
+        "type": "timestamptz",
+        "nullable": true
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamptz",
+        "nullable": true
       }
     ],
     "relationships": [],
@@ -61,7 +86,12 @@ export const vercelPostgresSchema = {
         "founded_year": 1987,
         "member_count": 320,
         "course_count": 2,
-        "outlet_count": 4
+        "outlet_count": 4,
+        "logo_url": null,
+        "brand_voice": "professional",
+        "timezone": "America/New_York",
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
       },
       {
         "club_id": "club_002",
@@ -72,7 +102,12 @@ export const vercelPostgresSchema = {
         "founded_year": 2001,
         "member_count": 285,
         "course_count": 1,
-        "outlet_count": 3
+        "outlet_count": 3,
+        "logo_url": null,
+        "brand_voice": "professional",
+        "timezone": "America/Phoenix",
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
       },
       {
         "club_id": "club_003",
@@ -83,7 +118,12 @@ export const vercelPostgresSchema = {
         "founded_year": 1994,
         "member_count": 410,
         "course_count": 2,
-        "outlet_count": 5
+        "outlet_count": 5,
+        "logo_url": null,
+        "brand_voice": "professional",
+        "timezone": "America/Phoenix",
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
       }
     ]
   },
@@ -452,6 +492,51 @@ export const vercelPostgresSchema = {
         "name": "communication_opt_in",
         "type": "integer",
         "nullable": false
+      },
+      {
+        "name": "club_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "external_id",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "health_score",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "health_tier",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "last_health_update",
+        "type": "timestamptz",
+        "nullable": true
+      },
+      {
+        "name": "preferred_channel",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "data_source",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "created_at",
+        "type": "timestamptz",
+        "nullable": true
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamptz",
+        "nullable": true
       }
     ],
     "relationships": [
@@ -464,12 +549,19 @@ export const vercelPostgresSchema = {
         "fromColumn": "household_id",
         "toTable": "households",
         "toColumn": "household_id"
+      },
+      {
+        "fromColumn": "club_id",
+        "toTable": "club",
+        "toColumn": "club_id"
       }
     ],
     "sampleRows": [
       {
         "member_id": "mbr_001",
         "member_number": "1001",
+        "club_id": "oakmont",
+        "external_id": null,
         "first_name": "James",
         "last_name": "Thornton",
         "email": "j.thornton@email.com",
@@ -482,14 +574,19 @@ export const vercelPostgresSchema = {
         "archetype": "Die-Hard Golfer",
         "ghin_number": "4821937",
         "household_id": "hh_001",
-        "current_health_score": 92,
-        "health_trend": "stable",
-        "sponsor_id": null,
-        "tier": "platinum"
+        "health_score": 92,
+        "health_tier": "healthy",
+        "last_health_update": "2026-01-15T08:00:00Z",
+        "preferred_channel": "email",
+        "data_source": "manual",
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-15T08:00:00Z"
       },
       {
         "member_id": "mbr_005",
         "member_number": "1005",
+        "club_id": "oakmont",
+        "external_id": null,
         "first_name": "Catherine",
         "last_name": "Walsh",
         "email": "c.walsh@email.com",
@@ -502,14 +599,19 @@ export const vercelPostgresSchema = {
         "archetype": "Social Butterfly",
         "ghin_number": null,
         "household_id": "hh_002",
-        "current_health_score": 78,
-        "health_trend": "declining",
-        "sponsor_id": "mbr_001",
-        "tier": "gold"
+        "health_score": 78,
+        "health_tier": "watch",
+        "last_health_update": "2026-01-15T08:00:00Z",
+        "preferred_channel": "email",
+        "data_source": "manual",
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-15T08:00:00Z"
       },
       {
         "member_id": "mbr_012",
         "member_number": "1012",
+        "club_id": "oakmont",
+        "external_id": null,
         "first_name": "Robert",
         "last_name": "Kimura",
         "email": "r.kimura@email.com",
@@ -522,10 +624,13 @@ export const vercelPostgresSchema = {
         "archetype": "Weekend Warrior",
         "ghin_number": "6103482",
         "household_id": "hh_003",
-        "current_health_score": 85,
-        "health_trend": "improving",
-        "sponsor_id": "mbr_001",
-        "tier": "silver"
+        "health_score": 85,
+        "health_tier": "healthy",
+        "last_health_update": "2026-01-15T08:00:00Z",
+        "preferred_channel": "email",
+        "data_source": "manual",
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-15T08:00:00Z"
       }
     ]
   },
@@ -2953,6 +3058,976 @@ export const vercelPostgresSchema = {
         "demand_level": "low",
         "computed_for_month": "2026-03"
       }
+    ]
+  },
+  {
+    "name": "board_report_snapshots",
+    "description": "",
+    "columns": [
+      { "name": "snapshot_id", "type": "integer", "nullable": false },
+      { "name": "snapshot_date", "type": "text", "nullable": false },
+      { "name": "members_saved", "type": "integer", "nullable": true },
+      { "name": "dues_protected", "type": "real", "nullable": true },
+      { "name": "ltv_protected", "type": "real", "nullable": true },
+      { "name": "revenue_recovered", "type": "real", "nullable": true },
+      { "name": "service_failures_caught", "type": "integer", "nullable": true },
+      { "name": "avg_response_time_hrs", "type": "real", "nullable": true },
+      { "name": "board_confidence_pct", "type": "integer", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "snapshot_id": 1, "snapshot_date": "2026-01-31", "members_saved": 12, "dues_protected": 187200.00, "ltv_protected": 624000.00, "revenue_recovered": 43500.00, "service_failures_caught": 8, "avg_response_time_hrs": 2.3, "board_confidence_pct": 88 },
+      { "snapshot_id": 2, "snapshot_date": "2026-02-28", "members_saved": 15, "dues_protected": 234000.00, "ltv_protected": 780000.00, "revenue_recovered": 51200.00, "service_failures_caught": 11, "avg_response_time_hrs": 1.9, "board_confidence_pct": 91 },
+      { "snapshot_id": 3, "snapshot_date": "2026-03-31", "members_saved": 9, "dues_protected": 140400.00, "ltv_protected": 468000.00, "revenue_recovered": 38700.00, "service_failures_caught": 6, "avg_response_time_hrs": 2.1, "board_confidence_pct": 89 }
+    ]
+  },
+  {
+    "name": "member_interventions",
+    "description": "",
+    "columns": [
+      { "name": "intervention_id", "type": "integer", "nullable": false },
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "trigger_type", "type": "text", "nullable": true },
+      { "name": "trigger_detail", "type": "text", "nullable": true },
+      { "name": "action_taken", "type": "text", "nullable": true },
+      { "name": "outcome", "type": "text", "nullable": true },
+      { "name": "health_before", "type": "integer", "nullable": true },
+      { "name": "health_after", "type": "integer", "nullable": true },
+      { "name": "dues_at_risk", "type": "real", "nullable": true },
+      { "name": "intervention_date", "type": "text", "nullable": true },
+      { "name": "resolved_date", "type": "text", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "intervention_id": 1, "member_id": "mbr_001", "trigger_type": "declining_usage", "trigger_detail": "Golf rounds dropped 60% over 3 months", "action_taken": "GM personal outreach call", "outcome": "retained", "health_before": 38, "health_after": 72, "dues_at_risk": 15600.00, "intervention_date": "2026-02-10", "resolved_date": "2026-02-18" },
+      { "intervention_id": 2, "member_id": "mbr_014", "trigger_type": "complaint_escalation", "trigger_detail": "Multiple dining complaints in 30 days", "action_taken": "Chef meeting and complimentary dinner", "outcome": "retained", "health_before": 45, "health_after": 68, "dues_at_risk": 15600.00, "intervention_date": "2026-03-01", "resolved_date": "2026-03-12" },
+      { "intervention_id": 3, "member_id": "mbr_027", "trigger_type": "payment_risk", "trigger_detail": "Invoice 60 days past due", "action_taken": "Membership director meeting", "outcome": "pending", "health_before": 29, "health_after": null, "dues_at_risk": 15600.00, "intervention_date": "2026-03-15", "resolved_date": null }
+    ]
+  },
+  {
+    "name": "operational_interventions",
+    "description": "",
+    "columns": [
+      { "name": "intervention_id", "type": "integer", "nullable": false },
+      { "name": "event_type", "type": "text", "nullable": true },
+      { "name": "event_date", "type": "text", "nullable": true },
+      { "name": "detection_method", "type": "text", "nullable": true },
+      { "name": "action_taken", "type": "text", "nullable": true },
+      { "name": "outcome", "type": "text", "nullable": true },
+      { "name": "revenue_protected", "type": "real", "nullable": true },
+      { "name": "members_affected", "type": "integer", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "intervention_id": 1, "event_type": "tee_sheet_gap", "event_date": "2026-03-08", "detection_method": "automated_scan", "action_taken": "Backfilled 6 slots via waitlist outreach", "outcome": "resolved", "revenue_protected": 1800.00, "members_affected": 6 },
+      { "intervention_id": 2, "event_type": "dining_overbook", "event_date": "2026-03-14", "detection_method": "capacity_alert", "action_taken": "Opened patio seating and added server", "outcome": "resolved", "revenue_protected": 4200.00, "members_affected": 24 }
+    ]
+  },
+  {
+    "name": "user_sessions",
+    "description": "",
+    "columns": [
+      { "name": "session_id", "type": "integer", "nullable": false },
+      { "name": "user_id", "type": "text", "nullable": true },
+      { "name": "login_at", "type": "timestamptz", "nullable": true },
+      { "name": "snapshot", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "session_id": 1, "user_id": "usr_gm_01", "login_at": "2026-03-28T08:15:00Z", "snapshot": "{\"role\":\"gm\",\"club\":\"club_001\"}" },
+      { "session_id": 2, "user_id": "usr_mem_dir", "login_at": "2026-03-28T09:02:00Z", "snapshot": "{\"role\":\"membership_director\",\"club\":\"club_001\"}" }
+    ]
+  },
+  {
+    "name": "experience_correlations",
+    "description": "",
+    "columns": [
+      { "name": "correlation_id", "type": "integer", "nullable": false },
+      { "name": "touchpoint", "type": "text", "nullable": true },
+      { "name": "retention_impact", "type": "real", "nullable": true },
+      { "name": "category", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "segment", "type": "text", "nullable": true },
+      { "name": "archetype", "type": "text", "nullable": true },
+      { "name": "trend_data", "type": "text", "nullable": true },
+      { "name": "delta", "type": "text", "nullable": true },
+      { "name": "delta_direction", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "correlation_id": 1, "touchpoint": "Post-round dining visit", "retention_impact": 0.34, "category": "dining", "description": "Members who dine after rounds retain at 34% higher rate", "segment": "active_golfers", "archetype": "social_golfer", "trend_data": "[0.28,0.30,0.32,0.34]", "delta": "+2%", "delta_direction": "up" },
+      { "correlation_id": 2, "touchpoint": "Event attendance (2+ per quarter)", "retention_impact": 0.27, "category": "events", "description": "Quarterly event attendees show 27% higher retention", "segment": "all_members", "archetype": "community_connector", "trend_data": "[0.22,0.24,0.26,0.27]", "delta": "+1%", "delta_direction": "up" }
+    ]
+  },
+  {
+    "name": "correlation_insights",
+    "description": "",
+    "columns": [
+      { "name": "insight_id", "type": "text", "nullable": false },
+      { "name": "headline", "type": "text", "nullable": true },
+      { "name": "detail", "type": "text", "nullable": true },
+      { "name": "domains", "type": "text", "nullable": true },
+      { "name": "impact", "type": "text", "nullable": true },
+      { "name": "metric_value", "type": "text", "nullable": true },
+      { "name": "metric_label", "type": "text", "nullable": true },
+      { "name": "trend_data", "type": "text", "nullable": true },
+      { "name": "delta", "type": "text", "nullable": true },
+      { "name": "delta_direction", "type": "text", "nullable": true },
+      { "name": "archetype", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "insight_id": "ci_001", "headline": "Dining frequency predicts retention", "detail": "Members dining 3+ times/month have 92% retention vs 71% for non-diners", "domains": "dining,retention", "impact": "high", "metric_value": "92%", "metric_label": "Retention rate", "trend_data": "[88,89,91,92]", "delta": "+1%", "delta_direction": "up", "archetype": "social_golfer" },
+      { "insight_id": "ci_002", "headline": "New member onboarding gap", "detail": "Members not playing within 30 days of joining have 3x churn risk", "domains": "golf,onboarding", "impact": "critical", "metric_value": "3x", "metric_label": "Churn multiplier", "trend_data": "[3.2,3.1,3.0,3.0]", "delta": "0%", "delta_direction": "flat", "archetype": null }
+    ]
+  },
+  {
+    "name": "event_roi_metrics",
+    "description": "",
+    "columns": [
+      { "name": "event_type", "type": "text", "nullable": false },
+      { "name": "attendance_avg", "type": "integer", "nullable": true },
+      { "name": "retention_rate", "type": "real", "nullable": true },
+      { "name": "avg_spend", "type": "real", "nullable": true },
+      { "name": "roi_score", "type": "real", "nullable": true },
+      { "name": "frequency", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "event_type": "Member-Guest Tournament", "attendance_avg": 72, "retention_rate": 0.96, "avg_spend": 285.00, "roi_score": 9.2, "frequency": "quarterly" },
+      { "event_type": "Wine Dinner", "attendance_avg": 48, "retention_rate": 0.94, "avg_spend": 175.00, "roi_score": 8.5, "frequency": "monthly" },
+      { "event_type": "Family Pool Party", "attendance_avg": 120, "retention_rate": 0.91, "avg_spend": 65.00, "roi_score": 7.8, "frequency": "bi-weekly" }
+    ]
+  },
+  {
+    "name": "archetype_spend_gaps",
+    "description": "",
+    "columns": [
+      { "name": "archetype", "type": "text", "nullable": false },
+      { "name": "member_count", "type": "integer", "nullable": true },
+      { "name": "current_dining", "type": "integer", "nullable": true },
+      { "name": "potential_dining", "type": "integer", "nullable": true },
+      { "name": "current_events", "type": "integer", "nullable": true },
+      { "name": "potential_events", "type": "integer", "nullable": true },
+      { "name": "avg_annual_spend", "type": "real", "nullable": true },
+      { "name": "untapped_dining", "type": "real", "nullable": true },
+      { "name": "untapped_events", "type": "real", "nullable": true },
+      { "name": "total_untapped", "type": "real", "nullable": true },
+      { "name": "campaign", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "archetype": "social_golfer", "member_count": 145, "current_dining": 2400, "potential_dining": 4200, "current_events": 1800, "potential_events": 3100, "avg_annual_spend": 18200.00, "untapped_dining": 1800.00, "untapped_events": 1300.00, "total_untapped": 3100.00, "campaign": "Post-round happy hour invitation" },
+      { "archetype": "fitness_focused", "member_count": 82, "current_dining": 800, "potential_dining": 2600, "current_events": 400, "potential_events": 1500, "avg_annual_spend": 9400.00, "untapped_dining": 1800.00, "untapped_events": 1100.00, "total_untapped": 2900.00, "campaign": "Healthy menu spotlight series" },
+      { "archetype": "family_oriented", "member_count": 110, "current_dining": 3200, "potential_dining": 4800, "current_events": 2200, "potential_events": 3600, "avg_annual_spend": 22500.00, "untapped_dining": 1600.00, "untapped_events": 1400.00, "total_untapped": 3000.00, "campaign": "Kids eat free weeknight promotion" }
+    ]
+  },
+  {
+    "name": "agent_definitions",
+    "description": "",
+    "columns": [
+      { "name": "agent_id", "type": "text", "nullable": false },
+      { "name": "name", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "model", "type": "text", "nullable": true },
+      { "name": "avatar", "type": "text", "nullable": true },
+      { "name": "source_systems", "type": "text", "nullable": true },
+      { "name": "last_run", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "agent_id": "agt_retention", "name": "Retention Sentinel", "description": "Monitors member health scores and triggers proactive outreach for at-risk members", "status": "active", "model": "swoop-retention-v2", "avatar": "shield", "source_systems": "health_scores,rounds,transactions,complaints", "last_run": "2026-03-28T06:00:00Z" },
+      { "agent_id": "agt_teesheet", "name": "Tee Sheet Optimizer", "description": "Analyzes booking patterns to maximize utilization and minimize no-shows", "status": "active", "model": "swoop-teesheet-v1", "avatar": "calendar", "source_systems": "rounds,booking_confirmations,demand_heatmap", "last_run": "2026-03-28T05:30:00Z" }
+    ]
+  },
+  {
+    "name": "agent_actions",
+    "description": "",
+    "columns": [
+      { "name": "action_id", "type": "text", "nullable": false },
+      { "name": "agent_id", "type": "text", "nullable": true },
+      { "name": "action_type", "type": "text", "nullable": true },
+      { "name": "priority", "type": "text", "nullable": true },
+      { "name": "source", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "impact_metric", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "approval_action", "type": "text", "nullable": true },
+      { "name": "dismissal_reason", "type": "text", "nullable": true },
+      { "name": "timestamp", "type": "timestamptz", "nullable": true },
+      { "name": "approved_at", "type": "timestamptz", "nullable": true },
+      { "name": "dismissed_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "agent_id", "toTable": "agent_definitions", "toColumn": "agent_id" }
+    ],
+    "sampleRows": [
+      { "action_id": "aa_001", "agent_id": "agt_retention", "action_type": "outreach", "priority": "high", "source": "health_score_drop", "description": "Schedule GM call with Thompson family - health score dropped 25 pts in 2 weeks", "impact_metric": "$15,600 dues at risk", "member_id": "mbr_001", "status": "pending", "approval_action": null, "dismissal_reason": null, "timestamp": "2026-03-28T06:05:00Z", "approved_at": null, "dismissed_at": null },
+      { "action_id": "aa_002", "agent_id": "agt_teesheet", "action_type": "slot_fill", "priority": "medium", "source": "cancellation_detected", "description": "Offer Saturday 8:30 AM slot to 3 waitlisted members", "impact_metric": "$450 green fees", "member_id": null, "status": "approved", "approval_action": "auto", "dismissal_reason": null, "timestamp": "2026-03-28T05:35:00Z", "approved_at": "2026-03-28T05:35:00Z", "dismissed_at": null }
+    ]
+  },
+  {
+    "name": "member_location_current",
+    "description": "",
+    "columns": [
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "zone", "type": "text", "nullable": true },
+      { "name": "sub_location", "type": "text", "nullable": true },
+      { "name": "check_in_time", "type": "timestamptz", "nullable": true },
+      { "name": "health_status", "type": "text", "nullable": true },
+      { "name": "activity_type", "type": "text", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "member_id": "mbr_001", "zone": "golf_course", "sub_location": "Hole 7 Fairway", "check_in_time": "2026-03-28T08:12:00Z", "health_status": "healthy", "activity_type": "round_in_progress" },
+      { "member_id": "mbr_014", "zone": "clubhouse", "sub_location": "Main Dining Room", "check_in_time": "2026-03-28T12:30:00Z", "health_status": "at_risk", "activity_type": "dining" },
+      { "member_id": "mbr_027", "zone": "fitness_center", "sub_location": "Weight Room", "check_in_time": "2026-03-28T06:45:00Z", "health_status": "healthy", "activity_type": "workout" }
+    ]
+  },
+  {
+    "name": "staff_location_current",
+    "description": "",
+    "columns": [
+      { "name": "staff_id", "type": "text", "nullable": false },
+      { "name": "name", "type": "text", "nullable": true },
+      { "name": "zone", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "eta_minutes", "type": "integer", "nullable": true },
+      { "name": "department", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "staff_id": "stf_001", "name": "Mike Reynolds", "zone": "golf_course", "status": "on_duty", "eta_minutes": null, "department": "golf_operations" },
+      { "staff_id": "stf_002", "name": "Sarah Chen", "zone": "clubhouse", "status": "on_duty", "eta_minutes": null, "department": "food_and_beverage" },
+      { "staff_id": "stf_003", "name": "James Whitfield", "zone": "pro_shop", "status": "available", "eta_minutes": 5, "department": "membership" }
+    ]
+  },
+  {
+    "name": "service_recovery_alerts",
+    "description": "",
+    "columns": [
+      { "name": "alert_id", "type": "integer", "nullable": false },
+      { "name": "member_id", "type": "text", "nullable": true },
+      { "name": "member_name", "type": "text", "nullable": true },
+      { "name": "severity", "type": "text", "nullable": true },
+      { "name": "zone", "type": "text", "nullable": true },
+      { "name": "detail", "type": "text", "nullable": true },
+      { "name": "recommended_action", "type": "text", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true },
+      { "name": "resolved_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "alert_id": 1, "member_id": "mbr_014", "member_name": "Patricia Langford", "severity": "high", "zone": "clubhouse", "detail": "30-minute wait for table despite reservation", "recommended_action": "Manager visit with complimentary appetizer", "created_at": "2026-03-28T12:45:00Z", "resolved_at": null },
+      { "alert_id": 2, "member_id": "mbr_008", "member_name": "Robert Chen", "severity": "medium", "zone": "golf_course", "detail": "Pace of play complaint - group ahead 20 min behind", "recommended_action": "Ranger intervention and pro shop credit", "created_at": "2026-03-28T10:20:00Z", "resolved_at": "2026-03-28T10:45:00Z" }
+    ]
+  },
+  {
+    "name": "booking_confirmations",
+    "description": "",
+    "columns": [
+      { "name": "confirmation_id", "type": "text", "nullable": false },
+      { "name": "booking_id", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": true },
+      { "name": "member_name", "type": "text", "nullable": true },
+      { "name": "tee_time", "type": "text", "nullable": true },
+      { "name": "cancel_probability", "type": "real", "nullable": true },
+      { "name": "outreach_status", "type": "text", "nullable": true },
+      { "name": "outreach_channel", "type": "text", "nullable": true },
+      { "name": "staff_notes", "type": "text", "nullable": true },
+      { "name": "contacted_at", "type": "timestamptz", "nullable": true },
+      { "name": "responded_at", "type": "timestamptz", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "confirmation_id": "bc_001", "booking_id": "bk_2045", "member_id": "mbr_019", "member_name": "David Mitchell", "tee_time": "2026-03-29T07:30:00", "cancel_probability": 0.72, "outreach_status": "contacted", "outreach_channel": "sms", "staff_notes": "Has cancelled last 3 Saturday bookings", "contacted_at": "2026-03-28T16:00:00Z", "responded_at": null, "created_at": "2026-03-28T15:30:00Z" },
+      { "confirmation_id": "bc_002", "booking_id": "bk_2048", "member_id": "mbr_005", "member_name": "Jennifer Walsh", "tee_time": "2026-03-29T09:00:00", "cancel_probability": 0.15, "outreach_status": "confirmed", "outreach_channel": "email", "staff_notes": null, "contacted_at": "2026-03-28T14:00:00Z", "responded_at": "2026-03-28T14:22:00Z", "created_at": "2026-03-28T13:00:00Z" }
+    ]
+  },
+  {
+    "name": "slot_reassignments",
+    "description": "",
+    "columns": [
+      { "name": "reassignment_id", "type": "text", "nullable": false },
+      { "name": "source_booking_id", "type": "text", "nullable": true },
+      { "name": "source_slot", "type": "text", "nullable": true },
+      { "name": "source_member_id", "type": "text", "nullable": true },
+      { "name": "source_member_name", "type": "text", "nullable": true },
+      { "name": "recommended_fill_member_id", "type": "text", "nullable": true },
+      { "name": "recommended_fill_member_name", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "staff_decision", "type": "text", "nullable": true },
+      { "name": "revenue_recovered", "type": "real", "nullable": true },
+      { "name": "health_before", "type": "integer", "nullable": true },
+      { "name": "health_after", "type": "integer", "nullable": true },
+      { "name": "decided_at", "type": "timestamptz", "nullable": true },
+      { "name": "audit_trail", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "reassignment_id": "sr_001", "source_booking_id": "bk_2045", "source_slot": "2026-03-29T07:30:00", "source_member_id": "mbr_019", "source_member_name": "David Mitchell", "recommended_fill_member_id": "mbr_033", "recommended_fill_member_name": "Alan Foster", "status": "offered", "staff_decision": null, "revenue_recovered": null, "health_before": 64, "health_after": null, "decided_at": null, "audit_trail": null },
+      { "reassignment_id": "sr_002", "source_booking_id": "bk_2031", "source_slot": "2026-03-28T14:00:00", "source_member_id": "mbr_011", "source_member_name": "Karen Brooks", "recommended_fill_member_id": "mbr_042", "recommended_fill_member_name": "Tom Henderson", "status": "accepted", "staff_decision": "approved", "revenue_recovered": 150.00, "health_before": 55, "health_after": 62, "decided_at": "2026-03-28T10:15:00Z", "audit_trail": "Auto-offered via waitlist; accepted within 12 min" }
+    ]
+  },
+  {
+    "name": "waitlist_config",
+    "description": "",
+    "columns": [
+      { "name": "club_id", "type": "text", "nullable": false },
+      { "name": "hold_time_minutes", "type": "integer", "nullable": true },
+      { "name": "auto_offer_threshold", "type": "real", "nullable": true },
+      { "name": "max_offers", "type": "integer", "nullable": true },
+      { "name": "notification_limit", "type": "integer", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "club_id": "club_001", "hold_time_minutes": 30, "auto_offer_threshold": 0.65, "max_offers": 3, "notification_limit": 5 }
+    ]
+  },
+  {
+    "name": "connected_systems",
+    "description": "",
+    "columns": [
+      { "name": "system_id", "type": "text", "nullable": false },
+      { "name": "vendor_name", "type": "text", "nullable": true },
+      { "name": "category", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "last_sync", "type": "timestamptz", "nullable": true },
+      { "name": "data_points_synced", "type": "integer", "nullable": true },
+      { "name": "config", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "system_id": "sys_001", "vendor_name": "ForeTees", "category": "tee_sheet", "status": "connected", "last_sync": "2026-03-28T06:00:00Z", "data_points_synced": 14520, "config": "{\"api_version\":\"v3\",\"sync_interval\":\"hourly\"}" },
+      { "system_id": "sys_002", "vendor_name": "Jonas Club Software", "category": "pms", "status": "connected", "last_sync": "2026-03-28T05:45:00Z", "data_points_synced": 82340, "config": "{\"modules\":[\"billing\",\"membership\",\"dining\"]}" },
+      { "system_id": "sys_003", "vendor_name": "Club Caddie", "category": "pos", "status": "degraded", "last_sync": "2026-03-27T22:00:00Z", "data_points_synced": 31200, "config": "{\"sync_interval\":\"daily\"}" }
+    ]
+  },
+  {
+    "name": "industry_benchmarks",
+    "description": "",
+    "columns": [
+      { "name": "metric_key", "type": "text", "nullable": false },
+      { "name": "club_value", "type": "real", "nullable": true },
+      { "name": "industry_value", "type": "real", "nullable": true },
+      { "name": "unit", "type": "text", "nullable": true },
+      { "name": "label", "type": "text", "nullable": true },
+      { "name": "comparison_text", "type": "text", "nullable": true },
+      { "name": "direction", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "metric_key": "member_retention_rate", "club_value": 94.2, "industry_value": 88.5, "unit": "percent", "label": "Member Retention Rate", "comparison_text": "5.7% above industry average", "direction": "better" },
+      { "metric_key": "avg_dues_per_member", "club_value": 15600.00, "industry_value": 12800.00, "unit": "dollars", "label": "Average Annual Dues", "comparison_text": "$2,800 above industry average", "direction": "higher" },
+      { "metric_key": "food_min_spend_compliance", "club_value": 78.0, "industry_value": 71.0, "unit": "percent", "label": "F&B Minimum Compliance", "comparison_text": "7% above industry average", "direction": "better" }
+    ]
+  },
+  {
+    "name": "activity_log",
+    "description": "",
+    "columns": [
+      { "name": "id", "type": "integer", "nullable": false },
+      { "name": "action_type", "type": "text", "nullable": true },
+      { "name": "action_subtype", "type": "text", "nullable": true },
+      { "name": "actor", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": true },
+      { "name": "member_name", "type": "text", "nullable": true },
+      { "name": "agent_id", "type": "text", "nullable": true },
+      { "name": "reference_id", "type": "text", "nullable": true },
+      { "name": "reference_type", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "meta", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "id": 1, "action_type": "intervention", "action_subtype": "outreach_call", "actor": "usr_gm_01", "member_id": "mbr_001", "member_name": "James Thompson", "agent_id": "agt_retention", "reference_id": "int_001", "reference_type": "intervention", "description": "GM called member regarding declining engagement", "meta": "{\"duration_min\":12,\"outcome\":\"positive\"}", "status": "completed", "created_at": "2026-03-28T10:30:00Z" },
+      { "id": 2, "action_type": "agent_action", "action_subtype": "slot_fill", "actor": "system", "member_id": null, "member_name": null, "agent_id": "agt_teesheet", "reference_id": "aa_002", "reference_type": "agent_action", "description": "Auto-offered cancelled slot to waitlisted members", "meta": "{\"slots_offered\":3}", "status": "completed", "created_at": "2026-03-28T05:35:00Z" }
+    ]
+  },
+  {
+    "name": "member_invoices",
+    "description": "",
+    "columns": [
+      { "name": "invoice_id", "type": "text", "nullable": false },
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "invoice_date", "type": "text", "nullable": true },
+      { "name": "due_date", "type": "text", "nullable": true },
+      { "name": "amount", "type": "real", "nullable": true },
+      { "name": "type", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "paid_date", "type": "text", "nullable": true },
+      { "name": "paid_amount", "type": "real", "nullable": true },
+      { "name": "days_past_due", "type": "integer", "nullable": true },
+      { "name": "late_fee", "type": "real", "nullable": true },
+      { "name": "collection_status", "type": "text", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "invoice_id": "inv_001", "member_id": "mbr_001", "invoice_date": "2026-03-01", "due_date": "2026-03-15", "amount": 1300.00, "type": "monthly_dues", "description": "March 2026 Monthly Dues", "status": "paid", "paid_date": "2026-03-12", "paid_amount": 1300.00, "days_past_due": 0, "late_fee": 0.00, "collection_status": null },
+      { "invoice_id": "inv_002", "member_id": "mbr_027", "invoice_date": "2026-01-01", "due_date": "2026-01-15", "amount": 1300.00, "type": "monthly_dues", "description": "January 2026 Monthly Dues", "status": "overdue", "paid_date": null, "paid_amount": 0.00, "days_past_due": 72, "late_fee": 65.00, "collection_status": "second_notice" },
+      { "invoice_id": "inv_003", "member_id": "mbr_014", "invoice_date": "2026-03-01", "due_date": "2026-03-15", "amount": 425.00, "type": "dining_minimum", "description": "Q1 2026 F&B Minimum Shortfall", "status": "pending", "paid_date": null, "paid_amount": 0.00, "days_past_due": 0, "late_fee": 0.00, "collection_status": null }
+    ]
+  },
+  {
+    "name": "health_scores",
+    "description": "",
+    "columns": [
+      { "name": "id", "type": "text", "nullable": false },
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "score", "type": "real", "nullable": true },
+      { "name": "tier", "type": "text", "nullable": true },
+      { "name": "golf_score", "type": "real", "nullable": true },
+      { "name": "dining_score", "type": "real", "nullable": true },
+      { "name": "email_score", "type": "real", "nullable": true },
+      { "name": "event_score", "type": "real", "nullable": true },
+      { "name": "computed_at", "type": "timestamptz", "nullable": true },
+      { "name": "archetype", "type": "text", "nullable": true },
+      { "name": "score_delta", "type": "real", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "id": "hs_001", "member_id": "mbr_001", "club_id": "club_001", "score": 82.5, "tier": "healthy", "golf_score": 91.0, "dining_score": 74.0, "email_score": 88.0, "event_score": 65.0, "computed_at": "2026-03-28T06:00:00Z", "archetype": "social_golfer", "score_delta": -3.2 },
+      { "id": "hs_002", "member_id": "mbr_014", "club_id": "club_001", "score": 47.0, "tier": "at_risk", "golf_score": 22.0, "dining_score": 58.0, "email_score": 45.0, "event_score": 71.0, "computed_at": "2026-03-28T06:00:00Z", "archetype": "community_connector", "score_delta": -12.5 },
+      { "id": "hs_003", "member_id": "mbr_027", "club_id": "club_001", "score": 29.0, "tier": "critical", "golf_score": 15.0, "dining_score": 32.0, "email_score": 12.0, "event_score": 40.0, "computed_at": "2026-03-28T06:00:00Z", "archetype": "fitness_focused", "score_delta": -8.0 }
+    ]
+  },
+  {
+    "name": "rounds",
+    "description": "",
+    "columns": [
+      { "name": "round_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "booking_id", "type": "text", "nullable": true },
+      { "name": "round_date", "type": "text", "nullable": true },
+      { "name": "tee_time", "type": "text", "nullable": true },
+      { "name": "course_id", "type": "text", "nullable": true },
+      { "name": "duration_minutes", "type": "integer", "nullable": true },
+      { "name": "pace_rating", "type": "text", "nullable": true },
+      { "name": "players", "type": "integer", "nullable": true },
+      { "name": "cancelled", "type": "boolean", "nullable": true },
+      { "name": "no_show", "type": "boolean", "nullable": true },
+      { "name": "data_source", "type": "text", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "round_id": "rnd_001", "club_id": "club_001", "member_id": "mbr_001", "booking_id": "bk_2020", "round_date": "2026-03-27", "tee_time": "07:30", "course_id": "crs_001", "duration_minutes": 252, "pace_rating": "good", "players": 4, "cancelled": false, "no_show": false, "data_source": "foretees", "created_at": "2026-03-27T07:30:00Z" },
+      { "round_id": "rnd_002", "club_id": "club_001", "member_id": "mbr_019", "booking_id": "bk_2025", "round_date": "2026-03-26", "tee_time": "09:00", "course_id": "crs_001", "duration_minutes": null, "pace_rating": null, "players": 2, "cancelled": true, "no_show": false, "data_source": "foretees", "created_at": "2026-03-25T10:00:00Z" },
+      { "round_id": "rnd_003", "club_id": "club_001", "member_id": "mbr_005", "booking_id": "bk_2030", "round_date": "2026-03-28", "tee_time": "08:00", "course_id": "crs_001", "duration_minutes": 240, "pace_rating": "excellent", "players": 4, "cancelled": false, "no_show": false, "data_source": "foretees", "created_at": "2026-03-28T08:00:00Z" }
+    ]
+  },
+  {
+    "name": "transactions",
+    "description": "",
+    "columns": [
+      { "name": "transaction_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "outlet_id", "type": "text", "nullable": true },
+      { "name": "outlet_name", "type": "text", "nullable": true },
+      { "name": "transaction_date", "type": "timestamptz", "nullable": true },
+      { "name": "total_amount", "type": "real", "nullable": true },
+      { "name": "item_count", "type": "integer", "nullable": true },
+      { "name": "category", "type": "text", "nullable": true },
+      { "name": "is_post_round", "type": "boolean", "nullable": true },
+      { "name": "data_source", "type": "text", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "transaction_id": "txn_001", "club_id": "club_001", "member_id": "mbr_001", "outlet_id": "out_grill", "outlet_name": "19th Hole Grill", "transaction_date": "2026-03-27T12:45:00Z", "total_amount": 68.50, "item_count": 3, "category": "dining", "is_post_round": true, "data_source": "jonas", "created_at": "2026-03-27T12:45:00Z" },
+      { "transaction_id": "txn_002", "club_id": "club_001", "member_id": "mbr_014", "outlet_id": "out_main", "outlet_name": "Main Dining Room", "transaction_date": "2026-03-26T19:00:00Z", "total_amount": 142.00, "item_count": 5, "category": "dining", "is_post_round": false, "data_source": "jonas", "created_at": "2026-03-26T19:00:00Z" },
+      { "transaction_id": "txn_003", "club_id": "club_001", "member_id": "mbr_005", "outlet_id": "out_pro", "outlet_name": "Pro Shop", "transaction_date": "2026-03-28T07:50:00Z", "total_amount": 89.99, "item_count": 1, "category": "retail", "is_post_round": false, "data_source": "club_caddie", "created_at": "2026-03-28T07:50:00Z" }
+    ]
+  },
+  {
+    "name": "complaints",
+    "description": "",
+    "columns": [
+      { "name": "complaint_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "category", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "priority", "type": "text", "nullable": true },
+      { "name": "reported_at", "type": "timestamptz", "nullable": true },
+      { "name": "resolved_at", "type": "timestamptz", "nullable": true },
+      { "name": "resolved_by", "type": "text", "nullable": true },
+      { "name": "resolution_notes", "type": "text", "nullable": true },
+      { "name": "sla_hours", "type": "integer", "nullable": true },
+      { "name": "data_source", "type": "text", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "complaint_id": "cmp_001", "club_id": "club_001", "member_id": "mbr_014", "category": "dining", "description": "Cold food served at main dining room, waited 40 minutes for entree", "status": "resolved", "priority": "high", "reported_at": "2026-03-20T20:15:00Z", "resolved_at": "2026-03-21T10:00:00Z", "resolved_by": "F&B Director", "resolution_notes": "Personal apology and complimentary dinner for two", "sla_hours": 24, "data_source": "manual" },
+      { "complaint_id": "cmp_002", "club_id": "club_001", "member_id": "mbr_008", "category": "course_conditions", "description": "Bunkers on holes 5 and 12 not maintained properly", "status": "in_progress", "priority": "medium", "reported_at": "2026-03-27T15:30:00Z", "resolved_at": null, "resolved_by": null, "resolution_notes": null, "sla_hours": 48, "data_source": "manual" }
+    ]
+  },
+  {
+    "name": "member_sentiment_ratings",
+    "description": "",
+    "columns": [
+      { "name": "rating_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "rating_type", "type": "text", "nullable": true },
+      { "name": "score", "type": "real", "nullable": true },
+      { "name": "comment", "type": "text", "nullable": true },
+      { "name": "context_id", "type": "text", "nullable": true },
+      { "name": "submitted_at", "type": "timestamptz", "nullable": true },
+      { "name": "source", "type": "text", "nullable": true },
+      { "name": "archived", "type": "boolean", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "rating_id": "rat_001", "club_id": "club_001", "member_id": "mbr_001", "rating_type": "nps", "score": 9.0, "comment": "Love the new practice facility improvements", "context_id": null, "submitted_at": "2026-03-15T14:00:00Z", "source": "quarterly_survey", "archived": false },
+      { "rating_id": "rat_002", "club_id": "club_001", "member_id": "mbr_014", "rating_type": "dining_experience", "score": 3.0, "comment": "Service has declined noticeably in the past month", "context_id": "txn_002", "submitted_at": "2026-03-26T20:00:00Z", "source": "post_visit", "archived": false }
+    ]
+  },
+  {
+    "name": "churn_predictions",
+    "description": "",
+    "columns": [
+      { "name": "prediction_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "prob_30d", "type": "real", "nullable": true },
+      { "name": "prob_60d", "type": "real", "nullable": true },
+      { "name": "prob_90d", "type": "real", "nullable": true },
+      { "name": "confidence", "type": "real", "nullable": true },
+      { "name": "risk_factors", "type": "text", "nullable": true },
+      { "name": "model_version", "type": "text", "nullable": true },
+      { "name": "computed_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "prediction_id": "cp_001", "club_id": "club_001", "member_id": "mbr_027", "prob_30d": 0.42, "prob_60d": 0.61, "prob_90d": 0.78, "confidence": 0.87, "risk_factors": "payment_delinquent,usage_decline,no_event_attendance", "model_version": "churn-v3.1", "computed_at": "2026-03-28T06:00:00Z" },
+      { "prediction_id": "cp_002", "club_id": "club_001", "member_id": "mbr_014", "prob_30d": 0.18, "prob_60d": 0.29, "prob_90d": 0.41, "confidence": 0.82, "risk_factors": "dining_complaints,declining_satisfaction", "model_version": "churn-v3.1", "computed_at": "2026-03-28T06:00:00Z" },
+      { "prediction_id": "cp_003", "club_id": "club_001", "member_id": "mbr_001", "prob_30d": 0.03, "prob_60d": 0.05, "prob_90d": 0.08, "confidence": 0.91, "risk_factors": null, "model_version": "churn-v3.1", "computed_at": "2026-03-28T06:00:00Z" }
+    ]
+  },
+  {
+    "name": "actions",
+    "description": "",
+    "columns": [
+      { "name": "action_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": true },
+      { "name": "action_type", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "priority", "type": "text", "nullable": true },
+      { "name": "assigned_to", "type": "text", "nullable": true },
+      { "name": "source", "type": "text", "nullable": true },
+      { "name": "impact_metric", "type": "text", "nullable": true },
+      { "name": "approved_at", "type": "timestamptz", "nullable": true },
+      { "name": "approved_by", "type": "text", "nullable": true },
+      { "name": "executed_at", "type": "timestamptz", "nullable": true },
+      { "name": "dismissed_at", "type": "timestamptz", "nullable": true },
+      { "name": "dismiss_reason", "type": "text", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "action_id": "act_001", "club_id": "club_001", "member_id": "mbr_027", "action_type": "payment_followup", "description": "Contact member regarding overdue January invoice", "status": "in_progress", "priority": "high", "assigned_to": "Membership Director", "source": "agent_retention", "impact_metric": "$15,600 annual dues", "approved_at": "2026-03-20T09:00:00Z", "approved_by": "usr_gm_01", "executed_at": null, "dismissed_at": null, "dismiss_reason": null, "created_at": "2026-03-19T06:00:00Z" },
+      { "action_id": "act_002", "club_id": "club_001", "member_id": "mbr_014", "action_type": "service_recovery", "description": "Schedule F&B director meeting to address dining concerns", "status": "completed", "priority": "medium", "assigned_to": "F&B Director", "source": "agent_retention", "impact_metric": "$15,600 annual dues", "approved_at": "2026-03-22T08:30:00Z", "approved_by": "usr_gm_01", "executed_at": "2026-03-23T11:00:00Z", "dismissed_at": null, "dismiss_reason": null, "created_at": "2026-03-21T06:00:00Z" }
+    ]
+  },
+  {
+    "name": "interventions",
+    "description": "",
+    "columns": [
+      { "name": "intervention_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": false },
+      { "name": "action_id", "type": "text", "nullable": true },
+      { "name": "intervention_type", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "initiated_by", "type": "text", "nullable": true },
+      { "name": "initiated_at", "type": "timestamptz", "nullable": true },
+      { "name": "health_score_before", "type": "real", "nullable": true },
+      { "name": "health_score_after", "type": "real", "nullable": true },
+      { "name": "outcome", "type": "text", "nullable": true },
+      { "name": "outcome_measured_at", "type": "timestamptz", "nullable": true },
+      { "name": "dues_protected", "type": "real", "nullable": true },
+      { "name": "revenue_recovered", "type": "real", "nullable": true },
+      { "name": "is_member_save", "type": "boolean", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "intervention_id": "int_001", "club_id": "club_001", "member_id": "mbr_001", "action_id": "act_003", "intervention_type": "personal_outreach", "description": "GM lunch meeting to discuss club experience and gather feedback", "initiated_by": "usr_gm_01", "initiated_at": "2026-02-10T12:00:00Z", "health_score_before": 38.0, "health_score_after": 72.0, "outcome": "retained", "outcome_measured_at": "2026-03-10T06:00:00Z", "dues_protected": 15600.00, "revenue_recovered": 0.00, "is_member_save": true },
+      { "intervention_id": "int_002", "club_id": "club_001", "member_id": "mbr_014", "action_id": "act_002", "intervention_type": "service_recovery", "description": "F&B director hosted complimentary dinner and discussed improvements", "initiated_by": "usr_fbd_01", "initiated_at": "2026-03-23T18:30:00Z", "health_score_before": 45.0, "health_score_after": 58.0, "outcome": "improving", "outcome_measured_at": "2026-03-28T06:00:00Z", "dues_protected": 15600.00, "revenue_recovered": 0.00, "is_member_save": false }
+    ]
+  },
+  {
+    "name": "correlations",
+    "description": "",
+    "columns": [
+      { "name": "correlation_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "correlation_key", "type": "text", "nullable": true },
+      { "name": "headline", "type": "text", "nullable": true },
+      { "name": "detail", "type": "text", "nullable": true },
+      { "name": "domains", "type": "text", "nullable": true },
+      { "name": "impact", "type": "text", "nullable": true },
+      { "name": "metric_value", "type": "text", "nullable": true },
+      { "name": "metric_label", "type": "text", "nullable": true },
+      { "name": "trend", "type": "text", "nullable": true },
+      { "name": "delta", "type": "text", "nullable": true },
+      { "name": "delta_direction", "type": "text", "nullable": true },
+      { "name": "computed_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "correlation_id": "cor_001", "club_id": "club_001", "correlation_key": "dining_frequency_retention", "headline": "Dining frequency strongly predicts retention", "detail": "Members averaging 3+ dining visits per month retain at 92% vs 71% for non-diners", "domains": "dining,retention", "impact": "high", "metric_value": "92%", "metric_label": "Diner retention rate", "trend": "[88,89,91,92]", "delta": "+1%", "delta_direction": "up", "computed_at": "2026-03-28T06:00:00Z" },
+      { "correlation_id": "cor_002", "club_id": "club_001", "correlation_key": "round_frequency_spend", "headline": "Round frequency drives ancillary spend", "detail": "Each additional round per month correlates with $120 incremental F&B spend", "domains": "golf,dining,revenue", "impact": "medium", "metric_value": "$120", "metric_label": "Incremental F&B per round", "trend": "[105,110,115,120]", "delta": "+$5", "delta_direction": "up", "computed_at": "2026-03-28T06:00:00Z" }
+    ]
+  },
+  {
+    "name": "users",
+    "description": "",
+    "columns": [
+      { "name": "user_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "email", "type": "text", "nullable": true },
+      { "name": "name", "type": "text", "nullable": true },
+      { "name": "role", "type": "text", "nullable": true },
+      { "name": "title", "type": "text", "nullable": true },
+      { "name": "active", "type": "boolean", "nullable": true },
+      { "name": "password_hash", "type": "text", "nullable": true },
+      { "name": "password_salt", "type": "text", "nullable": true },
+      { "name": "last_login", "type": "timestamptz", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "user_id": "usr_gm_01", "club_id": "club_001", "email": "jmartin@oakridgecc.com", "name": "John Martin", "role": "gm", "title": "General Manager", "active": true, "password_hash": null, "password_salt": null, "last_login": "2026-03-28T08:15:00Z", "created_at": "2025-06-01T00:00:00Z" },
+      { "user_id": "usr_mem_dir", "club_id": "club_001", "email": "sthompson@oakridgecc.com", "name": "Susan Thompson", "role": "membership_director", "title": "Director of Membership", "active": true, "password_hash": null, "password_salt": null, "last_login": "2026-03-28T09:02:00Z", "created_at": "2025-06-01T00:00:00Z" },
+      { "user_id": "usr_fbd_01", "club_id": "club_001", "email": "mgarcia@oakridgecc.com", "name": "Maria Garcia", "role": "fb_director", "title": "Food & Beverage Director", "active": true, "password_hash": null, "password_salt": null, "last_login": "2026-03-27T16:30:00Z", "created_at": "2025-07-15T00:00:00Z" }
+    ]
+  },
+  {
+    "name": "sessions",
+    "description": "",
+    "columns": [
+      { "name": "token", "type": "text", "nullable": false },
+      { "name": "user_id", "type": "text", "nullable": true },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "role", "type": "text", "nullable": true },
+      { "name": "expires_at", "type": "timestamptz", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "token": "tok_abc123def456", "user_id": "usr_gm_01", "club_id": "club_001", "role": "gm", "expires_at": "2026-03-29T08:15:00Z", "created_at": "2026-03-28T08:15:00Z" },
+      { "token": "tok_xyz789ghi012", "user_id": "usr_mem_dir", "club_id": "club_001", "role": "membership_director", "expires_at": "2026-03-29T09:02:00Z", "created_at": "2026-03-28T09:02:00Z" }
+    ]
+  },
+  {
+    "name": "notifications",
+    "description": "",
+    "columns": [
+      { "name": "notification_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "user_id", "type": "text", "nullable": true },
+      { "name": "channel", "type": "text", "nullable": true },
+      { "name": "type", "type": "text", "nullable": true },
+      { "name": "title", "type": "text", "nullable": true },
+      { "name": "body", "type": "text", "nullable": true },
+      { "name": "priority", "type": "text", "nullable": true },
+      { "name": "related_member_id", "type": "text", "nullable": true },
+      { "name": "related_action_id", "type": "text", "nullable": true },
+      { "name": "read_at", "type": "timestamptz", "nullable": true },
+      { "name": "sent_at", "type": "timestamptz", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "notification_id": "ntf_001", "club_id": "club_001", "user_id": "usr_gm_01", "channel": "in_app", "type": "health_alert", "title": "Critical: Member Health Score Drop", "body": "William Hayes (mbr_027) health score dropped to 29 - payment delinquency detected", "priority": "high", "related_member_id": "mbr_027", "related_action_id": "act_001", "read_at": "2026-03-28T08:20:00Z", "sent_at": "2026-03-28T06:05:00Z", "created_at": "2026-03-28T06:05:00Z" },
+      { "notification_id": "ntf_002", "club_id": "club_001", "user_id": "usr_mem_dir", "channel": "email", "type": "digest", "title": "Morning Digest - March 28", "body": "3 members require attention, 2 pending actions, 1 new complaint", "priority": "normal", "related_member_id": null, "related_action_id": null, "read_at": null, "sent_at": "2026-03-28T07:00:00Z", "created_at": "2026-03-28T07:00:00Z" }
+    ]
+  },
+  {
+    "name": "notification_preferences",
+    "description": "",
+    "columns": [
+      { "name": "user_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": false },
+      { "name": "morning_digest", "type": "boolean", "nullable": true },
+      { "name": "digest_time", "type": "text", "nullable": true },
+      { "name": "digest_channel", "type": "text", "nullable": true },
+      { "name": "high_priority_alerts", "type": "boolean", "nullable": true },
+      { "name": "alert_channel", "type": "text", "nullable": true },
+      { "name": "escalation_alerts", "type": "boolean", "nullable": true },
+      { "name": "slack_webhook", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "user_id": "usr_gm_01", "club_id": "club_001", "morning_digest": true, "digest_time": "07:00", "digest_channel": "email", "high_priority_alerts": true, "alert_channel": "in_app", "escalation_alerts": true, "slack_webhook": null },
+      { "user_id": "usr_mem_dir", "club_id": "club_001", "morning_digest": true, "digest_time": "06:30", "digest_channel": "email", "high_priority_alerts": true, "alert_channel": "email", "escalation_alerts": false, "slack_webhook": null }
+    ]
+  },
+  {
+    "name": "playbook_runs",
+    "description": "",
+    "columns": [
+      { "name": "run_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "playbook_id", "type": "text", "nullable": true },
+      { "name": "playbook_name", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": true },
+      { "name": "triggered_by", "type": "text", "nullable": true },
+      { "name": "trigger_reason", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "started_at", "type": "timestamptz", "nullable": true },
+      { "name": "completed_at", "type": "timestamptz", "nullable": true },
+      { "name": "health_score_at_start", "type": "real", "nullable": true },
+      { "name": "health_score_at_end", "type": "real", "nullable": true },
+      { "name": "outcome", "type": "text", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "member_id", "toTable": "members", "toColumn": "member_id" }
+    ],
+    "sampleRows": [
+      { "run_id": "pr_001", "club_id": "club_001", "playbook_id": "pb_at_risk", "playbook_name": "At-Risk Member Recovery", "member_id": "mbr_014", "triggered_by": "agt_retention", "trigger_reason": "Health score below 50 for 14+ days", "status": "in_progress", "started_at": "2026-03-21T06:00:00Z", "completed_at": null, "health_score_at_start": 45.0, "health_score_at_end": null, "outcome": null },
+      { "run_id": "pr_002", "club_id": "club_001", "playbook_id": "pb_new_member", "playbook_name": "New Member Onboarding", "member_id": "mbr_050", "triggered_by": "system", "trigger_reason": "New membership activated", "status": "completed", "started_at": "2026-02-15T06:00:00Z", "completed_at": "2026-03-15T06:00:00Z", "health_score_at_start": 50.0, "health_score_at_end": 74.0, "outcome": "successfully_onboarded" }
+    ]
+  },
+  {
+    "name": "playbook_steps",
+    "description": "",
+    "columns": [
+      { "name": "step_id", "type": "text", "nullable": false },
+      { "name": "run_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "step_number", "type": "integer", "nullable": true },
+      { "name": "title", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "assigned_to", "type": "text", "nullable": true },
+      { "name": "due_date", "type": "timestamptz", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "completed_at", "type": "timestamptz", "nullable": true },
+      { "name": "completed_by", "type": "text", "nullable": true },
+      { "name": "notes", "type": "text", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "run_id", "toTable": "playbook_runs", "toColumn": "run_id" }
+    ],
+    "sampleRows": [
+      { "step_id": "ps_001", "run_id": "pr_001", "club_id": "club_001", "step_number": 1, "title": "Review member profile and complaint history", "description": "Pull up full member profile, recent complaints, and health score trend", "assigned_to": "Membership Director", "due_date": "2026-03-22T17:00:00Z", "status": "completed", "completed_at": "2026-03-22T10:30:00Z", "completed_by": "usr_mem_dir", "notes": "Multiple dining complaints identified" },
+      { "step_id": "ps_002", "run_id": "pr_001", "club_id": "club_001", "step_number": 2, "title": "Schedule F&B recovery meeting", "description": "Coordinate with F&B director for complimentary dining experience", "assigned_to": "F&B Director", "due_date": "2026-03-25T17:00:00Z", "status": "completed", "completed_at": "2026-03-23T11:00:00Z", "completed_by": "usr_fbd_01", "notes": "Dinner scheduled for March 23" },
+      { "step_id": "ps_003", "run_id": "pr_001", "club_id": "club_001", "step_number": 3, "title": "Follow-up satisfaction check", "description": "Call member one week after recovery dinner to gauge satisfaction", "assigned_to": "Membership Director", "due_date": "2026-03-30T17:00:00Z", "status": "pending", "completed_at": null, "completed_by": null, "notes": null }
+    ]
+  },
+  {
+    "name": "onboarding_progress",
+    "description": "",
+    "columns": [
+      { "name": "club_id", "type": "text", "nullable": false },
+      { "name": "step_key", "type": "text", "nullable": false },
+      { "name": "completed", "type": "boolean", "nullable": true },
+      { "name": "completed_at", "type": "timestamptz", "nullable": true },
+      { "name": "notes", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "club_id": "club_001", "step_key": "import_members", "completed": true, "completed_at": "2025-06-01T10:00:00Z", "notes": "Imported 342 active members from Jonas" },
+      { "club_id": "club_001", "step_key": "connect_teesheet", "completed": true, "completed_at": "2025-06-02T14:00:00Z", "notes": "ForeTees API connected successfully" },
+      { "club_id": "club_001", "step_key": "configure_agents", "completed": true, "completed_at": "2025-06-05T09:00:00Z", "notes": "Retention and Tee Sheet agents activated" }
+    ]
+  },
+  {
+    "name": "feature_dependency",
+    "description": "",
+    "columns": [
+      { "name": "dependency_id", "type": "text", "nullable": false },
+      { "name": "feature_type", "type": "text", "nullable": true },
+      { "name": "feature_key", "type": "text", "nullable": true },
+      { "name": "domain_code", "type": "text", "nullable": true },
+      { "name": "dependency_type", "type": "text", "nullable": true },
+      { "name": "fallback_mode", "type": "text", "nullable": true },
+      { "name": "user_message", "type": "text", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "dependency_id": "fd_001", "feature_type": "widget", "feature_key": "health_score_trend", "domain_code": "golf", "dependency_type": "required", "fallback_mode": "hidden", "user_message": "Connect your tee sheet system to enable health score trends", "created_at": "2025-06-01T00:00:00Z" },
+      { "dependency_id": "fd_002", "feature_type": "page", "feature_key": "dining_analytics", "domain_code": "dining", "dependency_type": "required", "fallback_mode": "placeholder", "user_message": "Connect your POS system to view dining analytics", "created_at": "2025-06-01T00:00:00Z" }
+    ]
+  },
+  {
+    "name": "feature_state_log",
+    "description": "",
+    "columns": [
+      { "name": "log_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "feature_type", "type": "text", "nullable": true },
+      { "name": "feature_key", "type": "text", "nullable": true },
+      { "name": "previous_state", "type": "text", "nullable": true },
+      { "name": "new_state", "type": "text", "nullable": true },
+      { "name": "reason", "type": "text", "nullable": true },
+      { "name": "changed_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "log_id": "fsl_001", "club_id": "club_001", "feature_type": "widget", "feature_key": "health_score_trend", "previous_state": "disabled", "new_state": "enabled", "reason": "Golf data source connected", "changed_at": "2025-06-02T14:05:00Z" },
+      { "log_id": "fsl_002", "club_id": "club_001", "feature_type": "page", "feature_key": "dining_analytics", "previous_state": "placeholder", "new_state": "enabled", "reason": "POS data source connected", "changed_at": "2025-06-03T09:30:00Z" }
+    ]
+  },
+  {
+    "name": "pause_state",
+    "description": "",
+    "columns": [
+      { "name": "club_id", "type": "text", "nullable": false },
+      { "name": "target_type", "type": "text", "nullable": false },
+      { "name": "target_id", "type": "text", "nullable": false },
+      { "name": "paused", "type": "boolean", "nullable": true },
+      { "name": "paused_at", "type": "timestamptz", "nullable": true },
+      { "name": "resume_at", "type": "timestamptz", "nullable": true },
+      { "name": "paused_by", "type": "text", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "club_id": "club_001", "target_type": "agent", "target_id": "agt_teesheet", "paused": false, "paused_at": null, "resume_at": null, "paused_by": null },
+      { "club_id": "club_001", "target_type": "notification", "target_id": "digest_email", "paused": true, "paused_at": "2026-03-25T08:00:00Z", "resume_at": "2026-04-01T08:00:00Z", "paused_by": "usr_gm_01" }
+    ]
+  },
+  {
+    "name": "agent_activity",
+    "description": "",
+    "columns": [
+      { "name": "activity_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "agent_id", "type": "text", "nullable": true },
+      { "name": "action_type", "type": "text", "nullable": true },
+      { "name": "description", "type": "text", "nullable": true },
+      { "name": "member_id", "type": "text", "nullable": true },
+      { "name": "confidence", "type": "real", "nullable": true },
+      { "name": "auto_executed", "type": "boolean", "nullable": true },
+      { "name": "reasoning", "type": "text", "nullable": true },
+      { "name": "created_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [
+      { "fromColumn": "agent_id", "toTable": "agent_definitions", "toColumn": "agent_id" }
+    ],
+    "sampleRows": [
+      { "activity_id": "aact_001", "club_id": "club_001", "agent_id": "agt_retention", "action_type": "health_alert", "description": "Flagged mbr_027 for critical health score decline", "member_id": "mbr_027", "confidence": 0.92, "auto_executed": false, "reasoning": "Health score dropped 15 pts in 7 days; payment delinquency detected; no club visits in 45 days", "created_at": "2026-03-28T06:01:00Z" },
+      { "activity_id": "aact_002", "club_id": "club_001", "agent_id": "agt_teesheet", "action_type": "slot_optimization", "description": "Identified 4 high-probability cancellations for Saturday morning", "member_id": null, "confidence": 0.85, "auto_executed": true, "reasoning": "Pattern analysis shows 72% cancel probability for 3 bookings based on historical no-show data", "created_at": "2026-03-28T05:30:00Z" }
+    ]
+  },
+  {
+    "name": "agent_configs",
+    "description": "",
+    "columns": [
+      { "name": "club_id", "type": "text", "nullable": false },
+      { "name": "agent_id", "type": "text", "nullable": false },
+      { "name": "enabled", "type": "boolean", "nullable": true },
+      { "name": "auto_approve_threshold", "type": "real", "nullable": true },
+      { "name": "auto_approve_enabled", "type": "boolean", "nullable": true },
+      { "name": "last_run", "type": "timestamptz", "nullable": true },
+      { "name": "total_proposals", "type": "integer", "nullable": true },
+      { "name": "total_auto_executed", "type": "integer", "nullable": true },
+      { "name": "accuracy_score", "type": "real", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "club_id": "club_001", "agent_id": "agt_retention", "enabled": true, "auto_approve_threshold": 0.90, "auto_approve_enabled": false, "last_run": "2026-03-28T06:00:00Z", "total_proposals": 156, "total_auto_executed": 0, "accuracy_score": 0.89 },
+      { "club_id": "club_001", "agent_id": "agt_teesheet", "enabled": true, "auto_approve_threshold": 0.80, "auto_approve_enabled": true, "last_run": "2026-03-28T05:30:00Z", "total_proposals": 342, "total_auto_executed": 187, "accuracy_score": 0.94 }
+    ]
+  },
+  {
+    "name": "data_syncs",
+    "description": "",
+    "columns": [
+      { "name": "sync_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "source_type", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "records_processed", "type": "integer", "nullable": true },
+      { "name": "records_failed", "type": "integer", "nullable": true },
+      { "name": "error_message", "type": "text", "nullable": true },
+      { "name": "started_at", "type": "timestamptz", "nullable": true },
+      { "name": "completed_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "sync_id": "sync_001", "club_id": "club_001", "source_type": "tee_sheet", "status": "completed", "records_processed": 1240, "records_failed": 0, "error_message": null, "started_at": "2026-03-28T06:00:00Z", "completed_at": "2026-03-28T06:02:30Z" },
+      { "sync_id": "sync_002", "club_id": "club_001", "source_type": "pos", "status": "failed", "records_processed": 830, "records_failed": 12, "error_message": "Connection timeout after 30s - Club Caddie API unreachable", "started_at": "2026-03-28T05:00:00Z", "completed_at": "2026-03-28T05:00:32Z" },
+      { "sync_id": "sync_003", "club_id": "club_001", "source_type": "pms", "status": "completed", "records_processed": 4520, "records_failed": 3, "error_message": null, "started_at": "2026-03-28T05:45:00Z", "completed_at": "2026-03-28T05:48:15Z" }
+    ]
+  },
+  {
+    "name": "csv_imports",
+    "description": "",
+    "columns": [
+      { "name": "import_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "uploaded_by", "type": "text", "nullable": true },
+      { "name": "file_name", "type": "text", "nullable": true },
+      { "name": "import_type", "type": "text", "nullable": true },
+      { "name": "status", "type": "text", "nullable": true },
+      { "name": "total_rows", "type": "integer", "nullable": true },
+      { "name": "success_rows", "type": "integer", "nullable": true },
+      { "name": "error_rows", "type": "integer", "nullable": true },
+      { "name": "errors", "type": "text", "nullable": true },
+      { "name": "started_at", "type": "timestamptz", "nullable": true },
+      { "name": "completed_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "import_id": "imp_001", "club_id": "club_001", "uploaded_by": "usr_gm_01", "file_name": "members_update_march.csv", "import_type": "member_update", "status": "completed", "total_rows": 342, "success_rows": 340, "error_rows": 2, "errors": "[{\"row\":118,\"error\":\"invalid email\"},{\"row\":256,\"error\":\"duplicate member_id\"}]", "started_at": "2026-03-15T10:00:00Z", "completed_at": "2026-03-15T10:01:45Z" },
+      { "import_id": "imp_002", "club_id": "club_001", "uploaded_by": "usr_mem_dir", "file_name": "event_registrations_q1.csv", "import_type": "event_data", "status": "completed", "total_rows": 890, "success_rows": 890, "error_rows": 0, "errors": null, "started_at": "2026-03-20T14:30:00Z", "completed_at": "2026-03-20T14:32:10Z" }
+    ]
+  },
+  {
+    "name": "data_source_status",
+    "description": "",
+    "columns": [
+      { "name": "status_id", "type": "text", "nullable": false },
+      { "name": "club_id", "type": "text", "nullable": true },
+      { "name": "domain_code", "type": "text", "nullable": true },
+      { "name": "is_connected", "type": "boolean", "nullable": true },
+      { "name": "source_vendor", "type": "text", "nullable": true },
+      { "name": "last_sync_at", "type": "timestamptz", "nullable": true },
+      { "name": "row_count", "type": "integer", "nullable": true },
+      { "name": "staleness_hours", "type": "integer", "nullable": true },
+      { "name": "health_status", "type": "text", "nullable": true },
+      { "name": "updated_at", "type": "timestamptz", "nullable": true }
+    ],
+    "relationships": [],
+    "sampleRows": [
+      { "status_id": "dss_001", "club_id": "club_001", "domain_code": "golf", "is_connected": true, "source_vendor": "ForeTees", "last_sync_at": "2026-03-28T06:00:00Z", "row_count": 14520, "staleness_hours": 2, "health_status": "healthy", "updated_at": "2026-03-28T06:02:30Z" },
+      { "status_id": "dss_002", "club_id": "club_001", "domain_code": "dining", "is_connected": true, "source_vendor": "Club Caddie", "last_sync_at": "2026-03-27T22:00:00Z", "row_count": 31200, "staleness_hours": 10, "health_status": "degraded", "updated_at": "2026-03-28T06:00:00Z" },
+      { "status_id": "dss_003", "club_id": "club_001", "domain_code": "billing", "is_connected": true, "source_vendor": "Jonas Club Software", "last_sync_at": "2026-03-28T05:45:00Z", "row_count": 82340, "staleness_hours": 2, "health_status": "healthy", "updated_at": "2026-03-28T05:48:15Z" }
     ]
   }
 ]

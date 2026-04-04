@@ -7,6 +7,11 @@
  * Guided setup: create club → connect systems → import data → invite team → configure
  */
 import { sql } from '@vercel/postgres';
+import crypto from 'crypto';
+
+function hashPassword(password, salt) {
+  return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+}
 
 const ONBOARDING_STEPS = [
   { key: 'club_created', label: 'Club profile created', order: 1 },
@@ -63,14 +68,20 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { clubName, city, state, zip, memberCount, courseCount, outletCount, adminEmail, adminName } = req.body;
+    const { clubName, city, state, zip, memberCount, courseCount, outletCount, adminEmail, adminName, adminPassword } = req.body;
 
-    if (!clubName || !adminEmail || !adminName) {
-      return res.status(400).json({ error: 'clubName, adminEmail, and adminName required' });
+    if (!clubName || !adminEmail || !adminName || !adminPassword) {
+      return res.status(400).json({ error: 'clubName, adminEmail, adminName, and adminPassword required' });
+    }
+
+    if (adminPassword.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
     const clubId = `club_${Date.now()}`;
     const userId = `usr_${Date.now()}`;
+    const salt = crypto.randomBytes(16).toString('hex');
+    const passwordHash = hashPassword(adminPassword, salt);
 
     try {
       // Create club
@@ -79,10 +90,10 @@ export default async function handler(req, res) {
         VALUES (${clubId}, ${clubName}, ${city || null}, ${state || null}, ${zip || null}, ${memberCount || null}, ${courseCount || null}, ${outletCount || null})
       `;
 
-      // Create admin user
+      // Create admin user with hashed password
       await sql`
-        INSERT INTO users (user_id, club_id, email, name, role, title, active)
-        VALUES (${userId}, ${clubId}, ${adminEmail.toLowerCase()}, ${adminName}, 'gm', 'General Manager', TRUE)
+        INSERT INTO users (user_id, club_id, email, name, role, title, active, password_hash, password_salt)
+        VALUES (${userId}, ${clubId}, ${adminEmail.toLowerCase()}, ${adminName}, 'gm', 'General Manager', TRUE, ${passwordHash}, ${salt})
       `;
 
       // Initialize onboarding steps

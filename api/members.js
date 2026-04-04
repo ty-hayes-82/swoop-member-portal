@@ -3,6 +3,7 @@
 // Return shapes IDENTICAL to memberService.js
 
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 import { theme } from '../src/config/theme.js';
 
 const toNumber = (value, fallback = 0) => {
@@ -28,9 +29,10 @@ const archetypeBaselines = {
   default:            { rounds: 4,  dining: 150, events: 1, email: 0.4 },
 };
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
-    const latestWeekResult = await sql`SELECT MAX(week_number) AS latest_week FROM member_engagement_weekly`;
+    const latestWeekResult = await sql`SELECT MAX(week_number) AS latest_week FROM member_engagement_weekly WHERE club_id = ${clubId}`;
     const latestWeek = toNumber(latestWeekResult.rows[0]?.latest_week, 0);
 
     if (!latestWeek) {
@@ -58,7 +60,7 @@ export default async function handler(req, res) {
         WITH latest_scores AS (
           SELECT member_id, engagement_score AS score
           FROM member_engagement_weekly
-          WHERE week_number = ${latestWeek}
+          WHERE week_number = ${latestWeek} AND club_id = ${clubId}
         )
         SELECT
           CASE
@@ -70,6 +72,7 @@ export default async function handler(req, res) {
           COUNT(*) AS count
         FROM members m
         LEFT JOIN latest_scores ls ON ls.member_id::text = m.member_id::text
+        WHERE m.club_id = ${clubId}
         GROUP BY 1
         ORDER BY MIN(COALESCE(ls.score, 0)) DESC`,
 
@@ -84,7 +87,7 @@ export default async function handler(req, res) {
           ROUND(AVG(w.events_attended)::numeric, 2)   AS avg_events
         FROM members m
         JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
-        WHERE w.week_number = ${latestWeek}
+        WHERE w.week_number = ${latestWeek} AND m.club_id = ${clubId}
         GROUP BY m.archetype`,
 
       sql`
@@ -121,6 +124,7 @@ export default async function handler(req, res) {
         WHERE w.week_number = ${latestWeek}
           AND w.engagement_score < 50
           AND COALESCE(m.membership_status, 'active') <> 'resigned'
+          AND m.club_id = ${clubId}
         ORDER BY w.engagement_score ASC`,
 
       sql`
@@ -137,7 +141,7 @@ export default async function handler(req, res) {
         FROM members m
         LEFT JOIN feedback f ON m.member_id = f.member_id
           AND f.sentiment_score <= -0.5
-        WHERE m.membership_status = 'resigned'
+        WHERE m.membership_status = 'resigned' AND m.club_id = ${clubId}
         ORDER BY m.resigned_on`,
 
       sql`
@@ -155,6 +159,7 @@ export default async function handler(req, res) {
         FROM email_campaigns ec
         JOIN email_events ee ON ec.campaign_id = ee.campaign_id
         JOIN members m ON ee.member_id::text = m.member_id::text
+        WHERE m.club_id = ${clubId}
         GROUP BY ec.campaign_id, ec.subject, ec.send_date, ec.type, m.archetype
         ORDER BY ec.send_date, m.archetype`,
 
@@ -165,7 +170,8 @@ export default async function handler(req, res) {
         FROM members m
         JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
         WHERE w.week_number = ${latestWeek}
-          AND COALESCE(m.membership_status, 'active') <> 'resigned'`,
+          AND COALESCE(m.membership_status, 'active') <> 'resigned'
+          AND m.club_id = ${clubId}`,
     ]);
 
     // Decaying members: find members whose email open rate dropped 25%+ over 3 weeks
@@ -183,6 +189,7 @@ export default async function handler(req, res) {
         JOIN members m ON m.member_id::text = w.member_id::text
         WHERE w.week_number >= ${Math.max(1, latestWeek - 8)}
           AND COALESCE(m.membership_status, 'active') <> 'resigned'
+          AND m.club_id = ${clubId}
       ), trending AS (
         SELECT
           member_id,
@@ -405,4 +412,4 @@ export default async function handler(req, res) {
     console.error('/api/members error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

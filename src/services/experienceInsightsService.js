@@ -1,5 +1,6 @@
 // experienceInsightsService.js — correlation calculations from existing data
 // _init() hydrates from Postgres; arrays/objects are mutated in-place so imports stay current.
+import { apiFetch, getClubId } from './apiClient';
 import { memberArchetypes } from '@/data/members';
 
 // Touchpoint correlations with retention — derived from cross-domain analysis
@@ -331,9 +332,9 @@ let _d = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/experience-insights');
-    if (!res.ok) return;
-    _d = await res.json();
+    const data = await apiFetch('/api/experience-insights');
+    if (!data) return;
+    _d = data;
 
     if (Array.isArray(_d.touchpointCorrelations)) {
       touchpointCorrelations.length = 0;
@@ -360,11 +361,10 @@ export const _init = async () => {
 
   // Also try live computed correlations from compute-correlations API
   try {
-    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    const clubId = getClubId();
     if (clubId) {
-      const res = await fetch(`/api/compute-correlations?clubId=${clubId}&mode=get`);
-      if (res.ok) {
-        const data = await res.json();
+      const data = await apiFetch(`/api/compute-correlations?clubId=${clubId}&mode=get`);
+      if (data) {
         if (Array.isArray(data.correlations) && data.correlations.length > 0) {
           correlationInsights.length = 0;
           correlationInsights.push(...data.correlations.map(c => ({

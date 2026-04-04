@@ -9,6 +9,7 @@
  * Replaces hardcoded benchmark data in Board Report.
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 const INDUSTRY_AVERAGES = {
   retentionRate: 88,
@@ -21,11 +22,10 @@ const INDUSTRY_AVERAGES = {
   emailOpenRate: 32,
 };
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
 
-  const { clubId } = req.query;
-  if (!clubId) return res.status(400).json({ error: 'clubId required' });
+  const clubId = getClubId(req);
 
   try {
     // Compute club metrics
@@ -122,4 +122,4 @@ export default async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+}, { allowDemo: true });

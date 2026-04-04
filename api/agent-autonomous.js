@@ -8,6 +8,7 @@
  * GM approval and go to the Inbox.
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 const AGENTS = {
   demand_optimizer: {
@@ -48,7 +49,8 @@ const AGENTS = {
   },
 };
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   // Ensure agent activity table exists
   try {
     await sql`
@@ -82,8 +84,7 @@ export default async function handler(req, res) {
   } catch {}
 
   if (req.method === 'GET') {
-    const { clubId, agentId } = req.query;
-    if (!clubId) return res.status(400).json({ error: 'clubId required' });
+    const { agentId } = req.query;
 
     // Get agent configs
     const configs = await sql`SELECT * FROM agent_configs WHERE club_id = ${clubId}`;
@@ -106,9 +107,6 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'GET or POST only' });
-
-  const { clubId } = req.query;
-  if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
   try {
     const autoExecuted = [];
@@ -183,7 +181,7 @@ export default async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+}, { allowDemo: true });
 
 async function generateAgentProposals(clubId, agentId, def) {
   const proposals = [];

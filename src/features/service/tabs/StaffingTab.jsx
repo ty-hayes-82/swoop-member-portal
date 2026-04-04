@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { theme } from '@/config/theme';
 import { understaffedDays, feedbackRecords } from '@/data/staffing';
 import { getDailyBriefing } from '@/services/briefingService';
+import { getDailyForecast } from '@/services/weatherService';
 import MemberLink from '@/components/MemberLink';
 
 export default function StaffingTab() {
@@ -32,11 +33,18 @@ export default function StaffingTab() {
               Tomorrow's Staffing Risk
             </div>
             <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 8 }}>
-              Saturday: Grill Room needs 4 servers — only 2 scheduled
+              {briefing?.todayRisks?.demandForecast?.recommendation
+                || 'Saturday: Grill Room needs 4 servers — only 2 scheduled'}
             </div>
             <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6, marginBottom: theme.spacing.md }}>
-              Based on {briefing?.teeSheet?.roundsToday || 220} booked rounds + weather forecast + 1 private dining event.
-              On similar days with 2 servers, complaints increased {avgComplaintMultiplier}x and ticket times rose 20%.
+              {briefing?.todayRisks?.demandForecast
+                ? <>Based on {briefing.todayRisks.demandForecast.expectedRounds} expected rounds
+                  ({briefing?.teeSheet?.roundsToday || 220} booked × {briefing.todayRisks.demandForecast.golfModifier} weather factor)
+                  {briefing.todayRisks.demandForecast.weatherSummary !== 'No weather disruptions — standard demand expected'
+                    && <> — {briefing.todayRisks.demandForecast.weatherSummary}</>}.
+                  On similar days with 2 servers, complaints increased {avgComplaintMultiplier}x.</>
+                : <>Based on {briefing?.teeSheet?.roundsToday || 220} booked rounds + weather forecast + 1 private dining event.
+                  On similar days with 2 servers, complaints increased {avgComplaintMultiplier}x and ticket times rose 20%.</>}
             </div>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -102,7 +110,21 @@ export default function StaffingTab() {
                     {new Date(day.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                     <span style={{ color: theme.colors.textMuted, fontSize: 12, marginLeft: 8 }}>{isExpanded ? '▾' : '▸'}</span>
                   </div>
-                  <div style={{ fontSize: 13, color: theme.colors.textSecondary }}>{day.outlet} Lunch</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 13, color: theme.colors.textSecondary }}>{day.outlet} Lunch</span>
+                    {day.weather?.conditions && (
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: '999px',
+                        color: (day.weather.conditions === 'sunny' || day.weather.conditions === 'clear' || day.weather.conditions === 'perfect')
+                          ? '#ca8a04' : theme.colors.info || '#3B82F6',
+                        background: (day.weather.conditions === 'sunny' || day.weather.conditions === 'clear' || day.weather.conditions === 'perfect')
+                          ? '#ca8a0412' : `${theme.colors.info || '#3B82F6'}12`,
+                      }}>
+                        {day.weather.conditions}{day.weather.highTemp ? ` ${day.weather.highTemp}°F` : ''}
+                        {day.weather.wind ? `, ${day.weather.wind}mph` : ''}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div style={{
                   fontSize: 13, fontWeight: 700, color: theme.colors.risk,
@@ -175,6 +197,69 @@ export default function StaffingTab() {
           </div>
         </div>
       </div>
+
+      {/* 7-Day Staffing Outlook */}
+      {(() => {
+        const dailyForecast = getDailyForecast(7);
+        if (!dailyForecast?.length) return null;
+
+        return (
+          <div style={{
+            background: theme.colors.bgCard,
+            border: `1px solid ${theme.colors.border}`,
+            borderRadius: theme.radius.lg,
+            padding: theme.spacing.lg,
+          }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.md }}>
+              7-Day Weather & Demand Outlook
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+              {dailyForecast.map((day, i) => {
+                const gusts = day.gusts || day.wind || 0;
+                const precipProb = day.precipProb || 0;
+                const hasRisk = gusts > 15 || precipProb > 40 || (day.high || 72) < 45;
+                const dateStr = day.date
+                  ? new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+                  : `Day ${i + 1}`;
+
+                return (
+                  <div key={i} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '8px 12px', background: hasRisk ? `${theme.colors.warning}08` : theme.colors.bgDeep,
+                    borderRadius: theme.radius.sm, border: `1px solid ${hasRisk ? theme.colors.warning + '30' : theme.colors.border}`,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textPrimary, width: 120 }}>
+                        {dateStr}
+                      </span>
+                      <span style={{ fontSize: 12, color: theme.colors.textSecondary }}>
+                        {day.conditionsText || day.conditions || '—'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 12, color: theme.colors.textSecondary }}>
+                      <span>{day.high || '—'}°F</span>
+                      <span style={{ color: gusts > 15 ? theme.colors.warning : undefined }}>
+                        {gusts > 0 ? `${gusts}mph` : '—'}
+                      </span>
+                      <span style={{ color: precipProb > 40 ? theme.colors.warning : undefined }}>
+                        {precipProb}% rain
+                      </span>
+                      {hasRisk && (
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, color: theme.colors.warning,
+                          background: `${theme.colors.warning}12`, padding: '2px 6px', borderRadius: '999px',
+                        }}>
+                          Demand shift
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

@@ -308,6 +308,77 @@ export default function BoardReport() {
             </div>
           </Panel>
 
+          {/* Weather Impact Summary */}
+          <Panel>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>
+              Weather Impact
+            </h2>
+            <p style={{ fontSize: '12px', color: colors.panelMuted, marginBottom: '16px' }}>
+              Weather conditions and their effect on operations this month.
+            </p>
+            {(() => {
+              const weatherImpactedComplaints = feedbackRecords.filter(f =>
+                f.weatherContext?.isWeatherImpacted || f.weatherContext?.is_weather_impacted
+              );
+              const totalWeatherDays = understaffedDays.filter(d =>
+                d.weather?.conditions && (d.weather.conditions === 'rainy' || d.weather.conditions === 'windy' || (d.weather.wind || 0) > 15)
+              ).length;
+              const weatherPct = feedbackRecords.length > 0
+                ? Math.round((weatherImpactedComplaints.length / feedbackRecords.length) * 100)
+                : 0;
+
+              // Weather-adjusted consistency score
+              const resolvedC = feedbackRecords.filter(f => f.status === 'resolved').length;
+              const nonWeatherCount = Math.max(1, feedbackRecords.length - weatherImpactedComplaints.length);
+              const adjResRate = Math.round((resolvedC / nonWeatherCount) * 100);
+              const understaffedComplaintsPct = feedbackRecords.length > 0
+                ? feedbackRecords.filter(f => f.isUnderstaffedDay).length / feedbackRecords.length * 100 : 0;
+              const adjScore = Math.min(100, Math.round(
+                (adjResRate * 0.4) + ((100 - understaffedComplaintsPct) * 0.3) + (70 * 0.3)
+              ));
+
+              return (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
+                      <div style={{ fontSize: '28px', fontWeight: 700, color: totalWeatherDays > 3 ? colors.orange : colors.blue }}>
+                        {totalWeatherDays || '—'}
+                      </div>
+                      <div style={{ fontSize: '11px', color: colors.textMuted }}>Adverse Weather Days</div>
+                    </div>
+                    <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
+                      <div style={{ fontSize: '28px', fontWeight: 700, color: colors.blue }}>
+                        {weatherImpactedComplaints.length || '—'}
+                      </div>
+                      <div style={{ fontSize: '11px', color: colors.textMuted }}>Weather-Related Complaints</div>
+                    </div>
+                    <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
+                      <div style={{ fontSize: '28px', fontWeight: 700, color: adjScore >= 70 ? colors.green : adjScore >= 50 ? colors.orange : colors.red }}>
+                        {weatherImpactedComplaints.length > 0 ? adjScore : '—'}
+                      </div>
+                      <div style={{ fontSize: '11px', color: colors.textMuted }}>Weather-Adj Consistency</div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '13px', color: colors.panelText, lineHeight: 1.6 }}>
+                    {weatherImpactedComplaints.length > 0 ? (
+                      <>
+                        <strong>{weatherImpactedComplaints.length} complaints</strong> ({weatherPct}%) occurred on weather-impacted days,
+                        accounting for conditions outside the team's control. The weather-adjusted service consistency score
+                        of <strong>{adjScore}</strong> provides a fairer read on operational performance.
+                      </>
+                    ) : (
+                      <>
+                        Weather data integration is active. As complaint weather tagging populates,
+                        this section will show how adverse weather affects complaint patterns and provide
+                        weather-adjusted service consistency scores.
+                      </>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
+          </Panel>
+
           {/* Member Health Overview */}
           <Panel>
             <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>

@@ -1,3 +1,4 @@
+import { apiFetch } from './apiClient';
 import {
   cockpitItems as staticItems,
   sinceLastLogin as staticSinceLastLogin,
@@ -8,8 +9,8 @@ let _d = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/cockpit');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/cockpit');
+    if (data) _d = data;
   } catch {
     /* keep static fallback */
   }

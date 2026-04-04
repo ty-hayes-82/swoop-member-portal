@@ -3,6 +3,7 @@
 // Return shapes IDENTICAL to waitlistService.js
 
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 const normalizeHealthScore = (value) => {
   const numeric = Number(value);
@@ -18,7 +19,8 @@ const deriveRiskLevel = (score) => {
   return 'Critical';
 };
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     const [queue, predictions, heatmap, revenueAttr] = await Promise.all([
 
@@ -44,9 +46,10 @@ export default async function handler(req, res) {
                   NULLIF(COUNT(*), 0)
            FROM pos_checks pc WHERE pc.member_id::text = mw.member_id::text) AS dining_history_rate
         FROM member_waitlist mw
-        JOIN members m ON mw.member_id::text = m.member_id::text
+        JOIN members m ON mw.member_id::text = m.member_id::text AND m.club_id = ${clubId}
         JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
-          AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
+          AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly WHERE club_id = ${clubId})
+        WHERE mw.club_id = ${clubId}
         ORDER BY CASE mw.retention_priority WHEN 'HIGH' THEN 0 ELSE 1 END, w.engagement_score ASC`,
 
       sql`
@@ -59,14 +62,14 @@ export default async function handler(req, res) {
         FROM cancellation_risk cr
         JOIN bookings b ON cr.booking_id = b.booking_id
         JOIN members m ON cr.member_id::text = m.member_id::text
-        WHERE b.booking_date::date >= '2026-01-01'::date AND b.status = 'confirmed'
+        WHERE cr.club_id = ${clubId} AND b.booking_date::date >= '2026-01-01'::date AND b.status = 'confirmed'
         ORDER BY cr.cancel_probability DESC LIMIT 20`,
 
       sql`
         SELECT dh.heatmap_id, c.name AS course, dh.day_of_week, dh.time_block,
                dh.fill_rate, dh.unmet_rounds, dh.demand_level
         FROM demand_heatmap dh
-        JOIN courses c ON dh.course_id = c.course_id
+        JOIN courses c ON dh.course_id = c.course_id AND c.club_id = ${clubId}
         ORDER BY c.name,
           ARRAY_POSITION(ARRAY['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], dh.day_of_week),
           dh.time_block`,
@@ -75,7 +78,7 @@ export default async function handler(req, res) {
         SELECT
           ROUND(AVG(vs.total_spend) FILTER (WHERE vs.anchor_type = 'golf')::numeric, 2) AS avg_golf_spend,
           ROUND(AVG(vs.total_spend) FILTER (WHERE vs.anchor_type = 'golf' AND vs.touchpoints >= 2)::numeric, 2) AS avg_multi_touch_spend
-        FROM visit_sessions vs`,
+        FROM visit_sessions vs WHERE vs.club_id = ${clubId}`,
     ]);
 
     const queueRows = queue.rows.map(w => {
@@ -159,4 +162,4 @@ export default async function handler(req, res) {
     console.error('/api/waitlist error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

@@ -3,12 +3,14 @@
 // Return shapes IDENTICAL to staffingService.js
 
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     const [understaffed, feedback, shiftCoverage] = await Promise.all([
 
-      // Understaffed days — revenue impact via close_outs comparison
+      // Understaffed days — revenue impact via close_outs + weather context
       sql`
         SELECT
           co.date,
@@ -19,20 +21,30 @@ export default async function handler(req, res) {
           ROUND(AVG(
             EXTRACT(EPOCH FROM (pc.last_item_fulfilled_at::timestamptz -
                                 pc.first_item_fired_at::timestamptz)) / 60.0
-          )::numeric, 1)                         AS avg_ticket_min
+          )::numeric, 1)                         AS avg_ticket_min,
+          wdl.conditions_text AS wx_conditions,
+          wdl.high_temp       AS wx_high_temp,
+          wdl.wind_max_mph    AS wx_wind,
+          wdl.wind_gust_max_mph AS wx_gusts,
+          wdl.precip_total_in AS wx_precip,
+          wd.condition        AS wx_condition_legacy
         FROM close_outs co
         CROSS JOIN (
           SELECT AVG(fb_revenue) AS fb_revenue
-          FROM close_outs WHERE is_understaffed = 0 AND fb_revenue > 0
+          FROM close_outs WHERE club_id = ${clubId} AND is_understaffed = 0 AND fb_revenue > 0
         ) co2
         LEFT JOIN feedback f ON f.submitted_at::date = co.date::date
         LEFT JOIN pos_checks pc ON pc.opened_at::date = co.date::date
                                  AND pc.is_understaffed_day = 1
-        WHERE co.is_understaffed = 1
-        GROUP BY co.date, co.fb_revenue, co.is_understaffed, co2.fb_revenue
+        LEFT JOIN weather_daily_log wdl ON wdl.date = co.date::date AND wdl.club_id = 'club_001'
+        LEFT JOIN weather_daily wd ON wd.date = co.date
+        WHERE co.club_id = ${clubId} AND co.is_understaffed = 1
+        GROUP BY co.date, co.fb_revenue, co.is_understaffed, co2.fb_revenue,
+                 wdl.conditions_text, wdl.high_temp, wdl.wind_max_mph,
+                 wdl.wind_gust_max_mph, wdl.precip_total_in, wd.condition
         ORDER BY co.date`,
 
-      // Feedback — all records with understaffed flag
+      // Feedback — all records with understaffed flag + weather context
       sql`
         SELECT
           f.feedback_id,
@@ -45,9 +57,18 @@ export default async function handler(req, res) {
           f.status,
           f.description,
           f.resolved_at,
-          f.is_understaffed_day
+          f.is_understaffed_day,
+          cwc.is_weather_impacted,
+          cwc.impact_reason    AS weather_impact_reason,
+          cwc.conditions_text  AS weather_conditions,
+          cwc.high_temp        AS weather_high_temp,
+          cwc.wind_mph         AS weather_wind,
+          cwc.wind_gust_mph    AS weather_gusts,
+          cwc.precip_in        AS weather_precip
         FROM feedback f
         JOIN members m ON f.member_id = m.member_id
+        LEFT JOIN complaint_weather_context cwc ON cwc.complaint_id = f.feedback_id
+        WHERE f.club_id = ${clubId}
         ORDER BY f.submitted_at DESC`,
 
       // Shift coverage by department and date
@@ -60,6 +81,7 @@ export default async function handler(req, res) {
           ss.is_understaffed_day
         FROM staff_shifts ss
         JOIN staff s ON ss.staff_id = s.staff_id
+        WHERE ss.club_id = ${clubId}
         GROUP BY ss.shift_date, s.department, ss.is_understaffed_day
         ORDER BY ss.shift_date, s.department`,
     ]);
@@ -92,11 +114,17 @@ export default async function handler(req, res) {
         revenueLoss:        Math.max(0, Number(d.normal_avg_fb) - Number(d.fb_revenue)),
         complaintCount:     Number(d.complaint_count),
         avgTicketMin:       Number(d.avg_ticket_min),
-        // Fields required by StaffingTab UI
         scheduledStaff:     2,
         requiredStaff:      4,
         ticketTimeIncrease: 0.20,
         complaintMultiplier: Number(d.complaint_count) > 0 ? 2.0 : 1.0,
+        weather: {
+          conditions: d.wx_conditions || d.wx_condition_legacy || null,
+          highTemp:   d.wx_high_temp != null ? Number(d.wx_high_temp) : null,
+          wind:       d.wx_wind != null ? Number(d.wx_wind) : null,
+          gusts:      d.wx_gusts != null ? Number(d.wx_gusts) : null,
+          precip:     d.wx_precip != null ? Number(d.wx_precip) : null,
+        },
       })),
 
       feedbackRecords: feedbackRows.map(f => ({
@@ -111,6 +139,15 @@ export default async function handler(req, res) {
         description:      f.description,
         resolvedAt:       f.resolved_at,
         isUnderstaffed:   f.is_understaffed_day === 1,
+        weatherContext: f.is_weather_impacted != null ? {
+          isWeatherImpacted: f.is_weather_impacted,
+          impactReason:      f.weather_impact_reason,
+          conditions:        f.weather_conditions,
+          highTemp:          f.weather_high_temp != null ? Number(f.weather_high_temp) : null,
+          wind:              f.weather_wind != null ? Number(f.weather_wind) : null,
+          gusts:             f.weather_gusts != null ? Number(f.weather_gusts) : null,
+          precip:            f.weather_precip != null ? Number(f.weather_precip) : null,
+        } : null,
       })),
 
       // feedbackSummary must be an array to match the static data shape
@@ -147,4 +184,4 @@ export default async function handler(req, res) {
     console.error('/api/staffing error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

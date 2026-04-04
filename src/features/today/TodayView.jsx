@@ -13,6 +13,7 @@ import TomorrowForecast from './TomorrowForecast';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { theme } from '@/config/theme';
+import { getWeatherAlerts } from '@/services/weatherService';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -32,6 +33,9 @@ export default function TodayView() {
   const topPriority = priorities[0];
   const briefing = getDailyBriefing();
   const roundsToday = briefing?.teeSheet?.roundsToday || 220;
+
+  const weatherAlerts = getWeatherAlerts();
+  const [dismissedAlerts, setDismissedAlerts] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -76,6 +80,42 @@ export default function TodayView() {
             )}
           </div>
         </div>
+
+        {/* Weather Alerts Banner */}
+        {weatherAlerts.filter(a => !dismissedAlerts.includes(a.headline)).map((alert, i) => (
+          <div key={i} style={{
+            background: alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
+              ? `${theme.colors.urgent}12` : `${theme.colors.warning}12`,
+            border: `1px solid ${alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
+              ? theme.colors.urgent : theme.colors.warning}40`,
+            borderRadius: theme.radius.md,
+            padding: '12px 16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600,
+                color: alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
+                  ? theme.colors.urgent : theme.colors.warning }}>
+                {alert.headline || `${alert.type} Warning`}
+              </span>
+              {alert.description && (
+                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+                  — {alert.description}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setDismissedAlerts(prev => [...prev, alert.headline])}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: theme.colors.textMuted, fontSize: theme.fontSize.sm,
+                padding: '2px 6px',
+              }}
+            >
+              Dismiss
+            </button>
+          </div>
+        ))}
 
         {/* Section 2: Staffing vs Demand + Top 3 Complaints */}
         <TodaysRisks />

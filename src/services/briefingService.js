@@ -1,5 +1,6 @@
 // briefingService.js — Phase 1 static · Phase 2 /api/briefing
 
+import { apiFetch } from './apiClient';
 import { getMonthlyRevenueSummary, getRevenueByDay } from './operationsService';
 import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
@@ -11,8 +12,8 @@ let _d = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/briefing');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/briefing');
+    if (data) _d = data;
   } catch { /* keep static fallback */ }
 };
 

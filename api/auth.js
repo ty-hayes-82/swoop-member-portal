@@ -53,13 +53,13 @@ export default async function handler(req, res) {
 
       const user = result.rows[0];
 
-      // For Phase 1 demo: if no password hash stored, accept any password
-      // TODO: Remove this bypass before production launch
-      if (user.password_hash) {
-        const hash = hashPassword(password, user.password_salt);
-        if (hash !== user.password_hash) {
-          return res.status(401).json({ error: 'Invalid credentials' });
-        }
+      // Require password hash — no bypass
+      if (!user.password_hash || !user.password_salt) {
+        return res.status(401).json({ error: 'Account not configured. Contact your administrator.' });
+      }
+      const hash = hashPassword(password, user.password_salt);
+      if (hash !== user.password_hash) {
+        return res.status(401).json({ error: 'Invalid credentials' });
       }
 
       // Create session

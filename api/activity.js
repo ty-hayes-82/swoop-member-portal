@@ -1,6 +1,8 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     if (req.method === 'POST') {
       const { actionType, actionSubtype, actor, memberId, memberName, agentId, referenceId, referenceType, description, meta } = req.body;
@@ -10,15 +12,15 @@ export default async function handler(req, res) {
       }
 
       await sql`
-        INSERT INTO activity_log (action_type, action_subtype, actor, member_id, member_name, agent_id, reference_id, reference_type, description, meta)
-        VALUES (${actionType}, ${actionSubtype ?? null}, ${actor ?? 'gm_default'}, ${memberId ?? null}, ${memberName ?? null}, ${agentId ?? null}, ${referenceId ?? null}, ${referenceType ?? null}, ${description ?? null}, ${JSON.stringify(meta ?? {})})
+        INSERT INTO activity_log (action_type, action_subtype, actor, member_id, member_name, agent_id, reference_id, reference_type, description, meta, club_id)
+        VALUES (${actionType}, ${actionSubtype ?? null}, ${actor ?? 'gm_default'}, ${memberId ?? null}, ${memberName ?? null}, ${agentId ?? null}, ${referenceId ?? null}, ${referenceType ?? null}, ${description ?? null}, ${JSON.stringify(meta ?? {})}, ${clubId})
       `;
 
       return res.status(201).json({ success: true });
     }
 
     if (req.method === 'DELETE') {
-      await sql`DELETE FROM activity_log`;
+      await sql`DELETE FROM activity_log WHERE club_id = ${clubId}`;
       return res.status(200).json({ success: true, message: 'All activity history cleared' });
     }
 
@@ -29,13 +31,13 @@ export default async function handler(req, res) {
 
     let result;
     if (type && memberId) {
-      result = await sql`SELECT * FROM activity_log WHERE action_type = ${type} AND member_id = ${memberId} ORDER BY created_at DESC LIMIT ${limit}`;
+      result = await sql`SELECT * FROM activity_log WHERE club_id = ${clubId} AND action_type = ${type} AND member_id = ${memberId} ORDER BY created_at DESC LIMIT ${limit}`;
     } else if (type) {
-      result = await sql`SELECT * FROM activity_log WHERE action_type = ${type} ORDER BY created_at DESC LIMIT ${limit}`;
+      result = await sql`SELECT * FROM activity_log WHERE club_id = ${clubId} AND action_type = ${type} ORDER BY created_at DESC LIMIT ${limit}`;
     } else if (memberId) {
-      result = await sql`SELECT * FROM activity_log WHERE member_id = ${memberId} ORDER BY created_at DESC LIMIT ${limit}`;
+      result = await sql`SELECT * FROM activity_log WHERE club_id = ${clubId} AND member_id = ${memberId} ORDER BY created_at DESC LIMIT ${limit}`;
     } else {
-      result = await sql`SELECT * FROM activity_log ORDER BY created_at DESC LIMIT ${limit}`;
+      result = await sql`SELECT * FROM activity_log WHERE club_id = ${clubId} ORDER BY created_at DESC LIMIT ${limit}`;
     }
 
     res.status(200).json({ activities: result.rows });
@@ -43,4 +45,4 @@ export default async function handler(req, res) {
     console.error('Activity API error:', error);
     res.status(500).json({ error: error.message });
   }
-}
+}, { allowDemo: true });

@@ -1,5 +1,6 @@
 // staffingService.js — Phase 1 static · Phase 2 /api/staffing
 
+import { apiFetch } from './apiClient';
 import { understaffedDays, feedbackRecords, feedbackSummary, shiftCoverage } from '@/data/staffing';
 
 let _d = null;
@@ -42,8 +43,8 @@ const toString = (value, fallback = '') => (typeof value === 'string' && value.t
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/staffing');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/staffing');
+    if (data) _d = data;
   } catch {
     /* keep static fallback */
   }

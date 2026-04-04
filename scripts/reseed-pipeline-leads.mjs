@@ -1,6 +1,10 @@
 import { createClient } from '@vercel/postgres';
 
-const connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL || 'postgresql://neondb_owner:npg_STj6ErHVm0vF@ep-sparkling-brook-aiqua5yv.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require';
+const connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
+if (!connectionString) {
+  console.error('Error: POSTGRES_URL_NON_POOLING or POSTGRES_URL environment variable required');
+  process.exit(1);
+}
 
 const client = createClient({ connectionString });
 

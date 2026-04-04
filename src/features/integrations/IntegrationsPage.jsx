@@ -136,7 +136,7 @@ const STATUS_COLORS = {
   'coming-soon': '#c2410c',
 };
 
-export function IntegrationsPage() {
+export default function IntegrationsPage() {
   const { navigate } = useNavigationContext();
   const systems = useMemo(() => getConnectedSystems(), []);
   const systemMap = useMemo(() => Object.fromEntries(systems.map((system) => [system.id, system])), [systems]);

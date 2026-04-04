@@ -1,4 +1,5 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 const numberOr = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -31,7 +32,8 @@ const safeJsonParse = (str, fallback = []) => {
   try { return JSON.parse(str); } catch { return fallback; }
 };
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   const memberId = req.query.memberId || req.query.id;
 
   if (!memberId) {
@@ -49,7 +51,7 @@ export default async function handler(req, res) {
           m.preferred_dining_spot, m.tee_time_preference, m.dining_preference,
           m.member_notes, m.family_members, m.last_seen_location
         FROM members m
-        WHERE m.member_id = ${memberId}
+        WHERE m.member_id = ${memberId} AND m.club_id = ${clubId}
       `,
       sql`
         SELECT week_number, week_start, engagement_score, rounds_played, dining_spend, events_attended, email_open_rate
@@ -320,4 +322,4 @@ export default async function handler(req, res) {
     console.error('member-detail error', error);
     res.status(500).json({ error: 'Failed to load member detail' });
   }
-}
+}, { allowDemo: true });

@@ -24,6 +24,18 @@ export default function QualityTab() {
   );
   const scoreColor = consistencyScore >= 70 ? theme.colors.success : consistencyScore >= 50 ? '#ca8a04' : theme.colors.risk;
 
+  // Weather-adjusted score: exclude complaints that occurred on weather-impacted days
+  const weatherImpactedComplaints = feedbackRecords.filter(f => f.weatherContext?.isWeatherImpacted || f.weatherContext?.is_weather_impacted).length;
+  const nonWeatherComplaints = totalComplaints - weatherImpactedComplaints;
+  const adjustedResolutionRate = nonWeatherComplaints > 0 ? Math.round((resolvedCount / Math.max(nonWeatherComplaints, 1)) * 100) : 100;
+  const adjustedScore = weatherImpactedComplaints > 0
+    ? Math.min(100, Math.round(
+        (adjustedResolutionRate * 0.4) +
+        ((100 - understaffedPct) * 0.3) +
+        ((100 - slowRoundStats.overallRate * 100) * 0.3)
+      ))
+    : null;
+
   // Complaints by day of week
   const dayOfWeekMap = {};
   feedbackRecords.forEach(r => {
@@ -88,6 +100,10 @@ export default function QualityTab() {
             { label: 'Resolution Rate', value: `${resolutionRate}%`, color: resolutionRate >= 70 ? theme.colors.success : '#ca8a04' },
             { label: 'Understaffed Days', value: `${understaffedDays.length}`, color: understaffedDays.length <= 1 ? theme.colors.success : theme.colors.risk },
             { label: 'Open Complaints', value: `${totalComplaints - resolvedCount}`, color: (totalComplaints - resolvedCount) <= 2 ? '#ca8a04' : theme.colors.risk },
+            ...(adjustedScore != null ? [{
+              label: 'Weather-Adj Score', value: `${adjustedScore}`,
+              color: adjustedScore >= 70 ? theme.colors.success : adjustedScore >= 50 ? '#ca8a04' : theme.colors.risk,
+            }] : []),
           ].map(m => (
             <div key={m.label} style={{
               textAlign: 'center', minWidth: 80, padding: '6px 12px',

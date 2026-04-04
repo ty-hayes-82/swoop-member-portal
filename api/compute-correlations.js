@@ -13,14 +13,14 @@
  * Results stored in correlations table and served to Insights tab.
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const { clubId } = req.query;
-  if (!clubId) return res.status(400).json({ error: 'clubId required' });
+  const clubId = getClubId(req);
 
   // Ensure correlations table exists
   try {
@@ -97,7 +97,7 @@ export default async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+}, { allowDemo: true });
 
 async function computeDiningAfterRounds(clubId) {
   try {

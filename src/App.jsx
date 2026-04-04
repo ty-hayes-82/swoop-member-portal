@@ -11,15 +11,16 @@ import { Sidebar, Header, MobileConversionBar } from '@/components/layout';
 import ActionsDrawer from '@/components/layout/ActionsDrawer';
 
 // V3: Active features only — deleted features removed in Phase 5 cleanup
+// Lazy-load all pages except Today (initial view) for code-splitting
 import { TodayView } from '@/features/today';
-import { ServiceView } from '@/features/service';
-import { MembersView } from '@/features/members';
+const ServiceView = lazy(() => import('@/features/service/ServiceView'));
+const MembersView = lazy(() => import('@/features/members/MembersView'));
 const BoardReport = lazy(() => import("@/features/board-report/BoardReport.jsx"));
-import AdminHub from '@/features/admin/AdminHub';
-import MemberProfilePage from '@/features/member-profile/MemberProfilePage.jsx';
+const AdminHub = lazy(() => import('@/features/admin/AdminHub'));
+const MemberProfilePage = lazy(() => import('@/features/member-profile/MemberProfilePage.jsx'));
 import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
-import { IntegrationsPage } from '@/features/integrations';
-import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
+const IntegrationsPage = lazy(() => import('@/features/integrations/IntegrationsPage'));
+const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
 import LoginPage from '@/features/login/LoginPage';
 import { theme } from '@/config/theme';
 

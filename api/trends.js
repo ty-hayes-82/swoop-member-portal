@@ -4,6 +4,7 @@
 // MONTHS array: ['Aug','Sep','Oct','Nov','Dec','Jan'] — Jan = current (index 5)
 
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 // The DB only has January 2026 data. Aug–Dec are static prior-period values
 // (identical to data/trends.js). This function merges them so chart shapes are unchanged.
@@ -29,7 +30,8 @@ const PRIOR_OUTLET_TRENDS = {
   'Pool Bar':          [14000, 13000, 11000,  9000,  8500],
 };
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     // January actuals
     const [monthlyRevenue, paceData, members, email, fbData, eventsData, outletRev] = await Promise.all([
@@ -40,33 +42,35 @@ export default async function handler(req, res) {
           SUM(fb_revenue)::numeric AS fb,
           SUM(golf_revenue)::numeric AS golf
         FROM close_outs
-        WHERE date::date >= '2025-12-01'::date
+        WHERE club_id = ${clubId}
+          AND date::date >= '2025-12-01'::date
           AND date::date < '2026-02-01'::date
         GROUP BY 1
         ORDER BY 1`,
-      sql`SELECT COUNT(*) AS total, SUM(is_slow_round) AS slow FROM pace_of_play`,
+      sql`SELECT COUNT(*) AS total, SUM(is_slow_round) AS slow FROM pace_of_play WHERE club_id = ${clubId}`,
       sql`
         SELECT
           COUNT(*) FILTER (WHERE membership_status = 'active')          AS active,
           COUNT(*) FILTER (WHERE membership_status = 'resigned')         AS resigned,
           COUNT(*) FILTER (WHERE join_date >= '2026-01-01')              AS new_this_month
-        FROM members`,
+        FROM members WHERE club_id = ${clubId}`,
       sql`
         SELECT
           ROUND(
             COUNT(*) FILTER (WHERE event_type='open')::numeric /
             NULLIF(COUNT(*) FILTER (WHERE event_type='send'), 0), 3
           ) AS open_rate
-        FROM email_events`,
+        FROM email_events WHERE club_id = ${clubId}`,
       sql`
         SELECT AVG(total) AS avg_check FROM pos_checks
-        WHERE post_round_dining = 0`,
-      sql`SELECT COUNT(*) AS cnt FROM feedback`,
+        WHERE club_id = ${clubId} AND post_round_dining = 0`,
+      sql`SELECT COUNT(*) AS cnt FROM feedback WHERE club_id = ${clubId}`,
       sql`
         SELECT o.name, ROUND(SUM(pc.total)::numeric, 0) AS revenue
         FROM pos_checks pc
         JOIN dining_outlets o ON pc.outlet_id = o.outlet_id
-        WHERE pc.opened_at::date >= '2026-01-01'::date
+        WHERE pc.club_id = ${clubId}
+          AND pc.opened_at::date >= '2026-01-01'::date
           AND pc.opened_at::date < '2026-02-01'::date
         GROUP BY o.name`,
     ]);
@@ -76,8 +80,9 @@ export default async function handler(req, res) {
       SELECT ROUND(AVG(engagement_score)::numeric, 0) AS avg_health,
              COUNT(*) FILTER (WHERE engagement_score < 50) AS at_risk
       FROM member_engagement_weekly
-      WHERE week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
-        AND member_id IN (SELECT member_id FROM members WHERE membership_status = 'active')`;
+      WHERE club_id = ${clubId}
+        AND week_number = (SELECT MAX(week_number) FROM member_engagement_weekly WHERE club_id = ${clubId})
+        AND member_id IN (SELECT member_id FROM members WHERE club_id = ${clubId} AND membership_status = 'active')`;
 
     const monthly = new Map(monthlyRevenue.rows.map((row) => [String(row.month_start).slice(0, 10), row]));
     const decRaw = monthly.get('2025-12-01');
@@ -142,4 +147,4 @@ export default async function handler(req, res) {
     console.error('/api/trends error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

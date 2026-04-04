@@ -18,7 +18,12 @@ CREATE TABLE IF NOT EXISTS club (
     founded_year        INTEGER,
     member_count        INTEGER,
     course_count        INTEGER,
-    outlet_count        INTEGER
+    outlet_count        INTEGER,
+    logo_url            TEXT,
+    brand_voice         TEXT DEFAULT 'professional',
+    timezone            TEXT DEFAULT 'America/New_York',
+    created_at          TIMESTAMPTZ DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS courses (
@@ -44,6 +49,7 @@ CREATE TABLE IF NOT EXISTS dining_outlets (
 
 CREATE TABLE IF NOT EXISTS membership_types (
     type_code           TEXT PRIMARY KEY,       -- FG | SOC | JR | LEG | SPT | NR
+    club_id             TEXT,                   -- FK to club (multi-tenant)
     name                TEXT NOT NULL,
     annual_dues         REAL NOT NULL,
     fb_minimum          REAL NOT NULL DEFAULT 0,
@@ -56,6 +62,7 @@ CREATE TABLE IF NOT EXISTS membership_types (
 
 CREATE TABLE IF NOT EXISTS households (
     household_id        TEXT PRIMARY KEY,
+    club_id             TEXT,                   -- FK to club (multi-tenant)
     primary_member_id   TEXT,                   -- updated after members insert
     member_count        INTEGER NOT NULL DEFAULT 1,
     address             TEXT,
@@ -65,6 +72,8 @@ CREATE TABLE IF NOT EXISTS households (
 CREATE TABLE IF NOT EXISTS members (
     member_id               TEXT PRIMARY KEY,   -- mbr_001 … mbr_300
     member_number           INTEGER NOT NULL,
+    club_id                 TEXT,               -- FK to club (multi-tenant)
+    external_id             TEXT,               -- CMS external ID
     first_name              TEXT NOT NULL,
     last_name               TEXT NOT NULL,
     email                   TEXT,
@@ -80,12 +89,22 @@ CREATE TABLE IF NOT EXISTS members (
     annual_dues             REAL NOT NULL,
     account_balance         REAL NOT NULL DEFAULT 0,
     ghin_number             TEXT,
-    communication_opt_in    INTEGER NOT NULL DEFAULT 1
+    communication_opt_in    INTEGER NOT NULL DEFAULT 1,
+    health_score            REAL,               -- Swoop computed health score
+    health_tier             TEXT,               -- Tier from health score
+    last_health_update      TIMESTAMPTZ,        -- Last health recalculation
+    data_completeness       INTEGER DEFAULT 0,    -- Number of data dimensions with real data (0-4)
+    preferred_channel       TEXT DEFAULT 'email', -- Preferred outreach channel
+    data_source             TEXT DEFAULT 'manual', -- Data origin: manual | csv | api
+    created_at              TIMESTAMPTZ DEFAULT NOW(),
+    updated_at              TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_members_archetype        ON members(archetype);
 CREATE INDEX IF NOT EXISTS idx_members_status           ON members(membership_status);
 CREATE INDEX IF NOT EXISTS idx_members_household        ON members(household_id);
+CREATE INDEX IF NOT EXISTS idx_members_club             ON members(club_id);
+CREATE INDEX IF NOT EXISTS idx_members_health           ON members(club_id, health_score);
 
 -- ---------------------------------------------------------------------------
 -- 3.3 GOLF OPERATIONS DOMAIN
@@ -303,6 +322,7 @@ CREATE INDEX IF NOT EXISTS idx_feedback_understaffed    ON feedback(is_understaf
 
 CREATE TABLE IF NOT EXISTS service_requests (
     request_id          TEXT PRIMARY KEY,       -- sr_0001 …
+    club_id             TEXT,                   -- FK to club (multi-tenant)
     member_id           TEXT REFERENCES members(member_id),
     booking_id          TEXT REFERENCES bookings(booking_id),
     request_type        TEXT NOT NULL,          -- beverage_cart | pace_complaint | course_condition | equipment | facility_maintenance
@@ -330,6 +350,7 @@ CREATE TABLE IF NOT EXISTS staff (
 
 CREATE TABLE IF NOT EXISTS staff_shifts (
     shift_id            TEXT PRIMARY KEY,       -- shf_0001 …
+    club_id             TEXT,                   -- FK to club (multi-tenant)
     staff_id            TEXT NOT NULL REFERENCES staff(staff_id),
     shift_date          TEXT NOT NULL,
     outlet_id           TEXT REFERENCES dining_outlets(outlet_id),  -- NULL for non-F&B
@@ -363,6 +384,7 @@ CREATE TABLE IF NOT EXISTS close_outs (
 
 CREATE TABLE IF NOT EXISTS canonical_events (
     event_id            TEXT PRIMARY KEY,       -- MD5-based idempotency key
+    club_id             TEXT,                   -- FK to club (multi-tenant)
     entity_type         TEXT NOT NULL,
     entity_id           TEXT NOT NULL,
     event_type          TEXT NOT NULL,          -- created | updated | completed | cancelled | resigned
@@ -376,6 +398,7 @@ CREATE INDEX IF NOT EXISTS idx_canonical_timestamp      ON canonical_events(even
 
 CREATE TABLE IF NOT EXISTS member_engagement_daily (
     row_id              TEXT PRIMARY KEY,       -- 300 × 31 = 9,300 rows
+    club_id             TEXT,                   -- FK to club (multi-tenant)
     member_id           TEXT NOT NULL REFERENCES members(member_id),
     date                TEXT NOT NULL,
     rounds_played       INTEGER NOT NULL DEFAULT 0,
@@ -393,6 +416,7 @@ CREATE INDEX IF NOT EXISTS idx_daily_date               ON member_engagement_dai
 
 CREATE TABLE IF NOT EXISTS member_engagement_weekly (
     row_id              TEXT PRIMARY KEY,       -- 300 × 5 = 1,500 rows
+    club_id             TEXT,                   -- FK to club (multi-tenant)
     member_id           TEXT NOT NULL REFERENCES members(member_id),
     week_number         INTEGER NOT NULL,       -- 1–5
     week_start          TEXT NOT NULL,
@@ -411,6 +435,7 @@ CREATE INDEX IF NOT EXISTS idx_weekly_score             ON member_engagement_wee
 
 CREATE TABLE IF NOT EXISTS visit_sessions (
     session_id          TEXT PRIMARY KEY,       -- vs_00001 …
+    club_id             TEXT,                   -- FK to club (multi-tenant)
     member_id           TEXT NOT NULL REFERENCES members(member_id),
     session_date        TEXT NOT NULL,
     anchor_type         TEXT NOT NULL,          -- golf | dining | event
@@ -427,7 +452,8 @@ CREATE INDEX IF NOT EXISTS idx_sessions_date            ON visit_sessions(sessio
 
 CREATE TABLE IF NOT EXISTS weather_daily (
     weather_id          TEXT PRIMARY KEY,       -- one row per day
-    date                TEXT NOT NULL UNIQUE,
+    club_id             TEXT,                   -- FK to club (multi-tenant)
+    date                TEXT NOT NULL,
     condition           TEXT NOT NULL,          -- sunny | cloudy | rainy | windy | perfect
     temp_high           INTEGER NOT NULL,
     temp_low            INTEGER NOT NULL,
@@ -495,6 +521,7 @@ CREATE INDEX IF NOT EXISTS idx_heatmap_day_time         ON demand_heatmap(day_of
 
 CREATE TABLE IF NOT EXISTS board_report_snapshots (
   snapshot_id         SERIAL PRIMARY KEY,
+  club_id             TEXT,                    -- FK to club (multi-tenant)
   snapshot_date       DATE NOT NULL,
   members_saved       INT DEFAULT 0,
   dues_protected      NUMERIC(12,2) DEFAULT 0,
@@ -507,6 +534,7 @@ CREATE TABLE IF NOT EXISTS board_report_snapshots (
 
 CREATE TABLE IF NOT EXISTS member_interventions (
   intervention_id     SERIAL PRIMARY KEY,
+  club_id             TEXT,                    -- FK to club (multi-tenant)
   member_id           TEXT REFERENCES members(member_id),
   trigger_type        VARCHAR(50),
   trigger_detail      TEXT,
@@ -521,6 +549,7 @@ CREATE TABLE IF NOT EXISTS member_interventions (
 
 CREATE TABLE IF NOT EXISTS operational_interventions (
   intervention_id     SERIAL PRIMARY KEY,
+  club_id             TEXT,                    -- FK to club (multi-tenant)
   event_type          VARCHAR(100),
   event_date          DATE,
   detection_method    TEXT,
@@ -597,6 +626,7 @@ CREATE TABLE IF NOT EXISTS archetype_spend_gaps (
 
 CREATE TABLE IF NOT EXISTS agent_definitions (
   agent_id            VARCHAR(50) PRIMARY KEY,
+  club_id             TEXT,                    -- FK to club (multi-tenant)
   name                VARCHAR(100),
   description         TEXT,
   status              VARCHAR(20) DEFAULT 'active',
@@ -608,6 +638,7 @@ CREATE TABLE IF NOT EXISTS agent_definitions (
 
 CREATE TABLE IF NOT EXISTS agent_actions (
   action_id           VARCHAR(50) PRIMARY KEY,
+  club_id             TEXT,                    -- FK to club (multi-tenant)
   agent_id            VARCHAR(50) REFERENCES agent_definitions(agent_id),
   action_type         VARCHAR(50),
   priority            VARCHAR(20),
@@ -697,7 +728,7 @@ CREATE TABLE IF NOT EXISTS slot_reassignments (
 );
 
 CREATE TABLE IF NOT EXISTS waitlist_config (
-  club_id             VARCHAR(20) PRIMARY KEY DEFAULT 'oakmont',
+  club_id             TEXT PRIMARY KEY,        -- FK to club (multi-tenant, no default)
   hold_time_minutes   INT DEFAULT 30,
   auto_offer_threshold NUMERIC(3,2) DEFAULT 0.80,
   max_offers          INT DEFAULT 3,
@@ -710,6 +741,7 @@ CREATE TABLE IF NOT EXISTS waitlist_config (
 
 CREATE TABLE IF NOT EXISTS connected_systems (
   system_id           VARCHAR(50) PRIMARY KEY,
+  club_id             TEXT,                    -- FK to club (multi-tenant)
   vendor_name         VARCHAR(100),
   category            VARCHAR(50),
   status              VARCHAR(20) DEFAULT 'available',
@@ -720,6 +752,7 @@ CREATE TABLE IF NOT EXISTS connected_systems (
 
 CREATE TABLE IF NOT EXISTS industry_benchmarks (
   metric_key          VARCHAR(50) PRIMARY KEY,
+  club_id             TEXT,                    -- FK to club (multi-tenant)
   club_value          NUMERIC(12,2),
   industry_value      NUMERIC(12,2),
   unit                VARCHAR(10),
@@ -752,6 +785,442 @@ CREATE INDEX IF NOT EXISTS idx_activity_log_type ON activity_log(action_type);
 CREATE INDEX IF NOT EXISTS idx_activity_log_member ON activity_log(member_id);
 CREATE INDEX IF NOT EXISTS idx_activity_log_created ON activity_log(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activity_log_reference ON activity_log(reference_id, reference_type);
+
+-- ---------------------------------------------------------------------------
+-- 5.1 MEMBER INVOICES (Billing / A/R)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS member_invoices (
+  invoice_id          TEXT PRIMARY KEY,
+  member_id           TEXT NOT NULL,
+  invoice_date        TEXT NOT NULL,
+  due_date            TEXT NOT NULL,
+  amount              REAL NOT NULL,
+  type                TEXT NOT NULL DEFAULT 'dues',       -- dues | fb_minimum | assessment
+  description         TEXT NOT NULL,
+  status              TEXT NOT NULL DEFAULT 'paid',       -- paid | current | past_due_30 | past_due_60 | past_due_90
+  paid_date           TEXT,
+  paid_amount         REAL DEFAULT 0,
+  days_past_due       INTEGER NOT NULL DEFAULT 0,
+  late_fee            REAL DEFAULT 0,
+  collection_status   TEXT DEFAULT 'none'                 -- none | reminder_sent | second_notice | final_notice
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_member ON member_invoices(member_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON member_invoices(status);
+
+-- ---------------------------------------------------------------------------
+-- 5.2 PRODUCTION TABLES (Production data flow via CMS integrations)
+-- ---------------------------------------------------------------------------
+
+-- Health score time series
+CREATE TABLE IF NOT EXISTS health_scores (
+  id                  TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  member_id           TEXT NOT NULL,
+  club_id             TEXT NOT NULL,
+  score               REAL NOT NULL,
+  tier                TEXT NOT NULL,
+  golf_score          REAL,
+  dining_score        REAL,
+  email_score         REAL,
+  event_score         REAL,
+  computed_at         TIMESTAMPTZ DEFAULT NOW(),
+  archetype           TEXT,
+  score_delta         REAL
+);
+
+CREATE INDEX IF NOT EXISTS idx_health_scores_member ON health_scores(member_id, computed_at DESC);
+
+-- Production tee-sheet rounds
+CREATE TABLE IF NOT EXISTS rounds (
+  round_id            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT NOT NULL,
+  booking_id          TEXT,
+  round_date          DATE NOT NULL,
+  tee_time            TIME,
+  course_id           TEXT,
+  duration_minutes    INTEGER,
+  pace_rating         TEXT,
+  players             INTEGER DEFAULT 1,
+  cancelled           BOOLEAN DEFAULT FALSE,
+  no_show             BOOLEAN DEFAULT FALSE,
+  data_source         TEXT DEFAULT 'tee_sheet',
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_rounds_member ON rounds(member_id, round_date DESC);
+
+-- Production POS transactions
+CREATE TABLE IF NOT EXISTS transactions (
+  transaction_id      TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT,
+  outlet_id           TEXT,
+  outlet_name         TEXT,
+  transaction_date    TIMESTAMPTZ NOT NULL,
+  total_amount        NUMERIC(10,2),
+  item_count          INTEGER,
+  category            TEXT,
+  is_post_round       BOOLEAN DEFAULT FALSE,
+  data_source         TEXT DEFAULT 'pos',
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_transactions_member ON transactions(member_id, transaction_date DESC);
+
+-- Production complaints / service issues
+CREATE TABLE IF NOT EXISTS complaints (
+  complaint_id        TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT,
+  category            TEXT,
+  description         TEXT,
+  status              TEXT DEFAULT 'open',                -- open | in_progress | resolved
+  priority            TEXT DEFAULT 'medium',              -- low | medium | high | critical
+  reported_at         TIMESTAMPTZ DEFAULT NOW(),
+  resolved_at         TIMESTAMPTZ,
+  resolved_by         TEXT,
+  resolution_notes    TEXT,
+  sla_hours           INTEGER DEFAULT 24,
+  data_source         TEXT DEFAULT 'manual'
+);
+
+CREATE INDEX IF NOT EXISTS idx_complaints_club ON complaints(club_id, status);
+
+-- Member sentiment ratings
+CREATE TABLE IF NOT EXISTS member_sentiment_ratings (
+  rating_id           TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT NOT NULL,
+  rating_type         TEXT NOT NULL,
+  score               REAL NOT NULL,
+  comment             TEXT,
+  context_id          TEXT,
+  submitted_at        TIMESTAMPTZ DEFAULT NOW(),
+  source              TEXT NOT NULL DEFAULT 'manual',     -- manual | nps | survey
+  archived            BOOLEAN DEFAULT FALSE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentiment_member ON member_sentiment_ratings(member_id, submitted_at DESC);
+
+-- ML churn predictions
+CREATE TABLE IF NOT EXISTS churn_predictions (
+  prediction_id       TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT NOT NULL,
+  prob_30d            REAL,
+  prob_60d            REAL,
+  prob_90d            REAL,
+  confidence          REAL,
+  risk_factors        JSONB DEFAULT '[]',
+  model_version       TEXT DEFAULT 'rules_v1',
+  computed_at         TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(club_id, member_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_churn_predictions_club ON churn_predictions(club_id, member_id);
+
+-- ---------------------------------------------------------------------------
+-- 5.3 ACTIONS & INTERVENTIONS (Production lifecycle tracking)
+-- ---------------------------------------------------------------------------
+
+-- Multi-purpose action queue
+CREATE TABLE IF NOT EXISTS actions (
+  action_id           TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT,
+  action_type         TEXT NOT NULL,
+  description         TEXT,
+  status              TEXT DEFAULT 'pending',             -- pending | approved | dismissed | executed
+  priority            TEXT DEFAULT 'medium',
+  assigned_to         TEXT,
+  source              TEXT DEFAULT 'system',
+  impact_metric       TEXT,
+  approved_at         TIMESTAMPTZ,
+  approved_by         TEXT,
+  executed_at         TIMESTAMPTZ,
+  dismissed_at        TIMESTAMPTZ,
+  dismiss_reason      TEXT,
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_actions_club ON actions(club_id, status);
+
+-- Intervention outcome tracking
+CREATE TABLE IF NOT EXISTS interventions (
+  intervention_id     TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT NOT NULL,
+  action_id           TEXT,
+  intervention_type   TEXT NOT NULL,
+  description         TEXT,
+  initiated_by        TEXT,
+  initiated_at        TIMESTAMPTZ DEFAULT NOW(),
+  health_score_before REAL,
+  health_score_after  REAL,
+  outcome             TEXT,
+  outcome_measured_at TIMESTAMPTZ,
+  dues_protected      NUMERIC(10,2),
+  revenue_recovered   NUMERIC(10,2),
+  is_member_save      BOOLEAN DEFAULT FALSE
+);
+
+CREATE INDEX IF NOT EXISTS idx_interventions_member ON interventions(member_id);
+
+-- Production correlations
+CREATE TABLE IF NOT EXISTS correlations (
+  correlation_id      TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  correlation_key     TEXT NOT NULL,
+  headline            TEXT NOT NULL,
+  detail              TEXT,
+  domains             TEXT[],
+  impact              TEXT DEFAULT 'medium',
+  metric_value        TEXT,
+  metric_label        TEXT,
+  trend               REAL[],
+  delta               TEXT,
+  delta_direction     TEXT,
+  computed_at         TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(club_id, correlation_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_correlations_club ON correlations(club_id, correlation_key);
+
+-- ---------------------------------------------------------------------------
+-- 5.4 PLATFORM, AUTH & SYSTEM
+-- ---------------------------------------------------------------------------
+
+-- Platform user accounts
+CREATE TABLE IF NOT EXISTS users (
+  user_id             TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  email               TEXT NOT NULL UNIQUE,
+  name                TEXT NOT NULL,
+  role                TEXT NOT NULL DEFAULT 'viewer',     -- viewer | editor | admin | owner
+  title               TEXT,
+  active              BOOLEAN DEFAULT TRUE,
+  password_hash       TEXT,
+  password_salt       TEXT,
+  last_login          TIMESTAMPTZ,
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Auth session tokens
+CREATE TABLE IF NOT EXISTS sessions (
+  token               TEXT PRIMARY KEY,
+  user_id             TEXT NOT NULL,
+  club_id             TEXT NOT NULL,
+  role                TEXT NOT NULL,
+  expires_at          TIMESTAMPTZ NOT NULL,
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- In-app / email notifications
+CREATE TABLE IF NOT EXISTS notifications (
+  notification_id     TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  user_id             TEXT,
+  channel             TEXT NOT NULL DEFAULT 'in_app',     -- in_app | email | sms | slack
+  type                TEXT NOT NULL,
+  title               TEXT NOT NULL,
+  body                TEXT,
+  priority            TEXT DEFAULT 'normal',
+  related_member_id   TEXT,
+  related_action_id   TEXT,
+  read_at             TIMESTAMPTZ,
+  sent_at             TIMESTAMPTZ DEFAULT NOW(),
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(club_id, user_id, read_at);
+
+-- Notification delivery preferences
+CREATE TABLE IF NOT EXISTS notification_preferences (
+  user_id             TEXT PRIMARY KEY,
+  club_id             TEXT NOT NULL,
+  morning_digest      BOOLEAN DEFAULT TRUE,
+  digest_time         TEXT DEFAULT '07:00',
+  digest_channel      TEXT DEFAULT 'email',
+  high_priority_alerts BOOLEAN DEFAULT TRUE,
+  alert_channel       TEXT DEFAULT 'email',
+  escalation_alerts   BOOLEAN DEFAULT TRUE,
+  slack_webhook       TEXT
+);
+
+-- Playbook execution runs
+CREATE TABLE IF NOT EXISTS playbook_runs (
+  run_id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  playbook_id         TEXT NOT NULL,
+  playbook_name       TEXT NOT NULL,
+  member_id           TEXT NOT NULL,
+  triggered_by        TEXT,
+  trigger_reason      TEXT,
+  status              TEXT DEFAULT 'active',              -- active | completed | cancelled
+  started_at          TIMESTAMPTZ DEFAULT NOW(),
+  completed_at        TIMESTAMPTZ,
+  health_score_at_start REAL,
+  health_score_at_end REAL,
+  outcome             TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_playbook_runs_club ON playbook_runs(club_id, status);
+
+-- Steps within playbook runs
+CREATE TABLE IF NOT EXISTS playbook_steps (
+  step_id             TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  run_id              TEXT NOT NULL,
+  club_id             TEXT NOT NULL,
+  step_number         INTEGER NOT NULL,
+  title               TEXT NOT NULL,
+  description         TEXT,
+  assigned_to         TEXT,
+  due_date            TIMESTAMPTZ,
+  status              TEXT DEFAULT 'pending',             -- pending | in_progress | completed | skipped
+  completed_at        TIMESTAMPTZ,
+  completed_by        TEXT,
+  notes               TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_playbook_steps_run ON playbook_steps(run_id, step_number);
+
+-- Onboarding step completion tracking
+CREATE TABLE IF NOT EXISTS onboarding_progress (
+  club_id             TEXT NOT NULL,
+  step_key            TEXT NOT NULL,
+  completed           BOOLEAN DEFAULT FALSE,
+  completed_at        TIMESTAMPTZ,
+  notes               TEXT,
+  PRIMARY KEY (club_id, step_key)
+);
+
+-- Feature-to-domain dependency mapping
+CREATE TABLE IF NOT EXISTS feature_dependency (
+  dependency_id       TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  feature_type        TEXT NOT NULL,
+  feature_key         TEXT NOT NULL,
+  domain_code         TEXT NOT NULL,
+  dependency_type     TEXT NOT NULL,                      -- required | optional | enhancing
+  fallback_mode       TEXT,
+  user_message        TEXT,
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_feature_dependency_key ON feature_dependency(feature_type, feature_key);
+
+-- Feature state audit trail
+CREATE TABLE IF NOT EXISTS feature_state_log (
+  log_id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  feature_type        TEXT NOT NULL,
+  feature_key         TEXT NOT NULL,
+  previous_state      TEXT,
+  new_state           TEXT NOT NULL,
+  reason              TEXT,
+  changed_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_feature_state_log_club ON feature_state_log(club_id, changed_at DESC);
+
+-- Pause/resume controls for agents and playbooks
+CREATE TABLE IF NOT EXISTS pause_state (
+  club_id             TEXT NOT NULL,
+  target_type         TEXT NOT NULL,
+  target_id           TEXT NOT NULL,
+  paused              BOOLEAN DEFAULT FALSE,
+  paused_at           TIMESTAMPTZ,
+  resume_at           TIMESTAMPTZ,
+  paused_by           TEXT,
+  PRIMARY KEY (club_id, target_type, target_id)
+);
+
+-- ---------------------------------------------------------------------------
+-- 5.5 AGENT ACTIVITY & CONFIGS
+-- ---------------------------------------------------------------------------
+
+-- Granular agent audit trail
+CREATE TABLE IF NOT EXISTS agent_activity (
+  activity_id         TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  agent_id            TEXT NOT NULL,
+  action_type         TEXT NOT NULL,
+  description         TEXT,
+  member_id           TEXT,
+  confidence          REAL,
+  auto_executed       BOOLEAN DEFAULT FALSE,
+  reasoning           TEXT,
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_activity_club ON agent_activity(club_id, created_at DESC);
+
+-- Per-club agent configuration
+CREATE TABLE IF NOT EXISTS agent_configs (
+  club_id             TEXT NOT NULL,
+  agent_id            TEXT NOT NULL,
+  enabled             BOOLEAN DEFAULT TRUE,
+  auto_approve_threshold REAL DEFAULT 0.80,
+  auto_approve_enabled BOOLEAN DEFAULT FALSE,
+  last_run            TIMESTAMPTZ,
+  total_proposals     INTEGER DEFAULT 0,
+  total_auto_executed INTEGER DEFAULT 0,
+  accuracy_score      REAL DEFAULT 0.75,
+  PRIMARY KEY (club_id, agent_id)
+);
+
+-- ---------------------------------------------------------------------------
+-- 5.6 DATA SYNC & IMPORT TRACKING
+-- ---------------------------------------------------------------------------
+
+-- Individual sync run logs
+CREATE TABLE IF NOT EXISTS data_syncs (
+  sync_id             TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  source_type         TEXT NOT NULL,
+  status              TEXT DEFAULT 'running',             -- running | completed | failed
+  records_processed   INTEGER DEFAULT 0,
+  records_failed      INTEGER DEFAULT 0,
+  error_message       TEXT,
+  started_at          TIMESTAMPTZ DEFAULT NOW(),
+  completed_at        TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_data_syncs_club ON data_syncs(club_id, started_at DESC);
+
+-- CSV import tracking
+CREATE TABLE IF NOT EXISTS csv_imports (
+  import_id           TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  uploaded_by         TEXT,
+  file_name           TEXT,
+  import_type         TEXT NOT NULL,
+  status              TEXT DEFAULT 'processing',          -- processing | completed | failed
+  total_rows          INTEGER,
+  success_rows        INTEGER DEFAULT 0,
+  error_rows          INTEGER DEFAULT 0,
+  errors              JSONB DEFAULT '[]',
+  started_at          TIMESTAMPTZ DEFAULT NOW(),
+  completed_at        TIMESTAMPTZ
+);
+
+-- Per-domain connectivity health
+CREATE TABLE IF NOT EXISTS data_source_status (
+  status_id           TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  domain_code         TEXT NOT NULL,
+  is_connected        BOOLEAN NOT NULL DEFAULT FALSE,
+  source_vendor       TEXT,
+  last_sync_at        TIMESTAMPTZ,
+  row_count           INTEGER DEFAULT 0,
+  staleness_hours     INTEGER,
+  health_status       TEXT DEFAULT 'unknown',             -- unknown | healthy | stale | error
+  updated_at          TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(club_id, domain_code)
+);
+
+CREATE INDEX IF NOT EXISTS idx_data_source_status_club ON data_source_status(club_id);
 
 -- =============================================================================
 -- End of schema

@@ -3,14 +3,17 @@
 // Return shapes are IDENTICAL to operationsService.js — zero component changes on swap.
 
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     const [closeouts, pace, bottlenecks, waitlist] = await Promise.all([
       sql`SELECT date, TO_CHAR(date::date, 'Dy') AS day, golf_revenue, fb_revenue,
                  golf_revenue + fb_revenue AS total, weather, is_understaffed
           FROM close_outs
-          WHERE date::date >= '2026-01-01'::date
+          WHERE club_id = ${clubId}
+            AND date::date >= '2026-01-01'::date
             AND date::date < '2026-02-01'::date
           ORDER BY date`,
 
@@ -20,12 +23,13 @@ export default async function handler(req, res) {
                  WHEN total_minutes < 300 THEN '4h30–5h'
                  ELSE 'Over 5h' END AS range,
             COUNT(*) AS count
-          FROM pace_of_play GROUP BY 1 ORDER BY MIN(total_minutes)`,
+          FROM pace_of_play WHERE club_id = ${clubId} GROUP BY 1 ORDER BY MIN(total_minutes)`,
 
       sql`SELECT hole_number, COUNT(*) AS count,
                  ROUND(AVG(segment_minutes)::numeric, 1) AS avg_minutes,
                  SUM(is_bottleneck) AS bottleneck_count
           FROM pace_hole_segments
+          WHERE club_id = ${clubId}
           GROUP BY hole_number ORDER BY hole_number`,
 
       sql`SELECT we.requested_date AS date,
@@ -33,7 +37,8 @@ export default async function handler(req, res) {
                  we.waitlist_count,
                  we.has_event_overlap
           FROM waitlist_entries we
-          WHERE we.requested_date::date >= '2026-01-01'::date
+          WHERE we.club_id = ${clubId}
+            AND we.requested_date::date >= '2026-01-01'::date
             AND we.requested_date::date < '2026-02-01'::date
           ORDER BY we.requested_date`,
     ]);
@@ -46,7 +51,7 @@ export default async function handler(req, res) {
     const weekdayDays = operatingDays.filter(d => !['Sat', 'Sun'].includes(d.day));
 
     // Pace summary
-    const paceRows = await sql`SELECT total_minutes, is_slow_round FROM pace_of_play`;
+    const paceRows = await sql`SELECT total_minutes, is_slow_round FROM pace_of_play WHERE club_id = ${clubId}`;
     const rounds = paceRows.rows;
     const slowRounds = rounds.filter(r => r.is_slow_round === 1);
 
@@ -57,7 +62,7 @@ export default async function handler(req, res) {
         ROUND(AVG(CASE WHEN p.is_slow_round = 0 THEN 1.0 ELSE 0 END)::numeric, 3) AS fast_prd_rate
       FROM pace_of_play p
       JOIN pos_checks pc ON pc.linked_booking_id = p.booking_id
-      WHERE pc.post_round_dining = 1`;
+      WHERE p.club_id = ${clubId} AND pc.post_round_dining = 1`;
 
     res.status(200).json({
       revenueByDay: days.map(d => ({
@@ -120,4 +125,4 @@ export default async function handler(req, res) {
     console.error('/api/operations error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

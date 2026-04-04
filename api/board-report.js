@@ -1,12 +1,15 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     const [snapshots, interventions, opInterventions, trends] = await Promise.all([
       sql`
         SELECT members_saved, dues_protected, ltv_protected, revenue_recovered,
                service_failures_caught, avg_response_time_hrs, board_confidence_pct
         FROM board_report_snapshots
+        WHERE club_id = ${clubId}
         ORDER BY snapshot_date DESC
         LIMIT 1
       `,
@@ -17,11 +20,13 @@ export default async function handler(req, res) {
                mi.trigger, mi.action, mi.outcome, mi.dues_at_risk
         FROM member_interventions mi
         LEFT JOIN members m ON m.member_id = mi.member_id
+        WHERE mi.club_id = ${clubId}
         ORDER BY mi.created_at DESC
       `,
       sql`
         SELECT event, detection, action, outcome, revenue_protected
         FROM operational_interventions
+        WHERE club_id = ${clubId}
         ORDER BY event_date DESC
       `,
       sql`
@@ -31,6 +36,7 @@ export default async function handler(req, res) {
                service_failures_caught,
                avg_response_time_hrs
         FROM board_report_snapshots
+        WHERE club_id = ${clubId}
         ORDER BY snapshot_date ASC
         LIMIT 6
       `,
@@ -82,4 +88,4 @@ export default async function handler(req, res) {
     console.error('/api/board-report error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

@@ -7,8 +7,10 @@
  * Creates sequenced action plans with steps, owners, and deadlines.
  */
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   // Ensure playbook execution tables exist
   try {
     await sql`
@@ -49,8 +51,7 @@ export default async function handler(req, res) {
   } catch {}
 
   if (req.method === 'GET') {
-    const { clubId, memberId, status } = req.query;
-    if (!clubId) return res.status(400).json({ error: 'clubId required' });
+    const { memberId, status } = req.query;
 
     let runs;
     if (memberId) {
@@ -91,10 +92,10 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { clubId, playbookId, playbookName, memberId, triggeredBy, triggerReason, steps } = req.body;
+    const { playbookId, playbookName, memberId, triggeredBy, triggerReason, steps } = req.body;
 
-    if (!clubId || !playbookId || !memberId || !steps?.length) {
-      return res.status(400).json({ error: 'clubId, playbookId, memberId, and steps[] required' });
+    if (!playbookId || !memberId || !steps?.length) {
+      return res.status(400).json({ error: 'playbookId, memberId, and steps[] required' });
     }
 
     try {
@@ -211,4 +212,4 @@ export default async function handler(req, res) {
   if (!['GET', 'POST', 'PUT'].includes(req.method)) {
     res.status(405).json({ error: 'Method not allowed' });
   }
-}
+}, { allowDemo: true });

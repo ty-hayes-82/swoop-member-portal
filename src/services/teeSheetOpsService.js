@@ -2,6 +2,7 @@
 // Manages confirmation workflow, re-assignment pipeline, fill reporting, and waitlist config
 // Pattern: in-memory mutable store (same as agentService.js)
 
+import { apiFetch } from './apiClient';
 import {
   confirmationSeeds,
   reassignmentSeeds,
@@ -16,9 +17,9 @@ let _d = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/tee-sheet-ops');
-    if (!res.ok) return;
-    _d = await res.json();
+    const data = await apiFetch('/api/tee-sheet-ops');
+    if (!data) return;
+    _d = data;
     if (Array.isArray(_d.confirmations)) {
       confirmationStore = _d.confirmations.map((c) => ({ ...c }));
     }

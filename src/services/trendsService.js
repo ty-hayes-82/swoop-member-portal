@@ -1,14 +1,15 @@
 // trendsService.js — Phase 1 static · Phase 2 /api/trends
 // Narrative and chart helpers stay pure functions — they work on whatever data source is active.
 
+import { apiFetch } from './apiClient';
 import { trends as staticTrends, MONTHS as STATIC_MONTHS, outletTrends as staticOutletTrends } from '@/data/trends.js';
 
 let _d = null; // { trends, outletTrends, months }
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/trends');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/trends');
+    if (data) _d = data;
   } catch { /* keep static fallback */ }
 };
 

@@ -16,6 +16,7 @@ import { _init as initCockpit }     from '@/services/cockpitService';
 import { _init as initExperience }  from '@/services/experienceInsightsService';
 import { _init as initAgents }      from '@/services/agentService';
 import { _init as initIntegrations } from '@/services/integrationsService';
+import { _init as initWeather }      from '@/services/weatherService';
 // Removed from MVP init: pipeline, waitlist, location, teeSheetOps
 
 const DataCtx = createContext({ phase: 1 });
@@ -48,7 +49,7 @@ export function DataProvider({ children }) {
         initOps(), initFB(), initMembers(), initStaffing(),
         initTrends(), initBriefing(),
         initBoardReport(), initCockpit(), initExperience(),
-        initAgents(), initIntegrations(),
+        initAgents(), initIntegrations(), initWeather(),
       ]),
       timeout,
     ]).then(results => {

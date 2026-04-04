@@ -1,6 +1,7 @@
 // Pipeline test — verified 2026-03-07T23:02:54Z.
 // waitlistService.js — Phase 1 static · Phase 2 /api/waitlist
 
+import { apiFetch } from './apiClient';
 import {
   waitlistEntries,
   memberWaitlistEntries,
@@ -14,8 +15,8 @@ let _d = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/waitlist');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/waitlist');
+    if (data) _d = data;
   } catch {
     // Keep static fallback in demo mode.
   }

@@ -3,6 +3,8 @@
  * Every user action in the product flows through trackAction().
  * The DB table serves as the universal action log for future integrations.
  */
+import { apiFetch } from './apiClient';
+
 export function trackAction({
   actionType,
   actionSubtype,
@@ -14,7 +16,7 @@ export function trackAction({
   description,
   meta,
 }) {
-  fetch('/api/activity', {
+  apiFetch('/api/activity', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

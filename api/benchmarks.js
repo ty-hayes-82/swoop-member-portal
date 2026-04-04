@@ -1,8 +1,10 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
-    const benchmarks = await sql`SELECT * FROM industry_benchmarks ORDER BY metric_key`;
+    const benchmarks = await sql`SELECT * FROM industry_benchmarks WHERE club_id = ${clubId} ORDER BY metric_key`;
 
     res.status(200).json({
       benchmarks: benchmarks.rows.map(b => ({
@@ -19,4 +21,4 @@ export default async function handler(req, res) {
     console.error('/api/benchmarks error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

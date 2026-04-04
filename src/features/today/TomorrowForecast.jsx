@@ -1,6 +1,7 @@
 // TomorrowForecast — demand prediction for tomorrow
 import { theme } from '@/config/theme';
 import { getDailyBriefing } from '@/services/briefingService';
+import { getTomorrowForecast } from '@/services/weatherService';
 import { understaffedDays } from '@/data/staffing';
 
 const outlets = [
@@ -11,17 +12,25 @@ const outlets = [
 
 export default function TomorrowForecast() {
   const briefing = getDailyBriefing();
+  const tomorrow = briefing?.todayRisks?.tomorrow || getTomorrowForecast();
   const roundsBooked = briefing?.teeSheet?.roundsToday || 220;
-  const weather = briefing?.todayRisks?.weather || 'clear';
-  const wind = briefing?.todayRisks?.wind || 0;
-  const tempHigh = briefing?.todayRisks?.tempHigh || 72;
+
+  const weather = tomorrow?.conditions || briefing?.todayRisks?.weather || 'clear';
+  const wind = tomorrow?.wind || briefing?.todayRisks?.wind || 0;
+  const gusts = tomorrow?.gusts || wind;
+  const tempHigh = tomorrow?.high || briefing?.todayRisks?.tempHigh || 72;
+  const precipProb = tomorrow?.precipProb || 0;
 
   const highDemand = roundsBooked > 200;
-  const weatherImpact = wind > 15
-    ? 'Wind advisory may shift golfers to indoor dining'
-    : weather === 'rain'
-      ? 'Rain expected — prepare for indoor overflow'
-      : 'No weather disruptions expected';
+  const weatherImpact = gusts > 15
+    ? `Wind advisory — ${gusts} mph gusts may shift golfers to indoor dining`
+    : precipProb > 60
+      ? `${precipProb}% rain probability — prepare for cancellations and indoor overflow`
+      : precipProb > 40
+        ? `${precipProb}% chance of rain — monitor and prepare contingency`
+        : weather === 'rainy'
+          ? 'Rain expected — prepare for indoor overflow'
+          : 'No weather disruptions expected';
 
   const diningImpact = highDemand
     ? `${roundsBooked} rounds booked — expect 15% higher dining traffic`
@@ -43,7 +52,7 @@ export default function TomorrowForecast() {
 
       {/* Demand prediction */}
       <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
         gap: 12, marginBottom: 16,
       }}>
         <div style={{ textAlign: 'center' }}>
@@ -63,11 +72,19 @@ export default function TomorrowForecast() {
           </div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: wind > 15 ? theme.colors.warning : theme.colors.textPrimary }}>
-            {wind} mph
+          <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: gusts > 15 ? theme.colors.warning : theme.colors.textPrimary }}>
+            {gusts > wind ? `${wind}–${gusts}` : wind} mph
           </div>
           <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-            Wind
+            Wind{gusts > wind ? ' / Gusts' : ''}
+          </div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: precipProb > 40 ? theme.colors.warning : theme.colors.textPrimary }}>
+            {precipProb}%
+          </div>
+          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+            Rain chance
           </div>
         </div>
       </div>
@@ -107,7 +124,7 @@ export default function TomorrowForecast() {
         <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.4 }}>
           {diningImpact}
         </div>
-        <div style={{ fontSize: theme.fontSize.xs, color: wind > 15 ? theme.colors.warning : theme.colors.textSecondary, lineHeight: 1.4 }}>
+        <div style={{ fontSize: theme.fontSize.xs, color: gusts > 15 || precipProb > 40 ? theme.colors.warning : theme.colors.textSecondary, lineHeight: 1.4 }}>
           {weatherImpact}
         </div>
       </div>

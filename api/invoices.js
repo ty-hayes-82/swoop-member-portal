@@ -1,10 +1,12 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed. Use GET.' });
   }
 
+  const clubId = getClubId(req);
   try {
     const { memberId } = req.query;
 
@@ -31,7 +33,7 @@ export default async function handler(req, res) {
           m.archetype
         FROM member_invoices i
         LEFT JOIN members m ON i.member_id = m.member_id
-        WHERE i.member_id = ${memberId}
+        WHERE i.member_id = ${memberId} AND i.club_id = ${clubId}
         ORDER BY i.invoice_date DESC
       `;
 
@@ -65,36 +67,36 @@ export default async function handler(req, res) {
       SELECT
         COALESCE(SUM(amount - paid_amount + late_fee), 0) as total_outstanding
       FROM member_invoices
-      WHERE status != 'paid'
+      WHERE club_id = ${clubId} AND status != 'paid'
     `;
     const totalOutstanding = parseFloat(outstandingResult.rows[0].total_outstanding);
 
     // Breakdown by status
     const pastDue30Result = await sql`
       SELECT COUNT(DISTINCT member_id) as count, COALESCE(SUM(amount - paid_amount + late_fee), 0) as amount
-      FROM member_invoices WHERE status = 'past_due_30'
+      FROM member_invoices WHERE club_id = ${clubId} AND status = 'past_due_30'
     `;
     const pastDue60Result = await sql`
       SELECT COUNT(DISTINCT member_id) as count, COALESCE(SUM(amount - paid_amount + late_fee), 0) as amount
-      FROM member_invoices WHERE status = 'past_due_60'
+      FROM member_invoices WHERE club_id = ${clubId} AND status = 'past_due_60'
     `;
     const pastDue90Result = await sql`
       SELECT COUNT(DISTINCT member_id) as count, COALESCE(SUM(amount - paid_amount + late_fee), 0) as amount
-      FROM member_invoices WHERE status = 'past_due_90'
+      FROM member_invoices WHERE club_id = ${clubId} AND status = 'past_due_90'
     `;
     const currentDueResult = await sql`
       SELECT COUNT(DISTINCT member_id) as count, COALESCE(SUM(amount - paid_amount), 0) as amount
-      FROM member_invoices WHERE status = 'current'
+      FROM member_invoices WHERE club_id = ${clubId} AND status = 'current'
     `;
 
     // Collection rate: % of members with any past-due invoice
     const pastDueMembersCount = await sql`
       SELECT COUNT(DISTINCT member_id) as count
       FROM member_invoices
-      WHERE status IN ('past_due_30', 'past_due_60', 'past_due_90')
+      WHERE club_id = ${clubId} AND status IN ('past_due_30', 'past_due_60', 'past_due_90')
     `;
     const totalMembersCount = await sql`
-      SELECT COUNT(DISTINCT member_id) as count FROM member_invoices
+      SELECT COUNT(DISTINCT member_id) as count FROM member_invoices WHERE club_id = ${clubId}
     `;
     const collectionRate = totalMembersCount.rows[0].count > 0
       ? Math.round((parseInt(pastDueMembersCount.rows[0].count) / parseInt(totalMembersCount.rows[0].count)) * 10000) / 100
@@ -108,9 +110,9 @@ export default async function handler(req, res) {
       INNER JOIN (
         SELECT member_id, engagement_score,
                ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY week_number DESC) as rn
-        FROM member_engagement_weekly
+        FROM member_engagement_weekly WHERE club_id = ${clubId}
       ) e ON i.member_id = e.member_id AND e.rn = 1
-      WHERE i.status IN ('past_due_30', 'past_due_60', 'past_due_90')
+      WHERE i.club_id = ${clubId} AND i.status IN ('past_due_30', 'past_due_60', 'past_due_90')
         AND e.engagement_score < 50
     `;
     const atRiskCount = parseInt(atRiskCorrelationResult.rows[0].at_risk_count);
@@ -123,7 +125,7 @@ export default async function handler(req, res) {
     const avgDaysResult = await sql`
       SELECT COALESCE(AVG(days_past_due), 0) as avg_days
       FROM member_invoices
-      WHERE status IN ('past_due_30', 'past_due_60', 'past_due_90')
+      WHERE club_id = ${clubId} AND status IN ('past_due_30', 'past_due_60', 'past_due_90')
     `;
     const avgDaysPastDue = Math.round(parseFloat(avgDaysResult.rows[0].avg_days));
 
@@ -147,13 +149,13 @@ export default async function handler(req, res) {
           ELSE 'low'
         END as risk_level
       FROM member_invoices i
-      INNER JOIN members m ON i.member_id = m.member_id
+      INNER JOIN members m ON i.member_id = m.member_id AND m.club_id = ${clubId}
       LEFT JOIN (
         SELECT member_id, engagement_score,
                ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY week_number DESC) as rn
-        FROM member_engagement_weekly
+        FROM member_engagement_weekly WHERE club_id = ${clubId}
       ) e ON m.member_id = e.member_id AND e.rn = 1
-      WHERE i.status IN ('past_due_30', 'past_due_60', 'past_due_90')
+      WHERE i.club_id = ${clubId} AND i.status IN ('past_due_30', 'past_due_60', 'past_due_90')
       GROUP BY m.member_id, m.first_name, m.last_name, m.archetype,
                m.membership_type, e.engagement_score, m.annual_dues
       ORDER BY oldest_days_past_due DESC
@@ -185,7 +187,7 @@ export default async function handler(req, res) {
         END), 0) as still_outstanding
       FROM months mo
       LEFT JOIN member_invoices i
-        ON SUBSTRING(i.due_date FROM 1 FOR 7) = mo.month
+        ON SUBSTRING(i.due_date FROM 1 FOR 7) = mo.month AND i.club_id = ${clubId}
       GROUP BY mo.month
       ORDER BY mo.month ASC
     `;
@@ -238,4 +240,4 @@ export default async function handler(req, res) {
     console.error('Error fetching invoices:', error);
     return res.status(500).json({ error: error.message, stack: error.stack });
   }
-}
+}, { allowDemo: true });

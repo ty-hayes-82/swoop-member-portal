@@ -1,20 +1,22 @@
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     const segment = req.query.segment || 'all';
     const archetype = req.query.archetype || null;
 
     const [correlationsResult, insightsResult, eventRoiResult, spendGapsResult, complaintStatsResult] = await Promise.all([
-      sql`SELECT * FROM experience_correlations WHERE segment = ${segment} AND (archetype = ${archetype} OR archetype IS NULL) ORDER BY retention_impact DESC`,
-      sql`SELECT * FROM correlation_insights WHERE archetype = ${archetype} OR archetype IS NULL`,
-      sql`SELECT * FROM event_roi_metrics ORDER BY roi_score DESC`,
-      sql`SELECT * FROM archetype_spend_gaps ORDER BY total_untapped DESC`,
+      sql`SELECT * FROM experience_correlations WHERE club_id = ${clubId} AND segment = ${segment} AND (archetype = ${archetype} OR archetype IS NULL) ORDER BY retention_impact DESC`,
+      sql`SELECT * FROM correlation_insights WHERE club_id = ${clubId} AND (archetype = ${archetype} OR archetype IS NULL)`,
+      sql`SELECT * FROM event_roi_metrics WHERE club_id = ${clubId} ORDER BY roi_score DESC`,
+      sql`SELECT * FROM archetype_spend_gaps WHERE club_id = ${clubId} ORDER BY total_untapped DESC`,
       sql`SELECT
             COUNT(*) as total_complaints,
             COUNT(*) FILTER (WHERE resolved_at IS NOT NULL AND (resolved_at::date - submitted_at::date) <= 1) as resolved_within_24h,
             ROUND(AVG(CASE WHEN resolved_at IS NOT NULL THEN EXTRACT(EPOCH FROM (resolved_at::timestamp - submitted_at::timestamp)) / 3600 END)::numeric, 0) as avg_resolution_hours
-          FROM feedback`,
+          FROM feedback WHERE club_id = ${clubId}`,
     ]);
 
     const touchpointCorrelations = correlationsResult.rows.map(r => ({
@@ -91,4 +93,4 @@ export default async function handler(req, res) {
     console.error('/api/experience-insights error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

@@ -1,3 +1,4 @@
+import { apiFetch } from './apiClient';
 import { alertsFeed, locationMembers, staffOnDuty, zoneAnalytics } from '@/data/location';
 
 const defaultMembers = locationMembers;
@@ -9,8 +10,8 @@ let _d = null;
 
 export const _init = async () => {
   try {
-    const res = await fetch('/api/location');
-    if (res.ok) _d = await res.json();
+    const data = await apiFetch('/api/location');
+    if (data) _d = data;
   } catch { /* static fallback */ }
 };
 

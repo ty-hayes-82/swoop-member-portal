@@ -4,8 +4,12 @@
 // Return shape IDENTICAL to briefingService.js getDailyBriefing()
 
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
+import { getCurrentConditions, getForecast, generateAdvisory } from './services/weather.js';
+import { computeWeatherModifier, computeStaffingNeed } from './services/demand.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   const date = req.query.date ?? new Date().toISOString().slice(0, 10);
 
   try {
@@ -19,6 +23,7 @@ export default async function handler(req, res) {
                weather, is_understaffed,
                rounds_played, covers
         FROM close_outs
+        WHERE club_id = ${clubId}
         ORDER BY date DESC LIMIT 2`,
 
       // At-risk tee times today — members with score < 50 booked
@@ -35,6 +40,7 @@ export default async function handler(req, res) {
         WHERE b.booking_date = ${date}
           AND b.status = 'confirmed'
           AND w.engagement_score < 50
+          AND m.club_id = ${clubId}
         ORDER BY w.engagement_score ASC LIMIT 5`,
 
       // Active at-risk members
@@ -43,7 +49,7 @@ export default async function handler(req, res) {
         FROM members m
         JOIN member_engagement_weekly w ON m.member_id = w.member_id
           AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
-        WHERE w.engagement_score < 50 AND m.membership_status = 'active'`,
+        WHERE w.engagement_score < 50 AND m.membership_status = 'active' AND m.club_id = ${clubId}`,
 
       // Open (unresolved) complaints
       sql`
@@ -52,7 +58,7 @@ export default async function handler(req, res) {
                f.category, f.sentiment_score, f.status, f.submitted_at::date AS date
         FROM feedback f
         JOIN members m ON f.member_id = m.member_id
-        WHERE f.status != 'resolved'
+        WHERE f.status != 'resolved' AND f.club_id = ${clubId}
         ORDER BY f.sentiment_score ASC`,
 
       // Cancellation risk summary for today's bookings
@@ -62,24 +68,24 @@ export default async function handler(req, res) {
                  FILTER (WHERE cr.cancel_probability >= 0.60)::numeric, 0) AS rev_at_risk
         FROM cancellation_risk cr
         JOIN bookings b ON cr.booking_id = b.booking_id
-        WHERE b.booking_date = ${date} AND b.status = 'confirmed'`,
+        WHERE b.booking_date = ${date} AND b.status = 'confirmed' AND b.club_id = ${clubId}`,
 
       // Waitlist summary
       sql`
         SELECT COUNT(*) AS total,
                COUNT(*) FILTER (WHERE retention_priority = 'HIGH') AS high_priority
         FROM member_waitlist
-        WHERE filled_at IS NULL`,
+        WHERE filled_at IS NULL AND club_id = ${clubId}`,
 
       // Staffing summary
       sql`
         SELECT COUNT(*) FILTER (WHERE is_understaffed = 1) AS understaffed_count
-        FROM close_outs`,
+        FROM close_outs WHERE club_id = ${clubId}`,
     ]);
 
     const days = yesterday.rows;
     const yd   = days[1] ?? days[0];  // second-most-recent = yesterday
-    const monthlyRevRow = await sql`SELECT SUM(golf_revenue + fb_revenue) AS total FROM close_outs`;
+    const monthlyRevRow = await sql`SELECT SUM(golf_revenue + fb_revenue) AS total FROM close_outs WHERE club_id = ${clubId}`;
     const monthlyRevenue = Math.round(Number(monthlyRevRow.rows[0]?.total ?? 0));
 
     // Build incidents list from open complaints that touch yesterday's date
@@ -92,6 +98,47 @@ export default async function handler(req, res) {
     const highRisk = Number(cancelRisk.rows[0]?.high_risk ?? 0);
     const revAtRisk = Math.round(Number(cancelRisk.rows[0]?.rev_at_risk ?? 0));
     const atRiskCount = Number(atRisk.rows[0]?.cnt ?? 0);
+
+    // ─── Live weather data ────────────────────────────────
+    let weatherData = { weather: 'perfect', tempHigh: 72, wind: 0, gusts: 0, precipProb: 0, forecast: null, alerts: [] };
+    try {
+      const current = await getCurrentConditions(clubId);
+      const forecastData = await getForecast(clubId, { hours: 12, days: 2 });
+      const advisory = generateAdvisory(forecastData.hourly, forecastData.alerts);
+
+      weatherData = {
+        weather: current.conditions || 'clear',
+        tempHigh: Math.round(current.temp || 72),
+        feelsLike: Math.round(current.feelsLike || current.temp || 72),
+        wind: Math.round(current.wind || 0),
+        gusts: Math.round(current.gusts || 0),
+        humidity: current.humidity || 0,
+        uvIndex: current.uvIndex || 0,
+        precipProb: current.precipProbability || 0,
+        conditions: current.conditions,
+        conditionsText: current.conditionsText,
+        forecast: advisory || `${Math.round(current.temp || 72)}°F, ${current.conditionsText || 'fair'} — good conditions for play`,
+        alerts: (forecastData.alerts || []),
+        hourly: (forecastData.hourly || []).slice(0, 12),
+        tomorrow: forecastData.daily?.[1] || forecastData.daily?.[0] || null,
+        source: current.source,
+        stale: current.stale || false,
+      };
+
+      // Compute demand forecast for tomorrow
+      const tomorrowForecast = forecastData.daily?.[1] || forecastData.daily?.[0];
+      if (tomorrowForecast) {
+        const demandForecast = computeStaffingNeed({
+          roundsBooked: todayBookings.rows.length || 220,
+          events: 0,
+          forecast: tomorrowForecast,
+        });
+        weatherData.demandForecast = demandForecast;
+      }
+    } catch (e) {
+      console.warn('Live weather unavailable, using defaults:', e.message);
+      weatherData.forecast = 'Weather data temporarily unavailable';
+    }
 
     res.status(200).json({
       currentDate: date,
@@ -108,10 +155,7 @@ export default async function handler(req, res) {
       },
 
       todayRisks: {
-        weather: 'perfect',
-        tempHigh: 72,
-        wind: 18,
-        forecast: 'Wind advisory — 18 mph gusts expected by noon',
+        ...weatherData,
         atRiskTeetimes: todayBookings.rows.map(b => ({
           memberId:  b.member_id,
           name:      b.name,
@@ -128,7 +172,9 @@ export default async function handler(req, res) {
         cancellationRisk: {
           highRiskBookings:    highRisk,
           totalRevAtRisk:      revAtRisk,
-          driverSummary:       'Wind advisory + low-engagement members',
+          driverSummary:       weatherData.gusts > 15
+            ? `${weatherData.conditionsText || 'Weather'} advisory + low-engagement members`
+            : 'Low-engagement members with declining patterns',
           suggestedAction:     'Send confirmation nudges to highest-risk bookings',
           estimatedRevenueSaved: Math.round(revAtRisk * 0.34),
         },
@@ -186,4 +232,4 @@ export default async function handler(req, res) {
     console.error('/api/briefing error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

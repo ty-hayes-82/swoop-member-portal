@@ -3,8 +3,10 @@
 // Return shapes IDENTICAL to fbService.js
 
 import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
+  const clubId = getClubId(req);
   try {
     const [outlets, rainRows, sunnyRows, prdByArch] = await Promise.all([
       // Outlet performance — revenue, covers, avg check, understaffed impact
@@ -36,17 +38,18 @@ export default async function handler(req, res) {
             END
           )::numeric, 1)                                           AS understaffed_ticket_min
         FROM dining_outlets o
-        LEFT JOIN pos_checks pc ON o.outlet_id = pc.outlet_id
+        LEFT JOIN pos_checks pc ON o.outlet_id = pc.outlet_id AND pc.club_id = ${clubId}
+        WHERE o.club_id = ${clubId}
         GROUP BY o.outlet_id, o.name, o.type
         ORDER BY revenue DESC`,
 
       // Rain-day revenue
       sql`SELECT c.fb_revenue, c.golf_revenue, c.weather, c.date
-          FROM close_outs c WHERE c.weather = 'rainy'`,
+          FROM close_outs c WHERE c.club_id = ${clubId} AND c.weather = 'rainy'`,
 
       // Non-rain-day averages
       sql`SELECT AVG(c.golf_revenue) AS avg_golf, AVG(c.fb_revenue) AS avg_fb
-          FROM close_outs c WHERE c.weather != 'rainy' AND c.golf_revenue > 0`,
+          FROM close_outs c WHERE c.club_id = ${clubId} AND c.weather != 'rainy' AND c.golf_revenue > 0`,
 
       // Post-round dining conversion by archetype
       sql`
@@ -61,9 +64,9 @@ export default async function handler(req, res) {
           ROUND(AVG(pc.total) FILTER (WHERE pc.post_round_dining = 1)::numeric, 2) AS avg_prd_check
         FROM bookings b
         JOIN booking_players bp ON b.booking_id = bp.booking_id AND bp.is_guest = 0
-        JOIN members m ON bp.member_id = m.member_id
+        JOIN members m ON bp.member_id = m.member_id AND m.club_id = ${clubId}
         LEFT JOIN pos_checks pc ON pc.linked_booking_id = b.booking_id
-        WHERE b.status = 'completed'
+        WHERE b.club_id = ${clubId} AND b.status = 'completed'
         GROUP BY m.archetype
         ORDER BY conversion_rate DESC NULLS LAST`,
     ]);
@@ -121,4 +124,4 @@ export default async function handler(req, res) {
     console.error('/api/fb error:', err);
     res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });
