@@ -1,0 +1,201 @@
+﻿Request ID,Member #,Booking Ref,Type,Date,Response Time (min),Resolution Date,Notes
+sr_0001,mbr_001,,maintenance,2026-02-15T18:45:00.000Z,106,,
+sr_0002,mbr_104,bkg_0117,locker_issue,2026-03-04T08:16:00.000Z,85,2026-03-04T09:41:00.000Z,Resolved during shift
+sr_0003,mbr_009,bkg_0176,maintenance,2026-02-09T08:46:00.000Z,59,2026-02-09T09:45:00.000Z,Resolved by front desk
+sr_0004,mbr_067,,lesson_booking,2026-02-15T12:35:00.000Z,96,2026-02-15T14:11:00.000Z,Pro shop handled directly
+sr_0005,mbr_007,,event_rsvp,2026-02-27T10:07:00.000Z,104,2026-02-27T11:51:00.000Z,Forwarded to golf ops manager
+sr_0006,mbr_021,bkg_0043,guest_pass,2026-03-01T18:07:00.000Z,97,,
+sr_0007,mbr_095,bkg_0051,forecaddie,2026-02-10T17:43:00.000Z,59,2026-02-10T18:42:00.000Z,Completed — member notified via app
+sr_0008,mbr_057,bkg_0051,dining_reservation,2026-02-17T10:06:00.000Z,58,2026-02-17T11:04:00.000Z,Pro shop handled directly
+sr_0009,mbr_059,,event_rsvp,2026-02-20T17:49:00.000Z,28,2026-02-20T18:17:00.000Z,Completed — member notified via app
+sr_0010,mbr_067,bkg_0053,dining_reservation,2026-02-23T16:43:00.000Z,23,,
+sr_0011,mbr_109,bkg_0110,locker_issue,2026-02-17T13:11:00.000Z,14,2026-02-17T13:25:00.000Z,Follow-up call scheduled
+sr_0012,mbr_025,,lost_found,2026-02-12T08:17:00.000Z,82,,
+sr_0013,mbr_109,,range_setup,2026-03-05T18:41:00.000Z,120,,
+sr_0014,mbr_106,bkg_0068,locker_issue,2026-02-23T14:52:00.000Z,14,2026-02-23T15:06:00.000Z,Escalated to GM
+sr_0015,mbr_022,bkg_0187,range_setup,2026-02-16T10:53:00.000Z,98,2026-02-16T12:31:00.000Z,Chef confirmed dietary accommodations
+sr_0016,mbr_078,bkg_0115,lesson_booking,2026-02-14T12:34:00.000Z,63,2026-02-14T13:37:00.000Z,Forwarded to golf ops manager
+sr_0017,mbr_006,bkg_0037,lesson_booking,2026-02-19T14:01:00.000Z,62,,
+sr_0018,mbr_116,bkg_0023,cart_cooler,2026-02-12T18:07:00.000Z,76,,
+sr_0019,mbr_109,,range_setup,2026-02-16T18:57:00.000Z,105,2026-02-16T20:42:00.000Z,Forwarded to golf ops manager
+sr_0020,mbr_079,,event_rsvp,2026-03-01T17:28:00.000Z,101,2026-03-01T19:09:00.000Z,Maintenance completed before opening
+sr_0021,mbr_048,bkg_0143,forecaddie,2026-02-25T16:27:00.000Z,88,2026-02-25T17:55:00.000Z,Pro shop handled directly
+sr_0022,mbr_053,,tee_time_change,2026-02-16T12:12:00.000Z,5,,
+sr_0023,mbr_096,bkg_0177,cart_cooler,2026-02-24T09:11:00.000Z,35,,
+sr_0024,mbr_111,,lost_found,2026-02-18T18:54:00.000Z,64,2026-02-18T19:58:00.000Z,Resolved same day
+sr_0025,mbr_033,,club_repair,2026-03-08T14:53:00.000Z,50,2026-03-08T15:43:00.000Z,Chef confirmed dietary accommodations
+sr_0026,mbr_079,bkg_0105,lost_found,2026-03-03T09:28:00.000Z,63,2026-03-03T10:31:00.000Z,Follow-up call scheduled
+sr_0027,mbr_023,,lost_found,2026-02-15T16:17:00.000Z,96,2026-02-15T17:53:00.000Z,Escalated to GM
+sr_0028,mbr_022,bkg_0199,cart_cooler,2026-02-27T12:08:00.000Z,70,2026-02-27T13:18:00.000Z,Resolved same day
+sr_0029,mbr_037,,locker_issue,2026-02-09T07:05:00.000Z,27,2026-02-09T07:32:00.000Z,Forwarded to golf ops manager
+sr_0030,mbr_012,bkg_0041,forecaddie,2026-02-26T18:40:00.000Z,84,2026-02-26T20:04:00.000Z,Chef confirmed dietary accommodations
+sr_0031,mbr_023,,tee_time_change,2026-02-17T18:27:00.000Z,75,2026-02-17T19:42:00.000Z,Follow-up call scheduled
+sr_0032,mbr_023,,lost_found,2026-03-10T11:30:00.000Z,69,,
+sr_0033,mbr_095,bkg_0011,tee_time_change,2026-02-26T09:37:00.000Z,47,2026-02-26T10:24:00.000Z,Forwarded to golf ops manager
+sr_0034,mbr_019,,range_setup,2026-02-14T17:40:00.000Z,55,2026-02-14T18:35:00.000Z,Resolved during shift
+sr_0035,mbr_029,,club_repair,2026-02-27T17:54:00.000Z,81,,
+sr_0036,mbr_105,bkg_0120,forecaddie,2026-02-24T11:43:00.000Z,12,2026-02-24T11:55:00.000Z,Forwarded to golf ops manager
+sr_0037,mbr_015,bkg_0048,maintenance,2026-02-11T18:25:00.000Z,47,,
+sr_0038,mbr_112,,locker_issue,2026-02-11T13:10:00.000Z,17,2026-02-11T13:27:00.000Z,Maintenance completed before opening
+sr_0039,mbr_065,bkg_0137,guest_pass,2026-02-24T13:06:00.000Z,73,2026-02-24T14:19:00.000Z,Resolved during shift
+sr_0040,mbr_001,,cart_cooler,2026-02-13T07:12:00.000Z,104,,
+sr_0041,mbr_109,,tee_time_change,2026-02-24T14:42:00.000Z,107,2026-02-24T16:29:00.000Z,Escalated to GM
+sr_0042,mbr_071,,lesson_booking,2026-02-22T08:15:00.000Z,123,,
+sr_0043,mbr_109,bkg_0037,guest_pass,2026-03-01T11:13:00.000Z,57,2026-03-01T12:10:00.000Z,Chef confirmed dietary accommodations
+sr_0044,mbr_044,,dining_reservation,2026-02-11T18:22:00.000Z,82,2026-02-11T19:44:00.000Z,Resolved same day
+sr_0045,mbr_004,bkg_0003,lost_found,2026-03-02T08:54:00.000Z,13,2026-03-02T09:07:00.000Z,Resolved during shift
+sr_0046,mbr_040,,range_setup,2026-02-20T10:26:00.000Z,14,2026-02-20T10:40:00.000Z,Resolved same day
+sr_0047,mbr_015,,range_setup,2026-02-28T17:20:00.000Z,106,2026-02-28T19:06:00.000Z,Forwarded to golf ops manager
+sr_0048,mbr_047,bkg_0037,cart_cooler,2026-03-09T16:43:00.000Z,44,2026-03-09T17:27:00.000Z,Escalated to GM
+sr_0049,mbr_057,,cart_cooler,2026-02-16T08:01:00.000Z,52,2026-02-16T08:53:00.000Z,Assigned to maintenance crew
+sr_0050,mbr_002,bkg_0020,forecaddie,2026-02-22T14:38:00.000Z,71,2026-02-22T15:49:00.000Z,Forwarded to golf ops manager
+sr_0051,mbr_081,bkg_0035,club_repair,2026-02-11T13:41:00.000Z,20,2026-02-11T14:01:00.000Z,Assigned to maintenance crew
+sr_0052,mbr_019,,locker_issue,2026-02-13T17:54:00.000Z,60,2026-02-13T18:54:00.000Z,Resolved by front desk
+sr_0053,mbr_011,,lost_found,2026-02-23T07:53:00.000Z,47,2026-02-23T08:40:00.000Z,Resolved same day
+sr_0054,mbr_039,bkg_0012,event_rsvp,2026-03-08T12:36:00.000Z,102,2026-03-08T14:18:00.000Z,Pro shop handled directly
+sr_0055,mbr_044,,locker_issue,2026-02-15T10:13:00.000Z,72,2026-02-15T11:25:00.000Z,Assigned to maintenance crew
+sr_0056,mbr_033,bkg_0021,club_repair,2026-03-07T12:05:00.000Z,104,2026-03-07T13:49:00.000Z,Resolved same day
+sr_0057,mbr_019,,maintenance,2026-02-11T13:20:00.000Z,74,2026-02-11T14:34:00.000Z,Follow-up call scheduled
+sr_0058,mbr_082,bkg_0162,locker_issue,2026-02-26T15:26:00.000Z,59,2026-02-26T16:25:00.000Z,Follow-up call scheduled
+sr_0059,mbr_059,bkg_0155,forecaddie,2026-02-13T13:15:00.000Z,14,2026-02-13T13:29:00.000Z,Resolved during shift
+sr_0060,mbr_029,bkg_0171,range_setup,2026-02-16T14:08:00.000Z,79,,
+sr_0061,mbr_106,,range_setup,2026-02-13T13:54:00.000Z,70,2026-02-13T15:04:00.000Z,Escalated to GM
+sr_0062,mbr_007,,range_setup,2026-02-25T15:48:00.000Z,61,2026-02-25T16:49:00.000Z,Escalated to GM
+sr_0063,mbr_048,bkg_0184,guest_pass,2026-02-21T10:18:00.000Z,11,2026-02-21T10:29:00.000Z,Resolved same day
+sr_0064,mbr_085,bkg_0002,event_rsvp,2026-02-13T09:25:00.000Z,106,2026-02-13T11:11:00.000Z,Forwarded to golf ops manager
+sr_0065,mbr_088,bkg_0046,cart_cooler,2026-02-14T09:03:00.000Z,11,2026-02-14T09:14:00.000Z,Resolved by front desk
+sr_0066,mbr_048,,event_rsvp,2026-02-19T13:25:00.000Z,31,,
+sr_0067,mbr_107,bkg_0141,event_rsvp,2026-03-02T14:49:00.000Z,67,2026-03-02T15:56:00.000Z,Maintenance completed before opening
+sr_0068,mbr_002,,event_rsvp,2026-02-14T12:45:00.000Z,82,,
+sr_0069,mbr_104,,dining_reservation,2026-03-07T09:48:00.000Z,80,,
+sr_0070,mbr_100,bkg_0006,locker_issue,2026-03-06T17:11:00.000Z,111,2026-03-06T19:02:00.000Z,Chef confirmed dietary accommodations
+sr_0071,mbr_074,bkg_0104,forecaddie,2026-02-15T18:39:00.000Z,73,2026-02-15T19:52:00.000Z,Resolved by front desk
+sr_0072,mbr_024,,maintenance,2026-02-17T10:47:00.000Z,79,2026-02-17T12:06:00.000Z,Chef confirmed dietary accommodations
+sr_0073,mbr_067,,locker_issue,2026-03-01T09:30:00.000Z,37,2026-03-01T10:07:00.000Z,Forwarded to golf ops manager
+sr_0074,mbr_085,bkg_0037,tee_time_change,2026-03-08T07:17:00.000Z,57,,
+sr_0075,mbr_099,bkg_0086,forecaddie,2026-02-19T16:45:00.000Z,95,2026-02-19T18:20:00.000Z,Resolved same day
+sr_0076,mbr_027,,guest_pass,2026-02-20T15:09:00.000Z,26,,
+sr_0077,mbr_115,,forecaddie,2026-03-02T11:30:00.000Z,122,2026-03-02T13:32:00.000Z,Resolved same day
+sr_0078,mbr_027,,club_repair,2026-03-01T18:33:00.000Z,123,2026-03-01T20:36:00.000Z,Pro shop handled directly
+sr_0079,mbr_019,,guest_pass,2026-02-28T08:35:00.000Z,19,2026-02-28T08:54:00.000Z,Assigned to maintenance crew
+sr_0080,mbr_011,bkg_0027,lesson_booking,2026-02-27T14:00:00.000Z,15,2026-02-27T14:15:00.000Z,"Parts ordered, ETA 2 days"
+sr_0081,mbr_023,,lesson_booking,2026-02-11T11:04:00.000Z,93,2026-02-11T12:37:00.000Z,Resolved by front desk
+sr_0082,mbr_059,,event_rsvp,2026-02-23T14:06:00.000Z,46,,
+sr_0083,mbr_116,,club_repair,2026-02-28T16:23:00.000Z,105,2026-02-28T18:08:00.000Z,Forwarded to golf ops manager
+sr_0084,mbr_018,,lost_found,2026-02-28T17:48:00.000Z,64,2026-02-28T18:52:00.000Z,Follow-up call scheduled
+sr_0085,mbr_042,bkg_0164,range_setup,2026-02-27T14:32:00.000Z,101,2026-02-27T16:13:00.000Z,Chef confirmed dietary accommodations
+sr_0086,mbr_055,bkg_0114,club_repair,2026-02-15T09:49:00.000Z,32,2026-02-15T10:21:00.000Z,Follow-up call scheduled
+sr_0087,mbr_005,bkg_0156,lost_found,2026-02-15T14:38:00.000Z,100,2026-02-15T16:18:00.000Z,Forwarded to golf ops manager
+sr_0088,mbr_034,,cart_cooler,2026-02-18T11:00:00.000Z,103,2026-02-18T12:43:00.000Z,Resolved same day
+sr_0089,mbr_013,,dining_reservation,2026-02-24T16:36:00.000Z,79,2026-02-24T17:55:00.000Z,"Parts ordered, ETA 2 days"
+sr_0090,mbr_063,,cart_cooler,2026-03-01T13:17:00.000Z,46,,
+sr_0091,mbr_099,,event_rsvp,2026-03-04T12:22:00.000Z,72,2026-03-04T13:34:00.000Z,Forwarded to golf ops manager
+sr_0092,mbr_034,bkg_0037,dining_reservation,2026-02-23T12:32:00.000Z,111,,
+sr_0093,mbr_110,bkg_0075,maintenance,2026-02-10T09:01:00.000Z,68,2026-02-10T10:09:00.000Z,"Parts ordered, ETA 2 days"
+sr_0094,mbr_019,,lost_found,2026-02-09T13:23:00.000Z,28,2026-02-09T13:51:00.000Z,Assigned to maintenance crew
+sr_0095,mbr_076,,dining_reservation,2026-03-02T08:40:00.000Z,107,2026-03-02T10:27:00.000Z,Pro shop handled directly
+sr_0096,mbr_034,bkg_0117,forecaddie,2026-03-10T14:27:00.000Z,29,,
+sr_0097,mbr_107,bkg_0169,event_rsvp,2026-02-17T14:52:00.000Z,33,,
+sr_0098,mbr_112,bkg_0082,lost_found,2026-02-19T07:48:00.000Z,18,2026-02-19T08:06:00.000Z,Resolved during shift
+sr_0099,mbr_005,bkg_0177,lost_found,2026-02-12T16:49:00.000Z,37,,
+sr_0100,mbr_098,,guest_pass,2026-02-09T17:14:00.000Z,113,2026-02-09T19:07:00.000Z,Completed — member notified via app
+sr_0101,mbr_085,,dining_reservation,2026-02-26T15:24:00.000Z,80,2026-02-26T16:44:00.000Z,Follow-up call scheduled
+sr_0102,mbr_025,bkg_0155,guest_pass,2026-02-27T07:43:00.000Z,77,2026-02-27T09:00:00.000Z,Escalated to GM
+sr_0103,mbr_070,bkg_0186,club_repair,2026-02-18T12:38:00.000Z,38,2026-02-18T13:16:00.000Z,Follow-up call scheduled
+sr_0104,mbr_013,bkg_0156,locker_issue,2026-02-13T12:23:00.000Z,108,2026-02-13T14:11:00.000Z,"Parts ordered, ETA 2 days"
+sr_0105,mbr_064,,event_rsvp,2026-02-15T17:28:00.000Z,61,2026-02-15T18:29:00.000Z,Escalated to GM
+sr_0106,mbr_010,,tee_time_change,2026-02-23T09:46:00.000Z,26,,
+sr_0107,mbr_093,,dining_reservation,2026-02-27T08:04:00.000Z,36,2026-02-27T08:40:00.000Z,Maintenance completed before opening
+sr_0108,mbr_014,,locker_issue,2026-02-25T14:37:00.000Z,47,2026-02-25T15:24:00.000Z,Assigned to maintenance crew
+sr_0109,mbr_075,bkg_0027,forecaddie,2026-02-28T16:44:00.000Z,26,2026-02-28T17:10:00.000Z,Pro shop handled directly
+sr_0110,mbr_084,bkg_0122,club_repair,2026-02-09T09:47:00.000Z,114,2026-02-09T11:41:00.000Z,Maintenance completed before opening
+sr_0111,mbr_039,bkg_0134,guest_pass,2026-02-13T12:56:00.000Z,111,2026-02-13T14:47:00.000Z,Escalated to GM
+sr_0112,mbr_059,bkg_0198,lesson_booking,2026-02-17T11:39:00.000Z,105,2026-02-17T13:24:00.000Z,Maintenance completed before opening
+sr_0113,mbr_077,,tee_time_change,2026-02-14T10:19:00.000Z,10,2026-02-14T10:29:00.000Z,Resolved during shift
+sr_0114,mbr_071,bkg_0173,lesson_booking,2026-02-23T14:11:00.000Z,24,2026-02-23T14:35:00.000Z,Resolved same day
+sr_0115,mbr_071,,event_rsvp,2026-02-17T18:22:00.000Z,12,2026-02-17T18:34:00.000Z,Follow-up call scheduled
+sr_0116,mbr_007,,tee_time_change,2026-03-01T18:51:00.000Z,100,2026-03-01T20:31:00.000Z,"Parts ordered, ETA 2 days"
+sr_0117,mbr_040,bkg_0083,locker_issue,2026-02-24T18:24:00.000Z,54,2026-02-24T19:18:00.000Z,Escalated to GM
+sr_0118,mbr_010,,locker_issue,2026-02-18T16:10:00.000Z,23,2026-02-18T16:33:00.000Z,Pro shop handled directly
+sr_0119,mbr_004,,guest_pass,2026-02-24T14:07:00.000Z,78,2026-02-24T15:25:00.000Z,Resolved same day
+sr_0120,mbr_052,,forecaddie,2026-02-23T12:57:00.000Z,85,2026-02-23T14:22:00.000Z,Completed — member notified via app
+sr_0121,mbr_087,bkg_0064,club_repair,2026-03-09T18:05:00.000Z,40,2026-03-09T18:45:00.000Z,Resolved same day
+sr_0122,mbr_007,,locker_issue,2026-02-17T08:33:00.000Z,74,2026-02-17T09:47:00.000Z,Escalated to GM
+sr_0123,mbr_038,bkg_0197,event_rsvp,2026-03-09T08:22:00.000Z,83,2026-03-09T09:45:00.000Z,Resolved by front desk
+sr_0124,mbr_011,,guest_pass,2026-02-14T14:26:00.000Z,18,2026-02-14T14:44:00.000Z,Escalated to GM
+sr_0125,mbr_073,bkg_0199,guest_pass,2026-02-23T14:27:00.000Z,102,,
+sr_0126,mbr_112,bkg_0078,maintenance,2026-02-15T12:03:00.000Z,9,2026-02-15T12:12:00.000Z,Completed — member notified via app
+sr_0127,mbr_020,,locker_issue,2026-02-09T08:11:00.000Z,60,2026-02-09T09:11:00.000Z,Assigned to maintenance crew
+sr_0128,mbr_075,,event_rsvp,2026-03-04T09:42:00.000Z,82,2026-03-04T11:04:00.000Z,"Parts ordered, ETA 2 days"
+sr_0129,mbr_034,,dining_reservation,2026-03-02T07:36:00.000Z,11,2026-03-02T07:47:00.000Z,Chef confirmed dietary accommodations
+sr_0130,mbr_038,,cart_cooler,2026-02-24T15:36:00.000Z,92,2026-02-24T17:08:00.000Z,Maintenance completed before opening
+sr_0131,mbr_039,,tee_time_change,2026-03-07T14:36:00.000Z,90,2026-03-07T16:06:00.000Z,Assigned to maintenance crew
+sr_0132,mbr_063,,guest_pass,2026-02-28T18:29:00.000Z,98,2026-02-28T20:07:00.000Z,Chef confirmed dietary accommodations
+sr_0133,mbr_067,,cart_cooler,2026-02-26T13:13:00.000Z,75,2026-02-26T14:28:00.000Z,Forwarded to golf ops manager
+sr_0134,mbr_081,bkg_0042,maintenance,2026-02-22T10:09:00.000Z,5,2026-02-22T10:14:00.000Z,Resolved same day
+sr_0135,mbr_011,,lost_found,2026-02-15T16:54:00.000Z,28,2026-02-15T17:22:00.000Z,Assigned to maintenance crew
+sr_0136,mbr_046,,dining_reservation,2026-03-01T12:38:00.000Z,34,2026-03-01T13:12:00.000Z,Pro shop handled directly
+sr_0137,mbr_034,,maintenance,2026-02-23T18:50:00.000Z,116,,
+sr_0138,mbr_115,bkg_0174,guest_pass,2026-02-26T09:27:00.000Z,72,,
+sr_0139,mbr_108,bkg_0185,lost_found,2026-02-10T18:36:00.000Z,111,,
+sr_0140,mbr_109,,range_setup,2026-02-15T07:18:00.000Z,96,2026-02-15T08:54:00.000Z,Chef confirmed dietary accommodations
+sr_0141,mbr_017,bkg_0104,club_repair,2026-02-21T12:12:00.000Z,87,2026-02-21T13:39:00.000Z,Forwarded to golf ops manager
+sr_0142,mbr_068,bkg_0046,dining_reservation,2026-02-19T11:56:00.000Z,17,,
+sr_0143,mbr_100,bkg_0067,dining_reservation,2026-02-18T10:23:00.000Z,100,,
+sr_0144,mbr_109,,guest_pass,2026-02-10T16:04:00.000Z,79,,
+sr_0145,mbr_101,,club_repair,2026-03-06T07:25:00.000Z,79,2026-03-06T08:44:00.000Z,Forwarded to golf ops manager
+sr_0146,mbr_046,,forecaddie,2026-02-27T10:33:00.000Z,18,,
+sr_0147,mbr_091,bkg_0030,guest_pass,2026-03-03T15:49:00.000Z,116,2026-03-03T17:45:00.000Z,Escalated to GM
+sr_0148,mbr_040,,guest_pass,2026-02-12T13:47:00.000Z,70,2026-02-12T14:57:00.000Z,Escalated to GM
+sr_0149,mbr_041,,forecaddie,2026-03-10T14:49:00.000Z,38,2026-03-10T15:27:00.000Z,Resolved same day
+sr_0150,mbr_047,,cart_cooler,2026-03-07T13:16:00.000Z,104,2026-03-07T15:00:00.000Z,Escalated to GM
+sr_0151,mbr_068,,lost_found,2026-02-24T08:32:00.000Z,6,2026-02-24T08:38:00.000Z,Forwarded to golf ops manager
+sr_0152,mbr_086,,maintenance,2026-02-24T13:05:00.000Z,47,2026-02-24T13:52:00.000Z,Assigned to maintenance crew
+sr_0153,mbr_027,,lesson_booking,2026-02-21T15:36:00.000Z,123,2026-02-21T17:39:00.000Z,Resolved by front desk
+sr_0154,mbr_035,,tee_time_change,2026-02-28T18:53:00.000Z,120,2026-02-28T20:53:00.000Z,Follow-up call scheduled
+sr_0155,mbr_062,,lesson_booking,2026-03-07T09:16:00.000Z,45,2026-03-07T10:01:00.000Z,Escalated to GM
+sr_0156,mbr_022,bkg_0188,club_repair,2026-03-01T11:37:00.000Z,104,2026-03-01T13:21:00.000Z,Follow-up call scheduled
+sr_0157,mbr_061,,forecaddie,2026-02-14T13:58:00.000Z,112,,
+sr_0158,mbr_113,bkg_0129,lost_found,2026-03-01T12:48:00.000Z,61,2026-03-01T13:49:00.000Z,Chef confirmed dietary accommodations
+sr_0159,mbr_015,bkg_0116,locker_issue,2026-02-11T12:30:00.000Z,24,2026-02-11T12:54:00.000Z,Completed — member notified via app
+sr_0160,mbr_016,bkg_0051,lost_found,2026-02-10T17:34:00.000Z,81,2026-02-10T18:55:00.000Z,Maintenance completed before opening
+sr_0161,mbr_064,bkg_0148,tee_time_change,2026-02-13T10:58:00.000Z,54,2026-02-13T11:52:00.000Z,Chef confirmed dietary accommodations
+sr_0162,mbr_024,,range_setup,2026-02-15T11:40:00.000Z,110,,
+sr_0163,mbr_114,,event_rsvp,2026-02-28T11:18:00.000Z,122,2026-02-28T13:20:00.000Z,Follow-up call scheduled
+sr_0164,mbr_022,,maintenance,2026-03-09T18:10:00.000Z,107,2026-03-09T19:57:00.000Z,Maintenance completed before opening
+sr_0165,mbr_016,,guest_pass,2026-03-08T14:06:00.000Z,106,2026-03-08T15:52:00.000Z,Resolved same day
+sr_0166,mbr_053,,locker_issue,2026-02-25T14:43:00.000Z,39,,
+sr_0167,mbr_092,bkg_0112,forecaddie,2026-03-07T18:38:00.000Z,103,2026-03-07T20:21:00.000Z,Chef confirmed dietary accommodations
+sr_0168,mbr_010,,lesson_booking,2026-02-17T12:05:00.000Z,44,,
+sr_0169,mbr_117,,maintenance,2026-02-28T18:15:00.000Z,81,2026-02-28T19:36:00.000Z,Forwarded to golf ops manager
+sr_0170,mbr_043,bkg_0041,cart_cooler,2026-03-07T14:50:00.000Z,119,2026-03-07T16:49:00.000Z,Forwarded to golf ops manager
+sr_0171,mbr_084,bkg_0048,club_repair,2026-02-16T14:23:00.000Z,65,2026-02-16T15:28:00.000Z,Resolved during shift
+sr_0172,mbr_032,,locker_issue,2026-02-15T17:50:00.000Z,82,2026-02-15T19:12:00.000Z,Follow-up call scheduled
+sr_0173,mbr_066,,cart_cooler,2026-03-01T11:25:00.000Z,94,2026-03-01T12:59:00.000Z,Completed — member notified via app
+sr_0174,mbr_028,,locker_issue,2026-03-01T08:36:00.000Z,61,2026-03-01T09:37:00.000Z,Assigned to maintenance crew
+sr_0175,mbr_064,bkg_0022,tee_time_change,2026-02-21T14:12:00.000Z,18,2026-02-21T14:30:00.000Z,Maintenance completed before opening
+sr_0176,mbr_076,,dining_reservation,2026-02-16T18:05:00.000Z,110,2026-02-16T19:55:00.000Z,Follow-up call scheduled
+sr_0177,mbr_036,,dining_reservation,2026-02-28T17:02:00.000Z,123,,
+sr_0178,mbr_113,bkg_0161,tee_time_change,2026-03-01T15:40:00.000Z,13,2026-03-01T15:53:00.000Z,Escalated to GM
+sr_0179,mbr_024,,tee_time_change,2026-02-19T14:57:00.000Z,82,2026-02-19T16:19:00.000Z,Resolved same day
+sr_0180,mbr_053,,maintenance,2026-02-28T09:45:00.000Z,31,2026-02-28T10:16:00.000Z,"Parts ordered, ETA 2 days"
+sr_0181,mbr_069,,club_repair,2026-03-01T11:31:00.000Z,124,2026-03-01T13:35:00.000Z,Forwarded to golf ops manager
+sr_0182,mbr_034,,event_rsvp,2026-02-27T09:11:00.000Z,77,2026-02-27T10:28:00.000Z,Pro shop handled directly
+sr_0183,mbr_050,,dining_reservation,2026-02-24T18:09:00.000Z,48,2026-02-24T18:57:00.000Z,Maintenance completed before opening
+sr_0184,mbr_008,,tee_time_change,2026-02-26T08:11:00.000Z,117,2026-02-26T10:08:00.000Z,Maintenance completed before opening
+sr_0185,mbr_045,,guest_pass,2026-02-25T16:58:00.000Z,32,2026-02-25T17:30:00.000Z,Follow-up call scheduled
+sr_0186,mbr_043,bkg_0152,maintenance,2026-03-05T16:52:00.000Z,24,2026-03-05T17:16:00.000Z,Assigned to maintenance crew
+sr_0187,mbr_090,bkg_0022,locker_issue,2026-02-16T18:01:00.000Z,65,,
+sr_0188,mbr_110,,lost_found,2026-02-17T11:15:00.000Z,12,2026-02-17T11:27:00.000Z,Forwarded to golf ops manager
+sr_0189,mbr_010,,lost_found,2026-03-05T15:06:00.000Z,104,,
+sr_0190,mbr_097,,dining_reservation,2026-03-01T09:54:00.000Z,116,2026-03-01T11:50:00.000Z,Escalated to GM
+sr_0191,mbr_060,,locker_issue,2026-03-06T08:34:00.000Z,38,2026-03-06T09:12:00.000Z,Resolved during shift
+sr_0192,mbr_079,,lesson_booking,2026-03-03T07:10:00.000Z,96,,
+sr_0193,mbr_111,bkg_0186,event_rsvp,2026-03-05T14:04:00.000Z,107,2026-03-05T15:51:00.000Z,Follow-up call scheduled
+sr_0194,mbr_006,,tee_time_change,2026-02-18T07:12:00.000Z,80,2026-02-18T08:32:00.000Z,Resolved during shift
+sr_0195,mbr_075,,maintenance,2026-03-01T12:26:00.000Z,69,2026-03-01T13:35:00.000Z,Resolved during shift
+sr_0196,mbr_070,,guest_pass,2026-02-24T14:54:00.000Z,111,,
+sr_0197,mbr_093,,guest_pass,2026-02-26T09:25:00.000Z,92,2026-02-26T10:57:00.000Z,Resolved same day
+sr_0198,mbr_005,,range_setup,2026-02-22T10:38:00.000Z,93,2026-02-22T12:11:00.000Z,Resolved during shift
+sr_0199,mbr_018,bkg_0174,event_rsvp,2026-02-23T13:26:00.000Z,98,,
+sr_0200,mbr_107,,event_rsvp,2026-02-17T13:18:00.000Z,98,2026-02-17T14:56:00.000Z,Resolved by front desk

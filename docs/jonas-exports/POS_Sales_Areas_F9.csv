@@ -1,0 +1,6 @@
+﻿Sales Area ID,Sales Area Description,Type,Operating Hours,Weekday Covers,Weekend Covers
+outlet_main_dining,Main Dining Room,fine_dining,"breakfast,dinner",95,150
+outlet_grill,Grill Room,casual,"lunch,dinner",120,175
+outlet_bar_lounge,Bar/Lounge,bar,"lunch,dinner",80,120
+outlet_halfway_house,Halfway House,grab_go,"breakfast,lunch",70,140
+outlet_pool_bar,Pool Bar,bar,lunch,35,90
