@@ -4,8 +4,10 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
-import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getVolatileMembers } from '@/services/memberService';
+import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getVolatileMembers, getMemberSummary } from '@/services/memberService';
 import { getComplaintCorrelation } from '@/services/staffingService';
+import { isAuthenticatedClub } from '@/config/constants';
+import DataEmptyState from '@/components/ui/DataEmptyState';
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
@@ -148,6 +150,15 @@ export default function HealthOverview() {
   const [showAll, setShowAll] = useState(false);
   const { showToast, addAction } = useApp();
   const { navigate } = useNavigation();
+
+  // Authenticated club with no at-risk or watch members — show contextual message
+  if (isAuthenticatedClub() && atRisk.length === 0 && watchList.length === 0) {
+    const summary = getMemberSummary();
+    if (summary.total > 0) {
+      return <DataEmptyState icon="✅" title="No members at risk" description={`${summary.total} members imported. Health scores require golf and dining data in addition to the member roster. Import tee sheet and POS data to see risk levels.`} dataType="engagement data" />;
+    }
+    return <DataEmptyState icon="👥" title="No members imported yet" description="Import your member roster to start tracking member health and engagement." dataType="members" />;
+  }
 
   const allPriorityMembers = useMemo(
     () => buildPriorityList(atRisk, watchList, volatileMembers),

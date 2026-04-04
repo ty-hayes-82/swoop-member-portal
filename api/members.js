@@ -36,11 +36,26 @@ export default withAuth(async function handler(req, res) {
     const latestWeek = toNumber(latestWeekResult.rows[0]?.latest_week, 0);
 
     if (!latestWeek) {
-      // No engagement data yet — still return the member roster from the members table
-      const memberCount = await sql`SELECT COUNT(*) AS total FROM members WHERE club_id = ${clubId} AND COALESCE(membership_status, 'active') != 'resigned'`;
-      const total = toNumber(memberCount.rows[0]?.total, 0);
+      // No engagement data yet — return the member roster from the members table
+      const rosterResult = await sql`
+        SELECT member_id::text AS member_id,
+          COALESCE(NULLIF(TRIM(first_name || ' ' || last_name), ''), 'Member ' || RIGHT(member_id::text, 3)) AS name,
+          first_name, last_name, email, phone, membership_type, annual_dues, join_date,
+          COALESCE(membership_status, 'active') AS status, household_id
+        FROM members WHERE club_id = ${clubId} AND COALESCE(membership_status, 'active') != 'resigned'
+        ORDER BY last_name, first_name
+        LIMIT 1000`;
+      const total = rosterResult.rows.length;
+      const roster = rosterResult.rows.map(r => ({
+        memberId: r.member_id, name: r.name, firstName: r.first_name, lastName: r.last_name,
+        email: r.email, phone: r.phone, membershipType: r.membership_type,
+        annualDues: toNumber(r.annual_dues), joinDate: r.join_date, status: r.status,
+        householdId: r.household_id, score: null, archetype: null, tier: 'Insufficient Data',
+        trend: 'stable', topRisk: 'Health score requires golf + dining data',
+      }));
       return res.status(200).json({
         total,
+        memberRoster: roster,
         healthDistribution: [],
         memberSummary: {
           total,
