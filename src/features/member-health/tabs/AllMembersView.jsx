@@ -96,34 +96,13 @@ function getHealthLevel(score) {
 function FilterChip({ label, onRemove, color }) {
   return (
     <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '4px',
-        padding: '4px 10px',
-        borderRadius: '9999px',
-        fontSize: '12px',
-        fontWeight: 600,
-        background: color + '20',
-        color: color,
-        border: `1px solid ${color}40`,
-      }}
+      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
+      style={{ background: color + '20', color: color, border: `1px solid ${color}40` }}
     >
       {label}
       <button
         onClick={onRemove}
-        style={{
-          background: 'none',
-          border: 'none',
-          color: 'inherit',
-          cursor: 'pointer',
-          fontSize: '14px',
-          padding: 0,
-          lineHeight: 1,
-          opacity: 0.7,
-        }}
-        onMouseEnter={(e) => e.target.style.opacity = '1'}
-        onMouseLeave={(e) => e.target.style.opacity = '0.7'}
+        className="bg-transparent border-none text-inherit cursor-pointer text-sm p-0 leading-none opacity-70 hover:opacity-100"
       >
         ×
       </button>
@@ -134,17 +113,13 @@ function FilterChip({ label, onRemove, color }) {
 function MemberRow({ member, isExpanded, onToggle, index }) {
   const [hovered, setHovered] = useState(false);
   const healthLevel = getHealthLevel(member.score);
-  const healthColor = member.score >= 70 
-    ? '#22c55e' 
-    : member.score >= 50 
-    ? '#f59e0b' 
-    : member.score >= 30 
-    ? '#ea580c' 
+  const healthColor = member.score >= 70
+    ? '#22c55e'
+    : member.score >= 50
+    ? '#f59e0b'
+    : member.score >= 30
+    ? '#ea580c'
     : '#ef4444';
-
-  // DES-P05: Zebra striping with improved hover states
-  const zebraBackground = index % 2 === 0 ? '#F8F9FA' : '#F3F4F6';
-  const hoverBackground = hovered ? '#F9FAFB' : zebraBackground;
 
   return (
     <>
@@ -152,122 +127,90 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
         onClick={onToggle}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        style={{
-          borderTop: `1px solid ${'#E5E7EB'}`,
-          cursor: 'pointer',
-          background: hoverBackground,
-          transition: 'background 0.15s ease, transform 0.15s ease',
-          transform: hovered ? 'translateX(2px)' : 'translateX(0)',
-        }}
+        className={`border-t border-gray-200 cursor-pointer transition-all duration-150 ${index % 2 === 0 ? 'bg-[#F8F9FA]' : 'bg-gray-100'} hover:bg-gray-50 hover:translate-x-0.5`}
       >
-        <td style={{ padding: `${'8px'} ${'16px'}` }}>
+        <td className="px-4 py-2">
           <MemberLink
             mode="drawer"
             memberId={member.memberId}
-            style={{
-              fontWeight: 600,
-              color: hovered ? '#ff8b00' : '#1a1a2e',
-              textDecoration: hovered ? 'underline' : 'none',
-              textDecorationColor: `${'#ff8b00'}50`,
-              transition: 'color 0.12s ease',
-            }}
+            className={`font-semibold transition-colors duration-100 ${hovered ? 'text-brand-500 underline decoration-brand-500/50' : 'text-[#1a1a2e]'}`}
           >
             {member.name}
           </MemberLink>
         </td>
-        <td style={{ padding: `${'8px'} ${'16px'}` }}>
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontWeight: 700,
-              color: healthColor,
-            }}
-          >
+        <td className="px-4 py-2">
+          <span className="font-mono font-bold" style={{ color: healthColor }}>
             {member.score}
           </span>
         </td>
-        <td style={{ padding: `${'8px'} ${'16px'}` }}>
-          <span
-            style={{
-              fontSize: '12px',
-              color: healthColor,
-              fontWeight: 600,
-            }}
-          >
+        <td className="px-4 py-2">
+          <span className="text-xs font-semibold" style={{ color: healthColor }}>
             {healthLevel}
           </span>
         </td>
-        <td style={{ padding: `${'8px'} ${'16px'}` }}>
+        <td className="px-4 py-2">
           <ArchetypeBadge archetype={member.archetype} size="xs" />
         </td>
-        <td style={{ padding: `${'8px'} ${'16px'}` }}>
+        <td className="px-4 py-2">
           <span className="text-xs text-gray-500">
             {member.tier}
           </span>
         </td>
-        <td style={{ padding: `${'8px'} ${'16px'}` }}>
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#6B7280' }}>
+        <td className="px-4 py-2">
+          <span className="font-mono text-xs text-gray-500">
             ${(member.memberValueAnnual || 0).toLocaleString()}
           </span>
         </td>
-        <td style={{ padding: `${'8px'} ${'16px'}`, textAlign: 'right' }}>
+        <td className="px-4 py-2 text-right">
           <span
-            style={{
-              color: isExpanded ? '#ff8b00' : '#9CA3AF',
-              fontSize: '14px',
-              fontWeight: 600,
-              transition: 'transform 0.15s ease, color 0.12s ease',
-              display: 'inline-block',
-              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-            }}
+            className={`text-sm font-semibold inline-block transition-all duration-150 ${isExpanded ? 'text-brand-500 rotate-90' : 'text-gray-400 rotate-0'}`}
           >
             ›
           </span>
         </td>
       </tr>
       {isExpanded && (
-        <tr style={{ background: '#F3F4F6' }}>
-          <td colSpan={7} style={{ padding: '16px' }}>
+        <tr className="bg-gray-100">
+          <td colSpan={7} className="p-4">
             <div className="flex flex-col gap-4">
               {/* Member Details */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
                 <div>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
                     Last Seen
                   </div>
-                  <div style={{ fontSize: '14px', color: '#1a1a2e' }}>
+                  <div className="text-sm text-[#1a1a2e]">
                     {member.lastSeenLocation || 'Unknown'}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
                     Member Since
                   </div>
-                  <div style={{ fontSize: '14px', color: '#1a1a2e' }}>
+                  <div className="text-sm text-[#1a1a2e]">
                     {new Date(member.joinDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
                     Annual Dues
                   </div>
-                  <div style={{ fontSize: '14px', color: '#1a1a2e', fontFamily: "'JetBrains Mono', monospace" }}>
+                  <div className="text-sm text-[#1a1a2e] font-mono">
                     ${member.duesAnnual.toLocaleString()}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
                     Health Trend
                   </div>
-                  <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+                  <div className="flex gap-0.5 items-center">
                     {member.trend?.slice(-7).map((score, i) => (
                       <div
                         key={i}
+                        className="w-2 rounded-sm"
                         style={{
-                          width: '8px',
                           height: `${Math.max(4, score / 2)}px`,
                           background: score >= 70 ? '#22c55e' : score >= 50 ? '#f59e0b' : score >= 30 ? '#ea580c' : '#ef4444',
-                          borderRadius: '2px',
                           opacity: 0.4 + (i * 0.1),
                         }}
                       />
@@ -278,26 +221,21 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
 
               {/* Top Risk Signal */}
               {member.topRisk && member.topRisk !== 'No current risks' && (
-                <div style={{ 
-                  padding: '8px', 
-                  background: '#f59e0b' + '10', 
-                  borderRadius: '8px',
-                  borderLeft: `3px solid ${'#f59e0b'}`,
-                }}>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>
+                <div className="p-2 bg-amber-500/10 rounded-lg border-l-[3px] border-l-amber-500">
+                  <div className="text-xs text-gray-400 mb-1">
                     Primary Risk Signal:
                   </div>
-                  <div style={{ fontSize: '14px', color: '#1a1a2e' }}>
+                  <div className="text-sm text-[#1a1a2e]">
                     {member.topRisk}
                   </div>
                 </div>
               )}
 
               {/* Quick Actions */}
-              <QuickActions 
-                memberName={member.name} 
-                memberId={member.memberId} 
-                context={member.topRisk} 
+              <QuickActions
+                memberName={member.name}
+                memberId={member.memberId}
+                context={member.topRisk}
               />
             </div>
           </td>
@@ -358,8 +296,6 @@ export default function AllMembersView({ initialArchetype = null }) {
     }
 
     if (activityFilter) {
-      // Simulate activity recency based on health score as proxy
-      // (in prod, would use actual last_activity_date from backend)
       filtered = filtered.filter(m => {
         if (activityFilter === 'active') return m.score >= 50;
         if (activityFilter === 'inactive') return m.score >= 25 && m.score < 50;
@@ -466,13 +402,7 @@ export default function AllMembersView({ initialArchetype = null }) {
     <div className="flex flex-col gap-6">
       {/* Health Distribution Cards - Clickable */}
       <div>
-        <div style={{ 
-          fontSize: '14px', 
-          color: '#9CA3AF', 
-          marginBottom: '8px',
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}>
+        <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
           Filter by Health Level (click to filter)
         </div>
         <div className="grid-responsive-4">
@@ -482,43 +412,23 @@ export default function AllMembersView({ initialArchetype = null }) {
               <div
                 key={d.level}
                 onClick={() => applyHealthFilter(d.level)}
-                style={{
-                  background: '#ffffff',
-                  boxShadow: isActive ? '0 4px 12px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.06)',
-                  borderRadius: '12px',
-                  border: `2px solid ${isActive ? d.color : d.color + '40'}`,
-                  padding: '16px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  transform: isActive ? 'scale(1.02)' : 'scale(1)',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.transform = 'scale(1.02)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
-                  }
-                }}
+                className={`bg-white rounded-xl p-4 cursor-pointer transition-all duration-200 ${isActive ? 'shadow-theme-md scale-[1.02]' : 'shadow-theme-xs scale-100 hover:scale-[1.02] hover:shadow-theme-md'}`}
+                style={{ border: `2px solid ${isActive ? d.color : d.color + '40'}` }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div className="flex justify-between mb-2">
                   <span className="text-xs text-gray-400 uppercase tracking-wide">
                     {d.level}
                   </span>
-                  <span style={{ fontSize: '12px', color: d.color }}>
+                  <span className="text-xs" style={{ color: d.color }}>
                     {(d.percentage * 100).toFixed(0)}%
                   </span>
                 </div>
-                <div style={{ fontSize: '28px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: d.color }}>
+                <div className="text-[28px] font-mono font-bold" style={{ color: d.color }}>
                   {d.count}
                 </div>
                 <div className="text-xs text-gray-400">members</div>
-                <div style={{ height: 4, background: '#E5E7EB', borderRadius: 2, marginTop: '8px' }}>
-                  <div style={{ height: '100%', background: d.color, borderRadius: 2, width: `${d.percentage * 100}%` }} />
+                <div className="h-1 bg-gray-200 rounded-sm mt-2">
+                  <div className="h-full rounded-sm" style={{ background: d.color, width: `${d.percentage * 100}%` }} />
                 </div>
               </div>
             );
@@ -528,38 +438,17 @@ export default function AllMembersView({ initialArchetype = null }) {
 
       {/* Archetype Filter - Clickable */}
       <div>
-        <div style={{ 
-          fontSize: '14px', 
-          color: '#9CA3AF', 
-          marginBottom: '8px',
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}>
+        <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
           Filter by Archetype (click to filter)
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        <div className="flex flex-wrap gap-2">
           {memberArchetypes.map((arch) => {
             const isActive = archetypeFilter === arch.archetype;
             return (
               <div
                 key={arch.archetype}
                 onClick={() => setArchetypeFilter(isActive ? null : arch.archetype)}
-                style={{
-                  cursor: 'pointer',
-                  opacity: isActive ? 1 : 0.7,
-                  transform: isActive ? 'scale(1.05)' : 'scale(1)',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.opacity = '0.7';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }
-                }}
+                className={`cursor-pointer transition-all duration-200 ${isActive ? 'opacity-100 scale-105' : 'opacity-70 hover:opacity-100 hover:scale-105'}`}
               >
                 <ArchetypeBadge archetype={arch.archetype} size="md" />
               </div>
@@ -570,13 +459,7 @@ export default function AllMembersView({ initialArchetype = null }) {
 
       {/* Activity Filter */}
       <div>
-        <div style={{
-          fontSize: '14px',
-          color: '#9CA3AF',
-          marginBottom: '8px',
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}>
+        <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
           Filter by Last Activity
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -586,17 +469,7 @@ export default function AllMembersView({ initialArchetype = null }) {
               <button
                 key={f.key ?? 'all'}
                 onClick={() => { setActivityFilter(isActive ? null : f.key); setPage(0); }}
-                style={{
-                  padding: '6px 14px',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  border: `1px solid ${isActive ? '#ff8b00' : '#E5E7EB'}`,
-                  borderRadius: '12px',
-                  background: isActive ? `${'#ff8b00'}15` : '#F8F9FA',
-                  color: isActive ? '#ff8b00' : '#6B7280',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
+                className={`px-3.5 py-1.5 text-[13px] font-semibold rounded-xl cursor-pointer transition-all duration-150 ${isActive ? 'border border-brand-500 bg-brand-500/10 text-brand-500' : 'border border-gray-200 bg-gray-50 text-gray-500'}`}
               >
                 {f.label}
               </button>
@@ -607,15 +480,7 @@ export default function AllMembersView({ initialArchetype = null }) {
 
       {/* Active Filters */}
       {(healthFilter || archetypeFilter || activityFilter) && (
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '8px',
-          padding: '8px',
-          background: '#ffffff',
-          borderRadius: '12px',
-          border: `1px solid ${'#E5E7EB'}`,
-        }}>
+        <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-gray-200">
           <span className="text-xs text-gray-400 uppercase tracking-wide">
             Active Filters:
           </span>
@@ -637,23 +502,12 @@ export default function AllMembersView({ initialArchetype = null }) {
             <FilterChip
               label={`Activity: ${ACTIVITY_FILTERS.find(f => f.key === activityFilter)?.label || activityFilter}`}
               onRemove={() => { setActivityFilter(null); setPage(0); }}
-              color={'#2563eb' || '#2563eb'}
+              color={'#2563eb'}
             />
           )}
           <button
             onClick={clearFilters}
-            style={{
-              marginLeft: 'auto',
-              padding: '4px 12px',
-              fontSize: '12px',
-              color: '#9CA3AF',
-              background: 'none',
-              border: `1px solid ${'#E5E7EB'}`,
-              borderRadius: '8px',
-              cursor: 'pointer',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-            }}
+            className="ml-auto px-3 py-1 text-xs text-gray-400 bg-transparent border border-gray-200 rounded-lg cursor-pointer uppercase tracking-wider"
           >
             Clear All
           </button>
@@ -661,19 +515,8 @@ export default function AllMembersView({ initialArchetype = null }) {
       )}
 
       {/* Member List Table */}
-      <div style={{ 
-        background: '#F3F4F6', 
-        borderRadius: '12px', 
-        border: `1px solid ${'#E5E7EB'}`,
-        overflow: 'hidden',
-      }}>
-        <div style={{ 
-          padding: '16px', 
-          borderBottom: `1px solid ${'#E5E7EB'}`,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
+      <div className="bg-gray-100 rounded-xl border border-gray-200 overflow-hidden">
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <span className="text-sm font-semibold text-gray-800 dark:text-white/90">
               All Members
@@ -683,61 +526,33 @@ export default function AllMembersView({ initialArchetype = null }) {
               placeholder="Search by name..."
               value={searchTerm}
               onChange={e => { setSearchTerm(e.target.value); setPage(0); }}
-              style={{
-                padding: '6px 12px', fontSize: '12px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-                background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}`,
-                borderRadius: '8px', color: '#1a1a2e', outline: 'none',
-                minWidth: 180,
-              }}
+              className="px-3 py-1.5 text-xs font-sans bg-gray-100 border border-gray-200 rounded-lg text-[#1a1a2e] outline-none min-w-[180px]"
             />
           </div>
           <span className="text-xs text-gray-400">
             Showing {Math.min(page * PAGE_SIZE + 1, sortedMembers.length)}–{Math.min((page + 1) * PAGE_SIZE, sortedMembers.length)} of {sortedMembers.length} members{searchTerm && ` matching "${searchTerm}"`}
           </span>
         </div>
-        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <table style={{ 
-            width: '100%', 
-            minWidth: 900, 
-            borderCollapse: 'collapse', 
-            fontSize: '14px',
-          }}
-          className="member-table">
+        <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full min-w-[900px] border-collapse text-sm member-table">
             <thead>
-              <tr style={{ background: '#F8F9FA' }}>
+              <tr className="bg-gray-50">
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    style={{
-                      padding: `${'8px'} ${'16px'}`,
-                      textAlign: col.key === 'expand' ? 'right' : 'left',
-                      color: '#9CA3AF',
-                      fontSize: '12px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.06em',
-                      fontWeight: 500,
-                    }}
+                    className={`px-4 py-2 text-xs text-gray-400 uppercase tracking-wider font-medium ${col.key === 'expand' ? 'text-right' : 'text-left'}`}
                   >
                     {col.sortable === false ? (
                       <span>{col.label}</span>
                     ) : (
                       <button
                         onClick={() => toggleSort(col.key)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'inherit',
-                          font: 'inherit',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 4,
-                        }}
+                        className="bg-transparent border-none text-inherit font-inherit cursor-pointer inline-flex items-center gap-1"
                       >
                         {col.label}
                         {sortColumn === col.key && (
-                          <span style={{ fontSize: '11px' }}>
-                            {sortDir === 'asc' ? '▲' : '▼'}
+                          <span className="text-[11px]">
+                            {sortDir === 'asc' ? '\u25B2' : '\u25BC'}
                           </span>
                         )}
                       </button>
@@ -749,7 +564,7 @@ export default function AllMembersView({ initialArchetype = null }) {
             <tbody>
               {sortedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '24px', textAlign: 'center', color: '#9CA3AF' }}>
+                  <td colSpan={7} className="p-6 text-center text-gray-400">
                     No members match the current filters
                   </td>
                 </tr>
@@ -772,24 +587,11 @@ export default function AllMembersView({ initialArchetype = null }) {
         {sortedMembers.length > PAGE_SIZE && (() => {
           const totalPages = Math.ceil(sortedMembers.length / PAGE_SIZE);
           return (
-            <div style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: `${'8px'} ${'16px'}`,
-              borderTop: `1px solid ${'#E5E7EB'}`,
-              background: '#F8F9FA',
-            }}>
+            <div className="flex justify-between items-center px-4 py-2 border-t border-gray-200 bg-gray-50">
               <button
                 onClick={() => setPage(Math.max(0, page - 1))}
                 disabled={page === 0}
-                style={{
-                  padding: '6px 14px', fontSize: 13, fontWeight: 600,
-                  border: `1px solid ${'#E5E7EB'}`,
-                  borderRadius: '8px',
-                  background: page === 0 ? '#F3F4F6' : '#ffffff',
-                  color: page === 0 ? '#9CA3AF' : '#1a1a2e',
-                  cursor: page === 0 ? 'default' : 'pointer',
-                  opacity: page === 0 ? 0.5 : 1,
-                }}
+                className={`px-3.5 py-1.5 text-[13px] font-semibold border border-gray-200 rounded-lg cursor-pointer ${page === 0 ? 'bg-gray-100 text-gray-400 opacity-50 cursor-default' : 'bg-white text-[#1a1a2e]'}`}
               >
                 Previous
               </button>
@@ -799,15 +601,7 @@ export default function AllMembersView({ initialArchetype = null }) {
               <button
                 onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
                 disabled={page >= totalPages - 1}
-                style={{
-                  padding: '6px 14px', fontSize: 13, fontWeight: 600,
-                  border: `1px solid ${'#E5E7EB'}`,
-                  borderRadius: '8px',
-                  background: page >= totalPages - 1 ? '#F3F4F6' : '#ffffff',
-                  color: page >= totalPages - 1 ? '#9CA3AF' : '#1a1a2e',
-                  cursor: page >= totalPages - 1 ? 'default' : 'pointer',
-                  opacity: page >= totalPages - 1 ? 0.5 : 1,
-                }}
+                className={`px-3.5 py-1.5 text-[13px] font-semibold border border-gray-200 rounded-lg cursor-pointer ${page >= totalPages - 1 ? 'bg-gray-100 text-gray-400 opacity-50 cursor-default' : 'bg-white text-[#1a1a2e]'}`}
               >
                 Next
               </button>

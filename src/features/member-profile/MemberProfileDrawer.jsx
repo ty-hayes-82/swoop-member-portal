@@ -6,16 +6,16 @@ import { getOutreachHistory } from '@/services/activityService';
 import { getMemberChurnPrediction } from '@/services/memberService';
 
 const formatDate = (value) => {
-  if (!value) return '—';
+  if (!value) return '\u2014';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
+  if (Number.isNaN(date.getTime())) return '\u2014';
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 const formatDateTime = (value) => {
-  if (!value) return '—';
+  if (!value) return '\u2014';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
+  if (Number.isNaN(date.getTime())) return '\u2014';
   return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 };
 
@@ -61,18 +61,18 @@ const Section = ({ title, description, children, defaultCollapsed = false, colla
   const isCollapsed = collapsible && collapsed;
 
   return (
-    <section {...rest} style={{ border: `1px solid ${'#E5E7EB'}`, borderRadius: '12px', padding: '16px', background: '#ffffff' }}>
+    <section {...rest} className="border border-gray-200 rounded-xl p-4 bg-white">
       <div
         onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: isCollapsed ? 0 : '8px', cursor: collapsible ? 'pointer' : 'default' }}
+        className={`flex justify-between items-baseline ${isCollapsed ? '' : 'mb-2'} ${collapsible ? 'cursor-pointer' : 'cursor-default'}`}
       >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <h3 style={{ margin: 0, fontSize: '16px' }}>{title}</h3>
+        <div className="flex items-baseline gap-2">
+          <h3 className="m-0 text-base">{title}</h3>
           {isCollapsed && summary && <span className="text-xs text-gray-400">{summary}</span>}
         </div>
         <div className="flex items-center gap-2">
           {description && !isCollapsed && <span className="text-xs text-gray-400">{description}</span>}
-          {collapsible && <span style={{ fontSize: 12, color: '#9CA3AF', transition: 'transform 0.2s', transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
+          {collapsible && <span className="text-xs text-gray-400 transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
         </div>
       </div>
       {!isCollapsed && children}
@@ -88,9 +88,9 @@ function ActivityTimeline({ activity = [] }) {
   if (!activity.length) return <span className="text-gray-500">No recent activity logged.</span>;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="flex flex-col gap-2.5">
       {visible.map((a) => (
-        <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: '14px' }}>
+        <div key={a.id} className="flex justify-between gap-3 text-sm">
           <div>
             <div className="font-semibold">{a.type}</div>
             <div className="text-gray-500">{a.detail}</div>
@@ -101,13 +101,9 @@ function ActivityTimeline({ activity = [] }) {
       {activity.length > 3 && !showAll && (
         <button
           onClick={() => setShowAll(true)}
-          style={{
-            background: 'none', border: 'none', color: '#ff8b00',
-            fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-            textAlign: 'left', padding: 0,
-          }}
+          className="bg-transparent border-none text-brand-500 text-xs font-semibold cursor-pointer text-left p-0"
         >
-          Show all {activity.length} entries →
+          Show all {activity.length} entries {'\u2192'}
         </button>
       )}
     </div>
@@ -178,9 +174,9 @@ function MemberJourneyTimeline({ profile }) {
 
   const domainColors = {
     Golf: '#22c55e',
-    Dining: '#f59e0b' ?? '#f59e0b',
+    Dining: '#f59e0b',
     Events: '#ff8b00',
-    Email: '#2563eb' ?? '#4299e1',
+    Email: '#2563eb',
     Risk: '#ef4444',
     Activity: '#9CA3AF',
   };
@@ -200,92 +196,47 @@ function MemberJourneyTimeline({ profile }) {
     <div className="flex flex-col">
       {/* Decay Chain — "First Domino" visualization */}
       {decayChain.length >= 2 && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap',
-          padding: '10px 14px', marginBottom: 14,
-          background: `${'#ef4444'}06`,
-          border: `1px solid ${'#ef4444'}25`,
-          borderRadius: '12px',
-        }}>
-          <div style={{ width: '100%', marginBottom: 8 }}>
-            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#ef4444' }}>
+        <div className="flex items-center flex-wrap px-3.5 py-2.5 mb-3.5 bg-red-500/[0.04] border border-red-500/15 rounded-xl">
+          <div className="w-full mb-2">
+            <span className="text-[10px] font-bold tracking-wider uppercase text-error-500">
               Engagement Decay Sequence
             </span>
           </div>
           {decayChain.map((step, i) => {
             const color = domainColors[step.domain] ?? '#9CA3AF';
             return (
-              <div key={step.domain} style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{
-                  padding: '4px 10px',
-                  borderRadius: 6,
-                  background: color + '16',
-                  border: `1px solid ${color}40`,
-                }}>
-                  <div style={{ fontSize: '10px', fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    {step.domain} dropped
-                  </div>
-                  <div style={{ fontSize: '10px', color: '#9CA3AF' }}>{step.date}</div>
+              <div key={step.domain} className="flex items-center">
+                <div className="px-2.5 py-1 rounded-md" style={{ background: color + '16', border: `1px solid ${color}40` }}>
+                  <div className="text-[10px] font-bold uppercase tracking-tight" style={{ color }}>{step.domain} dropped</div>
+                  <div className="text-[10px] text-gray-400">{step.date}</div>
                 </div>
                 {i < decayChain.length - 1 && (
-                  <span style={{ margin: '0 6px', fontSize: '14px', color: '#9CA3AF', fontWeight: 700 }}>&rarr;</span>
+                  <span className="mx-1.5 text-sm text-gray-400 font-bold">&rarr;</span>
                 )}
               </div>
             );
           })}
         </div>
       )}
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', paddingLeft: 20 }}>
+    <div className="flex flex-col relative pl-5">
       {/* Vertical timeline line */}
-      <div style={{
-        position: 'absolute',
-        left: 8,
-        top: 4,
-        bottom: 4,
-        width: 2,
-        background: '#E5E7EB',
-      }} />
+      <div className="absolute left-2 top-1 bottom-1 w-0.5 bg-gray-200" />
       {journeyEvents.map((evt, i) => {
         const color = domainColors[evt.domain] ?? '#9CA3AF';
         const icon = typeIcons[evt.type] ?? '\u2022';
         return (
-          <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '6px 0', position: 'relative' }}>
-            <div style={{
-              position: 'absolute',
-              left: -16,
-              top: 10,
-              width: 14,
-              height: 14,
-              borderRadius: '50%',
-              background: color + '22',
-              border: '2px solid ' + color,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '8px',
-              color: color,
-              fontWeight: 700,
-              zIndex: 1,
-            }}>
+          <div key={i} className="flex gap-3 items-start py-1.5 relative">
+            <div className="absolute -left-4 top-2.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold z-[1]" style={{ background: color + '22', border: '2px solid ' + color, color: color }}>
               {icon}
             </div>
             <div className="flex-1">
-              <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
-                <span style={{
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  padding: '1px 6px',
-                  borderRadius: 3,
-                  background: color + '14',
-                  color: color,
-                }}>
+              <div className="flex gap-2 items-baseline">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-px rounded-sm" style={{ background: color + '14', color: color }}>
                   {evt.domain}
                 </span>
-                <span className="text-xs text-gray-400">{formatDateTime(evt.date) !== '—' ? formatDateTime(evt.date) : evt.date}</span>
+                <span className="text-xs text-gray-400">{formatDateTime(evt.date) !== '\u2014' ? formatDateTime(evt.date) : evt.date}</span>
               </div>
-              <div style={{ fontSize: '14px', color: '#6B7280', marginTop: 2 }}>{evt.label}</div>
+              <div className="text-sm text-gray-500 mt-0.5">{evt.label}</div>
             </div>
           </div>
         );
@@ -325,13 +276,13 @@ function HealthDimensionGrid({ profile }) {
   return (
     <div className="grid grid-cols-2 gap-2">
       {dimensions.map(d => (
-        <div key={d.label} style={{ padding: '8px 10px', borderRadius: '8px', border: `1px solid ${'#E5E7EB'}`, background: '#F8F9FA' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-            <span style={{ fontSize: '11px', color: '#9CA3AF' }}>{d.label} ({d.weight})</span>
-            <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: d.value >= 60 ? '#22c55e' : d.value >= 35 ? '#f59e0b' : '#ef4444' }}>{d.value}</span>
+        <div key={d.label} className="px-2.5 py-2 rounded-lg border border-gray-200 bg-gray-50">
+          <div className="flex justify-between mb-1">
+            <span className="text-[11px] text-gray-400">{d.label} ({d.weight})</span>
+            <span className="text-[11px] font-bold font-mono" style={{ color: d.value >= 60 ? '#22c55e' : d.value >= 35 ? '#f59e0b' : '#ef4444' }}>{d.value}</span>
           </div>
-          <div style={{ height: '4px', borderRadius: '2px', background: '#F3F4F6' }}>
-            <div style={{ height: '100%', borderRadius: '2px', background: d.value >= 60 ? '#22c55e' : d.value >= 35 ? '#f59e0b' : '#ef4444', width: `${d.value}%` }} />
+          <div className="h-1 rounded-sm bg-gray-100">
+            <div className="h-full rounded-sm" style={{ background: d.value >= 60 ? '#22c55e' : d.value >= 35 ? '#f59e0b' : '#ef4444', width: `${d.value}%` }} />
           </div>
         </div>
       ))}
@@ -355,28 +306,28 @@ function ChurnPredictionBadge({ profile }) {
 
   return (
     <Section title="Resignation Risk" description="AI-powered early warning">
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '8px' }}>
-        <div style={{ textAlign: 'center', padding: '8px 16px', borderRadius: '12px', background: `${color}10`, border: `1px solid ${color}30` }}>
-          <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color }}>{prob}%</div>
-          <div style={{ fontSize: '10px', color: '#9CA3AF' }}>90-day risk</div>
+      <div className="flex gap-4 mb-2">
+        <div className="text-center px-4 py-2 rounded-xl" style={{ background: `${color}10`, border: `1px solid ${color}30` }}>
+          <div className="text-2xl font-bold font-mono" style={{ color }}>{prob}%</div>
+          <div className="text-[10px] text-gray-400">90-day risk</div>
         </div>
         <div className="flex gap-2">
-          <div style={{ textAlign: 'center', padding: '8px 12px', borderRadius: '8px', background: '#F3F4F6' }}>
-            <div style={{ fontSize: '14px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{prediction.prob_30d}%</div>
-            <div style={{ fontSize: '10px', color: '#9CA3AF' }}>30-day</div>
+          <div className="text-center px-3 py-2 rounded-lg bg-gray-100">
+            <div className="text-sm font-bold font-mono">{prediction.prob_30d}%</div>
+            <div className="text-[10px] text-gray-400">30-day</div>
           </div>
-          <div style={{ textAlign: 'center', padding: '8px 12px', borderRadius: '8px', background: '#F3F4F6' }}>
-            <div style={{ fontSize: '14px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{prediction.prob_60d}%</div>
-            <div style={{ fontSize: '10px', color: '#9CA3AF' }}>60-day</div>
+          <div className="text-center px-3 py-2 rounded-lg bg-gray-100">
+            <div className="text-sm font-bold font-mono">{prediction.prob_60d}%</div>
+            <div className="text-[10px] text-gray-400">60-day</div>
           </div>
         </div>
       </div>
       {factors.length > 0 && (
         <div className="flex flex-col gap-1">
-          <div style={{ fontSize: '10px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contributing factors</div>
+          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contributing factors</div>
           {factors.slice(0, 3).map((f, i) => (
-            <div key={i} style={{ fontSize: '12px', color: '#6B7280', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-              <span style={{ color, fontWeight: 700, flexShrink: 0 }}>{Math.round(f.weight * 100)}%</span>
+            <div key={i} className="text-xs text-gray-500 flex gap-1.5 items-start">
+              <span className="font-bold shrink-0" style={{ color }}>{Math.round(f.weight * 100)}%</span>
               <span>{f.factor} — {f.detail}</span>
             </div>
           ))}
@@ -404,55 +355,42 @@ function getTalkingPoints(profile) {
   const risks = profile.riskSignals || [];
   const riskText = risks.map(r => (r.label || '').toLowerCase()).join(' ');
 
-  // Complaint-driven talking points
   if (riskText.includes('complaint') || riskText.includes('unresolved')) {
     points.push('Acknowledge the specific service issue and apologize directly');
     points.push('Share what the club has done to prevent recurrence');
   }
-
-  // Pace-of-play frustration
   if (riskText.includes('pace') || riskText.includes('slow')) {
-    points.push('Acknowledge pace-of-play frustration — mention ranger deployment improvements');
+    points.push('Acknowledge pace-of-play frustration \u2014 mention ranger deployment improvements');
     points.push('Offer preferred tee time slot hold to avoid peak congestion');
   }
-
-  // Dining decline
   if (riskText.includes('dining') || riskText.includes('f&b') || riskText.includes('grill')) {
     points.push('Invite to an upcoming Chef\'s Table or wine dinner event');
     points.push('Mention new menu additions or seasonal specials');
   }
-
-  // Golf activity decline
   if (riskText.includes('golf') || riskText.includes('round') || riskText.includes('tee')) {
     points.push('Ask about any scheduling changes or course condition concerns');
     if (archetype === 'Weekend Warrior') points.push('Offer a preferred Saturday morning tee time hold');
   }
-
-  // Email decay
   if (riskText.includes('email') || riskText.includes('newsletter') || riskText.includes('open rate')) {
-    points.push('Ask if they\'re receiving communications — offer preferred channel switch');
+    points.push('Ask if they\'re receiving communications \u2014 offer preferred channel switch');
   }
-
-  // Score-based defaults
   if (points.length === 0) {
     if (score < 30) {
       points.push('Express genuine concern and ask what the club can do differently');
       points.push('Offer a specific retention incentive (comp round, dining credit, event invite)');
     } else if (score < 50) {
-      points.push('Check in personally — ask how their recent experiences have been');
+      points.push('Check in personally \u2014 ask how their recent experiences have been');
       points.push('Mention an upcoming event or improvement relevant to their interests');
     } else {
       points.push('Thank them for their engagement and ask for feedback');
       points.push('Invite them to an upcoming member event');
     }
   }
-
   return points.slice(0, 3);
 }
 
 function OutreachHistory({ profile }) {
   const outreachEvents = useMemo(() => {
-    // Merge activity timeline outreach with local outreach log
     const fromActivity = (profile.activity || [])
       .filter(a => {
         const type = (a.type || '').toLowerCase();
@@ -463,7 +401,6 @@ function OutreachHistory({ profile }) {
       type: entry.type, detail: entry.description, timestamp: entry.timestamp,
       id: `log-${entry.timestamp}`, initiatedBy: entry.initiatedBy,
     }));
-    // Deduplicate by timestamp proximity and merge
     const merged = [...fromLog, ...fromActivity];
     return merged.slice(0, 8);
   }, [profile.activity, profile.memberId]);
@@ -475,16 +412,12 @@ function OutreachHistory({ profile }) {
   return (
     <div className="flex flex-col gap-2">
       {outreachEvents.map((evt, i) => (
-        <div key={evt.id || i} style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-          gap: 12, padding: '8px 10px', borderRadius: '8px',
-          background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}`,
-        }}>
+        <div key={evt.id || i} className="flex justify-between items-start gap-3 px-2.5 py-2 rounded-lg bg-gray-100 border border-gray-200">
           <div>
-            <div style={{ fontWeight: 600, fontSize: '14px' }}>{evt.type}</div>
+            <div className="font-semibold text-sm">{evt.type}</div>
             <div className="text-xs text-gray-500">{evt.detail}</div>
           </div>
-          <div style={{ fontSize: '12px', color: '#9CA3AF', whiteSpace: 'nowrap' }}>
+          <div className="text-xs text-gray-400 whitespace-nowrap">
             {formatDateTime(evt.timestamp)}
           </div>
         </div>
@@ -494,7 +427,6 @@ function OutreachHistory({ profile }) {
 }
 
 function SpendTrendSparkline({ profile }) {
-  // Generate monthly spend trend from activity data
   const spendData = useMemo(() => {
     const months = [];
     const now = new Date();
@@ -504,7 +436,6 @@ function SpendTrendSparkline({ profile }) {
         const d = new Date(a.timestamp);
         return d.getMonth() === m.getMonth() && d.getFullYear() === m.getFullYear();
       });
-      // Approximate spend from activity count * archetype multiplier
       const baseSpend = profile.duesAnnual ? profile.duesAnnual / 12 : 1500;
       const activityMultiplier = Math.max(0.2, Math.min(2, monthActivities.length / 3));
       months.push(Math.round(baseSpend * activityMultiplier * (0.8 + Math.random() * 0.4)));
@@ -518,8 +449,8 @@ function SpendTrendSparkline({ profile }) {
   return (
     <div className="flex items-center gap-3">
       <Sparkline data={spendData} color={trendColor} />
-      <div style={{ fontSize: '12px', color: trendColor, fontWeight: 600 }}>
-        {trend >= 0 ? '↑' : '↓'} ${Math.abs(trend).toLocaleString()}/mo
+      <div className="text-xs font-semibold" style={{ color: trendColor }}>
+        {trend >= 0 ? '\u2191' : '\u2193'} ${Math.abs(trend).toLocaleString()}/mo
       </div>
     </div>
   );
@@ -528,7 +459,7 @@ function SpendTrendSparkline({ profile }) {
 export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNote, onQuickAction, layout = 'drawer' }) {
   if (!profile) {
     return (
-      <div style={{ padding: '24px', color: '#9CA3AF' }}>
+      <div className="p-6 text-gray-400">
         Select a member to view their profile.
       </div>
     );
@@ -539,9 +470,9 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
   const isDrawerLayout = layout === 'drawer';
 
   const topMetrics = useMemo(() => [
-    { label: 'Annual dues', value: profile.duesAnnual ? `$${profile.duesAnnual.toLocaleString()}` : '—' },
-    { label: 'Annual value', value: profile.memberValueAnnual ? `$${profile.memberValueAnnual.toLocaleString()}` : '—' },
-    { label: 'Last seen', value: profile.lastSeenLocation ?? '—' },
+    { label: 'Annual dues', value: profile.duesAnnual ? `$${profile.duesAnnual.toLocaleString()}` : '\u2014' },
+    { label: 'Annual value', value: profile.memberValueAnnual ? `$${profile.memberValueAnnual.toLocaleString()}` : '\u2014' },
+    { label: 'Last seen', value: profile.lastSeenLocation ?? '\u2014' },
   ], [profile.duesAnnual, profile.memberValueAnnual, profile.lastSeenLocation]);
 
   const handleAddNote = () => {
@@ -551,13 +482,12 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
   };
 
   const quickActions = [
-    { key: 'call', label: 'Schedule call', icon: '📞' },
-    { key: 'email', label: 'Send email', icon: '✉️' },
-    { key: 'sms', label: 'Send SMS', icon: '💬' },
-    { key: 'comp', label: 'Offer comp', icon: '🎁' },
+    { key: 'call', label: 'Schedule call', icon: '\uD83D\uDCDE' },
+    { key: 'email', label: 'Send email', icon: '\u2709\uFE0F' },
+    { key: 'sms', label: 'Send SMS', icon: '\uD83D\uDCAC' },
+    { key: 'comp', label: 'Offer comp', icon: '\uD83C\uDF81' },
   ];
 
-  // Build context banner from risk signals
   const contextReason = useMemo(() => {
     if (!profile.riskSignals?.length) return null;
     const topSignal = profile.riskSignals[0];
@@ -568,66 +498,46 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
     <div className="flex flex-col gap-4">
       {/* Why am I looking at this member? — context banner */}
       {contextReason && (
-        <div style={{
-          padding: '10px 14px',
-          borderRadius: '8px',
-          background: `${'#ef4444'}06`,
-          border: `1px solid ${'#ef4444'}20`,
-          borderLeft: `3px solid ${'#ef4444'}`,
-          fontSize: '14px',
-          color: '#1a1a2e',
-        }}>
-          <span style={{ fontWeight: 700, color: '#ef4444', marginRight: 6 }}>Flagged:</span>
+        <div className="px-3.5 py-2.5 rounded-lg bg-red-500/[0.04] border border-red-500/[0.13] border-l-[3px] border-l-red-500 text-sm text-[#1a1a2e]">
+          <span className="font-bold text-error-500 mr-1.5">Flagged:</span>
           {contextReason}
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <div style={{
-            width: layout === 'page' ? 80 : 64,
-            height: layout === 'page' ? 80 : 64,
-            borderRadius: '50%',
-            background: '#F3F4F6',
-            border: `1px solid ${'#E5E7EB'}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: layout === 'page' ? 28 : 20,
-            fontWeight: 700,
-            color: '#1a1a2e',
-          }}>
+      <div className="flex justify-between items-start gap-4 flex-wrap">
+        <div className="flex gap-4 items-center">
+          <div className={`${layout === 'page' ? 'w-20 h-20 text-[28px]' : 'w-16 h-16 text-xl'} rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center font-bold text-[#1a1a2e]`}>
             {initials}
           </div>
           <div>
-          <div style={{ fontSize: '14px', color: '#9CA3AF', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Member Snapshot</div>
-          <h2 style={{ margin: '4px 0', fontSize: layout === 'page' ? 32 : 24 }}>{profile.name}</h2>
+          <div className="text-sm text-gray-400 tracking-wide uppercase">Member Snapshot</div>
+          <h2 className={`my-1 ${layout === 'page' ? 'text-[32px]' : 'text-2xl'}`}>{profile.name}</h2>
           <div className="text-sm text-gray-500">
-            {profile.tier} • Joined {formatDate(profile.joinDate)}
+            {profile.tier} {'\u2022'} Joined {formatDate(profile.joinDate)}
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: '8px', flexWrap: 'wrap' }}>
+          <div className="flex gap-3 mt-2 flex-wrap">
             {topMetrics.map((metric) => (
-              <div key={metric.label} style={{ padding: '8px 12px', borderRadius: '8px', background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}` }}>
-                <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{metric.label}</div>
-                <div style={{ fontSize: '14px', fontWeight: 600 }}>{metric.value}</div>
+              <div key={metric.label} className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-200">
+                <div className="text-xs text-gray-400 uppercase tracking-wider">{metric.label}</div>
+                <div className="text-sm font-semibold">{metric.value}</div>
               </div>
             ))}
           </div>
         </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Health score</div>
-          <div style={{ fontSize: 42, fontFamily: "'JetBrains Mono', monospace", color: profile.healthScore > 69 ? '#22c55e' : profile.healthScore > 40 ? '#f59e0b' : '#ef4444' }}>
-            {profile.healthScore ?? '—'}
+        <div className="text-right">
+          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">Health score</div>
+          <div className="text-[42px] font-mono" style={{ color: profile.healthScore > 69 ? '#22c55e' : profile.healthScore > 40 ? '#f59e0b' : '#ef4444' }}>
+            {profile.healthScore ?? '\u2014'}
           </div>
           <Sparkline data={profile.trend ?? []} />
           {layout !== 'page' && onOpenFullPage && (
             <button
               type="button"
               onClick={() => onOpenFullPage(profile.memberId)}
-              style={{ marginTop: '8px', border: 'none', background: 'none', color: '#ff8b00', fontWeight: 600, cursor: 'pointer' }}
+              className="mt-2 border-none bg-transparent text-brand-500 font-semibold cursor-pointer"
             >
-              Open full profile →
+              Open full profile {'\u2192'}
             </button>
           )}
         </div>
@@ -641,14 +551,14 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       {/* Resignation Risk — from predict-churn API */}
       <ChurnPredictionBadge profile={profile} />
 
-      <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '—'}`}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '14px' }}>
-          <span><strong>Phone:</strong> {profile.contact?.phone && profile.contact.phone !== '—'
-            ? <a href={`tel:${profile.contact.phone}`} style={{ color: '#ff8b00', textDecoration: 'none' }}>{profile.contact.phone}</a>
-            : '—'}</span>
-          <span><strong>Email:</strong> {profile.contact?.email && profile.contact.email !== '—'
-            ? <a href={`mailto:${profile.contact.email}`} style={{ color: '#ff8b00', textDecoration: 'none' }}>{profile.contact.email}</a>
-            : '—'}</span>
+      <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '\u2014'}`}>
+        <div className="flex flex-col gap-1.5 text-sm">
+          <span><strong>Phone:</strong> {profile.contact?.phone && profile.contact.phone !== '\u2014'
+            ? <a href={`tel:${profile.contact.phone}`} className="text-brand-500 no-underline">{profile.contact.phone}</a>
+            : '\u2014'}</span>
+          <span><strong>Email:</strong> {profile.contact?.email && profile.contact.email !== '\u2014'
+            ? <a href={`mailto:${profile.contact.email}`} className="text-brand-500 no-underline">{profile.contact.email}</a>
+            : '\u2014'}</span>
           <span><strong>Last outreach:</strong> {formatDateTime(profile.contact?.lastOutreach)}</span>
         </div>
       </Section>
@@ -658,24 +568,17 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         <Section title="Household" description={`${profile.family.length + 1} members`}>
           <div className="flex flex-col gap-2">
             {/* Aggregate household value */}
-            <div style={{
-              display: 'flex', gap: '16px', padding: '8px 12px',
-              background: '#F3F4F6', borderRadius: '8px',
-              border: `1px solid ${'#E5E7EB'}`,
-            }}>
+            <div className="flex gap-4 px-3 py-2 bg-gray-100 rounded-lg border border-gray-200">
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Household value</div>
-                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>
+                <div className="text-base font-bold font-mono">
                   ${((profile.duesAnnual || 0) * (1 + profile.family.length * 0.6)).toLocaleString()}/yr
                 </div>
               </div>
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Health (lowest)</div>
-                <div style={{
-                  fontSize: '16px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
-                  color: (profile.healthScore ?? 50) > 69 ? '#22c55e' : (profile.healthScore ?? 50) > 40 ? '#f59e0b' : '#ef4444',
-                }}>
-                  {profile.healthScore ?? '—'}
+                <div className="text-base font-bold font-mono" style={{ color: (profile.healthScore ?? 50) > 69 ? '#22c55e' : (profile.healthScore ?? 50) > 40 ? '#f59e0b' : '#ef4444' }}>
+                  {profile.healthScore ?? '\u2014'}
                 </div>
               </div>
             </div>
@@ -683,22 +586,14 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             {profile.family.map((f, i) => (
               <div key={i}
                 onClick={() => f.memberId && onClose?.()}
-                style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '8px 12px', borderRadius: '8px',
-                  border: `1px solid ${'#E5E7EB'}`,
-                  cursor: f.memberId ? 'pointer' : 'default',
-                  transition: 'background 0.12s',
-                }}
-                onMouseEnter={e => { if (f.memberId) e.currentTarget.style.background = '#F3F4F6'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                className={`flex justify-between items-center px-3 py-2 rounded-lg border border-gray-200 transition-colors duration-100 ${f.memberId ? 'cursor-pointer hover:bg-gray-100' : 'cursor-default'}`}
               >
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '14px', color: f.memberId ? '#ff8b00' : '#1a1a2e' }}>{f.name}</div>
+                  <div className={`font-semibold text-sm ${f.memberId ? 'text-brand-500' : 'text-[#1a1a2e]'}`}>{f.name}</div>
                   <div className="text-xs text-gray-400">{f.relation}</div>
                 </div>
                 {f.notes && (
-                  <div style={{ fontSize: '12px', color: '#6B7280', maxWidth: '50%', textAlign: 'right' }}>
+                  <div className="text-xs text-gray-500 max-w-[50%] text-right">
                     {f.notes}
                   </div>
                 )}
@@ -711,7 +606,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       {/* Archetype Description — Call Prep */}
       {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && (
         <Section title={`Archetype: ${profile.archetype}`} description="Behavioral profile">
-          <div style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.6 }}>
+          <div className="text-sm text-gray-500 leading-relaxed">
             {ARCHETYPE_DESCRIPTIONS[profile.archetype]}
           </div>
         </Section>
@@ -726,13 +621,9 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <Section title="Talking Points" description="Personalized for this call">
         <div className="flex flex-col gap-1.5">
           {getTalkingPoints(profile).map((point, i) => (
-            <div key={i} style={{
-              display: 'flex', gap: 8, alignItems: 'flex-start',
-              padding: '8px 12px', borderRadius: '8px',
-              background: `${'#ff8b00'}06`, border: `1px solid ${'#ff8b00'}20`,
-            }}>
-              <span style={{ color: '#ff8b00', fontWeight: 700, fontSize: '14px', flexShrink: 0 }}>{i + 1}.</span>
-              <span style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.5 }}>{point}</span>
+            <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]">
+              <span className="text-brand-500 font-bold text-sm shrink-0">{i + 1}.</span>
+              <span className="text-sm text-gray-500 leading-normal">{point}</span>
             </div>
           ))}
         </div>
@@ -782,20 +673,17 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             <div
               key={signal.id}
               onClick={() => {
-                // Scroll to activity timeline in the drawer
                 const activitySection = document.querySelector('[data-section="recent-activity"]');
                 if (activitySection) activitySection.scrollIntoView({ behavior: 'smooth' });
               }}
-              style={{ border: `1px solid ${'#E5E7EB'}`, borderRadius: '8px', padding: '10px 12px', cursor: 'pointer', transition: 'background 0.12s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#F3F4F6'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              className="border border-gray-200 rounded-lg px-3 py-2.5 cursor-pointer transition-colors hover:bg-gray-100"
               title="Click to view related activity"
             >
               <div className="flex justify-between items-center">
                 <div className="font-semibold">{signal.label}</div>
                 <SourceBadge system={signal.source ?? 'Member CRM'} size="xs" />
               </div>
-              <div className="text-xs text-gray-400">{formatDateTime(signal.timestamp)} · Confidence {signal.confidence ?? '—'}</div>
+              <div className="text-xs text-gray-400">{formatDateTime(signal.timestamp)} {'\u00B7'} Confidence {signal.confidence ?? '\u2014'}</div>
             </div>
           ))}
           {!(profile.riskSignals ?? []).length && <span className="text-gray-500">No active risks.</span>}
@@ -808,42 +696,23 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             value={noteText}
             onChange={(event) => setNoteText(event.target.value)}
             placeholder="Add a quick staff note..."
-            style={{
-              width: '100%',
-              minHeight: 96,
-              borderRadius: '8px',
-              border: `1px solid ${'#E5E7EB'}`,
-              padding: '8px',
-              fontSize: '14px',
-              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-              background: '#F3F4F6',
-              color: '#1a1a2e',
-            }}
+            className="w-full min-h-24 rounded-lg border border-gray-200 p-2 text-sm font-sans bg-gray-100 text-[#1a1a2e]"
           />
           <button
             type="button"
             onClick={handleAddNote}
-            style={{
-              alignSelf: 'flex-end',
-              padding: '6px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              background: '#ff8b00',
-              color: '#ffffff',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
+            className="self-end px-3.5 py-1.5 rounded-lg border-none bg-brand-500 text-white font-semibold cursor-pointer"
           >
             Save note
           </button>
           <div className="flex flex-col gap-2">
             {(profile.staffNotes ?? []).map((note) => (
-              <div key={note.id} style={{ border: `1px solid ${'#E5E7EB'}`, borderRadius: '8px', padding: '10px 12px' }}>
+              <div key={note.id} className="border border-gray-200 rounded-lg px-3 py-2.5">
                 <div className="font-semibold">{note.author}</div>
                 <div className="text-xs text-gray-400">
-                  {note.department ?? 'General'} • {formatDateTime(note.timestamp)}
+                  {note.department ?? 'General'} {'\u00B7'} {formatDateTime(note.timestamp)}
                 </div>
-                <div style={{ marginTop: 6 }}>{note.text}</div>
+                <div className="mt-1.5">{note.text}</div>
               </div>
             ))}
             {!(profile.staffNotes ?? []).length && <span className="text-gray-500">No notes yet.</span>}
@@ -851,22 +720,15 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
       </Section>
 
-      <div style={isDrawerLayout ? { position: 'sticky', bottom: 0, background: '#ffffff', padding: `${'16px'} 0 ${'8px'}`, boxShadow: '0 -12px 32px rgba(15, 23, 42, 0.08)', zIndex: 5 } : undefined}>
+      <div className={isDrawerLayout ? 'sticky bottom-0 bg-white pt-4 pb-2 shadow-[0_-12px_32px_rgba(15,23,42,0.08)] z-[5]' : ''}>
         <Section title="Quick actions">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          <div className="flex flex-wrap gap-2">
             {quickActions.map((action) => (
               <button
                 key={action.key}
                 type="button"
                 onClick={() => onQuickAction?.(profile.memberId, action.key)}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: '12px',
-                  border: '1px solid ' + '#E5E7EB',
-                  background: '#F3F4F6',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
+                className="px-3.5 py-2 rounded-xl border border-gray-200 bg-gray-100 cursor-pointer font-semibold"
               >
                 {action.icon} {action.label}
               </button>
@@ -876,17 +738,11 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </div>
 
       {onClose && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div className="flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            style={{
-              border: 'none',
-              background: 'none',
-              color: '#9CA3AF',
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
+            className="border-none bg-transparent text-gray-400 cursor-pointer font-semibold"
           >
             Close
           </button>
@@ -903,13 +759,10 @@ class DrawerErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: 32, textAlign: 'center', color: '#9CA3AF' }}>
-          <div style={{ fontSize: 24, marginBottom: 12 }}>Something went wrong</div>
-          <div style={{ fontSize: 14, marginBottom: 16 }}>Unable to load this member profile.</div>
-          <button onClick={this.props.onClose} style={{
-            padding: '8px 20px', borderRadius: 6, border: `1px solid ${'#E5E7EB'}`,
-            background: '#ffffff', cursor: 'pointer', color: '#1a1a2e',
-          }}>Close</button>
+        <div className="p-8 text-center text-gray-400">
+          <div className="text-2xl mb-3">Something went wrong</div>
+          <div className="text-sm mb-4">Unable to load this member profile.</div>
+          <button onClick={this.props.onClose} className="px-5 py-2 rounded-md border border-gray-200 bg-white cursor-pointer text-[#1a1a2e]">Close</button>
         </div>
       );
     }
@@ -963,7 +816,7 @@ export default function MemberProfileDrawer() {
     position: 'fixed',
     background: '#ffffff',
     boxShadow: '0 12px 40px rgba(15, 23, 42, 0.25)',
-    borderLeft: `1px solid ${'#E5E7EB'}`,
+    borderLeft: '1px solid #E5E7EB',
     borderTopLeftRadius: isMobile ? '16px' : 0,
     borderTopRightRadius: isMobile ? '16px' : 0,
     display: 'flex',

@@ -61,7 +61,7 @@ const SwoopSidebar = () => {
 
   return (
     <aside
-      className={`fixed flex flex-col top-0 px-5 left-0 bg-gray-900 text-white h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-800
+      className={`fixed flex flex-col top-0 px-5 left-0 bg-black text-white h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-800/50
         ${showFull ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}

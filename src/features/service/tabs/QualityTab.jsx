@@ -62,28 +62,14 @@ export default function QualityTab() {
     <div className="flex flex-col gap-6">
 
       {/* Service Consistency Score */}
-      <div style={{
-        background: '#ffffff',
-        border: `1px solid ${'#E5E7EB'}`,
-        borderRadius: '16px',
-        padding: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '24px',
-        flexWrap: 'wrap',
-      }}>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 flex items-center gap-6 flex-wrap">
         <div className="flex items-center gap-4">
-          <div style={{
-            width: 72, height: 72, borderRadius: '50%',
-            background: `conic-gradient(${scoreColor} ${consistencyScore * 3.6}deg, ${'#E5E7EB'} 0deg)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <div style={{
-              width: 58, height: 58, borderRadius: '50%', background: '#ffffff',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '22px', fontWeight: 800, color: scoreColor, lineHeight: 1 }}>
+          <div
+            className="w-[72px] h-[72px] rounded-full flex items-center justify-center shrink-0"
+            style={{ background: `conic-gradient(${scoreColor} ${consistencyScore * 3.6}deg, #E5E7EB 0deg)` }}
+          >
+            <div className="w-[58px] h-[58px] rounded-full bg-white flex flex-col items-center justify-center">
+              <span className="font-mono text-[22px] font-extrabold leading-none" style={{ color: scoreColor }}>
                 {consistencyScore}
               </span>
             </div>
@@ -115,11 +101,8 @@ export default function QualityTab() {
               color: adjustedScore >= 70 ? '#22c55e' : adjustedScore >= 50 ? '#ca8a04' : '#ef4444',
             }] : []),
           ].map(m => (
-            <div key={m.label} style={{
-              textAlign: 'center', minWidth: 80, padding: '6px 12px',
-              borderRadius: '8px', background: `${m.color}08`, border: `1px solid ${m.color}20`,
-            }}>
-              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '18px', fontWeight: 700, color: m.color }}>{m.value}</div>
+            <div key={m.label} className="text-center min-w-[80px] py-1.5 px-3 rounded-lg" style={{ background: `${m.color}08`, border: `1px solid ${m.color}20` }}>
+              <div className="font-mono text-lg font-bold" style={{ color: m.color }}>{m.value}</div>
               <div className="text-[10px] text-gray-400 font-semibold">{m.label}</div>
             </div>
           ))}
@@ -146,11 +129,8 @@ export default function QualityTab() {
         ].sort((a, b) => b.score - a.score);
         const top = drivers[0];
         return (
-          <div style={{
-            background: `${scoreColor}06`, border: `1px solid ${scoreColor}20`,
-            borderRadius: '12px', padding: '14px 18px',
-          }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: scoreColor, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <div className="rounded-xl py-3.5 px-[18px]" style={{ background: `${scoreColor}06`, border: `1px solid ${scoreColor}20` }}>
+            <div className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: scoreColor }}>
               Biggest Driver
             </div>
             <div className="text-sm text-gray-800 dark:text-white/90 mb-1">
@@ -158,11 +138,7 @@ export default function QualityTab() {
             </div>
             <button
               onClick={() => navigate('service', { tab: top.link })}
-              style={{
-                fontSize: '12px', fontWeight: 600, color: '#ff8b00',
-                background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                textDecoration: 'underline',
-              }}
+              className="text-xs font-semibold text-brand-500 bg-transparent border-none p-0 cursor-pointer underline"
             >
               {top.label} →
             </button>
@@ -171,12 +147,7 @@ export default function QualityTab() {
       })()}
 
       {/* By Day of Week */}
-      <div style={{
-        background: '#ffffff',
-        border: `1px solid ${'#E5E7EB'}`,
-        borderRadius: '16px',
-        padding: '24px',
-      }}>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
           Complaints by Day of Week
         </h3>
@@ -190,7 +161,6 @@ export default function QualityTab() {
             const dayComplaints = feedbackRecords.filter(r => new Date(r.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' }) === day);
             const catBreakdown = {};
             dayComplaints.forEach(c => { catBreakdown[c.category] = (catBreakdown[c.category] || 0) + 1; });
-            const tooltipText = count > 0 ? `${day}: ${count} complaint${count !== 1 ? 's' : ''}\n${Object.entries(catBreakdown).map(([k, v]) => `${v} ${k}`).join(', ')}` : `${day}: No complaints`;
             return (
               <div
                 key={day}
@@ -199,28 +169,22 @@ export default function QualityTab() {
                 onMouseLeave={() => setHoveredBar(null)}
               >
                 {isHovered && count > 0 && (
-                  <div style={{
-                    position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
-                    background: '#1a1a2e', color: '#fff', padding: '6px 10px', borderRadius: 6,
-                    fontSize: 11, whiteSpace: 'nowrap', zIndex: 10, marginBottom: 4,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                  }}>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 bg-[#1a1a2e] text-white py-1.5 px-2.5 rounded-md text-[11px] whitespace-nowrap z-10 mb-1 shadow-lg">
                     <div className="font-bold mb-0.5">{day}: {count} complaint{count !== 1 ? 's' : ''}</div>
-                    <div style={{ color: 'rgba(255,255,255,0.7)' }}>{Object.entries(catBreakdown).map(([k, v]) => `${v} ${k}`).join(', ')}</div>
+                    <div className="text-white/70">{Object.entries(catBreakdown).map(([k, v]) => `${v} ${k}`).join(', ')}</div>
                   </div>
                 )}
-                <span style={{ fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: '#1a1a2e' }}>
+                <span className="text-[11px] font-mono font-bold text-[#1a1a2e]">
                   {count || ''}
                 </span>
-                <div style={{
-                  width: '100%', maxWidth: 40,
-                  height: `${Math.max(heightPct, 4)}%`,
-                  background: isWeekend ? '#ef4444' : '#22c55e',
-                  borderRadius: '4px 4px 0 0',
-                  opacity: isHovered ? 1 : count > 0 ? 0.85 : 0.2,
-                  transition: 'height 0.3s, opacity 0.15s',
-                  cursor: count > 0 ? 'pointer' : 'default',
-                }} />
+                <div
+                  className={`w-full max-w-[40px] rounded-t transition-all duration-300 ${isWeekend ? 'bg-error-500' : 'bg-success-500'}`}
+                  style={{
+                    height: `${Math.max(heightPct, 4)}%`,
+                    opacity: isHovered ? 1 : count > 0 ? 0.85 : 0.2,
+                    cursor: count > 0 ? 'pointer' : 'default',
+                  }}
+                />
                 <span className="text-[11px] text-gray-400 font-semibold">{day}</span>
               </div>
             );
@@ -229,12 +193,7 @@ export default function QualityTab() {
       </div>
 
       {/* By Category */}
-      <div style={{
-        background: '#ffffff',
-        border: `1px solid ${'#E5E7EB'}`,
-        borderRadius: '16px',
-        padding: '24px',
-      }}>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
           Complaint Drivers
         </h3>
@@ -243,29 +202,30 @@ export default function QualityTab() {
             <div
               key={cat.category}
               onClick={() => navigate('service', { tab: 'complaints', category: cat.category })}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '16px',
-                cursor: 'pointer', padding: '4px 0', borderRadius: '8px',
-                transition: 'background 0.12s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#F3F4F6'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              className="flex items-center gap-4 cursor-pointer py-1 rounded-lg transition-colors duration-100 hover:bg-gray-100"
               title={`Click to view ${cat.category} complaints`}
             >
               <div className="w-[130px] text-[13px] font-medium text-gray-800 dark:text-white/90 shrink-0">
                 {cat.category}
               </div>
               <div className="flex-1 h-5 bg-gray-100 rounded overflow-hidden">
-                <div style={{
-                  height: '100%', width: `${(cat.count / maxCatCount) * 100}%`,
-                  background: cat.unresolvedCount > 2 ? '#ef4444' : '#22c55e',
-                  borderRadius: 4, transition: 'width 0.3s',
-                  display: 'flex', alignItems: 'center', paddingLeft: 8,
-                }}>
+                <div
+                  className="h-full rounded flex items-center pl-2 transition-all duration-300"
+                  style={{
+                    width: `${(cat.count / maxCatCount) * 100}%`,
+                    background: cat.unresolvedCount > 2 ? '#ef4444' : '#22c55e',
+                  }}
+                >
                   <span className="text-[10px] font-bold text-white">{cat.count}</span>
                 </div>
               </div>
-              <div style={{ fontSize: 12, color: cat.unresolvedCount > 0 ? '#ef4444' : '#22c55e', fontWeight: 600, minWidth: 80, textAlign: 'right', textDecoration: cat.unresolvedCount > 0 ? 'underline' : 'none' }}>
+              <div
+                className="text-xs font-semibold min-w-[80px] text-right"
+                style={{
+                  color: cat.unresolvedCount > 0 ? '#ef4444' : '#22c55e',
+                  textDecoration: cat.unresolvedCount > 0 ? 'underline' : 'none',
+                }}
+              >
                 {cat.unresolvedCount} unresolved
               </div>
             </div>
@@ -274,12 +234,7 @@ export default function QualityTab() {
       </div>
 
       {/* By Outlet */}
-      <div style={{
-        background: '#ffffff',
-        border: `1px solid ${'#E5E7EB'}`,
-        borderRadius: '16px',
-        padding: '24px',
-      }}>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
           Service Quality by Outlet
         </h3>
@@ -310,25 +265,18 @@ export default function QualityTab() {
             <div className="flex flex-col gap-2">
               {allOutlets.map(o => {
                 const isExpanded = expandedOutlet === o.name;
-                const outletComplaints = feedbackRecords.filter(r => r.isUnderstaffedDay ? o.name === 'Grill Room' : o.name === 'Other Outlets' || o.totalComplaints === 0);
+                const riskColor = riskColors[o.risk];
                 return (
                 <div key={o.name}>
                 <div
                   onClick={() => setExpandedOutlet(isExpanded ? null : o.name)}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '10px 14px', borderRadius: '8px',
-                    background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}`,
-                    cursor: 'pointer', transition: 'background 0.12s',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = `${'#E5E7EB'}40`; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#F3F4F6'; }}
+                  className="flex items-center justify-between py-2.5 px-3.5 rounded-lg bg-gray-100 border border-gray-200 cursor-pointer transition-colors duration-100 hover:bg-gray-200/40"
                 >
                   <div className="flex items-center gap-2.5">
-                    <span style={{
-                      width: 8, height: 8, borderRadius: '50%',
-                      background: riskColors[o.risk], flexShrink: 0,
-                    }} />
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ background: riskColor }}
+                    />
                     <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{o.name}</span>
                   </div>
                   <div className="flex items-center gap-4 text-xs">
@@ -340,18 +288,20 @@ export default function QualityTab() {
                     <span className="text-gray-500">
                       {o.totalComplaints} complaint{o.totalComplaints !== 1 ? 's' : ''}
                     </span>
-                    <span style={{
-                      fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: '999px',
-                      background: `${riskColors[o.risk]}12`, color: riskColors[o.risk],
-                      textTransform: 'uppercase',
-                    }}>
+                    <span
+                      className="text-[10px] font-bold py-0.5 px-2 rounded-full uppercase"
+                      style={{ background: `${riskColor}12`, color: riskColor }}
+                    >
                       {o.risk}
                     </span>
                     <span className="text-gray-400 text-xs">{isExpanded ? '▾' : '▸'}</span>
                   </div>
                 </div>
                 {isExpanded && (
-                  <div style={{ padding: '8px 14px 12px', fontSize: 12, color: '#6B7280', borderLeft: `3px solid ${riskColors[o.risk]}30`, marginLeft: 14 }}>
+                  <div
+                    className="py-2 px-3.5 text-xs text-gray-500 ml-3.5"
+                    style={{ borderLeft: `3px solid ${riskColor}30` }}
+                  >
                     {o.totalComplaints > 0 ? (
                       <div>{o.totalComplaints} complaint{o.totalComplaints !== 1 ? 's' : ''} this month. {o.understaffedDays > 0 ? `${o.understaffedDays} understaffed day${o.understaffedDays !== 1 ? 's' : ''} drove service quality below threshold.` : 'No staffing issues detected.'}</div>
                     ) : (
@@ -368,12 +318,7 @@ export default function QualityTab() {
       </div>
 
       {/* Shift Comparison */}
-      <div style={{
-        background: '#ffffff',
-        border: `1px solid ${'#E5E7EB'}`,
-        borderRadius: '16px',
-        padding: '24px',
-      }}>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
           AM vs PM Service Quality
         </h3>
@@ -385,13 +330,9 @@ export default function QualityTab() {
             { label: 'AM Shift (6am-12pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h <= 15; }).length, color: '#22c55e' },
             { label: 'PM Shift (12pm-9pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h > 15; }).length, color: '#ef4444' },
           ].map(shift => (
-            <div key={shift.label} style={{
-              padding: '16px', borderRadius: '8px',
-              background: `${shift.color}08`, border: `1px solid ${shift.color}20`,
-              textAlign: 'center',
-            }}>
+            <div key={shift.label} className="p-4 rounded-lg text-center" style={{ background: `${shift.color}08`, border: `1px solid ${shift.color}20` }}>
               <div className="text-xs text-gray-400 font-semibold mb-1">{shift.label}</div>
-              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 24, fontWeight: 700, color: shift.color }}>{shift.complaints}</div>
+              <div className="font-mono text-2xl font-bold" style={{ color: shift.color }}>{shift.complaints}</div>
               <div className="text-[11px] text-gray-500">complaints</div>
             </div>
           ))}

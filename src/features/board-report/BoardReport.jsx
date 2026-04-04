@@ -11,6 +11,7 @@ import DataEmptyState from '@/components/ui/DataEmptyState';
 
 const tabNames = ['Summary', 'Details'];
 
+// Kept for Recharts chart fill/stroke colors only
 const colors = {
   green: '#48bb78',
   blue: '#63b3ed',
@@ -22,13 +23,7 @@ const colors = {
   textMuted: '#BCC3CF',
   text: '#D8DCE3',
   white: '#F0F0F5',
-  pageHeading: '#1a1a2e',
-  pageSubtext: '#6B7280',
-  panelHeading: '#1a1a2e',
-  panelText: '#3F3F46',
-  panelMuted: '#6B7280',
   brand: '#ff8b00',
-  tabInactive: '#8890A0',
 };
 
 function formatCurrency(val) {
@@ -36,42 +31,44 @@ function formatCurrency(val) {
 }
 
 function HealthBadge({ value }) {
-  const color = value >= 60 ? colors.green : value >= 40 ? colors.yellow : colors.red;
+  const colorClass = value >= 60
+    ? 'bg-success-500/10 text-success-500'
+    : value >= 40
+      ? 'bg-warning-500/10 text-warning-500'
+      : 'bg-error-500/10 text-error-500';
   return (
-    <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: '12px', fontWeight: 700, fontSize: '13px', background: color + '22', color }}>
+    <span className={`inline-block px-2.5 py-0.5 rounded-xl font-bold text-[13px] ${colorClass}`}>
       {value}
     </span>
   );
 }
 
 function KPIStrip({ kpis, onDrillDown }) {
+  const colorMap = {
+    green: 'text-success-500',
+    blue: 'text-blue-400',
+    orange: 'text-warning-500',
+    red: 'text-error-500',
+  };
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
       {kpis.map((kpi) => (
         <div
           key={kpi.label}
           onClick={() => onDrillDown?.()}
-          style={{
-            background: colors.bg,
-            borderRadius: '12px',
-            padding: '16px',
-            textAlign: 'center',
-            border: '1px solid ' + colors.border,
-            cursor: 'pointer',
-            transition: 'box-shadow 0.15s, transform 0.15s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+          className="bg-gray-900 rounded-xl p-4 text-center border border-[#2d2d44] cursor-pointer transition-all duration-150 hover:shadow-lg hover:-translate-y-px"
         >
-          <div style={{ fontSize: '28px', fontWeight: 700, color: colors[kpi.color] || colors.green }}>
+          <div className={`text-[28px] font-bold ${colorMap[kpi.color] || 'text-success-500'}`}>
             {kpi.prefix}
             <AnimatedNumber value={kpi.value} duration={1200} decimals={kpi.value % 1 !== 0 ? 1 : 0} />
             {kpi.suffix}
           </div>
-          <div style={{ fontSize: '12px', color: colors.textMuted, marginTop: '4px' }}
-            title={kpi.label === 'Board Confidence Score' ? 'Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.' : undefined}>
+          <div
+            className="text-xs text-[#BCC3CF] mt-1"
+            title={kpi.label === 'Board Confidence Score' ? 'Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.' : undefined}
+          >
             {kpi.label}
-            {kpi.label === 'Board Confidence Score' && <span style={{ marginLeft: '4px', cursor: 'help', opacity: 0.6 }} title="Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.">&#9432;</span>}
+            {kpi.label === 'Board Confidence Score' && <span className="ml-1 cursor-help opacity-60" title="Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.">&#9432;</span>}
           </div>
         </div>
       ))}
@@ -130,7 +127,7 @@ export default function BoardReport() {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+      <div className="p-6 max-w-[1100px] mx-auto">
         <SkeletonGrid cards={6} columns={3} cardHeight={120} />
       </div>
     );
@@ -138,46 +135,31 @@ export default function BoardReport() {
 
   return (
     <PageTransition>
-      <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="p-6 max-w-[1100px] mx-auto">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: colors.pageHeading }}>
+          <h1 className="text-2xl font-bold text-gray-800">
             Board Report — Service, Members & Operations
           </h1>
-          <p style={{ fontSize: '14px', color: colors.pageSubtext, margin: '4px 0 0 0' }}>
+          <p className="text-sm text-gray-500 mt-1">
             Monthly executive summary — service quality, member health, and operational response
           </p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => { setActiveTab(0); setTimeout(() => window.print(), 100); }}
-            style={{
-              background: colors.brand, color: '#fff', border: 'none',
-              borderRadius: '8px', padding: '8px 20px', cursor: 'pointer',
-              fontWeight: 600, fontSize: '14px',
-            }}
+            className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none"
           >Export as PDF</button>
           <button
             onClick={() => window.print()}
-            style={{
-              background: 'transparent', color: colors.brand,
-              border: `1px solid ${colors.brand}`, borderRadius: '8px',
-              padding: '8px 20px', cursor: 'pointer', fontWeight: 600, fontSize: '14px',
-            }}
+            className="rounded-lg border border-brand-500 bg-transparent text-brand-500 px-5 py-2 text-sm font-semibold cursor-pointer"
           >Print</button>
         </div>
       </div>
 
       {/* Demo data indicator */}
       {!isRealClub() && (
-        <div style={{
-          padding: '8px 14px', marginBottom: '16px',
-          borderRadius: '8px',
-          background: `${'#f59e0b'}10`,
-          border: `1px solid ${'#f59e0b'}30`,
-          fontSize: '12px', color: '#b45309',
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
+        <div className="rounded-xl border border-warning-500/40 bg-warning-50 p-2 px-3.5 mb-4 text-xs text-amber-700 flex items-center gap-2">
           <span className="font-bold">Demo data</span>
           <span>— Real metrics will appear after 30 days of live data. All figures shown are simulated.</span>
         </div>
@@ -186,40 +168,37 @@ export default function BoardReport() {
       <KPIStrip kpis={kpis} onDrillDown={() => setActiveTab(1)} />
 
       {/* Board Confidence Score Methodology */}
-      <details style={{ marginBottom: '16px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px', padding: '12px 16px' }}>
-        <summary style={{ fontSize: '12px', fontWeight: 600, color: '#9CA3AF', cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <details className="mb-4 bg-white border border-gray-200 rounded-lg p-3 px-4">
+        <summary className="text-xs font-semibold text-gray-400 cursor-pointer list-none flex items-center gap-1.5">
           <span className="text-sm">&#9432;</span> How is the Board Confidence Score calculated?
         </summary>
-        <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+        <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2.5">
           {[
-            { label: 'Service Quality', weight: '30%', value: '87%', benchmark: 'Complaint resolution + consistency', color: '#22c55e' },
-            { label: 'Member Health', weight: '25%', value: '14 retained', benchmark: 'Health scores + interventions', color: '#3b82f6' },
-            { label: 'Operational Response', weight: '25%', value: '4.2 hrs avg', benchmark: 'Detection to action time', color: '#f59e0b' },
-            { label: 'Financial Performance', weight: '20%', value: 'On budget', benchmark: 'Dues + F&B vs plan', color: '#8b5cf6' },
+            { label: 'Service Quality', weight: '30%', value: '87%', benchmark: 'Complaint resolution + consistency', color: 'text-green-500' },
+            { label: 'Member Health', weight: '25%', value: '14 retained', benchmark: 'Health scores + interventions', color: 'text-blue-500' },
+            { label: 'Operational Response', weight: '25%', value: '4.2 hrs avg', benchmark: 'Detection to action time', color: 'text-amber-500' },
+            { label: 'Financial Performance', weight: '20%', value: 'On budget', benchmark: 'Dues + F&B vs plan', color: 'text-violet-500' },
           ].map(m => (
-            <div key={m.label} style={{ padding: '10px', borderRadius: '8px', background: '#F3F4F6', border: '1px solid ' + '#E5E7EB' }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: m.color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{m.label} ({m.weight})</div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a2e', marginTop: '4px' }}>{m.value}</div>
-              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>{m.benchmark}</div>
+            <div key={m.label} className="p-2.5 rounded-lg bg-gray-100 border border-gray-200">
+              <div className={`text-[10px] font-bold uppercase tracking-wide ${m.color}`}>{m.label} ({m.weight})</div>
+              <div className="text-sm font-bold text-gray-800 mt-1">{m.value}</div>
+              <div className="text-[10px] text-gray-400">{m.benchmark}</div>
             </div>
           ))}
         </div>
       </details>
 
       {/* Tab switcher */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+      <div className="flex gap-2 mb-5">
         {tabNames.map((tab, i) => (
           <button
             key={tab}
             onClick={() => setActiveTab(i)}
-            style={{
-              padding: '8px 18px', borderRadius: '8px',
-              border: activeTab === i ? 'none' : '1px solid ' + colors.tabInactive + '40',
-              cursor: 'pointer', fontWeight: 600, fontSize: '14px',
-              background: activeTab === i ? colors.brand : 'transparent',
-              color: activeTab === i ? '#fff' : colors.tabInactive,
-              transition: 'all 0.15s',
-            }}
+            className={`px-5 py-2 rounded-lg cursor-pointer font-semibold text-sm transition-all duration-150 ${
+              activeTab === i
+                ? 'bg-brand-500 text-white border-none'
+                : 'bg-transparent text-gray-400 border border-gray-300'
+            }`}
           >{tab}</button>
         ))}
       </div>
@@ -229,21 +208,21 @@ export default function BoardReport() {
         <>
           {/* Executive Summary — covers service, operations, and member health */}
           <Panel>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: colors.panelHeading }}>
+            <h2 className="text-lg font-bold text-gray-800 mb-4">
               Executive Summary
             </h2>
-            <p style={{ color: colors.panelText, lineHeight: 1.7, marginBottom: '16px' }}>
+            <p className="text-gray-600 leading-relaxed mb-4">
               This month, Oakmont Hills delivered consistent service quality with an <strong>{resolutionRate}% complaint resolution rate</strong> and
               an average resolution time of <strong>{avgResolutionDays} days</strong>. The operations team responded to alerts with an
               average <strong>4.2-hour detection-to-action time</strong>, catching {operationalSaves.length} service disruptions before
               they impacted members.
             </p>
-            <p style={{ color: colors.panelText, lineHeight: 1.7, marginBottom: '16px' }}>
+            <p className="text-gray-600 leading-relaxed mb-4">
               Member health remained strong with <strong>{dist.find(d => d.level === 'Healthy')?.count || 200} members in healthy status</strong>.
               Through proactive interventions, <strong>{memberSaves.length} members</strong> showing early disengagement signals were
               successfully re-engaged — demonstrating the value of early detection and personal outreach.
             </p>
-            <p style={{ color: colors.panelText, lineHeight: 1.7 }}>
+            <p className="text-gray-600 leading-relaxed">
               Staffing alignment and proactive scheduling adjustments prevented service gaps on high-demand days. The
               operational response improvements continue to compound, with response times improving 48% since launch.
             </p>
@@ -251,56 +230,56 @@ export default function BoardReport() {
 
           {/* Service & Operations — unified section */}
           <Panel>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>
+            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
               Service & Operations
             </h2>
-            <p style={{ fontSize: '12px', color: colors.panelMuted, marginBottom: '16px' }}>
+            <p className="text-xs text-gray-500 mb-4">
               Service consistency, complaint resolution, staffing coverage, and operational response.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
               {(() => {
                 const consistencyScore = Math.round(
                   (resolutionRate * 0.4) + ((100 - (feedbackRecords.filter(f => f.isUnderstaffedDay).length / Math.max(feedbackRecords.length, 1) * 100)) * 0.3) + (70 * 0.3)
                 );
-                const csColor = consistencyScore >= 70 ? colors.green : consistencyScore >= 50 ? colors.orange : colors.red;
+                const csColorClass = consistencyScore >= 70 ? 'text-success-500' : consistencyScore >= 50 ? 'text-warning-500' : 'text-error-500';
                 return (
-                  <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                    <div style={{ fontSize: '28px', fontWeight: 700, color: csColor }}>{consistencyScore}</div>
-                    <div style={{ fontSize: '11px', color: colors.textMuted }}>Service Consistency Score</div>
+                  <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                    <div className={`text-[28px] font-bold ${csColorClass}`}>{consistencyScore}</div>
+                    <div className="text-[11px] text-[#BCC3CF]">Service Consistency Score</div>
                   </div>
                 );
               })()}
-              <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                <div style={{ fontSize: '28px', fontWeight: 700, color: colors.green }}>{resolutionRate}%</div>
-                <div style={{ fontSize: '11px', color: colors.textMuted }}>Complaint Resolution Rate</div>
+              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                <div className="text-[28px] font-bold text-success-500">{resolutionRate}%</div>
+                <div className="text-[11px] text-[#BCC3CF]">Complaint Resolution Rate</div>
               </div>
-              <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                <div style={{ fontSize: '28px', fontWeight: 700, color: colors.green }}>{Math.round(((30 - understaffedDays.length) / 30) * 100)}%</div>
-                <div style={{ fontSize: '11px', color: colors.textMuted }}>Staffing Alignment Rate</div>
+              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                <div className="text-[28px] font-bold text-success-500">{Math.round(((30 - understaffedDays.length) / 30) * 100)}%</div>
+                <div className="text-[11px] text-[#BCC3CF]">Staffing Alignment Rate</div>
               </div>
-              <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                <div style={{ fontSize: '28px', fontWeight: 700, color: colors.green }}>4.2 hrs</div>
-                <div style={{ fontSize: '11px', color: colors.textMuted }}>Avg Detection to Action</div>
+              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                <div className="text-[28px] font-bold text-success-500">4.2 hrs</div>
+                <div className="text-[11px] text-[#BCC3CF]">Avg Detection to Action</div>
               </div>
             </div>
 
             {/* Staffing detail row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
-              <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                <div style={{ fontSize: '28px', fontWeight: 700, color: colors.green }}>{Math.max(0, 30 - understaffedDays.length)}</div>
-                <div style={{ fontSize: '11px', color: colors.textMuted }}>Days Fully Staffed</div>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                <div className="text-[28px] font-bold text-success-500">{Math.max(0, 30 - understaffedDays.length)}</div>
+                <div className="text-[11px] text-[#BCC3CF]">Days Fully Staffed</div>
               </div>
-              <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                <div style={{ fontSize: '28px', fontWeight: 700, color: colors.green }}>{operationalSaves.length}</div>
-                <div style={{ fontSize: '11px', color: colors.textMuted }}>Staffing Recommendations Acted On</div>
+              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                <div className="text-[28px] font-bold text-success-500">{operationalSaves.length}</div>
+                <div className="text-[11px] text-[#BCC3CF]">Staffing Recommendations Acted On</div>
               </div>
-              <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
+              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 {(() => {
                   const understaffedComplaintPct = feedbackRecords.length > 0 ? Math.round((feedbackRecords.filter(f => f.isUnderstaffedDay).length / feedbackRecords.length) * 100) : 0;
                   return (
                     <>
-                      <div style={{ fontSize: '28px', fontWeight: 700, color: understaffedComplaintPct > 30 ? colors.orange : colors.green }}>{understaffedComplaintPct}%</div>
-                      <div style={{ fontSize: '11px', color: colors.textMuted }}>Complaints on Understaffed Days</div>
+                      <div className={`text-[28px] font-bold ${understaffedComplaintPct > 30 ? 'text-warning-500' : 'text-success-500'}`}>{understaffedComplaintPct}%</div>
+                      <div className="text-[11px] text-[#BCC3CF]">Complaints on Understaffed Days</div>
                     </>
                   );
                 })()}
@@ -310,10 +289,7 @@ export default function BoardReport() {
             {/* Complaint categories */}
             <div className="flex gap-2 flex-wrap">
               {feedbackSummary.slice(0, 4).map(cat => (
-                <div key={cat.category} style={{
-                  padding: '6px 12px', borderRadius: '8px', fontSize: '12px',
-                  background: '#F3F4F6', border: '1px solid ' + '#E5E7EB',
-                }}>
+                <div key={cat.category} className="py-1.5 px-3 rounded-lg text-xs bg-gray-100 border border-gray-200">
                   <span className="font-semibold text-gray-800 dark:text-white/90">{cat.category}</span>
                   <span className="text-gray-400"> — {cat.count} total, {cat.unresolvedCount} open</span>
                 </div>
@@ -323,10 +299,10 @@ export default function BoardReport() {
 
           {/* Weather Impact Summary */}
           <Panel>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>
+            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
               Weather Impact
             </h2>
-            <p style={{ fontSize: '12px', color: colors.panelMuted, marginBottom: '16px' }}>
+            <p className="text-xs text-gray-500 mb-4">
               Weather conditions and their effect on operations this month.
             </p>
             {(() => {
@@ -350,29 +326,31 @@ export default function BoardReport() {
                 (adjResRate * 0.4) + ((100 - understaffedComplaintsPct) * 0.3) + (70 * 0.3)
               ));
 
+              const adjScoreColorClass = adjScore >= 70 ? 'text-success-500' : adjScore >= 50 ? 'text-warning-500' : 'text-error-500';
+
               return (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
-                    <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                      <div style={{ fontSize: '28px', fontWeight: 700, color: totalWeatherDays > 3 ? colors.orange : colors.blue }}>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                      <div className={`text-[28px] font-bold ${totalWeatherDays > 3 ? 'text-warning-500' : 'text-blue-400'}`}>
                         {totalWeatherDays || '—'}
                       </div>
-                      <div style={{ fontSize: '11px', color: colors.textMuted }}>Adverse Weather Days</div>
+                      <div className="text-[11px] text-[#BCC3CF]">Adverse Weather Days</div>
                     </div>
-                    <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                      <div style={{ fontSize: '28px', fontWeight: 700, color: colors.blue }}>
+                    <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                      <div className="text-[28px] font-bold text-blue-400">
                         {weatherImpactedComplaints.length || '—'}
                       </div>
-                      <div style={{ fontSize: '11px', color: colors.textMuted }}>Weather-Related Complaints</div>
+                      <div className="text-[11px] text-[#BCC3CF]">Weather-Related Complaints</div>
                     </div>
-                    <div style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                      <div style={{ fontSize: '28px', fontWeight: 700, color: adjScore >= 70 ? colors.green : adjScore >= 50 ? colors.orange : colors.red }}>
+                    <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                      <div className={`text-[28px] font-bold ${adjScoreColorClass}`}>
                         {weatherImpactedComplaints.length > 0 ? adjScore : '—'}
                       </div>
-                      <div style={{ fontSize: '11px', color: colors.textMuted }}>Weather-Adj Consistency</div>
+                      <div className="text-[11px] text-[#BCC3CF]">Weather-Adj Consistency</div>
                     </div>
                   </div>
-                  <div style={{ fontSize: '13px', color: colors.panelText, lineHeight: 1.6 }}>
+                  <div className="text-[13px] text-gray-600 leading-relaxed">
                     {weatherImpactedComplaints.length > 0 ? (
                       <>
                         <strong>{weatherImpactedComplaints.length} complaints</strong> ({weatherPct}%) occurred on weather-impacted days,
@@ -394,25 +372,22 @@ export default function BoardReport() {
 
           {/* Member Health Overview */}
           <Panel>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>
+            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
               Member Health Overview
             </h2>
-            <p style={{ fontSize: '12px', color: colors.panelMuted, marginBottom: '16px' }}>
+            <p className="text-xs text-gray-500 mb-4">
               Health distribution and intervention outcomes this month.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
               {dist.map(d => {
                 const delta = Number.isFinite(d?.delta) ? d.delta : 0;
-                const deltaColor = delta > 0 ? colors.red : delta < 0 ? colors.green : colors.textMuted;
+                const deltaColorClass = delta > 0 ? 'text-error-500' : delta < 0 ? 'text-success-500' : 'text-[#BCC3CF]';
                 return (
-                  <div key={d.level} style={{
-                    background: colors.bg, borderRadius: '12px', padding: '14px',
-                    border: '1px solid ' + colors.border, textAlign: 'center',
-                  }}>
-                    <div style={{ fontSize: '24px', fontWeight: 700, color: d.color }}>{d.count}</div>
-                    <div style={{ fontSize: '11px', color: colors.textMuted }}>{d.level}</div>
+                  <div key={d.level} className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                    <div className="text-2xl font-bold" style={{ color: d.color }}>{d.count}</div>
+                    <div className="text-[11px] text-[#BCC3CF]">{d.level}</div>
                     {delta !== 0 && (
-                      <div style={{ fontSize: '10px', fontWeight: 600, color: deltaColor, marginTop: '4px' }}>
+                      <div className={`text-[10px] font-semibold mt-1 ${deltaColorClass}`}>
                         {delta > 0 ? '+' : ''}{delta} vs last month
                       </div>
                     )}
@@ -420,7 +395,7 @@ export default function BoardReport() {
                 );
               })}
             </div>
-            <div style={{ fontSize: '13px', color: colors.panelText, lineHeight: 1.6 }}>
+            <div className="text-[13px] text-gray-600 leading-relaxed">
               <strong>{memberSaves.length} members</strong> were successfully re-engaged through proactive interventions this month.
               Top interventions included GM personal calls, F&B director outreach, and membership director meetings.
             </div>
@@ -428,19 +403,15 @@ export default function BoardReport() {
 
           {/* Operational Saves Detail */}
           <Panel>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>
+            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
               Operational Response Detail
             </h2>
-            <p style={{ fontSize: '12px', color: colors.panelMuted, marginBottom: '16px' }}>
+            <p className="text-xs text-gray-500 mb-4">
               {memberSaves.length} interventions completed, {operationalSaves.length} disruptions prevented this month.
             </p>
             <div className="flex flex-col gap-2">
               {operationalSaves.map(o => (
-                <div key={o.event} style={{
-                  padding: '10px 14px', borderRadius: '8px',
-                  background: '#F3F4F6', border: '1px solid ' + '#E5E7EB',
-                  fontSize: '13px',
-                }}>
+                <div key={o.event} className="py-2.5 px-3.5 rounded-lg text-[13px] bg-gray-100 border border-gray-200">
                   <span className="font-semibold text-gray-800 dark:text-white/90">{o.event}</span>
                   <span className="text-gray-400"> — {o.outcome}</span>
                 </div>
@@ -450,26 +421,22 @@ export default function BoardReport() {
 
           {/* F&B Performance — Placeholder */}
           <Panel>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', color: colors.panelHeading }}>
+            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
               F&B Performance
             </h2>
-            <div style={{
-              padding: '8px 12px', marginBottom: '16px', borderRadius: '6px',
-              background: `${colors.yellow}12`, border: `1px solid ${colors.yellow}30`,
-              fontSize: '12px', color: colors.yellow, display: 'flex', alignItems: 'center', gap: 6,
-            }}>
-              <span className="font-bold">Coming soon</span>
-              <span style={{ color: colors.textMuted }}>— Requires POS integration. Connect your POS system in Admin to unlock F&B metrics.</span>
+            <div className="rounded-xl border border-warning-500/40 bg-warning-50 p-2 px-3 mb-4 text-xs flex items-center gap-1.5">
+              <span className="font-bold text-warning-500">Coming soon</span>
+              <span className="text-[#BCC3CF]">— Requires POS integration. Connect your POS system in Admin to unlock F&B metrics.</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', opacity: 0.4 }}>
+            <div className="grid grid-cols-3 gap-3 opacity-40">
               {[
                 { label: 'Revenue per Cover', value: '—' },
                 { label: 'Covers vs Capacity', value: '—' },
                 { label: 'Post-Round Dining Rate', value: '—' },
               ].map(m => (
-                <div key={m.label} style={{ background: colors.bg, borderRadius: '12px', padding: '14px', border: '1px solid ' + colors.border, textAlign: 'center' }}>
-                  <div style={{ fontSize: '28px', fontWeight: 700, color: colors.textMuted }}>{m.value}</div>
-                  <div style={{ fontSize: '11px', color: colors.textMuted }}>{m.label}</div>
+                <div key={m.label} className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                  <div className="text-[28px] font-bold text-[#BCC3CF]">{m.value}</div>
+                  <div className="text-[11px] text-[#BCC3CF]">{m.label}</div>
                 </div>
               ))}
             </div>
@@ -480,41 +447,41 @@ export default function BoardReport() {
       {/* Details Tab */}
       {activeTab === 1 && (
         <div className="flex flex-col gap-4">
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: colors.pageHeading, margin: '8px 0 0' }}>Member Interventions</h2>
-          <div style={{ fontSize: '14px', color: colors.textMuted, marginBottom: '4px' }}>
+          <h2 className="text-lg font-bold text-gray-800 mt-2">Member Interventions</h2>
+          <div className="text-sm text-[#BCC3CF] mb-1">
             {memberSaves.length} members retained through proactive intervention
           </div>
           {memberSaves.map((m) => (
             <Panel key={m.name}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: colors.panelHeading }}>{m.name}</h3>
+              <div className="flex justify-between items-center mb-2.5">
+                <h3 className="text-base font-bold text-gray-800">{m.name}</h3>
               </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', color: colors.panelMuted }}>Health:</span>
+              <div className="flex gap-2 items-center mb-2.5">
+                <span className="text-[13px] text-gray-500">Health:</span>
                 <HealthBadge value={m.healthBefore} />
-                <span style={{ color: colors.panelMuted }}>{'→'}</span>
+                <span className="text-gray-500">{'→'}</span>
                 <HealthBadge value={m.healthAfter} />
               </div>
-              <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.panelText }}>
+              <div className="text-[13px] leading-relaxed text-gray-600">
                 <div><strong>Trigger:</strong> {m.trigger}</div>
                 <div><strong>Action:</strong> {m.action}</div>
-                <div><strong>Outcome:</strong> <span style={{ color: colors.green }}>{m.outcome}</span></div>
+                <div><strong>Outcome:</strong> <span className="text-success-500">{m.outcome}</span></div>
               </div>
-              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid ' + '#E5E7EB' }}>
-                <div style={{ fontSize: '11px', fontWeight: 600, color: colors.panelMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Evidence Chain</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0', flexWrap: 'wrap' }}>
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="text-[11px] font-semibold text-gray-500 mb-2 uppercase tracking-wide">Evidence Chain</div>
+                <div className="flex items-center flex-wrap">
                   {[
-                    { label: 'Signal detected', color: '#ef4444' },
-                    { label: 'GM alerted', color: '#f59e0b' },
-                    { label: 'Action taken', color: '#3b82f6' },
-                    { label: 'Member retained', color: '#22c55e' },
+                    { label: 'Signal detected', color: 'bg-red-500' },
+                    { label: 'GM alerted', color: 'bg-amber-500' },
+                    { label: 'Action taken', color: 'bg-blue-500' },
+                    { label: 'Member retained', color: 'bg-green-500' },
                   ].map((step, i) => (
-                    <div key={step.label} style={{ display: 'flex', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: step.color }} />
-                        <span style={{ fontSize: '11px', color: colors.panelText, whiteSpace: 'nowrap' }}>{step.label}</span>
+                    <div key={step.label} className="flex items-center">
+                      <div className="flex items-center gap-1">
+                        <div className={`w-2 h-2 rounded-full ${step.color}`} />
+                        <span className="text-[11px] text-gray-600 whitespace-nowrap">{step.label}</span>
                       </div>
-                      {i < 3 && <span style={{ margin: '0 6px', color: colors.panelMuted, fontSize: '10px' }}>{'-->'}</span>}
+                      {i < 3 && <span className="mx-1.5 text-gray-500 text-[10px]">{'-->'}</span>}
                     </div>
                   ))}
                 </div>
@@ -522,19 +489,19 @@ export default function BoardReport() {
             </Panel>
           ))}
 
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: colors.pageHeading, margin: '24px 0 0' }}>Operational Saves</h2>
-          <div style={{ fontSize: '14px', color: colors.textMuted, marginBottom: '4px' }}>
+          <h2 className="text-lg font-bold text-gray-800 mt-6">Operational Saves</h2>
+          <div className="text-sm text-[#BCC3CF] mb-1">
             {operationalSaves.length} operational disruptions prevented
           </div>
           {operationalSaves.map((o) => (
             <Panel key={o.event}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: colors.panelHeading }}>{o.event}</h3>
+              <div className="flex justify-between items-center mb-2.5">
+                <h3 className="text-base font-bold text-gray-800">{o.event}</h3>
               </div>
-              <div style={{ fontSize: '13px', lineHeight: 1.6, color: colors.panelText }}>
+              <div className="text-[13px] leading-relaxed text-gray-600">
                 <div><strong>Detection:</strong> {o.detection}</div>
                 <div><strong>Action:</strong> {o.action}</div>
-                <div><strong>Outcome:</strong> <span style={{ color: colors.green }}>{o.outcome}</span></div>
+                <div><strong>Outcome:</strong> <span className="text-success-500">{o.outcome}</span></div>
               </div>
             </Panel>
           ))}

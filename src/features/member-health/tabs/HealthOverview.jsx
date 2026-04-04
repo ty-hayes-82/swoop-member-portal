@@ -182,22 +182,19 @@ export default function HealthOverview() {
             ? 'same as last month.'
             : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;
           return (
-            <div key={d.level} style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', borderRadius: '12px',
-              border: `1px solid ${d.color}40`, padding: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div key={d.level} className="bg-white shadow-theme-xs rounded-xl p-4" style={{ border: `1px solid ${d.color}40` }}>
+              <div className="flex justify-between mb-2">
                 <span className="text-xs text-gray-400 uppercase tracking-wide">{d.level}</span>
-                <span style={{ fontSize: '12px', color: d.color }}>
+                <span className="text-xs" style={{ color: d.color }}>
                   {(d.percentage * 100).toFixed(0)}%
                 </span>
               </div>
-              <div style={{ fontSize: '28px', fontFamily: "'JetBrains Mono', monospace",
-                fontWeight: 700, color: d.color }}>{d.count}</div>
+              <div className="text-[28px] font-mono font-bold" style={{ color: d.color }}>{d.count}</div>
               <div className="text-xs text-gray-400">members</div>
-              <div style={{ height: 4, background: '#E5E7EB', borderRadius: 2, marginTop: '8px' }}>
-                <div style={{ height: '100%', background: d.color, borderRadius: 2,
-                  width: `${d.percentage * 100}%` }} />
+              <div className="h-1 bg-gray-200 rounded-sm mt-2">
+                <div className="h-full rounded-sm" style={{ background: d.color, width: `${d.percentage * 100}%` }} />
               </div>
-              <div style={{ marginTop: '8px', fontSize: '12px', color: '#6B7280', lineHeight: 1.4 }}>
+              <div className="mt-2 text-xs text-gray-500 leading-snug">
                 <strong>{d.count} members</strong> {descriptor} —{' '}
                 <span style={{ color: deltaColor }}>{deltaCopy}</span>
               </div>
@@ -208,15 +205,9 @@ export default function HealthOverview() {
 
       {/* Members Needing Attention — single priority list */}
       <div>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: '16px',
-        }}>
+        <div className="flex justify-between items-center mb-4">
           <div>
-            <div style={{
-              fontSize: '11px', fontWeight: 700, color: '#ef4444',
-              textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4,
-            }}>
+            <div className="text-[11px] font-bold text-error-500 uppercase tracking-wider mb-1">
               Members Needing Attention
             </div>
             <div className="text-xs text-gray-400">
@@ -235,42 +226,22 @@ export default function HealthOverview() {
               <div key={m.memberId}>
                 <div
                   onClick={() => setExpandedId(isExpanded ? null : m.memberId)}
-                  style={{
-                    padding: '14px 18px',
-                    background: '#ffffff',
-                    border: `1px solid ${'#E5E7EB'}`,
-                    borderLeft: `3px solid ${sc}`,
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    transition: 'box-shadow 0.15s, transform 0.15s',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+                  className="px-[18px] py-[14px] bg-white border border-gray-200 rounded-xl cursor-pointer transition-all duration-150 hover:shadow-theme-md hover:-translate-y-px"
+                  style={{ borderLeft: `3px solid ${sc}` }}
                 >
                   {/* Row 1: Name + badges */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <div className="flex justify-between items-center mb-1.5">
                     <div className="flex items-center gap-2.5">
-                      <span style={{
-                        fontSize: '12px', fontWeight: 700, color: '#9CA3AF',
-                        fontFamily: "'JetBrains Mono', monospace", width: 20,
-                      }}>
+                      <span className="text-xs font-bold text-gray-400 font-mono w-5">
                         {idx + 1}
                       </span>
-                      <MemberLink memberId={m.memberId} mode="drawer" style={{
-                        fontWeight: 700, fontSize: '14px', color: '#1a1a2e',
-                      }}>
+                      <MemberLink memberId={m.memberId} mode="drawer" className="font-bold text-sm text-[#1a1a2e]">
                         {m.name}
                       </MemberLink>
-                      <span style={{
-                        fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 10,
-                        background: `${sc}15`, color: sc, fontFamily: "'JetBrains Mono', monospace",
-                      }}>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono" style={{ background: `${sc}15`, color: sc }}>
                         {m.score}
                       </span>
-                      <span style={{
-                        fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: 10,
-                        background: `${'#9CA3AF'}10`, color: '#6B7280',
-                      }}>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100/60 text-gray-500">
                         {m.archetype}
                       </span>
                     </div>
@@ -282,11 +253,7 @@ export default function HealthOverview() {
                           trackAction({ actionType: 'call', memberId: m.memberId, memberName: m.name });
                         }}
                         title="Call"
-                        style={{
-                          width: 28, height: 28, borderRadius: '50%', border: '1px solid rgba(34,197,94,0.2)',
-                          background: 'rgba(34,197,94,0.08)', color: '#16a34a', fontSize: 13,
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}
+                        className="w-7 h-7 rounded-full border border-green-500/20 bg-green-500/[0.08] text-green-600 text-[13px] cursor-pointer flex items-center justify-center"
                       >
                         {'\uD83D\uDCDE'}
                       </button>
@@ -297,11 +264,7 @@ export default function HealthOverview() {
                           trackAction({ actionType: 'email', memberId: m.memberId, memberName: m.name });
                         }}
                         title="Email"
-                        style={{
-                          width: 28, height: 28, borderRadius: '50%', border: `1px solid ${'#3B82F6'}30`,
-                          background: `${'#3B82F6'}08`, color: '#3B82F6', fontSize: 13,
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}
+                        className="w-7 h-7 rounded-full border border-blue-500/20 bg-blue-500/[0.03] text-blue-500 text-[13px] cursor-pointer flex items-center justify-center"
                       >
                         {'\u2709\uFE0F'}
                       </button>
@@ -312,11 +275,7 @@ export default function HealthOverview() {
                           trackAction({ actionType: 'sms', memberId: m.memberId, memberName: m.name });
                         }}
                         title="SMS"
-                        style={{
-                          width: 28, height: 28, borderRadius: '50%', border: `1px solid ${'#ff8b00'}30`,
-                          background: `${'#ff8b00'}08`, color: '#ff8b00', fontSize: 13,
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}
+                        className="w-7 h-7 rounded-full border border-brand-500/20 bg-brand-500/[0.03] text-brand-500 text-[13px] cursor-pointer flex items-center justify-center"
                       >
                         {'\uD83D\uDCF1'}
                       </button>
@@ -324,18 +283,14 @@ export default function HealthOverview() {
                   </div>
 
                   {/* Row 2: Reason */}
-                  <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: 4, lineHeight: 1.4, paddingLeft: 30 }}>
+                  <div className="text-xs text-gray-500 mb-1 leading-snug pl-[30px]">
                     {m.reason}
                   </div>
 
                   {/* Row 3: Owner + Differentiated action */}
-                  <div style={{ fontSize: '12px', fontWeight: 600, paddingLeft: 30, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="text-xs font-semibold pl-[30px] flex items-center gap-2">
                     {m.owner && (
-                      <span style={{
-                        fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                        background: `${'#ff8b00'}10`, color: '#ff8b00',
-                        textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0,
-                      }}>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-brand-500/10 text-brand-500 uppercase tracking-tight shrink-0">
                         {m.owner}
                       </span>
                     )}
@@ -345,12 +300,7 @@ export default function HealthOverview() {
 
                 {/* Expanded: Quick Actions */}
                 {isExpanded && (
-                  <div style={{
-                    padding: '16px', background: '#F3F4F6',
-                    borderRadius: `0 0 ${'12px'} ${'12px'}`,
-                    border: `1px solid ${'#E5E7EB'}`, borderTop: 'none',
-                    marginTop: -1,
-                  }}>
+                  <div className="p-4 bg-gray-100 rounded-b-xl border border-gray-200 border-t-0 -mt-px">
                     <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk || m.signal} archetype={m.archetype} />
                   </div>
                 )}
@@ -362,14 +312,9 @@ export default function HealthOverview() {
         {allPriorityMembers.length > 5 && (
           <button
             onClick={() => setShowAll(!showAll)}
-            style={{
-              marginTop: 10, padding: '8px 16px', fontSize: '12px',
-              fontWeight: 600, color: '#ff8b00', background: 'none',
-              border: `1px solid ${'#ff8b00'}30`, borderRadius: '8px',
-              cursor: 'pointer', width: '100%', textAlign: 'center',
-            }}
+            className="mt-2.5 px-4 py-2 text-xs font-semibold text-brand-500 bg-transparent border border-brand-500/20 rounded-lg cursor-pointer w-full text-center hover:bg-brand-500/5 transition-colors"
           >
-            {showAll ? 'Show top 5 only' : `View all ${allPriorityMembers.length} at-risk members →`}
+            {showAll ? 'Show top 5 only' : `View all ${allPriorityMembers.length} at-risk members \u2192`}
           </button>
         )}
       </div>
@@ -399,51 +344,43 @@ export default function HealthOverview() {
           { key: 'metMembers', label: 'Met 3+ members' },
         ];
         return (
-          <div style={{
-            background: `${'#2563eb'}06`, border: `1px solid ${'#2563eb'}20`,
-            borderRadius: '12px', padding: '14px 18px',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <div className="bg-blue-600/[0.04] border border-blue-600/[0.13] rounded-xl px-[18px] py-[14px]">
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-xs font-bold text-blue-600 uppercase tracking-wider">
                 New Members (First 90 Days)
               </div>
               <button
                 onClick={() => navigate('members', { mode: 'cohorts' })}
-                style={{ fontSize: '12px', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, textDecoration: 'underline', padding: 0 }}
+                className="text-xs text-blue-600 bg-transparent border-none cursor-pointer font-semibold underline p-0"
               >
-                {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in integration window →
+                {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in integration window {'\u2192'}
               </button>
             </div>
             {newMemberData.map(m => {
               const completed = MILESTONES.filter(ms => m.milestones[ms.key]).length;
               return (
-                <div key={m.memberId} style={{ padding: '8px 0', borderTop: `1px solid ${'#2563eb'}10` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                    <MemberLink memberId={m.memberId} mode="drawer" style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a2e' }}>
+                <div key={m.memberId} className="py-2 border-t border-blue-600/[0.06]">
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <MemberLink memberId={m.memberId} mode="drawer" className="font-semibold text-sm text-[#1a1a2e]">
                       {m.name}
                     </MemberLink>
-                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: `${scoreColor(m.score)}15`, color: scoreColor(m.score), fontFamily: "'JetBrains Mono', monospace" }}>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono" style={{ background: `${scoreColor(m.score)}15`, color: scoreColor(m.score) }}>
                       {m.score}
                     </span>
-                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: `${'#2563eb'}12`, color: '#2563eb', fontFamily: "'JetBrains Mono', monospace" }}>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono bg-blue-600/[0.08] text-blue-600">
                       Day {m.dayIn} of 90
                     </span>
-                    <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: `${'#ff8b00'}10`, color: '#ff8b00', textTransform: 'uppercase', marginLeft: 'auto' }}>
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-brand-500/10 text-brand-500 uppercase ml-auto">
                       {m.owner || 'Membership Director'}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, paddingLeft: 2 }}>
+                  <div className="flex gap-2 pl-0.5">
                     {MILESTONES.map(ms => (
-                      <span key={ms.key} style={{
-                        fontSize: '10px', padding: '2px 8px', borderRadius: 4,
-                        background: m.milestones[ms.key] ? `${'#22c55e'}12` : `${'#9CA3AF'}08`,
-                        color: m.milestones[ms.key] ? '#22c55e' : '#9CA3AF',
-                        fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4,
-                      }}>
-                        {m.milestones[ms.key] ? '✓' : '○'} {ms.label}
+                      <span key={ms.key} className={`text-[10px] px-2 py-0.5 rounded font-semibold flex items-center gap-1 ${m.milestones[ms.key] ? 'bg-green-500/[0.08] text-green-500' : 'bg-gray-400/[0.06] text-gray-400'}`}>
+                        {m.milestones[ms.key] ? '\u2713' : '\u25CB'} {ms.label}
                       </span>
                     ))}
-                    <span style={{ fontSize: '10px', color: '#9CA3AF', marginLeft: 'auto' }}>
+                    <span className="text-[10px] text-gray-400 ml-auto">
                       {completed}/4 milestones
                     </span>
                   </div>

@@ -9,11 +9,11 @@ import {
 } from 'recharts';
 
 // --- Helpers ---
-const fmt$ = (v) => (Number.isFinite(v) ? `$${Math.round(v).toLocaleString()}` : '—');
-const fmtPct = (v) => (Number.isFinite(v) ? `${Math.round(v * 100)}%` : '—');
+const fmt$ = (v) => (Number.isFinite(v) ? `$${Math.round(v).toLocaleString()}` : '\u2014');
+const fmtPct = (v) => (Number.isFinite(v) ? `${Math.round(v * 100)}%` : '\u2014');
 const fmtDate = (v) => {
-  if (!v) return '—';
-  try { return new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } catch { return '—'; }
+  if (!v) return '\u2014';
+  try { return new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } catch { return '\u2014'; }
 };
 
 const HEALTH_COLORS = {
@@ -40,12 +40,9 @@ function healthLabel(score) {
 // --- Stat card ---
 function Stat({ label, value, accent, sub, mono }) {
   return (
-    <div style={{
-      background: '#ffffff', border: `1px solid ${'#E5E7EB'}`,
-      borderRadius: '12px', padding: '16px',
-    }}>
+    <div className="bg-white border border-gray-200 rounded-xl p-4">
       <div className="text-xs text-gray-400 uppercase tracking-wide">{label}</div>
-      <div style={{ fontSize: '28px', fontWeight: 700, color: accent || '#1a1a2e', fontFamily: mono ? "'JetBrains Mono', monospace" : 'inherit', marginTop: 4 }}>{value}</div>
+      <div className={`text-[28px] font-bold mt-1 ${mono ? 'font-mono' : ''}`} style={{ color: accent || '#1a1a2e' }}>{value}</div>
       {sub && <div className="text-xs text-gray-500 mt-0.5">{sub}</div>}
     </div>
   );
@@ -57,23 +54,20 @@ function Section({ title, children, cols, collapsible = false, defaultCollapsed 
   const isCollapsed = collapsible && collapsed;
 
   return (
-    <div style={{
-      background: '#ffffff', border: `1px solid ${'#E5E7EB'}`,
-      borderRadius: '16px', padding: '24px',
-    }}>
+    <div className="bg-white border border-gray-200 rounded-2xl p-6">
       {title && (
         <div
           onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isCollapsed ? 0 : '16px', cursor: collapsible ? 'pointer' : 'default' }}
+          className={`flex justify-between items-center ${isCollapsed ? '' : 'mb-4'} ${collapsible ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#1a1a2e' }}>{title}</h3>
+          <div className="flex items-baseline gap-2">
+            <h3 className="m-0 text-base font-bold text-[#1a1a2e]">{title}</h3>
             {isCollapsed && summary && <span className="text-xs text-gray-400">{summary}</span>}
           </div>
-          {collapsible && <span style={{ fontSize: 12, color: '#9CA3AF', transition: 'transform 0.2s', transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
+          {collapsible && <span className="text-xs text-gray-400 transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
         </div>
       )}
-      {!isCollapsed && (cols ? <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '16px' }}>{children}</div> : children)}
+      {!isCollapsed && (cols ? <div className="gap-4" style={{ display: 'grid', gridTemplateColumns: cols }}>{children}</div> : children)}
     </div>
   );
 }
@@ -120,7 +114,6 @@ export default function MemberProfilePage() {
       .then((data) => {
         if (!cancelled) {
           if (!data || (!data.member && !data.memberId)) {
-            // API returned empty — fall back to static service
             const fallback = getMemberProfile(memberId);
             setProfile(fallback);
             setLoading(false);
@@ -169,7 +162,6 @@ export default function MemberProfilePage() {
       })
       .catch(() => {
         if (!cancelled) {
-          // Fall back to static service for non-API members
           const fallback = getMemberProfile(memberId);
           setProfile(fallback);
           setLoading(false);
@@ -193,7 +185,7 @@ export default function MemberProfilePage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400, color: '#9CA3AF' }}>
+      <div className="flex justify-center items-center min-h-[400px] text-gray-400">
         Loading member profile...
       </div>
     );
@@ -201,12 +193,11 @@ export default function MemberProfilePage() {
 
   if (!profile) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minHeight: 400, paddingTop: 80 }}>
-        <div style={{ fontSize: '18px', color: '#9CA3AF' }}>Member not found</div>
-        <button onClick={() => setMemberId(null)} style={{
-          border: `1px solid ${'#E5E7EB'}`, borderRadius: '8px',
-          padding: '8px 16px', background: 'none', color: '#1a1a2e', cursor: 'pointer',
-        }}>← Back to roster</button>
+      <div className="flex flex-col items-center gap-4 min-h-[400px] pt-20">
+        <div className="text-lg text-gray-400">Member not found</div>
+        <button onClick={() => setMemberId(null)} className="border border-gray-200 rounded-lg px-4 py-2 bg-transparent text-[#1a1a2e] cursor-pointer">
+          {'\u2190'} Back to roster
+        </button>
       </div>
     );
   }
@@ -231,53 +222,34 @@ export default function MemberProfilePage() {
     <div className="flex flex-col gap-6">
       {/* Why am I looking at this member? — context banner */}
       {contextReason && (
-        <div style={{
-          padding: '10px 14px',
-          borderRadius: '8px',
-          background: `${'#ef4444'}06`,
-          border: `1px solid ${'#ef4444'}20`,
-          borderLeft: `3px solid ${'#ef4444'}`,
-          fontSize: '14px',
-          color: '#1a1a2e',
-        }}>
-          <span style={{ fontWeight: 700, color: '#ef4444', marginRight: 6 }}>Flagged:</span>
+        <div className="px-3.5 py-2.5 rounded-lg bg-red-500/[0.04] border border-red-500/[0.13] border-l-[3px] border-l-red-500 text-sm text-[#1a1a2e]">
+          <span className="font-bold text-error-500 mr-1.5">Flagged:</span>
           {contextReason}
         </div>
       )}
 
       {/* Back button + header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <button onClick={() => setMemberId(null)} style={{
-          border: `1px solid ${'#E5E7EB'}`, borderRadius: '8px',
-          padding: '6px 14px', background: '#ffffff', color: '#6B7280',
-          cursor: 'pointer', fontSize: '14px',
-        }}>← All Members</button>
-        <button onClick={() => openProfile(memberId)} style={{
-          border: `1px solid ${'#E5E7EB'}`, borderRadius: '8px',
-          padding: '6px 14px', background: '#ffffff', color: '#6B7280',
-          cursor: 'pointer', fontSize: '14px',
-        }}>Open Quick View →</button>
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <button onClick={() => setMemberId(null)} className="border border-gray-200 rounded-lg px-3.5 py-1.5 bg-white text-gray-500 cursor-pointer text-sm">
+          {'\u2190'} All Members
+        </button>
+        <button onClick={() => openProfile(memberId)} className="border border-gray-200 rounded-lg px-3.5 py-1.5 bg-white text-gray-500 cursor-pointer text-sm">
+          Open Quick View {'\u2192'}
+        </button>
       </div>
 
       {/* Hero header */}
-      <div style={{
-        background: '#ffffff', border: `1px solid ${'#E5E7EB'}`,
-        borderRadius: '16px', padding: '32px',
-        display: 'grid', gridTemplateColumns: '1fr auto', gap: '24px', alignItems: 'center',
-      }}>
+      <div className="bg-white border border-gray-200 rounded-2xl p-8 grid grid-cols-[1fr_auto] gap-6 items-center">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#1a1a2e' }}>
+          <div className="flex items-center gap-4 flex-wrap">
+            <h1 className="m-0 text-[28px] font-bold text-[#1a1a2e]">
               {profile.name || `${profile.firstName} ${profile.lastName}`}
             </h1>
-            <span style={{
-              padding: '4px 12px', borderRadius: 999, fontSize: '12px', fontWeight: 700,
-              background: `${color}20`, color, border: `1px solid ${color}40`,
-            }}>
-              {healthLabel(score)} · {score}
+            <span className="px-3 py-1 rounded-full text-xs font-bold" style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}>
+              {healthLabel(score)} {'\u00B7'} {score}
             </span>
           </div>
-          <div style={{ display: 'flex', gap: '24px', marginTop: '8px', flexWrap: 'wrap', fontSize: '14px', color: '#6B7280' }}>
+          <div className="flex gap-6 mt-2 flex-wrap text-sm text-gray-500">
             <span>{profile.archetype}</span>
             <span>{profile.tier || profile.membershipType}</span>
             <span>ID: {profile.memberId}</span>
@@ -287,36 +259,32 @@ export default function MemberProfilePage() {
             )}
           </div>
           {contact.lastSeenLocation && (
-            <div style={{ marginTop: '8px', fontSize: '12px', color: '#9CA3AF' }}>
+            <div className="mt-2 text-xs text-gray-400">
               Last seen: {contact.lastSeenLocation}
             </div>
           )}
         </div>
         {/* Health score gauge */}
-        <div style={{ textAlign: 'center', minWidth: 120 }}>
-          <div style={{
-            width: 100, height: 100, borderRadius: '50%',
-            border: `6px solid ${color}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto',
-          }}>
-            <span style={{ fontSize: '32px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color }}>{score}</span>
+        <div className="text-center min-w-[120px]">
+          <div className="w-[100px] h-[100px] rounded-full flex items-center justify-center mx-auto" style={{ border: `6px solid ${color}` }}>
+            <span className="text-[32px] font-bold font-mono" style={{ color }}>{score}</span>
           </div>
-          <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: 6 }}>Health Score</div>
+          <div className="text-xs text-gray-400 mt-1.5">Health Score</div>
         </div>
       </div>
 
       {/* Key metrics row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
         <Stat label="Annual Dues" value={fmt$(profile.duesAnnual)} accent={'#1a1a2e'} />
         <Stat label="Total Value" value={fmt$(profile.memberValueAnnual)} accent={'#ff8b00'} />
         <Stat label="Account Balance" value={fmt$(profile.accountBalance)} accent={profile.accountBalance < 0 ? '#ef4444' : '#22c55e'} />
         <Stat label="Email Open Rate" value={fmtPct(profile.emailOpenRate)} accent={'#ff8b00'} mono />
-        <Stat label="Rounds (30d)" value={profile.roundsPlayed ?? '—'} accent={'#22c55e'} mono />
+        <Stat label="Rounds (30d)" value={profile.roundsPlayed ?? '\u2014'} accent={'#22c55e'} mono />
         <Stat label="Dining Spend (30d)" value={fmt$(profile.diningSpend)} accent={'#f59e0b'} />
       </div>
 
       {/* Two-column grid: trend + risk signals */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="grid grid-cols-2 gap-6">
         {/* Health trend chart */}
         <Section title="Health Score Trend">
           {trendData.length > 1 ? (
@@ -330,7 +298,7 @@ export default function MemberProfilePage() {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF' }}>
+            <div className="h-[200px] flex items-center justify-center text-gray-400">
               Insufficient trend data
             </div>
           )}
@@ -341,54 +309,49 @@ export default function MemberProfilePage() {
           {riskSignals.length > 0 ? (
             <div className="flex flex-col gap-2">
               {riskSignals.map((signal, i) => (
-                <div key={i} style={{
-                  padding: '8px', borderRadius: '8px',
-                  border: `1px solid ${'#ef4444'}30`, background: `${'#ef4444'}08`,
-                }}>
+                <div key={i} className="p-2 rounded-lg border border-red-500/20 bg-red-500/[0.05]">
                   <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
                     {signal.label || signal.detail || signal}
                   </div>
                   {signal.source && (
-                    <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: 2 }}>
-                      Source: {signal.source} {signal.confidence ? `· Confidence: ${signal.confidence}` : ''}
+                    <div className="text-xs text-gray-400 mt-0.5">
+                      Source: {signal.source} {signal.confidence ? `\u00B7 Confidence: ${signal.confidence}` : ''}
                     </div>
                   )}
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ color: '#22c55e', fontSize: '14px' }}>No active risk signals</div>
+            <div className="text-green-500 text-sm">No active risk signals</div>
           )}
         </Section>
       </div>
 
       {/* Preferences & Family */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="grid grid-cols-2 gap-6">
         {/* Preferences */}
         <Section title="Preferences & Notes">
           <div className="flex flex-col gap-4">
             {preferences.teeWindows && (
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Tee Time Preference</div>
-                <div style={{ fontSize: '14px', color: '#1a1a2e', marginTop: 2 }}>{preferences.teeWindows}</div>
+                <div className="text-sm text-[#1a1a2e] mt-0.5">{preferences.teeWindows}</div>
               </div>
             )}
             {preferences.dining && (
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Dining Preference</div>
-                <div style={{ fontSize: '14px', color: '#1a1a2e', marginTop: 2 }}>{preferences.dining}</div>
+                <div className="text-sm text-[#1a1a2e] mt-0.5">{preferences.dining}</div>
               </div>
             )}
             {preferences.favoriteSpots && preferences.favoriteSpots.length > 0 && (
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Favorite Spots</div>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+                <div className="flex gap-1.5 flex-wrap mt-1">
                   {(Array.isArray(preferences.favoriteSpots) ? preferences.favoriteSpots : [preferences.favoriteSpots]).map((spot, i) => (
-                    <span key={i} style={{
-                      padding: '3px 10px', borderRadius: 999, fontSize: '12px',
-                      background: `${'#ff8b00'}15`, border: `1px solid ${'#ff8b00'}30`,
-                      color: '#6B7280',
-                    }}>{spot}</span>
+                    <span key={i} className="px-2.5 py-0.5 rounded-full text-xs bg-brand-500/10 border border-brand-500/20 text-gray-500">
+                      {spot}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -396,11 +359,11 @@ export default function MemberProfilePage() {
             {preferences.notes && (
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Member Notes</div>
-                <div style={{ fontSize: '14px', color: '#6B7280', marginTop: 2, lineHeight: 1.5 }}>{preferences.notes}</div>
+                <div className="text-sm text-gray-500 mt-0.5 leading-normal">{preferences.notes}</div>
               </div>
             )}
             {!preferences.teeWindows && !preferences.dining && !preferences.notes && (
-              <div style={{ color: '#9CA3AF', fontSize: '14px' }}>No preferences on file</div>
+              <div className="text-gray-400 text-sm">No preferences on file</div>
             )}
           </div>
         </Section>
@@ -410,21 +373,16 @@ export default function MemberProfilePage() {
           {family.length > 0 ? (
             <div className="flex flex-col gap-2">
               {family.map((member, i) => (
-                <div key={i} style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '8px', borderRadius: '8px',
-                  border: `1px solid ${'#E5E7EB'}`, background: '#F3F4F6',
-                }}>
+                <div key={i} className="flex justify-between items-center p-2 rounded-lg border border-gray-200 bg-gray-100">
                   <div>
-                    <div style={{ fontSize: '14px', fontWeight: 600 }}>{member.name}</div>
+                    <div className="text-sm font-semibold">{member.name}</div>
                     <div className="text-xs text-gray-400">
-                      {member.relationship} {member.age ? `· Age ${member.age}` : ''}
+                      {member.relationship} {member.age ? `\u00B7 Age ${member.age}` : ''}
                     </div>
                   </div>
                   {member.memberStatus && (
-                    <span style={{
-                      padding: '2px 8px', borderRadius: 999, fontSize: '10px', fontWeight: 600,
-                      background: member.memberStatus === 'Active' ? `${'#22c55e'}20` : `${'#f59e0b'}20`,
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{
+                      background: member.memberStatus === 'Active' ? '#22c55e20' : '#f59e0b20',
                       color: member.memberStatus === 'Active' ? '#22c55e' : '#f59e0b',
                     }}>{member.memberStatus}</span>
                   )}
@@ -432,32 +390,24 @@ export default function MemberProfilePage() {
               ))}
             </div>
           ) : (
-            <div style={{ color: '#9CA3AF', fontSize: '14px' }}>No family members on file</div>
+            <div className="text-gray-400 text-sm">No family members on file</div>
           )}
         </Section>
       </div>
 
       {/* Quick Actions */}
-      <div style={{
-        display: 'flex', gap: '8px', padding: '16px',
-        background: '#ffffff', border: `1px solid ${'#E5E7EB'}`,
-        borderRadius: '12px',
-      }}>
+      <div className="flex gap-2 p-4 bg-white border border-gray-200 rounded-xl">
         {[
-          { label: 'Schedule call', icon: '📞', color: '#16a34a' },
-          { label: 'Send email', icon: '✉️', color: '#3B82F6' },
-          { label: 'Send SMS', icon: '📱', color: '#ff8b00' },
-          { label: 'Offer comp', icon: '🎁', color: '#8b5cf6' },
+          { label: 'Schedule call', icon: '\uD83D\uDCDE', color: '#16a34a' },
+          { label: 'Send email', icon: '\u2709\uFE0F', color: '#3B82F6' },
+          { label: 'Send SMS', icon: '\uD83D\uDCF1', color: '#ff8b00' },
+          { label: 'Offer comp', icon: '\uD83C\uDF81', color: '#8b5cf6' },
         ].map(action => (
           <button
             key={action.label}
             onClick={() => {}}
-            style={{
-              flex: 1, padding: '10px 12px', borderRadius: '8px',
-              border: `1px solid ${action.color}25`, background: `${action.color}06`,
-              color: action.color, fontSize: '12px', fontWeight: 600,
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}
+            className="flex-1 px-2.5 py-2.5 rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5"
+            style={{ border: `1px solid ${action.color}25`, background: `${action.color}06`, color: action.color }}
           >
             <span className="text-sm">{action.icon}</span>
             {action.label}
@@ -468,20 +418,20 @@ export default function MemberProfilePage() {
       {/* Contact info */}
       <Section title="Contact Information" cols="repeat(auto-fit, minmax(200px, 1fr))">
         <div>
-          <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase' }}>Email</div>
-          <div style={{ fontSize: '14px', marginTop: 2 }}>{contact.email || profile.email || '—'}</div>
+          <div className="text-xs text-gray-400 uppercase">Email</div>
+          <div className="text-sm mt-0.5">{contact.email || profile.email || '\u2014'}</div>
         </div>
         <div>
-          <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase' }}>Phone</div>
-          <div style={{ fontSize: '14px', marginTop: 2 }}>{contact.phone || profile.phone || '—'}</div>
+          <div className="text-xs text-gray-400 uppercase">Phone</div>
+          <div className="text-sm mt-0.5">{contact.phone || profile.phone || '\u2014'}</div>
         </div>
         <div>
-          <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase' }}>Preferred Channel</div>
-          <div style={{ fontSize: '14px', marginTop: 2 }}>{contact.preferredChannel || '—'}</div>
+          <div className="text-xs text-gray-400 uppercase">Preferred Channel</div>
+          <div className="text-sm mt-0.5">{contact.preferredChannel || '\u2014'}</div>
         </div>
         <div>
-          <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase' }}>Last Seen</div>
-          <div style={{ fontSize: '14px', marginTop: 2 }}>{contact.lastSeenLocation || '—'}</div>
+          <div className="text-xs text-gray-400 uppercase">Last Seen</div>
+          <div className="text-sm mt-0.5">{contact.lastSeenLocation || '\u2014'}</div>
         </div>
       </Section>
 
@@ -490,36 +440,33 @@ export default function MemberProfilePage() {
         {invoiceItems.length > 0 ? (
           <>
             {invoices.summary && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', marginBottom: '16px' }}>
-                <div style={{ padding: '8px', borderRadius: '8px', background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}` }}>
-                  <div style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>Total Billed</div>
-                  <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{fmt$(invoices.summary.totalBilled)}</div>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
+                  <div className="text-[10px] text-gray-400 uppercase">Total Billed</div>
+                  <div className="text-base font-bold font-mono">{fmt$(invoices.summary.totalBilled)}</div>
                 </div>
-                <div style={{ padding: '8px', borderRadius: '8px', background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}` }}>
-                  <div style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>Total Paid</div>
-                  <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: '#22c55e' }}>{fmt$(invoices.summary.totalPaid)}</div>
+                <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
+                  <div className="text-[10px] text-gray-400 uppercase">Total Paid</div>
+                  <div className="text-base font-bold font-mono text-green-500">{fmt$(invoices.summary.totalPaid)}</div>
                 </div>
-                <div style={{ padding: '8px', borderRadius: '8px', background: invoices.summary.outstanding > 0 ? `${'#ef4444'}10` : '#F3F4F6', border: `1px solid ${invoices.summary.outstanding > 0 ? '#ef4444' + '30' : '#E5E7EB'}` }}>
-                  <div style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>Outstanding</div>
-                  <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: invoices.summary.outstanding > 0 ? '#ef4444' : '#1a1a2e' }}>{fmt$(invoices.summary.outstanding)}</div>
+                <div className="p-2 rounded-lg border" style={{ background: invoices.summary.outstanding > 0 ? '#ef444410' : '#F3F4F6', borderColor: invoices.summary.outstanding > 0 ? '#ef444430' : '#E5E7EB' }}>
+                  <div className="text-[10px] text-gray-400 uppercase">Outstanding</div>
+                  <div className="text-base font-bold font-mono" style={{ color: invoices.summary.outstanding > 0 ? '#ef4444' : '#1a1a2e' }}>{fmt$(invoices.summary.outstanding)}</div>
                 </div>
-                <div style={{ padding: '8px', borderRadius: '8px', background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}` }}>
-                  <div style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>Payment Status</div>
-                  <div style={{
-                    fontSize: '14px', fontWeight: 700, marginTop: 2,
-                    color: invoices.summary.paymentStatus === 'current' ? '#22c55e' : invoices.summary.paymentStatus === 'chronic' ? '#ef4444' : '#f59e0b',
-                  }}>
+                <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
+                  <div className="text-[10px] text-gray-400 uppercase">Payment Status</div>
+                  <div className="text-sm font-bold mt-0.5" style={{ color: invoices.summary.paymentStatus === 'current' ? '#22c55e' : invoices.summary.paymentStatus === 'chronic' ? '#ef4444' : '#f59e0b' }}>
                     {(invoices.summary.paymentStatus || 'unknown').charAt(0).toUpperCase() + (invoices.summary.paymentStatus || 'unknown').slice(1)}
                   </div>
                 </div>
               </div>
             )}
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-xs">
                 <thead>
-                  <tr style={{ borderBottom: `1px solid ${'#E5E7EB'}` }}>
+                  <tr className="border-b border-gray-200">
                     {['Date', 'Type', 'Description', 'Amount', 'Status', 'Paid', 'Late Fee'].map((h) => (
-                      <th key={h} style={{ padding: '8px 10px', textAlign: 'left', color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
+                      <th key={h} className="px-2.5 py-2 text-left text-gray-400 font-semibold uppercase tracking-tight">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -527,18 +474,18 @@ export default function MemberProfilePage() {
                   {invoiceItems.slice(0, 20).map((inv, i) => {
                     const statusColor = inv.status === 'paid' ? '#22c55e' : inv.status === 'current' ? '#f59e0b' : '#ef4444';
                     return (
-                      <tr key={i} style={{ borderBottom: `1px solid ${'#E5E7EB'}` }}>
-                        <td style={{ padding: '8px 10px', fontFamily: "'JetBrains Mono', monospace" }}>{fmtDate(inv.dueDate || inv.invoiceDate)}</td>
-                        <td style={{ padding: '8px 10px' }}>{inv.type}</td>
-                        <td style={{ padding: '8px 10px', color: '#6B7280', maxWidth: 200 }}>{inv.description}</td>
-                        <td style={{ padding: '8px 10px', fontFamily: "'JetBrains Mono', monospace" }}>{fmt$(inv.amount)}</td>
-                        <td style={{ padding: '8px 10px' }}>
-                          <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: '10px', fontWeight: 600, background: `${statusColor}15`, color: statusColor }}>
+                      <tr key={i} className="border-b border-gray-200">
+                        <td className="px-2.5 py-2 font-mono">{fmtDate(inv.dueDate || inv.invoiceDate)}</td>
+                        <td className="px-2.5 py-2">{inv.type}</td>
+                        <td className="px-2.5 py-2 text-gray-500 max-w-[200px]">{inv.description}</td>
+                        <td className="px-2.5 py-2 font-mono">{fmt$(inv.amount)}</td>
+                        <td className="px-2.5 py-2">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: `${statusColor}15`, color: statusColor }}>
                             {inv.status?.replace(/_/g, ' ')}
                           </span>
                         </td>
-                        <td style={{ padding: '8px 10px', fontFamily: "'JetBrains Mono', monospace", color: '#22c55e' }}>{inv.paidAmount > 0 ? fmt$(inv.paidAmount) : '—'}</td>
-                        <td style={{ padding: '8px 10px', fontFamily: "'JetBrains Mono', monospace", color: inv.lateFee > 0 ? '#ef4444' : '#9CA3AF' }}>{inv.lateFee > 0 ? fmt$(inv.lateFee) : '—'}</td>
+                        <td className="px-2.5 py-2 font-mono text-green-500">{inv.paidAmount > 0 ? fmt$(inv.paidAmount) : '\u2014'}</td>
+                        <td className="px-2.5 py-2 font-mono" style={{ color: inv.lateFee > 0 ? '#ef4444' : '#9CA3AF' }}>{inv.lateFee > 0 ? fmt$(inv.lateFee) : '\u2014'}</td>
                       </tr>
                     );
                   })}
@@ -547,32 +494,28 @@ export default function MemberProfilePage() {
             </div>
           </>
         ) : (
-          <div style={{ color: '#9CA3AF', fontSize: '14px' }}>No invoice history available</div>
+          <div className="text-gray-400 text-sm">No invoice history available</div>
         )}
       </Section>
 
       {/* Activity timeline */}
       <Section title="Activity Timeline" collapsible defaultCollapsed summary={`${(profile.activity || []).length} entries`}>
         {activity.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: 400, overflowY: 'auto' }}>
+          <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
             {activity.map((event, i) => (
-              <div key={i} style={{
-                display: 'flex', gap: '16px', alignItems: 'flex-start',
-                padding: '8px', borderRadius: '8px',
-                borderBottom: `1px solid ${'#E5E7EB'}`,
-              }}>
-                <span style={{ flexShrink: 0, width: 80, fontSize: '12px', color: '#9CA3AF', fontFamily: "'JetBrains Mono', monospace", paddingTop: 2 }}>
+              <div key={i} className="flex gap-4 items-start p-2 rounded-lg border-b border-gray-200">
+                <span className="shrink-0 w-20 text-xs text-gray-400 font-mono pt-0.5">
                   {fmtDate(event.date)}
                 </span>
                 <div>
-                  <div style={{ fontSize: '14px', color: '#1a1a2e' }}>{event.event || event.description}</div>
-                  {event.domain && <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: 2 }}>{event.domain}</div>}
+                  <div className="text-sm text-[#1a1a2e]">{event.event || event.description}</div>
+                  {event.domain && <div className="text-xs text-gray-400 mt-0.5">{event.domain}</div>}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div style={{ color: '#9CA3AF', fontSize: '14px' }}>No recent activity</div>
+          <div className="text-gray-400 text-sm">No recent activity</div>
         )}
       </Section>
 
@@ -581,14 +524,11 @@ export default function MemberProfilePage() {
         <Section title="Staff Notes">
           <div className="flex flex-col gap-2">
             {staffNotes.map((note, i) => (
-              <div key={i} style={{
-                padding: '16px', borderRadius: '8px',
-                background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}`,
-              }}>
-                <div style={{ fontSize: '14px', color: '#1a1a2e' }}>{typeof note === 'string' ? note : note.note || note.text}</div>
+              <div key={i} className="p-4 rounded-lg bg-gray-100 border border-gray-200">
+                <div className="text-sm text-[#1a1a2e]">{typeof note === 'string' ? note : note.note || note.text}</div>
                 {note.author && (
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: 4 }}>
-                    {note.author} {note.date ? `· ${fmtDate(note.date)}` : ''}
+                  <div className="text-xs text-gray-400 mt-1">
+                    {note.author} {note.date ? `\u00B7 ${fmtDate(note.date)}` : ''}
                   </div>
                 )}
               </div>
@@ -629,35 +569,25 @@ function MemberRoster({ onSelect }) {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search by name or member ID..."
-        style={{
-          padding: '12px 16px', borderRadius: '8px',
-          border: `1px solid ${'#E5E7EB'}`, background: '#ffffff',
-          color: '#1a1a2e', fontSize: '14px', maxWidth: 400,
-        }}
+        className="px-4 py-3 rounded-lg border border-gray-200 bg-white text-[#1a1a2e] text-sm max-w-[400px]"
       />
       <div className="text-xs text-gray-400">
-        Showing {filtered.length} at-risk members · Click any row to view full profile
+        Showing {filtered.length} at-risk members {'\u00B7'} Click any row to view full profile
       </div>
-      <div style={{
-        background: '#ffffff', border: `1px solid ${'#E5E7EB'}`,
-        borderRadius: '16px', overflow: 'hidden',
-      }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+        <table className="w-full border-collapse text-sm">
           <thead>
-            <tr style={{ borderBottom: `1px solid ${'#E5E7EB'}` }}>
+            <tr className="border-b border-gray-200">
               {['Name', 'Score', 'Archetype', 'Type', 'Annual Dues', 'Top Risk'].map((h) => (
-                <th key={h} style={{
-                  padding: '10px 14px', textAlign: 'left', color: '#9CA3AF',
-                  fontSize: '12px', fontWeight: 600, textTransform: 'uppercase',
-                }}>{h}</th>
+                <th key={h} className="px-3.5 py-2.5 text-left text-gray-400 text-xs font-semibold uppercase">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} style={{ padding: 20, textAlign: 'center', color: '#9CA3AF' }}>Loading...</td></tr>
+              <tr><td colSpan={6} className="p-5 text-center text-gray-400">Loading...</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={6} style={{ padding: 20, textAlign: 'center', color: '#9CA3AF' }}>No members found</td></tr>
+              <tr><td colSpan={6} className="p-5 text-center text-gray-400">No members found</td></tr>
             ) : filtered.map((m) => {
               const sc = m.score ?? m.healthScore ?? 0;
               const bk = healthBucket(sc);
@@ -666,18 +596,16 @@ function MemberRoster({ onSelect }) {
                 <tr
                   key={m.memberId}
                   onClick={() => onSelect(m.memberId)}
-                  style={{ borderBottom: `1px solid ${'#E5E7EB'}`, cursor: 'pointer' }}
-                  onMouseOver={(e) => { e.currentTarget.style.background = '#F3F4F6'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.background = 'none'; }}
+                  className="border-b border-gray-200 cursor-pointer hover:bg-gray-100"
                 >
-                  <td style={{ padding: '10px 14px', fontWeight: 600 }}>{m.name}</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", color: cl, fontWeight: 700 }}>{sc}</span>
+                  <td className="px-3.5 py-2.5 font-semibold">{m.name}</td>
+                  <td className="px-3.5 py-2.5">
+                    <span className="font-mono font-bold" style={{ color: cl }}>{sc}</span>
                   </td>
-                  <td style={{ padding: '10px 14px', color: '#6B7280' }}>{m.archetype}</td>
-                  <td style={{ padding: '10px 14px', color: '#6B7280' }}>{m.membershipType}</td>
-                  <td style={{ padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace" }}>{fmt$(m.annualDues || m.duesAnnual)}</td>
-                  <td style={{ padding: '10px 14px', color: '#6B7280', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.topRisk}</td>
+                  <td className="px-3.5 py-2.5 text-gray-500">{m.archetype}</td>
+                  <td className="px-3.5 py-2.5 text-gray-500">{m.membershipType}</td>
+                  <td className="px-3.5 py-2.5 font-mono">{fmt$(m.annualDues || m.duesAnnual)}</td>
+                  <td className="px-3.5 py-2.5 text-gray-500 max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap">{m.topRisk}</td>
                 </tr>
               );
             })}

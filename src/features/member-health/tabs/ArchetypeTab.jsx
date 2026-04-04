@@ -43,26 +43,22 @@ export default function ArchetypeTab() {
           const churnColor = ['Declining','Ghost','Social Butterfly'].includes(p.archetype) ? '#f59e0b'
             : p.archetype === 'Balanced Active' ? '#22c55e' : '#9CA3AF';
           return (
-            <button key={p.archetype} onClick={() => setSelected(p.archetype)} style={{
-              padding: '6px 14px', borderRadius: '12px', cursor: 'pointer',
-              border: `1px solid ${isSelected ? '#ff8b00' : '#E5E7EB'}`,
-              background: isSelected ? `${'#ff8b00'}08` : '#ffffff',
-              color: isSelected ? '#ff8b00' : '#6B7280',
-              fontSize: '12px', fontWeight: isSelected ? 700 : 400,
-            }}>
+            <button key={p.archetype} onClick={() => setSelected(p.archetype)}
+              className={`px-3.5 py-1.5 rounded-xl cursor-pointer text-xs ${isSelected ? 'border border-brand-500 bg-brand-500/[0.05] text-brand-500 font-bold' : 'border border-gray-200 bg-white text-gray-500 font-normal'}`}
+            >
               {p.archetype}
-              <span style={{ color: churnColor, marginLeft: 6 }}>{p.count}</span>
+              <span className="ml-1.5" style={{ color: churnColor }}>{p.count}</span>
             </button>
           );
         })}
       </div>
 
       {/* Main profile section */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="grid grid-cols-2 gap-6">
         {/* Left — visual */}
-        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '16px', border: `1px solid ${'#E5E7EB'}` }}>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', color: '#1a1a2e', marginBottom: 4 }}>{profile.archetype}</div>
-          <div style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '16px' }}>
+        <div className="bg-white rounded-xl p-4 border border-gray-200">
+          <div className="font-serif text-lg text-[#1a1a2e] mb-1">{profile.archetype}</div>
+          <div className="text-xs text-gray-400 mb-4">
             {profile.count} members at Oakmont Hills
           </div>
           <ResponsiveContainer width="100%" height={200}>
@@ -72,7 +68,7 @@ export default function ArchetypeTab() {
               <Radar dataKey="value" fill={'#ff8b00'} fillOpacity={0.2}
                 stroke={'#ff8b00'} strokeWidth={2} />
               <Tooltip formatter={v => [`${v}`, 'Engagement']}
-                contentStyle={{ background: '#ffffff', border: `1px solid ${'#E5E7EB'}`, borderRadius: 8, fontSize: 12 }}
+                contentStyle={{ background: '#ffffff', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 12 }}
                 labelStyle={{ color: '#1a1a2e' }} />
             </RadarChart>
           </ResponsiveContainer>
@@ -81,27 +77,27 @@ export default function ArchetypeTab() {
         {/* Right — plain English intel */}
         <div className="flex flex-col gap-2">
           {intel.summary && (
-            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '16px', border: `1px solid ${'#E5E7EB'}` }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>What this archetype is</div>
-              <div style={{ fontSize: '14px', color: '#1a1a2e', lineHeight: 1.6 }}>{intel.summary}</div>
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1">What this archetype is</div>
+              <div className="text-sm text-[#1a1a2e] leading-relaxed">{intel.summary}</div>
             </div>
           )}
           {intel.retention && (
-            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '16px', border: `1px solid ${'#E5E7EB'}` }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Retention outlook</div>
-              <div style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.6 }}>{intel.retention}</div>
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1">Retention outlook</div>
+              <div className="text-sm text-gray-500 leading-relaxed">{intel.retention}</div>
             </div>
           )}
           {intel.opportunity && (
-            <div style={{ background: '#ffffff', borderRadius: '12px', padding: `${'8px'} ${'16px'}`, border: `1px solid ${'#22c55e'}25` }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: '#22c55e', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Opportunity</div>
-              <div style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.6 }}>{intel.opportunity}</div>
+            <div className="bg-white rounded-xl px-4 py-2 border border-green-500/15">
+              <div className="text-[10px] font-bold text-green-500 tracking-wider uppercase mb-1">Opportunity</div>
+              <div className="text-sm text-gray-500 leading-relaxed">{intel.opportunity}</div>
             </div>
           )}
           {intel.watch && (
-            <div style={{ background: `${'#f59e0b'}08`, borderRadius: '12px', padding: `${'8px'} ${'16px'}`, border: `1px solid ${'#f59e0b'}30` }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Watch for</div>
-              <div style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.6 }}>{intel.watch}</div>
+            <div className="bg-amber-500/[0.05] rounded-xl px-4 py-2 border border-amber-500/20">
+              <div className="text-[10px] font-bold text-amber-500 tracking-wider uppercase mb-1">Watch for</div>
+              <div className="text-sm text-gray-500 leading-relaxed">{intel.watch}</div>
             </div>
           )}
         </div>
@@ -120,35 +116,30 @@ function SpendPotentialCard({ archetype }) {
 
   const categories = [
     { key: 'golf', label: 'Golf', engagement: current.engagement.golf, color: '#22c55e' },
-    { key: 'dining', label: 'Dining', engagement: current.engagement.dining, color: '#f59e0b' ?? '#f59e0b' },
+    { key: 'dining', label: 'Dining', engagement: current.engagement.dining, color: '#f59e0b' },
     { key: 'events', label: 'Events', engagement: current.engagement.events, color: '#ff8b00' },
-    { key: 'email', label: 'Email', engagement: current.engagement.email, color: '#2563eb' ?? '#9CA3AF' },
+    { key: 'email', label: 'Email', engagement: current.engagement.email, color: '#2563eb' },
   ];
 
   const avgAll = patterns.reduce((sum, p) => sum + p.avgAnnualSpend, 0) / patterns.length;
 
   return (
-    <div style={{
-      background: '#ffffff',
-      borderRadius: '12px',
-      border: '1px solid ' + '#E5E7EB',
-      padding: '24px',
-    }}>
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <div style={{ fontSize: '10px', fontWeight: 700, color: '#ff8b00', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: '2px' }}>
+          <div className="text-[10px] font-bold text-brand-500 tracking-wider uppercase mb-0.5">
             Spend Potential
           </div>
-          <div style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a2e' }}>
+          <div className="text-base font-bold text-[#1a1a2e]">
             {archetype} &mdash; {current.count} members
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
+        <div className="text-right">
           <div className="text-xs text-gray-400">Avg annual spend</div>
-          <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: '#1a1a2e' }}>
+          <div className="text-xl font-bold font-mono text-[#1a1a2e]">
             ${current.avgAnnualSpend.toLocaleString()}
           </div>
-          <div style={{ fontSize: '12px', color: current.avgAnnualSpend >= avgAll ? '#22c55e' : '#f59e0b' }}>
+          <div className="text-xs" style={{ color: current.avgAnnualSpend >= avgAll ? '#22c55e' : '#f59e0b' }}>
             {current.avgAnnualSpend >= avgAll ? 'Above' : 'Below'} club avg (${Math.round(avgAll).toLocaleString()})
           </div>
         </div>
@@ -158,42 +149,17 @@ function SpendPotentialCard({ archetype }) {
         {categories.map(cat => {
           const potential = 100 - cat.engagement;
           return (
-            <div key={cat.key} style={{
-              background: '#F3F4F6',
-              borderRadius: '8px',
-              padding: '8px',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>{cat.label}</div>
-              <div style={{
-                height: 6,
-                background: '#E5E7EB' + '60',
-                borderRadius: 3,
-                overflow: 'hidden',
-                marginBottom: '6px',
-              }}>
-                <div style={{
-                  height: '100%',
-                  width: cat.engagement + '%',
-                  background: cat.color,
-                  borderRadius: 3,
-                }} />
+            <div key={cat.key} className="bg-gray-100 rounded-lg p-2 text-center">
+              <div className="text-xs text-gray-400 mb-1">{cat.label}</div>
+              <div className="h-1.5 bg-gray-200/60 rounded-full overflow-hidden mb-1.5">
+                <div className="h-full rounded-full" style={{ width: cat.engagement + '%', background: cat.color }} />
               </div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: cat.color, fontFamily: "'JetBrains Mono', monospace" }}>
+              <div className="text-[13px] font-bold font-mono" style={{ color: cat.color }}>
                 {cat.engagement}%
               </div>
-              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>engaged</div>
+              <div className="text-[10px] text-gray-400">engaged</div>
               {potential > 30 && (
-                <div style={{
-                  marginTop: '4px',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  color: '#22c55e',
-                  background: '#22c55e' + '12',
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  display: 'inline-block',
-                }}>
+                <div className="mt-1 text-[10px] font-semibold text-green-500 bg-green-500/[0.08] px-1.5 py-0.5 rounded inline-block">
                   {potential}% untapped
                 </div>
               )}
@@ -203,16 +169,7 @@ function SpendPotentialCard({ archetype }) {
       </div>
 
       {current.spendPotential > 0 && (
-        <div style={{
-          marginTop: '16px',
-          padding: '8px',
-          background: '#22c55e' + '08',
-          border: '1px solid ' + '#22c55e' + '20',
-          borderRadius: '8px',
-          fontSize: '12px',
-          color: '#6B7280',
-          lineHeight: 1.5,
-        }}>
+        <div className="mt-4 p-2 bg-green-500/[0.05] border border-green-500/[0.13] rounded-lg text-xs text-gray-500 leading-normal">
           <strong className="text-success-500">Untapped potential:</strong>{' '}
           ${current.spendPotential.toLocaleString()}/member/year in dining and events.{' '}
           Across {current.count} {archetype} members, that&rsquo;s{' '}
@@ -221,37 +178,14 @@ function SpendPotentialCard({ archetype }) {
       )}
 
       {/* View outreach playbook for this archetype */}
-      <div style={{
-        marginTop: '16px',
-        display: 'flex',
-        gap: 10,
-        flexWrap: 'wrap',
-      }}>
+      <div className="mt-4 flex gap-2.5 flex-wrap">
         <button
           onClick={() => navigate('outreach-playbooks')}
-          style={{
-            padding: '8px 18px',
-            borderRadius: 8,
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-            border: '1.5px solid #e8772e',
-            background: 'rgba(232,119,46,0.06)',
-            color: '#e8772e',
-          }}
+          className="px-[18px] py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-[1.5px] border-brand-500 bg-brand-500/[0.06] text-brand-500"
         >View Outreach Playbook for {archetype}</button>
         <button
           onClick={() => navigate('playbooks')}
-          style={{
-            padding: '8px 18px',
-            borderRadius: 8,
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-            border: '1.5px solid #d4d4d8',
-            background: '#fff',
-            color: '#3f3f46',
-          }}
+          className="px-[18px] py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-[1.5px] border-gray-300 bg-white text-gray-700"
         >View All Playbooks</button>
       </div>
     </div>

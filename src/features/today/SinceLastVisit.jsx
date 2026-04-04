@@ -40,11 +40,7 @@ export default function SinceLastVisit({ yesterdayData = null }) {
 
   return (
     <div
-      className="flex flex-col bg-blue-600/[0.024] border border-blue-600/[0.12] rounded-lg"
-      style={{
-        gap: showYesterday ? '10px' : '0',
-        padding: showYesterday ? '12px 14px' : '8px 14px',
-      }}
+      className={`flex flex-col bg-blue-600/[0.024] border border-blue-600/[0.12] rounded-lg ${showYesterday ? 'gap-2.5 py-3 px-3.5' : 'gap-0 py-2 px-3.5'}`}
     >
       <div className="flex items-center gap-2.5 text-xs text-gray-500">
         <span className="font-semibold">Since your last visit</span>

@@ -98,12 +98,7 @@ export default function TodaysRisks() {
               <div
                 key={c.id}
                 onClick={() => navigate('service', { tab: 'complaints' })}
-                className="flex items-center justify-between py-2.5 px-3.5 rounded-lg cursor-pointer transition-shadow duration-150 hover:shadow-md"
-                style={{
-                  background: isOld ? 'rgba(239,68,68,0.024)' : undefined,
-                  border: `1px solid ${isOld ? 'rgba(239,68,68,0.15)' : '#e5e7eb'}`,
-                  animation: isCritical ? 'pulse-border 2s infinite' : 'none',
-                }}
+                className={`flex items-center justify-between py-2.5 px-3.5 rounded-lg cursor-pointer transition-shadow duration-150 hover:shadow-md ${isOld ? 'bg-red-500/[0.024] border border-red-500/[0.15]' : 'border border-gray-200'} ${isCritical ? 'animate-[pulse-border_2s_infinite]' : ''}`}
               >
                 <div className="flex items-center gap-2.5 flex-1 min-w-0">
                   <MemberLink memberId={c.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 dark:text-white/90 whitespace-nowrap">

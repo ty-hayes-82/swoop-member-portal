@@ -56,50 +56,34 @@ export default function CohortTab() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <div style={{
-        background: '#ffffff',
-        border: `1px solid ${'#E5E7EB'}`,
-        borderRadius: '12px',
-        padding: '24px',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+      <div className="bg-white border border-gray-200 rounded-xl p-6">
+        <div className="flex justify-between items-start flex-wrap gap-4">
           <div>
-            <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a2e', margin: 0, marginBottom: '4px' }}>
+            <h4 className="text-base font-bold text-[#1a1a2e] m-0 mb-1">
               First 90 Days
             </h4>
-            <p style={{ fontSize: '12px', color: '#9CA3AF', margin: 0 }}>
+            <p className="text-xs text-gray-400 m-0">
               New member integration tracking — are they building habits?
             </p>
           </div>
           <div className="flex gap-2">
-            <div style={{
-              textAlign: 'center', padding: '6px 14px', borderRadius: '8px',
-              background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)',
-            }}>
-              <div style={{ fontFamily: mono, fontSize: '18px', fontWeight: 700, color: '#16a34a' }}>{newMembers.length}</div>
-              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>New Members</div>
+            <div className="text-center px-3.5 py-1.5 rounded-lg bg-green-500/[0.06] border border-green-500/15">
+              <div className="text-lg font-bold text-green-600" style={{ fontFamily: mono }}>{newMembers.length}</div>
+              <div className="text-[10px] text-gray-400">New Members</div>
             </div>
-            <div style={{
-              textAlign: 'center', padding: '6px 14px', borderRadius: '8px',
-              background: flaggedCount > 0 ? 'rgba(234,88,12,0.06)' : 'rgba(34,197,94,0.06)',
-              border: `1px solid ${flaggedCount > 0 ? 'rgba(234,88,12,0.15)' : 'rgba(34,197,94,0.15)'}`,
-            }}>
-              <div style={{ fontFamily: mono, fontSize: '18px', fontWeight: 700, color: flaggedCount > 0 ? '#ea580c' : '#16a34a' }}>{flaggedCount}</div>
-              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>Falling Behind</div>
+            <div className={`text-center px-3.5 py-1.5 rounded-lg ${flaggedCount > 0 ? 'bg-orange-600/[0.06] border border-orange-600/15' : 'bg-green-500/[0.06] border border-green-500/15'}`}>
+              <div className="text-lg font-bold" style={{ fontFamily: mono, color: flaggedCount > 0 ? '#ea580c' : '#16a34a' }}>{flaggedCount}</div>
+              <div className="text-[10px] text-gray-400">Falling Behind</div>
             </div>
           </div>
         </div>
 
         {/* Phase Timeline */}
-        <div style={{ marginTop: '16px', display: 'flex', gap: 0, borderRadius: '8px', overflow: 'hidden' }}>
+        <div className="mt-4 flex rounded-lg overflow-hidden">
           {PHASES.map((phase, i) => (
-            <div key={phase.label} style={{
-              flex: 1, padding: '8px 12px', background: `${phase.color}10`,
-              borderRight: i < PHASES.length - 1 ? `2px solid ${'#ffffff'}` : 'none',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: phase.color }}>{phase.label}</div>
-              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>Weeks {phase.weeks}</div>
+            <div key={phase.label} className="flex-1 px-3 py-2 text-center" style={{ background: `${phase.color}10`, borderRight: i < PHASES.length - 1 ? '2px solid #ffffff' : 'none' }}>
+              <div className="text-[11px] font-bold" style={{ color: phase.color }}>{phase.label}</div>
+              <div className="text-[10px] text-gray-400">Weeks {phase.weeks}</div>
             </div>
           ))}
         </div>
@@ -113,62 +97,33 @@ export default function CohortTab() {
         const action = getSuggestedAction(member);
 
         return (
-          <div key={member.name} style={{
-            background: '#ffffff',
-            border: `1px solid ${isBehind ? 'rgba(234,88,12,0.2)' : '#E5E7EB'}`,
-            borderRadius: '12px',
-            padding: '16px',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+          <div key={member.name} className="bg-white rounded-xl p-4" style={{ border: `1px solid ${isBehind ? 'rgba(234,88,12,0.2)' : '#E5E7EB'}` }}>
+            <div className="flex justify-between items-center flex-wrap gap-2 mb-2">
               <div className="flex items-center gap-2">
-                <span style={{ fontWeight: 700, fontSize: '14px', color: '#1a1a2e' }}>{member.name}</span>
-                <span style={{
-                  fontSize: '10px', padding: '2px 8px', borderRadius: '999px',
-                  background: `${PHASES[phase].color}12`, color: PHASES[phase].color,
-                  fontWeight: 600,
-                }}>
+                <span className="font-bold text-sm text-[#1a1a2e]">{member.name}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PHASES[phase].color}12`, color: PHASES[phase].color }}>
                   {PHASES[phase].label} - Day {member.daysIn}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span style={{
-                  fontFamily: mono, fontSize: '14px', fontWeight: 700,
-                  color: getScoreColor(member.healthScore),
-                  background: `${getScoreColor(member.healthScore)}10`,
-                  padding: '2px 8px', borderRadius: '6px',
-                }}>
+                <span className="text-sm font-bold px-2 py-0.5 rounded-md" style={{ fontFamily: mono, color: getScoreColor(member.healthScore), background: `${getScoreColor(member.healthScore)}10` }}>
                   {member.healthScore}
                 </span>
-                <span style={{ fontSize: '11px', color: '#9CA3AF' }}>{member.archetype}</span>
+                <span className="text-[11px] text-gray-400">{member.archetype}</span>
               </div>
             </div>
 
             {/* Progress bar */}
-            <div style={{
-              height: 6, background: '#E5E7EB', borderRadius: 3,
-              overflow: 'hidden', marginBottom: '8px',
-            }}>
-              <div style={{
-                width: `${Math.min(member.daysIn / 90 * 100, 100)}%`,
-                height: '100%', borderRadius: 3,
-                background: PHASES[phase].color,
-                transition: 'width 0.4s ease',
-              }} />
+            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden mb-2">
+              <div className="h-full rounded-full transition-[width] duration-400 ease-out" style={{ width: `${Math.min(member.daysIn / 90 * 100, 100)}%`, background: PHASES[phase].color }} />
             </div>
 
             {/* Milestones */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: isBehind ? '8px' : 0 }}>
+            <div className={`flex gap-2 flex-wrap ${isBehind ? 'mb-2' : ''}`}>
               {MILESTONES.map((ms) => {
                 const done = member.milestones[ms.key];
                 return (
-                  <div key={ms.key} style={{
-                    display: 'flex', alignItems: 'center', gap: '4px',
-                    padding: '3px 10px', borderRadius: '999px', fontSize: '11px',
-                    background: done ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.06)',
-                    border: `1px solid ${done ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.15)'}`,
-                    color: done ? '#16a34a' : '#dc2626',
-                    fontWeight: 600,
-                  }}>
+                  <div key={ms.key} className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${done ? 'bg-green-500/[0.08] border border-green-500/20 text-green-600' : 'bg-red-500/[0.06] border border-red-500/15 text-red-600'}`}>
                     <span>{ms.icon}</span>
                     <span>{ms.label}</span>
                     <span>{done ? '\u2713' : '\u2717'}</span>
@@ -179,12 +134,7 @@ export default function CohortTab() {
 
             {/* Action suggestion for behind members */}
             {isBehind && (
-              <div style={{
-                padding: '8px 12px', borderRadius: '8px',
-                background: 'rgba(234,88,12,0.04)', border: '1px solid rgba(234,88,12,0.12)',
-                fontSize: '12px', color: '#ea580c', fontWeight: 500,
-                display: 'flex', alignItems: 'center', gap: '6px',
-              }}>
+              <div className="px-3 py-2 rounded-lg bg-orange-600/[0.04] border border-orange-600/[0.12] text-xs text-orange-600 font-medium flex items-center gap-1.5">
                 <span className="font-bold">Action:</span> {action}
               </div>
             )}
@@ -193,28 +143,15 @@ export default function CohortTab() {
       })}
 
       {/* Key Insight */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(59,130,246,0.04) 100%)',
-        border: '1px solid rgba(139,92,246,0.15)',
-        borderRadius: '12px',
-        padding: '24px',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '14px',
-      }}>
-        <div style={{
-          width: '40px', height: '40px', borderRadius: '8px',
-          background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.1))',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '20px', flexShrink: 0, border: '1px solid rgba(139,92,246,0.2)',
-        }}>
+      <div className="rounded-xl p-6 flex items-start gap-3.5" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(59,130,246,0.04) 100%)', border: '1px solid rgba(139,92,246,0.15)' }}>
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.1))', border: '1px solid rgba(139,92,246,0.2)' }}>
           {'\uD83D\uDCA1'}
         </div>
         <div>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgb(139,92,246)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>
+          <div className="text-[11px] font-bold text-violet-500 uppercase tracking-wider mb-1.5">
             Key Insight
           </div>
-          <p style={{ fontSize: '14px', color: '#1a1a2e', margin: 0, lineHeight: 1.7, fontWeight: 500 }}>
+          <p className="text-sm text-[#1a1a2e] m-0 leading-relaxed font-medium">
             Members who complete all 4 milestones within 60 days have a <strong>94% Year-1 retention rate</strong>.
             Members who miss 2+ milestones by Day 45 have only a <strong>58% retention rate</strong>.
             The buddy assignment playbook increases milestone completion by <strong>35%</strong>.
