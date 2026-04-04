@@ -1,42 +1,26 @@
 // WaitlistRow.jsx — UI primitive for member-aware waitlist queue
-// Props contract: see ARCHITECTURE.md §7
-
 import { useState } from 'react';
 import MemberLink from '@/components/MemberLink.jsx';
-import { theme } from '@/config/theme';
 import ArchetypeBadge from './ArchetypeBadge';
 
-const riskStyles = (riskLevel) => {
-  const c = theme.colors;
-  if (riskLevel === 'Critical') return { color: c.urgent,   bg: `${c.urgent}14`,   border: `${c.urgent}33` };
-  if (riskLevel === 'At Risk')  return { color: c.warning,  bg: `${c.warning}14`,  border: `${c.warning}33` };
-  if (riskLevel === 'Watch')    return { color: c.info,     bg: `${c.info}12`,     border: `${c.info}2E` };
-  return { color: c.success, bg: `${c.success}12`, border: `${c.success}2E` };
+const riskCls = (riskLevel) => {
+  if (riskLevel === 'Critical') return 'text-error-500 bg-error-50 border-error-200 dark:bg-error-500/10 dark:border-error-500/30';
+  if (riskLevel === 'At Risk')  return 'text-warning-500 bg-warning-50 border-warning-200 dark:bg-warning-500/10 dark:border-warning-500/30';
+  if (riskLevel === 'Watch')    return 'text-blue-light-500 bg-blue-light-50 border-blue-light-200 dark:bg-blue-light-500/10 dark:border-blue-light-500/30';
+  return 'text-success-500 bg-success-50 border-success-200 dark:bg-success-500/10 dark:border-success-500/30';
 };
 
-const priorityStyles = (retentionPriority) => {
-  const c = theme.colors;
-  if (retentionPriority === 'HIGH')
-    return { label: 'PRIORITY', color: c.success, bg: `${c.success}12`, border: `${c.success}2E` };
-  return { label: 'STANDARD', color: c.textMuted, bg: `${c.bgDeep}`, border: c.border };
+const priorityCls = (retentionPriority) => {
+  if (retentionPriority === 'HIGH') return { label: 'PRIORITY', cls: 'text-success-500 bg-success-50 border-success-200 dark:bg-success-500/10 dark:border-success-500/30' };
+  return { label: 'STANDARD', cls: 'text-gray-500 bg-gray-100 border-gray-200 dark:bg-white/5 dark:border-gray-700 dark:text-gray-400' };
 };
 
 export default function WaitlistRow({
-  memberId,
-  memberName,
-  archetype,
-  healthScore,
-  riskLevel,
-  retentionPriority,
-  requestedSlot,
-  daysWaiting,
-  lastRound,
-  memberValueAnnual,
-  churnRiskScore,
-  onSelect,
+  memberId, memberName, archetype, healthScore, riskLevel, retentionPriority,
+  requestedSlot, daysWaiting, lastRound, memberValueAnnual, churnRiskScore, onSelect,
 }) {
-  const r = riskStyles(riskLevel);
-  const p = priorityStyles(retentionPriority);
+  const rCls = riskCls(riskLevel);
+  const p = priorityCls(retentionPriority);
   const clickable = typeof onSelect === 'function';
   const [hovered, setHovered] = useState(false);
 
@@ -46,99 +30,51 @@ export default function WaitlistRow({
       onClick={clickable ? () => onSelect(memberId) : undefined}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1.4fr 1fr 110px 92px 110px 140px',
-        gap: theme.spacing.sm,
-        alignItems: 'center',
-        padding: '10px 12px',
-        border: `1px solid ${hovered ? theme.colors.info + '40' : theme.colors.border}`,
-        borderRadius: theme.radius.md,
-        background: hovered ? theme.colors.bgCardHover : theme.colors.bgCard,
-        cursor: clickable ? 'pointer' : 'default',
-        transition: 'border-color 0.15s ease, background 0.15s ease, transform 0.12s ease',
-        boxShadow: hovered ? theme.shadow.sm : 'none',
-        transform: hovered ? 'translateY(-1px)' : 'none',
-      }}
+      className={`gap-3 items-center px-3 py-2.5 rounded-xl border transition-all duration-150 ${
+        hovered
+          ? 'border-blue-light-200 bg-gray-50 shadow-theme-xs -translate-y-px dark:border-blue-light-500/30 dark:bg-white/[0.05]'
+          : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'
+      } ${clickable ? 'cursor-pointer' : 'cursor-default'}`}
+      style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 110px 92px 110px 140px' }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-          <MemberLink
-            memberId={memberId}
-            style={{ fontWeight: 700, color: theme.colors.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-          >
+      <div className="flex flex-col gap-1 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <MemberLink memberId={memberId} className="font-bold text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap dark:text-white/90">
             {memberName}
           </MemberLink>
-          <span style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: theme.colors.textMuted }}>
-            {memberId}
-          </span>
+          <span className="font-mono text-[11px] text-gray-500 dark:text-gray-400">{memberId}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+        <div className="flex items-center gap-1.5 flex-wrap">
           <ArchetypeBadge archetype={archetype} size="xs" />
-          {lastRound && (
-            <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>
-              Last round: {lastRound}
-            </span>
-          )}
+          {lastRound && <span className="text-[11px] text-gray-500 dark:text-gray-400">Last round: {lastRound}</span>}
         </div>
       </div>
 
-      <div style={{ fontSize: '12px', color: theme.colors.textSecondary }}>
+      <div className="text-xs text-gray-600 dark:text-gray-400">
         {requestedSlot}
-        <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '2px' }}>
-          Waiting {daysWaiting}d
-        </div>
+        <div className="text-[11px] text-gray-500 mt-0.5 dark:text-gray-400">Waiting {daysWaiting}d</div>
       </div>
 
-      <div style={{ textAlign: 'right' }}>
-        <div style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.textPrimary }}>
-          {healthScore}
-        </div>
+      <div className="text-right">
+        <div className="font-mono font-bold text-gray-800 dark:text-white/90">{healthScore}</div>
         {typeof churnRiskScore === 'number' && (
-          <div style={{ fontFamily: theme.fonts.mono, fontSize: '11px', color: theme.colors.textMuted }}>
-            Risk {Math.round(churnRiskScore * 100)}%
-          </div>
+          <div className="font-mono text-[11px] text-gray-500 dark:text-gray-400">Risk {Math.round(churnRiskScore * 100)}%</div>
         )}
       </div>
 
-      <span style={{
-        justifySelf: 'start',
-        fontSize: '11px',
-        fontWeight: 700,
-        padding: '2px 8px',
-        borderRadius: '999px',
-        background: r.bg,
-        color: r.color,
-        border: `1px solid ${r.border}`,
-        whiteSpace: 'nowrap',
-      }}>
+      <span className={`justify-self-start text-[11px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap border ${rCls}`}>
         {riskLevel}
       </span>
 
-      <span style={{
-        justifySelf: 'start',
-        fontSize: '11px',
-        fontWeight: 800,
-        letterSpacing: '0.02em',
-        padding: '2px 8px',
-        borderRadius: '999px',
-        background: p.bg,
-        color: p.color,
-        border: `1px solid ${p.border}`,
-        whiteSpace: 'nowrap',
-      }}>
+      <span className={`justify-self-start text-[11px] font-extrabold tracking-wide px-2 py-0.5 rounded-full whitespace-nowrap border ${p.cls}`}>
         {p.label}
       </span>
 
-      <div style={{ textAlign: 'right' }}>
+      <div className="text-right">
         {typeof memberValueAnnual === 'number' && (
-          <div style={{ fontFamily: theme.fonts.mono, fontSize: '12px', color: theme.colors.textPrimary, fontWeight: 700 }}>
-            ${memberValueAnnual.toLocaleString()}/yr
-          </div>
+          <div className="font-mono text-xs text-gray-800 font-bold dark:text-white/90">${memberValueAnnual.toLocaleString()}/yr</div>
         )}
-        <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '2px' }}>
-          Action: fill first
-        </div>
+        <div className="text-[11px] text-gray-500 mt-0.5 dark:text-gray-400">Action: fill first</div>
       </div>
     </div>
   );

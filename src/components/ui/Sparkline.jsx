@@ -1,30 +1,26 @@
-import { theme } from '@/config/theme';
-
 // DES-P08: Sparkline component for inline trend visualization
 
-export default function Sparkline({ 
-  data = [], 
-  width = 80, 
+export default function Sparkline({
+  data = [],
+  width = 80,
   height = 24,
-  color = theme.colors.accent,
+  color = '#465fff',
   lineWidth = 2,
   showDots = false,
-  style = {}
+  className = ''
 }) {
   if (!data || data.length === 0) return null;
 
   const max = Math.max(...data);
   const min = Math.min(...data);
-  const range = max - min || 1; // Avoid division by zero
+  const range = max - min || 1;
 
-  // Normalize data points to SVG coordinates
   const points = data.map((value, index) => {
     const x = (index / (data.length - 1)) * width;
     const y = height - ((value - min) / range) * height;
     return { x, y };
   });
 
-  // Build path string
   const pathData = points
     .map((point, index) => {
       const command = index === 0 ? 'M' : 'L';
@@ -37,9 +33,8 @@ export default function Sparkline({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      style={{ display: 'block', ...style }}
+      className={`block ${className}`}
     >
-      {/* Line */}
       <path
         d={pathData}
         fill="none"
@@ -48,8 +43,6 @@ export default function Sparkline({
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      
-      {/* Dots at each point */}
       {showDots && points.map((point, index) => (
         <circle
           key={index}
@@ -64,30 +57,30 @@ export default function Sparkline({
 }
 
 // Sparkline with positive/negative coloring
-export function TrendSparkline({ 
-  data = [], 
-  width = 80, 
+export function TrendSparkline({
+  data = [],
+  width = 80,
   height = 24,
-  positiveColor = theme.colors.success,
-  negativeColor = theme.colors.urgent,
-  style = {}
+  positiveColor = '#12b76a',
+  negativeColor = '#f04438',
+  className = ''
 }) {
   if (!data || data.length === 0) return null;
 
   const trend = data.length > 1 ? data[data.length - 1] - data[0] : 0;
   const color = trend >= 0 ? positiveColor : negativeColor;
 
-  return <Sparkline data={data} width={width} height={height} color={color} style={style} />;
+  return <Sparkline data={data} width={width} height={height} color={color} className={className} />;
 }
 
 // Bar chart sparkline
-export function SparkBar({ 
-  data = [], 
-  width = 80, 
+export function SparkBar({
+  data = [],
+  width = 80,
   height = 24,
-  color = theme.colors.accent,
+  color = '#465fff',
   gap = 2,
-  style = {}
+  className = ''
 }) {
   if (!data || data.length === 0) return null;
 
@@ -99,7 +92,7 @@ export function SparkBar({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      style={{ display: 'block', ...style }}
+      className={`block ${className}`}
     >
       {data.map((value, index) => {
         const barHeight = (value / max) * height;
@@ -123,14 +116,14 @@ export function SparkBar({
 }
 
 // Win/loss sparkline (positive/negative bars)
-export function WinLossSparkline({ 
-  data = [], 
-  width = 80, 
+export function WinLossSparkline({
+  data = [],
+  width = 80,
   height = 24,
-  positiveColor = theme.colors.success,
-  negativeColor = theme.colors.urgent,
+  positiveColor = '#12b76a',
+  negativeColor = '#f04438',
   gap = 2,
-  style = {}
+  className = ''
 }) {
   if (!data || data.length === 0) return null;
 
@@ -143,7 +136,7 @@ export function WinLossSparkline({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      style={{ display: 'block', ...style }}
+      className={`block ${className}`}
     >
       {/* Zero line */}
       <line
@@ -151,7 +144,7 @@ export function WinLossSparkline({
         y1={zeroY}
         x2={width}
         y2={zeroY}
-        stroke={theme.colors.border}
+        stroke="#e4e7ec"
         strokeWidth={1}
       />
 

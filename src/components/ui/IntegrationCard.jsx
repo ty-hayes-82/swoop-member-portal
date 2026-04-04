@@ -1,54 +1,45 @@
 // IntegrationCard — single integration system card with status + partner list
-// Props: id, name, category, icon, themeColor, status, lastSync, partners, description,
-//        isSelected, onSelect
-import { theme } from '@/config/theme';
 
 const STATUS_CONFIG = {
-  connected:   { label: 'Connected',   dot: theme.colors.success },
-  available:   { label: 'Available',   dot: theme.colors.warning },
-  coming_soon: { label: 'Coming Q2',   dot: theme.colors.textMuted },
+  connected:   { label: 'Connected',   dotCls: 'bg-success-500' },
+  available:   { label: 'Available',   dotCls: 'bg-warning-500' },
+  coming_soon: { label: 'Coming Q2',   dotCls: 'bg-gray-400' },
 };
 
 export default function IntegrationCard({
   name, category, icon, themeColor, status, lastSync, partners, description,
   isSelected, onSelect,
 }) {
-  const color = theme.colors[themeColor] ?? theme.colors.accent;
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.available;
 
   return (
     <button
       onClick={onSelect}
-      style={{
-        display: 'block', width: '100%', textAlign: 'left',
-        background: isSelected ? `${color}12` : theme.colors.bgCard,
-        border: `1.5px solid ${isSelected ? color : theme.colors.border}`,
-        borderRadius: theme.radius.md,
-        padding: theme.spacing.md,
-        cursor: 'pointer',
-        transition: 'all 0.15s ease',
-        opacity: status === 'coming_soon' ? 0.7 : 1,
-      }}
+      className={`block w-full text-left rounded-xl p-4 cursor-pointer transition-all duration-150 ${
+        isSelected
+          ? 'bg-brand-50 border-[1.5px] border-brand-500 dark:bg-brand-500/10 dark:border-brand-500'
+          : 'bg-white border-[1.5px] border-gray-200 dark:bg-white/[0.03] dark:border-gray-800'
+      } ${status === 'coming_soon' ? 'opacity-70' : 'opacity-100'}`}
     >
       {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '20px', lineHeight: 1 }}>{icon}</span>
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xl leading-none">{icon}</span>
           <div>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color }}>{name}</div>
-            <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: '1px' }}>{category}</div>
+            <div className="text-sm font-bold text-brand-500">{name}</div>
+            <div className="text-[10px] text-gray-500 mt-px dark:text-gray-400">{category}</div>
           </div>
         </div>
         <StatusPip cfg={cfg} lastSync={lastSync} />
       </div>
 
       {/* Description */}
-      <p style={{ fontSize: '11px', color: theme.colors.textSecondary ?? theme.colors.textMuted, lineHeight: 1.5, margin: '0 0 8px' }}>
+      <p className="text-[11px] text-gray-600 leading-relaxed m-0 mb-2 dark:text-gray-400">
         {description}
       </p>
 
       {/* Partners */}
-      <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>
+      <div className="text-[10px] text-gray-500 dark:text-gray-400">
         Also: {partners.slice(1).join(', ')}
       </div>
     </button>
@@ -57,13 +48,13 @@ export default function IntegrationCard({
 
 function StatusPip({ cfg, lastSync }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: cfg.dot, display: 'inline-block' }} />
-        <span style={{ fontSize: '10px', color: cfg.dot, fontWeight: 600 }}>{cfg.label}</span>
+    <div className="flex flex-col items-end gap-0.5 shrink-0">
+      <div className="flex items-center gap-1">
+        <span className={`w-1.5 h-1.5 rounded-full inline-block ${cfg.dotCls}`} />
+        <span className={`text-[10px] font-semibold ${cfg.dotCls === 'bg-success-500' ? 'text-success-500' : cfg.dotCls === 'bg-warning-500' ? 'text-warning-500' : 'text-gray-400'}`}>{cfg.label}</span>
       </div>
       {lastSync && (
-        <span style={{ fontSize: '10px', color: theme.colors.textMuted }}>Synced {lastSync}</span>
+        <span className="text-[10px] text-gray-500 dark:text-gray-400">Synced {lastSync}</span>
       )}
     </div>
   );

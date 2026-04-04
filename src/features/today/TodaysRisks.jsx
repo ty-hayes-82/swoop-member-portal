@@ -1,5 +1,4 @@
 // TodaysRisks — Staffing status grid + Open complaints with aging
-import { theme } from '@/config/theme';
 import { feedbackRecords } from '@/data/staffing';
 import { useNavigation } from '@/context/NavigationContext';
 import MemberLink from '@/components/MemberLink';
@@ -14,9 +13,9 @@ const OUTLETS = [
 ];
 
 function getStaffingColor(current, required) {
-  if (current >= required) return theme.colors.success;
+  if (current >= required) return '#22c55e';
   if (current >= required - 1) return '#ca8a04';
-  return theme.colors.urgent;
+  return '#ef4444';
 }
 
 function getStaffingLabel(current, required) {
@@ -42,25 +41,18 @@ export default function TodaysRisks() {
 
   const statusColors = {
     acknowledged: '#ca8a04',
-    in_progress: theme.colors.info500,
-    escalated: theme.colors.urgent,
+    in_progress: '#3B82F6',
+    escalated: '#ef4444',
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+    <div className="flex flex-col gap-4">
       {/* Staffing Status Grid */}
       <div>
-        <div style={{
-          fontSize: '11px', fontWeight: 700, color: theme.colors.accent,
-          textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10,
-        }}>
+        <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wide mb-2.5">
           Today's Staffing vs Demand
         </div>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 10,
-        }}>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2.5">
           {OUTLETS.map(outlet => {
             const color = getStaffingColor(outlet.current, outlet.required);
             const label = getStaffingLabel(outlet.current, outlet.required);
@@ -68,30 +60,21 @@ export default function TodaysRisks() {
               <div
                 key={outlet.name}
                 onClick={() => navigate('service', { tab: 'staffing' })}
-                style={{
-                  background: theme.colors.bgCard,
-                  border: `1px solid ${theme.colors.border}`,
-                  borderLeft: `3px solid ${color}`,
-                  borderRadius: theme.radius.md,
-                  padding: '12px 16px',
-                  cursor: 'pointer',
-                  transition: 'box-shadow 0.15s, transform 0.15s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.boxShadow = theme.shadow.md; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+                className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl py-3 px-4 cursor-pointer transition-all duration-150 hover:shadow-md hover:-translate-y-px"
+                style={{ borderLeft: `3px solid ${color}` }}
               >
-                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: 4 }}>
+                <div className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">
                   {outlet.name}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold" style={{ color }}>
                     {outlet.current}/{outlet.required}
                   </span>
-                  <span style={{ fontSize: theme.fontSize.xs, color, fontWeight: 600 }}>
+                  <span className="text-xs font-semibold" style={{ color }}>
                     {label}
                   </span>
                 </div>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
+                <div className="text-xs text-gray-500 mt-0.5">
                   servers
                 </div>
               </div>
@@ -102,79 +85,60 @@ export default function TodaysRisks() {
 
       {/* Open Complaints with Aging */}
       <div>
-        <div style={{
-          fontSize: '11px', fontWeight: 700, color: theme.colors.warning,
-          textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10,
-        }}>
+        <div className="text-[11px] font-bold text-warning-500 uppercase tracking-wide mb-2.5">
           Open Complaints ({totalUnresolved})
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div className="flex flex-col gap-1.5">
           {displayComplaints.map(c => {
             const isOld = c.daysOpen > 7;
             const isCritical = c.daysOpen > 30;
-            const statusColor = statusColors[c.status] || theme.colors.textMuted;
+            const statusColor = statusColors[c.status] || '#6b7280';
 
             return (
               <div
                 key={c.id}
                 onClick={() => navigate('service', { tab: 'complaints' })}
+                className="flex items-center justify-between py-2.5 px-3.5 rounded-lg cursor-pointer transition-shadow duration-150 hover:shadow-md"
                 style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '10px 14px', borderRadius: theme.radius.sm,
-                  background: isOld ? `${theme.colors.urgent}06` : theme.colors.bgCard,
-                  border: `1px solid ${isOld ? theme.colors.urgent + '25' : theme.colors.border}`,
-                  cursor: 'pointer',
-                  transition: 'box-shadow 0.15s',
+                  background: isOld ? 'rgba(239,68,68,0.024)' : undefined,
+                  border: `1px solid ${isOld ? 'rgba(239,68,68,0.15)' : '#e5e7eb'}`,
                   animation: isCritical ? 'pulse-border 2s infinite' : 'none',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.boxShadow = theme.shadow.md; }}
-                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-                  <MemberLink memberId={c.memberId} mode="drawer" style={{
-                    fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary,
-                    whiteSpace: 'nowrap',
-                  }}>
+                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                  <MemberLink memberId={c.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 dark:text-white/90 whitespace-nowrap">
                     {c.memberName}
                   </MemberLink>
-                  <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                  <span className="text-xs text-gray-500">
                     {c.category}
                   </span>
                   {c.isUnderstaffedDay && (
-                    <span style={{ fontSize: '9px', fontWeight: 700, color: theme.colors.urgent, background: `${theme.colors.urgent}12`, padding: '1px 5px', borderRadius: '999px' }}>
+                    <span className="text-[9px] font-bold text-error-500 bg-error-500/[0.07] px-1.5 py-px rounded-full">
                       Understaffed
                     </span>
                   )}
                   {!c.isUnderstaffedDay && c.daysOpen <= 10 && (
-                    <span style={{ fontSize: '9px', fontWeight: 700, color: '#ca8a04', background: '#ca8a0412', padding: '1px 5px', borderRadius: '999px' }}>
+                    <span className="text-[9px] font-bold text-[#ca8a04] bg-[#ca8a0412] px-1.5 py-px rounded-full">
                       High-demand day
                     </span>
                   )}
                   {c.category === 'Pace of Play' && (
-                    <span style={{ fontSize: '9px', fontWeight: 700, color: theme.colors.info500 || '#3B82F6', background: `${theme.colors.info500 || '#3B82F6'}12`, padding: '1px 5px', borderRadius: '999px' }}>
+                    <span className="text-[9px] font-bold text-blue-500 bg-blue-500/[0.07] px-1.5 py-px rounded-full">
                       Weather impact
                     </span>
                   )}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                  <span style={{
-                    fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                    background: `${theme.colors.accent}10`, color: theme.colors.accent,
-                    textTransform: 'uppercase', letterSpacing: '0.04em',
-                  }}>
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight">
                     {c.daysOpen > 14 ? 'GM' : 'Dept Head'}
                   </span>
-                  <span style={{
-                    fontSize: theme.fontSize.xs, fontWeight: 700,
-                    color: isOld ? theme.colors.urgent : theme.colors.textSecondary,
-                  }}>
+                  <span className={`text-xs font-bold ${isOld ? 'text-error-500' : 'text-gray-600'}`}>
                     {c.daysOpen}d
                   </span>
-                  <span style={{
-                    fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: 10,
-                    background: `${statusColor}15`, color: statusColor,
-                    textTransform: 'capitalize',
-                  }}>
+                  <span
+                    className="text-[10px] font-semibold py-0.5 px-2 rounded-xl capitalize"
+                    style={{ background: `${statusColor}15`, color: statusColor }}
+                  >
                     {c.status.replace('_', ' ')}
                   </span>
                 </div>
@@ -186,12 +150,7 @@ export default function TodaysRisks() {
         {totalUnresolved > 3 && (
           <button
             onClick={() => navigate('service', { tab: 'complaints' })}
-            style={{
-              marginTop: 8, padding: '6px 12px', fontSize: theme.fontSize.xs,
-              fontWeight: 600, color: theme.colors.accent, background: 'none',
-              border: `1px solid ${theme.colors.accent}30`, borderRadius: theme.radius.sm,
-              cursor: 'pointer',
-            }}
+            className="mt-2 py-1.5 px-3 text-xs font-semibold text-brand-500 bg-transparent border border-brand-500/20 rounded-lg cursor-pointer"
           >
             View all {totalUnresolved} in Service →
           </button>
@@ -200,8 +159,8 @@ export default function TodaysRisks() {
 
       <style>{`
         @keyframes pulse-border {
-          0%, 100% { border-color: ${theme.colors.urgent}25; }
-          50% { border-color: ${theme.colors.urgent}60; }
+          0%, 100% { border-color: rgba(239,68,68,0.15); }
+          50% { border-color: rgba(239,68,68,0.38); }
         }
       `}</style>
     </div>

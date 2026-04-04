@@ -1,7 +1,5 @@
 // QuickActions — connects insight to real-world action.
-// Phase A: Button hierarchy — Draft/Call are primary (filled), Assign is secondary (tinted outline).
 import { useState } from 'react';
-import { theme } from '@/config/theme';
 import { getActionsForArchetype, outreachCategories } from '@/data/outreach';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
@@ -20,15 +18,15 @@ export default function QuickActions({ memberName, memberId, context = '', arche
   const outreachActions = archetype ? getActionsForArchetype(archetype) : [];
 
   const ACTION_META = {
-    note: { label: 'Personal note', icon: '✉', color: theme.colors.accent },
-    call: { label: 'Scheduled call', icon: '📞', color: theme.colors.success },
-    task: { label: 'Staff assignment', icon: '→', color: theme.colors.staffing },
+    note: { label: 'Personal note', icon: '\u2709', colorCls: 'text-brand-500' },
+    call: { label: 'Scheduled call', icon: '\uD83D\uDCDE', colorCls: 'text-success-500' },
+    task: { label: 'Staff assignment', icon: '\u2192', colorCls: 'text-blue-light-500' },
   };
 
-  const STATUS_STYLES = {
-    Completed: { color: theme.colors.success, background: theme.colors.success + '14' },
-    Scheduled: { color: theme.colors.info, background: theme.colors.info + '14' },
-    Assigned:  { color: theme.colors.staffing, background: theme.colors.staffing + '14' },
+  const STATUS_CLS = {
+    Completed: 'text-success-500 bg-success-50',
+    Scheduled: 'text-blue-light-500 bg-blue-light-50',
+    Assigned:  'text-blue-light-600 bg-blue-light-50',
   };
 
   const getDueLabel = (type) => {
@@ -63,8 +61,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
   };
 
   const firstName = memberName?.split(' ')[0] ?? 'the member';
-
-  const defaultNote = `Dear ${firstName},\n\nI wanted to reach out personally to apologize for your recent experience at the Grill Room. Your satisfaction is our top priority and I'm sorry we fell short.\n\nI'd love to have you as my guest for lunch this week — please let me know what works for your schedule.\n\nWarm regards,\n[GM Name]\nOakmont Hills Country Club`;
+  const defaultNote = `Dear ${firstName},\n\nI wanted to reach out personally to apologize for your recent experience at the Grill Room. Your satisfaction is our top priority and I'm sorry we fell short.\n\nI'd love to have you as my guest for lunch this week \u2014 please let me know what works for your schedule.\n\nWarm regards,\n[GM Name]\nOakmont Hills Country Club`;
 
   const handleSend = (type) => {
     setSent(type);
@@ -83,79 +80,58 @@ export default function QuickActions({ memberName, memberId, context = '', arche
     setTimeout(() => setSent(null), 4000);
   };
 
-  const primaryBtn = (label, icon, key, color) => (
+  const primaryBtn = (label, icon, key, colorCls) => (
     <button
       key={key}
       onClick={() => setMode(mode === key ? null : key)}
-      style={{
-        padding: '7px 16px', borderRadius: theme.radius.md, fontSize: theme.fontSize.sm,
-        fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px',
-        border: `1px solid ${mode === key ? color + '60' : color}`,
-        background: mode === key ? color + '18' : color,
-        color: mode === key ? color : theme.colors.white,
-        boxShadow: mode === key ? 'none' : '0 1px 4px ' + color + '40',
-        transition: 'all 0.15s',
-      }}
+      className={`px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer inline-flex items-center gap-1.5 transition-all duration-150 border ${
+        mode === key
+          ? `bg-brand-50 text-brand-500 border-brand-200 dark:bg-brand-500/10 dark:border-brand-500/30`
+          : `bg-brand-500 text-white border-brand-500 shadow-theme-xs`
+      }`}
     >{icon} {label}</button>
   );
 
-  const secondaryBtn = (label, icon, key, color) => (
+  const secondaryBtn = (label, icon, key) => (
     <button
       key={key}
       onClick={() => setMode(mode === key ? null : key)}
-      style={{
-        padding: '7px 14px', borderRadius: theme.radius.md, fontSize: theme.fontSize.sm,
-        fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px',
-        border: `1px solid ${mode === key ? color + '60' : color + '35'}`,
-        background: mode === key ? color + '14' : color + '08',
-        color: color,
-        transition: 'all 0.15s',
-      }}
+      className={`px-3.5 py-2 rounded-xl text-sm font-semibold cursor-pointer inline-flex items-center gap-1.5 transition-all duration-150 border ${
+        mode === key
+          ? 'bg-blue-light-50 text-blue-light-600 border-blue-light-200 dark:bg-blue-light-500/10 dark:border-blue-light-500/30'
+          : 'bg-blue-light-50/50 text-blue-light-600 border-blue-light-200/50 dark:bg-blue-light-500/5 dark:border-blue-light-500/20'
+      }`}
     >{icon} {label}</button>
   );
 
   return (
     <div>
       {sent && (
-        <div style={{ marginBottom: theme.spacing.sm, padding: '8px 12px', borderRadius: theme.radius.sm,
-          background: theme.colors.success + '12', border: '1px solid ' + theme.colors.success + '30',
-          fontSize: theme.fontSize.sm, color: theme.colors.success }}>
-          ✓ {sent === 'note' ? 'Personal note ready to send' : sent === 'call' ? 'Call scheduled' : 'Task assigned to ' + staff}
+        <div className="mb-3 px-3 py-2 rounded-lg bg-success-50 border border-success-200 text-sm text-success-500 dark:bg-success-500/10 dark:border-success-500/30">
+          \u2713 {sent === 'note' ? 'Personal note ready to send' : sent === 'call' ? 'Call scheduled' : 'Task assigned to ' + staff}
         </div>
       )}
-      <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
-        {primaryBtn('Draft personal note', '✉', 'note', theme.colors.accent)}
-        {primaryBtn('Schedule a call', '📞', 'call', theme.colors.success)}
-        {secondaryBtn('Assign to staff', '→', 'task', theme.colors.staffing)}
+      <div className="flex gap-3 flex-wrap">
+        {primaryBtn('Draft personal note', '\u2709', 'note', 'text-brand-500')}
+        {primaryBtn('Schedule a call', '\uD83D\uDCDE', 'call', 'text-success-500')}
+        {secondaryBtn('Assign to staff', '\u2192', 'task')}
       </div>
 
       {mode === 'note' && (
-        <div style={{ marginTop: theme.spacing.sm, padding: theme.spacing.md,
-          background: theme.colors.bgCard, border: '1px solid ' + theme.colors.accent + '30',
-          borderRadius: theme.radius.md }}>
-          <div style={{ fontSize: '11px', color: theme.colors.accent, fontWeight: 700, letterSpacing: '0.05em', marginBottom: theme.spacing.sm }}>
+        <div className="mt-3 p-4 bg-white border border-brand-200 rounded-xl dark:bg-white/[0.03] dark:border-brand-500/30">
+          <div className="text-[11px] text-brand-500 font-bold tracking-wide mb-3">
             PERSONAL NOTE TO {memberName?.toUpperCase()}
           </div>
           <textarea
             defaultValue={defaultNote}
             onChange={e => setNote(e.target.value)}
-            style={{ width: '100%', height: 160, padding: theme.spacing.sm, fontSize: theme.fontSize.sm,
-              fontFamily: theme.fonts.sans, color: theme.colors.textPrimary,
-              background: theme.colors.bgDeep, border: '1px solid ' + theme.colors.border,
-              borderRadius: theme.radius.sm, resize: 'vertical', lineHeight: 1.6, outline: 'none', boxSizing: 'border-box' }}
+            className="w-full h-40 p-3 text-sm text-gray-800 bg-gray-100 border border-gray-200 rounded-lg resize-y leading-relaxed outline-none box-border dark:bg-gray-800 dark:border-gray-700 dark:text-white/90"
           />
-          <div style={{ display: 'flex', gap: theme.spacing.sm, marginTop: theme.spacing.sm }}>
-            <button onClick={() => handleSend('note')} style={{
-              padding: '7px 18px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
-              fontWeight: 600, cursor: 'pointer', border: 'none',
-              background: theme.colors.accent, color: theme.colors.white,
-              boxShadow: '0 1px 4px ' + theme.colors.accent + '40' }}>
+          <div className="flex gap-3 mt-3">
+            <button onClick={() => handleSend('note')} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs">
               Send via email
             </button>
-            <button onClick={() => setMode(null)} style={{
-              padding: '7px 14px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
-              cursor: 'pointer', border: 'none', background: 'none',
-              color: theme.colors.textMuted, fontWeight: 500 }}>
+            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium">
               Dismiss
             </button>
           </div>
@@ -163,111 +139,82 @@ export default function QuickActions({ memberName, memberId, context = '', arche
       )}
 
       {mode === 'call' && (
-        <div style={{ marginTop: theme.spacing.sm, padding: theme.spacing.md,
-          background: theme.colors.bgCard, border: '1px solid ' + theme.colors.success + '30', borderRadius: theme.radius.md }}>
-          <div style={{ fontSize: '11px', color: theme.colors.success, fontWeight: 700, letterSpacing: '0.05em', marginBottom: theme.spacing.sm }}>
+        <div className="mt-3 p-4 bg-white border border-success-200 rounded-xl dark:bg-white/[0.03] dark:border-success-500/30">
+          <div className="text-[11px] text-success-500 font-bold tracking-wide mb-3">
             SCHEDULE A CALL WITH {memberName?.toUpperCase()}
           </div>
-          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.md, lineHeight: 1.6 }}>
-            Reminder: <strong style={{ color: theme.colors.textPrimary }}>James has a tee time Saturday 7:42 AM.</strong> A brief conversation at the first tee would be ideal — personal, not a formal call.
+          <div className="text-sm text-gray-600 mb-4 leading-relaxed dark:text-gray-400">
+            Reminder: <strong className="text-gray-800 dark:text-white/90">James has a tee time Saturday 7:42 AM.</strong> A brief conversation at the first tee would be ideal \u2014 personal, not a formal call.
           </div>
-          <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap', marginBottom: theme.spacing.md }}>
+          <div className="flex gap-3 flex-wrap mb-4">
             {['Today 4 PM', 'Friday AM', 'Saturday at the tee', 'Monday morning'].map(t => (
-              <button key={t} onClick={() => setTime(t)} style={{
-                padding: '5px 12px', borderRadius: '20px', fontSize: theme.fontSize.xs,
-                cursor: 'pointer', fontWeight: time === t ? 700 : 400,
-                border: '1px solid ' + (time === t ? theme.colors.success : theme.colors.border),
-                background: time === t ? theme.colors.success + '12' : 'none',
-                color: time === t ? theme.colors.success : theme.colors.textSecondary,
-              }}>{t}</button>
+              <button key={t} onClick={() => setTime(t)} className={`px-3 py-1.5 rounded-full text-xs cursor-pointer border ${
+                time === t
+                  ? 'font-bold border-success-500 bg-success-50 text-success-500 dark:bg-success-500/10 dark:border-success-500/40'
+                  : 'font-normal border-gray-200 bg-transparent text-gray-600 dark:border-gray-700 dark:text-gray-400'
+              }`}>{t}</button>
             ))}
           </div>
-          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-            <button onClick={() => handleSend('call')} style={{
-              padding: '7px 18px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
-              fontWeight: 600, cursor: 'pointer', border: 'none',
-              background: theme.colors.accent, color: theme.colors.white,
-              boxShadow: '0 1px 4px ' + theme.colors.success + '40' }}>
+          <div className="flex gap-3">
+            <button onClick={() => handleSend('call')} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs">
               Add to calendar
             </button>
-            <button onClick={() => setMode(null)} style={{
-              padding: '7px 14px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
-              cursor: 'pointer', border: 'none', background: 'none',
-              color: theme.colors.textMuted, fontWeight: 500 }}>Dismiss</button>
+            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium">Dismiss</button>
           </div>
         </div>
       )}
 
       {mode === 'task' && (
-        <div style={{ marginTop: theme.spacing.sm, padding: theme.spacing.md,
-          background: theme.colors.bgCard, border: '1px solid ' + theme.colors.staffing + '30', borderRadius: theme.radius.md }}>
-          <div style={{ fontSize: '11px', color: theme.colors.staffing, fontWeight: 700, letterSpacing: '0.05em', marginBottom: theme.spacing.sm }}>
+        <div className="mt-3 p-4 bg-white border border-blue-light-200 rounded-xl dark:bg-white/[0.03] dark:border-blue-light-500/30">
+          <div className="text-[11px] text-blue-light-600 font-bold tracking-wide mb-3">
             ASSIGN FOLLOW-UP TASK
           </div>
-          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm }}>
+          <div className="text-sm text-gray-600 mb-3 dark:text-gray-400">
             Task: <em>Follow up with {memberName} re: {context || 'service complaint'}</em>
           </div>
-          <div style={{ marginBottom: theme.spacing.sm }}>
-            <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginBottom: 4 }}>Assign to</div>
-            <select onChange={e => setStaff(e.target.value)} value={staff} style={{
-              padding: '7px 12px', fontSize: theme.fontSize.sm, borderRadius: theme.radius.sm,
-              border: '1px solid ' + theme.colors.border, background: theme.colors.bgDeep,
-              color: theme.colors.textPrimary, cursor: 'pointer', outline: 'none' }}>
+          <div className="mb-3">
+            <div className="text-[11px] text-gray-500 mb-1 dark:text-gray-400">Assign to</div>
+            <select onChange={e => setStaff(e.target.value)} value={staff} className="px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-100 text-gray-800 cursor-pointer outline-none dark:bg-gray-800 dark:border-gray-700 dark:text-white/90">
               {STAFF.map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
-          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-            <button onClick={() => handleSend('task')} style={{
-              padding: '7px 18px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
-              fontWeight: 600, cursor: 'pointer', border: 'none',
-              background: theme.colors.accent, color: theme.colors.white,
-              boxShadow: '0 1px 4px ' + theme.colors.staffing + '40' }}>
+          <div className="flex gap-3">
+            <button onClick={() => handleSend('task')} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs">
               Assign task
             </button>
-            <button onClick={() => setMode(null)} style={{
-              padding: '7px 14px', borderRadius: theme.radius.sm, fontSize: theme.fontSize.sm,
-              cursor: 'pointer', border: 'none', background: 'none',
-              color: theme.colors.textMuted, fontWeight: 500 }}>Dismiss</button>
+            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium">Dismiss</button>
           </div>
         </div>
       )}
 
-
       {/* Archetype-specific outreach suggestions */}
       {outreachActions.length > 0 && (
-        <div style={{ marginTop: theme.spacing.md }}>
+        <div className="mt-4">
           <button
             onClick={() => setShowOutreach(!showOutreach)}
-            style={{
-              width: '100%', padding: '10px 14px', borderRadius: theme.radius.md,
-              border: '1px solid rgba(37,99,235,0.2)', background: showOutreach ? 'rgba(37,99,235,0.04)' : '#fafbff',
-              color: '#2563eb', fontSize: theme.fontSize.sm, fontWeight: 600,
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              transition: 'all 0.15s',
-            }}
+            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-semibold cursor-pointer flex items-center justify-between transition-all duration-150 ${
+              showOutreach ? 'bg-brand-50 border-brand-200 text-brand-500 dark:bg-brand-500/5 dark:border-brand-500/30' : 'bg-white border-brand-200/50 text-brand-500 dark:bg-white/[0.03] dark:border-brand-500/20'
+            }`}
           >
-            <span>📨 Outreach Playbook for {archetype}</span>
-            <span style={{ fontSize: '12px', color: '#a1a1aa' }}>{showOutreach ? '\u25B2' : '\u25BC'} {outreachActions.length} actions</span>
+            <span>\uD83D\uDCE8 Outreach Playbook for {archetype}</span>
+            <span className="text-xs text-gray-400">{showOutreach ? '\u25B2' : '\u25BC'} {outreachActions.length} actions</span>
           </button>
           {showOutreach && (
-            <div style={{ marginTop: theme.spacing.sm, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="mt-3 flex flex-col gap-2">
               {outreachActions.map((action, idx) => {
                 const cat = outreachCategories.find(c => c.key === action.category);
                 return (
-                  <div key={action.id} style={{
-                    padding: '12px 14px', borderRadius: theme.radius.md,
-                    border: idx < 2 ? '1px solid rgba(37,99,235,0.2)' : '1px solid ' + theme.colors.border,
-                    background: idx < 2 ? 'rgba(37,99,235,0.03)' : theme.colors.bgCard,
-                    display: 'flex', alignItems: 'flex-start', gap: '10px',
-                  }}>
-                    <span style={{ fontSize: '16px', marginTop: '2px' }}>{cat?.icon || '\u2728'}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: '2px' }}>
+                  <div key={action.id} className={`px-3.5 py-3 rounded-xl border flex items-start gap-2.5 ${
+                    idx < 2 ? 'border-brand-200 bg-brand-50/50 dark:border-brand-500/20 dark:bg-brand-500/5' : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'
+                  }`}>
+                    <span className="text-base mt-0.5">{cat?.icon || '\u2728'}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-gray-800 mb-0.5 dark:text-white/90">
                         {action.label}
-                        {idx < 2 && <span style={{ fontSize: '10px', fontWeight: 700, color: '#2563eb', marginLeft: '6px', background: 'rgba(37,99,235,0.08)', padding: '1px 6px', borderRadius: '3px' }}>TOP</span>}
+                        {idx < 2 && <span className="text-[10px] font-bold text-brand-500 ml-1.5 bg-brand-50 px-1.5 py-px rounded dark:bg-brand-500/15">TOP</span>}
                       </div>
-                      <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, lineHeight: 1.4 }}>{action.description}</div>
-                      <div style={{ marginTop: '6px', fontSize: '11px', color: '#a1a1aa' }}>Owner: {action.defaultOwner}</div>
+                      <div className="text-xs text-gray-500 leading-snug dark:text-gray-400">{action.description}</div>
+                      <div className="mt-1.5 text-[11px] text-gray-400">Owner: {action.defaultOwner}</div>
                     </div>
                     <button
                       onClick={(e) => {
@@ -276,12 +223,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
                         showToast(action.label + ' triggered for ' + memberName, 'info');
                         trackAction({ actionType: 'email', actionSubtype: 'outreach', memberId, memberName, description: action.label });
                       }}
-                      style={{
-                        padding: '5px 12px', borderRadius: theme.radius.sm, fontSize: '11px',
-                        fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(37,99,235,0.3)',
-                        background: 'rgba(37,99,235,0.06)', color: '#2563eb', whiteSpace: 'nowrap',
-                        flexShrink: 0,
-                      }}
+                      className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-200 bg-brand-50 text-brand-500 whitespace-nowrap shrink-0 dark:bg-brand-500/10 dark:border-brand-500/30"
                     >Deploy</button>
                   </div>
                 );
@@ -292,42 +234,31 @@ export default function QuickActions({ memberName, memberId, context = '', arche
       )}
 
       {actionLog.length > 0 && (
-        <div style={{ marginTop: theme.spacing.md, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.md, overflow: 'hidden' }}>
-          <div style={{ padding: '10px 12px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.colors.textMuted, background: theme.colors.bgDeep }}>
+        <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800">
+          <div className="px-3 py-2.5 text-[11px] font-bold tracking-wide uppercase text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400">
             Follow-up tracker
           </div>
           {actionLog.map((entry, idx) => {
             const meta = ACTION_META[entry.type] ?? ACTION_META.note;
             const isLast = idx === actionLog.length - 1;
-            const statusMeta = STATUS_STYLES[entry.status] || { color: theme.colors.textSecondary, background: theme.colors.bgDeep };
+            const statusCls = STATUS_CLS[entry.status] || 'text-gray-600 bg-gray-100';
             return (
-              <div key={entry.id} style={{
-                padding: '12px 14px',
-                borderBottom: isLast ? 'none' : '1px solid ' + theme.colors.border,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: theme.spacing.sm,
-                flexWrap: 'wrap',
-              }}>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: meta.color, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div key={entry.id} className={`px-3.5 py-3 flex justify-between items-center gap-3 flex-wrap ${isLast ? '' : 'border-b border-gray-200 dark:border-gray-800'}`}>
+                <div className="min-w-0 flex-1">
+                  <div className={`text-sm font-semibold flex items-center gap-1.5 ${meta.colorCls}`}>
                     <span aria-hidden="true">{meta.icon}</span> {meta.label}
                   </div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 4 }}>
-                    Owner: <strong>{entry.owner}</strong> · Due: {entry.dueLabel}
+                  <div className="text-xs text-gray-600 mt-1 dark:text-gray-400">
+                    Owner: <strong>{entry.owner}</strong> \u00B7 Due: {entry.dueLabel}
                   </div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     Logged {formatLoggedAt(entry.createdAt)}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: statusMeta.color, background: statusMeta.background, padding: '4px 12px', borderRadius: '999px' }}>{entry.status}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${statusCls}`}>{entry.status}</span>
                   {entry.status !== 'Completed' && (
-                    <button onClick={() => markActionCompleted(entry.id)} style={{
-                      padding: '4px 10px', borderRadius: theme.radius.sm, border: '1px solid ' + theme.colors.border,
-                      background: 'none', color: theme.colors.accent, fontSize: theme.fontSize.xs, cursor: 'pointer', fontWeight: 600,
-                    }}>
+                    <button onClick={() => markActionCompleted(entry.id)} className="px-2.5 py-1 rounded-lg border border-gray-200 bg-transparent text-brand-500 text-xs cursor-pointer font-semibold dark:border-gray-700">
                       Mark done
                     </button>
                   )}

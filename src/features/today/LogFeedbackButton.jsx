@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
 
@@ -35,85 +34,38 @@ export default function LogFeedbackButton() {
     return (
       <button
         onClick={() => setOpen(true)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '10px 16px',
-          borderRadius: theme.radius.md,
-          border: `1px solid ${theme.colors.border}`,
-          background: theme.colors.bgCard,
-          cursor: 'pointer',
-          fontSize: theme.fontSize.xs,
-          fontWeight: 600,
-          color: theme.colors.textSecondary,
-          width: '100%',
-        }}
+        className="flex items-center gap-2 py-2.5 px-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] cursor-pointer text-xs font-semibold text-gray-500 w-full"
       >
-        <span style={{ fontSize: '16px' }}>+</span>
+        <span className="text-base">+</span>
         Log Member Feedback
       </button>
     );
   }
 
-  const inputStyle = {
-    width: '100%',
-    padding: '8px 10px',
-    borderRadius: theme.radius.sm,
-    border: `1px solid ${theme.colors.border}`,
-    background: theme.colors.bgDeep,
-    color: theme.colors.textPrimary,
-    fontSize: theme.fontSize.xs,
-    boxSizing: 'border-box',
-  };
-
   return (
-    <div style={{
-      padding: theme.spacing.md,
-      borderRadius: theme.radius.md,
-      border: `1px solid ${theme.colors.accent}30`,
-      background: theme.colors.bgCard,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: theme.spacing.sm,
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}>
-        <span style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>
+    <div className="p-4 rounded-xl border border-brand-500/20 bg-white dark:bg-white/[0.03] flex flex-col gap-2">
+      <div className="flex justify-between items-center">
+        <span className="text-sm font-bold text-gray-800 dark:text-white/90">
           Log Feedback
         </span>
         <button
           onClick={() => setOpen(false)}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: theme.colors.textMuted,
-            fontSize: '16px',
-          }}
+          className="bg-transparent border-none cursor-pointer text-gray-400 text-base"
         >
           ×
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+      <div className="flex gap-1.5 flex-wrap">
         {TYPES.map((t) => (
           <button
             key={t}
             onClick={() => setType(t)}
-            style={{
-              padding: '4px 10px',
-              borderRadius: '6px',
-              border: `1px solid ${type === t ? theme.colors.accent : theme.colors.border}`,
-              background: type === t ? `${theme.colors.accent}12` : 'transparent',
-              cursor: 'pointer',
-              fontSize: '11px',
-              fontWeight: type === t ? 700 : 500,
-              color: type === t ? theme.colors.accent : theme.colors.textSecondary,
-            }}
+            className={`py-1 px-2.5 rounded-md border cursor-pointer text-[11px] ${
+              type === t
+                ? 'border-brand-500 bg-brand-500/[0.07] font-bold text-brand-500'
+                : 'border-gray-200 dark:border-gray-800 bg-transparent font-medium text-gray-500'
+            }`}
           >
             {t}
           </button>
@@ -125,7 +77,7 @@ export default function LogFeedbackButton() {
         placeholder="Member name"
         value={memberName}
         onChange={(e) => setMemberName(e.target.value)}
-        style={inputStyle}
+        className="w-full py-2 px-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-100 text-gray-800 dark:text-white/90 text-xs box-border"
       />
 
       <textarea
@@ -133,22 +85,17 @@ export default function LogFeedbackButton() {
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={3}
-        style={{ ...inputStyle, resize: 'vertical' }}
+        className="w-full py-2 px-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-100 text-gray-800 dark:text-white/90 text-xs box-border resize-y"
       />
 
       <button
         onClick={handleSubmit}
         disabled={!memberName.trim() || !note.trim()}
-        style={{
-          padding: '8px 16px',
-          borderRadius: theme.radius.sm,
-          border: 'none',
-          background: memberName.trim() && note.trim() ? theme.colors.accent : theme.colors.border,
-          color: 'white',
-          fontSize: theme.fontSize.xs,
-          fontWeight: 700,
-          cursor: memberName.trim() && note.trim() ? 'pointer' : 'default',
-        }}
+        className={`py-2 px-4 rounded-lg border-none text-white text-xs font-bold ${
+          memberName.trim() && note.trim()
+            ? 'bg-brand-500 cursor-pointer'
+            : 'bg-gray-200 cursor-default'
+        }`}
       >
         Save Feedback
       </button>

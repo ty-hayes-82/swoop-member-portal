@@ -1,61 +1,18 @@
 // DataQuality — "Your Systems" integration panel.
-// Critique Phase 5: show error states, data quality %, what's flowing in.
-// Eliminates "black box" anxiety for experienced operators.
 import { useState } from 'react';
-import { theme } from '@/config/theme';
 
 const SYSTEMS = [
-  {
-    name: 'Tee Sheet',
-    type: 'Tee Sheet & Reservations',
-    status: 'connected',
-    lastSync: '4 min ago',
-    quality: 98,
-    detail: '2,524 bookings · 8,196 player records · 35 waitlist entries',
-    note: null,
-  },
-  {
-    name: 'POS',
-    type: 'Food & Beverage',
-    status: 'connected',
-    lastSync: '7 min ago',
-    quality: 94,
-    detail: '3,851 checks · 17,443 line items',
-    note: '6% of checks are guest transactions — not linked to member profiles. This is expected.',
-  },
-  {
-    name: 'Member CRM',
-    type: 'Member CRM & Dues',
-    status: 'connected',
-    lastSync: '12 min ago',
-    quality: 99,
-    detail: '300 members · 220 households · 6 membership types',
-    note: null,
-  },
-  {
-    name: 'Scheduling',
-    type: 'Staffing & Scheduling',
-    status: 'connected',
-    lastSync: '1 min ago',
-    quality: 97,
-    detail: '45 staff · 701 shifts · 31 days',
-    note: null,
-  },
-  {
-    name: 'Analytics',
-    type: 'Events & Programming',
-    status: 'connected',
-    lastSync: '9 min ago',
-    quality: 100,
-    detail: '12 events · 641 registrations',
-    note: null,
-  },
+  { name: 'Tee Sheet', type: 'Tee Sheet & Reservations', status: 'connected', lastSync: '4 min ago', quality: 98, detail: '2,524 bookings \u00B7 8,196 player records \u00B7 35 waitlist entries', note: null },
+  { name: 'POS', type: 'Food & Beverage', status: 'connected', lastSync: '7 min ago', quality: 94, detail: '3,851 checks \u00B7 17,443 line items', note: '6% of checks are guest transactions \u2014 not linked to member profiles. This is expected.' },
+  { name: 'Member CRM', type: 'Member CRM & Dues', status: 'connected', lastSync: '12 min ago', quality: 99, detail: '300 members \u00B7 220 households \u00B7 6 membership types', note: null },
+  { name: 'Scheduling', type: 'Staffing & Scheduling', status: 'connected', lastSync: '1 min ago', quality: 97, detail: '45 staff \u00B7 701 shifts \u00B7 31 days', note: null },
+  { name: 'Analytics', type: 'Events & Programming', status: 'connected', lastSync: '9 min ago', quality: 100, detail: '12 events \u00B7 641 registrations', note: null },
 ];
 
-const statusStyle = (s) => ({
-  connected: { color: theme.colors.success, label: '● Connected' },
-  warning:   { color: theme.colors.warning, label: '◑ Partial' },
-  error:     { color: theme.colors.urgent,  label: '○ Offline' },
+const statusCfg = (s) => ({
+  connected: { label: '\u25CF Connected', cls: 'text-success-500' },
+  warning:   { label: '\u25D1 Partial', cls: 'text-warning-500' },
+  error:     { label: '\u25CB Offline', cls: 'text-error-500' },
 }[s]);
 
 export default function DataQuality() {
@@ -63,70 +20,58 @@ export default function DataQuality() {
   const overall = Math.round(SYSTEMS.reduce((s, sys) => s + sys.quality, 0) / SYSTEMS.length);
 
   return (
-    <div style={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.lg, overflow: 'hidden' }}>
+    <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-gray-800 dark:bg-white/[0.03]">
       {/* Header */}
-      <div style={{ padding: `${theme.spacing.md} ${theme.spacing.lg}`, borderBottom: `1px solid ${theme.colors.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="px-5 py-4 sm:px-6 border-b border-gray-200 flex justify-between items-center dark:border-gray-800">
         <div>
-          <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>Your Connected Systems</div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
-            Every number in this platform traces back to one of these systems
-          </div>
+          <div className="text-sm font-semibold text-gray-800 dark:text-white/90">Your Connected Systems</div>
+          <div className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">Every number in this platform traces back to one of these systems</div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xl, fontWeight: 700, color: theme.colors.success }}>{overall}%</div>
-          <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>data quality</div>
+        <div className="text-right">
+          <div className="font-mono text-xl font-bold text-success-500">{overall}%</div>
+          <div className="text-[10px] text-gray-500 dark:text-gray-400">data quality</div>
         </div>
       </div>
 
       {/* System rows */}
-      {SYSTEMS.map((sys, i) => {
-        const st = statusStyle(sys.status);
+      {SYSTEMS.map((sys) => {
+        const st = statusCfg(sys.status);
         const isOpen = expanded === sys.name;
         return (
           <div key={sys.name}>
             <div
               onClick={() => setExpanded(isOpen ? null : sys.name)}
-              style={{
-                padding: `${theme.spacing.sm} ${theme.spacing.lg}`,
-                borderBottom: `1px solid ${theme.colors.borderLight}`,
-                display: 'flex', alignItems: 'center', gap: theme.spacing.md,
-                cursor: 'pointer', background: isOpen ? theme.colors.bgDeep : 'transparent',
-              }}
+              className={`px-5 py-3 sm:px-6 border-b border-gray-100 flex items-center gap-4 cursor-pointer dark:border-gray-800 ${isOpen ? 'bg-gray-50 dark:bg-gray-800' : 'bg-transparent'}`}
             >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>{sys.name}</span>
-                  <span style={{ fontSize: '10px', color: theme.colors.textMuted }}>{sys.type}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{sys.name}</span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400">{sys.type}</span>
                 </div>
-                <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: 1 }}>{sys.detail}</div>
+                <div className="text-[11px] text-gray-500 mt-px dark:text-gray-400">{sys.detail}</div>
               </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: '11px', color: st.color, fontWeight: 600 }}>{st.label}</div>
-                <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Synced {sys.lastSync}</div>
+              <div className="text-right shrink-0">
+                <div className={`text-[11px] font-semibold ${st.cls}`}>{st.label}</div>
+                <div className="text-[10px] text-gray-500 dark:text-gray-400">Synced {sys.lastSync}</div>
               </div>
-              <div style={{ width: 48, height: 6, background: theme.colors.border, borderRadius: 3, flexShrink: 0 }}>
-                <div style={{ height: '100%', background: sys.quality > 95 ? theme.colors.success : theme.colors.warning, borderRadius: 3, width: `${sys.quality}%` }} />
+              <div className="w-12 h-1.5 bg-gray-200 rounded-sm shrink-0 dark:bg-gray-700">
+                <div className={`h-full rounded-sm ${sys.quality > 95 ? 'bg-success-500' : 'bg-warning-500'}`} style={{ width: `${sys.quality}%` }} />
               </div>
-              <span style={{ fontSize: '10px', color: theme.colors.textMuted, width: 30, flexShrink: 0 }}>{sys.quality}%</span>
-              <span style={{
-                fontSize: '14px', color: theme.colors.textMuted,
-                display: 'inline-block',
-                transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                transition: 'transform 0.15s ease',
-              }}>›</span>
+              <span className="text-[10px] text-gray-500 w-8 shrink-0 dark:text-gray-400">{sys.quality}%</span>
+              <span className="text-sm text-gray-500 inline-block transition-transform duration-150 dark:text-gray-400" style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>\u203A</span>
             </div>
             {isOpen && (
-              <div style={{ padding: `${theme.spacing.sm} ${theme.spacing.lg} ${theme.spacing.md}`, background: theme.colors.bgDeep, borderBottom: `1px solid ${theme.colors.border}` }}>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.6 }}>
-                  <strong style={{ color: theme.colors.textPrimary }}>What we pull:</strong> {sys.detail}
+              <div className="px-5 py-3 sm:px-6 pb-4 bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-800">
+                <div className="text-xs text-gray-600 leading-relaxed dark:text-gray-400">
+                  <strong className="text-gray-800 dark:text-white/90">What we pull:</strong> {sys.detail}
                 </div>
                 {sys.note && (
-                  <div style={{ marginTop: '6px', padding: '6px 10px', background: `${theme.colors.info}10`, borderLeft: `3px solid ${theme.colors.info}`, borderRadius: `0 4px 4px 0`, fontSize: theme.fontSize.xs, color: theme.colors.info, lineHeight: 1.6 }}>
-                    ℹ {sys.note}
+                  <div className="mt-1.5 px-2.5 py-1.5 bg-blue-light-50 border-l-[3px] border-l-blue-light-500 rounded-r text-xs text-blue-light-600 leading-relaxed dark:bg-blue-light-500/10">
+                    \u2139 {sys.note}
                   </div>
                 )}
-                <div style={{ marginTop: '8px', fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-                  Data quality measures what % of records fully matched across systems.{sys.quality < 100 && ` The ${100 - sys.quality}% gap is normal — it represents guest transactions and records created outside normal workflow.`}
+                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Data quality measures what % of records fully matched across systems.{sys.quality < 100 && ` The ${100 - sys.quality}% gap is normal \u2014 it represents guest transactions and records created outside normal workflow.`}
                 </div>
               </div>
             )}
@@ -134,11 +79,9 @@ export default function DataQuality() {
         );
       })}
 
-      <div style={{ padding: theme.spacing.md, background: theme.colors.bgDeep, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>
-          Typical go-live timeline with Tee Sheet + POS: 10–14 days
-        </span>
-        <span style={{ fontSize: '11px', color: theme.colors.success, fontWeight: 600 }}>● All systems syncing normally</span>
+      <div className="p-4 bg-gray-50 flex justify-between items-center dark:bg-gray-800">
+        <span className="text-[11px] text-gray-500 dark:text-gray-400">Typical go-live timeline with Tee Sheet + POS: 10\u201314 days</span>
+        <span className="text-[11px] text-success-500 font-semibold">\u25CF All systems syncing normally</span>
       </div>
     </div>
   );

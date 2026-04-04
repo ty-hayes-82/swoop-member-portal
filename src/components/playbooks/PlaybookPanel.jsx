@@ -1,6 +1,4 @@
-// PlaybookPanel — renamed "Response Plan" (critique: "Intervention sounds clinical")
-// Phase 3: confirmation step before activating, trail after, history before.
-import { theme } from '@/config/theme';
+// PlaybookPanel — renamed "Response Plan"
 import { useFixItActions } from '@/hooks/useFixItActions';
 import { useAppContext } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
@@ -18,7 +16,7 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
 
   const active  = isActive(id);
   const impact  = getImpact(id);
-  const accent  = accentColor ?? theme.colors.accent;
+  const accent  = accentColor ?? '#465fff';
   const trail   = trailSteps[id] ?? [];
   const done    = trailProgress[id] ?? 0;
   const fmt     = (n) => n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n}`;
@@ -31,124 +29,89 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
   };
 
   return (
-    <div style={{
-      background: theme.colors.bgCard,
-      border: `1px solid ${active ? `${accent}50` : theme.colors.border}`,
-      borderRadius: theme.radius.lg, overflow: 'hidden',
-      boxShadow: active ? `0 0 20px ${accent}14` : theme.shadow.sm,
-    }}>
+    <div className={`rounded-2xl border bg-white overflow-hidden dark:bg-white/[0.03] ${active ? 'border-brand-200 shadow-theme-md dark:border-brand-500/30' : 'border-gray-200 shadow-theme-xs dark:border-gray-800'}`}>
       {/* Header */}
-      <div style={{
-        padding: theme.spacing.lg, borderBottom: `1px solid ${theme.colors.border}`,
-        background: active ? `${accent}08` : theme.colors.bgDeep,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-      }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm, marginBottom: 6 }}>
-            {active && <span style={{ width: 8, height: 8, borderRadius: '50%', background: theme.colors.success, flexShrink: 0, boxShadow: `0 0 6px ${theme.colors.success}` }} />}
-            {/* Phase 2: "Response Plan" not "Playbook" */}
-            <span style={{ fontSize: '11px', fontWeight: 700, color: accent, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Response Plan</span>
+      <div className={`p-5 sm:p-6 border-b border-gray-200 flex justify-between items-start dark:border-gray-800 ${active ? 'bg-brand-50 dark:bg-brand-500/5' : 'bg-gray-50 dark:bg-gray-800'}`}>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-1.5">
+            {active && <span className="w-2 h-2 rounded-full bg-success-500 shrink-0 shadow-[0_0_6px_#12b76a]" />}
+            <span className="text-[11px] font-bold text-brand-500 tracking-wider uppercase">Response Plan</span>
           </div>
-          <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary, fontFamily: theme.fonts.serif, marginBottom: 6 }}>{title}</div>
-          <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: 0, maxWidth: 520, lineHeight: 1.5 }}>{scenario}</p>
+          <div className="text-lg font-bold text-gray-800 font-serif mb-1.5 dark:text-white/90">{title}</div>
+          <p className="text-sm text-gray-600 m-0 max-w-[520px] leading-relaxed dark:text-gray-400">{scenario}</p>
           {memberContext && (
-            <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>Triggered for:</span>
-              <span style={{ fontSize: '12px', fontWeight: 600, color: memberContext.color, padding: '2px 8px',
-                background: `${memberContext.color}14`, borderRadius: '4px', border: `1px solid ${memberContext.color}25` }}>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-[11px] text-gray-500 dark:text-gray-400">Triggered for:</span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded border" style={{ color: memberContext.color, background: `${memberContext.color}14`, borderColor: `${memberContext.color}25` }}>
                 {memberContext.name}
               </span>
-              <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{memberContext.profile}</span>
+              <span className="text-[11px] text-gray-500 dark:text-gray-400">{memberContext.profile}</span>
             </div>
           )}
         </div>
-        <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: theme.spacing.lg }}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Monthly impact</div>
-          <div style={{ fontSize: theme.fontSize.xl, fontFamily: theme.fonts.mono, fontWeight: 700, color: active ? theme.colors.success : accent }}>{fmt(impact.monthly)}</div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{fmt(impact.annual)}/yr</div>
+        <div className="text-right shrink-0 ml-6">
+          <div className="text-xs text-gray-500 dark:text-gray-400">Monthly impact</div>
+          <div className={`text-xl font-mono font-bold ${active ? 'text-success-500' : 'text-brand-500'}`}>{fmt(impact.monthly)}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{fmt(impact.annual)}/yr</div>
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ padding: theme.spacing.lg }}>
-
+      <div className="p-5 sm:p-6">
         {/* Logic chain */}
         {impact.logicChain && (
-          <div style={{ marginBottom: theme.spacing.md, padding: '8px 12px', background: `${accent}08`,
-            borderLeft: `3px solid ${accent}50`, borderRadius: `0 ${theme.radius.sm} ${theme.radius.sm} 0` }}>
-            <div style={{ fontSize: '10px', fontWeight: 700, color: accent, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 3 }}>How we get to that number</div>
-            <div style={{ fontSize: '12px', color: theme.colors.textSecondary, fontFamily: theme.fonts.mono }}>{impact.logicChain}</div>
+          <div className="mb-4 px-3 py-2 bg-brand-50 border-l-[3px] border-l-brand-500 rounded-r-lg dark:bg-brand-500/5">
+            <div className="text-[10px] font-bold text-brand-500 tracking-wide uppercase mb-[3px]">How we get to that number</div>
+            <div className="text-xs text-gray-600 font-mono dark:text-gray-400">{impact.logicChain}</div>
           </div>
         )}
 
-        {/* Pre-activate: what will happen + history */}
         {!active && <ActionPreview steps={steps} accent={accent} />}
         {!active && <PlaybookHistory playbookId={id} accent={accent} />}
 
-        {/* Post-activate: trail */}
         {active && trail.length > 0 && (
-          <div style={{ marginBottom: theme.spacing.md, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.success, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>Actions taken</div>
+          <div className="mb-4 flex flex-col gap-1.5">
+            <div className="text-[11px] font-bold text-success-500 tracking-wider uppercase mb-1">Actions taken</div>
             {trail.map((step, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
-                padding: '7px 10px', borderRadius: theme.radius.sm,
-                background: i < done ? `${theme.colors.success}08` : theme.colors.bgDeep,
-                border: `1px solid ${i < done ? theme.colors.success + '20' : theme.colors.border}`,
-                opacity: i < done ? 1 : 0.45, transition: 'all 0.4s ease',
-              }}>
-                <span style={{ fontSize: '13px', flexShrink: 0 }}>{i < done ? '✓' : '◌'}</span>
-                <span style={{ fontSize: '12px', color: i < done ? theme.colors.textPrimary : theme.colors.textMuted }}>{step}</span>
+              <div key={i} className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg border transition-all duration-400 ${
+                i < done ? 'bg-success-50 border-success-200 dark:bg-success-500/5 dark:border-success-500/20' : 'bg-gray-100 border-gray-200 opacity-45 dark:bg-gray-800 dark:border-gray-700'
+              }`}>
+                <span className="text-sm shrink-0">{i < done ? '\u2713' : '\u25CC'}</span>
+                <span className={`text-xs ${i < done ? 'text-gray-800 dark:text-white/90' : 'text-gray-500 dark:text-gray-400'}`}>{step}</span>
               </div>
             ))}
           </div>
         )}
 
         {/* Steps toggle */}
-        <button onClick={() => setStepsExpanded(e => !e)} style={{
-          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-          marginBottom: stepsExpanded ? theme.spacing.md : 0,
-          color: accent, fontSize: theme.fontSize.sm, display: 'flex', alignItems: 'center', gap: 6,
-        }}>
-          {stepsExpanded ? '▾' : '▸'} {steps.length}-step plan details
+        <button onClick={() => setStepsExpanded(e => !e)} className={`bg-transparent border-none cursor-pointer p-0 text-brand-500 text-sm flex items-center gap-1.5 ${stepsExpanded ? 'mb-4' : 'mb-0'}`}>
+          {stepsExpanded ? '\u25BE' : '\u25B8'} {steps.length}-step plan details
         </button>
         {stepsExpanded && (
-          <div style={{ marginBottom: theme.spacing.md }}>
+          <div className="mb-4">
             {steps.map((step, i) => <PlaybookStep key={i} stepNumber={i + 1} {...step} isCompleted={active} />)}
           </div>
         )}
 
         <BeforeAfter beforeMetrics={beforeMetrics} afterMetrics={afterMetrics} isActive={active} />
 
-        {/* Confirmation step — Phase 3 */}
         {confirming && !active && (
-          <div style={{ marginTop: theme.spacing.md, padding: theme.spacing.md,
-            background: `${accent}08`, border: `1px solid ${accent}40`, borderRadius: theme.radius.md }}>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.sm }}>
-              Confirm activation
+          <div className="mt-4 p-4 bg-brand-50 border border-brand-200 rounded-xl dark:bg-brand-500/5 dark:border-brand-500/30">
+            <div className="text-sm font-bold text-gray-800 mb-3 dark:text-white/90">Confirm activation</div>
+            <div className="text-sm text-gray-600 leading-relaxed mb-4 dark:text-gray-400">
+              Activating <strong>{title}</strong> will trigger the {steps.length} steps shown above. Each step is previewed \u2014 nothing will happen that isn't listed. You can deactivate at any time.
             </div>
-            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6, marginBottom: theme.spacing.md }}>
-              Activating <strong>{title}</strong> will trigger the {steps.length} steps shown above. Each step is previewed — nothing will happen that isn't listed. You can deactivate at any time.
-            </div>
-            <div style={{ display: 'flex', gap: theme.spacing.sm, alignItems: 'center' }}>
-              <button onClick={handleActivate} style={{
-                padding: `${theme.spacing.sm} ${theme.spacing.lg}`, borderRadius: theme.radius.md,
-                border: 'none', background: accent, color: theme.colors.white,
-                fontSize: theme.fontSize.sm, fontWeight: 700, cursor: 'pointer',
-                boxShadow: `0 2px 6px ${accent}50` }}>
+            <div className="flex gap-3 items-center">
+              <button onClick={handleActivate} className="px-5 py-3 rounded-xl border-none bg-brand-500 text-white text-sm font-bold cursor-pointer shadow-theme-sm">
                 Yes, activate this plan
               </button>
-              <button onClick={() => setConfirming(false)} style={{
-                padding: `${theme.spacing.sm} ${theme.spacing.md}`, borderRadius: theme.radius.md,
-                border: 'none', background: 'none',
-                color: theme.colors.textMuted, fontSize: theme.fontSize.sm, cursor: 'pointer', fontWeight: 500 }}>
+              <button onClick={() => setConfirming(false)} className="px-4 py-3 rounded-xl border-none bg-transparent text-gray-500 text-sm cursor-pointer font-medium dark:text-gray-400">
                 Not yet
               </button>
             </div>
           </div>
         )}
 
-        {/* Activate button */}
         {!confirming && (
           <button
             onClick={() => {
@@ -159,15 +122,13 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
                 handleActivate();
               }
             }}
-            style={{
-              width: '100%', marginTop: theme.spacing.md,
-              padding: `${theme.spacing.sm} ${theme.spacing.md}`, borderRadius: theme.radius.md,
-              border: `1px solid ${active ? theme.colors.border : accent}`,
-              background: active ? theme.colors.bgDeep : accent,
-              color: active ? theme.colors.textSecondary : theme.colors.white,
-              fontSize: theme.fontSize.md, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-            }}>
-            {active ? '✓ Active — Deactivate' : `Activate this response plan`}
+            className={`w-full mt-4 px-4 py-3 rounded-xl text-base font-semibold cursor-pointer transition-all duration-200 ${
+              active
+                ? 'border border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                : 'border border-brand-500 bg-brand-500 text-white'
+            }`}
+          >
+            {active ? '\u2713 Active \u2014 Deactivate' : 'Activate this response plan'}
           </button>
         )}
       </div>

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { theme } from '@/config/theme';
 import { Panel } from '@/components/ui';
 import PageTransition from '@/components/ui/PageTransition';
 import { useNavigationContext } from '@/context/NavigationContext';
@@ -20,20 +19,20 @@ const s = {
   input: {
     width: '100%',
     padding: '10px 12px',
-    fontSize: theme.fontSize.sm,
-    fontFamily: theme.fonts.sans,
-    color: theme.colors.textPrimary,
-    background: theme.colors.bgDeep,
-    border: '1px solid ' + theme.colors.border,
-    borderRadius: theme.radius.sm,
+    fontSize: '14px',
+    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+    color: '#1a1a2e',
+    background: '#F3F4F6',
+    border: '1px solid ' + '#E5E7EB',
+    borderRadius: '8px',
     outline: 'none',
     boxSizing: 'border-box',
   },
   label: {
     display: 'block',
-    fontSize: theme.fontSize.xs,
+    fontSize: '12px',
     fontWeight: 600,
-    color: theme.colors.textSecondary,
+    color: '#6B7280',
     marginBottom: '6px',
   },
   fieldGroup: {
@@ -52,29 +51,29 @@ const s = {
   }),
   btn: (variant) => ({
     padding: '8px 20px',
-    borderRadius: theme.radius.sm,
-    border: variant === 'primary' ? 'none' : '1px solid ' + theme.colors.border,
-    background: variant === 'primary' ? theme.colors.accent : 'transparent',
-    color: variant === 'primary' ? '#fff' : theme.colors.textPrimary,
+    borderRadius: '8px',
+    border: variant === 'primary' ? 'none' : '1px solid ' + '#E5E7EB',
+    background: variant === 'primary' ? '#E8740C' : 'transparent',
+    color: variant === 'primary' ? '#fff' : '#1a1a2e',
     fontWeight: 600,
-    fontSize: theme.fontSize.sm,
+    fontSize: '14px',
     cursor: 'pointer',
-    fontFamily: theme.fonts.sans,
+    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
   }),
   sectionTitle: {
     fontSize: '15px',
     fontWeight: 700,
-    color: theme.colors.textPrimary,
+    color: '#1a1a2e',
     marginBottom: '12px',
   },
   sectionDesc: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.textMuted,
+    fontSize: '12px',
+    color: '#9CA3AF',
     marginBottom: '16px',
     lineHeight: 1.5,
   },
   divider: {
-    borderTop: '1px solid ' + theme.colors.border,
+    borderTop: '1px solid ' + '#E5E7EB',
     margin: '20px 0',
   },
 };
@@ -142,15 +141,15 @@ function UsersTab() {
             gap: '12px',
             alignItems: 'center',
             padding: '14px 16px',
-            background: theme.colors.bgCard,
-            border: '1px solid ' + theme.colors.border,
-            borderRadius: theme.radius.sm,
+            background: '#ffffff',
+            border: '1px solid ' + '#E5E7EB',
+            borderRadius: '8px',
           }}>
             <div>
-              <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{user.name}</div>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{user.email}</div>
+              <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a2e' }}>{user.name}</div>
+              <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{user.email}</div>
             </div>
-            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>{user.role}</div>
+            <div style={{ fontSize: '14px', color: '#6B7280' }}>{user.role}</div>
             <div>
               <span style={s.badge(
                 user.status === 'active' ? '#15803D' : '#B45309',
@@ -159,10 +158,10 @@ function UsersTab() {
                 {user.status}
               </span>
             </div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{user.lastLogin}</div>
+            <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{user.lastLogin}</div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button style={{ ...s.btn('ghost'), padding: '4px 10px', fontSize: '12px' }}>Edit</button>
-              <button style={{ ...s.btn('ghost'), padding: '4px 10px', fontSize: '12px', color: theme.colors.danger500 }}>Remove</button>
+              <button style={{ ...s.btn('ghost'), padding: '4px 10px', fontSize: '12px', color: '#ef4444' }}>Remove</button>
             </div>
           </div>
         ))}
@@ -176,12 +175,12 @@ function UsersTab() {
         {ROLES.map(role => (
           <div key={role} style={{
             padding: '14px',
-            background: theme.colors.bgCard,
-            border: '1px solid ' + theme.colors.border,
-            borderRadius: theme.radius.sm,
+            background: '#ffffff',
+            border: '1px solid ' + '#E5E7EB',
+            borderRadius: '8px',
           }}>
-            <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, marginBottom: '6px', color: theme.colors.textPrimary }}>{role}</div>
-            <div style={{ fontSize: '11px', color: theme.colors.textMuted, lineHeight: 1.5 }}>
+            <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: '#1a1a2e' }}>{role}</div>
+            <div style={{ fontSize: '11px', color: '#9CA3AF', lineHeight: 1.5 }}>
               {role === 'General Manager' && 'Full access. Approve actions, manage users, view all data.'}
               {role === 'Assistant GM' && 'Full access except user management and billing.'}
               {role === 'F&B Director' && 'F&B dashboards, dining insights, staffing for F&B.'}
@@ -293,9 +292,9 @@ function IntegrationCard({ integration }) {
   return (
     <div style={{
       padding: '14px',
-      background: theme.colors.bgCard,
-      border: '1px solid ' + theme.colors.border,
-      borderRadius: theme.radius.sm,
+      background: '#ffffff',
+      border: '1px solid ' + '#E5E7EB',
+      borderRadius: '8px',
       cursor: 'pointer',
       transition: 'border-color 0.15s',
     }} onClick={() => setExpanded(!expanded)}>
@@ -303,41 +302,41 @@ function IntegrationCard({ integration }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '20px' }}>{integration.icon}</span>
           <div>
-            <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{integration.name}</div>
-            <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '2px' }}>{integration.description}</div>
+            <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a2e' }}>{integration.name}</div>
+            <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '2px' }}>{integration.description}</div>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           <span style={s.badge(cfg.color, cfg.bg)}>{cfg.label}</span>
-          <span style={{ fontSize: '12px', color: theme.colors.textMuted, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}>&#9660;</span>
+          <span style={{ fontSize: '12px', color: '#9CA3AF', transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}>&#9660;</span>
         </div>
       </div>
 
       {expanded && (
-        <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid ' + theme.colors.border }}>
-          <div style={{ fontSize: '12px', fontWeight: 600, color: theme.colors.textSecondary, marginBottom: '8px' }}>Capabilities</div>
+        <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid ' + '#E5E7EB' }}>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: '#6B7280', marginBottom: '8px' }}>Capabilities</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
             {integration.features.map(f => (
               <span key={f} style={{
                 fontSize: '11px',
                 padding: '3px 10px',
                 borderRadius: '12px',
-                background: theme.colors.bgDeep,
-                color: theme.colors.textSecondary,
-                border: '1px solid ' + theme.colors.border,
+                background: '#F3F4F6',
+                color: '#6B7280',
+                border: '1px solid ' + '#E5E7EB',
               }}>{f}</span>
             ))}
           </div>
           {integration.status === 'connected' ? (
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button style={s.btn('ghost')}>Configure</button>
-              <button style={{ ...s.btn('ghost'), color: theme.colors.danger500 }}>Disconnect</button>
-              <span style={{ fontSize: '11px', color: theme.colors.success500, marginLeft: 'auto' }}>Last synced: 5 min ago</span>
+              <button style={{ ...s.btn('ghost'), color: '#ef4444' }}>Disconnect</button>
+              <span style={{ fontSize: '11px', color: '#22c55e', marginLeft: 'auto' }}>Last synced: 5 min ago</span>
             </div>
           ) : integration.status === 'available' ? (
             <button style={s.btn('primary')}>Connect</button>
           ) : (
-            <div style={{ fontSize: '12px', color: theme.colors.textMuted, fontStyle: 'italic' }}>This integration is on our roadmap. Contact support to express interest.</div>
+            <div style={{ fontSize: '12px', color: '#9CA3AF', fontStyle: 'italic' }}>This integration is on our roadmap. Contact support to express interest.</div>
           )}
         </div>
       )}
@@ -364,8 +363,8 @@ function IntegrationsTab({ onNavigate }) {
 
   return (
     <div>
-      <div style={{ padding: '12px 16px', background: theme.colors.info50, border: `1px solid ${theme.colors.info500}30`, borderRadius: theme.radius.sm, marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.info700 }}>
+      <div style={{ padding: '12px 16px', background: '#eff6ff', border: `1px solid ${'#3B82F6'}30`, borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: '12px', color: '#1d4ed8' }}>
           These are <strong>outbound action channels</strong> Swoop uses to send alerts, emails, and notifications. For data source connections (tee sheet, POS, CRM), visit Connected Systems.
         </div>
         <button onClick={() => onNavigate('integrations')} style={{ ...s.btn('ghost'), padding: '4px 12px', fontSize: '12px', whiteSpace: 'nowrap', marginLeft: '12px' }}>Go to Connected Systems</button>
@@ -387,13 +386,13 @@ function IntegrationsTab({ onNavigate }) {
             <button key={f.key} onClick={() => setFilter(f.key)} style={{
               padding: '6px 14px',
               borderRadius: '6px',
-              border: filter === f.key ? 'none' : '1px solid ' + theme.colors.border,
-              background: filter === f.key ? theme.colors.accent : 'transparent',
-              color: filter === f.key ? '#fff' : theme.colors.textSecondary,
+              border: filter === f.key ? 'none' : '1px solid ' + '#E5E7EB',
+              background: filter === f.key ? '#E8740C' : 'transparent',
+              color: filter === f.key ? '#fff' : '#6B7280',
               fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer',
-              fontFamily: theme.fonts.sans,
+              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
             }}>{f.label}</button>
           ))}
         </div>
@@ -436,19 +435,19 @@ function OnboardingTab({ setActiveTab, navigate }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px', padding: '20px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.md }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px', padding: '20px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '12px' }}>
         <div style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
           <svg width="72" height="72" viewBox="0 0 72 72">
-            <circle cx="36" cy="36" r="30" fill="none" stroke={theme.colors.bgDeep} strokeWidth="6" />
-            <circle cx="36" cy="36" r="30" fill="none" stroke={theme.colors.accent} strokeWidth="6"
+            <circle cx="36" cy="36" r="30" fill="none" stroke={'#F3F4F6'} strokeWidth="6" />
+            <circle cx="36" cy="36" r="30" fill="none" stroke={'#E8740C'} strokeWidth="6"
               strokeDasharray={`${pct * 1.885} 188.5`} strokeLinecap="round"
               transform="rotate(-90 36 36)" style={{ transition: 'stroke-dasharray 0.3s' }} />
           </svg>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '16px', fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>{pct}%</div>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '16px', fontFamily: "'JetBrains Mono', monospace", color: '#1a1a2e' }}>{pct}%</div>
         </div>
         <div>
-          <div style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textPrimary }}>{completedCount} of {ONBOARDING_STEPS.length} steps complete</div>
-          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, marginTop: '4px' }}>Complete all steps to unlock full Swoop intelligence. Estimated time remaining: ~15 minutes.</div>
+          <div style={{ fontSize: '18px', fontWeight: 700, color: '#1a1a2e' }}>{completedCount} of {ONBOARDING_STEPS.length} steps complete</div>
+          <div style={{ fontSize: '14px', color: '#9CA3AF', marginTop: '4px' }}>Complete all steps to unlock full Swoop intelligence. Estimated time remaining: ~15 minutes.</div>
         </div>
       </div>
 
@@ -456,21 +455,21 @@ function OnboardingTab({ setActiveTab, navigate }) {
         {ONBOARDING_STEPS.map(step => (
           <div key={step.id} style={{
             display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px',
-            background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm,
-            borderLeft: `3px solid ${step.done ? theme.colors.success500 : theme.colors.warning500}`,
+            background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px',
+            borderLeft: `3px solid ${step.done ? '#22c55e' : '#f59e0b'}`,
           }}>
             <div style={{
               width: 24, height: 24, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: step.done ? theme.colors.success500 : theme.colors.bgDeep, color: step.done ? '#fff' : theme.colors.textMuted,
+              background: step.done ? '#22c55e' : '#F3F4F6', color: step.done ? '#fff' : '#9CA3AF',
               fontSize: '12px', fontWeight: 700,
             }}>
               {step.done ? '\u2713' : '\u2022'}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{step.label}</div>
-              <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '2px' }}>
+              <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a2e' }}>{step.label}</div>
+              <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '2px' }}>
                 {step.desc}
-                {step.progress && <span style={{ marginLeft: '6px', fontWeight: 700, color: theme.colors.warning500 }}>({step.progress})</span>}
+                {step.progress && <span style={{ marginLeft: '6px', fontWeight: 700, color: '#f59e0b' }}>({step.progress})</span>}
               </div>
             </div>
             {!step.done && (
@@ -532,7 +531,7 @@ function ToggleSwitch({ checked, onChange }) {
   return (
     <button onClick={() => onChange(!checked)} style={{
       width: '36px', height: '20px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-      background: checked ? theme.colors.accent : theme.colors.bgDeep,
+      background: checked ? '#E8740C' : '#F3F4F6',
       position: 'relative', transition: 'background 0.15s',
       boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
     }}>
@@ -590,10 +589,10 @@ function NotificationsTab() {
       <div style={{ ...s.sectionDesc, marginBottom: '12px' }}>Verify your notification channels are working before relying on them for critical alerts.</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '24px' }}>
         {CHANNELS.map(ch => (
-          <div key={ch.key} style={{ padding: '12px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm, textAlign: 'center' }}>
+          <div key={ch.key} style={{ padding: '12px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px', textAlign: 'center' }}>
             <div style={{ fontSize: '20px', marginBottom: '6px' }}>{ch.icon}</div>
-            <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{ch.label}</div>
-            <div style={{ fontSize: '10px', color: ch.configured ? theme.colors.success500 : theme.colors.textMuted, marginTop: '2px' }}>
+            <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a2e' }}>{ch.label}</div>
+            <div style={{ fontSize: '10px', color: ch.configured ? '#22c55e' : '#9CA3AF', marginTop: '2px' }}>
               {ch.configured ? ch.detail : 'Not configured'}
             </div>
             <button
@@ -601,9 +600,9 @@ function NotificationsTab() {
               disabled={!ch.configured || testStatus[ch.key] === 'sending'}
               style={{
                 marginTop: '8px', padding: '4px 12px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', cursor: ch.configured ? 'pointer' : 'default',
-                border: 'none', fontFamily: theme.fonts.sans,
-                background: testStatus[ch.key] === 'sent' ? theme.colors.success50 : ch.configured ? `${theme.colors.accent}15` : theme.colors.bgDeep,
-                color: testStatus[ch.key] === 'sent' ? theme.colors.success500 : ch.configured ? theme.colors.accent : theme.colors.textMuted,
+                border: 'none', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                background: testStatus[ch.key] === 'sent' ? '#f0fdf4' : ch.configured ? `${'#E8740C'}15` : '#F3F4F6',
+                color: testStatus[ch.key] === 'sent' ? '#22c55e' : ch.configured ? '#E8740C' : '#9CA3AF',
               }}
             >
               {testStatus[ch.key] === 'sending' ? 'Sending...' : testStatus[ch.key] === 'sent' ? 'Sent!' : 'Send Test'}
@@ -623,27 +622,27 @@ function NotificationsTab() {
             {sec.items.map(item => (
               <div key={item.key} style={{
                 padding: '12px 16px',
-                background: theme.colors.bgCard,
-                border: '1px solid ' + theme.colors.border,
-                borderRadius: theme.radius.sm,
+                background: '#ffffff',
+                border: '1px solid ' + '#E5E7EB',
+                borderRadius: '8px',
               }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(4, 60px)', gap: '8px', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{item.label}</div>
-                    <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>{item.description}</div>
+                    <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a2e' }}>{item.label}</div>
+                    <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{item.description}</div>
                   </div>
                   {CHANNELS.map(ch => (
                     <div key={ch.key} style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: '9px', color: theme.colors.textMuted, marginBottom: '4px', textTransform: 'uppercase' }}>{ch.label}</div>
+                      <div style={{ fontSize: '9px', color: '#9CA3AF', marginBottom: '4px', textTransform: 'uppercase' }}>{ch.label}</div>
                       <ToggleSwitch checked={settings[item.key][ch.key]} onChange={() => toggle(item.key, ch.key)} />
                     </div>
                   ))}
                 </div>
                 {ROLE_DEFAULTS[item.key]?.length > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid ' + theme.colors.border }}>
-                    <span style={{ fontSize: '10px', color: theme.colors.textMuted, flexShrink: 0 }}>Routes to:</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid ' + '#E5E7EB' }}>
+                    <span style={{ fontSize: '10px', color: '#9CA3AF', flexShrink: 0 }}>Routes to:</span>
                     {ROLE_DEFAULTS[item.key].map(role => (
-                      <span key={role} style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '10px', background: `${theme.colors.accent}12`, color: theme.colors.accent, fontWeight: 600 }}>{role}</span>
+                      <span key={role} style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '10px', background: `${'#E8740C'}12`, color: '#E8740C', fontWeight: 600 }}>{role}</span>
                     ))}
                   </div>
                 )}
@@ -657,8 +656,8 @@ function NotificationsTab() {
       <div style={s.sectionTitle}>Escalation Rules</div>
       <div style={s.sectionDesc}>Define what happens when alerts go unacknowledged.</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        <div style={{ padding: '16px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm }}>
-          <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, marginBottom: '8px', color: theme.colors.textPrimary }}>First Escalation</div>
+        <div style={{ padding: '16px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px' }}>
+          <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '8px', color: '#1a1a2e' }}>First Escalation</div>
           <div style={s.fieldGroup}>
             <label style={s.label}>If unacknowledged after</label>
             <select style={s.input}><option>30 minutes</option><option>1 hour</option><option>2 hours</option><option>4 hours</option></select>
@@ -668,8 +667,8 @@ function NotificationsTab() {
             <select style={s.input}><option>Assistant GM</option>{ROLES.map(r => <option key={r}>{r}</option>)}</select>
           </div>
         </div>
-        <div style={{ padding: '16px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm }}>
-          <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, marginBottom: '8px', color: theme.colors.textPrimary }}>Second Escalation</div>
+        <div style={{ padding: '16px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px' }}>
+          <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '8px', color: '#1a1a2e' }}>Second Escalation</div>
           <div style={s.fieldGroup}>
             <label style={s.label}>If still unacknowledged after</label>
             <select style={s.input}><option>2 hours</option><option>4 hours</option><option>8 hours</option><option>24 hours</option></select>
@@ -763,7 +762,7 @@ function ClubProfileTab() {
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Club Logo</label>
-            <div style={{ padding: '20px', border: '2px dashed ' + theme.colors.border, borderRadius: theme.radius.sm, textAlign: 'center', color: theme.colors.textMuted, fontSize: theme.fontSize.xs, cursor: 'pointer' }}>
+            <div style={{ padding: '20px', border: '2px dashed ' + '#E5E7EB', borderRadius: '8px', textAlign: 'center', color: '#9CA3AF', fontSize: '12px', cursor: 'pointer' }}>
               Drop image here or click to upload (PNG, SVG)
             </div>
           </div>
@@ -777,8 +776,8 @@ function ClubProfileTab() {
         {['18-Hole Golf Course', '9-Hole Course', 'Practice Range', 'Pool & Aquatics', 'Tennis Courts', 'Pickleball Courts', 'Fitness Center', 'Spa', 'Main Dining Room', 'Casual Grill', 'Banquet Facilities', 'Pro Shop', 'Locker Rooms', 'Kids Programs', 'Golf Simulators'].map(a => (
           <label key={a} style={{
             display: 'flex', gap: '8px', alignItems: 'center', padding: '10px 12px',
-            background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm,
-            fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, cursor: 'pointer',
+            background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px',
+            fontSize: '14px', color: '#1a1a2e', cursor: 'pointer',
           }}>
             <input type="checkbox" defaultChecked={['18-Hole Golf Course', 'Pool & Aquatics', 'Main Dining Room', 'Casual Grill', 'Banquet Facilities', 'Pro Shop', 'Locker Rooms', 'Practice Range', 'Fitness Center'].includes(a)} />
             {a}
@@ -811,11 +810,11 @@ function ClubProfileTab() {
             <label style={s.label}>Brand Colors</label>
             <div style={{ display: 'flex', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#1B4332', border: '1px solid ' + theme.colors.border }} />
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#1B4332', border: '1px solid ' + '#E5E7EB' }} />
                 <input style={{ ...s.input, width: '90px' }} defaultValue="#1B4332" />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#C9A84C', border: '1px solid ' + theme.colors.border }} />
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#C9A84C', border: '1px solid ' + '#E5E7EB' }} />
                 <input style={{ ...s.input, width: '90px' }} defaultValue="#C9A84C" />
               </div>
             </div>
@@ -828,7 +827,7 @@ function ClubProfileTab() {
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Brand Guidelines (Upload)</label>
-            <div style={{ padding: '16px', border: '2px dashed ' + theme.colors.border, borderRadius: theme.radius.sm, textAlign: 'center', color: theme.colors.textMuted, fontSize: theme.fontSize.xs, cursor: 'pointer' }}>
+            <div style={{ padding: '16px', border: '2px dashed ' + '#E5E7EB', borderRadius: '8px', textAlign: 'center', color: '#9CA3AF', fontSize: '12px', cursor: 'pointer' }}>
               Drop PDF or image here (brand guide, logo usage, letterhead)
             </div>
           </div>
@@ -853,10 +852,10 @@ function BillingTab() {
         <Panel>
           <div style={s.sectionTitle}>Current Plan</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '12px' }}>
-            <span style={{ fontSize: '28px', fontWeight: 700, color: theme.colors.accent }}>Pro</span>
-            <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted }}>$499/month</span>
+            <span style={{ fontSize: '28px', fontWeight: 700, color: '#E8740C' }}>Pro</span>
+            <span style={{ fontSize: '14px', color: '#9CA3AF' }}>$499/month</span>
           </div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, lineHeight: 1.6, marginBottom: '16px' }}>
+          <div style={{ fontSize: '12px', color: '#9CA3AF', lineHeight: 1.6, marginBottom: '16px' }}>
             Full dashboard access, 6 AI agents, unlimited members, all integrations, board reports, and priority support.
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -876,10 +875,10 @@ function BillingTab() {
               { label: 'Data syncs', value: '1,440', limit: 'Unlimited' },
               { label: 'API calls', value: '8,291', limit: '50,000/mo' },
             ].map(u => (
-              <div key={u.label} style={{ padding: '10px', background: theme.colors.bgDeep, borderRadius: theme.radius.sm }}>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textPrimary }}>{u.value}</div>
-                <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>{u.label}</div>
-                <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: '2px' }}>Limit: {u.limit}</div>
+              <div key={u.label} style={{ padding: '10px', background: '#F3F4F6', borderRadius: '8px' }}>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#1a1a2e' }}>{u.value}</div>
+                <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{u.label}</div>
+                <div style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '2px' }}>Limit: {u.limit}</div>
               </div>
             ))}
           </div>
@@ -900,20 +899,20 @@ function BillingTab() {
           const max = Math.max(...metric.data) * 1.2;
           const points = metric.data.map((v, i) => `${(i / 5) * 100},${40 - (v / max) * 36}`).join(' ');
           return (
-            <div key={metric.label} style={{ padding: '14px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm }}>
-              <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginBottom: '4px' }}>{metric.label}</div>
+            <div key={metric.label} style={{ padding: '14px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px' }}>
+              <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px' }}>{metric.label}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                <span style={{ fontSize: '18px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>{current.toLocaleString()}</span>
-                <span style={{ fontSize: '10px', color: theme.colors.textMuted }}>/ {metric.limit.toLocaleString()}</span>
+                <span style={{ fontSize: '18px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: '#1a1a2e' }}>{current.toLocaleString()}</span>
+                <span style={{ fontSize: '10px', color: '#9CA3AF' }}>/ {metric.limit.toLocaleString()}</span>
               </div>
               <svg width="100%" height="40" viewBox="0 0 100 40" preserveAspectRatio="none" style={{ marginTop: '6px' }}>
-                <polyline points={points} fill="none" stroke={theme.colors.accent} strokeWidth="1.5" strokeLinecap="round" />
+                <polyline points={points} fill="none" stroke={'#E8740C'} strokeWidth="1.5" strokeLinecap="round" />
               </svg>
-              <div style={{ height: '4px', borderRadius: '2px', background: theme.colors.bgDeep, marginTop: '4px' }}>
-                <div style={{ height: '100%', borderRadius: '2px', background: pctUsed > 80 ? theme.colors.danger500 : theme.colors.accent, width: `${Math.min(pctUsed, 100)}%`, transition: 'width 0.3s' }} />
+              <div style={{ height: '4px', borderRadius: '2px', background: '#F3F4F6', marginTop: '4px' }}>
+                <div style={{ height: '100%', borderRadius: '2px', background: pctUsed > 80 ? '#ef4444' : '#E8740C', width: `${Math.min(pctUsed, 100)}%`, transition: 'width 0.3s' }} />
               </div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: '4px' }}>{pctUsed}% consumed</div>
-              {metric.alert && <div style={{ fontSize: '10px', color: theme.colors.success500, marginTop: '2px' }}>{metric.alert}</div>}
+              <div style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '4px' }}>{pctUsed}% consumed</div>
+              {metric.alert && <div style={{ fontSize: '10px', color: '#22c55e', marginTop: '2px' }}>{metric.alert}</div>}
             </div>
           );
         })}
@@ -929,12 +928,12 @@ function BillingTab() {
         ].map(inv => (
           <div key={inv.invoice} style={{
             display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '12px', alignItems: 'center',
-            padding: '12px 16px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm,
+            padding: '12px 16px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px',
           }}>
-            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{inv.date}</div>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>{inv.amount}</div>
+            <div style={{ fontSize: '14px', color: '#1a1a2e' }}>{inv.date}</div>
+            <div style={{ fontSize: '14px', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: '#1a1a2e' }}>{inv.amount}</div>
             <div><span style={s.badge('#15803D', '#F0FDF4')}>{inv.status}</span></div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{inv.invoice}</div>
+            <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{inv.invoice}</div>
             <button style={{ ...s.btn('ghost'), padding: '4px 10px', fontSize: '12px' }}>Download</button>
           </div>
         ))}
@@ -942,12 +941,12 @@ function BillingTab() {
 
       <div style={s.divider} />
       <div style={s.sectionTitle}>Payment Method</div>
-      <div style={{ padding: '16px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ padding: '16px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '24px' }}>💳</span>
           <div>
-            <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>Visa ending in 4242</div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Expires 08/2027</div>
+            <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a2e' }}>Visa ending in 4242</div>
+            <div style={{ fontSize: '12px', color: '#9CA3AF' }}>Expires 08/2027</div>
           </div>
         </div>
         <button style={s.btn('ghost')}>Update Card</button>
@@ -988,12 +987,12 @@ function SecurityTab() {
             <label style={s.label}>Two-Factor Authentication</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <ToggleSwitch checked={true} onChange={() => {}} />
-              <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>Required for all users</span>
+              <span style={{ fontSize: '14px', color: '#6B7280' }}>Required for all users</span>
             </div>
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Single Sign-On (SSO)</label>
-            <div style={{ padding: '12px', background: theme.colors.bgDeep, borderRadius: theme.radius.sm, fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+            <div style={{ padding: '12px', background: '#F3F4F6', borderRadius: '8px', fontSize: '12px', color: '#9CA3AF' }}>
               SSO is available on the Club plan ($1,499/mo). Supports SAML 2.0 and OAuth.
             </div>
           </div>
@@ -1013,7 +1012,7 @@ function SecurityTab() {
             <label style={s.label}>Audit Logging</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <ToggleSwitch checked={true} onChange={() => {}} />
-              <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>Log all user actions</span>
+              <span style={{ fontSize: '14px', color: '#6B7280' }}>Log all user actions</span>
             </div>
           </div>
           <div style={s.fieldGroup}>
@@ -1025,8 +1024,8 @@ function SecurityTab() {
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>API Keys</label>
-            <div style={{ padding: '10px 12px', background: theme.colors.bgDeep, borderRadius: theme.radius.sm, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: theme.fontSize.sm, fontFamily: theme.fonts.mono, color: theme.colors.textMuted }}>sk_live_****************************7f2a</span>
+            <div style={{ padding: '10px 12px', background: '#F3F4F6', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '14px', fontFamily: "'JetBrains Mono', monospace", color: '#9CA3AF' }}>sk_live_****************************7f2a</span>
               <button style={{ ...s.btn('ghost'), padding: '4px 10px', fontSize: '12px' }}>Regenerate</button>
             </div>
           </div>
@@ -1045,12 +1044,12 @@ function SecurityTab() {
         ].map((log, i) => (
           <div key={i} style={{
             display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1.2fr auto', gap: '12px', alignItems: 'center',
-            padding: '10px 16px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm,
+            padding: '10px 16px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px',
           }}>
-            <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{log.user}</div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{log.time}</div>
-            <div style={{ fontSize: theme.fontSize.xs, fontFamily: theme.fonts.mono, color: theme.colors.textMuted }}>{log.ip}</div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{log.device}</div>
+            <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a2e' }}>{log.user}</div>
+            <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{log.time}</div>
+            <div style={{ fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", color: '#9CA3AF' }}>{log.ip}</div>
+            <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{log.device}</div>
             <span style={s.badge(
               log.status === 'success' ? '#15803D' : '#B91C1C',
               log.status === 'success' ? '#F0FDF4' : '#FEF2F2'
@@ -1087,15 +1086,15 @@ export default function AdminDashboard() {
     <PageTransition>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: theme.colors.textPrimary }}>Admin Settings</h1>
-          <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, margin: '4px 0 0 0' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: '#1a1a2e' }}>Admin Settings</h1>
+          <p style={{ fontSize: '14px', color: '#9CA3AF', margin: '4px 0 0 0' }}>
             Manage users, action channels, notifications, and club configuration.
           </p>
         </div>
 
         <div style={{
           display: 'flex', gap: '4px', marginBottom: '24px', overflowX: 'auto',
-          borderBottom: '1px solid ' + theme.colors.border, paddingBottom: '0',
+          borderBottom: '1px solid ' + '#E5E7EB', paddingBottom: '0',
         }}>
           {TABS.map(tab => (
             <button
@@ -1104,13 +1103,13 @@ export default function AdminDashboard() {
               style={{
                 padding: '10px 18px',
                 border: 'none',
-                borderBottom: activeTab === tab.key ? '2px solid ' + theme.colors.accent : '2px solid transparent',
+                borderBottom: activeTab === tab.key ? '2px solid ' + '#E8740C' : '2px solid transparent',
                 background: 'none',
-                color: activeTab === tab.key ? theme.colors.textPrimary : theme.colors.textMuted,
+                color: activeTab === tab.key ? '#1a1a2e' : '#9CA3AF',
                 fontWeight: activeTab === tab.key ? 600 : 400,
-                fontSize: theme.fontSize.sm,
+                fontSize: '14px',
                 cursor: 'pointer',
-                fontFamily: theme.fonts.sans,
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',

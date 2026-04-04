@@ -4,7 +4,6 @@
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { getArchetypeProfiles } from '@/services/memberService';
 import { getArchetypeSpendPatterns } from '@/services/experienceInsightsService';
-import { theme } from '@/config/theme';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { useState } from 'react';
 
@@ -36,20 +35,20 @@ export default function ArchetypeTab() {
   }));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
       {/* Archetype selector */}
-      <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
+      <div className="flex gap-2 flex-wrap">
         {profiles.map(p => {
           const isSelected = selected === p.archetype;
-          const churnColor = ['Declining','Ghost','Social Butterfly'].includes(p.archetype) ? theme.colors.warning
-            : p.archetype === 'Balanced Active' ? theme.colors.success : theme.colors.textMuted;
+          const churnColor = ['Declining','Ghost','Social Butterfly'].includes(p.archetype) ? '#f59e0b'
+            : p.archetype === 'Balanced Active' ? '#22c55e' : '#9CA3AF';
           return (
             <button key={p.archetype} onClick={() => setSelected(p.archetype)} style={{
-              padding: '6px 14px', borderRadius: theme.radius.md, cursor: 'pointer',
-              border: `1px solid ${isSelected ? theme.colors.accent : theme.colors.border}`,
-              background: isSelected ? `${theme.colors.accent}08` : theme.colors.bgCard,
-              color: isSelected ? theme.colors.accent : theme.colors.textSecondary,
-              fontSize: theme.fontSize.xs, fontWeight: isSelected ? 700 : 400,
+              padding: '6px 14px', borderRadius: '12px', cursor: 'pointer',
+              border: `1px solid ${isSelected ? '#E8740C' : '#E5E7EB'}`,
+              background: isSelected ? `${'#E8740C'}08` : '#ffffff',
+              color: isSelected ? '#E8740C' : '#6B7280',
+              fontSize: '12px', fontWeight: isSelected ? 700 : 400,
             }}>
               {p.archetype}
               <span style={{ color: churnColor, marginLeft: 6 }}>{p.count}</span>
@@ -59,50 +58,50 @@ export default function ArchetypeTab() {
       </div>
 
       {/* Main profile section */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.spacing.lg }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         {/* Left — visual */}
-        <div style={{ background: theme.colors.bgCard, borderRadius: theme.radius.md, padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
-          <div style={{ fontFamily: theme.fonts.serif, fontSize: theme.fontSize.lg, color: theme.colors.textPrimary, marginBottom: 4 }}>{profile.archetype}</div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: theme.spacing.md }}>
+        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '16px', border: `1px solid ${'#E5E7EB'}` }}>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', color: '#1a1a2e', marginBottom: 4 }}>{profile.archetype}</div>
+          <div style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '16px' }}>
             {profile.count} members at Oakmont Hills
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke={theme.colors.border} />
-              <PolarAngleAxis dataKey="dim" tick={{ fill: theme.colors.textSecondary, fontSize: 11 }} />
-              <Radar dataKey="value" fill={theme.colors.members} fillOpacity={0.2}
-                stroke={theme.colors.members} strokeWidth={2} />
+              <PolarGrid stroke={'#E5E7EB'} />
+              <PolarAngleAxis dataKey="dim" tick={{ fill: '#6B7280', fontSize: 11 }} />
+              <Radar dataKey="value" fill={'#E8740C'} fillOpacity={0.2}
+                stroke={'#E8740C'} strokeWidth={2} />
               <Tooltip formatter={v => [`${v}`, 'Engagement']}
-                contentStyle={{ background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`, borderRadius: 8, fontSize: 12 }}
-                labelStyle={{ color: theme.colors.textPrimary }} />
+                contentStyle={{ background: '#ffffff', border: `1px solid ${'#E5E7EB'}`, borderRadius: 8, fontSize: 12 }}
+                labelStyle={{ color: '#1a1a2e' }} />
             </RadarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Right — plain English intel */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+        <div className="flex flex-col gap-2">
           {intel.summary && (
-            <div style={{ background: theme.colors.bgCard, borderRadius: theme.radius.md, padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.textMuted, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>What this archetype is</div>
-              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, lineHeight: 1.6 }}>{intel.summary}</div>
+            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '16px', border: `1px solid ${'#E5E7EB'}` }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>What this archetype is</div>
+              <div style={{ fontSize: '14px', color: '#1a1a2e', lineHeight: 1.6 }}>{intel.summary}</div>
             </div>
           )}
           {intel.retention && (
-            <div style={{ background: theme.colors.bgCard, borderRadius: theme.radius.md, padding: theme.spacing.md, border: `1px solid ${theme.colors.border}` }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.textMuted, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Retention outlook</div>
-              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6 }}>{intel.retention}</div>
+            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '16px', border: `1px solid ${'#E5E7EB'}` }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Retention outlook</div>
+              <div style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.6 }}>{intel.retention}</div>
             </div>
           )}
           {intel.opportunity && (
-            <div style={{ background: theme.colors.bgCard, borderRadius: theme.radius.md, padding: `${theme.spacing.sm} ${theme.spacing.md}`, border: `1px solid ${theme.colors.success}25` }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Opportunity</div>
-              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6 }}>{intel.opportunity}</div>
+            <div style={{ background: '#ffffff', borderRadius: '12px', padding: `${'8px'} ${'16px'}`, border: `1px solid ${'#22c55e'}25` }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#22c55e', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Opportunity</div>
+              <div style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.6 }}>{intel.opportunity}</div>
             </div>
           )}
           {intel.watch && (
-            <div style={{ background: `${theme.colors.warning}08`, borderRadius: theme.radius.md, padding: `${theme.spacing.sm} ${theme.spacing.md}`, border: `1px solid ${theme.colors.warning}30` }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.warning, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Watch for</div>
-              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6 }}>{intel.watch}</div>
+            <div style={{ background: `${'#f59e0b'}08`, borderRadius: '12px', padding: `${'8px'} ${'16px'}`, border: `1px solid ${'#f59e0b'}30` }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Watch for</div>
+              <div style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.6 }}>{intel.watch}</div>
             </div>
           )}
         </div>
@@ -120,55 +119,55 @@ function SpendPotentialCard({ archetype }) {
   if (!current) return null;
 
   const categories = [
-    { key: 'golf', label: 'Golf', engagement: current.engagement.golf, color: theme.colors.success },
-    { key: 'dining', label: 'Dining', engagement: current.engagement.dining, color: theme.colors.fb ?? theme.colors.warning },
-    { key: 'events', label: 'Events', engagement: current.engagement.events, color: theme.colors.accent },
-    { key: 'email', label: 'Email', engagement: current.engagement.email, color: theme.colors.info ?? theme.colors.textMuted },
+    { key: 'golf', label: 'Golf', engagement: current.engagement.golf, color: '#22c55e' },
+    { key: 'dining', label: 'Dining', engagement: current.engagement.dining, color: '#f59e0b' ?? '#f59e0b' },
+    { key: 'events', label: 'Events', engagement: current.engagement.events, color: '#E8740C' },
+    { key: 'email', label: 'Email', engagement: current.engagement.email, color: '#2563eb' ?? '#9CA3AF' },
   ];
 
   const avgAll = patterns.reduce((sum, p) => sum + p.avgAnnualSpend, 0) / patterns.length;
 
   return (
     <div style={{
-      background: theme.colors.bgCard,
-      borderRadius: theme.radius.md,
-      border: '1px solid ' + theme.colors.border,
-      padding: theme.spacing.lg,
+      background: '#ffffff',
+      borderRadius: '12px',
+      border: '1px solid ' + '#E5E7EB',
+      padding: '24px',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.md }}>
+      <div className="flex justify-between items-center mb-4">
         <div>
-          <div style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.accent, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: '2px' }}>
+          <div style={{ fontSize: '10px', fontWeight: 700, color: '#E8740C', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: '2px' }}>
             Spend Potential
           </div>
-          <div style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary }}>
+          <div style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a2e' }}>
             {archetype} &mdash; {current.count} members
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Avg annual spend</div>
-          <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>
+          <div className="text-xs text-gray-400">Avg annual spend</div>
+          <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: '#1a1a2e' }}>
             ${current.avgAnnualSpend.toLocaleString()}
           </div>
-          <div style={{ fontSize: theme.fontSize.xs, color: current.avgAnnualSpend >= avgAll ? theme.colors.success : theme.colors.warning }}>
+          <div style={{ fontSize: '12px', color: current.avgAnnualSpend >= avgAll ? '#22c55e' : '#f59e0b' }}>
             {current.avgAnnualSpend >= avgAll ? 'Above' : 'Below'} club avg (${Math.round(avgAll).toLocaleString()})
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.sm }}>
+      <div className="grid grid-cols-4 gap-2">
         {categories.map(cat => {
           const potential = 100 - cat.engagement;
           return (
             <div key={cat.key} style={{
-              background: theme.colors.bgDeep,
-              borderRadius: theme.radius.sm,
-              padding: theme.spacing.sm,
+              background: '#F3F4F6',
+              borderRadius: '8px',
+              padding: '8px',
               textAlign: 'center',
             }}>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: '4px' }}>{cat.label}</div>
+              <div style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>{cat.label}</div>
               <div style={{
                 height: 6,
-                background: theme.colors.border + '60',
+                background: '#E5E7EB' + '60',
                 borderRadius: 3,
                 overflow: 'hidden',
                 marginBottom: '6px',
@@ -180,17 +179,17 @@ function SpendPotentialCard({ archetype }) {
                   borderRadius: 3,
                 }} />
               </div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: cat.color, fontFamily: theme.fonts.mono }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: cat.color, fontFamily: "'JetBrains Mono', monospace" }}>
                 {cat.engagement}%
               </div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>engaged</div>
+              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>engaged</div>
               {potential > 30 && (
                 <div style={{
                   marginTop: '4px',
                   fontSize: '10px',
                   fontWeight: 600,
-                  color: theme.colors.success,
-                  background: theme.colors.success + '12',
+                  color: '#22c55e',
+                  background: '#22c55e' + '12',
                   padding: '2px 6px',
                   borderRadius: '4px',
                   display: 'inline-block',
@@ -205,16 +204,16 @@ function SpendPotentialCard({ archetype }) {
 
       {current.spendPotential > 0 && (
         <div style={{
-          marginTop: theme.spacing.md,
-          padding: theme.spacing.sm,
-          background: theme.colors.success + '08',
-          border: '1px solid ' + theme.colors.success + '20',
-          borderRadius: theme.radius.sm,
-          fontSize: theme.fontSize.xs,
-          color: theme.colors.textSecondary,
+          marginTop: '16px',
+          padding: '8px',
+          background: '#22c55e' + '08',
+          border: '1px solid ' + '#22c55e' + '20',
+          borderRadius: '8px',
+          fontSize: '12px',
+          color: '#6B7280',
           lineHeight: 1.5,
         }}>
-          <strong style={{ color: theme.colors.success }}>Untapped potential:</strong>{' '}
+          <strong className="text-success-500">Untapped potential:</strong>{' '}
           ${current.spendPotential.toLocaleString()}/member/year in dining and events.{' '}
           Across {current.count} {archetype} members, that&rsquo;s{' '}
           <strong>${(current.spendPotential * current.count).toLocaleString()}</strong> in annual opportunity.
@@ -223,7 +222,7 @@ function SpendPotentialCard({ archetype }) {
 
       {/* View outreach playbook for this archetype */}
       <div style={{
-        marginTop: theme.spacing.md,
+        marginTop: '16px',
         display: 'flex',
         gap: 10,
         flexWrap: 'wrap',

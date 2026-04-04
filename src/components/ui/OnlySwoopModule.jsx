@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { theme } from '@/config/theme.js';
 import { DEMO_TIMESTAMP } from '@/config/constants.js';
 
 export default function OnlySwoopModule({ question, insights = [], action, context = [], timestamp }) {
@@ -13,70 +12,26 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
   const remainingInsights = insights.slice(2);
   const resolvedTimestamp = timestamp ?? DEMO_TIMESTAMP;
   const collapsedSummary = action
-    ? `${action.owner}${action.dueBy ? ` · Due ${action.dueBy}` : ''}`
+    ? `${action.owner}${action.dueBy ? ` \u00B7 Due ${action.dueBy}` : ''}`
     : insightCount > 0
       ? `${insightCount} supporting signal${insightCount === 1 ? '' : 's'}`
       : '';
 
   return (
     <section
-      style={{
-        border: `1.5px solid ${theme.colors.borderStrong ?? theme.colors.border}`,
-        borderRadius: theme.radius.xl,
-        padding: theme.spacing.lg,
-        background: theme.colors.bgCard,
-        boxShadow: theme.shadow.sm,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.md,
-        marginBottom: theme.spacing.xl,
-      }}
+      className="border-[1.5px] border-gray-200 rounded-2xl p-5 sm:p-6 bg-white shadow-theme-xs flex flex-col gap-4 mb-8 dark:border-gray-800 dark:bg-white/[0.03]"
       data-animate
     >
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: theme.spacing.sm,
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <p
-            style={{
-              margin: 0,
-              fontSize: theme.fontSize.xs,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: theme.colors.textMuted,
-              fontWeight: 700,
-            }}
-          >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex-1 min-w-[220px]">
+          <p className="m-0 text-xs tracking-widest uppercase text-gray-500 font-bold dark:text-gray-400">
             Only Swoop can answer
           </p>
-          <h2
-            style={{
-              fontSize: theme.fontSize.lg,
-              fontFamily: theme.fonts.serif,
-              color: theme.colors.textPrimary,
-              margin: `${theme.spacing.xs} 0 0`,
-              lineHeight: 1.3,
-            }}
-          >
+          <h2 className="text-lg font-serif text-gray-800 mt-1 leading-tight dark:text-white/90">
             {question}
           </h2>
           {!expanded && collapsedSummary && (
-            <div
-              style={{
-                marginTop: theme.spacing.xs,
-                fontSize: theme.fontSize.sm,
-                color: theme.colors.textSecondary,
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 6,
-              }}
-            >
+            <div className="mt-1 text-sm text-gray-600 flex flex-wrap gap-1.5 dark:text-gray-400">
               <span>{collapsedSummary}</span>
             </div>
           )}
@@ -85,79 +40,30 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
           type="button"
           onClick={() => setExpanded((prev) => !prev)}
           aria-expanded={expanded}
-          style={{
-            border: `1px solid ${theme.colors.border}`,
-            background: expanded ? theme.colors.bgDeep : theme.colors.bg,
-            color: theme.colors.textPrimary,
-            fontSize: theme.fontSize.sm,
-            fontWeight: 600,
-            padding: `${theme.spacing.xs} ${theme.spacing.md}`,
-            borderRadius: theme.radius.md,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            cursor: 'pointer',
-          }}
+          className={`border border-gray-200 text-sm font-semibold px-4 py-1.5 rounded-xl inline-flex items-center gap-1.5 cursor-pointer text-gray-800 dark:text-white/90 dark:border-gray-700 ${
+            expanded ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
+          }`}
         >
           <span>{expanded ? 'Hide details' : 'View details'}</span>
-          <span>{expanded ? '▴' : '▾'}</span>
+          <span>{expanded ? '\u25B4' : '\u25BE'}</span>
         </button>
       </div>
 
       {expanded && (
         <>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'stretch',
-              gap: theme.spacing.md,
-              marginTop: theme.spacing.md,
-            }}
-          >
+          <div className="flex flex-wrap items-stretch gap-4 mt-4">
             {context.length > 0 && (
-              <div style={{ flex: 1, minWidth: 240 }}>
-                <div
-                  style={{
-                    marginTop: theme.spacing.xs,
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: theme.spacing.sm,
-                  }}
-                >
+              <div className="flex-1 min-w-[240px]">
+                <div className="mt-1 flex flex-wrap gap-3">
                   {context.map(({ label, value, icon }) => (
                     <div
                       key={`${label}-${value}`}
-                      style={{
-                        padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-                        borderRadius: theme.radius.md,
-                        background: theme.colors.bgDeep,
-                        border: `1px solid ${theme.colors.border}`,
-                        minWidth: 150,
-                        flex: '0 1 auto',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2,
-                      }}
+                      className="px-3 py-1.5 rounded-xl bg-gray-100 border border-gray-200 min-w-[150px] flex flex-col gap-0.5 dark:bg-gray-800 dark:border-gray-700"
                     >
-                      <span
-                        style={{
-                          fontSize: theme.fontSize.xs,
-                          color: theme.colors.textMuted,
-                          textTransform: 'uppercase',
-                          fontWeight: 600,
-                          letterSpacing: '0.08em',
-                        }}
-                      >
+                      <span className="text-xs text-gray-500 uppercase font-semibold tracking-widest dark:text-gray-400">
                         {icon ? `${icon} ${label}` : label}
                       </span>
-                      <span
-                        style={{
-                          fontSize: theme.fontSize.md,
-                          fontWeight: 600,
-                          color: theme.colors.textPrimary,
-                        }}
-                      >
+                      <span className="text-base font-semibold text-gray-800 dark:text-white/90">
                         {value}
                       </span>
                     </div>
@@ -166,59 +72,19 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
               </div>
             )}
             {action && (
-              <div
-                style={{
-                  flexBasis: 320,
-                  flexShrink: 0,
-                  borderRadius: theme.radius.lg,
-                  background: theme.colors.bgDeep,
-                  border: `1px solid ${theme.colors.border}`,
-                  padding: theme.spacing.md,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: theme.spacing.xs,
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: theme.fontSize.sm,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    color: theme.colors.textMuted,
-                  }}
-                >
+              <div className="basis-80 shrink-0 rounded-2xl bg-gray-100 border border-gray-200 p-4 flex flex-col gap-1.5 dark:bg-gray-800 dark:border-gray-700">
+                <p className="m-0 text-sm uppercase tracking-widest text-gray-500 dark:text-gray-400">
                   Immediate action
                 </p>
-                <p style={{ margin: 0, fontSize: theme.fontSize.md, lineHeight: 1.4 }}>{action.text}</p>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: theme.spacing.xs,
-                    fontSize: theme.fontSize.sm,
-                    color: theme.colors.textSecondary,
-                    fontWeight: 600,
-                  }}
-                >
-                  <span style={{ color: theme.colors.textPrimary }}>{action.owner}</span>
+                <p className="m-0 text-base leading-snug text-gray-800 dark:text-white/90">{action.text}</p>
+                <div className="flex flex-wrap gap-1.5 text-sm text-gray-600 font-semibold dark:text-gray-400">
+                  <span className="text-gray-800 dark:text-white/90">{action.owner}</span>
                   {action.dueBy && (
-                    <span style={{ color: theme.colors.textMuted }}>
-                      · Due {action.dueBy}
-                    </span>
+                    <span className="text-gray-500 dark:text-gray-400">\u00B7 Due {action.dueBy}</span>
                   )}
                 </div>
                 {resolvedTimestamp && (
-                  <p
-                    style={{
-                      margin: `${theme.spacing.xs} 0 0`,
-                      fontSize: theme.fontSize.xs,
-                      color: theme.colors.textMuted,
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                      fontWeight: 600,
-                    }}
-                  >
+                  <p className="mt-1.5 mb-0 text-xs text-gray-500 tracking-wide uppercase font-semibold dark:text-gray-400">
                     As of {resolvedTimestamp}
                   </p>
                 )}
@@ -227,29 +93,11 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
           </div>
 
           {insightCount > 0 && (
-            <div
-              style={{
-                marginTop: theme.spacing.md,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.xs,
-              }}
-            >
+            <div className="mt-4 flex flex-col gap-1.5">
               {previewInsights.length > 0 && (
-                <ul
-                  style={{
-                    margin: 0,
-                    paddingLeft: theme.spacing.md,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 6,
-                    color: theme.colors.textPrimary,
-                  }}
-                >
+                <ul className="m-0 pl-4 flex flex-col gap-1.5 text-gray-800 dark:text-white/90">
                   {previewInsights.map((insight) => (
-                    <li key={`preview-${insight}`} style={{ lineHeight: 1.4 }}>
-                      {insight}
-                    </li>
+                    <li key={`preview-${insight}`} className="leading-snug">{insight}</li>
                   ))}
                 </ul>
               )}
@@ -259,41 +107,20 @@ export default function OnlySwoopModule({ question, insights = [], action, conte
                   <button
                     type="button"
                     onClick={() => setShowSignals((prev) => !prev)}
-                    style={{
-                      border: '1px solid ' + theme.colors.border,
-                      background: showSignals ? theme.colors.bgDeep : `${theme.colors.operations}15`,
-                      color: showSignals ? theme.colors.textPrimary : theme.colors.operations,
-                      fontSize: theme.fontSize.sm,
-                      fontWeight: 700,
-                      padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-                      borderRadius: theme.radius.md,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      cursor: 'pointer',
-                    }}
+                    className={`border border-gray-200 text-sm font-bold px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5 cursor-pointer dark:border-gray-700 ${
+                      showSignals
+                        ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white/90'
+                        : 'bg-blue-light-50 text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400'
+                    }`}
                   >
                     <span>{showSignals ? 'Hide' : 'View'} additional signals</span>
-                    <span style={{ fontSize: theme.fontSize.xs, opacity: 0.8 }}>
-                      ({remainingInsights.length})
-                    </span>
+                    <span className="text-xs opacity-80">({remainingInsights.length})</span>
                   </button>
 
                   {showSignals && (
-                    <ul
-                      style={{
-                        margin: `${theme.spacing.xs} 0 0`,
-                        paddingLeft: theme.spacing.md,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: theme.spacing.xs,
-                        color: theme.colors.textPrimary,
-                      }}
-                    >
+                    <ul className="mt-1.5 mb-0 pl-4 flex flex-col gap-1.5 text-gray-800 dark:text-white/90">
                       {remainingInsights.map((insight) => (
-                        <li key={`extra-${insight}`} style={{ lineHeight: 1.4 }}>
-                          {insight}
-                        </li>
+                        <li key={`extra-${insight}`} className="leading-snug">{insight}</li>
                       ))}
                     </ul>
                   )}

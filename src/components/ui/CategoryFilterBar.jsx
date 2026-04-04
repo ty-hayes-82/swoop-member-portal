@@ -1,87 +1,51 @@
-// CategoryFilterBar — horizontal scrollable filter tabs for 10 vendor categories
-// Props: categories (with count), activeCategory (string | null), onSelect fn
-// Color rule: all colors via theme.colors only — no hardcoded hex
-import { theme } from '@/config/theme';
+// CategoryFilterBar — horizontal scrollable filter tabs for vendor categories
 
 export default function CategoryFilterBar({ categories = [], activeCategory, onSelect }) {
   return (
-    <div style={{
-      overflowX:  'auto',
-      WebkitOverflowScrolling: 'touch',
-      scrollbarWidth: 'none',
-      msOverflowStyle: 'none',
-      paddingBottom: '2px',
-    }}>
-      <div style={{
-        display:    'flex',
-        gap:        theme.spacing.sm,
-        alignItems: 'center',
-        minWidth:   'max-content',
-        padding:    `${theme.spacing.xs} 0`,
-      }}>
+    <div className="overflow-x-auto pb-0.5" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div className="flex gap-3 items-center min-w-max py-1">
         {/* "All" pill */}
         <Pill
           label="All"
           icon={null}
           count={categories.reduce((s, c) => s + (c.count ?? 0), 0)}
           isActive={activeCategory === null}
-          color={theme.colors.accent}
           onSelect={() => onSelect(null)}
         />
 
-        {categories.map(cat => {
-          const color = theme.colors[cat.themeColor] ?? theme.colors.accent;
-          return (
-            <Pill
-              key={cat.id}
-              label={cat.label}
-              icon={cat.icon}
-              count={cat.count ?? 0}
-              isActive={activeCategory === cat.id}
-              color={color}
-              onSelect={() => onSelect(activeCategory === cat.id ? null : cat.id)}
-            />
-          );
-        })}
+        {categories.map(cat => (
+          <Pill
+            key={cat.id}
+            label={cat.label}
+            icon={cat.icon}
+            count={cat.count ?? 0}
+            isActive={activeCategory === cat.id}
+            onSelect={() => onSelect(activeCategory === cat.id ? null : cat.id)}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
-function Pill({ label, icon, count, isActive, color, onSelect }) {
+function Pill({ label, icon, count, isActive, onSelect }) {
   return (
     <button
       onClick={onSelect}
-      style={{
-        display:       'inline-flex',
-        alignItems:    'center',
-        gap:           '5px',
-        padding:       '6px 12px',
-        borderRadius:  theme.radius.xl,
-        border:        `1px solid ${isActive ? color : theme.colors.border}`,
-        background:    isActive ? color : theme.colors.bgCard,
-        color:         isActive ? theme.colors.bgCard : theme.colors.textSecondary,
-        fontSize:      theme.fontSize.sm,
-        fontWeight:    isActive ? 700 : 500,
-        cursor:        'pointer',
-        whiteSpace:    'nowrap',
-        transition:    'all 0.15s ease',
-        fontFamily:    theme.fonts.sans,
-      }}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm whitespace-nowrap cursor-pointer transition-all duration-150 ${
+        isActive
+          ? 'bg-brand-500 text-white border-brand-500 font-bold'
+          : 'bg-white text-gray-600 border-gray-200 font-medium hover:bg-gray-50 dark:bg-white/[0.03] dark:text-gray-400 dark:border-gray-700 dark:hover:bg-white/5'
+      }`}
     >
-      {icon && <span style={{ fontSize: '13px', lineHeight: 1 }}>{icon}</span>}
+      {icon && <span className="text-sm leading-none">{icon}</span>}
       {label}
       {count > 0 && (
-        <span style={{
-          fontSize:   '10px',
-          fontWeight: 700,
-          background: isActive ? 'rgba(255,255,255,0.25)' : theme.colors.bgDeep,
-          color:      isActive ? theme.colors.bgCard : theme.colors.textMuted,
-          padding:    '1px 5px',
-          borderRadius: theme.radius.sm,
-          minWidth:   '18px',
-          textAlign:  'center',
-        }}>
+        <span className={`text-[10px] font-bold px-1.5 py-px rounded-lg min-w-[18px] text-center ${
+          isActive
+            ? 'bg-white/25 text-white'
+            : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+        }`}>
           {count}
         </span>
       )}

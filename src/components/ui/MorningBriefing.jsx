@@ -1,7 +1,5 @@
 // MorningBriefing — printable daily sheet GMs can hand to department heads.
-// Critique Phase 3: "Many GMs still run morning standups with printed sheets."
 import { useState } from 'react';
-import { theme } from '@/config/theme';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getAtRiskMembers } from '@/services/memberService';
@@ -9,11 +7,7 @@ import { getAtRiskMembers } from '@/services/memberService';
 export default function MorningBriefing() {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState({
-    results: false,
-    actions: false,
-    members: false,
-    staffing: false,
-    notes: false,
+    results: false, actions: false, members: false, staffing: false, notes: false,
   });
   const briefing = getDailyBriefing();
   const atRisk = getAtRiskMembers();
@@ -21,19 +15,15 @@ export default function MorningBriefing() {
   const handlePrint = () => window.print();
   const toggleSection = (key) => setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const SectionHeader = ({ label, color, sectionKey }) => (
+  const SectionHeader = ({ label, colorCls, sectionKey }) => (
     <button
       onClick={() => toggleSection(sectionKey)}
-      style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        width: '100%', padding: '6px 0', border: 'none', background: 'none',
-        cursor: 'pointer', textAlign: 'left',
-      }}
+      className="flex justify-between items-center w-full py-1.5 border-none bg-transparent cursor-pointer text-left"
     >
-      <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color, textTransform: 'uppercase' }}>
+      <div className={`text-[11px] font-bold tracking-widest uppercase ${colorCls}`}>
         {label}
       </div>
-      <span style={{ fontSize: '16px', color }}>{collapsed[sectionKey] ? '＋' : '−'}</span>
+      <span className={`text-base ${colorCls}`}>{collapsed[sectionKey] ? '\uFF0B' : '\u2212'}</span>
     </button>
   );
 
@@ -41,93 +31,69 @@ export default function MorningBriefing() {
     <>
       <button
         onClick={() => setOpen(true)}
-        style={{
-          padding: '10px 20px', borderRadius: theme.radius.md, fontSize: theme.fontSize.sm,
-          fontWeight: 700, cursor: 'pointer',
-          border: 'none',
-          background: theme.colors.operations, color: '#fff',
-          display: 'flex', alignItems: 'center', gap: '8px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-          transition: 'opacity 0.15s',
-        }}>
-        🖨 Print Today's Briefing
+        className="px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer border-none bg-blue-light-500 text-white flex items-center gap-2 shadow-theme-sm transition-opacity duration-150 hover:bg-blue-light-600"
+      >
+        \uD83D\uDDA8 Print Today's Briefing
       </button>
 
       {open && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(0,0,0,0.5)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center', padding: theme.spacing.xl,
-        }}>
-          <div style={{
-            background: theme.colors.white, color: theme.colors.briefingInk,
-            borderRadius: theme.radius.lg, width: '100%', maxWidth: 640,
-            maxHeight: '90vh', overflow: 'auto',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-          }}>
+        <div className="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-8">
+          <div className="bg-white text-gray-900 rounded-2xl w-full max-w-[640px] max-h-[90vh] overflow-auto shadow-theme-xl">
             {/* Print header */}
-            <div style={{ padding: '24px 32px', borderBottom: `2px solid ${theme.colors.operations}`, background: theme.colors.briefingPaper }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div className="px-8 py-6 border-b-2 border-blue-light-500 bg-gray-50">
+              <div className="flex justify-between items-start">
                 <div>
-                  <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontSize: '22px', fontWeight: 400, color: theme.colors.briefingInk }}>
+                  <div className="text-[22px] font-normal text-gray-900">
                     Oakmont Hills CC
                   </div>
-                  <div style={{ fontSize: '13px', color: theme.colors.briefingMuted, marginTop: 2 }}>
-                    Morning Operations Briefing · Saturday, January 17, 2026
+                  <div className="text-sm text-gray-500 mt-0.5">
+                    Morning Operations Briefing \u00B7 Saturday, January 17, 2026
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={handlePrint} style={{
-                    padding: '7px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 600,
-                    cursor: 'pointer', border: 'none', background: theme.colors.operations, color: theme.colors.white }}>
+                <div className="flex gap-2">
+                  <button onClick={handlePrint} className="px-4 py-2 rounded-md text-sm font-semibold cursor-pointer border-none bg-blue-light-500 text-white">
                     Print / Save PDF
                   </button>
-                  <button onClick={() => setOpen(false)} style={{
-                    padding: '7px 14px', borderRadius: '6px', fontSize: '13px',
-                    cursor: 'pointer', border: `1px solid ${theme.colors.briefingBorder}`, background: 'none', color: theme.colors.briefingMuted }}>
+                  <button onClick={() => setOpen(false)} className="px-3.5 py-2 rounded-md text-sm cursor-pointer border border-gray-300 bg-transparent text-gray-500">
                     Close
                   </button>
                 </div>
               </div>
             </div>
 
-            <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="px-8 py-6 flex flex-col gap-5">
               {/* Yesterday summary */}
               <section>
-                <SectionHeader label="Yesterday's Results" color={theme.colors.operations} sectionKey="results" />
+                <SectionHeader label="Yesterday's Results" colorCls="text-blue-light-500" sectionKey="results" />
                 {!collapsed.results && (
-                  <div style={{ background: theme.colors.briefingPaper, borderRadius: '8px', padding: '14px 16px', fontSize: '14px', lineHeight: 1.7, color: theme.colors.briefingInk }}>
-                    Revenue <strong>${briefing.yesterdayRecap.revenue.toLocaleString()}</strong> — {briefing.yesterdayRecap.revenueVsPlan > 0 ? '▲' : '▼'} {Math.abs(briefing.yesterdayRecap.revenueVsPlan)}% vs. plan
+                  <div className="bg-gray-50 rounded-lg px-4 py-3.5 text-sm leading-relaxed text-gray-900">
+                    Revenue <strong>${briefing.yesterdayRecap.revenue.toLocaleString()}</strong> \u2014 {briefing.yesterdayRecap.revenueVsPlan > 0 ? '\u25B2' : '\u25BC'} {Math.abs(briefing.yesterdayRecap.revenueVsPlan)}% vs. plan
                     {briefing.yesterdayRecap.revenueVsLastWeek && (
-                      <>, {briefing.yesterdayRecap.revenueVsLastWeek > 0 ? '▲' : '▼'} {Math.abs(briefing.yesterdayRecap.revenueVsLastWeek).toFixed(1)}% vs. last Sat</>
+                      <>, {briefing.yesterdayRecap.revenueVsLastWeek > 0 ? '\u25B2' : '\u25BC'} {Math.abs(briefing.yesterdayRecap.revenueVsLastWeek).toFixed(1)}% vs. last Sat</>
                     )}.
                     {' '}{briefing.yesterdayRecap.rounds} rounds completed
                     {briefing.yesterdayRecap.roundsVsLastWeek && (
                       <> ({briefing.yesterdayRecap.roundsVsLastWeek > 0 ? '+' : ''}{briefing.yesterdayRecap.roundsVsLastWeek} vs. last Sat)</>
                     )}.
                     {briefing.yesterdayRecap.incidents.length > 0 && (
-                      <span style={{ color: theme.colors.urgent }}> {briefing.yesterdayRecap.incidents.length} issue{briefing.yesterdayRecap.incidents.length > 1 ? 's' : ''} to follow up on.</span>
+                      <span className="text-error-500"> {briefing.yesterdayRecap.incidents.length} issue{briefing.yesterdayRecap.incidents.length > 1 ? 's' : ''} to follow up on.</span>
                     )}
                   </div>
                 )}
               </section>
 
-              {/* Priority Actions for Today */}
+              {/* Priority Actions */}
               <section>
-                <SectionHeader label="Priority Actions — Do These First" color={theme.colors.success} sectionKey="actions" />
+                <SectionHeader label="Priority Actions \u2014 Do These First" colorCls="text-success-500" sectionKey="actions" />
                 {!collapsed.actions && (
-                  <div style={{ background: theme.colors.briefingPaper, borderRadius: '8px', padding: '12px 16px' }}>
+                  <div className="bg-gray-50 rounded-lg px-4 py-3">
                     {(briefing.quickWins || []).map((win, idx) => (
-                      <div key={win.id} style={{ borderBottom: idx < briefing.quickWins.length - 1 ? `1px solid ${theme.colors.briefingDivider}` : 'none', paddingBottom: '10px', marginBottom: idx < briefing.quickWins.length - 1 ? '10px' : 0 }}>
-                        <div style={{ fontSize: '13px', fontWeight: 600, color: theme.colors.briefingInk, marginBottom: '4px' }}>
-                          {win.icon} {win.title}
-                        </div>
-                        <div style={{ fontSize: '12px', color: theme.colors.briefingMuted, lineHeight: 1.5 }}>
-                          {win.detail}
-                        </div>
-                        <div style={{ fontSize: '11px', color: theme.colors.success, fontWeight: 600, marginTop: '4px' }}>
-                          Impact: {win.impact} · Effort: {win.effort}
-                          {win.conversionRate && <> · {win.conversionRate}% conversion</>}
+                      <div key={win.id} className={`pb-2.5 ${idx < briefing.quickWins.length - 1 ? 'mb-2.5 border-b border-gray-200' : ''}`}>
+                        <div className="text-sm font-semibold text-gray-900 mb-1">{win.icon} {win.title}</div>
+                        <div className="text-xs text-gray-500 leading-relaxed">{win.detail}</div>
+                        <div className="text-[11px] text-success-500 font-semibold mt-1">
+                          Impact: {win.impact} \u00B7 Effort: {win.effort}
+                          {win.conversionRate && <> \u00B7 {win.conversionRate}% conversion</>}
                         </div>
                       </div>
                     ))}
@@ -135,62 +101,55 @@ export default function MorningBriefing() {
                 )}
               </section>
 
-              {/* Today's watch list */}
+              {/* Watch list */}
               <section>
-                <SectionHeader label="Members Needing Attention Today" color={theme.colors.urgent} sectionKey="members" />
+                <SectionHeader label="Members Needing Attention Today" colorCls="text-error-500" sectionKey="members" />
                 {!collapsed.members && atRisk.filter(m => m.score < 40).map(m => (
-                  <div key={m.memberId} style={{ borderBottom: `1px solid ${theme.colors.briefingDivider}`, padding: '10px 0', display: 'flex', justifyContent: 'space-between' }}>
+                  <div key={m.memberId} className="border-b border-gray-200 py-2.5 flex justify-between">
                     <div>
-                      <MemberLink
-                        memberId={m.memberId}
-                        style={{ fontSize: '14px', fontWeight: 600, color: theme.colors.briefingInk }}
-                      >
-                        {m.name}
-                      </MemberLink>
-                      <div style={{ fontSize: '12px', color: theme.colors.briefingMuted, marginTop: 2 }}>{m.topRisk}</div>
+                      <MemberLink memberId={m.memberId} className="text-sm font-semibold text-gray-900">{m.name}</MemberLink>
+                      <div className="text-xs text-gray-500 mt-0.5">{m.topRisk}</div>
                     </div>
-                    <div style={{ fontSize: '12px', color: theme.colors.urgent, fontWeight: 600, flexShrink: 0, marginLeft: '16px', marginTop: 4 }}>
-                      Action needed
-                    </div>
+                    <div className="text-xs text-error-500 font-semibold shrink-0 ml-4 mt-1">Action needed</div>
                   </div>
                 ))}
               </section>
 
               {/* Staffing */}
               <section>
-                <SectionHeader label="Staffing & Weather" color={theme.colors.staffing} sectionKey="staffing" />
+                <SectionHeader label="Staffing & Weather" colorCls="text-blue-light-600" sectionKey="staffing" />
                 {!collapsed.staffing && (
-                  <div style={{ background: theme.colors.briefingPaper, borderRadius: '8px', padding: '14px 16px', fontSize: '14px', color: theme.colors.briefingInk, lineHeight: 1.7 }}>
+                  <div className="bg-gray-50 rounded-lg px-4 py-3.5 text-sm text-gray-900 leading-relaxed">
                     <div>Weather: <strong>{briefing.todayRisks.conditionsText || briefing.todayRisks.weather}</strong>
-                      {briefing.todayRisks.tempHigh && <> — {briefing.todayRisks.tempHigh}°F</>}
-                      {briefing.todayRisks.gusts > 0 && <>, {briefing.todayRisks.gusts > briefing.todayRisks.wind ? `${briefing.todayRisks.wind}–${briefing.todayRisks.gusts}` : briefing.todayRisks.wind} mph wind</>}
+                      {briefing.todayRisks.tempHigh && <> \u2014 {briefing.todayRisks.tempHigh}\u00B0F</>}
+                      {briefing.todayRisks.gusts > 0 && <>, {briefing.todayRisks.gusts > briefing.todayRisks.wind ? `${briefing.todayRisks.wind}\u2013${briefing.todayRisks.gusts}` : briefing.todayRisks.wind} mph wind</>}
                       {briefing.todayRisks.precipProb > 0 && <>, {briefing.todayRisks.precipProb}% rain</>}
                     </div>
                     {briefing.todayRisks.forecast && (
-                      <div style={{ marginTop: 4, fontSize: '13px', color: theme.colors.briefingMuted }}>{briefing.todayRisks.forecast}</div>
+                      <div className="mt-1 text-sm text-gray-500">{briefing.todayRisks.forecast}</div>
                     )}
-                    <div style={{ marginTop: 4 }}>
+                    <div className="mt-1">
                       {briefing.todayRisks.staffingGaps.length === 0
-                        ? <span style={{ color: theme.colors.success }}>✓ All positions fully staffed</span>
-                        : <span style={{ color: theme.colors.urgent }}>⚠ Gap: {briefing.todayRisks.staffingGaps.join(', ')}</span>}
+                        ? <span className="text-success-500">\u2713 All positions fully staffed</span>
+                        : <span className="text-error-500">\u26A0 Gap: {briefing.todayRisks.staffingGaps.join(', ')}</span>}
                     </div>
                   </div>
                 )}
               </section>
 
-              {/* Notes line */}
+              {/* Notes */}
               <section>
-                <SectionHeader label="Department Head Notes" color={theme.colors.briefingSection} sectionKey="notes" />
+                <SectionHeader label="Department Head Notes" colorCls="text-gray-500" sectionKey="notes" />
                 {!collapsed.notes && ['Golf Operations', 'F&B', 'Membership', 'Grounds'].map(dept => (
-                  <div key={dept} style={{ borderBottom: `1px solid ${theme.colors.briefingDivider}`, padding: '12px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ fontSize: '13px', color: theme.colors.briefingMuted, width: 120, flexShrink: 0 }}>{dept}</div>
-                    <div style={{ flex: 1, borderBottom: `1px solid ${theme.colors.briefingBorder}`, height: 20 }} />
+                  <div key={dept} className="border-b border-gray-200 py-3 flex items-center gap-3">
+                    <div className="text-sm text-gray-500 w-[120px] shrink-0">{dept}</div>
+                    <div className="flex-1 border-b border-gray-300 h-5" />
                   </div>
                 ))}
               </section>
 
-              <div style={{ fontSize: '11px', color: theme.colors.briefingSection, textAlign: 'center', borderTop: `1px solid ${theme.colors.briefingDivider}`, paddingTop: '16px' }}>
-                Oakmont Hills CC · Powered by Swoop Golf Intelligence · Demo Environment
+              <div className="text-[11px] text-gray-400 text-center border-t border-gray-200 pt-4">
+                Oakmont Hills CC \u00B7 Powered by Swoop Golf Intelligence \u00B7 Demo Environment
               </div>
             </div>
           </div>

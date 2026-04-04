@@ -7,7 +7,6 @@ import ResignationTimeline from './ResignationTimeline';
 import RecoveryTab from './tabs/RecoveryTab';
 import AllMembersView from './tabs/AllMembersView';
 import { sourceSystems } from '@/services/memberService';
-import { theme } from '@/config/theme';
 import ActionRecommendation from '@/components/ActionRecommendation.jsx';
 import { SkeletonMemberList } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
@@ -27,10 +26,10 @@ const TABS = [
 export default function MemberHealth() {
   const [activeTab, setActiveTab] = useState('health');
   const [showInsight, setShowInsight] = useState(true);
-  
+
   // FP-P02: Loading state
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 650);
     return () => clearTimeout(timer);
@@ -43,9 +42,9 @@ export default function MemberHealth() {
 
   return (
     <PageTransition>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <div className="flex flex-col gap-6">
       {showInsight ? (
-        <div style={{ position: 'relative' }}>
+        <div className="relative">
           <StoryHeadline
             variant="urgent"
             headline="5 members showed disengagement signals 6-8 weeks before leaving — here's what to watch for."
@@ -54,16 +53,7 @@ export default function MemberHealth() {
           <button
             type="button"
             onClick={() => setShowInsight(false)}
-            style={{
-              position: 'absolute',
-              top: 8,
-              right: 12,
-              border: 'none',
-              background: 'none',
-              color: theme.colors.textMuted,
-              fontSize: theme.fontSize.xs,
-              cursor: 'pointer',
-            }}
+            className="absolute top-2 right-3 border-none bg-transparent text-gray-400 text-xs cursor-pointer"
           >
             Dismiss
           </button>
@@ -72,18 +62,7 @@ export default function MemberHealth() {
         <button
           type="button"
           onClick={() => setShowInsight(true)}
-          style={{
-            alignSelf: 'flex-end',
-            border: '1px dashed ' + theme.colors.border,
-            background: theme.colors.bg,
-            color: theme.colors.textSecondary,
-            fontSize: theme.fontSize.xs,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            padding: '6px 10px',
-            borderRadius: theme.radius.sm,
-            cursor: 'pointer',
-          }}
+          className="self-end border border-dashed border-gray-200 bg-gray-50 text-gray-500 text-xs uppercase tracking-widest py-1.5 px-2.5 rounded-lg cursor-pointer"
         >
           Show AI insight
         </button>
@@ -95,7 +74,7 @@ export default function MemberHealth() {
         tabs={TABS}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        accentColor={theme.colors.members}
+        accentColor={'#E8740C'}
         sourceSystems={sourceSystems}
       >
         {activeTab === 'health'       && <HealthOverview />}

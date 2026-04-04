@@ -1,37 +1,17 @@
-import { theme } from '@/config/theme';
-
-const VARIANT_STYLES = {
-  insight:     { border: theme.colors.navBriefing, bg: `${theme.colors.navBriefing}0D`, icon: '💡', color: theme.colors.navBriefing },
-  warning:     { border: theme.colors.warning, bg: `${theme.colors.warning}0D`, icon: '⚠️', color: theme.colors.warning },
-  urgent:      { border: theme.colors.urgent, bg: `${theme.colors.urgent}0D`, icon: '⚠',  color: theme.colors.urgent },
-  opportunity: { border: theme.colors.accent, bg: `${theme.colors.accent}0D`, icon: '◎',  color: theme.colors.accent },
+const VARIANT_CONFIG = {
+  insight:     { borderCls: 'border-l-brand-500', bgCls: 'bg-brand-50 dark:bg-brand-500/5', icon: '\uD83D\uDCA1' },
+  warning:     { borderCls: 'border-l-warning-500', bgCls: 'bg-warning-50 dark:bg-warning-500/5', icon: '\u26A0\uFE0F' },
+  urgent:      { borderCls: 'border-l-error-500', bgCls: 'bg-error-50 dark:bg-error-500/5', icon: '\u26A0' },
+  opportunity: { borderCls: 'border-l-brand-500', bgCls: 'bg-brand-50 dark:bg-brand-500/5', icon: '\u25CE' },
 };
 
 export default function SoWhatCallout({ children, variant = 'insight' }) {
-  const s = VARIANT_STYLES[variant] || VARIANT_STYLES.insight;
+  const s = VARIANT_CONFIG[variant] || VARIANT_CONFIG.insight;
 
   return (
-    <div style={{
-      borderLeft: `4px solid ${s.border}`,
-      borderTop: `1px solid ${s.border}22`,
-      borderBottom: `1px solid ${s.border}22`,
-      borderRight: `1px solid ${s.border}18`,
-      background: s.bg,
-      borderRadius: `0 8px 8px 0`,
-      padding: '14px 18px',
-      display: 'flex',
-      gap: '10px',
-      alignItems: 'flex-start',
-      boxShadow: `0 2px 8px ${s.border}14`,
-    }}>
-      <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>{s.icon}</span>
-      <p style={{
-        fontSize: '13px',
-        color: 'var(--text-secondary)',
-        lineHeight: 1.6,
-        fontStyle: 'italic',
-        margin: 0,
-      }}>
+    <div className={`border-l-4 ${s.borderCls} ${s.bgCls} rounded-r-lg px-5 py-3.5 flex gap-2.5 items-start shadow-theme-xs`}>
+      <span className="text-base shrink-0 mt-px">{s.icon}</span>
+      <p className="text-sm text-gray-600 leading-relaxed italic m-0 dark:text-gray-400">
         {children}
       </p>
     </div>

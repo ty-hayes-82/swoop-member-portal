@@ -1,63 +1,18 @@
 import { useState } from 'react';
-import { theme } from '@/config/theme';
 
-// System node definitions - connected systems light up green, available systems stay gray
 const SYSTEMS = [
-  {
-    id: 'tee-sheet',
-    label: 'Tee Sheet',
-    connected: true,
-    lastSync: '2 min ago',
-    signals: ['Round bookings', 'Cancellations', 'Pace of play'],
-  },
-  {
-    id: 'pos-fb',
-    label: 'POS/F&B',
-    connected: true,
-    lastSync: '5 min ago',
-    signals: ['Dining spend', 'Check averages', 'Outlet mix'],
-  },
-  {
-    id: 'crm',
-    label: 'Member CRM',
-    connected: true,
-    lastSync: '1 hour ago',
-    signals: ['Member profiles', 'Dues status', 'Lifecycle notes'],
-  },
-  {
-    id: 'scheduling',
-    label: 'Scheduling',
-    connected: true,
-    lastSync: '10 min ago',
-    signals: ['Staff coverage', 'Labor hours', 'Shift patterns'],
-  },
-  {
-    id: 'complaints',
-    label: 'Feedback',
-    connected: true,
-    lastSync: '30 min ago',
-    signals: ['Service issues', 'Complaint themes', 'Response time'],
-  },
-  {
-    id: 'weather',
-    label: 'Weather',
-    connected: true,
-    lastSync: 'Live',
-    signals: ['Conditions', 'Forecasts', 'Impact predictions'],
-  },
-  {
-    id: 'gps-app',
-    label: 'Swoop App',
-    connected: true,
-    lastSync: 'Live',
-    signals: ['GPS tracking', 'In-app orders', 'Push engagement'],
-  },
+  { id: 'tee-sheet', label: 'Tee Sheet', connected: true, lastSync: '2 min ago', signals: ['Round bookings', 'Cancellations', 'Pace of play'] },
+  { id: 'pos-fb', label: 'POS/F&B', connected: true, lastSync: '5 min ago', signals: ['Dining spend', 'Check averages', 'Outlet mix'] },
+  { id: 'crm', label: 'Member CRM', connected: true, lastSync: '1 hour ago', signals: ['Member profiles', 'Dues status', 'Lifecycle notes'] },
+  { id: 'scheduling', label: 'Scheduling', connected: true, lastSync: '10 min ago', signals: ['Staff coverage', 'Labor hours', 'Shift patterns'] },
+  { id: 'complaints', label: 'Feedback', connected: true, lastSync: '30 min ago', signals: ['Service issues', 'Complaint themes', 'Response time'] },
+  { id: 'weather', label: 'Weather', connected: true, lastSync: 'Live', signals: ['Conditions', 'Forecasts', 'Impact predictions'] },
+  { id: 'gps-app', label: 'Swoop App', connected: true, lastSync: 'Live', signals: ['GPS tracking', 'In-app orders', 'Push engagement'] },
 ];
 
 export default function UnifiedExperienceMap() {
   const [hoveredNode, setHoveredNode] = useState(null);
 
-  // SVG dimensions and layout
   const width = 800;
   const height = 600;
   const centerX = width / 2;
@@ -66,234 +21,73 @@ export default function UnifiedExperienceMap() {
   const nodeRadius = 50;
   const orbitRadius = 200;
 
-  // Calculate positions for nodes in a circle around the center
   const nodePositions = SYSTEMS.map((system, index) => {
-    const angle = (index * 2 * Math.PI) / SYSTEMS.length - Math.PI / 2; // Start from top
-    return {
-      ...system,
-      x: centerX + orbitRadius * Math.cos(angle),
-      y: centerY + orbitRadius * Math.sin(angle),
-    };
+    const angle = (index * 2 * Math.PI) / SYSTEMS.length - Math.PI / 2;
+    return { ...system, x: centerX + orbitRadius * Math.cos(angle), y: centerY + orbitRadius * Math.sin(angle) };
   });
 
   return (
-    <div style={{
-      background: theme.colors.bgCard,
-      border: '1px solid ' + theme.colors.border,
-      borderRadius: theme.radius.lg,
-      padding: theme.spacing.lg,
-      marginBottom: theme.spacing.lg,
-    }}>
-      <div style={{ marginBottom: theme.spacing.md }}>
-        <div style={{
-          fontSize: '11px',
-          color: theme.colors.textMuted,
-          textTransform: 'uppercase',
-          letterSpacing: '0.08em',
-          fontWeight: 600,
-        }}>
-          Cross-Domain Intelligence
-        </div>
-        <div style={{
-          fontSize: theme.fontSize.lg,
-          fontWeight: 700,
-          color: theme.colors.textPrimary,
-          marginTop: '4px',
-        }}>
-          Unified Experience Map
-        </div>
-        <div style={{
-          fontSize: theme.fontSize.sm,
-          color: theme.colors.textSecondary,
-          marginTop: '4px',
-        }}>
-          Layer 3 Intelligence connects all your club systems in real time. Hover over nodes to see live data signals.
-        </div>
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 mb-6 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="mb-4">
+        <div className="text-[11px] text-gray-500 uppercase tracking-widest font-semibold dark:text-gray-400">Cross-Domain Intelligence</div>
+        <div className="text-lg font-bold text-gray-800 mt-1 dark:text-white/90">Unified Experience Map</div>
+        <div className="text-sm text-gray-600 mt-1 dark:text-gray-400">Layer 3 Intelligence connects all your club systems in real time. Hover over nodes to see live data signals.</div>
       </div>
 
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '500px',
-        position: 'relative',
-      }}>
-        <svg
-          width={width}
-          height={height}
-          viewBox={`0 0 ${width} ${height}`}
-          style={{ maxWidth: '100%', height: 'auto' }}
-        >
-          {/* Connection lines from center to each system */}
+      <div className="flex justify-center items-center min-h-[500px] relative">
+        <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="max-w-full h-auto">
           {nodePositions.map((node) => (
-            <line
-              key={`line-${node.id}`}
-              x1={centerX}
-              y1={centerY}
-              x2={node.x}
-              y2={node.y}
-              stroke={node.connected ? theme.colors.accent : theme.colors.borderLight}
-              strokeWidth={node.connected ? 3 : 2}
-              strokeDasharray={node.connected ? '0' : '8,4'}
-              opacity={node.connected ? 0.6 : 0.3}
-              style={{
-                transition: 'all 0.3s ease',
-              }}
+            <line key={`line-${node.id}`} x1={centerX} y1={centerY} x2={node.x} y2={node.y}
+              stroke={node.connected ? '#465fff' : '#e4e7ec'} strokeWidth={node.connected ? 3 : 2}
+              strokeDasharray={node.connected ? '0' : '8,4'} opacity={node.connected ? 0.6 : 0.3}
+              style={{ transition: 'all 0.3s ease' }}
             />
           ))}
 
-          {/* Center node - Layer 3 Intelligence (always lit) */}
           <g>
-            <circle
-              cx={centerX}
-              cy={centerY}
-              r={centerRadius}
-              fill={theme.colors.accent}
-              stroke={theme.colors.accent}
-              strokeWidth={4}
-              style={{
-                filter: `drop-shadow(0 0 20px ${theme.colors.accent}66)`,
-              }}
-            />
-            <text
-              x={centerX}
-              y={centerY - 10}
-              textAnchor="middle"
-              fill={theme.colors.white}
-              fontSize="16"
-              fontWeight="700"
-            >
-              Layer 3
-            </text>
-            <text
-              x={centerX}
-              y={centerY + 10}
-              textAnchor="middle"
-              fill={theme.colors.white}
-              fontSize="16"
-              fontWeight="700"
-            >
-              Intelligence
-            </text>
+            <circle cx={centerX} cy={centerY} r={centerRadius} fill="#465fff" stroke="#465fff" strokeWidth={4}
+              style={{ filter: 'drop-shadow(0 0 20px rgba(70,95,255,0.4))' }} />
+            <text x={centerX} y={centerY - 10} textAnchor="middle" fill="white" fontSize="16" fontWeight="700">Layer 3</text>
+            <text x={centerX} y={centerY + 10} textAnchor="middle" fill="white" fontSize="16" fontWeight="700">Intelligence</text>
           </g>
 
-          {/* System nodes */}
           {nodePositions.map((node) => {
             const isHovered = hoveredNode === node.id;
-            const nodeColor = node.connected ? theme.colors.accent : theme.colors.textMuted;
-            const nodeFill = node.connected ? theme.colors.accent + '22' : theme.colors.bgDeep;
-
             return (
-              <g
-                key={node.id}
-                onMouseEnter={() => setHoveredNode(node.id)}
-                onMouseLeave={() => setHoveredNode(null)}
-                style={{ cursor: 'pointer' }}
-              >
-                {/* Node circle */}
-                <circle
-                  cx={node.x}
-                  cy={node.y}
-                  r={nodeRadius}
-                  fill={nodeFill}
-                  stroke={nodeColor}
-                  strokeWidth={isHovered ? 4 : 3}
-                  style={{
-                    transition: 'all 0.3s ease',
-                    filter: node.connected && isHovered
-                      ? `drop-shadow(0 0 12px ${theme.colors.accent}66)`
-                      : 'none',
-                  }}
+              <g key={node.id} onMouseEnter={() => setHoveredNode(node.id)} onMouseLeave={() => setHoveredNode(null)} style={{ cursor: 'pointer' }}>
+                <circle cx={node.x} cy={node.y} r={nodeRadius}
+                  fill={node.connected ? 'rgba(70,95,255,0.13)' : '#f9fafb'}
+                  stroke={node.connected ? '#465fff' : '#98a2b3'} strokeWidth={isHovered ? 4 : 3}
+                  style={{ transition: 'all 0.3s ease', filter: node.connected && isHovered ? 'drop-shadow(0 0 12px rgba(70,95,255,0.4))' : 'none' }}
                 />
-                
-                {/* Node label */}
-                <text
-                  x={node.x}
-                  y={node.y}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill={nodeColor}
-                  fontSize="14"
-                  fontWeight="600"
-                  style={{
-                    pointerEvents: 'none',
-                    userSelect: 'none',
-                  }}
-                >
+                <text x={node.x} y={node.y} textAnchor="middle" dominantBaseline="middle"
+                  fill={node.connected ? '#465fff' : '#98a2b3'} fontSize="14" fontWeight="600"
+                  style={{ pointerEvents: 'none', userSelect: 'none' }}>
                   {node.label}
                 </text>
-
-                {/* Status indicator dot */}
                 {node.connected && (
-                  <circle
-                    cx={node.x + nodeRadius - 15}
-                    cy={node.y - nodeRadius + 15}
-                    r={6}
-                    fill={theme.colors.success}
-                    stroke={theme.colors.white}
-                    strokeWidth={2}
-                  />
+                  <circle cx={node.x + nodeRadius - 15} cy={node.y - nodeRadius + 15} r={6} fill="#12b76a" stroke="white" strokeWidth={2} />
                 )}
               </g>
             );
           })}
         </svg>
 
-        {/* Tooltip overlay - shown when hovering a node */}
         {hoveredNode && (
-          <div style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            background: theme.colors.bgCard,
-            border: `2px solid ${theme.colors.accent}`,
-            borderRadius: theme.radius.md,
-            padding: '16px',
-            maxWidth: '280px',
-            boxShadow: theme.shadow.lg,
-            zIndex: 10,
-          }}>
+          <div className="absolute top-5 right-5 bg-white border-2 border-brand-500 rounded-xl p-4 max-w-[280px] shadow-theme-lg z-10 dark:bg-white/[0.03]">
             {(() => {
               const node = SYSTEMS.find((s) => s.id === hoveredNode);
               return (
                 <>
-                  <div style={{
-                    fontSize: theme.fontSize.md,
-                    fontWeight: 700,
-                    color: theme.colors.textPrimary,
-                    marginBottom: '8px',
-                  }}>
-                    {node.label}
-                  </div>
-                  <div style={{
-                    fontSize: theme.fontSize.xs,
-                    color: node.connected ? theme.colors.success : theme.colors.textMuted,
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    marginBottom: '8px',
-                  }}>
-                    {node.connected ? `● Connected — ${node.lastSync}` : '○ Available'}
+                  <div className="text-base font-bold text-gray-800 mb-2 dark:text-white/90">{node.label}</div>
+                  <div className={`text-xs font-semibold uppercase tracking-widest mb-2 ${node.connected ? 'text-success-500' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {node.connected ? `\u25CF Connected \u2014 ${node.lastSync}` : '\u25CB Available'}
                   </div>
                   {node.connected && (
                     <>
-                      <div style={{
-                        fontSize: theme.fontSize.xs,
-                        color: theme.colors.textMuted,
-                        marginBottom: '4px',
-                        fontWeight: 600,
-                      }}>
-                        Live Signals:
-                      </div>
-                      <ul style={{
-                        margin: 0,
-                        paddingLeft: '16px',
-                        fontSize: theme.fontSize.xs,
-                        color: theme.colors.textSecondary,
-                      }}>
-                        {node.signals.map((signal) => (
-                          <li key={signal}>{signal}</li>
-                        ))}
+                      <div className="text-xs text-gray-500 mb-1 font-semibold dark:text-gray-400">Live Signals:</div>
+                      <ul className="m-0 pl-4 text-xs text-gray-600 dark:text-gray-400">
+                        {node.signals.map((signal) => (<li key={signal}>{signal}</li>))}
                       </ul>
                     </>
                   )}
@@ -304,18 +98,8 @@ export default function UnifiedExperienceMap() {
         )}
       </div>
 
-      <div style={{
-        marginTop: theme.spacing.md,
-        padding: '12px 16px',
-        background: theme.colors.bgDeep,
-        borderRadius: theme.radius.sm,
-        fontSize: theme.fontSize.sm,
-        color: theme.colors.textSecondary,
-        textAlign: 'center',
-      }}>
-        <strong style={{ color: theme.colors.textPrimary }}>
-          Layer 3 Intelligence:
-        </strong>
+      <div className="mt-4 px-4 py-3 bg-gray-100 rounded-lg text-sm text-gray-600 text-center dark:bg-gray-800 dark:text-gray-400">
+        <strong className="text-gray-800 dark:text-white/90">Layer 3 Intelligence:</strong>
         {' '}Correlates data across all systems to answer questions no single source can answer.
       </div>
     </div>

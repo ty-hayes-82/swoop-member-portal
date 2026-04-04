@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { getMemberSaves, getMonthlyTrends } from '@/services/boardReportService';
-import { theme } from '@/config/theme';
 import { Panel } from '@/components/ui';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -17,10 +16,10 @@ const formatCurrency = (value) => {
 };
 
 const recoveryMethods = [
-  { method: 'Personal GM Call', success: 95, count: 6, color: theme.colors.success },
-  { method: 'Event Invitation', success: 91, count: 3, color: theme.colors.info },
+  { method: 'Personal GM Call', success: 95, count: 6, color: '#22c55e' },
+  { method: 'Event Invitation', success: 91, count: 3, color: '#2563eb' },
   { method: 'Billing Resolution', success: 100, count: 2, color: '#8b5cf6' },
-  { method: 'Engagement Autopilot', success: 87, count: 4, color: theme.colors.accent },
+  { method: 'Engagement Autopilot', success: 87, count: 4, color: '#E8740C' },
 ];
 
 export default function RecoveryTab() {
@@ -39,29 +38,29 @@ export default function RecoveryTab() {
   const maxSaved = useMemo(() => Math.max(...trends.map(t => t.membersSaved), 1), [trends]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
 
       {/* Recovery Summary KPIs */}
       <div className="grid-responsive-4">
         {[
-          { label: 'Members Saved', value: kpis.totalSaved, color: theme.colors.success, subtitle: 'at-risk members retained' },
-          { label: 'Avg Health Improvement', value: `+${kpis.avgImprovement} pts`, color: theme.colors.success, subtitle: 'average score recovery' },
-          { label: 'Retention Rate', value: '100%', color: theme.colors.success, subtitle: 'of intervened members' },
-          { label: 'Avg Response Time', value: '4.2 hrs', color: theme.colors.info, subtitle: 'from alert to first action' },
+          { label: 'Members Saved', value: kpis.totalSaved, color: '#22c55e', subtitle: 'at-risk members retained' },
+          { label: 'Avg Health Improvement', value: `+${kpis.avgImprovement} pts`, color: '#22c55e', subtitle: 'average score recovery' },
+          { label: 'Retention Rate', value: '100%', color: '#22c55e', subtitle: 'of intervened members' },
+          { label: 'Avg Response Time', value: '4.2 hrs', color: '#2563eb', subtitle: 'from alert to first action' },
         ].map((kpi) => (
           <div key={kpi.label} style={{
-            background: theme.colors.bgCard,
+            background: '#ffffff',
             boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
             borderRadius: '16px',
-            border: `1px solid ${theme.colors.border}`,
-            padding: theme.spacing.md,
+            border: `1px solid ${'#E5E7EB'}`,
+            padding: '16px',
           }}>
             <div style={{
-              fontSize: theme.fontSize.xs,
-              color: theme.colors.textMuted,
+              fontSize: '12px',
+              color: '#9CA3AF',
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
-              marginBottom: theme.spacing.sm,
+              marginBottom: '8px',
             }}>{kpi.label}</div>
             <div style={{
               fontSize: '28px',
@@ -70,8 +69,8 @@ export default function RecoveryTab() {
               color: kpi.color,
             }}>{kpi.value}</div>
             <div style={{
-              fontSize: theme.fontSize.xs,
-              color: theme.colors.textMuted,
+              fontSize: '12px',
+              color: '#9CA3AF',
               marginTop: 4,
             }}>{kpi.subtitle}</div>
           </div>
@@ -80,17 +79,17 @@ export default function RecoveryTab() {
 
       {/* Recovery Timeline */}
       <div style={{
-        background: theme.colors.bgCard,
+        background: '#ffffff',
         borderRadius: '16px',
-        border: `1px solid ${theme.colors.border}`,
+        border: `1px solid ${'#E5E7EB'}`,
         padding: '24px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       }}>
-        <div style={{ marginBottom: '20px' }}>
+        <div className="mb-5">
           <div style={{
             fontSize: '11px',
             fontWeight: 700,
-            color: theme.colors.success,
+            color: '#22c55e',
             textTransform: 'uppercase',
             letterSpacing: '1.5px',
             marginBottom: '4px',
@@ -98,73 +97,73 @@ export default function RecoveryTab() {
           <h3 style={{
             fontSize: '20px',
             fontWeight: 700,
-            color: theme.colors.textPrimary,
+            color: '#1a1a2e',
             margin: 0,
             lineHeight: 1.3,
           }}>Intervention Outcomes</h3>
           <p style={{
             fontSize: '12px',
-            color: theme.colors.textMuted,
+            color: '#9CA3AF',
             margin: '6px 0 0',
           }}>
             Each intervention below turned an at-risk member into a retained, re-engaged member.
-            Total members retained: <strong style={{ color: theme.colors.success }}>{memberSaves.length}</strong>
+            Total members retained: <strong className="text-success-500">{memberSaves.length}</strong>
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="flex flex-col gap-3">
           {memberSaves.map((save) => {
             const improvement = save.healthAfter - save.healthBefore;
             return (
               <div key={save.name} style={{
                 display: 'grid',
                 gridTemplateColumns: '1.2fr 100px 1.8fr 1fr',
-                gap: theme.spacing.md,
+                gap: '16px',
                 alignItems: 'center',
                 padding: '14px 16px',
-                background: theme.colors.bg,
-                border: `1px solid ${theme.colors.border}`,
+                background: '#F8F9FA',
+                border: `1px solid ${'#E5E7EB'}`,
                 borderRadius: '12px',
-                fontSize: theme.fontSize.xs,
+                fontSize: '12px',
               }}>
                 {/* Member + Trigger */}
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '13px', color: theme.colors.textPrimary }}>{save.name}</div>
-                  <div style={{ color: theme.colors.textMuted, marginTop: 2, lineHeight: 1.4 }}>{save.trigger}</div>
+                  <div style={{ fontWeight: 700, fontSize: '13px', color: '#1a1a2e' }}>{save.name}</div>
+                  <div style={{ color: '#9CA3AF', marginTop: 2, lineHeight: 1.4 }}>{save.trigger}</div>
                 </div>
 
                 {/* Health Score Change */}
-                <div style={{ textAlign: 'center' }}>
+                <div className="text-center">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                     <span style={{
                       fontFamily: "'JetBrains Mono', monospace",
                       fontWeight: 700,
                       fontSize: '13px',
-                      color: theme.colors.urgent,
+                      color: '#ef4444',
                     }}>{save.healthBefore}</span>
-                    <span style={{ color: theme.colors.textMuted, fontSize: '14px' }}>{'\u2192'}</span>
+                    <span style={{ color: '#9CA3AF', fontSize: '14px' }}>{'\u2192'}</span>
                     <span style={{
                       fontFamily: "'JetBrains Mono', monospace",
                       fontWeight: 700,
                       fontSize: '13px',
-                      color: theme.colors.success,
+                      color: '#22c55e',
                     }}>{save.healthAfter}</span>
                   </div>
                   <div style={{
                     fontSize: '10px',
                     fontWeight: 700,
-                    color: theme.colors.success,
+                    color: '#22c55e',
                     marginTop: 2,
                   }}>+{improvement} pts</div>
                 </div>
 
                 {/* Action + Outcome */}
                 <div>
-                  <div style={{ color: theme.colors.textSecondary, lineHeight: 1.4 }}>
-                    <strong style={{ color: theme.colors.info }}>Action:</strong> {save.action}
+                  <div style={{ color: '#6B7280', lineHeight: 1.4 }}>
+                    <strong style={{ color: '#2563eb' }}>Action:</strong> {save.action}
                   </div>
-                  <div style={{ color: theme.colors.textSecondary, marginTop: 4, lineHeight: 1.4 }}>
-                    <strong style={{ color: theme.colors.success }}>Outcome:</strong> {save.outcome}
+                  <div style={{ color: '#6B7280', marginTop: 4, lineHeight: 1.4 }}>
+                    <strong className="text-success-500">Outcome:</strong> {save.outcome}
                   </div>
                 </div>
 
@@ -174,9 +173,9 @@ export default function RecoveryTab() {
                     fontFamily: "'JetBrains Mono', monospace",
                     fontWeight: 700,
                     fontSize: '14px',
-                    color: theme.colors.success,
+                    color: '#22c55e',
                   }}>Retained</div>
-                  <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: 2 }}>member saved</div>
+                  <div style={{ fontSize: '10px', color: '#9CA3AF', marginTop: 2 }}>member saved</div>
                 </div>
               </div>
             );
@@ -186,17 +185,17 @@ export default function RecoveryTab() {
 
       {/* Recovery by Method */}
       <div style={{
-        background: theme.colors.bgCard,
+        background: '#ffffff',
         borderRadius: '16px',
-        border: `1px solid ${theme.colors.border}`,
+        border: `1px solid ${'#E5E7EB'}`,
         padding: '24px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       }}>
-        <div style={{ marginBottom: '20px' }}>
+        <div className="mb-5">
           <div style={{
             fontSize: '11px',
             fontWeight: 700,
-            color: theme.colors.accent,
+            color: '#E8740C',
             textTransform: 'uppercase',
             letterSpacing: '1.5px',
             marginBottom: '4px',
@@ -204,20 +203,20 @@ export default function RecoveryTab() {
           <h3 style={{
             fontSize: '20px',
             fontWeight: 700,
-            color: theme.colors.textPrimary,
+            color: '#1a1a2e',
             margin: 0,
             lineHeight: 1.3,
           }}>Which Interventions Work Best</h3>
           <p style={{
             fontSize: '12px',
-            color: theme.colors.textMuted,
+            color: '#9CA3AF',
             margin: '6px 0 0',
           }}>
             Success rate by intervention type across all recovery actions.
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="flex flex-col gap-3.5">
           {recoveryMethods.map((rm) => (
             <div key={rm.method} style={{
               display: 'flex',
@@ -225,16 +224,16 @@ export default function RecoveryTab() {
               gap: '16px',
             }}>
               <div style={{ width: '160px', flexShrink: 0 }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: theme.colors.textPrimary }}>{rm.method}</div>
-                <div style={{ fontSize: '11px', color: theme.colors.textMuted }}>{rm.count} interventions</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a2e' }}>{rm.method}</div>
+                <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{rm.count} interventions</div>
               </div>
               <div style={{ flex: 1, position: 'relative', height: '28px' }}>
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  background: theme.colors.bg,
+                  background: '#F8F9FA',
                   borderRadius: '8px',
-                  border: `1px solid ${theme.colors.border}`,
+                  border: `1px solid ${'#E5E7EB'}`,
                 }} />
                 <div style={{
                   position: 'absolute',
@@ -262,17 +261,17 @@ export default function RecoveryTab() {
 
       {/* Monthly Recovery Trend */}
       <div style={{
-        background: theme.colors.bgCard,
+        background: '#ffffff',
         borderRadius: '16px',
-        border: `1px solid ${theme.colors.border}`,
+        border: `1px solid ${'#E5E7EB'}`,
         padding: '24px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       }}>
-        <div style={{ marginBottom: '20px' }}>
+        <div className="mb-5">
           <div style={{
             fontSize: '11px',
             fontWeight: 700,
-            color: theme.colors.info,
+            color: '#2563eb',
             textTransform: 'uppercase',
             letterSpacing: '1.5px',
             marginBottom: '4px',
@@ -280,13 +279,13 @@ export default function RecoveryTab() {
           <h3 style={{
             fontSize: '20px',
             fontWeight: 700,
-            color: theme.colors.textPrimary,
+            color: '#1a1a2e',
             margin: 0,
             lineHeight: 1.3,
           }}>Recovery Volume Over Time</h3>
           <p style={{
             fontSize: '12px',
-            color: theme.colors.textMuted,
+            color: '#9CA3AF',
             margin: '6px 0 0',
           }}>
             Members saved per month and response time improvement over the last 6 months.
@@ -315,13 +314,13 @@ export default function RecoveryTab() {
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: '12px',
                   fontWeight: 700,
-                  color: theme.colors.success,
+                  color: '#22c55e',
                 }}>{t.membersSaved}</div>
                 <div style={{
                   width: '100%',
                   maxWidth: '48px',
                   height: `${barHeight}px`,
-                  background: `linear-gradient(180deg, ${theme.colors.success}, ${theme.colors.success}90)`,
+                  background: `linear-gradient(180deg, ${'#22c55e'}, ${'#22c55e'}90)`,
                   borderRadius: '6px 6px 2px 2px',
                   position: 'relative',
                 }}>
@@ -332,7 +331,7 @@ export default function RecoveryTab() {
                     right: 0,
                     textAlign: 'center',
                     fontSize: '10px',
-                    color: theme.colors.textMuted,
+                    color: '#9CA3AF',
                     fontWeight: 600,
                   }}>{t.month}</div>
                 </div>
@@ -348,29 +347,29 @@ export default function RecoveryTab() {
           gap: '12px',
           marginTop: '40px',
           paddingTop: '16px',
-          borderTop: `1px solid ${theme.colors.border}`,
+          borderTop: `1px solid ${'#E5E7EB'}`,
         }}>
           {trends.map((t) => (
             <div key={t.month} style={{
               textAlign: 'center',
               padding: '8px',
-              background: theme.colors.bg,
+              background: '#F8F9FA',
               borderRadius: '8px',
-              border: `1px solid ${theme.colors.border}`,
+              border: `1px solid ${'#E5E7EB'}`,
             }}>
-              <div style={{ fontSize: '11px', fontWeight: 600, color: theme.colors.textMuted }}>{t.month}</div>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF' }}>{t.month}</div>
               <div style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: '14px',
                 fontWeight: 700,
-                color: theme.colors.success,
+                color: '#22c55e',
                 marginTop: 2,
               }}>{formatCurrency(t.duesProtected)}</div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>protected</div>
+              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>protected</div>
               <div style={{
                 fontSize: '11px',
                 fontWeight: 600,
-                color: t.responseTime <= 4.5 ? theme.colors.success : theme.colors.warning,
+                color: t.responseTime <= 4.5 ? '#22c55e' : '#f59e0b',
                 marginTop: 4,
               }}>{t.responseTime}h response</div>
             </div>
@@ -381,8 +380,8 @@ export default function RecoveryTab() {
       {/* Bottom callout */}
       <div style={{
         padding: '16px 20px',
-        background: `linear-gradient(135deg, ${theme.colors.success}08, ${theme.colors.success}03)`,
-        border: `1px solid ${theme.colors.success}30`,
+        background: `linear-gradient(135deg, ${'#22c55e'}08, ${'#22c55e'}03)`,
+        border: `1px solid ${'#22c55e'}30`,
         borderRadius: '12px',
         display: 'flex',
         alignItems: 'flex-start',
@@ -392,7 +391,7 @@ export default function RecoveryTab() {
           width: 40,
           height: 40,
           borderRadius: '50%',
-          background: `${theme.colors.success}18`,
+          background: `${'#22c55e'}18`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -402,10 +401,10 @@ export default function RecoveryTab() {
           {'\u2705'}
         </div>
         <div>
-          <div style={{ fontSize: '14px', fontWeight: 700, color: theme.colors.success, marginBottom: '4px' }}>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: '#22c55e', marginBottom: '4px' }}>
             Every intervention here started as an alert on the Health Overview tab
           </div>
-          <div style={{ fontSize: '12px', color: theme.colors.textSecondary, lineHeight: 1.6 }}>
+          <div style={{ fontSize: '12px', color: '#6B7280', lineHeight: 1.6 }}>
             Swoop detected disengagement signals 6-8 weeks before any of these members would have resigned.
             The average health score improved by {kpis.avgImprovement} points after intervention, protecting {formatCurrency(kpis.totalDuesProtected)} in annual dues.
             Response time has improved from 8.1 hours in September to 3.8 hours in February.

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigation } from '@/context/NavigationContext';
-import { theme } from '@/config/theme';
 
 export default function BackLink({ to = 'daily-briefing', label = 'Back to Cockpit' }) {
   const { navigate } = useNavigation();
@@ -11,22 +10,11 @@ export default function BackLink({ to = 'daily-briefing', label = 'Back to Cockp
       onClick={() => navigate(to)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 4,
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        fontSize: theme.fontSize.xs,
-        fontWeight: 600,
-        color: hovered ? theme.colors.accent : theme.colors.textMuted,
-        padding: '4px 0',
-        marginBottom: theme.spacing.sm,
-        transition: 'color 0.15s',
-      }}
+      className={`inline-flex items-center gap-1 bg-transparent border-none cursor-pointer text-xs font-semibold py-1 px-0 mb-3 transition-colors duration-150 ${
+        hovered ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400'
+      }`}
     >
-      ← {label}
+      \u2190 {label}
     </button>
   );
 }

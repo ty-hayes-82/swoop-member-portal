@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { theme } from '@/config/theme';
 import { getConnectedSystems } from '@/services/integrationsService';
 import { useNavigationContext } from '@/context/NavigationContext';
 import PageTransition from '@/components/ui/PageTransition';
@@ -198,31 +197,31 @@ export default function IntegrationsPage() {
   return (
     <PageTransition>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-      <header style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <h1 style={{ margin: 0, fontSize: 28, color: theme.colors.textPrimary }}>Connected Systems</h1>
-        <p style={{ margin: 0, maxWidth: 600, color: theme.colors.textSecondary }}>
+      <header className="flex flex-col gap-2">
+        <h1 style={{ margin: 0, fontSize: 28, color: '#1a1a2e' }}>Connected Systems</h1>
+        <p style={{ margin: 0, maxWidth: 600, color: '#6B7280' }}>
           See what data flows into Swoop and the intelligence it powers.
         </p>
       </header>
 
-      <section className="grid-responsive-4" style={{ display: 'grid', gap: 16 }}>
+      <section className="grid-responsive-4" className="grid gap-4">
         {summaryCards.map((card) => (
           <div key={card.label} style={{
-            borderRadius: theme.radius.md,
-            border: `1px solid ${theme.colors.border}`,
+            borderRadius: '12px',
+            border: `1px solid ${'#E5E7EB'}`,
             padding: '16px 18px',
-            background: theme.colors.bgCard,
-            boxShadow: theme.shadow.sm,
+            background: '#ffffff',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
             position: 'relative',
           }} title={card.tooltip}>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{card.label}</div>
+            <div style={{ fontSize: '12px', color: '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{card.label}</div>
             <div style={{ 
               fontSize: 28, 
               fontWeight: 700, 
               marginTop: 6,
-              color: card.color || theme.colors.textPrimary
+              color: card.color || '#1a1a2e'
             }}>{card.value}</div>
-            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>{card.sub}</div>
+            <div className="text-sm text-gray-500">{card.sub}</div>
             {card.color && (
               <div style={{
                 position: 'absolute',
@@ -241,7 +240,7 @@ export default function IntegrationsPage() {
 
       {/* GMC-05: Filter buttons */}
       <section style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ fontSize: 14, color: theme.colors.textMuted, marginRight: 8 }}>Filter:</span>
+        <span style={{ fontSize: 14, color: '#9CA3AF', marginRight: 8 }}>Filter:</span>
         {[
           { value: 'all', label: 'All' },
           { value: 'connected', label: 'Connected' },
@@ -255,10 +254,10 @@ export default function IntegrationsPage() {
               padding: '6px 14px',
               fontSize: 13,
               fontWeight: 600,
-              border: `1px solid ${statusFilter === filter.value ? theme.colors.primary : theme.colors.border}`,
-              borderRadius: theme.radius.md,
-              background: statusFilter === filter.value ? `${theme.colors.primary}15` : theme.colors.bg,
-              color: statusFilter === filter.value ? theme.colors.primary : theme.colors.textSecondary,
+              border: `1px solid ${statusFilter === filter.value ? '#E8740C' : '#E5E7EB'}`,
+              borderRadius: '12px',
+              background: statusFilter === filter.value ? `${'#E8740C'}15` : '#F8F9FA',
+              color: statusFilter === filter.value ? '#E8740C' : '#6B7280',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
@@ -268,23 +267,23 @@ export default function IntegrationsPage() {
         ))}
       </section>
 
-      <section style={{ display: 'grid', gap: 20 }}>
+      <section className="grid gap-5">
         {categories.map((category) => (
           <div key={category.label} style={{
-            borderRadius: theme.radius.lg,
-            border: `1px solid ${theme.colors.border}`,
-            background: theme.colors.bgCard,
+            borderRadius: '16px',
+            border: `1px solid ${'#E5E7EB'}`,
+            background: '#ffffff',
             padding: 24,
             display: 'flex',
             flexDirection: 'column',
             gap: 16,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 24 }}>{category.icon}</span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">{category.icon}</span>
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 700 }}>{category.label}</div>
-                  <div style={{ fontSize: 14, color: theme.colors.textSecondary }}>{category.description}</div>
+                  <div className="text-sm text-gray-500">{category.description}</div>
                 </div>
               </div>
             </div>
@@ -295,10 +294,10 @@ export default function IntegrationsPage() {
                 const syncInfo = SYNC_DETAILS[vendor.name];
                 return (
                 <div key={vendor.name} style={{
-                  border: `1px solid ${isExpanded ? theme.colors.accent + '50' : theme.colors.border}`,
-                  borderRadius: theme.radius.md,
+                  border: `1px solid ${isExpanded ? '#E8740C' + '50' : '#E5E7EB'}`,
+                  borderRadius: '12px',
                   padding: '12px 14px',
-                  background: theme.colors.bg,
+                  background: '#F8F9FA',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 6,
@@ -306,7 +305,7 @@ export default function IntegrationsPage() {
                   transition: 'border-color 0.15s',
                 }} onClick={() => isConnected && setExpandedVendor(isExpanded ? null : vendor.name)}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                    <div style={{ fontWeight: 600 }}>{vendor.name}</div>
+                    <div className="font-semibold">{vendor.name}</div>
                     <span style={{
                       fontSize: 11,
                       fontWeight: 600,
@@ -321,47 +320,47 @@ export default function IntegrationsPage() {
                     </span>
                   </div>
                   {isConnected && (
-                    <div style={{ fontSize: 12, color: theme.colors.textMuted }}>
+                    <div className="text-xs text-gray-400">
                       Last sync: {timeAgo(vendor.lastSync) || '2m ago'}
                     </div>
                   )}
                   {isConnected && VENDOR_POWERS[vendor.name] && (
-                    <div style={{ fontSize: 11, color: theme.colors.accent, opacity: 0.85 }}>
+                    <div style={{ fontSize: 11, color: '#E8740C', opacity: 0.85 }}>
                       Powers: {VENDOR_POWERS[vendor.name]}
                     </div>
                   )}
-                  <div style={{ fontSize: 13, color: theme.colors.textSecondary }}>{vendor.dataPoints}</div>
+                  <div className="text-[13px] text-gray-500">{vendor.dataPoints}</div>
 
                   {/* Sync detail panel for connected systems */}
                   {isConnected && isExpanded && syncInfo && (
-                    <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: `1px solid ${theme.colors.border}` }} onClick={e => e.stopPropagation()}>
+                    <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: `1px solid ${'#E5E7EB'}` }} onClick={e => e.stopPropagation()}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                        <div style={{ padding: '6px 8px', background: theme.colors.bgCard, borderRadius: '6px', border: `1px solid ${theme.colors.border}` }}>
-                          <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase' }}>Frequency</div>
-                          <div style={{ fontSize: '13px', fontWeight: 600, color: theme.colors.textPrimary }}>{syncInfo.freq}</div>
+                        <div style={{ padding: '6px 8px', background: '#ffffff', borderRadius: '6px', border: `1px solid ${'#E5E7EB'}` }}>
+                          <div style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>Frequency</div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a2e' }}>{syncInfo.freq}</div>
                         </div>
-                        <div style={{ padding: '6px 8px', background: theme.colors.bgCard, borderRadius: '6px', border: `1px solid ${theme.colors.border}` }}>
-                          <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase' }}>Records Today</div>
-                          <div style={{ fontSize: '13px', fontWeight: 600, color: theme.colors.textPrimary }}>{syncInfo.todayRecords.toLocaleString()}</div>
+                        <div style={{ padding: '6px 8px', background: '#ffffff', borderRadius: '6px', border: `1px solid ${'#E5E7EB'}` }}>
+                          <div style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>Records Today</div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a2e' }}>{syncInfo.todayRecords.toLocaleString()}</div>
                         </div>
-                        <div style={{ padding: '6px 8px', background: theme.colors.bgCard, borderRadius: '6px', border: `1px solid ${theme.colors.border}` }}>
-                          <div style={{ fontSize: '10px', color: theme.colors.textMuted, textTransform: 'uppercase' }}>Data Quality</div>
+                        <div style={{ padding: '6px 8px', background: '#ffffff', borderRadius: '6px', border: `1px solid ${'#E5E7EB'}` }}>
+                          <div style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>Data Quality</div>
                           <div style={{ fontSize: '13px', fontWeight: 600, color: '#22c55e' }}>98.5%</div>
                         </div>
                       </div>
-                      <div style={{ fontSize: '11px', fontWeight: 600, color: theme.colors.textMuted, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Recent Syncs</div>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Recent Syncs</div>
                       {syncInfo.history.map((h, i) => (
-                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px', borderBottom: i < syncInfo.history.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
-                          <span style={{ color: theme.colors.textMuted }}>{h.time}</span>
-                          <span style={{ fontFamily: theme.fonts?.mono, color: theme.colors.textSecondary }}>{h.records} records</span>
-                          <span style={{ color: h.ok ? '#22c55e' : theme.colors.urgent, fontWeight: 600 }}>{h.ok ? 'OK' : 'Error'}</span>
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px', borderBottom: i < syncInfo.history.length - 1 ? `1px solid ${'#E5E7EB'}` : 'none' }}>
+                          <span className="text-gray-400">{h.time}</span>
+                          <span style={{ fontFamily: '"JetBrains Mono", monospace', color: '#6B7280' }}>{h.records} records</span>
+                          <span style={{ color: h.ok ? '#22c55e' : '#ef4444', fontWeight: 600 }}>{h.ok ? 'OK' : 'Error'}</span>
                         </div>
                       ))}
                       <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
-                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${theme.colors.accent}40`, background: `${theme.colors.accent}12`, color: theme.colors.accent, cursor: 'pointer' }}>Force Sync</button>
-                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${theme.colors.border}`, background: 'transparent', color: theme.colors.textSecondary, cursor: 'pointer' }}>View Logs</button>
-                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${theme.colors.border}`, background: 'transparent', color: theme.colors.textSecondary, cursor: 'pointer' }}>Configure</button>
-                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${theme.colors.urgent}40`, background: 'transparent', color: theme.colors.urgent, cursor: 'pointer', marginLeft: 'auto' }}>Disconnect</button>
+                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E8740C'}40`, background: `${'#E8740C'}12`, color: '#E8740C', cursor: 'pointer' }}>Force Sync</button>
+                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>View Logs</button>
+                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>Configure</button>
+                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#ef4444'}40`, background: 'transparent', color: '#ef4444', cursor: 'pointer', marginLeft: 'auto' }}>Disconnect</button>
                       </div>
                     </div>
                   )}
@@ -374,9 +373,9 @@ export default function IntegrationsPage() {
                           padding: '6px 12px',
                           fontSize: 12,
                           fontWeight: 600,
-                          border: `1px solid ${theme.colors.primary}`,
-                          borderRadius: theme.radius.sm,
-                          background: theme.colors.primary,
+                          border: `1px solid ${'#E8740C'}`,
+                          borderRadius: '8px',
+                          background: '#E8740C',
                           color: '#fff',
                           cursor: 'pointer',
                           transition: 'all 0.15s ease',
@@ -391,7 +390,7 @@ export default function IntegrationsPage() {
                             padding: 0,
                             border: 'none',
                             background: 'none',
-                            color: theme.colors.accent,
+                            color: '#E8740C',
                             fontSize: 11,
                             fontWeight: 600,
                             cursor: 'pointer',
@@ -409,8 +408,8 @@ export default function IntegrationsPage() {
                         onClick={() => alert(`Request submitted! We'll notify you when ${vendor.name} integration is available.`)}
                         style={{
                           padding: '5px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                          border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm,
-                          background: 'transparent', color: theme.colors.textSecondary,
+                          border: `1px solid ${'#E5E7EB'}`, borderRadius: '8px',
+                          background: 'transparent', color: '#6B7280',
                         }}
                       >
                         Request This Integration
@@ -420,7 +419,7 @@ export default function IntegrationsPage() {
                           onClick={() => navigate('integrations/csv-import', { category: category.csvCategory, vendor: vendor.name })}
                           style={{
                             padding: 0, border: 'none', background: 'none',
-                            color: theme.colors.accent, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                            color: '#E8740C', fontSize: 11, fontWeight: 600, cursor: 'pointer',
                           }}
                         >
                           upload CSV instead →

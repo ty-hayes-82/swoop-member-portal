@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getResignationScenarios } from '@/services/memberService';
-import { theme } from '@/config/theme';
-
 const DOMAIN_COLORS = {
-  Golf: theme.colors.chartGolf,
-  'F&B': theme.colors.fb,
-  Email: theme.colors.members,
-  Feedback: theme.colors.urgent,
-  All: theme.colors.textMuted,
-  Membership: theme.colors.urgent,
+  Golf: '#22c55e',
+  'F&B': '#f59e0b',
+  Email: '#E8740C',
+  Feedback: '#ef4444',
+  All: '#9CA3AF',
+  Membership: '#ef4444',
 };
 
 const AGENT_ANNOTATIONS = {
@@ -27,8 +25,8 @@ export default function ResignationTimeline() {
   const [expanded, setExpanded] = useState(null);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-      <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>
+    <div className="flex flex-col gap-4">
+      <div className="text-sm text-gray-500">
         5 preventable resignations in January — each with a distinct decay pattern.
       </div>
       {scenarios.map((scenario) => {
@@ -37,73 +35,49 @@ export default function ResignationTimeline() {
         return (
           <div
             key={scenario.memberId}
-            style={{
-              background: theme.colors.bgCardHover,
-              borderRadius: theme.radius.md,
-              border: `1px solid ${isOpen ? `${theme.colors.urgent}50` : theme.colors.border}`,
-              overflow: 'hidden',
-            }}
+            className={`bg-gray-50 rounded-xl overflow-hidden border ${isOpen ? 'border-error-500/30' : 'border-gray-200 dark:border-gray-800'}`}
           >
             <button
               onClick={() => setExpanded(isOpen ? null : scenario.memberId)}
-              style={{
-                width: '100%',
-                padding: theme.spacing.md,
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                textAlign: 'left',
-              }}
+              className="w-full p-4 bg-transparent border-none cursor-pointer flex justify-between items-center text-left"
             >
               <div>
                 <MemberLink
                   memberId={scenario.memberId}
-                  style={{ fontSize: theme.fontSize.md, fontWeight: 600 }}
+                  className="text-base font-semibold"
                 >
                   {scenario.name}
                 </MemberLink>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
+                <div className="text-xs text-gray-400 mt-0.5">
                   {scenario.archetype} · Resigned {scenario.resignDate}
                 </div>
               </div>
-              <span style={{ color: theme.colors.textMuted }}>{isOpen ? '▾' : '▸'}</span>
+              <span className="text-gray-400">{isOpen ? '▾' : '▸'}</span>
             </button>
 
             {isOpen && (
-              <div style={{ padding: `0 ${theme.spacing.md} ${theme.spacing.md}`, borderTop: `1px solid ${theme.colors.border}` }}>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, padding: `${theme.spacing.sm} 0`, marginBottom: theme.spacing.sm }}>
+              <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-800">
+                <div className="text-xs text-gray-400 py-2 mb-2">
                   Pattern: {scenario.pattern}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="flex flex-col gap-2">
                   {scenario.timeline.map((point, index) => (
-                    <div key={index} style={{ display: 'flex', gap: theme.spacing.md, alignItems: 'flex-start' }}>
-                      <span style={{ flexShrink: 0, width: 70, fontSize: theme.fontSize.xs, color: theme.colors.textMuted, fontFamily: theme.fonts.mono, paddingTop: 2 }}>
+                    <div key={index} className="flex gap-4 items-start">
+                      <span className="shrink-0 w-[70px] text-xs text-gray-400 font-mono pt-0.5">
                         {point.date}
                       </span>
-                      <span style={{ flexShrink: 0, width: 8, height: 8, borderRadius: '50%', marginTop: 4, background: DOMAIN_COLORS[point.domain] ?? theme.colors.textMuted }} />
-                      <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.5 }}>{point.event}</span>
+                      <span className="shrink-0 w-2 h-2 rounded-full mt-1" style={{ background: DOMAIN_COLORS[point.domain] ?? '#9CA3AF' }} />
+                      <span className="text-xs text-gray-500 leading-normal">{point.event}</span>
                     </div>
                   ))}
 
                   {annotation && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: theme.spacing.md,
-                        alignItems: 'flex-start',
-                        marginTop: 6,
-                        paddingTop: 8,
-                        borderTop: `1px dashed ${theme.colors.agentCyan}33`,
-                      }}
-                    >
-                      <span style={{ flexShrink: 0, width: 70, fontSize: theme.fontSize.xs, color: theme.colors.agentCyan, fontFamily: theme.fonts.mono, paddingTop: 2, opacity: 0.8 }}>
+                    <div className="flex gap-4 items-start mt-1.5 pt-2 border-t border-dashed border-cyan-500/20">
+                      <span className="shrink-0 w-[70px] text-xs text-cyan-500 font-mono pt-0.5 opacity-80">
                         {annotation.date}
                       </span>
-                      <span style={{ flexShrink: 0, fontSize: 11, marginTop: 3, opacity: 0.7, color: theme.colors.agentCyan }}>⬡</span>
-                      <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.agentCyan, lineHeight: 1.5, opacity: 0.9 }}>{annotation.note}</span>
+                      <span className="shrink-0 text-[11px] mt-[3px] opacity-70 text-cyan-500">⬡</span>
+                      <span className="text-xs text-cyan-500 leading-normal opacity-90">{annotation.note}</span>
                     </div>
                   )}
                 </div>

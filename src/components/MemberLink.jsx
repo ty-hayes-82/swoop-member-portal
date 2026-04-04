@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { useMemberProfile } from '@/context/MemberProfileContext';
-import { theme } from '@/config/theme';
 
 export default function MemberLink({ memberId, name, children, mode = 'drawer', style, className }) {
   const { openProfile } = useMemberProfile();
@@ -24,19 +23,8 @@ export default function MemberLink({ memberId, name, children, mode = 'drawer', 
     <button
       type="button"
       onClick={handleClick}
-      className={className}
-      style={{
-        border: 'none',
-        background: 'none',
-        padding: 0,
-        margin: 0,
-        font: 'inherit',
-        color: theme.colors.accent,
-        cursor: 'pointer',
-        textDecoration: 'underline',
-        textDecorationColor: theme.colors.accent + '80',
-        ...style,
-      }}
+      className={`border-none bg-transparent p-0 m-0 font-inherit text-brand-500 cursor-pointer underline decoration-brand-500/50 ${className || ''}`}
+      style={style}
     >
       {children ?? name}
     </button>

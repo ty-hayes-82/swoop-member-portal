@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigationContext } from '@/context/NavigationContext';
-import { theme } from '@/config/theme';
 
 const DISMISS_KEY = 'swoop_flowlink_dismissed';
 
@@ -25,64 +24,40 @@ export default function FlowLink({ flowNum, persona, desc }) {
         onClick={() => navigate('storyboard-flows')}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        title={`See how ${persona} uses this → Flow ${flowNum}`}
-        style={{
-          fontSize: theme.fontSize.xs,
-          color: hovered ? theme.colors.accent : theme.colors.textMuted,
-          background: hovered ? `${theme.colors.accent}08` : 'none',
-          border: `1px solid ${hovered ? theme.colors.accent + '30' : 'transparent'}`,
-          borderRadius: theme.radius.sm,
-          cursor: 'pointer',
-          padding: '3px 8px',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px',
-          transition: 'all 0.15s',
-        }}
+        title={`See how ${persona} uses this \u2192 Flow ${flowNum}`}
+        className={`text-xs cursor-pointer rounded-lg px-2 py-[3px] inline-flex items-center gap-1 transition-all duration-150 border ${
+          hovered
+            ? 'text-brand-500 bg-brand-50 border-brand-200 dark:bg-brand-500/5 dark:border-brand-500/30'
+            : 'text-gray-500 bg-transparent border-transparent dark:text-gray-400'
+        }`}
       >
-        📖
+        \uD83D\uDCD6
       </button>
     );
   }
 
   // Full prompt mode (first visit)
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+    <div className="inline-flex items-center gap-1.5">
       <button
         type="button"
-        style={{
-          fontSize: theme.fontSize.xs,
-          color: hovered ? theme.colors.accent : theme.colors.textMuted,
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '4px 0',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px',
-        }}
+        className={`text-xs bg-transparent border-none cursor-pointer py-1 px-0 inline-flex items-center gap-1 transition-colors duration-150 ${
+          hovered ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400'
+        }`}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onClick={() => navigate('storyboard-flows')}
         title={desc || undefined}
       >
-        📖 See how {persona} uses this → Flow {flowNum}
+        \uD83D\uDCD6 See how {persona} uses this \u2192 Flow {flowNum}
       </button>
       <button
         type="button"
         onClick={handleDismiss}
-        style={{
-          fontSize: 11,
-          color: theme.colors.textMuted,
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '2px 4px',
-          opacity: 0.5,
-        }}
+        className="text-[11px] text-gray-500 bg-transparent border-none cursor-pointer px-1 py-0.5 opacity-50 dark:text-gray-400"
         title="Dismiss guide prompt"
       >
-        ×
+        \u00D7
       </button>
     </div>
   );

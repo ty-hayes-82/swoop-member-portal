@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { theme } from '@/config/theme';
 import PageTransition from '@/components/ui/PageTransition';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
@@ -453,7 +452,7 @@ function PlaybookCard({ playbook, onSelect, isSelected }) {
         }}>
           {playbook.category}
         </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div className="flex items-center gap-1.5">
           {playbook.triggeredCount > 0 && (
             <span style={{
               fontSize: 10, fontWeight: 700, color: '#e8772e',
@@ -482,7 +481,7 @@ function PlaybookDetail({ playbook }) {
   const { showToast, addAction } = useApp();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div className="flex flex-col">
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
@@ -658,7 +657,7 @@ export default function PlaybooksPage() {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.5px', color: '#e8772e', textTransform: 'uppercase', marginBottom: 6 }}>
               Outreach Playbooks
             </div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#0f0f0f', margin: '0 0 6px', fontFamily: theme.fonts.serif }}>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#0f0f0f', margin: '0 0 6px', fontFamily: "'Playfair Display', serif" }}>
               Automated Response Protocols
             </h1>
             <p style={{ fontSize: 14, color: '#666', margin: 0, lineHeight: 1.5 }}>

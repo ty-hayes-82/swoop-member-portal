@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { theme } from '@/config/theme';
 import { Panel } from '@/components/ui';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
@@ -28,7 +27,7 @@ const colors = {
   panelHeading: '#1a1a2e',
   panelText: '#3F3F46',
   panelMuted: '#6B7280',
-  brand: theme.colors?.accent || '#F3922D',
+  brand: '#E8740C',
   tabInactive: '#8890A0',
 };
 
@@ -149,7 +148,7 @@ export default function BoardReport() {
             Monthly executive summary — service quality, member health, and operational response
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="flex gap-2">
           <button
             onClick={() => { setActiveTab(0); setTimeout(() => window.print(), 100); }}
             style={{
@@ -173,13 +172,13 @@ export default function BoardReport() {
       {!isRealClub() && (
         <div style={{
           padding: '8px 14px', marginBottom: '16px',
-          borderRadius: theme.radius.sm,
-          background: `${theme.colors.warning500}10`,
-          border: `1px solid ${theme.colors.warning500}30`,
-          fontSize: '12px', color: theme.colors.warning700,
+          borderRadius: '8px',
+          background: `${'#f59e0b'}10`,
+          border: `1px solid ${'#f59e0b'}30`,
+          fontSize: '12px', color: '#b45309',
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
-          <span style={{ fontWeight: 700 }}>Demo data</span>
+          <span className="font-bold">Demo data</span>
           <span>— Real metrics will appear after 30 days of live data. All figures shown are simulated.</span>
         </div>
       )}
@@ -187,9 +186,9 @@ export default function BoardReport() {
       <KPIStrip kpis={kpis} onDrillDown={() => setActiveTab(1)} />
 
       {/* Board Confidence Score Methodology */}
-      <details style={{ marginBottom: '16px', background: theme.colors.bgCard, border: '1px solid ' + theme.colors.border, borderRadius: theme.radius.sm, padding: '12px 16px' }}>
-        <summary style={{ fontSize: '12px', fontWeight: 600, color: theme.colors.textMuted, cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '14px' }}>&#9432;</span> How is the Board Confidence Score calculated?
+      <details style={{ marginBottom: '16px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px', padding: '12px 16px' }}>
+        <summary style={{ fontSize: '12px', fontWeight: 600, color: '#9CA3AF', cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span className="text-sm">&#9432;</span> How is the Board Confidence Score calculated?
         </summary>
         <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
           {[
@@ -198,10 +197,10 @@ export default function BoardReport() {
             { label: 'Operational Response', weight: '25%', value: '4.2 hrs avg', benchmark: 'Detection to action time', color: '#f59e0b' },
             { label: 'Financial Performance', weight: '20%', value: 'On budget', benchmark: 'Dues + F&B vs plan', color: '#8b5cf6' },
           ].map(m => (
-            <div key={m.label} style={{ padding: '10px', borderRadius: '8px', background: theme.colors.bgDeep, border: '1px solid ' + theme.colors.border }}>
+            <div key={m.label} style={{ padding: '10px', borderRadius: '8px', background: '#F3F4F6', border: '1px solid ' + '#E5E7EB' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, color: m.color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{m.label} ({m.weight})</div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: theme.colors.textPrimary, marginTop: '4px' }}>{m.value}</div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>{m.benchmark}</div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a2e', marginTop: '4px' }}>{m.value}</div>
+              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>{m.benchmark}</div>
             </div>
           ))}
         </div>
@@ -309,14 +308,14 @@ export default function BoardReport() {
             </div>
 
             {/* Complaint categories */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="flex gap-2 flex-wrap">
               {feedbackSummary.slice(0, 4).map(cat => (
                 <div key={cat.category} style={{
                   padding: '6px 12px', borderRadius: '8px', fontSize: '12px',
-                  background: theme.colors.bgDeep, border: '1px solid ' + theme.colors.border,
+                  background: '#F3F4F6', border: '1px solid ' + '#E5E7EB',
                 }}>
-                  <span style={{ fontWeight: 600, color: theme.colors.textPrimary }}>{cat.category}</span>
-                  <span style={{ color: theme.colors.textMuted }}> — {cat.count} total, {cat.unresolvedCount} open</span>
+                  <span className="font-semibold text-gray-800 dark:text-white/90">{cat.category}</span>
+                  <span className="text-gray-400"> — {cat.count} total, {cat.unresolvedCount} open</span>
                 </div>
               ))}
             </div>
@@ -435,15 +434,15 @@ export default function BoardReport() {
             <p style={{ fontSize: '12px', color: colors.panelMuted, marginBottom: '16px' }}>
               {memberSaves.length} interventions completed, {operationalSaves.length} disruptions prevented this month.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="flex flex-col gap-2">
               {operationalSaves.map(o => (
                 <div key={o.event} style={{
                   padding: '10px 14px', borderRadius: '8px',
-                  background: theme.colors.bgDeep, border: '1px solid ' + theme.colors.border,
+                  background: '#F3F4F6', border: '1px solid ' + '#E5E7EB',
                   fontSize: '13px',
                 }}>
-                  <span style={{ fontWeight: 600, color: theme.colors.textPrimary }}>{o.event}</span>
-                  <span style={{ color: theme.colors.textMuted }}> — {o.outcome}</span>
+                  <span className="font-semibold text-gray-800 dark:text-white/90">{o.event}</span>
+                  <span className="text-gray-400"> — {o.outcome}</span>
                 </div>
               ))}
             </div>
@@ -459,7 +458,7 @@ export default function BoardReport() {
               background: `${colors.yellow}12`, border: `1px solid ${colors.yellow}30`,
               fontSize: '12px', color: colors.yellow, display: 'flex', alignItems: 'center', gap: 6,
             }}>
-              <span style={{ fontWeight: 700 }}>Coming soon</span>
+              <span className="font-bold">Coming soon</span>
               <span style={{ color: colors.textMuted }}>— Requires POS integration. Connect your POS system in Admin to unlock F&B metrics.</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', opacity: 0.4 }}>
@@ -480,7 +479,7 @@ export default function BoardReport() {
 
       {/* Details Tab */}
       {activeTab === 1 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="flex flex-col gap-4">
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: colors.pageHeading, margin: '8px 0 0' }}>Member Interventions</h2>
           <div style={{ fontSize: '14px', color: colors.textMuted, marginBottom: '4px' }}>
             {memberSaves.length} members retained through proactive intervention
@@ -501,7 +500,7 @@ export default function BoardReport() {
                 <div><strong>Action:</strong> {m.action}</div>
                 <div><strong>Outcome:</strong> <span style={{ color: colors.green }}>{m.outcome}</span></div>
               </div>
-              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid ' + theme.colors.border }}>
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid ' + '#E5E7EB' }}>
                 <div style={{ fontSize: '11px', fontWeight: 600, color: colors.panelMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Evidence Chain</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0', flexWrap: 'wrap' }}>
                   {[

@@ -1,6 +1,5 @@
 // features/integrations/StickyPanel.jsx
 // The sticky right-column panel. Shows empty state or full combination result.
-import { theme } from '@/config/theme';
 import { combinations } from '@/data/combinations';
 import { integrationsById } from '@/data/integrations';
 
@@ -10,65 +9,45 @@ function EmptyState({ selected }) {
   const item = hasOne ? integrationsById[selected[0]] : null;
 
   return (
-    <div style={{
-      background: theme.colors.white,
-      border: `1px solid ${theme.colors.border}`,
-      borderRadius: 12,
-      padding: '36px 24px',
-      textAlign: 'center',
-      minHeight: 320,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 12,
-    }}>
+    <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl py-9 px-6 text-center min-h-[320px] flex flex-col items-center justify-center gap-3">
       {hasOne ? (
         <>
-          <div style={{
-            width: 56, height: 56, borderRadius: 14,
-            background: `${item.color}15`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 26, marginBottom: 4,
-          }}>{item.icon}</div>
-          <div style={{ fontWeight: 600, fontSize: theme.fontSize.md, color: theme.colors.textPrimary }}>
+          <div
+            className="w-14 h-14 rounded-[14px] flex items-center justify-center text-[26px] mb-1"
+            style={{ background: `${item.color}15` }}
+          >{item.icon}</div>
+          <div className="font-semibold text-base text-gray-800 dark:text-white/90">
             {item.name} selected
           </div>
-          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, lineHeight: 1.5, maxWidth: 240 }}>
+          <div className="text-sm text-gray-400 leading-normal max-w-[240px]">
             Now pick a second system from the grid to see what they unlock together.
           </div>
           {/* Ghost icons of remaining options */}
-          <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div className="flex gap-2 mt-2 flex-wrap justify-center">
             {Object.values(integrationsById)
               .filter(i => i.id !== selected[0])
               .slice(0, 6)
               .map(i => (
-                <div key={i.id} style={{
-                  width: 32, height: 32, borderRadius: 8,
-                  background: theme.colors.bgDeep,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 16, opacity: 0.5,
-                }}>{i.icon}</div>
+                <div key={i.id} className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-base opacity-50">
+                  {i.icon}
+                </div>
               ))}
           </div>
         </>
       ) : (
         <>
-          <div style={{ fontSize: 40, marginBottom: 4, opacity: 0.3 }}>⚡</div>
-          <div style={{ fontWeight: 600, fontSize: theme.fontSize.md, color: theme.colors.textPrimary }}>
+          <div className="text-[40px] mb-1 opacity-30">⚡</div>
+          <div className="font-semibold text-base text-gray-800 dark:text-white/90">
             Pick two systems
           </div>
-          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, lineHeight: 1.5, maxWidth: 240 }}>
+          <div className="text-sm text-gray-400 leading-normal max-w-[240px]">
             Select any two integrations from the grid to see the insights and automations they unlock together.
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <div className="flex gap-2 mt-2">
             {['💳','⛳','👥','🌤'].map((icon, i) => (
-              <div key={i} style={{
-                width: 36, height: 36, borderRadius: 9,
-                background: theme.colors.bgDeep,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18, opacity: 0.4,
-              }}>{icon}</div>
+              <div key={i} className="w-9 h-9 rounded-[9px] bg-gray-100 flex items-center justify-center text-lg opacity-40">
+                {icon}
+              </div>
             ))}
           </div>
         </>
@@ -80,57 +59,39 @@ function EmptyState({ selected }) {
 // ── Section label ────────────────────────────────────────────────────────────
 function SectionLabel({ color, children }) {
   return (
-    <div style={{
-      fontSize: theme.fontSize.xs, fontWeight: 600,
-      textTransform: 'uppercase', letterSpacing: '1.1px',
-      color, marginBottom: 10,
-    }}>{children}</div>
+    <div className="text-xs font-semibold uppercase tracking-[1.1px] mb-2.5" style={{ color }}>
+      {children}
+    </div>
   );
 }
 
 function ListItem({ color, text, last }) {
   return (
-    <div style={{
-      display: 'flex', gap: 9, alignItems: 'flex-start',
-      padding: '8px 0',
-      borderBottom: last ? 'none' : `1px solid ${theme.colors.border}`,
-      fontSize: theme.fontSize.sm,
-      color: theme.colors.textSecondary,
-      lineHeight: 1.5,
-    }}>
-      <span style={{
-        width: 6, height: 6, borderRadius: '50%',
-        background: color, marginTop: 7, flexShrink: 0,
-      }} />
+    <div
+      className="flex gap-[9px] items-start py-2 text-sm text-gray-500 leading-normal"
+      style={{ borderBottom: last ? 'none' : '1px solid #E5E7EB' }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: color }} />
       {text}
     </div>
   );
 }
 
-// ── Combination result ───────────────────────────────────────────────────────
+// ── Combination result ───���───────────────────────────────────────────────────
 function ComboResult({ idA, idB }) {
   const combo = combinations[`${idA}+${idB}`];
   const intA = integrationsById[idA];
   const intB = integrationsById[idB];
 
-  const panelStyle = {
-    background: theme.colors.white,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: 12,
-    overflow: 'hidden',
-    animation: 'fadeSlideIn 0.3s ease',
-    boxShadow: '0 2px 16px rgba(0,0,0,0.07)',
-  };
-
   if (!combo) {
     return (
-      <div style={panelStyle}>
-        <div style={{ padding: '28px 20px', textAlign: 'center' }}>
-          <div style={{ fontSize: 28, marginBottom: 10 }}>{intA.icon} + {intB.icon}</div>
-          <div style={{ fontWeight: 600, fontSize: theme.fontSize.md, color: theme.colors.textPrimary, marginBottom: 8 }}>
+      <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-md animate-[fadeSlideIn_0.3s_ease]">
+        <div className="py-7 px-5 text-center">
+          <div className="text-[28px] mb-2.5">{intA.icon} + {intB.icon}</div>
+          <div className="font-semibold text-base text-gray-800 dark:text-white/90 mb-2">
             Cross-System Intelligence
           </div>
-          <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.5, margin: 0 }}>
+          <p className="text-sm text-gray-500 leading-normal m-0">
             Contact our team to explore what <strong>{intA.name}</strong> + <strong>{intB.name}</strong> can reveal for your club.
           </p>
         </div>
@@ -139,76 +100,55 @@ function ComboResult({ idA, idB }) {
   }
 
   return (
-    <div style={panelStyle} id="combination-panel">
+    <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-md animate-[fadeSlideIn_0.3s_ease]" id="combination-panel">
       {/* Header */}
-      <div style={{
-        padding: '18px 20px',
-        borderBottom: `1px solid ${theme.colors.border}`,
-        background: 'rgba(247,245,242,0.6)',
-        display: 'flex', alignItems: 'center', gap: 12,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{
-            width: 38, height: 38, borderRadius: 9,
-            background: `${intA.color}18`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
-          }}>{intA.icon}</span>
-          <span style={{ fontSize: 14, color: theme.colors.textMuted }}>+</span>
-          <span style={{
-            width: 38, height: 38, borderRadius: 9,
-            background: `${intB.color}18`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
-          }}>{intB.icon}</span>
+      <div className="py-[18px] px-5 border-b border-gray-200 dark:border-gray-800 bg-[rgba(247,245,242,0.6)] flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span
+            className="w-[38px] h-[38px] rounded-[9px] flex items-center justify-center text-lg"
+            style={{ background: `${intA.color}18` }}
+          >{intA.icon}</span>
+          <span className="text-sm text-gray-400">+</span>
+          <span
+            className="w-[38px] h-[38px] rounded-[9px] flex items-center justify-center text-lg"
+            style={{ background: `${intB.color}18` }}
+          >{intB.icon}</span>
         </div>
         <div>
-          <div style={{ fontWeight: 700, fontSize: theme.fontSize.md, color: theme.colors.textPrimary, lineHeight: 1.2 }}>
+          <div className="font-bold text-base text-gray-800 dark:text-white/90 leading-tight">
             {combo.title}
           </div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
+          <div className="text-xs text-gray-400 mt-0.5">
             {intA.name} × {intB.name}
           </div>
         </div>
       </div>
 
       {/* Insights */}
-      <div style={{ padding: '16px 20px 0' }}>
-        <SectionLabel color={theme.colors.integrationTeeSheet}>Insights Unlocked</SectionLabel>
+      <div className="px-5 pt-4">
+        <SectionLabel color={'#1a7a3c'}>Insights Unlocked</SectionLabel>
         {combo.insights.map((text, i) => (
-          <ListItem key={i} color={theme.colors.integrationTeeSheet} text={text} last={i === combo.insights.length - 1} />
+          <ListItem key={i} color={'#1a7a3c'} text={text} last={i === combo.insights.length - 1} />
         ))}
       </div>
 
       {/* Divider */}
-      <div style={{ height: 1, background: theme.colors.border, margin: '12px 0' }} />
+      <div className="h-px bg-gray-200 dark:bg-gray-800 my-3" />
 
       {/* Automations */}
-      <div style={{ padding: '0 20px' }}>
-        <SectionLabel color={theme.colors.operations}>Automations Enabled</SectionLabel>
+      <div className="px-5">
+        <SectionLabel color={'#22c55e'}>Automations Enabled</SectionLabel>
         {combo.automations.map((text, i) => (
-          <ListItem key={i} color={theme.colors.operations} text={text} last={i === combo.automations.length - 1} />
+          <ListItem key={i} color={'#22c55e'} text={text} last={i === combo.automations.length - 1} />
         ))}
       </div>
 
       {/* Example insight */}
-      <div style={{
-        margin: '14px 20px 20px',
-        background: 'rgba(139,100,32,0.05)',
-        border: `1px solid rgba(139,100,32,0.18)`,
-        borderLeft: `4px solid ${theme.colors.integrationPos}`,
-        borderRadius: '0 8px 8px 0',
-        padding: '12px 14px',
-      }}>
-        <div style={{
-          fontSize: 10, fontWeight: 600, color: theme.colors.integrationPos,
-          letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: 5,
-        }}>
+      <div className="mx-5 mt-3.5 mb-5 bg-[rgba(139,100,32,0.05)] border border-[rgba(139,100,32,0.18)] border-l-4 border-l-[#8b6420] rounded-r-lg py-3 px-3.5">
+        <div className="text-[10px] font-semibold text-[#8b6420] tracking-wide uppercase mb-1.5">
           Example Swoop Insight
         </div>
-        <p style={{
-          fontSize: theme.fontSize.sm, fontStyle: 'italic',
-          color: theme.colors.textPrimary, lineHeight: 1.55,
-          margin: 0, fontWeight: 500,
-        }}>
+        <p className="text-sm italic text-gray-800 dark:text-white/90 leading-normal m-0 font-medium">
           "{combo.example}"
         </p>
       </div>
@@ -216,7 +156,7 @@ function ComboResult({ idA, idB }) {
   );
 }
 
-// ── Export ───────────────────────────────────────────────────────────────────
+// ── Export ────────���───────────────────────────────���──────────────────────────
 export function StickyPanel({ selected }) {
   if (selected.length < 2) {
     return <EmptyState selected={selected} />;

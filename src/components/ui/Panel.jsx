@@ -5,84 +5,52 @@ export default function Panel({
   sourceSystems,
 }) {
   return (
-    <div style={{
-      background: 'var(--bg-card)',
-      border: '1px solid var(--border)',
-      borderRadius: '10px',
-      overflow: 'hidden',
-    }}>
+    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden dark:border-gray-800 dark:bg-white/[0.03]">
       {/* Header */}
-      <div style={{
-        padding: '20px 24px 0',
-        borderBottom: tabs ? 'none' : '1px solid var(--border-light)',
-        paddingBottom: tabs ? '0' : '16px',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+      <div className={`px-5 pt-5 sm:px-6 sm:pt-6 ${tabs ? 'pb-0' : 'pb-4 border-b border-gray-100 dark:border-gray-800'}`}>
+        <div className="flex justify-between items-start">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-semibold text-gray-800 leading-tight dark:text-white/90">
               {title}
             </h3>
             {subtitle && (
-              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
+              <p className="text-sm text-gray-500 mt-1 italic dark:text-gray-400">
                 {subtitle}
               </p>
             )}
             {sourceSystems && sourceSystems.length > 0 && (
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '8px', alignItems: 'center' }}>
-                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Source:</span>
+              <div className="flex gap-1 flex-wrap mt-2 items-center">
+                <span className="text-[10px] text-gray-500 dark:text-gray-400">Source:</span>
                 {sourceSystems.map(s => <SourceBadge key={s} system={s} size="xs" />)}
               </div>
             )}
           </div>
-          {actions && <div style={{ flexShrink: 0, marginLeft: '12px' }}>{actions}</div>}
+          {actions && <div className="shrink-0 ml-3">{actions}</div>}
         </div>
 
         {/* Tabs */}
         {tabs && (
-          <div style={{
-            display: 'flex',
-            flexWrap: 'nowrap',
-            columnGap: 0,
-            marginTop: '16px',
-            maxWidth: '100%',
-            overflowX: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'thin',
-          }}>
+          <div className="flex flex-nowrap mt-4 max-w-full overflow-x-auto [scrollbar-width:thin]" style={{ WebkitOverflowScrolling: 'touch' }}>
             {tabs.map(tab => {
               const active = tab.key === activeTab;
               return (
                 <button
                   key={tab.key}
                   onClick={() => onTabChange?.(tab.key)}
-                  style={{
-                    padding: '8px 16px',
-                    fontSize: '13px',
-                    fontWeight: active ? 600 : 400,
-                    color: active ? 'var(--text-primary)' : 'var(--text-muted)',
-                    borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
-                    background: 'none',
-                    transition: 'color 0.15s, border-color 0.15s',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    flex: '0 1 auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
+                  className={`px-4 py-2 text-sm whitespace-nowrap flex items-center gap-2 transition-colors duration-150 shrink-0 border-b-2 ${
+                    active
+                      ? 'font-semibold text-gray-800 border-brand-500 dark:text-white/90'
+                      : 'font-normal text-gray-500 border-transparent dark:text-gray-400'
+                  }`}
                 >
                   <span>{tab.label}</span>
                   {tab.badge && (
                     <span
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        color: active ? 'var(--accent)' : 'var(--text-muted)',
-                        background: active ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)',
-                        border: `1px solid ${active ? 'var(--accent)' : 'rgba(255,255,255,0.12)'}`,
-                        borderRadius: '999px',
-                        padding: '2px 8px',
-                      }}
+                      className={`text-[11px] font-semibold rounded-full px-2 py-0.5 border ${
+                        active
+                          ? 'text-brand-500 border-brand-500 bg-brand-50 dark:bg-brand-500/15'
+                          : 'text-gray-500 border-gray-200 bg-gray-50 dark:text-gray-400 dark:border-gray-700 dark:bg-white/5'
+                      }`}
                     >
                       {tab.badge}
                     </span>
@@ -95,7 +63,7 @@ export default function Panel({
       </div>
 
       {/* Content */}
-      <div style={{ padding: '24px' }}>
+      <div className="p-5 sm:p-6">
         {children}
       </div>
     </div>

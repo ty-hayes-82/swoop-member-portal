@@ -1,6 +1,5 @@
 // QualityTab — service consistency by shift, outlet, and day of week
 import { useState } from 'react';
-import { theme } from '@/config/theme';
 import { isAuthenticatedClub } from '@/config/constants';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
 import { getSlowRoundRate } from '@/services/operationsService';
@@ -33,7 +32,7 @@ export default function QualityTab() {
     ((100 - understaffedPct) * 0.3) +
     ((100 - (slowRoundStats.overallRate || 0) * 100) * 0.3)
   );
-  const scoreColor = consistencyScore >= 70 ? theme.colors.success : consistencyScore >= 50 ? '#ca8a04' : theme.colors.risk;
+  const scoreColor = consistencyScore >= 70 ? '#22c55e' : consistencyScore >= 50 ? '#ca8a04' : '#ef4444';
 
   // Weather-adjusted score: exclude complaints that occurred on weather-impacted days
   const weatherImpactedComplaints = feedbackRecords.filter(f => f.weatherContext?.isWeatherImpacted || f.weatherContext?.is_weather_impacted).length;
@@ -60,43 +59,43 @@ export default function QualityTab() {
   const maxCatCount = Math.max(...feedbackSummary.map(c => c.count), 1);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
 
       {/* Service Consistency Score */}
       <div style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.lg,
-        padding: theme.spacing.lg,
+        background: '#ffffff',
+        border: `1px solid ${'#E5E7EB'}`,
+        borderRadius: '16px',
+        padding: '24px',
         display: 'flex',
         alignItems: 'center',
-        gap: theme.spacing.lg,
+        gap: '24px',
         flexWrap: 'wrap',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
+        <div className="flex items-center gap-4">
           <div style={{
             width: 72, height: 72, borderRadius: '50%',
-            background: `conic-gradient(${scoreColor} ${consistencyScore * 3.6}deg, ${theme.colors.border} 0deg)`,
+            background: `conic-gradient(${scoreColor} ${consistencyScore * 3.6}deg, ${'#E5E7EB'} 0deg)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
             <div style={{
-              width: 58, height: 58, borderRadius: '50%', background: theme.colors.bgCard,
+              width: 58, height: 58, borderRadius: '50%', background: '#ffffff',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             }}>
-              <span style={{ fontFamily: theme.fonts.mono, fontSize: '22px', fontWeight: 800, color: scoreColor, lineHeight: 1 }}>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '22px', fontWeight: 800, color: scoreColor, lineHeight: 1 }}>
                 {consistencyScore}
               </span>
             </div>
           </div>
           <div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
+            <div className="text-xs text-gray-400 uppercase tracking-widest font-bold">
               Service Consistency Score
             </div>
-            <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary }}>
+            <div className="text-lg font-bold text-gray-800 dark:text-white/90">
               {consistencyScore >= 70 ? 'Consistent' : consistencyScore >= 50 ? 'Needs Attention' : 'At Risk'}
             </div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 2 }}>
+            <div className="text-xs text-gray-500 mt-0.5">
               {consistencyScore >= 70
                 ? 'Service is consistent — no major gaps detected'
                 : consistencyScore >= 50
@@ -106,22 +105,22 @@ export default function QualityTab() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: theme.spacing.md, flexWrap: 'wrap', marginLeft: 'auto' }}>
+        <div className="flex gap-4 flex-wrap ml-auto">
           {[
-            { label: 'Resolution Rate', value: `${resolutionRate}%`, color: resolutionRate >= 70 ? theme.colors.success : '#ca8a04' },
-            { label: 'Understaffed Days', value: `${understaffedDays.length}`, color: understaffedDays.length <= 1 ? theme.colors.success : theme.colors.risk },
-            { label: 'Open Complaints', value: `${totalComplaints - resolvedCount}`, color: (totalComplaints - resolvedCount) <= 2 ? '#ca8a04' : theme.colors.risk },
+            { label: 'Resolution Rate', value: `${resolutionRate}%`, color: resolutionRate >= 70 ? '#22c55e' : '#ca8a04' },
+            { label: 'Understaffed Days', value: `${understaffedDays.length}`, color: understaffedDays.length <= 1 ? '#22c55e' : '#ef4444' },
+            { label: 'Open Complaints', value: `${totalComplaints - resolvedCount}`, color: (totalComplaints - resolvedCount) <= 2 ? '#ca8a04' : '#ef4444' },
             ...(adjustedScore != null ? [{
               label: 'Weather-Adj Score', value: `${adjustedScore}`,
-              color: adjustedScore >= 70 ? theme.colors.success : adjustedScore >= 50 ? '#ca8a04' : theme.colors.risk,
+              color: adjustedScore >= 70 ? '#22c55e' : adjustedScore >= 50 ? '#ca8a04' : '#ef4444',
             }] : []),
           ].map(m => (
             <div key={m.label} style={{
               textAlign: 'center', minWidth: 80, padding: '6px 12px',
-              borderRadius: theme.radius.sm, background: `${m.color}08`, border: `1px solid ${m.color}20`,
+              borderRadius: '8px', background: `${m.color}08`, border: `1px solid ${m.color}20`,
             }}>
-              <div style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.lg, fontWeight: 700, color: m.color }}>{m.value}</div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted, fontWeight: 600 }}>{m.label}</div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '18px', fontWeight: 700, color: m.color }}>{m.value}</div>
+              <div className="text-[10px] text-gray-400 font-semibold">{m.label}</div>
             </div>
           ))}
         </div>
@@ -149,18 +148,18 @@ export default function QualityTab() {
         return (
           <div style={{
             background: `${scoreColor}06`, border: `1px solid ${scoreColor}20`,
-            borderRadius: theme.radius.md, padding: '14px 18px',
+            borderRadius: '12px', padding: '14px 18px',
           }}>
-            <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: scoreColor, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: scoreColor, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
               Biggest Driver
             </div>
-            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, marginBottom: 4 }}>
+            <div className="text-sm text-gray-800 dark:text-white/90 mb-1">
               {top.text}
             </div>
             <button
               onClick={() => navigate('service', { tab: top.link })}
               style={{
-                fontSize: theme.fontSize.xs, fontWeight: 600, color: theme.colors.accent,
+                fontSize: '12px', fontWeight: 600, color: '#E8740C',
                 background: 'none', border: 'none', padding: 0, cursor: 'pointer',
                 textDecoration: 'underline',
               }}
@@ -173,15 +172,15 @@ export default function QualityTab() {
 
       {/* By Day of Week */}
       <div style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.lg,
-        padding: theme.spacing.lg,
+        background: '#ffffff',
+        border: `1px solid ${'#E5E7EB'}`,
+        borderRadius: '16px',
+        padding: '24px',
       }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.md }}>
+        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
           Complaints by Day of Week
         </h3>
-        <div style={{ display: 'flex', gap: theme.spacing.sm, alignItems: 'flex-end', height: 120, position: 'relative' }}>
+        <div className="flex gap-2 items-end h-[120px] relative">
           {weekdays.map(day => {
             const count = dayOfWeekMap[day] || 0;
             const heightPct = maxDayCount > 0 ? (count / maxDayCount) * 100 : 0;
@@ -195,7 +194,7 @@ export default function QualityTab() {
             return (
               <div
                 key={day}
-                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, position: 'relative' }}
+                className="flex-1 flex flex-col items-center gap-1 relative"
                 onMouseEnter={() => setHoveredBar(day)}
                 onMouseLeave={() => setHoveredBar(null)}
               >
@@ -206,23 +205,23 @@ export default function QualityTab() {
                     fontSize: 11, whiteSpace: 'nowrap', zIndex: 10, marginBottom: 4,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                   }}>
-                    <div style={{ fontWeight: 700, marginBottom: 2 }}>{day}: {count} complaint{count !== 1 ? 's' : ''}</div>
+                    <div className="font-bold mb-0.5">{day}: {count} complaint{count !== 1 ? 's' : ''}</div>
                     <div style={{ color: 'rgba(255,255,255,0.7)' }}>{Object.entries(catBreakdown).map(([k, v]) => `${v} ${k}`).join(', ')}</div>
                   </div>
                 )}
-                <span style={{ fontSize: '11px', fontFamily: theme.fonts.mono, fontWeight: 700, color: theme.colors.textPrimary }}>
+                <span style={{ fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: '#1a1a2e' }}>
                   {count || ''}
                 </span>
                 <div style={{
                   width: '100%', maxWidth: 40,
                   height: `${Math.max(heightPct, 4)}%`,
-                  background: isWeekend ? theme.colors.risk : theme.colors.operations,
+                  background: isWeekend ? '#ef4444' : '#22c55e',
                   borderRadius: '4px 4px 0 0',
                   opacity: isHovered ? 1 : count > 0 ? 0.85 : 0.2,
                   transition: 'height 0.3s, opacity 0.15s',
                   cursor: count > 0 ? 'pointer' : 'default',
                 }} />
-                <span style={{ fontSize: '11px', color: theme.colors.textMuted, fontWeight: 600 }}>{day}</span>
+                <span className="text-[11px] text-gray-400 font-semibold">{day}</span>
               </div>
             );
           })}
@@ -231,42 +230,42 @@ export default function QualityTab() {
 
       {/* By Category */}
       <div style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.lg,
-        padding: theme.spacing.lg,
+        background: '#ffffff',
+        border: `1px solid ${'#E5E7EB'}`,
+        borderRadius: '16px',
+        padding: '24px',
       }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.md }}>
+        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
           Complaint Drivers
         </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+        <div className="flex flex-col gap-2">
           {feedbackSummary.map(cat => (
             <div
               key={cat.category}
               onClick={() => navigate('service', { tab: 'complaints', category: cat.category })}
               style={{
-                display: 'flex', alignItems: 'center', gap: theme.spacing.md,
-                cursor: 'pointer', padding: '4px 0', borderRadius: theme.radius.sm,
+                display: 'flex', alignItems: 'center', gap: '16px',
+                cursor: 'pointer', padding: '4px 0', borderRadius: '8px',
                 transition: 'background 0.12s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = theme.colors.bgDeep; }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#F3F4F6'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
               title={`Click to view ${cat.category} complaints`}
             >
-              <div style={{ width: 130, fontSize: 13, fontWeight: 500, color: theme.colors.textPrimary, flexShrink: 0 }}>
+              <div className="w-[130px] text-[13px] font-medium text-gray-800 dark:text-white/90 shrink-0">
                 {cat.category}
               </div>
-              <div style={{ flex: 1, height: 20, background: theme.colors.bgDeep, borderRadius: 4, overflow: 'hidden' }}>
+              <div className="flex-1 h-5 bg-gray-100 rounded overflow-hidden">
                 <div style={{
                   height: '100%', width: `${(cat.count / maxCatCount) * 100}%`,
-                  background: cat.unresolvedCount > 2 ? theme.colors.risk : theme.colors.operations,
+                  background: cat.unresolvedCount > 2 ? '#ef4444' : '#22c55e',
                   borderRadius: 4, transition: 'width 0.3s',
                   display: 'flex', alignItems: 'center', paddingLeft: 8,
                 }}>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff' }}>{cat.count}</span>
+                  <span className="text-[10px] font-bold text-white">{cat.count}</span>
                 </div>
               </div>
-              <div style={{ fontSize: 12, color: cat.unresolvedCount > 0 ? theme.colors.risk : theme.colors.success, fontWeight: 600, minWidth: 80, textAlign: 'right', textDecoration: cat.unresolvedCount > 0 ? 'underline' : 'none' }}>
+              <div style={{ fontSize: 12, color: cat.unresolvedCount > 0 ? '#ef4444' : '#22c55e', fontWeight: 600, minWidth: 80, textAlign: 'right', textDecoration: cat.unresolvedCount > 0 ? 'underline' : 'none' }}>
                 {cat.unresolvedCount} unresolved
               </div>
             </div>
@@ -276,12 +275,12 @@ export default function QualityTab() {
 
       {/* By Outlet */}
       <div style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.lg,
-        padding: theme.spacing.lg,
+        background: '#ffffff',
+        border: `1px solid ${'#E5E7EB'}`,
+        borderRadius: '16px',
+        padding: '24px',
       }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.md }}>
+        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
           Service Quality by Outlet
         </h3>
         {(() => {
@@ -306,9 +305,9 @@ export default function QualityTab() {
             { name: 'Banquet/Events', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
             { name: 'Pool Bar', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
           ];
-          const riskColors = { high: theme.colors.risk, medium: '#ca8a04', low: theme.colors.success };
+          const riskColors = { high: '#ef4444', medium: '#ca8a04', low: '#22c55e' };
           return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+            <div className="flex flex-col gap-2">
               {allOutlets.map(o => {
                 const isExpanded = expandedOutlet === o.name;
                 const outletComplaints = feedbackRecords.filter(r => r.isUnderstaffedDay ? o.name === 'Grill Room' : o.name === 'Other Outlets' || o.totalComplaints === 0);
@@ -318,27 +317,27 @@ export default function QualityTab() {
                   onClick={() => setExpandedOutlet(isExpanded ? null : o.name)}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '10px 14px', borderRadius: theme.radius.sm,
-                    background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
+                    padding: '10px 14px', borderRadius: '8px',
+                    background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}`,
                     cursor: 'pointer', transition: 'background 0.12s',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = `${theme.colors.border}40`; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = theme.colors.bgDeep; }}
+                  onMouseEnter={e => { e.currentTarget.style.background = `${'#E5E7EB'}40`; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#F3F4F6'; }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div className="flex items-center gap-2.5">
                     <span style={{
                       width: 8, height: 8, borderRadius: '50%',
                       background: riskColors[o.risk], flexShrink: 0,
                     }} />
-                    <span style={{ fontSize: 14, fontWeight: 600, color: theme.colors.textPrimary }}>{o.name}</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{o.name}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 12 }}>
+                  <div className="flex items-center gap-4 text-xs">
                     {o.understaffedDays > 0 && (
-                      <span style={{ color: theme.colors.risk, fontWeight: 600 }}>
+                      <span className="text-error-500 font-semibold">
                         {o.understaffedDays} understaffed day{o.understaffedDays !== 1 ? 's' : ''}
                       </span>
                     )}
-                    <span style={{ color: theme.colors.textSecondary }}>
+                    <span className="text-gray-500">
                       {o.totalComplaints} complaint{o.totalComplaints !== 1 ? 's' : ''}
                     </span>
                     <span style={{
@@ -348,11 +347,11 @@ export default function QualityTab() {
                     }}>
                       {o.risk}
                     </span>
-                    <span style={{ color: theme.colors.textMuted, fontSize: 12 }}>{isExpanded ? '▾' : '▸'}</span>
+                    <span className="text-gray-400 text-xs">{isExpanded ? '▾' : '▸'}</span>
                   </div>
                 </div>
                 {isExpanded && (
-                  <div style={{ padding: '8px 14px 12px', fontSize: 12, color: theme.colors.textSecondary, borderLeft: `3px solid ${riskColors[o.risk]}30`, marginLeft: 14 }}>
+                  <div style={{ padding: '8px 14px 12px', fontSize: 12, color: '#6B7280', borderLeft: `3px solid ${riskColors[o.risk]}30`, marginLeft: 14 }}>
                     {o.totalComplaints > 0 ? (
                       <div>{o.totalComplaints} complaint{o.totalComplaints !== 1 ? 's' : ''} this month. {o.understaffedDays > 0 ? `${o.understaffedDays} understaffed day${o.understaffedDays !== 1 ? 's' : ''} drove service quality below threshold.` : 'No staffing issues detected.'}</div>
                     ) : (
@@ -370,30 +369,30 @@ export default function QualityTab() {
 
       {/* Shift Comparison */}
       <div style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.lg,
-        padding: theme.spacing.lg,
+        background: '#ffffff',
+        border: `1px solid ${'#E5E7EB'}`,
+        borderRadius: '16px',
+        padding: '24px',
       }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.colors.textPrimary, marginBottom: theme.spacing.md }}>
+        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
           AM vs PM Service Quality
         </h3>
-        <p style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
+        <p className="text-[13px] text-gray-500 mb-4">
           Complaints categorized by time of day. Lunch service (11am-2pm) shows highest complaint density, correlating with staffing gaps.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.spacing.md }}>
+        <div className="grid grid-cols-2 gap-4">
           {[
-            { label: 'AM Shift (6am-12pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h <= 15; }).length, color: theme.colors.success },
-            { label: 'PM Shift (12pm-9pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h > 15; }).length, color: theme.colors.risk },
+            { label: 'AM Shift (6am-12pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h <= 15; }).length, color: '#22c55e' },
+            { label: 'PM Shift (12pm-9pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h > 15; }).length, color: '#ef4444' },
           ].map(shift => (
             <div key={shift.label} style={{
-              padding: theme.spacing.md, borderRadius: theme.radius.sm,
+              padding: '16px', borderRadius: '8px',
               background: `${shift.color}08`, border: `1px solid ${shift.color}20`,
               textAlign: 'center',
             }}>
-              <div style={{ fontSize: 12, color: theme.colors.textMuted, fontWeight: 600, marginBottom: 4 }}>{shift.label}</div>
-              <div style={{ fontFamily: theme.fonts.mono, fontSize: 24, fontWeight: 700, color: shift.color }}>{shift.complaints}</div>
-              <div style={{ fontSize: 11, color: theme.colors.textSecondary }}>complaints</div>
+              <div className="text-xs text-gray-400 font-semibold mb-1">{shift.label}</div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 24, fontWeight: 700, color: shift.color }}>{shift.complaints}</div>
+              <div className="text-[11px] text-gray-500">complaints</div>
             </div>
           ))}
         </div>

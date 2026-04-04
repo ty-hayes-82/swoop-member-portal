@@ -1,9 +1,7 @@
 /**
  * M2: Team Workload View
- * Shows pending actions per staff member with completion rates.
  */
 import { useMemo } from 'react';
-import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
 
 const STAFF_ROLES = [
@@ -20,8 +18,6 @@ export default function TeamWorkloadPanel() {
 
   const workload = useMemo(() => {
     const byOwner = {};
-
-    // Count actions by owner/assignee
     inbox.forEach(action => {
       const owner = action.owner || action.assignedTo || action.source || 'Unassigned';
       if (!byOwner[owner]) byOwner[owner] = { pending: 0, approved: 0, dismissed: 0, total: 0 };
@@ -31,9 +27,7 @@ export default function TeamWorkloadPanel() {
       else if (action.status === 'dismissed') byOwner[owner].dismissed++;
     });
 
-    // Map to staff members + catch unmatched
     const result = STAFF_ROLES.map(staff => {
-      // Match by name or role
       const match = Object.entries(byOwner).find(([key]) =>
         key.toLowerCase().includes(staff.name.toLowerCase()) ||
         key.toLowerCase().includes(staff.title.toLowerCase()) ||
@@ -44,65 +38,46 @@ export default function TeamWorkloadPanel() {
       return { ...staff, ...data, completionRate };
     });
 
-    // AI Agents row removed from MVP — agent recommendations flow into
-    // the inbox as regular actions attributed to staff owners
-
     return result.filter(r => r.total > 0 || STAFF_ROLES.some(s => s.name === r.name));
   }, [inbox]);
 
   const totalPending = workload.reduce((s, w) => s + w.pending, 0);
 
   return (
-    <div style={{
-      border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md,
-      background: theme.colors.bgCard, overflow: 'hidden',
-    }}>
-      <div style={{
-        padding: '12px 16px', borderBottom: `1px solid ${theme.colors.border}`,
-        background: theme.colors.bgDeep, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
+    <div className="border border-gray-200 rounded-xl bg-white overflow-hidden dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="px-4 py-3 border-b border-gray-200 bg-gray-100 flex justify-between items-center dark:border-gray-800 dark:bg-gray-800">
         <div>
-          <div style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>Team Workload</div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{totalPending} pending actions across team</div>
+          <div className="font-bold text-sm text-gray-800 dark:text-white/90">Team Workload</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{totalPending} pending actions across team</div>
         </div>
       </div>
 
-      <div style={{ padding: '8px' }}>
+      <div className="p-2">
         {/* Header */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1.5fr 0.7fr 0.7fr 0.7fr 0.8fr',
-          gap: 8, padding: '6px 8px', fontSize: '10px', fontWeight: 600,
-          color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em',
-        }}>
+        <div className="grid gap-2 px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400"
+          style={{ gridTemplateColumns: '1.5fr 0.7fr 0.7fr 0.7fr 0.8fr' }}>
           <span>Team Member</span>
-          <span style={{ textAlign: 'center' }}>Pending</span>
-          <span style={{ textAlign: 'center' }}>Approved</span>
-          <span style={{ textAlign: 'center' }}>Dismissed</span>
-          <span style={{ textAlign: 'right' }}>Completion</span>
+          <span className="text-center">Pending</span>
+          <span className="text-center">Approved</span>
+          <span className="text-center">Dismissed</span>
+          <span className="text-right">Completion</span>
         </div>
 
         {workload.map(member => (
-          <div key={member.name} style={{
-            display: 'grid', gridTemplateColumns: '1.5fr 0.7fr 0.7fr 0.7fr 0.8fr',
-            gap: 8, padding: '8px', borderRadius: theme.radius.sm,
-            alignItems: 'center', fontSize: theme.fontSize.xs,
-            background: member.pending > 3 ? `${theme.colors.warning}06` : 'transparent',
-          }}>
+          <div key={member.name}
+            className={`grid gap-2 p-2 rounded-lg items-center text-xs ${member.pending > 3 ? 'bg-warning-50 dark:bg-warning-500/5' : 'bg-transparent'}`}
+            style={{ gridTemplateColumns: '1.5fr 0.7fr 0.7fr 0.7fr 0.8fr' }}>
             <div>
-              <div style={{ fontWeight: 600, color: theme.colors.textPrimary }}>{member.name}</div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>{member.title}</div>
+              <div className="font-semibold text-gray-800 dark:text-white/90">{member.name}</div>
+              <div className="text-[10px] text-gray-500 dark:text-gray-400">{member.title}</div>
             </div>
-            <div style={{
-              textAlign: 'center', fontWeight: 700, fontFamily: theme.fonts.mono,
-              color: member.pending > 0 ? theme.colors.accent : theme.colors.textMuted,
-            }}>{member.pending}</div>
-            <div style={{ textAlign: 'center', fontFamily: theme.fonts.mono, color: theme.colors.success }}>{member.approved}</div>
-            <div style={{ textAlign: 'center', fontFamily: theme.fonts.mono, color: theme.colors.textMuted }}>{member.dismissed}</div>
-            <div style={{ textAlign: 'right' }}>
-              <span style={{
-                fontWeight: 700, fontFamily: theme.fonts.mono,
-                color: member.completionRate >= 80 ? theme.colors.success : member.completionRate >= 50 ? theme.colors.warning : theme.colors.textMuted,
-              }}>{member.completionRate}%</span>
+            <div className={`text-center font-bold font-mono ${member.pending > 0 ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400'}`}>{member.pending}</div>
+            <div className="text-center font-mono text-success-500">{member.approved}</div>
+            <div className="text-center font-mono text-gray-500 dark:text-gray-400">{member.dismissed}</div>
+            <div className="text-right">
+              <span className={`font-bold font-mono ${
+                member.completionRate >= 80 ? 'text-success-500' : member.completionRate >= 50 ? 'text-warning-500' : 'text-gray-500 dark:text-gray-400'
+              }`}>{member.completionRate}%</span>
             </div>
           </div>
         ))}

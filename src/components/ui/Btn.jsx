@@ -1,57 +1,20 @@
 // Btn — Button primitive with clear visual hierarchy
 // variant: 'primary' | 'secondary' | 'tertiary' | 'ghost'
-// Phase A design improvement: stops all-ghost-button syndrome
-import { theme } from '@/config/theme';
 
-const BASE = {
-  display: 'inline-flex', alignItems: 'center', gap: '6px',
-  fontFamily: theme.fonts.sans, fontWeight: 600,
-  borderRadius: theme.radius.md, cursor: 'pointer',
-  transition: 'all 0.15s ease', border: 'none', outline: 'none',
-  textDecoration: 'none', whiteSpace: 'nowrap',
+const SIZE_CLASSES = {
+  sm: 'px-3 py-1.5 text-xs',
+  md: 'px-4 py-2 text-sm',
+  lg: 'px-5 py-2.5 text-base',
 };
 
-const SIZE = {
-  sm: { padding: '5px 12px', fontSize: theme.fontSize.xs },
-  md: { padding: '7px 16px', fontSize: theme.fontSize.sm },
-  lg: { padding: '10px 22px', fontSize: theme.fontSize.md },
+const VARIANT_CLASSES = {
+  primary: 'bg-brand-500 text-white border border-brand-500 shadow-theme-xs hover:bg-brand-600',
+  secondary: 'bg-brand-50 text-brand-500 border border-brand-200 hover:bg-brand-100 dark:bg-brand-500/10 dark:border-brand-500/30',
+  ghost: 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 dark:bg-white/[0.03] dark:text-gray-400 dark:border-gray-700 dark:hover:bg-white/5',
+  tertiary: 'bg-transparent text-gray-600 border-none font-medium text-sm dark:text-gray-400',
 };
 
-function getVariantStyle(variant, accentColor, disabled) {
-  const accent = accentColor ?? theme.colors.accent;   // orange by default
-  if (disabled) return {
-    background: theme.colors.bgDeep,
-    color: theme.colors.textMuted,
-    border: `1px solid ${theme.colors.border}`,
-    cursor: 'not-allowed', opacity: 0.6,
-  };
-  switch (variant) {
-    case 'primary':
-      return {
-        background: accent, color: theme.colors.white,
-        border: `1px solid ${accent}`,
-        boxShadow: `0 1px 3px ${accent}40`,
-      };
-    case 'secondary':
-      return {
-        background: `${accent}10`, color: accent,
-        border: `1px solid ${accent}40`,
-      };
-    case 'ghost':
-      return {
-        background: theme.colors.bgCard, color: theme.colors.textSecondary,
-        border: `1px solid ${theme.colors.border}`,
-      };
-    case 'tertiary':
-    default:
-      return {
-        background: 'none', color: theme.colors.textSecondary,
-        border: 'none', padding: undefined,
-        fontWeight: 500, fontSize: theme.fontSize.sm,
-        textDecoration: 'none',
-      };
-  }
-}
+const DISABLED_CLASSES = 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700';
 
 export default function Btn({
   variant = 'ghost',
@@ -63,14 +26,15 @@ export default function Btn({
   style = {},
   type = 'button',
 }) {
-  const sizeStyle = variant === 'tertiary' ? {} : SIZE[size];
-  const variantStyle = getVariantStyle(variant, accent, disabled);
+  const sizeCls = variant === 'tertiary' ? '' : (SIZE_CLASSES[size] || SIZE_CLASSES.md);
+  const variantCls = disabled ? DISABLED_CLASSES : (VARIANT_CLASSES[variant] || VARIANT_CLASSES.ghost);
 
   return (
     <button
       type={type}
       onClick={disabled ? undefined : onClick}
-      style={{ ...BASE, ...sizeStyle, ...variantStyle, ...style }}
+      className={`inline-flex items-center gap-1.5 font-semibold rounded-xl cursor-pointer transition-all duration-150 outline-none whitespace-nowrap ${sizeCls} ${variantCls}`}
+      style={style}
     >
       {children}
     </button>

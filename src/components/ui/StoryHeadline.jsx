@@ -1,32 +1,25 @@
 // StoryHeadline.jsx — Story-first headline for every view.
-// Renders above the fold so the GM reads the business implication first,
-// then sees data as evidence. Spec: under 80 lines, theme tokens only.
-import { theme } from '@/config/theme';
 
-const VARIANT_STYLES = {
+const VARIANT_CONFIG = {
   urgent: {
-    borderColor: theme.colors.urgent,
-    accentColor: theme.colors.urgent,
-    bg: `${theme.colors.urgent}08`,
-    icon: '⚠',
+    borderClass: 'border-l-error-500',
+    bgClass: 'bg-error-50 dark:bg-error-500/5',
+    icon: '\u26A0',
   },
   warning: {
-    borderColor: theme.colors.warning,
-    accentColor: theme.colors.warning,
-    bg: `${theme.colors.warning}08`,
-    icon: '◆',
+    borderClass: 'border-l-warning-500',
+    bgClass: 'bg-warning-50 dark:bg-warning-500/5',
+    icon: '\u25C6',
   },
   insight: {
-    borderColor: theme.colors.accent,
-    accentColor: theme.colors.accent,
-    bg: `${theme.colors.accent}06`,
-    icon: '◈',
+    borderClass: 'border-l-brand-500',
+    bgClass: 'bg-brand-50 dark:bg-brand-500/5',
+    icon: '\u25C8',
   },
   opportunity: {
-    borderColor: theme.colors.accent,
-    accentColor: theme.colors.accent,
-    bg: `${theme.colors.accent}06`,
-    icon: '◎',
+    borderClass: 'border-l-brand-500',
+    bgClass: 'bg-brand-50 dark:bg-brand-500/5',
+    icon: '\u25CE',
   },
 };
 
@@ -37,49 +30,20 @@ const VARIANT_STYLES = {
  * @param {'urgent'|'warning'|'insight'|'opportunity'} [variant='insight']
  */
 export default function StoryHeadline({ headline, context, variant = 'insight' }) {
-  const s = VARIANT_STYLES[variant] ?? VARIANT_STYLES.insight;
+  const s = VARIANT_CONFIG[variant] ?? VARIANT_CONFIG.insight;
 
   return (
-    <div style={{
-      background: s.bg,
-      borderLeft: `4px solid ${s.borderColor}`,
-      borderRadius: `0 ${theme.radius.md} ${theme.radius.md} 0`,
-      padding: `${theme.spacing.md} ${theme.spacing.lg}`,
-      marginBottom: theme.spacing.sm,
-      boxShadow: `0 2px 8px ${s.borderColor}18`,
-      borderTop: `1px solid ${s.borderColor}22`,
-      borderBottom: `1px solid ${s.borderColor}22`,
-      borderRight: `1px solid ${s.borderColor}18`,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: theme.spacing.md }}>
-        <span style={{
-          fontSize: '20px',
-          lineHeight: 1,
-          marginTop: '2px',
-          flexShrink: 0,
-          opacity: 0.85,
-        }}>
+    <div className={`border-l-4 ${s.borderClass} ${s.bgClass} rounded-r-xl px-5 py-4 sm:px-6 mb-3 shadow-theme-xs`}>
+      <div className="flex items-start gap-4">
+        <span className="text-xl leading-none mt-0.5 shrink-0 opacity-85">
           {s.icon}
         </span>
         <div>
-          <p style={{
-            fontFamily: theme.fonts.serif,
-            fontSize: theme.fontSize.lg,
-            color: theme.colors.textPrimary,
-            fontWeight: 400,
-            lineHeight: 1.35,
-            margin: 0,
-          }}>
+          <p className="font-serif text-lg text-gray-800 font-normal leading-snug m-0 dark:text-white/90">
             {headline}
           </p>
           {context && (
-            <p style={{
-              fontSize: theme.fontSize.sm,
-              color: theme.colors.textSecondary,
-              marginTop: theme.spacing.xs,
-              margin: `${theme.spacing.xs} 0 0 0`,
-              lineHeight: 1.5,
-            }}>
+            <p className="text-sm text-gray-600 mt-2 leading-relaxed m-0 dark:text-gray-400">
               {context}
             </p>
           )}

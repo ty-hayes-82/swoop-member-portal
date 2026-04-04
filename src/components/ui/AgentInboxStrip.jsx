@@ -1,79 +1,30 @@
-import { theme } from '@/config/theme';
 import InfoTooltip from '@/components/ui/InfoTooltip';
 
 export default function AgentInboxStrip({ pendingCount = 0, topAction, onApproveTop, onOpenInbox }) {
   if (pendingCount < 1) return null;
 
   return (
-    <div
-      style={{
-        background: `${theme.colors.agentCyan}0D`,
-        border: `1px solid ${theme.colors.agentCyan}3D`,
-        borderRadius: theme.radius.md,
-        padding: theme.spacing.md,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 10,
-      }}
-    >
-      <div style={{ minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-          <span style={{ color: theme.colors.agentCyan, fontWeight: 700, fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            Agent Inbox
-          </span>
-          <span
-            style={{
-              fontSize: '10px',
-              fontWeight: 700,
-              background: theme.colors.agentCyan,
-              color: theme.colors.textPrimary,
-              borderRadius: 999,
-              padding: '1px 7px',
-            }}
-          >
-            {pendingCount}
-          </span>
+    <div className="bg-blue-light-50 border border-blue-light-200 rounded-xl p-4 flex items-center justify-between gap-2.5 dark:bg-blue-light-500/5 dark:border-blue-light-500/25">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 mb-[3px]">
+          <span className="text-blue-light-600 font-bold text-[11px] tracking-wider uppercase dark:text-blue-light-400">Agent Inbox</span>
+          <span className="text-[10px] font-bold bg-blue-light-500 text-white rounded-full px-2 py-px">{pendingCount}</span>
         </div>
-        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div className="text-xs text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis dark:text-gray-400">
           {topAction?.description ?? 'Actions are waiting for review.'}
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
+      <div className="flex gap-2 shrink-0 items-center">
         {topAction && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <button
-              onClick={onApproveTop}
-              style={{
-                borderRadius: theme.radius.sm,
-                border: `1px solid ${theme.colors.agentApproved}4D`,
-                background: `${theme.colors.agentApproved}1F`,
-                color: theme.colors.agentApproved,
-                padding: '5px 10px',
-                fontSize: '11px',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
+          <div className="flex items-center gap-1">
+            <button onClick={onApproveTop} className="rounded-lg border border-success-200 bg-success-50 text-success-600 px-2.5 py-1.5 text-[11px] font-bold cursor-pointer dark:bg-success-500/10 dark:border-success-500/30 dark:text-success-400">
               Approve top
             </button>
-            <InfoTooltip text="Approve → Sends push notification via Swoop app → Tracks in Intervention Queue → GM sees response status within 24h" />
+            <InfoTooltip text="Approve \u2192 Sends push notification via Swoop app \u2192 Tracks in Intervention Queue \u2192 GM sees response status within 24h" />
           </div>
         )}
-        <button
-          onClick={onOpenInbox}
-          style={{
-            borderRadius: theme.radius.sm,
-            border: `1px solid ${theme.colors.agentCyan}52`,
-            background: 'transparent',
-            color: theme.colors.agentCyan,
-            padding: '5px 10px',
-            fontSize: '11px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >
+        <button onClick={onOpenInbox} className="rounded-lg border border-blue-light-200 bg-transparent text-blue-light-600 px-2.5 py-1.5 text-[11px] font-bold cursor-pointer dark:border-blue-light-500/30 dark:text-blue-light-400">
           View inbox
         </button>
       </div>

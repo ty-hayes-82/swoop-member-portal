@@ -2,14 +2,12 @@ import { SoWhatCallout, PlaybookActionCard } from '@/components/ui';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getEmailHeatmap, getDecayingMembers } from '@/services/memberService';
-import { theme } from '@/config/theme';
-
 function heatColor(rate) {
-  if (rate >= 0.65) return theme.colors.success;
-  if (rate >= 0.45) return theme.colors.success;
-  if (rate >= 0.25) return theme.colors.warning;
-  if (rate >= 0.10) return theme.colors.staffing;
-  return theme.colors.urgent;
+  if (rate >= 0.65) return '#22c55e';
+  if (rate >= 0.45) return '#22c55e';
+  if (rate >= 0.25) return '#f59e0b';
+  if (rate >= 0.10) return '#f59e0b';
+  return '#ef4444';
 }
 
 const formatPercent = (value) => (Number.isFinite(value) ? `${(value * 100).toFixed(0)}%` : '—');
@@ -26,40 +24,37 @@ export default function EmailTab() {
     heatmap.find(h => h.campaign === campaign && h.archetype === archetype)?.openRate ?? 0;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
       {/* Heatmap */}
-      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
-        padding: theme.spacing.md, border: `1px solid ${theme.colors.border}`, overflowX: 'auto' }}>
-        <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary,
-          marginBottom: '4px' }}>Communication Health — Email Engagement</div>
-        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
-          marginBottom: theme.spacing.md }}>Email engagement is an early health score input — decay here precedes golf and dining disengagement by 6-8 weeks</div>
-        <table style={{ borderCollapse: 'collapse', fontSize: theme.fontSize.xs, minWidth: 600 }}>
+      <div className="bg-gray-100 rounded-xl p-4 border border-gray-200 dark:border-gray-800 overflow-x-auto">
+        <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-1">
+          Communication Health — Email Engagement
+        </div>
+        <div className="text-xs text-gray-400 mb-4">
+          Email engagement is an early health score input — decay here precedes golf and dining disengagement by 6-8 weeks
+        </div>
+        <table className="border-collapse text-xs min-w-[600px]">
           <thead>
             <tr>
-              <th style={{ padding: '4px 8px', color: theme.colors.textMuted, textAlign: 'left',
-                minWidth: 140 }}>Campaign</th>
+              <th className="py-1 px-2 text-gray-400 text-left min-w-[140px]">Campaign</th>
               {archetypes.map(a => (
-                <th key={a} style={{ padding: '4px 8px', color: theme.colors.textMuted,
-                  textAlign: 'center', minWidth: 80, fontSize: 10 }}>{a.split(' ')[0]}</th>
+                <th key={a} className="py-1 px-2 text-gray-400 text-center min-w-[80px] text-[10px]">{a.split(' ')[0]}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {campaigns.map(c => (
               <tr key={c}>
-                <td style={{ padding: '4px 8px', color: theme.colors.textSecondary,
-                  fontSize: 10, maxWidth: 140 }}>{c}</td>
+                <td className="py-1 px-2 text-gray-500 text-[10px] max-w-[140px]">{c}</td>
                 {archetypes.map(a => {
                   const rate = getRate(c, a);
-                  const color = Number.isFinite(rate) ? heatColor(rate) : theme.colors.textMuted;
+                  const color = Number.isFinite(rate) ? heatColor(rate) : '#9CA3AF';
                   return (
-                    <td key={a} style={{ padding: '4px 8px', textAlign: 'center' }}>
-                      <div style={{
-                        background: `${color}30`, border: `1px solid ${color}60`,
-                        borderRadius: 4, padding: '3px 6px',
-                        color, fontFamily: theme.fonts.mono, fontSize: 10,
-                      }}>
+                    <td key={a} className="py-1 px-2 text-center">
+                      <div
+                        className="rounded py-[3px] px-1.5 font-mono text-[10px]"
+                        style={{ background: `${color}30`, border: `1px solid ${color}60`, color }}
+                      >
                         {rate > 0 ? formatPercent(rate) : '—'}
                       </div>
                     </td>
@@ -72,33 +67,29 @@ export default function EmailTab() {
       </div>
 
       {/* Decay watch list */}
-      <div style={{ background: theme.colors.bgDeep, borderRadius: theme.radius.md,
-        border: `1px solid ${theme.colors.urgent}30`, overflow: 'hidden' }}>
-        <div style={{ padding: theme.spacing.md, borderBottom: `1px solid ${theme.colors.border}` }}>
-          <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.urgent }}>
+      <div className="bg-gray-100 rounded-xl border border-error-500/20 overflow-hidden">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+          <span className="text-sm font-semibold text-error-500">
             ⚠ Engagement Decay Watch List
           </span>
-          <span style={{ marginLeft: theme.spacing.sm, fontSize: theme.fontSize.xs,
-            color: theme.colors.textMuted }}>Email decay precedes disengagement by 4-6 weeks</span>
+          <span className="ml-2 text-xs text-gray-400">Email decay precedes disengagement by 4-6 weeks</span>
         </div>
         {decaying.map((m, i) => (
-          <div key={i} style={{ padding: theme.spacing.md,
-            borderBottom: i < decaying.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div key={i} className="p-4" style={{ borderBottom: i < decaying.length - 1 ? '1px solid #E5E7EB' : 'none' }}>
+            <div className="flex justify-between items-center">
               <MemberLink
                 memberId={m.memberId}
-                style={{ color: theme.colors.textPrimary, fontSize: theme.fontSize.sm }}
+                className="text-gray-800 dark:text-white/90 text-sm"
               >
                 {m.name}
               </MemberLink>
-              <span style={{ color: theme.colors.urgent, fontFamily: theme.fonts.mono,
-                fontSize: theme.fontSize.sm }}>{formatTrend(m.trend)}</span>
+              <span className="text-error-500 font-mono text-sm">{formatTrend(m.trend)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, flexWrap: 'wrap', gap: 8 }}>
-              <div style={{ display: 'flex', gap: theme.spacing.md }}>
+            <div className="flex justify-between items-center mt-1 flex-wrap gap-2">
+              <div className="flex gap-4">
                 {[['Nov', m.nov], ['Dec', m.dec], ['Jan', m.jan]].map(([label, val]) => (
-                  <span key={label} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
-                    {label}: <span style={{ color: heatColor(Number.isFinite(val) ? val : 0), fontFamily: theme.fonts.mono }}>
+                  <span key={label} className="text-xs text-gray-400">
+                    {label}: <span className="font-mono" style={{ color: heatColor(Number.isFinite(val) ? val : 0) }}>
                       {formatPercent(val)}
                     </span>
                   </span>

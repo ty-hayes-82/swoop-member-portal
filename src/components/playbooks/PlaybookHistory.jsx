@@ -1,75 +1,30 @@
 // PlaybookHistory.jsx — shows simulated past run history for each playbook
-// Hard ceiling: 150 lines. Target: 80 lines.
-
 import { PLAYBOOK_HISTORY } from '@/config/actionTypes';
-import { theme } from '@/config/theme';
 
 export default function PlaybookHistory({ playbookId, accent }) {
   const history = PLAYBOOK_HISTORY[playbookId];
   if (!history?.length) return null;
 
   return (
-    <div style={{
-      marginBottom: theme.spacing.md,
-      padding: theme.spacing.md,
-      background: `${theme.colors.success}06`,
-      border: `1px solid ${theme.colors.success}20`,
-      borderRadius: theme.radius.md,
-    }}>
-      <div style={{
-        fontSize: '11px', fontWeight: 600, color: theme.colors.success,
-        letterSpacing: '0.06em', textTransform: 'uppercase',
-        marginBottom: theme.spacing.sm,
-        display: 'flex', alignItems: 'center', gap: '6px',
-      }}>
-        <span>✓</span> Track Record
+    <div className="mb-4 p-4 bg-success-50 border border-success-200 rounded-xl dark:bg-success-500/5 dark:border-success-500/20">
+      <div className="text-[11px] font-semibold text-success-500 tracking-wider uppercase mb-3 flex items-center gap-1.5">
+        <span>\u2713</span> Track Record
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div className="flex flex-col gap-1.5">
         {history.map((record, i) => (
-          <div key={i} style={{
-            display: 'flex', alignItems: 'center',
-            padding: '8px 10px',
-            background: theme.colors.bgCardHover,
-            borderRadius: theme.radius.sm,
-            gap: theme.spacing.md,
-          }}>
+          <div key={i} className="flex items-center px-2.5 py-2 bg-gray-50 rounded-lg gap-4 dark:bg-gray-800">
             {/* Quarter */}
-            <span style={{
-              fontSize: '11px', fontWeight: 700, color: theme.colors.textMuted,
-              fontFamily: theme.fonts.mono, minWidth: '48px',
-            }}>
-              {record.quarter}
-            </span>
+            <span className="text-[11px] font-bold text-gray-500 font-mono min-w-[48px] dark:text-gray-400">{record.quarter}</span>
 
             {/* Runs count */}
-            <span style={{
-              fontSize: '11px', color: theme.colors.textMuted,
-              padding: '2px 6px',
-              background: `${accent}12`,
-              borderRadius: '4px',
-              flexShrink: 0,
-            }}>
-              {record.runs}× run
-            </span>
+            <span className="text-[11px] text-gray-500 px-1.5 py-0.5 bg-brand-50 rounded shrink-0 dark:bg-brand-500/10 dark:text-gray-400">{record.runs}\u00D7 run</span>
 
             {/* Outcome */}
-            <span style={{
-              fontSize: '12px', color: theme.colors.textSecondary,
-              flex: 1, minWidth: 0,
-            }}>
-              {record.outcome}
-            </span>
+            <span className="text-xs text-gray-600 flex-1 min-w-0 dark:text-gray-400">{record.outcome}</span>
 
             {/* Impact */}
-            <span style={{
-              fontSize: '12px', fontWeight: 700,
-              color: theme.colors.success,
-              fontFamily: theme.fonts.mono,
-              flexShrink: 0,
-            }}>
-              {record.impact}
-            </span>
+            <span className="text-xs font-bold text-success-500 font-mono shrink-0">{record.impact}</span>
           </div>
         ))}
       </div>

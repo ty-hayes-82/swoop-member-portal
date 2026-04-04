@@ -1,4 +1,3 @@
-import { theme } from '@/config/theme';
 import { useNavigation } from '@/context/NavigationContext';
 import { isRealClub } from '@/config/constants';
 import { paceFBImpact } from '@/data/pace';
@@ -36,82 +35,38 @@ export default function RevenueSummaryCard() {
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: theme.spacing.sm,
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}>
-        <div style={{
-          fontSize: '11px',
-          fontWeight: 700,
-          color: theme.colors.operations,
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}>
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-between items-center">
+        <div className="text-[11px] font-bold text-success-500 uppercase tracking-wide">
           Revenue Snapshot
         </div>
       </div>
 
-      <div style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md,
-        padding: theme.spacing.md,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.sm,
-      }}>
+      <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-col gap-2">
         {/* Total opportunity — summary only */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <div className="flex justify-between items-baseline">
           <div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Total addressable opportunity</div>
-            <div style={{
-              fontSize: 24, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
-              color: theme.colors.textPrimary,
-            }}>
-              ${totalOpportunity.toLocaleString()}<span style={{ fontSize: 14, color: theme.colors.textMuted }}>/mo</span>
+            <div className="text-xs text-gray-400">Total addressable opportunity</div>
+            <div className="text-2xl font-bold font-mono text-gray-800 dark:text-white/90">
+              ${totalOpportunity.toLocaleString()}<span className="text-sm text-gray-400">/mo</span>
             </div>
           </div>
-          <div style={{
-            fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textAlign: 'right',
-          }}>
+          <div className="text-xs text-gray-400 text-right">
             ${(totalOpportunity * 12).toLocaleString()}/yr
           </div>
         </div>
 
         {/* Top action */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '6px 10px',
-          background: `${theme.colors.success}06`,
-          border: `1px solid ${theme.colors.success}20`,
-          borderRadius: theme.radius.sm,
-          gap: 8,
-        }}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
-            Top action: <span style={{ color: theme.colors.textPrimary, fontWeight: 600 }}>{topAction.label}</span>
+        <div className="flex items-center justify-between py-1.5 px-2.5 bg-success-500/[0.024] border border-success-500/[0.12] rounded-lg gap-2">
+          <div className="text-xs text-gray-500">
+            Top action: <span className="text-gray-800 dark:text-white/90 font-semibold">{topAction.label}</span>
           </div>
         </div>
 
         {/* Explore CTA */}
         <button
           onClick={() => navigate('revenue')}
-          style={{
-            padding: '8px 16px',
-            fontSize: theme.fontSize.xs,
-            fontWeight: 700,
-            color: theme.colors.accent,
-            background: `${theme.colors.accent}08`,
-            border: `1px solid ${theme.colors.accent}30`,
-            borderRadius: theme.radius.md,
-            cursor: 'pointer',
-            textAlign: 'center',
-          }}
+          className="py-2 px-4 text-xs font-bold text-brand-500 bg-brand-500/[0.03] border border-brand-500/20 rounded-xl cursor-pointer text-center"
         >
           Explore full breakdown in Revenue →
         </button>

@@ -1,34 +1,18 @@
-import { theme } from '@/config/theme';
-
-const VARIANT_STYLES = {
-  urgent:   { bg: `${theme.colors.urgent}20`, color: theme.colors.urgent, border: `${theme.colors.urgent}40` },
-  warning:  { bg: `${theme.colors.warning}20`, color: theme.colors.warning, border: `${theme.colors.warning}40` },
-  success:  { bg: `${theme.colors.success}20`, color: theme.colors.success, border: `${theme.colors.success}40` },
-  neutral:  { bg: `${theme.colors.reportSage}20`, color: theme.colors.reportSage, border: `${theme.colors.reportSage}40` },
-  effort:   { bg: 'var(--bg-deep)', color: 'var(--text-muted)', border: 'var(--border)' },
-  timeline: { bg: 'var(--bg-deep)', color: 'var(--text-muted)', border: 'var(--border)' },
+const VARIANT_CLASSES = {
+  urgent:   'bg-error-50 text-error-600 border-error-200 dark:bg-error-500/15 dark:text-error-500 dark:border-error-500/30',
+  warning:  'bg-warning-50 text-warning-600 border-warning-200 dark:bg-warning-500/15 dark:text-warning-500 dark:border-warning-500/30',
+  success:  'bg-success-50 text-success-600 border-success-200 dark:bg-success-500/15 dark:text-success-500 dark:border-success-500/30',
+  neutral:  'bg-gray-100 text-gray-600 border-gray-200 dark:bg-white/5 dark:text-gray-400 dark:border-gray-700',
+  effort:   'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700',
+  timeline: 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700',
 };
 
 export default function Badge({ text, variant = 'neutral', size = 'sm' }) {
-  const s = VARIANT_STYLES[variant] || VARIANT_STYLES.neutral;
-  const pad = size === 'sm' ? '2px 8px' : '4px 12px';
-  const fs  = size === 'sm' ? '11px' : '13px';
+  const variantCls = VARIANT_CLASSES[variant] || VARIANT_CLASSES.neutral;
+  const sizeCls = size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-3 py-1 text-sm';
 
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      padding: pad,
-      borderRadius: '999px',
-      fontSize: fs,
-      fontWeight: 600,
-      letterSpacing: '0.02em',
-      background: s.bg,
-      color: s.color,
-      border: `1px solid ${s.border}`,
-      whiteSpace: 'nowrap',
-      fontFamily: 'var(--font-sans)',
-    }}>
+    <span className={`inline-flex items-center rounded-full font-semibold tracking-wide whitespace-nowrap border ${sizeCls} ${variantCls}`}>
       {text}
     </span>
   );

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
 
 const STORAGE_KEY = 'swoop_last_visit';
@@ -40,37 +39,18 @@ export default function SinceLastVisit({ yesterdayData = null }) {
   const showYesterday = yesterdayData && elapsed > 12 * 60 * 60 * 1000; // >12 hours
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: showYesterday ? '10px' : '0',
-      padding: showYesterday ? '12px 14px' : '8px 14px',
-      background: `${theme.colors.info}06`,
-      border: `1px solid ${theme.colors.info}20`,
-      borderRadius: theme.radius.sm,
-    }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        fontSize: theme.fontSize.xs,
-        color: theme.colors.textSecondary,
-      }}>
-        <span style={{ fontWeight: 600 }}>Since your last visit</span>
-        <span style={{ color: theme.colors.textMuted }}>({formatTimeAgo(elapsed)})</span>
+    <div
+      className="flex flex-col bg-blue-600/[0.024] border border-blue-600/[0.12] rounded-lg"
+      style={{
+        gap: showYesterday ? '10px' : '0',
+        padding: showYesterday ? '12px 14px' : '8px 14px',
+      }}
+    >
+      <div className="flex items-center gap-2.5 text-xs text-gray-500">
+        <span className="font-semibold">Since your last visit</span>
+        <span className="text-gray-400">({formatTimeAgo(elapsed)})</span>
         {pendingAgentCount > 0 && (
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '2px 8px',
-            borderRadius: '999px',
-            background: `${theme.colors.accent}12`,
-            border: `1px solid ${theme.colors.accent}30`,
-            color: theme.colors.accent,
-            fontWeight: 700,
-            fontSize: '11px',
-          }}>
+          <span className="inline-flex items-center gap-1 py-0.5 px-2 rounded-full bg-brand-500/[0.07] border border-brand-500/20 text-brand-500 font-bold text-[11px]">
             {pendingAgentCount} new action{pendingAgentCount !== 1 ? 's' : ''}
           </span>
         )}
@@ -78,44 +58,30 @@ export default function SinceLastVisit({ yesterdayData = null }) {
 
       {/* Yesterday's key metrics — shown when GM has been away >12 hours */}
       {showYesterday && (
-        <div style={{
-          display: 'flex',
-          gap: '16px',
-          flexWrap: 'wrap',
-          paddingTop: '6px',
-          borderTop: `1px solid ${theme.colors.info}15`,
-        }}>
+        <div className="flex gap-4 flex-wrap pt-1.5 border-t border-blue-600/[0.08]">
           {yesterdayData.revenue != null && (
-            <div style={{ fontSize: theme.fontSize.xs }}>
-              <span style={{ color: theme.colors.textMuted }}>Revenue: </span>
-              <span style={{ fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>
+            <div className="text-xs">
+              <span className="text-gray-400">Revenue: </span>
+              <span className="font-bold font-mono text-gray-800 dark:text-white/90">
                 {formatCurrency(yesterdayData.revenue)}
               </span>
               {yesterdayData.revenueVsPlan != null && (
-                <span style={{
-                  marginLeft: 4,
-                  fontWeight: 600,
-                  color: yesterdayData.revenueVsPlan < 0 ? theme.colors.urgent : theme.colors.success,
-                }}>
+                <span className={`ml-1 font-semibold ${yesterdayData.revenueVsPlan < 0 ? 'text-error-500' : 'text-success-500'}`}>
                   {yesterdayData.revenueVsPlan >= 0 ? '+' : ''}{(yesterdayData.revenueVsPlan * 100).toFixed(0)}% vs plan
                 </span>
               )}
             </div>
           )}
           {yesterdayData.rounds != null && (
-            <div style={{ fontSize: theme.fontSize.xs }}>
-              <span style={{ color: theme.colors.textMuted }}>Rounds: </span>
-              <span style={{ fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>
+            <div className="text-xs">
+              <span className="text-gray-400">Rounds: </span>
+              <span className="font-bold font-mono text-gray-800 dark:text-white/90">
                 {yesterdayData.rounds}
               </span>
             </div>
           )}
           {yesterdayData.isUnderstaffed && (
-            <span style={{
-              fontSize: '10px', fontWeight: 700, padding: '1px 6px',
-              borderRadius: '4px', background: `${theme.colors.urgent}12`,
-              color: theme.colors.urgent,
-            }}>
+            <span className="text-[10px] font-bold py-px px-1.5 rounded bg-error-500/[0.07] text-error-500">
               5 complaints filed — understaffed
             </span>
           )}

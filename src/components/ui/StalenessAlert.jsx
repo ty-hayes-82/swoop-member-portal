@@ -1,10 +1,7 @@
 /**
- * Staleness Alert Banner — Resilience Phase 3
- * Shows when any connected data domain exceeds freshness threshold.
- * Mount at top of any dashboard page.
+ * Staleness Alert Banner — shows when data domain exceeds freshness threshold.
  */
 import { useState, useEffect } from 'react';
-import { theme } from '@/config/theme';
 
 const THRESHOLDS = { CRM: 48, TEE_SHEET: 24, POS: 24, EMAIL: 72, LABOR: 48 };
 const DOMAIN_LABELS = { CRM: 'CRM', TEE_SHEET: 'Tee Sheet', POS: 'POS', EMAIL: 'Email', LABOR: 'Labor' };
@@ -38,13 +35,8 @@ export default function StalenessAlert() {
   if (staledomains.length === 0) return null;
 
   return (
-    <div style={{
-      padding: '10px 16px', borderRadius: theme.radius.md,
-      background: `${theme.colors.warning}08`, border: `1px solid ${theme.colors.warning}25`,
-      display: 'flex', alignItems: 'center', gap: 8,
-      fontSize: theme.fontSize.xs, color: theme.colors.warning, fontWeight: 500,
-    }}>
-      <span style={{ fontSize: '16px' }}>⚠️</span>
+    <div className="px-4 py-2.5 rounded-xl bg-warning-50 border border-warning-200 flex items-center gap-2 text-xs text-warning-600 font-medium dark:bg-warning-500/5 dark:border-warning-500/25 dark:text-warning-400">
+      <span className="text-base">\u26A0\uFE0F</span>
       <div>
         {staledomains.map(d => (
           <span key={d.code}>

@@ -3,8 +3,6 @@
  * Steps: Club Info → Course Setup → Upload Data → Ready
  */
 import { useState, useRef } from 'react';
-import { theme } from '@/config/theme';
-
 const TEMPLATES = [
   { file: 'swoop-template-members-only.xlsx', label: 'Members Only', desc: '20 members — test health scores and at-risk detection', sheets: '1 sheet', color: '#3b82f6' },
   { file: 'swoop-template-members-rounds.xlsx', label: 'Members + Rounds', desc: '25 members, 80 rounds — adds golf engagement analysis', sheets: '2 sheets', color: '#8b5cf6' },
@@ -217,7 +215,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
 
         {/* ─── Step 0: Club Info ─── */}
         {step === 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="flex flex-col gap-3.5">
             <div>
               <label style={labelStyle}>Club Name *</label>
               <input value={clubName} onChange={e => setClubName(e.target.value)} placeholder="Pine Valley Country Club" style={inputStyle} />
@@ -251,7 +249,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
 
         {/* ─── Step 1: Course Setup ─── */}
         {step === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="flex flex-col gap-3.5">
             <div style={{ padding: '12px 16px', borderRadius: '10px', background: '#F0F9FF', border: '1px solid #BAE6FD', fontSize: '13px', color: '#0369A1' }}>
               Club created! Now set up your course (optional).
             </div>
@@ -283,13 +281,13 @@ export default function NewClubSetup({ onComplete, onBack }) {
 
         {/* ─── Step 2: Upload Data ─── */}
         {step === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="flex flex-col gap-4">
             <div style={{ fontSize: '14px', color: '#374151', fontWeight: 500 }}>
               Download a template, fill in your data, and upload it. Start with Members Only to test quickly.
             </div>
 
             {/* Template downloads */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="flex flex-col gap-2">
               {TEMPLATES.map((t) => (
                 <a
                   key={t.file}
@@ -302,12 +300,12 @@ export default function NewClubSetup({ onComplete, onBack }) {
                     textDecoration: 'none', color: '#374151',
                   }}
                 >
-                  <span style={{ fontSize: '20px' }}>📥</span>
-                  <div style={{ flex: 1 }}>
+                  <span className="text-xl">📥</span>
+                  <div className="flex-1">
                     <div style={{ fontSize: '13px', fontWeight: 700, color: t.color }}>{t.label}</div>
                     <div style={{ fontSize: '11px', color: '#6B7280' }}>{t.desc}</div>
                   </div>
-                  <span style={{ fontSize: '11px', color: '#9CA3AF', fontWeight: 600 }}>{t.sheets}</span>
+                  <span className="text-[11px] text-gray-400 font-semibold">{t.sheets}</span>
                 </a>
               ))}
             </div>
@@ -327,7 +325,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleFileUpload}
-                style={{ display: 'none' }}
+                className="hidden"
               />
               {uploading ? (
                 <div style={{ fontSize: '14px', color: '#F3922D', fontWeight: 600 }}>Uploading and processing...</div>
@@ -370,7 +368,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
         {/* ─── Step 3: Ready ─── */}
         {step === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'center' }}>
-            <div style={{ fontSize: '48px' }}>🎉</div>
+            <div className="text-5xl">🎉</div>
             <div style={{ fontSize: '20px', fontWeight: 700, color: '#0F0F0F' }}>
               {clubName} is ready!
             </div>
@@ -383,12 +381,12 @@ export default function NewClubSetup({ onComplete, onBack }) {
                   {uploadResults.rounds > 0 && <div>✅ Golf engagement & pace analysis</div>}
                   {uploadResults.transactions > 0 && <div>✅ Revenue signals & spend patterns</div>}
                   {uploadResults.complaints > 0 && <div>✅ Complaint tracking & follow-through</div>}
-                  {!uploadResults.transactions && <div style={{ color: '#9CA3AF' }}>📎 Upload F&B data later to unlock revenue insights</div>}
-                  {!uploadResults.complaints && <div style={{ color: '#9CA3AF' }}>📎 Upload complaints later to track service follow-through</div>}
+                  {!uploadResults.transactions && <div className="text-gray-400">📎 Upload F&B data later to unlock revenue insights</div>}
+                  {!uploadResults.complaints && <div className="text-gray-400">📎 Upload complaints later to track service follow-through</div>}
                 </div>
               </div>
             ) : (
-              <div style={{ fontSize: '14px', color: '#6B7280' }}>
+              <div className="text-sm text-gray-500">
                 No data uploaded yet. You can upload data from Admin &gt; CSV Import anytime.
               </div>
             )}

@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import { theme } from '@/config/theme';
+
+const VARIANT_CONFIG = {
+  success: { bgCls: 'bg-success-500', icon: '\u2713' },
+  error:   { bgCls: 'bg-error-500', icon: '\u2715' },
+  info:    { bgCls: 'bg-blue-light-500', icon: '\u2139' },
+  warning: { bgCls: 'bg-warning-500', icon: '\u26A0' },
+};
 
 export function Toast({ message, variant = 'success', duration = 4000, onClose }) {
   const [isVisible, setIsVisible] = useState(true);
@@ -18,39 +24,18 @@ export function Toast({ message, variant = 'success', duration = 4000, onClose }
 
   if (!isVisible) return null;
 
-  const variants = {
-    success: { bg: theme.colors.success, icon: '✓' },
-    error: { bg: theme.colors.urgent, icon: '✕' },
-    info: { bg: theme.colors.operations, icon: 'ℹ' },
-    warning: { bg: theme.colors.warning, icon: '⚠' },
-  };
-
-  const config = variants[variant] || variants.success;
+  const config = VARIANT_CONFIG[variant] || VARIANT_CONFIG.success;
 
   return (
     <div
+      className={`fixed right-6 z-[9999] ${config.bgCls} text-white px-6 py-3.5 rounded-xl shadow-theme-xl border border-white/15 flex items-center gap-2.5 text-sm font-medium transition-all duration-300`}
       style={{
-        position: 'fixed',
         bottom: isExiting ? '-100px' : '24px',
-        right: '24px',
-        zIndex: 9999,
-        background: config.bg,
-        color: theme.colors.white,
-        padding: '14px 24px',
-        borderRadius: theme.radius.md,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-        border: '1px solid rgba(255,255,255,0.15)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        fontSize: theme.fontSize.sm,
-        fontWeight: 500,
         opacity: isExiting ? 0 : 1,
         transform: `translateY(${isExiting ? '20px' : '0'})`,
-        transition: 'all 0.3s ease',
       }}
     >
-      <span style={{ fontSize: '18px', fontWeight: 700 }}>{config.icon}</span>
+      <span className="text-lg font-bold">{config.icon}</span>
       <span>{message}</span>
     </div>
   );

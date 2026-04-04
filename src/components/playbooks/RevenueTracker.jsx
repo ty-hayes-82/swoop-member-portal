@@ -1,9 +1,7 @@
 import { useFixItActions } from '@/hooks/useFixItActions';
-import { theme } from '@/config/theme';
 
 /**
  * RevenueTracker — cumulative impact display for sidebar / header
- * Props: { compact? }
  */
 export default function RevenueTracker({ compact = false }) {
   const { activeCount, totalPlaybooks, totalRevenueImpact } = useFixItActions();
@@ -14,43 +12,29 @@ export default function RevenueTracker({ compact = false }) {
 
   if (compact) {
     return (
-      <div style={{
-        padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-        background: activeCount > 0 ? `${theme.colors.success}18` : theme.colors.bgCardHover,
-        borderRadius: theme.radius.md,
-        border: `1px solid ${activeCount > 0 ? `${theme.colors.success}40` : theme.colors.border}`,
-      }}>
-        <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: 2 }}>
+      <div className={`px-3 py-3 rounded-xl border ${activeCount > 0 ? 'bg-success-50 border-success-200 dark:bg-success-500/10 dark:border-success-500/30' : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'}`}>
+        <div className="text-xs text-gray-500 mb-0.5 dark:text-gray-400">
           {activeCount}/{totalPlaybooks} playbooks active
         </div>
-        <div style={{ fontSize: theme.fontSize.md, fontFamily: theme.fonts.mono, fontWeight: 700,
-          color: activeCount > 0 ? theme.colors.success : theme.colors.textSecondary }}>
-          {fmt(totalRevenueImpact.monthly)}<span style={{ fontSize: theme.fontSize.xs, fontWeight: 400 }}>/mo</span>
+        <div className={`text-base font-mono font-bold ${activeCount > 0 ? 'text-success-500' : 'text-gray-600 dark:text-gray-400'}`}>
+          {fmt(totalRevenueImpact.monthly)}<span className="text-xs font-normal">/mo</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{
-      padding: theme.spacing.md, borderRadius: theme.radius.md,
-      background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-    }}>
-      <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm }}>
-        Revenue Impact Tracker
-      </div>
-      <div style={{ display: 'flex', gap: theme.spacing.lg }}>
+    <div className="p-4 rounded-xl bg-white border border-gray-200 dark:bg-white/[0.03] dark:border-gray-800">
+      <div className="text-sm text-gray-600 mb-3 dark:text-gray-400">Revenue Impact Tracker</div>
+      <div className="flex gap-6">
         {[
           { label: 'Monthly', value: fmt(totalRevenueImpact.monthly) },
           { label: 'Annualized', value: fmt(totalRevenueImpact.annual) },
           { label: 'Playbooks', value: `${activeCount} / ${totalPlaybooks}` },
         ].map(({ label, value }) => (
           <div key={label}>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{label}</div>
-            <div style={{ fontSize: theme.fontSize.xl, fontFamily: theme.fonts.mono, fontWeight: 700,
-              color: activeCount > 0 ? theme.colors.success : theme.colors.textPrimary }}>
-              {value}
-            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">{label}</div>
+            <div className={`text-xl font-mono font-bold ${activeCount > 0 ? 'text-success-500' : 'text-gray-800 dark:text-white/90'}`}>{value}</div>
           </div>
         ))}
       </div>

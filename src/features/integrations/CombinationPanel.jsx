@@ -1,32 +1,6 @@
 // features/integrations/CombinationPanel.jsx
-import { theme } from '@/config/theme';
 import { combinations } from '@/data/combinations';
 import { integrationsById } from '@/data/integrations';
-
-const sectionLabelStyle = (color) => ({
-  fontSize: theme.fontSize.xs,
-  fontWeight: 600,
-  textTransform: 'uppercase',
-  letterSpacing: '1.2px',
-  color,
-  marginBottom: 12,
-});
-
-const listItemStyle = (accentColor) => ({
-  display: 'flex',
-  gap: 10,
-  padding: '10px 0',
-  borderBottom: `1px solid ${theme.colors.border}`,
-  fontSize: theme.fontSize.sm,
-  color: theme.colors.textSecondary,
-  lineHeight: 1.5,
-  alignItems: 'flex-start',
-});
-
-const bulletStyle = (color) => ({
-  width: 6, height: 6, borderRadius: '50%',
-  background: color, marginTop: 6, flexShrink: 0,
-});
 
 export function CombinationPanel({ selected }) {
   if (selected.length < 2) return null;
@@ -37,25 +11,15 @@ export function CombinationPanel({ selected }) {
   const intA = integrationsById[idA];
   const intB = integrationsById[idB];
 
-  const panelStyle = {
-    background: theme.colors.white,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: theme.spacing.xl,
-    animation: 'fadeSlideIn 0.3s ease',
-    boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
-  };
-
   if (!combo) {
     return (
-      <div style={panelStyle}>
-        <div style={{ padding: '32px 36px', textAlign: 'center' }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>{intA.icon} + {intB.icon}</div>
-          <div style={{ fontSize: theme.fontSize.lg, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: 8 }}>
+      <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden mb-8 shadow-md animate-[fadeSlideIn_0.3s_ease]">
+        <div className="py-8 px-9 text-center">
+          <div className="text-[32px] mb-3">{intA.icon} + {intB.icon}</div>
+          <div className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-2">
             Cross-System Intelligence
           </div>
-          <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, maxWidth: 480, margin: '0 auto' }}>
+          <p className="text-sm text-gray-500 max-w-[480px] mx-auto">
             This combination unlocks powerful cross-system intelligence. Contact our team to explore what <strong>{intA.name}</strong> + <strong>{intB.name}</strong> can reveal for your club.
           </p>
         </div>
@@ -64,49 +28,38 @@ export function CombinationPanel({ selected }) {
   }
 
   return (
-    <div style={panelStyle} id="combination-panel">
+    <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden mb-8 shadow-md animate-[fadeSlideIn_0.3s_ease]" id="combination-panel">
       {/* Header */}
-      <div style={{
-        padding: '24px 36px',
-        borderBottom: `1px solid ${theme.colors.border}`,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 16,
-        background: 'rgba(247,245,242,0.5)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{
-            width: 44, height: 44, borderRadius: 10,
-            background: `${intA.color}15`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22,
-          }}>{intA.icon}</span>
-          <span style={{ fontSize: 18, color: theme.colors.textMuted, fontWeight: 300 }}>+</span>
-          <span style={{
-            width: 44, height: 44, borderRadius: 10,
-            background: `${intB.color}15`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22,
-          }}>{intB.icon}</span>
+      <div className="py-6 px-9 border-b border-gray-200 dark:border-gray-800 flex items-center gap-4 bg-[rgba(247,245,242,0.5)]">
+        <div className="flex items-center gap-3">
+          <span
+            className="w-11 h-11 rounded-[10px] flex items-center justify-center text-[22px]"
+            style={{ background: `${intA.color}15` }}
+          >{intA.icon}</span>
+          <span className="text-lg text-gray-400 font-light">+</span>
+          <span
+            className="w-11 h-11 rounded-[10px] flex items-center justify-center text-[22px]"
+            style={{ background: `${intB.color}15` }}
+          >{intB.icon}</span>
         </div>
         <div>
-          <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary }}>
+          <div className="text-lg font-bold text-gray-800 dark:text-white/90">
             {combo.title}
           </div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginTop: 2 }}>
+          <div className="text-xs text-gray-400 mt-0.5">
             {intA.name} × {intB.name}
           </div>
         </div>
       </div>
 
       {/* Two columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', padding: '28px 36px', gap: 36 }}>
+      <div className="grid grid-cols-2 py-7 px-9 gap-9">
         {/* Insights */}
         <div>
-          <div style={sectionLabelStyle(theme.colors.integrationTeeSheet)}>Insights Unlocked</div>
+          <div className="text-xs font-semibold uppercase tracking-[1.2px] text-[#1a7a3c] mb-3">Insights Unlocked</div>
           {combo.insights.map((insight, i) => (
-            <div key={i} style={{ ...listItemStyle(theme.colors.integrationTeeSheet), borderBottom: i < combo.insights.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
-              <span style={bulletStyle(theme.colors.integrationTeeSheet)} />
+            <div key={i} className="flex gap-2.5 py-2.5 items-start text-sm text-gray-500 leading-normal" style={{ borderBottom: i < combo.insights.length - 1 ? '1px solid #E5E7EB' : 'none' }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#1a7a3c] mt-1.5 shrink-0" />
               {insight}
             </div>
           ))}
@@ -114,10 +67,10 @@ export function CombinationPanel({ selected }) {
 
         {/* Automations */}
         <div>
-          <div style={sectionLabelStyle(theme.colors.operations)}>Automations Enabled</div>
+          <div className="text-xs font-semibold uppercase tracking-[1.2px] text-success-500 mb-3">Automations Enabled</div>
           {combo.automations.map((auto, i) => (
-            <div key={i} style={{ ...listItemStyle(theme.colors.operations), borderBottom: i < combo.automations.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}>
-              <span style={bulletStyle(theme.colors.operations)} />
+            <div key={i} className="flex gap-2.5 py-2.5 items-start text-sm text-gray-500 leading-normal" style={{ borderBottom: i < combo.automations.length - 1 ? '1px solid #E5E7EB' : 'none' }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-success-500 mt-1.5 shrink-0" />
               {auto}
             </div>
           ))}
@@ -125,18 +78,11 @@ export function CombinationPanel({ selected }) {
       </div>
 
       {/* Example insight */}
-      <div style={{
-        margin: '0 36px 28px',
-        background: 'rgba(139,100,32,0.06)',
-        border: `1px solid rgba(139,100,32,0.2)`,
-        borderLeft: `4px solid ${theme.colors.integrationPos}`,
-        borderRadius: '0 8px 8px 0',
-        padding: '14px 18px',
-      }}>
-        <div style={{ fontSize: theme.fontSize.xs, fontWeight: 600, color: theme.colors.integrationPos, letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: 6 }}>
+      <div className="mx-9 mb-7 bg-[rgba(139,100,32,0.06)] border border-[rgba(139,100,32,0.2)] border-l-4 border-l-[#8b6420] rounded-r-lg py-3.5 px-[18px]">
+        <div className="text-xs font-semibold text-[#8b6420] tracking-wide uppercase mb-1.5">
           Example Swoop Insight
         </div>
-        <p style={{ fontSize: theme.fontSize.sm, fontStyle: 'italic', color: theme.colors.textPrimary, lineHeight: 1.6, margin: 0, fontWeight: 500 }}>
+        <p className="text-sm italic text-gray-800 dark:text-white/90 leading-relaxed m-0 font-medium">
           "{combo.example}"
         </p>
       </div>

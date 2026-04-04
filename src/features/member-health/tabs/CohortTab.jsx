@@ -1,5 +1,3 @@
-import { theme } from '@/config/theme';
-
 const mono = "'JetBrains Mono', monospace";
 
 // Simulated new members within last 90 days
@@ -56,52 +54,52 @@ export default function CohortTab() {
   const flaggedCount = newMembers.filter(m => getMilestoneStatus(m).pct < 75).length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+    <div className="flex flex-col gap-4">
       {/* Header */}
       <div style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md,
-        padding: theme.spacing.lg,
+        background: '#ffffff',
+        border: `1px solid ${'#E5E7EB'}`,
+        borderRadius: '12px',
+        padding: '24px',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: theme.spacing.md }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h4 style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary, margin: 0, marginBottom: '4px' }}>
+            <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a2e', margin: 0, marginBottom: '4px' }}>
               First 90 Days
             </h4>
-            <p style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, margin: 0 }}>
+            <p style={{ fontSize: '12px', color: '#9CA3AF', margin: 0 }}>
               New member integration tracking — are they building habits?
             </p>
           </div>
-          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+          <div className="flex gap-2">
             <div style={{
-              textAlign: 'center', padding: '6px 14px', borderRadius: theme.radius.sm,
+              textAlign: 'center', padding: '6px 14px', borderRadius: '8px',
               background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)',
             }}>
-              <div style={{ fontFamily: mono, fontSize: theme.fontSize.lg, fontWeight: 700, color: '#16a34a' }}>{newMembers.length}</div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>New Members</div>
+              <div style={{ fontFamily: mono, fontSize: '18px', fontWeight: 700, color: '#16a34a' }}>{newMembers.length}</div>
+              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>New Members</div>
             </div>
             <div style={{
-              textAlign: 'center', padding: '6px 14px', borderRadius: theme.radius.sm,
+              textAlign: 'center', padding: '6px 14px', borderRadius: '8px',
               background: flaggedCount > 0 ? 'rgba(234,88,12,0.06)' : 'rgba(34,197,94,0.06)',
               border: `1px solid ${flaggedCount > 0 ? 'rgba(234,88,12,0.15)' : 'rgba(34,197,94,0.15)'}`,
             }}>
-              <div style={{ fontFamily: mono, fontSize: theme.fontSize.lg, fontWeight: 700, color: flaggedCount > 0 ? '#ea580c' : '#16a34a' }}>{flaggedCount}</div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Falling Behind</div>
+              <div style={{ fontFamily: mono, fontSize: '18px', fontWeight: 700, color: flaggedCount > 0 ? '#ea580c' : '#16a34a' }}>{flaggedCount}</div>
+              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>Falling Behind</div>
             </div>
           </div>
         </div>
 
         {/* Phase Timeline */}
-        <div style={{ marginTop: theme.spacing.md, display: 'flex', gap: 0, borderRadius: theme.radius.sm, overflow: 'hidden' }}>
+        <div style={{ marginTop: '16px', display: 'flex', gap: 0, borderRadius: '8px', overflow: 'hidden' }}>
           {PHASES.map((phase, i) => (
             <div key={phase.label} style={{
               flex: 1, padding: '8px 12px', background: `${phase.color}10`,
-              borderRight: i < PHASES.length - 1 ? `2px solid ${theme.colors.bgCard}` : 'none',
+              borderRight: i < PHASES.length - 1 ? `2px solid ${'#ffffff'}` : 'none',
               textAlign: 'center',
             }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: phase.color }}>{phase.label}</div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Weeks {phase.weeks}</div>
+              <div style={{ fontSize: '10px', color: '#9CA3AF' }}>Weeks {phase.weeks}</div>
             </div>
           ))}
         </div>
@@ -116,14 +114,14 @@ export default function CohortTab() {
 
         return (
           <div key={member.name} style={{
-            background: theme.colors.bgCard,
-            border: `1px solid ${isBehind ? 'rgba(234,88,12,0.2)' : theme.colors.border}`,
-            borderRadius: theme.radius.md,
-            padding: theme.spacing.md,
+            background: '#ffffff',
+            border: `1px solid ${isBehind ? 'rgba(234,88,12,0.2)' : '#E5E7EB'}`,
+            borderRadius: '12px',
+            padding: '16px',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: theme.spacing.sm }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
-                <span style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{member.name}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+              <div className="flex items-center gap-2">
+                <span style={{ fontWeight: 700, fontSize: '14px', color: '#1a1a2e' }}>{member.name}</span>
                 <span style={{
                   fontSize: '10px', padding: '2px 8px', borderRadius: '999px',
                   background: `${PHASES[phase].color}12`, color: PHASES[phase].color,
@@ -132,23 +130,23 @@ export default function CohortTab() {
                   {PHASES[phase].label} - Day {member.daysIn}
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+              <div className="flex items-center gap-2">
                 <span style={{
-                  fontFamily: mono, fontSize: theme.fontSize.sm, fontWeight: 700,
+                  fontFamily: mono, fontSize: '14px', fontWeight: 700,
                   color: getScoreColor(member.healthScore),
                   background: `${getScoreColor(member.healthScore)}10`,
                   padding: '2px 8px', borderRadius: '6px',
                 }}>
                   {member.healthScore}
                 </span>
-                <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{member.archetype}</span>
+                <span style={{ fontSize: '11px', color: '#9CA3AF' }}>{member.archetype}</span>
               </div>
             </div>
 
             {/* Progress bar */}
             <div style={{
-              height: 6, background: theme.colors.border, borderRadius: 3,
-              overflow: 'hidden', marginBottom: theme.spacing.sm,
+              height: 6, background: '#E5E7EB', borderRadius: 3,
+              overflow: 'hidden', marginBottom: '8px',
             }}>
               <div style={{
                 width: `${Math.min(member.daysIn / 90 * 100, 100)}%`,
@@ -159,7 +157,7 @@ export default function CohortTab() {
             </div>
 
             {/* Milestones */}
-            <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap', marginBottom: isBehind ? theme.spacing.sm : 0 }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: isBehind ? '8px' : 0 }}>
               {MILESTONES.map((ms) => {
                 const done = member.milestones[ms.key];
                 return (
@@ -182,12 +180,12 @@ export default function CohortTab() {
             {/* Action suggestion for behind members */}
             {isBehind && (
               <div style={{
-                padding: '8px 12px', borderRadius: theme.radius.sm,
+                padding: '8px 12px', borderRadius: '8px',
                 background: 'rgba(234,88,12,0.04)', border: '1px solid rgba(234,88,12,0.12)',
-                fontSize: theme.fontSize.xs, color: '#ea580c', fontWeight: 500,
+                fontSize: '12px', color: '#ea580c', fontWeight: 500,
                 display: 'flex', alignItems: 'center', gap: '6px',
               }}>
-                <span style={{ fontWeight: 700 }}>Action:</span> {action}
+                <span className="font-bold">Action:</span> {action}
               </div>
             )}
           </div>
@@ -198,14 +196,14 @@ export default function CohortTab() {
       <div style={{
         background: 'linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(59,130,246,0.04) 100%)',
         border: '1px solid rgba(139,92,246,0.15)',
-        borderRadius: theme.radius.md,
-        padding: theme.spacing.lg,
+        borderRadius: '12px',
+        padding: '24px',
         display: 'flex',
         alignItems: 'flex-start',
         gap: '14px',
       }}>
         <div style={{
-          width: '40px', height: '40px', borderRadius: theme.radius.sm,
+          width: '40px', height: '40px', borderRadius: '8px',
           background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.1))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '20px', flexShrink: 0, border: '1px solid rgba(139,92,246,0.2)',
@@ -216,7 +214,7 @@ export default function CohortTab() {
           <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgb(139,92,246)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>
             Key Insight
           </div>
-          <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, margin: 0, lineHeight: 1.7, fontWeight: 500 }}>
+          <p style={{ fontSize: '14px', color: '#1a1a2e', margin: 0, lineHeight: 1.7, fontWeight: 500 }}>
             Members who complete all 4 milestones within 60 days have a <strong>94% Year-1 retention rate</strong>.
             Members who miss 2+ milestones by Day 45 have only a <strong>58% retention rate</strong>.
             The buddy assignment playbook increases milestone completion by <strong>35%</strong>.

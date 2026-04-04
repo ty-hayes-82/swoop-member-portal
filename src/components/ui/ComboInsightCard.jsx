@@ -1,7 +1,4 @@
 // ComboInsightCard — cross-system insight card with KPI or sparkline preview
-// Props: id, systems, label, insight, automations, preview, swoop_only,
-//        isExpanded, onToggle, allSystems, sparklineData (resolved by parent)
-import { theme } from '@/config/theme';
 import Sparkline from './Sparkline';
 
 export default function ComboInsightCard({
@@ -9,73 +6,48 @@ export default function ComboInsightCard({
   isExpanded, onToggle, allSystems, sparklineData,
 }) {
   return (
-    <div style={{
-      background: theme.colors.bgCard,
-      border: `1px solid ${theme.colors.border}`,
-      borderRadius: theme.radius.md,
-      overflow: 'hidden',
-      transition: 'box-shadow 0.15s ease',
-    }}>
-      {/* Header — always visible */}
-      <button onClick={onToggle} style={{
-        display: 'flex', width: '100%', alignItems: 'center',
-        justifyContent: 'space-between', padding: theme.spacing.md,
-        background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden transition-shadow duration-150 dark:border-gray-800 dark:bg-white/[0.03]">
+      {/* Header */}
+      <button onClick={onToggle} className="flex w-full items-center justify-between p-4 bg-transparent border-none cursor-pointer text-left">
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <SystemBadges systems={systems} allSystems={allSystems} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary, lineHeight: 1.3 }}>
-              {label}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px' }}>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-bold text-gray-800 leading-tight dark:text-white/90">{label}</div>
+            <div className="flex items-center gap-2 mt-[3px]">
               {swoop_only && (
-                <span title="This insight is only possible when systems are connected through Swoop — no single vendor can see across all of these data sources alone." style={{
-                  fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                  color: theme.colors.accent, background: `${theme.colors.accent}18`,
-                  padding: '1px 5px', borderRadius: '3px', display: 'inline-block', cursor: 'help',
-                }}>
-                  Swoop Only ⓘ
+                <span title="This insight is only possible when systems are connected through Swoop." className="text-[9px] font-bold uppercase tracking-wider text-brand-500 bg-brand-50 px-1.5 py-px rounded cursor-help inline-block dark:bg-brand-500/15">
+                  Swoop Only \u24D8
                 </span>
               )}
               {!isExpanded && preview?.value && (
-                <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>
-                  <span style={{ fontWeight: 700, color: theme.colors.textPrimary, fontFamily: theme.fonts.mono }}>
-                    {preview.value}
-                  </span>
-                  {' · '}{preview.label}
+                <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                  <span className="font-bold text-gray-800 font-mono dark:text-white/90">{preview.value}</span>
+                  {' \u00B7 '}{preview.label}
                 </span>
               )}
             </div>
           </div>
         </div>
-        <span style={{ color: theme.colors.textMuted, fontSize: '12px', marginLeft: '8px', flexShrink: 0 }}>
-          {isExpanded ? '▲' : '▼'}
-        </span>
+        <span className="text-gray-500 text-xs ml-2 shrink-0 dark:text-gray-400">{isExpanded ? '\u25B2' : '\u25BC'}</span>
       </button>
 
       {/* Expanded body */}
       {isExpanded && (
-        <div style={{ padding: `0 ${theme.spacing.md} ${theme.spacing.md}`, borderTop: `1px solid ${theme.colors.bgDeep}` }}>
-          <p style={{ fontSize: '12px', color: theme.colors.textSecondary ?? theme.colors.textMuted, lineHeight: 1.6, margin: '12px 0' }}>
-            {insight}
-          </p>
+        <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-800">
+          <p className="text-xs text-gray-600 leading-relaxed my-3 dark:text-gray-400">{insight}</p>
 
           {/* Automations */}
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: theme.colors.textMuted, marginBottom: '6px' }}>
-              Automations
-            </div>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div className="mb-3">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 dark:text-gray-400">Automations</div>
+            <ul className="m-0 p-0 list-none flex flex-col gap-1">
               {automations.map((a, i) => (
-                <li key={i} style={{ fontSize: '12px', color: theme.colors.textPrimary, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
-                  <span style={{ color: theme.colors.success, flexShrink: 0, marginTop: '1px' }}>→</span> {a}
+                <li key={i} className="text-xs text-gray-800 flex items-start gap-1.5 dark:text-white/90">
+                  <span className="text-success-500 shrink-0 mt-px">\u2192</span> {a}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Preview */}
           <PreviewWidget preview={preview} sparklineData={sparklineData} />
         </div>
       )}
@@ -85,17 +57,12 @@ export default function ComboInsightCard({
 
 function SystemBadges({ systems, allSystems }) {
   return (
-    <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+    <div className="flex gap-1 shrink-0">
       {systems.map(id => {
         const sys = allSystems.find(s => s.id === id);
         if (!sys) return null;
-        const color = theme.colors[sys.themeColor] ?? theme.colors.accent;
         return (
-          <span key={id} style={{
-            fontSize: '10px', fontWeight: 600, color,
-            background: `${color}18`, border: `1px solid ${color}40`,
-            padding: '2px 6px', borderRadius: '4px',
-          }}>
+          <span key={id} className="text-[10px] font-semibold text-brand-500 bg-brand-50 border border-brand-200 px-1.5 py-0.5 rounded dark:bg-brand-500/15 dark:border-brand-500/30">
             {sys.name}
           </span>
         );
@@ -105,26 +72,23 @@ function SystemBadges({ systems, allSystems }) {
 }
 
 function PreviewWidget({ preview, sparklineData }) {
-  const bg = theme.colors.bgDeep;
   return (
-    <div style={{ background: bg, borderRadius: theme.radius.sm, padding: '10px 12px' }}>
-      <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: theme.colors.textMuted, marginBottom: '6px' }}>
-        {preview.label}
-      </div>
+    <div className="bg-gray-100 rounded-lg px-3 py-2.5 dark:bg-gray-800">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 dark:text-gray-400">{preview.label}</div>
       {preview.type === 'sparkline' && sparklineData?.length > 0 ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ flex: 1 }}>
-            <Sparkline data={sparklineData} height={36} color={preview.trend === 'down' ? theme.colors.warning : theme.colors.success} />
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <Sparkline data={sparklineData} height={36} color={preview.trend === 'down' ? '#f79009' : '#12b76a'} />
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textPrimary, fontFamily: 'JetBrains Mono, monospace' }}>{preview.value}</div>
-            <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>{preview.subtext}</div>
+          <div className="text-right">
+            <div className="text-lg font-bold text-gray-800 font-mono dark:text-white/90">{preview.value}</div>
+            <div className="text-[10px] text-gray-500 dark:text-gray-400">{preview.subtext}</div>
           </div>
         </div>
       ) : (
         <div>
-          <div style={{ fontSize: '22px', fontWeight: 700, color: theme.colors.textPrimary, fontFamily: 'JetBrains Mono, monospace' }}>{preview.value}</div>
-          <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: '2px' }}>{preview.subtext}</div>
+          <div className="text-[22px] font-bold text-gray-800 font-mono dark:text-white/90">{preview.value}</div>
+          <div className="text-[10px] text-gray-500 mt-0.5 dark:text-gray-400">{preview.subtext}</div>
         </div>
       )}
     </div>

@@ -1,11 +1,10 @@
 // PendingActionsInline — Action Queue: hero alert + pending actions merged
 import { useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
-import { theme } from '@/config/theme';
 import MemberLink from '@/components/MemberLink';
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
-const PRIORITY_COLORS = { high: theme.colors.urgent, medium: theme.colors.warning, low: theme.colors.textMuted };
+const PRIORITY_COLORS = { high: '#ef4444', medium: '#f59e0b', low: '#9CA3AF' };
 
 // Map agent/source names to role-based owners
 const SOURCE_TO_OWNER = {
@@ -43,63 +42,37 @@ export default function PendingActionsInline({ topPriority = null }) {
 
   return (
     <div>
-      <div style={{
-        fontSize: '11px', fontWeight: 700, color: theme.colors.accent,
-        textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12,
-      }}>
+      <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wide mb-3">
         Action Queue {hasActions ? `(${pendingAgentCount})` : ''}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+      <div className="flex flex-col gap-2">
         {/* Hero alert — top priority action card */}
         {hasHero && (
           <div
             onClick={() => window.dispatchEvent(new CustomEvent('swoop:open-actions'))}
-            style={{
-              padding: '14px 18px',
-              borderRadius: theme.radius.md,
-              background: `${theme.colors.urgent}06`,
-              border: `1px solid ${theme.colors.urgent}25`,
-              borderLeft: `4px solid ${theme.colors.urgent}`,
-              boxShadow: theme.shadow.sm,
-              cursor: 'pointer',
-              transition: 'box-shadow 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow = theme.shadow.md; }}
-            onMouseLeave={e => { e.currentTarget.style.boxShadow = theme.shadow.sm; }}
+            className="py-3.5 px-[18px] rounded-xl bg-red-500/[0.024] border border-red-500/[0.15] border-l-4 border-l-red-500 shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md"
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{
-                  fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
-                  letterSpacing: '0.06em', padding: '2px 8px', borderRadius: 10,
-                  background: `${theme.colors.urgent}15`, color: theme.colors.urgent,
-                }}>
+            <div className="flex justify-between items-center mb-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wide py-0.5 px-2 rounded-[10px] bg-red-500/[0.08] text-red-500">
                   Priority
                 </span>
-                <span style={{
-                  fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                  background: `${theme.colors.accent}10`, color: theme.colors.accent,
-                  textTransform: 'uppercase', letterSpacing: '0.04em',
-                }}>
+                <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight">
                   GM
                 </span>
               </div>
-              <span style={{
-                fontSize: '10px', fontWeight: 600, color: theme.colors.urgent,
-                padding: '2px 8px', borderRadius: 10,
-                background: `${theme.colors.urgent}10`,
-              }}>
+              <span className="text-[10px] font-semibold text-red-500 py-0.5 px-2 rounded-[10px] bg-red-500/[0.06]">
                 Act Now
               </span>
             </div>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: 4, lineHeight: 1.4 }}>
+            <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-1 leading-snug">
               {topPriority.memberName ? (
                 <>
                   <MemberLink
                     mode="drawer"
                     memberId={topPriority.memberId}
-                    style={{ fontWeight: 700, color: theme.colors.textPrimary }}
+                    className="font-bold text-gray-800 dark:text-white/90"
                   >
                     {topPriority.memberName}
                   </MemberLink>
@@ -110,7 +83,7 @@ export default function PendingActionsInline({ topPriority = null }) {
               )}
             </div>
             {topPriority.recommendation && (
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, lineHeight: 1.4 }}>
+              <div className="text-xs text-gray-500 leading-snug">
                 {topPriority.recommendation}
               </div>
             )}
@@ -119,54 +92,35 @@ export default function PendingActionsInline({ topPriority = null }) {
 
         {/* Pending action cards */}
         {topActions.map((action) => {
-          const prioColor = PRIORITY_COLORS[action.priority] ?? theme.colors.accent;
+          const prioColor = PRIORITY_COLORS[action.priority] ?? '#E8740C';
           return (
             <div
               key={action.id}
               onClick={() => window.dispatchEvent(new CustomEvent('swoop:open-actions'))}
-              style={{
-                padding: '12px 16px',
-                borderRadius: theme.radius.md,
-                background: theme.colors.bgCard,
-                border: `1px solid ${theme.colors.border}`,
-                borderLeft: `4px solid ${prioColor}`,
-                boxShadow: theme.shadow.sm,
-                cursor: 'pointer',
-                transition: 'box-shadow 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.boxShadow = theme.shadow.md; }}
-              onMouseLeave={e => { e.currentTarget.style.boxShadow = theme.shadow.sm; }}
+              className="py-3 px-4 rounded-xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md"
+              style={{ borderLeft: `4px solid ${prioColor}` }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{
-                    fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
-                    letterSpacing: '0.06em', padding: '2px 8px', borderRadius: 10,
-                    background: `${prioColor}15`, color: prioColor,
-                  }}>
+              <div className="flex justify-between items-center mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-wide py-0.5 px-2 rounded-[10px]"
+                    style={{ background: `${prioColor}15`, color: prioColor }}
+                  >
                     {action.priority}
                   </span>
-                  <span style={{
-                    fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                    background: `${theme.colors.accent}10`, color: theme.colors.accent,
-                    textTransform: 'uppercase', letterSpacing: '0.04em',
-                  }}>
+                  <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight">
                     {getActionOwner(action)}
                   </span>
                 </div>
-                <span style={{
-                  fontSize: '10px', fontWeight: 600, color: theme.colors.accent,
-                  padding: '2px 8px', borderRadius: 10,
-                  background: `${theme.colors.accent}10`,
-                }}>
+                <span className="text-[10px] font-semibold text-brand-500 py-0.5 px-2 rounded-[10px] bg-brand-500/[0.06]">
                   Pending approval
                 </span>
               </div>
-              <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, marginBottom: 2, lineHeight: 1.4 }}>
+              <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-0.5 leading-snug">
                 {action.description}
               </div>
               {action.impactMetric && (
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.success, fontWeight: 500 }}>
+                <div className="text-xs text-success-500 font-medium">
                   {action.impactMetric}
                 </div>
               )}
@@ -178,17 +132,7 @@ export default function PendingActionsInline({ topPriority = null }) {
         {hasActions && (
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('swoop:open-actions'))}
-            style={{
-              padding: '10px 16px',
-              fontSize: theme.fontSize.sm,
-              fontWeight: 700,
-              color: '#fff',
-              background: theme.colors.accent,
-              border: 'none',
-              borderRadius: theme.radius.md,
-              cursor: 'pointer',
-              textAlign: 'center',
-            }}
+            className="py-2.5 px-4 text-sm font-bold text-white bg-brand-500 border-none rounded-xl cursor-pointer text-center"
           >
             Review all {pendingAgentCount} actions in Inbox →
           </button>

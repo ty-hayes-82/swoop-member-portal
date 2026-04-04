@@ -1,6 +1,4 @@
-import { theme } from '@/config/theme';
-
-const trendColor = (trend) => (trend === 'down' ? theme.colors.integrationTrendDown : theme.colors.operations);
+const trendColor = (trend) => (trend === 'down' ? '#ef4444' : '#22c55e');
 
 export function ComboInsightCard({ combo, systemsById }) {
   const [leftId, rightId] = combo.systems;
@@ -10,44 +8,30 @@ export function ComboInsightCard({ combo, systemsById }) {
   if (!left || !right) return null;
 
   return (
-    <article style={{
-      background: theme.colors.white,
-      border: `1px solid ${theme.colors.border}`,
-      borderRadius: 12,
-      padding: 16,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 12,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: theme.colors.textMuted }}>
+    <article className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs text-gray-400">
           <NodeChip name={left.name} logo={left.logo} />
           <span>↔</span>
           <NodeChip name={right.name} logo={right.logo} />
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.textPrimary }}>
+        <div className="text-right">
+          <div className="text-lg font-bold font-mono text-gray-800 dark:text-white/90">
             {combo.kpi.value}
           </div>
-          <div style={{ fontSize: 10, color: theme.colors.textMuted }}>{combo.kpi.label}</div>
+          <div className="text-[10px] text-gray-400">{combo.kpi.label}</div>
         </div>
       </div>
 
-      <p style={{ margin: 0, fontSize: 13, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
+      <p className="m-0 text-[13px] text-gray-500 leading-normal">
         {combo.insight}
       </p>
 
       {combo.preview?.type === 'sparkline' ? (
         <SparklinePreview preview={combo.preview} />
       ) : (
-        <div style={{
-          background: theme.colors.bgDeep,
-          borderRadius: 8,
-          padding: '10px 12px',
-          fontSize: 12,
-          color: theme.colors.textSecondary,
-        }}>
-          <strong style={{ color: theme.colors.textPrimary }}>{combo.preview?.value}</strong> {combo.preview?.label}
+        <div className="bg-gray-100 rounded-lg py-2.5 px-3 text-xs text-gray-500">
+          <strong className="text-gray-800 dark:text-white/90">{combo.preview?.value}</strong> {combo.preview?.label}
         </div>
       )}
     </article>
@@ -56,18 +40,8 @@ export function ComboInsightCard({ combo, systemsById }) {
 
 function NodeChip({ name, logo }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <span style={{
-        width: 20,
-        height: 20,
-        borderRadius: 6,
-        border: `1px solid ${theme.colors.border}`,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 10,
-        fontWeight: 700,
-      }}>
+    <span className="inline-flex items-center gap-1.5">
+      <span className="w-5 h-5 rounded-md border border-gray-200 dark:border-gray-800 inline-flex items-center justify-center text-[10px] font-bold">
         {logo}
       </span>
       <span>{name}</span>
@@ -90,12 +64,12 @@ function SparklinePreview({ preview }) {
     .join(' ');
 
   return (
-    <div style={{ background: theme.colors.bgDeep, borderRadius: 8, padding: '10px 12px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: theme.colors.textMuted }}>
+    <div className="bg-gray-100 rounded-lg py-2.5 px-3">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[10px] uppercase tracking-wide text-gray-400">
           {preview.label}
         </span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: trendColor(preview.trend) }}>{preview.value}</span>
+        <span className="text-xs font-bold" style={{ color: trendColor(preview.trend) }}>{preview.value}</span>
       </div>
       <svg width="160" height="36" viewBox="0 0 160 36" aria-hidden="true">
         <path d={path} fill="none" stroke={trendColor(preview.trend)} strokeWidth="2" />

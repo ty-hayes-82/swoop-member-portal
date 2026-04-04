@@ -1,88 +1,62 @@
 // VendorDetailPanel — fixed right-side slide-in panel with vendor detail + combos
-// Props: vendor (object | null), combos (array), onClose fn
-// Color rule: all colors via theme.colors only — no hardcoded hex
-import { theme } from '@/config/theme';
 import TierBadge from './TierBadge';
 
 const STATUS = {
-  connected:   { label: 'Connected',   colorKey: 'success'   },
-  available:   { label: 'Available',   colorKey: 'warning'   },
-  coming_soon: { label: 'Coming Soon', colorKey: 'textMuted' },
+  connected:   { label: 'Connected',   cls: 'text-success-500', dotCls: 'bg-success-500' },
+  available:   { label: 'Available',   cls: 'text-warning-500', dotCls: 'bg-warning-500' },
+  coming_soon: { label: 'Coming Soon', cls: 'text-gray-400', dotCls: 'bg-gray-400' },
 };
-
-const sectionLabel = () => ({
-  fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
-  letterSpacing: '0.07em', color: theme.colors.textMuted, marginBottom: theme.spacing.sm,
-});
 
 export default function VendorDetailPanel({ vendor, combos = [], onClose }) {
   if (!vendor) return (
-    <div style={{ position:'fixed', top:0, right:0, bottom:0, width:'320px',
-      transform:'translateX(100%)', transition:'transform 0.25s ease' }} />
+    <div className="fixed top-0 right-0 bottom-0 w-80 translate-x-full transition-transform duration-250" />
   );
 
-  const accent  = theme.colors[vendor.themeColor] ?? theme.colors.accent;
-  const sc      = STATUS[vendor.status] ?? STATUS.available;
-  const statClr = theme.colors[sc.colorKey];
+  const sc = STATUS[vendor.status] ?? STATUS.available;
 
   return (
-    <div style={{ position:'fixed', top:0, right:0, bottom:0, width:'320px',
-      background:theme.colors.bgCard, borderLeft:`1px solid ${theme.colors.border}`,
-      boxShadow:theme.shadow.lg, zIndex:200, display:'flex', flexDirection:'column',
-      transform:'translateX(0)', transition:'transform 0.25s ease', overflowY:'auto' }}>
-
+    <div className="fixed top-0 right-0 bottom-0 w-80 bg-white border-l border-gray-200 shadow-theme-xl z-[200] flex flex-col translate-x-0 transition-transform duration-250 overflow-y-auto dark:bg-white/[0.03] dark:border-gray-800">
       {/* Header */}
-      <div style={{ padding:`${theme.spacing.md} ${theme.spacing.md} ${theme.spacing.sm}`,
-        borderBottom:`1px solid ${theme.colors.border}`, background:`${accent}08` }}>
-        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'10px', flex:1, minWidth:0 }}>
-            <span style={{ fontSize:'24px', lineHeight:1, width:'44px', height:'44px',
-              display:'flex', alignItems:'center', justifyContent:'center',
-              borderRadius:theme.radius.md, background:`${accent}18`, flexShrink:0 }}>
+      <div className="p-4 pb-3 border-b border-gray-200 bg-brand-50 dark:border-gray-800 dark:bg-brand-500/5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <span className="text-2xl leading-none w-11 h-11 flex items-center justify-center rounded-xl bg-brand-100 shrink-0 dark:bg-brand-500/15">
               {vendor.icon}
             </span>
             <div>
-              <div style={{ fontSize:theme.fontSize.md, fontWeight:700, color:theme.colors.textPrimary, lineHeight:1.3 }}>
-                {vendor.name}
-              </div>
+              <div className="text-base font-bold text-gray-800 leading-tight dark:text-white/90">{vendor.name}</div>
               <TierBadge tier={vendor.tier} size="sm" />
             </div>
           </div>
-          <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer',
-            padding:'4px', color:theme.colors.textMuted, fontSize:'16px', lineHeight:1, flexShrink:0 }}>✕</button>
+          <button onClick={onClose} className="bg-transparent border-none cursor-pointer p-1 text-gray-500 text-base leading-none shrink-0 dark:text-gray-400">\u2715</button>
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:'6px', marginTop:'10px' }}>
-          <span style={{ width:'8px', height:'8px', borderRadius:'50%', background:statClr, flexShrink:0 }} />
-          <span style={{ fontSize:'12px', color:statClr, fontWeight:600 }}>{sc.label}</span>
-          {vendor.status==='connected' && vendor.lastSync &&
-            <span style={{ fontSize:'11px', color:theme.colors.textMuted }}>· {vendor.lastSync}</span>}
+        <div className="flex items-center gap-1.5 mt-2.5">
+          <span className={`w-2 h-2 rounded-full shrink-0 ${sc.dotCls}`} />
+          <span className={`text-xs font-semibold ${sc.cls}`}>{sc.label}</span>
+          {vendor.status === 'connected' && vendor.lastSync &&
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">\u00B7 {vendor.lastSync}</span>}
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ padding:theme.spacing.md, display:'flex', flexDirection:'column', gap:theme.spacing.md }}>
-
+      <div className="p-4 flex flex-col gap-4">
         <div>
-          <div style={sectionLabel()}>Why This Integration</div>
-          <p style={{ fontSize:'13px', color:theme.colors.textSecondary, lineHeight:1.65, margin:0 }}>{vendor.why}</p>
+          <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-3 dark:text-gray-400">Why This Integration</div>
+          <p className="text-sm text-gray-600 leading-relaxed m-0 dark:text-gray-400">{vendor.why}</p>
         </div>
 
         <div>
-          <div style={sectionLabel()}>Go Live Estimate</div>
-          <span style={{ fontSize:'13px', fontWeight:700, color:theme.colors.textPrimary, fontFamily:theme.fonts.mono }}>
-            {vendor.goLive}
-          </span>
-          <span style={{ fontSize:'11px', color:theme.colors.textMuted }}> after approval</span>
+          <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-3 dark:text-gray-400">Go Live Estimate</div>
+          <span className="text-sm font-bold text-gray-800 font-mono dark:text-white/90">{vendor.goLive}</span>
+          <span className="text-[11px] text-gray-500 dark:text-gray-400"> after approval</span>
         </div>
 
         {vendor.partners?.length > 0 && (
           <div>
-            <div style={sectionLabel()}>Works With</div>
-            <div style={{ display:'flex', flexWrap:'wrap', gap:'6px' }}>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-3 dark:text-gray-400">Works With</div>
+            <div className="flex flex-wrap gap-1.5">
               {vendor.partners.map((p, i) => (
-                <span key={i} style={{ fontSize:'11px', fontWeight:600, color:accent,
-                  background:`${accent}14`, border:`1px solid ${accent}30`,
-                  padding:'3px 8px', borderRadius:theme.radius.sm }}>{p}</span>
+                <span key={i} className="text-[11px] font-semibold text-brand-500 bg-brand-50 border border-brand-200 px-2 py-[3px] rounded-lg dark:bg-brand-500/15 dark:border-brand-500/30">{p}</span>
               ))}
             </div>
           </div>
@@ -90,17 +64,14 @@ export default function VendorDetailPanel({ vendor, combos = [], onClose }) {
 
         {combos.length > 0 && (
           <div>
-            <div style={sectionLabel()}>Combo Insights ({combos.length})</div>
-            <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-3 dark:text-gray-400">Combo Insights ({combos.length})</div>
+            <div className="flex flex-col gap-2">
               {combos.map(c => (
-                <div key={c.id} style={{ padding:'10px 12px', borderRadius:theme.radius.sm,
-                  background:theme.colors.bgDeep, borderLeft:`3px solid ${theme.colors.accent}` }}>
-                  <div style={{ fontSize:'12px', fontWeight:700, color:theme.colors.textPrimary, marginBottom:'4px' }}>{c.label}</div>
-                  <div style={{ fontSize:'11px', color:theme.colors.textSecondary, lineHeight:1.5 }}>{c.insight}</div>
+                <div key={c.id} className="px-3 py-2.5 rounded-lg bg-gray-100 border-l-[3px] border-l-brand-500 dark:bg-gray-800">
+                  <div className="text-xs font-bold text-gray-800 mb-1 dark:text-white/90">{c.label}</div>
+                  <div className="text-[11px] text-gray-600 leading-relaxed dark:text-gray-400">{c.insight}</div>
                   {c.swoop_only && (
-                    <span style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase',
-                      letterSpacing:'0.06em', color:theme.colors.accent, background:`${theme.colors.accent}18`,
-                      padding:'1px 5px', borderRadius:'3px', display:'inline-block', marginTop:'5px' }}>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-brand-500 bg-brand-50 px-1.5 py-px rounded inline-block mt-1.5 dark:bg-brand-500/15">
                       Swoop Only
                     </span>
                   )}

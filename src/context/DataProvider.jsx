@@ -4,7 +4,6 @@
 // Components never change — they call the same synchronous service functions as always.
 
 import { useState, useEffect, createContext, useContext } from 'react';
-import { theme } from '@/config/theme';
 import { _init as initOps }      from '@/services/operationsService';
 import { _init as initFB }       from '@/services/fbService';
 import { _init as initMembers }  from '@/services/memberService';
@@ -69,23 +68,11 @@ export function DataProvider({ children }) {
 
   if (!ready) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: theme.colors.bg,
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        gap: 16,
-      }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: '50%',
-          border: `3px solid ${theme.colors.border}`,
-          borderTopColor: theme.colors.operations,
-          animation: 'spin 0.8s linear infinite',
-        }} />
-        <p style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm, fontFamily: theme.fonts.sans }}>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
+        <div className="w-9 h-9 rounded-full border-[3px] border-gray-200 border-t-success-500 animate-spin" />
+        <p className="text-gray-400 text-sm font-sans">
           Loading your club data…
         </p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }

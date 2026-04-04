@@ -1,5 +1,3 @@
-import { theme } from '@/config/theme';
-
 const rows = [
   { dataType: 'Tee time bookings', competitors: 'Rounds played, no-shows', swoop: 'Rounds + GPS pace tracking + post-round behavior' },
   { dataType: 'Dining activity', competitors: 'Check totals, covers', swoop: 'Checks + wait times + turn-stand-to-table conversion' },
@@ -11,34 +9,28 @@ const rows = [
 
 export default function DataSourceComparison() {
   return (
-    <div style={{
-      background: theme.colors.bgCard,
-      border: '1px solid ' + theme.colors.border,
-      borderRadius: theme.radius.md,
-      padding: theme.spacing.lg,
-      marginTop: theme.spacing.lg,
-    }}>
-      <div style={{ fontSize: '11px', color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+    <div className="rounded-xl border border-gray-200 bg-white p-5 sm:p-6 mt-6 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="text-[11px] text-gray-500 uppercase tracking-widest font-semibold dark:text-gray-400">
         Data depth comparison
       </div>
-      <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary, marginTop: '4px', marginBottom: theme.spacing.md }}>
+      <div className="text-lg font-bold text-gray-800 mt-1 mb-4 dark:text-white/90">
         Same data source. Deeper intelligence.
       </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse min-w-[500px]">
           <thead>
-            <tr style={{ background: theme.colors.bgDeep }}>
-              <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textPrimary, borderBottom: '1px solid ' + theme.colors.border }}>Data Type</th>
-              <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textMuted, borderBottom: '1px solid ' + theme.colors.border }}>Single-System View</th>
-              <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.accent, borderBottom: '1px solid ' + theme.colors.border }}>Swoop Intelligence</th>
+            <tr className="bg-gray-50 dark:bg-gray-800">
+              <th className="text-left px-3 py-2.5 text-xs font-bold text-gray-800 border-b border-gray-200 dark:text-white/90 dark:border-gray-800">Data Type</th>
+              <th className="text-left px-3 py-2.5 text-xs font-bold text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-800">Single-System View</th>
+              <th className="text-left px-3 py-2.5 text-xs font-bold text-brand-500 border-b border-gray-200 dark:border-gray-800">Swoop Intelligence</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row, i) => (
               <tr key={i}>
-                <td style={{ padding: '10px 12px', fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, borderBottom: '1px solid ' + theme.colors.borderLight }}>{row.dataType}</td>
-                <td style={{ padding: '10px 12px', fontSize: theme.fontSize.sm, color: theme.colors.textMuted, borderBottom: '1px solid ' + theme.colors.borderLight }}>{row.competitors}</td>
-                <td style={{ padding: '10px 12px', fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, fontWeight: 500, borderBottom: '1px solid ' + theme.colors.borderLight }}>{row.swoop}</td>
+                <td className="px-3 py-2.5 text-sm font-semibold text-gray-800 border-b border-gray-100 dark:text-white/90 dark:border-gray-800">{row.dataType}</td>
+                <td className="px-3 py-2.5 text-sm text-gray-500 border-b border-gray-100 dark:text-gray-400 dark:border-gray-800">{row.competitors}</td>
+                <td className="px-3 py-2.5 text-sm text-gray-800 font-medium border-b border-gray-100 dark:text-white/90 dark:border-gray-800">{row.swoop}</td>
               </tr>
             ))}
           </tbody>

@@ -1,6 +1,4 @@
 import { PlaybookPanel } from '@/components/playbooks';
-import { theme } from '@/config/theme';
-
 const SERVICE_SAVE_STEPS = [
   {
     title: 'Auto-escalate high-sentiment complaints',
@@ -77,13 +75,13 @@ const DECAY_AFTER = [
 const MBR_203_CONTEXT = {
   name: 'James Whitfield',
   archetype: 'Balanced Active',
-  color: theme.colors.textPrimary,
+  color: '#1a1a2e',
   profile: 'Normally engaged across all domains — complaint from this archetype is a red flag',
 };
 
 export default function MemberPlaybooks() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xl }}>
+    <div className="flex flex-col gap-8">
       <PlaybookPanel
         id="service-save"
         title="Service Save Protocol"
@@ -91,7 +89,7 @@ export default function MemberPlaybooks() {
         steps={SERVICE_SAVE_STEPS}
         beforeMetrics={SERVICE_SAVE_BEFORE}
         afterMetrics={SERVICE_SAVE_AFTER}
-        accentColor={theme.colors.urgent}
+        accentColor={'#ef4444'}
         memberContext={MBR_203_CONTEXT}
       />
       <PlaybookPanel
@@ -101,7 +99,7 @@ export default function MemberPlaybooks() {
         steps={DECAY_STEPS}
         beforeMetrics={DECAY_BEFORE}
         afterMetrics={DECAY_AFTER}
-        accentColor={theme.colors.members}
+        accentColor={'#E8740C'}
       />
     </div>
   );

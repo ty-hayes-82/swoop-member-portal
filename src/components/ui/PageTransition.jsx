@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { theme } from '@/config/theme';
 
 // DES-P10: Page transition component for smooth route changes
 
@@ -7,7 +6,6 @@ export default function PageTransition({ children, duration = 300 }) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Trigger animation on mount
     const timer = setTimeout(() => setIsVisible(true), 10);
     return () => clearTimeout(timer);
   }, []);
@@ -26,12 +24,12 @@ export default function PageTransition({ children, duration = 300 }) {
 }
 
 // Card animation component
-export function AnimatedCard({ 
-  children, 
-  delay = 0, 
+export function AnimatedCard({
+  children,
+  delay = 0,
   duration = 400,
-  style = {},
-  ...props 
+  className = '',
+  ...props
 }) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -42,11 +40,11 @@ export function AnimatedCard({
 
   return (
     <div
+      className={className}
       style={{
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0)' : 'translateY(12px)',
         transition: `opacity ${duration}ms ease-out ${delay}ms, transform ${duration}ms ease-out ${delay}ms`,
-        ...style,
       }}
       {...props}
     >
@@ -56,13 +54,13 @@ export function AnimatedCard({
 }
 
 // Button press animation wrapper
-export function AnimatedButton({ 
-  children, 
+export function AnimatedButton({
+  children,
   onClick,
-  style = {},
+  className = '',
   hoverScale = 1.02,
   activeScale = 0.98,
-  ...props 
+  ...props
 }) {
   const [isPressed, setIsPressed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -77,18 +75,13 @@ export function AnimatedButton({
         setIsPressed(false);
       }}
       onClick={onClick}
+      className={`cursor-pointer border-none bg-transparent p-0 transition-transform duration-150 ${className}`}
       style={{
-        transform: isPressed 
-          ? `scale(${activeScale})` 
-          : isHovered 
-          ? `scale(${hoverScale})` 
+        transform: isPressed
+          ? `scale(${activeScale})`
+          : isHovered
+          ? `scale(${hoverScale})`
           : 'scale(1)',
-        transition: 'transform 0.15s ease',
-        cursor: 'pointer',
-        border: 'none',
-        background: 'transparent',
-        padding: 0,
-        ...style,
       }}
       {...props}
     >
@@ -98,13 +91,13 @@ export function AnimatedButton({
 }
 
 // Number counter animation
-export function AnimatedNumber({ 
-  value, 
+export function AnimatedNumber({
+  value,
   duration = 1000,
   prefix = '',
   suffix = '',
   decimals = 0,
-  style = {}
+  className = ''
 }) {
   const [displayValue, setDisplayValue] = useState(0);
 
@@ -112,61 +105,41 @@ export function AnimatedNumber({
     const start = 0;
     const end = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : value;
     const startTime = Date.now();
-    
+
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
+
       // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = start + (end - start) * eased;
-      
+
       setDisplayValue(current);
-      
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
     };
-    
+
     animate();
   }, [value, duration]);
 
   return (
-    <span style={style}>
+    <span className={className}>
       {prefix}{displayValue.toFixed(decimals)}{suffix}
     </span>
   );
 }
 
 // Loading spinner component
-export function LoadingSpinner({ 
-  size = 24, 
-  color = theme.colors.accent,
-  style = {} 
+export function LoadingSpinner({
+  size = 24,
+  className = ''
 }) {
   return (
     <div
-      style={{
-        width: size,
-        height: size,
-        border: `3px solid ${color}20`,
-        borderTop: `3px solid ${color}`,
-        borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite',
-        ...style,
-      }}
+      className={`rounded-full border-3 border-brand-100 border-t-brand-500 animate-spin dark:border-brand-500/20 dark:border-t-brand-500 ${className}`}
+      style={{ width: size, height: size }}
     />
   );
-}
-
-// Inject spin animation
-if (typeof document !== 'undefined' && !document.getElementById('spin-keyframes')) {
-  const style = document.createElement('style');
-  style.id = 'spin-keyframes';
-  style.innerHTML = `
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `;
-  document.head.appendChild(style);
 }

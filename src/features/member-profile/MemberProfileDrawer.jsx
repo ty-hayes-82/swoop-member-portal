@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { theme } from '@/config/theme';
 import SourceBadge from '@/components/ui/SourceBadge.jsx';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { getOutreachHistory } from '@/services/activityService';
@@ -34,8 +33,8 @@ const useIsMobile = () => {
   return isMobile;
 };
 
-const Sparkline = ({ data = [], color = theme.colors.agentCyan }) => {
-  if (!data.length) return <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>No trend data</span>;
+const Sparkline = ({ data = [], color = '#06b6d4' }) => {
+  if (!data.length) return <span className="text-xs text-gray-400">No trend data</span>;
   const width = 160;
   const height = 48;
   const max = Math.max(...data);
@@ -62,18 +61,18 @@ const Section = ({ title, description, children, defaultCollapsed = false, colla
   const isCollapsed = collapsible && collapsed;
 
   return (
-    <section {...rest} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: theme.spacing.md, background: theme.colors.bgCard }}>
+    <section {...rest} style={{ border: `1px solid ${'#E5E7EB'}`, borderRadius: '12px', padding: '16px', background: '#ffffff' }}>
       <div
         onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: isCollapsed ? 0 : theme.spacing.sm, cursor: collapsible ? 'pointer' : 'default' }}
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: isCollapsed ? 0 : '8px', cursor: collapsible ? 'pointer' : 'default' }}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <h3 style={{ margin: 0, fontSize: theme.fontSize.md }}>{title}</h3>
-          {isCollapsed && summary && <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{summary}</span>}
+          <h3 style={{ margin: 0, fontSize: '16px' }}>{title}</h3>
+          {isCollapsed && summary && <span className="text-xs text-gray-400">{summary}</span>}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {description && !isCollapsed && <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{description}</span>}
-          {collapsible && <span style={{ fontSize: 12, color: theme.colors.textMuted, transition: 'transform 0.2s', transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
+        <div className="flex items-center gap-2">
+          {description && !isCollapsed && <span className="text-xs text-gray-400">{description}</span>}
+          {collapsible && <span style={{ fontSize: 12, color: '#9CA3AF', transition: 'transform 0.2s', transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
         </div>
       </div>
       {!isCollapsed && children}
@@ -86,25 +85,25 @@ function ActivityTimeline({ activity = [] }) {
   const [showAll, setShowAll] = React.useState(false);
   const visible = showAll ? activity : activity.slice(0, 3);
 
-  if (!activity.length) return <span style={{ color: theme.colors.textSecondary }}>No recent activity logged.</span>;
+  if (!activity.length) return <span className="text-gray-500">No recent activity logged.</span>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {visible.map((a) => (
-        <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: theme.fontSize.sm }}>
+        <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: '14px' }}>
           <div>
-            <div style={{ fontWeight: 600 }}>{a.type}</div>
-            <div style={{ color: theme.colors.textSecondary }}>{a.detail}</div>
+            <div className="font-semibold">{a.type}</div>
+            <div className="text-gray-500">{a.detail}</div>
           </div>
-          <div style={{ color: theme.colors.textMuted }}>{formatDateTime(a.timestamp)}</div>
+          <div className="text-gray-400">{formatDateTime(a.timestamp)}</div>
         </div>
       ))}
       {activity.length > 3 && !showAll && (
         <button
           onClick={() => setShowAll(true)}
           style={{
-            background: 'none', border: 'none', color: theme.colors.accent,
-            fontSize: theme.fontSize.xs, fontWeight: 600, cursor: 'pointer',
+            background: 'none', border: 'none', color: '#E8740C',
+            fontSize: '12px', fontWeight: 600, cursor: 'pointer',
             textAlign: 'left', padding: 0,
           }}
         >
@@ -178,12 +177,12 @@ function MemberJourneyTimeline({ profile }) {
   }, [profile]);
 
   const domainColors = {
-    Golf: theme.colors.success,
-    Dining: theme.colors.fb ?? theme.colors.warning,
-    Events: theme.colors.accent,
-    Email: theme.colors.info ?? '#4299e1',
-    Risk: theme.colors.urgent,
-    Activity: theme.colors.textMuted,
+    Golf: '#22c55e',
+    Dining: '#f59e0b' ?? '#f59e0b',
+    Events: '#E8740C',
+    Email: '#2563eb' ?? '#4299e1',
+    Risk: '#ef4444',
+    Activity: '#9CA3AF',
   };
 
   const typeIcons = {
@@ -194,27 +193,27 @@ function MemberJourneyTimeline({ profile }) {
   };
 
   if (!journeyEvents.length) {
-    return <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>No journey data available.</span>;
+    return <span className="text-sm text-gray-500">No journey data available.</span>;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div className="flex flex-col">
       {/* Decay Chain — "First Domino" visualization */}
       {decayChain.length >= 2 && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap',
           padding: '10px 14px', marginBottom: 14,
-          background: `${theme.colors.urgent}06`,
-          border: `1px solid ${theme.colors.urgent}25`,
-          borderRadius: theme.radius.md,
+          background: `${'#ef4444'}06`,
+          border: `1px solid ${'#ef4444'}25`,
+          borderRadius: '12px',
         }}>
           <div style={{ width: '100%', marginBottom: 8 }}>
-            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.colors.urgent }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#ef4444' }}>
               Engagement Decay Sequence
             </span>
           </div>
           {decayChain.map((step, i) => {
-            const color = domainColors[step.domain] ?? theme.colors.textMuted;
+            const color = domainColors[step.domain] ?? '#9CA3AF';
             return (
               <div key={step.domain} style={{ display: 'flex', alignItems: 'center' }}>
                 <div style={{
@@ -226,10 +225,10 @@ function MemberJourneyTimeline({ profile }) {
                   <div style={{ fontSize: '10px', fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {step.domain} dropped
                   </div>
-                  <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>{step.date}</div>
+                  <div style={{ fontSize: '10px', color: '#9CA3AF' }}>{step.date}</div>
                 </div>
                 {i < decayChain.length - 1 && (
-                  <span style={{ margin: '0 6px', fontSize: '14px', color: theme.colors.textMuted, fontWeight: 700 }}>&rarr;</span>
+                  <span style={{ margin: '0 6px', fontSize: '14px', color: '#9CA3AF', fontWeight: 700 }}>&rarr;</span>
                 )}
               </div>
             );
@@ -244,10 +243,10 @@ function MemberJourneyTimeline({ profile }) {
         top: 4,
         bottom: 4,
         width: 2,
-        background: theme.colors.border,
+        background: '#E5E7EB',
       }} />
       {journeyEvents.map((evt, i) => {
-        const color = domainColors[evt.domain] ?? theme.colors.textMuted;
+        const color = domainColors[evt.domain] ?? '#9CA3AF';
         const icon = typeIcons[evt.type] ?? '\u2022';
         return (
           <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '6px 0', position: 'relative' }}>
@@ -270,7 +269,7 @@ function MemberJourneyTimeline({ profile }) {
             }}>
               {icon}
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="flex-1">
               <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
                 <span style={{
                   fontSize: '10px',
@@ -284,9 +283,9 @@ function MemberJourneyTimeline({ profile }) {
                 }}>
                   {evt.domain}
                 </span>
-                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{formatDateTime(evt.date) !== '—' ? formatDateTime(evt.date) : evt.date}</span>
+                <span className="text-xs text-gray-400">{formatDateTime(evt.date) !== '—' ? formatDateTime(evt.date) : evt.date}</span>
               </div>
-              <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, marginTop: 2 }}>{evt.label}</div>
+              <div style={{ fontSize: '14px', color: '#6B7280', marginTop: 2 }}>{evt.label}</div>
             </div>
           </div>
         );
@@ -317,22 +316,22 @@ function HealthDimensionGrid({ profile }) {
 
   // Use real dimensions from profile if available (populated by health_scores API), else approximate
   const dimensions = [
-    { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: theme.colors.accent },
-    { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: theme.colors.success },
-    { label: 'Email Engagement', weight: '25%', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: theme.colors.info500 },
+    { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#E8740C' },
+    { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#22c55e' },
+    { label: 'Email Engagement', weight: '25%', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: '#3B82F6' },
     { label: 'Event Attendance', weight: '20%', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
   ];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+    <div className="grid grid-cols-2 gap-2">
       {dimensions.map(d => (
-        <div key={d.label} style={{ padding: '8px 10px', borderRadius: theme.radius.sm, border: `1px solid ${theme.colors.border}`, background: theme.colors.bg }}>
+        <div key={d.label} style={{ padding: '8px 10px', borderRadius: '8px', border: `1px solid ${'#E5E7EB'}`, background: '#F8F9FA' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-            <span style={{ fontSize: '11px', color: theme.colors.textMuted }}>{d.label} ({d.weight})</span>
-            <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: theme.fonts.mono, color: d.value >= 60 ? theme.colors.success : d.value >= 35 ? theme.colors.warning : theme.colors.urgent }}>{d.value}</span>
+            <span style={{ fontSize: '11px', color: '#9CA3AF' }}>{d.label} ({d.weight})</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: d.value >= 60 ? '#22c55e' : d.value >= 35 ? '#f59e0b' : '#ef4444' }}>{d.value}</span>
           </div>
-          <div style={{ height: '4px', borderRadius: '2px', background: theme.colors.bgDeep }}>
-            <div style={{ height: '100%', borderRadius: '2px', background: d.value >= 60 ? theme.colors.success : d.value >= 35 ? theme.colors.warning : theme.colors.urgent, width: `${d.value}%` }} />
+          <div style={{ height: '4px', borderRadius: '2px', background: '#F3F4F6' }}>
+            <div style={{ height: '100%', borderRadius: '2px', background: d.value >= 60 ? '#22c55e' : d.value >= 35 ? '#f59e0b' : '#ef4444', width: `${d.value}%` }} />
           </div>
         </div>
       ))}
@@ -351,32 +350,32 @@ function ChurnPredictionBadge({ profile }) {
   if (!prediction || !prediction.prob_90d) return null;
 
   const prob = prediction.prob_90d;
-  const color = prob >= 60 ? theme.colors.urgent : prob >= 30 ? theme.colors.warning : theme.colors.success;
+  const color = prob >= 60 ? '#ef4444' : prob >= 30 ? '#f59e0b' : '#22c55e';
   const factors = prediction.risk_factors || [];
 
   return (
     <Section title="Resignation Risk" description="AI-powered early warning">
-      <div style={{ display: 'flex', gap: theme.spacing.md, marginBottom: theme.spacing.sm }}>
-        <div style={{ textAlign: 'center', padding: '8px 16px', borderRadius: theme.radius.md, background: `${color}10`, border: `1px solid ${color}30` }}>
-          <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: theme.fonts.mono, color }}>{prob}%</div>
-          <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>90-day risk</div>
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '8px' }}>
+        <div style={{ textAlign: 'center', padding: '8px 16px', borderRadius: '12px', background: `${color}10`, border: `1px solid ${color}30` }}>
+          <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color }}>{prob}%</div>
+          <div style={{ fontSize: '10px', color: '#9CA3AF' }}>90-day risk</div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ textAlign: 'center', padding: '8px 12px', borderRadius: theme.radius.sm, background: theme.colors.bgDeep }}>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, fontFamily: theme.fonts.mono }}>{prediction.prob_30d}%</div>
-            <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>30-day</div>
+        <div className="flex gap-2">
+          <div style={{ textAlign: 'center', padding: '8px 12px', borderRadius: '8px', background: '#F3F4F6' }}>
+            <div style={{ fontSize: '14px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{prediction.prob_30d}%</div>
+            <div style={{ fontSize: '10px', color: '#9CA3AF' }}>30-day</div>
           </div>
-          <div style={{ textAlign: 'center', padding: '8px 12px', borderRadius: theme.radius.sm, background: theme.colors.bgDeep }}>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, fontFamily: theme.fonts.mono }}>{prediction.prob_60d}%</div>
-            <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>60-day</div>
+          <div style={{ textAlign: 'center', padding: '8px 12px', borderRadius: '8px', background: '#F3F4F6' }}>
+            <div style={{ fontSize: '14px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{prediction.prob_60d}%</div>
+            <div style={{ fontSize: '10px', color: '#9CA3AF' }}>60-day</div>
           </div>
         </div>
       </div>
       {factors.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: '10px', fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contributing factors</div>
+        <div className="flex flex-col gap-1">
+          <div style={{ fontSize: '10px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contributing factors</div>
           {factors.slice(0, 3).map((f, i) => (
-            <div key={i} style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+            <div key={i} style={{ fontSize: '12px', color: '#6B7280', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
               <span style={{ color, fontWeight: 700, flexShrink: 0 }}>{Math.round(f.weight * 100)}%</span>
               <span>{f.factor} — {f.detail}</span>
             </div>
@@ -470,22 +469,22 @@ function OutreachHistory({ profile }) {
   }, [profile.activity, profile.memberId]);
 
   if (!outreachEvents.length) {
-    return <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>No outreach history recorded yet.</span>;
+    return <span className="text-sm text-gray-500">No outreach history recorded yet.</span>;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="flex flex-col gap-2">
       {outreachEvents.map((evt, i) => (
         <div key={evt.id || i} style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-          gap: 12, padding: '8px 10px', borderRadius: theme.radius.sm,
-          background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
+          gap: 12, padding: '8px 10px', borderRadius: '8px',
+          background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}`,
         }}>
           <div>
-            <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm }}>{evt.type}</div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>{evt.detail}</div>
+            <div style={{ fontWeight: 600, fontSize: '14px' }}>{evt.type}</div>
+            <div className="text-xs text-gray-500">{evt.detail}</div>
           </div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: '12px', color: '#9CA3AF', whiteSpace: 'nowrap' }}>
             {formatDateTime(evt.timestamp)}
           </div>
         </div>
@@ -514,12 +513,12 @@ function SpendTrendSparkline({ profile }) {
   }, [profile]);
 
   const trend = spendData.length >= 2 ? spendData[spendData.length - 1] - spendData[0] : 0;
-  const trendColor = trend >= 0 ? theme.colors.success : theme.colors.urgent;
+  const trendColor = trend >= 0 ? '#22c55e' : '#ef4444';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div className="flex items-center gap-3">
       <Sparkline data={spendData} color={trendColor} />
-      <div style={{ fontSize: theme.fontSize.xs, color: trendColor, fontWeight: 600 }}>
+      <div style={{ fontSize: '12px', color: trendColor, fontWeight: 600 }}>
         {trend >= 0 ? '↑' : '↓'} ${Math.abs(trend).toLocaleString()}/mo
       </div>
     </div>
@@ -529,7 +528,7 @@ function SpendTrendSparkline({ profile }) {
 export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNote, onQuickAction, layout = 'drawer' }) {
   if (!profile) {
     return (
-      <div style={{ padding: theme.spacing.lg, color: theme.colors.textMuted }}>
+      <div style={{ padding: '24px', color: '#9CA3AF' }}>
         Select a member to view their profile.
       </div>
     );
@@ -566,59 +565,59 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
   }, [profile.riskSignals]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+    <div className="flex flex-col gap-4">
       {/* Why am I looking at this member? — context banner */}
       {contextReason && (
         <div style={{
           padding: '10px 14px',
-          borderRadius: theme.radius.sm,
-          background: `${theme.colors.urgent}06`,
-          border: `1px solid ${theme.colors.urgent}20`,
-          borderLeft: `3px solid ${theme.colors.urgent}`,
-          fontSize: theme.fontSize.sm,
-          color: theme.colors.textPrimary,
+          borderRadius: '8px',
+          background: `${'#ef4444'}06`,
+          border: `1px solid ${'#ef4444'}20`,
+          borderLeft: `3px solid ${'#ef4444'}`,
+          fontSize: '14px',
+          color: '#1a1a2e',
         }}>
-          <span style={{ fontWeight: 700, color: theme.colors.urgent, marginRight: 6 }}>Flagged:</span>
+          <span style={{ fontWeight: 700, color: '#ef4444', marginRight: 6 }}>Flagged:</span>
           {contextReason}
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: theme.spacing.md, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: theme.spacing.md, alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <div style={{
             width: layout === 'page' ? 80 : 64,
             height: layout === 'page' ? 80 : 64,
             borderRadius: '50%',
-            background: theme.colors.bgDeep,
-            border: `1px solid ${theme.colors.border}`,
+            background: '#F3F4F6',
+            border: `1px solid ${'#E5E7EB'}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: layout === 'page' ? 28 : 20,
             fontWeight: 700,
-            color: theme.colors.textPrimary,
+            color: '#1a1a2e',
           }}>
             {initials}
           </div>
           <div>
-          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textMuted, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Member Snapshot</div>
+          <div style={{ fontSize: '14px', color: '#9CA3AF', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Member Snapshot</div>
           <h2 style={{ margin: '4px 0', fontSize: layout === 'page' ? 32 : 24 }}>{profile.name}</h2>
-          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>
+          <div className="text-sm text-gray-500">
             {profile.tier} • Joined {formatDate(profile.joinDate)}
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: theme.spacing.sm, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 12, marginTop: '8px', flexWrap: 'wrap' }}>
             {topMetrics.map((metric) => (
-              <div key={metric.label} style={{ padding: '8px 12px', borderRadius: theme.radius.sm, background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}` }}>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{metric.label}</div>
-                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600 }}>{metric.value}</div>
+              <div key={metric.label} style={{ padding: '8px 12px', borderRadius: '8px', background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}` }}>
+                <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{metric.label}</div>
+                <div style={{ fontSize: '14px', fontWeight: 600 }}>{metric.value}</div>
               </div>
             ))}
           </div>
         </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Health score</div>
-          <div style={{ fontSize: 42, fontFamily: theme.fonts.mono, color: profile.healthScore > 69 ? theme.colors.success : profile.healthScore > 40 ? theme.colors.warning : theme.colors.urgent }}>
+          <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Health score</div>
+          <div style={{ fontSize: 42, fontFamily: "'JetBrains Mono', monospace", color: profile.healthScore > 69 ? '#22c55e' : profile.healthScore > 40 ? '#f59e0b' : '#ef4444' }}>
             {profile.healthScore ?? '—'}
           </div>
           <Sparkline data={profile.trend ?? []} />
@@ -626,7 +625,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             <button
               type="button"
               onClick={() => onOpenFullPage(profile.memberId)}
-              style={{ marginTop: theme.spacing.sm, border: 'none', background: 'none', color: theme.colors.accent, fontWeight: 600, cursor: 'pointer' }}
+              style={{ marginTop: '8px', border: 'none', background: 'none', color: '#E8740C', fontWeight: 600, cursor: 'pointer' }}
             >
               Open full profile →
             </button>
@@ -643,12 +642,12 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <ChurnPredictionBadge profile={profile} />
 
       <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '—'}`}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: theme.fontSize.sm }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '14px' }}>
           <span><strong>Phone:</strong> {profile.contact?.phone && profile.contact.phone !== '—'
-            ? <a href={`tel:${profile.contact.phone}`} style={{ color: theme.colors.accent, textDecoration: 'none' }}>{profile.contact.phone}</a>
+            ? <a href={`tel:${profile.contact.phone}`} style={{ color: '#E8740C', textDecoration: 'none' }}>{profile.contact.phone}</a>
             : '—'}</span>
           <span><strong>Email:</strong> {profile.contact?.email && profile.contact.email !== '—'
-            ? <a href={`mailto:${profile.contact.email}`} style={{ color: theme.colors.accent, textDecoration: 'none' }}>{profile.contact.email}</a>
+            ? <a href={`mailto:${profile.contact.email}`} style={{ color: '#E8740C', textDecoration: 'none' }}>{profile.contact.email}</a>
             : '—'}</span>
           <span><strong>Last outreach:</strong> {formatDateTime(profile.contact?.lastOutreach)}</span>
         </div>
@@ -657,24 +656,24 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       {/* Household / Family Unit View */}
       {profile.family && profile.family.length > 0 && (
         <Section title="Household" description={`${profile.family.length + 1} members`}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="flex flex-col gap-2">
             {/* Aggregate household value */}
             <div style={{
-              display: 'flex', gap: theme.spacing.md, padding: '8px 12px',
-              background: theme.colors.bgDeep, borderRadius: theme.radius.sm,
-              border: `1px solid ${theme.colors.border}`,
+              display: 'flex', gap: '16px', padding: '8px 12px',
+              background: '#F3F4F6', borderRadius: '8px',
+              border: `1px solid ${'#E5E7EB'}`,
             }}>
               <div>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Household value</div>
-                <div style={{ fontSize: theme.fontSize.md, fontWeight: 700, fontFamily: theme.fonts.mono }}>
+                <div className="text-xs text-gray-400 uppercase tracking-wide">Household value</div>
+                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>
                   ${((profile.duesAnnual || 0) * (1 + profile.family.length * 0.6)).toLocaleString()}/yr
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Health (lowest)</div>
+                <div className="text-xs text-gray-400 uppercase tracking-wide">Health (lowest)</div>
                 <div style={{
-                  fontSize: theme.fontSize.md, fontWeight: 700, fontFamily: theme.fonts.mono,
-                  color: (profile.healthScore ?? 50) > 69 ? theme.colors.success : (profile.healthScore ?? 50) > 40 ? theme.colors.warning : theme.colors.urgent,
+                  fontSize: '16px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
+                  color: (profile.healthScore ?? 50) > 69 ? '#22c55e' : (profile.healthScore ?? 50) > 40 ? '#f59e0b' : '#ef4444',
                 }}>
                   {profile.healthScore ?? '—'}
                 </div>
@@ -686,20 +685,20 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                 onClick={() => f.memberId && onClose?.()}
                 style={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '8px 12px', borderRadius: theme.radius.sm,
-                  border: `1px solid ${theme.colors.border}`,
+                  padding: '8px 12px', borderRadius: '8px',
+                  border: `1px solid ${'#E5E7EB'}`,
                   cursor: f.memberId ? 'pointer' : 'default',
                   transition: 'background 0.12s',
                 }}
-                onMouseEnter={e => { if (f.memberId) e.currentTarget.style.background = theme.colors.bgDeep; }}
+                onMouseEnter={e => { if (f.memberId) e.currentTarget.style.background = '#F3F4F6'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
               >
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: f.memberId ? theme.colors.accent : theme.colors.textPrimary }}>{f.name}</div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{f.relation}</div>
+                  <div style={{ fontWeight: 600, fontSize: '14px', color: f.memberId ? '#E8740C' : '#1a1a2e' }}>{f.name}</div>
+                  <div className="text-xs text-gray-400">{f.relation}</div>
                 </div>
                 {f.notes && (
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, maxWidth: '50%', textAlign: 'right' }}>
+                  <div style={{ fontSize: '12px', color: '#6B7280', maxWidth: '50%', textAlign: 'right' }}>
                     {f.notes}
                   </div>
                 )}
@@ -712,7 +711,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       {/* Archetype Description — Call Prep */}
       {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && (
         <Section title={`Archetype: ${profile.archetype}`} description="Behavioral profile">
-          <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.6 }}>
+          <div style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.6 }}>
             {ARCHETYPE_DESCRIPTIONS[profile.archetype]}
           </div>
         </Section>
@@ -725,15 +724,15 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
       {/* Recommended Talking Points */}
       <Section title="Talking Points" description="Personalized for this call">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div className="flex flex-col gap-1.5">
           {getTalkingPoints(profile).map((point, i) => (
             <div key={i} style={{
               display: 'flex', gap: 8, alignItems: 'flex-start',
-              padding: '8px 12px', borderRadius: theme.radius.sm,
-              background: `${theme.colors.accent}06`, border: `1px solid ${theme.colors.accent}20`,
+              padding: '8px 12px', borderRadius: '8px',
+              background: `${'#E8740C'}06`, border: `1px solid ${'#E8740C'}20`,
             }}>
-              <span style={{ color: theme.colors.accent, fontWeight: 700, fontSize: theme.fontSize.sm, flexShrink: 0 }}>{i + 1}.</span>
-              <span style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.5 }}>{point}</span>
+              <span style={{ color: '#E8740C', fontWeight: 700, fontSize: '14px', flexShrink: 0 }}>{i + 1}.</span>
+              <span style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.5 }}>{point}</span>
             </div>
           ))}
         </div>
@@ -745,24 +744,24 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </Section>
 
       <Section title="Preferences & insights">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+        <div className="flex flex-col gap-2">
           {profile.preferences?.favoriteSpots && (
-            <div style={{ fontSize: theme.fontSize.sm }}>
+            <div className="text-sm">
               <strong>Favorite spots:</strong> {profile.preferences.favoriteSpots.join(', ')}
             </div>
           )}
           {profile.preferences?.teeWindows && (
-            <div style={{ fontSize: theme.fontSize.sm }}>
+            <div className="text-sm">
               <strong>Tee time window:</strong> {profile.preferences.teeWindows}
             </div>
           )}
           {profile.preferences?.dining && (
-            <div style={{ fontSize: theme.fontSize.sm }}>
+            <div className="text-sm">
               <strong>Dining:</strong> {profile.preferences.dining}
             </div>
           )}
           {profile.preferences?.notes && (
-            <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>{profile.preferences.notes}</div>
+            <div className="text-sm text-gray-500">{profile.preferences.notes}</div>
           )}
         </div>
       </Section>
@@ -778,7 +777,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </Section>
 
       <Section title="Risk signals">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+        <div className="flex flex-col gap-2">
           {(profile.riskSignals ?? []).map((signal) => (
             <div
               key={signal.id}
@@ -787,24 +786,24 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                 const activitySection = document.querySelector('[data-section="recent-activity"]');
                 if (activitySection) activitySection.scrollIntoView({ behavior: 'smooth' });
               }}
-              style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '10px 12px', cursor: 'pointer', transition: 'background 0.12s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = theme.colors.bgDeep; }}
+              style={{ border: `1px solid ${'#E5E7EB'}`, borderRadius: '8px', padding: '10px 12px', cursor: 'pointer', transition: 'background 0.12s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#F3F4F6'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
               title="Click to view related activity"
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontWeight: 600 }}>{signal.label}</div>
+              <div className="flex justify-between items-center">
+                <div className="font-semibold">{signal.label}</div>
                 <SourceBadge system={signal.source ?? 'Member CRM'} size="xs" />
               </div>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{formatDateTime(signal.timestamp)} · Confidence {signal.confidence ?? '—'}</div>
+              <div className="text-xs text-gray-400">{formatDateTime(signal.timestamp)} · Confidence {signal.confidence ?? '—'}</div>
             </div>
           ))}
-          {!(profile.riskSignals ?? []).length && <span style={{ color: theme.colors.textSecondary }}>No active risks.</span>}
+          {!(profile.riskSignals ?? []).length && <span className="text-gray-500">No active risks.</span>}
         </div>
       </Section>
 
       <Section title="Staff notes">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+        <div className="flex flex-col gap-2">
           <textarea
             value={noteText}
             onChange={(event) => setNoteText(event.target.value)}
@@ -812,13 +811,13 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             style={{
               width: '100%',
               minHeight: 96,
-              borderRadius: theme.radius.sm,
-              border: `1px solid ${theme.colors.border}`,
-              padding: theme.spacing.sm,
-              fontSize: theme.fontSize.sm,
-              fontFamily: theme.fonts.sans,
-              background: theme.colors.bgDeep,
-              color: theme.colors.textPrimary,
+              borderRadius: '8px',
+              border: `1px solid ${'#E5E7EB'}`,
+              padding: '8px',
+              fontSize: '14px',
+              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+              background: '#F3F4F6',
+              color: '#1a1a2e',
             }}
           />
           <button
@@ -827,34 +826,34 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             style={{
               alignSelf: 'flex-end',
               padding: '6px 14px',
-              borderRadius: theme.radius.sm,
+              borderRadius: '8px',
               border: 'none',
-              background: theme.colors.accent,
-              color: theme.colors.white,
+              background: '#E8740C',
+              color: '#ffffff',
               fontWeight: 600,
               cursor: 'pointer',
             }}
           >
             Save note
           </button>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="flex flex-col gap-2">
             {(profile.staffNotes ?? []).map((note) => (
-              <div key={note.id} style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.sm, padding: '10px 12px' }}>
-                <div style={{ fontWeight: 600 }}>{note.author}</div>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+              <div key={note.id} style={{ border: `1px solid ${'#E5E7EB'}`, borderRadius: '8px', padding: '10px 12px' }}>
+                <div className="font-semibold">{note.author}</div>
+                <div className="text-xs text-gray-400">
                   {note.department ?? 'General'} • {formatDateTime(note.timestamp)}
                 </div>
                 <div style={{ marginTop: 6 }}>{note.text}</div>
               </div>
             ))}
-            {!(profile.staffNotes ?? []).length && <span style={{ color: theme.colors.textSecondary }}>No notes yet.</span>}
+            {!(profile.staffNotes ?? []).length && <span className="text-gray-500">No notes yet.</span>}
           </div>
         </div>
       </Section>
 
-      <div style={isDrawerLayout ? { position: 'sticky', bottom: 0, background: theme.colors.white, padding: `${theme.spacing.md} 0 ${theme.spacing.sm}`, boxShadow: '0 -12px 32px rgba(15, 23, 42, 0.08)', zIndex: 5 } : undefined}>
+      <div style={isDrawerLayout ? { position: 'sticky', bottom: 0, background: '#ffffff', padding: `${'16px'} 0 ${'8px'}`, boxShadow: '0 -12px 32px rgba(15, 23, 42, 0.08)', zIndex: 5 } : undefined}>
         <Section title="Quick actions">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {quickActions.map((action) => (
               <button
                 key={action.key}
@@ -862,9 +861,9 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                 onClick={() => onQuickAction?.(profile.memberId, action.key)}
                 style={{
                   padding: '8px 14px',
-                  borderRadius: theme.radius.md,
-                  border: '1px solid ' + theme.colors.border,
-                  background: theme.colors.bgDeep,
+                  borderRadius: '12px',
+                  border: '1px solid ' + '#E5E7EB',
+                  background: '#F3F4F6',
                   cursor: 'pointer',
                   fontWeight: 600,
                 }}
@@ -884,7 +883,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             style={{
               border: 'none',
               background: 'none',
-              color: theme.colors.textMuted,
+              color: '#9CA3AF',
               cursor: 'pointer',
               fontWeight: 600,
             }}
@@ -904,12 +903,12 @@ class DrawerErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: 32, textAlign: 'center', color: theme.colors.textMuted }}>
+        <div style={{ padding: 32, textAlign: 'center', color: '#9CA3AF' }}>
           <div style={{ fontSize: 24, marginBottom: 12 }}>Something went wrong</div>
           <div style={{ fontSize: 14, marginBottom: 16 }}>Unable to load this member profile.</div>
           <button onClick={this.props.onClose} style={{
-            padding: '8px 20px', borderRadius: 6, border: `1px solid ${theme.colors.border}`,
-            background: theme.colors.bgCard, cursor: 'pointer', color: theme.colors.textPrimary,
+            padding: '8px 20px', borderRadius: 6, border: `1px solid ${'#E5E7EB'}`,
+            background: '#ffffff', cursor: 'pointer', color: '#1a1a2e',
           }}>Close</button>
         </div>
       );
@@ -962,15 +961,15 @@ export default function MemberProfileDrawer() {
 
   const panelBase = {
     position: 'fixed',
-    background: theme.colors.white,
+    background: '#ffffff',
     boxShadow: '0 12px 40px rgba(15, 23, 42, 0.25)',
-    borderLeft: `1px solid ${theme.colors.border}`,
-    borderTopLeftRadius: isMobile ? theme.radius.lg : 0,
-    borderTopRightRadius: isMobile ? theme.radius.lg : 0,
+    borderLeft: `1px solid ${'#E5E7EB'}`,
+    borderTopLeftRadius: isMobile ? '16px' : 0,
+    borderTopRightRadius: isMobile ? '16px' : 0,
     display: 'flex',
     flexDirection: 'column',
-    padding: theme.spacing.lg,
-    gap: theme.spacing.md,
+    padding: '24px',
+    gap: '16px',
     transition: 'transform 0.25s ease',
     zIndex: 1002,
     overflowY: 'auto',

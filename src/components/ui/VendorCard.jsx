@@ -1,100 +1,53 @@
 // VendorCard — individual vendor card with tier badge, status, and combo count
-// Props: id, name, categoryLabel, icon, themeColor, tier, status,
-//        lastSync, description, comboCount, isSelected, onSelect
-// Color rule: all colors via theme.colors only — no hardcoded hex
-import { theme } from '@/config/theme';
 import TierBadge from './TierBadge';
 
 const STATUS_DOT = {
-  connected:   { color: 'success',  label: 'Connected'   },
-  available:   { color: 'warning',  label: 'Available'   },
-  coming_soon: { color: 'textMuted', label: 'Coming Soon' },
+  connected:   { dotCls: 'bg-success-500', textCls: 'text-success-500', label: 'Connected' },
+  available:   { dotCls: 'bg-warning-500', textCls: 'text-warning-500', label: 'Available' },
+  coming_soon: { dotCls: 'bg-gray-400', textCls: 'text-gray-400', label: 'Coming Soon' },
 };
 
 export default function VendorCard({
   name, categoryLabel, icon, themeColor, tier, status,
   lastSync, description, comboCount = 0, isSelected, onSelect,
 }) {
-  const cfg         = STATUS_DOT[status] ?? STATUS_DOT.available;
-  const statusColor = theme.colors[cfg.color];
-  const accentColor = theme.colors[themeColor] ?? theme.colors.accent;
+  const cfg = STATUS_DOT[status] ?? STATUS_DOT.available;
 
   return (
     <button
       onClick={onSelect}
-      style={{
-        display:       'flex',
-        flexDirection: 'column',
-        gap:           theme.spacing.sm,
-        width:         '100%',
-        textAlign:     'left',
-        background:    theme.colors.bgCard,
-        border:        `1px solid ${isSelected ? accentColor : theme.colors.border}`,
-        borderLeft:    `3px solid ${isSelected ? accentColor : 'transparent'}`,
-        borderRadius:  theme.radius.md,
-        padding:       theme.spacing.md,
-        cursor:        'pointer',
-        transition:    'box-shadow 0.15s ease, border-color 0.15s ease',
-        boxShadow:     isSelected ? theme.shadow.md : theme.shadow.sm,
-        fontFamily:    theme.fonts.sans,
-      }}
+      className={`flex flex-col gap-3 w-full text-left rounded-xl p-4 cursor-pointer transition-all duration-150 ${
+        isSelected
+          ? 'bg-white border border-brand-500 border-l-[3px] border-l-brand-500 shadow-theme-md dark:bg-white/[0.03]'
+          : 'bg-white border border-gray-200 border-l-[3px] border-l-transparent shadow-theme-xs dark:bg-white/[0.03] dark:border-gray-800'
+      }`}
     >
-      {/* Top row: icon + name + TierBadge */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{
-          fontSize: '18px', lineHeight: 1,
-          width: '32px', height: '32px', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', borderRadius: theme.radius.sm,
-          background: `${accentColor}14`, flexShrink: 0,
-        }}>
+      {/* Top row */}
+      <div className="flex items-center gap-2">
+        <span className="text-lg leading-none w-8 h-8 flex items-center justify-center rounded-lg bg-brand-50 shrink-0 dark:bg-brand-500/10">
           {icon}
         </span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: theme.fontSize.sm, fontWeight: 700,
-            color: theme.colors.textPrimary, lineHeight: 1.3,
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>
-            {name}
-          </div>
-          <div style={{
-            fontSize: '11px', color: accentColor, fontWeight: 600,
-            textTransform: 'uppercase', letterSpacing: '0.04em',
-          }}>
-            {categoryLabel}
-          </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-bold text-gray-800 leading-tight whitespace-nowrap overflow-hidden text-ellipsis dark:text-white/90">{name}</div>
+          <div className="text-[11px] text-brand-500 font-semibold uppercase tracking-wide">{categoryLabel}</div>
         </div>
         <TierBadge tier={tier} size="sm" />
       </div>
 
       {/* Description */}
-      <p style={{
-        fontSize: '12px', color: theme.colors.textSecondary,
-        lineHeight: 1.5, margin: 0,
-        display: '-webkit-box', WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical', overflow: 'hidden',
-      }}>
-        {description}
-      </p>
+      <p className="text-xs text-gray-600 leading-relaxed m-0 line-clamp-2 dark:text-gray-400">{description}</p>
 
-      {/* Bottom row: status + combo count */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{
-            width: '7px', height: '7px', borderRadius: '50%',
-            background: statusColor, flexShrink: 0,
-          }} />
-          <span style={{ fontSize: '11px', color: theme.colors.textMuted, fontWeight: 500 }}>
-            {cfg.label}
-            {status === 'connected' && lastSync ? ` · ${lastSync}` : ''}
+      {/* Bottom row */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <span className={`w-[7px] h-[7px] rounded-full shrink-0 ${cfg.dotCls}`} />
+          <span className="text-[11px] text-gray-500 font-medium dark:text-gray-400">
+            {cfg.label}{status === 'connected' && lastSync ? ` \u00B7 ${lastSync}` : ''}
           </span>
         </div>
         {comboCount > 0 && (
-          <span style={{
-            fontSize: '11px', color: theme.colors.accent,
-            fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px',
-          }}>
-            {comboCount} combo insight{comboCount > 1 ? 's' : ''} →
+          <span className="text-[11px] text-brand-500 font-semibold flex items-center gap-[3px]">
+            {comboCount} combo insight{comboCount > 1 ? 's' : ''} \u2192
           </span>
         )}
       </div>

@@ -1,79 +1,57 @@
-import { theme } from '@/config/theme';
-
 const CATEGORY_COLORS = {
-  'tee-sheet': theme.colors.integrationTeeSheet,
-  pos: theme.colors.integrationPos,
-  crm: theme.colors.integrationCrm,
-  staffing: theme.colors.operations,
-  waitlist: theme.colors.integrationWaitlist,
+  'tee-sheet': '#1a7a3c',
+  pos: '#8b6420',
+  crm: '#4a6fa5',
+  staffing: '#22c55e',
+  waitlist: '#7c3aed',
 };
 
 const STATUS_COLORS = {
-  connected: theme.colors.operations,
-  available: theme.colors.integrationPos,
-  'coming-soon': theme.colors.integrationMuted,
+  connected: '#22c55e',
+  available: '#8b6420',
+  'coming-soon': '#94a3b8',
 };
 
 export function IntegrationCard({ system, isSelected, onClick, cardRef }) {
-  const categoryColor = CATEGORY_COLORS[system.category] ?? theme.colors.integrationNeutral;
-  const statusColor = STATUS_COLORS[system.status] ?? theme.colors.integrationNeutral;
+  const categoryColor = CATEGORY_COLORS[system.category] ?? '#64748b';
+  const statusColor = STATUS_COLORS[system.status] ?? '#64748b';
 
   return (
     <article
       ref={cardRef}
       onClick={onClick}
+      className="bg-white dark:bg-white/[0.03] rounded-xl p-4 cursor-pointer transition-all duration-200"
       style={{
-        background: theme.colors.white,
-        border: isSelected ? `2px solid ${categoryColor}` : `1px solid ${theme.colors.border}`,
-        borderRadius: 12,
-        padding: 16,
-        cursor: 'pointer',
+        border: isSelected ? `2px solid ${categoryColor}` : '1px solid #E5E7EB',
         boxShadow: isSelected ? '0 0 0 2px rgba(26,122,60,0.15)' : '0 1px 4px rgba(0,0,0,0.05)',
-        transition: 'all 0.2s ease',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
+      <div className="flex justify-between gap-2.5 mb-2.5">
         <div>
-          <h3 style={{ margin: 0, fontSize: theme.fontSize.md, color: theme.colors.textPrimary }}>{system.name}</h3>
-          <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+          <h3 className="m-0 text-base text-gray-800 dark:text-white/90">{system.name}</h3>
+          <div className="flex gap-1.5 mt-2 flex-wrap">
             <Badge text={system.category} color={categoryColor} />
-            <Badge text={`Tier ${system.tier}`} color={theme.colors.integrationNeutral} />
+            <Badge text={`Tier ${system.tier}`} color={'#64748b'} />
             <Badge text={system.status} color={statusColor} />
           </div>
         </div>
-        <span style={{
-          width: 34,
-          height: 34,
-          borderRadius: 10,
-          border: `1px solid ${theme.colors.border}`,
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 12,
-          fontWeight: 700,
-        }}>
+        <span className="w-[34px] h-[34px] rounded-[10px] border border-gray-200 dark:border-gray-800 inline-flex items-center justify-center text-xs font-bold">
           {system.logo}
         </span>
       </div>
 
-      <div style={{ fontSize: 12, color: theme.colors.textSecondary, marginBottom: 10 }}>
+      <div className="text-xs text-gray-500 mb-2.5">
         <strong style={{ color: statusColor }}>{system.status}</strong>
         {' · '}
         Last sync: {system.lastSync ?? 'Not connected yet'}
       </div>
 
-      <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: theme.colors.textMuted, marginBottom: 6 }}>
+      <div className="text-[11px] uppercase tracking-wide text-gray-400 mb-1.5">
         Key Endpoints
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      <div className="flex flex-wrap gap-1.5">
         {system.endpoints.map((endpoint) => (
-          <span key={endpoint} style={{
-            background: theme.colors.bgDeep,
-            borderRadius: 6,
-            padding: '3px 7px',
-            fontSize: 11,
-            color: theme.colors.textSecondary,
-          }}>
+          <span key={endpoint} className="bg-gray-100 rounded-md py-[3px] px-[7px] text-[11px] text-gray-500">
             {endpoint}
           </span>
         ))}
@@ -84,16 +62,10 @@ export function IntegrationCard({ system, isSelected, onClick, cardRef }) {
 
 function Badge({ text, color }) {
   return (
-    <span style={{
-      fontSize: 10,
-      fontWeight: 700,
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-      color,
-      background: `${color}18`,
-      borderRadius: 4,
-      padding: '2px 6px',
-    }}>
+    <span
+      className="text-[10px] font-bold uppercase tracking-wide rounded py-0.5 px-1.5"
+      style={{ color, background: `${color}18` }}
+    >
       {text}
     </span>
   );

@@ -1,48 +1,10 @@
-import { theme } from '@/config/theme';
-
-// DES-P06: Skeleton loader components with shimmer animation
-
-const shimmerKeyframes = `
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-`;
-
-const shimmerStyle = {
-  background: `linear-gradient(
-    90deg,
-    ${theme.colors.bgDeep} 0%,
-    ${theme.colors.border} 50%,
-    ${theme.colors.bgDeep} 100%
-  )`,
-  backgroundSize: '2000px 100%',
-  animation: 'shimmer 1.8s infinite linear',
-  borderRadius: theme.radius.sm,
-};
-
-// Inject shimmer animation keyframes
-if (typeof document !== 'undefined' && !document.getElementById('shimmer-keyframes')) {
-  const style = document.createElement('style');
-  style.id = 'shimmer-keyframes';
-  style.innerHTML = shimmerKeyframes;
-  document.head.appendChild(style);
-}
+// DES-P06: Skeleton loader components with Tailwind animate-pulse
 
 export function SkeletonLine({ width = '100%', height = 16, marginBottom = 8, style = {} }) {
   return (
     <div
-      style={{
-        ...shimmerStyle,
-        width,
-        height,
-        marginBottom,
-        ...style,
-      }}
+      className="animate-pulse bg-gray-200 rounded-lg dark:bg-gray-700"
+      style={{ width, height, marginBottom, ...style }}
     />
   );
 }
@@ -50,35 +12,25 @@ export function SkeletonLine({ width = '100%', height = 16, marginBottom = 8, st
 export function SkeletonCircle({ size = 40, style = {} }) {
   return (
     <div
-      style={{
-        ...shimmerStyle,
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        ...style,
-      }}
+      className="animate-pulse bg-gray-200 rounded-full dark:bg-gray-700"
+      style={{ width: size, height: size, ...style }}
     />
   );
 }
 
-export function SkeletonCard({ 
-  headerLines = 2, 
-  bodyLines = 3, 
+export function SkeletonCard({
+  headerLines = 2,
+  bodyLines = 3,
   hasButton = true,
-  style = {} 
+  style = {}
 }) {
   return (
     <div
-      style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md,
-        padding: theme.spacing.lg,
-        ...style,
-      }}
+      className="rounded-xl border border-gray-200 bg-white p-5 sm:p-6 dark:border-gray-800 dark:bg-white/[0.03]"
+      style={style}
     >
       {/* Header skeleton */}
-      <div style={{ marginBottom: theme.spacing.md }}>
+      <div className="mb-4">
         {Array.from({ length: headerLines }).map((_, i) => (
           <SkeletonLine
             key={i}
@@ -90,7 +42,7 @@ export function SkeletonCard({
       </div>
 
       {/* Body skeleton */}
-      <div style={{ marginBottom: theme.spacing.md }}>
+      <div className="mb-4">
         {Array.from({ length: bodyLines }).map((_, i) => (
           <SkeletonLine
             key={i}
@@ -109,28 +61,18 @@ export function SkeletonCard({
   );
 }
 
-export function SkeletonTable({ 
-  rows = 5, 
+export function SkeletonTable({
+  rows = 5,
   columns = 6,
-  style = {} 
+  style = {}
 }) {
   return (
     <div
-      style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md,
-        overflow: 'hidden',
-        ...style,
-      }}
+      className="rounded-xl border border-gray-200 bg-white overflow-hidden dark:border-gray-800 dark:bg-white/[0.03]"
+      style={style}
     >
       {/* Table header */}
-      <div style={{ 
-        padding: theme.spacing.md,
-        borderBottom: `1px solid ${theme.colors.border}`,
-        display: 'flex',
-        gap: theme.spacing.md,
-      }}>
+      <div className="p-4 border-b border-gray-200 flex gap-4 dark:border-gray-800">
         {Array.from({ length: columns }).map((_, i) => (
           <SkeletonLine
             key={i}
@@ -145,13 +87,7 @@ export function SkeletonTable({
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div
           key={rowIndex}
-          style={{
-            padding: theme.spacing.md,
-            borderBottom: `1px solid ${theme.colors.border}`,
-            display: 'flex',
-            gap: theme.spacing.md,
-            alignItems: 'center',
-          }}
+          className="p-4 border-b border-gray-200 flex gap-4 items-center dark:border-gray-800"
         >
           {Array.from({ length: columns }).map((_, colIndex) => (
             <SkeletonLine
@@ -167,34 +103,22 @@ export function SkeletonTable({
   );
 }
 
-export function SkeletonGrid({ 
-  cards = 4, 
+export function SkeletonGrid({
+  cards = 4,
   columns = 4,
   cardHeight = 140,
-  style = {} 
+  style = {}
 }) {
   return (
     <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${columns}, 1fr)`,
-        gap: theme.spacing.md,
-        ...style,
-      }}
+      className="gap-4"
+      style={{ display: 'grid', gridTemplateColumns: `repeat(${columns}, 1fr)`, ...style }}
     >
       {Array.from({ length: cards }).map((_, i) => (
         <div
           key={i}
-          style={{
-            background: theme.colors.bgCard,
-            border: `1px solid ${theme.colors.border}`,
-            borderRadius: theme.radius.md,
-            padding: theme.spacing.md,
-            height: cardHeight,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.sm,
-          }}
+          className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-3 dark:border-gray-800 dark:bg-white/[0.03]"
+          style={{ height: cardHeight }}
         >
           <SkeletonLine width="60%" height={16} />
           <SkeletonLine width="100%" height={32} marginBottom={8} />
@@ -208,7 +132,7 @@ export function SkeletonGrid({
 // Preset skeleton layouts for common page patterns
 export function SkeletonDashboard() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
       <SkeletonLine width="300px" height={32} />
       <SkeletonGrid cards={4} columns={4} />
       <SkeletonCard headerLines={1} bodyLines={4} hasButton={true} />
@@ -219,7 +143,7 @@ export function SkeletonDashboard() {
 
 export function SkeletonMemberList() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
       <SkeletonGrid cards={4} columns={4} cardHeight={100} />
       <SkeletonTable rows={8} columns={6} />
     </div>

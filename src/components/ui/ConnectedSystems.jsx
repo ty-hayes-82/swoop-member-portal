@@ -1,101 +1,42 @@
 // ConnectedSystems.jsx — integration status panel for Daily Briefing + Demo Mode
-// Hard ceiling: 150 lines. Target: 80 lines.
-
-import { theme } from '@/config/theme';
 
 const SYSTEMS = [
-  {
-    name:     'Tee Sheet',
-    role:     'Tee Sheet · Golf Operations',
-    icon:     '⛳',
-    color:    theme.colors.operations,
-    lastSync: '4 min ago',
-    records:  '2,524 bookings',
-  },
-  {
-    name:     'POS',
-    role:     'Food & Beverage · Payments',
-    icon:     '🍽',
-    color:    theme.colors.fb,
-    lastSync: '2 min ago',
-    records:  '3,851 checks',
-  },
-  {
-    name:     'Member CRM',
-    role:     'Member CRM · Email',
-    icon:     '★',
-    color:    theme.colors.textSecondary,
-    lastSync: '8 min ago',
-    records:  '300 members',
-  },
-  {
-    name:     'Scheduling',
-    role:     'Staff Scheduling',
-    icon:     '📅',
-    color:    theme.colors.staffing,
-    lastSync: '12 min ago',
-    records:  '701 shifts',
-  },
-  {
-    name:     'Analytics',
-    role:     'Membership Management',
-    icon:     '◉',
-    color:    theme.colors.textSecondary,
-    lastSync: '6 min ago',
-    records:  '300 accounts',
-  },
+  { name: 'Tee Sheet', role: 'Tee Sheet \u00B7 Golf Operations', icon: '\u26F3', colorCls: 'text-blue-light-500', lastSync: '4 min ago', records: '2,524 bookings' },
+  { name: 'POS', role: 'Food & Beverage \u00B7 Payments', icon: '\uD83C\uDF7D', colorCls: 'text-orange-500', lastSync: '2 min ago', records: '3,851 checks' },
+  { name: 'Member CRM', role: 'Member CRM \u00B7 Email', icon: '\u2605', colorCls: 'text-gray-600 dark:text-gray-400', lastSync: '8 min ago', records: '300 members' },
+  { name: 'Scheduling', role: 'Staff Scheduling', icon: '\uD83D\uDCC5', colorCls: 'text-blue-light-600', lastSync: '12 min ago', records: '701 shifts' },
+  { name: 'Analytics', role: 'Membership Management', icon: '\u25C9', colorCls: 'text-gray-600 dark:text-gray-400', lastSync: '6 min ago', records: '300 accounts' },
 ];
 
 export default function ConnectedSystems({ compact = false }) {
   return (
-    <div style={{
-      background:   theme.colors.bgCard,
-      border:       `1px solid ${theme.colors.border}`,
-      borderRadius: theme.radius.md,
-      overflow:     'hidden',
-    }}>
-      <div style={{
-        padding:      `${theme.spacing.sm} ${theme.spacing.md}`,
-        borderBottom: `1px solid ${theme.colors.border}`,
-        display:      'flex',
-        alignItems:   'center',
-        gap:          theme.spacing.sm,
-      }}>
-        <span style={{ fontSize: '11px', fontWeight: 600, color: theme.colors.textSecondary,
-          letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-3 dark:border-gray-800">
+        <span className="text-[11px] font-semibold text-gray-600 tracking-wider uppercase dark:text-gray-400">
           Connected Systems
         </span>
-        <span style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '10px',
-          background: `${theme.colors.success}20`, color: theme.colors.success, fontWeight: 600 }}>
+        <span className="text-[10px] px-1.5 py-px rounded-full bg-success-50 text-success-500 font-semibold dark:bg-success-500/15">
           {SYSTEMS.length} Live
         </span>
       </div>
 
-      <div style={{ padding: compact ? `${theme.spacing.sm} ${theme.spacing.md}` : theme.spacing.md,
-        display: 'flex', flexDirection: 'column', gap: compact ? '6px' : theme.spacing.sm }}>
+      <div className={`flex flex-col ${compact ? 'px-4 py-3 gap-1.5' : 'p-4 gap-3'}`}>
         {SYSTEMS.map(sys => (
-          <div key={sys.name} style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
-            {/* Green dot */}
-            <div style={{ width: 6, height: 6, borderRadius: '50%',
-              background: theme.colors.success, flexShrink: 0, boxShadow: `0 0 4px ${theme.colors.success}` }} />
-
-            <span style={{ fontSize: '13px' }}>{sys.icon}</span>
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: sys.color }}>{sys.name}</span>
-                {!compact && (
-                  <span style={{ fontSize: '10px', color: theme.colors.textMuted }}>{sys.role}</span>
-                )}
+          <div key={sys.name} className="flex items-center gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0 shadow-[0_0_4px_#12b76a]" />
+            <span className="text-sm">{sys.icon}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline gap-1.5">
+                <span className={`text-xs font-semibold ${sys.colorCls}`}>{sys.name}</span>
+                {!compact && <span className="text-[10px] text-gray-500 dark:text-gray-400">{sys.role}</span>}
               </div>
               {!compact && (
-                <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: '1px' }}>
-                  {sys.records} · synced {sys.lastSync}
+                <div className="text-[10px] text-gray-500 mt-px dark:text-gray-400">
+                  {sys.records} \u00B7 synced {sys.lastSync}
                 </div>
               )}
             </div>
-
-            <span style={{ fontSize: '10px', color: theme.colors.success, flexShrink: 0 }}>●</span>
+            <span className="text-[10px] text-success-500 shrink-0">\u25CF</span>
           </div>
         ))}
       </div>

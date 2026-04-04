@@ -24,32 +24,26 @@ export default function StatCard({
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered && onClick ? 'var(--bg-card-hover)' : 'var(--bg-card)',
-        border: `1px solid var(--border)`,
-        borderRadius: '10px',
-        padding: '20px',
-        cursor: onClick ? 'pointer' : 'default',
-        transition: 'background 0.15s ease, box-shadow 0.15s ease',
-        boxShadow: hovered && onClick ? '0 4px 12px rgba(0,0,0,0.08)' : '0 1px 3px rgba(0,0,0,0.06)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        minWidth: 0,
-      }}
+      className={`rounded-xl border border-gray-200 p-5 flex flex-col gap-2 min-w-0 transition-all duration-150 dark:border-gray-800 dark:bg-white/[0.03] ${
+        onClick ? 'cursor-pointer' : 'cursor-default'
+      } ${
+        hovered && onClick
+          ? 'bg-gray-50 shadow-theme-md dark:bg-white/[0.05]'
+          : 'bg-white shadow-theme-xs dark:bg-white/[0.03]'
+      }`}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500, letterSpacing: '0.03em', lineHeight: 1.3 }}>
+      <div className="flex justify-between items-start">
+        <span className="text-xs text-gray-600 font-medium tracking-wide leading-tight dark:text-gray-400">
           {label}
         </span>
         {badge && <Badge text={badge.text} variant={badge.variant} size="sm" />}
       </div>
 
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '28px', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.02em' }}>
+      <div className="font-mono text-[28px] font-semibold text-gray-800 leading-none tracking-tight dark:text-white/90">
         {formatValue(value, format)}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div className="flex justify-between items-end">
         {trend && (
           <TrendArrow
             direction={trend.direction}
@@ -59,13 +53,13 @@ export default function StatCard({
           />
         )}
         {sparklineData && sparklineData.length > 1 && (
-          <div style={{ width: '80px', height: '28px', marginLeft: 'auto' }}>
+          <div className="w-20 h-7 ml-auto">
             <Sparkline data={sparklineData} height={28} />
           </div>
         )}
       </div>
       {source && (
-        <div style={{ marginTop: '2px' }}>
+        <div className="mt-0.5">
           <SourceBadge system={source} size="xs" />
         </div>
       )}

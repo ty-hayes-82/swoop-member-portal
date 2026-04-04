@@ -1,24 +1,15 @@
 /**
- * Notification Feed — Track 3, Item 8
- * Slide-up panel showing recent notifications from api/notifications.js
- * Used by the header bell icon or as a standalone panel.
+ * Notification Feed — slide-up panel showing recent notifications
  */
 import { useState, useEffect, useCallback } from 'react';
-import { theme } from '@/config/theme';
-
-const PRIORITY_COLORS = {
-  urgent: theme.colors.urgent,
-  high: theme.colors.warning,
-  normal: theme.colors.textMuted,
-};
 
 const TYPE_ICONS = {
-  morning_digest: '☀️',
-  escalation: '⚠️',
-  sla_breach: '🚨',
-  playbook_step: '📋',
-  health_alert: '💓',
-  default: '🔔',
+  morning_digest: '\u2600\uFE0F',
+  escalation: '\u26A0\uFE0F',
+  sla_breach: '\uD83D\uDEA8',
+  playbook_step: '\uD83D\uDCCB',
+  health_alert: '\uD83D\uDC93',
+  default: '\uD83D\uDD14',
 };
 
 export default function NotificationFeed({ clubId, onClose }) {
@@ -55,98 +46,67 @@ export default function NotificationFeed({ clubId, onClose }) {
   }, [notifications]);
 
   return (
-    <div style={{
-      background: theme.colors.bgCard,
-      border: `1px solid ${theme.colors.border}`,
-      borderRadius: theme.radius.lg,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-      maxHeight: '480px',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
+    <div className="rounded-2xl border border-gray-200 bg-white shadow-theme-lg max-h-[480px] overflow-hidden flex flex-col dark:border-gray-800 dark:bg-white/[0.03]">
       {/* Header */}
-      <div style={{
-        padding: '14px 16px',
-        borderBottom: `1px solid ${theme.colors.border}`,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}>
-        <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>
+      <div className="px-4 py-3.5 border-b border-gray-200 flex justify-between items-center dark:border-gray-800">
+        <div className="text-sm font-bold text-gray-800 dark:text-white/90">
           Notifications {notifications.length > 0 && `(${notifications.length})`}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="flex gap-2">
           {notifications.length > 0 && (
-            <button
-              onClick={markAllRead}
-              style={{
-                fontSize: theme.fontSize.xs, color: theme.colors.accent,
-                background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600,
-              }}
-            >
+            <button onClick={markAllRead} className="text-xs text-brand-500 bg-transparent border-none cursor-pointer font-semibold">
               Mark all read
             </button>
           )}
           {onClose && (
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.colors.textMuted, fontSize: '16px' }}>
-              ×
+            <button onClick={onClose} className="bg-transparent border-none cursor-pointer text-gray-500 text-base dark:text-gray-400">
+              \u00D7
             </button>
           )}
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ overflowY: 'auto', maxHeight: '420px' }}>
+      <div className="overflow-y-auto max-h-[420px]">
         {loading && (
-          <div style={{ padding: theme.spacing.lg, textAlign: 'center', color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
+          <div className="p-5 text-center text-gray-500 text-sm dark:text-gray-400">
             Loading notifications...
           </div>
         )}
         {!loading && notifications.length === 0 && (
-          <div style={{ padding: theme.spacing.lg, textAlign: 'center', color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
-            All caught up — no new notifications.
+          <div className="p-5 text-center text-gray-500 text-sm dark:text-gray-400">
+            All caught up \u2014 no new notifications.
           </div>
         )}
         {notifications.map(n => {
           const icon = TYPE_ICONS[n.type] || TYPE_ICONS.default;
-          const prioColor = PRIORITY_COLORS[n.priority] || PRIORITY_COLORS.normal;
+          const isUrgent = n.priority === 'urgent';
           const timeAgo = getTimeAgo(n.created_at);
 
           return (
             <div
               key={n.notification_id}
               onClick={() => markRead(n.notification_id)}
-              style={{
-                padding: '12px 16px',
-                borderBottom: `1px solid ${theme.colors.border}`,
-                cursor: 'pointer',
-                display: 'flex',
-                gap: 10,
-                alignItems: 'flex-start',
-                background: n.priority === 'urgent' ? `${theme.colors.urgent}04` : 'transparent',
-              }}
+              className={`px-4 py-3 border-b border-gray-200 cursor-pointer flex gap-2.5 items-start dark:border-gray-800 ${isUrgent ? 'bg-error-50 dark:bg-error-500/5' : 'bg-transparent'}`}
             >
-              <span style={{ fontSize: '18px', flexShrink: 0 }}>{icon}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary, lineHeight: 1.4 }}>
+              <span className="text-lg shrink-0">{icon}</span>
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-gray-800 leading-snug dark:text-white/90">
                   {n.title}
                 </div>
                 {n.body && (
-                  <div style={{
-                    fontSize: theme.fontSize.xs, color: theme.colors.textSecondary, marginTop: 2,
-                    lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                  }}>
+                  <div className="text-xs text-gray-600 mt-0.5 leading-relaxed line-clamp-2 dark:text-gray-400">
                     {n.body}
                   </div>
                 )}
-                <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: 4, display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div className="text-[10px] text-gray-500 mt-1 flex gap-2 items-center dark:text-gray-400">
                   <span>{timeAgo}</span>
                   {n.priority !== 'normal' && (
-                    <span style={{
-                      padding: '1px 6px', borderRadius: '4px', fontWeight: 700, textTransform: 'uppercase',
-                      fontSize: '9px', background: `${prioColor}15`, color: prioColor,
-                    }}>{n.priority}</span>
+                    <span className={`px-1.5 py-px rounded font-bold uppercase text-[9px] ${
+                      n.priority === 'urgent'
+                        ? 'bg-error-50 text-error-500 dark:bg-error-500/15'
+                        : 'bg-warning-50 text-warning-500 dark:bg-warning-500/15'
+                    }`}>{n.priority}</span>
                   )}
                 </div>
               </div>

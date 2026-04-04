@@ -1,7 +1,5 @@
 // PlaybookActionCard — inline contextual card connecting insights to playbooks.
-// Used across Experience Insights, Member Risk, Daily Briefing, etc.
 import { useState } from 'react';
-import { theme } from '@/config/theme';
 import { useApp } from '@/context/AppContext';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { trackAction } from '@/services/activityService';
@@ -15,8 +13,7 @@ export default function PlaybookActionCard({
   impact,
   memberCount,
   buttonLabel = 'Take Action',
-  buttonColor = '#e8772e',
-  variant = 'standard', // 'standard' | 'compact' | 'urgent'
+  variant = 'standard',
   linkTo,
 }) {
   const { showToast } = useApp();
@@ -25,8 +22,6 @@ export default function PlaybookActionCard({
 
   const isUrgent = variant === 'urgent';
   const isCompact = variant === 'compact';
-  const borderColor = isUrgent ? '#dc2626' : '#22c55e';
-  const bgColor = isUrgent ? 'rgba(220,38,38,0.03)' : 'rgba(34,197,94,0.03)';
 
   const handleActivate = () => {
     showToast(`${playbookName || title} activated for ${memberCount || 'targeted'} members`, 'success');
@@ -40,32 +35,25 @@ export default function PlaybookActionCard({
 
   if (isCompact) {
     return (
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '8px 14px', borderRadius: 8,
-        background: bgColor, borderLeft: `3px solid ${borderColor}`,
-        gap: 12, flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: 14 }}>{icon}</span>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#0f0f0f' }}>{title}</span>
+      <div className={`flex items-center justify-between px-3.5 py-2 rounded-lg gap-3 flex-wrap ${
+        isUrgent ? 'bg-error-50 border-l-[3px] border-l-error-500 dark:bg-error-500/5' : 'bg-success-50 border-l-[3px] border-l-success-500 dark:bg-success-500/5'
+      }`}>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="text-sm">{icon}</span>
+          <span className="text-xs font-semibold text-gray-800 dark:text-white/90">{title}</span>
           {memberCount && (
-            <span style={{ fontSize: 11, color: '#888', background: '#f4f4f5', padding: '1px 6px', borderRadius: 3 }}>
+            <span className="text-[11px] text-gray-500 bg-gray-100 px-1.5 py-px rounded dark:bg-gray-800 dark:text-gray-400">
               {memberCount} members
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div className="flex gap-1.5">
           {impact && (
-            <span style={{ fontSize: 11, fontWeight: 700, color: buttonColor }}>{impact}</span>
+            <span className="text-[11px] font-bold text-brand-500">{impact}</span>
           )}
           <button
             onClick={handleActivate}
-            style={{
-              padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600,
-              cursor: 'pointer', border: 'none',
-              background: buttonColor, color: 'white',
-            }}
+            className="px-3 py-1 rounded-md text-[11px] font-semibold cursor-pointer border-none bg-brand-500 text-white"
           >{buttonLabel}</button>
         </div>
       </div>
@@ -76,52 +64,34 @@ export default function PlaybookActionCard({
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered ? (isUrgent ? 'rgba(220,38,38,0.04)' : 'rgba(34,197,94,0.04)') : bgColor,
-        borderLeft: `4px solid ${borderColor}`,
-        borderRadius: 10,
-        padding: '16px 20px',
-        transition: 'background 0.15s',
-      }}
+      className={`rounded-xl px-5 py-4 transition-colors duration-150 border-l-4 ${
+        isUrgent
+          ? `border-l-error-500 ${hovered ? 'bg-error-50' : 'bg-error-50/50'} dark:bg-error-500/5`
+          : `border-l-success-500 ${hovered ? 'bg-success-50' : 'bg-success-50/50'} dark:bg-success-500/5`
+      }`}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <span style={{ fontSize: 14 }}>{icon}</span>
-        <span style={{
-          fontSize: 10, fontWeight: 700, letterSpacing: '1px',
-          textTransform: 'uppercase', color: borderColor,
-        }}>{label}</span>
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-sm">{icon}</span>
+        <span className={`text-[10px] font-bold tracking-widest uppercase ${isUrgent ? 'text-error-500' : 'text-success-500'}`}>{label}</span>
       </div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: '#0f0f0f', marginBottom: 4 }}>
-        {title}
-      </div>
+      <div className="text-sm font-bold text-gray-800 mb-1 dark:text-white/90">{title}</div>
       {description && (
-        <div style={{ fontSize: 13, color: '#666', lineHeight: 1.5, marginBottom: 12 }}>
-          {description}
-        </div>
+        <div className="text-sm text-gray-600 leading-relaxed mb-3 dark:text-gray-400">{description}</div>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+      <div className="flex items-center gap-2.5 flex-wrap">
         <button
           onClick={handleActivate}
-          style={{
-            padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-            cursor: 'pointer', border: 'none',
-            background: buttonColor, color: 'white',
-            transition: 'opacity 0.15s',
-          }}
+          className="px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white transition-opacity duration-150"
         >{buttonLabel}</button>
         <button
           onClick={handleViewPlaybook}
-          style={{
-            padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-            cursor: 'pointer', border: `1.5px solid ${buttonColor}40`,
-            background: 'transparent', color: buttonColor,
-          }}
+          className="px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer border-[1.5px] border-brand-200 bg-transparent text-brand-500 dark:border-brand-500/30"
         >View Details</button>
         {impact && (
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#d9534f', marginLeft: 'auto' }}>{impact}</span>
+          <span className="text-xs font-bold text-error-500 ml-auto">{impact}</span>
         )}
         {memberCount && (
-          <span style={{ fontSize: 11, color: '#888' }}>{memberCount} members affected</span>
+          <span className="text-[11px] text-gray-500 dark:text-gray-400">{memberCount} members affected</span>
         )}
       </div>
     </div>

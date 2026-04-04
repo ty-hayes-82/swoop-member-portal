@@ -1,87 +1,57 @@
 // VendorLandscapeSection.jsx — full vendor landscape organized by category
-// Props contract: { categories: VENDOR_LANDSCAPE[] }
-import { theme } from '@/config/theme';
 
-const TIER_COLOR = {
-  primary:      theme.colors.success,
-  supported:    theme.colors.textMuted,
-  coming_soon:  theme.colors.textMuted,
+const TIER_CLS = {
+  primary:     { text: 'text-success-600 dark:text-success-400', bg: 'bg-success-50 dark:bg-success-500/10', border: 'border-success-200 dark:border-success-500/30' },
+  supported:   { text: 'text-gray-500 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+  coming_soon: { text: 'text-gray-500 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
 };
-const TIER_BG = {
-  primary:      `${theme.colors.success}12`,
-  supported:    theme.colors.bgDeep,
-  coming_soon:  theme.colors.bgDeep,
-};
-const TIER_BORDER = {
-  primary:      `${theme.colors.success}30`,
-  supported:    theme.colors.border,
-  coming_soon:  theme.colors.border,
-};
-const TIER_LABEL = { primary: 'Live', supported: 'Supported', coming_soon: 'Soon' };
 
 export default function VendorLandscapeSection({ categories }) {
   const totalVendors = categories.reduce((n, c) => n + c.vendors.length, 0);
 
   return (
     <div>
-      <div style={{ marginBottom: theme.spacing.sm }}>
-        <div style={{ fontSize: theme.fontSize.md, fontWeight: 700, color: theme.colors.textPrimary }}>
-          Full Vendor Landscape
-        </div>
-        <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: '2px' }}>
-          {totalVendors}+ compatible vendors across {categories.length} categories — Swoop works with what you already have
+      <div className="mb-3">
+        <div className="text-base font-bold text-gray-800 dark:text-white/90">Full Vendor Landscape</div>
+        <div className="text-[11px] text-gray-500 mt-0.5 dark:text-gray-400">
+          {totalVendors}+ compatible vendors across {categories.length} categories \u2014 Swoop works with what you already have
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: theme.spacing.sm }}>
+      <div className="grid grid-cols-2 gap-3">
         {categories.map(cat => {
-          const color = theme.colors[cat.themeColor] || theme.colors.textMuted;
           const primaryCount   = cat.vendors.filter(v => v.tier === 'primary').length;
           const supportedCount = cat.vendors.filter(v => v.tier === 'supported').length;
           const soonCount      = cat.vendors.filter(v => v.tier === 'coming_soon').length;
 
           return (
-            <div key={cat.category} style={{
-              background: theme.colors.bgCard,
-              border: `1px solid ${theme.colors.border}`,
-              borderLeft: `3px solid ${color}`,
-              borderRadius: theme.radius.sm,
-              padding: theme.spacing.sm,
-            }}>
+            <div key={cat.category} className="rounded-lg border border-gray-200 border-l-[3px] border-l-brand-500 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]">
               {/* Category header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '14px', lineHeight: 1 }}>{cat.icon}</span>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-sm leading-none">{cat.icon}</span>
                 <div>
-                  <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textPrimary, lineHeight: 1.2 }}>
-                    {cat.category}
-                  </div>
-                  <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: '1px' }}>{cat.description}</div>
+                  <div className="text-xs font-bold text-gray-800 leading-tight dark:text-white/90">{cat.category}</div>
+                  <div className="text-[10px] text-gray-500 mt-px dark:text-gray-400">{cat.description}</div>
                 </div>
               </div>
 
               {/* Vendor chips */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
-                {cat.vendors.map(v => (
-                  <span key={v.name} style={{
-                    fontSize: '10px',
-                    fontWeight: v.tier === 'primary' ? 600 : 400,
-                    color: TIER_COLOR[v.tier],
-                    background: TIER_BG[v.tier],
-                    border: `1px solid ${TIER_BORDER[v.tier]}`,
-                    borderRadius: '3px',
-                    padding: '2px 6px',
-                    opacity: v.tier === 'coming_soon' ? 0.65 : 1,
-                  }}>
-                    {v.name}
-                  </span>
-                ))}
+              <div className="flex flex-wrap gap-1 mb-2">
+                {cat.vendors.map(v => {
+                  const cls = TIER_CLS[v.tier] || TIER_CLS.supported;
+                  return (
+                    <span key={v.name} className={`text-[10px] px-1.5 py-0.5 rounded border ${cls.text} ${cls.bg} ${cls.border} ${v.tier === 'primary' ? 'font-semibold' : 'font-normal'} ${v.tier === 'coming_soon' ? 'opacity-65' : ''}`}>
+                      {v.name}
+                    </span>
+                  );
+                })}
               </div>
 
               {/* Tier counts */}
-              <div style={{ display: 'flex', gap: '10px', borderTop: `1px solid ${theme.colors.borderLight}`, paddingTop: '6px' }}>
-                {primaryCount   > 0 && <Tally label="Live"      count={primaryCount}   color={theme.colors.success} />}
-                {supportedCount > 0 && <Tally label="Supported" count={supportedCount} color={theme.colors.textMuted} />}
-                {soonCount      > 0 && <Tally label="Coming"    count={soonCount}      color={theme.colors.textMuted} />}
+              <div className="flex gap-2.5 border-t border-gray-100 pt-1.5 dark:border-gray-800">
+                {primaryCount   > 0 && <Tally label="Live"      count={primaryCount}   cls="text-success-500" />}
+                {supportedCount > 0 && <Tally label="Supported" count={supportedCount} cls="text-gray-500 dark:text-gray-400" />}
+                {soonCount      > 0 && <Tally label="Coming"    count={soonCount}      cls="text-gray-500 dark:text-gray-400" />}
               </div>
             </div>
           );
@@ -91,10 +61,10 @@ export default function VendorLandscapeSection({ categories }) {
   );
 }
 
-function Tally({ label, count, color }) {
+function Tally({ label, count, cls }) {
   return (
-    <span style={{ fontSize: '10px', color, display: 'flex', alignItems: 'center', gap: '3px' }}>
-      <span style={{ fontWeight: 700, fontFamily: theme.fonts.mono }}>{count}</span>
+    <span className={`text-[10px] flex items-center gap-[3px] ${cls}`}>
+      <span className="font-bold font-mono">{count}</span>
       <span>{label}</span>
     </span>
   );

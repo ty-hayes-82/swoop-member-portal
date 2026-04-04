@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import { theme } from '@/config/theme';
 import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
@@ -100,10 +99,10 @@ function FilterChip({ label, onRemove, color }) {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: theme.spacing.xs,
+        gap: '4px',
         padding: '4px 10px',
-        borderRadius: theme.radius.full,
-        fontSize: theme.fontSize.xs,
+        borderRadius: '9999px',
+        fontSize: '12px',
         fontWeight: 600,
         background: color + '20',
         color: color,
@@ -118,7 +117,7 @@ function FilterChip({ label, onRemove, color }) {
           border: 'none',
           color: 'inherit',
           cursor: 'pointer',
-          fontSize: theme.fontSize.sm,
+          fontSize: '14px',
           padding: 0,
           lineHeight: 1,
           opacity: 0.7,
@@ -136,16 +135,16 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
   const [hovered, setHovered] = useState(false);
   const healthLevel = getHealthLevel(member.score);
   const healthColor = member.score >= 70 
-    ? theme.colors.success 
+    ? '#22c55e' 
     : member.score >= 50 
-    ? theme.colors.warning 
+    ? '#f59e0b' 
     : member.score >= 30 
-    ? theme.colors.riskAtRiskAlt 
-    : theme.colors.urgent;
+    ? '#ea580c' 
+    : '#ef4444';
 
   // DES-P05: Zebra striping with improved hover states
-  const zebraBackground = index % 2 === 0 ? theme.colors.bg : theme.colors.bgDeep;
-  const hoverBackground = hovered ? theme.colors.bgCardHover : zebraBackground;
+  const zebraBackground = index % 2 === 0 ? '#F8F9FA' : '#F3F4F6';
+  const hoverBackground = hovered ? '#F9FAFB' : zebraBackground;
 
   return (
     <>
@@ -154,32 +153,32 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
-          borderTop: `1px solid ${theme.colors.border}`,
+          borderTop: `1px solid ${'#E5E7EB'}`,
           cursor: 'pointer',
           background: hoverBackground,
           transition: 'background 0.15s ease, transform 0.15s ease',
           transform: hovered ? 'translateX(2px)' : 'translateX(0)',
         }}
       >
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+        <td style={{ padding: `${'8px'} ${'16px'}` }}>
           <MemberLink
             mode="drawer"
             memberId={member.memberId}
             style={{
               fontWeight: 600,
-              color: hovered ? theme.colors.accent : theme.colors.textPrimary,
+              color: hovered ? '#E8740C' : '#1a1a2e',
               textDecoration: hovered ? 'underline' : 'none',
-              textDecorationColor: `${theme.colors.accent}50`,
+              textDecorationColor: `${'#E8740C'}50`,
               transition: 'color 0.12s ease',
             }}
           >
             {member.name}
           </MemberLink>
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+        <td style={{ padding: `${'8px'} ${'16px'}` }}>
           <span
             style={{
-              fontFamily: theme.fonts.mono,
+              fontFamily: "'JetBrains Mono', monospace",
               fontWeight: 700,
               color: healthColor,
             }}
@@ -187,10 +186,10 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
             {member.score}
           </span>
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+        <td style={{ padding: `${'8px'} ${'16px'}` }}>
           <span
             style={{
-              fontSize: theme.fontSize.xs,
+              fontSize: '12px',
               color: healthColor,
               fontWeight: 600,
             }}
@@ -198,23 +197,23 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
             {healthLevel}
           </span>
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
+        <td style={{ padding: `${'8px'} ${'16px'}` }}>
           <ArchetypeBadge archetype={member.archetype} size="xs" />
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+        <td style={{ padding: `${'8px'} ${'16px'}` }}>
+          <span className="text-xs text-gray-500">
             {member.tier}
           </span>
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}` }}>
-          <span style={{ fontFamily: theme.fonts.mono, fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+        <td style={{ padding: `${'8px'} ${'16px'}` }}>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#6B7280' }}>
             ${(member.memberValueAnnual || 0).toLocaleString()}
           </span>
         </td>
-        <td style={{ padding: `${theme.spacing.sm} ${theme.spacing.md}`, textAlign: 'right' }}>
+        <td style={{ padding: `${'8px'} ${'16px'}`, textAlign: 'right' }}>
           <span
             style={{
-              color: isExpanded ? theme.colors.accent : theme.colors.textMuted,
+              color: isExpanded ? '#E8740C' : '#9CA3AF',
               fontSize: '14px',
               fontWeight: 600,
               transition: 'transform 0.15s ease, color 0.12s ease',
@@ -227,37 +226,37 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
         </td>
       </tr>
       {isExpanded && (
-        <tr style={{ background: theme.colors.bgDeep }}>
-          <td colSpan={7} style={{ padding: theme.spacing.md }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+        <tr style={{ background: '#F3F4F6' }}>
+          <td colSpan={7} style={{ padding: '16px' }}>
+            <div className="flex flex-col gap-4">
               {/* Member Details */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: theme.spacing.md }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                 <div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: theme.spacing.xs }}>
+                  <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
                     Last Seen
                   </div>
-                  <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
+                  <div style={{ fontSize: '14px', color: '#1a1a2e' }}>
                     {member.lastSeenLocation || 'Unknown'}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: theme.spacing.xs }}>
+                  <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
                     Member Since
                   </div>
-                  <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
+                  <div style={{ fontSize: '14px', color: '#1a1a2e' }}>
                     {new Date(member.joinDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: theme.spacing.xs }}>
+                  <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
                     Annual Dues
                   </div>
-                  <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary, fontFamily: theme.fonts.mono }}>
+                  <div style={{ fontSize: '14px', color: '#1a1a2e', fontFamily: "'JetBrains Mono', monospace" }}>
                     ${member.duesAnnual.toLocaleString()}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: theme.spacing.xs }}>
+                  <div style={{ fontSize: '12px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
                     Health Trend
                   </div>
                   <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
@@ -267,7 +266,7 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
                         style={{
                           width: '8px',
                           height: `${Math.max(4, score / 2)}px`,
-                          background: score >= 70 ? theme.colors.success : score >= 50 ? theme.colors.warning : score >= 30 ? theme.colors.riskAtRiskAlt : theme.colors.urgent,
+                          background: score >= 70 ? '#22c55e' : score >= 50 ? '#f59e0b' : score >= 30 ? '#ea580c' : '#ef4444',
                           borderRadius: '2px',
                           opacity: 0.4 + (i * 0.1),
                         }}
@@ -280,15 +279,15 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
               {/* Top Risk Signal */}
               {member.topRisk && member.topRisk !== 'No current risks' && (
                 <div style={{ 
-                  padding: theme.spacing.sm, 
-                  background: theme.colors.warning + '10', 
-                  borderRadius: theme.radius.sm,
-                  borderLeft: `3px solid ${theme.colors.warning}`,
+                  padding: '8px', 
+                  background: '#f59e0b' + '10', 
+                  borderRadius: '8px',
+                  borderLeft: `3px solid ${'#f59e0b'}`,
                 }}>
-                  <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, marginBottom: theme.spacing.xs }}>
+                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>
                     Primary Risk Signal:
                   </div>
-                  <div style={{ fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>
+                  <div style={{ fontSize: '14px', color: '#1a1a2e' }}>
                     {member.topRisk}
                   </div>
                 </div>
@@ -384,10 +383,10 @@ export default function AllMembersView({ initialArchetype = null }) {
     });
     const total = filteredMembers.length || 1;
     return [
-      { level: 'Healthy', count: counts.Healthy, percentage: counts.Healthy / total, color: theme.colors.success, min: 70 },
-      { level: 'Watch', count: counts.Watch, percentage: counts.Watch / total, color: theme.colors.warning, min: 50 },
-      { level: 'At Risk', count: counts['At Risk'], percentage: counts['At Risk'] / total, color: theme.colors.riskAtRiskAlt || '#ea580c', min: 30 },
-      { level: 'Critical', count: counts.Critical, percentage: counts.Critical / total, color: theme.colors.urgent, min: 0 },
+      { level: 'Healthy', count: counts.Healthy, percentage: counts.Healthy / total, color: '#22c55e', min: 70 },
+      { level: 'Watch', count: counts.Watch, percentage: counts.Watch / total, color: '#f59e0b', min: 50 },
+      { level: 'At Risk', count: counts['At Risk'], percentage: counts['At Risk'] / total, color: '#ea580c', min: 30 },
+      { level: 'Critical', count: counts.Critical, percentage: counts.Critical / total, color: '#ef4444', min: 0 },
     ];
   }, [filteredMembers]);
 
@@ -464,13 +463,13 @@ export default function AllMembersView({ initialArchetype = null }) {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
       {/* Health Distribution Cards - Clickable */}
       <div>
         <div style={{ 
-          fontSize: theme.fontSize.sm, 
-          color: theme.colors.textMuted, 
-          marginBottom: theme.spacing.sm,
+          fontSize: '14px', 
+          color: '#9CA3AF', 
+          marginBottom: '8px',
           textTransform: 'uppercase',
           letterSpacing: '0.06em',
         }}>
@@ -484,11 +483,11 @@ export default function AllMembersView({ initialArchetype = null }) {
                 key={d.level}
                 onClick={() => applyHealthFilter(d.level)}
                 style={{
-                  background: theme.colors.bgCard,
-                  boxShadow: isActive ? theme.shadow.md : theme.shadow.sm,
-                  borderRadius: theme.radius.md,
+                  background: '#ffffff',
+                  boxShadow: isActive ? '0 4px 12px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.06)',
+                  borderRadius: '12px',
                   border: `2px solid ${isActive ? d.color : d.color + '40'}`,
-                  padding: theme.spacing.md,
+                  padding: '16px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   transform: isActive ? 'scale(1.02)' : 'scale(1)',
@@ -496,29 +495,29 @@ export default function AllMembersView({ initialArchetype = null }) {
                 onMouseEnter={(e) => {
                   if (!isActive) {
                     e.currentTarget.style.transform = 'scale(1.02)';
-                    e.currentTarget.style.boxShadow = theme.shadow.md;
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
                     e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = theme.shadow.sm;
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
                   }
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: theme.spacing.sm }}>
-                  <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span className="text-xs text-gray-400 uppercase tracking-wide">
                     {d.level}
                   </span>
-                  <span style={{ fontSize: theme.fontSize.xs, color: d.color }}>
+                  <span style={{ fontSize: '12px', color: d.color }}>
                     {(d.percentage * 100).toFixed(0)}%
                   </span>
                 </div>
-                <div style={{ fontSize: theme.fontSize.xxl, fontFamily: theme.fonts.mono, fontWeight: 700, color: d.color }}>
+                <div style={{ fontSize: '28px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: d.color }}>
                   {d.count}
                 </div>
-                <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>members</div>
-                <div style={{ height: 4, background: theme.colors.border, borderRadius: 2, marginTop: theme.spacing.sm }}>
+                <div className="text-xs text-gray-400">members</div>
+                <div style={{ height: 4, background: '#E5E7EB', borderRadius: 2, marginTop: '8px' }}>
                   <div style={{ height: '100%', background: d.color, borderRadius: 2, width: `${d.percentage * 100}%` }} />
                 </div>
               </div>
@@ -530,15 +529,15 @@ export default function AllMembersView({ initialArchetype = null }) {
       {/* Archetype Filter - Clickable */}
       <div>
         <div style={{ 
-          fontSize: theme.fontSize.sm, 
-          color: theme.colors.textMuted, 
-          marginBottom: theme.spacing.sm,
+          fontSize: '14px', 
+          color: '#9CA3AF', 
+          marginBottom: '8px',
           textTransform: 'uppercase',
           letterSpacing: '0.06em',
         }}>
           Filter by Archetype (click to filter)
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {memberArchetypes.map((arch) => {
             const isActive = archetypeFilter === arch.archetype;
             return (
@@ -572,15 +571,15 @@ export default function AllMembersView({ initialArchetype = null }) {
       {/* Activity Filter */}
       <div>
         <div style={{
-          fontSize: theme.fontSize.sm,
-          color: theme.colors.textMuted,
-          marginBottom: theme.spacing.sm,
+          fontSize: '14px',
+          color: '#9CA3AF',
+          marginBottom: '8px',
           textTransform: 'uppercase',
           letterSpacing: '0.06em',
         }}>
           Filter by Last Activity
         </div>
-        <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
+        <div className="flex gap-2 flex-wrap">
           {ACTIVITY_FILTERS.map((f) => {
             const isActive = activityFilter === f.key;
             return (
@@ -591,10 +590,10 @@ export default function AllMembersView({ initialArchetype = null }) {
                   padding: '6px 14px',
                   fontSize: 13,
                   fontWeight: 600,
-                  border: `1px solid ${isActive ? theme.colors.accent : theme.colors.border}`,
-                  borderRadius: theme.radius.md,
-                  background: isActive ? `${theme.colors.accent}15` : theme.colors.bg,
-                  color: isActive ? theme.colors.accent : theme.colors.textSecondary,
+                  border: `1px solid ${isActive ? '#E8740C' : '#E5E7EB'}`,
+                  borderRadius: '12px',
+                  background: isActive ? `${'#E8740C'}15` : '#F8F9FA',
+                  color: isActive ? '#E8740C' : '#6B7280',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
@@ -611,34 +610,34 @@ export default function AllMembersView({ initialArchetype = null }) {
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
-          gap: theme.spacing.sm,
-          padding: theme.spacing.sm,
-          background: theme.colors.bgCard,
-          borderRadius: theme.radius.md,
-          border: `1px solid ${theme.colors.border}`,
+          gap: '8px',
+          padding: '8px',
+          background: '#ffffff',
+          borderRadius: '12px',
+          border: `1px solid ${'#E5E7EB'}`,
         }}>
-          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <span className="text-xs text-gray-400 uppercase tracking-wide">
             Active Filters:
           </span>
           {healthFilter && (
             <FilterChip
               label={`Health: ${healthFilter.max ? `${healthFilter.min}-${healthFilter.max}` : `${healthFilter.min}+`}`}
               onRemove={() => setHealthFilter(null)}
-              color={theme.colors.members}
+              color={'#E8740C'}
             />
           )}
           {archetypeFilter && (
             <FilterChip
               label={`Archetype: ${archetypeFilter}`}
               onRemove={() => setArchetypeFilter(null)}
-              color={theme.colors.accent}
+              color={'#E8740C'}
             />
           )}
           {activityFilter && (
             <FilterChip
               label={`Activity: ${ACTIVITY_FILTERS.find(f => f.key === activityFilter)?.label || activityFilter}`}
               onRemove={() => { setActivityFilter(null); setPage(0); }}
-              color={theme.colors.info || '#2563eb'}
+              color={'#2563eb' || '#2563eb'}
             />
           )}
           <button
@@ -646,11 +645,11 @@ export default function AllMembersView({ initialArchetype = null }) {
             style={{
               marginLeft: 'auto',
               padding: '4px 12px',
-              fontSize: theme.fontSize.xs,
-              color: theme.colors.textMuted,
+              fontSize: '12px',
+              color: '#9CA3AF',
               background: 'none',
-              border: `1px solid ${theme.colors.border}`,
-              borderRadius: theme.radius.sm,
+              border: `1px solid ${'#E5E7EB'}`,
+              borderRadius: '8px',
               cursor: 'pointer',
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
@@ -663,20 +662,20 @@ export default function AllMembersView({ initialArchetype = null }) {
 
       {/* Member List Table */}
       <div style={{ 
-        background: theme.colors.bgDeep, 
-        borderRadius: theme.radius.md, 
-        border: `1px solid ${theme.colors.border}`,
+        background: '#F3F4F6', 
+        borderRadius: '12px', 
+        border: `1px solid ${'#E5E7EB'}`,
         overflow: 'hidden',
       }}>
         <div style={{ 
-          padding: theme.spacing.md, 
-          borderBottom: `1px solid ${theme.colors.border}`,
+          padding: '16px', 
+          borderBottom: `1px solid ${'#E5E7EB'}`,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
-            <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-semibold text-gray-800 dark:text-white/90">
               All Members
             </span>
             <input
@@ -685,14 +684,14 @@ export default function AllMembersView({ initialArchetype = null }) {
               value={searchTerm}
               onChange={e => { setSearchTerm(e.target.value); setPage(0); }}
               style={{
-                padding: '6px 12px', fontSize: theme.fontSize.xs, fontFamily: theme.fonts.sans,
-                background: theme.colors.bgDeep, border: `1px solid ${theme.colors.border}`,
-                borderRadius: theme.radius.sm, color: theme.colors.textPrimary, outline: 'none',
+                padding: '6px 12px', fontSize: '12px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                background: '#F3F4F6', border: `1px solid ${'#E5E7EB'}`,
+                borderRadius: '8px', color: '#1a1a2e', outline: 'none',
                 minWidth: 180,
               }}
             />
           </div>
-          <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>
+          <span className="text-xs text-gray-400">
             Showing {Math.min(page * PAGE_SIZE + 1, sortedMembers.length)}–{Math.min((page + 1) * PAGE_SIZE, sortedMembers.length)} of {sortedMembers.length} members{searchTerm && ` matching "${searchTerm}"`}
           </span>
         </div>
@@ -701,19 +700,19 @@ export default function AllMembersView({ initialArchetype = null }) {
             width: '100%', 
             minWidth: 900, 
             borderCollapse: 'collapse', 
-            fontSize: theme.fontSize.sm,
+            fontSize: '14px',
           }}
           className="member-table">
             <thead>
-              <tr style={{ background: theme.colors.bg }}>
+              <tr style={{ background: '#F8F9FA' }}>
                 {columns.map((col) => (
                   <th
                     key={col.key}
                     style={{
-                      padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+                      padding: `${'8px'} ${'16px'}`,
                       textAlign: col.key === 'expand' ? 'right' : 'left',
-                      color: theme.colors.textMuted,
-                      fontSize: theme.fontSize.xs,
+                      color: '#9CA3AF',
+                      fontSize: '12px',
                       textTransform: 'uppercase',
                       letterSpacing: '0.06em',
                       fontWeight: 500,
@@ -750,7 +749,7 @@ export default function AllMembersView({ initialArchetype = null }) {
             <tbody>
               {sortedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: theme.spacing.lg, textAlign: 'center', color: theme.colors.textMuted }}>
+                  <td colSpan={7} style={{ padding: '24px', textAlign: 'center', color: '#9CA3AF' }}>
                     No members match the current filters
                   </td>
                 </tr>
@@ -775,26 +774,26 @@ export default function AllMembersView({ initialArchetype = null }) {
           return (
             <div style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-              borderTop: `1px solid ${theme.colors.border}`,
-              background: theme.colors.bg,
+              padding: `${'8px'} ${'16px'}`,
+              borderTop: `1px solid ${'#E5E7EB'}`,
+              background: '#F8F9FA',
             }}>
               <button
                 onClick={() => setPage(Math.max(0, page - 1))}
                 disabled={page === 0}
                 style={{
                   padding: '6px 14px', fontSize: 13, fontWeight: 600,
-                  border: `1px solid ${theme.colors.border}`,
-                  borderRadius: theme.radius.sm,
-                  background: page === 0 ? theme.colors.bgDeep : theme.colors.bgCard,
-                  color: page === 0 ? theme.colors.textMuted : theme.colors.textPrimary,
+                  border: `1px solid ${'#E5E7EB'}`,
+                  borderRadius: '8px',
+                  background: page === 0 ? '#F3F4F6' : '#ffffff',
+                  color: page === 0 ? '#9CA3AF' : '#1a1a2e',
                   cursor: page === 0 ? 'default' : 'pointer',
                   opacity: page === 0 ? 0.5 : 1,
                 }}
               >
                 Previous
               </button>
-              <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+              <span className="text-xs text-gray-500">
                 Page {page + 1} of {totalPages}
               </span>
               <button
@@ -802,10 +801,10 @@ export default function AllMembersView({ initialArchetype = null }) {
                 disabled={page >= totalPages - 1}
                 style={{
                   padding: '6px 14px', fontSize: 13, fontWeight: 600,
-                  border: `1px solid ${theme.colors.border}`,
-                  borderRadius: theme.radius.sm,
-                  background: page >= totalPages - 1 ? theme.colors.bgDeep : theme.colors.bgCard,
-                  color: page >= totalPages - 1 ? theme.colors.textMuted : theme.colors.textPrimary,
+                  border: `1px solid ${'#E5E7EB'}`,
+                  borderRadius: '8px',
+                  background: page >= totalPages - 1 ? '#F3F4F6' : '#ffffff',
+                  color: page >= totalPages - 1 ? '#9CA3AF' : '#1a1a2e',
                   cursor: page >= totalPages - 1 ? 'default' : 'pointer',
                   opacity: page >= totalPages - 1 ? 0.5 : 1,
                 }}

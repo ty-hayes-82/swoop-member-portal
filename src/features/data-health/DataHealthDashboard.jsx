@@ -4,7 +4,6 @@
  * dependent feature count, and "features you will unlock."
  */
 import { useState, useEffect } from 'react';
-import { theme } from '@/config/theme';
 import { useNavigation } from '@/context/NavigationContext';
 
 const DOMAIN_INFO = {
@@ -32,7 +31,6 @@ export default function DataHealthDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Fallback for demo mode — reflect the 4 sources shown as connected in Integrations tab
   const DEMO_CONNECTED = { CRM: true, EMAIL: true };
   const domains = data?.domains || Object.keys(DOMAIN_INFO).map(code => ({
     code,
@@ -46,159 +44,114 @@ export default function DataHealthDashboard() {
   const nextDomain = data?.nextDomainToConnect;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
       <div>
-        <h2 style={{ fontSize: theme.fontSize.xl, fontWeight: 700, margin: 0 }}>Data Health</h2>
-        <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
+        <h2 className="text-xl font-bold m-0">Data Health</h2>
+        <p className="text-sm text-gray-500 mt-1 mb-0">
           Connection status, data freshness, and feature availability across all data domains.
         </p>
       </div>
 
       {/* Value Score */}
-      <div style={{
-        padding: theme.spacing.lg, borderRadius: theme.radius.lg,
-        background: `linear-gradient(135deg, ${theme.colors.accent}08, ${theme.colors.accent}02)`,
-        border: `1px solid ${theme.colors.accent}30`,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
+      <div className="p-6 rounded-2xl bg-gradient-to-br from-brand-500/[0.03] to-brand-500/[0.01] border border-brand-500/20 flex justify-between items-center">
         <div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Platform Value Score</div>
-          <div style={{ fontSize: '36px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.accent }}>{valueScore}%</div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+          <div className="text-xs text-gray-400 uppercase tracking-wide">Platform Value Score</div>
+          <div className="text-4xl font-bold font-mono text-brand-500">{valueScore}%</div>
+          <div className="text-xs text-gray-500">
             {valueScore < 50 ? 'Connect more data sources to unlock full platform value' : valueScore < 85 ? 'Good coverage — add POS or Email for maximum insight' : 'Excellent — near-full platform value'}
           </div>
         </div>
-        <div style={{ width: 120, height: 120, position: 'relative' }}>
+        <div className="w-[120px] h-[120px] relative">
           <svg width="120" height="120" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="50" fill="none" stroke={theme.colors.bgDeep} strokeWidth="10" />
-            <circle cx="60" cy="60" r="50" fill="none" stroke={theme.colors.accent} strokeWidth="10"
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#F3F4F6" strokeWidth="10" />
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#E8740C" strokeWidth="10"
               strokeDasharray={`${valueScore * 3.14} ${314 - valueScore * 3.14}`}
               strokeLinecap="round" transform="rotate(-90 60 60)" />
           </svg>
         </div>
       </div>
 
-      {/* Next recommendation */}
       {nextDomain && (
-        <div style={{
-          padding: theme.spacing.md, borderRadius: theme.radius.md,
-          background: `${theme.colors.info}06`, border: `1px solid ${theme.colors.info}20`,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
+        <div className="p-4 rounded-xl bg-blue-600/[0.024] border border-blue-600/[0.12] flex justify-between items-center">
           <div>
-            <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, color: theme.colors.textPrimary }}>
+            <div className="text-sm font-bold text-gray-800 dark:text-white/90">
               Recommended: Connect {nextDomain.domain.replace('_', ' ')}
             </div>
-            <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
-              {nextDomain.message}
-            </div>
+            <div className="text-xs text-gray-500">{nextDomain.message}</div>
           </div>
-          <button onClick={() => navigate('integrations')} style={{
-            padding: '8px 16px', borderRadius: theme.radius.sm, border: 'none',
-            background: theme.colors.info, color: '#fff', fontWeight: 700,
-            fontSize: theme.fontSize.xs, cursor: 'pointer',
-          }}>Connect Now</button>
+          <button onClick={() => navigate('integrations')} className="py-2 px-4 rounded-lg border-none bg-blue-600 text-white font-bold text-xs cursor-pointer">Connect Now</button>
         </div>
       )}
 
-      {/* Domain cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: theme.spacing.md }}>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
         {domains.map(domain => {
           const info = DOMAIN_INFO[domain.code] || { icon: '📦', label: domain.code, desc: '', vendor: '' };
           const isConnected = domain.connected || domain.is_connected;
           const valuePct = VALUE_PCTS[domain.code] || 0;
-          const dependentFeatures = features.filter(f =>
-            f.missingHard?.includes(domain.code)
-          ).length;
+          const dependentFeatures = features.filter(f => f.missingHard?.includes(domain.code)).length;
 
           return (
-            <div key={domain.code} style={{
-              padding: theme.spacing.md, borderRadius: theme.radius.md,
-              background: theme.colors.bgCard, border: `1px solid ${isConnected ? theme.colors.success + '30' : theme.colors.border}`,
-              opacity: isConnected ? 1 : 0.85,
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.sm }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: '24px' }}>{info.icon}</span>
+            <div key={domain.code} className={`p-4 rounded-xl bg-white dark:bg-white/[0.03] border ${isConnected ? 'border-success-500/20' : 'border-gray-200 dark:border-gray-800'} ${isConnected ? '' : 'opacity-85'}`}>
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{info.icon}</span>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{info.label}</div>
-                    <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{info.desc}</div>
+                    <div className="font-bold text-sm text-gray-800 dark:text-white/90">{info.label}</div>
+                    <div className="text-xs text-gray-400">{info.desc}</div>
                   </div>
                 </div>
-                <span style={{
-                  fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '12px',
-                  background: isConnected ? `${theme.colors.success}15` : `${theme.colors.textMuted}15`,
-                  color: isConnected ? theme.colors.success : theme.colors.textMuted,
-                  textTransform: 'uppercase',
-                }}>{isConnected ? 'Connected' : 'Not Connected'}</span>
+                <span className={`text-[10px] font-bold py-[3px] px-2 rounded-xl uppercase ${isConnected ? 'bg-success-500/[0.08] text-success-500' : 'bg-gray-400/[0.08] text-gray-400'}`}>
+                  {isConnected ? 'Connected' : 'Not Connected'}
+                </span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: theme.spacing.sm }}>
-                <div style={{ padding: '6px 8px', borderRadius: theme.radius.sm, background: theme.colors.bgDeep }}>
-                  <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Rows</div>
-                  <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, fontFamily: theme.fonts.mono }}>{isConnected ? (domain.row_count || 0).toLocaleString() : '—'}</div>
-                </div>
-                <div style={{ padding: '6px 8px', borderRadius: theme.radius.sm, background: theme.colors.bgDeep }}>
-                  <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Value</div>
-                  <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, fontFamily: theme.fonts.mono }}>{valuePct}%</div>
-                </div>
-                <div style={{ padding: '6px 8px', borderRadius: theme.radius.sm, background: theme.colors.bgDeep }}>
-                  <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Unlocks</div>
-                  <div style={{ fontSize: theme.fontSize.sm, fontWeight: 700, fontFamily: theme.fonts.mono }}>{isConnected ? '✓' : dependentFeatures > 0 ? `${dependentFeatures} features` : '—'}</div>
-                </div>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {[
+                  { label: 'Rows', val: isConnected ? (domain.row_count || 0).toLocaleString() : '—' },
+                  { label: 'Value', val: `${valuePct}%` },
+                  { label: 'Unlocks', val: isConnected ? '✓' : dependentFeatures > 0 ? `${dependentFeatures} features` : '—' },
+                ].map(m => (
+                  <div key={m.label} className="py-1.5 px-2 rounded-lg bg-gray-100">
+                    <div className="text-[10px] text-gray-400">{m.label}</div>
+                    <div className="text-sm font-bold font-mono">{m.val}</div>
+                  </div>
+                ))}
               </div>
 
               {isConnected && domain.last_sync_at && (
-                <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: 8 }}>
+                <div className="text-[10px] text-gray-400 mt-2">
                   Last sync: {new Date(domain.last_sync_at).toLocaleString()} · {domain.health_status || 'healthy'}
                 </div>
               )}
 
               {!isConnected && (
-                <button onClick={() => navigate('integrations')} style={{
-                  width: '100%', marginTop: 8, padding: '6px', borderRadius: theme.radius.sm,
-                  border: `1px solid ${theme.colors.accent}30`, background: `${theme.colors.accent}06`,
-                  color: theme.colors.accent, fontSize: theme.fontSize.xs, fontWeight: 600,
-                  cursor: 'pointer',
-                }}>Connect {info.label}</button>
+                <button onClick={() => navigate('integrations')} className="w-full mt-2 py-1.5 rounded-lg border border-brand-500/20 bg-brand-500/[0.024] text-brand-500 text-xs font-semibold cursor-pointer">
+                  Connect {info.label}
+                </button>
               )}
 
               {info.vendor && (
-                <div style={{ fontSize: '10px', color: theme.colors.textMuted, marginTop: 4 }}>
-                  Supported: {info.vendor}
-                </div>
+                <div className="text-[10px] text-gray-400 mt-1">Supported: {info.vendor}</div>
               )}
             </div>
           );
         })}
       </div>
 
-      {/* Feature availability summary */}
       {features.length > 0 && (
-        <div style={{
-          padding: theme.spacing.md, borderRadius: theme.radius.md,
-          background: theme.colors.bgCard, border: `1px solid ${theme.colors.border}`,
-        }}>
-          <div style={{ fontWeight: 700, fontSize: theme.fontSize.sm, marginBottom: theme.spacing.sm }}>Feature Availability</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: theme.spacing.sm, textAlign: 'center' }}>
-            <div style={{ padding: '8px', borderRadius: theme.radius.sm, background: `${theme.colors.success}08` }}>
-              <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.success }}>
-                {data?.availableFeatures ?? features.filter(f => f.status === 'available').length}
+        <div className="p-4 rounded-xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800">
+          <div className="font-bold text-sm mb-2">Feature Availability</div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            {[
+              { label: 'Available', count: data?.availableFeatures ?? features.filter(f => f.status === 'available').length, color: 'text-success-500', bg: 'bg-success-500/[0.03]' },
+              { label: 'Degraded', count: data?.degradedFeatures ?? features.filter(f => f.status === 'degraded').length, color: 'text-warning-500', bg: 'bg-warning-500/[0.03]' },
+              { label: 'Locked', count: data?.unavailableFeatures ?? features.filter(f => f.status === 'unavailable').length, color: 'text-gray-400', bg: 'bg-gray-400/[0.03]' },
+            ].map(m => (
+              <div key={m.label} className={`p-2 rounded-lg ${m.bg}`}>
+                <div className={`text-xl font-bold font-mono ${m.color}`}>{m.count}</div>
+                <div className="text-[10px] text-gray-400">{m.label}</div>
               </div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Available</div>
-            </div>
-            <div style={{ padding: '8px', borderRadius: theme.radius.sm, background: `${theme.colors.warning}08` }}>
-              <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.warning }}>
-                {data?.degradedFeatures ?? features.filter(f => f.status === 'degraded').length}
-              </div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Degraded</div>
-            </div>
-            <div style={{ padding: '8px', borderRadius: theme.radius.sm, background: `${theme.colors.textMuted}08` }}>
-              <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.textMuted }}>
-                {data?.unavailableFeatures ?? features.filter(f => f.status === 'unavailable').length}
-              </div>
-              <div style={{ fontSize: '10px', color: theme.colors.textMuted }}>Locked</div>
-            </div>
+            ))}
           </div>
         </div>
       )}

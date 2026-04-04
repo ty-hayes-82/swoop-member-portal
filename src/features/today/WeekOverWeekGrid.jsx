@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { theme } from '@/config/theme';
 import { useNavigation } from '@/context/NavigationContext';
 import { getLiveDashboard } from '@/services/memberService';
 
@@ -34,28 +33,22 @@ export default function WeekOverWeekGrid() {
   }, [live]);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: theme.spacing.md }}>
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
       {metrics.map(({ label, current, prior, delta, positive, context, link }) => (
         <div
           key={label}
           onClick={link ? () => navigate(link) : undefined}
-          style={{
-            background: theme.colors.bgCard,
-            borderRadius: theme.radius.md,
-            border: `1px solid ${theme.colors.border}`,
-            padding: theme.spacing.md,
-            cursor: link ? 'pointer' : 'default',
-          }}
+          className={`bg-white dark:bg-white/[0.03] rounded-xl border border-gray-200 dark:border-gray-800 p-4 ${link ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>{label}</div>
-          <div style={{ fontSize: theme.fontSize.lg, fontWeight: 700, color: theme.colors.textPrimary, fontFamily: theme.fonts.mono }}>{current}</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-            <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>Prior: {prior}</span>
-            <span style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: positive ? theme.colors.success : theme.colors.urgent }}>{delta}</span>
+          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">{label}</div>
+          <div className="text-lg font-bold text-gray-800 dark:text-white/90 font-mono">{current}</div>
+          <div className="flex justify-between items-center mt-1">
+            <span className="text-xs text-gray-400">Prior: {prior}</span>
+            <span className={`text-xs font-bold ${positive ? 'text-success-500' : 'text-error-500'}`}>{delta}</span>
           </div>
-          <div style={{ fontSize: '11px', color: theme.colors.textSecondary, marginTop: '6px', lineHeight: 1.4 }}>
+          <div className="text-[11px] text-gray-500 mt-1.5 leading-snug">
             {context}
-            {link && <span style={{ color: theme.colors.accent, fontWeight: 600 }}> Tap to investigate →</span>}
+            {link && <span className="text-brand-500 font-semibold"> Tap to investigate →</span>}
           </div>
         </div>
       ))}

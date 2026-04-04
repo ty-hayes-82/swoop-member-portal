@@ -1,5 +1,3 @@
-import { theme } from '@/config/theme';
-
 const SOURCE_ICONS = {
   'Tee Sheet': '\u26F3',
   'POS': '\uD83D\uDCB3',
@@ -41,39 +39,23 @@ const SOURCE_DESCRIPTIONS = {
  * Accepts either `signals` (array of {source, detail}) or `systems` (array of strings).
  */
 export default function EvidenceStrip({ signals = [], systems = [], compact = false }) {
-  // Support string-array shorthand: systems={['POS', 'Tee Sheet']}
   const items = signals.length > 0
     ? signals
     : systems.map(s => ({ source: s, detail: '' }));
   if (!items.length) return null;
   return (
-    <div style={{
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: compact ? '6px' : '8px',
-      padding: compact ? '6px 0' : '8px 0',
-      borderTop: '1px solid ' + (theme.colors?.border || '#2d2d44'),
-      marginTop: compact ? '6px' : '10px',
-    }}>
+    <div className={`flex flex-wrap border-t border-gray-200 dark:border-gray-800 ${compact ? 'gap-1.5 py-1.5 mt-1.5' : 'gap-2 py-2 mt-2.5'}`}>
       {items.map((sig, i) => (
         <div
           key={i}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            background: (theme.colors?.bgCard || '#1a1a2e') + 'cc',
-            border: '1px solid ' + (theme.colors?.border || '#2d2d44'),
-            borderRadius: '6px',
-            padding: compact ? '2px 8px' : '4px 10px',
-            fontSize: compact ? '11px' : '12px',
-            color: theme.colors?.textSecondary || '#a0a0b8',
-          }}
-          title={SOURCE_DESCRIPTIONS[sig.source] || (sig.timestamp ? sig.source + ' — ' + sig.timestamp : sig.source)}
+          className={`inline-flex items-center gap-1 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 ${
+            compact ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs'
+          } text-gray-600 dark:text-gray-400`}
+          title={SOURCE_DESCRIPTIONS[sig.source] || (sig.timestamp ? sig.source + ' \u2014 ' + sig.timestamp : sig.source)}
         >
           <span>{SOURCE_ICONS[sig.source] || '\uD83D\uDD17'}</span>
-          <span style={{ fontWeight: 600, color: theme.colors?.textMuted || '#cbd5e0' }}>{sig.source}</span>
-          {!compact && <span style={{ opacity: 0.8 }}>{sig.detail}</span>}
+          <span className="font-semibold text-gray-500 dark:text-gray-300">{sig.source}</span>
+          {!compact && <span className="opacity-80">{sig.detail}</span>}
         </div>
       ))}
     </div>
