@@ -19,17 +19,19 @@ const LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dinin
 
 function generateRoster() {
   const roster = [];
+  const atRisk = getAtRiskMembers();
+  const watch = getWatchMembers();
   // Include real profiles first
   Object.values(memberProfiles).forEach(p => {
     roster.push({ memberId: p.memberId, name: p.name, score: p.healthScore, archetype: p.archetype, duesAnnual: p.duesAnnual, memberValueAnnual: p.memberValueAnnual, tier: p.tier, joinDate: p.joinDate, trend: p.trend, topRisk: p.riskSignals?.[0]?.label || 'No current risks', lastSeenLocation: p.lastSeenLocation });
   });
   // Include at-risk and watch members
-  (atRiskMembers || []).forEach(m => {
+  (atRisk || []).forEach(m => {
     if (!roster.find(r => r.memberId === m.memberId)) {
       roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: m.score < 30 ? 'Critical' : 'At Risk', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || 'Engagement declining' });
     }
   });
-  (watchMembers || []).forEach(m => {
+  (watch || []).forEach(m => {
     if (!roster.find(r => r.memberId === m.memberId)) {
       roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: 'Watch', joinDate: '2021-06-01', trend: 'stable', topRisk: m.signal || 'Minor engagement shift' });
     }
