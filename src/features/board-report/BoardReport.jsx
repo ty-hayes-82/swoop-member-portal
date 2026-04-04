@@ -6,8 +6,9 @@ import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { getKPIs, getMemberSaves, getOperationalSaves } from '@/services/boardReportService';
 import { getHealthDistribution } from '@/services/memberService';
-import { feedbackRecords, feedbackSummary, understaffedDays } from '@/data/staffing';
-import { isRealClub } from '@/config/constants';
+import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
+import { isRealClub, isAuthenticatedClub } from '@/config/constants';
+import DataEmptyState from '@/components/ui/DataEmptyState';
 
 const tabNames = ['Summary', 'Details'];
 
@@ -86,10 +87,23 @@ export default function BoardReport() {
   const memberSaves = getMemberSaves();
   const operationalSaves = getOperationalSaves();
   const dist = getHealthDistribution();
+
+  // Real club with no data — show empty state
+  if (isAuthenticatedClub() && memberSaves.length === 0 && kpis.every(k => k.value === 0)) {
+    return (
+      <PageTransition>
+        <DataEmptyState icon="📊" title="Board report needs data" description="Import member, golf, and F&B data to generate your executive board report with KPIs, member saves, and operational insights." dataType="club data" />
+      </PageTransition>
+    );
+  }
+
   const totalDues = memberSaves.reduce((sum, m) => sum + m.duesAtRisk, 0);
   const totalOpsRevenue = operationalSaves.reduce((sum, o) => sum + o.revenueProtected, 0);
 
-  // Complaint resolution stats
+  // Complaint resolution stats — use service layer (returns [] for real clubs with no data)
+  const feedbackRecords = getComplaintCorrelation();
+  const feedbackSummary = getFeedbackSummary();
+  const understaffedDays = getUnderstaffedDays();
   const resolved = feedbackRecords.filter(f => f.status === 'resolved');
   const unresolved = feedbackRecords.filter(f => f.status !== 'resolved');
   const resolutionRate = feedbackRecords.length > 0

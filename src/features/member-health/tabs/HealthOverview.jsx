@@ -5,7 +5,7 @@ import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
 import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getVolatileMembers } from '@/services/memberService';
-import { feedbackRecords } from '@/data/staffing';
+import { getComplaintCorrelation } from '@/services/staffingService';
 import { theme } from '@/config/theme';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
@@ -22,7 +22,7 @@ const levelDescriptions = {
 };
 
 function getComplaintInfo(memberId) {
-  const complaint = feedbackRecords.find(
+  const complaint = getComplaintCorrelation().find(
     f => f.memberId === memberId && f.status !== 'resolved'
   );
   if (!complaint) return null;

@@ -4,8 +4,10 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import { PlaybookActionCard } from '@/components/ui';
-import { memberProfiles, atRiskMembers, watchMembers, healthDistribution, memberArchetypes } from '@/data/members';
-import { setRosterCache } from '@/services/memberService';
+import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, setRosterCache } from '@/services/memberService';
+import { isAuthenticatedClub } from '@/config/constants';
+import { memberProfiles } from '@/data/members';
+import DataEmptyState from '@/components/ui/DataEmptyState';
 
 // Generate full 300-member roster from all available data sources
 const FIRST_NAMES = ['James','Robert','John','Michael','David','William','Richard','Joseph','Thomas','Christopher','Charles','Daniel','Matthew','Anthony','Mark','Steven','Paul','Andrew','Joshua','Kenneth','Kevin','Brian','George','Timothy','Ronald','Edward','Jason','Jeffrey','Ryan','Jacob','Gary','Nicholas','Eric','Jonathan','Stephen','Larry','Justin','Scott','Brandon','Benjamin','Samuel','Patrick','Alexander','Frank','Raymond','Jack','Dennis','Jerry','Tyler','Aaron','Jose','Nathan','Henry','Douglas','Peter','Zachary','Kyle','Noah','Ethan','Jeremy','Walter','Christian','Keith','Roger','Terry','Harry','Ralph','Sean','Jesse','Roy','Louis','Alan','Eugene','Russell','Randy','Philip','Howard','Vincent','Bobby','Dylan','Johnny','Phillip','Victor','Clarence','Travis','Austin','Martha','Donna','Sandra','Gloria','Teresa','Sara','Debra','Alice','Rachel','Emma','Lisa','Nancy','Betty','Margaret','Dorothy','Kimberly','Emily','Donna','Michelle','Carol','Amanda','Melissa','Deborah','Stephanie','Rebecca','Sharon','Laura','Cynthia','Kathleen','Amy','Angela','Shirley','Anna','Brenda','Pamela','Nicole','Samantha','Katherine','Christine','Helen','Debbie','Janet','Catherine','Maria','Heather','Diane','Olivia','Julie','Joyce','Virginia','Victoria','Kelly','Lauren','Christina','Joan','Evelyn','Judith','Andrea','Hannah','Megan','Cheryl','Jacqueline','Martha','Gloria','Teresa','Ann','Sara','Madison','Frances','Kathryn','Janice','Jean','Abigail','Julia','Grace','Judy'];
@@ -80,8 +82,8 @@ function generateRoster() {
   return roster;
 }
 
-const allMembers = generateRoster();
-setRosterCache(allMembers);
+const allMembers = isAuthenticatedClub() ? [] : generateRoster();
+if (!isAuthenticatedClub()) setRosterCache(allMembers);
 
 function getHealthLevel(score) {
   if (score >= 70) return 'Healthy';
@@ -314,6 +316,10 @@ const ACTIVITY_FILTERS = [
 ];
 
 export default function AllMembersView({ initialArchetype = null }) {
+  if (isAuthenticatedClub() && allMembers.length === 0) {
+    return <DataEmptyState icon="👥" title="No members imported yet" description="Import your member roster to see health scores, archetypes, and engagement data for every member." dataType="members" />;
+  }
+
   const [expandedMember, setExpandedMember] = useState(null);
   const [healthFilter, setHealthFilter] = useState(null);
   const [archetypeFilter, setArchetypeFilter] = useState(initialArchetype);

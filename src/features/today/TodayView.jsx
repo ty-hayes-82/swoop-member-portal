@@ -14,6 +14,8 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { theme } from '@/config/theme';
 import { getWeatherAlerts } from '@/services/weatherService';
+import { isAuthenticatedClub } from '@/config/constants';
+import DataEmptyState from '@/components/ui/DataEmptyState';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -32,7 +34,7 @@ export default function TodayView() {
   const priorities = getPriorityItems();
   const topPriority = priorities[0];
   const briefing = getDailyBriefing();
-  const roundsToday = briefing?.teeSheet?.roundsToday || 220;
+  const roundsToday = briefing?.teeSheet?.roundsToday || (isAuthenticatedClub() ? 0 : 220);
 
   const weatherAlerts = getWeatherAlerts();
   const [dismissedAlerts, setDismissedAlerts] = useState([]);
@@ -45,6 +47,22 @@ export default function TodayView() {
 
   if (isLoading) {
     return <SkeletonDashboard />;
+  }
+
+  // Real club with no operational data — show welcome state instead of demo data
+  const hasNoData = isAuthenticatedClub() && !briefing?.teeSheet?.roundsToday && priorities.length === 0;
+  if (hasNoData) {
+    return (
+      <PageTransition>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%' }}>
+          <div>
+            <h1 style={{ fontSize: 26, fontWeight: 700, color: theme.colors.textPrimary, margin: 0 }}>{getGreeting()}</h1>
+            <p style={{ fontSize: 14, color: theme.colors.textSecondary, margin: '4px 0 0' }}>{formatDate()}</p>
+          </div>
+          <DataEmptyState icon="📊" title="Welcome to your dashboard" description="Import your member roster, tee sheet, and POS data to see today's operational briefing. Start with members — each data source you connect unlocks more insights." dataType="club data" />
+        </div>
+      </PageTransition>
+    );
   }
 
   return (
