@@ -36,7 +36,7 @@ export default withAuth(async function handler(req, res) {
         LEFT JOIN feedback f ON f.submitted_at::date = co.date::date
         LEFT JOIN pos_checks pc ON pc.opened_at::date = co.date::date
                                  AND pc.is_understaffed_day = 1
-        LEFT JOIN weather_daily_log wdl ON wdl.date = co.date::date AND wdl.club_id = 'club_001'
+        LEFT JOIN weather_daily_log wdl ON wdl.date = co.date::date AND wdl.club_id = ${clubId}
         LEFT JOIN weather_daily wd ON wd.date = co.date
         WHERE co.club_id = ${clubId} AND co.is_understaffed = 1
         GROUP BY co.date, co.fb_revenue, co.is_understaffed, co2.fb_revenue,
