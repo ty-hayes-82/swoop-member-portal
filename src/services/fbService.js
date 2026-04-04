@@ -1,7 +1,7 @@
 // fbService.js — Phase 1 static · Phase 2 /api/fb
 
 import { apiFetch } from './apiClient';
-import { isRealClub } from '@/config/constants';
+import { isAuthenticatedClub } from '@/config/constants';
 import { outlets, postRoundConversion, rainDayImpact, fbMonthComparison } from '@/data/outlets';
 import { dailyRevenue } from '@/data/revenue';
 
@@ -14,7 +14,7 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-export const getOutletPerformance = () => _d ? _d.outlets : isRealClub() ? [] : outlets;
+export const getOutletPerformance = () => _d ? _d.outlets : isAuthenticatedClub() ? [] : outlets;
 
 const toNumber = (value, fallback = 0) => {
   const num = Number(value);
@@ -29,7 +29,7 @@ const normalizeConversionEntries = (entries = []) =>
   }));
 
 export const getPostRoundConversion = () => {
-  if (!_d && isRealClub()) return { overall: 0, byArchetype: [] };
+  if (!_d && isAuthenticatedClub()) return { overall: 0, byArchetype: [] };
   const source = _d?.postRoundConversion ?? postRoundConversion;
 
   if (!source) {
@@ -59,7 +59,7 @@ export const getPostRoundConversion = () => {
 
 export const getRainDayImpact = () => {
   if (_d) return _d.rainDayImpact;
-  if (isRealClub()) return [];
+  if (isAuthenticatedClub()) return [];
   const avgGolf = dailyRevenue.filter(d => d.weather !== 'rainy' && d.golf > 0)
     .reduce((s, d) => s + d.golf, 0) /
     dailyRevenue.filter(d => d.weather !== 'rainy' && d.golf > 0).length;
@@ -75,12 +75,12 @@ export const getRainDayImpact = () => {
 
 export const getFBMonthComparison = () => {
   if (_d?.fbMonthComparison) return _d.fbMonthComparison;
-  if (isRealClub()) return [];
+  if (isAuthenticatedClub()) return [];
   return fbMonthComparison;
 };
 
 export const getMealPeriodBreakdown = () => {
-  const src = _d ? _d.outlets : isRealClub() ? [] : outlets;
+  const src = _d ? _d.outlets : isAuthenticatedClub() ? [] : outlets;
   return src.flatMap(o =>
     (o.periods ?? []).map(p => ({
       outlet: o.outlet, period: p.period,
@@ -92,7 +92,7 @@ export const getMealPeriodBreakdown = () => {
 
 export const getFBSummary = () => {
   if (_d) return _d.fbSummary;
-  if (isRealClub()) return { totalRevenue: 0, totalCovers: 0, understaffingLoss: 0, overallAvgCheck: 0 };
+  if (isAuthenticatedClub()) return { totalRevenue: 0, totalCovers: 0, understaffingLoss: 0, overallAvgCheck: 0 };
   return {
     totalRevenue:       outlets.reduce((s, o) => s + o.revenue, 0),
     totalCovers:        outlets.reduce((s, o) => s + o.covers, 0),

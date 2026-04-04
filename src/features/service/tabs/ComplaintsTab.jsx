@@ -1,7 +1,7 @@
 // ComplaintsTab — complaint patterns, resolution status, and understaffed-day correlation
 import { useState, useEffect } from 'react';
 import { theme } from '@/config/theme';
-import { isRealClub } from '@/config/constants';
+import { isAuthenticatedClub } from '@/config/constants';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { getComplaintCorrelation, getFeedbackSummary } from '@/services/staffingService';
 import { getPaceFBImpact } from '@/services/operationsService';
@@ -30,7 +30,7 @@ export default function ComplaintsTab() {
 
   const feedbackRecords = getComplaintCorrelation();
 
-  if (isRealClub() && feedbackRecords.length === 0) {
+  if (isAuthenticatedClub() && feedbackRecords.length === 0) {
     return <DataEmptyState icon="📝" title="No complaint data yet" description="Import feedback data from your CRM to track complaints, resolution rates, and service patterns." dataType="feedback" />;
   }
 

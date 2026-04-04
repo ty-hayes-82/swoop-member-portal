@@ -4,7 +4,7 @@
 // Falls back to static data from src/data/weather.js when API is unavailable.
 
 import { weatherDaily as weatherData } from '../data/weather';
-import { isRealClub } from '@/config/constants';
+import { isAuthenticatedClub } from '@/config/constants';
 
 let _current = null;
 let _forecast = null;
@@ -25,7 +25,7 @@ export const _init = async () => {
 
 export function getCurrentWeather() {
   if (_current) return _current;
-  if (isRealClub()) return null;
+  if (isAuthenticatedClub()) return null;
 
   // Phase 1 static fallback — derive from weather.js seed data
   const today = weatherData?.find(d => d.date === '2026-01-17') || weatherData?.[0];
@@ -49,7 +49,7 @@ export function getCurrentWeather() {
 
 export function getHourlyForecast() {
   if (_forecast?.hourly?.length) return _forecast.hourly;
-  if (isRealClub()) return [];
+  if (isAuthenticatedClub()) return [];
 
   // Phase 1 fallback — generate synthetic hourly from daily data
   const today = weatherData?.find(d => d.date === '2026-01-17') || weatherData?.[0];
@@ -72,7 +72,7 @@ export function getHourlyForecast() {
 
 export function getDailyForecast(numDays = 10) {
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
-  if (isRealClub()) return [];
+  if (isAuthenticatedClub()) return [];
 
   // Phase 1 fallback — use weatherData seed
   const startIdx = weatherData?.findIndex(d => d.date === '2026-01-17') ?? 0;

@@ -2,7 +2,7 @@
 // Phase 2 swap: DataProvider calls _init() before render. All exports stay synchronous.
 
 import { apiFetch } from './apiClient';
-import { isRealClub } from '@/config/constants';
+import { isAuthenticatedClub } from '@/config/constants';
 import { dailyRevenue } from '@/data/revenue';
 import { paceDistribution, slowRoundStats, bottleneckHoles, paceFBImpact } from '@/data/pace';
 import { waitlistEntries } from '@/data/pipeline';
@@ -58,7 +58,7 @@ export const _init = async () => {
 
 export const getRevenueByDay = () => {
   if (_d) return _d.revenueByDay;
-  if (isRealClub()) return [];
+  if (isAuthenticatedClub()) return [];
   return dailyRevenue.map(d => ({
     date: d.date, day: d.day, golf: d.golf, fb: d.fb,
     total: d.golf + d.fb, weather: d.weather, isUnderstaffed: d.isUnderstaffed,
@@ -67,7 +67,7 @@ export const getRevenueByDay = () => {
 
 export const getMonthlyRevenueSummary = () => {
   if (_d) return _d.monthlySummary;
-  if (isRealClub()) return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
+  if (isAuthenticatedClub()) return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
   const data = dailyRevenue;
   const total = data.reduce((s, d) => s + d.golf + d.fb, 0);
   const weekendDays = data.filter(d => ['Sat','Sun'].includes(d.day));
@@ -83,7 +83,7 @@ export const getMonthlyRevenueSummary = () => {
 };
 
 export const getPaceDistribution = () => {
-  if (!_d && isRealClub()) return [];
+  if (!_d && isAuthenticatedClub()) return [];
   const source = (_d?.paceDistribution ?? paceDistribution ?? DEFAULT_PACE_DISTRIBUTION);
   if (!Array.isArray(source) || source.length === 0) return DEFAULT_PACE_DISTRIBUTION;
   return source.map((item, index) => {
@@ -98,7 +98,7 @@ export const getPaceDistribution = () => {
 };
 
 export const getSlowRoundRate = () => {
-  if (!_d && isRealClub()) return { totalRounds: 0, slowRounds: 0, overallRate: 0, weekendRate: 0, weekdayRate: 0, threshold: 270 };
+  if (!_d && isAuthenticatedClub()) return { totalRounds: 0, slowRounds: 0, overallRate: 0, weekendRate: 0, weekdayRate: 0, threshold: 270 };
   const source = (_d?.slowRoundStats ?? slowRoundStats ?? DEFAULT_SLOW_ROUND_STATS);
   const totalRounds = Math.round(sanitizePositive(source?.totalRounds, DEFAULT_SLOW_ROUND_STATS.totalRounds));
   const slowRounds = Math.round(sanitizePositive(source?.slowRounds, DEFAULT_SLOW_ROUND_STATS.slowRounds));
@@ -113,7 +113,7 @@ export const getSlowRoundRate = () => {
 };
 
 export const getBottleneckHoles = () => {
-  if (!_d && isRealClub()) return [];
+  if (!_d && isAuthenticatedClub()) return [];
   const source = (_d?.bottleneckHoles ?? bottleneckHoles ?? DEFAULT_BOTTLENECK_HOLES);
   if (!Array.isArray(source) || source.length === 0) return DEFAULT_BOTTLENECK_HOLES;
   return source.map((item, index) => {
@@ -128,7 +128,7 @@ export const getBottleneckHoles = () => {
 };
 
 export const getPaceFBImpact = () => {
-  if (!_d && isRealClub()) return { fastConversionRate: 0, slowConversionRate: 0, avgCheckFast: 0, avgCheckSlow: 0, slowRoundsPerMonth: 0, revenueLostPerMonth: 0 };
+  if (!_d && isAuthenticatedClub()) return { fastConversionRate: 0, slowConversionRate: 0, avgCheckFast: 0, avgCheckSlow: 0, slowRoundsPerMonth: 0, revenueLostPerMonth: 0 };
   const source = (_d?.paceFBImpact ?? paceFBImpact ?? DEFAULT_PACE_FB_IMPACT);
   return {
     fastConversionRate: sanitizeRate(source?.fastConversionRate, DEFAULT_PACE_FB_IMPACT.fastConversionRate),
@@ -142,7 +142,7 @@ export const getPaceFBImpact = () => {
 
 export const getDemandGaps = () => {
   if (_d) return _d.demandGaps;
-  if (isRealClub()) return [];
+  if (isAuthenticatedClub()) return [];
   return waitlistEntries.map(w => ({
     date: w.date, slot: w.slot,
     waitlistCount: w.count, eventOverlap: w.hasEventOverlap,

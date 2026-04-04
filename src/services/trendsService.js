@@ -2,7 +2,7 @@
 // Narrative and chart helpers stay pure functions — they work on whatever data source is active.
 
 import { apiFetch } from './apiClient';
-import { isRealClub } from '@/config/constants';
+import { isAuthenticatedClub } from '@/config/constants';
 import { trends as staticTrends, MONTHS as STATIC_MONTHS, outletTrends as staticOutletTrends } from '@/data/trends.js';
 
 let _d = null; // { trends, outletTrends, months }
@@ -14,8 +14,8 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-const _trends = () => _d ? _d.trends : isRealClub() ? {} : staticTrends;
-const _months = () => _d ? _d.months : isRealClub() ? [] : STATIC_MONTHS;
+const _trends = () => _d ? _d.trends : isAuthenticatedClub() ? {} : staticTrends;
+const _months = () => _d ? _d.months : isAuthenticatedClub() ? [] : STATIC_MONTHS;
 
 const FORMAT_FNS = {
   percent:  v => `${(v * 100).toFixed(0)}%`,
@@ -68,7 +68,7 @@ export function getMultiSeriesTrendData(keys) {
 }
 
 export function getOutletTrendData(outletName) {
-  const src = _d ? _d.outletTrends : isRealClub() ? {} : staticOutletTrends;
+  const src = _d ? _d.outletTrends : isAuthenticatedClub() ? {} : staticOutletTrends;
   const months = _months();
   const series = src?.[outletName];
   if (!series) return [];

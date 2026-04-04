@@ -6,7 +6,7 @@ import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
 import { getCancellationSummary, getWaitlistSummary }  from './waitlistService';
 import { cancellationProbabilities } from '../data/pipeline';
-import { isRealClub } from '@/config/constants';
+import { isAuthenticatedClub } from '@/config/constants';
 
 let _d = null;
 
@@ -28,7 +28,7 @@ const EMPTY_BRIEFING = {
 
 export const getDailyBriefing = (date = '2026-01-17') => {
   if (_d) return _d;
-  if (isRealClub()) return EMPTY_BRIEFING;
+  if (isAuthenticatedClub()) return EMPTY_BRIEFING;
 
   // Phase 1 static fallback — identical shape to API response
   const revData    = getRevenueByDay();

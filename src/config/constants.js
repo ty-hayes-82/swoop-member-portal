@@ -31,9 +31,19 @@ export function isRealClub() {
 // Backward compat — some files import CLUB_NAME
 export const CLUB_NAME = DEMO_CLUB_NAME;
 
+// Whether this is an authenticated non-demo club (for data fallback decisions)
+// Unlike isRealClub(), this does NOT require the swoop_production flag.
+// Used by services to decide: show empty states (real club) vs demo data (demo mode).
+export function isAuthenticatedClub() {
+  try {
+    const clubId = localStorage.getItem('swoop_club_id');
+    return !!clubId && clubId !== 'demo';
+  } catch { return false; }
+}
+
 // Whether static demo data should be used (only in demo mode)
 export function useStaticData() {
-  return !isRealClub();
+  return !isAuthenticatedClub();
 }
 
 export const SLOW_ROUND_THRESHOLD_MIN = 270;

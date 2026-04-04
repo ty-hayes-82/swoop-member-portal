@@ -1,5 +1,5 @@
 import { apiFetch, getClubId } from './apiClient';
-import { isRealClub } from '@/config/constants';
+import { isAuthenticatedClub } from '@/config/constants';
 import {
   kpis as staticKpis,
   memberSaves as staticMemberSaves,
@@ -40,7 +40,7 @@ const EMPTY_KPIS = [
 ];
 
 export const getKPIs = () => {
-  if (!_liveKpis && isRealClub()) return EMPTY_KPIS;
+  if (!_liveKpis && isAuthenticatedClub()) return EMPTY_KPIS;
   if (!_liveKpis) return staticKpis;
   // Merge live data into static structure
   return staticKpis.map(kpi => {
@@ -51,9 +51,9 @@ export const getKPIs = () => {
   });
 };
 
-export const getMemberSaves = () => isRealClub() && !_liveKpis ? [] : staticMemberSaves;
-export const getOperationalSaves = () => isRealClub() && !_liveKpis ? [] : staticOperationalSaves;
-export const getMonthlyTrends = () => isRealClub() && !_liveKpis ? [] : staticMonthlyTrends;
+export const getMemberSaves = () => isAuthenticatedClub() && !_liveKpis ? [] : staticMemberSaves;
+export const getOperationalSaves = () => isAuthenticatedClub() && !_liveKpis ? [] : staticOperationalSaves;
+export const getMonthlyTrends = () => isAuthenticatedClub() && !_liveKpis ? [] : staticMonthlyTrends;
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

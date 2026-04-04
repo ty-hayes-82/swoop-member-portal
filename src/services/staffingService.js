@@ -1,7 +1,7 @@
 // staffingService.js — Phase 1 static · Phase 2 /api/staffing
 
 import { apiFetch } from './apiClient';
-import { isRealClub } from '@/config/constants';
+import { isAuthenticatedClub } from '@/config/constants';
 import { understaffedDays, feedbackRecords, feedbackSummary, shiftCoverage } from '@/data/staffing';
 
 let _d = null;
@@ -106,11 +106,11 @@ const sanitizeFeedbackRecords = (source) => {
   }));
 };
 
-export const getUnderstaffedDays = () => sanitizeUnderstaffedDays(_d ? _d.understaffedDays : isRealClub() ? [] : understaffedDays);
-export const getShiftCoverage = () => sanitizeShiftCoverage(_d ? _d.shiftCoverage : isRealClub() ? [] : shiftCoverage);
-export const getFeedbackSummary = () => sanitizeFeedbackSummary(_d ? _d.feedbackSummary : isRealClub() ? [] : feedbackSummary);
+export const getUnderstaffedDays = () => sanitizeUnderstaffedDays(_d ? _d.understaffedDays : isAuthenticatedClub() ? [] : understaffedDays);
+export const getShiftCoverage = () => sanitizeShiftCoverage(_d ? _d.shiftCoverage : isAuthenticatedClub() ? [] : shiftCoverage);
+export const getFeedbackSummary = () => sanitizeFeedbackSummary(_d ? _d.feedbackSummary : isAuthenticatedClub() ? [] : feedbackSummary);
 
-export const getComplaintCorrelation = () => sanitizeFeedbackRecords(_d ? _d.feedbackRecords : isRealClub() ? [] : feedbackRecords);
+export const getComplaintCorrelation = () => sanitizeFeedbackRecords(_d ? _d.feedbackRecords : isAuthenticatedClub() ? [] : feedbackRecords);
 
 export const getStaffingSummary = () => {
   if (_d?.staffingSummary) {
@@ -124,7 +124,7 @@ export const getStaffingSummary = () => {
     };
   }
   const days = getUnderstaffedDays();
-  const complaints = isRealClub() ? [] : sanitizeFeedbackRecords(feedbackRecords);
+  const complaints = isAuthenticatedClub() ? [] : sanitizeFeedbackRecords(feedbackRecords);
   return {
     understaffedDaysCount: days.length,
     totalRevenueLoss: days.reduce((s, d) => s + d.revenueLoss, 0),

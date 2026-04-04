@@ -3,7 +3,7 @@
 // 4/4 survey respondents would act on "Add server based on weather + demand"
 import { useState } from 'react';
 import { theme } from '@/config/theme';
-import { isRealClub } from '@/config/constants';
+import { isAuthenticatedClub } from '@/config/constants';
 import { getUnderstaffedDays, getComplaintCorrelation } from '@/services/staffingService';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getDailyForecast } from '@/services/weatherService';
@@ -16,7 +16,7 @@ export default function StaffingTab() {
   const understaffedDays = getUnderstaffedDays();
   const feedbackRecords = getComplaintCorrelation();
 
-  if (isRealClub() && understaffedDays.length === 0 && feedbackRecords.length === 0) {
+  if (isAuthenticatedClub() && understaffedDays.length === 0 && feedbackRecords.length === 0) {
     return <DataEmptyState icon="📋" title="No staffing data yet" description="Import staffing and shift data to see coverage gaps, demand forecasting, and complaint correlation." dataType="staffing" />;
   }
 
