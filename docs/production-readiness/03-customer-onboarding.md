@@ -64,7 +64,7 @@ Today view shows data for connected domains, empty states for others
 ## 3.5 Next Steps
 
 - [ ] Test the full onboarding flow end-to-end with a synthetic club
-- [ ] Validate Jonas CSV alias matching against a real export
+- [ ] Validate Jonas CSV alias matching (see [06-testing-validation.md](./06-testing-validation.md) §6.3)
 - [ ] Build onboarding runbook documenting each step for Swoop team
 - [ ] Implement password reset flow (SendGrid is configured)
 - [ ] Design and implement empty state components for partially-hydrated pages

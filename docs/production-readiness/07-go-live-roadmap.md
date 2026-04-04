@@ -22,13 +22,13 @@
 
 ### Remaining Work
 
-**Sprint 6 (Week 1): Integration Testing**
+**Sprint 6 (Apr 7-11): Integration Testing**
 - Test full onboarding flow: create club -> create user -> import CSV -> compute scores
-- Validate Jonas CSV alias matching with real export data
+- Validate Jonas CSV alias matching with real export (see [06-testing-validation.md](./06-testing-validation.md))
 - Test empty state handling for pages with no data
 - Verify all 5 nav pages render correctly with real Postgres data
 
-**Sprint 7 (Week 2): Launch Prep**
+**Sprint 7 (Apr 14-18): Launch Prep**
 - Create onboarding runbook for Swoop team
 - Build password reset flow (SendGrid configured)
 - Design empty state components ("Connect your tee sheet to see golf analytics")
@@ -103,6 +103,6 @@ Files created/modified on `production-readiness-plan` branch:
 - `src/features/integrations/IntegrationMap.jsx` -- Orphaned SVG
 - `src/features/landing/PortalLanding.jsx` -- Unreachable page
 
-**Modified (30+ API endpoints):** All wrapped with `withAuth` + `club_id` filtering.
+**Modified (29 API endpoints):** All wrapped with `withAuth` + `club_id` filtering.
 **Modified (15 services):** All updated to use `apiFetch` with Bearer tokens.
 **Modified:** `seed/schema.sql` (club_id on 25+ tables), `vite.config.js` (code-splitting), `src/App.jsx` (lazy loading).

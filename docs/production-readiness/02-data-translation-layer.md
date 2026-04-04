@@ -41,7 +41,7 @@ The architecture defines that only `src/services/*.js` files change when swappin
 - **Updated on branch:** Auth middleware applied, `club_id` scoped from session
 
 **Next steps:**
-- Test with a real Jonas CSV export to validate alias matching
+- Test with a real Jonas CSV export (see [06-testing-validation.md](./06-testing-validation.md) §6.3)
 - Add import types for `tee-times`, `staffing`, `events`
 - Add progress feedback UI during large imports
 

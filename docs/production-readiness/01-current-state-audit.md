@@ -80,7 +80,7 @@ Additional cleanup on `production-readiness-plan` branch:
 |-------|----------|-----------------|
 | Password bypass in `api/auth.js` | Critical | **FIXED** -- requires password hash |
 | Hardcoded DB credentials in `scripts/reseed-pipeline-leads.mjs` | Critical | **FIXED** -- uses env var only |
-| No auth middleware | High | **FIXED** -- `api/lib/withAuth.js` applied to 30+ endpoints |
+| No auth middleware | High | **FIXED** -- `api/lib/withAuth.js` applied to 29 endpoints |
 | No `.env.example` | Medium | **FIXED** -- created |
 | Env var mismatch (`ANTHROPIC_API_KEY`) | Low | Open |
 

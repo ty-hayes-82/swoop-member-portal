@@ -24,7 +24,7 @@
 79 files changed, 4,786 insertions, 713 deletions across 5 sprints:
 
 - Auth password bypass removed, password hashing added to onboarding
-- `api/lib/withAuth.js` middleware created and applied to 30+ API endpoints
+- `api/lib/withAuth.js` middleware created and applied to 29 API endpoints
 - `club_id` added to 25+ tables in schema + migration script created
 - All API endpoints now filter by `club_id` from authenticated session
 - `src/services/apiClient.js` created for authenticated API calls

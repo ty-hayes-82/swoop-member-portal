@@ -62,7 +62,29 @@ Testing contract: `src/data/*.js` (known inputs) -> `src/services/*.js` (determi
 | `memberService.getAtRiskMembers()` count consistency | Core metric on Today + Members | S |
 | End-to-end: create club -> import CSV -> compute scores -> verify UI | Full pipeline validation | L |
 
-## 6.4 Next Steps
+## 6.4 Test Infrastructure Requirements
+
+**Test database:** Use Neon branching to create an isolated test branch from production schema. Each test run operates on a clean branch that is reset after completion.
+
+**Test auth tokens:** Create a `swoop_test` club with a known session token seeded in the test database. API tests use this token via `Authorization: Bearer <test-token>` header.
+
+**CI integration:** GitHub Actions workflow to:
+1. Create Neon test branch
+2. Run seed/schema.sql + migration 007
+3. Run unit tests (vitest)
+4. Run API tests against test branch
+5. Tear down test branch
+
+**Running tests locally:**
+```bash
+# Unit tests (no DB required)
+npm test
+
+# API tests (requires POSTGRES_URL pointing to test branch)
+POSTGRES_URL=<neon-test-branch-url> npm run test:api
+```
+
+## 6.5 Next Steps
 
 - [ ] Create seed data generators for each synthetic club profile
 - [ ] Write API endpoint tests (at minimum: auth, members, import-csv, compute-health-scores)

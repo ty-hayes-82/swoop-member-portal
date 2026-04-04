@@ -9,7 +9,7 @@
 | Item | Original Effort | Status | Notes |
 |------|----------------|--------|-------|
 | Remove auth password bypass | XS (2-4 hrs) | **DONE** | `api/auth.js` -- requires hash comparison |
-| Auth middleware for all API routes | M (16-24 hrs) | **DONE** | `api/lib/withAuth.js` applied to 30+ endpoints |
+| Auth middleware for all API routes | M (16-24 hrs) | **DONE** | `api/lib/withAuth.js` applied to 29 endpoints |
 | Add `club_id` to missing tables | M (20-30 hrs) | **DONE** | Migration 007 + schema.sql updated (25+ tables) |
 | Wire CSV import to Postgres | M (16-24 hrs) | **DONE** | `api/import-csv.js` already had INSERT logic; auth + club_id added |
 | Health score data completeness gate | S (8-12 hrs) | **DONE** | Requires 2+ dimensions; `data_completeness` column added |
@@ -38,10 +38,11 @@
 | Jonas CRM API connector | L (40-60 hrs) | Not started |
 | Playbook execution tracking | M (16-24 hrs) | UI exists, no backend persistence |
 | Email notifications (SendGrid) | S (8-12 hrs) | API endpoints exist, partially wired |
-| Password reset flow | S (8-12 hrs) | Not started |
 | Code-split dashboard chunk | S (4-8 hrs) | **DONE** -- 938KB -> 132KB largest chunk |
 | Fix stale test | XS (1 hr) | **DONE** -- 12/12 tests passing |
 | Frontend RBAC (nav filtering by role) | S (8-12 hrs) | Middleware supports it, UI not wired |
+| Fix ANTHROPIC_API_KEY env var mismatch | XS (1-2 hrs) | Open (see 01 §1.6) |
+| Clean retention-centric language in services | S (4-8 hrs) | Not started (see 01 §1.1 Phase 4) |
 
 ## 5.3 P2 -- Moat Builders (6+ months)
 

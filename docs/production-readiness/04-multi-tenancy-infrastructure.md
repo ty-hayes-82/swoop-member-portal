@@ -23,7 +23,7 @@ Tables updated: `households`, `membership_types`, `weather_daily`, `canonical_ev
 
 ## 4.2 API-Level Tenant Isolation
 
-**Implemented on branch:** `api/lib/withAuth.js` middleware applied to 30+ API endpoints.
+**Implemented on branch:** `api/lib/withAuth.js` middleware applied to 29 API endpoints.
 
 The middleware:
 - Validates Bearer token from `sessions` table
