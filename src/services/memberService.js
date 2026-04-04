@@ -320,13 +320,18 @@ let _d = getInitialData();
 let _live = null;
 
 export const _init = async () => {
+  _apiLoaded = true;
   try {
     const apiData = await apiFetch('/api/members');
     if (apiData) {
+      // Check if API returned actual member data (not just metadata)
+      const hasMemberData = (apiData.total > 0) ||
+        (Array.isArray(apiData.atRiskMembers) && apiData.atRiskMembers.length > 0) ||
+        (apiData.memberProfiles && Object.keys(apiData.memberProfiles).length > 0);
+      if (hasMemberData) _hasRealMembers = true;
       _d = {
         ..._d,
         ...apiData,
-        // Use API health distribution if available, otherwise static
         healthDistribution: apiData.healthDistribution || _d.healthDistribution,
         memberProfiles: apiData.memberProfiles || _d.memberProfiles,
       };
@@ -359,26 +364,34 @@ export const _init = async () => {
 
 export const getLiveDashboard = () => _live;
 
+// For authenticated clubs: only return data that came from the API, never static demo data.
+// _apiLoaded is set to true after _init completes, regardless of whether data was found.
+// _hasRealMembers is true only if the API returned actual member records.
+let _apiLoaded = false;
+let _hasRealMembers = false;
+
+const _shouldReturnEmpty = () => isAuthenticatedClub() && !_hasRealMembers;
+
 export const getHealthDistribution = () => {
-  if (isAuthenticatedClub() && !_live) return [];
+  if (_shouldReturnEmpty()) return [];
   const archetypes = normalizeArchetypes(_d?.memberArchetypes);
   const totalMembers = archetypes.reduce((sum, item) => sum + item.count, 0);
   return normalizeHealthDistribution(_d?.healthDistribution, totalMembers);
 };
 export const getAtRiskMembers       = () => {
-  if (isAuthenticatedClub() && !_live) return [];
+  if (_shouldReturnEmpty()) return [];
   return normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
 };
 export const getArchetypeProfiles   = () => {
-  if (isAuthenticatedClub() && !_live) return [];
+  if (_shouldReturnEmpty()) return [];
   return normalizeArchetypes(_d?.memberArchetypes);
 };
 export const getResignationScenarios= () => {
-  if (isAuthenticatedClub() && !_live) return [];
+  if (_shouldReturnEmpty()) return [];
   return normalizeResignationScenarios(_d?.resignationScenarios);
 };
 export const getEmailHeatmap        = () => {
-  if (isAuthenticatedClub() && !_live) return [];
+  if (_shouldReturnEmpty()) return [];
   const raw = Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
   return raw.map(e => ({
     campaign: e.campaign ?? e.subject ?? 'Unknown',
@@ -388,12 +401,12 @@ export const getEmailHeatmap        = () => {
   }));
 };
 export const getDecayingMembers     = () => {
-  if (isAuthenticatedClub() && !_live) return [];
+  if (_shouldReturnEmpty()) return [];
   return normalizeDecayingMembers(_d?.decayingMembers);
 };
 
 export const getMemberSummary = () => {
-  if (isAuthenticatedClub() && !_live) {
+  if (_shouldReturnEmpty()) {
     return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
   }
   const summary = _d?.memberSummary ?? {};
@@ -410,7 +423,7 @@ export const getMemberSummary = () => {
 };
 
 export const getWatchMembers = () => {
-  if (isAuthenticatedClub() && !_live) return [];
+  if (_shouldReturnEmpty()) return [];
   return (staticWatchMembers ?? []).map((m) => ({
     ...m,
     trend: 'watch',

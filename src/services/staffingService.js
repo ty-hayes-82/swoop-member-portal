@@ -107,19 +107,31 @@ const sanitizeFeedbackRecords = (source) => {
 };
 
 export const getUnderstaffedDays = () => {
-  if (!_d && isAuthenticatedClub()) return [];
+  if (isAuthenticatedClub()) {
+    const real = _d?.understaffedDays;
+    return Array.isArray(real) && real.length ? sanitizeUnderstaffedDays(real) : [];
+  }
   return sanitizeUnderstaffedDays(_d ? _d.understaffedDays : understaffedDays);
 };
 export const getShiftCoverage = () => {
-  if (!_d && isAuthenticatedClub()) return [];
+  if (isAuthenticatedClub()) {
+    const real = _d?.shiftCoverage;
+    return Array.isArray(real) && real.length ? sanitizeShiftCoverage(real) : [];
+  }
   return sanitizeShiftCoverage(_d ? _d.shiftCoverage : shiftCoverage);
 };
 export const getFeedbackSummary = () => {
-  if (!_d && isAuthenticatedClub()) return [];
+  if (isAuthenticatedClub()) {
+    const real = _d?.feedbackSummary;
+    return Array.isArray(real) && real.length ? sanitizeFeedbackSummary(real) : [];
+  }
   return sanitizeFeedbackSummary(_d ? _d.feedbackSummary : feedbackSummary);
 };
 export const getComplaintCorrelation = () => {
-  if (!_d && isAuthenticatedClub()) return [];
+  if (isAuthenticatedClub()) {
+    const real = _d?.feedbackRecords;
+    return Array.isArray(real) && real.length ? sanitizeFeedbackRecords(real) : [];
+  }
   return sanitizeFeedbackRecords(_d ? _d.feedbackRecords : feedbackRecords);
 };
 
