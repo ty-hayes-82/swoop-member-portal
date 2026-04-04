@@ -3,18 +3,27 @@
 // 4/4 survey respondents would act on "Add server based on weather + demand"
 import { useState } from 'react';
 import { theme } from '@/config/theme';
-import { understaffedDays, feedbackRecords } from '@/data/staffing';
+import { isRealClub } from '@/config/constants';
+import { getUnderstaffedDays, getComplaintCorrelation } from '@/services/staffingService';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getDailyForecast } from '@/services/weatherService';
+import DataEmptyState from '@/components/ui/DataEmptyState';
 import MemberLink from '@/components/MemberLink';
 
 export default function StaffingTab() {
   const [expandedDay, setExpandedDay] = useState(null);
   const briefing = getDailyBriefing();
+  const understaffedDays = getUnderstaffedDays();
+  const feedbackRecords = getComplaintCorrelation();
+
+  if (isRealClub() && understaffedDays.length === 0 && feedbackRecords.length === 0) {
+    return <DataEmptyState icon="📋" title="No staffing data yet" description="Import staffing and shift data to see coverage gaps, demand forecasting, and complaint correlation." dataType="staffing" />;
+  }
+
   const totalComplaints = feedbackRecords.filter(f => f.isUnderstaffedDay).length;
-  const avgComplaintMultiplier = (
-    understaffedDays.reduce((sum, day) => sum + day.complaintMultiplier, 0) / understaffedDays.length
-  ).toFixed(1);
+  const avgComplaintMultiplier = understaffedDays.length > 0
+    ? (understaffedDays.reduce((sum, day) => sum + day.complaintMultiplier, 0) / understaffedDays.length).toFixed(1)
+    : '0';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>

@@ -1,14 +1,25 @@
 // QualityTab — service consistency by shift, outlet, and day of week
 import { useState } from 'react';
 import { theme } from '@/config/theme';
-import { feedbackRecords, feedbackSummary, understaffedDays } from '@/data/staffing';
-import { slowRoundStats } from '@/data/pace';
+import { isRealClub } from '@/config/constants';
+import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
+import { getSlowRoundRate } from '@/services/operationsService';
+import DataEmptyState from '@/components/ui/DataEmptyState';
 import { useNavigationContext } from '@/context/NavigationContext';
 
 export default function QualityTab() {
   const { navigate } = useNavigationContext();
   const [expandedOutlet, setExpandedOutlet] = useState(null);
   const [hoveredBar, setHoveredBar] = useState(null);
+  const feedbackRecords = getComplaintCorrelation();
+  const feedbackSummary = getFeedbackSummary();
+  const understaffedDays = getUnderstaffedDays();
+  const slowRoundStats = getSlowRoundRate();
+
+  if (isRealClub() && feedbackRecords.length === 0) {
+    return <DataEmptyState icon="✅" title="No service quality data yet" description="Import POS and feedback data to see service consistency scores, complaint patterns, and quality correlations." dataType="POS + feedback" />;
+  }
+
   const totalComplaints = feedbackRecords.length;
   const resolvedCount = feedbackRecords.filter(f => f.status === 'resolved').length;
   const resolutionRate = totalComplaints > 0 ? Math.round((resolvedCount / totalComplaints) * 100) : 0;
@@ -20,7 +31,7 @@ export default function QualityTab() {
   const consistencyScore = Math.round(
     (resolutionRate * 0.4) +
     ((100 - understaffedPct) * 0.3) +
-    ((100 - slowRoundStats.overallRate * 100) * 0.3)
+    ((100 - (slowRoundStats.overallRate || 0) * 100) * 0.3)
   );
   const scoreColor = consistencyScore >= 70 ? theme.colors.success : consistencyScore >= 50 ? '#ca8a04' : theme.colors.risk;
 
@@ -32,7 +43,7 @@ export default function QualityTab() {
     ? Math.min(100, Math.round(
         (adjustedResolutionRate * 0.4) +
         ((100 - understaffedPct) * 0.3) +
-        ((100 - slowRoundStats.overallRate * 100) * 0.3)
+        ((100 - (slowRoundStats.overallRate || 0) * 100) * 0.3)
       ))
     : null;
 

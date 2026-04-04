@@ -1,4 +1,5 @@
 import { apiFetch, getClubId } from './apiClient';
+import { isRealClub } from '@/config/constants';
 import {
   kpis as staticKpis,
   memberSaves as staticMemberSaves,
@@ -31,7 +32,15 @@ export const _init = async () => {
   } catch {}
 };
 
+const EMPTY_KPIS = [
+  { label: 'Members Retained', value: 0, unit: 'members', description: 'Awaiting data' },
+  { label: 'Dues Protected', value: 0, unit: '$', description: 'Awaiting data' },
+  { label: 'Service Consistency', value: 0, unit: '%', description: 'Awaiting data' },
+  { label: 'Operational Response', value: 0, unit: '%', description: 'Awaiting data' },
+];
+
 export const getKPIs = () => {
+  if (!_liveKpis && isRealClub()) return EMPTY_KPIS;
   if (!_liveKpis) return staticKpis;
   // Merge live data into static structure
   return staticKpis.map(kpi => {
@@ -42,9 +51,9 @@ export const getKPIs = () => {
   });
 };
 
-export const getMemberSaves = () => staticMemberSaves;
-export const getOperationalSaves = () => staticOperationalSaves;
-export const getMonthlyTrends = () => staticMonthlyTrends;
+export const getMemberSaves = () => isRealClub() && !_liveKpis ? [] : staticMemberSaves;
+export const getOperationalSaves = () => isRealClub() && !_liveKpis ? [] : staticOperationalSaves;
+export const getMonthlyTrends = () => isRealClub() && !_liveKpis ? [] : staticMonthlyTrends;
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

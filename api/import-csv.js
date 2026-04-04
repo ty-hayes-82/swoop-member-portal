@@ -10,25 +10,115 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getClubId } from './lib/withAuth.js';
 
 const IMPORT_TYPES = {
+  // Phase 1: Club Setup + Members
   members: {
     requiredFields: ['first_name', 'last_name'],
-    optionalFields: ['email', 'phone', 'membership_type', 'annual_dues', 'join_date', 'external_id', 'household_id'],
+    optionalFields: ['email', 'phone', 'membership_type', 'annual_dues', 'join_date', 'external_id', 'household_id', 'birthday', 'sex', 'handicap', 'current_balance', 'status', 'date_resigned'],
     table: 'members',
+  },
+  club_profile: {
+    requiredFields: ['club_name'],
+    optionalFields: ['city', 'state', 'zip', 'founded_year', 'member_count', 'course_count', 'outlet_count'],
+    table: 'club',
+  },
+  membership_types: {
+    requiredFields: ['type_code', 'description'],
+    optionalFields: ['annual_fee', 'fnb_minimum', 'golf_eligible'],
+    table: 'membership_types',
+  },
+  households: {
+    requiredFields: ['household_id', 'primary_member_id'],
+    optionalFields: ['dependent_count', 'home_address'],
+    table: 'households',
+  },
+  // Phase 2: Golf Operations
+  courses: {
+    requiredFields: ['course_code', 'course_name'],
+    optionalFields: ['holes', 'par', 'interval_min', 'start_time', 'end_time'],
+    table: 'courses',
+  },
+  tee_times: {
+    requiredFields: ['reservation_id', 'course', 'date', 'tee_time'],
+    optionalFields: ['players', 'guest_flag', 'transportation', 'caddie', 'holes', 'status', 'check_in_time', 'round_start', 'round_end', 'duration_min'],
+    table: 'bookings',
+  },
+  booking_players: {
+    requiredFields: ['player_id', 'reservation_id'],
+    optionalFields: ['member_id', 'guest_name', 'guest_flag', 'position'],
+    table: 'booking_players',
   },
   rounds: {
     requiredFields: ['member_id', 'round_date'],
     optionalFields: ['tee_time', 'course_id', 'duration_minutes', 'pace_rating', 'players', 'cancelled', 'no_show'],
     table: 'rounds',
   },
+  // Phase 3: F&B + Service
   transactions: {
     requiredFields: ['transaction_date', 'total_amount'],
-    optionalFields: ['member_id', 'outlet_name', 'category', 'item_count', 'is_post_round'],
+    optionalFields: ['member_id', 'outlet_name', 'category', 'item_count', 'is_post_round', 'tax', 'gratuity', 'comp', 'discount', 'void', 'settlement_method', 'open_time', 'close_time'],
     table: 'transactions',
+  },
+  sales_areas: {
+    requiredFields: ['sales_area_id', 'description'],
+    optionalFields: ['type', 'operating_hours', 'weekday_covers', 'weekend_covers'],
+    table: 'dining_outlets',
+  },
+  line_items: {
+    requiredFields: ['line_item_id', 'check_id'],
+    optionalFields: ['item_description', 'sales_category', 'regular_price', 'qty', 'line_total', 'comp', 'void', 'fire_time'],
+    table: 'pos_line_items',
+  },
+  daily_close: {
+    requiredFields: ['date'],
+    optionalFields: ['golf_revenue', 'fb_revenue', 'total_revenue', 'rounds_played', 'covers', 'weather'],
+    table: 'close_outs',
   },
   complaints: {
     requiredFields: ['category', 'description'],
-    optionalFields: ['member_id', 'status', 'priority', 'reported_at', 'resolved_at'],
+    optionalFields: ['member_id', 'status', 'priority', 'reported_at', 'resolved_at', 'severity'],
     table: 'complaints',
+  },
+  service_requests: {
+    requiredFields: ['request_id', 'type', 'date'],
+    optionalFields: ['member_id', 'booking_ref', 'response_time_min', 'resolution_date', 'notes'],
+    table: 'service_requests',
+  },
+  // Phase 4: Events + Email
+  events: {
+    requiredFields: ['event_id', 'event_name'],
+    optionalFields: ['event_type', 'start_date', 'capacity', 'pricing_category', 'description'],
+    table: 'event_definitions',
+  },
+  event_registrations: {
+    requiredFields: ['registration_id', 'event_id'],
+    optionalFields: ['member_id', 'status', 'guest_count', 'fee_paid', 'registration_date', 'check_in_time'],
+    table: 'event_registrations',
+  },
+  email_campaigns: {
+    requiredFields: ['campaign_id', 'subject'],
+    optionalFields: ['campaign_type', 'send_date', 'audience_count'],
+    table: 'email_campaigns',
+  },
+  email_events: {
+    requiredFields: ['campaign_id', 'member_id', 'event_type'],
+    optionalFields: ['timestamp', 'link_clicked', 'device'],
+    table: 'email_events',
+  },
+  // Phase 5: Staffing + Billing
+  staff: {
+    requiredFields: ['employee_id', 'first_name', 'last_name'],
+    optionalFields: ['department', 'job_title', 'hire_date', 'hourly_rate', 'ft_pt'],
+    table: 'staff',
+  },
+  shifts: {
+    requiredFields: ['shift_id', 'employee_id', 'date'],
+    optionalFields: ['location', 'shift_start', 'shift_end', 'actual_hours', 'notes'],
+    table: 'staff_shifts',
+  },
+  invoices: {
+    requiredFields: ['invoice_id', 'member_id', 'statement_date'],
+    optionalFields: ['due_date', 'net_amount', 'billing_code_type', 'description', 'aging_bucket', 'last_payment', 'payment_amount', 'days_past_due', 'late_fee'],
+    table: 'member_invoices',
   },
 };
 
@@ -115,6 +205,21 @@ export default withAuth(async function handler(req, res) {
           INSERT INTO complaints (club_id, member_id, category, description, status, priority, reported_at, data_source)
           VALUES (${clubId}, ${row.member_id || null}, ${row.category}, ${row.description}, ${row.status || 'open'}, ${row.priority || 'medium'}, ${row.reported_at || new Date().toISOString()}, 'csv_import')
         `;
+      } else {
+        // Generic insert for all other import types
+        const allFields = [...config.requiredFields, ...config.optionalFields];
+        const columns = ['club_id', 'data_source'];
+        const values = [clubId, 'csv_import'];
+        for (const field of allFields) {
+          if (row[field] !== undefined && row[field] !== null && String(row[field]).trim() !== '') {
+            columns.push(field);
+            const val = row[field];
+            values.push(typeof val === 'string' && !isNaN(Number(val)) && field.match(/amount|fee|price|total|revenue|rate|count|hours|covers|capacity/) ? Number(val) : val);
+          }
+        }
+        const placeholders = values.map((_, idx) => `$${idx + 1}`).join(', ');
+        const colNames = columns.map(c => `"${c}"`).join(', ');
+        await sql.query(`INSERT INTO ${config.table} (${colNames}) VALUES (${placeholders})`, values);
       }
       successCount++;
     } catch (e) {

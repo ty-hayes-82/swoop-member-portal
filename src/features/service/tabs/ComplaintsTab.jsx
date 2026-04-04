@@ -1,9 +1,11 @@
 // ComplaintsTab — complaint patterns, resolution status, and understaffed-day correlation
 import { useState, useEffect } from 'react';
 import { theme } from '@/config/theme';
+import { isRealClub } from '@/config/constants';
 import { useNavigationContext } from '@/context/NavigationContext';
-import { feedbackRecords, feedbackSummary } from '@/data/staffing';
-import { paceFBImpact } from '@/data/pace';
+import { getComplaintCorrelation, getFeedbackSummary } from '@/services/staffingService';
+import { getPaceFBImpact } from '@/services/operationsService';
+import DataEmptyState from '@/components/ui/DataEmptyState';
 import MemberLink from '@/components/MemberLink';
 
 const STATUS_STYLES = {
@@ -26,6 +28,12 @@ export default function ComplaintsTab() {
   const [statusFilter, setStatusFilter] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
 
+  const feedbackRecords = getComplaintCorrelation();
+
+  if (isRealClub() && feedbackRecords.length === 0) {
+    return <DataEmptyState icon="📝" title="No complaint data yet" description="Import feedback data from your CRM to track complaints, resolution rates, and service patterns." dataType="feedback" />;
+  }
+
   // Accept category filter from Quality tab drill-down
   useEffect(() => {
     if (!routeIntent) return;
@@ -40,7 +48,8 @@ export default function ComplaintsTab() {
 
   const openComplaints = filteredComplaints;
   const understaffedComplaints = feedbackRecords.filter(f => f.isUnderstaffedDay).length;
-  const { fastConversionRate, slowConversionRate } = paceFBImpact;
+  const paceFB = getPaceFBImpact();
+  const { fastConversionRate, slowConversionRate } = paceFB;
   const conversionDrop = ((fastConversionRate - slowConversionRate) / fastConversionRate * 100).toFixed(0);
 
   return (
@@ -279,7 +288,7 @@ export default function ComplaintsTab() {
           Complaint Drivers
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-          {feedbackSummary.map(cat => (
+          {getFeedbackSummary().map(cat => (
             <div key={cat.category} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               padding: theme.spacing.sm, background: theme.colors.bgDeep, borderRadius: theme.radius.sm, fontSize: 14,

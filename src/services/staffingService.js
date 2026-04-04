@@ -1,6 +1,7 @@
 // staffingService.js — Phase 1 static · Phase 2 /api/staffing
 
 import { apiFetch } from './apiClient';
+import { isRealClub } from '@/config/constants';
 import { understaffedDays, feedbackRecords, feedbackSummary, shiftCoverage } from '@/data/staffing';
 
 let _d = null;
@@ -105,11 +106,11 @@ const sanitizeFeedbackRecords = (source) => {
   }));
 };
 
-export const getUnderstaffedDays = () => sanitizeUnderstaffedDays(_d ? _d.understaffedDays : understaffedDays);
-export const getShiftCoverage = () => sanitizeShiftCoverage(_d ? _d.shiftCoverage : shiftCoverage);
-export const getFeedbackSummary = () => sanitizeFeedbackSummary(_d ? _d.feedbackSummary : feedbackSummary);
+export const getUnderstaffedDays = () => sanitizeUnderstaffedDays(_d ? _d.understaffedDays : isRealClub() ? [] : understaffedDays);
+export const getShiftCoverage = () => sanitizeShiftCoverage(_d ? _d.shiftCoverage : isRealClub() ? [] : shiftCoverage);
+export const getFeedbackSummary = () => sanitizeFeedbackSummary(_d ? _d.feedbackSummary : isRealClub() ? [] : feedbackSummary);
 
-export const getComplaintCorrelation = () => sanitizeFeedbackRecords(_d ? _d.feedbackRecords : feedbackRecords);
+export const getComplaintCorrelation = () => sanitizeFeedbackRecords(_d ? _d.feedbackRecords : isRealClub() ? [] : feedbackRecords);
 
 export const getStaffingSummary = () => {
   if (_d?.staffingSummary) {
@@ -123,11 +124,12 @@ export const getStaffingSummary = () => {
     };
   }
   const days = getUnderstaffedDays();
+  const complaints = isRealClub() ? [] : sanitizeFeedbackRecords(feedbackRecords);
   return {
     understaffedDaysCount: days.length,
     totalRevenueLoss: days.reduce((s, d) => s + d.revenueLoss, 0),
     annualizedLoss: days.reduce((s, d) => s + d.revenueLoss, 0) * 12,
-    unresolvedComplaints: sanitizeFeedbackRecords(feedbackRecords).filter((f) => f.status !== 'resolved').length,
+    unresolvedComplaints: complaints.filter((f) => f.status !== 'resolved').length,
   };
 };
 
