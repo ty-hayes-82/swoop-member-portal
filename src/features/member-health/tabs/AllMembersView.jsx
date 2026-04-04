@@ -4,7 +4,7 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import { PlaybookActionCard } from '@/components/ui';
-import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, setRosterCache } from '@/services/memberService';
+import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, setRosterCache, getMemberRoster } from '@/services/memberService';
 import { isAuthenticatedClub } from '@/config/constants';
 import { memberProfiles } from '@/data/members';
 import DataEmptyState from '@/components/ui/DataEmptyState';
@@ -84,7 +84,7 @@ function generateRoster() {
   return roster;
 }
 
-const allMembers = isAuthenticatedClub() ? [] : generateRoster();
+const allMembers = isAuthenticatedClub() ? getMemberRoster() : generateRoster();
 if (!isAuthenticatedClub()) setRosterCache(allMembers);
 
 function getHealthLevel(score) {

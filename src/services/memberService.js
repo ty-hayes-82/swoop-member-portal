@@ -423,7 +423,11 @@ export const getMemberSummary = () => {
 };
 
 export const getWatchMembers = () => {
-  if (_shouldReturnEmpty()) return [];
+  if (isAuthenticatedClub()) {
+    // For real clubs, only return watch members from API data, never static
+    const apiWatch = _d?.watchMembers ?? [];
+    return Array.isArray(apiWatch) ? apiWatch.map((m) => ({ ...m, trend: 'watch', riskLevel: 'Watch' })) : [];
+  }
   return (staticWatchMembers ?? []).map((m) => ({
     ...m,
     trend: 'watch',
@@ -431,6 +435,9 @@ export const getWatchMembers = () => {
   }));
 };
 
+
+// Member roster from API (for authenticated clubs with no engagement data)
+export const getMemberRoster = () => _d?.memberRoster ?? [];
 
 // Volatile Members: Watch/At-Risk tier (30-69) with active complaint or unresolved issue
 export const getVolatileMembers = () => {
