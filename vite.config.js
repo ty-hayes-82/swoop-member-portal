@@ -38,8 +38,8 @@ export default defineConfig({
           if (id.includes('/src/features/admin/')) return 'page-admin';
           if (id.includes('/src/features/playbooks/')) return 'page-playbooks';
           if (id.includes('/src/features/integrations/')) return 'page-integrations';
-          if (id.includes('/src/features/member-profile/')) return 'page-member-profile';
-          if (id.includes('/src/features/member-health/')) return 'page-member-health';
+          if (id.includes('/src/features/member-profile/')) return 'page-members';
+          if (id.includes('/src/features/member-health/')) return 'page-members';
           if (id.includes('/src/mobile/')) return 'mobile';
 
           return undefined;
