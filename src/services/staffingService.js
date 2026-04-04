@@ -106,11 +106,22 @@ const sanitizeFeedbackRecords = (source) => {
   }));
 };
 
-export const getUnderstaffedDays = () => sanitizeUnderstaffedDays(_d ? _d.understaffedDays : isAuthenticatedClub() ? [] : understaffedDays);
-export const getShiftCoverage = () => sanitizeShiftCoverage(_d ? _d.shiftCoverage : isAuthenticatedClub() ? [] : shiftCoverage);
-export const getFeedbackSummary = () => sanitizeFeedbackSummary(_d ? _d.feedbackSummary : isAuthenticatedClub() ? [] : feedbackSummary);
-
-export const getComplaintCorrelation = () => sanitizeFeedbackRecords(_d ? _d.feedbackRecords : isAuthenticatedClub() ? [] : feedbackRecords);
+export const getUnderstaffedDays = () => {
+  if (!_d && isAuthenticatedClub()) return [];
+  return sanitizeUnderstaffedDays(_d ? _d.understaffedDays : understaffedDays);
+};
+export const getShiftCoverage = () => {
+  if (!_d && isAuthenticatedClub()) return [];
+  return sanitizeShiftCoverage(_d ? _d.shiftCoverage : shiftCoverage);
+};
+export const getFeedbackSummary = () => {
+  if (!_d && isAuthenticatedClub()) return [];
+  return sanitizeFeedbackSummary(_d ? _d.feedbackSummary : feedbackSummary);
+};
+export const getComplaintCorrelation = () => {
+  if (!_d && isAuthenticatedClub()) return [];
+  return sanitizeFeedbackRecords(_d ? _d.feedbackRecords : feedbackRecords);
+};
 
 export const getStaffingSummary = () => {
   if (_d?.staffingSummary) {

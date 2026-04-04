@@ -17,7 +17,7 @@ export const _init = async () => {
   // Fetch live outcomes from track-outcomes
   try {
     const data = await apiFetch(`/api/dashboard-live?clubId=${clubId}`);
-    if (data?.boardReportSummary) {
+    if (data?.boardReportSummary && (data.boardReportSummary.membersSaved > 0 || data.boardReportSummary.duesProtected > 0)) {
       _liveKpis = {
         membersSaved: data.boardReportSummary.membersSaved,
         duesProtected: data.boardReportSummary.duesProtected,

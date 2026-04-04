@@ -1,6 +1,7 @@
 // memberService.js — live data via /api/members
 
 import { apiFetch, getClubId as getClientClubId } from './apiClient';
+import { isAuthenticatedClub } from '@/config/constants';
 import {
   memberArchetypes as staticArchetypes,
   healthDistribution as staticHealthDistribution,
@@ -359,14 +360,25 @@ export const _init = async () => {
 export const getLiveDashboard = () => _live;
 
 export const getHealthDistribution = () => {
+  if (isAuthenticatedClub() && !_live) return [];
   const archetypes = normalizeArchetypes(_d?.memberArchetypes);
   const totalMembers = archetypes.reduce((sum, item) => sum + item.count, 0);
   return normalizeHealthDistribution(_d?.healthDistribution, totalMembers);
 };
-export const getAtRiskMembers       = () => normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
-export const getArchetypeProfiles   = () => normalizeArchetypes(_d?.memberArchetypes);
-export const getResignationScenarios= () => normalizeResignationScenarios(_d?.resignationScenarios);
+export const getAtRiskMembers       = () => {
+  if (isAuthenticatedClub() && !_live) return [];
+  return normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
+};
+export const getArchetypeProfiles   = () => {
+  if (isAuthenticatedClub() && !_live) return [];
+  return normalizeArchetypes(_d?.memberArchetypes);
+};
+export const getResignationScenarios= () => {
+  if (isAuthenticatedClub() && !_live) return [];
+  return normalizeResignationScenarios(_d?.resignationScenarios);
+};
 export const getEmailHeatmap        = () => {
+  if (isAuthenticatedClub() && !_live) return [];
   const raw = Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
   return raw.map(e => ({
     campaign: e.campaign ?? e.subject ?? 'Unknown',
@@ -375,9 +387,15 @@ export const getEmailHeatmap        = () => {
     clickRate: toNumber(e.clickRate, 0),
   }));
 };
-export const getDecayingMembers     = () => normalizeDecayingMembers(_d?.decayingMembers);
+export const getDecayingMembers     = () => {
+  if (isAuthenticatedClub() && !_live) return [];
+  return normalizeDecayingMembers(_d?.decayingMembers);
+};
 
 export const getMemberSummary = () => {
+  if (isAuthenticatedClub() && !_live) {
+    return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
+  }
   const summary = _d?.memberSummary ?? {};
   return {
     total: Math.max(0, Math.round(toNumber(summary.total, 0))),
@@ -392,6 +410,7 @@ export const getMemberSummary = () => {
 };
 
 export const getWatchMembers = () => {
+  if (isAuthenticatedClub() && !_live) return [];
   return (staticWatchMembers ?? []).map((m) => ({
     ...m,
     trend: 'watch',

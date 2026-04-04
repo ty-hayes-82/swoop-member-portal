@@ -89,7 +89,7 @@ export default function BoardReport() {
   const dist = getHealthDistribution();
 
   // Real club with no data — show empty state
-  if (isAuthenticatedClub() && memberSaves.length === 0 && kpis.every(k => k.value === 0)) {
+  if (isAuthenticatedClub() && (memberSaves.length === 0 || kpis.every(k => k.value === 0))) {
     return (
       <PageTransition>
         <DataEmptyState icon="📊" title="Board report needs data" description="Import member, golf, and F&B data to generate your executive board report with KPIs, member saves, and operational insights." dataType="club data" />
