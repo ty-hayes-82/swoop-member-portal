@@ -36,10 +36,14 @@ export default withAuth(async function handler(req, res) {
     const latestWeek = toNumber(latestWeekResult.rows[0]?.latest_week, 0);
 
     if (!latestWeek) {
+      // No engagement data yet — still return the member roster from the members table
+      const memberCount = await sql`SELECT COUNT(*) AS total FROM members WHERE club_id = ${clubId} AND COALESCE(membership_status, 'active') != 'resigned'`;
+      const total = toNumber(memberCount.rows[0]?.total, 0);
       return res.status(200).json({
+        total,
         healthDistribution: [],
         memberSummary: {
-          total: 0,
+          total,
           healthy: 0,
           atRisk: 0,
           critical: 0,
