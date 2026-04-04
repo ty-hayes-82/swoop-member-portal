@@ -41,19 +41,19 @@ layer(base);
   --color-white: #ffffff;
   --color-black: #101828;
 
-  /* Swoop brand orange (remapped from TailAdmin blue) */
-  --color-brand-25: #fff8f0;
-  --color-brand-50: #fff3e6;
-  --color-brand-100: #ffe4c4;
-  --color-brand-200: #ffd19a;
-  --color-brand-300: #ffb96e;
-  --color-brand-400: #f9a44a;
-  --color-brand-500: #F3922D;
-  --color-brand-600: #D97706;
-  --color-brand-700: #B45309;
-  --color-brand-800: #92400E;
-  --color-brand-900: #78350F;
-  --color-brand-950: #451A03;
+  /* TailAdmin default brand blue */
+  --color-brand-25: #f2f7ff;
+  --color-brand-50: #ecf3ff;
+  --color-brand-100: #dde9ff;
+  --color-brand-200: #c2d6ff;
+  --color-brand-300: #9cb9ff;
+  --color-brand-400: #7592ff;
+  --color-brand-500: #465fff;
+  --color-brand-600: #3641f5;
+  --color-brand-700: #2a31d8;
+  --color-brand-800: #252dae;
+  --color-brand-900: #262e89;
+  --color-brand-950: #161950;
 
   --color-blue-light-25: #f5fbff;
   --color-blue-light-50: #f0f9ff;
@@ -147,7 +147,7 @@ layer(base);
   --shadow-theme-xl: 0px 20px 24px -4px rgba(16, 24, 40, 0.08),
     0px 8px 8px -4px rgba(16, 24, 40, 0.03);
   --shadow-datepicker: -5px 0 0 #262d3c, 5px 0 0 #262d3c;
-  --shadow-focus-ring: 0px 0px 0px 4px rgba(243, 146, 45, 0.12);
+  --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
   --shadow-slider-navigation: 0px 1px 2px 0px rgba(16, 24, 40, 0.1),
     0px 1px 3px 0px rgba(16, 24, 40, 0.1);
   --shadow-tooltip: 0px 4px 6px -2px rgba(16, 24, 40, 0.05),
