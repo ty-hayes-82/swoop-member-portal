@@ -45,9 +45,9 @@ export default function ArchetypeTab() {
           return (
             <button key={p.archetype} onClick={() => setSelected(p.archetype)} style={{
               padding: '6px 14px', borderRadius: '12px', cursor: 'pointer',
-              border: `1px solid ${isSelected ? '#E8740C' : '#E5E7EB'}`,
-              background: isSelected ? `${'#E8740C'}08` : '#ffffff',
-              color: isSelected ? '#E8740C' : '#6B7280',
+              border: `1px solid ${isSelected ? '#465fff' : '#E5E7EB'}`,
+              background: isSelected ? `${'#465fff'}08` : '#ffffff',
+              color: isSelected ? '#465fff' : '#6B7280',
               fontSize: '12px', fontWeight: isSelected ? 700 : 400,
             }}>
               {p.archetype}
@@ -69,8 +69,8 @@ export default function ArchetypeTab() {
             <RadarChart data={radarData}>
               <PolarGrid stroke={'#E5E7EB'} />
               <PolarAngleAxis dataKey="dim" tick={{ fill: '#6B7280', fontSize: 11 }} />
-              <Radar dataKey="value" fill={'#E8740C'} fillOpacity={0.2}
-                stroke={'#E8740C'} strokeWidth={2} />
+              <Radar dataKey="value" fill={'#465fff'} fillOpacity={0.2}
+                stroke={'#465fff'} strokeWidth={2} />
               <Tooltip formatter={v => [`${v}`, 'Engagement']}
                 contentStyle={{ background: '#ffffff', border: `1px solid ${'#E5E7EB'}`, borderRadius: 8, fontSize: 12 }}
                 labelStyle={{ color: '#1a1a2e' }} />
@@ -121,7 +121,7 @@ function SpendPotentialCard({ archetype }) {
   const categories = [
     { key: 'golf', label: 'Golf', engagement: current.engagement.golf, color: '#22c55e' },
     { key: 'dining', label: 'Dining', engagement: current.engagement.dining, color: '#f59e0b' ?? '#f59e0b' },
-    { key: 'events', label: 'Events', engagement: current.engagement.events, color: '#E8740C' },
+    { key: 'events', label: 'Events', engagement: current.engagement.events, color: '#465fff' },
     { key: 'email', label: 'Email', engagement: current.engagement.email, color: '#2563eb' ?? '#9CA3AF' },
   ];
 
@@ -136,7 +136,7 @@ function SpendPotentialCard({ archetype }) {
     }}>
       <div className="flex justify-between items-center mb-4">
         <div>
-          <div style={{ fontSize: '10px', fontWeight: 700, color: '#E8740C', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: '2px' }}>
+          <div style={{ fontSize: '10px', fontWeight: 700, color: '#465fff', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: '2px' }}>
             Spend Potential
           </div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a2e' }}>

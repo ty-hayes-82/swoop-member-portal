@@ -171,14 +171,28 @@ layer(base);
   ::before,
   ::backdrop,
   ::file-selector-button {
+    box-sizing: border-box;
     border-color: var(--color-gray-200, currentColor);
+  }
+  html, body {
+    height: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-gray-50 font-sans text-gray-800;
+  }
+  #root {
+    height: 100%;
+    display: flex;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
-  }
-  body {
-    @apply bg-gray-50 font-sans text-gray-800;
   }
 }
 

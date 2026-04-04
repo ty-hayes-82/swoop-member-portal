@@ -5,7 +5,7 @@ import QuickActions from '@/components/ui/QuickActions.jsx';
 import { PlaybookActionCard } from '@/components/ui';
 import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, setRosterCache, getMemberRoster } from '@/services/memberService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { memberProfiles } from '@/data/members';
+import { memberProfiles, memberArchetypes } from '@/data/members';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
 // Generate full 300-member roster from all available data sources
@@ -166,9 +166,9 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
             memberId={member.memberId}
             style={{
               fontWeight: 600,
-              color: hovered ? '#E8740C' : '#1a1a2e',
+              color: hovered ? '#465fff' : '#1a1a2e',
               textDecoration: hovered ? 'underline' : 'none',
-              textDecorationColor: `${'#E8740C'}50`,
+              textDecorationColor: `${'#465fff'}50`,
               transition: 'color 0.12s ease',
             }}
           >
@@ -213,7 +213,7 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
         <td style={{ padding: `${'8px'} ${'16px'}`, textAlign: 'right' }}>
           <span
             style={{
-              color: isExpanded ? '#E8740C' : '#9CA3AF',
+              color: isExpanded ? '#465fff' : '#9CA3AF',
               fontSize: '14px',
               fontWeight: 600,
               transition: 'transform 0.15s ease, color 0.12s ease',
@@ -590,10 +590,10 @@ export default function AllMembersView({ initialArchetype = null }) {
                   padding: '6px 14px',
                   fontSize: 13,
                   fontWeight: 600,
-                  border: `1px solid ${isActive ? '#E8740C' : '#E5E7EB'}`,
+                  border: `1px solid ${isActive ? '#465fff' : '#E5E7EB'}`,
                   borderRadius: '12px',
-                  background: isActive ? `${'#E8740C'}15` : '#F8F9FA',
-                  color: isActive ? '#E8740C' : '#6B7280',
+                  background: isActive ? `${'#465fff'}15` : '#F8F9FA',
+                  color: isActive ? '#465fff' : '#6B7280',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
@@ -623,14 +623,14 @@ export default function AllMembersView({ initialArchetype = null }) {
             <FilterChip
               label={`Health: ${healthFilter.max ? `${healthFilter.min}-${healthFilter.max}` : `${healthFilter.min}+`}`}
               onRemove={() => setHealthFilter(null)}
-              color={'#E8740C'}
+              color={'#465fff'}
             />
           )}
           {archetypeFilter && (
             <FilterChip
               label={`Archetype: ${archetypeFilter}`}
               onRemove={() => setArchetypeFilter(null)}
-              color={'#E8740C'}
+              color={'#465fff'}
             />
           )}
           {activityFilter && (

@@ -4,7 +4,7 @@ import { getResignationScenarios } from '@/services/memberService';
 const DOMAIN_COLORS = {
   Golf: '#22c55e',
   'F&B': '#f59e0b',
-  Email: '#E8740C',
+  Email: '#465fff',
   Feedback: '#ef4444',
   All: '#9CA3AF',
   Membership: '#ef4444',

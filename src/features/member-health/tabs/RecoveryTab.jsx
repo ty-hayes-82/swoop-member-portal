@@ -19,7 +19,7 @@ const recoveryMethods = [
   { method: 'Personal GM Call', success: 95, count: 6, color: '#22c55e' },
   { method: 'Event Invitation', success: 91, count: 3, color: '#2563eb' },
   { method: 'Billing Resolution', success: 100, count: 2, color: '#8b5cf6' },
-  { method: 'Engagement Autopilot', success: 87, count: 4, color: '#E8740C' },
+  { method: 'Engagement Autopilot', success: 87, count: 4, color: '#465fff' },
 ];
 
 export default function RecoveryTab() {
@@ -195,7 +195,7 @@ export default function RecoveryTab() {
           <div style={{
             fontSize: '11px',
             fontWeight: 700,
-            color: '#E8740C',
+            color: '#465fff',
             textTransform: 'uppercase',
             letterSpacing: '1.5px',
             marginBottom: '4px',

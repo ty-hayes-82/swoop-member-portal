@@ -29,15 +29,15 @@ export default function StaffingTab() {
 
       {/* Tomorrow's Staffing Risk — most actionable cross-domain insight */}
       <div style={{
-        background: `linear-gradient(135deg, ${'#E8740C'}08, ${'#E8740C'}02)`,
-        border: `1px solid ${'#E8740C'}30`,
+        background: `linear-gradient(135deg, ${'#465fff'}08, ${'#465fff'}02)`,
+        border: `1px solid ${'#465fff'}30`,
         borderRadius: '16px',
         padding: '24px',
       }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
           <span className="text-[28px] shrink-0">📋</span>
           <div className="flex-1">
-            <div style={{ fontSize: '12px', fontWeight: 700, color: '#E8740C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#465fff', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
               Tomorrow's Staffing Risk
             </div>
             <div style={{ fontSize: '18px', fontWeight: 700, color: '#1a1a2e', marginBottom: 8 }}>
@@ -57,7 +57,7 @@ export default function StaffingTab() {
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '8px 16px', borderRadius: '8px',
-              background: '#E8740C', color: '#fff',
+              background: '#465fff', color: '#fff',
               fontSize: '14px', fontWeight: 600,
               cursor: 'pointer',
             }}>
@@ -161,7 +161,7 @@ export default function StaffingTab() {
                 {dayComplaints.length > 0 ? dayComplaints.map(c => (
                   <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: `1px solid ${'#E5E7EB'}` }}>
                     <span>
-                      <MemberLink mode="drawer" memberId={c.memberId} style={{ fontWeight: 600, color: '#E8740C', textDecoration: 'none' }}>
+                      <MemberLink mode="drawer" memberId={c.memberId} style={{ fontWeight: 600, color: '#465fff', textDecoration: 'none' }}>
                         {c.memberName || c.memberId}
                       </MemberLink>
                       <span className="text-gray-400"> — {c.category}</span>

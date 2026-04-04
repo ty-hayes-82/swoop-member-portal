@@ -232,7 +232,7 @@ export default function MemberProfile() {
                       <ReferenceArea y1={70} y2={100} fill="#dcfce7" fillOpacity={0.4} stroke="none" />
                       <ReferenceArea y1={50} y2={70} fill="#fef9c3" fillOpacity={0.4} stroke="none" />
                       <ReferenceArea y1={30} y2={50} fill="#fee2e2" fillOpacity={0.4} stroke="none" />
-                      <Line type="monotone" dataKey="score" stroke={'#E8740C'} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="score" stroke={'#465fff'} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
@@ -315,7 +315,7 @@ export default function MemberProfile() {
                         <XAxis dataKey="label" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                         <YAxis domain={[0, 100]} hide />
                         <Tooltip content={<HealthTooltip />} />
-                        <Area type="monotone" dataKey="score" stroke={'#E8740C'} fill="#fde68a" strokeWidth={3} fillOpacity={0.4} />
+                        <Area type="monotone" dataKey="score" stroke={'#465fff'} fill="#c2d6ff" strokeWidth={3} fillOpacity={0.4} />
                       </AreaChart>
                     </ResponsiveContainer>
                   ) : (

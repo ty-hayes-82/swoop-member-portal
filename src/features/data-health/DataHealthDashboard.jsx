@@ -64,7 +64,7 @@ export default function DataHealthDashboard() {
         <div className="w-[120px] h-[120px] relative">
           <svg width="120" height="120" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="50" fill="none" stroke="#F3F4F6" strokeWidth="10" />
-            <circle cx="60" cy="60" r="50" fill="none" stroke="#E8740C" strokeWidth="10"
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#465fff" strokeWidth="10"
               strokeDasharray={`${valueScore * 3.14} ${314 - valueScore * 3.14}`}
               strokeLinecap="round" transform="rotate(-90 60 60)" />
           </svg>

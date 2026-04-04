@@ -130,14 +130,14 @@ function buildPriorityList(atRisk, watchList, volatileMembers) {
 const ACTION_TYPE_COLORS = {
   complaint: '#ef4444',
   email: '#f59e0b',
-  golf: '#E8740C',
+  golf: '#465fff',
   dining: '#3B82F6',
   'new-member': '#2563eb',
   ghost: '#9CA3AF',
   declining: '#ef4444',
   social: '#8b5cf6',
   snowbird: '#2563eb',
-  general: '#E8740C',
+  general: '#465fff',
 };
 
 export default function HealthOverview() {
@@ -228,7 +228,7 @@ export default function HealthOverview() {
         <div className="flex flex-col gap-2">
           {priorityMembers.map((m, idx) => {
             const sc = scoreColor(m.score);
-            const actionColor = ACTION_TYPE_COLORS[m.actionType] || '#E8740C';
+            const actionColor = ACTION_TYPE_COLORS[m.actionType] || '#465fff';
             const isExpanded = expandedId === m.memberId;
 
             return (
@@ -313,8 +313,8 @@ export default function HealthOverview() {
                         }}
                         title="SMS"
                         style={{
-                          width: 28, height: 28, borderRadius: '50%', border: `1px solid ${'#E8740C'}30`,
-                          background: `${'#E8740C'}08`, color: '#E8740C', fontSize: 13,
+                          width: 28, height: 28, borderRadius: '50%', border: `1px solid ${'#465fff'}30`,
+                          background: `${'#465fff'}08`, color: '#465fff', fontSize: 13,
                           cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}
                       >
@@ -333,7 +333,7 @@ export default function HealthOverview() {
                     {m.owner && (
                       <span style={{
                         fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                        background: `${'#E8740C'}10`, color: '#E8740C',
+                        background: `${'#465fff'}10`, color: '#465fff',
                         textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0,
                       }}>
                         {m.owner}
@@ -364,8 +364,8 @@ export default function HealthOverview() {
             onClick={() => setShowAll(!showAll)}
             style={{
               marginTop: 10, padding: '8px 16px', fontSize: '12px',
-              fontWeight: 600, color: '#E8740C', background: 'none',
-              border: `1px solid ${'#E8740C'}30`, borderRadius: '8px',
+              fontWeight: 600, color: '#465fff', background: 'none',
+              border: `1px solid ${'#465fff'}30`, borderRadius: '8px',
               cursor: 'pointer', width: '100%', textAlign: 'center',
             }}
           >
@@ -428,7 +428,7 @@ export default function HealthOverview() {
                     <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: `${'#2563eb'}12`, color: '#2563eb', fontFamily: "'JetBrains Mono', monospace" }}>
                       Day {m.dayIn} of 90
                     </span>
-                    <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: `${'#E8740C'}10`, color: '#E8740C', textTransform: 'uppercase', marginLeft: 'auto' }}>
+                    <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: `${'#465fff'}10`, color: '#465fff', textTransform: 'uppercase', marginLeft: 'auto' }}>
                       {m.owner || 'Membership Director'}
                     </span>
                   </div>

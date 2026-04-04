@@ -159,7 +159,7 @@ export default function QualityTab() {
             <button
               onClick={() => navigate('service', { tab: top.link })}
               style={{
-                fontSize: '12px', fontWeight: 600, color: '#E8740C',
+                fontSize: '12px', fontWeight: 600, color: '#465fff',
                 background: 'none', border: 'none', padding: 0, cursor: 'pointer',
                 textDecoration: 'underline',
               }}

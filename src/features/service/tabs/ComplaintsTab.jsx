@@ -59,16 +59,16 @@ export default function ComplaintsTab() {
         {STATUS_FILTERS.map(f => (
           <button key={f.label} onClick={() => setStatusFilter(f.key)} style={{
             padding: '5px 14px', borderRadius: '999px', fontSize: 12, fontWeight: 600,
-            cursor: 'pointer', border: `1px solid ${statusFilter === f.key ? '#E8740C' : '#E5E7EB'}`,
-            background: statusFilter === f.key ? `${'#E8740C'}12` : 'transparent',
-            color: statusFilter === f.key ? '#E8740C' : '#9CA3AF',
+            cursor: 'pointer', border: `1px solid ${statusFilter === f.key ? '#465fff' : '#E5E7EB'}`,
+            background: statusFilter === f.key ? `${'#465fff'}12` : 'transparent',
+            color: statusFilter === f.key ? '#465fff' : '#9CA3AF',
           }}>{f.label} ({f.key ? feedbackRecords.filter(r => r.status === f.key).length : feedbackRecords.filter(r => r.status !== 'resolved').length})</button>
         ))}
         {categoryFilter && (
           <button onClick={() => setCategoryFilter(null)} style={{
             padding: '5px 14px', borderRadius: '999px', fontSize: 12, fontWeight: 600,
-            cursor: 'pointer', border: `1px solid ${'#E8740C'}`,
-            background: `${'#E8740C'}12`, color: '#E8740C',
+            cursor: 'pointer', border: `1px solid ${'#465fff'}`,
+            background: `${'#465fff'}12`, color: '#465fff',
           }}>Category: {categoryFilter} ×</button>
         )}
       </div>
