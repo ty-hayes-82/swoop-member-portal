@@ -12,7 +12,6 @@ import MemberAlerts from './MemberAlerts';
 import TomorrowForecast from './TomorrowForecast';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
-import { theme } from '@/config/theme';
 import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
@@ -54,10 +53,10 @@ export default function TodayView() {
   if (hasNoData) {
     return (
       <PageTransition>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%' }}>
+        <div className="flex flex-col gap-6 w-full">
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 700, color: theme.colors.textPrimary, margin: 0 }}>{getGreeting()}</h1>
-            <p style={{ fontSize: 14, color: theme.colors.textSecondary, margin: '4px 0 0' }}>{formatDate()}</p>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90 m-0">{getGreeting()}</h1>
+            <p className="text-sm text-gray-500 mt-1 mb-0">{formatDate()}</p>
           </div>
           <DataEmptyState icon="📊" title="Welcome to your dashboard" description="Import your member roster, tee sheet, and POS data to see today's operational briefing. Start with members — each data source you connect unlocks more insights." dataType="club data" />
         </div>
@@ -67,33 +66,21 @@ export default function TodayView() {
 
   return (
     <PageTransition>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%' }}>
+      <div className="flex flex-col gap-6 w-full">
 
         {/* Section 1: Morning Briefing Header */}
-        <div style={{
-          background: theme.colors.bgCard,
-          border: `1px solid ${theme.colors.border}`,
-          borderRadius: theme.radius.md,
-          padding: '20px 24px',
-        }}>
-          <div style={{
-            fontSize: theme.fontSize.lg, fontWeight: 700,
-            color: theme.colors.textPrimary, marginBottom: 4,
-            fontFamily: theme.fonts.serif,
-          }}>
+        <div className="rounded-xl border border-gray-200 bg-white px-6 py-5 dark:border-gray-800 dark:bg-white/[0.03]">
+          <div className="text-lg font-bold text-gray-800 dark:text-white/90 mb-1 font-serif">
             {getGreeting()}
           </div>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 16,
-            fontSize: theme.fontSize.xs, color: theme.colors.textMuted,
-          }}>
+          <div className="flex items-center gap-4 text-xs text-gray-500">
             <span>{formatDate()}</span>
-            <span style={{ color: theme.colors.border }}>|</span>
+            <span className="text-gray-200 dark:text-gray-700">|</span>
             <span>{roundsToday} rounds booked today</span>
             {briefing?.todayRisks?.forecast && (
               <>
-                <span style={{ color: theme.colors.border }}>|</span>
-                <span style={{ color: theme.colors.warning }}>{briefing.todayRisks.forecast}</span>
+                <span className="text-gray-200 dark:text-gray-700">|</span>
+                <span className="text-warning-500">{briefing.todayRisks.forecast}</span>
               </>
             )}
           </div>
@@ -101,34 +88,27 @@ export default function TodayView() {
 
         {/* Weather Alerts Banner */}
         {weatherAlerts.filter(a => !dismissedAlerts.includes(a.headline)).map((alert, i) => (
-          <div key={i} style={{
-            background: alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
-              ? `${theme.colors.urgent}12` : `${theme.colors.warning}12`,
-            border: `1px solid ${alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
-              ? theme.colors.urgent : theme.colors.warning}40`,
-            borderRadius: theme.radius.md,
-            padding: '12px 16px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: theme.fontSize.sm, fontWeight: 600,
-                color: alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
-                  ? theme.colors.urgent : theme.colors.warning }}>
+          <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border ${
+            alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
+              ? 'border-error-500/40 bg-error-50 dark:bg-error-500/10'
+              : 'border-warning-500/40 bg-warning-50 dark:bg-warning-500/10'
+          }`}>
+            <div className="flex items-center gap-2">
+              <span className={`text-sm font-semibold ${
+                alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
+                  ? 'text-error-500' : 'text-warning-500'
+              }`}>
                 {alert.headline || `${alert.type} Warning`}
               </span>
               {alert.description && (
-                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>
+                <span className="text-xs text-gray-500">
                   — {alert.description}
                 </span>
               )}
             </div>
             <button
               onClick={() => setDismissedAlerts(prev => [...prev, alert.headline])}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: theme.colors.textMuted, fontSize: theme.fontSize.sm,
-                padding: '2px 6px',
-              }}
+              className="bg-transparent border-none cursor-pointer text-gray-400 text-sm px-1.5 py-0.5"
             >
               Dismiss
             </button>

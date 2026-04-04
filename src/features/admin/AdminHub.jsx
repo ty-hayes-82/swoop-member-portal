@@ -8,7 +8,6 @@
  * - Activity Log (Import History + Agent Actions + System Events)
  */
 import { useState, useEffect } from 'react';
-import { theme } from '@/config/theme';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 
 // V3: Reduced from 5 tabs to 2. CSV Import, Notifications, User Roles deferred.
@@ -39,30 +38,27 @@ export default function AdminHub() {
   const [activeTab, setActiveTab] = useState('data-hub');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 style={{ fontSize: theme.fontSize.xl, fontWeight: 700, margin: 0 }}>Admin</h1>
-        <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
+        <h1 className="text-xl font-bold m-0 text-gray-800 dark:text-white/90">Admin</h1>
+        <p className="text-sm text-gray-500 mt-1 mb-0">
           Integrations and data health monitoring.
         </p>
       </div>
 
       {/* Tab navigation */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', background: theme.colors.bgDeep, borderRadius: theme.radius.md, padding: '3px', border: `1px solid ${theme.colors.border}` }}>
+      <div className="flex gap-1.5 flex-wrap rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         {ADMIN_TABS.map(tab => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            style={{
-              padding: '7px 16px', borderRadius: '8px', fontSize: theme.fontSize.xs, fontWeight: 600,
-              cursor: 'pointer', border: 'none', transition: 'all 0.15s',
-              background: activeTab === tab.key ? theme.colors.bgCard : 'transparent',
-              color: activeTab === tab.key ? theme.colors.textPrimary : theme.colors.textMuted,
-              boxShadow: activeTab === tab.key ? theme.shadow.sm : 'none',
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 ${
+              activeTab === tab.key
+                ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
+                : 'bg-transparent text-gray-500 hover:text-gray-700'
+            }`}
           >
-            <span style={{ fontSize: '14px' }}>{tab.icon}</span>
+            <span className="text-sm">{tab.icon}</span>
             {tab.label}
           </button>
         ))}
@@ -78,18 +74,18 @@ export default function AdminHub() {
 
 function DataHubTab({ clubId }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+    <div className="flex flex-col gap-6">
       <div>
-        <h2 style={{ fontSize: theme.fontSize.lg, fontWeight: 700, margin: 0 }}>Data Hub</h2>
-        <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
+        <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-white/90">Data Hub</h2>
+        <p className="text-sm text-gray-500 mt-1 mb-0">
           Connect data sources, upload CSVs, and see what intelligence each connection unlocks.
         </p>
       </div>
 
       {/* Connected Sources */}
-      <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, background: theme.colors.bgCard, padding: theme.spacing.lg }}>
-        <h3 style={{ fontSize: theme.fontSize.md, fontWeight: 700, margin: '0 0 12px' }}>Connected Sources</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: theme.spacing.md }}>
+      <div className="rounded-xl border border-gray-200 bg-white p-5 sm:p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+        <h3 className="text-base font-bold mb-3 m-0 text-gray-800 dark:text-white/90">Connected Sources</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[
             { name: 'Jonas Club CRM', status: 'connected', icon: '👥', tables: 'members, households, membership_types', rows: '300+' },
             { name: 'ForeTees Tee Sheet', status: 'available', icon: '⛳', tables: 'bookings, pace_of_play', rows: '—' },
@@ -100,43 +96,34 @@ function DataHubTab({ clubId }) {
             { name: 'Events System', status: 'connected', icon: '🎉', tables: 'event_definitions, event_registrations', rows: '120+' },
             { name: 'Complaints & Feedback', status: 'connected', icon: '📝', tables: 'feedback, service_requests', rows: '47' },
           ].map(source => (
-            <div key={source.name} style={{
-              padding: '12px 14px', borderRadius: theme.radius.sm,
-              border: `1px solid ${source.status === 'connected' ? theme.colors.success + '30' : theme.colors.border}`,
-              background: source.status === 'connected' ? `${theme.colors.success}04` : theme.colors.bg,
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <span style={{ fontSize: '18px' }}>{source.icon}</span>
-                <span style={{
-                  fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px',
-                  background: source.status === 'connected' ? `${theme.colors.success}15` : `${theme.colors.textMuted}10`,
-                  color: source.status === 'connected' ? theme.colors.success : theme.colors.textMuted,
-                  textTransform: 'uppercase',
-                }}>{source.status}</span>
+            <div key={source.name} className={`px-3.5 py-3 rounded-lg border ${
+              source.status === 'connected'
+                ? 'border-success-300 bg-success-50 dark:border-success-500/30 dark:bg-success-500/5'
+                : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
+            }`}>
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-lg">{source.icon}</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-xl uppercase ${
+                  source.status === 'connected'
+                    ? 'bg-success-100 text-success-600 dark:bg-success-500/15 dark:text-success-400'
+                    : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                }`}>{source.status}</span>
               </div>
-              <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>{source.name}</div>
-              <div style={{ fontSize: '11px', color: theme.colors.textMuted, marginTop: 2 }}>{source.tables}</div>
-              {source.status === 'connected' && <div style={{ fontSize: '11px', color: theme.colors.success, marginTop: 4 }}>{source.rows} rows synced</div>}
+              <div className="font-semibold text-sm text-gray-800 dark:text-white/90">{source.name}</div>
+              <div className="text-[11px] text-gray-500 mt-0.5">{source.tables}</div>
+              {source.status === 'connected' && <div className="text-[11px] text-success-600 dark:text-success-400 mt-1">{source.rows} rows synced</div>}
             </div>
           ))}
         </div>
       </div>
 
       {/* CSV Upload link */}
-      <div style={{
-        padding: theme.spacing.md, borderRadius: theme.radius.md,
-        background: `${theme.colors.accent}06`, border: `1px solid ${theme.colors.accent}20`,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
+      <div className="flex justify-between items-center rounded-xl p-4 bg-brand-50 border border-brand-200 dark:bg-brand-500/5 dark:border-brand-500/20">
         <div>
-          <div style={{ fontWeight: 700, fontSize: theme.fontSize.sm, color: theme.colors.textPrimary }}>Manual Data Upload</div>
-          <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textSecondary }}>Upload CSV files for members, rounds, transactions, or complaints when API access isn't available.</div>
+          <div className="font-bold text-sm text-gray-800 dark:text-white/90">Manual Data Upload</div>
+          <div className="text-xs text-gray-500">Upload CSV files for members, rounds, transactions, or complaints when API access isn't available.</div>
         </div>
-        <button onClick={() => { window.location.hash = '#/integrations/csv-import'; }} style={{
-          padding: '8px 16px', borderRadius: theme.radius.sm, border: 'none',
-          background: theme.colors.accent, color: '#fff', fontWeight: 700,
-          fontSize: theme.fontSize.xs, cursor: 'pointer',
-        }}>Open Upload Tool</button>
+        <button onClick={() => { window.location.hash = '#/integrations/csv-import'; }} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer">Open Upload Tool</button>
       </div>
     </div>
   );
@@ -152,29 +139,25 @@ function ActivityLogTab({ clubId }) {
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+    <div className="flex flex-col gap-4">
       <div>
-        <h2 style={{ fontSize: theme.fontSize.lg, fontWeight: 700, margin: 0 }}>Activity Log</h2>
-        <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
+        <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-white/90">Activity Log</h2>
+        <p className="text-sm text-gray-500 mt-1 mb-0">
           Every action taken in the platform — approvals, dismissals, outreach, imports, and system events.
         </p>
       </div>
       {entries.length === 0 ? (
-        <div style={{ padding: theme.spacing.xl, textAlign: 'center', color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
+        <div className="p-8 text-center text-gray-400 text-sm">
           No activity logged yet. Actions will appear here as you use the platform.
         </div>
       ) : (
         entries.map((entry, i) => (
-          <div key={i} style={{
-            padding: '10px 14px', borderRadius: theme.radius.sm,
-            border: `1px solid ${theme.colors.border}`, background: theme.colors.bgCard,
-            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-          }}>
+          <div key={i} className="flex justify-between items-start px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
             <div>
-              <div style={{ fontWeight: 600, fontSize: theme.fontSize.sm }}>{entry.type || entry.description}</div>
-              <div style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{entry.memberName || entry.detail || ''}</div>
+              <div className="font-semibold text-sm text-gray-800 dark:text-white/90">{entry.type || entry.description}</div>
+              <div className="text-xs text-gray-500">{entry.memberName || entry.detail || ''}</div>
             </div>
-            <div style={{ fontSize: '11px', color: theme.colors.textMuted, whiteSpace: 'nowrap' }}>
+            <div className="text-[11px] text-gray-500 whitespace-nowrap">
               {entry.timestamp ? new Date(entry.timestamp).toLocaleString() : ''}
             </div>
           </div>
@@ -195,60 +178,51 @@ function UserRolesTab() {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h2 style={{ fontSize: theme.fontSize.lg, fontWeight: 700, margin: 0 }}>User Roles</h2>
-          <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, margin: '4px 0 0' }}>
+          <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-white/90">User Roles</h2>
+          <p className="text-sm text-gray-500 mt-1 mb-0">
             Manage team access and role assignments.
           </p>
         </div>
-        <button style={{
-          padding: '8px 16px', borderRadius: theme.radius.sm,
-          border: `1px solid ${theme.colors.accent}`, background: `${theme.colors.accent}08`,
-          color: theme.colors.accent, fontWeight: 700, fontSize: theme.fontSize.sm,
-          cursor: 'pointer',
-        }}>
+        <button className="px-4 py-2 rounded-lg border border-brand-500 bg-brand-50 text-brand-500 font-bold text-sm cursor-pointer dark:bg-brand-500/5">
           + Invite User
         </button>
       </div>
 
-      <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: theme.fontSize.sm }}>
+      <div className="border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800">
+        <table className="w-full border-collapse text-sm">
           <thead>
-            <tr style={{ background: theme.colors.bgDeep, borderBottom: `1px solid ${theme.colors.border}` }}>
+            <tr className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
               {['Name', 'Email', 'Role', 'Status', 'Last Active'].map(h => (
-                <th key={h} style={{
-                  padding: '10px 14px', textAlign: 'left', fontSize: theme.fontSize.xs,
-                  fontWeight: 600, color: theme.colors.textMuted, textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                }}>{h}</th>
+                <th key={h} className="px-3.5 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {teamMembers.map((m, i) => (
-              <tr key={m.email} style={{ borderBottom: i < teamMembers.length - 1 ? `1px solid ${theme.colors.border}` : 'none', background: theme.colors.bgCard }}>
-                <td style={{ padding: '12px 14px', fontWeight: 600, color: theme.colors.textPrimary }}>{m.name}</td>
-                <td style={{ padding: '12px 14px', color: theme.colors.textSecondary }}>{m.email}</td>
-                <td style={{ padding: '12px 14px' }}>
-                  <span style={{
-                    padding: '3px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: 600,
-                    background: m.role === 'General Manager' ? `${theme.colors.accent}12` : `${theme.colors.info}10`,
-                    color: m.role === 'General Manager' ? theme.colors.accent : theme.colors.info,
-                  }}>{m.role}</span>
+              <tr key={m.email} className={`bg-white dark:bg-white/[0.03] ${i < teamMembers.length - 1 ? 'border-b border-gray-200 dark:border-gray-800' : ''}`}>
+                <td className="px-3.5 py-3 font-semibold text-gray-800 dark:text-white/90">{m.name}</td>
+                <td className="px-3.5 py-3 text-gray-500">{m.email}</td>
+                <td className="px-3.5 py-3">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                    m.role === 'General Manager'
+                      ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/10'
+                      : 'bg-blue-50 text-blue-500 dark:bg-blue-500/10'
+                  }`}>{m.role}</span>
                 </td>
-                <td style={{ padding: '12px 14px' }}>
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 4,
-                    color: m.status === 'Active' ? theme.colors.success : theme.colors.warning,
-                    fontSize: theme.fontSize.xs, fontWeight: 600,
-                  }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: m.status === 'Active' ? theme.colors.success : theme.colors.warning }} />
+                <td className="px-3.5 py-3">
+                  <span className={`inline-flex items-center gap-1 text-xs font-semibold ${
+                    m.status === 'Active' ? 'text-success-600' : 'text-warning-500'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      m.status === 'Active' ? 'bg-success-500' : 'bg-warning-500'
+                    }`} />
                     {m.status}
                   </span>
                 </td>
-                <td style={{ padding: '12px 14px', color: theme.colors.textMuted, fontSize: theme.fontSize.xs }}>{m.lastActive}</td>
+                <td className="px-3.5 py-3 text-gray-500 text-xs">{m.lastActive}</td>
               </tr>
             ))}
           </tbody>
@@ -256,12 +230,12 @@ function UserRolesTab() {
       </div>
 
       {/* Account section */}
-      <div style={{ borderTop: `1px solid ${theme.colors.border}`, paddingTop: theme.spacing.md, marginTop: theme.spacing.sm }}>
-        <div style={{ fontSize: theme.fontSize.xs, fontWeight: 700, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: theme.spacing.sm }}>
+      <div className="border-t border-gray-200 dark:border-gray-800 pt-4 mt-2">
+        <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
           Your Account
         </div>
-        <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, background: theme.colors.bgCard, padding: theme.spacing.md }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: theme.fontSize.sm }}>
+        <div className="border border-gray-200 rounded-xl bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+          <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-white/90">
             <div><strong>Signed in as:</strong> {user.name || '—'} ({user.role || '—'})</div>
             <div><strong>Email:</strong> {user.email || '—'}</div>
             <div><strong>Club ID:</strong> {user.clubId || 'Demo Mode'}</div>
@@ -274,13 +248,7 @@ function UserRolesTab() {
             localStorage.removeItem('swoop_club_id');
             window.location.reload();
           }}
-          style={{
-            marginTop: theme.spacing.sm,
-            padding: '8px 16px', borderRadius: theme.radius.sm,
-            border: `1px solid ${theme.colors.urgent}30`, background: `${theme.colors.urgent}08`,
-            color: theme.colors.urgent, fontWeight: 600, fontSize: theme.fontSize.xs,
-            cursor: 'pointer',
-          }}
+          className="mt-2 px-4 py-2 rounded-lg border border-error-300 bg-error-50 text-error-600 font-semibold text-xs cursor-pointer dark:bg-error-500/5 dark:border-error-500/30"
         >Sign Out</button>
       </div>
     </div>

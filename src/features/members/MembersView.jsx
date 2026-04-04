@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { StoryHeadline } from '@/components/ui';
 // CollapsibleSection removed in V3 — At-Risk mode simplified
-import { theme } from '@/config/theme';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { getMemberSummary } from '@/services/memberService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
@@ -76,7 +75,7 @@ export default function MembersView() {
 
   return (
     <PageTransition>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <div className="flex flex-col gap-6">
 
         <StoryHeadline
           variant={headlineData.variant}
@@ -87,30 +86,16 @@ export default function MembersView() {
         <EvidenceStrip systems={['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email']} />
 
         {/* Mode switcher */}
-        <div style={{
-          display: 'flex',
-          background: theme.colors.bgDeep,
-          borderRadius: theme.radius.md,
-          padding: '3px',
-          border: `1px solid ${theme.colors.border}`,
-          alignSelf: 'flex-start',
-        }}>
+        <div className="flex self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
           {MODES.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => setMode(key)}
-              style={{
-                padding: '7px 20px',
-                borderRadius: '8px',
-                fontSize: theme.fontSize.sm,
-                fontWeight: 600,
-                cursor: 'pointer',
-                border: 'none',
-                transition: 'all 0.15s',
-                background: mode === key ? theme.colors.bgCard : 'transparent',
-                color: mode === key ? theme.colors.textPrimary : theme.colors.textMuted,
-                boxShadow: mode === key ? theme.shadow.sm : 'none',
-              }}
+              className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 ${
+                mode === key
+                  ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
+                  : 'bg-transparent text-gray-500 hover:text-gray-700'
+              }`}
             >
               {label}
             </button>
@@ -119,31 +104,24 @@ export default function MembersView() {
 
         {/* Archetype filter chips — only in All Members mode (HealthOverview has its own filters) */}
         {mode === 'search' && (
-          <div style={{
-            display: 'flex', gap: '6px', flexWrap: 'wrap',
-            overflowX: 'auto', WebkitOverflowScrolling: 'touch',
-          }}>
+          <div className="flex gap-1.5 flex-wrap overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             <button
               onClick={() => setArchetype(null)}
-              style={{
-                padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 600,
-                cursor: 'pointer', border: `1px solid ${!archetype ? theme.colors.accent : theme.colors.border}`,
-                background: !archetype ? `${theme.colors.accent}12` : 'transparent',
-                color: !archetype ? theme.colors.accent : theme.colors.textMuted,
-                whiteSpace: 'nowrap', transition: 'all 0.12s',
-              }}
+              className={`px-3.5 py-1 rounded-full text-xs font-semibold cursor-pointer border whitespace-nowrap transition-all duration-100 ${
+                !archetype
+                  ? 'border-brand-500 bg-brand-50 text-brand-500 dark:bg-brand-500/10'
+                  : 'border-gray-200 bg-transparent text-gray-500 hover:border-gray-300'
+              }`}
             >All Archetypes</button>
             {['Die-Hard Golfer', 'Social Butterfly', 'Balanced Active', 'Weekend Warrior', 'Declining', 'New Member', 'Ghost', 'Snowbird'].map((a) => (
               <button
                 key={a}
                 onClick={() => setArchetype(archetype === a ? null : a)}
-                style={{
-                  padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 600,
-                  cursor: 'pointer', border: `1px solid ${archetype === a ? theme.colors.accent : theme.colors.border}`,
-                  background: archetype === a ? `${theme.colors.accent}12` : 'transparent',
-                  color: archetype === a ? theme.colors.accent : theme.colors.textMuted,
-                  whiteSpace: 'nowrap', transition: 'all 0.12s',
-                }}
+                className={`px-3.5 py-1 rounded-full text-xs font-semibold cursor-pointer border whitespace-nowrap transition-all duration-100 ${
+                  archetype === a
+                    ? 'border-brand-500 bg-brand-50 text-brand-500 dark:bg-brand-500/10'
+                    : 'border-gray-200 bg-transparent text-gray-500 hover:border-gray-300'
+                }`}
               >{a}</button>
             ))}
           </div>
@@ -151,7 +129,7 @@ export default function MembersView() {
 
         {/* Mode: At-Risk — V3: simplified to HealthOverview + ResignationTimeline */}
         {mode === 'at-risk' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+          <div className="flex flex-col gap-6">
             <HealthOverview />
           </div>
         )}

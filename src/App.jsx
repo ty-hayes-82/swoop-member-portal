@@ -7,8 +7,9 @@ import { MemberProfileProvider, useMemberProfile } from '@/context/MemberProfile
 // Mobile app — lazy loaded, zero bundle impact on desktop
 const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 import { DataProvider } from '@/context/DataProvider';
-import { Sidebar, Header, MobileConversionBar } from '@/components/layout';
+import { MobileConversionBar } from '@/components/layout';
 import ActionsDrawer from '@/components/layout/ActionsDrawer';
+import SwoopLayout from '@/components/layout/SwoopLayout';
 
 // V3: Active features only — deleted features removed in Phase 5 cleanup
 // Lazy-load all pages except Today (initial view) for code-splitting
@@ -22,7 +23,6 @@ import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.j
 const IntegrationsPage = lazy(() => import('@/features/integrations/IntegrationsPage'));
 const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
 import LoginPage from '@/features/login/LoginPage';
-import { theme } from '@/config/theme';
 
 // V3 Phase 5: Clean route map — only active pages.
 // All legacy routes handled by ROUTE_REDIRECTS in NavigationContext.
@@ -39,22 +39,15 @@ const ROUTES = {
 
 function AppShell() {
   const { currentRoute } = useNavigationContext();
-  const { isDrawerOpen } = useMemberProfile();
   const PageComponent = ROUTES[currentRoute] ?? TodayView;
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [actionsDrawerOpen, setActionsDrawerOpen] = useState(false);
-  const drawerOffset = !isMobile && isDrawerOpen ? 700 : 0;
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [currentRoute]);
 
   // Listen for custom event to open actions drawer from any component
   useEffect(() => {
@@ -63,85 +56,38 @@ function AppShell() {
     return () => window.removeEventListener('swoop:open-actions', handler);
   }, []);
 
+  const footerContent = (
+    <>
+      Swoop Golf &middot; Integrated Intelligence for Private Clubs
+      {(() => {
+        try {
+          const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+          const clubId = localStorage.getItem('swoop_club_id');
+          return (
+            <span>
+              {user.name ? ` · ${user.name}` : ''}
+              {clubId && clubId !== 'demo' ? ` · ${clubId}` : ' · Demo Environment'}
+              <button
+                onClick={() => { localStorage.removeItem('swoop_auth_user'); localStorage.removeItem('swoop_auth_token'); localStorage.removeItem('swoop_club_id'); window.location.reload(); }}
+                className="ml-3 text-brand-500 hover:text-brand-600 font-semibold"
+              >Sign Out</button>
+            </span>
+          );
+        } catch { return ' · Demo Environment'; }
+      })()}
+    </>
+  );
+
   return (
-    <div
-      style={{
-        background: theme.colors.bg,
-        color: theme.colors.textPrimary,
-        fontFamily: theme.fonts.sans,
-        minHeight: '100vh',
-      }}
+    <SwoopLayout
+      footer={footerContent}
+      actionsDrawer={
+        <ActionsDrawer isOpen={actionsDrawerOpen} onClose={() => setActionsDrawerOpen(false)} />
+      }
+      mobileBar={isMobile ? <MobileConversionBar /> : null}
     >
-      {isMobile && mobileMenuOpen && (
-        <div
-          onClick={() => setMobileMenuOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 110 }}
-        />
-      )}
-      <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>        {(!isMobile || mobileMenuOpen) && (
-          <Sidebar isMobile={isMobile} mobileMenuOpen={mobileMenuOpen} onOpenActions={() => setActionsDrawerOpen(true)} />
-        )}
-        <div
-          style={{
-            flex: 1,
-            marginLeft: isMobile ? 0 : 0,
-            transition: 'margin 0.2s ease',
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: '100vh',
-            width: '100%',
-            paddingLeft: isMobile ? 0 : 0,
-            paddingRight: 0,
-          }}
-        >
-          <Header
-            isMobile={isMobile}
-            onMobileMenuToggle={isMobile ? () => setMobileMenuOpen((v) => !v) : undefined}
-          />
-          <main
-            style={{
-              flex: 1,
-              padding: isMobile ? '16px 16px 96px' : theme.spacing.xl,
-              width: '100%',
-              minHeight: 0,
-            }}
-          >
-            <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, color: theme.colors.textMuted }}>Loading...</div>}>
-              <PageComponent />
-            </Suspense>
-          </main>
-          <footer
-            style={{
-              padding: `${theme.spacing.md} ${isMobile ? '16px' : theme.spacing.xl}`,
-              borderTop: `1px solid ${theme.colors.border}`,
-              fontSize: theme.fontSize.xs,
-              color: theme.colors.textMuted,
-              textAlign: 'center',
-            }}
-          >
-            Swoop Golf · Integrated Intelligence for Private Clubs
-            {(() => {
-              try {
-                const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
-                const clubId = localStorage.getItem('swoop_club_id');
-                return (
-                  <span>
-                    {user.name ? ` · ${user.name}` : ''}
-                    {clubId && clubId !== 'demo' ? ` · ${clubId}` : ' · Demo Environment'}
-                    <button
-                      onClick={() => { localStorage.removeItem('swoop_auth_user'); localStorage.removeItem('swoop_auth_token'); localStorage.removeItem('swoop_club_id'); window.location.reload(); }}
-                      style={{ marginLeft: 12, background: 'none', border: 'none', color: theme.colors.accent, cursor: 'pointer', fontSize: theme.fontSize.xs, fontWeight: 600 }}
-                    >Sign Out</button>
-                  </span>
-                );
-              } catch { return ' · Demo Environment'; }
-            })()}
-          </footer>
-        </div>
-      </div>
-      {isMobile && <MobileConversionBar />}
-      <ActionsDrawer isOpen={actionsDrawerOpen} onClose={() => setActionsDrawerOpen(false)} />
-    </div>
+      <PageComponent />
+    </SwoopLayout>
   );
 }
 
@@ -163,7 +109,7 @@ function RouterViews() {
 
   if (isMobileRoute) {
     return (
-      <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'system-ui', color: '#6B7280' }}>Loading Swoop Mobile...</div>}>
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Swoop Mobile...</div>}>
         <MobileApp />
       </Suspense>
     );

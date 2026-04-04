@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
+import './styles/tailwind.css';
 import './styles/global.css';
 import './styles/platform-polish.css';
 import './styles/design-improvements.css';
