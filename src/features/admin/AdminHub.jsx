@@ -9,6 +9,8 @@
  */
 import { useState, useEffect } from 'react';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
+import { Card } from '@/components/tailadmin';
+import Badge from '@/components/tailadmin/Badge';
 
 // V3: Reduced from 5 tabs to 2. CSV Import, Notifications, User Roles deferred.
 // V5: Data Health tab hidden until 2+ live API sources connected
@@ -47,12 +49,12 @@ export default function AdminHub() {
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1.5 flex-wrap rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+      <div className="flex gap-1 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
         {ADMIN_TABS.map(tab => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 ${
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
               activeTab === tab.key
                 ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
                 : 'bg-transparent text-gray-500 hover:text-gray-700'
@@ -83,7 +85,7 @@ function DataHubTab({ clubId }) {
       </div>
 
       {/* Connected Sources */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 sm:p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+      <Card>
         <h3 className="text-base font-bold mb-3 m-0 text-gray-800 dark:text-white/90">Connected Sources</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[
@@ -103,11 +105,7 @@ function DataHubTab({ clubId }) {
             }`}>
               <div className="flex justify-between items-center mb-1.5">
                 <span className="text-lg">{source.icon}</span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-xl uppercase ${
-                  source.status === 'connected'
-                    ? 'bg-success-100 text-success-600 dark:bg-success-500/15 dark:text-success-400'
-                    : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
-                }`}>{source.status}</span>
+                <Badge color={source.status === 'connected' ? 'success' : 'light'} size="sm">{source.status}</Badge>
               </div>
               <div className="font-semibold text-sm text-gray-800 dark:text-white/90">{source.name}</div>
               <div className="text-[11px] text-gray-500 mt-0.5">{source.tables}</div>
@@ -115,7 +113,7 @@ function DataHubTab({ clubId }) {
             </div>
           ))}
         </div>
-      </div>
+      </Card>
 
       {/* CSV Upload link */}
       <div className="flex justify-between items-center rounded-xl p-4 bg-brand-50 border border-brand-200 dark:bg-brand-500/5 dark:border-brand-500/20">

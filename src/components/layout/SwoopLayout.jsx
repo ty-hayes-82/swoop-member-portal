@@ -8,12 +8,12 @@ const LayoutContent = ({ children, footer, actionsDrawer, mobileBar }) => {
   const { isExpanded, isHovered } = useSidebar();
 
   return (
-    <div className="min-h-screen xl:flex">
+    <div className="min-h-screen lg:flex">
       <SwoopSidebar />
       <Backdrop />
       <div
         className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ${
-          isExpanded || isHovered ? "xl:ml-[290px]" : "xl:ml-[90px]"
+          isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"
         }`}
       >
         <SwoopHeader />

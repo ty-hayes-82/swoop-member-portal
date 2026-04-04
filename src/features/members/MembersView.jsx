@@ -86,12 +86,12 @@ export default function MembersView() {
         <EvidenceStrip systems={['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email']} />
 
         {/* Mode switcher */}
-        <div className="flex self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+        <div className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
           {MODES.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => setMode(key)}
-              className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 ${
+              className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
                 mode === key
                   ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
                   : 'bg-transparent text-gray-500 hover:text-gray-700'

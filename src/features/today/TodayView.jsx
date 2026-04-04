@@ -69,7 +69,7 @@ export default function TodayView() {
       <div className="flex flex-col gap-6 w-full">
 
         {/* Section 1: Morning Briefing Header */}
-        <div className="rounded-xl border border-gray-200 bg-white px-6 py-5 dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="rounded-xl border border-brand-100 bg-brand-25 px-6 py-5 dark:border-gray-800 dark:bg-white/[0.03]">
           <div className="text-lg font-bold text-gray-800 dark:text-white/90 mb-1 font-serif">
             {getGreeting()}
           </div>

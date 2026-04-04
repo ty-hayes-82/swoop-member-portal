@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useNavigationContext } from "@/context/NavigationContext";
 import { NAV_ITEMS } from "@/config/navigation";
 
 const SwoopHeader = () => {
-  const [isMenuOpen, setMenuOpen] = useState(false);
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const { currentRoute } = useNavigationContext();
   const inputRef = useRef(null);
@@ -23,7 +22,7 @@ const SwoopHeader = () => {
   }
 
   const handleToggle = () => {
-    if (window.innerWidth >= 1280) {
+    if (window.innerWidth >= 1024) {
       toggleSidebar();
     } else {
       toggleMobileSidebar();
@@ -42,12 +41,13 @@ const SwoopHeader = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 xl:border-b">
-      <div className="flex flex-col items-center justify-between grow xl:flex-row xl:px-6">
-        <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 xl:justify-normal xl:border-b-0 xl:px-0 lg:py-4">
+    <header className="sticky top-0 flex w-full bg-white border-b border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900">
+      <div className="flex items-center justify-between w-full gap-4 px-3 py-3 lg:px-6 lg:py-4">
+        {/* Left: hamburger + logo (mobile) or hamburger + search (desktop) */}
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Hamburger / sidebar toggle */}
           <button
-            className={`items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 flex dark:text-gray-400 lg:h-11 lg:w-11 xl:border ${
+            className={`flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg z-99999 dark:border-gray-800 dark:text-gray-400 lg:h-11 lg:w-11 lg:border lg:border-gray-200 ${
               isMobileOpen ? "bg-gray-100 dark:bg-white/[0.03]" : ""
             }`}
             onClick={handleToggle}
@@ -65,25 +65,14 @@ const SwoopHeader = () => {
           </button>
 
           {/* Mobile logo */}
-          <div className="xl:hidden flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-2">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500">
               <span className="text-lg font-bold text-white">S</span>
             </div>
-            <span className="text-lg font-semibold text-gray-800">Swoop</span>
           </div>
 
-          {/* Mobile menu dots */}
-          <button
-            onClick={() => setMenuOpen(!isMenuOpen)}
-            className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 xl:hidden"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path fillRule="evenodd" clipRule="evenodd" d="M5.99902 10.4951C6.82745 10.4951 7.49902 11.1667 7.49902 11.9951V12.0051C7.49902 12.8335 6.82745 13.5051 5.99902 13.5051C5.1706 13.5051 4.49902 12.8335 4.49902 12.0051V11.9951C4.49902 11.1667 5.1706 10.4951 5.99902 10.4951ZM17.999 10.4951C18.8275 10.4951 19.499 11.1667 19.499 11.9951V12.0051C19.499 12.8335 18.8275 13.5051 17.999 13.5051C17.1706 13.5051 16.499 12.8335 16.499 12.0051V11.9951C16.499 11.1667 17.1706 10.4951 17.999 10.4951ZM13.499 11.9951C13.499 11.1667 12.8275 10.4951 11.999 10.4951C11.1706 10.4951 10.499 11.1667 10.499 11.9951V12.0051C10.499 12.8335 11.1706 13.5051 11.999 13.5051C12.8275 13.5051 13.499 12.8335 13.499 12.0051V11.9951Z" fill="currentColor" />
-            </svg>
-          </button>
-
           {/* Desktop search */}
-          <div className="hidden xl:block">
+          <div className="hidden lg:block">
             <form>
               <div className="relative">
                 <span className="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">
@@ -95,10 +84,10 @@ const SwoopHeader = () => {
                   ref={inputRef}
                   type="text"
                   placeholder="Search or type command..."
-                  className="h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
+                  className="h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 lg:w-[430px]"
                 />
                 <button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
-                  <span>⌘</span>
+                  <span>&#8984;</span>
                   <span>K</span>
                 </button>
               </div>
@@ -106,49 +95,41 @@ const SwoopHeader = () => {
           </div>
         </div>
 
-        {/* Right section: page title, user info */}
-        <div
-          className={`${
-            isMenuOpen ? "flex" : "hidden"
-          } items-center justify-between w-full gap-4 px-5 py-4 xl:flex shadow-theme-md xl:justify-end xl:px-0 xl:shadow-none`}
-        >
-          <div className="flex items-center gap-3">
-            {/* Page context */}
-            <div className="hidden xl:flex items-center gap-2 text-sm text-gray-500">
-              <span className="font-medium text-gray-800">{currentNav.label}</span>
-              {clubId !== "demo" && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-xs font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
-                  LIVE
-                </span>
-              )}
-              {clubId === "demo" && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-warning-50 text-warning-600 text-xs font-medium">
-                  DEMO
-                </span>
-              )}
-            </div>
+        {/* Right: page title + LIVE/DEMO badge + user avatar */}
+        <div className="flex items-center gap-3">
+          {/* Page context + badge */}
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span className="font-medium text-gray-800 dark:text-white/90">{currentNav.label}</span>
+            {clubId !== "demo" && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-xs font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
+                LIVE
+              </span>
+            )}
+            {clubId === "demo" && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-warning-50 text-warning-600 text-xs font-medium">
+                DEMO
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* User info */}
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userName}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {clubId === "demo" ? "Demo Environment" : clubId}
-                </p>
-              </div>
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 text-brand-600 font-semibold text-sm">
-                {userName
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </div>
+          {/* User info */}
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90 m-0">
+                {userName}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 m-0">
+                {clubId === "demo" ? "Demo Environment" : clubId}
+              </p>
+            </div>
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 text-brand-600 font-semibold text-sm">
+              {userName
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}
             </div>
           </div>
         </div>

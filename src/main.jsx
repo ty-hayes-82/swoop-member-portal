@@ -1,9 +1,9 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
-import './styles/tailwind.css';
 import './styles/global.css';
 import './styles/platform-polish.css';
 import './styles/design-improvements.css';
+import './styles/tailwind.css';
 
 const LandingPage = lazy(() => import('./landing/LandingPage.jsx'));
 const App = lazy(() => import('./App.jsx'));

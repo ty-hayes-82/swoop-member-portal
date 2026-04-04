@@ -20,7 +20,7 @@ export const SidebarProvider = ({ children }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1280;
+      const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
       if (!mobile) {
         setIsMobileOpen(false);

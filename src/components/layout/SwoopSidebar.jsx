@@ -64,14 +64,14 @@ const SwoopSidebar = () => {
       className={`fixed flex flex-col top-0 px-5 left-0 bg-gray-900 text-white h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-800
         ${showFull ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        xl:translate-x-0`}
+        lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Logo */}
       <div
         className={`py-8 flex ${
-          !isExpanded && !isHovered ? "xl:justify-center" : "justify-start"
+          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
         <button
@@ -96,7 +96,7 @@ const SwoopSidebar = () => {
             <h2
               className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                 !isExpanded && !isHovered
-                  ? "xl:justify-center"
+                  ? "lg:justify-center"
                   : "justify-start"
               }`}
             >
@@ -117,12 +117,12 @@ const SwoopSidebar = () => {
                     onClick={() => navigate(item.key)}
                     className={`menu-item group cursor-pointer ${
                       isActive(item.key)
-                        ? "bg-white/10 text-white"
+                        ? "bg-brand-500/15 text-brand-400"
                         : "text-gray-300 hover:bg-white/5 hover:text-white"
                     } ${
                       !isExpanded && !isHovered
-                        ? "xl:justify-center"
-                        : "xl:justify-start"
+                        ? "lg:justify-center"
+                        : "lg:justify-start"
                     }`}
                   >
                     <span

@@ -66,7 +66,7 @@ function AppShell() {
           return (
             <span>
               {user.name ? ` · ${user.name}` : ''}
-              {clubId && clubId !== 'demo' ? ` · ${clubId}` : ' · Demo Environment'}
+              {clubId && clubId !== 'demo' ? ` · ${user.clubName || 'Connected Club'}` : ' · Demo Environment'}
               <button
                 onClick={() => { localStorage.removeItem('swoop_auth_user'); localStorage.removeItem('swoop_auth_token'); localStorage.removeItem('swoop_club_id'); window.location.reload(); }}
                 className="ml-3 text-brand-500 hover:text-brand-600 font-semibold"
