@@ -308,9 +308,9 @@ export default function MemberProfilePage() {
       {/* Key metrics row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
         <Stat label="Annual Dues" value={fmt$(profile.duesAnnual)} accent={'#1a1a2e'} />
-        <Stat label="Total Value" value={fmt$(profile.memberValueAnnual)} accent={'#465fff'} />
+        <Stat label="Total Value" value={fmt$(profile.memberValueAnnual)} accent={'#ff8b00'} />
         <Stat label="Account Balance" value={fmt$(profile.accountBalance)} accent={profile.accountBalance < 0 ? '#ef4444' : '#22c55e'} />
-        <Stat label="Email Open Rate" value={fmtPct(profile.emailOpenRate)} accent={'#465fff'} mono />
+        <Stat label="Email Open Rate" value={fmtPct(profile.emailOpenRate)} accent={'#ff8b00'} mono />
         <Stat label="Rounds (30d)" value={profile.roundsPlayed ?? '—'} accent={'#22c55e'} mono />
         <Stat label="Dining Spend (30d)" value={fmt$(profile.diningSpend)} accent={'#f59e0b'} />
       </div>
@@ -386,7 +386,7 @@ export default function MemberProfilePage() {
                   {(Array.isArray(preferences.favoriteSpots) ? preferences.favoriteSpots : [preferences.favoriteSpots]).map((spot, i) => (
                     <span key={i} style={{
                       padding: '3px 10px', borderRadius: 999, fontSize: '12px',
-                      background: `${'#465fff'}15`, border: `1px solid ${'#465fff'}30`,
+                      background: `${'#ff8b00'}15`, border: `1px solid ${'#ff8b00'}30`,
                       color: '#6B7280',
                     }}>{spot}</span>
                   ))}
@@ -446,7 +446,7 @@ export default function MemberProfilePage() {
         {[
           { label: 'Schedule call', icon: '📞', color: '#16a34a' },
           { label: 'Send email', icon: '✉️', color: '#3B82F6' },
-          { label: 'Send SMS', icon: '📱', color: '#465fff' },
+          { label: 'Send SMS', icon: '📱', color: '#ff8b00' },
           { label: 'Offer comp', icon: '🎁', color: '#8b5cf6' },
         ].map(action => (
           <button

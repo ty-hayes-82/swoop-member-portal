@@ -27,7 +27,7 @@ export default function IntegrationMap({
           const isHov = hoveredEdge === edge.id;
           return (
             <path key={edge.id} d={edge.path}
-              stroke="#465fff" strokeWidth={isHov ? 2 : 1.5}
+              stroke="#ff8b00" strokeWidth={isHov ? 2 : 1.5}
               fill="none" strokeLinecap="round"
               opacity={isLit ? (isHov ? 0.8 : 0.3) : 0.05}
               style={{ transition: 'opacity 0.2s, stroke-width 0.15s', cursor: 'pointer' }}
@@ -54,12 +54,12 @@ export default function IntegrationMap({
               onClick={() => onSelectCategory?.(node.id)}
             >
               <circle cx={node.x} cy={node.y} r={r + 8}
-                fill="#465fff" opacity={isActive || isHov ? 0.12 : 0.05}
+                fill="#ff8b00" opacity={isActive || isHov ? 0.12 : 0.05}
                 style={{ transition: 'all 0.15s' }}
               />
               <circle cx={node.x} cy={node.y} r={r}
-                fill={isActive ? '#465fff' : '#ffffff'}
-                stroke="#465fff" strokeWidth={isActive ? 0 : 2}
+                fill={isActive ? '#ff8b00' : '#ffffff'}
+                stroke="#ff8b00" strokeWidth={isActive ? 0 : 2}
                 style={{ transition: 'all 0.15s' }}
               />
               <text x={node.x} y={node.y - 5}
@@ -71,7 +71,7 @@ export default function IntegrationMap({
               <text x={node.x} y={node.y + 12}
                 textAnchor="middle" dominantBaseline="middle"
                 fontSize="8" fontWeight="700"
-                fill={isActive ? '#ffffff' : '#465fff'}
+                fill={isActive ? '#ffffff' : '#ff8b00'}
                 style={{ pointerEvents: 'none', userSelect: 'none', fontFamily: 'monospace', transition: 'fill 0.15s' }}>
                 {node.count}
               </text>
@@ -82,14 +82,14 @@ export default function IntegrationMap({
               )}
               <text x={node.x} y={node.y + r + 13}
                 textAnchor="middle" fontSize="8" fontWeight="600"
-                fill={isActive ? '#465fff' : '#667085'}
+                fill={isActive ? '#ff8b00' : '#667085'}
                 style={{ pointerEvents: 'none', userSelect: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', transition: 'fill 0.15s' }}>
                 {line1}
               </text>
               {line2 && (
                 <text x={node.x} y={node.y + r + 23}
                   textAnchor="middle" fontSize="8" fontWeight="600"
-                  fill={isActive ? '#465fff' : '#667085'}
+                  fill={isActive ? '#ff8b00' : '#667085'}
                   style={{ pointerEvents: 'none', userSelect: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', transition: 'fill 0.15s' }}>
                   {line2}
                 </text>
@@ -101,7 +101,7 @@ export default function IntegrationMap({
         {/* Center Swoop mark */}
         <circle cx={width / 2} cy={height / 2} r={26} fill="#1d2939" />
         <text x={width / 2} y={height / 2 - 4} textAnchor="middle" dominantBaseline="middle"
-          fontSize="7" fontWeight="800" fill="#465fff"
+          fontSize="7" fontWeight="800" fill="#ff8b00"
           style={{ letterSpacing: '0.1em', userSelect: 'none' }}>
           SWOOP
         </text>

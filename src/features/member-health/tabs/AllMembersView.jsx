@@ -166,9 +166,9 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
             memberId={member.memberId}
             style={{
               fontWeight: 600,
-              color: hovered ? '#465fff' : '#1a1a2e',
+              color: hovered ? '#ff8b00' : '#1a1a2e',
               textDecoration: hovered ? 'underline' : 'none',
-              textDecorationColor: `${'#465fff'}50`,
+              textDecorationColor: `${'#ff8b00'}50`,
               transition: 'color 0.12s ease',
             }}
           >
@@ -213,7 +213,7 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
         <td style={{ padding: `${'8px'} ${'16px'}`, textAlign: 'right' }}>
           <span
             style={{
-              color: isExpanded ? '#465fff' : '#9CA3AF',
+              color: isExpanded ? '#ff8b00' : '#9CA3AF',
               fontSize: '14px',
               fontWeight: 600,
               transition: 'transform 0.15s ease, color 0.12s ease',
@@ -590,10 +590,10 @@ export default function AllMembersView({ initialArchetype = null }) {
                   padding: '6px 14px',
                   fontSize: 13,
                   fontWeight: 600,
-                  border: `1px solid ${isActive ? '#465fff' : '#E5E7EB'}`,
+                  border: `1px solid ${isActive ? '#ff8b00' : '#E5E7EB'}`,
                   borderRadius: '12px',
-                  background: isActive ? `${'#465fff'}15` : '#F8F9FA',
-                  color: isActive ? '#465fff' : '#6B7280',
+                  background: isActive ? `${'#ff8b00'}15` : '#F8F9FA',
+                  color: isActive ? '#ff8b00' : '#6B7280',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
@@ -623,14 +623,14 @@ export default function AllMembersView({ initialArchetype = null }) {
             <FilterChip
               label={`Health: ${healthFilter.max ? `${healthFilter.min}-${healthFilter.max}` : `${healthFilter.min}+`}`}
               onRemove={() => setHealthFilter(null)}
-              color={'#465fff'}
+              color={'#ff8b00'}
             />
           )}
           {archetypeFilter && (
             <FilterChip
               label={`Archetype: ${archetypeFilter}`}
               onRemove={() => setArchetypeFilter(null)}
-              color={'#465fff'}
+              color={'#ff8b00'}
             />
           )}
           {activityFilter && (

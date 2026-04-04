@@ -92,7 +92,7 @@ export default function PendingActionsInline({ topPriority = null }) {
 
         {/* Pending action cards */}
         {topActions.map((action) => {
-          const prioColor = PRIORITY_COLORS[action.priority] ?? '#465fff';
+          const prioColor = PRIORITY_COLORS[action.priority] ?? '#ff8b00';
           return (
             <div
               key={action.id}

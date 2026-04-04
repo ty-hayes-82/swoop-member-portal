@@ -102,7 +102,7 @@ function ActivityTimeline({ activity = [] }) {
         <button
           onClick={() => setShowAll(true)}
           style={{
-            background: 'none', border: 'none', color: '#465fff',
+            background: 'none', border: 'none', color: '#ff8b00',
             fontSize: '12px', fontWeight: 600, cursor: 'pointer',
             textAlign: 'left', padding: 0,
           }}
@@ -179,7 +179,7 @@ function MemberJourneyTimeline({ profile }) {
   const domainColors = {
     Golf: '#22c55e',
     Dining: '#f59e0b' ?? '#f59e0b',
-    Events: '#465fff',
+    Events: '#ff8b00',
     Email: '#2563eb' ?? '#4299e1',
     Risk: '#ef4444',
     Activity: '#9CA3AF',
@@ -316,7 +316,7 @@ function HealthDimensionGrid({ profile }) {
 
   // Use real dimensions from profile if available (populated by health_scores API), else approximate
   const dimensions = [
-    { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#465fff' },
+    { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#ff8b00' },
     { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#22c55e' },
     { label: 'Email Engagement', weight: '25%', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: '#3B82F6' },
     { label: 'Event Attendance', weight: '20%', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
@@ -625,7 +625,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             <button
               type="button"
               onClick={() => onOpenFullPage(profile.memberId)}
-              style={{ marginTop: '8px', border: 'none', background: 'none', color: '#465fff', fontWeight: 600, cursor: 'pointer' }}
+              style={{ marginTop: '8px', border: 'none', background: 'none', color: '#ff8b00', fontWeight: 600, cursor: 'pointer' }}
             >
               Open full profile →
             </button>
@@ -644,10 +644,10 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '—'}`}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '14px' }}>
           <span><strong>Phone:</strong> {profile.contact?.phone && profile.contact.phone !== '—'
-            ? <a href={`tel:${profile.contact.phone}`} style={{ color: '#465fff', textDecoration: 'none' }}>{profile.contact.phone}</a>
+            ? <a href={`tel:${profile.contact.phone}`} style={{ color: '#ff8b00', textDecoration: 'none' }}>{profile.contact.phone}</a>
             : '—'}</span>
           <span><strong>Email:</strong> {profile.contact?.email && profile.contact.email !== '—'
-            ? <a href={`mailto:${profile.contact.email}`} style={{ color: '#465fff', textDecoration: 'none' }}>{profile.contact.email}</a>
+            ? <a href={`mailto:${profile.contact.email}`} style={{ color: '#ff8b00', textDecoration: 'none' }}>{profile.contact.email}</a>
             : '—'}</span>
           <span><strong>Last outreach:</strong> {formatDateTime(profile.contact?.lastOutreach)}</span>
         </div>
@@ -694,7 +694,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
               >
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '14px', color: f.memberId ? '#465fff' : '#1a1a2e' }}>{f.name}</div>
+                  <div style={{ fontWeight: 600, fontSize: '14px', color: f.memberId ? '#ff8b00' : '#1a1a2e' }}>{f.name}</div>
                   <div className="text-xs text-gray-400">{f.relation}</div>
                 </div>
                 {f.notes && (
@@ -729,9 +729,9 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             <div key={i} style={{
               display: 'flex', gap: 8, alignItems: 'flex-start',
               padding: '8px 12px', borderRadius: '8px',
-              background: `${'#465fff'}06`, border: `1px solid ${'#465fff'}20`,
+              background: `${'#ff8b00'}06`, border: `1px solid ${'#ff8b00'}20`,
             }}>
-              <span style={{ color: '#465fff', fontWeight: 700, fontSize: '14px', flexShrink: 0 }}>{i + 1}.</span>
+              <span style={{ color: '#ff8b00', fontWeight: 700, fontSize: '14px', flexShrink: 0 }}>{i + 1}.</span>
               <span style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.5 }}>{point}</span>
             </div>
           ))}
@@ -828,7 +828,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               padding: '6px 14px',
               borderRadius: '8px',
               border: 'none',
-              background: '#465fff',
+              background: '#ff8b00',
               color: '#ffffff',
               fontWeight: 600,
               cursor: 'pointer',

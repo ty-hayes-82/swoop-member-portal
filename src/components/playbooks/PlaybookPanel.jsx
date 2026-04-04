@@ -16,7 +16,7 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
 
   const active  = isActive(id);
   const impact  = getImpact(id);
-  const accent  = accentColor ?? '#465fff';
+  const accent  = accentColor ?? '#ff8b00';
   const trail   = trailSteps[id] ?? [];
   const done    = trailProgress[id] ?? 0;
   const fmt     = (n) => n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n}`;

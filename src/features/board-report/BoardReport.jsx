@@ -27,7 +27,7 @@ const colors = {
   panelHeading: '#1a1a2e',
   panelText: '#3F3F46',
   panelMuted: '#6B7280',
-  brand: '#465fff',
+  brand: '#ff8b00',
   tabInactive: '#8890A0',
 };
 

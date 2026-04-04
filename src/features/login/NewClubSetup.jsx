@@ -7,7 +7,7 @@ const TEMPLATES = [
   { file: 'swoop-template-members-only.xlsx', label: 'Members Only', desc: '20 members — test health scores and at-risk detection', sheets: '1 sheet', color: '#3b82f6' },
   { file: 'swoop-template-members-rounds.xlsx', label: 'Members + Rounds', desc: '25 members, 80 rounds — adds golf engagement analysis', sheets: '2 sheets', color: '#8b5cf6' },
   { file: 'swoop-template-members-rounds-fb.xlsx', label: 'Members + Rounds + F&B', desc: '30 members, 100 rounds, 150 transactions — unlocks revenue signals', sheets: '3 sheets', color: '#16a34a' },
-  { file: 'swoop-template-full.xlsx', label: 'Full Dataset', desc: '40 members, 120 rounds, 200 transactions, 15 complaints — everything', sheets: '4 sheets', color: '#465fff' },
+  { file: 'swoop-template-full.xlsx', label: 'Full Dataset', desc: '40 members, 120 rounds, 200 transactions, 15 complaints — everything', sheets: '4 sheets', color: '#ff8b00' },
 ];
 
 const STEP_LABELS = ['Club Info', 'Course', 'Upload Data', 'Ready'];
@@ -168,7 +168,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
   const labelStyle = { fontSize: '13px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' };
   const btnPrimary = {
     padding: '12px 24px', borderRadius: '10px', border: 'none',
-    background: '#465fff', color: '#fff', fontSize: '14px',
+    background: '#ff8b00', color: '#fff', fontSize: '14px',
     fontWeight: 700, cursor: 'pointer',
   };
   const btnSecondary = {
@@ -201,7 +201,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
           {STEP_LABELS.map((_, i) => (
             <div key={i} style={{
               flex: 1, height: '4px', borderRadius: '2px',
-              background: i <= step ? '#465fff' : '#E5E7EB',
+              background: i <= step ? '#ff8b00' : '#E5E7EB',
               transition: 'background 0.3s',
             }} />
           ))}
@@ -328,7 +328,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
                 className="hidden"
               />
               {uploading ? (
-                <div style={{ fontSize: '14px', color: '#465fff', fontWeight: 600 }}>Uploading and processing...</div>
+                <div style={{ fontSize: '14px', color: '#ff8b00', fontWeight: 600 }}>Uploading and processing...</div>
               ) : uploadedFileName ? (
                 <>
                   <div style={{ fontSize: '24px', marginBottom: '8px' }}>✅</div>

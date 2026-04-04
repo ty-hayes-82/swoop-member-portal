@@ -74,7 +74,7 @@ export default function MemberHealth() {
         tabs={TABS}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        accentColor={'#465fff'}
+        accentColor={'#ff8b00'}
         sourceSystems={sourceSystems}
       >
         {activeTab === 'health'       && <HealthOverview />}

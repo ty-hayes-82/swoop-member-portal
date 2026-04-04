@@ -53,7 +53,7 @@ const s = {
     padding: '8px 20px',
     borderRadius: '8px',
     border: variant === 'primary' ? 'none' : '1px solid ' + '#E5E7EB',
-    background: variant === 'primary' ? '#465fff' : 'transparent',
+    background: variant === 'primary' ? '#ff8b00' : 'transparent',
     color: variant === 'primary' ? '#fff' : '#1a1a2e',
     fontWeight: 600,
     fontSize: '14px',
@@ -387,7 +387,7 @@ function IntegrationsTab({ onNavigate }) {
               padding: '6px 14px',
               borderRadius: '6px',
               border: filter === f.key ? 'none' : '1px solid ' + '#E5E7EB',
-              background: filter === f.key ? '#465fff' : 'transparent',
+              background: filter === f.key ? '#ff8b00' : 'transparent',
               color: filter === f.key ? '#fff' : '#6B7280',
               fontSize: '12px',
               fontWeight: 600,
@@ -439,7 +439,7 @@ function OnboardingTab({ setActiveTab, navigate }) {
         <div style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
           <svg width="72" height="72" viewBox="0 0 72 72">
             <circle cx="36" cy="36" r="30" fill="none" stroke={'#F3F4F6'} strokeWidth="6" />
-            <circle cx="36" cy="36" r="30" fill="none" stroke={'#465fff'} strokeWidth="6"
+            <circle cx="36" cy="36" r="30" fill="none" stroke={'#ff8b00'} strokeWidth="6"
               strokeDasharray={`${pct * 1.885} 188.5`} strokeLinecap="round"
               transform="rotate(-90 36 36)" style={{ transition: 'stroke-dasharray 0.3s' }} />
           </svg>
@@ -531,7 +531,7 @@ function ToggleSwitch({ checked, onChange }) {
   return (
     <button onClick={() => onChange(!checked)} style={{
       width: '36px', height: '20px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-      background: checked ? '#465fff' : '#F3F4F6',
+      background: checked ? '#ff8b00' : '#F3F4F6',
       position: 'relative', transition: 'background 0.15s',
       boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
     }}>
@@ -601,8 +601,8 @@ function NotificationsTab() {
               style={{
                 marginTop: '8px', padding: '4px 12px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', cursor: ch.configured ? 'pointer' : 'default',
                 border: 'none', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-                background: testStatus[ch.key] === 'sent' ? '#f0fdf4' : ch.configured ? `${'#465fff'}15` : '#F3F4F6',
-                color: testStatus[ch.key] === 'sent' ? '#22c55e' : ch.configured ? '#465fff' : '#9CA3AF',
+                background: testStatus[ch.key] === 'sent' ? '#f0fdf4' : ch.configured ? `${'#ff8b00'}15` : '#F3F4F6',
+                color: testStatus[ch.key] === 'sent' ? '#22c55e' : ch.configured ? '#ff8b00' : '#9CA3AF',
               }}
             >
               {testStatus[ch.key] === 'sending' ? 'Sending...' : testStatus[ch.key] === 'sent' ? 'Sent!' : 'Send Test'}
@@ -642,7 +642,7 @@ function NotificationsTab() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid ' + '#E5E7EB' }}>
                     <span style={{ fontSize: '10px', color: '#9CA3AF', flexShrink: 0 }}>Routes to:</span>
                     {ROLE_DEFAULTS[item.key].map(role => (
-                      <span key={role} style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '10px', background: `${'#465fff'}12`, color: '#465fff', fontWeight: 600 }}>{role}</span>
+                      <span key={role} style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '10px', background: `${'#ff8b00'}12`, color: '#ff8b00', fontWeight: 600 }}>{role}</span>
                     ))}
                   </div>
                 )}
@@ -852,7 +852,7 @@ function BillingTab() {
         <Panel>
           <div style={s.sectionTitle}>Current Plan</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '12px' }}>
-            <span style={{ fontSize: '28px', fontWeight: 700, color: '#465fff' }}>Pro</span>
+            <span style={{ fontSize: '28px', fontWeight: 700, color: '#ff8b00' }}>Pro</span>
             <span style={{ fontSize: '14px', color: '#9CA3AF' }}>$499/month</span>
           </div>
           <div style={{ fontSize: '12px', color: '#9CA3AF', lineHeight: 1.6, marginBottom: '16px' }}>
@@ -906,10 +906,10 @@ function BillingTab() {
                 <span style={{ fontSize: '10px', color: '#9CA3AF' }}>/ {metric.limit.toLocaleString()}</span>
               </div>
               <svg width="100%" height="40" viewBox="0 0 100 40" preserveAspectRatio="none" style={{ marginTop: '6px' }}>
-                <polyline points={points} fill="none" stroke={'#465fff'} strokeWidth="1.5" strokeLinecap="round" />
+                <polyline points={points} fill="none" stroke={'#ff8b00'} strokeWidth="1.5" strokeLinecap="round" />
               </svg>
               <div style={{ height: '4px', borderRadius: '2px', background: '#F3F4F6', marginTop: '4px' }}>
-                <div style={{ height: '100%', borderRadius: '2px', background: pctUsed > 80 ? '#ef4444' : '#465fff', width: `${Math.min(pctUsed, 100)}%`, transition: 'width 0.3s' }} />
+                <div style={{ height: '100%', borderRadius: '2px', background: pctUsed > 80 ? '#ef4444' : '#ff8b00', width: `${Math.min(pctUsed, 100)}%`, transition: 'width 0.3s' }} />
               </div>
               <div style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '4px' }}>{pctUsed}% consumed</div>
               {metric.alert && <div style={{ fontSize: '10px', color: '#22c55e', marginTop: '2px' }}>{metric.alert}</div>}
@@ -1103,7 +1103,7 @@ export default function AdminDashboard() {
               style={{
                 padding: '10px 18px',
                 border: 'none',
-                borderBottom: activeTab === tab.key ? '2px solid ' + '#465fff' : '2px solid transparent',
+                borderBottom: activeTab === tab.key ? '2px solid ' + '#ff8b00' : '2px solid transparent',
                 background: 'none',
                 color: activeTab === tab.key ? '#1a1a2e' : '#9CA3AF',
                 fontWeight: activeTab === tab.key ? 600 : 400,

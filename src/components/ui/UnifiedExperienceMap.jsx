@@ -38,14 +38,14 @@ export default function UnifiedExperienceMap() {
         <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="max-w-full h-auto">
           {nodePositions.map((node) => (
             <line key={`line-${node.id}`} x1={centerX} y1={centerY} x2={node.x} y2={node.y}
-              stroke={node.connected ? '#465fff' : '#e4e7ec'} strokeWidth={node.connected ? 3 : 2}
+              stroke={node.connected ? '#ff8b00' : '#e4e7ec'} strokeWidth={node.connected ? 3 : 2}
               strokeDasharray={node.connected ? '0' : '8,4'} opacity={node.connected ? 0.6 : 0.3}
               style={{ transition: 'all 0.3s ease' }}
             />
           ))}
 
           <g>
-            <circle cx={centerX} cy={centerY} r={centerRadius} fill="#465fff" stroke="#465fff" strokeWidth={4}
+            <circle cx={centerX} cy={centerY} r={centerRadius} fill="#ff8b00" stroke="#ff8b00" strokeWidth={4}
               style={{ filter: 'drop-shadow(0 0 20px rgba(70,95,255,0.4))' }} />
             <text x={centerX} y={centerY - 10} textAnchor="middle" fill="white" fontSize="16" fontWeight="700">Layer 3</text>
             <text x={centerX} y={centerY + 10} textAnchor="middle" fill="white" fontSize="16" fontWeight="700">Intelligence</text>
@@ -57,11 +57,11 @@ export default function UnifiedExperienceMap() {
               <g key={node.id} onMouseEnter={() => setHoveredNode(node.id)} onMouseLeave={() => setHoveredNode(null)} style={{ cursor: 'pointer' }}>
                 <circle cx={node.x} cy={node.y} r={nodeRadius}
                   fill={node.connected ? 'rgba(70,95,255,0.13)' : '#f9fafb'}
-                  stroke={node.connected ? '#465fff' : '#98a2b3'} strokeWidth={isHovered ? 4 : 3}
+                  stroke={node.connected ? '#ff8b00' : '#98a2b3'} strokeWidth={isHovered ? 4 : 3}
                   style={{ transition: 'all 0.3s ease', filter: node.connected && isHovered ? 'drop-shadow(0 0 12px rgba(70,95,255,0.4))' : 'none' }}
                 />
                 <text x={node.x} y={node.y} textAnchor="middle" dominantBaseline="middle"
-                  fill={node.connected ? '#465fff' : '#98a2b3'} fontSize="14" fontWeight="600"
+                  fill={node.connected ? '#ff8b00' : '#98a2b3'} fontSize="14" fontWeight="600"
                   style={{ pointerEvents: 'none', userSelect: 'none' }}>
                   {node.label}
                 </text>

@@ -92,7 +92,7 @@ function buildPriorityList() {
 const ARCHETYPE_COLORS = {
   'Die-Hard Golfer': '#22c55e',
   'Social Butterfly': '#2563eb',
-  'Balanced Active': '#465fff',
+  'Balanced Active': '#ff8b00',
   'Weekend Warrior': '#f59e0b',
   'Declining': '#ef4444',
   'New Member': '#3B82F6',

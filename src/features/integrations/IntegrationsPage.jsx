@@ -254,10 +254,10 @@ export default function IntegrationsPage() {
               padding: '6px 14px',
               fontSize: 13,
               fontWeight: 600,
-              border: `1px solid ${statusFilter === filter.value ? '#465fff' : '#E5E7EB'}`,
+              border: `1px solid ${statusFilter === filter.value ? '#ff8b00' : '#E5E7EB'}`,
               borderRadius: '12px',
-              background: statusFilter === filter.value ? `${'#465fff'}15` : '#F8F9FA',
-              color: statusFilter === filter.value ? '#465fff' : '#6B7280',
+              background: statusFilter === filter.value ? `${'#ff8b00'}15` : '#F8F9FA',
+              color: statusFilter === filter.value ? '#ff8b00' : '#6B7280',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
@@ -294,7 +294,7 @@ export default function IntegrationsPage() {
                 const syncInfo = SYNC_DETAILS[vendor.name];
                 return (
                 <div key={vendor.name} style={{
-                  border: `1px solid ${isExpanded ? '#465fff' + '50' : '#E5E7EB'}`,
+                  border: `1px solid ${isExpanded ? '#ff8b00' + '50' : '#E5E7EB'}`,
                   borderRadius: '12px',
                   padding: '12px 14px',
                   background: '#F8F9FA',
@@ -325,7 +325,7 @@ export default function IntegrationsPage() {
                     </div>
                   )}
                   {isConnected && VENDOR_POWERS[vendor.name] && (
-                    <div style={{ fontSize: 11, color: '#465fff', opacity: 0.85 }}>
+                    <div style={{ fontSize: 11, color: '#ff8b00', opacity: 0.85 }}>
                       Powers: {VENDOR_POWERS[vendor.name]}
                     </div>
                   )}
@@ -357,7 +357,7 @@ export default function IntegrationsPage() {
                         </div>
                       ))}
                       <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
-                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#465fff'}40`, background: `${'#465fff'}12`, color: '#465fff', cursor: 'pointer' }}>Force Sync</button>
+                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#ff8b00'}40`, background: `${'#ff8b00'}12`, color: '#ff8b00', cursor: 'pointer' }}>Force Sync</button>
                         <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>View Logs</button>
                         <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>Configure</button>
                         <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#ef4444'}40`, background: 'transparent', color: '#ef4444', cursor: 'pointer', marginLeft: 'auto' }}>Disconnect</button>
@@ -373,9 +373,9 @@ export default function IntegrationsPage() {
                           padding: '6px 12px',
                           fontSize: 12,
                           fontWeight: 600,
-                          border: `1px solid ${'#465fff'}`,
+                          border: `1px solid ${'#ff8b00'}`,
                           borderRadius: '8px',
-                          background: '#465fff',
+                          background: '#ff8b00',
                           color: '#fff',
                           cursor: 'pointer',
                           transition: 'all 0.15s ease',
@@ -390,7 +390,7 @@ export default function IntegrationsPage() {
                             padding: 0,
                             border: 'none',
                             background: 'none',
-                            color: '#465fff',
+                            color: '#ff8b00',
                             fontSize: 11,
                             fontWeight: 600,
                             cursor: 'pointer',
@@ -419,7 +419,7 @@ export default function IntegrationsPage() {
                           onClick={() => navigate('integrations/csv-import', { category: category.csvCategory, vendor: vendor.name })}
                           style={{
                             padding: 0, border: 'none', background: 'none',
-                            color: '#465fff', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                            color: '#ff8b00', fontSize: 11, fontWeight: 600, cursor: 'pointer',
                           }}
                         >
                           upload CSV instead →
