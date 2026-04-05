@@ -129,9 +129,7 @@ const SwoopHeader = () => {
 
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500">
-              <span className="text-lg font-bold text-white">S</span>
-            </div>
+            <img src="/favicon.svg" alt="Swoop" className="w-8 h-8 rounded-lg" />
           </div>
 
           {/* Desktop search */}

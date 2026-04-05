@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="14" fill="#ff8b00"/>
+  <!-- Geometric bird mark inspired by Swoop Golf logo -->
+  <g transform="translate(8, 10)" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Bird body - geometric origami style -->
+    <path d="M24 4 L6 22 L24 40 L42 22 Z"/>
+    <!-- Wing line -->
+    <path d="M6 22 L24 16 L42 22"/>
+    <!-- Eye -->
+    <circle cx="28" cy="15" r="2.5" fill="white" stroke="none"/>
+    <!-- Tail -->
+    <path d="M24 40 L18 44"/>
+    <path d="M24 40 L30 44"/>
+  </g>
+</svg>

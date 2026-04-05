@@ -79,9 +79,7 @@ const SwoopSidebar = () => {
           className="flex items-center gap-3 cursor-pointer"
           aria-label="Swoop home"
         >
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500">
-            <span className="text-lg font-bold text-white">S</span>
-          </div>
+          <img src="/favicon.svg" alt="Swoop" className="w-8 h-8 rounded-lg" />
           {showFull && (
             <span className="text-xl font-semibold text-white tracking-tight">
               Swoop

@@ -92,9 +92,7 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-[400px] rounded-2xl border border-gray-200 bg-white p-10 shadow-theme-lg">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand-500">
-              <span className="text-xl font-bold text-white">S</span>
-            </div>
+            <img src="/favicon.svg" alt="Swoop" className="w-10 h-10 rounded-xl" />
           </div>
           <div className="text-2xl font-extrabold text-gray-800">Set New Password</div>
           <div className="text-sm text-gray-500 mt-1">Enter your new password below.</div>
