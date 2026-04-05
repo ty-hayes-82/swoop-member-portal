@@ -167,7 +167,7 @@ const SwoopHeader = () => {
                           key={r.id}
                           onMouseDown={(e) => {
                             e.preventDefault();
-                            navigate("members", { mode: "search" });
+                            navigate("member-profile", { memberId: r.id });
                             setShowSearchResults(false);
                             setSearchQuery('');
                           }}

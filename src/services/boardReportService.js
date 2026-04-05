@@ -1,5 +1,6 @@
 import { apiFetch, getClubId } from './apiClient';
 import { isAuthenticatedClub } from '@/config/constants';
+import { getMemberSummary as _getMemberSummary } from '@/services/memberService';
 import {
   kpis as staticKpis,
   memberSaves as staticMemberSaves,
@@ -40,15 +41,31 @@ const EMPTY_KPIS = [
 ];
 
 export const getKPIs = () => {
-  if (!_liveKpis && isAuthenticatedClub()) return EMPTY_KPIS;
-  if (!_liveKpis) return staticKpis;
-  // Merge live data into static structure
-  return staticKpis.map(kpi => {
-    if (kpi.label === 'Members Retained' && _liveKpis.membersSaved > 0) {
-      return { ...kpi, value: _liveKpis.membersSaved };
+  if (_liveKpis) {
+    return staticKpis.map(kpi => {
+      if (kpi.label === 'Members Retained' && _liveKpis.membersSaved > 0) {
+        return { ...kpi, value: _liveKpis.membersSaved };
+      }
+      return kpi;
+    });
+  }
+  // For real clubs without live board data, build KPIs from member health data
+  if (isAuthenticatedClub()) {
+    const summary = _getMemberSummary();
+    if (summary.totalMembers > 0 || summary.total > 0) {
+      const total = summary.totalMembers || summary.total;
+      const healthy = summary.healthy || 0;
+      const retentionPct = total > 0 ? Math.round((healthy / total) * 100) : 0;
+      return [
+        { label: 'Members Retained', value: healthy, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total members tracked` },
+        { label: 'Dues at Risk', value: Math.round((summary.potentialDuesAtRisk || 0) / 1000), unit: '$K', prefix: '$', suffix: 'K', color: 'warning', description: 'Annual dues from at-risk + critical members' },
+        { label: 'Retention Rate', value: retentionPct, unit: '%', prefix: '', suffix: '%', color: retentionPct >= 80 ? 'success' : 'warning', description: 'Healthy members as % of total' },
+        { label: 'At Risk', value: (summary.atRisk || 0) + (summary.critical || 0), unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
+      ];
     }
-    return kpi;
-  });
+    return EMPTY_KPIS;
+  }
+  return staticKpis;
 };
 
 export const getMemberSaves = () => isAuthenticatedClub() && !_liveKpis ? [] : staticMemberSaves;

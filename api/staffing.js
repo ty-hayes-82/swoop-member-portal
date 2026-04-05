@@ -87,7 +87,39 @@ export default withAuth(async function handler(req, res) {
     ]);
 
     const understaffedDays = understaffed.rows;
-    const feedbackRows = feedback.rows;
+    let feedbackRows = feedback.rows;
+
+    // If no feedback table data, fall back to complaints table
+    if (feedbackRows.length === 0) {
+      try {
+        const complaints = await sql`
+          SELECT
+            c.complaint_id AS feedback_id,
+            c.member_id,
+            COALESCE(m.first_name || ' ' || m.last_name, 'Unknown') AS member_name,
+            m.archetype,
+            c.reported_at::date AS date,
+            c.category,
+            COALESCE(c.severity, -0.5) AS sentiment,
+            c.status,
+            c.description,
+            c.resolved_at,
+            0 AS is_understaffed_day,
+            NULL AS is_weather_impacted,
+            NULL AS weather_impact_reason,
+            NULL AS weather_conditions,
+            NULL AS weather_high_temp,
+            NULL AS weather_wind,
+            NULL AS weather_gusts,
+            NULL AS weather_precip
+          FROM complaints c
+          LEFT JOIN members m ON c.member_id::text = m.member_id::text AND m.club_id = ${clubId}
+          WHERE c.club_id = ${clubId}
+          ORDER BY c.reported_at DESC
+        `;
+        feedbackRows = complaints.rows;
+      } catch { /* complaints table may not exist */ }
+    }
     const unresolvedCount = feedbackRows.filter(f => f.status !== 'resolved').length;
 
     const totalRevenueLoss = understaffedDays.reduce((s, d) => {
