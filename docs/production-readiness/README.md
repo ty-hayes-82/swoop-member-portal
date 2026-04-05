@@ -39,9 +39,11 @@
 
 See [05-production-ready-definition.md](./05-production-ready-definition.md) for the full P0/P1/P2 breakdown with updated status.
 
-**Remaining P0 items before first paying customer:**
-- End-to-end CSV import testing with real Jonas export
-- Empty state handling when real data is sparse
-- Password reset flow
-- Onboarding runbook for Swoop team
-- Dry run with synthetic club data
+**All P0 items complete as of April 5, 2026:**
+- ~~End-to-end CSV import testing~~ Done — E2E test passes 10/10 on live deployment
+- ~~Empty state handling~~ Done — all 5 pages + sub-tabs have DataEmptyState guards
+- ~~Password reset flow~~ Done — forgot-password + reset-password endpoints + frontend
+- ~~Onboarding runbook~~ Done — see [ONBOARDING-RUNBOOK.md](../ONBOARDING-RUNBOOK.md)
+- ~~Dry run with synthetic club data~~ Done — 300 members, 1200 rounds, 3000 transactions imported + scored
+
+**Ready for first paying customer (Bowling Green CC).**
