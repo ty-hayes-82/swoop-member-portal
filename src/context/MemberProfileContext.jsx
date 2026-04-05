@@ -86,7 +86,10 @@ export function MemberProfileProvider({ children }) {
     let cancelled = false;
     setLoading(true);
 
-    fetch(`/api/member-detail?id=${encodeURIComponent(activeMemberId)}`)
+    const authToken = localStorage.getItem('swoop_auth_token');
+    fetch(`/api/member-detail?id=${encodeURIComponent(activeMemberId)}`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (cancelled) return;

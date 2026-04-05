@@ -65,7 +65,10 @@ export default function MemberProfile() {
   useEffect(() => {
     let isMounted = true;
     setState((prev) => ({ ...prev, loading: true, error: null }));
-    fetch(`/api/member-detail?memberId=${encodeURIComponent(memberId ?? '')}`)
+    const authToken = localStorage.getItem('swoop_auth_token');
+    fetch(`/api/member-detail?memberId=${encodeURIComponent(memberId ?? '')}`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    })
       .then(async (response) => {
         if (!response.ok) {
           const message = await response.json().catch(() => ({}));

@@ -109,7 +109,10 @@ export default function MemberProfilePage() {
       return () => { cancelled = true; };
     }
 
-    fetch(`/api/member-detail?id=${encodeURIComponent(memberId)}`)
+    const authToken = localStorage.getItem('swoop_auth_token');
+    fetch(`/api/member-detail?id=${encodeURIComponent(memberId)}`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    })
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
         if (!cancelled) {

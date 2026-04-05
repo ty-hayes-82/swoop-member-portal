@@ -83,8 +83,7 @@ function generateRoster() {
   return roster;
 }
 
-const allMembers = isAuthenticatedClub() ? getMemberRoster() : generateRoster();
-if (!isAuthenticatedClub()) setRosterCache(allMembers);
+// Moved inside component — module-scope call ran before _init() populated data
 
 function getHealthLevel(score) {
   if (score >= 70) return 'Healthy';
@@ -255,6 +254,12 @@ const ACTIVITY_FILTERS = [
 ];
 
 export default function AllMembersView({ initialArchetype = null }) {
+  const allMembers = useMemo(() => {
+    const members = isAuthenticatedClub() ? getMemberRoster() : generateRoster();
+    if (!isAuthenticatedClub()) setRosterCache(members);
+    return members;
+  }, []);
+
   if (isAuthenticatedClub() && allMembers.length === 0) {
     return <DataEmptyState icon="👥" title="No members imported yet" description="Import your member roster to see health scores, archetypes, and engagement data for every member." dataType="members" />;
   }

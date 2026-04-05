@@ -167,6 +167,35 @@ export default withAuth(async function handler(req, res) {
   const clubId = getClubId(req);
 
   try {
+    // Ensure health score columns exist on members table
+    try {
+      await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS health_score REAL`;
+      await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS health_tier TEXT`;
+      await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS archetype TEXT`;
+      await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS data_completeness INTEGER DEFAULT 0`;
+      await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS last_health_update TIMESTAMPTZ`;
+    } catch { /* columns may already exist */ }
+
+    // Ensure health_scores history table exists
+    try {
+      await sql`CREATE TABLE IF NOT EXISTS health_scores (
+        id SERIAL PRIMARY KEY,
+        member_id TEXT NOT NULL,
+        club_id TEXT NOT NULL,
+        score REAL, tier TEXT, golf_score REAL, dining_score REAL, email_score REAL, event_score REAL,
+        archetype TEXT, score_delta REAL,
+        computed_at TIMESTAMPTZ DEFAULT NOW()
+      )`;
+    } catch { /* table may already exist */ }
+
+    // Ensure data_syncs table exists
+    try {
+      await sql`CREATE TABLE IF NOT EXISTS data_syncs (
+        id SERIAL PRIMARY KEY, club_id TEXT, source_type TEXT, status TEXT,
+        records_processed INTEGER, records_failed INTEGER, completed_at TIMESTAMPTZ
+      )`;
+    } catch {}
+
     // Get all members for this club
     const members = await sql`
       SELECT member_id, join_date FROM members WHERE club_id = ${clubId} AND (status = 'active' OR membership_status = 'active' OR status IS NULL)
