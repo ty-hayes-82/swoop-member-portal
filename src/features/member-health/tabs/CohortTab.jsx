@@ -50,7 +50,22 @@ function getSuggestedAction(member) {
   return 'On track - continue monitoring';
 }
 
+import { isAuthenticatedClub } from '@/config/constants';
+import DataEmptyState from '@/components/ui/DataEmptyState';
+
 export default function CohortTab() {
+  // Real clubs need actual new member data — show empty state until available
+  if (isAuthenticatedClub()) {
+    return (
+      <DataEmptyState
+        icon="🎓"
+        title="New member tracking coming soon"
+        description="Once members are imported with join dates, this view will track the first 90 days — onboarding milestones, habit formation, and engagement progress for recent joins."
+        dataType="member roster with join dates"
+      />
+    );
+  }
+
   const flaggedCount = newMembers.filter(m => getMilestoneStatus(m).pct < 75).length;
 
   return (

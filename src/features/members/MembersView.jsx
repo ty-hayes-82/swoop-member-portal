@@ -7,6 +7,8 @@ import { getMemberSummary } from '@/services/memberService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
+import { isAuthenticatedClub } from '@/config/constants';
+import DataEmptyState from '@/components/ui/DataEmptyState';
 
 // Member Health tabs — V3: reduced to 2 (At-Risk uses HealthOverview, search uses AllMembersView)
 import HealthOverview from '@/features/member-health/tabs/HealthOverview';
@@ -69,6 +71,28 @@ export default function MembersView() {
 
   if (isLoading) {
     return <SkeletonGrid cards={6} columns={2} cardHeight={140} />;
+  }
+
+  // Real club with no member data — show welcome state
+  const summary = getMemberSummary();
+  if (isAuthenticatedClub() && (!summary.totalMembers || summary.totalMembers === 0)) {
+    return (
+      <PageTransition>
+        <div className="flex flex-col gap-6">
+          <StoryHeadline
+            variant="insight"
+            headline="Member intelligence starts with your roster"
+            context="Import your member data to unlock health scores, at-risk alerts, and engagement analytics."
+          />
+          <DataEmptyState
+            icon="👥"
+            title="No members imported yet"
+            description="Upload your member roster CSV to see health scores, archetypes, at-risk alerts, and engagement trends for every member. Start with Admin → Integrations → Open Upload Tool."
+            dataType="members"
+          />
+        </div>
+      </PageTransition>
+    );
   }
 
   const headlineData = HEADLINES[mode]();

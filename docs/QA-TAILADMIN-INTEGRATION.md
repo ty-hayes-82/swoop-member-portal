@@ -2,7 +2,7 @@
 
 **App URL:** https://swoop-member-portal-production-readiness.vercel.app/#/login
 **Branch:** `production-readiness-plan`
-**Build:** `4074b56` (or later)
+**Build:** `1568049` (or later)
 
 ---
 
@@ -20,9 +20,9 @@
 | # | Step | Expected Result | Pass? |
 |---|------|----------------|-------|
 | 1.1 | Navigate to `/#/login` | Login card centered on gray-50 background, rounded-2xl with shadow | |
-| 1.2 | Verify Swoop logo | Blue "S" badge (brand-500 `#465fff`) with "Swoop Golf" text | |
+| 1.2 | Verify Swoop logo | Orange "S" badge (brand-500 `#ff8b00`) with "Swoop Golf" text | |
 | 1.3 | Verify form inputs | Rounded-lg inputs with `border-gray-300`, focus ring turns blue | |
-| 1.4 | Verify "Sign In" button | Blue `bg-brand-500` button, hover darkens to brand-600 | |
+| 1.4 | Verify "Sign In" button | Orange `bg-brand-500` button, hover darkens to brand-600 | |
 | 1.5 | Verify "Enter Demo Mode" button | White button with gray border, hover shows gray-50 bg | |
 | 1.6 | Verify test account hint box | Blue-tinted info box (`bg-blue-light-50`) with blue border | |
 | 1.7 | Enter invalid credentials | Red error banner with `bg-error-50` and `text-error-600` | |
@@ -34,7 +34,7 @@
 
 | # | Step | Expected Result | Pass? |
 |---|------|----------------|-------|
-| 2.1 | Verify sidebar visible at 1024px+ | Dark sidebar (bg-gray-900) appears on left, 290px wide | |
+| 2.1 | Verify sidebar visible at 1024px+ | Black sidebar (bg-black) appears on left, 290px wide | |
 | 2.2 | Verify sidebar nav items | 5 items: Today, Service, Members, Board Report, Admin — with SVG icons | |
 | 2.3 | Click each nav item | Active item highlights with `bg-brand-500/15 text-brand-400` (blue tint) | |
 | 2.4 | Hover sidebar collapse | Mouse over collapsed sidebar → expands to 290px on hover | |
@@ -160,21 +160,21 @@
 
 ---
 
-## Color Reference (TailAdmin Default Blue)
+## Color Reference (Swoop Orange + Black)
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `brand-25` | `#f2f7ff` | Hero banner bg |
-| `brand-50` | `#ecf3ff` | Active chip bg, light accent bg |
-| `brand-100` | `#dde9ff` | User avatar bg |
-| `brand-400` | `#7592ff` | Active sidebar text |
-| `brand-500` | `#465fff` | Primary buttons, active states, links |
-| `brand-600` | `#3641f5` | Button hover, deep accent |
+| `brand-25` | `#fff9f0` | Hero banner bg |
+| `brand-50` | `#fff3e0` | Active chip bg, light accent bg |
+| `brand-100` | `#ffe0b2` | User avatar bg |
+| `brand-400` | `#ffa726` | Active sidebar text |
+| `brand-500` | `#ff8b00` | Primary buttons, active states, links |
+| `brand-600` | `#e67e00` | Button hover, deep accent |
 | `gray-50` | `#f9fafb` | Page background |
 | `gray-200` | `#e4e7ec` | Card borders |
 | `gray-500` | `#667085` | Muted text |
 | `gray-800` | `#1d2939` | Primary text |
-| `gray-900` | `#101828` | Sidebar background |
+| `black` | `#000000` | Sidebar background |
 | `success-500` | `#12b76a` | Connected status, positive indicators |
 | `error-500` | `#f04438` | Error states, severe alerts |
 | `warning-500` | `#f79009` | Warning states, weather alerts |
@@ -184,7 +184,7 @@
 ## Pass Criteria
 
 - All 10 test sections pass with no blocking issues
-- Zero instances of old orange (`#F3922D`) in visible UI
+- Brand color is consistently `#ff8b00` (Swoop orange) across all accent elements
 - Sidebar visible on standard laptop screens (1024px+)
 - Tab switchers readable with proper spacing
 - TailAdmin Card and Badge components used on Admin page
