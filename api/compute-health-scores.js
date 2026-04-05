@@ -200,7 +200,7 @@ export default withAuth(async function handler(req, res) {
             UPDATE members
             SET health_score = NULL, health_tier = 'Insufficient Data', archetype = 'New Member',
                 data_completeness = ${dataCompleteness}, last_health_update = NOW()
-            WHERE member_id = ${member.member_id}
+            WHERE member_id = ${member.member_id} AND club_id = ${clubId}
           `;
           computed++;
           continue;
@@ -256,7 +256,7 @@ export default withAuth(async function handler(req, res) {
           UPDATE members
           SET health_score = ${score}, health_tier = ${tier}, archetype = ${archetype},
               data_completeness = ${dataCompleteness}, last_health_update = NOW()
-          WHERE member_id = ${member.member_id}
+          WHERE member_id = ${member.member_id} AND club_id = ${clubId}
         `;
 
         // Alert on significant drops

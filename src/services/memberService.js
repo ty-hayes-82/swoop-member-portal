@@ -327,6 +327,7 @@ export const _init = async () => {
       // Check if API returned actual member data (not just metadata)
       const hasMemberData = (apiData.total > 0) ||
         (Array.isArray(apiData.atRiskMembers) && apiData.atRiskMembers.length > 0) ||
+        (Array.isArray(apiData.memberRoster) && apiData.memberRoster.length > 0) ||
         (apiData.memberProfiles && Object.keys(apiData.memberProfiles).length > 0);
       if (hasMemberData) _hasRealMembers = true;
       _d = {
@@ -335,6 +336,12 @@ export const _init = async () => {
         healthDistribution: apiData.healthDistribution || _d.healthDistribution,
         memberProfiles: apiData.memberProfiles || _d.memberProfiles,
       };
+      // Ensure memberSummary.totalMembers is populated from apiData.total or roster length
+      if (_d.memberSummary) {
+        _d.memberSummary.totalMembers = _d.memberSummary.totalMembers || apiData.total || (Array.isArray(apiData.memberRoster) ? apiData.memberRoster.length : 0);
+      } else {
+        _d.memberSummary = { total: apiData.total || 0, totalMembers: apiData.total || (Array.isArray(apiData.memberRoster) ? apiData.memberRoster.length : 0) };
+      }
     }
   } catch { /* keep static fallback */ }
 
@@ -350,6 +357,7 @@ export const _init = async () => {
           _d.memberSummary = {
             ..._d.memberSummary,
             total: _live.totalMembers,
+            totalMembers: _live.totalMembers,
             healthy: _live.healthTiers.Healthy,
             watch: _live.healthTiers.Watch,
             atRisk: _live.healthTiers['At Risk'],
@@ -371,6 +379,8 @@ let _apiLoaded = false;
 let _hasRealMembers = false;
 
 const _shouldReturnEmpty = () => isAuthenticatedClub() && !_hasRealMembers;
+
+export const hasRealMemberData = () => _hasRealMembers;
 
 export const getHealthDistribution = () => {
   if (_shouldReturnEmpty()) return [];
@@ -410,8 +420,11 @@ export const getMemberSummary = () => {
     return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
   }
   const summary = _d?.memberSummary ?? {};
+  const total = Math.max(0, Math.round(toNumber(summary.total, 0)));
+  const totalMembers = Math.max(0, Math.round(toNumber(summary.totalMembers || summary.total, 0)));
   return {
-    total: Math.max(0, Math.round(toNumber(summary.total, 0))),
+    total,
+    totalMembers,
     healthy: Math.max(0, Math.round(toNumber(summary.healthy, 0))),
     watch: Math.max(0, Math.round(toNumber(summary.watch, 0))),
     atRisk: Math.max(0, Math.round(toNumber(summary.atRisk, 0))),

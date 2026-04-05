@@ -87,34 +87,43 @@ const IMPORT_TYPES = {
   // Phase 4: Events + Email
   events: {
     requiredFields: ['event_id', 'event_name'],
-    optionalFields: ['event_type', 'start_date', 'capacity', 'pricing_category', 'description'],
+    optionalFields: ['event_type', 'start_date', 'capacity', 'registration_fee', 'description'],
     table: 'event_definitions',
+    // CSV field -> DB column mapping
+    columnMap: { event_name: 'name', event_type: 'type', start_date: 'event_date' },
   },
   event_registrations: {
     requiredFields: ['registration_id', 'event_id'],
     optionalFields: ['member_id', 'status', 'guest_count', 'fee_paid', 'registration_date', 'check_in_time'],
     table: 'event_registrations',
+    columnMap: { registration_date: 'registered_at', check_in_time: 'checked_in_at' },
+    defaults: { registered_at: () => new Date().toISOString() },
   },
   email_campaigns: {
     requiredFields: ['campaign_id', 'subject'],
     optionalFields: ['campaign_type', 'send_date', 'audience_count'],
     table: 'email_campaigns',
+    columnMap: { campaign_type: 'type', audience_count: 'recipient_count' },
   },
   email_events: {
     requiredFields: ['campaign_id', 'member_id', 'event_type'],
     optionalFields: ['timestamp', 'link_clicked', 'device'],
     table: 'email_events',
+    columnMap: { timestamp: 'occurred_at', device: 'device_type' },
+    defaults: { event_id: () => `ee_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, occurred_at: () => new Date().toISOString() },
   },
   // Phase 5: Staffing + Billing
   staff: {
     requiredFields: ['employee_id', 'first_name', 'last_name'],
     optionalFields: ['department', 'job_title', 'hire_date', 'hourly_rate', 'ft_pt'],
     table: 'staff',
+    columnMap: { employee_id: 'staff_id', job_title: 'role', ft_pt: 'is_full_time' },
   },
   shifts: {
     requiredFields: ['shift_id', 'employee_id', 'date'],
     optionalFields: ['location', 'shift_start', 'shift_end', 'actual_hours', 'notes'],
     table: 'staff_shifts',
+    columnMap: { employee_id: 'staff_id', date: 'shift_date', shift_start: 'start_time', shift_end: 'end_time', actual_hours: 'hours_worked' },
   },
   invoices: {
     requiredFields: ['invoice_id', 'member_id', 'statement_date'],
@@ -211,13 +220,37 @@ export default withAuth(async function handler(req, res) {
       } else {
         // Generic insert for all other import types
         const allFields = [...config.requiredFields, ...config.optionalFields];
-        const columns = ['club_id', 'data_source'];
-        const values = [clubId, 'csv_import'];
+        const columnMap = config.columnMap || {};
+        // Not all tables have club_id or data_source columns
+        const tablesWithoutClubId = new Set(['event_registrations', 'email_events', 'booking_players', 'pos_line_items', 'pos_payments']);
+        const tablesWithDataSource = new Set(['members', 'rounds', 'transactions', 'complaints']);
+        const columns = [];
+        const values = [];
+        if (!tablesWithoutClubId.has(config.table)) {
+          columns.push('club_id');
+          values.push(clubId);
+        }
+        if (tablesWithDataSource.has(config.table)) {
+          columns.push('data_source');
+          values.push('csv_import');
+        }
+        const mappedColumns = new Set(); // track which DB columns we've added
         for (const field of allFields) {
           if (row[field] !== undefined && row[field] !== null && String(row[field]).trim() !== '') {
-            columns.push(field);
+            const dbColumn = columnMap[field] || field;
+            columns.push(dbColumn);
+            mappedColumns.add(dbColumn);
             const val = row[field];
             values.push(typeof val === 'string' && !isNaN(Number(val)) && field.match(/amount|fee|price|total|revenue|rate|count|hours|covers|capacity/) ? Number(val) : val);
+          }
+        }
+        // Apply defaults for missing NOT NULL columns
+        if (config.defaults) {
+          for (const [col, defaultFn] of Object.entries(config.defaults)) {
+            if (!mappedColumns.has(col)) {
+              columns.push(col);
+              values.push(typeof defaultFn === 'function' ? defaultFn() : defaultFn);
+            }
           }
         }
         const placeholders = values.map((_, idx) => `$${idx + 1}`).join(', ');

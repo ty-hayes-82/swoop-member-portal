@@ -14,6 +14,7 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
+import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
 function getGreeting() {
@@ -49,7 +50,8 @@ export default function TodayView() {
   }
 
   // Real club with no operational data — show welcome state instead of demo data
-  const hasNoData = isAuthenticatedClub() && !briefing?.teeSheet?.roundsToday && priorities.length === 0;
+  // Don't show empty state if we have imported member data
+  const hasNoData = isAuthenticatedClub() && !briefing?.teeSheet?.roundsToday && priorities.length === 0 && !hasRealMemberData();
   if (hasNoData) {
     return (
       <PageTransition>

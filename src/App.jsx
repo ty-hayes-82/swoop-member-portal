@@ -21,6 +21,7 @@ const AdminHub = lazy(() => import('@/features/admin/AdminHub'));
 const MemberProfilePage = lazy(() => import('@/features/member-profile/MemberProfilePage.jsx'));
 import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
 const IntegrationsPage = lazy(() => import('@/features/integrations/IntegrationsPage'));
+const CsvImportPage = lazy(() => import('@/features/integrations/CsvImportPage'));
 const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
 import LoginPage from '@/features/login/LoginPage';
 const ResetPasswordPage = lazy(() => import('@/features/login/ResetPasswordPage'));
@@ -35,6 +36,8 @@ const ROUTES = {
   'admin': AdminHub,
   'member-profile': MemberProfilePage,
   'integrations': IntegrationsPage,
+  'integrations/csv-import': CsvImportPage,
+  'csv-import': CsvImportPage,
   'playbooks': PlaybooksPage,
 };
 

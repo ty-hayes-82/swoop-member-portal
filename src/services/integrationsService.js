@@ -1,6 +1,7 @@
 import { apiFetch } from './apiClient';
 import { COMBOS, SYSTEMS, INTEGRATION_CATEGORY_SECTIONS, VENDOR_INTELLIGENCE_DETAILS } from '@/data/integrations';
 import { CATEGORY_TEMPLATE_MAP } from '@/services/csvImportService';
+import { isAuthenticatedClub } from '@/config/constants';
 
 let _d = null;
 
@@ -12,7 +13,13 @@ export const _init = async () => {
 };
 
 export function getConnectedSystems() {
-  if (!_d?.systems) return SYSTEMS;
+  if (!_d?.systems) {
+    // For real clubs, don't show hardcoded demo systems as connected
+    if (isAuthenticatedClub()) {
+      return SYSTEMS.map(s => ({ ...s, status: 'available', lastSync: null }));
+    }
+    return SYSTEMS;
+  }
   // Merge: use DB status/lastSync for systems that exist in both
   return SYSTEMS.map(s => {
     const live = _d.systems.find(ls => ls.id === s.id);

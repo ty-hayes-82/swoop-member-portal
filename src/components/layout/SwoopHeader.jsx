@@ -69,7 +69,10 @@ const SwoopHeader = () => {
         return;
       }
       searchTimerRef.current = setTimeout(() => {
-        fetch(`/api/search?q=${encodeURIComponent(q.trim())}&clubId=${clubId}`)
+        const token = localStorage.getItem('swoop_auth_token');
+        fetch(`/api/search?q=${encodeURIComponent(q.trim())}&clubId=${clubId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
           .then((r) => (r.ok ? r.json() : { results: [] }))
           .then((data) => {
             setSearchResults(data.results || []);

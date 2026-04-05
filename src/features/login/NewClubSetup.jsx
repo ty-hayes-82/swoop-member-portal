@@ -17,12 +17,15 @@ export default function NewClubSetup({ onComplete, onBack }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Step 1 state
+  // Step 0 state — club info + admin account
   const [clubName, setClubName] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [zip, setZip] = useState('');
   const [memberCount, setMemberCount] = useState('');
+  const [adminName, setAdminName] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
 
   // Created club data
   const [clubId, setClubId] = useState(null);
@@ -42,6 +45,9 @@ export default function NewClubSetup({ onComplete, onBack }) {
   // ─── Step 1: Create Club ───
   const handleCreateClub = async () => {
     if (!clubName.trim()) { setError('Club name is required'); return; }
+    if (!adminName.trim()) { setError('Your name is required'); return; }
+    if (!adminEmail.trim()) { setError('Email is required'); return; }
+    if (!adminPassword || adminPassword.length < 8) { setError('Password must be at least 8 characters'); return; }
     setError(null);
     setLoading(true);
     try {
@@ -56,8 +62,9 @@ export default function NewClubSetup({ onComplete, onBack }) {
           memberCount: parseInt(memberCount) || 50,
           courseCount: 1,
           outletCount: 3,
-          adminEmail: `admin@${clubName.trim().toLowerCase().replace(/\s+/g, '')}.com`,
-          adminName: 'Club Admin',
+          adminEmail: adminEmail.trim(),
+          adminName: adminName.trim(),
+          adminPassword,
         }),
       });
       const data = await res.json();
@@ -149,9 +156,9 @@ export default function NewClubSetup({ onComplete, onBack }) {
   // ─── Step 4: Go to Dashboard ───
   const handleFinish = () => {
     const user = {
-      userId: userId || 'admin', clubId, name: 'Club Admin',
+      userId: userId || 'admin', clubId, name: adminName.trim() || 'Club Admin',
       clubName: clubName.trim(),
-      email: `admin@club.com`, role: 'gm', title: 'General Manager',
+      email: adminEmail.trim() || 'admin@club.com', role: 'gm', title: 'General Manager',
     };
     localStorage.setItem('swoop_auth_user', JSON.stringify(user));
     localStorage.setItem('swoop_club_id', clubId);
@@ -237,6 +244,23 @@ export default function NewClubSetup({ onComplete, onBack }) {
             <div>
               <label style={labelStyle}>Estimated Members</label>
               <input type="number" value={memberCount} onChange={e => setMemberCount(e.target.value)} placeholder="300" style={inputStyle} />
+            </div>
+            <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '14px', marginTop: '4px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '10px' }}>Admin Account</div>
+              <div className="flex flex-col gap-3.5">
+                <div>
+                  <label style={labelStyle}>Your Name *</label>
+                  <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Sarah Mitchell" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Email *</label>
+                  <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="sarah@pinevalleycc.com" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Password *</label>
+                  <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Min 8 characters" style={inputStyle} />
+                </div>
+              </div>
             </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
               <button onClick={onBack} style={btnSecondary}>Back</button>

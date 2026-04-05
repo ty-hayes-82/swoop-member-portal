@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 import { Card } from '@/components/tailadmin';
 import Badge from '@/components/tailadmin/Badge';
+import { getConnectedSystems } from '@/services/integrationsService';
 
 // V3: Reduced from 5 tabs to 2. CSV Import, Notifications, User Roles deferred.
 // V5: Data Health tab hidden until 2+ live API sources connected
@@ -92,28 +93,19 @@ function DataHubTab({ clubId }) {
       <Card>
         <h3 className="text-base font-bold mb-3 m-0 text-gray-800 dark:text-white/90">Connected Sources</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {[
-            { name: 'Jonas Club CRM', status: 'connected', icon: '👥', tables: 'members, households, membership_types', rows: '300+' },
-            { name: 'ForeTees Tee Sheet', status: 'available', icon: '⛳', tables: 'bookings, pace_of_play', rows: '—' },
-            { name: 'POS System', status: 'available', icon: '🍽️', tables: 'pos_checks, pos_line_items, pos_payments', rows: '—' },
-            { name: 'Email Marketing', status: 'available', icon: '📧', tables: 'email_campaigns, email_events', rows: '—' },
-            { name: 'Staffing / Labor', status: 'available', icon: '👷', tables: 'staff, staff_shifts', rows: '—' },
-            { name: 'Weather API', status: 'connected', icon: '🌤️', tables: 'weather_daily', rows: '365' },
-            { name: 'Events System', status: 'connected', icon: '🎉', tables: 'event_definitions, event_registrations', rows: '120+' },
-            { name: 'Complaints & Feedback', status: 'connected', icon: '📝', tables: 'feedback, service_requests', rows: '47' },
-          ].map(source => (
-            <div key={source.name} className={`px-3.5 py-3 rounded-lg border ${
+          {getConnectedSystems().slice(0, 12).map(source => (
+            <div key={source.id} className={`px-3.5 py-3 rounded-lg border ${
               source.status === 'connected'
                 ? 'border-success-300 bg-success-50 dark:border-success-500/30 dark:bg-success-500/5'
                 : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
             }`}>
               <div className="flex justify-between items-center mb-1.5">
-                <span className="text-lg">{source.icon}</span>
+                <span className="text-lg font-bold text-gray-400">{source.logo}</span>
                 <Badge color={source.status === 'connected' ? 'success' : 'light'} size="sm">{source.status}</Badge>
               </div>
               <div className="font-semibold text-sm text-gray-800 dark:text-white/90">{source.name}</div>
-              <div className="text-[11px] text-gray-500 mt-0.5">{source.tables}</div>
-              {source.status === 'connected' && <div className="text-[11px] text-success-600 dark:text-success-400 mt-1">{source.rows} rows synced</div>}
+              <div className="text-[11px] text-gray-500 mt-0.5">{source.category}</div>
+              {source.status === 'connected' && source.lastSync && <div className="text-[11px] text-success-600 dark:text-success-400 mt-1">Synced {source.lastSync}</div>}
             </div>
           ))}
         </div>
