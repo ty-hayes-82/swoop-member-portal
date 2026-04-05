@@ -114,9 +114,19 @@ export default async function handler(req, res) {
         `;
       }
 
+      // Create a session token so the user is immediately logged in
+      const token = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      await sql`
+        INSERT INTO sessions (token, user_id, club_id, role, expires_at)
+        VALUES (${token}, ${userId}, ${clubId}, 'gm', ${expiresAt.toISOString()})
+      `;
+
       res.status(201).json({
         clubId,
         userId,
+        token,
+        user: { userId, clubId, name: adminName, email: adminEmail.toLowerCase(), role: 'gm', title: 'General Manager', clubName },
         message: `Club "${clubName}" created. Onboarding started.`,
         nextStep: 'crm_connected',
       });

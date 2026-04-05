@@ -71,6 +71,13 @@ export default function NewClubSetup({ onComplete, onBack }) {
       if (!res.ok) { setError(data.error || 'Failed to create club'); setLoading(false); return; }
       setClubId(data.clubId);
       setUserId(data.userId);
+      // Store auth token immediately so API calls work during setup
+      if (data.token) {
+        localStorage.setItem('swoop_auth_token', data.token);
+        localStorage.setItem('swoop_club_id', data.clubId);
+        localStorage.setItem('swoop_club_name', clubName.trim());
+        localStorage.setItem('swoop_auth_user', JSON.stringify(data.user));
+      }
       setStep(1);
     } catch {
       setError('Connection error. Check your network and try again.');

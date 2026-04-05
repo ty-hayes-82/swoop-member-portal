@@ -8,6 +8,7 @@
  * - Activity Log (Import History + Agent Actions + System Events)
  */
 import { useState, useEffect } from 'react';
+import { useNavigationContext } from '@/context/NavigationContext';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 import { Card } from '@/components/tailadmin';
 import Badge from '@/components/tailadmin/Badge';
@@ -21,6 +22,7 @@ const ALL_ADMIN_TABS = [
 ];
 
 export default function AdminHub() {
+  const { navigate } = useNavigationContext();
   const [liveSourceCount, setLiveSourceCount] = useState(0);
   const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
 
@@ -117,7 +119,7 @@ function DataHubTab({ clubId }) {
           <div className="font-bold text-sm text-gray-800 dark:text-white/90">Manual Data Upload</div>
           <div className="text-xs text-gray-500">Upload CSV files for members, rounds, transactions, or complaints when API access isn't available.</div>
         </div>
-        <button onClick={() => { window.location.hash = '#/integrations/csv-import'; }} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer">Open Upload Tool</button>
+        <button onClick={() => navigate('csv-import')} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer">Open Upload Tool</button>
       </div>
     </div>
   );
