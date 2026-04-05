@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 export default async function handler(req, res) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
   const results = {};
   try {
     const types = await sql`SELECT event_type, COUNT(*) AS n FROM email_events GROUP BY event_type ORDER BY n DESC`;

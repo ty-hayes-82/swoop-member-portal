@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+// XLSX is lazy-loaded inside parseCSV to reduce initial bundle size
 
 // Maps integration categories (from SYSTEMS data) to CSV template keys
 export const CATEGORY_TEMPLATE_MAP = {
@@ -533,6 +533,7 @@ export const generateTemplate = (key) => {
 };
 
 export const parseCSV = async (file) => {
+  const XLSX = await import('xlsx');
   const extension = (file.name.split('.').pop() ?? '').toLowerCase();
   let workbook;
   if (extension === 'xlsx' || extension === 'xls') {

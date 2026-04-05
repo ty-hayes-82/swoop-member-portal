@@ -1,12 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useNavigationContext } from "@/context/NavigationContext";
 import { NAV_ITEMS } from "@/config/navigation";
 
 const SwoopHeader = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
-  const { currentRoute } = useNavigationContext();
+  const { currentRoute, navigate } = useNavigationContext();
   const inputRef = useRef(null);
+  const searchTimerRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const currentNav = NAV_ITEMS.find((item) => item.key === currentRoute) || NAV_ITEMS[0];
 
@@ -40,8 +46,59 @@ const SwoopHeader = () => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Fetch unread notification count on mount
+  useEffect(() => {
+    if (!clubId || clubId === "demo") return;
+    fetch(`/api/notifications?clubId=${clubId}&unreadOnly=true`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.notifications) setUnreadCount(data.notifications.length);
+      })
+      .catch(() => {});
+  }, [clubId]);
+
+  // Debounced search
+  const handleSearchChange = useCallback(
+    (e) => {
+      const q = e.target.value;
+      setSearchQuery(q);
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+      if (!q || q.trim().length < 2) {
+        setSearchResults([]);
+        setShowSearchResults(false);
+        return;
+      }
+      searchTimerRef.current = setTimeout(() => {
+        fetch(`/api/search?q=${encodeURIComponent(q.trim())}&clubId=${clubId}`)
+          .then((r) => (r.ok ? r.json() : { results: [] }))
+          .then((data) => {
+            setSearchResults(data.results || []);
+            setShowSearchResults(true);
+          })
+          .catch(() => {
+            setSearchResults([]);
+            setShowSearchResults(false);
+          });
+      }, 300);
+    },
+    [clubId]
+  );
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Escape") {
+      setShowSearchResults(false);
+      setSearchQuery('');
+    }
+    if (e.key === "Enter" && searchResults.length > 0) {
+      e.preventDefault();
+      navigate("members", { mode: "search" });
+      setShowSearchResults(false);
+      setSearchQuery('');
+    }
+  };
+
   return (
-    <header className="sticky top-0 flex w-full bg-white border-b border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900">
+    <header role="banner" className="sticky top-0 flex w-full bg-white border-b border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center justify-between w-full gap-4 px-3 py-3 lg:px-6 lg:py-4">
         {/* Left: hamburger + logo (mobile) or hamburger + search (desktop) */}
         <div className="flex items-center gap-2 sm:gap-4">
@@ -84,12 +141,41 @@ const SwoopHeader = () => {
                   ref={inputRef}
                   type="text"
                   placeholder="Search or type command..."
+                  aria-label="Search"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleSearchKeyDown}
+                  onFocus={() => searchResults.length > 0 && setShowSearchResults(true)}
+                  onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
                   className="h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 lg:w-[430px]"
                 />
                 <button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
                   <span>&#8984;</span>
                   <span>K</span>
                 </button>
+                {showSearchResults && (
+                  <div className="absolute left-0 top-12 w-full rounded-xl border border-gray-200 bg-white shadow-theme-lg z-50 max-h-80 overflow-y-auto dark:border-gray-800 dark:bg-gray-900">
+                    {searchResults.length === 0 ? (
+                      <div className="p-3 text-sm text-gray-500 text-center">No results found</div>
+                    ) : (
+                      searchResults.map((r) => (
+                        <button
+                          key={r.id}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            navigate("members", { mode: "search" });
+                            setShowSearchResults(false);
+                            setSearchQuery('');
+                          }}
+                          className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 cursor-pointer bg-transparent border-x-0 border-t-0"
+                        >
+                          <div className="text-sm font-semibold text-gray-800 dark:text-white/90">{r.name}</div>
+                          <div className="text-xs text-gray-500">{r.email} {r.archetype ? `\u00B7 ${r.archetype}` : ''}</div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             </form>
           </div>
@@ -110,6 +196,30 @@ const SwoopHeader = () => {
               <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-warning-50 text-warning-600 text-xs font-medium">
                 DEMO
               </span>
+            )}
+          </div>
+
+          {/* Notification bell */}
+          <div className="relative">
+            <button
+              onClick={() => setNotifOpen(!notifOpen)}
+              className="relative flex items-center justify-center w-10 h-10 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+              aria-label="Notifications"
+            >
+              <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-error-500 rounded-full">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+            {notifOpen && (
+              <div className="absolute right-0 top-12 w-80 max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-theme-lg z-50">
+                <div className="p-3 border-b border-gray-200 font-semibold text-sm text-gray-800">Notifications</div>
+                <div className="p-3 text-sm text-gray-500 text-center">No new notifications</div>
+              </div>
             )}
           </div>
 

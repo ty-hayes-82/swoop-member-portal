@@ -1,5 +1,6 @@
 import { sql } from "@vercel/postgres";
 export default async function handler(req, res) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
   try {
     const tables = await sql`SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name`;
     const result = {};

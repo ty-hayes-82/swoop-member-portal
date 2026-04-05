@@ -4,6 +4,7 @@
  * Returns: { members: true, rounds: false, transactions: false, ... }
  */
 import { sql } from '@vercel/postgres';
+import { withAuth } from './lib/withAuth.js';
 
 const TABLES = [
   { key: 'members', table: 'members', filter: 'club_id' },
@@ -15,7 +16,7 @@ const TABLES = [
   { key: 'health_scores', table: 'health_scores', filter: 'club_id' },
 ];
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
 
   const { clubId } = req.query;
@@ -52,4 +53,4 @@ export default async function handler(req, res) {
     dataScore: Object.values(availability).filter(Boolean).length,
     maxScore: TABLES.length,
   });
-}
+}, { roles: ['swoop_admin'] });

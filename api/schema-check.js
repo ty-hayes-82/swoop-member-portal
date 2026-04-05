@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 export default async function handler(req, res) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
   const tables = ['members','member_engagement_weekly','feedback','email_events','email_campaigns','visit_sessions','event_registrations','event_definitions','pos_checks','bookings','close_outs','pace_of_play','pace_hole_segments','weather_daily','waitlist_entries'];
   const result = {};
   for (const t of tables) {

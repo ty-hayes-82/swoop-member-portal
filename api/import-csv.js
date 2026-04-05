@@ -8,6 +8,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getClubId } from './lib/withAuth.js';
+import { cors } from './lib/cors.js';
 
 const IMPORT_TYPES = {
   // Phase 1: Club Setup + Members
@@ -139,6 +140,8 @@ function validateRow(row, config, rowIndex) {
 }
 
 export default withAuth(async function handler(req, res) {
+  if (cors(req, res)) return;
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
   }

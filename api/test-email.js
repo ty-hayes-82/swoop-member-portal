@@ -3,6 +3,7 @@
  * POST /api/test-email { to, subject, body }
  */
 export default async function handler(req, res) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const { to, from, subject, body } = req.body;

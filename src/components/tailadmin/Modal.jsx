@@ -7,8 +7,10 @@ export const Modal = ({
   className = "",
   showCloseButton = true,
   isFullscreen = false,
+  ariaLabel = "Dialog",
 }) => {
   const modalRef = useRef(null);
+  const closeButtonRef = useRef(null);
 
   useEffect(() => {
     const handleEscape = (event) => {
@@ -29,6 +31,14 @@ export const Modal = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      // Move focus into modal when it opens
+      requestAnimationFrame(() => {
+        if (closeButtonRef.current) {
+          closeButtonRef.current.focus();
+        } else if (modalRef.current) {
+          modalRef.current.focus();
+        }
+      });
     } else {
       document.body.style.overflow = "unset";
     }
@@ -56,10 +66,16 @@ export const Modal = ({
         ref={modalRef}
         className={`${contentClasses} ${className}`}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={ariaLabel}
+        tabIndex={-1}
       >
         {showCloseButton && (
           <button
+            ref={closeButtonRef}
             onClick={onClose}
+            aria-label="Close dialog"
             className="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11"
           >
             <svg

@@ -34,6 +34,9 @@ export default function ActionsDrawer({ isOpen, onClose }) {
       <div
         className={`fixed top-0 right-0 h-screen bg-white border-l border-gray-200 flex flex-col overflow-hidden z-[210] transition-transform duration-250 dark:bg-white/[0.03] dark:border-gray-800 ${isOpen ? 'translate-x-0 shadow-theme-xl' : 'translate-x-full'}`}
         style={{ width: Math.min(480, typeof window !== 'undefined' ? window.innerWidth - 60 : 480) }}
+        role="dialog"
+        aria-label="Actions drawer"
+        aria-hidden={!isOpen}
       >
         {/* Header */}
         <div className="px-5 py-4 border-b border-gray-200 flex justify-between items-center shrink-0 dark:border-gray-800">

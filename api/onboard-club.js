@@ -8,6 +8,8 @@
  */
 import { sql } from '@vercel/postgres';
 import crypto from 'crypto';
+import { rateLimit } from './lib/rateLimit.js';
+import { cors } from './lib/cors.js';
 
 function hashPassword(password, salt) {
   return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
@@ -26,6 +28,13 @@ const ONBOARDING_STEPS = [
 ];
 
 export default async function handler(req, res) {
+  if (cors(req, res)) return;
+
+  const rl = rateLimit(req, { maxAttempts: 3, windowMs: 3600000 });
+  if (rl.limited) {
+    return res.status(429).json({ error: 'Too many requests. Try again later.', retryAfter: rl.retryAfter });
+  }
+
   // Ensure onboarding table exists
   try {
     await sql`

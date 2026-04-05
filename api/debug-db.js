@@ -1,6 +1,7 @@
 import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
   try {
     const [membersByStatus, healthTiers, scoreStats, distinctMembers, weeklyCounts, sampleMembers, atRiskSample] = await Promise.all([
       sql`SELECT COUNT(*) AS total, membership_status FROM members GROUP BY membership_status`,

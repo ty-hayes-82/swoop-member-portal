@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
+import ErrorBoundary from './components/ErrorBoundary';
 import './styles/tailwind.css';
 
 const LandingPage = lazy(() => import('./landing/LandingPage.jsx'));
@@ -10,9 +11,11 @@ const isLandingRoute = normalizedPath === '/landing';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Suspense fallback={null}>
-      {isLandingRoute ? <LandingPage /> : <App />}
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={null}>
+        {isLandingRoute ? <LandingPage /> : <App />}
+      </Suspense>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 // deploy trigger Thu Mar  5 18:41:19 UTC 2026

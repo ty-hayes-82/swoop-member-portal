@@ -9,6 +9,8 @@
  */
 import { sql } from '@vercel/postgres';
 import crypto from 'crypto';
+import { rateLimit } from './lib/rateLimit.js';
+import { cors } from './lib/cors.js';
 
 const SESSION_TTL_HOURS = 24;
 
@@ -21,6 +23,8 @@ function hashPassword(password, salt) {
 }
 
 export default async function handler(req, res) {
+  if (cors(req, res)) return;
+
   // Ensure sessions table exists
   try {
     await sql`
@@ -36,6 +40,11 @@ export default async function handler(req, res) {
   } catch {}
 
   if (req.method === 'POST') {
+    const rl = rateLimit(req, { maxAttempts: 5, windowMs: 3600000 });
+    if (rl.limited) {
+      return res.status(429).json({ error: 'Too many login attempts. Try again later.', retryAfter: rl.retryAfter });
+    }
+
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' });

@@ -110,10 +110,12 @@ export default function MembersView() {
         <EvidenceStrip systems={['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email']} />
 
         {/* Mode switcher */}
-        <div className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
+        <div role="tablist" aria-label="Member views" className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
           {MODES.map(({ key, label }) => (
             <button
               key={key}
+              role="tab"
+              aria-selected={mode === key}
               onClick={() => setMode(key)}
               className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
                 mode === key
@@ -151,22 +153,24 @@ export default function MembersView() {
           </div>
         )}
 
-        {/* Mode: At-Risk — V3: simplified to HealthOverview + ResignationTimeline */}
-        {mode === 'at-risk' && (
-          <div className="flex flex-col gap-6">
-            <HealthOverview />
-          </div>
-        )}
+        <div role="tabpanel">
+          {/* Mode: At-Risk — V3: simplified to HealthOverview + ResignationTimeline */}
+          {mode === 'at-risk' && (
+            <div className="flex flex-col gap-6">
+              <HealthOverview />
+            </div>
+          )}
 
-        {/* Mode: Search */}
-        {mode === 'search' && (
-          <AllMembersView initialArchetype={archetype} />
-        )}
+          {/* Mode: Search */}
+          {mode === 'search' && (
+            <AllMembersView initialArchetype={archetype} />
+          )}
 
-        {/* Mode: First 90 Days */}
-        {mode === 'cohorts' && (
-          <CohortTab />
-        )}
+          {/* Mode: First 90 Days */}
+          {mode === 'cohorts' && (
+            <CohortTab />
+          )}
+        </div>
       </div>
     </PageTransition>
   );

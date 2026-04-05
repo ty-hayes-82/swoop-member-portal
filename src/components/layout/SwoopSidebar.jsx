@@ -77,6 +77,7 @@ const SwoopSidebar = () => {
         <button
           onClick={() => navigate("today")}
           className="flex items-center gap-3 cursor-pointer"
+          aria-label="Swoop home"
         >
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500">
             <span className="text-lg font-bold text-white">S</span>
@@ -91,7 +92,7 @@ const SwoopSidebar = () => {
 
       {/* Navigation */}
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar flex-1">
-        <nav className="mb-6">
+        <nav className="mb-6" role="navigation" aria-label="Main navigation">
           <div className="flex flex-col gap-1">
             <h2
               className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
@@ -124,6 +125,7 @@ const SwoopSidebar = () => {
                         ? "lg:justify-center"
                         : "lg:justify-start"
                     }`}
+                    {...(isActive(item.key) ? { "aria-current": "page" } : {})}
                   >
                     <span
                       className={`${

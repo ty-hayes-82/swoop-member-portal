@@ -6,6 +6,7 @@
  * Returns per-feature availability based on connected data domains.
  */
 import { sql } from '@vercel/postgres';
+import { withAuth } from './lib/withAuth.js';
 
 // Agent dependency matrix from the resilience audit
 const AGENT_DEPENDENCIES = [
@@ -36,7 +37,7 @@ const PLAYBOOK_DEPENDENCIES = [
 const ALL_FEATURES = [...AGENT_DEPENDENCIES, ...PLAYBOOK_DEPENDENCIES];
 const DOMAINS = ['CRM', 'TEE_SHEET', 'POS', 'EMAIL', 'LABOR'];
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method === 'GET') {
     const { clubId } = req.query;
     if (!clubId) return res.status(400).json({ error: 'clubId required' });
@@ -158,7 +159,7 @@ export default async function handler(req, res) {
   }
 
   res.status(405).json({ error: 'GET or POST only' });
-}
+}, { roles: ['swoop_admin'] });
 
 function getNextRecommendedDomain(connected, features) {
   const DOMAIN_ORDER = ['CRM', 'TEE_SHEET', 'POS', 'EMAIL', 'LABOR'];

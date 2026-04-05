@@ -9,6 +9,7 @@ const CANONICAL_OUTLETS = [
 ];
 
 export default async function handler(req, res) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
   if (req.method && req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Use POST to trigger the seed-fix.' });

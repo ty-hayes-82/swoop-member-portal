@@ -108,24 +108,28 @@ export default function LoginPage({ onLogin }) {
         {/* Login form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="text-[13px] font-semibold text-gray-700 block mb-1.5">Email</label>
+            <label htmlFor="login-email" className="text-[13px] font-semibold text-gray-700 block mb-1.5">Email</label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="sarah@oakmonthills.com"
               required
+              aria-required="true"
               className="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
           <div>
-            <label className="text-[13px] font-semibold text-gray-700 block mb-1.5">Password</label>
+            <label htmlFor="login-password" className="text-[13px] font-semibold text-gray-700 block mb-1.5">Password</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Enter password"
               required
+              aria-required="true"
               className="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
@@ -160,12 +164,15 @@ export default function LoginPage({ onLogin }) {
           <div className="mt-4 p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
             <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Reset your password</div>
             <p className="text-xs text-gray-500 mb-3">Enter your email and we'll send you a reset link.</p>
+            <label htmlFor="forgot-email" className="sr-only">Account email</label>
             <input
+              id="forgot-email"
               type="email"
               value={forgotEmail}
               onChange={e => setForgotEmail(e.target.value)}
               placeholder="Your account email"
-              className={inputClasses}
+              aria-required="true"
+              className="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
             {forgotMessage && (
               <div className={`mt-2 text-xs font-medium ${forgotMessage.includes('error') ? 'text-error-500' : 'text-success-600'}`}>
@@ -203,14 +210,18 @@ export default function LoginPage({ onLogin }) {
             <div className="text-[13px] font-semibold text-gray-700">
               Enter your contact info to receive test emails and SMS during demo:
             </div>
+            <label htmlFor="demo-email" className="sr-only">Demo email</label>
             <input
+              id="demo-email"
               type="email"
               value={demoEmail}
               onChange={e => setDemoEmail(e.target.value)}
               placeholder="Your email (for test emails)"
               className="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
+            <label htmlFor="demo-phone" className="sr-only">Demo phone</label>
             <input
+              id="demo-phone"
               type="tel"
               value={demoPhone}
               onChange={e => setDemoPhone(e.target.value)}

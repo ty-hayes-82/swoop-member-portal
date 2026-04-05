@@ -3,14 +3,29 @@
 // Returns proposed actions in the same shape as Phase A mock data
 // agentService.js calls this when Phase C flag is enabled
 
+import { sql } from '@vercel/postgres';
+
+async function getClubName(clubId) {
+  if (!clubId) return 'your club';
+  try {
+    const result = await sql`SELECT name FROM club WHERE club_id = ${clubId}`;
+    return result.rows[0]?.name || 'your club';
+  } catch {
+    return 'your club';
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { agentId, context } = req.body ?? {};
+  const { agentId, context, clubId } = req.body ?? {};
   if (!agentId) return res.status(400).json({ error: 'agentId required' });
 
+  // Resolve club name dynamically — no hardcoded club references
+  const clubName = await getClubName(clubId || req.auth?.clubId);
+
   const SYSTEM_PROMPTS = {
-    'chief-of-staff': `You are the Morning Chief of Staff for Oakmont Hills Country Club.
+    'chief-of-staff': `You are the Morning Chief of Staff for ${clubName}.
 Your job is to review the operational briefing and propose a prioritized action plan for GM approval.
 
 Rules:
@@ -30,7 +45,7 @@ Return format: JSON array of objects with these fields exactly:
   "sourceSignals": ["signal:id", ...]
 }]`,
 
-    'retention-sentinel': `You are the Retention Sentinel for Oakmont Hills Country Club.
+    'retention-sentinel': `You are the Retention Sentinel for ${clubName}.
 You monitor all members for disengagement signals and flag those at risk of resignation.
 
 Rules:
@@ -42,7 +57,7 @@ Rules:
 
 Return format: same JSON array format as chief-of-staff.`,
 
-    'service-recovery': `You are the Service Recovery Agent for Oakmont Hills Country Club.
+    'service-recovery': `You are the Service Recovery Agent for ${clubName}.
 You monitor unresolved member complaints and propose follow-up interventions.
 
 Rules:

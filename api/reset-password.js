@@ -7,14 +7,23 @@
  */
 import { sql } from '@vercel/postgres';
 import crypto from 'crypto';
+import { rateLimit } from './lib/rateLimit.js';
+import { cors } from './lib/cors.js';
 
 function hashPassword(password, salt) {
   return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
 }
 
 export default async function handler(req, res) {
+  if (cors(req, res)) return;
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
+  }
+
+  const rl = rateLimit(req, { maxAttempts: 5, windowMs: 3600000 });
+  if (rl.limited) {
+    return res.status(429).json({ error: 'Too many requests. Try again later.', retryAfter: rl.retryAfter });
   }
 
   const { token, newPassword } = req.body || {};

@@ -1,6 +1,7 @@
 import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
   try {
     // Create tables if not exists
     await sql`CREATE TABLE IF NOT EXISTS agent_definitions (

@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
-export default async function handler(req, res) {
+import { withAuth } from './lib/withAuth.js';
+export default withAuth(async function handler(req, res) {
   try {
     const [linkedCount, completedBookings, bpCount, prdChecks, sampleLinked, sampleBooking, sampleBP] = await Promise.all([
       sql`SELECT COUNT(*) AS c FROM pos_checks WHERE linked_booking_id IS NOT NULL`,
@@ -31,4 +32,4 @@ export default async function handler(req, res) {
       joinTest: joinTest.rows[0],
     });
   } catch(e) { res.status(500).json({ error: e.message }); }
-}
+}, { roles: ['swoop_admin'] });

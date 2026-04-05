@@ -50,10 +50,12 @@ export default function ServiceView() {
         <EvidenceStrip systems={['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather']} />
 
         {/* Tab switcher */}
-        <div className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
+        <div role="tablist" aria-label="Service tabs" className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
           {TABS.map(({ key, label }) => (
             <button
               key={key}
+              role="tab"
+              aria-selected={activeTab === key}
               onClick={() => setActiveTab(key)}
               className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
                 activeTab === key
@@ -67,9 +69,11 @@ export default function ServiceView() {
         </div>
 
         {/* Tab content */}
-        {activeTab === 'quality' && <QualityTab />}
-        {activeTab === 'staffing' && <StaffingTab />}
-        {activeTab === 'complaints' && <ComplaintsTab />}
+        <div role="tabpanel">
+          {activeTab === 'quality' && <QualityTab />}
+          {activeTab === 'staffing' && <StaffingTab />}
+          {activeTab === 'complaints' && <ComplaintsTab />}
+        </div>
       </div>
     </PageTransition>
   );

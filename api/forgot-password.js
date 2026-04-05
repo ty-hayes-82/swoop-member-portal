@@ -9,14 +9,23 @@
  */
 import { sql } from '@vercel/postgres';
 import crypto from 'crypto';
+import { rateLimit } from './lib/rateLimit.js';
+import { cors } from './lib/cors.js';
 
 const RESET_TTL_HOURS = 1;
 const FROM_EMAIL = 'ty.hayes@swoopgolf.com';
 const FROM_NAME = 'Swoop Golf';
 
 export default async function handler(req, res) {
+  if (cors(req, res)) return;
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
+  }
+
+  const rl = rateLimit(req, { maxAttempts: 3, windowMs: 3600000 });
+  if (rl.limited) {
+    return res.status(429).json({ error: 'Too many requests. Try again later.', retryAfter: rl.retryAfter });
   }
 
   const { email } = req.body || {};

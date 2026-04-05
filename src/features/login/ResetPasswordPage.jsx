@@ -102,24 +102,28 @@ export default function ResetPasswordPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1.5">New Password</label>
+            <label htmlFor="new-password" className="text-sm font-semibold text-gray-700 block mb-1.5">New Password</label>
             <input
+              id="new-password"
               type="password"
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
               placeholder="Minimum 8 characters"
               required
+              aria-required="true"
               className={inputClasses}
             />
           </div>
           <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1.5">Confirm Password</label>
+            <label htmlFor="confirm-password" className="text-sm font-semibold text-gray-700 block mb-1.5">Confirm Password</label>
             <input
+              id="confirm-password"
               type="password"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               placeholder="Re-enter your password"
               required
+              aria-required="true"
               className={inputClasses}
             />
           </div>

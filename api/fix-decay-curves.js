@@ -5,6 +5,7 @@
 import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
   try {
     const maxWeekResult = await sql`SELECT MAX(week_number) AS mw FROM member_engagement_weekly`;
     const maxWeek = Number(maxWeekResult.rows[0]?.mw ?? 12);

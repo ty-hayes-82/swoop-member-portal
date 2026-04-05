@@ -6,8 +6,9 @@
  * including last successful sync per source type.
  */
 import { sql } from '@vercel/postgres';
+import { withAuth } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'GET only' });
   }
@@ -52,4 +53,4 @@ export default async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+}, { roles: ['swoop_admin'] });

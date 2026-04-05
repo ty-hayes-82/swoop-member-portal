@@ -49,10 +49,12 @@ export default function AdminHub() {
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
+      <div role="tablist" aria-label="Admin tabs" className="flex gap-1 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
         {ADMIN_TABS.map(tab => (
           <button
             key={tab.key}
+            role="tab"
+            aria-selected={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
               activeTab === tab.key
@@ -67,8 +69,10 @@ export default function AdminHub() {
       </div>
 
       {/* Tab content */}
-      {activeTab === 'data-hub' && <DataHubTab clubId={clubId} />}
-      {activeTab === 'health' && <DataHealthDashboard />}
+      <div role="tabpanel">
+        {activeTab === 'data-hub' && <DataHubTab clubId={clubId} />}
+        {activeTab === 'health' && <DataHealthDashboard />}
+      </div>
       {/* V3: CSV Import, Notifications, User Roles removed — white-glove onboarding */}
     </div>
   );
