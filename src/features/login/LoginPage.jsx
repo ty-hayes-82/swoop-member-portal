@@ -45,6 +45,30 @@ export default function LoginPage({ onLogin }) {
   // New club setup mode
   const [showNewClub, setShowNewClub] = useState(false);
 
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState('');
+
+  const handleForgotPassword = async () => {
+    if (!forgotEmail) { setForgotMessage('Please enter your email'); return; }
+    setForgotLoading(true);
+    setForgotMessage('');
+    try {
+      const res = await fetch('/api/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      const data = await res.json();
+      setForgotMessage(data.message || 'Reset link sent. Check your email.');
+    } catch {
+      setForgotMessage('Connection error. Please try again.');
+    }
+    setForgotLoading(false);
+  };
+
   // Demo mode state
   const [showDemoSetup, setShowDemoSetup] = useState(false);
   const [demoEmail, setDemoEmail] = useState('');
@@ -120,6 +144,51 @@ export default function LoginPage({ onLogin }) {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        {/* Forgot password */}
+        <div className="text-center mt-3">
+          <button
+            onClick={() => setShowForgotPassword(true)}
+            className="text-sm text-brand-500 hover:text-brand-600 font-medium bg-transparent border-none cursor-pointer"
+          >
+            Forgot your password?
+          </button>
+        </div>
+
+        {/* Forgot password form */}
+        {showForgotPassword && (
+          <div className="mt-4 p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Reset your password</div>
+            <p className="text-xs text-gray-500 mb-3">Enter your email and we'll send you a reset link.</p>
+            <input
+              type="email"
+              value={forgotEmail}
+              onChange={e => setForgotEmail(e.target.value)}
+              placeholder="Your account email"
+              className={inputClasses}
+            />
+            {forgotMessage && (
+              <div className={`mt-2 text-xs font-medium ${forgotMessage.includes('error') ? 'text-error-500' : 'text-success-600'}`}>
+                {forgotMessage}
+              </div>
+            )}
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={handleForgotPassword}
+                disabled={forgotLoading}
+                className="px-4 py-2 rounded-lg bg-brand-500 text-white text-xs font-bold hover:bg-brand-600 disabled:opacity-50 transition-colors"
+              >
+                {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+              </button>
+              <button
+                onClick={() => { setShowForgotPassword(false); setForgotMessage(''); }}
+                className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 text-xs font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Divider */}
         <div className="flex items-center gap-3 my-6">

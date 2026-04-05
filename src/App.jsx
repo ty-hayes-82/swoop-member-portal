@@ -23,6 +23,7 @@ import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.j
 const IntegrationsPage = lazy(() => import('@/features/integrations/IntegrationsPage'));
 const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
 import LoginPage from '@/features/login/LoginPage';
+const ResetPasswordPage = lazy(() => import('@/features/login/ResetPasswordPage'));
 
 // V3 Phase 5: Clean route map — only active pages.
 // All legacy routes handled by ROUTE_REDIRECTS in NavigationContext.
@@ -126,6 +127,16 @@ export default function App() {
   const [authed, setAuthed] = useState(() => {
     try { return !!localStorage.getItem('swoop_auth_user'); } catch { return false; }
   });
+
+  // Password reset page — accessible without auth
+  const hash = window.location.hash;
+  if (hash.startsWith('#/reset-password')) {
+    return (
+      <Suspense fallback={null}>
+        <ResetPasswordPage />
+      </Suspense>
+    );
+  }
 
   if (!authed) {
     return <LoginPage onLogin={() => { setAuthed(true); window.location.reload(); }} />;
