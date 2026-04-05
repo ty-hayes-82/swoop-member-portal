@@ -49,7 +49,10 @@ const SwoopHeader = () => {
   // Fetch unread notification count on mount
   useEffect(() => {
     if (!clubId || clubId === "demo") return;
-    fetch(`/api/notifications?clubId=${clubId}&unreadOnly=true`)
+    const token = localStorage.getItem('swoop_auth_token');
+    fetch(`/api/notifications?clubId=${clubId}&unreadOnly=true`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.notifications) setUnreadCount(data.notifications.length);
@@ -233,7 +236,7 @@ const SwoopHeader = () => {
                 {userName}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 m-0">
-                {clubId === "demo" ? "Demo Environment" : clubId}
+                {clubId === "demo" ? "Demo Environment" : ((() => { try { return localStorage.getItem("swoop_club_name") || JSON.parse(localStorage.getItem("swoop_auth_user") || "{}").clubName || "Connected Club"; } catch { return "Connected Club"; } })())}
               </p>
             </div>
             <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 text-brand-600 font-semibold text-sm">

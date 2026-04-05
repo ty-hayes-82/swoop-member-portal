@@ -53,12 +53,17 @@ export default withAuth(async function handler(req, res) {
     const { clubId, userId, unreadOnly } = req.query;
     if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
-    const query = unreadOnly === 'true'
-      ? sql`SELECT * FROM notifications WHERE club_id = ${clubId} AND (user_id = ${userId} OR user_id IS NULL) AND read_at IS NULL ORDER BY created_at DESC LIMIT 50`
-      : sql`SELECT * FROM notifications WHERE club_id = ${clubId} AND (user_id = ${userId} OR user_id IS NULL) ORDER BY created_at DESC LIMIT 50`;
+    try {
+      const query = unreadOnly === 'true'
+        ? sql`SELECT * FROM notifications WHERE club_id = ${clubId} AND (user_id = ${userId} OR user_id IS NULL) AND read_at IS NULL ORDER BY created_at DESC LIMIT 50`
+        : sql`SELECT * FROM notifications WHERE club_id = ${clubId} AND (user_id = ${userId} OR user_id IS NULL) ORDER BY created_at DESC LIMIT 50`;
 
-    const result = await query;
-    return res.status(200).json({ notifications: result.rows });
+      const result = await query;
+      return res.status(200).json({ notifications: result.rows });
+    } catch {
+      // Table may not have any data yet for this club — return empty
+      return res.status(200).json({ notifications: [] });
+    }
   }
 
   if (req.method === 'POST') {

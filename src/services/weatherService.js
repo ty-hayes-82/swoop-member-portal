@@ -9,11 +9,13 @@ import { isAuthenticatedClub } from '@/config/constants';
 let _current = null;
 let _forecast = null;
 
-const CLUB_ID = 'club_001';
+function getClubId() {
+  try { return localStorage.getItem('swoop_club_id') || 'club_001'; } catch { return 'club_001'; }
+}
 
 export const _init = async () => {
   try {
-    const res = await fetch(`/api/weather?clubId=${CLUB_ID}&type=forecast`);
+    const res = await fetch(`/api/weather?clubId=${getClubId()}&type=forecast`);
     if (res.ok) {
       _forecast = await res.json();
       _current = _forecast.current || null;
