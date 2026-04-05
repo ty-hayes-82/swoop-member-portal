@@ -48,6 +48,13 @@ export default async function handler(req, res) {
       }
     } catch (e) {
       console.error('Weather API error:', e);
+      // Return graceful fallback instead of 500 when weather sources are unavailable
+      if (e.message?.includes('No coordinates found') || e.message?.includes('All weather sources unavailable')) {
+        return res.status(200).json({
+          temp: null, conditions: 'unavailable', conditionsText: 'Weather data unavailable',
+          source: 'none', stale: true, error: e.message,
+        });
+      }
       return res.status(500).json({ error: e.message });
     }
   }

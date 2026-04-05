@@ -16,11 +16,44 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'POST only' });
+  const clubId = getClubId(req);
+
+  // GET: Return precomputed correlations from the database
+  if (req.method === 'GET') {
+    try {
+      const { rows } = await sql`
+        SELECT correlation_key, headline, detail, domains, impact,
+               metric_value, metric_label, trend, delta, delta_direction, computed_at
+        FROM correlations
+        WHERE club_id = ${clubId}
+        ORDER BY computed_at DESC
+      `;
+      return res.status(200).json({
+        clubId,
+        correlationsComputed: rows.length,
+        correlations: rows.map(r => ({
+          key: r.correlation_key,
+          headline: r.headline,
+          detail: r.detail,
+          domains: r.domains,
+          impact: r.impact,
+          metricValue: r.metric_value,
+          metricLabel: r.metric_label,
+          trend: r.trend,
+          delta: r.delta,
+          deltaDirection: r.delta_direction,
+          computedAt: r.computed_at,
+        })),
+      });
+    } catch (e) {
+      console.error('Fetch correlations error:', e);
+      return res.status(200).json({ clubId, correlationsComputed: 0, correlations: [] });
+    }
   }
 
-  const clubId = getClubId(req);
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'GET or POST only' });
+  }
 
   // Ensure correlations table exists
   try {

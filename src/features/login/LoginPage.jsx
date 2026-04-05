@@ -101,6 +101,11 @@ export default function LoginPage({ onLogin }) {
       <div className="w-full max-w-[400px] rounded-2xl border border-gray-200 bg-white p-10 shadow-theme-lg">
         {/* Logo */}
         <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand-500">
+              <span className="text-xl font-bold text-white">S</span>
+            </div>
+          </div>
           <div className="text-[28px] font-extrabold text-gray-900">Swoop Golf</div>
           <div className="text-sm text-gray-500 mt-1">Club Intelligence for General Managers</div>
         </div>
