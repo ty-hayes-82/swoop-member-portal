@@ -89,8 +89,8 @@ const IMPORT_TYPES = {
     requiredFields: ['event_id', 'event_name'],
     optionalFields: ['event_type', 'start_date', 'capacity', 'registration_fee', 'description'],
     table: 'event_definitions',
-    // CSV field -> DB column mapping
     columnMap: { event_name: 'name', event_type: 'type', start_date: 'event_date' },
+    defaults: { capacity: () => 50, type: () => 'social', event_date: () => new Date().toISOString().slice(0, 10), registration_fee: () => 0 },
   },
   event_registrations: {
     requiredFields: ['registration_id', 'event_id'],
@@ -118,13 +118,14 @@ const IMPORT_TYPES = {
     optionalFields: ['department', 'job_title', 'hire_date', 'hourly_rate', 'ft_pt'],
     table: 'staff',
     columnMap: { employee_id: 'staff_id', job_title: 'role', ft_pt: 'is_full_time' },
-    defaults: { hire_date: () => new Date().toISOString().slice(0, 10) },
+    defaults: { hire_date: () => new Date().toISOString().slice(0, 10), hourly_rate: () => 15, department: () => 'General', role: () => 'Staff' },
   },
   shifts: {
     requiredFields: ['shift_id', 'employee_id', 'date'],
     optionalFields: ['location', 'shift_start', 'shift_end', 'actual_hours', 'notes'],
     table: 'staff_shifts',
-    columnMap: { employee_id: 'staff_id', date: 'shift_date', shift_start: 'start_time', shift_end: 'end_time', actual_hours: 'hours_worked' },
+    columnMap: { employee_id: 'staff_id', date: 'shift_date', shift_start: 'start_time', shift_end: 'end_time', actual_hours: 'hours_worked', location: 'outlet_id' },
+    defaults: { start_time: () => '08:00', end_time: () => '16:00', hours_worked: () => 8 },
   },
   invoices: {
     requiredFields: ['invoice_id', 'member_id', 'statement_date'],

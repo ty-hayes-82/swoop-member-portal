@@ -47,22 +47,35 @@ async function phase0() {
 
   if (club.ok && club.data.clubId) {
     CLUB_ID = club.data.clubId;
-    log('0', '0.1.1 Create club', 'PASS', `clubId=${CLUB_ID}`);
+    // Use token from onboard if available, otherwise login
+    if (club.data.token) {
+      TOKEN = club.data.token;
+      log('0', '0.1.1 Create club + auto-login', 'PASS', `clubId=${CLUB_ID}, token=${TOKEN.slice(0, 12)}...`);
+    } else {
+      log('0', '0.1.1 Create club', 'PASS', `clubId=${CLUB_ID}`);
+    }
   } else {
     log('0', '0.1.1 Create club', 'FAIL', JSON.stringify(club.data).slice(0, 100));
     return false;
   }
 
-  // 0.1.2 Login
-  const login = await api('POST', '/api/auth', {
-    email: `qa-prog-${TS}@test.com`, password: 'TestPass123!',
-  });
-  if (login.ok && login.data.token) {
-    TOKEN = login.data.token;
-    log('0', '0.1.2 Login', 'PASS', `token=${TOKEN.slice(0, 12)}...`);
+  // 0.1.2 Login (if no token from onboard)
+  if (!TOKEN) {
+    const login = await api('POST', '/api/auth', {
+      email: `qa-prog-${TS}@test.com`, password: 'TestPass123!',
+    });
+    if (login.ok && login.data.token) {
+      TOKEN = login.data.token;
+      log('0', '0.1.2 Login', 'PASS', `token=${TOKEN.slice(0, 12)}...`);
+    } else {
+      log('0', '0.1.2 Login', 'FAIL', JSON.stringify(login.data).slice(0, 100));
+      return false;
+    }
   } else {
-    log('0', '0.1.2 Login', 'FAIL', JSON.stringify(login.data).slice(0, 100));
-    return false;
+    // Verify session works with the onboard token
+    const session = await api('GET', '/api/auth');
+    log('0', '0.1.2 Session from onboard token', session.ok ? 'PASS' : 'FAIL',
+      session.ok ? `user=${session.data.user?.name}` : `status=${session.status}`);
   }
 
   // 0.1.3 Validate session
