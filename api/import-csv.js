@@ -118,6 +118,7 @@ const IMPORT_TYPES = {
     optionalFields: ['department', 'job_title', 'hire_date', 'hourly_rate', 'ft_pt'],
     table: 'staff',
     columnMap: { employee_id: 'staff_id', job_title: 'role', ft_pt: 'is_full_time' },
+    defaults: { hire_date: () => new Date().toISOString().slice(0, 10) },
   },
   shifts: {
     requiredFields: ['shift_id', 'employee_id', 'date'],

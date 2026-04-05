@@ -36,38 +36,90 @@ export default withAuth(async function handler(req, res) {
     const latestWeek = toNumber(latestWeekResult.rows[0]?.latest_week, 0);
 
     if (!latestWeek) {
-      // No engagement data yet — return the member roster from the members table
+      // No engagement_weekly data — use health scores computed directly on the members table
       const rosterResult = await sql`
         SELECT member_id::text AS member_id,
           COALESCE(NULLIF(TRIM(first_name || ' ' || last_name), ''), 'Member ' || RIGHT(member_id::text, 3)) AS name,
           first_name, last_name, email, phone, membership_type, annual_dues, join_date,
-          COALESCE(membership_status, 'active') AS status, household_id
+          COALESCE(membership_status, 'active') AS status, household_id,
+          health_score, health_tier, archetype
         FROM members WHERE club_id = ${clubId} AND COALESCE(membership_status, 'active') != 'resigned'
         ORDER BY last_name, first_name
         LIMIT 1000`;
       const total = rosterResult.rows.length;
+      const hasScores = rosterResult.rows.some(r => r.health_score != null);
+
       const roster = rosterResult.rows.map(r => ({
         memberId: r.member_id, name: r.name, firstName: r.first_name, lastName: r.last_name,
         email: r.email, phone: r.phone, membershipType: r.membership_type,
         annualDues: toNumber(r.annual_dues), joinDate: r.join_date, status: r.status,
-        householdId: r.household_id, score: null, archetype: null, tier: 'Insufficient Data',
-        trend: 'stable', topRisk: 'Health score requires golf + dining data',
+        householdId: r.household_id,
+        score: r.health_score != null ? toNumber(r.health_score) : null,
+        archetype: r.archetype || null,
+        tier: r.health_tier || 'Insufficient Data',
+        trend: 'stable',
+        topRisk: r.health_score != null && toNumber(r.health_score) < 50
+          ? 'Engagement declining across systems'
+          : (r.health_score == null ? 'Health score requires golf + dining data' : 'No current risks'),
       }));
+
+      // Build health distribution from members table if scores exist
+      let healthDistribution = [];
+      let memberArchetypes = [];
+      let atRiskMembers = [];
+      let summaryData = { total, healthy: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0 };
+
+      if (hasScores) {
+        const tierCounts = { Healthy: 0, Watch: 0, 'At Risk': 0, Critical: 0, 'Insufficient Data': 0 };
+        const archetypeCounts = {};
+        let scoreSum = 0, scoreCount = 0;
+        for (const r of rosterResult.rows) {
+          const tier = r.health_tier || 'Insufficient Data';
+          tierCounts[tier] = (tierCounts[tier] || 0) + 1;
+          if (r.archetype) archetypeCounts[r.archetype] = (archetypeCounts[r.archetype] || 0) + 1;
+          if (r.health_score != null) { scoreSum += toNumber(r.health_score); scoreCount++; }
+        }
+        const levelColors = { Healthy: '#22C55E', Watch: '#EAB308', 'At Risk': '#B45309', Critical: '#B91C1C', 'Insufficient Data': '#D4D4D8' };
+        healthDistribution = Object.entries(tierCounts)
+          .filter(([, count]) => count > 0)
+          .map(([level, count]) => ({ level, count, percentage: total > 0 ? count / total : 0, color: levelColors[level] || '#D4D4D8' }));
+
+        const radarProfiles = {
+          'Die-Hard Golfer': { golf: 88, dining: 42, events: 28, email: 32, trend: 4 },
+          'Social Butterfly': { golf: 18, dining: 82, events: 78, email: 72, trend: 6 },
+          'Balanced Active': { golf: 68, dining: 62, events: 54, email: 55, trend: -2 },
+          'Weekend Warrior': { golf: 52, dining: 44, events: 32, email: 28, trend: -8 },
+          'Declining': { golf: 24, dining: 18, events: 8, email: 22, trend: -18 },
+          'New Member': { golf: 42, dining: 48, events: 38, email: 68, trend: 14 },
+          'Ghost': { golf: 4, dining: 6, events: 2, email: 8, trend: -4 },
+          'Snowbird': { golf: 62, dining: 52, events: 34, email: 44, trend: 2 },
+        };
+        memberArchetypes = Object.entries(archetypeCounts).map(([archetype, count]) => ({
+          archetype, count, ...(radarProfiles[archetype] || { golf: 50, dining: 50, events: 50, email: 50, trend: 0 }),
+        }));
+
+        atRiskMembers = roster.filter(r => r.score != null && r.score < 50).map(r => ({
+          memberId: r.memberId, name: r.name, archetype: r.archetype, membershipType: r.membershipType,
+          annualDues: r.annualDues, duesAnnual: r.annualDues, healthScore: r.score, score: r.score,
+          riskLevel: r.score < 30 ? 'Critical' : 'At Risk', trend: 'declining', topRisk: r.topRisk,
+        }));
+
+        summaryData = {
+          total, healthy: tierCounts.Healthy || 0,
+          atRisk: tierCounts['At Risk'] || 0, critical: tierCounts.Critical || 0,
+          riskCount: (tierCounts['At Risk'] || 0) + (tierCounts.Critical || 0),
+          avgHealthScore: scoreCount > 0 ? Math.round(scoreSum / scoreCount * 10) / 10 : 0,
+          potentialDuesAtRisk: rosterResult.rows.filter(r => r.health_score != null && toNumber(r.health_score) < 50).reduce((s, r) => s + toNumber(r.annual_dues), 0),
+        };
+      }
+
       return res.status(200).json({
         total,
         memberRoster: roster,
-        healthDistribution: [],
-        memberSummary: {
-          total,
-          healthy: 0,
-          atRisk: 0,
-          critical: 0,
-          riskCount: 0,
-          avgHealthScore: 0,
-          potentialDuesAtRisk: 0,
-        },
-        memberArchetypes: [],
-        atRiskMembers: [],
+        healthDistribution,
+        memberSummary: summaryData,
+        memberArchetypes,
+        atRiskMembers,
         resignationScenarios: [],
         emailHeatmap: [],
         decayingMembers: [],
