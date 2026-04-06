@@ -10,7 +10,7 @@ const VALID_ROUTES = new Set([
   // V3 hidden but still routable for backward compat
   'revenue', 'insights', 'actions',
   // Accessible via direct navigation (not in nav)
-  'member-profile', 'integrations', 'profile',
+  'member-profile', 'integrations', 'profile', 'automations',
   // Legacy routes (redirect via ROUTE_REDIRECTS below)
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
   'member-health', 'revenue-leakage', 'outreach-playbooks', 'staffing-service', 'growth-pipeline',
@@ -27,13 +27,13 @@ const ROUTE_REDIRECTS = {
   'daily-briefing': 'today',
   'landing': 'today',
   // Decommissioned features → Today (V3: actions is no longer standalone)
-  'actions': 'today',
-  'playbooks-automation': 'today',
-  'automation-dashboard': 'today',
-  'agent-command': 'today',
-  'outreach-playbooks': 'today',
-  'playbooks': 'today',
-  'intervention-queue': 'today',
+  'actions': 'automations',
+  'playbooks-automation': 'automations',
+  'automation-dashboard': 'automations',
+  'agent-command': 'automations',
+  'outreach-playbooks': 'automations',
+  'playbooks': 'automations',
+  'intervention-queue': 'automations',
   // Members-related
   'member-health': 'members',
   'waitlist-demand': 'members',

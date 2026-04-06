@@ -44,6 +44,15 @@ export const navItems = [
     sourceSystems: ['All Systems'],
   },
   {
+    key: 'automations',
+    label: 'Automations',
+    section: 'PRIMARY',
+    icon: '⚡',
+    color: theme.colors.navBriefing,
+    subtitle: 'AI agents, action inbox, and automated playbooks.',
+    sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email'],
+  },
+  {
     key: 'admin',
     label: 'Admin',
     section: 'PRIMARY',

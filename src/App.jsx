@@ -23,6 +23,7 @@ import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.j
 const IntegrationsPage = lazy(() => import('@/features/integrations/IntegrationsPage'));
 const CsvImportPage = lazy(() => import('@/features/integrations/CsvImportPage'));
 const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
+const AutomationsHub = lazy(() => import('@/features/automations/AutomationsHub'));
 const ProfilePage = lazy(() => import('@/features/profile/ProfilePage'));
 import LoginPage from '@/features/login/LoginPage';
 const ResetPasswordPage = lazy(() => import('@/features/login/ResetPasswordPage'));
@@ -40,6 +41,7 @@ const ROUTES = {
   'integrations/csv-import': CsvImportPage,
   'csv-import': CsvImportPage,
   'playbooks': PlaybooksPage,
+  'automations': AutomationsHub,
   'profile': ProfilePage,
 };
 

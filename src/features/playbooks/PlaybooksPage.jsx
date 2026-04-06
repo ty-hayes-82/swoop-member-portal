@@ -633,7 +633,7 @@ function PlaybookDetail({ playbook }) {
   );
 }
 
-export default function PlaybooksPage() {
+export default function PlaybooksPage({ embedded = false }) {
   // V5: Show all playbooks (hidden flag removed — all are operational-category playbooks now)
   const visiblePlaybooks = useMemo(() => PLAYBOOKS, []);
   const [selectedId, setSelectedId] = useState(visiblePlaybooks[0]?.id);
@@ -648,10 +648,13 @@ export default function PlaybooksPage() {
   // Auto-select first in filtered list if current selection is filtered out
   const effectiveSelected = filtered.find(p => p.id === selectedId) ? selected : filtered[0];
 
+  const Wrapper = embedded ? ({ children }) => <>{children}</> : PageTransition;
+
   return (
-    <PageTransition>
+    <Wrapper>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {/* Page Header */}
+        {/* Page Header — hidden when embedded in AutomationsHub */}
+        {!embedded && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.5px', color: '#e8772e', textTransform: 'uppercase', marginBottom: 6 }}>
@@ -684,6 +687,7 @@ export default function PlaybooksPage() {
             })}
           </div>
         </div>
+        )}
 
         {/* Category Filter */}
         <div style={{ display: 'flex', gap: 6, background: '#f4f4f5', borderRadius: 10, padding: 3, alignSelf: 'flex-start' }}>
@@ -733,6 +737,6 @@ export default function PlaybooksPage() {
           )}
         </div>
       </div>
-    </PageTransition>
+    </Wrapper>
   );
 }
