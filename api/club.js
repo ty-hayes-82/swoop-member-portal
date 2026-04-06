@@ -174,6 +174,9 @@ export default withAuth(async function handler(req, res) {
     try {
       let deletedCounts = {};
 
+      // Temporarily disable FK checks for clean cascade delete
+      await sql`SET session_replication_role = 'replica'`;
+
       for (const table of CLUB_TABLES) {
         try {
           const result = await sql.query(
@@ -185,6 +188,9 @@ export default withAuth(async function handler(req, res) {
           deletedCounts[table] = `err: ${tableErr.message?.substring(0, 80)}`;
         }
       }
+
+      // Re-enable FK checks
+      await sql`SET session_replication_role = 'origin'`;
 
       const totalDeleted = Object.values(deletedCounts)
         .filter(v => typeof v === 'number')
