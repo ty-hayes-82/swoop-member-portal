@@ -222,13 +222,26 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
   const fileInputRef = useRef(null);
   const config = getImportTypeConfig(importType);
   const [dragOver, setDragOver] = useState(false);
+  const [fileError, setFileError] = useState(null);
+
+  const validateAndSetFile = useCallback((f) => {
+    if (!f) return;
+    const ext = f.name.split('.').pop()?.toLowerCase();
+    if (!['csv', 'xlsx', 'xls'].includes(ext)) {
+      setFileError(`Unsupported file type ".${ext}". Please upload a .csv or .xlsx file.`);
+      setFile(null);
+      return;
+    }
+    setFileError(null);
+    setFile(f);
+  }, [setFile]);
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setDragOver(false);
     const f = e.dataTransfer?.files?.[0];
-    if (f) setFile(f);
-  }, [setFile]);
+    if (f) validateAndSetFile(f);
+  }, [validateAndSetFile]);
 
   return (
     <div>
@@ -268,7 +281,7 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
           ref={fileInputRef}
           type="file"
           accept=".csv,.xlsx,.xls"
-          onChange={e => setFile(e.target.files?.[0] || null)}
+          onChange={e => validateAndSetFile(e.target.files?.[0])}
           className="hidden"
         />
         {file ? (
@@ -291,6 +304,13 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
       </div>
 
       {/* Required fields hint */}
+      {/* File type error */}
+      {fileError && (
+        <div className="mb-3 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400">
+          {fileError}
+        </div>
+      )}
+
       {config && (
         <div className="mb-4 text-xs text-gray-400">
           <span className="font-semibold text-gray-500 dark:text-gray-400">Required columns: </span>

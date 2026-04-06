@@ -108,7 +108,7 @@ export default function InboxTab() {
   return (
     <div className="flex flex-col gap-4">
       {/* Filter bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             {totalPending} pending action{totalPending !== 1 ? 's' : ''}
@@ -119,7 +119,7 @@ export default function InboxTab() {
             <button
               key={p}
               onClick={() => setPriorityFilter(p)}
-              className={`px-3 py-1 rounded-lg text-[11px] font-semibold cursor-pointer border transition-colors ${
+              className={`px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold cursor-pointer border transition-colors ${
                 priorityFilter === p
                   ? 'bg-gray-800 text-white border-gray-800 dark:bg-gray-200 dark:text-gray-900 dark:border-gray-200'
                   : 'bg-transparent text-gray-500 border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800'

@@ -59,7 +59,7 @@ export default function ArchetypeTab() {
         <div className="bg-white rounded-xl p-4 border border-gray-200">
           <div className="font-serif text-lg text-[#1a1a2e] mb-1">{profile.archetype}</div>
           <div className="text-xs text-gray-400 mb-4">
-            {profile.count} members at Oakmont Hills
+            {profile.count} members at your club
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <RadarChart data={radarData}>

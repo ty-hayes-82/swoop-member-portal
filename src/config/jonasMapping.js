@@ -91,7 +91,7 @@ export const JONAS_IMPORT_TYPES = [
       { swoop: 'discount', label: 'Discount', required: false, aliases: ['Discount', 'Discounts', 'discount'] },
       { swoop: 'void', label: 'Void', required: false, aliases: ['Void', 'Voided', 'void'] },
       { swoop: 'settlement_method', label: 'Settlement Method', required: false, aliases: ['Settlement Method', 'Payment Method', 'Payment Type', 'settlement_method'] },
-      { swoop: 'open_time', label: 'Open Time', required: false, aliases: ['Open Time', 'Opened At', 'open_time'] },
+      { swoop: 'open_time', label: 'Open Time', required: false, aliases: ['Opened At', 'open_time'] },
       { swoop: 'close_time', label: 'Close Time', required: false, aliases: ['Close Time', 'Closed At', 'close_time'] },
       { swoop: 'is_post_round', label: 'Post-Round Dining', required: false, aliases: ['Post Round', 'Is Post Round', 'is_post_round'] },
     ],

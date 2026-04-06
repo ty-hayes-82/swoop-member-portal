@@ -45,24 +45,24 @@ export default function AutomationsHub() {
         </p>
       </div>
 
-      {/* Tab navigation */}
-      <div role="tablist" aria-label="Automations tabs" className="flex gap-1 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
+      {/* Tab navigation — mobile-optimized: equal-width tabs, hidden icons on small screens */}
+      <div role="tablist" aria-label="Automations tabs" className="flex gap-0.5 sm:gap-1 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         {TABS.map(tab => (
           <button
             key={tab.key}
             role="tab"
             aria-selected={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
+            className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
               activeTab === tab.key
                 ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
                 : 'bg-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            <span className="text-sm">{tab.icon}</span>
+            <span className="text-sm hidden sm:inline">{tab.icon}</span>
             {tab.label}
             {tab.key === 'inbox' && pendingCount > 0 && (
-              <span className="ml-1 min-w-[18px] h-[18px] inline-flex items-center justify-center rounded-full bg-brand-500 text-white text-[10px] font-bold px-1">
+              <span className="ml-0.5 sm:ml-1 min-w-[16px] h-[16px] sm:min-w-[18px] sm:h-[18px] inline-flex items-center justify-center rounded-full bg-brand-500 text-white text-[9px] sm:text-[10px] font-bold px-0.5 sm:px-1">
                 {pendingCount}
               </span>
             )}

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getAtRiskMembers } from '@/services/memberService';
+import { getClubName } from '@/config/constants';
 
 export default function MorningBriefing() {
   const [open, setOpen] = useState(false);
@@ -44,7 +45,7 @@ export default function MorningBriefing() {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="text-[22px] font-normal text-gray-900">
-                    Oakmont Hills CC
+                    {getClubName()}
                   </div>
                   <div className="text-sm text-gray-500 mt-0.5">
                     Morning Operations Briefing \u00B7 Saturday, January 17, 2026
@@ -149,7 +150,7 @@ export default function MorningBriefing() {
               </section>
 
               <div className="text-[11px] text-gray-400 text-center border-t border-gray-200 pt-4">
-                Oakmont Hills CC \u00B7 Powered by Swoop Golf Intelligence \u00B7 Demo Environment
+                {getClubName()} &middot; Powered by Swoop Golf Intelligence
               </div>
             </div>
           </div>

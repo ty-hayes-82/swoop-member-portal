@@ -61,7 +61,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
   };
 
   const firstName = memberName?.split(' ')[0] ?? 'the member';
-  const defaultNote = `Dear ${firstName},\n\nI wanted to reach out personally to apologize for your recent experience at the Grill Room. Your satisfaction is our top priority and I'm sorry we fell short.\n\nI'd love to have you as my guest for lunch this week \u2014 please let me know what works for your schedule.\n\nWarm regards,\n[GM Name]\nOakmont Hills Country Club`;
+  const defaultNote = `Dear ${firstName},\n\nI wanted to reach out personally to apologize for your recent experience at the Grill Room. Your satisfaction is our top priority and I'm sorry we fell short.\n\nI'd love to have you as my guest for lunch this week \u2014 please let me know what works for your schedule.\n\nWarm regards,\n[GM Name]\nYour Club`;
 
   const handleSend = (type) => {
     setSent(type);

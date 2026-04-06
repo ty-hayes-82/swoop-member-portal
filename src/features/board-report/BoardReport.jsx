@@ -6,7 +6,7 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { getKPIs, getMemberSaves, getOperationalSaves } from '@/services/boardReportService';
 import { getHealthDistribution } from '@/services/memberService';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
-import { isRealClub, isAuthenticatedClub } from '@/config/constants';
+import { isRealClub, isAuthenticatedClub, getClubName } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
 const tabNames = ['Summary', 'Details'];
@@ -224,7 +224,7 @@ export default function BoardReport() {
               Executive Summary
             </h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              This month, Oakmont Hills delivered consistent service quality with an <strong>{resolutionRate}% complaint resolution rate</strong> and
+              This month, {getClubName()} delivered consistent service quality with an <strong>{resolutionRate}% complaint resolution rate</strong> and
               an average resolution time of <strong>{avgResolutionDays} days</strong>. The operations team responded to alerts with an
               average <strong>4.2-hour detection-to-action time</strong>, catching {operationalSaves.length} service disruptions before
               they impacted members.
