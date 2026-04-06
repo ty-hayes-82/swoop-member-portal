@@ -47,7 +47,7 @@ export default withAuth(async function handler(req, res) {
         ORDER BY last_name, first_name
         LIMIT 1000`;
       const total = rosterResult.rows.length;
-      const hasScores = rosterResult.rows.some(r => r.health_score != null);
+      const hasScores = rosterResult.rows.some(r => r.health_score != null || r.health_tier != null);
 
       const roster = rosterResult.rows.map(r => ({
         memberId: r.member_id, name: r.name, firstName: r.first_name, lastName: r.last_name,
