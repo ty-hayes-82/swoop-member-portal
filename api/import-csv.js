@@ -303,6 +303,20 @@ export default withAuth(async function handler(req, res) {
     const domain = IMPORT_TO_DOMAIN[importType];
     if (domain) {
       try {
+        // Ensure table exists before inserting
+        await sql`
+          CREATE TABLE IF NOT EXISTS data_source_status (
+            club_id TEXT NOT NULL,
+            domain_code TEXT NOT NULL,
+            is_connected BOOLEAN DEFAULT FALSE,
+            source_vendor TEXT,
+            row_count INTEGER DEFAULT 0,
+            health_status TEXT DEFAULT 'unknown',
+            last_sync_at TIMESTAMPTZ,
+            staleness_hours NUMERIC,
+            PRIMARY KEY (club_id, domain_code)
+          )
+        `;
         await sql`
           INSERT INTO data_source_status (club_id, domain_code, is_connected, source_vendor, row_count, health_status, last_sync_at)
           VALUES (${clubId}, ${domain}, TRUE, 'csv_import', ${successCount}, 'healthy', NOW())
@@ -310,7 +324,7 @@ export default withAuth(async function handler(req, res) {
             is_connected = TRUE, row_count = data_source_status.row_count + ${successCount},
             health_status = 'healthy', last_sync_at = NOW(), source_vendor = COALESCE(data_source_status.source_vendor, 'csv_import')
         `;
-      } catch { /* data_source_status table may not exist yet — non-critical */ }
+      } catch (e) { console.error('[import-csv] data_source_status update failed:', e.message); }
     }
   }
 

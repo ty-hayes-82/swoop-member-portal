@@ -32,10 +32,10 @@ export default withAuth(async function handler(req, res) {
       WHERE club_id = ${clubId} AND (status = 'active' OR membership_status = 'active' OR status IS NULL) AND health_tier IN ('At Risk', 'Critical')
     `;
 
-    // Open complaints
+    // Open complaints (include all non-resolved statuses)
     const complaints = await sql`
       SELECT COUNT(*) as count FROM complaints
-      WHERE club_id = ${clubId} AND status = 'open'
+      WHERE club_id = ${clubId} AND COALESCE(status, 'open') NOT IN ('resolved', 'closed')
     `;
 
     // Pending actions

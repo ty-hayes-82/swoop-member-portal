@@ -347,6 +347,8 @@ export const _init = async () => {
             critical: _live.healthTiers.Critical,
             potentialDuesAtRisk: _live.duesAtRisk,
           };
+          // If live data has real members, mark as real even if /api/members didn't return them
+          if (_live.totalMembers > 0) _hasRealMembers = true;
         }
       }
     }

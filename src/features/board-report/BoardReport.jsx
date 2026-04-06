@@ -4,7 +4,7 @@ import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { getKPIs, getMemberSaves, getOperationalSaves } from '@/services/boardReportService';
-import { getHealthDistribution } from '@/services/memberService';
+import { getHealthDistribution, getLiveDashboard } from '@/services/memberService';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
 import { isRealClub, isAuthenticatedClub, getClubName } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
@@ -79,13 +79,21 @@ function KPIStrip({ kpis, onDrillDown }) {
 export default function BoardReport() {
   const { routeIntent, clearRouteIntent } = useNavigationContext();
   const [activeTab, setActiveTab] = useState(0);
+  const [ready, setReady] = useState(false);
+
+  // Allow async data to settle before rendering (services init in background)
+  useEffect(() => {
+    const timer = setTimeout(() => setReady(true), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   const kpis = getKPIs();
   const memberSaves = getMemberSaves();
   const operationalSaves = getOperationalSaves();
   const dist = getHealthDistribution();
 
-  // Real club with no data — show empty state with export buttons
-  if (isAuthenticatedClub() && kpis.every(k => k.value === 0)) {
+  // Real club with no data — show empty state, but wait for data to load first
+  if (ready && isAuthenticatedClub() && kpis.every(k => k.value === 0)) {
     return (
       <PageTransition>
         <div className="p-6 max-w-[1100px] mx-auto">
@@ -431,27 +439,54 @@ export default function BoardReport() {
             </div>
           </Panel>
 
-          {/* F&B Performance — Placeholder */}
+          {/* F&B Performance */}
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-1.5">
               F&B Performance
             </h2>
-            <div className="rounded-xl border border-warning-500/40 bg-warning-50 p-2 px-3 mb-4 text-xs flex items-center gap-1.5">
-              <span className="font-bold text-warning-500">Coming soon</span>
-              <span className="text-[#BCC3CF]">— Requires POS integration. Connect your POS system in Admin to unlock F&B metrics.</span>
-            </div>
-            <div className="grid grid-cols-3 gap-3 opacity-40">
-              {[
-                { label: 'Revenue per Cover', value: '—' },
-                { label: 'Covers vs Capacity', value: '—' },
-                { label: 'Post-Round Dining Rate', value: '—' },
-              ].map(m => (
-                <div key={m.label} className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
-                  <div className="text-[28px] font-bold text-[#BCC3CF]">{m.value}</div>
-                  <div className="text-[11px] text-[#BCC3CF]">{m.label}</div>
-                </div>
-              ))}
-            </div>
+            {(() => {
+              const live = getLiveDashboard();
+              const hasRevenue = live?.weekOverWeek?.revenue?.current > 0;
+              if (hasRevenue) {
+                const rev = live.weekOverWeek.revenue;
+                return (
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
+                      <div className="text-2xl font-bold text-gray-800 dark:text-white/90">${Math.round(rev.current).toLocaleString()}</div>
+                      <div className="text-xs text-gray-500">This Week Revenue</div>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
+                      <div className="text-2xl font-bold text-gray-800 dark:text-white/90">{rev.change}</div>
+                      <div className="text-xs text-gray-500">Week-over-Week</div>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
+                      <div className="text-2xl font-bold text-gray-800 dark:text-white/90">—</div>
+                      <div className="text-xs text-gray-500">Post-Round Dining Rate</div>
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <>
+                  <div className="rounded-xl border border-warning-500/40 bg-warning-50 dark:bg-warning-500/10 p-2 px-3 mb-4 text-xs flex items-center gap-1.5">
+                    <span className="font-bold text-warning-500">Awaiting data</span>
+                    <span className="text-gray-400">— Import F&B transactions via CSV Import or connect your POS system to unlock revenue metrics.</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 opacity-40">
+                    {[
+                      { label: 'Revenue per Cover', value: '—' },
+                      { label: 'Covers vs Capacity', value: '—' },
+                      { label: 'Post-Round Dining Rate', value: '—' },
+                    ].map(m => (
+                      <div key={m.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
+                        <div className="text-2xl font-bold text-gray-400">{m.value}</div>
+                        <div className="text-xs text-gray-400">{m.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
           </Panel>
         </>
       )}
