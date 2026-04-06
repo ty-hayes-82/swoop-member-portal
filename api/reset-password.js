@@ -17,8 +17,19 @@ function hashPassword(password, salt) {
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
+  // GET: validate token without consuming it
+  if (req.method === 'GET') {
+    const { token } = req.query;
+    if (!token) return res.status(200).json({ valid: false });
+    try {
+      const { rows } = await sql`SELECT expires_at FROM password_resets WHERE token = ${token}`;
+      if (!rows.length) return res.status(200).json({ valid: false });
+      return res.status(200).json({ valid: new Date(rows[0].expires_at) > new Date() });
+    } catch { return res.status(200).json({ valid: false }); }
+  }
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'POST only' });
+    return res.status(405).json({ error: 'GET or POST only' });
   }
 
   const rl = rateLimit(req, { maxAttempts: 5, windowMs: 3600000 });

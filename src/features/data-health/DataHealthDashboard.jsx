@@ -5,6 +5,7 @@
  */
 import { useState, useEffect } from 'react';
 import { useNavigation } from '@/context/NavigationContext';
+import { apiFetch } from '@/services/apiClient';
 
 const DOMAIN_INFO = {
   CRM: { icon: '👥', label: 'CRM / Members', desc: 'Member profiles, dues, tenure, household data', vendor: 'Jonas Club, Clubessential' },
@@ -24,8 +25,7 @@ export default function DataHealthDashboard() {
   useEffect(() => {
     const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
     if (!clubId) { setLoading(false); return; }
-    fetch(`/api/feature-availability?clubId=${clubId}`)
-      .then(r => r.ok ? r.json() : null)
+    apiFetch(`/api/feature-availability?clubId=${clubId}`)
       .then(d => { if (d) setData(d); })
       .catch(() => {})
       .finally(() => setLoading(false));

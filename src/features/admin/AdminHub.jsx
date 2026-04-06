@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { useNavigationContext } from '@/context/NavigationContext';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 import { Card } from '@/components/tailadmin';
+import { apiFetch } from '@/services/apiClient';
 import Badge from '@/components/tailadmin/Badge';
 import { getConnectedSystems } from '@/services/integrationsService';
 
@@ -28,8 +29,7 @@ export default function AdminHub() {
 
   useEffect(() => {
     if (!clubId) return;
-    fetch(`/api/feature-availability?clubId=${clubId}`)
-      .then(r => r.ok ? r.json() : null)
+    apiFetch(`/api/feature-availability?clubId=${clubId}`)
       .then(d => {
         if (d?.domains) {
           const connected = d.domains.filter(dm => dm.connected).length;

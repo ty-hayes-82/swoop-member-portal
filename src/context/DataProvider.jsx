@@ -38,9 +38,9 @@ export function DataProvider({ children }) {
       return;
     }
 
-    // 3-second timeout — if Neon cold-starts, don't block the UI
+    // 10-second timeout — Neon cold-starts can take 3-5s
     const timeout = new Promise(resolve =>
-      setTimeout(() => resolve('timeout'), 3000)
+      setTimeout(() => resolve('timeout'), 10000)
     );
 
     Promise.race([

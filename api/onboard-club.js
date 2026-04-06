@@ -80,7 +80,7 @@ export default async function handler(req, res) {
     const { clubName, city, state, zip, memberCount, courseCount, outletCount, adminEmail, adminName, adminPassword } = req.body;
 
     if (!clubName || !adminEmail || !adminName || !adminPassword) {
-      return res.status(400).json({ error: 'clubName, adminEmail, adminName, and adminPassword required' });
+      return res.status(400).json({ error: 'Please provide your club name, admin name, email, and password.' });
     }
 
     if (adminPassword.length < 8) {
@@ -98,6 +98,21 @@ export default async function handler(req, res) {
         INSERT INTO club (club_id, name, city, state, zip, member_count, course_count, outlet_count)
         VALUES (${clubId}, ${clubName}, ${city || null}, ${state || null}, ${zip || null}, ${memberCount || null}, ${courseCount || null}, ${outletCount || null})
       `;
+
+      // Geocode city/state/zip for weather API (non-blocking)
+      if (city || zip) {
+        try {
+          const addr = encodeURIComponent(`${city || ''}, ${state || ''} ${zip || ''}`);
+          const geoRes = await fetch(`https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${addr}&benchmark=Public_AR_Current&format=json`);
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            const match = geoData?.result?.addressMatches?.[0]?.coordinates;
+            if (match?.y && match?.x) {
+              await sql`UPDATE club SET latitude = ${match.y}, longitude = ${match.x} WHERE club_id = ${clubId}`;
+            }
+          }
+        } catch { /* geocoding is non-critical */ }
+      }
 
       // Create admin user with hashed password
       await sql`

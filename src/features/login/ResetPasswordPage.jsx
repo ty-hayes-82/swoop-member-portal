@@ -2,7 +2,7 @@
  * Reset Password Page — shown when user clicks the reset link from email.
  * Reads token from URL hash: /#/reset-password?token=xxx
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState('');
@@ -10,10 +10,22 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [validating, setValidating] = useState(true);
+  const [tokenValid, setTokenValid] = useState(null);
 
   // Extract token from hash: /#/reset-password?token=xxx
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
   const token = hashParams.get('token');
+
+  // Validate token on mount before showing the form
+  useEffect(() => {
+    if (!token) { setValidating(false); return; }
+    fetch(`/api/reset-password?token=${encodeURIComponent(token)}`)
+      .then(r => r.json())
+      .then(data => setTokenValid(data.valid === true))
+      .catch(() => setTokenValid(false))
+      .finally(() => setValidating(false));
+  }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,12 +64,20 @@ export default function ResetPasswordPage() {
 
   const inputClasses = "w-full h-11 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10";
 
-  if (!token) {
+  if (validating) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
+        <div className="w-9 h-9 rounded-full border-[3px] border-gray-200 border-t-brand-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!token || tokenValid === false) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
         <div className="w-full max-w-[400px] rounded-2xl border border-gray-200 bg-white p-10 shadow-theme-lg text-center">
           <div className="text-2xl font-extrabold text-gray-800 mb-2">Invalid Link</div>
-          <p className="text-sm text-gray-500 mb-6">This password reset link is missing or invalid.</p>
+          <p className="text-sm text-gray-500 mb-6">This password reset link is invalid or has expired.</p>
           <a href="#/login" className="text-sm font-semibold text-brand-500 hover:text-brand-600">Back to Sign In</a>
         </div>
       </div>

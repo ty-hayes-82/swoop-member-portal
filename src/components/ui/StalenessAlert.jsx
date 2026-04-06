@@ -2,6 +2,7 @@
  * Staleness Alert Banner — shows when data domain exceeds freshness threshold.
  */
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/services/apiClient';
 
 const THRESHOLDS = { CRM: 48, TEE_SHEET: 24, POS: 24, EMAIL: 72, LABOR: 48 };
 const DOMAIN_LABELS = { CRM: 'CRM', TEE_SHEET: 'Tee Sheet', POS: 'POS', EMAIL: 'Email', LABOR: 'Labor' };
@@ -12,8 +13,7 @@ export default function StalenessAlert() {
   useEffect(() => {
     const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
     if (!clubId) return;
-    fetch(`/api/feature-availability?clubId=${clubId}`)
-      .then(r => r.ok ? r.json() : null)
+    apiFetch(`/api/feature-availability?clubId=${clubId}`)
       .then(data => {
         if (!data?.domains) return;
         const stale = data.domains.filter(d => {

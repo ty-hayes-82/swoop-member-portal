@@ -98,8 +98,9 @@ function setHashPath(path) {
 }
 
 export function NavigationProvider({ children }) {
-  const [{ route, memberId }, setRouteState] = useState(parseHash);
-  const [routeIntent, setRouteIntent] = useState(null);
+  const initialParsed = typeof parseHash === 'function' ? parseHash() : parseHash;
+  const [{ route, memberId }, setRouteState] = useState(initialParsed);
+  const [routeIntent, setRouteIntent] = useState(initialParsed.mode ? { mode: initialParsed.mode } : null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // 'today' = simplified 3-item briefing | 'analytics' = trend & deep-dive modules
   const [viewMode, setViewMode] = useState('today');
@@ -132,8 +133,9 @@ export function NavigationProvider({ children }) {
   // Listen for browser back/forward
   useEffect(() => {
     function onPopState() {
-      setRouteState(parseHash());
-      setRouteIntent(null);
+      const parsed = parseHash();
+      setRouteState(parsed);
+      setRouteIntent(parsed.mode ? { mode: parsed.mode } : null);
     }
     window.addEventListener('popstate', onPopState);
     // Set initial hash if none present

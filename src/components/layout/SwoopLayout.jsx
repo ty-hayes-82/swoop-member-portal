@@ -12,7 +12,7 @@ const LayoutContent = ({ children, footer, actionsDrawer, mobileBar }) => {
       <SwoopSidebar />
       <Backdrop />
       <div
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ${
+        className={`flex-1 flex flex-col h-screen overflow-y-auto transition-all duration-300 ease-in-out ${
           isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"
         }`}
       >

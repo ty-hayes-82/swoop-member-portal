@@ -28,15 +28,9 @@ const TRAIL_STEPS = {
 const defaultAgents = getAgents();
 const defaultStatuses = Object.fromEntries(defaultAgents.map((agent) => [agent.id, agent.status]));
 
-// For real production clubs, start with empty inbox — no demo actions
-// Must match isRealClub() from constants.js: requires swoop_production=true
-const _isReal = (() => {
-  try {
-    const id = localStorage.getItem('swoop_club_id');
-    if (!id || id === 'demo') return false;
-    return localStorage.getItem('swoop_production') === 'true';
-  } catch { return false; }
-})();
+// For authenticated (non-demo) clubs, start with empty inbox — no demo actions
+import { isAuthenticatedClub } from '@/config/constants';
+const _isReal = isAuthenticatedClub();
 
 const initialState = {
   currentDate: new Date().toISOString().split('T')[0],
