@@ -4,7 +4,7 @@
  * Tests all 8 phases from QA-PROGRESSIVE-IMPORT.md
  */
 
-const BASE = process.argv[2] || 'https://swoop-member-portal.vercel.app';
+const BASE = process.argv[2] || 'https://swoop-member-portal-production-readiness.vercel.app';
 const TS = Date.now();
 
 let TOKEN, CLUB_ID, PASS = 0, FAIL = 0, SKIP = 0;
@@ -53,6 +53,21 @@ async function phase0() {
       log('0', '0.1.1 Create club + auto-login', 'PASS', `clubId=${CLUB_ID}, token=${TOKEN.slice(0, 12)}...`);
     } else {
       log('0', '0.1.1 Create club', 'PASS', `clubId=${CLUB_ID}`);
+    }
+  } else if (club.status === 429) {
+    // Rate-limited — fall back to creating via login with a new account
+    log('0', '0.1.1 Create club', 'SKIP', 'Rate-limited. Retrying with fresh timestamp...');
+    // Try logging in with previously created QA account
+    const fallbackEmail = process.argv[3] || `qa-prog-${TS}@test.com`;
+    const fallbackPass = 'TestPass123!';
+    const login = await api('POST', '/api/auth', { email: fallbackEmail, password: fallbackPass });
+    if (login.ok && login.data.token) {
+      TOKEN = login.data.token;
+      CLUB_ID = login.data.user.clubId;
+      log('0', '0.1.1 Fallback login', 'PASS', `Reusing club=${CLUB_ID}`);
+    } else {
+      log('0', '0.1.1 Create club', 'FAIL', `Rate-limited AND no fallback account. Provide email as 3rd arg.`);
+      return false;
     }
   } else {
     log('0', '0.1.1 Create club', 'FAIL', JSON.stringify(club.data).slice(0, 100));
@@ -271,7 +286,7 @@ async function phase5() {
     clubId: CLUB_ID, importType: 'events', rows: eventRows, uploadedBy: 'qa-test',
   });
   log('5', '5.1 Import 12 events', evtImp.ok && evtImp.data.success === 12 ? 'PASS' : 'FAIL',
-    `success=${evtImp.data?.success}, errors=${evtImp.data?.errors}`);
+    `success=${evtImp.data?.success}, errors=${evtImp.data?.errors}${evtImp.data?.errorDetails?.[0]?.message ? ' — ' + evtImp.data.errorDetails[0].message.slice(0, 80) : ''}`);
 
   // Registrations
   const regRows = [];
@@ -291,7 +306,7 @@ async function phase5() {
     clubId: CLUB_ID, importType: 'event_registrations', rows: regRows, uploadedBy: 'qa-test',
   });
   log('5', '5.2 Import 60 registrations', regImp.ok && regImp.data.success === 60 ? 'PASS' : 'FAIL',
-    `success=${regImp.data?.success}, errors=${regImp.data?.errors}`);
+    `success=${regImp.data?.success}, errors=${regImp.data?.errors}${regImp.data?.errorDetails?.[0]?.message ? ' — ' + regImp.data.errorDetails[0].message.slice(0, 80) : ''}`);
 
   return true;
 }
@@ -318,7 +333,7 @@ async function phase6() {
     clubId: CLUB_ID, importType: 'email_campaigns', rows: campaigns, uploadedBy: 'qa-test',
   });
   log('6', '6.1 Import 8 campaigns', campImp.ok && campImp.data.success === 8 ? 'PASS' : 'FAIL',
-    `success=${campImp.data?.success}, errors=${campImp.data?.errors}`);
+    `success=${campImp.data?.success}, errors=${campImp.data?.errors}${campImp.data?.errorDetails?.[0]?.message ? ' — ' + campImp.data.errorDetails[0].message.slice(0, 80) : ''}`);
 
   // Email events
   const emailEvents = [];
@@ -335,7 +350,7 @@ async function phase6() {
     clubId: CLUB_ID, importType: 'email_events', rows: emailEvents, uploadedBy: 'qa-test',
   });
   log('6', '6.2 Import 200 email events', eeImp.ok && eeImp.data.success === 200 ? 'PASS' : 'FAIL',
-    `success=${eeImp.data?.success}, errors=${eeImp.data?.errors}`);
+    `success=${eeImp.data?.success}, errors=${eeImp.data?.errors}${eeImp.data?.errorDetails?.[0]?.message ? ' — ' + eeImp.data.errorDetails[0].message.slice(0, 80) : ''}`);
 
   return true;
 }
@@ -366,7 +381,7 @@ async function phase7() {
     clubId: CLUB_ID, importType: 'staff', rows: staff, uploadedBy: 'qa-test',
   });
   log('7', '7.1 Import 20 staff', staffImp.ok && staffImp.data.success === 20 ? 'PASS' : 'FAIL',
-    `success=${staffImp.data?.success}, errors=${staffImp.data?.errors}`);
+    `success=${staffImp.data?.success}, errors=${staffImp.data?.errors}${staffImp.data?.errorDetails?.[0]?.message ? ' — ' + staffImp.data.errorDetails[0].message.slice(0, 80) : ''}`);
 
   // Shifts
   const shifts = [];
@@ -389,7 +404,7 @@ async function phase7() {
     clubId: CLUB_ID, importType: 'shifts', rows: shifts, uploadedBy: 'qa-test',
   });
   log('7', '7.2 Import 100 shifts', shiftImp.ok && shiftImp.data.success === 100 ? 'PASS' : 'FAIL',
-    `success=${shiftImp.data?.success}, errors=${shiftImp.data?.errors}`);
+    `success=${shiftImp.data?.success}, errors=${shiftImp.data?.errors}${shiftImp.data?.errorDetails?.[0]?.message ? ' — ' + shiftImp.data.errorDetails[0].message.slice(0, 80) : ''}`);
 
   return true;
 }
