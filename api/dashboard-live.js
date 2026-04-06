@@ -23,7 +23,11 @@ export default withAuth(async function handler(req, res) {
       GROUP BY health_tier
     `;
     const tiers = {};
-    tierCounts.rows.forEach(r => { tiers[r.health_tier] = Number(r.count); });
+    let allActiveMembers = 0;
+    tierCounts.rows.forEach(r => {
+      tiers[r.health_tier] = Number(r.count);
+      allActiveMembers += Number(r.count);
+    });
 
     // At-risk dues exposure
     const duesAtRisk = await sql`
@@ -130,7 +134,7 @@ export default withAuth(async function handler(req, res) {
         'At Risk': tiers['At Risk'] || 0,
         Critical: tiers['Critical'] || 0,
       },
-      totalMembers: Object.values(tiers).reduce((s, v) => s + v, 0),
+      totalMembers: allActiveMembers,
       atRiskCount: (tiers['At Risk'] || 0) + (tiers['Critical'] || 0),
       duesAtRisk: Number(duesAtRisk.rows[0]?.total) || 0,
       openComplaints: Number(complaints.rows[0]?.count) || 0,

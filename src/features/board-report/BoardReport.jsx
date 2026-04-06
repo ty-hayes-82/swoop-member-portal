@@ -79,42 +79,29 @@ function KPIStrip({ kpis, onDrillDown }) {
 export default function BoardReport() {
   const { routeIntent, clearRouteIntent } = useNavigationContext();
   const [activeTab, setActiveTab] = useState(0);
-  const [ready, setReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Allow async data to settle before rendering (services init in background)
   useEffect(() => {
-    const timer = setTimeout(() => setReady(true), 800);
+    const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!routeIntent) return;
+    if (typeof routeIntent.tab === 'number' && routeIntent.tab >= 0 && routeIntent.tab < tabNames.length) {
+      setActiveTab(routeIntent.tab);
+    }
+    clearRouteIntent();
+  }, [routeIntent, clearRouteIntent]);
 
   const kpis = getKPIs();
   const memberSaves = getMemberSaves();
   const operationalSaves = getOperationalSaves();
   const dist = getHealthDistribution();
 
-  // Real club with no data — show empty state, but wait for data to load first
-  if (ready && isAuthenticatedClub() && kpis.every(k => k.value === 0)) {
-    return (
-      <PageTransition>
-        <div className="p-6 max-w-[1100px] mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Board Report — Service, Members & Operations</h1>
-              <p className="text-sm text-gray-500 mt-1">Monthly executive summary — service quality, member health, and operational response</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => window.print()} className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none">Export as PDF</button>
-              <button onClick={() => window.print()} className="rounded-lg border border-brand-500 bg-transparent text-brand-500 px-5 py-2 text-sm font-semibold cursor-pointer">Print</button>
-            </div>
-          </div>
-          <DataEmptyState icon="📊" title="Board report needs data" description="Import member, golf, and F&B data to generate your executive board report with KPIs, member saves, and operational insights." dataType="club data" />
-        </div>
-      </PageTransition>
-    );
-  }
-
-  const totalDues = memberSaves.reduce((sum, m) => sum + m.duesAtRisk, 0);
-  const totalOpsRevenue = operationalSaves.reduce((sum, o) => sum + o.revenueProtected, 0);
+  const totalDues = memberSaves.reduce((sum, m) => sum + (m.duesAtRisk || 0), 0);
+  const totalOpsRevenue = operationalSaves.reduce((sum, o) => sum + (o.revenueProtected || 0), 0);
 
   // Complaint resolution stats — use service layer (returns [] for real clubs with no data)
   const feedbackRecords = getComplaintCorrelation();
@@ -131,25 +118,33 @@ export default function BoardReport() {
       }, 0) / resolved.length).toFixed(1)
     : '—';
 
-  useEffect(() => {
-    if (!routeIntent) return;
-    if (typeof routeIntent.tab === 'number' && routeIntent.tab >= 0 && routeIntent.tab < tabNames.length) {
-      setActiveTab(routeIntent.tab);
-    }
-    clearRouteIntent();
-  }, [routeIntent, clearRouteIntent]);
-
-  const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 750);
-    return () => clearTimeout(timer);
-  }, []);
+  const isEmpty = isAuthenticatedClub() && kpis.every(k => k.value === 0);
 
   if (isLoading) {
     return (
       <div className="p-6 max-w-[1100px] mx-auto">
         <SkeletonGrid cards={6} columns={3} cardHeight={120} />
       </div>
+    );
+  }
+
+  if (isEmpty) {
+    return (
+      <PageTransition>
+        <div className="p-6 max-w-[1100px] mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Board Report — Service, Members & Operations</h1>
+              <p className="text-sm text-gray-500 mt-1">Monthly executive summary — service quality, member health, and operational response</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => window.print()} className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none">Export as PDF</button>
+              <button onClick={() => window.print()} className="rounded-lg border border-brand-500 bg-transparent text-brand-500 px-5 py-2 text-sm font-semibold cursor-pointer">Print</button>
+            </div>
+          </div>
+          <DataEmptyState icon="📊" title="Board report needs data" description="Import member, golf, and F&B data to generate your executive board report with KPIs, member saves, and operational insights." dataType="club data" />
+        </div>
+      </PageTransition>
     );
   }
 

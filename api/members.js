@@ -69,7 +69,7 @@ export default withAuth(async function handler(req, res) {
       let atRiskMembers = [];
       let summaryData = { total, healthy: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0 };
 
-      if (hasScores) {
+      if (total > 0) {
         const tierCounts = { Healthy: 0, Watch: 0, 'At Risk': 0, Critical: 0, 'Insufficient Data': 0 };
         const archetypeCounts = {};
         let scoreSum = 0, scoreCount = 0;
@@ -109,7 +109,7 @@ export default withAuth(async function handler(req, res) {
           atRisk: tierCounts['At Risk'] || 0, critical: tierCounts.Critical || 0,
           riskCount: (tierCounts['At Risk'] || 0) + (tierCounts.Critical || 0),
           avgHealthScore: scoreCount > 0 ? Math.round(scoreSum / scoreCount * 10) / 10 : 0,
-          potentialDuesAtRisk: rosterResult.rows.filter(r => r.health_score != null && toNumber(r.health_score) < 50).reduce((s, r) => s + toNumber(r.annual_dues), 0),
+          potentialDuesAtRisk: rosterResult.rows.filter(r => (r.health_tier === 'At Risk' || r.health_tier === 'Critical') || (r.health_score != null && toNumber(r.health_score) < 50)).reduce((s, r) => s + toNumber(r.annual_dues), 0),
         };
       }
 

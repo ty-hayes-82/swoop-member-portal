@@ -3,11 +3,32 @@ import { Component } from 'react';
 export default class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorHash: null };
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true, error };
+    return { hasError: true, error, errorHash: window.location.hash };
+  }
+
+  componentDidMount() {
+    this._onHashChange = () => {
+      if (this.state.hasError) {
+        this.setState({ hasError: false, error: null, errorHash: null });
+      }
+    };
+    window.addEventListener('hashchange', this._onHashChange);
+
+    // Fallback: poll for hash changes (covers page.goto in tests)
+    this._hashPoll = setInterval(() => {
+      if (this.state.hasError && window.location.hash !== this.state.errorHash) {
+        this.setState({ hasError: false, error: null, errorHash: null });
+      }
+    }, 500);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('hashchange', this._onHashChange);
+    clearInterval(this._hashPoll);
   }
 
   componentDidCatch(error, errorInfo) {
@@ -15,7 +36,7 @@ export default class ErrorBoundary extends Component {
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, errorHash: null });
     // Navigate to Today as a safe page
     window.location.hash = '#/today';
   };

@@ -103,14 +103,34 @@ export default async function handler(req, res) {
       // Geocode city/state/zip for weather API (non-blocking)
       if (city || zip) {
         try {
+          let lat = null, lon = null;
+
+          // Try Census geocoder first (works best with full street addresses)
           const addr = encodeURIComponent(`${city || ''}, ${state || ''} ${zip || ''}`);
           const geoRes = await fetch(`https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${addr}&benchmark=Public_AR_Current&format=json`);
           if (geoRes.ok) {
             const geoData = await geoRes.json();
             const match = geoData?.result?.addressMatches?.[0]?.coordinates;
-            if (match?.y && match?.x) {
-              await sql`UPDATE club SET latitude = ${match.y}, longitude = ${match.x} WHERE club_id = ${clubId}`;
+            if (match?.y && match?.x) { lat = match.y; lon = match.x; }
+          }
+
+          // Fallback: Nominatim (OpenStreetMap) — handles city/state/zip well
+          if (!lat) {
+            const q = encodeURIComponent(`${city || ''}, ${state || ''} ${zip || ''}`);
+            const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {
+              headers: { 'User-Agent': 'SwoopGolf/1.0 (club-onboarding)' },
+            });
+            if (nomRes.ok) {
+              const nomData = await nomRes.json();
+              if (nomData?.[0]?.lat && nomData?.[0]?.lon) {
+                lat = parseFloat(nomData[0].lat);
+                lon = parseFloat(nomData[0].lon);
+              }
             }
+          }
+
+          if (lat && lon) {
+            await sql`UPDATE club SET latitude = ${lat}, longitude = ${lon} WHERE club_id = ${clubId}`;
           }
         } catch { /* geocoding is non-critical */ }
       }

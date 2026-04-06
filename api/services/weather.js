@@ -99,15 +99,14 @@ async function googleCurrentConditions(lat, lon) {
   const key = process.env.GOOGLE_WEATHER_API_KEY;
   if (!key) throw new Error('GOOGLE_WEATHER_API_KEY not configured');
 
-  const res = await fetch(`${GOOGLE_BASE}/v1/currentConditions:lookup?key=${key}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      location: { latitude: lat, longitude: lon },
-      languageCode: 'en',
-      unitsSystem: 'IMPERIAL',
-    }),
+  const params = new URLSearchParams({
+    key,
+    'location.latitude': lat,
+    'location.longitude': lon,
+    languageCode: 'en',
+    unitsSystem: 'IMPERIAL',
   });
+  const res = await fetch(`${GOOGLE_BASE}/v1/currentConditions:lookup?${params}`);
 
   if (!res.ok) throw new Error(`Google Weather current: ${res.status} ${await res.text()}`);
   const d = await res.json();
@@ -123,7 +122,7 @@ async function googleCurrentConditions(lat, lon) {
     cloudCover: d.cloudCover,
     conditions: normalizeConditionCode(d.weatherCondition?.type),
     conditionsText: d.weatherCondition?.description?.text || d.weatherCondition?.type,
-    precipProbability: d.precipitation?.probability || 0,
+    precipProbability: d.precipitation?.probability?.percent || 0,
     visibility: d.visibility?.distance?.value,
     dewPoint: d.dewPoint?.degrees,
     pressure: d.pressure?.meanSeaLevelMillibars,
@@ -135,20 +134,16 @@ async function googleForecast(lat, lon, { hours, days } = {}) {
   const key = process.env.GOOGLE_WEATHER_API_KEY;
   if (!key) throw new Error('GOOGLE_WEATHER_API_KEY not configured');
 
+  let gotData = false;
   const result = { hourly: [], daily: [], alerts: [] };
 
   // Hourly forecast
   if (hours) {
-    const res = await fetch(`${GOOGLE_BASE}/v1/forecast/hours:lookup?key=${key}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: { latitude: lat, longitude: lon },
-        languageCode: 'en',
-        unitsSystem: 'IMPERIAL',
-        hours: Math.min(hours, 240),
-      }),
+    const hParams = new URLSearchParams({
+      key, 'location.latitude': lat, 'location.longitude': lon,
+      languageCode: 'en', unitsSystem: 'IMPERIAL', hours: Math.min(hours, 240),
     });
+    const res = await fetch(`${GOOGLE_BASE}/v1/forecast/hours:lookup?${hParams}`);
     if (res.ok) {
       const d = await res.json();
       result.hourly = (d.forecastHours || []).map(h => ({
@@ -157,8 +152,8 @@ async function googleForecast(lat, lon, { hours, days } = {}) {
         feelsLike: h.feelsLikeTemperature?.degrees,
         wind: h.wind?.speed?.value,
         gusts: h.wind?.gust?.value || 0,
-        precipProb: h.precipitation?.probability || 0,
-        precipAmount: h.precipitation?.qpf?.value || 0,
+        precipProb: h.precipitation?.probability?.percent ?? h.precipitation?.probability ?? 0,
+        precipAmount: h.precipitation?.qpf?.quantity ?? h.precipitation?.qpf?.value ?? 0,
         humidity: h.relativeHumidity,
         conditions: normalizeConditionCode(h.weatherCondition?.type),
         conditionsText: h.weatherCondition?.description?.text || h.weatherCondition?.type,
@@ -171,46 +166,44 @@ async function googleForecast(lat, lon, { hours, days } = {}) {
 
   // Daily forecast
   if (days) {
-    const res = await fetch(`${GOOGLE_BASE}/v1/forecast/days:lookup?key=${key}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: { latitude: lat, longitude: lon },
-        languageCode: 'en',
-        unitsSystem: 'IMPERIAL',
-        days: Math.min(days, 10),
-      }),
+    const dParams = new URLSearchParams({
+      key, 'location.latitude': lat, 'location.longitude': lon,
+      languageCode: 'en', unitsSystem: 'IMPERIAL', days: Math.min(days, 10),
     });
+    const res = await fetch(`${GOOGLE_BASE}/v1/forecast/days:lookup?${dParams}`);
     if (res.ok) {
       const d = await res.json();
-      result.daily = (d.forecastDays || []).map(day => ({
-        date: day.interval?.startTime?.split('T')[0],
-        high: day.maxTemperature?.degrees,
-        low: day.minTemperature?.degrees,
-        wind: day.maxWind?.speed?.value,
-        gusts: day.maxWind?.gust?.value || 0,
-        precipProb: day.precipitation?.probability || 0,
-        precipAmount: day.precipitation?.qpf?.value || 0,
-        conditions: normalizeConditionCode(day.weatherCondition?.type),
-        conditionsText: day.weatherCondition?.description?.text || day.weatherCondition?.type,
-        humidity: day.avgHumidity,
-        uvIndex: day.maxUvIndex,
-        thunderstormProb: day.thunderstormProbability || 0,
-      }));
+      result.daily = (d.forecastDays || []).map(day => {
+        const df = day.daytimeForecast || {};
+        const displayDate = day.displayDate;
+        const dateStr = displayDate
+          ? `${displayDate.year}-${String(displayDate.month).padStart(2,'0')}-${String(displayDate.day).padStart(2,'0')}`
+          : day.interval?.startTime?.split('T')[0];
+        return {
+          date: dateStr,
+          high: day.maxTemperature?.degrees,
+          low: day.minTemperature?.degrees,
+          wind: df.wind?.speed?.value || 0,
+          gusts: df.wind?.gust?.value || 0,
+          precipProb: df.precipitation?.probability?.percent ?? 0,
+          precipAmount: df.precipitation?.qpf?.quantity ?? 0,
+          conditions: normalizeConditionCode(df.weatherCondition?.type),
+          conditionsText: df.weatherCondition?.description?.text || df.weatherCondition?.type,
+          humidity: df.relativeHumidity || 0,
+          uvIndex: df.uvIndex || 0,
+          thunderstormProb: df.thunderstormProbability || 0,
+        };
+      });
     }
   }
 
-  // Weather alerts
+  // Weather alerts (piggyback on current conditions)
   try {
-    const alertRes = await fetch(`${GOOGLE_BASE}/v1/currentConditions:lookup?key=${key}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: { latitude: lat, longitude: lon },
-        languageCode: 'en',
-        unitsSystem: 'IMPERIAL',
-      }),
+    const aParams = new URLSearchParams({
+      key, 'location.latitude': lat, 'location.longitude': lon,
+      languageCode: 'en', unitsSystem: 'IMPERIAL',
     });
+    const alertRes = await fetch(`${GOOGLE_BASE}/v1/currentConditions:lookup?${aParams}`);
     if (alertRes.ok) {
       const ad = await alertRes.json();
       result.alerts = (ad.currentWeatherAlerts || []).map(a => ({
@@ -223,7 +216,113 @@ async function googleForecast(lat, lon, { hours, days } = {}) {
     }
   } catch { /* alerts are best-effort */ }
 
+  // If no hourly or daily data returned, treat as failure so fallback kicks in
+  if (!result.hourly.length && !result.daily.length) {
+    throw new Error('Google Weather returned no forecast data');
+  }
+
   return result;
+}
+
+// ─── Open-Meteo API (free, no key) ───────────────────────
+
+function normalizeWMOCode(code) {
+  // WMO weather interpretation codes → simple categories
+  if (code <= 1) return 'sunny';
+  if (code <= 3) return 'partly_cloudy';
+  if (code <= 48) return 'cloudy'; // fog codes 45-48
+  if (code <= 67) return 'rainy';  // drizzle + rain codes
+  if (code <= 77) return 'snow';
+  if (code <= 82) return 'rainy';  // rain showers
+  if (code <= 86) return 'snow';   // snow showers
+  if (code >= 95) return 'thunderstorm';
+  return 'cloudy';
+}
+
+function wmoCodeText(code) {
+  const map = {
+    0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+    45: 'Fog', 48: 'Depositing rime fog',
+    51: 'Light drizzle', 53: 'Moderate drizzle', 55: 'Dense drizzle',
+    61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
+    71: 'Slight snow', 73: 'Moderate snow', 75: 'Heavy snow',
+    80: 'Slight rain showers', 81: 'Moderate rain showers', 82: 'Violent rain showers',
+    95: 'Thunderstorm', 96: 'Thunderstorm with slight hail', 99: 'Thunderstorm with heavy hail',
+  };
+  return map[code] || 'Unknown';
+}
+
+async function openMeteoCurrent(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,cloud_cover,uv_index&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Open-Meteo current: ${res.status}`);
+  const d = await res.json();
+  const c = d.current;
+  if (!c) throw new Error('No current conditions from Open-Meteo');
+
+  return {
+    temp: Math.round(c.temperature_2m),
+    feelsLike: Math.round(c.apparent_temperature),
+    humidity: Math.round(c.relative_humidity_2m || 0),
+    wind: Math.round(c.wind_speed_10m || 0),
+    gusts: Math.round(c.wind_gusts_10m || 0),
+    uvIndex: Math.round(c.uv_index || 0),
+    cloudCover: Math.round(c.cloud_cover || 0),
+    conditions: normalizeWMOCode(c.weather_code),
+    conditionsText: wmoCodeText(c.weather_code),
+    precipProbability: 0, // current doesn't include precip prob
+    thunderstormProbability: c.weather_code >= 95 ? 80 : 0,
+  };
+}
+
+async function openMeteoForecast(lat, lon, { hours = 24, days = 10 } = {}) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,cloud_cover,uv_index,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto&forecast_hours=${Math.min(hours, 240)}&forecast_days=${Math.min(days, 16)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Open-Meteo forecast: ${res.status}`);
+  const d = await res.json();
+
+  const hourly = [];
+  if (d.hourly?.time) {
+    for (let i = 0; i < Math.min(d.hourly.time.length, hours); i++) {
+      hourly.push({
+        time: d.hourly.time[i],
+        temp: Math.round(d.hourly.temperature_2m[i]),
+        feelsLike: Math.round(d.hourly.apparent_temperature[i]),
+        wind: Math.round(d.hourly.wind_speed_10m[i] || 0),
+        gusts: Math.round(d.hourly.wind_gusts_10m[i] || 0),
+        precipProb: d.hourly.precipitation_probability[i] || 0,
+        precipAmount: d.hourly.precipitation[i] || 0,
+        humidity: Math.round(d.hourly.relative_humidity_2m[i] || 0),
+        conditions: normalizeWMOCode(d.hourly.weather_code[i]),
+        conditionsText: wmoCodeText(d.hourly.weather_code[i]),
+        cloudCover: Math.round(d.hourly.cloud_cover[i] || 0),
+        uvIndex: Math.round(d.hourly.uv_index[i] || 0),
+        thunderstormProb: d.hourly.weather_code[i] >= 95 ? 80 : 0,
+      });
+    }
+  }
+
+  const daily = [];
+  if (d.daily?.time) {
+    for (let i = 0; i < Math.min(d.daily.time.length, days); i++) {
+      daily.push({
+        date: d.daily.time[i],
+        high: Math.round(d.daily.temperature_2m_max[i]),
+        low: Math.round(d.daily.temperature_2m_min[i]),
+        wind: Math.round(d.daily.wind_speed_10m_max[i] || 0),
+        gusts: Math.round(d.daily.wind_gusts_10m_max[i] || 0),
+        precipProb: d.daily.precipitation_probability_max[i] || 0,
+        precipAmount: d.daily.precipitation_sum[i] || 0,
+        conditions: normalizeWMOCode(d.daily.weather_code[i]),
+        conditionsText: wmoCodeText(d.daily.weather_code[i]),
+        humidity: 0, // daily doesn't include avg humidity
+        uvIndex: Math.round(d.daily.uv_index_max[i] || 0),
+        thunderstormProb: d.daily.weather_code[i] >= 95 ? 80 : 0,
+      });
+    }
+  }
+
+  return { hourly, daily, alerts: [] };
 }
 
 // ─── Visual Crossing API ──────────────────────────────────
@@ -291,7 +390,7 @@ async function visualCrossingCurrent(lat, lon) {
 
 /**
  * Get current weather conditions for a club.
- * Falls back: Google → Visual Crossing → cached
+ * Falls back: Google → Open-Meteo → Visual Crossing → cached
  */
 export async function getCurrentConditions(clubId) {
   const { lat, lon } = await getClubCoordinates(clubId);
@@ -301,7 +400,15 @@ export async function getCurrentConditions(clubId) {
     const data = await googleCurrentConditions(lat, lon);
     return { ...data, source: 'google', stale: false };
   } catch (e) {
-    console.warn('Google Weather current failed, trying Visual Crossing:', e.message);
+    console.warn('Google Weather current failed:', e.message);
+  }
+
+  // Fallback to Open-Meteo (free, no key)
+  try {
+    const data = await openMeteoCurrent(lat, lon);
+    return { ...data, source: 'open_meteo', stale: false };
+  } catch (e) {
+    console.warn('Open-Meteo current failed:', e.message);
   }
 
   // Fallback to Visual Crossing
@@ -333,15 +440,38 @@ export async function getForecast(clubId, { hours = 24, days = 10 } = {}) {
 
   const { lat, lon } = await getClubCoordinates(clubId);
 
-  // Try Google
+  // Try Google first
+  let googleData = null;
   try {
-    const data = await googleForecast(lat, lon, { hours, days });
+    googleData = await googleForecast(lat, lon, { hours, days });
     const current = await googleCurrentConditions(lat, lon).catch(() => null);
-    const result = { current, ...data, source: 'google', stale: false };
+
+    // Google may return fewer days than requested — supplement with Open-Meteo
+    if (googleData.daily.length < days) {
+      try {
+        const supplement = await openMeteoForecast(lat, lon, { hours: 0, days });
+        const googleDates = new Set(googleData.daily.map(d => d.date));
+        const extraDays = supplement.daily.filter(d => !googleDates.has(d.date));
+        googleData.daily = [...googleData.daily, ...extraDays].slice(0, days);
+      } catch { /* supplement is best-effort */ }
+    }
+
+    const result = { current, ...googleData, source: 'google', stale: false };
     await cacheForecast(clubId, result);
     return result;
   } catch (e) {
     console.warn('Google Weather forecast failed:', e.message);
+  }
+
+  // Fallback to Open-Meteo (free, no key)
+  try {
+    const data = await openMeteoForecast(lat, lon, { hours, days });
+    const current = await openMeteoCurrent(lat, lon).catch(() => null);
+    const result = { current, ...data, source: 'open_meteo', stale: false };
+    await cacheForecast(clubId, result);
+    return result;
+  } catch (e) {
+    console.warn('Open-Meteo forecast failed:', e.message);
   }
 
   // Fallback: stale cache

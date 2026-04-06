@@ -19,6 +19,8 @@ import {
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function parseCSV(text) {
+  // Strip UTF-8 BOM if present
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
   // Handle quoted fields with commas inside
   const lines = [];
   let current = '';
@@ -732,6 +734,10 @@ export default function CsvImportPage() {
         setError(data.error || 'Import failed');
       } else {
         setResult(data);
+        // Re-initialize all services so insights appear immediately
+        if (data.success > 0) {
+          window.dispatchEvent(new CustomEvent('swoop:data-imported'));
+        }
       }
     } catch (err) {
       setError(`Upload error: ${err.message}`);

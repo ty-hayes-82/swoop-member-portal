@@ -138,6 +138,79 @@ const IMPORT_TYPES = {
   },
 };
 
+// Server-side alias resolution — maps raw CSV headers to Swoop field names
+const FIELD_ALIASES = {
+  // Members
+  'given name': 'first_name', 'first name': 'first_name', 'surname': 'last_name', 'last name': 'last_name',
+  'member #': 'external_id', 'member number': 'external_id', 'member id': 'external_id',
+  'phone #': 'phone', 'annual fee': 'annual_dues', 'annual dues': 'annual_dues',
+  'date joined': 'join_date', 'membership type': 'membership_type', 'mem type': 'membership_type',
+  'household id': 'household_id', 'handicap #': 'handicap', 'current balance': 'current_balance',
+  'date resigned': 'date_resigned', 'date of birth': 'birthday',
+  // Tee Times
+  'reservation id': 'reservation_id', 'confirmation #': 'reservation_id', 'tee sheet date': 'date',
+  'play date': 'date', 'tee time': 'tee_time', 'guest flag': 'guest_flag',
+  'number of players': 'players', 'check-in time': 'check_in_time',
+  'round start': 'round_start', 'round end': 'round_end', 'duration (min)': 'duration_min',
+  // Transactions
+  'open time': 'transaction_date', 'close time': 'close_time', 'transaction date': 'transaction_date',
+  'net amount': 'total_amount', 'total due': 'total_amount', 'total amount': 'total_amount', 'chit total': 'total_amount',
+  'sales area': 'outlet_name', 'outlet name': 'outlet_name', 'item count': 'item_count',
+  'settlement method': 'settlement_method',
+  // Complaints
+  'happometer score': 'priority', 'reported at': 'reported_at', 'created date': 'reported_at',
+  'resolution date': 'resolved_at', 'resolved at': 'resolved_at',
+  // Events
+  'event number': 'event_id', 'event id': 'event_id', 'event name': 'event_name',
+  'event type': 'event_type', 'start date': 'start_date', 'event date': 'start_date',
+  'registration fee': 'registration_fee', 'member price': 'registration_fee',
+  // Event Registrations
+  'registration id': 'registration_id', 'reg id': 'registration_id',
+  'client code': 'member_id', 'event booking number': 'event_id',
+  'event registrant status': 'status', 'guest count': 'guest_count',
+  'fee paid': 'fee_paid', 'amount paid': 'fee_paid', 'registration date': 'registration_date',
+  // Email Campaigns
+  'campaign id': 'campaign_id', 'email subject': 'subject',
+  'campaign type': 'campaign_type', 'send date': 'send_date',
+  'audience count': 'audience_count', 'recipient count': 'audience_count',
+  // Email Events
+  'campaign': 'campaign_id', 'occurred at': 'timestamp',
+  'link clicked': 'link_clicked', 'device type': 'device',
+  // Staff
+  'employee id': 'employee_id', 'staff code': 'employee_id',
+  'dept': 'department', 'preferred department': 'department',
+  'job title': 'job_title', 'preferred job': 'job_title',
+  'hire date': 'hire_date', 'hourly rate': 'hourly_rate', 'pay rate': 'hourly_rate',
+  'ft/pt': 'ft_pt', 'employment type': 'ft_pt',
+  // Shifts
+  'shift id': 'shift_id', 'shift start': 'shift_start', 'shift end': 'shift_end',
+  'act hrs': 'actual_hours', 'actual hours': 'actual_hours', 'hours worked': 'actual_hours',
+  'shift date': 'date',
+};
+
+// Per-import overrides (when a header maps differently based on context)
+const IMPORT_ALIAS_OVERRIDES = {
+  email_events: { 'member #': 'member_id', 'member id': 'member_id', 'event id': '_skip' },
+  email_campaigns: { 'subject': 'subject' },
+  event_registrations: { 'member #': 'member_id', 'event number': 'event_id' },
+  complaints: { 'type': 'category', 'subject': 'description', 'date': 'reported_at', 'member #': 'member_id' },
+  tee_times: { 'member #': 'member_id' },
+  transactions: { 'member #': 'member_id' },
+};
+
+function resolveAliases(row, importType) {
+  const overrides = IMPORT_ALIAS_OVERRIDES[importType] || {};
+  const resolved = {};
+  for (const [key, value] of Object.entries(row)) {
+    const lower = key.trim().toLowerCase();
+    const mapped = overrides[lower] || FIELD_ALIASES[lower] || key;
+    if (mapped !== '_skip') {
+      resolved[mapped] = value;
+    }
+  }
+  return resolved;
+}
+
 function validateRow(row, config, rowIndex) {
   const errors = [];
   for (const field of config.requiredFields) {
@@ -161,6 +234,7 @@ export default withAuth(async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
+  try {
   const clubId = getClubId(req);
   const { importType, rows, uploadedBy } = req.body;
 
@@ -173,16 +247,34 @@ export default withAuth(async function handler(req, res) {
     return res.status(400).json({ error: `Unknown import type: ${importType}. Valid types: ${Object.keys(IMPORT_TYPES).join(', ')}` });
   }
 
-  // Create import tracking record
+  // Create import tracking record (skip if csv_imports table doesn't exist)
   const importId = `imp_${Date.now()}`;
-  await sql`
-    INSERT INTO csv_imports (import_id, club_id, uploaded_by, import_type, status, total_rows)
-    VALUES (${importId}, ${clubId}, ${uploadedBy || 'system'}, ${importType}, 'processing', ${rows.length})
-  `;
+  try {
+    await sql`
+      INSERT INTO csv_imports (import_id, club_id, uploaded_by, import_type, status, total_rows)
+      VALUES (${importId}, ${clubId}, ${uploadedBy || 'system'}, ${importType}, 'processing', ${rows.length})
+    `;
+  } catch {
+    // csv_imports table may not exist — non-critical, continue with import
+  }
 
   let successCount = 0;
   let errorCount = 0;
   const allErrors = [];
+
+  // Pre-import: ensure tables exist for import types not covered by core migrations
+  const ENSURE_TABLES = {
+    email_campaigns: `CREATE TABLE IF NOT EXISTS email_campaigns (campaign_id TEXT PRIMARY KEY, club_id TEXT, subject TEXT, type TEXT, send_date TEXT, recipient_count INTEGER DEFAULT 0, data_source TEXT DEFAULT 'csv_import')`,
+    email_events: `CREATE TABLE IF NOT EXISTS email_events (event_id TEXT PRIMARY KEY, campaign_id TEXT NOT NULL, member_id TEXT NOT NULL, club_id TEXT, event_type TEXT NOT NULL, occurred_at TEXT, link_clicked TEXT, device_type TEXT, data_source TEXT DEFAULT 'csv_import')`,
+    shifts: `CREATE TABLE IF NOT EXISTS staff_shifts (shift_id TEXT PRIMARY KEY, club_id TEXT, staff_id TEXT NOT NULL, shift_date TEXT NOT NULL, outlet_id TEXT, start_time TEXT DEFAULT '08:00', end_time TEXT DEFAULT '16:00', hours_worked REAL DEFAULT 8, notes TEXT, data_source TEXT DEFAULT 'csv_import')`,
+  };
+  if (ENSURE_TABLES[importType]) {
+    try { await sql.query(ENSURE_TABLES[importType]); } catch (e) { console.warn('Table ensure failed:', e.message); }
+    // email_events also needs email_campaigns table
+    if (importType === 'email_events' && ENSURE_TABLES.email_campaigns) {
+      try { await sql.query(ENSURE_TABLES.email_campaigns); } catch { /* already exists */ }
+    }
+  }
 
   // Pre-import: auto-create referenced courses for tee_times to avoid FK violations
   if (importType === 'tee_times') {
@@ -199,7 +291,7 @@ export default withAuth(async function handler(req, res) {
   }
 
   for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
+    const row = resolveAliases(rows[i], importType);
     const rowErrors = validateRow(row, config, i);
 
     if (rowErrors.length > 0) {
@@ -213,9 +305,10 @@ export default withAuth(async function handler(req, res) {
         const memberId = row.external_id || `mbr_${Date.now()}_${i}`;
         const uniqueMemberId = `${clubId}_${memberId}`;
         const statusVal = row.status || 'active';
+        const defaultTier = row.date_resigned ? 'Critical' : 'Watch'; // Default until health scores computed
         await sql`
-          INSERT INTO members (member_id, club_id, external_id, first_name, last_name, email, phone, membership_type, annual_dues, join_date, household_id, date_of_birth, gender, account_balance, membership_status, resigned_on, data_source)
-          VALUES (${uniqueMemberId}, ${clubId}, ${row.external_id || null}, ${row.first_name}, ${row.last_name}, ${row.email || null}, ${row.phone || null}, ${row.membership_type || null}, ${row.annual_dues ? Number(row.annual_dues) : null}, ${row.join_date || null}, ${row.household_id || null}, ${row.birthday || row.date_of_birth || null}, ${row.sex || row.gender || null}, ${row.current_balance ? Number(row.current_balance) : null}, ${statusVal}, ${row.date_resigned || null}, 'csv_import')
+          INSERT INTO members (member_id, club_id, external_id, first_name, last_name, email, phone, membership_type, annual_dues, join_date, household_id, date_of_birth, gender, account_balance, membership_status, resigned_on, health_tier, data_source)
+          VALUES (${uniqueMemberId}, ${clubId}, ${row.external_id || null}, ${row.first_name}, ${row.last_name}, ${row.email || null}, ${row.phone || null}, ${row.membership_type || null}, ${row.annual_dues ? Number(row.annual_dues) : null}, ${row.join_date || null}, ${row.household_id || null}, ${row.birthday || row.date_of_birth || null}, ${row.sex || row.gender || null}, ${row.current_balance ? Number(row.current_balance) : null}, ${statusVal}, ${row.date_resigned || null}, ${defaultTier}, 'csv_import')
           ON CONFLICT (member_id) DO UPDATE SET
             club_id = EXCLUDED.club_id,
             first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
@@ -291,6 +384,9 @@ export default withAuth(async function handler(req, res) {
           const dbPkCol = columnMap[pkCol] || pkCol;
           const updateCols = columns.filter(c => c !== dbPkCol && c !== 'club_id').map(c => `"${c}" = EXCLUDED."${c}"`).join(', ');
           upsertSuffix = updateCols ? ` ON CONFLICT ("${dbPkCol}") DO UPDATE SET ${updateCols}` : ' ON CONFLICT DO NOTHING';
+        } else {
+          // insertOnly types: skip duplicates instead of crashing
+          upsertSuffix = ' ON CONFLICT DO NOTHING';
         }
         await sql.query(`INSERT INTO ${config.table} (${colNames}) VALUES (${placeholders})${upsertSuffix}`, values);
       }
@@ -301,15 +397,17 @@ export default withAuth(async function handler(req, res) {
     }
   }
 
-  // Update import record
-  await sql`
-    UPDATE csv_imports
-    SET status = ${errorCount === rows.length ? 'failed' : errorCount > 0 ? 'partial' : 'completed'},
-        success_rows = ${successCount}, error_rows = ${errorCount},
-        errors = ${JSON.stringify(allErrors.slice(0, 50))}::jsonb,
-        completed_at = NOW()
-    WHERE import_id = ${importId}
-  `;
+  // Update import record (non-critical if csv_imports table doesn't exist)
+  try {
+    await sql`
+      UPDATE csv_imports
+      SET status = ${errorCount === rows.length ? 'failed' : errorCount > 0 ? 'partial' : 'completed'},
+          success_rows = ${successCount}, error_rows = ${errorCount},
+          errors = ${JSON.stringify(allErrors.slice(0, 50))}::jsonb,
+          completed_at = NOW()
+      WHERE import_id = ${importId}
+    `;
+  } catch { /* csv_imports may not exist */ }
 
   // Update data_source_status so Data Health dashboard reflects CSV imports
   if (successCount > 0) {
@@ -342,7 +440,19 @@ export default withAuth(async function handler(req, res) {
     }
   }
 
-  res.status(200).json({
+  // Post-import: trigger health score recomputation (fire-and-forget)
+  if (successCount > 0 && ['members', 'tee_times', 'rounds', 'transactions', 'complaints', 'events', 'event_registrations', 'email_events'].includes(importType)) {
+    const token = req.headers.authorization;
+    const host = req.headers.host || 'swoop-member-portal.vercel.app';
+    const proto = host.includes('localhost') ? 'http' : 'https';
+    fetch(`${proto}://${host}/api/compute-health-scores?clubId=${clubId}`, {
+      method: 'POST',
+      headers: { Authorization: token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clubId }),
+    }).catch(e => console.warn('[import-csv] Health score recompute trigger failed:', e.message));
+  }
+
+  return res.status(200).json({
     importId,
     importType,
     totalRows: rows.length,
@@ -351,4 +461,8 @@ export default withAuth(async function handler(req, res) {
     errorDetails: allErrors.slice(0, 20),
     status: errorCount === rows.length ? 'failed' : errorCount > 0 ? 'partial' : 'completed',
   });
+  } catch (e) {
+    console.error('[import-csv] Unhandled error:', e);
+    return res.status(500).json({ error: e.message || 'Internal import error' });
+  }
 }, { roles: ['gm', 'assistant_gm', 'swoop_admin'] });

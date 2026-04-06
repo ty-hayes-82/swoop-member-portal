@@ -21,10 +21,20 @@ import { _init as initWeather }      from '@/services/weatherService';
 const DataCtx = createContext({ phase: 1 });
 export const useDataContext = () => useContext(DataCtx);
 
+async function initAllServices() {
+  return Promise.allSettled([
+    initOps(), initFB(), initMembers(), initStaffing(),
+    initTrends(), initBriefing(),
+    initBoardReport(), initCockpit(), initExperience(),
+    initAgents(), initIntegrations(), initWeather(),
+  ]);
+}
+
 export function DataProvider({ children }) {
   const [phase, setPhase] = useState(1);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const rawFlag = import.meta.env?.VITE_API_ENABLED;
@@ -43,15 +53,7 @@ export function DataProvider({ children }) {
       setTimeout(() => resolve('timeout'), 10000)
     );
 
-    Promise.race([
-      Promise.allSettled([
-        initOps(), initFB(), initMembers(), initStaffing(),
-        initTrends(), initBriefing(),
-        initBoardReport(), initCockpit(), initExperience(),
-        initAgents(), initIntegrations(), initWeather(),
-      ]),
-      timeout,
-    ]).then(results => {
+    Promise.race([initAllServices(), timeout]).then(results => {
       if (results !== 'timeout') {
         const anySucceeded = results.some(r => r.status === 'fulfilled');
         if (anySucceeded) setPhase(2);
@@ -64,6 +66,16 @@ export function DataProvider({ children }) {
       setError(err?.message);
       setReady(true);
     });
+  }, [refreshKey]);
+
+  // Listen for data refresh events (e.g., after CSV import completes)
+  useEffect(() => {
+    const handler = () => {
+      console.info('[DataProvider] Refreshing all services after data import...');
+      setRefreshKey(k => k + 1);
+    };
+    window.addEventListener('swoop:data-imported', handler);
+    return () => window.removeEventListener('swoop:data-imported', handler);
   }, []);
 
   if (!ready) {

@@ -10,6 +10,7 @@ import TodaysRisks from './TodaysRisks';
 import PendingActionsInline from './PendingActionsInline';
 import MemberAlerts from './MemberAlerts';
 import TomorrowForecast from './TomorrowForecast';
+import WeekForecast from './WeekForecast';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
@@ -128,6 +129,9 @@ export default function TodayView() {
 
         {/* Section 5: Tomorrow's Forecast */}
         <TomorrowForecast />
+
+        {/* Section 6: 10-Day Forecast */}
+        <WeekForecast />
 
       </div>
     </PageTransition>

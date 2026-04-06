@@ -94,7 +94,9 @@ function AppShell() {
       }
       mobileBar={isMobile ? <MobileConversionBar /> : null}
     >
-      <PageComponent />
+      <Suspense fallback={null}>
+        <PageComponent key={currentRoute} />
+      </Suspense>
     </SwoopLayout>
   );
 }
