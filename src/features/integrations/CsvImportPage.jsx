@@ -73,9 +73,10 @@ export default function CsvImportPage() {
 
       const user = (() => { try { return JSON.parse(localStorage.getItem('swoop_auth_user') || '{}'); } catch { return {}; } })();
 
+      const token = localStorage.getItem('swoop_auth_token');
       const res = await fetch('/api/import-csv', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ clubId, importType, rows, uploadedBy: user.userId || 'csv-import-tool' }),
       });
       const data = await res.json();

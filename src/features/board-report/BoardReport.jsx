@@ -85,7 +85,7 @@ export default function BoardReport() {
   const dist = getHealthDistribution();
 
   // Real club with no data — show empty state with export buttons
-  if (isAuthenticatedClub() && (memberSaves.length === 0 || kpis.every(k => k.value === 0))) {
+  if (isAuthenticatedClub() && kpis.every(k => k.value === 0)) {
     return (
       <PageTransition>
         <div className="p-6 max-w-[1100px] mx-auto">

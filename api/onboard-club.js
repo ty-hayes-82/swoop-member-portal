@@ -146,7 +146,11 @@ export default async function handler(req, res) {
         nextStep: 'crm_connected',
       });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      const msg = e.message || '';
+      if (msg.includes('users_email_key') || msg.includes('duplicate key')) {
+        return res.status(409).json({ error: 'An account with this email already exists. Please use a different email or sign in.' });
+      }
+      res.status(500).json({ error: 'Something went wrong creating your club. Please try again.' });
     }
   }
 

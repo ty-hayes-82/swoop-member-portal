@@ -290,6 +290,23 @@ export default withAuth(async function handler(req, res) {
     WHERE import_id = ${importId}
   `;
 
+  // Update data_source_status so Data Health dashboard reflects CSV imports
+  if (successCount > 0) {
+    const IMPORT_TO_DOMAIN = { members: 'CRM', rounds: 'TEE_SHEET', tee_times: 'TEE_SHEET', transactions: 'POS', complaints: 'CRM', events: 'EMAIL', event_registrations: 'EMAIL', email_campaigns: 'EMAIL', email_events: 'EMAIL', staff: 'LABOR', shifts: 'LABOR' };
+    const domain = IMPORT_TO_DOMAIN[importType];
+    if (domain) {
+      try {
+        await sql`
+          INSERT INTO data_source_status (club_id, domain_code, is_connected, source_vendor, row_count, health_status, last_sync_at)
+          VALUES (${clubId}, ${domain}, TRUE, 'csv_import', ${successCount}, 'healthy', NOW())
+          ON CONFLICT (club_id, domain_code) DO UPDATE SET
+            is_connected = TRUE, row_count = data_source_status.row_count + ${successCount},
+            health_status = 'healthy', last_sync_at = NOW(), source_vendor = COALESCE(data_source_status.source_vendor, 'csv_import')
+        `;
+      } catch { /* data_source_status table may not exist yet — non-critical */ }
+    }
+  }
+
   res.status(200).json({
     importId,
     importType,

@@ -1,12 +1,13 @@
 // TodaysRisks — Staffing status grid + Open complaints with aging
-import { feedbackRecords } from '@/data/staffing';
+import { getComplaintCorrelation, getShiftCoverage } from '@/services/staffingService';
+import { isAuthenticatedClub } from '@/config/constants';
 import { useNavigation } from '@/context/NavigationContext';
 import MemberLink from '@/components/MemberLink';
 
-const REF_DATE = new Date('2026-01-31');
+const REF_DATE = new Date();
 
-// Current staffing status per outlet (derived from staffing data)
-const OUTLETS = [
+// Default outlets for demo mode
+const DEMO_OUTLETS = [
   { name: 'Grill Room', current: 2, required: 4 },
   { name: 'Terrace', current: 3, required: 3 },
   { name: 'Pool Bar', current: 1, required: 1 },
@@ -26,13 +27,24 @@ function getStaffingLabel(current, required) {
 
 export default function TodaysRisks() {
   const { navigate } = useNavigation();
+  const allComplaints = getComplaintCorrelation();
+  const shiftCoverage = getShiftCoverage();
+
+  // For authenticated clubs with no data, show nothing
+  if (isAuthenticatedClub() && allComplaints.length === 0 && shiftCoverage.length === 0) {
+    return null;
+  }
+
+  const OUTLETS = shiftCoverage.length > 0
+    ? shiftCoverage.slice(0, 5).map(s => ({ name: s.outlet || s.department || 'Outlet', current: s.actual || s.current || 0, required: s.required || s.scheduled || 0 }))
+    : (isAuthenticatedClub() ? [] : DEMO_OUTLETS);
 
   // Unresolved complaints with aging
-  const unresolvedComplaints = feedbackRecords
+  const unresolvedComplaints = allComplaints
     .filter(f => f.status !== 'resolved')
     .map(f => {
       const days = Math.round((REF_DATE - new Date(f.date)) / (1000 * 60 * 60 * 24));
-      return { ...f, daysOpen: days };
+      return { ...f, daysOpen: Math.max(0, days) };
     })
     .sort((a, b) => b.daysOpen - a.daysOpen);
 

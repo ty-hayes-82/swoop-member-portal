@@ -255,7 +255,7 @@ export default function MemberProfilePage() {
           <div className="flex gap-6 mt-2 flex-wrap text-sm text-gray-500">
             <span>{profile.archetype}</span>
             <span>{profile.tier || profile.membershipType}</span>
-            <span>ID: {profile.memberId}</span>
+            {profile.externalId && <span>ID: {profile.externalId}</span>}
             {profile.memberSince && <span>Member since {fmtDate(profile.memberSince)}</span>}
             {profile.membershipStatus && profile.membershipStatus !== 'active' && (
               <span className="text-error-500 font-semibold">{profile.membershipStatus.toUpperCase()}</span>
