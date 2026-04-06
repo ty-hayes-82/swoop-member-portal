@@ -7,12 +7,14 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { useApp } from '@/context/AppContext';
 import InboxTab from './InboxTab';
 import AgentsTab from './AgentsTab';
+import SettingsTab from './SettingsTab';
 import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
 
 const TABS = [
   { key: 'inbox', label: 'Inbox', icon: '📥' },
   { key: 'playbooks', label: 'Playbooks', icon: '📋' },
   { key: 'agents', label: 'Agents', icon: '🤖' },
+  { key: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
 export default function AutomationsHub() {
@@ -73,6 +75,7 @@ export default function AutomationsHub() {
         {activeTab === 'inbox' && <InboxTab />}
         {activeTab === 'playbooks' && <PlaybooksPage embedded />}
         {activeTab === 'agents' && <AgentsTab />}
+        {activeTab === 'settings' && <SettingsTab />}
       </div>
     </div>
   );
