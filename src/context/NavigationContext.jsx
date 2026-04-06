@@ -55,8 +55,7 @@ const ROUTE_REDIRECTS = {
   'data-health': 'admin',
   'activity-history': 'admin',
   'data-model': 'admin',
-  'integrations/csv-import': 'admin',
-  'csv-import': 'admin',
+  'integrations/csv-import': 'csv-import',
   // Hidden features
   'storyboard-flows': 'today',
   'demo-mode': 'today',
@@ -68,8 +67,13 @@ function parseHash() {
   const raw = window.location.hash.replace(/^#\/?/, '');
   if (!raw) return { route: DEFAULT_ROUTE, memberId: null };
   if (raw.startsWith('members/')) {
-    const [, memberId] = raw.split('/');
-    return { route: 'member-profile', memberId: memberId || null };
+    const [, subpath] = raw.split('/');
+    // Known sub-views route to members page with mode intent
+    const MEMBER_MODES = { 'at-risk': 'at-risk', 'first-90-days': 'cohorts', 'all-members': 'search', 'all': 'search' };
+    if (MEMBER_MODES[subpath]) {
+      return { route: 'members', memberId: null, mode: MEMBER_MODES[subpath] };
+    }
+    return { route: 'member-profile', memberId: subpath || null };
   }
   const normalized = raw.replace(/\/+$/, '');
   // Apply redirects

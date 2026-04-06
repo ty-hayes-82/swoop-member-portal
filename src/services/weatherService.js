@@ -10,12 +10,14 @@ let _current = null;
 let _forecast = null;
 
 function getClubId() {
-  try { return localStorage.getItem('swoop_club_id') || 'club_001'; } catch { return 'club_001'; }
+  try { return localStorage.getItem('swoop_club_id') || null; } catch { return null; }
 }
 
 export const _init = async () => {
   try {
-    const res = await fetch(`/api/weather?clubId=${getClubId()}&type=forecast`);
+    const cid = getClubId();
+    if (!cid) return;
+    const res = await fetch(`/api/weather?clubId=${cid}&type=forecast`);
     if (res.ok) {
       _forecast = await res.json();
       _current = _forecast.current || null;

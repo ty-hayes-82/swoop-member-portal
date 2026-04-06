@@ -34,6 +34,7 @@ export default function LoginPage({ onLogin }) {
       localStorage.setItem('swoop_auth_token', data.token);
       localStorage.setItem('swoop_auth_user', JSON.stringify(data.user));
       localStorage.setItem('swoop_club_id', data.user.clubId);
+      if (data.user.clubName) localStorage.setItem('swoop_club_name', data.user.clubName);
 
       onLogin?.(data.user);
     } catch (err) {

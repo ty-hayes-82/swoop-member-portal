@@ -159,7 +159,7 @@ export default withAuth(async function handler(req, res) {
   }
 
   res.status(405).json({ error: 'GET or POST only' });
-}, { roles: ['swoop_admin'] });
+}, { roles: [] });
 
 function getNextRecommendedDomain(connected, features) {
   const DOMAIN_ORDER = ['CRM', 'TEE_SHEET', 'POS', 'EMAIL', 'LABOR'];

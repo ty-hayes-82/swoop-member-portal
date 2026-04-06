@@ -87,8 +87,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    const clubId = `club_${Date.now()}`;
-    const userId = `usr_${Date.now()}`;
+    const clubId = crypto.randomUUID();
+    const userId = crypto.randomUUID();
     const salt = crypto.randomBytes(16).toString('hex');
     const passwordHash = hashPassword(adminPassword, salt);
 

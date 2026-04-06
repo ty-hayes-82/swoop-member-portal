@@ -52,8 +52,9 @@ export default async function handler(req, res) {
 
     try {
       const result = await sql`
-        SELECT user_id, club_id, name, role, title, password_hash, password_salt
-        FROM users WHERE email = ${email.toLowerCase()} AND active = TRUE
+        SELECT u.user_id, u.club_id, u.name, u.role, u.title, u.password_hash, u.password_salt, c.name AS club_name
+        FROM users u LEFT JOIN club c ON u.club_id = c.club_id
+        WHERE u.email = ${email.toLowerCase()} AND u.active = TRUE
       `;
 
       if (result.rows.length === 0) {
@@ -84,7 +85,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         token,
-        user: { userId: user.user_id, clubId: user.club_id, name: user.name, email, role: user.role, title: user.title },
+        user: { userId: user.user_id, clubId: user.club_id, name: user.name, email, role: user.role, title: user.title, clubName: user.club_name || null },
         expiresAt: expiresAt.toISOString(),
       });
     } catch (e) {
@@ -101,8 +102,8 @@ export default async function handler(req, res) {
     const token = authHeader.slice(7);
     try {
       const result = await sql`
-        SELECT s.user_id, s.club_id, s.role, s.expires_at, u.name, u.email, u.title
-        FROM sessions s JOIN users u ON s.user_id = u.user_id
+        SELECT s.user_id, s.club_id, s.role, s.expires_at, u.name, u.email, u.title, c.name AS club_name
+        FROM sessions s JOIN users u ON s.user_id = u.user_id LEFT JOIN club c ON s.club_id = c.club_id
         WHERE s.token = ${token} AND s.expires_at > NOW()
       `;
 
@@ -112,7 +113,7 @@ export default async function handler(req, res) {
 
       const session = result.rows[0];
       return res.status(200).json({
-        user: { userId: session.user_id, clubId: session.club_id, name: session.name, email: session.email, role: session.role, title: session.title },
+        user: { userId: session.user_id, clubId: session.club_id, name: session.name, email: session.email, role: session.role, title: session.title, clubName: session.club_name || null },
         expiresAt: session.expires_at,
       });
     } catch (e) {

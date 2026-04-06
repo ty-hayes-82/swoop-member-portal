@@ -31,15 +31,23 @@ export default function DataHealthDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+  const isAuthenticated = !!clubId && clubId !== 'demo';
   const DEMO_CONNECTED = { CRM: true, EMAIL: true };
-  const domains = data?.domains || Object.keys(DOMAIN_INFO).map(code => ({
+  const domains = data?.domains || Object.keys(DOMAIN_INFO).map(code => (isAuthenticated ? {
+    code,
+    connected: false,
+    health_status: 'disconnected',
+    row_count: 0,
+    last_sync_at: null,
+  } : {
     code,
     connected: !!DEMO_CONNECTED[code],
     health_status: DEMO_CONNECTED[code] ? 'healthy' : 'disconnected',
     row_count: code === 'CRM' ? 300 : code === 'EMAIL' ? 120 : 0,
     last_sync_at: DEMO_CONNECTED[code] ? new Date().toISOString() : null,
   }));
-  const valueScore = data?.valueScore ?? (Object.keys(DEMO_CONNECTED).reduce((sum, k) => sum + (VALUE_PCTS[k] || 0), 0));
+  const valueScore = data?.valueScore ?? (isAuthenticated ? 0 : Object.keys(DEMO_CONNECTED).reduce((sum, k) => sum + (VALUE_PCTS[k] || 0), 0));
   const features = data?.features || [];
   const nextDomain = data?.nextDomainToConnect;
 

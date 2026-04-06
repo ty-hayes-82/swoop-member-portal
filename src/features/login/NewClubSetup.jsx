@@ -1,6 +1,6 @@
 /**
  * NewClubSetup — 4-step wizard for onboarding a new club
- * Steps: Club Info → Course Setup → Upload Data → Ready
+ * Steps: Club Info → Admin Account → Upload Data → Ready
  */
 import { useState, useRef } from 'react';
 const TEMPLATES = [
@@ -10,19 +10,21 @@ const TEMPLATES = [
   { file: 'swoop-template-full.xlsx', label: 'Full Dataset', desc: '40 members, 120 rounds, 200 transactions, 15 complaints — everything', sheets: '4 sheets', color: '#ff8b00' },
 ];
 
-const STEP_LABELS = ['Club Info', 'Course', 'Upload Data', 'Ready'];
+const STEP_LABELS = ['Club Info', 'Admin Account', 'Upload Data', 'Ready'];
 
 export default function NewClubSetup({ onComplete, onBack }) {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Step 0 state — club info + admin account
+  // Step 0 state — club info
   const [clubName, setClubName] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [zip, setZip] = useState('');
   const [memberCount, setMemberCount] = useState('');
+
+  // Step 1 state — admin account
   const [adminName, setAdminName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
@@ -32,19 +34,20 @@ export default function NewClubSetup({ onComplete, onBack }) {
   const [userId, setUserId] = useState(null);
 
   // Step 2 state
-  const [courseName, setCourseName] = useState('');
-  const [holes, setHoles] = useState('18');
-  const [par, setPar] = useState('72');
-
-  // Step 3 state
   const [uploadResults, setUploadResults] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState(null);
   const fileInputRef = useRef(null);
 
-  // ─── Step 1: Create Club ───
-  const handleCreateClub = async () => {
+  // ─── Step 0: Validate Club Info & advance ───
+  const handleClubInfoNext = () => {
     if (!clubName.trim()) { setError('Club name is required'); return; }
+    setError(null);
+    setStep(1);
+  };
+
+  // ─── Step 1: Create Club with Admin Account ───
+  const handleCreateClub = async () => {
     if (!adminName.trim()) { setError('Your name is required'); return; }
     if (!adminEmail.trim()) { setError('Email is required'); return; }
     if (!adminPassword || adminPassword.length < 8) { setError('Password must be at least 8 characters'); return; }
@@ -78,26 +81,11 @@ export default function NewClubSetup({ onComplete, onBack }) {
         localStorage.setItem('swoop_club_name', clubName.trim());
         localStorage.setItem('swoop_auth_user', JSON.stringify(data.user));
       }
-      setStep(1);
+      setStep(2);
     } catch {
       setError('Connection error. Check your network and try again.');
     }
     setLoading(false);
-  };
-
-  // ─── Step 2: Course Setup (optional) ───
-  const handleCourseSetup = async () => {
-    if (courseName.trim()) {
-      // Save course — inline POST (no dedicated endpoint yet, skip if fails)
-      try {
-        await fetch('/api/onboard-club', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clubId, step: 'course_setup', courseName: courseName.trim(), holes: parseInt(holes), par: parseInt(par) }),
-        });
-      } catch { /* non-critical */ }
-    }
-    setStep(2);
   };
 
   // ─── Step 3: Upload Data ───
@@ -252,25 +240,31 @@ export default function NewClubSetup({ onComplete, onBack }) {
               <label style={labelStyle}>Estimated Members</label>
               <input type="number" value={memberCount} onChange={e => setMemberCount(e.target.value)} placeholder="300" style={inputStyle} />
             </div>
-            <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '14px', marginTop: '4px' }}>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '10px' }}>Admin Account</div>
-              <div className="flex flex-col gap-3.5">
-                <div>
-                  <label style={labelStyle}>Your Name *</label>
-                  <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Sarah Mitchell" style={inputStyle} />
-                </div>
-                <div>
-                  <label style={labelStyle}>Email *</label>
-                  <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="sarah@pinevalleycc.com" style={inputStyle} />
-                </div>
-                <div>
-                  <label style={labelStyle}>Password *</label>
-                  <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Min 8 characters" style={inputStyle} />
-                </div>
-              </div>
-            </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
               <button onClick={onBack} style={btnSecondary}>Back</button>
+              <button onClick={handleClubInfoNext} style={{ ...btnPrimary, flex: 1 }}>Next</button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── Step 1: Admin Account ─── */}
+        {step === 1 && (
+          <div className="flex flex-col gap-3.5">
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '2px' }}>Create your admin account</div>
+            <div>
+              <label style={labelStyle}>Your Name *</label>
+              <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Sarah Mitchell" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Email *</label>
+              <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="sarah@pinevalleycc.com" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Password *</label>
+              <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Min 8 characters" style={inputStyle} />
+            </div>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+              <button onClick={() => { setError(null); setStep(0); }} style={btnSecondary}>Back</button>
               <button onClick={handleCreateClub} disabled={loading} style={{ ...btnPrimary, flex: 1, opacity: loading ? 0.7 : 1 }}>
                 {loading ? 'Setting up...' : 'Next'}
               </button>
@@ -278,41 +272,12 @@ export default function NewClubSetup({ onComplete, onBack }) {
           </div>
         )}
 
-        {/* ─── Step 1: Course Setup ─── */}
-        {step === 1 && (
-          <div className="flex flex-col gap-3.5">
-            <div style={{ padding: '12px 16px', borderRadius: '10px', background: '#F0F9FF', border: '1px solid #BAE6FD', fontSize: '13px', color: '#0369A1' }}>
-              Club created! Now set up your course (optional).
-            </div>
-            <div>
-              <label style={labelStyle}>Course Name</label>
-              <input value={courseName} onChange={e => setCourseName(e.target.value)} placeholder="Championship Course" style={inputStyle} />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div>
-                <label style={labelStyle}>Holes</label>
-                <select value={holes} onChange={e => setHoles(e.target.value)} style={inputStyle}>
-                  <option value="18">18 Holes</option>
-                  <option value="9">9 Holes</option>
-                  <option value="27">27 Holes</option>
-                  <option value="36">36 Holes</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Par</label>
-                <input type="number" value={par} onChange={e => setPar(e.target.value)} style={inputStyle} />
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-              <button onClick={() => setStep(2)} style={btnSecondary}>Skip</button>
-              <button onClick={handleCourseSetup} style={{ ...btnPrimary, flex: 1 }}>Save & Continue</button>
-            </div>
-          </div>
-        )}
-
         {/* ─── Step 2: Upload Data ─── */}
         {step === 2 && (
           <div className="flex flex-col gap-4">
+            <div style={{ padding: '12px 16px', borderRadius: '10px', background: '#F0F9FF', border: '1px solid #BAE6FD', fontSize: '13px', color: '#0369A1' }}>
+              Club created! Upload your data or skip for now.
+            </div>
             <div style={{ fontSize: '14px', color: '#374151', fontWeight: 500 }}>
               Download a template, fill in your data, and upload it. Start with Members Only to test quickly.
             </div>

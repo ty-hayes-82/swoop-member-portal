@@ -36,6 +36,7 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
       if (data.user.clubId) localStorage.setItem('swoop_club_id', data.user.clubId);
+      if (data.user.clubName) localStorage.setItem('swoop_club_name', data.user.clubName);
     }).catch(() => {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
@@ -56,6 +57,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem(TOKEN_KEY, data.token);
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
       if (data.user.clubId) localStorage.setItem('swoop_club_id', data.user.clubId);
+      if (data.user.clubName) localStorage.setItem('swoop_club_name', data.user.clubName);
       setUser(data.user);
       return true;
     } catch (e) {

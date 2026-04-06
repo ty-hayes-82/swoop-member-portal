@@ -58,7 +58,7 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-[400px] rounded-2xl border border-gray-200 bg-white p-10 shadow-theme-lg text-center">
           <div className="text-2xl font-extrabold text-gray-800 mb-2">Invalid Link</div>
           <p className="text-sm text-gray-500 mb-6">This password reset link is missing or invalid.</p>
-          <a href="/#/login" className="text-sm font-semibold text-brand-500 hover:text-brand-600">Back to Sign In</a>
+          <a href="#/login" className="text-sm font-semibold text-brand-500 hover:text-brand-600">Back to Sign In</a>
         </div>
       </div>
     );
@@ -72,7 +72,7 @@ export default function ResetPasswordPage() {
           <div className="text-2xl font-extrabold text-gray-800 mb-2">Password Reset</div>
           <p className="text-sm text-gray-500 mb-6">Your password has been updated. You can now sign in with your new password.</p>
           <a
-            href="/#/login"
+            href="#/login"
             onClick={() => {
               localStorage.removeItem('swoop_auth_user');
               localStorage.removeItem('swoop_auth_token');
@@ -142,7 +142,7 @@ export default function ResetPasswordPage() {
         </form>
 
         <div className="text-center mt-4">
-          <a href="/#/login" className="text-sm text-gray-500 hover:text-gray-700">Back to Sign In</a>
+          <a href="#/login" className="text-sm text-gray-500 hover:text-gray-700">Back to Sign In</a>
         </div>
       </div>
     </div>

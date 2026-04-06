@@ -131,9 +131,16 @@ export default function App() {
     try { return !!localStorage.getItem('swoop_auth_user'); } catch { return false; }
   });
 
+  // Track hash changes so reset-password → login transitions work
+  const [currentHash, setCurrentHash] = useState(() => window.location.hash);
+  useEffect(() => {
+    const onHashChange = () => setCurrentHash(window.location.hash);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
   // Password reset page — accessible without auth
-  const hash = window.location.hash;
-  if (hash.startsWith('#/reset-password')) {
+  if (currentHash.startsWith('#/reset-password')) {
     return (
       <Suspense fallback={null}>
         <ResetPasswordPage />
