@@ -87,6 +87,7 @@ export default function LoginPage({ onLogin }) {
       role: 'gm', title: 'General Manager',
     };
     localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
+    localStorage.setItem('swoop_auth_token', 'demo');
     if (demoEmail) localStorage.setItem('swoop_demo_email', demoEmail);
     if (demoPhone) localStorage.setItem('swoop_demo_phone', demoPhone);
     localStorage.removeItem('swoop_club_id');
