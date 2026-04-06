@@ -264,25 +264,56 @@ export function AppProvider({ children }) {
     approveAgentServiceAction(id, meta);
     dispatch({ type: 'APPROVE_ACTION', id, meta });
 
-    // Wire to real execution API if club is configured
     const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
-    if (clubId) {
-      const token = localStorage.getItem('swoop_auth_token');
-      const demoEmail = localStorage.getItem('swoop_demo_email');
-      const demoPhone = localStorage.getItem('swoop_demo_phone');
-      fetch('/api/execute-action', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({
-          actionId: id, clubId,
-          executionType: meta.executionType || 'staff_task',
-          memberId: meta.memberId || null,
-          senderName: meta.approvalAction || 'GM',
-          ...(demoEmail ? { demoOverrideEmail: demoEmail } : {}),
-          ...(demoPhone ? { demoOverridePhone: demoPhone } : {}),
-        }),
-      }).catch(() => {});
+    if (!clubId) return;
+
+    const execType = meta.executionType || 'staff_task';
+    const demoEmail = localStorage.getItem('swoop_demo_email') || '';
+    const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
+    const emailSendMode = localStorage.getItem('swoop_email_send_mode') || 'local';
+    const smsSendMode = localStorage.getItem('swoop_sms_send_mode') || 'local';
+
+    // Find the action description from inbox for local send
+    const actionItem = state.inbox.find(a => a.id === id);
+    const memberName = actionItem?.memberName || meta.memberName || 'Member';
+    const description = meta.customMessage || actionItem?.description || '';
+
+    // ── Local email: open mailto: link ──
+    if (execType === 'email' && emailSendMode === 'local') {
+      const toAddr = demoEmail || meta.memberEmail || '';
+      const subject = encodeURIComponent(`A personal note from your club`);
+      const body = encodeURIComponent(
+        `Dear ${memberName},\n\n${description}\n\nWe value your membership and would love to hear from you.\n\nWarm regards`
+      );
+      window.open(`mailto:${toAddr}?subject=${subject}&body=${body}`, '_self');
+      return;
     }
+
+    // ── Local SMS: open sms: link ──
+    if (execType === 'sms' && smsSendMode === 'local') {
+      const toNum = demoPhone || meta.memberPhone || '';
+      const body = encodeURIComponent(description || `Hi ${memberName}, just checking in from the club.`);
+      // sms: URI — use & for iOS, ? for Android; &body= works on both modern platforms
+      window.open(`sms:${toNum}?&body=${body}`, '_self');
+      return;
+    }
+
+    // ── Cloud send: call API (SendGrid / Twilio) ──
+    const token = localStorage.getItem('swoop_auth_token');
+    fetch('/api/execute-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({
+        actionId: id, clubId,
+        executionType: execType,
+        memberId: meta.memberId || null,
+        senderName: meta.approvalAction || 'GM',
+        customMessage: description,
+        templateId: meta.templateId || 'personal_note',
+        ...(demoEmail ? { demoOverrideEmail: demoEmail } : {}),
+        ...(demoPhone ? { demoOverridePhone: demoPhone } : {}),
+      }),
+    }).catch(() => {});
   }
 
   function dismissAction(id, meta = {}) {
