@@ -55,10 +55,18 @@ export default withAuth(async function handler(req, res) {
   }
 
   try {
-    // Get action details
-    const actionResult = await sql`
+    // Get action details — check both actions and agent_actions tables
+    let actionResult = await sql`
       SELECT * FROM actions WHERE action_id = ${actionId} AND club_id = ${clubId}
     `;
+    if (actionResult.rows.length === 0) {
+      // Fallback: check agent_actions table (seeded demo actions live here)
+      actionResult = await sql`
+        SELECT action_id, agent_id, action_type, priority, source, description,
+               impact_metric, member_id, status, club_id
+        FROM agent_actions WHERE action_id = ${actionId} AND club_id = ${clubId}
+      `;
+    }
     if (actionResult.rows.length === 0) {
       return res.status(404).json({ error: 'Action not found' });
     }
