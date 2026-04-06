@@ -274,14 +274,19 @@ export function AppProvider({ children }) {
     // Wire to real execution API if club is configured
     const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
     if (clubId) {
+      const token = localStorage.getItem('swoop_auth_token');
+      const demoEmail = localStorage.getItem('swoop_demo_email');
+      const demoPhone = localStorage.getItem('swoop_demo_phone');
       fetch('/api/execute-action', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({
           actionId: id, clubId,
           executionType: meta.executionType || 'staff_task',
           memberId: meta.memberId || null,
           senderName: meta.approvalAction || 'GM',
+          ...(demoEmail ? { demoOverrideEmail: demoEmail } : {}),
+          ...(demoPhone ? { demoOverridePhone: demoPhone } : {}),
         }),
       }).catch(() => {});
     }

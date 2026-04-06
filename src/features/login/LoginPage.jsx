@@ -103,7 +103,7 @@ export default function LoginPage({ onLogin }) {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-3">
-            <img src="/favicon.svg" alt="Swoop" className="w-10 h-10 rounded-xl" />
+            <img src="/favicon.svg" alt="Swoop Golf" className="w-12 h-12" />
           </div>
           <div className="text-[28px] font-extrabold text-gray-900">Swoop Golf</div>
           <div className="text-sm text-gray-500 mt-1">Club Intelligence for General Managers</div>

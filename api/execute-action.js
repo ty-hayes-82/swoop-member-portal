@@ -95,7 +95,9 @@ export default withAuth(async function handler(req, res) {
       const body = renderTemplate(template.body, templateVars);
 
       // Send via SendGrid if API key is configured
-      const toEmail = memberEmail || (await getMemberEmail(memberId || action.member_id));
+      // In demo mode, override recipient with demo user's email
+      const demoOverrideEmail = req.body.demoOverrideEmail;
+      const toEmail = demoOverrideEmail || memberEmail || (await getMemberEmail(memberId || action.member_id));
       let emailSent = false;
       if (process.env.SENDGRID_API_KEY && toEmail) {
         try {
@@ -132,7 +134,9 @@ export default withAuth(async function handler(req, res) {
 
     } else if (executionType === 'sms') {
       // Send via Twilio
-      const toPhone = memberPhone || (await getMemberPhone(memberId || action.member_id));
+      // In demo mode, override recipient with demo user's phone
+      const demoOverridePhone = req.body.demoOverridePhone;
+      const toPhone = demoOverridePhone || memberPhone || (await getMemberPhone(memberId || action.member_id));
       let smsSent = false;
       const twilioSid = process.env.TWILIO_ACCOUNT_SID;
       const twilioAuth = process.env.TWILIO_API_KEY_SECRET || process.env.TWILIO_AUTH_TOKEN;
