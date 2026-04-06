@@ -525,17 +525,13 @@ function PlaybookDetail({ playbook }) {
         <div className="text-xs sm:text-[13px] text-gray-400 font-medium">When you activate this playbook:</div>
         <button
           onClick={() => setEditingSteps(true)}
-          style={{
-            background: 'transparent', border: '1px solid #e5e5e5', borderRadius: 8,
-            padding: '5px 14px', fontSize: 12, fontWeight: 600, color: '#666',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-transparent text-xs font-semibold text-gray-500 cursor-pointer hover:bg-gray-50 transition dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
           Customize Steps
-          {customSteps && <span style={{ fontSize: 9, background: '#e8772e', color: '#fff', padding: '1px 5px', borderRadius: 8, marginLeft: 4 }}>Customized</span>}
+          {customSteps && <span className="text-[9px] bg-brand-500 text-white px-1.5 py-px rounded-full ml-1">Customized</span>}
         </button>
       </div>
 
@@ -654,22 +650,22 @@ export default function PlaybooksPage({ embedded = false }) {
 
   return (
     <Wrapper>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div className="flex flex-col gap-5 sm:gap-6">
         {/* Page Header — hidden when embedded in AutomationsHub */}
         {!embedded && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.5px', color: '#e8772e', textTransform: 'uppercase', marginBottom: 6 }}>
+            <div className="text-[11px] font-bold tracking-widest text-brand-500 uppercase mb-1.5">
               Outreach Playbooks
             </div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#0f0f0f', margin: '0 0 6px', fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white/90 m-0 mb-1.5 font-serif">
               Automated Response Protocols
             </h1>
-            <p style={{ fontSize: 14, color: '#666', margin: 0, lineHeight: 1.5 }}>
-              Step-by-step playbooks that activate automatically when patterns are detected. Each playbook coordinates staff alerts, member outreach, and follow-up actions.
+            <p className="text-sm text-gray-500 dark:text-gray-400 m-0 leading-relaxed">
+              Step-by-step playbooks that activate automatically when patterns are detected.
             </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             {[
               { cat: 'Service Recovery', color: '#c0392b' },
               { cat: 'New Member Success', color: '#0ea5e9' },
@@ -681,9 +677,9 @@ export default function PlaybooksPage({ embedded = false }) {
               const count = visiblePlaybooks.filter(p => p.category === cat).length;
               if (count === 0) return null;
               return (
-                <div key={cat} style={{ textAlign: 'center', padding: '8px 16px', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 10 }}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color }}>{count}</div>
-                  <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{cat}</div>
+                <div key={cat} className="text-center px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <div className="text-lg sm:text-xl font-bold" style={{ color }}>{count}</div>
+                  <div className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wide">{cat}</div>
                 </div>
               );
             })}
@@ -691,20 +687,18 @@ export default function PlaybooksPage({ embedded = false }) {
         </div>
         )}
 
-        {/* Category Filter — scrollable on mobile */}
-        <div className="overflow-x-auto -mx-1 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div style={{ display: 'inline-flex', gap: 4, background: '#f4f4f5', borderRadius: 10, padding: 3 }}>
+        {/* Category Filter — horizontally scrollable on mobile */}
+        <div className="overflow-x-auto -mx-1 px-1 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="inline-flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
             {CATEGORY_FILTERS.map(cat => (
               <button
                 key={cat}
                 onClick={() => setCategoryFilter(cat)}
-                style={{
-                  padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                  cursor: 'pointer', border: 'none', transition: 'all 0.15s', whiteSpace: 'nowrap',
-                  background: categoryFilter === cat ? '#fff' : 'transparent',
-                  color: categoryFilter === cat ? '#0f0f0f' : '#888',
-                  boxShadow: categoryFilter === cat ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                }}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer border-none whitespace-nowrap transition-all ${
+                  categoryFilter === cat
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
+                    : 'bg-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                }`}
               >{cat}</button>
             ))}
           </div>

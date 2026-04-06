@@ -1,8 +1,11 @@
 /**
  * NewClubSetup — 4-step wizard for onboarding a new club
  * Steps: Club Info → Admin Account → Upload Data → Ready
+ *
+ * Uses TailAdmin-style layout: centered form with max-w-md mx-auto
  */
 import { useState, useRef } from 'react';
+
 const TEMPLATES = [
   { file: 'swoop-template-members-only.xlsx', label: 'Members Only', desc: '20 members — test health scores and at-risk detection', sheets: '1 sheet', color: '#3b82f6' },
   { file: 'swoop-template-members-rounds.xlsx', label: 'Members + Rounds', desc: '25 members, 80 rounds — adds golf engagement analysis', sheets: '2 sheets', color: '#8b5cf6' },
@@ -11,6 +14,8 @@ const TEMPLATES = [
 ];
 
 const STEP_LABELS = ['Club Info', 'Admin Account', 'Upload Data', 'Ready'];
+
+const inputClasses = 'h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:border-gray-700 dark:focus:border-brand-800';
 
 export default function NewClubSetup({ onComplete, onBack }) {
   const [step, setStep] = useState(0);
@@ -74,7 +79,6 @@ export default function NewClubSetup({ onComplete, onBack }) {
       if (!res.ok) { setError(data.error || 'Failed to create club'); setLoading(false); return; }
       setClubId(data.clubId);
       setUserId(data.userId);
-      // Store auth token immediately so API calls work during setup
       if (data.token) {
         localStorage.setItem('swoop_auth_token', data.token);
         localStorage.setItem('swoop_club_id', data.clubId);
@@ -88,43 +92,34 @@ export default function NewClubSetup({ onComplete, onBack }) {
     setLoading(false);
   };
 
-  // ─── Step 3: Upload Data ───
+  // ─── Step 2: Upload Data ───
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // File type validation
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (ext !== 'xlsx' && ext !== 'xls') {
       setError(`Invalid file type ".${ext}" — please upload an .xlsx file. Download a template above to get the correct format.`);
       return;
     }
-
     setUploading(true);
     setError(null);
     setUploadedFileName(file.name);
-
     try {
       const XLSX = await import('xlsx');
       const data = await file.arrayBuffer();
       const wb = XLSX.read(data, { type: 'array' });
       const results = { members: 0, rounds: 0, transactions: 0, complaints: 0 };
-
       for (const sheetName of wb.SheetNames) {
         const ws = wb.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json(ws);
         if (rows.length === 0) continue;
-
-        // Auto-detect import type by sheet name or column headers
         const cols = Object.keys(rows[0]).map(c => c.toLowerCase());
         let importType = null;
         if (sheetName.toLowerCase().includes('member') || cols.includes('first_name')) importType = 'members';
         else if (sheetName.toLowerCase().includes('round') || cols.includes('round_date')) importType = 'rounds';
         else if (sheetName.toLowerCase().includes('transaction') || cols.includes('total_amount')) importType = 'transactions';
         else if (sheetName.toLowerCase().includes('complaint') || cols.includes('category') && cols.includes('description')) importType = 'complaints';
-
         if (!importType) continue;
-
         const res = await fetch('/api/import-csv', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -133,14 +128,9 @@ export default function NewClubSetup({ onComplete, onBack }) {
         const result = await res.json();
         results[importType] = result.success || rows.length;
       }
-
       setUploadResults(results);
-
-      // Trigger health score computation if members were imported
       if (results.members > 0) {
-        try {
-          await fetch(`/api/compute-health-scores?clubId=${clubId}`, { method: 'POST' });
-        } catch { /* non-critical */ }
+        try { await fetch(`/api/compute-health-scores?clubId=${clubId}`, { method: 'POST' }); } catch { /* non-critical */ }
       }
     } catch (err) {
       setError(`Upload error: ${err.message}`);
@@ -148,7 +138,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
     setUploading(false);
   };
 
-  // ─── Step 4: Go to Dashboard ───
+  // ─── Step 3: Go to Dashboard ───
   const handleFinish = () => {
     const user = {
       userId: userId || 'admin', clubId, name: adminName.trim() || 'Club Admin',
@@ -161,111 +151,88 @@ export default function NewClubSetup({ onComplete, onBack }) {
     onComplete?.(user);
   };
 
-  // ─── Shared styles ───
-  const inputStyle = {
-    width: '100%', padding: '10px 14px', fontSize: '14px',
-    border: '1px solid #E5E7EB', borderRadius: '10px',
-    outline: 'none', boxSizing: 'border-box', background: '#F9FAFB',
-  };
-  const labelStyle = { fontSize: '13px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' };
-  const btnPrimary = {
-    padding: '12px 24px', borderRadius: '10px', border: 'none',
-    background: '#ff8b00', color: '#fff', fontSize: '14px',
-    fontWeight: 700, cursor: 'pointer',
-  };
-  const btnSecondary = {
-    padding: '12px 24px', borderRadius: '10px',
-    border: '1px solid #E5E7EB', background: '#fff',
-    color: '#374151', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
-  };
-
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#F8F9FA', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-    }}>
-      <div style={{
-        width: '100%', maxWidth: 520, padding: '40px',
-        background: '#fff', borderRadius: '16px',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-        border: '1px solid #E5E7EB',
-      }}>
+    <div className="relative flex flex-col justify-center w-full min-h-screen bg-gray-50 dark:bg-gray-900 font-sans px-6 py-12">
+      <div className="w-full max-w-lg mx-auto">
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 800, color: '#0F0F0F' }}>Set Up Your Club</div>
-          <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-extrabold text-gray-800 dark:text-white/90">Set Up Your Club</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Step {step + 1} of {STEP_LABELS.length}: {STEP_LABELS[step]}
-          </div>
+          </p>
         </div>
 
         {/* Progress bar */}
-        <div style={{ display: 'flex', gap: '4px', marginBottom: '28px' }}>
+        <div className="flex gap-1 mb-7">
           {STEP_LABELS.map((_, i) => (
-            <div key={i} style={{
-              flex: 1, height: '4px', borderRadius: '2px',
-              background: i <= step ? '#ff8b00' : '#E5E7EB',
-              transition: 'background 0.3s',
-            }} />
+            <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= step ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'}`} />
           ))}
         </div>
 
+        {/* Error banner */}
         {error && (
-          <div style={{ padding: '10px 14px', borderRadius: '10px', background: '#FEE2E2', color: '#991B1B', fontSize: '13px', fontWeight: 500, marginBottom: '16px' }}>
+          <div className="mb-4 px-4 py-3 rounded-lg bg-error-50 border border-error-500/30 text-error-700 text-sm font-medium dark:bg-error-500/10 dark:text-error-400">
             {error}
           </div>
         )}
 
         {/* ─── Step 0: Club Info ─── */}
         {step === 0 && (
-          <div className="flex flex-col gap-3.5">
+          <div className="space-y-4">
             <div>
-              <label style={labelStyle}>Club Name *</label>
-              <input value={clubName} onChange={e => setClubName(e.target.value)} placeholder="Pine Valley Country Club" style={inputStyle} />
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Club Name *</label>
+              <input value={clubName} onChange={e => setClubName(e.target.value)} placeholder="Pine Valley Country Club" className={inputClasses} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', gap: '10px' }}>
+            <div className="grid grid-cols-[1fr_80px_100px] gap-3">
               <div>
-                <label style={labelStyle}>City</label>
-                <input value={city} onChange={e => setCity(e.target.value)} placeholder="Scottsdale" style={inputStyle} />
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">City</label>
+                <input value={city} onChange={e => setCity(e.target.value)} placeholder="Scottsdale" className={inputClasses} />
               </div>
               <div>
-                <label style={labelStyle}>State</label>
-                <input value={state} onChange={e => setState(e.target.value)} placeholder="AZ" maxLength={2} style={inputStyle} />
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">State</label>
+                <input value={state} onChange={e => setState(e.target.value)} placeholder="AZ" maxLength={2} className={inputClasses} />
               </div>
               <div>
-                <label style={labelStyle}>ZIP</label>
-                <input value={zip} onChange={e => setZip(e.target.value)} placeholder="85255" style={inputStyle} />
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">ZIP</label>
+                <input value={zip} onChange={e => setZip(e.target.value)} placeholder="85255" className={inputClasses} />
               </div>
             </div>
             <div>
-              <label style={labelStyle}>Estimated Members</label>
-              <input type="number" value={memberCount} onChange={e => setMemberCount(e.target.value)} placeholder="300" style={inputStyle} />
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Estimated Members</label>
+              <input type="number" value={memberCount} onChange={e => setMemberCount(e.target.value)} placeholder="300" className={inputClasses} />
             </div>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-              <button onClick={onBack} style={btnSecondary}>Back</button>
-              <button onClick={handleClubInfoNext} style={{ ...btnPrimary, flex: 1 }}>Next</button>
+            <div className="flex gap-3 pt-2">
+              <button onClick={onBack} className="px-5 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">
+                Back
+              </button>
+              <button onClick={handleClubInfoNext} className="flex-1 py-3 rounded-lg text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 transition">
+                Next
+              </button>
             </div>
           </div>
         )}
 
         {/* ─── Step 1: Admin Account ─── */}
         {step === 1 && (
-          <div className="flex flex-col gap-3.5">
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '2px' }}>Create your admin account</div>
+          <div className="space-y-4">
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Create your admin account</p>
             <div>
-              <label style={labelStyle}>Your Name *</label>
-              <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Sarah Mitchell" style={inputStyle} />
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Your Name *</label>
+              <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Sarah Mitchell" className={inputClasses} />
             </div>
             <div>
-              <label style={labelStyle}>Email *</label>
-              <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="sarah@pinevalleycc.com" style={inputStyle} />
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Email *</label>
+              <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="sarah@pinevalleycc.com" className={inputClasses} />
             </div>
             <div>
-              <label style={labelStyle}>Password *</label>
-              <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Min 8 characters" style={inputStyle} />
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Password *</label>
+              <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Min 8 characters" className={inputClasses} />
             </div>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-              <button onClick={() => { setError(null); setStep(0); }} style={btnSecondary}>Back</button>
-              <button onClick={handleCreateClub} disabled={loading} style={{ ...btnPrimary, flex: 1, opacity: loading ? 0.7 : 1 }}>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => { setError(null); setStep(0); }} className="px-5 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">
+                Back
+              </button>
+              <button onClick={handleCreateClub} disabled={loading} className={`flex-1 py-3 rounded-lg text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 transition ${loading ? 'opacity-70 cursor-wait' : ''}`}>
                 {loading ? 'Setting up...' : 'Next'}
               </button>
             </div>
@@ -274,34 +241,29 @@ export default function NewClubSetup({ onComplete, onBack }) {
 
         {/* ─── Step 2: Upload Data ─── */}
         {step === 2 && (
-          <div className="flex flex-col gap-4">
-            <div style={{ padding: '12px 16px', borderRadius: '10px', background: '#F0F9FF', border: '1px solid #BAE6FD', fontSize: '13px', color: '#0369A1' }}>
+          <div className="space-y-4">
+            <div className="px-4 py-3 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/30 dark:text-blue-400">
               Club created! Upload your data or skip for now.
             </div>
-            <div style={{ fontSize: '14px', color: '#374151', fontWeight: 500 }}>
+            <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
               Download a template, fill in your data, and upload it. Start with Members Only to test quickly.
-            </div>
+            </p>
 
             {/* Template downloads */}
-            <div className="flex flex-col gap-2">
+            <div className="space-y-2">
               {TEMPLATES.map((t) => (
                 <a
                   key={t.file}
                   href={`/templates/${t.file}`}
                   download
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    padding: '10px 14px', borderRadius: '10px',
-                    border: `1px solid ${t.color}25`, background: `${t.color}06`,
-                    textDecoration: 'none', color: '#374151',
-                  }}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition no-underline text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600"
                 >
                   <span className="text-xl">📥</span>
-                  <div className="flex-1">
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: t.color }}>{t.label}</div>
-                    <div style={{ fontSize: '11px', color: '#6B7280' }}>{t.desc}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold" style={{ color: t.color }}>{t.label}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{t.desc}</div>
                   </div>
-                  <span className="text-[11px] text-gray-400 font-semibold">{t.sheets}</span>
+                  <span className="text-xs text-gray-400 font-semibold shrink-0">{t.sheets}</span>
                 </a>
               ))}
             </div>
@@ -309,42 +271,35 @@ export default function NewClubSetup({ onComplete, onBack }) {
             {/* Upload area */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              style={{
-                padding: '24px', borderRadius: '10px',
-                border: `2px dashed ${uploadedFileName ? '#16a34a40' : '#D1D5DB'}`,
-                background: uploadedFileName ? '#F0FDF408' : '#FAFAFA',
-                textAlign: 'center', cursor: 'pointer',
-              }}
+              className={`p-6 rounded-lg border-2 border-dashed text-center cursor-pointer transition-colors ${
+                uploadedFileName
+                  ? 'border-success-500/40 bg-success-50/30 dark:bg-success-500/5'
+                  : 'border-gray-300 bg-gray-50 hover:border-gray-400 dark:border-gray-700 dark:bg-gray-800'
+              }`}
             >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
+              <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className="hidden" />
               {uploading ? (
-                <div style={{ fontSize: '14px', color: '#ff8b00', fontWeight: 600 }}>Uploading and processing...</div>
+                <div className="text-sm text-brand-500 font-semibold">Uploading and processing...</div>
               ) : uploadedFileName ? (
                 <>
-                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>✅</div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#16a34a' }}>{uploadedFileName}</div>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '4px' }}>Click to upload a different file</div>
+                  <div className="text-2xl mb-2">✅</div>
+                  <div className="text-sm font-semibold text-success-600">{uploadedFileName}</div>
+                  <div className="text-xs text-gray-400 mt-1">Click to upload a different file</div>
                 </>
               ) : (
                 <>
-                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>📄</div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>Click to upload XLSX file</div>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '4px' }}>Multi-sheet files auto-detected</div>
+                  <div className="text-2xl mb-2">📄</div>
+                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">Click to upload XLSX file</div>
+                  <div className="text-xs text-gray-400 mt-1">Multi-sheet files auto-detected</div>
                 </>
               )}
             </div>
 
             {/* Upload results */}
             {uploadResults && (
-              <div style={{ padding: '14px 16px', borderRadius: '10px', background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#16a34a', marginBottom: '6px' }}>Upload Complete</div>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', fontSize: '12px', color: '#374151' }}>
+              <div className="px-4 py-3 rounded-lg bg-success-50 border border-success-200 dark:bg-success-500/10 dark:border-success-500/30">
+                <div className="text-sm font-bold text-success-600 dark:text-success-400 mb-1">Upload Complete</div>
+                <div className="flex gap-3 flex-wrap text-xs text-gray-700 dark:text-gray-300">
                   {uploadResults.members > 0 && <span>{uploadResults.members} members</span>}
                   {uploadResults.rounds > 0 && <span>{uploadResults.rounds} rounds</span>}
                   {uploadResults.transactions > 0 && <span>{uploadResults.transactions} transactions</span>}
@@ -353,8 +308,15 @@ export default function NewClubSetup({ onComplete, onBack }) {
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
-              <button onClick={() => setStep(3)} style={{ ...(uploadResults ? btnPrimary : btnSecondary), flex: 1 }}>
+            <div className="pt-1">
+              <button
+                onClick={() => setStep(3)}
+                className={`w-full py-3 rounded-lg text-sm font-bold transition ${
+                  uploadResults
+                    ? 'bg-brand-500 text-white hover:bg-brand-600'
+                    : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700'
+                }`}
+              >
                 {uploadResults ? 'Continue' : 'Skip for Now'}
               </button>
             </div>
@@ -363,16 +325,16 @@ export default function NewClubSetup({ onComplete, onBack }) {
 
         {/* ─── Step 3: Ready ─── */}
         {step === 3 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'center' }}>
+          <div className="text-center space-y-5">
             <div className="text-5xl">🎉</div>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: '#0F0F0F' }}>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
               {clubName} is ready!
-            </div>
+            </h2>
 
             {uploadResults ? (
-              <div style={{ textAlign: 'left', padding: '16px', borderRadius: '10px', background: '#F9FAFB', border: '1px solid #E5E7EB' }}>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '8px' }}>What you can see now:</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px', color: '#374151' }}>
+              <div className="text-left p-4 rounded-lg bg-gray-50 border border-gray-200 dark:bg-white/[0.03] dark:border-gray-700">
+                <div className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">What you can see now:</div>
+                <div className="space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
                   {uploadResults.members > 0 && <div>✅ Health scores & at-risk members</div>}
                   {uploadResults.rounds > 0 && <div>✅ Golf engagement & pace analysis</div>}
                   {uploadResults.transactions > 0 && <div>✅ Revenue signals & spend patterns</div>}
@@ -382,12 +344,12 @@ export default function NewClubSetup({ onComplete, onBack }) {
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 No data uploaded yet. You can upload data from Admin &gt; CSV Import anytime.
-              </div>
+              </p>
             )}
 
-            <button onClick={handleFinish} style={{ ...btnPrimary, width: '100%', fontSize: '16px', padding: '14px' }}>
+            <button onClick={handleFinish} className="w-full py-3.5 rounded-lg bg-brand-500 text-white text-base font-bold hover:bg-brand-600 transition">
               Open Dashboard
             </button>
           </div>
