@@ -118,6 +118,7 @@ const IMPORT_TYPES = {
     optionalFields: ['department', 'job_title', 'hire_date', 'hourly_rate', 'ft_pt'],
     table: 'staff',
     columnMap: { employee_id: 'staff_id', job_title: 'role', ft_pt: 'is_full_time' },
+    valueTransform: { ft_pt: v => (String(v).toUpperCase() === 'FT' || v === '1' || v === true) ? 1 : 0 },
     defaults: { hire_date: () => new Date().toISOString().slice(0, 10), hourly_rate: () => 15, department: () => 'General', role: () => 'Staff' },
   },
   shifts: {
@@ -193,10 +194,12 @@ export default withAuth(async function handler(req, res) {
     try {
       if (importType === 'members') {
         const memberId = row.external_id || `mbr_${Date.now()}_${i}`;
+        const uniqueMemberId = `${clubId}_${memberId}`;
         await sql`
           INSERT INTO members (member_id, club_id, external_id, first_name, last_name, email, phone, membership_type, annual_dues, join_date, household_id, data_source, status)
-          VALUES (${memberId}, ${clubId}, ${row.external_id || null}, ${row.first_name}, ${row.last_name}, ${row.email || null}, ${row.phone || null}, ${row.membership_type || null}, ${row.annual_dues ? Number(row.annual_dues) : null}, ${row.join_date || null}, ${row.household_id || null}, 'csv_import', 'active')
+          VALUES (${uniqueMemberId}, ${clubId}, ${row.external_id || null}, ${row.first_name}, ${row.last_name}, ${row.email || null}, ${row.phone || null}, ${row.membership_type || null}, ${row.annual_dues ? Number(row.annual_dues) : null}, ${row.join_date || null}, ${row.household_id || null}, 'csv_import', 'active')
           ON CONFLICT (member_id) DO UPDATE SET
+            club_id = EXCLUDED.club_id,
             first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
             email = COALESCE(EXCLUDED.email, members.email),
             phone = COALESCE(EXCLUDED.phone, members.phone),
@@ -242,7 +245,9 @@ export default withAuth(async function handler(req, res) {
             const dbColumn = columnMap[field] || field;
             columns.push(dbColumn);
             mappedColumns.add(dbColumn);
-            const val = row[field];
+            let val = row[field];
+            // Apply value transforms (e.g., ft_pt "FT"→1, "PT"→0)
+            if (config.valueTransform?.[field]) val = config.valueTransform[field](val);
             values.push(typeof val === 'string' && !isNaN(Number(val)) && field.match(/amount|fee|price|total|revenue|rate|count|hours|covers|capacity/) ? Number(val) : val);
           }
         }
@@ -257,7 +262,12 @@ export default withAuth(async function handler(req, res) {
         }
         const placeholders = values.map((_, idx) => `$${idx + 1}`).join(', ');
         const colNames = columns.map(c => `"${c}"`).join(', ');
-        await sql.query(`INSERT INTO ${config.table} (${colNames}) VALUES (${placeholders})`, values);
+        // Use ON CONFLICT DO UPDATE for upsert behavior on tables with primary keys
+        const pkCol = config.requiredFields[0];
+        const dbPkCol = columnMap[pkCol] || pkCol;
+        const updateCols = columns.filter(c => c !== dbPkCol && c !== 'club_id').map(c => `"${c}" = EXCLUDED."${c}"`).join(', ');
+        const upsertSuffix = updateCols ? ` ON CONFLICT ("${dbPkCol}") DO UPDATE SET ${updateCols}` : ' ON CONFLICT DO NOTHING';
+        await sql.query(`INSERT INTO ${config.table} (${colNames}) VALUES (${placeholders})${upsertSuffix}`, values);
       }
       successCount++;
     } catch (e) {

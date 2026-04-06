@@ -172,7 +172,7 @@ async function phase2() {
 
   const rows = [];
   for (let i = 1; i <= 220; i++) {
-    const memberId = `ext_${(i % 55) + 1}`;
+    const memberId = `${CLUB_ID}_ext_${(i % 55) + 1}`;
     const daysAgo = i % 90;
     const d = new Date(2026, 3, 5); // April 5, 2026
     d.setDate(d.getDate() - daysAgo);
@@ -205,7 +205,7 @@ async function phase3() {
   const outlets = ['Grill Room','Terrace','Pool Bar','Halfway House','Banquet'];
   const rows = [];
   for (let i = 1; i <= 550; i++) {
-    const memberId = `ext_${(i % 55) + 1}`;
+    const memberId = `${CLUB_ID}_ext_${(i % 55) + 1}`;
     const daysAgo = i % 90;
     const d = new Date(2026, 3, 5);
     d.setDate(d.getDate() - daysAgo);
@@ -246,7 +246,7 @@ async function phase4() {
     const d = new Date(2026, 3, 5);
     d.setDate(d.getDate() - daysAgo);
     rows.push({
-      member_id: `ext_${(i % 55) + 1}`,
+      member_id: `${CLUB_ID}_ext_${(i % 55) + 1}`,
       category: cats[i % 5],
       description: descs[i],
       status: statuses[i % 5],
@@ -294,7 +294,7 @@ async function phase5() {
     regRows.push({
       registration_id: `reg_${i + 1}`,
       event_id: `evt_${(i % 12) + 1}`,
-      member_id: `ext_${(i % 55) + 1}`,
+      member_id: `${CLUB_ID}_ext_${(i % 55) + 1}`,
       status: 'attended',
       guest_count: i % 3,
       fee_paid: 25 + (i % 4) * 25,
@@ -340,7 +340,7 @@ async function phase6() {
   for (let i = 0; i < 200; i++) {
     emailEvents.push({
       campaign_id: `camp_${(i % 8) + 1}`,
-      member_id: `ext_${(i % 55) + 1}`,
+      member_id: `${CLUB_ID}_ext_${(i % 55) + 1}`,
       event_type: i % 4 === 0 ? 'opened' : i % 4 === 1 ? 'clicked' : 'sent',
       timestamp: `2026-${String((i % 12) + 1).padStart(2, '0')}-02T10:00:00Z`,
     });
