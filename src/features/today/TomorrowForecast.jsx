@@ -1,6 +1,7 @@
 // TomorrowForecast — demand prediction for tomorrow
 import { getDailyBriefing } from '@/services/briefingService';
 import { getTomorrowForecast } from '@/services/weatherService';
+import { isAuthenticatedClub } from '@/config/constants';
 import { understaffedDays } from '@/data/staffing';
 
 const outlets = [
@@ -12,7 +13,7 @@ const outlets = [
 export default function TomorrowForecast() {
   const briefing = getDailyBriefing();
   const tomorrow = briefing?.todayRisks?.tomorrow || getTomorrowForecast();
-  const roundsBooked = briefing?.teeSheet?.roundsToday || 220;
+  const roundsBooked = briefing?.teeSheet?.roundsToday || (isAuthenticatedClub() ? 0 : 220);
 
   const weather = tomorrow?.conditions || briefing?.todayRisks?.weather || 'clear';
   const wind = tomorrow?.wind || briefing?.todayRisks?.wind || 0;

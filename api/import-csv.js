@@ -184,6 +184,20 @@ export default withAuth(async function handler(req, res) {
   let errorCount = 0;
   const allErrors = [];
 
+  // Pre-import: auto-create referenced courses for tee_times to avoid FK violations
+  if (importType === 'tee_times') {
+    const courseIds = new Set(rows.map(r => r.course).filter(Boolean));
+    for (const courseId of courseIds) {
+      try {
+        await sql`
+          INSERT INTO courses (course_id, club_id, course_name, holes, par)
+          VALUES (${courseId}, ${clubId}, ${courseId}, 18, 72)
+          ON CONFLICT (course_id) DO NOTHING
+        `;
+      } catch { /* courses table may not exist or have different schema — non-critical */ }
+    }
+  }
+
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const rowErrors = validateRow(row, config, i);
