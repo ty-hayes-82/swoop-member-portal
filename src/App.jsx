@@ -132,7 +132,7 @@ function RouterViews() {
 
 export default function App() {
   const [authed, setAuthed] = useState(() => {
-    try { return !!localStorage.getItem('swoop_auth_user'); } catch { return false; }
+    try { return !!(localStorage.getItem('swoop_auth_user') && localStorage.getItem('swoop_auth_token')); } catch { return false; }
   });
 
   // Track hash changes so reset-password → login transitions work

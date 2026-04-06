@@ -450,7 +450,7 @@ function SpendTrendSparkline({ profile }) {
     <div className="flex items-center gap-3">
       <Sparkline data={spendData} color={trendColor} />
       <div className="text-xs font-semibold" style={{ color: trendColor }}>
-        {trend >= 0 ? '\u2191' : '\u2193'} ${Math.abs(trend).toLocaleString()}/mo
+        {trend >= 0 ? '\u2191' : '\u2193'} ${(Number.isFinite(trend) ? Math.abs(trend) : 0).toLocaleString()}/mo
       </div>
     </div>
   );
@@ -470,8 +470,8 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
   const isDrawerLayout = layout === 'drawer';
 
   const topMetrics = useMemo(() => [
-    { label: 'Annual dues', value: profile.duesAnnual ? `$${profile.duesAnnual.toLocaleString()}` : '\u2014' },
-    { label: 'Annual value', value: profile.memberValueAnnual ? `$${profile.memberValueAnnual.toLocaleString()}` : '\u2014' },
+    { label: 'Annual dues', value: Number.isFinite(profile.duesAnnual) ? `$${Math.round(profile.duesAnnual).toLocaleString()}` : '\u2014' },
+    { label: 'Annual value', value: Number.isFinite(profile.memberValueAnnual) ? `$${Math.round(profile.memberValueAnnual).toLocaleString()}` : '\u2014' },
     { label: 'Last seen', value: profile.lastSeenLocation ?? '\u2014' },
   ], [profile.duesAnnual, profile.memberValueAnnual, profile.lastSeenLocation]);
 
@@ -572,7 +572,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Household value</div>
                 <div className="text-base font-bold font-mono">
-                  ${((profile.duesAnnual || 0) * (1 + profile.family.length * 0.6)).toLocaleString()}/yr
+                  ${Math.round((profile.duesAnnual || 0) * (1 + (profile.family?.length ?? 0) * 0.6)).toLocaleString()}/yr
                 </div>
               </div>
               <div>
