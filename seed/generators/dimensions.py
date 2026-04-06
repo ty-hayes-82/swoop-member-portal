@@ -18,8 +18,8 @@ fake = Faker()
 def gen_club(cfg: dict) -> list[tuple]:
     return [(
         cfg['club_id'],
-        'Oakmont Hills Country Club',
-        'Scottsdale', 'AZ', '85255',
+        'Pinetree Country Club',
+        'Kennesaw', 'GA', '30144',
         1987, 300, 2, 5,
     )]
 

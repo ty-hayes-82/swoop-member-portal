@@ -1,4 +1,4 @@
-// Pace of play data — Oakmont Hills CC, January 2026
+// Pace of play data — Pinetree CC, January 2026
 // Round duration distributions and bottleneck hole data
 
 export const paceDistribution = [

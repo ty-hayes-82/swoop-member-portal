@@ -17,9 +17,11 @@ import { getConnectedSystems } from '@/services/integrationsService';
 
 // V3: Reduced from 5 tabs to 2. CSV Import, Notifications, User Roles deferred.
 // V5: Data Health tab hidden until 2+ live API sources connected
+// V6: Club Management tab for switching/deleting clubs
 const ALL_ADMIN_TABS = [
   { key: 'data-hub', label: 'Integrations', icon: '🔌' },
   { key: 'health', label: 'Data Health', icon: '🩺' },
+  { key: 'clubs', label: 'Club Management', icon: '🏌️' },
 ];
 
 export default function AdminHub() {
@@ -75,6 +77,7 @@ export default function AdminHub() {
       <div role="tabpanel">
         {activeTab === 'data-hub' && <DataHubTab clubId={clubId} />}
         {activeTab === 'health' && <DataHealthDashboard />}
+        {activeTab === 'clubs' && <ClubManagementTab currentClubId={clubId} />}
       </div>
       {/* V3: CSV Import, Notifications, User Roles removed — white-glove onboarding */}
     </div>
@@ -168,10 +171,10 @@ function UserRolesTab() {
   const user = (() => { try { return JSON.parse(localStorage.getItem('swoop_auth_user') || '{}'); } catch { return {}; } })();
 
   const teamMembers = [
-    { name: user.name || 'Sarah Mitchell', email: user.email || 'sarah@oakmontcc.com', role: 'General Manager', status: 'Active', lastActive: 'Today' },
-    { name: 'James Crawford', email: 'james@oakmontcc.com', role: 'Head Golf Professional', status: 'Active', lastActive: '2 days ago' },
-    { name: 'Maria Santos', email: 'maria@oakmontcc.com', role: 'F&B Director', status: 'Active', lastActive: '1 day ago' },
-    { name: 'David Chen', email: 'david@oakmontcc.com', role: 'Membership Director', status: 'Invited', lastActive: '—' },
+    { name: user.name || 'Sarah Mitchell', email: user.email || 'sarah@pinetreecc.com', role: 'General Manager', status: 'Active', lastActive: 'Today' },
+    { name: 'James Crawford', email: 'james@pinetreecc.com', role: 'Head Golf Professional', status: 'Active', lastActive: '2 days ago' },
+    { name: 'Maria Santos', email: 'maria@pinetreecc.com', role: 'F&B Director', status: 'Active', lastActive: '1 day ago' },
+    { name: 'David Chen', email: 'david@pinetreecc.com', role: 'Membership Director', status: 'Invited', lastActive: '—' },
   ];
 
   return (
@@ -248,6 +251,159 @@ function UserRolesTab() {
           className="mt-2 px-4 py-2 rounded-lg border border-error-300 bg-error-50 text-error-600 font-semibold text-xs cursor-pointer dark:bg-error-500/5 dark:border-error-500/30"
         >Sign Out</button>
       </div>
+    </div>
+  );
+}
+
+function ClubManagementTab({ currentClubId }) {
+  const [clubs, setClubs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(null);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  const fetchClubs = async () => {
+    setLoading(true);
+    try {
+      const data = await apiFetch('/api/club');
+      if (data?.clubs) setClubs(data.clubs);
+    } catch { setError('Failed to load clubs'); }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchClubs(); }, []);
+
+  const handleSwitch = (clubId, clubName) => {
+    localStorage.setItem('swoop_club_id', clubId);
+    localStorage.setItem('swoop_club_name', clubName || 'Club');
+    const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+    user.clubId = clubId;
+    user.clubName = clubName;
+    localStorage.setItem('swoop_auth_user', JSON.stringify(user));
+    window.location.reload();
+  };
+
+  const handleDelete = async (clubId) => {
+    if (!confirm(`Delete ALL data for club "${clubId}"? This cannot be undone.`)) return;
+    setDeleting(clubId);
+    setError(null);
+    try {
+      const force = clubId === 'club_001' ? '&force=true' : '';
+      const res = await fetch(`/api/club?clubId=${clubId}${force}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('swoop_auth_token')}`,
+          'X-Demo-Club': clubId,
+        },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccess(`Deleted ${data.totalRowsDeleted} rows from ${clubId}`);
+        // If we deleted the current club, switch away
+        if (clubId === currentClubId) {
+          localStorage.removeItem('swoop_club_id');
+          localStorage.removeItem('swoop_club_name');
+        }
+        fetchClubs();
+      } else {
+        setError(data.error || 'Delete failed');
+      }
+    } catch (e) {
+      setError(e.message);
+    }
+    setDeleting(null);
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-white/90">Club Management</h2>
+          <p className="text-sm text-gray-500 mt-1 mb-0">
+            View all clubs in the database, switch between them, or clean up test data.
+          </p>
+        </div>
+        <button onClick={fetchClubs} className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 font-semibold text-xs cursor-pointer hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">
+          Refresh
+        </button>
+      </div>
+
+      {error && (
+        <div className="px-3.5 py-2.5 rounded-lg bg-error-50 text-error-700 text-sm font-medium dark:bg-error-500/10 dark:text-error-400">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="px-3.5 py-2.5 rounded-lg bg-success-50 text-success-700 text-sm font-medium dark:bg-success-500/10 dark:text-success-400">
+          {success}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="text-center py-8 text-gray-400 text-sm">Loading clubs...</div>
+      ) : clubs.length === 0 ? (
+        <Card>
+          <div className="text-center py-8 text-gray-400">
+            <div className="text-3xl mb-2">🏌️</div>
+            <div className="text-sm font-medium">No clubs found in database</div>
+          </div>
+        </Card>
+      ) : (
+        <div className="border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                {['Club ID', 'Name', 'Location', 'Members', 'Last Activity', 'Actions'].map(h => (
+                  <th key={h} className="px-3.5 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {clubs.map((club, i) => {
+                const isActive = club.club_id === currentClubId;
+                return (
+                  <tr key={club.club_id} className={`${isActive ? 'bg-brand-50 dark:bg-brand-500/5' : 'bg-white dark:bg-white/[0.03]'} ${i < clubs.length - 1 ? 'border-b border-gray-200 dark:border-gray-800' : ''}`}>
+                    <td className="px-3.5 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">
+                      {club.club_id}
+                      {isActive && <span className="ml-2 px-1.5 py-0.5 rounded bg-brand-500 text-white text-[10px] font-bold">ACTIVE</span>}
+                    </td>
+                    <td className="px-3.5 py-3 font-semibold text-gray-800 dark:text-white/90">{club.name || '—'}</td>
+                    <td className="px-3.5 py-3 text-gray-500 text-xs">{[club.city, club.state].filter(Boolean).join(', ') || '—'}</td>
+                    <td className="px-3.5 py-3 text-gray-600 dark:text-gray-400">{club.member_count ?? '—'}</td>
+                    <td className="px-3.5 py-3 text-gray-500 text-xs">{club.last_activity ? new Date(club.last_activity).toLocaleDateString() : '—'}</td>
+                    <td className="px-3.5 py-3">
+                      <div className="flex gap-2">
+                        {!isActive && (
+                          <button
+                            onClick={() => handleSwitch(club.club_id, club.name)}
+                            className="px-2.5 py-1 rounded-md border border-brand-300 bg-brand-50 text-brand-600 text-[11px] font-bold cursor-pointer hover:bg-brand-100 dark:bg-brand-500/5 dark:border-brand-500/30"
+                          >
+                            Switch
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(club.club_id)}
+                          disabled={deleting === club.club_id}
+                          className="px-2.5 py-1 rounded-md border border-error-300 bg-error-50 text-error-600 text-[11px] font-bold cursor-pointer hover:bg-error-100 disabled:opacity-50 dark:bg-error-500/5 dark:border-error-500/30"
+                        >
+                          {deleting === club.club_id ? 'Deleting...' : 'Delete Data'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Card>
+        <div className="text-xs text-gray-500">
+          <strong>Current club:</strong> {currentClubId || 'None selected'}
+          {currentClubId?.startsWith('demo_') && <span className="ml-2 text-warning-500 font-semibold">(Demo session — data will be cleaned up on logout)</span>}
+        </div>
+      </Card>
     </div>
   );
 }

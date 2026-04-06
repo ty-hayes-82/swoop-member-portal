@@ -1,4 +1,4 @@
-// Member data — Oakmont Hills CC, January 2026
+// Member data — Pinetree CC, January 2026
 
 import { theme } from '@/config/theme';
 
@@ -169,7 +169,7 @@ export const memberProfiles = {
       emailBody: `Hi James — I saw your note about Friday’s lunch and I agree we missed the mark. We overhauled that shift and I reserved your usual table for Saturday in case you and your foursome would like to stay after the round. I’d also like to call you personally if you have five minutes today. Appreciate you allowing us to fix this.
 
 — Alice`,
-      smsDraft: 'James — it’s Alice from Oakmont Hills. Saw your Friday lunch note and I’d like to call you personally before your tee time tomorrow. What time works?',
+      smsDraft: 'James — it’s Alice from Pinetree. Saw your Friday lunch note and I’d like to call you personally before your tee time tomorrow. What time works?',
     },
     staffNotes: [
       { id: 'note_whitfield_1', author: 'Membership Director', department: 'Membership', text: 'Hosted 2025 member-guest; expects white-glove treatment when entertaining clients.', timestamp: '2025-11-04T18:10:00Z' },
@@ -280,7 +280,7 @@ export const memberProfiles = {
       emailBody: `Robert — I’m stepping in to close the loop on your Grill Room note. We re-staffed that shift and I’d like to host you (and a guest) after your next round to make sure the experience is right. Can you let me know which day works?
 
 — Maya, F&B Director`,
-      smsDraft: 'Robert, it’s Maya at Oakmont Hills. Saw your note. Free tomorrow to talk?',
+      smsDraft: 'Robert, it’s Maya at Pinetree. Saw your note. Free tomorrow to talk?',
     },
     staffNotes: [
       { id: 'note_callahan_1', author: 'F&B Director', department: 'F&B', text: 'Prefers mid-week lunch with CFO. Always orders sparkling water + chopped salad.', timestamp: '2025-10-02T19:15:00Z' },

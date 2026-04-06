@@ -1,4 +1,4 @@
-// Raw revenue data — Oakmont Hills CC, January 2026
+// Raw revenue data — Pinetree CC, January 2026
 // Day-by-day golf + F&B revenue with weather and staffing flags
 
 export const dailyRevenue = [

@@ -44,7 +44,7 @@ export default function SettingsScreen() {
           }}>Open</button>
         } />
         <SettingsRow icon="👤" label="Signed in as" sub="Sarah Mitchell · General Manager" />
-        <SettingsRow icon="🏌️" label="Club" sub="Oakmont Hills Country Club" />
+        <SettingsRow icon="🏌️" label="Club" sub="Pinetree Country Club" />
         <SettingsRow icon="📱" label="Version" sub="Swoop Mobile 1.0.0 · Phase 1 MVP" />
       </div>
 

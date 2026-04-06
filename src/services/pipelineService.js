@@ -1,4 +1,4 @@
-// pipelineService.js — live data via /api/pipeline with static Oakmont fallback
+// pipelineService.js — live data via /api/pipeline with static Pinetree fallback
 
 import { apiFetch } from './apiClient';
 import { warmLeads, memberWaitlistEntries } from '@/data/pipeline';

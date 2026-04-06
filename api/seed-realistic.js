@@ -1096,7 +1096,7 @@ export default async function handler(req, res) {
 
     // clubs (if exists)
     await sql.query(`
-      INSERT INTO club (club_id, name, city, state, zip) VALUES ('club_001', 'Oakmont Hills Country Club', 'Scottsdale', 'AZ', '85255')
+      INSERT INTO club (club_id, name, city, state, zip) VALUES ('club_001', 'Pinetree Country Club', 'Kennesaw', 'GA', '30144')
       ON CONFLICT (club_id) DO NOTHING
     `).catch(() => {});
 

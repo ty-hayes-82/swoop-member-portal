@@ -63,7 +63,7 @@ Daily Briefing · Operations · Revenue & F&B · Member Retention · Staffing & 
 
 ## 5. Demo Data Context
 
-**Oakmont Hills Country Club, Scottsdale AZ, January 2026**
+**Pinetree Country Club, Kennesaw GA, January 2026**
 
 | Fact | Value |
 |------|-------|

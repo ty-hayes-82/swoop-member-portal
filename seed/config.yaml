@@ -1,6 +1,6 @@
 # =============================================================================
 # Swoop Golf Seed Configuration
-# Oakmont Hills Country Club · January 2026
+# Pinetree Country Club · January 2026
 # Edit parameters here — no code changes required
 # =============================================================================
 
@@ -86,7 +86,7 @@ resignation_scenarios:
 # ─── Email campaigns ──────────────────────────────────────────────────────────
 email_campaigns:
   - id: "cam_001"
-    subject: "Happy New Year from Oakmont Hills"
+    subject: "Happy New Year from Pinetree"
     type: "newsletter"
     send_date: "2026-01-02"
 

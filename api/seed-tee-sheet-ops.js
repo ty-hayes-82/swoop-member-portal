@@ -35,7 +35,7 @@ export default async function handler(req, res) {
       audit_trail JSONB DEFAULT '[]'
     )`;
     await sql`CREATE TABLE IF NOT EXISTS waitlist_config (
-      club_id VARCHAR(20) PRIMARY KEY DEFAULT 'oakmont',
+      club_id VARCHAR(20) PRIMARY KEY DEFAULT 'club_001',
       hold_time_minutes INT DEFAULT 30,
       auto_offer_threshold NUMERIC(3,2) DEFAULT 0.80,
       max_offers INT DEFAULT 3,
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     // Seed waitlist_config
     await sql`INSERT INTO waitlist_config (club_id, hold_time_minutes, auto_offer_threshold, max_offers, notification_limit)
       VALUES
-        ('oakmont', 30, 0.80, 3, 2)
+        ('club_001', 30, 0.80, 3, 2)
       ON CONFLICT (club_id) DO NOTHING`;
 
     res.status(200).json({ ok: true, message: 'Tee sheet ops seed data inserted.' });

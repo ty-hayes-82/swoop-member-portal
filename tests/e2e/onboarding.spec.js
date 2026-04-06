@@ -214,6 +214,7 @@ test.describe('2 — Setup Wizard', () => {
     await expect(page.locator('text=/Welcome to your dashboard/i')).toBeVisible();
     const body = await page.locator('body').textContent();
     expect(body).not.toContain('Oakmont Hills');
+    expect(body).not.toContain('Scottsdale');
   });
 
   test('2.12 — All sidebar pages load without crash', async () => {

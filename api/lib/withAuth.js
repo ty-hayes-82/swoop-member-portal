@@ -31,6 +31,12 @@ export function withAuth(handler, options = {}) {
       }
     }
 
+    // Allow demo_ cleanup requests without auth (sendBeacon has no headers)
+    if (allowDemo && req.query?.cleanup === 'true' && req.query?.clubId?.startsWith('demo_')) {
+      req.auth = { clubId: req.query.clubId, userId: 'demo', role: 'viewer', isDemo: true };
+      return handler(req, res);
+    }
+
     if (!authHeader?.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Authentication required' });
     }

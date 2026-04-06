@@ -85,7 +85,7 @@ def main():
     rng = random.Random(args.seed)
 
     print(f'\n{"="*60}')
-    print(f'  Swoop Golf Seed — Oakmont Hills CC · January 2026')
+    print(f'  Swoop Golf Seed — Pinetree CC · January 2026')
     print(f'  Random seed: {args.seed}')
     print(f'  Mode: {"SQLite (local test)" if args.sqlite else "Postgres (Vercel)"}')
     print(f'{"="*60}')
@@ -93,7 +93,7 @@ def main():
     # ── Database connection ───────────────────────────────────────────────────
     if args.sqlite:
         import sqlite3
-        db_path = os.path.join(os.path.dirname(__file__), '..', 'oakmont_hills_jan2026.db')
+        db_path = os.path.join(os.path.dirname(__file__), '..', 'pinetree_jan2026.db')
         conn = sqlite3.connect(db_path)
         conn.execute('PRAGMA journal_mode=WAL')
         conn.execute('PRAGMA foreign_keys=ON')

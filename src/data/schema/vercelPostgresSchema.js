@@ -560,7 +560,7 @@ export const vercelPostgresSchema = {
       {
         "member_id": "mbr_001",
         "member_number": "1001",
-        "club_id": "oakmont",
+        "club_id": "club_001",
         "external_id": null,
         "first_name": "James",
         "last_name": "Thornton",
@@ -585,7 +585,7 @@ export const vercelPostgresSchema = {
       {
         "member_id": "mbr_005",
         "member_number": "1005",
-        "club_id": "oakmont",
+        "club_id": "club_001",
         "external_id": null,
         "first_name": "Catherine",
         "last_name": "Walsh",
@@ -610,7 +610,7 @@ export const vercelPostgresSchema = {
       {
         "member_id": "mbr_012",
         "member_number": "1012",
-        "club_id": "oakmont",
+        "club_id": "club_001",
         "external_id": null,
         "first_name": "Robert",
         "last_name": "Kimura",

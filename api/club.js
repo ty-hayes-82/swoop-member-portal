@@ -1,0 +1,206 @@
+/**
+ * Club Management API
+ * GET    /api/club              — list all clubs
+ * GET    /api/club?clubId=xxx   — get single club details
+ * PUT    /api/club              — update club record in DB
+ * DELETE /api/club?clubId=xxx   — cascade-delete all data for a club
+ *
+ * DELETE is restricted to swoop_admin role (or demo cleanup).
+ */
+import { sql } from '@vercel/postgres';
+import { withAuth, getClubId } from './lib/withAuth.js';
+
+// All tables with a club_id column, ordered so FKs delete before parents
+const CLUB_TABLES = [
+  // Children / leaf tables first
+  'playbook_steps',
+  'playbook_runs',
+  'agent_activity',
+  'agent_configs',
+  'agent_actions',
+  'agent_definitions',
+  'notification_preferences',
+  'notifications',
+  'sessions',
+  'password_resets',
+  'csv_imports',
+  'data_syncs',
+  'data_source_status',
+  'feature_state_log',
+  'feature_dependency',
+  'onboarding_progress',
+  'pause_state',
+  'activity_log',
+  'correlation_insights',
+  'experience_correlations',
+  'correlations',
+  'churn_predictions',
+  'member_sentiment_ratings',
+  'health_scores',
+  'interventions',
+  'actions',
+  'member_interventions',
+  'operational_interventions',
+  'board_report_snapshots',
+  'user_sessions',
+  'complaint_weather_context',
+  'weather_hourly_cache',
+  'weather_daily_log',
+  'weather_daily',
+  'service_recovery_alerts',
+  'slot_reassignments',
+  'booking_confirmations',
+  'member_location_current',
+  'staff_location_current',
+  'waitlist_config',
+  'connected_systems',
+  'industry_benchmarks',
+  'event_roi_metrics',
+  'archetype_spend_gaps',
+  'demand_heatmap',
+  'cancellation_risk',
+  'member_waitlist',
+  'member_engagement_weekly',
+  'member_engagement_daily',
+  'visit_sessions',
+  'canonical_events',
+  'close_outs',
+  'staff_shifts',
+  'staff',
+  'email_events',
+  'email_campaigns',
+  'feedback',
+  'service_requests',
+  'complaints',
+  'transactions',
+  'rounds',
+  'member_invoices',
+  'event_registrations',
+  'event_definitions',
+  'pos_payments',
+  'pos_line_items',
+  'pos_checks',
+  'waitlist_entries',
+  'pace_hole_segments',
+  'pace_of_play',
+  'booking_players',
+  'bookings',
+  // Parent tables
+  'members',
+  'households',
+  'membership_types',
+  'dining_outlets',
+  'courses',
+  'users',
+  // Club itself — last
+  'club',
+];
+
+export default withAuth(async function handler(req, res) {
+  // ─── GET: list clubs or get single club ───
+  if (req.method === 'GET') {
+    try {
+      const clubId = req.query?.clubId;
+      if (clubId) {
+        const result = await sql`SELECT * FROM club WHERE club_id = ${clubId}`;
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Club not found' });
+
+        // Get member count
+        const memberCount = await sql`SELECT COUNT(*) as count FROM members WHERE club_id = ${clubId}`;
+
+        return res.status(200).json({
+          ...result.rows[0],
+          memberCount: Number(memberCount.rows[0]?.count || 0),
+        });
+      }
+
+      // List all clubs with member counts
+      const result = await sql`
+        SELECT c.*,
+          (SELECT COUNT(*) FROM members m WHERE m.club_id = c.club_id) as member_count,
+          (SELECT MAX(s.created_at) FROM sessions s WHERE s.club_id = c.club_id) as last_activity
+        FROM club c
+        ORDER BY c.name
+      `;
+      return res.status(200).json({ clubs: result.rows });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
+  // ─── PUT: update club details ───
+  if (req.method === 'PUT') {
+    const { clubId, name, city, state, zip } = req.body;
+    if (!clubId) return res.status(400).json({ error: 'clubId required' });
+
+    try {
+      await sql`
+        UPDATE club SET
+          name = COALESCE(${name || null}, name),
+          city = COALESCE(${city || null}, city),
+          state = COALESCE(${state || null}, state),
+          zip = COALESCE(${zip || null}, zip)
+        WHERE club_id = ${clubId}
+      `;
+      return res.status(200).json({ success: true });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
+  // ─── POST with ?cleanup=true: sendBeacon demo cleanup (same as DELETE) ───
+  if (req.method === 'POST' && req.query?.cleanup === 'true') {
+    req.method = 'DELETE'; // fall through to DELETE handler below
+  }
+
+  // ─── DELETE: cascade-delete all club data ───
+  if (req.method === 'DELETE') {
+    const clubId = req.query?.clubId;
+    if (!clubId) return res.status(400).json({ error: 'clubId query param required' });
+
+    // Only swoop_admin can delete (or demo cleanup of demo club)
+    const isDemoCleanup = clubId.startsWith('demo_');
+    if (req.auth.role !== 'swoop_admin' && !isDemoCleanup && !req.auth.isDemo) {
+      return res.status(403).json({ error: 'Only swoop_admin can delete club data' });
+    }
+
+    // Safety: prevent deleting club_001 (seed data) unless forced
+    if (clubId === 'club_001' && req.query?.force !== 'true') {
+      return res.status(400).json({
+        error: 'club_001 is the primary demo club. Pass ?force=true to confirm deletion.'
+      });
+    }
+
+    try {
+      let deletedCounts = {};
+
+      for (const table of CLUB_TABLES) {
+        try {
+          const result = await sql.query(
+            `DELETE FROM ${table} WHERE club_id = $1`,
+            [clubId]
+          );
+          deletedCounts[table] = result.rowCount || 0;
+        } catch {
+          // Table may not exist — skip
+          deletedCounts[table] = 'skipped';
+        }
+      }
+
+      const totalDeleted = Object.values(deletedCounts)
+        .filter(v => typeof v === 'number')
+        .reduce((a, b) => a + b, 0);
+
+      return res.status(200).json({
+        success: true,
+        clubId,
+        totalRowsDeleted: totalDeleted,
+        details: deletedCounts,
+      });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
+  return res.status(405).json({ error: 'Method not allowed' });
+}, { allowDemo: true });

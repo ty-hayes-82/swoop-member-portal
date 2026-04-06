@@ -64,6 +64,40 @@ function AppShell() {
     return () => window.removeEventListener('swoop:open-actions', handler);
   }, []);
 
+  // Demo session cleanup: delete demo club data from DB on sign-out or page close
+  useEffect(() => {
+    const cleanupDemo = () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+        const clubId = localStorage.getItem('swoop_club_id');
+        if (user?.isDemoSession && clubId?.startsWith('demo_')) {
+          // Use sendBeacon for reliability during page unload
+          navigator.sendBeacon(`/api/club?clubId=${clubId}&cleanup=true`, '');
+        }
+      } catch {}
+    };
+    window.addEventListener('beforeunload', cleanupDemo);
+    return () => window.removeEventListener('beforeunload', cleanupDemo);
+  }, []);
+
+  const handleSignOut = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+      const clubId = localStorage.getItem('swoop_club_id');
+      // Clean up demo data from DB
+      if (user?.isDemoSession && clubId?.startsWith('demo_')) {
+        fetch(`/api/club?clubId=${clubId}`, { method: 'DELETE', headers: { 'X-Demo-Club': clubId } }).catch(() => {});
+      }
+    } catch {}
+    localStorage.removeItem('swoop_auth_user');
+    localStorage.removeItem('swoop_auth_token');
+    localStorage.removeItem('swoop_club_id');
+    localStorage.removeItem('swoop_club_name');
+    localStorage.removeItem('swoop_demo_email');
+    localStorage.removeItem('swoop_demo_phone');
+    window.location.reload();
+  };
+
   const footerContent = (
     <>
       Swoop Golf &middot; Integrated Intelligence for Private Clubs
@@ -71,12 +105,13 @@ function AppShell() {
         try {
           const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
           const clubId = localStorage.getItem('swoop_club_id');
+          const isDemoSession = user?.isDemoSession || clubId === 'demo';
           return (
             <span>
               {user.name ? ` · ${user.name}` : ''}
-              {clubId && clubId !== 'demo' ? ` · ${user.clubName || localStorage.getItem('swoop_club_name') || 'Connected Club'}` : ' · Demo Environment'}
+              {!isDemoSession && clubId ? ` · ${user.clubName || localStorage.getItem('swoop_club_name') || 'Connected Club'}` : ' · Demo Environment'}
               <button
-                onClick={() => { localStorage.removeItem('swoop_auth_user'); localStorage.removeItem('swoop_auth_token'); localStorage.removeItem('swoop_club_id'); window.location.reload(); }}
+                onClick={handleSignOut}
                 className="ml-3 text-brand-500 hover:text-brand-600 font-semibold"
               >Sign Out</button>
             </span>

@@ -80,17 +80,21 @@ export default function LoginPage({ onLogin }) {
       setShowDemoSetup(true);
       return;
     }
+    // Each demo session gets a unique club_id so cleanup doesn't affect others
+    const demoClubId = `demo_${Date.now()}`;
     const demoUser = {
-      userId: 'demo', clubId: 'demo', name: 'Demo User',
+      userId: 'demo', clubId: demoClubId, name: 'Demo User',
       email: demoEmail || 'demo@swoopgolf.com',
       phone: demoPhone || '',
       role: 'gm', title: 'General Manager',
+      isDemoSession: true,
     };
     localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
     localStorage.setItem('swoop_auth_token', 'demo');
+    localStorage.setItem('swoop_club_id', demoClubId);
+    localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
     if (demoEmail) localStorage.setItem('swoop_demo_email', demoEmail);
     if (demoPhone) localStorage.setItem('swoop_demo_phone', demoPhone);
-    localStorage.removeItem('swoop_club_id');
     onLogin?.(demoUser);
   };
 
@@ -159,7 +163,7 @@ export default function LoginPage({ onLogin }) {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="sarah@oakmonthills.com"
+                placeholder="sarah@pinetreecc.com"
                 required
                 aria-required="true"
                 className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
@@ -280,7 +284,7 @@ export default function LoginPage({ onLogin }) {
             onClick={handleDemoLogin}
             className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors"
           >
-            {showDemoSetup ? 'Start Demo' : 'Enter Demo Mode (Oakmont Hills CC)'}
+            {showDemoSetup ? 'Start Demo' : 'Enter Demo Mode (Pinetree CC)'}
           </button>
 
           {/* Set up new club */}
@@ -293,7 +297,7 @@ export default function LoginPage({ onLogin }) {
 
           {/* Test account hint */}
           <div className="mt-6 px-3.5 py-3 rounded-xl bg-blue-50 border border-blue-100 text-xs text-blue-700 leading-relaxed">
-            <strong>Test account:</strong> sarah@oakmonthills.com / any password
+            <strong>Test account:</strong> sarah@pinetreecc.com / any password
             <br />
             <strong>Demo mode:</strong> Uses static sample data — enter your email/phone to receive test notifications
           </div>

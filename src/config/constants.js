@@ -1,5 +1,5 @@
-export const DEMO_CLUB_NAME = 'Oakmont Hills CC';
-export const DEMO_CLUB_LOCATION = 'Scottsdale, AZ';
+export const DEMO_CLUB_NAME = 'Pinetree Country Club';
+export const DEMO_CLUB_LOCATION = 'Kennesaw, GA';
 export const DEMO_DATE = '2026-01-17';
 export const DEMO_MONTH = 'January 2026';
 export const DEMO_TIMESTAMP = 'Jan 17, 2026 7:00 AM';
@@ -13,7 +13,7 @@ export function getClubName() {
     const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
     if (user.clubName) return user.clubName;
     const clubId = localStorage.getItem('swoop_club_id');
-    if (!clubId || clubId === 'demo') return DEMO_CLUB_NAME;
+    if (!clubId || clubId === 'demo' || clubId.startsWith('demo_')) return DEMO_CLUB_NAME;
     return 'Your Club';
   } catch { return DEMO_CLUB_NAME; }
 }
@@ -21,7 +21,7 @@ export function getClubName() {
 export function isRealClub() {
   try {
     const clubId = localStorage.getItem('swoop_club_id');
-    if (!clubId || clubId === 'demo') return false;
+    if (!clubId || clubId === 'demo' || clubId.startsWith('demo_')) return false;
     // Seeded/test clubs are not "real" — check for production flag
     const isProduction = localStorage.getItem('swoop_production') === 'true';
     return isProduction;
@@ -37,7 +37,7 @@ export const CLUB_NAME = DEMO_CLUB_NAME;
 export function isAuthenticatedClub() {
   try {
     const clubId = localStorage.getItem('swoop_club_id');
-    return !!clubId && clubId !== 'demo';
+    return !!clubId && clubId !== 'demo' && !clubId.startsWith('demo_');
   } catch { return false; }
 }
 

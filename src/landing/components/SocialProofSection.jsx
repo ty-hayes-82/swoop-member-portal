@@ -79,7 +79,7 @@ export default function SocialProofSection() {
           What Swoop detects in the demo scenario
         </h2>
         <p style={{ color: theme.colors.textMuted, marginBottom: theme.spacing.xl, textAlign: 'center', maxWidth: 700, margin: '0 auto ' + theme.spacing.xl }}>
-          These metrics are from the Oakmont Hills CC demo environment (300 members, Jan 2026). Real founding partner case studies will be published as clubs onboard.
+          These metrics are from the Pinetree CC demo environment (300 members, Jan 2026). Real founding partner case studies will be published as clubs onboard.
         </p>
         <div className="landing-grid-2" style={{ gap: theme.spacing.lg }}>
           {metricCards.map((card) => (

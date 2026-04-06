@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Swoop Golf Five Lenses Platform — Database Schema
--- Oakmont Hills Country Club · January 2026 simulation
+-- Pinetree Country Club · January 2026 simulation
 -- 32 tables across 7 operational domains
 -- Run once against Vercel Postgres (POSTGRES_URL_NON_POOLING)
 -- =============================================================================

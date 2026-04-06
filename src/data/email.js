@@ -1,4 +1,4 @@
-// Email campaign data — Oakmont Hills CC, January 2026
+// Email campaign data — Pinetree CC, January 2026
 
 export const emailCampaigns = [
   { campaign: 'Happy New Year',         type: 'Newsletter',   date: 'Jan 2'  },

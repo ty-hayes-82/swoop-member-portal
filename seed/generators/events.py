@@ -48,7 +48,7 @@ def gen_event_definitions(cfg: dict) -> list[tuple]:
         rows.append((
             ev['id'], cfg['club_id'], ev['name'], ev['type'],
             ev['date'], ev['capacity'], float(ev['fee']),
-            f"Join us for {ev['name']} at Oakmont Hills.",
+            f"Join us for {ev['name']} at Pinetree.",
         ))
     return rows
 

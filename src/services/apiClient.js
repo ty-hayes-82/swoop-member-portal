@@ -15,8 +15,8 @@ function getAuthHeaders() {
   }
 
   // Demo mode — no token, but we identify the demo club
-  if (user?.clubId === 'demo') {
-    return { 'X-Demo-Club': 'club_001' };
+  if (user?.isDemoSession || user?.clubId === 'demo' || user?.clubId?.startsWith('demo_')) {
+    return { 'X-Demo-Club': user.clubId?.startsWith('demo_') ? user.clubId : 'club_001' };
   }
 
   return {};
@@ -34,7 +34,7 @@ export function getClubId() {
 
 export function isDemo() {
   const user = JSON.parse(localStorage.getItem('swoop_auth_user') || 'null');
-  return user?.clubId === 'demo' || user?.userId === 'demo';
+  return user?.clubId === 'demo' || user?.userId === 'demo' || user?.isDemoSession === true || user?.clubId?.startsWith('demo_');
 }
 
 /**

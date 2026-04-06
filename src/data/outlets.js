@@ -1,4 +1,4 @@
-// F&B outlet performance data — Oakmont Hills CC, January 2026
+// F&B outlet performance data — Pinetree CC, January 2026
 
 export const outlets = [
   {

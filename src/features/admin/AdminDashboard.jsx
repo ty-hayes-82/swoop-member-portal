@@ -83,12 +83,12 @@ const s = {
 // USERS & ROLES TAB
 // ═══════════════════════════════════════════════════════════════════════
 const MOCK_USERS = [
-  { id: 1, name: 'Sarah Mitchell', email: 'sarah@oakmonthills.com', role: 'General Manager', status: 'active', lastLogin: '2 hours ago' },
-  { id: 2, name: 'Tom Bradford', email: 'tom@oakmonthills.com', role: 'Assistant GM', status: 'active', lastLogin: '1 day ago' },
-  { id: 3, name: 'Maria Chen', email: 'maria@oakmonthills.com', role: 'F&B Director', status: 'active', lastLogin: '3 hours ago' },
-  { id: 4, name: 'Jeff Nguyen', email: 'jeff@oakmonthills.com', role: 'Head Golf Pro', status: 'active', lastLogin: '5 hours ago' },
-  { id: 5, name: 'Lisa Park', email: 'lisa@oakmonthills.com', role: 'Membership Director', status: 'active', lastLogin: '12 hours ago' },
-  { id: 6, name: 'Dave Wilson', email: 'dave@oakmonthills.com', role: 'Controller', status: 'invited', lastLogin: 'Never' },
+  { id: 1, name: 'Sarah Mitchell', email: 'sarah@pinetreecc.com', role: 'General Manager', status: 'active', lastLogin: '2 hours ago' },
+  { id: 2, name: 'Tom Bradford', email: 'tom@pinetreecc.com', role: 'Assistant GM', status: 'active', lastLogin: '1 day ago' },
+  { id: 3, name: 'Maria Chen', email: 'maria@pinetreecc.com', role: 'F&B Director', status: 'active', lastLogin: '3 hours ago' },
+  { id: 4, name: 'Jeff Nguyen', email: 'jeff@pinetreecc.com', role: 'Head Golf Pro', status: 'active', lastLogin: '5 hours ago' },
+  { id: 5, name: 'Lisa Park', email: 'lisa@pinetreecc.com', role: 'Membership Director', status: 'active', lastLogin: '12 hours ago' },
+  { id: 6, name: 'Dave Wilson', email: 'dave@pinetreecc.com', role: 'Controller', status: 'invited', lastLogin: 'Never' },
 ];
 
 const ROLES = ['General Manager', 'Assistant GM', 'F&B Director', 'Head Golf Pro', 'Membership Director', 'Controller', 'Events Manager', 'View Only'];
@@ -118,7 +118,7 @@ function UsersTab() {
             </div>
             <div style={s.fieldGroup}>
               <label style={s.label}>Email</label>
-              <input style={s.input} type="email" placeholder="jane@oakmonthills.com" />
+              <input style={s.input} type="email" placeholder="jane@pinetreecc.com" />
             </div>
             <div style={s.fieldGroup}>
               <label style={s.label}>Role</label>
@@ -576,7 +576,7 @@ function NotificationsTab() {
   };
 
   const CHANNELS = [
-    { key: 'email', label: 'Email', icon: '📧', configured: true, detail: 'sarah@oakmonthills.com' },
+    { key: 'email', label: 'Email', icon: '📧', configured: true, detail: 'sarah@pinetreecc.com' },
     { key: 'sms', label: 'SMS', icon: '📱', configured: true, detail: '(908) 555-0142' },
     { key: 'push', label: 'Push', icon: '🔔', configured: true, detail: 'Swoop mobile app' },
     { key: 'slack', label: 'Slack', icon: '💬', configured: false, detail: 'Not connected' },
@@ -697,33 +697,33 @@ function ClubProfileTab() {
         <Panel>
           <div style={s.fieldGroup}>
             <label style={s.label}>Club Name</label>
-            <input style={s.input} defaultValue="Oakmont Hills Country Club" />
+            <input style={s.input} defaultValue="Pinetree Country Club" />
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Address</label>
-            <input style={s.input} defaultValue="1200 Oakmont Drive" />
+            <input style={s.input} defaultValue="3400 McCollum Pkwy NW" />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
             <div style={s.fieldGroup}>
               <label style={s.label}>City</label>
-              <input style={s.input} defaultValue="Westfield" />
+              <input style={s.input} defaultValue="Kennesaw" />
             </div>
             <div style={s.fieldGroup}>
               <label style={s.label}>State</label>
-              <input style={s.input} defaultValue="NJ" />
+              <input style={s.input} defaultValue="GA" />
             </div>
             <div style={s.fieldGroup}>
               <label style={s.label}>Zip</label>
-              <input style={s.input} defaultValue="07090" />
+              <input style={s.input} defaultValue="30144" />
             </div>
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Phone</label>
-            <input style={s.input} defaultValue="(908) 555-0142" />
+            <input style={s.input} defaultValue="(770) 427-4322" />
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Website</label>
-            <input style={s.input} defaultValue="https://oakmonthills.com" />
+            <input style={s.input} defaultValue="https://pinetreecc.com" />
           </div>
         </Panel>
 

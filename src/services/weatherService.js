@@ -12,7 +12,7 @@ let _forecast = null;
 function getClubId() {
   try {
     const cid = localStorage.getItem('swoop_club_id') || null;
-    return cid === 'demo' ? 'club_001' : cid;
+    return (cid === 'demo' || cid?.startsWith('demo_')) ? 'club_001' : cid;
   } catch { return null; }
 }
 

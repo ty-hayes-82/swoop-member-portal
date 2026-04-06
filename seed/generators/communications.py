@@ -57,11 +57,11 @@ RESIGN_DATES = {
 }
 
 LINK_URLS = [
-    'https://oakmonthills.com/events',
-    'https://oakmonthills.com/dining',
-    'https://oakmonthills.com/tee-times',
-    'https://oakmonthills.com/wine-dinner',
-    'https://oakmonthills.com/super-bowl',
+    'https://pinetreecc.com/events',
+    'https://pinetreecc.com/dining',
+    'https://pinetreecc.com/tee-times',
+    'https://pinetreecc.com/wine-dinner',
+    'https://pinetreecc.com/super-bowl',
 ]
 
 DEVICES = ['mobile', 'desktop', 'tablet']
