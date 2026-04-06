@@ -111,6 +111,7 @@ const IMPORT_TYPES = {
     table: 'email_events',
     columnMap: { timestamp: 'occurred_at', device: 'device_type' },
     defaults: { event_id: () => `ee_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, occurred_at: () => new Date().toISOString() },
+    insertOnly: true,
   },
   // Phase 5: Staffing + Billing
   staff: {
@@ -127,6 +128,7 @@ const IMPORT_TYPES = {
     table: 'staff_shifts',
     columnMap: { employee_id: 'staff_id', date: 'shift_date', shift_start: 'start_time', shift_end: 'end_time', actual_hours: 'hours_worked', location: 'outlet_id' },
     defaults: { start_time: () => '08:00', end_time: () => '16:00', hours_worked: () => 8 },
+    insertOnly: true,
   },
   invoices: {
     requiredFields: ['invoice_id', 'member_id', 'statement_date'],
@@ -262,11 +264,13 @@ export default withAuth(async function handler(req, res) {
         }
         const placeholders = values.map((_, idx) => `$${idx + 1}`).join(', ');
         const colNames = columns.map(c => `"${c}"`).join(', ');
-        // Use ON CONFLICT DO UPDATE for upsert behavior on tables with primary keys
-        const pkCol = config.requiredFields[0];
-        const dbPkCol = columnMap[pkCol] || pkCol;
-        const updateCols = columns.filter(c => c !== dbPkCol && c !== 'club_id').map(c => `"${c}" = EXCLUDED."${c}"`).join(', ');
-        const upsertSuffix = updateCols ? ` ON CONFLICT ("${dbPkCol}") DO UPDATE SET ${updateCols}` : ' ON CONFLICT DO NOTHING';
+        let upsertSuffix = '';
+        if (!config.insertOnly) {
+          const pkCol = config.requiredFields[0];
+          const dbPkCol = columnMap[pkCol] || pkCol;
+          const updateCols = columns.filter(c => c !== dbPkCol && c !== 'club_id').map(c => `"${c}" = EXCLUDED."${c}"`).join(', ');
+          upsertSuffix = updateCols ? ` ON CONFLICT ("${dbPkCol}") DO UPDATE SET ${updateCols}` : ' ON CONFLICT DO NOTHING';
+        }
         await sql.query(`INSERT INTO ${config.table} (${colNames}) VALUES (${placeholders})${upsertSuffix}`, values);
       }
       successCount++;
