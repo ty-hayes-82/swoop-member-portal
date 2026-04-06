@@ -174,9 +174,7 @@ export default withAuth(async function handler(req, res) {
     try {
       let deletedCounts = {};
 
-      // Temporarily disable FK checks for clean cascade delete
-      await sql`SET session_replication_role = 'replica'`;
-
+      // Pass 1: delete from all tables by club_id
       for (const table of CLUB_TABLES) {
         try {
           const result = await sql.query(
@@ -184,13 +182,36 @@ export default withAuth(async function handler(req, res) {
             [clubId]
           );
           deletedCounts[table] = result.rowCount || 0;
-        } catch (tableErr) {
-          deletedCounts[table] = `err: ${tableErr.message?.substring(0, 80)}`;
+        } catch {
+          deletedCounts[table] = 'pass1-skip';
         }
       }
 
-      // Re-enable FK checks
-      await sql`SET session_replication_role = 'origin'`;
+      // Pass 2: clean up orphan rows in child tables that reference parent rows being deleted
+      // email_events references email_campaigns; event_registrations references event_definitions
+      const orphanCleanup = [
+        `DELETE FROM email_events WHERE campaign_id IN (SELECT campaign_id FROM email_campaigns WHERE club_id = $1)`,
+        `DELETE FROM event_registrations WHERE event_id IN (SELECT event_id FROM event_definitions WHERE club_id = $1)`,
+        `DELETE FROM booking_players WHERE booking_id IN (SELECT booking_id FROM bookings WHERE club_id = $1)`,
+        `DELETE FROM pos_line_items WHERE check_id IN (SELECT check_id FROM pos_checks WHERE club_id = $1)`,
+        `DELETE FROM pos_payments WHERE check_id IN (SELECT check_id FROM pos_checks WHERE club_id = $1)`,
+        `DELETE FROM pace_hole_segments WHERE pace_id IN (SELECT pace_id FROM pace_of_play WHERE club_id = $1)`,
+      ];
+      for (const q of orphanCleanup) {
+        try { await sql.query(q, [clubId]); } catch {}
+      }
+
+      // Pass 3: retry any skipped tables
+      for (const table of CLUB_TABLES) {
+        if (deletedCounts[table] === 'pass1-skip') {
+          try {
+            const result = await sql.query(`DELETE FROM ${table} WHERE club_id = $1`, [clubId]);
+            deletedCounts[table] = result.rowCount || 0;
+          } catch (e) {
+            deletedCounts[table] = `err: ${e.message?.substring(0, 80)}`;
+          }
+        }
+      }
 
       const totalDeleted = Object.values(deletedCounts)
         .filter(v => typeof v === 'number')
