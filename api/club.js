@@ -182,17 +182,7 @@ export default withAuth(async function handler(req, res) {
           );
           deletedCounts[table] = result.rowCount || 0;
         } catch (tableErr) {
-          // FK constraint or missing table — try without parameterized query for club table
-          if (table === 'club') {
-            try {
-              const r2 = await sql`DELETE FROM club WHERE club_id = ${clubId}`;
-              deletedCounts[table] = r2.rowCount || 0;
-            } catch {
-              deletedCounts[table] = 'skipped';
-            }
-          } else {
-            deletedCounts[table] = 'skipped';
-          }
+          deletedCounts[table] = `err: ${tableErr.message?.substring(0, 80)}`;
         }
       }
 
