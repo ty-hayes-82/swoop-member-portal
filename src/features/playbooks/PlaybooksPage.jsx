@@ -502,39 +502,39 @@ function PlaybookDetail({ playbook }) {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.5px', color: '#e8772e', textTransform: 'uppercase' }}>Playbook</span>
-          <span style={{ background: '#e8772e', color: 'white', fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10 }}>TRIGGERED</span>
+      <div className="mb-6 sm:mb-8">
+        <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
+          <span className="text-[11px] font-bold tracking-wider text-brand-500 uppercase">Playbook</span>
+          <span className="bg-brand-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">TRIGGERED</span>
           {playbook.triggeredCount > 0 && (
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#e8772e', background: 'rgba(232,119,46,0.08)', padding: '3px 10px', borderRadius: 6 }}>
-              Currently triggered for {playbook.triggeredCount} members
+            <span className="text-[11px] font-semibold text-brand-500 bg-brand-500/10 px-2.5 py-0.5 rounded-md">
+              Triggered for {playbook.triggeredCount} members
             </span>
           )}
         </div>
-        <h2 style={{ fontSize: 28, fontWeight: 700, color: '#0f0f0f', margin: '0 0 8px 0', fontFamily: 'inherit' }}>{playbook.name}</h2>
-        <p style={{ color: '#666', fontSize: 14, lineHeight: 1.6, maxWidth: 700, margin: 0 }}>{playbook.description}</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white/90 m-0 mb-2">{playbook.name}</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed m-0">{playbook.description}</p>
       </div>
 
-      {/* Triggered For + Monthly Impact */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 36, flexWrap: 'wrap', gap: 16 }}>
+      {/* Triggered For + Track Record */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div>
-          <div style={{ fontSize: 12, color: '#999', marginBottom: 6 }}>Triggered for:</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ background: '#1a1a2e', color: 'white', padding: '5px 14px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}>{playbook.triggeredFor.name}</span>
-            <span style={{ color: '#888', fontSize: 13, fontStyle: 'italic' }}>{playbook.triggeredFor.note}</span>
+          <div className="text-xs text-gray-400 mb-1.5">Triggered for:</div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="bg-gray-800 text-white px-3 py-1 rounded-md text-xs font-medium dark:bg-gray-200 dark:text-gray-900">{playbook.triggeredFor.name}</span>
+            <span className="text-xs text-gray-400 italic">{playbook.triggeredFor.note}</span>
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 12, color: '#999' }}>Track record</div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#16a34a' }}>{playbook.trackRecord[0]?.result}</div>
-          <div style={{ fontSize: 13, color: '#999' }}>{playbook.trackRecord[0]?.period}</div>
+        <div className="sm:text-right">
+          <div className="text-xs text-gray-400">Track record</div>
+          <div className="text-base font-bold text-green-600">{playbook.trackRecord[0]?.result}</div>
+          <div className="text-xs text-gray-400">{playbook.trackRecord[0]?.period}</div>
         </div>
       </div>
 
       {/* Steps Header */}
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ fontSize: 13, color: '#999', fontWeight: 500 }}>When you activate this playbook:</div>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+        <div className="text-xs sm:text-[13px] text-gray-400 font-medium">When you activate this playbook:</div>
         <button
           onClick={() => setEditingSteps(true)}
           style={{
@@ -553,26 +553,14 @@ function PlaybookDetail({ playbook }) {
 
       {/* Steps */}
       {displaySteps.map((step, idx) => (
-        <div key={idx} style={{
-          background: '#fafafa', border: '1px solid #eee', borderRadius: 12,
-          padding: '20px 24px', marginBottom: 12,
-          display: 'flex', alignItems: 'flex-start', gap: 16,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-            <div style={{
-              width: 28, height: 28, background: '#4a90d9', color: 'white', borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700,
-            }}>{idx + 1}</div>
-            <span style={{
-              background: step.badge.bg, color: step.badge.color,
-              padding: '3px 10px', borderRadius: 5, fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap',
-            }}>{step.badge.text}</span>
+        <div key={idx} className="bg-gray-50 border border-gray-200 rounded-xl p-3 sm:p-4 lg:px-6 mb-3 dark:bg-gray-800 dark:border-gray-700">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
+            <div className="w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold shrink-0">{idx + 1}</div>
+            <span style={{ background: step.badge.bg, color: step.badge.color }} className="text-[11px] font-semibold px-2.5 py-0.5 rounded">{step.badge.text}</span>
+            <span className="text-[11px] text-gray-400 ml-auto">{step.timing}</span>
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 600, color: '#0f0f0f', fontSize: 14, marginBottom: 4 }}>{step.title}</div>
-            <div style={{ color: '#777', fontSize: 13, lineHeight: 1.5 }}>{step.detail}</div>
-          </div>
-          <div style={{ color: '#999', fontSize: 12, whiteSpace: 'nowrap', flexShrink: 0 }}>{step.timing}</div>
+          <div className="font-semibold text-sm text-gray-800 dark:text-white/90 mb-1">{step.title}</div>
+          <div className="text-xs sm:text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed">{step.detail}</div>
         </div>
       ))}
 
@@ -599,22 +587,22 @@ function PlaybookDetail({ playbook }) {
       </div>
 
       {/* Before / After */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 24 }}>
-        <div style={{ background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 12, padding: 24 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', marginBottom: 16 }}>{'\u25CF'} BEFORE</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-6">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 dark:bg-gray-800 dark:border-gray-700">
+          <div className="text-xs font-semibold text-gray-400 mb-3">{'\u25CF'} BEFORE</div>
           {playbook.before.map((item, idx) => (
-            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: idx < playbook.before.length - 1 ? 12 : 0, gap: 12 }}>
-              <span style={{ fontSize: 13, color: '#555' }}>{item.label}</span>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#0f0f0f', whiteSpace: 'nowrap' }}>{item.value}</span>
+            <div key={idx} className="flex justify-between gap-2 mb-2 last:mb-0">
+              <span className="text-xs sm:text-[13px] text-gray-500">{item.label}</span>
+              <span className="text-xs sm:text-sm font-bold text-gray-800 dark:text-white/90 whitespace-nowrap">{item.value}</span>
             </div>
           ))}
         </div>
-        <div style={{ background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 12, padding: 24 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#27ae60', marginBottom: 16 }}>{'\u25CF'} AFTER</div>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 dark:bg-gray-800 dark:border-gray-700">
+          <div className="text-xs font-semibold text-green-500 mb-3">{'\u25CF'} AFTER</div>
           {playbook.after.map((item, idx) => (
-            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: idx < playbook.after.length - 1 ? 12 : 0, gap: 12 }}>
-              <span style={{ fontSize: 13, color: '#555' }}>{item.label}</span>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#0f0f0f', whiteSpace: 'nowrap' }}>{item.value}</span>
+            <div key={idx} className="flex justify-between gap-2 mb-2 last:mb-0">
+              <span className="text-xs sm:text-[13px] text-gray-500">{item.label}</span>
+              <span className="text-xs sm:text-sm font-bold text-gray-800 dark:text-white/90 whitespace-nowrap">{item.value}</span>
             </div>
           ))}
         </div>
@@ -722,31 +710,29 @@ export default function PlaybooksPage({ embedded = false }) {
         </div>
         )}
 
-        {/* Category Filter */}
-        <div style={{ display: 'flex', gap: 6, background: '#f4f4f5', borderRadius: 10, padding: 3, alignSelf: 'flex-start' }}>
-          {CATEGORY_FILTERS.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setCategoryFilter(cat)}
-              style={{
-                padding: '7px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', border: 'none', transition: 'all 0.15s',
-                background: categoryFilter === cat ? '#fff' : 'transparent',
-                color: categoryFilter === cat ? '#0f0f0f' : '#888',
-                boxShadow: categoryFilter === cat ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-              }}
-            >{cat}</button>
-          ))}
+        {/* Category Filter — scrollable on mobile */}
+        <div className="overflow-x-auto -mx-1 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ display: 'inline-flex', gap: 4, background: '#f4f4f5', borderRadius: 10, padding: 3 }}>
+            {CATEGORY_FILTERS.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                style={{
+                  padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                  cursor: 'pointer', border: 'none', transition: 'all 0.15s', whiteSpace: 'nowrap',
+                  background: categoryFilter === cat ? '#fff' : 'transparent',
+                  color: categoryFilter === cat ? '#0f0f0f' : '#888',
+                  boxShadow: categoryFilter === cat ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                }}
+              >{cat}</button>
+            ))}
+          </div>
         </div>
 
-        {/* Two-column layout: cards left, detail right */}
-        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+        {/* Two-column layout: cards left, detail right. Stacks on mobile. */}
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 lg:items-start">
           {/* Left: Playbook Cards */}
-          <div style={{
-            flex: '0 0 380px', maxHeight: 'calc(100vh - 220px)', overflowY: 'auto',
-            display: 'flex', flexDirection: 'column', gap: 12,
-            paddingRight: 4,
-          }}>
+          <div className="w-full lg:w-[380px] lg:shrink-0 lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto flex flex-col gap-3 lg:pr-1">
             {filtered.map(pb => (
               <PlaybookCard
                 key={pb.id}
@@ -759,12 +745,7 @@ export default function PlaybooksPage({ embedded = false }) {
 
           {/* Right: Selected Playbook Detail */}
           {effectiveSelected && (
-            <div style={{
-              flex: 1, minWidth: 0,
-              background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14,
-              padding: '32px 40px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-              maxHeight: 'calc(100vh - 220px)', overflowY: 'auto',
-            }}>
+            <div className="flex-1 min-w-0 bg-white border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto dark:bg-gray-900 dark:border-gray-800">
               <PlaybookDetail playbook={effectiveSelected} />
             </div>
           )}

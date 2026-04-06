@@ -35,15 +35,6 @@ export const navItems = [
     sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
   },
   {
-    key: 'board-report',
-    label: 'Board Report',
-    section: 'PRIMARY',
-    icon: '📊',
-    color: theme.colors.navDemo,
-    subtitle: 'Monthly executive summary — service quality, member health, and impact.',
-    sourceSystems: ['All Systems'],
-  },
-  {
     key: 'automations',
     label: 'Automations',
     section: 'PRIMARY',
@@ -51,6 +42,15 @@ export const navItems = [
     color: theme.colors.navBriefing,
     subtitle: 'AI agents, action inbox, and automated playbooks.',
     sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email'],
+  },
+  {
+    key: 'board-report',
+    label: 'Board Report',
+    section: 'PRIMARY',
+    icon: '📊',
+    color: theme.colors.navDemo,
+    subtitle: 'Monthly executive summary — service quality, member health, and impact.',
+    sourceSystems: ['All Systems'],
   },
   {
     key: 'admin',
