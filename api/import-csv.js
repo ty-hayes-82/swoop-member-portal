@@ -40,8 +40,9 @@ const IMPORT_TYPES = {
   },
   tee_times: {
     requiredFields: ['reservation_id', 'course', 'date', 'tee_time'],
-    optionalFields: ['players', 'guest_flag', 'transportation', 'caddie', 'holes', 'status', 'check_in_time', 'round_start', 'round_end', 'duration_min'],
+    optionalFields: ['players', 'guest_flag', 'transportation', 'caddie', 'status', 'check_in_time', 'round_start', 'round_end', 'duration_min'],
     table: 'bookings',
+    columnMap: { reservation_id: 'booking_id', course: 'course_id', date: 'booking_date', players: 'player_count', guest_flag: 'has_guest', caddie: 'has_caddie', duration_min: 'duration_minutes' },
   },
   booking_players: {
     requiredFields: ['player_id', 'reservation_id'],
@@ -197,9 +198,10 @@ export default withAuth(async function handler(req, res) {
       if (importType === 'members') {
         const memberId = row.external_id || `mbr_${Date.now()}_${i}`;
         const uniqueMemberId = `${clubId}_${memberId}`;
+        const statusVal = row.status || 'active';
         await sql`
-          INSERT INTO members (member_id, club_id, external_id, first_name, last_name, email, phone, membership_type, annual_dues, join_date, household_id, data_source, status)
-          VALUES (${uniqueMemberId}, ${clubId}, ${row.external_id || null}, ${row.first_name}, ${row.last_name}, ${row.email || null}, ${row.phone || null}, ${row.membership_type || null}, ${row.annual_dues ? Number(row.annual_dues) : null}, ${row.join_date || null}, ${row.household_id || null}, 'csv_import', 'active')
+          INSERT INTO members (member_id, club_id, external_id, first_name, last_name, email, phone, membership_type, annual_dues, join_date, household_id, date_of_birth, gender, account_balance, membership_status, resigned_on, data_source)
+          VALUES (${uniqueMemberId}, ${clubId}, ${row.external_id || null}, ${row.first_name}, ${row.last_name}, ${row.email || null}, ${row.phone || null}, ${row.membership_type || null}, ${row.annual_dues ? Number(row.annual_dues) : null}, ${row.join_date || null}, ${row.household_id || null}, ${row.birthday || row.date_of_birth || null}, ${row.sex || row.gender || null}, ${row.current_balance ? Number(row.current_balance) : null}, ${statusVal}, ${row.date_resigned || null}, 'csv_import')
           ON CONFLICT (member_id) DO UPDATE SET
             club_id = EXCLUDED.club_id,
             first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
@@ -207,6 +209,11 @@ export default withAuth(async function handler(req, res) {
             phone = COALESCE(EXCLUDED.phone, members.phone),
             membership_type = COALESCE(EXCLUDED.membership_type, members.membership_type),
             annual_dues = COALESCE(EXCLUDED.annual_dues, members.annual_dues),
+            date_of_birth = COALESCE(EXCLUDED.date_of_birth, members.date_of_birth),
+            gender = COALESCE(EXCLUDED.gender, members.gender),
+            account_balance = COALESCE(EXCLUDED.account_balance, members.account_balance),
+            membership_status = COALESCE(EXCLUDED.membership_status, members.membership_status),
+            resigned_on = COALESCE(EXCLUDED.resigned_on, members.resigned_on),
             updated_at = NOW()
         `;
       } else if (importType === 'rounds') {

@@ -82,6 +82,7 @@ export default function AdminHub() {
 }
 
 function DataHubTab({ clubId }) {
+  const { navigate } = useNavigationContext();
   return (
     <div className="flex flex-col gap-6">
       <div>

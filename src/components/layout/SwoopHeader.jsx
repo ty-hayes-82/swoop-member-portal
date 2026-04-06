@@ -15,6 +15,7 @@ const SwoopHeader = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+  const notifRef = useRef(null);
 
   const currentNav = NAV_ITEMS.find((item) => item.key === currentRoute) || NAV_ITEMS[0];
 
@@ -58,6 +59,25 @@ const SwoopHeader = () => {
     if (userMenuOpen) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [userMenuOpen]);
+
+  // Close notification dropdown on outside click or Escape
+  useEffect(() => {
+    if (!notifOpen) return;
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+    };
+    const handleEscape = (e) => {
+      if (e.key === "Escape") setNotifOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [notifOpen]);
 
   const handleSignOut = () => {
     setUserMenuOpen(false);
@@ -228,7 +248,7 @@ const SwoopHeader = () => {
           </div>
 
           {/* Notification bell */}
-          <div className="relative">
+          <div className="relative" ref={notifRef}>
             <button
               onClick={() => setNotifOpen(!notifOpen)}
               className="relative flex items-center justify-center w-10 h-10 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
