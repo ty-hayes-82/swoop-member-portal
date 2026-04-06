@@ -39,7 +39,7 @@ export default function AdminHub() {
       .catch(() => {});
   }, [clubId]);
 
-  const ADMIN_TABS = liveSourceCount >= 2 ? ALL_ADMIN_TABS : ALL_ADMIN_TABS.filter(t => t.key !== 'health');
+  const ADMIN_TABS = ALL_ADMIN_TABS;
   const [activeTab, setActiveTab] = useState('data-hub');
 
   return (

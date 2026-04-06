@@ -13,14 +13,19 @@ export const _init = async () => {
 };
 
 export function getConnectedSystems() {
-  if (!_d?.systems) {
-    // For real clubs, don't show hardcoded demo systems as connected
-    if (isAuthenticatedClub()) {
+  if (isAuthenticatedClub()) {
+    if (!_d?.systems || _d.systems.length === 0) {
+      // No live data from API — show all as available for real clubs
       return SYSTEMS.map(s => ({ ...s, status: 'available', lastSync: null }));
     }
-    return SYSTEMS;
+    // Merge live API data with static system list
+    return SYSTEMS.map(s => {
+      const live = _d.systems.find(ls => ls.id === s.id);
+      return live ? { ...s, status: live.status, lastSync: live.lastSync } : { ...s, status: 'available', lastSync: null };
+    });
   }
-  // Merge: use DB status/lastSync for systems that exist in both
+  // Demo mode — show hardcoded statuses from SYSTEMS array
+  if (!_d?.systems) return SYSTEMS;
   return SYSTEMS.map(s => {
     const live = _d.systems.find(ls => ls.id === s.id);
     return live ? { ...s, status: live.status, lastSync: live.lastSync } : s;
