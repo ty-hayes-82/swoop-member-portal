@@ -151,6 +151,7 @@ export default withAuth(async function handler(req, res) {
       const twilioUser = process.env.TWILIO_API_KEY_SID || twilioSid;
       const msgSvcSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
 
+      let twilioDebug = null;
       if (twilioSid && twilioAuth && toPhone) {
         try {
           const params = new URLSearchParams();
@@ -167,8 +168,14 @@ export default withAuth(async function handler(req, res) {
             },
             body: params.toString(),
           });
+          const twBody = await twRes.json().catch(() => ({}));
           smsSent = twRes.ok;
-        } catch {}
+          twilioDebug = { status: twRes.status, sid: twBody.sid, twStatus: twBody.status, error: twBody.message, code: twBody.code };
+        } catch (e) {
+          twilioDebug = { error: e.message };
+        }
+      } else {
+        twilioDebug = { error: 'Missing config', hasSid: !!twilioSid, hasAuth: !!twilioAuth, hasPhone: !!toPhone, hasMsgSvc: !!msgSvcSid };
       }
 
       await sql`
@@ -181,6 +188,8 @@ export default withAuth(async function handler(req, res) {
 
       results.status = smsSent ? 'sent' : 'queued';
       results.message = `SMS ${smsSent ? 'sent' : 'queued'} for ${memberName || 'member'}`;
+      results.toPhone = toPhone;
+      if (twilioDebug) results.twilioDebug = twilioDebug;
 
     } else if (executionType === 'staff_task') {
       // Create a task for a staff member
