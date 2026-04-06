@@ -431,47 +431,35 @@ function PlaybookCard({ playbook, onSelect, isSelected }) {
   return (
     <div
       onClick={() => onSelect(playbook.id)}
-      style={{
-        background: '#fff',
-        border: isSelected ? '2px solid #e8772e' : '1px solid #e5e5e5',
-        borderRadius: 14,
-        padding: '20px 24px',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-        boxShadow: isSelected ? '0 0 0 3px rgba(232,119,46,0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-      }}
+      className={`bg-white rounded-xl p-3 sm:p-4 lg:p-5 cursor-pointer transition-all flex flex-col gap-2 dark:bg-gray-900 ${
+        isSelected
+          ? 'border-2 border-brand-500 shadow-[0_0_0_3px_rgba(232,119,46,0.12)]'
+          : 'border border-gray-200 shadow-sm hover:border-gray-300 dark:border-gray-800'
+      }`}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{
-          fontSize: 10, fontWeight: 700, letterSpacing: '1.2px', color: playbook.categoryColor,
-          textTransform: 'uppercase', background: playbook.categoryColor + '12',
-          padding: '3px 8px', borderRadius: 4,
-        }}>
+      <div className="flex items-center justify-between">
+        <span
+          className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded"
+          style={{ color: playbook.categoryColor, background: playbook.categoryColor + '12' }}
+        >
           {playbook.category}
         </span>
         <div className="flex items-center gap-1.5">
           {playbook.triggeredCount > 0 && (
-            <span style={{
-              fontSize: 10, fontWeight: 700, color: '#e8772e',
-              background: 'rgba(232,119,46,0.1)', padding: '2px 7px', borderRadius: 4,
-            }}>{playbook.triggeredCount} triggered</span>
+            <span className="text-[10px] font-bold text-brand-500 bg-brand-500/10 px-1.5 py-0.5 rounded">
+              {playbook.triggeredCount} triggered
+            </span>
           )}
-          <span style={{ fontSize: 11, color: '#999' }}>{stepCount} steps</span>
+          <span className="text-[11px] text-gray-400">{stepCount} steps</span>
         </div>
       </div>
-      <div style={{ fontSize: 16, fontWeight: 700, color: '#0f0f0f', lineHeight: 1.3 }}>{playbook.name}</div>
-      <div style={{
-        fontSize: 13, color: '#666', lineHeight: 1.5,
-        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-      }}>
+      <div className="text-sm sm:text-base font-bold text-gray-800 dark:text-white/90 leading-snug">{playbook.name}</div>
+      <div className="text-xs sm:text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
         {playbook.description}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 6, borderTop: '1px solid #f4f4f5' }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: '#16a34a' }}>{playbook.trackRecord[0]?.result}</span>
-        <span style={{ fontSize: 11, color: '#888', background: '#f9f9f9', padding: '2px 8px', borderRadius: 4 }}>{playbook.trackRecord[0]?.runs} last quarter</span>
+      <div className="flex items-center justify-between mt-auto pt-1.5 border-t border-gray-100 dark:border-gray-800">
+        <span className="text-xs sm:text-[13px] font-semibold text-green-600">{playbook.trackRecord[0]?.result}</span>
+        <span className="text-[10px] sm:text-[11px] text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded">{playbook.trackRecord[0]?.runs}</span>
       </div>
     </div>
   );
@@ -565,23 +553,21 @@ function PlaybookDetail({ playbook }) {
       ))}
 
       {/* Track Record */}
-      <div style={{ background: 'white', border: '1px solid #e5e5e5', borderRadius: 12, padding: 24, marginTop: 32 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <span style={{ color: '#27ae60', fontWeight: 700 }}>{'\u2713'}</span>
-          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '1px', color: '#27ae60', textTransform: 'uppercase' }}>Track Record</span>
+      <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 mt-6 sm:mt-8 dark:bg-gray-900 dark:border-gray-800">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
+          <span className="text-green-600 font-bold">{'\u2713'}</span>
+          <span className="text-xs font-bold tracking-wider text-green-600 uppercase">Track Record</span>
         </div>
         {playbook.trackRecord.map((tr, idx) => (
-          <div key={idx} style={{
-            display: 'flex', justifyContent: 'space-between', padding: '10px 0',
-            borderBottom: idx < playbook.trackRecord.length - 1 ? '1px solid #f0f0f0' : 'none',
-            alignItems: 'center', flexWrap: 'wrap', gap: 8,
-          }}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontWeight: 600, fontSize: 13 }}>{tr.period}</span>
-              <span style={{ background: '#f0f0f0', padding: '2px 8px', borderRadius: 4, fontSize: 11, color: '#666' }}>{tr.runs}</span>
-              <span style={{ color: '#666', fontSize: 13 }}>{tr.result}</span>
+          <div key={idx} className={`flex flex-col sm:flex-row sm:justify-between sm:items-center py-2.5 gap-1 sm:gap-2 ${
+            idx < playbook.trackRecord.length - 1 ? 'border-b border-gray-100 dark:border-gray-800' : ''
+          }`}>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs sm:text-[13px] font-semibold text-gray-800 dark:text-white/90">{tr.period}</span>
+              <span className="text-[10px] sm:text-[11px] bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded">{tr.runs}</span>
+              <span className="text-xs sm:text-[13px] text-gray-500">{tr.result}</span>
             </div>
-            <span style={{ color: '#27ae60', fontWeight: 600, fontSize: 13 }}>{tr.impact}</span>
+            <span className="text-xs sm:text-[13px] font-semibold text-green-600">{tr.impact}</span>
           </div>
         ))}
       </div>
@@ -609,7 +595,7 @@ function PlaybookDetail({ playbook }) {
       </div>
 
       {/* Activate Button */}
-      <div style={{ marginTop: 32 }}>
+      <div className="mt-6 sm:mt-8">
         <button
           onClick={() => {
             showToast(`${playbook.name} activated`, 'success');
@@ -639,13 +625,8 @@ function PlaybookDetail({ playbook }) {
               }).catch(() => {});
             }
           }}
-          style={{
-            width: '100%', background: playbook.categoryColor || '#c0392b', color: 'white', border: 'none',
-            padding: 16, borderRadius: 10, fontSize: 16, fontWeight: 600, cursor: 'pointer',
-            transition: 'opacity 0.15s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          className="w-full text-white border-none py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold cursor-pointer transition-opacity hover:opacity-90"
+          style={{ background: playbook.categoryColor || '#c0392b' }}
         >
           Activate this playbook
         </button>
@@ -729,10 +710,14 @@ export default function PlaybooksPage({ embedded = false }) {
           </div>
         </div>
 
-        {/* Two-column layout: cards left, detail right. Stacks on mobile. */}
+        {/* Two-column layout: cards left, detail right.
+            Mobile: show cards OR detail (not both). Tap card → show detail + back button.
+            Desktop (lg+): show both side by side. */}
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 lg:items-start">
-          {/* Left: Playbook Cards */}
-          <div className="w-full lg:w-[380px] lg:shrink-0 lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto flex flex-col gap-3 lg:pr-1">
+          {/* Left: Playbook Cards — hidden on mobile when a card is selected */}
+          <div className={`w-full lg:w-[380px] lg:shrink-0 lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto flex flex-col gap-3 lg:pr-1 ${
+            selectedId ? 'hidden lg:flex' : 'flex'
+          }`}>
             {filtered.map(pb => (
               <PlaybookCard
                 key={pb.id}
@@ -743,9 +728,21 @@ export default function PlaybooksPage({ embedded = false }) {
             ))}
           </div>
 
-          {/* Right: Selected Playbook Detail */}
+          {/* Right: Selected Playbook Detail — always visible on desktop, conditional on mobile */}
           {effectiveSelected && (
-            <div className="flex-1 min-w-0 bg-white border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto dark:bg-gray-900 dark:border-gray-800">
+            <div className={`flex-1 min-w-0 bg-white border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto dark:bg-gray-900 dark:border-gray-800 ${
+              selectedId ? 'block' : 'hidden lg:block'
+            }`}>
+              {/* Back button — mobile only */}
+              <button
+                onClick={() => setSelectedId(null)}
+                className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-4 cursor-pointer bg-transparent border-none p-0 hover:text-gray-700 dark:text-gray-400"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                </svg>
+                Back to playbooks
+              </button>
               <PlaybookDetail playbook={effectiveSelected} />
             </div>
           )}
