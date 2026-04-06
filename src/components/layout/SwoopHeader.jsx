@@ -13,6 +13,8 @@ const SwoopHeader = () => {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   const currentNav = NAV_ITEMS.find((item) => item.key === currentRoute) || NAV_ITEMS[0];
 
@@ -45,6 +47,28 @@ const SwoopHeader = () => {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [userMenuOpen]);
+
+  const handleSignOut = () => {
+    setUserMenuOpen(false);
+    localStorage.removeItem("swoop_auth_token");
+    localStorage.removeItem("swoop_auth_user");
+    localStorage.removeItem("swoop_club_id");
+    localStorage.removeItem("swoop_club_name");
+    localStorage.removeItem("swoop_production");
+    window.location.hash = "#/";
+    window.location.reload();
+  };
 
   // Fetch unread notification count on mount
   useEffect(() => {
@@ -227,24 +251,80 @@ const SwoopHeader = () => {
             )}
           </div>
 
-          {/* User info */}
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90 m-0">
-                {userName}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 m-0">
-                {clubId === "demo" ? "Demo Environment" : ((() => { try { return localStorage.getItem("swoop_club_name") || JSON.parse(localStorage.getItem("swoop_auth_user") || "{}").clubName || "Connected Club"; } catch { return "Connected Club"; } })())}
-              </p>
-            </div>
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 text-brand-600 font-semibold text-sm">
-              {userName
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </div>
+          {/* User info + dropdown */}
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-3 cursor-pointer rounded-lg px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90 m-0">
+                  {userName}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 m-0">
+                  {clubId === "demo" ? "Demo Environment" : ((() => { try { return localStorage.getItem("swoop_club_name") || JSON.parse(localStorage.getItem("swoop_auth_user") || "{}").clubName || "Connected Club"; } catch { return "Connected Club"; } })())}
+                </p>
+              </div>
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 text-brand-600 font-semibold text-sm">
+                {userName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </div>
+              <svg className={`w-4 h-4 text-gray-400 transition-transform ${userMenuOpen ? "rotate-180" : ""}`} viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+              </svg>
+            </button>
+
+            {/* Dropdown menu */}
+            {userMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-theme-lg z-50 py-1 dark:bg-gray-900 dark:border-gray-800">
+                {/* User summary */}
+                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-white/90 m-0">{userName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 m-0 mt-0.5">
+                    {(() => { try { return JSON.parse(localStorage.getItem("swoop_auth_user") || "{}").email || ""; } catch { return ""; } })()}
+                  </p>
+                </div>
+
+                {/* Menu items */}
+                <div className="py-1">
+                  <button
+                    onClick={() => { setUserMenuOpen(false); navigate("profile"); }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-2.5"
+                  >
+                    <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
+                    </svg>
+                    My Profile
+                  </button>
+                  <button
+                    onClick={() => { setUserMenuOpen(false); navigate("admin"); }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-2.5"
+                  >
+                    <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9v1a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+                    </svg>
+                    Club Settings
+                  </button>
+                </div>
+
+                {/* Sign out */}
+                <div className="border-t border-gray-100 dark:border-gray-800 py-1">
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 cursor-pointer flex items-center gap-2.5"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

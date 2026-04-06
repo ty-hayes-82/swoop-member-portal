@@ -281,36 +281,19 @@ const normalizeResignationScenarios = (raw) => {
   });
 };
 
-// For real clubs (non-demo), start with empty data — no Oakmont Hills fallback
+// All modes start empty — populated from API via _init().
+// Demo mode (club_001) fetches live DB data just like real clubs.
 function getInitialData() {
-  try {
-    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
-    if (clubId && clubId !== 'demo') {
-      // Real club — start empty, populate from API only
-      return {
-        memberArchetypes: [],
-        healthDistribution: [],
-        atRiskMembers: [],
-        membersAtRisk: [],
-        resignationScenarios: [],
-        memberProfiles: {},
-        memberSummary: {},
-        emailHeatmap: [],
-        decayingMembers: [],
-      };
-    }
-  } catch {}
-  // Demo mode — use static Oakmont Hills data
   return {
-    memberArchetypes: staticArchetypes,
-    healthDistribution: staticHealthDistribution,
-    atRiskMembers: staticAtRiskMembers,
-    membersAtRisk: staticAtRiskMembers,
-    resignationScenarios: staticResignationScenarios,
-    memberProfiles: staticMemberProfiles,
-    memberSummary: staticMemberSummary,
-    emailHeatmap: staticEmailHeatmap,
-    decayingMembers: staticDecayingMembers,
+    memberArchetypes: [],
+    healthDistribution: [],
+    atRiskMembers: [],
+    membersAtRisk: [],
+    resignationScenarios: [],
+    memberProfiles: {},
+    memberSummary: {},
+    emailHeatmap: [],
+    decayingMembers: [],
   };
 }
 
@@ -436,16 +419,8 @@ export const getMemberSummary = () => {
 };
 
 export const getWatchMembers = () => {
-  if (isAuthenticatedClub()) {
-    // For real clubs, only return watch members from API data, never static
-    const apiWatch = _d?.watchMembers ?? [];
-    return Array.isArray(apiWatch) ? apiWatch.map((m) => ({ ...m, trend: 'watch', riskLevel: 'Watch' })) : [];
-  }
-  return (staticWatchMembers ?? []).map((m) => ({
-    ...m,
-    trend: 'watch',
-    riskLevel: 'Watch',
-  }));
+  const apiWatch = _d?.watchMembers ?? [];
+  return Array.isArray(apiWatch) ? apiWatch.map((m) => ({ ...m, trend: 'watch', riskLevel: 'Watch' })) : [];
 };
 
 

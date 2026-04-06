@@ -14,8 +14,8 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-const _trends = () => _d ? _d.trends : isAuthenticatedClub() ? {} : staticTrends;
-const _months = () => _d ? _d.months : isAuthenticatedClub() ? [] : STATIC_MONTHS;
+const _trends = () => _d ? _d.trends : {};
+const _months = () => _d ? _d.months : [];
 
 const FORMAT_FNS = {
   percent:  v => `${(v * 100).toFixed(0)}%`,
@@ -68,7 +68,7 @@ export function getMultiSeriesTrendData(keys) {
 }
 
 export function getOutletTrendData(outletName) {
-  const src = _d ? _d.outletTrends : isAuthenticatedClub() ? {} : staticOutletTrends;
+  const src = _d ? _d.outletTrends : {};
   const months = _months();
   const series = src?.[outletName];
   if (!series) return [];

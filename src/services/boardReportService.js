@@ -49,28 +49,25 @@ export const getKPIs = () => {
       return kpi;
     });
   }
-  // For real clubs without live board data, build KPIs from member health data
-  if (isAuthenticatedClub()) {
-    const summary = _getMemberSummary();
-    if (summary.totalMembers > 0 || summary.total > 0) {
-      const total = summary.totalMembers || summary.total;
-      const healthy = summary.healthy || 0;
-      const retentionPct = total > 0 ? Math.round((healthy / total) * 100) : 0;
-      return [
-        { label: 'Members Retained', value: healthy, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total members tracked` },
-        { label: 'Dues at Risk', value: Math.round((summary.potentialDuesAtRisk || 0) / 1000), unit: '$K', prefix: '$', suffix: 'K', color: 'warning', description: 'Annual dues from at-risk + critical members' },
-        { label: 'Retention Rate', value: retentionPct, unit: '%', prefix: '', suffix: '%', color: retentionPct >= 80 ? 'success' : 'warning', description: 'Healthy members as % of total' },
-        { label: 'At Risk', value: (summary.atRisk || 0) + (summary.critical || 0), unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
-      ];
-    }
-    return EMPTY_KPIS;
+  // Build KPIs from member health data (works for both demo and real clubs)
+  const summary = _getMemberSummary();
+  if (summary.totalMembers > 0 || summary.total > 0) {
+    const total = summary.totalMembers || summary.total;
+    const healthy = summary.healthy || 0;
+    const retentionPct = total > 0 ? Math.round((healthy / total) * 100) : 0;
+    return [
+      { label: 'Members Retained', value: healthy, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total members tracked` },
+      { label: 'Dues at Risk', value: Math.round((summary.potentialDuesAtRisk || 0) / 1000), unit: '$K', prefix: '$', suffix: 'K', color: 'warning', description: 'Annual dues from at-risk + critical members' },
+      { label: 'Retention Rate', value: retentionPct, unit: '%', prefix: '', suffix: '%', color: retentionPct >= 80 ? 'success' : 'warning', description: 'Healthy members as % of total' },
+      { label: 'At Risk', value: (summary.atRisk || 0) + (summary.critical || 0), unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
+    ];
   }
-  return staticKpis;
+  return EMPTY_KPIS;
 };
 
-export const getMemberSaves = () => isAuthenticatedClub() && !_liveKpis ? [] : staticMemberSaves;
-export const getOperationalSaves = () => isAuthenticatedClub() && !_liveKpis ? [] : staticOperationalSaves;
-export const getMonthlyTrends = () => isAuthenticatedClub() && !_liveKpis ? [] : staticMonthlyTrends;
+export const getMemberSaves = () => _liveKpis ? staticMemberSaves : [];
+export const getOperationalSaves = () => _liveKpis ? staticOperationalSaves : [];
+export const getMonthlyTrends = () => _liveKpis ? staticMonthlyTrends : [];
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

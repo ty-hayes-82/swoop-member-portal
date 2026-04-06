@@ -41,9 +41,10 @@ export function isAuthenticatedClub() {
   } catch { return false; }
 }
 
-// Whether static demo data should be used (only in demo mode)
+// Whether static demo data should be used
+// As of V4, always returns false — demo mode now uses live DB data from club_001
 export function useStaticData() {
-  return !isAuthenticatedClub();
+  return false;
 }
 
 export const SLOW_ROUND_THRESHOLD_MIN = 270;

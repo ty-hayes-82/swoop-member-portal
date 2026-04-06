@@ -28,10 +28,7 @@ const TRAIL_STEPS = {
 const defaultAgents = getAgents();
 const defaultStatuses = Object.fromEntries(defaultAgents.map((agent) => [agent.id, agent.status]));
 
-// For authenticated (non-demo) clubs, start with empty inbox — no demo actions
-import { isAuthenticatedClub } from '@/config/constants';
-const _isReal = isAuthenticatedClub();
-
+// V4: All modes start empty — inbox populated from API via agentService._init()
 const initialState = {
   currentDate: new Date().toISOString().split('T')[0],
   playbooks: {
@@ -44,13 +41,13 @@ const initialState = {
     'new-member-90day': 0,
     'staffing-gap': 0,
   },
-  inbox: _isReal ? [] : getAllActions(),
-  pendingCount: _isReal ? 0 : getPendingActions().length,
+  inbox: [],
+  pendingCount: 0,
   agentStatuses: defaultStatuses,
   agentConfigs: {},
   teeSheetOps: {
-    confirmations: _isReal ? [] : getTSOConfirmations(),
-    reassignments: _isReal ? [] : getTSOReassignments(),
+    confirmations: [],
+    reassignments: [],
     config: getTSOConfig(),
   },
 };
@@ -212,11 +209,7 @@ function loadPersistedState(base) {
         return item;
       });
     }
-    // If persisted inbox has 0 pending items, reset to defaults so demo stays populated
-    // But NOT for real clubs — they should start empty
-    if (!_isReal && computePendingCount(nextInbox) === 0 && computePendingCount(base.inbox) > 0) {
-      nextInbox = base.inbox;
-    }
+    // V4: No static demo reset — all data comes from API
     // Merge any new default actions not present in persisted inbox (e.g., follow-up cards)
     if (Array.isArray(inbox)) {
       const existingIds = new Set(nextInbox.map(i => i.id));

@@ -28,9 +28,9 @@ const EMPTY_BRIEFING = {
 
 export const getDailyBriefing = (date = '2026-01-17') => {
   if (_d) return _d;
-  if (isAuthenticatedClub()) return EMPTY_BRIEFING;
+  return EMPTY_BRIEFING;
 
-  // Phase 1 static fallback — identical shape to API response
+  // Phase 1 static fallback — unreachable, kept for reference
   const revData    = getRevenueByDay();
   const yesterday  = revData.find(d => d.date === '2026-01-16') ?? revData[15];
   const atRisk     = getAtRiskMembers();

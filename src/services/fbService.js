@@ -1,9 +1,7 @@
 // fbService.js — Phase 1 static · Phase 2 /api/fb
+// V4: All modes use live DB data via _init(). No static fallback.
 
 import { apiFetch } from './apiClient';
-import { isAuthenticatedClub } from '@/config/constants';
-import { outlets, postRoundConversion, rainDayImpact, fbMonthComparison } from '@/data/outlets';
-import { dailyRevenue } from '@/data/revenue';
 
 let _d = null;
 
@@ -11,10 +9,10 @@ export const _init = async () => {
   try {
     const data = await apiFetch('/api/fb');
     if (data) _d = data;
-  } catch { /* keep static fallback */ }
+  } catch { /* keep empty fallback */ }
 };
 
-export const getOutletPerformance = () => _d ? _d.outlets : isAuthenticatedClub() ? [] : outlets;
+export const getOutletPerformance = () => _d ? _d.outlets : [];
 
 const toNumber = (value, fallback = 0) => {
   const num = Number(value);
@@ -29,8 +27,8 @@ const normalizeConversionEntries = (entries = []) =>
   }));
 
 export const getPostRoundConversion = () => {
-  if (!_d && isAuthenticatedClub()) return { overall: 0, byArchetype: [] };
-  const source = _d?.postRoundConversion ?? postRoundConversion;
+  if (!_d) return { overall: 0, byArchetype: [] };
+  const source = _d.postRoundConversion;
 
   if (!source) {
     return { overall: 0, byArchetype: [] };
@@ -41,7 +39,6 @@ export const getPostRoundConversion = () => {
     const overall = byArchetype.length
       ? byArchetype.reduce((sum, item) => sum + item.rate, 0) / byArchetype.length
       : 0;
-
     return { overall, byArchetype };
   }
 
@@ -59,28 +56,16 @@ export const getPostRoundConversion = () => {
 
 export const getRainDayImpact = () => {
   if (_d) return _d.rainDayImpact;
-  if (isAuthenticatedClub()) return [];
-  const avgGolf = dailyRevenue.filter(d => d.weather !== 'rainy' && d.golf > 0)
-    .reduce((s, d) => s + d.golf, 0) /
-    dailyRevenue.filter(d => d.weather !== 'rainy' && d.golf > 0).length;
-  const avgFb = dailyRevenue.filter(d => d.weather !== 'rainy')
-    .reduce((s, d) => s + d.fb, 0) /
-    dailyRevenue.filter(d => d.weather !== 'rainy').length;
-  return rainDayImpact.map(d => ({
-    ...d,
-    golfVsAvg: Math.round(((d.golfRevenue - avgGolf) / avgGolf) * 100),
-    fbVsAvg:   Math.round(((d.fbRevenue   - avgFb)   / avgFb)   * 100),
-  }));
+  return [];
 };
 
 export const getFBMonthComparison = () => {
   if (_d?.fbMonthComparison) return _d.fbMonthComparison;
-  if (isAuthenticatedClub()) return [];
-  return fbMonthComparison;
+  return [];
 };
 
 export const getMealPeriodBreakdown = () => {
-  const src = _d ? _d.outlets : isAuthenticatedClub() ? [] : outlets;
+  const src = _d ? _d.outlets : [];
   return src.flatMap(o =>
     (o.periods ?? []).map(p => ({
       outlet: o.outlet, period: p.period,
@@ -92,16 +77,7 @@ export const getMealPeriodBreakdown = () => {
 
 export const getFBSummary = () => {
   if (_d) return _d.fbSummary;
-  if (isAuthenticatedClub()) return { totalRevenue: 0, totalCovers: 0, understaffingLoss: 0, overallAvgCheck: 0 };
-  return {
-    totalRevenue:       outlets.reduce((s, o) => s + o.revenue, 0),
-    totalCovers:        outlets.reduce((s, o) => s + o.covers, 0),
-    understaffingLoss:  outlets.reduce((s, o) => s + Math.abs(o.understaffedImpact), 0),
-    overallAvgCheck:    +(
-      outlets.reduce((s, o) => s + o.revenue, 0) /
-      outlets.reduce((s, o) => s + o.covers, 0)
-    ).toFixed(2),
-  };
+  return { totalRevenue: 0, totalCovers: 0, understaffingLoss: 0, overallAvgCheck: 0 };
 };
 
 export const sourceSystems = ['POS', 'Tee Sheet', 'Weather API'];

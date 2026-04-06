@@ -107,32 +107,20 @@ const sanitizeFeedbackRecords = (source) => {
 };
 
 export const getUnderstaffedDays = () => {
-  if (isAuthenticatedClub()) {
-    const real = _d?.understaffedDays;
-    return Array.isArray(real) && real.length ? sanitizeUnderstaffedDays(real) : [];
-  }
-  return sanitizeUnderstaffedDays(_d ? _d.understaffedDays : understaffedDays);
+  const real = _d?.understaffedDays;
+  return Array.isArray(real) && real.length ? sanitizeUnderstaffedDays(real) : [];
 };
 export const getShiftCoverage = () => {
-  if (isAuthenticatedClub()) {
-    const real = _d?.shiftCoverage;
-    return Array.isArray(real) && real.length ? sanitizeShiftCoverage(real) : [];
-  }
-  return sanitizeShiftCoverage(_d ? _d.shiftCoverage : shiftCoverage);
+  const real = _d?.shiftCoverage;
+  return Array.isArray(real) && real.length ? sanitizeShiftCoverage(real) : [];
 };
 export const getFeedbackSummary = () => {
-  if (isAuthenticatedClub()) {
-    const real = _d?.feedbackSummary;
-    return Array.isArray(real) && real.length ? sanitizeFeedbackSummary(real) : [];
-  }
-  return sanitizeFeedbackSummary(_d ? _d.feedbackSummary : feedbackSummary);
+  const real = _d?.feedbackSummary;
+  return Array.isArray(real) && real.length ? sanitizeFeedbackSummary(real) : [];
 };
 export const getComplaintCorrelation = () => {
-  if (isAuthenticatedClub()) {
-    const real = _d?.feedbackRecords;
-    return Array.isArray(real) && real.length ? sanitizeFeedbackRecords(real) : [];
-  }
-  return sanitizeFeedbackRecords(_d ? _d.feedbackRecords : feedbackRecords);
+  const real = _d?.feedbackRecords;
+  return Array.isArray(real) && real.length ? sanitizeFeedbackRecords(real) : [];
 };
 
 export const getStaffingSummary = () => {
@@ -147,7 +135,7 @@ export const getStaffingSummary = () => {
     };
   }
   const days = getUnderstaffedDays();
-  const complaints = isAuthenticatedClub() ? [] : sanitizeFeedbackRecords(feedbackRecords);
+  const complaints = [];
   return {
     understaffedDaysCount: days.length,
     totalRevenueLoss: days.reduce((s, d) => s + d.revenueLoss, 0),
