@@ -30,10 +30,11 @@ const ONBOARDING_STEPS = [
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
-  const rl = rateLimit(req, { maxAttempts: 3, windowMs: 3600000 });
-  if (rl.limited) {
-    return res.status(429).json({ error: 'Too many requests. Try again later.', retryAfter: rl.retryAfter });
-  }
+  // Rate limit disabled during testing — re-enable before production
+  // const rl = rateLimit(req, { maxAttempts: 3, windowMs: 3600000 });
+  // if (rl.limited) {
+  //   return res.status(429).json({ error: 'Too many requests. Try again later.', retryAfter: rl.retryAfter });
+  // }
 
   // Ensure onboarding table exists
   try {
