@@ -390,10 +390,9 @@ async function phase7() {
     const d = new Date(2026, 3, 5);
     d.setDate(d.getDate() - daysAgo);
     shifts.push({
-      shift_id: `shift_${i + 1}`,
+      shift_id: `shift_${TS}_${i + 1}`,
       employee_id: `staff_${(i % 20) + 1}`,
       date: d.toISOString().slice(0, 10),
-      location: depts[i % 5],
       shift_start: '08:00',
       shift_end: '16:00',
       actual_hours: 7.5 + (i % 3) * 0.5,
