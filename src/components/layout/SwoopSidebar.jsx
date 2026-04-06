@@ -69,20 +69,16 @@ const SwoopSidebar = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Logo */}
-      <div
-        className={`py-8 flex ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-        }`}
-      >
+      <div className="py-8 flex justify-center">
         <button
           onClick={() => navigate("today")}
-          className="flex items-center gap-3 cursor-pointer"
+          className="flex items-center justify-center cursor-pointer"
           aria-label="Swoop home"
         >
           {showFull ? (
-            <img src="/swoop-logo-white.svg" alt="Swoop Golf" className="h-8" />
+            <img src="/swoop-logo-white.svg" alt="Swoop Golf" className="h-12" />
           ) : (
-            <img src="/favicon.svg" alt="Swoop" className="w-8 h-8 rounded-lg" />
+            <img src="/favicon.svg" alt="Swoop" className="w-10 h-10 rounded-lg" />
           )}
         </button>
       </div>
