@@ -143,7 +143,8 @@ const IMPORT_TYPES = {
 const FIELD_ALIASES = {
   // Members
   'given name': 'first_name', 'first name': 'first_name', 'surname': 'last_name', 'last name': 'last_name',
-  'member #': 'external_id', 'member number': 'external_id', 'member id': 'external_id',
+  'member #': 'external_id', 'member id': 'external_id',
+  'member number': '_skip',  // Numeric index, not the canonical member identifier
   'phone #': 'phone', 'annual fee': 'annual_dues', 'annual dues': 'annual_dues',
   'date joined': 'join_date', 'membership type': 'membership_type', 'mem type': 'membership_type',
   'household id': 'household_id', 'handicap #': 'handicap', 'current balance': 'current_balance',
