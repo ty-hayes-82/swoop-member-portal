@@ -28,6 +28,15 @@ const navIcons = {
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   ),
+  "tee-sheet": (
+    <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 18V6" />
+      <path d="M12 6c2 0 4-1 4-3" />
+      <path d="M12 6c-2 0-4-1-4-3" />
+      <circle cx="12" cy="20" r="2" />
+      <path d="M4 12h16" />
+    </svg>
+  ),
   automations: (
     <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />

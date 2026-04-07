@@ -17,15 +17,6 @@ export const navItems = [
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
   },
   {
-    key: 'tee-sheet',
-    label: 'Tee Sheet',
-    section: 'PRIMARY',
-    icon: '🏌️',
-    color: theme.colors.navOperations,
-    subtitle: "Today's bookings, at-risk golfers, and cart prep recommendations.",
-    sourceSystems: ['Tee Sheet', 'Member CRM', 'Weather', 'POS'],
-  },
-  {
     key: 'service',
     label: 'Service',
     section: 'PRIMARY',
@@ -42,6 +33,15 @@ export const navItems = [
     color: theme.colors.navMembers,
     subtitle: 'Member intelligence: who needs attention, why, and what to do.',
     sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
+  },
+  {
+    key: 'tee-sheet',
+    label: 'Tee Sheet',
+    section: 'PRIMARY',
+    icon: '🏌️',
+    color: theme.colors.navOperations,
+    subtitle: "Today's bookings, at-risk golfers, and cart prep recommendations.",
+    sourceSystems: ['Tee Sheet', 'Member CRM', 'Weather', 'POS'],
   },
   {
     key: 'automations',
