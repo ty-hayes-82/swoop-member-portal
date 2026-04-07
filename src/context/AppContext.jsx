@@ -200,7 +200,11 @@ const AppContext = createContext(null);
 
 function loadPersistedState(base) {
   try {
-    const inbox = JSON.parse(localStorage.getItem('swoop_agent_inbox') || 'null');
+    // In guided demo mode, don't load persisted inbox from a previous session
+    // — start fresh so only activated gates produce data
+    const isGuided = localStorage.getItem('swoop_demo_guided') === 'true';
+
+    const inbox = isGuided ? null : JSON.parse(localStorage.getItem('swoop_agent_inbox') || 'null');
     const agentStatuses = JSON.parse(localStorage.getItem('swoop_agent_statuses') || 'null');
     const agentConfigs = JSON.parse(localStorage.getItem('swoop_agent_configs') || 'null');
 

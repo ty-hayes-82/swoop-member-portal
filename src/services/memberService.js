@@ -426,6 +426,7 @@ export const getMemberSummary = () => {
 };
 
 export const getWatchMembers = () => {
+  if (_shouldReturnEmpty()) return [];
   const apiWatch = _d?.watchMembers ?? [];
   return Array.isArray(apiWatch) ? apiWatch.map((m) => ({ ...m, trend: 'watch', riskLevel: 'Watch' })) : [];
 };

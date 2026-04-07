@@ -2,11 +2,10 @@
 import { getDailyBriefing } from '@/services/briefingService';
 import { getTomorrowForecast } from '@/services/weatherService';
 import { shouldUseStatic } from '@/services/demoGate';
-import { isAuthenticatedClub } from '@/config/constants';
 import { getUnderstaffedDays } from '@/services/staffingService';
 
 function getOutlets() {
-  if (!shouldUseStatic('complaints')) return [];
+  if (!shouldUseStatic('complaints') && !shouldUseStatic('weather')) return [];
   return [
     { name: 'Grill Room', requiredStaff: 4, scheduledStaff: 2, status: 'gap' },
     { name: 'Terrace', requiredStaff: 3, scheduledStaff: 3, status: 'full' },
@@ -16,8 +15,14 @@ function getOutlets() {
 
 export default function TomorrowForecast() {
   const briefing = getDailyBriefing();
-  const tomorrow = briefing?.todayRisks?.tomorrow || getTomorrowForecast();
-  const roundsBooked = briefing?.teeSheet?.roundsToday || (isAuthenticatedClub() ? 0 : 220);
+  const tomorrowWeather = getTomorrowForecast();
+  const tomorrow = briefing?.todayRisks?.tomorrow || tomorrowWeather;
+  const roundsBooked = briefing?.teeSheet?.roundsToday || 0;
+
+  // If no data sources are loaded, don't render
+  const hasBriefing = briefing?.teeSheet?.roundsToday > 0;
+  const hasWeather = !!tomorrowWeather;
+  if (!hasBriefing && !hasWeather && !shouldUseStatic('tee-sheet') && !shouldUseStatic('weather')) return null;
 
   const weather = tomorrow?.conditions || briefing?.todayRisks?.weather || 'clear';
   const wind = tomorrow?.wind || briefing?.todayRisks?.wind || 0;

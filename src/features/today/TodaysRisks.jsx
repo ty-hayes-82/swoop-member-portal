@@ -1,17 +1,10 @@
 // TodaysRisks — Staffing status grid + Open complaints with aging
 import { getComplaintCorrelation, getShiftCoverage } from '@/services/staffingService';
-import { isAuthenticatedClub } from '@/config/constants';
+import { shouldUseStatic } from '@/services/demoGate';
 import { useNavigation } from '@/context/NavigationContext';
 import MemberLink from '@/components/MemberLink';
 
 const REF_DATE = new Date();
-
-// Default outlets for demo mode
-const DEMO_OUTLETS = [
-  { name: 'Grill Room', current: 2, required: 4 },
-  { name: 'Terrace', current: 3, required: 3 },
-  { name: 'Pool Bar', current: 1, required: 1 },
-];
 
 function getStaffingColor(current, required) {
   if (current >= required) return '#22c55e';
@@ -30,15 +23,15 @@ export default function TodaysRisks() {
   const allComplaints = getComplaintCorrelation();
   const shiftCoverage = getShiftCoverage();
 
-  // For authenticated clubs with no data, show nothing
-  if (isAuthenticatedClub() && allComplaints.length === 0 && shiftCoverage.length === 0) {
+  // No data available — hide section
+  if (allComplaints.length === 0 && shiftCoverage.length === 0) {
     return null;
   }
 
   // Aggregate shift coverage by department — API returns per-date rows,
   // roll up to department-level for display
   const OUTLETS = (() => {
-    if (shiftCoverage.length === 0) return isAuthenticatedClub() ? [] : DEMO_OUTLETS;
+    if (shiftCoverage.length === 0) return [];
 
     // Group by department and compute avg staffing
     const byDept = {};

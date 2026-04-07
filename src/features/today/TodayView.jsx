@@ -139,7 +139,7 @@ export default function TodayView() {
   const priorities = getPriorityItems();
   const topPriority = priorities[0];
   const briefing = getDailyBriefing();
-  const roundsToday = briefing?.teeSheet?.roundsToday || (isAuthenticatedClub() ? 0 : 220);
+  const roundsToday = briefing?.teeSheet?.roundsToday || 0;
 
   const weatherAlerts = getWeatherAlerts();
   const [dismissedAlerts, setDismissedAlerts] = useState([]);
@@ -182,8 +182,12 @@ export default function TodayView() {
           </div>
           <div className="flex items-center gap-2 sm:gap-4 text-xs text-gray-500 flex-wrap">
             <span>{formatDate()}</span>
-            <span className="text-gray-200 dark:text-gray-700">|</span>
-            <span>{roundsToday} rounds booked today</span>
+            {roundsToday > 0 && (
+              <>
+                <span className="text-gray-200 dark:text-gray-700">|</span>
+                <span>{roundsToday} rounds booked today</span>
+              </>
+            )}
             {briefing?.todayRisks?.forecast && (
               <>
                 <span className="text-gray-200 dark:text-gray-700">|</span>
