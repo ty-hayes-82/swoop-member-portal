@@ -96,7 +96,8 @@ export default function DemoWizard() {
                     {source.name}
                   </div>
                   <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                    {source.description}
+                    {source.system}
+                    {source.csvFiles?.length > 0 && <span className="ml-1 opacity-60">· {source.csvFiles.length} files</span>}
                   </div>
                 </div>
                 {!isLoaded && (
