@@ -1,12 +1,12 @@
 // TomorrowForecast — demand prediction for tomorrow
 import { getDailyBriefing } from '@/services/briefingService';
 import { getTomorrowForecast } from '@/services/weatherService';
-import { isSourceLoaded } from '@/services/demoGate';
+import { shouldUseStatic } from '@/services/demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
-import { understaffedDays } from '@/data/staffing';
+import { getUnderstaffedDays } from '@/services/staffingService';
 
 function getOutlets() {
-  if (!isSourceLoaded('complaints')) return [];
+  if (!shouldUseStatic('complaints')) return [];
   return [
     { name: 'Grill Room', requiredStaff: 4, scheduledStaff: 2, status: 'gap' },
     { name: 'Terrace', requiredStaff: 3, scheduledStaff: 3, status: 'full' },

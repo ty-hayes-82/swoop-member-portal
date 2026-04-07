@@ -2,8 +2,7 @@
 // Narrative and chart helpers stay pure functions — they work on whatever data source is active.
 
 import { apiFetch } from './apiClient';
-import { isSourceLoaded } from './demoGate';
-import { isAuthenticatedClub } from '@/config/constants';
+import { shouldUseStatic } from './demoGate';
 import { trends as staticTrends, MONTHS as STATIC_MONTHS, outletTrends as staticOutletTrends } from '@/data/trends.js';
 
 let _d = null; // { trends, outletTrends, months }
@@ -15,8 +14,8 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-const _trends = () => _d ? _d.trends : {};
-const _months = () => _d ? _d.months : [];
+const _trends = () => _d?.trends ?? (shouldUseStatic('pipeline') ? staticTrends : {});
+const _months = () => _d?.months ?? (shouldUseStatic('pipeline') ? STATIC_MONTHS : []);
 
 const FORMAT_FNS = {
   percent:  v => `${(v * 100).toFixed(0)}%`,
@@ -25,7 +24,7 @@ const FORMAT_FNS = {
 };
 
 export function getTrendNarrative(metricKey, format = 'number') {
-  if (!isSourceLoaded('pipeline')) return null;
+  if (!_d && !shouldUseStatic('pipeline')) return null;
   const series = _trends()[metricKey];
   const months = _months();
   if (!series || series.length < 2) return null;
@@ -70,7 +69,7 @@ export function getMultiSeriesTrendData(keys) {
 }
 
 export function getOutletTrendData(outletName) {
-  const src = _d ? _d.outletTrends : {};
+  const src = _d?.outletTrends ?? (shouldUseStatic('pipeline') ? staticOutletTrends : {});
   const months = _months();
   const series = src?.[outletName];
   if (!series) return [];

@@ -3,9 +3,9 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import { PlaybookActionCard } from '@/components/ui';
-import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, setRosterCache, getMemberRoster } from '@/services/memberService';
+import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, getAllMemberProfiles, setRosterCache, getMemberRoster } from '@/services/memberService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { memberProfiles, memberArchetypes } from '@/data/members';
+import { shouldUseStatic } from '@/services/demoGate';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
 // Generate full 300-member roster from all available data sources
@@ -17,11 +17,13 @@ const TRENDS = ['up','down','stable','stable','up','stable','down','stable'];
 const LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
 
 function generateRoster() {
+  if (!shouldUseStatic('members')) return [];
   const roster = [];
   const atRisk = getAtRiskMembers();
   const watch = getWatchMembers();
   // Include real profiles first
-  Object.values(memberProfiles).forEach(p => {
+  const profiles = getAllMemberProfiles();
+  Object.values(profiles).forEach(p => {
     roster.push({ memberId: p.memberId, name: p.name, score: p.healthScore, archetype: p.archetype, duesAnnual: p.duesAnnual, memberValueAnnual: p.memberValueAnnual, tier: p.tier, joinDate: p.joinDate, trend: p.trend, topRisk: p.riskSignals?.[0]?.label || 'No current risks', lastSeenLocation: p.lastSeenLocation });
   });
   // Include at-risk and watch members
@@ -447,7 +449,7 @@ export default function AllMembersView({ initialArchetype = null }) {
           Filter by Archetype (click to filter)
         </div>
         <div className="flex flex-wrap gap-2">
-          {memberArchetypes.map((arch) => {
+          {getArchetypeProfiles().map((arch) => {
             const isActive = archetypeFilter === arch.archetype;
             return (
               <div

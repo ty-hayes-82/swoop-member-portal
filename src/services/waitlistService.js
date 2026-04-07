@@ -2,6 +2,7 @@
 // waitlistService.js — Phase 1 static · Phase 2 /api/waitlist
 
 import { apiFetch } from './apiClient';
+import { shouldUseStatic } from './demoGate';
 import {
   waitlistEntries,
   memberWaitlistEntries,
@@ -23,6 +24,7 @@ export const _init = async () => {
 };
 
 export const getWaitlistQueue = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return [];
   const entries = _d ? _d.queue : memberWaitlistEntries;
   const normalized = Array.isArray(entries) ? entries.map((entry) => normalizeWaitlistEntry(entry)) : [];
   return normalized.sort((a, b) => {
@@ -34,16 +36,19 @@ export const getWaitlistQueue = () => {
 };
 
 export const getWaitlistSummary = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return { total: 0, highPriority: 0, normalPriority: 0, avgHealthScore: 0 };
   if (_d?.queue) return summarizeWaitlistEntries(_d.queue);
   return summarizeWaitlistEntries(memberWaitlistEntries);
 };
 
 export const getCancellationPredictions = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return [];
   const src = _d ? _d.cancellationPredictions : cancellationProbabilities;
   return [...src].sort((a, b) => b.cancelProbability - a.cancelProbability);
 };
 
 export const getCancellationSummary = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return { total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: '' };
   if (_d) return _d.cancellationSummary;
   const preds = cancellationProbabilities;
   const highRisk = preds.filter((p) => p.cancelProbability >= 0.6);
@@ -55,7 +60,10 @@ export const getCancellationSummary = () => {
   };
 };
 
-export const getDemandHeatmap = () => (_d ? _d.demandHeatmap : demandHeatmap);
+export const getDemandHeatmap = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return [];
+  return _d ? _d.demandHeatmap : demandHeatmap;
+};
 export const getRevenuePerSlot = () => (_d ? _d.revenueAttribution : revenuePerSlot);
 
 export const getWaitlistDemandSparkline = () => {

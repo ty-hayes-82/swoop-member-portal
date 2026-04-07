@@ -3,6 +3,7 @@
 // Pattern: in-memory mutable store (same as agentService.js)
 
 import { apiFetch } from './apiClient';
+import { shouldUseStatic } from './demoGate';
 import {
   confirmationSeeds,
   reassignmentSeeds,
@@ -40,6 +41,7 @@ let steeringData = { ...demandSteeringSeeds };
 // ── Confirmations ──────────────────────────────────────────────
 
 export function getConfirmations() {
+  if (!shouldUseStatic('tee-sheet') && !_d) return [];
   return [...confirmationStore].sort((a, b) => b.cancelProbability - a.cancelProbability);
 }
 
@@ -78,6 +80,7 @@ export function getConfirmationSummary() {
 // ── Re-Assignment Pipeline ─────────────────────────────────────
 
 export function getReassignments() {
+  if (!shouldUseStatic('tee-sheet') && !_d) return [];
   return [...reassignmentStore].sort((a, b) => {
     const statusOrder = { pending: 0, approved: 1, completed: 2, overridden: 3, skipped: 4 };
     return (statusOrder[a.status] ?? 5) - (statusOrder[b.status] ?? 5);

@@ -1,4 +1,5 @@
 import { apiFetch } from './apiClient';
+import { shouldUseStatic } from './demoGate';
 import { alertsFeed, locationMembers, staffOnDuty, zoneAnalytics } from '@/data/location';
 
 const defaultMembers = locationMembers;
@@ -58,10 +59,17 @@ const normalizeStaff = (source) => {
   }));
 };
 
-export const getLiveMemberLocations = (payload = null) => normalizeMembers(payload?.members ?? _d?.members ?? payload?.locationMembers);
-export const getStaffLocations = (payload = null) => normalizeStaff(payload?.staff ?? _d?.staff ?? payload?.staffOnDuty);
+export const getLiveMemberLocations = (payload = null) => {
+  if (!shouldUseStatic('weather') && !_d && !payload) return [];
+  return normalizeMembers(payload?.members ?? _d?.members ?? payload?.locationMembers);
+};
+export const getStaffLocations = (payload = null) => {
+  if (!shouldUseStatic('weather') && !_d && !payload) return [];
+  return normalizeStaff(payload?.staff ?? _d?.staff ?? payload?.staffOnDuty);
+};
 
 export const getServiceRecoveryAlerts = (payload = null) => {
+  if (!shouldUseStatic('weather') && !_d && !payload) return [];
   const source = payload?.alerts ?? _d?.alerts ?? payload?.alertsFeed;
   const list = Array.isArray(source) && source.length ? source : defaultAlerts;
   return list.map((alert, index) => ({
@@ -75,6 +83,7 @@ export const getServiceRecoveryAlerts = (payload = null) => {
 };
 
 export const getZoneDensity = (members = [], payload = null) => {
+  if (!shouldUseStatic('weather') && !_d && !payload) return [];
   const liveMembers = normalizeMembers(Array.isArray(members) ? members : []);
   const byZone = liveMembers.reduce((acc, member) => {
     acc[member.zoneId] = (acc[member.zoneId] ?? 0) + 1;

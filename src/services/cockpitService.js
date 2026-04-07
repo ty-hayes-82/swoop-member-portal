@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { isSourceLoaded } from './demoGate';
+import { shouldUseStatic } from './demoGate';
 import { cockpitItems, sinceLastLogin as staticSinceLastLogin } from '@/data/cockpit';
 
 let _d = null;
@@ -13,6 +13,6 @@ export const _init = async () => {
   }
 };
 
-export const getPriorityItems = () => !isSourceLoaded('agents') ? [] : (_d?.priorities ?? cockpitItems);
-export const getSinceLastLogin = () => !isSourceLoaded('agents') ? [] : (_d?.sinceLastLogin ?? staticSinceLastLogin);
+export const getPriorityItems = () => _d?.priorities ?? (shouldUseStatic('agents') ? cockpitItems : []);
+export const getSinceLastLogin = () => _d?.sinceLastLogin ?? (shouldUseStatic('agents') ? staticSinceLastLogin : []);
 export const sourceSystems = ['CRM', 'POS', 'Weather', 'Tee Sheet', 'Complaints'];

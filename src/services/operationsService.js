@@ -2,11 +2,12 @@
 // Phase 2 swap: DataProvider calls _init() before render. All exports stay synchronous.
 
 import { apiFetch } from './apiClient';
-import { isSourceLoaded } from './demoGate';
+import { shouldUseStatic } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { dailyRevenue } from '@/data/revenue';
 import { paceDistribution, slowRoundStats, bottleneckHoles, paceFBImpact } from '@/data/pace';
 import { waitlistEntries } from '@/data/pipeline';
+import { todayTeeSheet, teeSheetSummary } from '@/data/teeSheet';
 
 let _d = null; // hydrated by _init()
 const DEFAULT_PACE_DISTRIBUTION = [
@@ -58,9 +59,9 @@ export const _init = async () => {
 };
 
 export const getRevenueByDay = () => {
-  if (!isSourceLoaded('fb')) return [];
   if (_d) return _d.revenueByDay;
-  return [];
+  if (!shouldUseStatic('fb')) return [];
+  return dailyRevenue;
 };
 
 export const getMonthlyRevenueSummary = () => {
@@ -69,22 +70,25 @@ export const getMonthlyRevenueSummary = () => {
 };
 
 export const getPaceDistribution = () => {
-  if (!_d) return [];
-  const source = (_d?.paceDistribution ?? paceDistribution ?? DEFAULT_PACE_DISTRIBUTION);
-  if (!Array.isArray(source) || source.length === 0) return DEFAULT_PACE_DISTRIBUTION;
-  return source.map((item, index) => {
-    const fallback = DEFAULT_PACE_DISTRIBUTION[index] ?? DEFAULT_PACE_DISTRIBUTION[DEFAULT_PACE_DISTRIBUTION.length - 1];
-    return {
-      bucket: toBucket(item?.bucket, fallback.bucket),
-      minutes: sanitizePositive(item?.minutes, fallback.minutes),
-      count: Math.round(sanitizePositive(item?.count, fallback.count)),
-      isSlow: typeof item?.isSlow === 'boolean' ? item.isSlow : fallback.isSlow,
-    };
-  });
+  if (_d) {
+    const source = (_d?.paceDistribution ?? paceDistribution ?? DEFAULT_PACE_DISTRIBUTION);
+    if (!Array.isArray(source) || source.length === 0) return DEFAULT_PACE_DISTRIBUTION;
+    return source.map((item, index) => {
+      const fallback = DEFAULT_PACE_DISTRIBUTION[index] ?? DEFAULT_PACE_DISTRIBUTION[DEFAULT_PACE_DISTRIBUTION.length - 1];
+      return {
+        bucket: toBucket(item?.bucket, fallback.bucket),
+        minutes: sanitizePositive(item?.minutes, fallback.minutes),
+        count: Math.round(sanitizePositive(item?.count, fallback.count)),
+        isSlow: typeof item?.isSlow === 'boolean' ? item.isSlow : fallback.isSlow,
+      };
+    });
+  }
+  if (!shouldUseStatic('pace')) return [];
+  return paceDistribution ?? DEFAULT_PACE_DISTRIBUTION;
 };
 
 export const getSlowRoundRate = () => {
-  if (!_d) return { totalRounds: 0, slowRounds: 0, overallRate: 0, weekendRate: 0, weekdayRate: 0, threshold: 270 };
+  if (!_d && !shouldUseStatic('pace')) return { totalRounds: 0, slowRounds: 0, overallRate: 0, weekendRate: 0, weekdayRate: 0, threshold: 270 };
   const source = (_d?.slowRoundStats ?? slowRoundStats ?? DEFAULT_SLOW_ROUND_STATS);
   const totalRounds = Math.round(sanitizePositive(source?.totalRounds, DEFAULT_SLOW_ROUND_STATS.totalRounds));
   const slowRounds = Math.round(sanitizePositive(source?.slowRounds, DEFAULT_SLOW_ROUND_STATS.slowRounds));
@@ -99,7 +103,7 @@ export const getSlowRoundRate = () => {
 };
 
 export const getBottleneckHoles = () => {
-  if (!_d) return [];
+  if (!_d && !shouldUseStatic('pace')) return [];
   const source = (_d?.bottleneckHoles ?? bottleneckHoles ?? DEFAULT_BOTTLENECK_HOLES);
   if (!Array.isArray(source) || source.length === 0) return DEFAULT_BOTTLENECK_HOLES;
   return source.map((item, index) => {
@@ -114,7 +118,7 @@ export const getBottleneckHoles = () => {
 };
 
 export const getPaceFBImpact = () => {
-  if (!_d) return { fastConversionRate: 0, slowConversionRate: 0, avgCheckFast: 0, avgCheckSlow: 0, slowRoundsPerMonth: 0, revenueLostPerMonth: 0 };
+  if (!_d && !shouldUseStatic('pace')) return { fastConversionRate: 0, slowConversionRate: 0, avgCheckFast: 0, avgCheckSlow: 0, slowRoundsPerMonth: 0, revenueLostPerMonth: 0 };
   const source = (_d?.paceFBImpact ?? paceFBImpact ?? DEFAULT_PACE_FB_IMPACT);
   return {
     fastConversionRate: sanitizeRate(source?.fastConversionRate, DEFAULT_PACE_FB_IMPACT.fastConversionRate),
@@ -133,6 +137,18 @@ export const getDemandGaps = () => {
     date: w.date, slot: w.slot,
     waitlistCount: w.count, eventOverlap: w.hasEventOverlap,
   }));
+};
+
+// ── Tee Sheet ─────────────────────────────────────────────────
+
+export const getTodayTeeSheet = () => {
+  if (!shouldUseStatic('tee-sheet') && !_d) return [];
+  return _d?.todayTeeSheet ?? todayTeeSheet;
+};
+
+export const getTeeSheetSummary = () => {
+  if (!shouldUseStatic('tee-sheet') && !_d) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
+  return _d?.teeSheetSummary ?? teeSheetSummary;
 };
 
 export const sourceSystems = ['Tee Sheet', 'Weather API'];

@@ -1,6 +1,7 @@
 // pipelineService.js — live data via /api/pipeline with static Pinetree fallback
 
 import { apiFetch } from './apiClient';
+import { shouldUseStatic } from './demoGate';
 import { warmLeads, memberWaitlistEntries } from '@/data/pipeline';
 import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetrics';
 
@@ -214,11 +215,18 @@ export const _init = async () => {
   }
 };
 
-export const getWarmLeads = () => getPipelineSnapshot().leads;
+export const getWarmLeads = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return [];
+  return getPipelineSnapshot().leads;
+};
 
-export const getPipelineSummary = () => getPipelineSnapshot().summary;
+export const getPipelineSummary = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return buildPipelineSummary([]);
+  return getPipelineSnapshot().summary;
+};
 
 export const getConversionInsights = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return { readyInvites: 0, dormantHotLeads: 0, avgDaysSinceVisit: 0, avgScore: 0, uniqueSponsors: 0 };
   const leads = getSanitizedLeads();
   const hotLeads = leads.filter((lead) => lead.tier === 'hot');
   const avgScore = leads.length
@@ -255,6 +263,7 @@ export const getConversionInsights = () => {
 };
 
 export const getWaitlistWithRiskScoring = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return [];
   const source = Array.isArray(_d?.waitlistEntries) && _d.waitlistEntries.length
     ? _d.waitlistEntries
     : getStaticWaitlistEntries();
@@ -267,6 +276,7 @@ export const getWaitlistWithRiskScoring = () => {
 };
 
 export const getWaitlistSummary = () => {
+  if (!shouldUseStatic('pipeline') && !_d) return { total: 0, highPriority: 0, normalPriority: 0, avgHealthScore: 0 };
   const source = Array.isArray(_d?.waitlistEntries) && _d.waitlistEntries.length
     ? _d.waitlistEntries
     : getStaticWaitlistEntries();

@@ -1,6 +1,5 @@
 import { apiFetch, getClubId } from './apiClient';
-import { isSourceLoaded } from './demoGate';
-import { isAuthenticatedClub } from '@/config/constants';
+import { shouldUseStatic } from './demoGate';
 import { getMemberSummary as _getMemberSummary } from '@/services/memberService';
 import {
   kpis as staticKpis,
@@ -42,7 +41,6 @@ const EMPTY_KPIS = [
 ];
 
 export const getKPIs = () => {
-  if (!isSourceLoaded('pipeline')) return [];
   if (_liveKpis) {
     return staticKpis.map(kpi => {
       if (kpi.label === 'Members Retained' && _liveKpis.membersSaved > 0) {
@@ -64,12 +62,13 @@ export const getKPIs = () => {
       { label: 'At Risk', value: (summary.atRisk || 0) + (summary.critical || 0), unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
     ];
   }
-  return EMPTY_KPIS;
+  if (!shouldUseStatic('pipeline')) return EMPTY_KPIS;
+  return staticKpis;
 };
 
-export const getMemberSaves = () => _liveKpis ? staticMemberSaves : (isAuthenticatedClub() ? [] : staticMemberSaves);
-export const getOperationalSaves = () => _liveKpis ? staticOperationalSaves : (isAuthenticatedClub() ? [] : staticOperationalSaves);
-export const getMonthlyTrends = () => _liveKpis ? staticMonthlyTrends : (isAuthenticatedClub() ? [] : staticMonthlyTrends);
+export const getMemberSaves = () => _liveKpis ? staticMemberSaves : (shouldUseStatic('pipeline') ? staticMemberSaves : []);
+export const getOperationalSaves = () => _liveKpis ? staticOperationalSaves : (shouldUseStatic('pipeline') ? staticOperationalSaves : []);
+export const getMonthlyTrends = () => _liveKpis ? staticMonthlyTrends : (shouldUseStatic('pipeline') ? staticMonthlyTrends : []);
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

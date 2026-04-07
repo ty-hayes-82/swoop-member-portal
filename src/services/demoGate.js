@@ -1,9 +1,12 @@
 /**
- * Demo Gate — controls which data files are "imported" in guided demo mode.
- * Tracks individual file imports and resolves service-level gates from them.
+ * Demo Gate — single source of truth for data mode.
  *
- * In full demo mode or authenticated mode, all sources return as loaded.
- * In guided demo mode, only explicitly imported files unlock their gate.
+ * Three modes:
+ *   'live'    — Real authenticated club. API data only, zero static fallback.
+ *   'demo'    — Full demo mode. All static data from src/data/ loaded.
+ *   'guided'  — Guided demo. Static data gated per imported file.
+ *
+ * Every service getter should call getDataMode() and branch accordingly.
  */
 
 const FILES_KEY = 'swoop_demo_files';
@@ -25,6 +28,32 @@ export function isGuidedMode() {
   try {
     return localStorage.getItem(GUIDED_KEY) === 'true';
   } catch { return false; }
+}
+
+/**
+ * Returns the current data mode: 'live' | 'demo' | 'guided'
+ * Every service should branch on this instead of ad-hoc checks.
+ */
+export function getDataMode() {
+  try {
+    const clubId = localStorage.getItem('swoop_club_id');
+    const isReal = !!clubId && clubId !== 'demo' && !clubId.startsWith('demo_');
+    if (isReal) return 'live';
+    if (isGuidedMode()) return 'guided';
+    return 'demo';
+  } catch { return 'demo'; }
+}
+
+/**
+ * Shorthand: should this service return static data for the given gate?
+ * Returns true if mode is demo, or mode is guided AND gate is open.
+ * Returns false if mode is live (never use static) or gate is closed.
+ */
+export function shouldUseStatic(gateId) {
+  const mode = getDataMode();
+  if (mode === 'live') return false;
+  if (mode === 'guided') return isSourceLoaded(gateId);
+  return true; // demo mode — always use static
 }
 
 function getLoadedFileSet() {

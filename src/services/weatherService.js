@@ -4,8 +4,7 @@
 // Falls back to static data from src/data/weather.js when API is unavailable.
 
 import { weatherDaily as weatherData } from '../data/weather';
-import { isSourceLoaded } from './demoGate';
-import { isAuthenticatedClub } from '@/config/constants';
+import { shouldUseStatic } from './demoGate';
 
 let _current = null;
 let _forecast = null;
@@ -32,8 +31,8 @@ export const _init = async () => {
 // ─── Current Conditions ───────────────────────────────────
 
 export function getCurrentWeather() {
-  if (!isSourceLoaded('weather')) return null;
   if (_current) return _current;
+  if (!shouldUseStatic('weather')) return null;
   // Static fallback: Jan 17 demo day
   const today = weatherData.find(d => d.date === '2026-01-17') || weatherData[16];
   if (today) return { temp: today.tempHigh, condition: today.condition, wind: today.wind, humidity: 35 };
@@ -43,16 +42,16 @@ export function getCurrentWeather() {
 // ─── Hourly Forecast ──────────────────────────────────────
 
 export function getHourlyForecast() {
-  if (!isSourceLoaded('weather')) return [];
   if (_forecast?.hourly?.length) return _forecast.hourly;
+  if (!shouldUseStatic('weather')) return [];
   return [];
 }
 
 // ─── Daily Forecast (up to 10 days) ──────────────────────
 
 export function getDailyForecast(numDays = 10) {
-  if (!isSourceLoaded('weather')) return [];
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
+  if (!shouldUseStatic('weather')) return [];
   // Static fallback from weather data starting Jan 17
   const startIdx = weatherData.findIndex(d => d.date === '2026-01-17');
   if (startIdx >= 0) {
@@ -75,18 +74,14 @@ export function getTomorrowForecast() {
 // ─── Weather Alerts ───────────────────────────────────────
 
 export function getWeatherAlerts() {
-  if (!isSourceLoaded('weather')) return [];
   if (_forecast?.alerts?.length) return _forecast.alerts;
-  // Static fallback: wind advisory for demo day
-  if (!isAuthenticatedClub()) {
-    return [{
-      type: 'Wind Advisory',
-      severity: 'MODERATE',
-      headline: 'Wind Advisory — gusts to 30-40 mph expected Saturday afternoon',
-      description: 'Consider pre-notifying 32 afternoon tee times with reschedule options.',
-    }];
-  }
-  return [];
+  if (!shouldUseStatic('weather')) return [];
+  return [{
+    type: 'Wind Advisory',
+    severity: 'MODERATE',
+    headline: 'Wind Advisory — gusts to 30-40 mph expected Saturday afternoon',
+    description: 'Consider pre-notifying 32 afternoon tee times with reschedule options.',
+  }];
 }
 
 // ─── Forecast metadata ───────────────────────────────────

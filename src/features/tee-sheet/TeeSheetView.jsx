@@ -5,7 +5,7 @@ import ArchetypeBadge from '@/components/ui/ArchetypeBadge';
 import MemberLink from '@/components/MemberLink';
 import ActionPanel from '@/components/ui/ActionPanel';
 import PageTransition from '@/components/ui/PageTransition';
-import { todayTeeSheet, teeSheetSummary } from '@/data/teeSheet';
+import { getTodayTeeSheet, getTeeSheetSummary } from '@/services/operationsService';
 import { useApp } from '@/context/AppContext';
 import { apiFetch } from '@/services/apiClient';
 
@@ -169,8 +169,9 @@ export default function TeeSheetView() {
   const [showCartPrep, setShowCartPrep] = useState(false);
   const [expandedAlertId, setExpandedAlertId] = useState(null);
   const { showToast } = useApp();
-  const atRiskTimes = todayTeeSheet.filter(t => t.healthScore < 50);
-  const vipTimes = todayTeeSheet.filter(t => t.duesAnnual >= 18000 && t.healthScore >= 50);
+  const teeData = getTodayTeeSheet();
+  const atRiskTimes = teeData.filter(t => t.healthScore < 50);
+  const vipTimes = teeData.filter(t => t.duesAnnual >= 18000 && t.healthScore >= 50);
 
   const handleSendCartText = async (teeTime) => {
     const firstName = teeTime.name.split(' ')[0];
@@ -267,7 +268,7 @@ export default function TeeSheetView() {
         <StoryHeadline
           variant="insight"
           headline="Who's on the course today — and who needs your attention?"
-          context={`${teeSheetSummary.totalRounds} rounds booked across ${todayTeeSheet.length} groups. ${atRiskTimes.length} at-risk members playing today. ${teeSheetSummary.weatherTemp}\u00B0F, ${teeSheetSummary.weatherCondition}.`}
+          context={`${getTeeSheetSummary().totalRounds} rounds booked across ${teeData.length} groups. ${atRiskTimes.length} at-risk members playing today. ${getTeeSheetSummary().weatherTemp}\u00B0F, ${getTeeSheetSummary().weatherCondition}.`}
         />
 
         <EvidenceStrip systems={['Tee Sheet', 'Member CRM', 'Weather', 'POS']} />
@@ -297,7 +298,7 @@ export default function TeeSheetView() {
           <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
               <div className="text-sm font-bold text-gray-800">Today's Tee Sheet</div>
-              <div className="text-xs text-gray-400">Friday, January 17, 2026 - {todayTeeSheet.length} groups</div>
+              <div className="text-xs text-gray-400">Friday, January 17, 2026 - {teeData.length} groups</div>
             </div>
             <div className="flex items-center gap-3 text-xs text-gray-500">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> At Risk</span>
@@ -321,7 +322,7 @@ export default function TeeSheetView() {
                 </tr>
               </thead>
               <tbody>
-                {todayTeeSheet.map((t, i) => {
+                {teeData.map((t, i) => {
                   const color = healthColor(t.healthScore);
                   const isAtRisk = t.healthScore < 50;
                   const isVip = t.duesAnnual >= 18000 && t.healthScore >= 50;
@@ -383,11 +384,11 @@ export default function TeeSheetView() {
             <svg className={`w-4 h-4 text-gray-400 transition-transform ${showCartPrep ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
             </svg>
-            Cart Prep Recommendations ({todayTeeSheet.length} carts)
+            Cart Prep Recommendations ({teeData.length} carts)
           </button>
           {showCartPrep && (
             <div className="flex flex-col gap-3">
-              {todayTeeSheet.map(t => <CartPrepCard key={`prep-${t.memberId}`} teeTime={t} onSendCartText={handleSendCartText} onSendDiningNudge={handleSendDiningNudge} />)}
+              {teeData.map(t => <CartPrepCard key={`prep-${t.memberId}`} teeTime={t} onSendCartText={handleSendCartText} onSendDiningNudge={handleSendDiningNudge} />)}
             </div>
           )}
         </div>

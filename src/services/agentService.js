@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { isSourceLoaded } from './demoGate';
+import { shouldUseStatic } from './demoGate';
 import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents';
 
 // Filter out decommissioned action types (waitlist removed from MVP)
@@ -28,8 +28,9 @@ const byNewest = (a, b) => {
 };
 
 export function getAgents() {
-  if (!isSourceLoaded('agents')) return [];
-  return _d?.agents ?? agentDefinitions;
+  if (_d?.agents) return _d.agents;
+  if (!shouldUseStatic('agents')) return [];
+  return agentDefinitions;
 }
 
 export function getAgentDefinitions() {
@@ -42,7 +43,8 @@ export function getAgentById(id) {
 }
 
 export function getAllActions() {
-  if (!isSourceLoaded('agents')) return [];
+  if (_d?.actions) return [...actionStore].sort(byNewest);
+  if (!shouldUseStatic('agents')) return [];
   return [...actionStore].sort(byNewest);
 }
 

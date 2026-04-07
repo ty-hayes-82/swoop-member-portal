@@ -17,13 +17,13 @@ import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
-import { todayTeeSheet } from '@/data/teeSheet';
-import { isSourceLoaded } from '@/services/demoGate';
+import { getTodayTeeSheet } from '@/services/operationsService';
 
 // GM Greeting Alert — simulates real-time member check-in notifications
 function buildCheckinAlerts() {
-  if (!isSourceLoaded('tee-sheet')) return [];
-  return todayTeeSheet
+  const teeSheet = getTodayTeeSheet();
+  if (!teeSheet.length) return [];
+  return teeSheet
     .filter(t => t.healthScore < 50 || t.duesAnnual >= 20000)
     .slice(0, 3)
     .map(t => ({

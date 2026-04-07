@@ -363,8 +363,8 @@ export const getLiveDashboard = () => _live;
 let _apiLoaded = false;
 let _hasRealMembers = false;
 
-import { isSourceLoaded } from './demoGate';
-const _shouldReturnEmpty = () => (isAuthenticatedClub() && !_hasRealMembers) || !isSourceLoaded('members');
+import { shouldUseStatic } from './demoGate';
+const _shouldReturnEmpty = () => !shouldUseStatic('members') && !_hasRealMembers;
 
 export const hasRealMemberData = () => _hasRealMembers;
 
@@ -381,6 +381,10 @@ export const getAtRiskMembers       = () => {
 export const getArchetypeProfiles   = () => {
   if (_shouldReturnEmpty()) return [];
   return normalizeArchetypes(_d?.memberArchetypes);
+};
+export const getAllMemberProfiles   = () => {
+  if (_shouldReturnEmpty()) return {};
+  return _d?.memberProfiles ?? {};
 };
 export const getResignationScenarios= () => {
   if (_shouldReturnEmpty()) return [];

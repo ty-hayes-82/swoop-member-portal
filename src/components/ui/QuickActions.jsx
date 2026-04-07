@@ -1,6 +1,7 @@
 // QuickActions — connects insight to real-world action.
 import { useState, useEffect } from 'react';
 import { getActionsForArchetype, outreachCategories } from '@/data/outreach';
+import { shouldUseStatic } from '@/services/demoGate';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
 import { apiFetch } from '@/services/apiClient';
@@ -16,7 +17,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
   const [sent, setSent]   = useState(null);
   const [actionLog, setActionLog] = useState([]);
   const [showOutreach, setShowOutreach] = useState(false);
-  const outreachActions = archetype ? getActionsForArchetype(archetype) : [];
+  const outreachActions = archetype && shouldUseStatic('email') ? getActionsForArchetype(archetype) : [];
 
   const ACTION_META = {
     note: { label: 'Personal note', icon: '\u2709', colorCls: 'text-brand-500' },

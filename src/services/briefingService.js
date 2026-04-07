@@ -1,13 +1,12 @@
 // briefingService.js — Phase 1 static · Phase 2 /api/briefing
 
 import { apiFetch } from './apiClient';
-import { isSourceLoaded } from './demoGate';
+import { shouldUseStatic } from './demoGate';
 import { getMonthlyRevenueSummary, getRevenueByDay } from './operationsService';
 import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
 import { getCancellationSummary, getWaitlistSummary }  from './waitlistService';
 import { cancellationProbabilities } from '../data/pipeline';
-import { isAuthenticatedClub } from '@/config/constants';
 
 let _d = null;
 
@@ -49,9 +48,8 @@ const DEMO_BRIEFING = {
 };
 
 export const getDailyBriefing = (date = '2026-01-17') => {
-  if (!isSourceLoaded('tee-sheet')) return EMPTY_BRIEFING;
   if (_d) return _d;
-  if (isAuthenticatedClub()) return EMPTY_BRIEFING;
+  if (!shouldUseStatic('tee-sheet')) return EMPTY_BRIEFING;
 
   // Demo mode: try to build from service data, fall back to static
   try {

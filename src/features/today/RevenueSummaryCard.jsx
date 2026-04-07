@@ -1,15 +1,21 @@
 import { useNavigation } from '@/context/NavigationContext';
 import { isRealClub } from '@/config/constants';
-import { paceFBImpact } from '@/data/pace';
-import { understaffedDays } from '@/data/staffing';
+import { shouldUseStatic } from '@/services/demoGate';
+import { getPaceFBImpact } from '@/services/operationsService';
+import { getUnderstaffedDays } from '@/services/staffingService';
 import { archetypeSpendGaps } from '@/services/experienceInsightsService';
 import { getMemberSummary } from '@/services/memberService';
 
-const PACE_LOSS = paceFBImpact.revenueLostPerMonth;
-const STAFFING_LOSS = understaffedDays.reduce((sum, day) => sum + day.revenueLoss, 0);
-const WEATHER_LOSS = 420;
-const PROSHOP_LOSS = Math.round((72000 + 45000) / 12);
-const TOTAL_LEAKAGE = PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS + PROSHOP_LOSS;
+function getLeakageData() {
+  if (!shouldUseStatic('fb') && !shouldUseStatic('complaints')) return null;
+  const paceFB = getPaceFBImpact();
+  const staffDays = getUnderstaffedDays();
+  const PACE_LOSS = shouldUseStatic('fb') ? paceFB.revenueLostPerMonth : 0;
+  const STAFFING_LOSS = shouldUseStatic('complaints') ? staffDays.reduce((sum, day) => sum + day.revenueLoss, 0) : 0;
+  const WEATHER_LOSS = 420;
+  const PROSHOP_LOSS = Math.round((72000 + 45000) / 12);
+  return { PACE_LOSS, STAFFING_LOSS, WEATHER_LOSS, PROSHOP_LOSS, TOTAL: PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS + PROSHOP_LOSS };
+}
 
 export default function RevenueSummaryCard() {
   const { navigate } = useNavigation();
@@ -21,17 +27,19 @@ export default function RevenueSummaryCard() {
     if (duesAtRisk === 0) return null; // No revenue data yet
   }
 
+  const leakage = getLeakageData();
+  if (!leakage) return null;
+
   const spendTotal = archetypeSpendGaps.reduce((s, a) => s + a.totalUntapped, 0);
   const spendMonthly = Math.round(spendTotal / 12);
   const memberSummary = getMemberSummary();
   const duesAtRisk = memberSummary.potentialDuesAtRisk || 533000;
   const duesMonthly = Math.round(duesAtRisk / 12);
-  const totalOpportunity = TOTAL_LEAKAGE + spendMonthly + duesMonthly;
+  const totalOpportunity = leakage.TOTAL + spendMonthly + duesMonthly;
 
-  // Top action — pace of play is typically the biggest lever
   const topAction = {
     label: 'Deploy rangers to holes 4, 8, 12, 16 on weekends',
-    impact: `+$${PACE_LOSS.toLocaleString()}/mo`,
+    impact: `+$${leakage.PACE_LOSS.toLocaleString()}/mo`,
   };
 
   return (
@@ -43,7 +51,6 @@ export default function RevenueSummaryCard() {
       </div>
 
       <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-col gap-2">
-        {/* Total opportunity — summary only */}
         <div className="flex justify-between items-baseline">
           <div>
             <div className="text-xs text-gray-400">Total addressable opportunity</div>
@@ -56,14 +63,12 @@ export default function RevenueSummaryCard() {
           </div>
         </div>
 
-        {/* Top action */}
         <div className="flex items-center justify-between py-1.5 px-2.5 bg-success-500/[0.024] border border-success-500/[0.12] rounded-lg gap-2">
           <div className="text-xs text-gray-500">
             Top action: <span className="text-gray-800 dark:text-white/90 font-semibold">{topAction.label}</span>
           </div>
         </div>
 
-        {/* Explore CTA */}
         <button
           onClick={() => navigate('revenue')}
           className="py-2 px-4 text-xs font-bold text-brand-500 bg-brand-500/[0.03] border border-brand-500/20 rounded-xl cursor-pointer text-center"
