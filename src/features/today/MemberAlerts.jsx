@@ -1,19 +1,9 @@
 // MemberAlerts — Top 5 priority members needing attention this week
-import { atRiskMembers, watchMembers } from '@/data/members';
-import { feedbackRecords } from '@/data/staffing';
+// Uses live API data from memberService (not static demo data)
+import { getAtRiskMembers, getWatchMembers } from '@/services/memberService';
+import { getComplaintCorrelation } from '@/services/staffingService';
 import MemberLink from '@/components/MemberLink';
 import { useNavigation } from '@/context/NavigationContext';
-
-const REF_DATE = new Date('2026-01-31');
-
-function getComplaintDays(memberId) {
-  const complaint = feedbackRecords.find(
-    f => f.memberId === memberId && f.status !== 'resolved'
-  );
-  if (!complaint) return null;
-  const days = Math.round((REF_DATE - new Date(complaint.date)) / (1000 * 60 * 60 * 24));
-  return { days, category: complaint.category };
-}
 
 const ACTION_OWNERS = {
   'Ghost': 'GM',
@@ -26,18 +16,36 @@ const ACTION_OWNERS = {
   'Balanced Active': 'Membership Director',
 };
 
+function getComplaintDays(memberId) {
+  const records = getComplaintCorrelation();
+  const complaint = records.find(
+    f => f.memberId === memberId && f.status !== 'resolved'
+  );
+  if (!complaint) return null;
+  const days = Math.round((Date.now() - new Date(complaint.date || complaint.reported_at).getTime()) / (1000 * 60 * 60 * 24));
+  return { days: Math.max(0, days), category: complaint.category };
+}
+
 function buildPriorityList() {
+  const atRisk = getAtRiskMembers();
+  const watch = getWatchMembers();
+
   const all = [
-    ...atRiskMembers.map(m => ({ ...m, tier: 'at-risk' })),
-    ...watchMembers.map(m => ({ ...m, score: m.score, tier: 'watch' })),
+    ...atRisk.map(m => ({ ...m, tier: 'at-risk' })),
+    ...watch.map(m => ({ ...m, tier: 'watch' })),
   ];
+
+  if (all.length === 0) return [];
 
   return all
     .map(m => {
-      const complaint = getComplaintDays(m.memberId);
+      const memberId = m.memberId || m.member_id;
+      const name = m.name || `${m.firstName || ''} ${m.lastName || ''}`.trim();
+      const score = m.score ?? m.healthScore ?? 50;
+      const archetype = m.archetype || 'Unknown';
+      const complaint = getComplaintDays(memberId);
       const hasComplaint = !!complaint;
-      const score = m.score ?? 50;
-      const isNewMember = m.archetype === 'New Member';
+      const isNewMember = archetype === 'New Member';
       const priorityScore =
         (100 - score) +
         (hasComplaint ? 20 : 0) +
@@ -48,24 +56,24 @@ function buildPriorityList() {
       if (hasComplaint) {
         reason = `Complaint unresolved ${complaint.days} days (${complaint.category})`;
         action = `Schedule GM call — complaint unresolved ${complaint.days} days`;
-        owner = complaint.days > 14 ? 'GM' : (ACTION_OWNERS[m.archetype] || 'GM');
-      } else if (m.archetype === 'Ghost') {
+        owner = complaint.days > 14 ? 'GM' : (ACTION_OWNERS[archetype] || 'GM');
+      } else if (archetype === 'Ghost') {
         reason = m.topRisk || m.signal || 'Engagement fully lapsed';
         action = 'GM personal call — re-engagement conversation';
         owner = 'GM';
-      } else if (m.archetype === 'Declining') {
+      } else if (archetype === 'Declining') {
         reason = m.topRisk || m.signal || 'Activity declining across golf + dining';
         action = 'Membership Director outreach — identify root cause';
         owner = 'Membership Director';
-      } else if (m.archetype === 'Weekend Warrior') {
+      } else if (archetype === 'Weekend Warrior') {
         reason = m.topRisk || m.signal || 'Weekend golf frequency declining';
         action = 'Priority Saturday tee time offer';
         owner = 'Pro Shop';
-      } else if (m.archetype === 'Die-Hard Golfer') {
+      } else if (archetype === 'Die-Hard Golfer') {
         reason = m.topRisk || m.signal || 'Golf activity declining';
         action = 'Pro shop outreach — check equipment/injury/schedule';
         owner = 'Pro Shop';
-      } else if (m.archetype === 'Social Butterfly') {
+      } else if (archetype === 'Social Butterfly') {
         reason = m.topRisk || m.signal || 'Dining and event engagement dropping';
         action = 'Invite to upcoming wine dinner or social event';
         owner = 'Events Coordinator';
@@ -73,20 +81,20 @@ function buildPriorityList() {
         reason = m.topRisk || m.signal || 'No habits forming in first 60 days';
         action = 'New member integration check-in — identify engagement gaps';
         owner = 'Membership Director';
-      } else if (m.archetype === 'Snowbird') {
+      } else if (archetype === 'Snowbird') {
         reason = m.topRisk || m.signal || 'Seasonal return expected — no reactivation';
         action = 'Send welcome-back package + tee time reservation';
         owner = 'Front Desk';
       } else {
         reason = m.topRisk || m.signal || 'Health score declining';
         action = m.action || 'Personalized outreach based on engagement pattern';
-        owner = ACTION_OWNERS[m.archetype] || 'Membership Director';
+        owner = ACTION_OWNERS[archetype] || 'Membership Director';
       }
 
-      return { ...m, priorityScore, reason, action, owner };
+      return { memberId, name, score, archetype, priorityScore, reason, action, owner };
     })
     .sort((a, b) => b.priorityScore - a.priorityScore)
-    .slice(0, 3);
+    .slice(0, 5);
 }
 
 const ARCHETYPE_COLORS = {
@@ -104,6 +112,19 @@ export default function MemberAlerts() {
   const { navigate } = useNavigation();
   const members = buildPriorityList();
 
+  if (members.length === 0) {
+    return (
+      <div>
+        <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-3">
+          Priority Member Alerts
+        </div>
+        <div className="py-6 px-4 text-center text-sm text-gray-400 border border-dashed border-gray-200 rounded-xl">
+          No at-risk members detected yet. Import member data and engagement sources to see priority alerts.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="text-[11px] font-bold text-error-500 uppercase tracking-wide mb-3">
@@ -112,9 +133,8 @@ export default function MemberAlerts() {
 
       <div className="flex flex-col gap-2">
         {members.map((m) => {
-          const score = m.score ?? 50;
-          const scoreColor = score < 30 ? '#ef4444'
-            : score < 50 ? '#f59e0b'
+          const scoreColor = m.score < 30 ? '#ef4444'
+            : m.score < 50 ? '#f59e0b'
             : '#6B7280';
           const arcColor = ARCHETYPE_COLORS[m.archetype] || '#9CA3AF';
 
@@ -133,7 +153,7 @@ export default function MemberAlerts() {
                     className="text-[10px] font-bold py-0.5 px-2 rounded-[10px]"
                     style={{ background: `${scoreColor}15`, color: scoreColor }}
                   >
-                    {score}
+                    {m.score}
                   </span>
                   <span
                     className="text-[10px] font-semibold py-0.5 px-2 rounded-[10px]"

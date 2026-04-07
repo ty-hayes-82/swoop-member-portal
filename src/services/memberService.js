@@ -427,7 +427,14 @@ export const getWatchMembers = () => {
 
 
 // Member roster from API (for authenticated clubs with no engagement data)
-export const getMemberRoster = () => _d?.memberRoster ?? [];
+export const getMemberRoster = () => {
+  const roster = _d?.memberRoster ?? [];
+  return roster.map(m => ({
+    ...m,
+    memberValueAnnual: m.memberValueAnnual ?? m.annualDues ?? m.duesAnnual ?? 0,
+    duesAnnual: m.duesAnnual ?? m.annualDues ?? 0,
+  }));
+};
 
 // Volatile Members: Watch/At-Risk tier (30-69) with active complaint or unresolved issue
 export const getVolatileMembers = () => {

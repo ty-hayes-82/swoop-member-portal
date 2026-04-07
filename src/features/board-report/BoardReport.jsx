@@ -111,12 +111,13 @@ export default function BoardReport() {
   const unresolved = feedbackRecords.filter(f => f.status !== 'resolved');
   const resolutionRate = feedbackRecords.length > 0
     ? Math.round((resolved.length / feedbackRecords.length) * 100) : 0;
-  const avgResolutionDays = resolved.length > 0
-    ? (resolved.reduce((sum, f) => {
-        const days = Math.round((new Date(f.resolved_date) - new Date(f.date)) / (1000 * 60 * 60 * 24));
-        return sum + days;
-      }, 0) / resolved.length).toFixed(1)
-    : '—';
+  const resolvedWithDates = resolved.filter(f => f.resolved_date || f.resolved_at);
+  const avgResolutionDays = resolvedWithDates.length > 0
+    ? (resolvedWithDates.reduce((sum, f) => {
+        const days = Math.round((new Date(f.resolved_date || f.resolved_at) - new Date(f.date || f.reported_at)) / (1000 * 60 * 60 * 24));
+        return sum + (Number.isFinite(days) ? days : 0);
+      }, 0) / resolvedWithDates.length).toFixed(1)
+    : null;
 
   const isEmpty = isAuthenticatedClub() && kpis.every(k => k.value === 0);
 
@@ -227,8 +228,8 @@ export default function BoardReport() {
               Executive Summary
             </h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              This month, {getClubName()} delivered consistent service quality with an <strong>{resolutionRate}% complaint resolution rate</strong> and
-              an average resolution time of <strong>{avgResolutionDays} days</strong>. The operations team responded to alerts with an
+              This month, {getClubName()} delivered consistent service quality with an <strong>{resolutionRate}% complaint resolution rate</strong>{avgResolutionDays ? <> and
+              an average resolution time of <strong>{avgResolutionDays} days</strong></> : ''}. The operations team responded to alerts with an
               average <strong>4.2-hour detection-to-action time</strong>, catching {operationalSaves.length} service disruptions before
               they impacted members.
             </p>

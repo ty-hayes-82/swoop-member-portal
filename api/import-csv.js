@@ -40,7 +40,7 @@ const IMPORT_TYPES = {
   },
   tee_times: {
     requiredFields: ['reservation_id', 'course', 'date', 'tee_time'],
-    optionalFields: ['players', 'guest_flag', 'transportation', 'caddie', 'status', 'check_in_time', 'round_start', 'round_end', 'duration_min'],
+    optionalFields: ['member_id', 'players', 'guest_flag', 'transportation', 'caddie', 'status', 'check_in_time', 'round_start', 'round_end', 'duration_min'],
     table: 'bookings',
     columnMap: { reservation_id: 'booking_id', course: 'course_id', date: 'booking_date', players: 'player_count', guest_flag: 'has_guest', caddie: 'has_caddie', duration_min: 'duration_minutes' },
   },
@@ -266,8 +266,12 @@ export default withAuth(async function handler(req, res) {
   const ENSURE_TABLES = {
     email_campaigns: `CREATE TABLE IF NOT EXISTS email_campaigns (campaign_id TEXT PRIMARY KEY, club_id TEXT, subject TEXT, type TEXT, send_date TEXT, recipient_count INTEGER DEFAULT 0, data_source TEXT DEFAULT 'csv_import')`,
     email_events: `CREATE TABLE IF NOT EXISTS email_events (event_id TEXT PRIMARY KEY, campaign_id TEXT NOT NULL, member_id TEXT NOT NULL, club_id TEXT, event_type TEXT NOT NULL, occurred_at TEXT, link_clicked TEXT, device_type TEXT, data_source TEXT DEFAULT 'csv_import')`,
-    shifts: `CREATE TABLE IF NOT EXISTS staff_shifts (shift_id TEXT PRIMARY KEY, club_id TEXT, staff_id TEXT NOT NULL, shift_date TEXT NOT NULL, outlet_id TEXT, start_time TEXT DEFAULT '08:00', end_time TEXT DEFAULT '16:00', hours_worked REAL DEFAULT 8, notes TEXT, data_source TEXT DEFAULT 'csv_import')`,
+    shifts: `CREATE TABLE IF NOT EXISTS staff_shifts (shift_id TEXT PRIMARY KEY, club_id TEXT, staff_id TEXT NOT NULL, shift_date TEXT NOT NULL, outlet_id TEXT, start_time TEXT DEFAULT '08:00', end_time TEXT DEFAULT '16:00', hours_worked REAL DEFAULT 8, is_understaffed_day INTEGER DEFAULT 0, notes TEXT, data_source TEXT DEFAULT 'csv_import')`,
   };
+  // Ensure bookings has member_id column for tee_times import
+  if (importType === 'tee_times') {
+    try { await sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS member_id TEXT`; } catch {}
+  }
   if (ENSURE_TABLES[importType]) {
     try { await sql.query(ENSURE_TABLES[importType]); } catch (e) { console.warn('Table ensure failed:', e.message); }
     // email_events also needs email_campaigns table
@@ -301,6 +305,14 @@ export default withAuth(async function handler(req, res) {
     }
 
     try {
+      // Prefix member_id with clubId to match members table format
+      if (row.member_id && importType !== 'members') {
+        const rawId = row.member_id;
+        if (!rawId.startsWith(clubId)) {
+          row.member_id = `${clubId}_${rawId}`;
+        }
+      }
+
       if (importType === 'members') {
         const memberId = row.external_id || `mbr_${Date.now()}_${i}`;
         const uniqueMemberId = `${clubId}_${memberId}`;
@@ -343,7 +355,7 @@ export default withAuth(async function handler(req, res) {
         const allFields = [...config.requiredFields, ...config.optionalFields];
         const columnMap = config.columnMap || {};
         // Not all tables have club_id or data_source columns
-        const tablesWithoutClubId = new Set(['event_registrations', 'email_events', 'booking_players', 'pos_line_items', 'pos_payments']);
+        const tablesWithoutClubId = new Set(['booking_players', 'pos_line_items', 'pos_payments']);
         const tablesWithDataSource = new Set(['members', 'rounds', 'transactions', 'complaints']);
         const columns = [];
         const values = [];

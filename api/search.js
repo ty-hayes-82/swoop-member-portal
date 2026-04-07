@@ -31,22 +31,30 @@ export default async function handler(req, res) {
 
   try {
     const { rows: members } = await sql`
-      SELECT member_id, first_name, last_name, email, health_score, archetype
+      SELECT member_id, first_name, last_name, email, health_score, health_tier, archetype, annual_dues, membership_type
       FROM members
       WHERE club_id = ${clubId}
         AND (LOWER(first_name || ' ' || last_name) LIKE LOWER(${searchTerm})
-             OR LOWER(email) LIKE LOWER(${searchTerm}))
-      LIMIT 10
+             OR LOWER(email) LIKE LOWER(${searchTerm})
+             OR LOWER(COALESCE(external_id, '')) LIKE LOWER(${searchTerm}))
+      ORDER BY
+        CASE WHEN LOWER(first_name) LIKE LOWER(${searchTerm}) THEN 0 ELSE 1 END,
+        last_name, first_name
+      LIMIT 20
     `;
 
     return res.status(200).json({
       results: members.map(m => ({
         type: 'member',
         id: m.member_id,
+        memberId: m.member_id,
         name: `${m.first_name} ${m.last_name}`,
         email: m.email,
         healthScore: m.health_score,
+        tier: m.health_tier,
         archetype: m.archetype,
+        annualDues: m.annual_dues,
+        membershipType: m.membership_type,
       })),
     });
   } catch (err) {
