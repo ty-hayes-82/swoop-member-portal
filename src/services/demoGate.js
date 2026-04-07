@@ -1,16 +1,25 @@
 /**
- * Demo Gate — controls which data sources are "loaded" in guided demo mode.
- * Module-level (not React) so services can call it synchronously.
+ * Demo Gate — controls which data files are "imported" in guided demo mode.
+ * Tracks individual file imports and resolves service-level gates from them.
  *
  * In full demo mode or authenticated mode, all sources return as loaded.
- * In guided demo mode, only explicitly loaded sources return data.
+ * In guided demo mode, only explicitly imported files unlock their gate.
  */
 
-const STORAGE_KEY = 'swoop_demo_sources';
+const FILES_KEY = 'swoop_demo_files';
 const GUIDED_KEY = 'swoop_demo_guided';
 
-// Event name dispatched when sources change (DemoWizardContext listens)
+// Event name dispatched when files change (DemoWizardContext listens)
 export const SOURCES_CHANGED_EVENT = 'swoop:demo-sources-changed';
+
+// File-to-gate mapping (loaded lazily to avoid circular imports)
+let _fileGateMap = null;
+function getFileGateMap() {
+  if (_fileGateMap) return _fileGateMap;
+  // Build map from config — but avoid importing at module load to prevent circular deps
+  // Instead, read from localStorage where we also store the gateId per file
+  return {};
+}
 
 export function isGuidedMode() {
   try {
@@ -18,71 +27,100 @@ export function isGuidedMode() {
   } catch { return false; }
 }
 
-function getLoadedSet() {
+function getLoadedFileSet() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(FILES_KEY);
     return raw ? new Set(JSON.parse(raw)) : new Set();
   } catch { return new Set(); }
 }
 
-function persistSet(set) {
+function getLoadedGateSet() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
+    const raw = localStorage.getItem('swoop_demo_gates');
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function persistFiles(fileSet, gateSet) {
+  try {
+    localStorage.setItem(FILES_KEY, JSON.stringify([...fileSet]));
+    localStorage.setItem('swoop_demo_gates', JSON.stringify([...gateSet]));
   } catch {}
 }
 
 /**
- * Check if a data source is available.
- * Returns true if: not in guided mode, OR the source has been loaded.
+ * Check if a service-level gate is open.
+ * Returns true if: not in guided mode, OR at least one file for this gate has been imported.
  */
-export function isSourceLoaded(sourceId) {
+export function isSourceLoaded(gateId) {
   if (!isGuidedMode()) return true;
-  return getLoadedSet().has(sourceId);
+  return getLoadedGateSet().has(gateId);
 }
 
 /**
- * Load a data source (guided mode only).
- * Persists to localStorage and dispatches event for React re-render.
+ * Check if a specific file has been imported.
  */
-export function loadSource(sourceId) {
-  const set = getLoadedSet();
-  set.add(sourceId);
-  persistSet(set);
-  window.dispatchEvent(new CustomEvent(SOURCES_CHANGED_EVENT, { detail: { sourceId, action: 'load' } }));
+export function isFileLoaded(fileId) {
+  if (!isGuidedMode()) return true;
+  return getLoadedFileSet().has(fileId);
 }
 
 /**
- * Unload a data source.
+ * Import a file. Opens the corresponding gate.
  */
-export function unloadSource(sourceId) {
-  const set = getLoadedSet();
-  set.delete(sourceId);
-  persistSet(set);
-  window.dispatchEvent(new CustomEvent(SOURCES_CHANGED_EVENT, { detail: { sourceId, action: 'unload' } }));
+export function loadFile(fileId, gateId) {
+  const files = getLoadedFileSet();
+  const gates = getLoadedGateSet();
+  files.add(fileId);
+  if (gateId) gates.add(gateId);
+  persistFiles(files, gates);
+  window.dispatchEvent(new CustomEvent(SOURCES_CHANGED_EVENT, { detail: { fileId, gateId, action: 'load' } }));
 }
 
 /**
- * Load all sources at once.
+ * Remove a file import.
  */
-export function loadAllSources(sourceIds) {
-  const set = new Set(sourceIds);
-  persistSet(set);
+export function unloadFile(fileId, gateId, allFilesForGate = []) {
+  const files = getLoadedFileSet();
+  const gates = getLoadedGateSet();
+  files.delete(fileId);
+  // Only close the gate if no other files for this gate are loaded
+  if (gateId) {
+    const otherFilesLoaded = allFilesForGate.some(f => f !== fileId && files.has(f));
+    if (!otherFilesLoaded) gates.delete(gateId);
+  }
+  persistFiles(files, gates);
+  window.dispatchEvent(new CustomEvent(SOURCES_CHANGED_EVENT, { detail: { fileId, gateId, action: 'unload' } }));
+}
+
+/**
+ * Load all files and gates at once.
+ */
+export function loadAllFiles(fileIds, gateIds) {
+  const files = new Set(fileIds);
+  const gates = new Set(gateIds);
+  persistFiles(files, gates);
   window.dispatchEvent(new CustomEvent(SOURCES_CHANGED_EVENT, { detail: { action: 'load-all' } }));
 }
 
 /**
- * Get list of currently loaded source IDs.
+ * Get lists of currently loaded file IDs and gate IDs.
  */
-export function getLoadedSources() {
-  return [...getLoadedSet()];
+export function getLoadedFiles() {
+  return [...getLoadedFileSet()];
+}
+
+export function getLoadedGates() {
+  return [...getLoadedGateSet()];
 }
 
 /**
- * Reset guided mode (clear all loaded sources).
+ * Reset guided mode (clear all loaded files and gates).
  */
 export function resetGuidedMode() {
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(FILES_KEY);
+    localStorage.removeItem('swoop_demo_gates');
     localStorage.removeItem(GUIDED_KEY);
   } catch {}
 }

@@ -1,54 +1,57 @@
 /**
  * DemoWizardContext — React wrapper around demoGate for re-render triggers.
- * When a source is loaded/unloaded, this context updates so components re-render
- * with the new data availability.
+ * Tracks individual file imports and provides re-render on any change.
  */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { isGuidedMode, isSourceLoaded, loadSource, unloadSource, loadAllSources, getLoadedSources, SOURCES_CHANGED_EVENT } from '@/services/demoGate';
-import { ALL_SOURCE_IDS } from '@/config/demoSources';
+import { isGuidedMode, isFileLoaded, loadFile, unloadFile, loadAllFiles, getLoadedFiles, getLoadedGates, SOURCES_CHANGED_EVENT } from '@/services/demoGate';
+import { DEMO_FILES, ALL_FILE_IDS, ALL_SOURCE_IDS } from '@/config/demoSources';
 
 const DemoWizardCtx = createContext(null);
 
 export function DemoWizardProvider({ children }) {
   const guided = isGuidedMode();
-  const [loaded, setLoaded] = useState(() => new Set(getLoadedSources()));
+  const [loadedFiles, setLoadedFiles] = useState(() => new Set(getLoadedFiles()));
+  const [loadedGates, setLoadedGates] = useState(() => new Set(getLoadedGates()));
   const [wizardOpen, setWizardOpen] = useState(guided);
-  // renderKey forces child tree to re-mount when sources change,
-  // so service getter functions re-execute with new gate state
   const [renderKey, setRenderKey] = useState(0);
 
-  // Listen for source changes (from demoGate module)
   useEffect(() => {
     const handler = () => {
-      setLoaded(new Set(getLoadedSources()));
+      setLoadedFiles(new Set(getLoadedFiles()));
+      setLoadedGates(new Set(getLoadedGates()));
       setRenderKey(k => k + 1);
     };
     window.addEventListener(SOURCES_CHANGED_EVENT, handler);
     return () => window.removeEventListener(SOURCES_CHANGED_EVENT, handler);
   }, []);
 
-  const load = useCallback((id) => {
-    loadSource(id);
+  const importFile = useCallback((fileId) => {
+    const fileDef = DEMO_FILES.find(f => f.id === fileId);
+    if (fileDef) loadFile(fileId, fileDef.gateId);
   }, []);
 
-  const unload = useCallback((id) => {
-    unloadSource(id);
+  const removeFile = useCallback((fileId) => {
+    const fileDef = DEMO_FILES.find(f => f.id === fileId);
+    const siblingIds = DEMO_FILES.filter(f => f.gateId === fileDef?.gateId).map(f => f.id);
+    if (fileDef) unloadFile(fileId, fileDef.gateId, siblingIds);
   }, []);
 
-  const loadAll = useCallback(() => {
-    loadAllSources(ALL_SOURCE_IDS);
+  const importAll = useCallback(() => {
+    loadAllFiles(ALL_FILE_IDS, ALL_SOURCE_IDS);
   }, []);
 
   return (
     <DemoWizardCtx.Provider value={{
       isGuided: guided,
-      loaded,
-      loadedCount: loaded.size,
-      totalCount: ALL_SOURCE_IDS.length,
-      isLoaded: (id) => loaded.has(id),
-      load,
-      unload,
-      loadAll,
+      loadedFiles,
+      loadedGates,
+      fileCount: loadedFiles.size,
+      totalFiles: DEMO_FILES.length,
+      isFileImported: (fileId) => loadedFiles.has(fileId),
+      isGateOpen: (gateId) => loadedGates.has(gateId),
+      importFile,
+      removeFile,
+      importAll,
       wizardOpen,
       setWizardOpen,
       renderKey,
