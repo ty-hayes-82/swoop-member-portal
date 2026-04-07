@@ -1,14 +1,18 @@
 // TomorrowForecast — demand prediction for tomorrow
 import { getDailyBriefing } from '@/services/briefingService';
 import { getTomorrowForecast } from '@/services/weatherService';
+import { isSourceLoaded } from '@/services/demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { understaffedDays } from '@/data/staffing';
 
-const outlets = [
-  { name: 'Grill Room', requiredStaff: 4, scheduledStaff: 2, status: 'gap' },
-  { name: 'Terrace', requiredStaff: 3, scheduledStaff: 3, status: 'full' },
-  { name: 'Pool Bar', requiredStaff: 1, scheduledStaff: 1, status: 'full' },
-];
+function getOutlets() {
+  if (!isSourceLoaded('complaints')) return [];
+  return [
+    { name: 'Grill Room', requiredStaff: 4, scheduledStaff: 2, status: 'gap' },
+    { name: 'Terrace', requiredStaff: 3, scheduledStaff: 3, status: 'full' },
+    { name: 'Pool Bar', requiredStaff: 1, scheduledStaff: 1, status: 'full' },
+  ];
+}
 
 export default function TomorrowForecast() {
   const briefing = getDailyBriefing();
@@ -84,7 +88,7 @@ export default function TomorrowForecast() {
       </div>
 
       <div className="flex flex-col gap-1.5 mb-3">
-        {outlets.map(outlet => {
+        {getOutlets().map(outlet => {
           const isFull = outlet.status === 'full';
           const color = isFull ? '#22c55e' : '#ef4444';
           return (

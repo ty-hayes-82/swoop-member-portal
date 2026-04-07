@@ -18,33 +18,37 @@ import { isAuthenticatedClub } from '@/config/constants';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { todayTeeSheet } from '@/data/teeSheet';
+import { isSourceLoaded } from '@/services/demoGate';
 
 // GM Greeting Alert — simulates real-time member check-in notifications
-const CHECKIN_ALERTS = todayTeeSheet
-  .filter(t => t.healthScore < 50 || t.duesAnnual >= 20000)
-  .slice(0, 3)
-  .map(t => ({
-    memberId: t.memberId,
-    name: t.name,
-    healthScore: t.healthScore,
-    archetype: t.archetype,
-    duesAnnual: t.duesAnnual,
-    time: t.time,
-    course: t.course,
-    isAtRisk: t.healthScore < 50,
-    isVip: t.duesAnnual >= 20000,
-    talkingPoints: t.healthScore < 50
-      ? [
-          t.cartPrep.note?.includes('complaint') ? 'Acknowledge recent complaint — show you\'re aware and it\'s being fixed' : 'Ask about their recent experience — listen for friction points',
-          `Playing ${t.course} course at ${t.time} — ${t.group.length > 1 ? `with ${t.group.filter(g => g !== t.name).join(', ')}` : 'solo today'}`,
-          t.archetype === 'Declining' ? 'Invite to upcoming event to re-engage' : 'Mention a specific improvement the club has made recently',
-        ]
-      : [
-          `VIP member ($${(t.duesAnnual / 1000).toFixed(0)}K dues) — personal greeting at the starter`,
-          `Playing ${t.course} at ${t.time} with ${t.group.filter(g => g !== t.name).join(', ') || 'group'}`,
-          'Thank them for their continued membership',
-        ],
-  }));
+function buildCheckinAlerts() {
+  if (!isSourceLoaded('tee-sheet')) return [];
+  return todayTeeSheet
+    .filter(t => t.healthScore < 50 || t.duesAnnual >= 20000)
+    .slice(0, 3)
+    .map(t => ({
+      memberId: t.memberId,
+      name: t.name,
+      healthScore: t.healthScore,
+      archetype: t.archetype,
+      duesAnnual: t.duesAnnual,
+      time: t.time,
+      course: t.course,
+      isAtRisk: t.healthScore < 50,
+      isVip: t.duesAnnual >= 20000,
+      talkingPoints: t.healthScore < 50
+        ? [
+            t.cartPrep.note?.includes('complaint') ? 'Acknowledge recent complaint — show you\'re aware and it\'s being fixed' : 'Ask about their recent experience — listen for friction points',
+            `Playing ${t.course} course at ${t.time} — ${t.group.length > 1 ? `with ${t.group.filter(g => g !== t.name).join(', ')}` : 'solo today'}`,
+            t.archetype === 'Declining' ? 'Invite to upcoming event to re-engage' : 'Mention a specific improvement the club has made recently',
+          ]
+        : [
+            `VIP member ($${(t.duesAnnual / 1000).toFixed(0)}K dues) — personal greeting at the starter`,
+            `Playing ${t.course} at ${t.time} with ${t.group.filter(g => g !== t.name).join(', ') || 'group'}`,
+            'Thank them for their continued membership',
+          ],
+    }));
+}
 
 function GmGreetingAlert({ onDismiss }) {
   const [alerts, setAlerts] = useState([]);
@@ -52,7 +56,8 @@ function GmGreetingAlert({ onDismiss }) {
 
   useEffect(() => {
     // Simulate check-ins arriving at staggered intervals
-    const timers = CHECKIN_ALERTS.map((alert, i) =>
+    const checkinAlerts = buildCheckinAlerts();
+    const timers = checkinAlerts.map((alert, i) =>
       setTimeout(() => setAlerts(prev => [...prev, alert]), 3000 + i * 5000)
     );
     return () => timers.forEach(clearTimeout);

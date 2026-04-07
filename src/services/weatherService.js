@@ -43,6 +43,7 @@ export function getCurrentWeather() {
 // ─── Hourly Forecast ──────────────────────────────────────
 
 export function getHourlyForecast() {
+  if (!isSourceLoaded('weather')) return [];
   if (_forecast?.hourly?.length) return _forecast.hourly;
   return [];
 }
@@ -50,6 +51,7 @@ export function getHourlyForecast() {
 // ─── Daily Forecast (up to 10 days) ──────────────────────
 
 export function getDailyForecast(numDays = 10) {
+  if (!isSourceLoaded('weather')) return [];
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
   // Static fallback from weather data starting Jan 17
   const startIdx = weatherData.findIndex(d => d.date === '2026-01-17');
@@ -73,6 +75,7 @@ export function getTomorrowForecast() {
 // ─── Weather Alerts ───────────────────────────────────────
 
 export function getWeatherAlerts() {
+  if (!isSourceLoaded('weather')) return [];
   if (_forecast?.alerts?.length) return _forecast.alerts;
   // Static fallback: wind advisory for demo day
   if (!isAuthenticatedClub()) {
