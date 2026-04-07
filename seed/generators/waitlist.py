@@ -16,31 +16,31 @@ WIND_THRESHOLD_MPH = 15   # wind above this triggers weather cancel signal
 # At-risk resignation members anchor the waitlist
 AT_RISK_MEMBERS = [
     {
-        'member_id': 'mbr_089', 'name': 'Anne Jordan',
+        'member_id': 'mbr_059', 'name': 'Anne Jordan',
         'archetype': 'Weekend Warrior', 'health_score': 38,
         'risk_level': 'At Risk', 'last_round': '2025-12-28',
         'dining_history': 'Low converter',
     },
     {
-        'member_id': 'mbr_042', 'name': 'Kevin Hurst',
+        'member_id': 'mbr_071', 'name': 'Kevin Hurst',
         'archetype': 'Declining', 'health_score': 22,
         'risk_level': 'Critical', 'last_round': '2025-11-10',
         'dining_history': 'Stopped dining',
     },
     {
-        'member_id': 'mbr_271', 'name': 'Steven Park',
+        'member_id': 'mbr_072', 'name': 'Steven Park',
         'archetype': 'Declining', 'health_score': 31,
         'risk_level': 'At Risk', 'last_round': '2025-10-30',
         'dining_history': 'Hits F&B minimum only',
     },
     {
-        'member_id': 'mbr_203', 'name': 'James Whitfield',
+        'member_id': 'mbr_038', 'name': 'James Whitfield',
         'archetype': 'Balanced Active', 'health_score': 44,
         'risk_level': 'Watch', 'last_round': '2026-01-14',
         'dining_history': 'Regular diner, complaint pending',
     },
     {
-        'member_id': 'mbr_117', 'name': 'Linda Leonard',
+        'member_id': 'mbr_089', 'name': 'Linda Leonard',
         'archetype': 'Ghost', 'health_score': 8,
         'risk_level': 'Critical', 'last_round': '2025-09-15',
         'dining_history': 'Rare',
@@ -174,7 +174,7 @@ def gen_cancellation_risk(
     risk_num = 0
     sim_date = date(2026, 1, 17)
 
-    HIGH_RISK_MEMBERS = {'mbr_089', 'mbr_042', 'mbr_271', 'mbr_203', 'mbr_117'}
+    HIGH_RISK_MEMBERS = {'mbr_059', 'mbr_071', 'mbr_072', 'mbr_038', 'mbr_089'}
 
     for row in booking_rows:
         d = dict(zip(booking_cols, row))
@@ -189,7 +189,7 @@ def gen_cancellation_risk(
         # but here we use a heuristic based on booking metadata
 
         # Assign a plausible member_id: use a hash of booking_id to pick deterministically
-        mid_seed = int(d['booking_id'].replace('bkg_', '')) % 300
+        mid_seed = int(d['booking_id'].replace('bkg_', '')) % 100
         mid = f'mbr_{(mid_seed + 1):03d}'
         member = member_map.get(mid, {})
         arch = member.get('archetype', 'Balanced Active')
@@ -215,7 +215,7 @@ def gen_cancellation_risk(
             drivers.append(CANCELLATION_DRIVERS['low_engagement'])
         if arch in ('Declining', 'Ghost'):
             drivers.append(CANCELLATION_DRIVERS['historical'])
-        if mid == 'mbr_203':
+        if mid == 'mbr_038':
             drivers.append(CANCELLATION_DRIVERS['complaint_open'])
         if not drivers:
             drivers.append(CANCELLATION_DRIVERS['historical'])

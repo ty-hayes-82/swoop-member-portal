@@ -59,7 +59,7 @@ export default async function handler(req, res) {
     // ── Clear existing seed data ───────────────────────────────────────
 
     await sql`DELETE FROM board_report_snapshots WHERE snapshot_date >= '2025-09-01'`;
-    await sql`DELETE FROM member_interventions WHERE member_id IN ('mbr_203','mbr_112','mbr_087','mbr_156','mbr_091','mbr_178')`;
+    await sql`DELETE FROM member_interventions WHERE member_id IN ('mbr_038','mbr_112','mbr_087','mbr_156','mbr_091','mbr_178')`;
     await sql`DELETE FROM operational_interventions WHERE event_date >= '2026-01-01'`;
     await sql`DELETE FROM user_sessions WHERE user_id = 'gm_default'`;
 
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
     await sql`
       INSERT INTO member_interventions (member_id, health_before, health_after, trigger, action, outcome, dues_at_risk)
       VALUES
-        ('mbr_203', 34, 71,
+        ('mbr_038', 34, 71,
          'Pace-of-play complaint went unresolved for 5 days; spend dropped 40%',
          'GM personal call + complimentary round + service recovery note',
          'Re-engaged within 48 hrs, booked 3 rounds following week',

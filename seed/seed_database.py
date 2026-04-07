@@ -137,7 +137,7 @@ def main():
         _insert(conn, 'membership_types', MTYPE_COLS, mtype_rows, args.sqlite)
         log(f'membership_types: {len(mtype_rows)} rows')
 
-        hh_rows = gen_households(220)
+        hh_rows = gen_households(75)
         _insert(conn, 'households', HH_COLS, hh_rows, args.sqlite)
         log(f'households: {len(hh_rows)} rows (placeholder primary_member_id)')
 
@@ -283,18 +283,19 @@ def main():
         log('F&B minimum behavior applied for 4 Declining members')
 
         # Update member table with resignation data
+        # MEMBER_COLS: 0=member_id, 9=membership_status, 12=resigned_on
         if args.sqlite:
             for row in member_rows:
                 conn.execute(
                     'UPDATE members SET membership_status=?, resigned_on=? WHERE member_id=?',
-                    (row[8], row[11], row[0])
+                    (row[9], row[12], row[0])
                 )
         else:
             with conn.cursor() as cur:
                 for row in member_rows:
                     cur.execute(
                         'UPDATE members SET membership_status=%s, resigned_on=%s WHERE member_id=%s',
-                        (row[8], row[11], row[0])
+                        (row[9], row[12], row[0])
                     )
 
         # Now insert F&B and remaining data
@@ -382,6 +383,26 @@ def main():
         log(f'member_engagement_weekly: {len(weekly_rows)} rows')
         _insert(conn, 'visit_sessions', SESSION_COLS, session_rows, args.sqlite)
         log(f'visit_sessions: {len(session_rows)} rows')
+
+        # ── Health scores + engagement score alignment ───────────────────
+        _compute_health_scores(conn, member_list, weekly_rows, WEEKLY_COLS, args.sqlite, rng)
+        log('health_score + health_tier set on members table')
+        log('engagement_score aligned in member_engagement_weekly')
+
+        # ── Backfill club_id on all tables that need it ──────────────────
+        club_id = cfg['club_id']
+        _backfill_club_id = [
+            'member_engagement_daily', 'member_engagement_weekly',
+            'visit_sessions', 'canonical_events', 'staff_shifts',
+            'service_requests', 'households',
+        ]
+        for table in _backfill_club_id:
+            if args.sqlite:
+                conn.execute(f"UPDATE {table} SET club_id = ? WHERE club_id IS NULL", (club_id,))
+            else:
+                with conn.cursor() as cur:
+                    cur.execute(f"UPDATE {table} SET club_id = %s WHERE club_id IS NULL", (club_id,))
+        log(f'club_id backfilled on {len(_backfill_club_id)} tables')
         _commit(conn, args.sqlite)
 
         # ══════════════════════════════════════════════════════════════════════
@@ -414,6 +435,80 @@ def main():
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
+# Archetype health score targets from the plan
+_ARCHETYPE_HEALTH_RANGES = {
+    'Die-Hard Golfer':  (77, 92),
+    'Balanced Active':  (72, 88),
+    'Social Butterfly': (72, 85),
+    'Weekend Warrior':  (57, 72),
+    'Declining':        (22, 45),
+    'New Member':       (62, 72),
+    'Ghost':            (5, 20),
+    'Snowbird':         (68, 78),
+}
+_HEALTH_OVERRIDES = {
+    'mbr_038': 44, 'mbr_059': 38, 'mbr_071': 22, 'mbr_072': 31,
+    'mbr_089': 8, 'mbr_094': 5, 'mbr_091': 18, 'mbr_092': 10,
+    'mbr_001': 88, 'mbr_002': 92, 'mbr_006': 90, 'mbr_014': 91,
+    'mbr_019': 85, 'mbr_023': 88, 'mbr_043': 85, 'mbr_041': 82,
+    'mbr_100': 78,
+}
+
+
+def _compute_health_scores(conn, member_list, weekly_rows, weekly_cols, sqlite_mode, rng):
+    """
+    Set health_score + health_tier on members table from archetype targets.
+    Also align engagement_score in member_engagement_weekly so the API
+    displays correct health distributions.
+    """
+    for m in member_list:
+        mid = m['member_id']
+        arch = m['archetype']
+        status = m.get('membership_status', 'active')
+
+        if mid in _HEALTH_OVERRIDES:
+            hs = _HEALTH_OVERRIDES[mid]
+        else:
+            lo, hi = _ARCHETYPE_HEALTH_RANGES.get(arch, (50, 70))
+            hs = rng.randint(lo, hi)
+
+        tier = 'Healthy' if hs >= 70 else 'Watch' if hs >= 50 else 'At Risk' if hs >= 30 else 'Critical'
+
+        if sqlite_mode:
+            conn.execute(
+                'UPDATE members SET health_score=?, health_tier=? WHERE member_id=?',
+                (hs, tier, mid)
+            )
+        else:
+            with conn.cursor() as cur:
+                cur.execute(
+                    'UPDATE members SET health_score=%s, health_tier=%s, last_health_update=NOW() WHERE member_id=%s',
+                    (hs, tier, mid)
+                )
+
+        # Align weekly engagement_score so API health calculations match
+        for wk in range(1, 6):
+            if status == 'resigned':
+                score = round(max(0, min(100, hs + (5 - wk) * 8)), 1)
+            elif arch == 'Declining':
+                score = round(max(0, min(100, hs + (5 - wk) * 3)), 1)
+            else:
+                noise = rng.uniform(-3, 3)
+                score = round(max(0, min(100, hs + noise)), 1)
+
+            if sqlite_mode:
+                conn.execute(
+                    'UPDATE member_engagement_weekly SET engagement_score=? WHERE member_id=? AND week_number=?',
+                    (score, mid, wk)
+                )
+            else:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        'UPDATE member_engagement_weekly SET engagement_score=%s WHERE member_id=%s AND week_number=%s',
+                        (score, mid, wk)
+                    )
+
+
 def _gen_waitlist_entries(booking_rows, booking_cols, cfg):
     """Generate aggregate waitlist_entries from unmet slot demand."""
     from collections import defaultdict
@@ -438,20 +533,35 @@ def _gen_waitlist_entries(booking_rows, booking_cols, cfg):
             max(1, count - 1),   # waitlist_count = overflow
             0, ttime,
         ))
-        if entry_num >= 35:
+        if entry_num >= 20:
             break
     return rows
 
 
 def _sqlite_schema(conn, _sqlite):
-    import os
+    import os, re
     schema_path = os.path.join(os.path.dirname(__file__), 'schema.sql')
     with open(schema_path) as f:
         sql = f.read()
     # Strip Postgres-specific syntax for SQLite
     sql = sql.replace('TIMESTAMPTZ', 'TEXT')
-    sql = sql.replace('IF NOT EXISTS', 'IF NOT EXISTS')
-    # Remove ALTER TABLE ... ADD CONSTRAINT (not supported in SQLite this way)
+    sql = sql.replace('JSONB', 'TEXT')
+    sql = sql.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
+    # VARCHAR(n) → TEXT, NUMERIC(n,m) → REAL, TEXT[] → TEXT
+    sql = re.sub(r'VARCHAR\(\d+\)', 'TEXT', sql)
+    sql = re.sub(r'NUMERIC\(\d+,\d+\)', 'REAL', sql)
+    sql = sql.replace('TEXT[]', 'TEXT')
+    # Replace DEFAULT NOW() with SQLite-compatible default
+    sql = sql.replace("DEFAULT NOW()", "DEFAULT CURRENT_TIMESTAMP")
+    # Replace gen_random_uuid()::TEXT with NULL (SQLite has no uuid)
+    sql = re.sub(r"DEFAULT gen_random_uuid\(\)::TEXT", "DEFAULT NULL", sql)
+    # Replace DATE type with TEXT for SQLite
+    sql = re.sub(r'\bDATE\b(?!\s+NOT)', 'TEXT', sql)
+    # Remove Postgres casts like ::TEXT
+    sql = re.sub(r'::\w+', '', sql)
+    # Remove DEFERRABLE clauses
+    sql = re.sub(r'\s+DEFERRABLE\s+INITIALLY\s+DEFERRED', '', sql)
+    # Remove ALTER TABLE ... ADD CONSTRAINT (not supported in SQLite)
     lines = []
     skip = False
     for line in sql.splitlines():

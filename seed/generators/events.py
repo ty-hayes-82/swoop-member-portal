@@ -34,11 +34,11 @@ ARCHETYPE_EVENT_RATE = {
 
 # Resigned members don't attend events after their resignation date
 RESIGN_DATES = {
-    'mbr_042': '2026-01-08',
-    'mbr_117': '2026-01-15',
-    'mbr_203': '2026-01-22',
-    'mbr_089': '2026-01-27',
-    'mbr_271': '2026-01-31',
+    'mbr_071': '2026-01-08',
+    'mbr_089': '2026-01-15',
+    'mbr_038': '2026-01-22',
+    'mbr_059': '2026-01-27',
+    'mbr_072': '2026-01-31',
 }
 
 

@@ -45,15 +45,15 @@ FB_MINIMUMS = {
     'LEG': 3000.0, 'SPT': 2500.0, 'NR': 0.0,
 }
 
-# Members who hit minimum then stop (4 Declining members, not mbr_271 who is in resign list)
-FB_MINIMUM_MEMBERS = {'mbr_028', 'mbr_063', 'mbr_145', 'mbr_271'}
+# Members who hit minimum then stop (4 Declining members with F&B minimum behavior)
+FB_MINIMUM_MEMBERS = {'mbr_072', 'mbr_074', 'mbr_076', 'mbr_078'}
 
 RESIGN_SPECS = {
-    'mbr_042': {'resigned_on': '2026-01-08', 'archetype': 'Declining'},
-    'mbr_117': {'resigned_on': '2026-01-15', 'archetype': 'Ghost'},
-    'mbr_203': {'resigned_on': '2026-01-22', 'archetype': 'Balanced Active'},
-    'mbr_089': {'resigned_on': '2026-01-27', 'archetype': 'Weekend Warrior'},
-    'mbr_271': {'resigned_on': '2026-01-31', 'archetype': 'Declining'},
+    'mbr_071': {'resigned_on': '2026-01-08', 'archetype': 'Declining'},
+    'mbr_089': {'resigned_on': '2026-01-15', 'archetype': 'Ghost'},
+    'mbr_038': {'resigned_on': '2026-01-22', 'archetype': 'Balanced Active'},
+    'mbr_059': {'resigned_on': '2026-01-27', 'archetype': 'Weekend Warrior'},
+    'mbr_072': {'resigned_on': '2026-01-31', 'archetype': 'Declining'},
 }
 
 
@@ -65,15 +65,15 @@ def apply_resignations(member_rows: list[tuple]) -> list[tuple]:
     membership_status → 'resigned', resigned_on → date.
     member_rows columns match MEMBER_COLS from dimensions.py.
     """
-    # member_id is index 0, membership_status is index 8, resigned_on is index 11
+    # member_id is index 0, club_id is index 2, membership_status is index 9, resigned_on is index 12
     updated = []
     for row in member_rows:
         mid = row[0]
         if mid in RESIGN_SPECS:
             spec = RESIGN_SPECS[mid]
             row = list(row)
-            row[8]  = 'resigned'
-            row[11] = spec['resigned_on']
+            row[9]  = 'resigned'
+            row[12] = spec['resigned_on']
             row = tuple(row)
         updated.append(row)
     return updated

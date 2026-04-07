@@ -9,17 +9,17 @@ simulation_month: "2026-01"
 club_id: "club_001"
 
 # ─── Member population ────────────────────────────────────────────────────────
-member_count: 300
+member_count: 100
 
 archetype_weights:
-  Die-Hard Golfer:   54   # 18%
-  Social Butterfly:  45   # 15%
-  Balanced Active:   66   # 22%
-  Weekend Warrior:   45   # 15%
-  Declining:         30   # 10%
-  New Member:        24   #  8%
-  Ghost:             21   #  7%
-  Snowbird:          15   #  5%
+  Die-Hard Golfer:   18   # 18%
+  Balanced Active:   22   # 22%
+  Social Butterfly:  15   # 15%
+  Weekend Warrior:   15   # 15%
+  Declining:         10   # 10%
+  New Member:         8   #  8%
+  Ghost:              7   #  7%
+  Snowbird:           5   #  5%
 
 # ─── Golf operations ──────────────────────────────────────────────────────────
 weekday_utilization_min: 0.55
@@ -55,17 +55,17 @@ understaffed_revenue_multiplier: 0.92       # ~8% lower F&B revenue
 
 # ─── Resignation scenarios ────────────────────────────────────────────────────
 resignation_scenarios:
-  - member_id: "mbr_042"   # Kevin Hurst
+  - member_id: "mbr_071"   # Kevin Hurst
     resigned_on: "2026-01-08"
     archetype: "Declining"
     pattern: "gradual_decay"
 
-  - member_id: "mbr_117"   # Linda Leonard
+  - member_id: "mbr_089"   # Linda Leonard
     resigned_on: "2026-01-15"
     archetype: "Ghost"
     pattern: "ghost_departure"
 
-  - member_id: "mbr_203"   # James Whitfield
+  - member_id: "mbr_038"   # James Whitfield
     resigned_on: "2026-01-22"
     archetype: "Balanced Active"
     pattern: "service_failure"
@@ -73,12 +73,12 @@ resignation_scenarios:
     complaint_sentiment: -0.8
     complaint_category: "Service Speed"
 
-  - member_id: "mbr_089"   # Anne Jordan
+  - member_id: "mbr_059"   # Anne Jordan
     resigned_on: "2026-01-27"
     archetype: "Weekend Warrior"
     pattern: "slow_withdrawal"
 
-  - member_id: "mbr_271"   # Steven Park
+  - member_id: "mbr_072"   # Steven Park
     resigned_on: "2026-01-31"
     archetype: "Declining"
     pattern: "fb_minimum_hit"

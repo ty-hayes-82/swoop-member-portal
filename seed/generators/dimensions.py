@@ -2,15 +2,11 @@
 seed/generators/dimensions.py
 Phase 1 — All reference/dimension data:
   club, courses, dining_outlets, membership_types,
-  members (300, 8 archetypes), households (220),
-  weather_daily (31 days, Scottsdale January)
+  members (100, 8 archetypes, deterministic named roster),
+  households (75), weather_daily (31 days, Scottsdale January)
 """
 import random
-import hashlib
 from datetime import date, timedelta
-from faker import Faker
-
-fake = Faker()
 
 
 # ─── Club reference ───────────────────────────────────────────────────────────
@@ -20,7 +16,7 @@ def gen_club(cfg: dict) -> list[tuple]:
         cfg['club_id'],
         'Pinetree Country Club',
         'Kennesaw', 'GA', '30144',
-        1987, 300, 2, 5,
+        1987, 100, 2, 5,
     )]
 
 CLUB_COLS = ['club_id', 'name', 'city', 'state', 'zip',
@@ -64,17 +60,6 @@ def gen_membership_types() -> list[tuple]:
 
 MTYPE_COLS = ['type_code', 'name', 'annual_dues', 'fb_minimum', 'golf_eligible']
 
-# Map archetypes → membership type distribution
-ARCHETYPE_MEMBERSHIP = {
-    'Die-Hard Golfer':  ['FG', 'FG', 'FG', 'LEG', 'SPT'],
-    'Social Butterfly': ['SOC', 'SOC', 'FG'],
-    'Balanced Active':  ['FG', 'SPT', 'JR', 'LEG'],
-    'Weekend Warrior':  ['SPT', 'FG', 'JR'],
-    'Declining':        ['FG', 'SPT', 'JR', 'NR'],
-    'New Member':       ['JR', 'FG', 'SPT'],
-    'Ghost':            ['NR', 'SOC', 'FG'],
-    'Snowbird':         ['NR', 'FG', 'SPT'],
-}
 
 MEMBERSHIP_DUES = {
     'FG': 18000, 'SOC': 6000, 'JR': 9000,
@@ -82,20 +67,152 @@ MEMBERSHIP_DUES = {
 }
 
 
+# ─── Named Member Roster ────────────────────────────────────────────────────
+# Each entry: (first_name, last_name, gender, membership_type)
+# Ordered by member_id within each archetype block.
+
+NAMED_ROSTER = {
+    'Die-Hard Golfer': [
+        ('John',     'Harrison',   'M', 'FG'),   # mbr_001
+        ('Robert',   'Callaway',   'M', 'FG'),   # mbr_002
+        ('Thomas',   'Mitchell',   'M', 'LEG'),  # mbr_003
+        ('David',    'Kensington', 'M', 'FG'),   # mbr_004
+        ('Michael',  'Brennan',    'M', 'SPT'),  # mbr_005
+        ('William',  'Frasier',    'M', 'FG'),   # mbr_006
+        ('Charles',  'Dunham',     'M', 'FG'),   # mbr_007
+        ('Patricia', 'Hampton',    'F', 'FG'),   # mbr_008
+        ('Richard',  'Tate',       'M', 'LEG'),  # mbr_009
+        ('Susan',    'Tate',       'F', 'FG'),   # mbr_010
+        ('James',    'O\'Brien',   'M', 'FG'),   # mbr_011
+        ('George',   'Whitaker',   'M', 'FG'),   # mbr_012
+        ('Donald',   'Price',      'M', 'FG'),   # mbr_013
+        ('Edward',   'Lawson',     'M', 'LEG'),  # mbr_014
+        ('Frank',    'Chambers',   'M', 'FG'),   # mbr_015
+        ('Raymond',  'Voss',       'M', 'SPT'),  # mbr_016
+        ('Kenneth',  'Marsh',      'M', 'FG'),   # mbr_017
+        ('Daniel',   'Foley',      'M', 'FG'),   # mbr_018
+    ],
+    'Balanced Active': [
+        ('Sarah',       'Collins',   'F', 'FG'),   # mbr_019
+        ('Mark',        'Wheeler',   'M', 'SPT'),  # mbr_020
+        ('Jennifer',    'Adams',     'F', 'JR'),   # mbr_021
+        ('Christopher', 'Lane',      'M', 'FG'),   # mbr_022
+        ('Angela',      'Morrison',  'F', 'LEG'),  # mbr_023
+        ('Brian',       'Hawkins',   'M', 'FG'),   # mbr_024
+        ('Karen',       'Patel',     'F', 'SPT'),  # mbr_025
+        ('Raj',         'Patel',     'M', 'FG'),   # mbr_026
+        ('Lisa',        'Bennett',   'F', 'FG'),   # mbr_027
+        ('Steven',      'Torres',    'M', 'JR'),   # mbr_028
+        ('Michelle',    'Foster',    'F', 'FG'),   # mbr_029
+        ('Andrew',      'Cooper',    'M', 'SPT'),  # mbr_030
+        ('Diane',       'Walsh',     'F', 'FG'),   # mbr_031
+        ('Gregory',     'Schultz',   'M', 'LEG'),  # mbr_032
+        ('Stephanie',   'Cruz',      'F', 'JR'),   # mbr_033
+        ('Paul',        'Richmond',  'M', 'FG'),   # mbr_034
+        ('Rachel',      'Kim',       'F', 'FG'),   # mbr_035
+        ('Nathan',      'Bell',      'M', 'SPT'),  # mbr_036
+        ('Laura',       'Fleming',   'F', 'FG'),   # mbr_037
+        ('James',       'Whitfield', 'M', 'FG'),   # mbr_038 — RESIGNS Jan 22
+        ('Derek',       'Hoffman',   'M', 'FG'),   # mbr_039
+        ('Heather',     'Douglas',   'F', 'JR'),   # mbr_040
+    ],
+    'Social Butterfly': [
+        ('Victoria',  'Sinclair', 'F', 'SOC'),  # mbr_041
+        ('Margaret',  'Liu',      'F', 'SOC'),  # mbr_042
+        ('Catherine', 'Hayes',    'F', 'FG'),   # mbr_043
+        ('Evelyn',    'Drake',    'F', 'SOC'),  # mbr_044
+        ('Barbara',   'Conway',   'F', 'SOC'),  # mbr_045
+        ('Olivia',    'Grant',    'F', 'FG'),   # mbr_046
+        ('Peter',     'Sinclair', 'M', 'FG'),   # mbr_047
+        ('Natalie',   'West',     'F', 'SOC'),  # mbr_048
+        ('Joanne',    'Tucker',   'F', 'SOC'),  # mbr_049
+        ('Sandra',    'Reeves',   'F', 'FG'),   # mbr_050
+        ('Alice',     'Chen',     'F', 'SOC'),  # mbr_051
+        ('Deborah',   'Maxwell',  'F', 'SOC'),  # mbr_052
+        ('Howard',    'Blake',    'M', 'FG'),   # mbr_053
+        ('Christine', 'Vargas',   'F', 'SOC'),  # mbr_054
+        ('Pamela',    'Nolan',    'F', 'SOC'),  # mbr_055
+    ],
+    'Weekend Warrior': [
+        ('Scott',   'Patterson', 'M', 'SPT'),  # mbr_056
+        ('Jeff',    'Larson',    'M', 'FG'),   # mbr_057
+        ('Mike',    'Donovan',   'M', 'JR'),   # mbr_058
+        ('Anne',    'Jordan',    'F', 'SPT'),  # mbr_059 — RESIGNS Jan 27
+        ('Travis',  'Burke',     'M', 'FG'),   # mbr_060
+        ('Carlos',  'Mendez',    'M', 'SPT'),  # mbr_061
+        ('Ryan',    'Gallagher', 'M', 'JR'),   # mbr_062
+        ('Chad',    'Simmons',   'M', 'FG'),   # mbr_063
+        ('Nicole',  'Fraser',    'F', 'SPT'),  # mbr_064
+        ('Brett',   'Dawson',    'M', 'FG'),   # mbr_065
+        ('Tyler',   'Robbins',   'M', 'JR'),   # mbr_066
+        ('Kyle',    'Preston',   'M', 'SPT'),  # mbr_067
+        ('Todd',    'Morrison',  'M', 'FG'),   # mbr_068
+        ('Aaron',   'Fletcher',  'M', 'SPT'),  # mbr_069
+        ('Patrick', 'Dunn',      'M', 'FG'),   # mbr_070
+    ],
+    'Declining': [
+        ('Kevin',   'Hurst',    'M', 'FG'),   # mbr_071 — RESIGNS Jan 8
+        ('Steven',  'Park',     'M', 'SPT'),  # mbr_072 — RESIGNS Jan 31
+        ('Gerald',  'Norton',   'M', 'FG'),   # mbr_073
+        ('Barbara', 'Winters',  'F', 'JR'),   # mbr_074
+        ('Harold',  'Simms',    'M', 'NR'),   # mbr_075
+        ('Dorothy', 'Keane',    'F', 'SPT'),  # mbr_076
+        ('Arthur',  'Bowen',    'M', 'FG'),   # mbr_077
+        ('Carol',   'Marsh',    'F', 'JR'),   # mbr_078
+        ('Walter',  'Gray',     'M', 'NR'),   # mbr_079
+        ('Martha',  'Fleming',  'F', 'SPT'),  # mbr_080
+    ],
+    'New Member': [
+        ('Jason',    'Rivera',     'M', 'JR'),   # mbr_081
+        ('Emily',    'Chang',      'F', 'FG'),   # mbr_082
+        ('Tyler',    'Grant',      'M', 'SPT'),  # mbr_083
+        ('Samantha', 'Flores',     'F', 'JR'),   # mbr_084
+        ('Connor',   'Blake',      'M', 'FG'),   # mbr_085
+        ('Priya',    'Sharma',     'F', 'SPT'),  # mbr_086
+        ('Derek',    'Washington', 'M', 'JR'),   # mbr_087
+        ('Megan',    'Torres',     'F', 'FG'),   # mbr_088
+    ],
+    'Ghost': [
+        ('Linda',   'Leonard',  'F', 'NR'),   # mbr_089 — RESIGNS Jan 15
+        ('Roger',   'Haines',   'M', 'SOC'),  # mbr_090
+        ('Philip',  'Duarte',   'M', 'FG'),   # mbr_091
+        ('Janet',   'Reese',    'F', 'NR'),   # mbr_092
+        ('Dennis',  'Olsen',    'M', 'SOC'),  # mbr_093
+        ('Marilyn', 'Prescott', 'F', 'FG'),   # mbr_094
+        ('Warren',  'Chang',    'M', 'NR'),   # mbr_095
+    ],
+    'Snowbird': [
+        ('Ronald',  'Petersen', 'M', 'NR'),   # mbr_096
+        ('Shirley', 'Hampton',  'F', 'FG'),   # mbr_097
+        ('Douglas', 'Archer',   'M', 'SPT'),  # mbr_098
+        ('Helen',   'Porter',   'F', 'NR'),   # mbr_099
+        ('Robert',  'Sinclair', 'M', 'FG'),   # mbr_100
+    ],
+}
+
+# Specific household pairings (hh_id -> [member_id, member_id])
+# These are the named households from the plan; remaining multi-member
+# households are assigned sequentially by the generator.
+NAMED_HOUSEHOLDS = {
+    'hh_005': ['mbr_009', 'mbr_010'],   # Richard & Susan Tate
+    'hh_013': ['mbr_025', 'mbr_026'],   # Karen & Raj Patel
+    'hh_021': ['mbr_041', 'mbr_047'],   # Victoria & Peter Sinclair
+}
+
+
 # ─── Households ───────────────────────────────────────────────────────────────
 
-def gen_households(count: int = 220) -> tuple[list[tuple], dict]:
+def gen_households(count: int = 75) -> list[tuple]:
     """
-    Generate 220 households.
-    80 multi-member (2–3 members), 140 single.
-    Returns (rows, hh_id -> member_slots mapping).
+    Generate 75 households.
+    25 multi-member (2 members), 50 single.
+    Returns rows with placeholder primary_member_id (updated after members).
     """
     rows = []
-    # We'll fill primary_member_id after members are created; use placeholder
     for i in range(1, count + 1):
         hh_id = f'hh_{i:03d}'
-        is_multi = 1 if i <= 80 else 0
-        rows.append((hh_id, None, 0, fake.address().replace('\n', ', '), is_multi))
+        is_multi = 1 if i <= 25 else 0
+        rows.append((hh_id, None, 0, f'{100 + i} Pine Valley Dr, Kennesaw, GA 30144', is_multi))
     return rows
 
 HH_COLS = ['household_id', 'primary_member_id', 'member_count', 'address', 'is_multi_member']
@@ -105,38 +222,82 @@ HH_COLS = ['household_id', 'primary_member_id', 'member_count', 'address', 'is_m
 
 def gen_members(cfg: dict, rng: random.Random) -> tuple[list[tuple], list[tuple]]:
     """
-    Generate 300 members across 8 archetypes.
+    Generate 100 members across 8 archetypes using the deterministic NAMED_ROSTER.
     Returns (member_rows, household_update_rows).
     Resignation scenarios are applied post-generation via cross_domain linker.
     """
     weights = cfg['archetype_weights']
-    archetype_list = []
-    for archetype, count in weights.items():
-        archetype_list.extend([archetype] * count)
-    rng.shuffle(archetype_list)
 
-    # Assign households: 80 multi-member HHs, 140 single
-    # Multi-member HHs get 2 members each (80 × 2 = 160), remaining 140 get single HHs
-    hh_assignments = []
-    for i in range(1, 81):       # 80 multi-member households
-        hh_assignments.extend([f'hh_{i:03d}', f'hh_{i:03d}'])
-    for i in range(81, 221):     # 140 single households
-        hh_assignments.append(f'hh_{i:03d}')
-    rng.shuffle(hh_assignments)
+    # Build ordered archetype list matching NAMED_ROSTER order
+    archetype_order = [
+        'Die-Hard Golfer', 'Balanced Active', 'Social Butterfly',
+        'Weekend Warrior', 'Declining', 'New Member', 'Ghost', 'Snowbird',
+    ]
+
+    # Pre-assign households: 25 multi-member HHs get 2 members each (50 slots),
+    # remaining 50 members get single HHs (hh_026 through hh_075).
+    # First, build a flat list of all 100 members with their archetype + roster data
+    all_members = []
+    for archetype in archetype_order:
+        roster = NAMED_ROSTER[archetype]
+        for entry in roster:
+            all_members.append((archetype, entry))
+
+    # Build household assignments
+    # Named households get specific slots
+    member_to_hh = {}
+    used_hh = set()
+    for hh_id, member_ids in NAMED_HOUSEHOLDS.items():
+        for mid in member_ids:
+            member_to_hh[mid] = hh_id
+        used_hh.add(hh_id)
+
+    # Assign remaining multi-member households (fill hh_001 through hh_025, skipping used)
+    unassigned = []
+    for idx, (archetype, entry) in enumerate(all_members):
+        m_id = f'mbr_{idx + 1:03d}'
+        if m_id not in member_to_hh:
+            unassigned.append(m_id)
+
+    multi_hh_idx = 0
+    multi_hh_queue = []
+    for i in range(1, 26):
+        hh_id = f'hh_{i:03d}'
+        if hh_id not in used_hh:
+            multi_hh_queue.append(hh_id)
+
+    # Pair up unassigned members for multi-member households
+    pair_idx = 0
+    for hh_id in multi_hh_queue:
+        # Find next two unassigned members
+        assigned = 0
+        while pair_idx < len(unassigned) and assigned < 2:
+            mid = unassigned[pair_idx]
+            if mid not in member_to_hh:
+                member_to_hh[mid] = hh_id
+                assigned += 1
+            pair_idx += 1
+
+    # Assign single households for remaining unassigned
+    single_hh_idx = 26
+    for mid in unassigned:
+        if mid not in member_to_hh:
+            member_to_hh[mid] = f'hh_{single_hh_idx:03d}'
+            single_hh_idx += 1
+
+    # Also assign any members from named households that were in the unassigned tracking
+    # (they should already be assigned above)
 
     member_rows = []
     hh_member_map = {}  # hh_id -> [member_ids]
 
-    for idx in range(300):
+    for idx, (archetype, (first_name, last_name, gender, mtype)) in enumerate(all_members):
         m_num = idx + 1
         m_id = f'mbr_{m_num:03d}'
-        archetype = archetype_list[idx]
-        hh_id = hh_assignments[idx]
-
-        mtype = rng.choice(ARCHETYPE_MEMBERSHIP[archetype])
         dues = MEMBERSHIP_DUES[mtype]
+        hh_id = member_to_hh[m_id]
 
-        # Join date: 1–10 years ago for most, <1 year for New Members
+        # Join date: archetype-appropriate
         if archetype == 'New Member':
             days_ago = rng.randint(30, 89)
         elif archetype == 'Ghost':
@@ -146,15 +307,15 @@ def gen_members(cfg: dict, rng: random.Random) -> tuple[list[tuple], list[tuple]
         join_dt = date(2026, 1, 17) - timedelta(days=days_ago)
 
         dob_year = rng.randint(1950, 1995)
-        gender = rng.choice(['M', 'F'])
 
         member_rows.append((
             m_id,
             m_num,
-            fake.first_name_male() if gender == 'M' else fake.first_name_female(),
-            fake.last_name(),
-            f'{m_id}@example.com',
-            fake.phone_number()[:20],
+            cfg['club_id'],
+            first_name,
+            last_name,
+            f'{first_name.lower()}.{last_name.lower()}@example.com',
+            f'({rng.randint(200,999)}) {rng.randint(200,999)}-{rng.randint(1000,9999)}',
             f'{dob_year}-{rng.randint(1,12):02d}-{rng.randint(1,28):02d}',
             gender,
             mtype,
@@ -166,18 +327,18 @@ def gen_members(cfg: dict, rng: random.Random) -> tuple[list[tuple], list[tuple]
             float(dues),
             round(rng.uniform(0, 200), 2),   # account_balance
             f'{rng.randint(1000000, 9999999)}',  # ghin_number
-            1,               # communication_opt_in (19 members will be flipped to 0 below)
+            1,               # communication_opt_in (some flipped to 0 below)
         ))
 
         if hh_id not in hh_member_map:
             hh_member_map[hh_id] = []
         hh_member_map[hh_id].append(m_id)
 
-    # Opt out ~7% of members
-    opt_out_indices = rng.sample(range(300), 19)
+    # Opt out ~7% of members (7 out of 100)
+    opt_out_indices = rng.sample(range(100), 7)
     for i in opt_out_indices:
         row = list(member_rows[i])
-        row[17] = 0
+        row[18] = 0  # communication_opt_in index (after club_id addition)
         member_rows[i] = tuple(row)
 
     # Build household update data
@@ -192,7 +353,7 @@ def gen_members(cfg: dict, rng: random.Random) -> tuple[list[tuple], list[tuple]
 
 
 MEMBER_COLS = [
-    'member_id', 'member_number', 'first_name', 'last_name', 'email', 'phone',
+    'member_id', 'member_number', 'club_id', 'first_name', 'last_name', 'email', 'phone',
     'date_of_birth', 'gender', 'membership_type', 'membership_status',
     'join_date', 'resigned_on', 'household_id', 'archetype',
     'annual_dues', 'account_balance', 'ghin_number', 'communication_opt_in',
@@ -201,7 +362,7 @@ MEMBER_COLS = [
 
 # ─── Weather ──────────────────────────────────────────────────────────────────
 
-# Scottsdale January: 20 sunny, 4 perfect, 4 cloudy, 2 windy, 1 rainy
+# Scottsdale January: 19 sunny, 4 perfect, 4 cloudy, 2 windy, 2 rainy
 # Jan 6 = club closed (maintenance) — still gets a weather row
 WEATHER_TEMPLATE = (
     ['sunny'] * 19 +

@@ -30,12 +30,13 @@ OUTLET_MEAL_WINDOWS = {
 }
 
 # Expected covers per outlet per day (weekday / weekend)
+# Scaled for 100-member club (~60% of 300-member baseline)
 OUTLET_DAILY_COVERS = {
-    'out_001': {'wd': 18, 'we': 30},
-    'out_002': {'wd': 28, 'we': 44},
-    'out_003': {'wd': 18, 'we': 20},
-    'out_004': {'wd': 22, 'we': 26},
-    'out_005': {'wd':  5, 'we':  9},
+    'out_001': {'wd': 12, 'we': 20},
+    'out_002': {'wd': 18, 'we': 28},
+    'out_003': {'wd': 12, 'we': 14},
+    'out_004': {'wd': 14, 'we': 18},
+    'out_005': {'wd':  3, 'we':  6},
 }
 
 MENU_CATEGORIES = {

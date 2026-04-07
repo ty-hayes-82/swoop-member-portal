@@ -39,21 +39,21 @@ def _decay_multiplier(campaign_idx: int, archetype: str, member_id: str) -> floa
         # ~12% drop from start to end across 8 campaigns
         return max(0.05, 1.0 - campaign_idx * 0.025)
     resign_decay = {
-        'mbr_042': 0.0,    # Kevin Hurst — stopped opening in November
-        'mbr_117': 0.0,    # Linda Leonard — ghost, no opens
-        'mbr_203': 1.0,    # James Whitfield — active until Jan 22 complaint
-        'mbr_089': max(0.1, 1.0 - campaign_idx * 0.12),  # Anne Jordan — decay
-        'mbr_271': max(0.05, 1.0 - campaign_idx * 0.05),  # Steven Park — slow decay
+        'mbr_071': 0.0,    # Kevin Hurst — stopped opening in November
+        'mbr_089': 0.0,    # Linda Leonard — ghost, no opens
+        'mbr_038': 1.0,    # James Whitfield — active until Jan 22 complaint
+        'mbr_059': max(0.1, 1.0 - campaign_idx * 0.12),  # Anne Jordan — decay
+        'mbr_072': max(0.05, 1.0 - campaign_idx * 0.05),  # Steven Park — slow decay
     }
     return resign_decay.get(member_id, 1.0)
 
 
 RESIGN_DATES = {
-    'mbr_042': datetime(2026, 1, 8),
-    'mbr_117': datetime(2026, 1, 15),
-    'mbr_203': datetime(2026, 1, 22),
-    'mbr_089': datetime(2026, 1, 27),
-    'mbr_271': datetime(2026, 1, 31),
+    'mbr_071': datetime(2026, 1, 8),
+    'mbr_089': datetime(2026, 1, 15),
+    'mbr_038': datetime(2026, 1, 22),
+    'mbr_059': datetime(2026, 1, 27),
+    'mbr_072': datetime(2026, 1, 31),
 }
 
 LINK_URLS = [
@@ -73,7 +73,7 @@ def gen_email_campaigns(cfg: dict) -> list[tuple]:
     for camp in cfg['email_campaigns']:
         rows.append((
             camp['id'], cfg['club_id'], camp['subject'], camp['type'],
-            camp['send_date'], 281, None,  # 281 opted-in recipients
+            camp['send_date'], 93, None,  # ~93 opted-in recipients (100 - 7% opt-out)
         ))
     return rows
 
@@ -112,14 +112,14 @@ def gen_email_events(
             ev_num += 1
             send_ts = (send_dt + timedelta(seconds=rng.randint(0, 3600))).isoformat()
             rows.append((
-                f'ee_{ev_num:05d}', camp_id, mid, 'send', send_ts, None, None,
+                f'ee_{ev_num:05d}', camp_id, mid, 'sent', send_ts, None, None,
             ))
 
             # Bounce (2% of sends)
             if rng.random() < 0.02:
                 ev_num += 1
                 rows.append((
-                    f'ee_{ev_num:05d}', camp_id, mid, 'bounce',
+                    f'ee_{ev_num:05d}', camp_id, mid, 'bounced',
                     send_ts, None, None,
                 ))
                 continue
@@ -139,7 +139,7 @@ def gen_email_events(
                 device = rng.choices(DEVICES, weights=DEVICE_WEIGHTS)[0]
                 ev_num += 1
                 rows.append((
-                    f'ee_{ev_num:05d}', camp_id, mid, 'open', open_ts, None, device,
+                    f'ee_{ev_num:05d}', camp_id, mid, 'opened', open_ts, None, device,
                 ))
 
                 # Click (subset of openers)
@@ -149,7 +149,7 @@ def gen_email_events(
                     link = rng.choice(LINK_URLS)
                     ev_num += 1
                     rows.append((
-                        f'ee_{ev_num:05d}', camp_id, mid, 'click', click_ts, link, device,
+                        f'ee_{ev_num:05d}', camp_id, mid, 'clicked', click_ts, link, device,
                     ))
 
             # Unsubscribe (rare, slightly higher for Declining)
@@ -157,7 +157,7 @@ def gen_email_events(
             if rng.random() < unsub_prob:
                 ev_num += 1
                 rows.append((
-                    f'ee_{ev_num:05d}', camp_id, mid, 'unsubscribe',
+                    f'ee_{ev_num:05d}', camp_id, mid, 'unsubscribed',
                     send_ts, None, None,
                 ))
 

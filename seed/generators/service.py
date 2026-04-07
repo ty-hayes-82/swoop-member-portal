@@ -195,20 +195,20 @@ def gen_feedback(members: list[dict], cfg: dict, rng: random.Random) -> list[tup
     rows = []
     fb_num = 0
 
-    # Normal feedback: ~1 per day across the month
+    # Normal feedback: ~0.5 per day across the month (scaled for 100 members)
     for day in range(1, 32):
         dt_str = f'2026-01-{day:02d}'
         if dt_str == '2026-01-06':
             continue
         is_understaffed = dt_str in UNDERSTAFFED_DATES
-        n = rng.randint(1, 3) if is_understaffed else (1 if rng.random() < 0.65 else 0)
+        n = rng.randint(1, 3) if is_understaffed else (1 if rng.random() < 0.45 else 0)
 
         for _ in range(n):
             member = rng.choice(members)
             mid = member['member_id']
-            # Skip mbr_203's slot — we'll add it precisely below
-            if mid == 'mbr_203':
-                mid = rng.choice([m['member_id'] for m in members if m['member_id'] != 'mbr_203'])
+            # Skip mbr_038's slot — we'll add it precisely below
+            if mid == 'mbr_038':
+                mid = rng.choice([m['member_id'] for m in members if m['member_id'] != 'mbr_038'])
 
             cat = rng.choice(FEEDBACK_CATEGORIES)
             # Understaffed → service speed complaints more likely
@@ -241,10 +241,10 @@ def gen_feedback(members: list[dict], cfg: dict, rng: random.Random) -> list[tup
                 status, resolved_at, 1 if is_understaffed else 0,
             ))
 
-    # mbr_203 James Whitfield — precise complaint Jan 18 (never resolved)
+    # mbr_038 James Whitfield — precise complaint Jan 18 (never resolved)
     fb_num += 1
     rows.append((
-        f'fb_{fb_num:03d}', 'mbr_203', cfg['club_id'],
+        f'fb_{fb_num:03d}', 'mbr_038', cfg['club_id'],
         '2026-01-18T14:32:00',
         'Service Speed', -0.8,
         'Waited 25 minutes for service at the Grill Room. Staff appeared overwhelmed.',
@@ -263,7 +263,7 @@ def gen_service_requests(
     cfg: dict,
     rng: random.Random,
 ) -> list[tuple]:
-    """~214 service requests spread across operating days."""
+    """~120 service requests spread across operating days (scaled for 100 members)."""
     rows = []
     req_num = 0
 
@@ -279,7 +279,7 @@ def gen_service_requests(
         if dt_str == '2026-01-06':
             continue
         is_understaffed = dt_str in UNDERSTAFFED_DATES
-        n = rng.randint(7, 11) if is_understaffed else rng.randint(5, 9)
+        n = rng.randint(4, 7) if is_understaffed else rng.randint(2, 5)
 
         day_bookings = bkg_by_date.get(dt_str, [])
 

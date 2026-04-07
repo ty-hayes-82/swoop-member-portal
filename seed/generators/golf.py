@@ -36,11 +36,11 @@ ARCHETYPE_GOLF_RATE = {
 }
 
 RESIGNATION_GOLF_CUTOFFS = {
-    'mbr_042': date(2025, 11, 15),   # Kevin Hurst – stopped Nov
-    'mbr_117': date(2025, 10, 20),   # Linda Leonard – last visit Oct
-    'mbr_089': None,                 # Anne Jordan – gradual (handled inline)
-    'mbr_203': None,                 # James Whitfield – active until resignation
-    'mbr_271': date(2025, 11, 1),    # Steven Park – no golf since Nov
+    'mbr_071': date(2025, 11, 15),   # Kevin Hurst – stopped Nov
+    'mbr_089': date(2025, 10, 20),   # Linda Leonard – last visit Oct
+    'mbr_059': None,                 # Anne Jordan – gradual (handled inline)
+    'mbr_038': None,                 # James Whitfield – active until resignation
+    'mbr_072': date(2025, 11, 1),    # Steven Park – no golf since Nov
 }
 
 
@@ -244,7 +244,7 @@ def _pick_golfer(
                 continue
 
         # Anne Jordan: gradual decline (Weekend Warrior resign Jan 27)
-        if mid == 'mbr_089' and arch == 'Weekend Warrior':
+        if mid == 'mbr_059' and arch == 'Weekend Warrior':
             dt_obj = date.fromisoformat(dt_str)
             if dt_obj.month == 1 and dt_obj.year == 2026:
                 base_w *= 0.05   # near zero in January

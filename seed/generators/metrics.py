@@ -92,7 +92,7 @@ def _compute_daily(
     # Email opens
     for ev in email_event_rows:
         ed = dict(zip(email_event_cols, ev))
-        if ed['event_type'] == 'open':
+        if ed['event_type'] == 'opened':
             dt = ed['occurred_at'][:10]
             opens_by_md[ed['member_id']][dt] += 1
 
@@ -127,11 +127,11 @@ DAILY_COLS = ['row_id', 'member_id', 'date', 'rounds_played', 'dining_checks',
 
 
 RESIGN_DECAY_MEMBERS = {
-    'mbr_042': 0.55,   # Kevin Hurst — Declining, near-zero by Jan
-    'mbr_117': 0.10,   # Linda Leonard — Ghost, minimal activity
-    'mbr_089': 0.65,   # Anne Jordan — Weekend Warrior, progressive withdrawal
-    'mbr_271': 0.60,   # Steven Park — Declining, F&B only obligation
-    # mbr_203 (James Whitfield) is Balanced Active until complaint Jan 18 — natural decay from Week 3
+    'mbr_071': 0.55,   # Kevin Hurst — Declining, near-zero by Jan
+    'mbr_089': 0.10,   # Linda Leonard — Ghost, minimal activity
+    'mbr_059': 0.65,   # Anne Jordan — Weekend Warrior, progressive withdrawal
+    'mbr_072': 0.60,   # Steven Park — Declining, F&B only obligation
+    # mbr_038 (James Whitfield) is Balanced Active until complaint Jan 18 — natural decay from Week 3
 }
 
 
@@ -205,7 +205,7 @@ def _compute_weekly(daily_rows: list[tuple], members: list[dict]) -> list[tuple]
                 decay_factor = max(0.05, peak - (wk_num - 1) * (peak / 5))
                 engagement = round(engagement * decay_factor, 1)
                 engagement = max(0, engagement)
-            elif mid == 'mbr_203' and wk_num >= 3:
+            elif mid == 'mbr_038' and wk_num >= 3:
                 engagement = round(engagement * max(0.1, 1.0 - (wk_num - 2) * 0.30), 1)
 
             rows.append((
