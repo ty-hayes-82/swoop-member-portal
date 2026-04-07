@@ -108,7 +108,8 @@ const ALIAS_MAP = {
   // Members
   'given name': 'first_name', 'first name': 'first_name', 'firstname': 'first_name',
   'surname': 'last_name', 'last name': 'last_name', 'lastname': 'last_name',
-  'member #': 'external_id', 'member number': 'external_id', 'member id': 'external_id',
+  'member #': 'external_id', 'member id': 'external_id',
+  'member number': '_skip', // Numeric index, not the canonical identifier
   'email': 'email', 'phone #': 'phone', 'phone': 'phone',
   'membership type': 'membership_type', 'mem type': 'membership_type',
   'annual fee': 'annual_dues', 'annual dues': 'annual_dues',
