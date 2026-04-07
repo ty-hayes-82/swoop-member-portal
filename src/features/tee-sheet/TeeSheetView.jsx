@@ -3,6 +3,7 @@ import { StoryHeadline } from '@/components/ui';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge';
 import MemberLink from '@/components/MemberLink';
+import ActionPanel from '@/components/ui/ActionPanel';
 import PageTransition from '@/components/ui/PageTransition';
 import { todayTeeSheet, teeSheetSummary } from '@/data/teeSheet';
 import { useApp } from '@/context/AppContext';
@@ -22,35 +23,53 @@ const healthLabel = (score) => {
   return 'Critical';
 };
 
-function AlertCard({ teeTime, onSendRecovery }) {
+function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
   const color = healthColor(teeTime.healthScore);
   const isVip = teeTime.duesAnnual >= 18000;
   const hasComplaint = teeTime.cartPrep.note?.toLowerCase().includes('complaint') || teeTime.cartPrep.note?.toLowerCase().includes('critical');
+
+  const recommended = [];
+  if (hasComplaint) {
+    recommended.push({ key: 'recovery-email', icon: '✉', label: 'Send Recovery Email', type: 'email', description: 'Acknowledge issue and offer remedy' });
+    recommended.push({ key: 'apology-sms', icon: '💬', label: 'Send Apology Text', type: 'sms', description: 'Personal apology via SMS' });
+  } else {
+    recommended.push({ key: 'checkin-sms', icon: '💬', label: 'Personal Check-in Text', type: 'sms', description: 'Warm outreach to re-engage' });
+    recommended.push({ key: 'checkin-email', icon: '✉', label: 'Send Personal Email', type: 'email', description: 'Personalized GM email' });
+  }
+  if (isVip) {
+    recommended.push({ key: 'comp', icon: '🎁', label: 'Comp Offer', type: 'comp_offer', description: `VIP recovery — $${(teeTime.duesAnnual / 1000).toFixed(0)}K member` });
+  }
+
   return (
     <div className="bg-white rounded-xl border-l-4 p-4 border border-gray-200" style={{ borderLeftColor: color }}>
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <MemberLink memberId={teeTime.memberId} mode="drawer" className="font-bold text-sm text-gray-800">
-              {teeTime.name}
-            </MemberLink>
-            <span className="text-xs text-gray-400">{teeTime.time} - {teeTime.course}</span>
-            {isVip && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200">VIP</span>}
+      <div
+        className="cursor-pointer"
+        onClick={onToggle}
+      >
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <MemberLink memberId={teeTime.memberId} mode="drawer" className="font-bold text-sm text-gray-800">
+                {teeTime.name}
+              </MemberLink>
+              <span className="text-xs text-gray-400">{teeTime.time} - {teeTime.course}</span>
+              {isVip && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200">VIP</span>}
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="font-mono text-sm font-bold" style={{ color }}>{teeTime.healthScore}</span>
+              <span className="text-[10px] font-semibold" style={{ color }}>{healthLabel(teeTime.healthScore)}</span>
+              <ArchetypeBadge archetype={teeTime.archetype} size="xs" />
+            </div>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="font-mono text-sm font-bold" style={{ color }}>{teeTime.healthScore}</span>
-            <span className="text-[10px] font-semibold" style={{ color }}>{healthLabel(teeTime.healthScore)}</span>
-            <ArchetypeBadge archetype={teeTime.archetype} size="xs" />
-          </div>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: `${color}15`, color }}>
+            {Math.round(teeTime.cancelRisk * 100)}% cancel risk
+          </span>
         </div>
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: `${color}15`, color }}>
-          {Math.round(teeTime.cancelRisk * 100)}% cancel risk
-        </span>
+        <div className="text-xs text-gray-600 leading-relaxed">
+          {teeTime.cartPrep.note}
+        </div>
       </div>
-      <div className="text-xs text-gray-600 leading-relaxed">
-        {teeTime.cartPrep.note}
-      </div>
-      {/* Proactive recovery actions */}
+      {/* Quick action buttons (always visible) */}
       <div className="flex gap-2 mt-3 flex-wrap">
         {hasComplaint && (
           <button
@@ -66,7 +85,27 @@ function AlertCard({ teeTime, onSendRecovery }) {
         >
           <span>💬</span> {hasComplaint ? 'Send Apology Text' : 'Personal Check-in Text'}
         </button>
+        <button
+          onClick={onToggle}
+          className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-gray-200 bg-white text-gray-500 inline-flex items-center gap-1"
+        >
+          {isExpanded ? '▾ Less' : '▸ More actions'}
+        </button>
       </div>
+      {/* Expanded inline action panel */}
+      {isExpanded && (
+        <ActionPanel
+          context={{
+            memberId: teeTime.memberId,
+            memberName: teeTime.name,
+            description: teeTime.cartPrep.note,
+            source: 'Tee Sheet',
+          }}
+          recommended={recommended}
+          onClose={onToggle}
+          compact
+        />
+      )}
     </div>
   );
 }
@@ -128,6 +167,7 @@ function CartPrepCard({ teeTime, onSendCartText, onSendDiningNudge }) {
 
 export default function TeeSheetView() {
   const [showCartPrep, setShowCartPrep] = useState(false);
+  const [expandedAlertId, setExpandedAlertId] = useState(null);
   const { showToast } = useApp();
   const atRiskTimes = todayTeeSheet.filter(t => t.healthScore < 50);
   const vipTimes = todayTeeSheet.filter(t => t.duesAnnual >= 18000 && t.healthScore >= 50);
@@ -239,7 +279,15 @@ export default function TeeSheetView() {
               At-Risk Members on Course Today ({atRiskTimes.length})
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {atRiskTimes.map(t => <AlertCard key={t.memberId} teeTime={t} onSendRecovery={handleSendRecovery} />)}
+              {atRiskTimes.map(t => (
+                <AlertCard
+                  key={t.memberId}
+                  teeTime={t}
+                  onSendRecovery={handleSendRecovery}
+                  isExpanded={expandedAlertId === t.memberId}
+                  onToggle={() => setExpandedAlertId(expandedAlertId === t.memberId ? null : t.memberId)}
+                />
+              ))}
             </div>
           </div>
         )}

@@ -6,6 +6,7 @@ import { getComplaintCorrelation, getFeedbackSummary } from '@/services/staffing
 import { getPaceFBImpact } from '@/services/operationsService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import MemberLink from '@/components/MemberLink';
+import ActionPanel from '@/components/ui/ActionPanel';
 
 const STATUS_STYLES = {
   resolved: { bg: `${'#22c55e'}12`, color: '#22c55e', label: 'Resolved' },
@@ -26,6 +27,7 @@ export default function ComplaintsTab() {
   const { routeIntent, clearRouteIntent } = useNavigationContext();
   const [statusFilter, setStatusFilter] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
+  const [expandedComplaintId, setExpandedComplaintId] = useState(null);
 
   const feedbackRecords = getComplaintCorrelation();
 
@@ -114,63 +116,93 @@ export default function ComplaintsTab() {
             {openComplaints.map(complaint => {
               const daysSince = Math.round((new Date('2026-01-31') - new Date(complaint.date)) / (1000 * 60 * 60 * 24));
               const statusStyle = STATUS_STYLES[complaint.status] || STATUS_STYLES.acknowledged;
+              const isComplaintExpanded = expandedComplaintId === complaint.id;
+              const complaintRecommended = [];
+              if (daysSince > 3 && complaint.status !== 'resolved') {
+                complaintRecommended.push({ key: 'escalate', icon: '🔺', label: 'Escalate to GM', type: 'staff_task', description: `${daysSince} days unresolved — needs personal attention` });
+              }
+              if (complaint.status !== 'resolved') {
+                complaintRecommended.push({ key: 'recovery-email', icon: '✉', label: 'Send Recovery Email', type: 'email', description: `Acknowledge ${complaint.category} complaint` });
+                complaintRecommended.push({ key: 'apology-sms', icon: '💬', label: 'Send Apology Text', type: 'sms', description: 'Personal apology via SMS' });
+              }
+
               return (
-                <div
-                  key={complaint.id}
-                  className={`p-4 bg-gray-100 rounded-lg flex justify-between items-center flex-wrap gap-2 ${daysSince > 7 ? 'border border-error-500/30' : 'border border-gray-200'}`}
-                >
-                  <div className="flex-1 min-w-[200px]">
-                    <div className="flex items-center gap-2 mb-1">
-                      {complaint.memberName ? (
-                        <MemberLink mode="drawer" memberId={complaint.memberId} className="font-semibold text-[#1a1a2e] text-sm">
-                          {complaint.memberName}
-                        </MemberLink>
-                      ) : (
-                        <span className="font-semibold text-[#1a1a2e] text-sm">
-                          Member {complaint.memberId}
-                        </span>
-                      )}
-                      {complaint.isUnderstaffedDay && (
-                        <span className="text-[10px] font-bold text-error-500 bg-error-500/[0.07] py-0.5 px-1.5 rounded-full">
-                          Understaffed day
-                        </span>
-                      )}
-                      {daysSince <= 3 && (
-                        <span className="text-[10px] font-bold text-[#ca8a04] bg-[#ca8a0412] py-0.5 px-1.5 rounded-full">
-                          High-demand day
-                        </span>
-                      )}
-                      {(complaint.weatherContext?.isWeatherImpacted || complaint.weatherContext?.is_weather_impacted) && (
-                        <span
-                          className="text-[10px] font-bold text-blue-600 bg-blue-600/[0.07] py-0.5 px-1.5 rounded-full"
-                          title={complaint.weatherContext?.impactReason || complaint.weatherContext?.impact_reason || ''}
-                        >
-                          Weather: {complaint.weatherContext?.impactReason || complaint.weatherContext?.impact_reason || 'Weather impact'}
-                        </span>
-                      )}
-                      {!complaint.weatherContext && complaint.category === 'Pace of Play' && (
-                        <span className="text-[10px] font-bold text-blue-600 bg-blue-600/[0.07] py-0.5 px-1.5 rounded-full">
-                          Weather impact
-                        </span>
-                      )}
+                <div key={complaint.id}>
+                  <div
+                    onClick={() => setExpandedComplaintId(isComplaintExpanded ? null : complaint.id)}
+                    className={`p-4 bg-gray-100 rounded-lg flex justify-between items-center flex-wrap gap-2 cursor-pointer transition-shadow hover:shadow-sm ${daysSince > 7 ? 'border border-error-500/30' : 'border border-gray-200'}`}
+                  >
+                    <div className="flex-1 min-w-[200px]">
+                      <div className="flex items-center gap-2 mb-1">
+                        {complaint.memberName ? (
+                          <MemberLink mode="drawer" memberId={complaint.memberId} className="font-semibold text-[#1a1a2e] text-sm">
+                            {complaint.memberName}
+                          </MemberLink>
+                        ) : (
+                          <span className="font-semibold text-[#1a1a2e] text-sm">
+                            Member {complaint.memberId}
+                          </span>
+                        )}
+                        {complaint.isUnderstaffedDay && (
+                          <span className="text-[10px] font-bold text-error-500 bg-error-500/[0.07] py-0.5 px-1.5 rounded-full">
+                            Understaffed day
+                          </span>
+                        )}
+                        {daysSince <= 3 && (
+                          <span className="text-[10px] font-bold text-[#ca8a04] bg-[#ca8a0412] py-0.5 px-1.5 rounded-full">
+                            High-demand day
+                          </span>
+                        )}
+                        {(complaint.weatherContext?.isWeatherImpacted || complaint.weatherContext?.is_weather_impacted) && (
+                          <span
+                            className="text-[10px] font-bold text-blue-600 bg-blue-600/[0.07] py-0.5 px-1.5 rounded-full"
+                            title={complaint.weatherContext?.impactReason || complaint.weatherContext?.impact_reason || ''}
+                          >
+                            Weather: {complaint.weatherContext?.impactReason || complaint.weatherContext?.impact_reason || 'Weather impact'}
+                          </span>
+                        )}
+                        {!complaint.weatherContext && complaint.category === 'Pace of Play' && (
+                          <span className="text-[10px] font-bold text-blue-600 bg-blue-600/[0.07] py-0.5 px-1.5 rounded-full">
+                            Weather impact
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {complaint.category} — {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {complaint.category} — {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {daysSince > 7 && (
-                      <span className="text-[11px] font-bold text-error-500">
-                        {daysSince}d open
+                    <div className="flex items-center gap-2">
+                      {daysSince > 7 && (
+                        <span className="text-[11px] font-bold text-error-500">
+                          {daysSince}d open
+                        </span>
+                      )}
+                      <span
+                        className="text-[11px] font-semibold py-0.5 px-2.5 rounded-full"
+                        style={{ background: statusStyle.bg, color: statusStyle.color }}
+                      >
+                        {statusStyle.label}
                       </span>
-                    )}
-                    <span
-                      className="text-[11px] font-semibold py-0.5 px-2.5 rounded-full"
-                      style={{ background: statusStyle.bg, color: statusStyle.color }}
-                    >
-                      {statusStyle.label}
-                    </span>
+                      {complaint.status !== 'resolved' && (
+                        <span className="text-[10px] font-semibold text-brand-500">
+                          {isComplaintExpanded ? '▾' : '▸ Act'}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {isComplaintExpanded && complaint.status !== 'resolved' && (
+                    <ActionPanel
+                      context={{
+                        memberId: complaint.memberId,
+                        memberName: complaint.memberName,
+                        description: `${complaint.category} complaint — ${daysSince} days open`,
+                        source: 'Service Recovery',
+                      }}
+                      recommended={complaintRecommended}
+                      onClose={() => setExpandedComplaintId(null)}
+                      compact
+                    />
+                  )}
                 </div>
               );
             })}
