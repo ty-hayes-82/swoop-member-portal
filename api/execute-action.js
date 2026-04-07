@@ -237,9 +237,13 @@ export default withAuth(async function handler(req, res) {
       results.message = `Comp offer logged for ${memberName}`;
     }
 
-    // Update action status to executed
+    // Update action status to executed in both tables
     await sql`
       UPDATE actions SET status = 'executed', executed_at = NOW()
+      WHERE action_id = ${actionId}
+    `;
+    await sql`
+      UPDATE agent_actions SET status = 'executed', approved_at = NOW()
       WHERE action_id = ${actionId}
     `;
 

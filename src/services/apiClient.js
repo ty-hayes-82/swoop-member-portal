@@ -10,7 +10,7 @@ function getAuthHeaders() {
   const token = localStorage.getItem('swoop_auth_token');
   const user = JSON.parse(localStorage.getItem('swoop_auth_user') || 'null');
 
-  if (token) {
+  if (token && token !== 'demo') {
     return { Authorization: `Bearer ${token}` };
   }
 

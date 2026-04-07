@@ -177,12 +177,16 @@ export function MemberProfileProvider({ children }) {
         const actionId = `quick_${actionType}_${Date.now()}`;
         showToast?.('Generating draft...', 'info');
         trackAction({ actionType, memberId, memberName });
+        // Add to inbox so the action has a record, then approve with skipCloudSend
+        // to avoid a 404 from /api/execute-action (this ID doesn't exist in the DB)
+        addAction?.({ description: `${actionType === 'email' ? 'Email' : 'SMS'} outreach — ${memberName}`, memberId, memberName, actionType: 'RETENTION_OUTREACH', source: 'Quick Action', priority: 'medium', impactMetric: `${actionType} sent` });
         approveAction?.(actionId, {
           executionType: actionType,
           memberId,
           memberName,
           memberEmail,
           memberPhone,
+          skipCloudSend: true,
         });
         return;
       }

@@ -63,7 +63,7 @@ export function approveAction(id, meta = {}) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ actionId: id, operation: 'approve', meta }),
-  }).catch(() => {});
+  }).catch((err) => { console.error('Failed to persist action approval:', err); });
   return actionStore.find((action) => action.id === id) ?? null;
 }
 
@@ -83,7 +83,7 @@ export function dismissAction(id, meta = {}) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ actionId: id, operation: 'dismiss', meta }),
-  }).catch(() => {});
+  }).catch((err) => { console.error('Failed to persist action dismissal:', err); });
   return actionStore.find((action) => action.id === id) ?? null;
 }
 

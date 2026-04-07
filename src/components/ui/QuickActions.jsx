@@ -8,7 +8,7 @@ import { apiFetch } from '@/services/apiClient';
 const STAFF = ['F&B Director', 'Head Golf Professional', 'Membership Director', 'Grill Room Manager', 'Club Manager'];
 
 export default function QuickActions({ memberName, memberId, context = '', archetype = '' }) {
-  const { showToast } = useApp();
+  const { showToast, addAction } = useApp();
   const [mode, setMode]   = useState(null);
   const [note, setNote]   = useState('');
   const [time, setTime]   = useState('');
@@ -122,9 +122,18 @@ export default function QuickActions({ memberName, memberId, context = '', arche
         ? `Call scheduled for ${memberName}`
         : `Task assigned to ${staff}`;
     showToast(message, 'info');
-    if (type === 'note') trackAction({ actionType: 'note', actionSubtype: 'personal', memberId, memberName, description: note || defaultNote });
-    if (type === 'call') trackAction({ actionType: 'call', actionSubtype: 'schedule', memberId, memberName });
-    if (type === 'task') trackAction({ actionType: 'task', actionSubtype: 'assign', memberId, memberName, meta: { assignedTo: staff } });
+    if (type === 'note') {
+      trackAction({ actionType: 'note', actionSubtype: 'personal', memberId, memberName, description: note || defaultNote });
+      addAction({ description: `Personal note drafted for ${memberName}`, memberId, memberName, actionType: 'DRAFT_MESSAGE', source: 'Quick Action', priority: 'low', impactMetric: 'Email drafted' });
+    }
+    if (type === 'call') {
+      trackAction({ actionType: 'call', actionSubtype: 'schedule', memberId, memberName });
+      addAction({ description: `Call scheduled with ${memberName}`, memberId, memberName, actionType: 'FOLLOW_UP', source: 'Quick Action', priority: 'medium', impactMetric: 'Call scheduled' });
+    }
+    if (type === 'task') {
+      trackAction({ actionType: 'task', actionSubtype: 'assign', memberId, memberName, meta: { assignedTo: staff } });
+      addAction({ description: `Task assigned to ${staff}: follow up with ${memberName}`, memberId, memberName, actionType: 'RETENTION_OUTREACH', source: 'Quick Action', priority: 'medium', impactMetric: `Assigned to ${staff}` });
+    }
     setTimeout(() => setSent(null), 4000);
   };
 

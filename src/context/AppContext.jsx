@@ -11,19 +11,20 @@ import {
 } from '@/services/teeSheetOpsService';
 import { useToast } from '@/components/ui/Toast.jsx';
 import { apiFetch } from '@/services/apiClient';
+import { trackAction } from '@/services/activityService';
 
-// V3: Only 3 core playbooks. Removed slow-saturday (renamed to staffing-gap),
-// engagement-decay, peak-demand-capture.
 const PLAYBOOK_DEFS = {
   'service-save': { monthly: 18000, annual: 216000 },
   'new-member-90day': { monthly: 22000, annual: 264000 },
   'staffing-gap': { monthly: 2100, annual: 25200 },
+  'engagement-decay': { monthly: 9000, annual: 108000 },
 };
 
 const TRAIL_STEPS = {
   'service-save': ['🚩 James Whitfield flagged at front desk', '📢 F&B Director alerted with complaint details', '✉ GM personal alert: James Whitfield — 8K member, 4-day unresolved complaint', '🎁 Comp appetizer offer queued for James Whitfield'],
   'new-member-90day': ['🤝 Member matched with compatible golfers', '🎉 Family event invitation sent', '📞 Concierge check-in scheduled', '📋 90-day pulse survey queued'],
   'staffing-gap': ['📊 72-hour shift gap detection enabled', '📢 Flex pool (4 staff) notified for Grill Room backup', '📅 Post-day audit report scheduled daily'],
+  'engagement-decay': ['📊 Weekly health scan flagged 30 declining members', '✉ 30 personalized re-engagement emails queued', '🚩 Non-responders flagged for GM personal outreach'],
 };
 
 const defaultAgents = getAgents();
@@ -37,11 +38,13 @@ const initialState = {
     'service-save': { active: false, activatedAt: null },
     'new-member-90day': { active: false, activatedAt: null },
     'staffing-gap': { active: false, activatedAt: null },
+    'engagement-decay': { active: false, activatedAt: null },
   },
   trailProgress: {
     'service-save': 0,
     'new-member-90day': 0,
     'staffing-gap': 0,
+    'engagement-decay': 0,
   },
   inbox: defaultInbox,
   pendingCount: defaultInbox.filter(a => a.status === 'pending').length,
@@ -266,6 +269,18 @@ export function AppProvider({ children }) {
     approveAgentServiceAction(id, meta);
     dispatch({ type: 'APPROVE_ACTION', id, meta });
 
+    const actionItem = state.inbox.find(a => a.id === id);
+    trackAction({
+      actionType: 'approve',
+      actionSubtype: meta.executionType || 'general',
+      memberId: meta.memberId || actionItem?.memberId || null,
+      memberName: meta.memberName || actionItem?.memberName || null,
+      agentId: actionItem?.agentId || null,
+      referenceId: id,
+      referenceType: 'action',
+      description: `Approved: ${actionItem?.description || id}`,
+    });
+
     const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
     if (!clubId) return;
 
@@ -275,8 +290,7 @@ export function AppProvider({ children }) {
     const emailSendMode = localStorage.getItem('swoop_email_send_mode') || 'local';
     const smsSendMode = localStorage.getItem('swoop_sms_send_mode') || 'local';
 
-    // Find the action description from inbox for local send
-    const actionItem = state.inbox.find(a => a.id === id);
+    // Use actionItem found above for local send
     const memberName = actionItem?.memberName || meta.memberName || 'Member';
     const description = meta.customMessage || actionItem?.description || '';
 
@@ -355,10 +369,13 @@ export function AppProvider({ children }) {
     }
 
     // ── Cloud send: call API (SendGrid / Twilio) ──
+    // Skip cloud send for quick actions with no real DB action record
+    if (meta.skipCloudSend) return;
     const token = localStorage.getItem('swoop_auth_token');
+    const authHeaders = token && token !== 'demo' ? { Authorization: `Bearer ${token}` } : { 'X-Demo-Club': clubId };
     fetch('/api/execute-action', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify({
         actionId: id, clubId,
         executionType: execType,
@@ -369,12 +386,28 @@ export function AppProvider({ children }) {
         ...(demoEmail ? { demoOverrideEmail: demoEmail } : {}),
         ...(demoPhone ? { demoOverridePhone: demoPhone } : {}),
       }),
-    }).catch(() => {});
+    }).then(r => {
+      if (r && !r.ok) showToast('Action may not have been delivered — check status', 'error');
+    }).catch(() => {
+      showToast('Failed to send action — please retry', 'error');
+    });
   }
 
   function dismissAction(id, meta = {}) {
     dismissAgentServiceAction(id, meta);
     dispatch({ type: 'DISMISS_ACTION', id, meta });
+
+    const actionItem = state.inbox.find(a => a.id === id);
+    trackAction({
+      actionType: 'dismiss',
+      actionSubtype: meta.reason || 'no_reason',
+      memberId: actionItem?.memberId || null,
+      memberName: actionItem?.memberName || null,
+      agentId: actionItem?.agentId || null,
+      referenceId: id,
+      referenceType: 'action',
+      description: `Dismissed: ${actionItem?.description || id}`,
+    });
   }
 
   return (

@@ -5,9 +5,16 @@
  */
 import { apiFetch } from './apiClient';
 
+function getActorName() {
+  try {
+    return localStorage.getItem('swoop_user_name') || localStorage.getItem('swoop_demo_name') || 'GM';
+  } catch { return 'GM'; }
+}
+
 export function trackAction({
   actionType,
   actionSubtype,
+  actor,
   memberId,
   memberName,
   agentId,
@@ -16,12 +23,14 @@ export function trackAction({
   description,
   meta,
 }) {
+  const resolvedActor = actor ?? getActorName();
   apiFetch('/api/activity', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       actionType,
       actionSubtype: actionSubtype ?? null,
+      actor: resolvedActor,
       memberId: memberId ?? null,
       memberName: memberName ?? null,
       agentId: agentId ?? null,
@@ -30,7 +39,7 @@ export function trackAction({
       description: description ?? null,
       meta: meta ?? {},
     }),
-  }).catch(() => {});
+  }).catch((err) => { console.error('Failed to log activity:', err); });
 
   // Also log outreach events to localStorage for member profile display
   if (memberId && ['call', 'email', 'sms', 'comp', 'outreach'].includes(actionType)) {
@@ -43,7 +52,7 @@ export function trackAction({
         type: actionType,
         description: description ?? `${actionType} for ${memberName ?? memberId}`,
         timestamp: new Date().toISOString(),
-        initiatedBy: 'Sarah Mitchell',
+        initiatedBy: resolvedActor,
       });
       // Keep last 100 entries
       localStorage.setItem(key, JSON.stringify(existing.slice(0, 100)));

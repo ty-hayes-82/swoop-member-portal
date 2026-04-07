@@ -16,7 +16,7 @@ const PLAYBOOKS = [
     category: 'Service Recovery',
     categoryColor: '#c0392b',
     description: 'An engaged member files a complaint that goes unresolved, leading to resignation within days. One saved resignation protects $18K\u2013$22K in dues plus $3K\u2013$5K in ancillary revenue.',
-    triggeredFor: { name: 'James Whitfield', note: '6-year member in good standing \u2014 complaint from this profile is a red flag' },
+    triggeredFor: { name: 'James Whitfield', memberId: 'mbr_203', note: '6-year member in good standing \u2014 complaint from this profile is a red flag' },
     monthlyImpact: '$18K',
     yearlyImpact: '$216K/yr',
     steps: [
@@ -46,7 +46,7 @@ const PLAYBOOKS = [
     category: 'New Member Success',
     categoryColor: '#0ea5e9',
     description: 'New members who don\u2019t build habits in the first 90 days are 4x more likely to resign by Year 2. This playbook triggers at Day 30, 60, and 90 when engagement thresholds aren\u2019t met \u2014 fewer than 3 rounds, zero dining visits, or zero events attended.',
-    triggeredFor: { name: 'Rachel Simmons', note: 'Day 34 \u2014 1 round played, 0 dining, 0 events. Integration score: 18%' },
+    triggeredFor: { name: 'Rachel Simmons', memberId: 'mbr_309', note: 'Day 34 \u2014 1 round played, 0 dining, 0 events. Integration score: 18%' },
     monthlyImpact: '$22K',
     yearlyImpact: '$264K/yr',
     steps: [
@@ -78,7 +78,7 @@ const PLAYBOOKS = [
     category: 'Member Engagement',
     categoryColor: '#6b7280',
     description: '24 members currently have zero activity across golf, dining, and events for 60+ days. They\u2019re paying dues but getting no value \u2014 the most likely next step is a resignation letter. Saving even 5 Ghost members protects ~$90K/yr.',
-    triggeredFor: { name: 'David Kowalski', note: '72 days inactive \u2014 was a 2x/week golfer through September. No visits since Oct 3.' },
+    triggeredFor: { name: 'David Kowalski', memberId: 'mbr_055', note: '72 days inactive \u2014 was a 2x/week golfer through September. No visits since Oct 3.' },
     monthlyImpact: '$7.5K',
     yearlyImpact: '$90K/yr',
     steps: [
@@ -110,7 +110,7 @@ const PLAYBOOKS = [
     category: 'Member Engagement',
     categoryColor: '#dc2626',
     description: '30 members trending down with $733K at risk. When a member\u2019s 90-day engagement drops below 30% of their personal baseline \u2014 rounds halved, dining flatlined \u2014 it\u2019s a quiet signal that something is wrong. This playbook catches the decline before the resignation.',
-    triggeredFor: { name: 'Robert Ashford', note: 'Rounds dropped from 8/mo to 2/mo. Dining visits from 6 to 1. Health score: 28 (was 74).' },
+    triggeredFor: { name: 'Robert Ashford', memberId: 'mbr_271', note: 'Rounds dropped from 8/mo to 2/mo. Dining visits from 6 to 1. Health score: 28 (was 74).' },
     monthlyImpact: '$24K',
     yearlyImpact: '$290K/yr',
     steps: [
@@ -142,7 +142,7 @@ const PLAYBOOKS = [
     category: 'Service Recovery',
     categoryColor: '#b91c1c',
     description: 'A more aggressive, value-weighted version of the Service Save Protocol. When negative sentiment is detected for any member paying $12K+ in annual dues \u2014 survey below 3, front desk complaint, or negative post-visit feedback \u2014 the response window shrinks from hours to minutes.',
-    triggeredFor: { name: 'Catherine Mercer', note: '$24K/yr dues, 14-year member. Rated post-dinner experience 2/5 \u2014 "waited 40 minutes for entrees, server never checked back."' },
+    triggeredFor: { name: 'Catherine Mercer', memberId: 'mbr_134', note: '$24K/yr dues, 14-year member. Rated post-dinner experience 2/5 \u2014 "waited 40 minutes for entrees, server never checked back."' },
     monthlyImpact: '$24K',
     yearlyImpact: '$288K/yr',
     steps: [
@@ -271,7 +271,7 @@ const PLAYBOOKS = [
     category: 'Revenue',
     categoryColor: '#0891b2',
     description: '16 Snowbird members return seasonally, and every year the club misses the window to make their arrival feel curated. This playbook triggers 3 weeks before each Snowbird\u2019s historical arrival date and turns a seasonal return into a VIP homecoming.',
-    triggeredFor: { name: 'George & Patricia Langford', note: 'Historically arrive Nov 1\u20137. Last year\u2019s first tee time: Nov 3 at 8:15am. $22K/yr dues.' },
+    triggeredFor: { name: 'George & Patricia Langford', memberId: 'mbr_311', note: 'Historically arrive Nov 1\u20137. Last year\u2019s first tee time: Nov 3 at 8:15am. $22K/yr dues.' },
     monthlyImpact: '$8K',
     yearlyImpact: '$96K/yr',
     steps: [
@@ -365,7 +365,7 @@ const PLAYBOOKS = [
     category: 'Revenue',
     categoryColor: '#ea580c',
     description: '98 Die-Hard Golfers and Weekend Warriors play regularly but never eat at the club. They\u2019re physically on the property 4+ times a month and spending $0 in dining. This playbook cross-sells F&B to members who are already through the front door.',
-    triggeredFor: { name: 'Tom Brennan', note: '6 rounds in the last 30 days, $0 in dining. Avg post-round time on property: 22 minutes. Leaving without eating.' },
+    triggeredFor: { name: 'Tom Brennan', memberId: 'mbr_304', note: '6 rounds in the last 30 days, $0 in dining. Avg post-round time on property: 22 minutes. Leaving without eating.' },
     monthlyImpact: '$11K',
     yearlyImpact: '$132K/yr',
     steps: [
@@ -466,7 +466,7 @@ function PlaybookCard({ playbook, onSelect, isSelected }) {
 }
 
 function PlaybookDetail({ playbook }) {
-  const { showToast, addAction } = useApp();
+  const { showToast, addAction, dispatch } = useApp();
   const [editingSteps, setEditingSteps] = useState(false);
 
   // Load customized steps if they exist
@@ -597,6 +597,7 @@ function PlaybookDetail({ playbook }) {
             showToast(`${playbook.name} activated`, 'success');
             trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: playbook.name });
             addAction({ description: `${playbook.name} activated — ${playbook.triggeredCount || 0} members triggered`, actionType: 'RETENTION_OUTREACH', source: 'Playbook Engine', priority: 'high', impactMetric: playbook.impact || '' });
+            dispatch({ type: 'ACTIVATE_PLAYBOOK', id: playbook.id });
 
             // Wire to real playbook execution API
             const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
@@ -618,7 +619,7 @@ function PlaybookDetail({ playbook }) {
                     dueDays: i * 3 + 1,
                   })),
                 }),
-              }).catch(() => {});
+              }).catch((err) => { console.error('Playbook execution API error:', err); });
             }
           }}
           className="w-full text-white border-none py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold cursor-pointer transition-opacity hover:opacity-90"

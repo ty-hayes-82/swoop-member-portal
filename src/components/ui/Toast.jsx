@@ -44,7 +44,7 @@ export function Toast({ message, variant = 'success', duration = 4000, onClose }
 export function useToast() {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = (message, variant = 'success', duration = 3000) => {
+  const showToast = (message, variant = 'success', duration = 4000) => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, variant, duration }]);
   };

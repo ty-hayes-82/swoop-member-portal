@@ -16,7 +16,7 @@ export default function PlaybookActionCard({
   variant = 'standard',
   linkTo,
 }) {
-  const { showToast } = useApp();
+  const { showToast, dispatch, addAction } = useApp();
   const { navigate } = useNavigationContext();
   const [hovered, setHovered] = useState(false);
 
@@ -26,6 +26,10 @@ export default function PlaybookActionCard({
   const handleActivate = () => {
     showToast(`${playbookName || title} activated for ${memberCount || 'targeted'} members`, 'success');
     trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: playbookName || title, meta: { memberCount, impact } });
+    if (playbookName) {
+      dispatch({ type: 'ACTIVATE_PLAYBOOK', id: playbookName.toLowerCase().replace(/\s+/g, '-') });
+      addAction({ description: `${playbookName} activated — ${memberCount || 'targeted'} members`, actionType: 'RETENTION_OUTREACH', source: 'Playbook Engine', priority: 'high', impactMetric: impact || '' });
+    }
   };
 
   const handleViewPlaybook = () => {

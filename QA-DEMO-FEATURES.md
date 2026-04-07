@@ -3,7 +3,7 @@
 **Environment:** https://swoop-member-portal-dev.vercel.app (or localhost:5173)
 **Login:** Click "Enter Demo Mode (Pinetree CC)" on the login page, then click "Start Demo"
 **Browser:** Chrome recommended (Gmail compose URLs open in new tab)
-**Time:** ~25 minutes for full pass
+**Time:** ~35 minutes for full pass
 
 ---
 
@@ -36,7 +36,7 @@
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 2.1 | Scroll to bottom, click "Cart Prep Recommendations" to expand | Cart prep cards appear for all 22 tee times | |
+| 2.1 | Scroll to bottom, click "Cart Prep Recommendations" to expand | Cart prep cards appear for all 20 tee times | |
 | 2.2 | Find any cart prep card (e.g., Kevin Hurst) | Card shows beverage, snack, group, and operational note | |
 | 2.3 | Verify two action buttons appear on each card | "Send Cart Prep Text" (orange) and "Post-Round Dining Nudge" (amber) | |
 | 2.4 | Click **"Send Cart Prep Text"** on Kevin Hurst's card | Toast "Generating cart prep text..." appears, then your SMS app opens with a pre-filled message mentioning their beverage/snack preferences and tee time | |
@@ -118,6 +118,7 @@
 | 7.3 | Wait for AI draft (~2-3 seconds) | Textarea populates with AI-generated email content. "AI-generated draft" label appears in header | |
 | 7.4 | Edit the draft text | Textarea is editable — changes persist | |
 | 7.5 | Click the send button | If Gmail mode: button reads "Open in Gmail" — click opens Gmail compose with the draft. If Local mode: button reads "Draft email" — opens mailto. If Cloud mode: button reads "Send via email" — sends via API | |
+| 7.6 | **[NEW]** Verify action appears in global inbox | Navigate to Automations > Inbox tab. A new action "Personal note drafted for [Name]" should appear as a pending item with source "Quick Action" | |
 
 **Fallback:** If AI fails, the textarea shows a generic template starting with "Dear [FirstName]..."
 
@@ -131,12 +132,12 @@
 |---|------|-----------------|-------|
 | 8.1 | Navigate to Automations page | Inbox tab shows pending actions | |
 | 8.2 | Verify these 6 new action types appear in the inbox (they may require scrolling): | | |
-| | - **Post-round dining offer** (John Harrison, high priority, "🍽 Post-Round Dining") | Revenue Analyst source, $152 F&B capture metric | |
-| | - **Staff push alert** (Robert Callaway, high priority, "📲 Staff Alert") | Member Pulse source, $22K VIP member | |
-| | - **Snowbird welcome-back** (Ronald Petersen, medium priority, "🌴 Welcome Back") | Engagement Autopilot source, $20K seasonal member | |
-| | - **Rapid response** (James Whitfield, high priority, "⚡ Rapid Response") | Service Recovery source, 42-min ticket time detail | |
-| | - **Day-30 check-in** (Jason Rivera, medium priority, "📞 Day-30 Check-in") | Member Pulse source, 30-day milestone | |
-| | - **Dining dormancy** (Sandra Chen, medium priority, "🍷 Dining Nudge") | Revenue Analyst source, $480/mo at risk | |
+| | - **Post-round dining offer** (John Harrison, high priority, "Post-Round Dining") | Revenue Analyst source, $152 F&B capture metric | |
+| | - **Staff push alert** (Robert Callaway, high priority, "Staff Alert") | Member Pulse source, $22K VIP member | |
+| | - **Snowbird welcome-back** (Ronald Petersen, medium priority, "Welcome Back") | Engagement Autopilot source, $20K seasonal member | |
+| | - **Rapid response** (James Whitfield, high priority, "Rapid Response") | Service Recovery source, 42-min ticket time detail | |
+| | - **Day-30 check-in** (Jason Rivera, medium priority, "Day-30 Check-in") | Member Pulse source, 30-day milestone | |
+| | - **Dining dormancy** (Sandra Chen, medium priority, "Dining Nudge") | Revenue Analyst source, $480/mo at risk | |
 | 8.3 | Click **Approve** on the Post-round dining offer | SMS app opens with personalized dining offer for John Harrison | |
 | 8.4 | Click **Approve** on the Snowbird welcome-back | Gmail compose (or mailto) opens with welcome-back email for Ronald Petersen | |
 | 8.5 | Click **Approve** on the Staff push alert | SMS opens with staff alert content (push notifications simulated via SMS in demo) | |
@@ -169,6 +170,72 @@
 | 10.3 | Verify SMS button reads "Draft SMS" | Label updated from "Send SMS" to "Draft SMS" | |
 | 10.4 | Click **"Draft in Gmail"** (or "Draft email") | Toast "Generating draft..." appears, then Gmail compose (or mailto) opens with AI-generated subject and body personalized to the member | |
 | 10.5 | Click **"Draft SMS"** | Toast "Generating draft..." appears, then SMS app opens with AI-generated short message (< 160 chars) | |
+| 10.6 | **[NEW]** Verify action logged to global inbox | Navigate to Automations > Inbox. An "Email outreach" or "SMS outreach" action should appear with source "Quick Action" | |
+
+---
+
+## Test 11: Action Logging & Audit Trail (NEW)
+
+**Page:** Automations (`#/automations`) + DevTools Console
+
+| # | Step | Expected Result | Pass? |
+|---|------|-----------------|-------|
+| 11.1 | Open DevTools Console (F12 > Console tab) | Console visible | |
+| 11.2 | Go to Automations > Inbox. **Approve** any pending action | Toast confirms the action. No `console.error` messages about failed persistence. Action moves to "Recently Handled" with approved status and timestamp | |
+| 11.3 | **Dismiss** any pending action | Action moves to "Recently Handled" with dismissed status and timestamp. No console errors | |
+| 11.4 | Open a member profile drawer. Click **"Draft personal note"** | Note panel opens, AI draft loads | |
+| 11.5 | Click "Open in Gmail" (or "Draft email") | Toast confirms. Navigate to Automations > Inbox — a "Personal note drafted for [Name]" action appears | |
+| 11.6 | Click **"Schedule a call"** > pick a time > "Add to calendar" | Toast confirms. Navigate to Automations > Inbox — a "Call scheduled with [Name]" action appears | |
+| 11.7 | Click **"Assign to staff"** > pick staff > "Assign task" | Toast confirms. Navigate to Automations > Inbox — a "Task assigned to [Staff]" action appears | |
+| 11.8 | Verify Follow-up Tracker | Below the Quick Actions buttons, a "Follow-up tracker" section appears showing all 3 actions with correct statuses (Completed/Scheduled/Assigned) | |
+| 11.9 | Click **"Mark done"** on a Scheduled or Assigned entry | Status changes to "Completed" | |
+
+---
+
+## Test 12: Playbook Activation & State (NEW)
+
+**Page:** Member Health (`#/member-health`) and Playbooks (`#/playbooks`)
+
+| # | Step | Expected Result | Pass? |
+|---|------|-----------------|-------|
+| 12.1 | Navigate to Member Health page | Two response plans visible: "Service Save Protocol" and "Engagement Decay Intervention" | |
+| 12.2 | On **Service Save Protocol**, click "Activate this response plan" | Confirmation panel appears: "Confirm activation" with step preview | |
+| 12.3 | Click "Yes, activate this plan" | Trail animation fires: 4 steps animate in sequence with checkmarks. Button changes to "Active — Deactivate". Monthly impact shows in green | |
+| 12.4 | On **Engagement Decay Intervention**, click "Activate this response plan" | Same confirmation flow. Trail shows 3 steps: health scan, re-engagement emails, personal outreach. Monthly impact shows **$9K** (not $0) | |
+| 12.5 | Click "Active — Deactivate" on Service Save | Playbook deactivates, button returns to "Activate this response plan" | |
+| 12.6 | Verify **Track Record** sections | Service Save: shows Q4 2025 and Q3 2025 data. Engagement Decay: shows Q4 2025 data | |
+| 12.7 | Navigate to **Playbooks** page (`#/playbooks`) | Playbook catalog loads with category filters | |
+| 12.8 | Select **Service Save Protocol** | Detail view shows steps, triggered for "James Whitfield", track record, before/after metrics | |
+| 12.9 | Click **"Activate this playbook"** | Toast "Service Save Protocol activated". Action appears in Automations inbox. If logged into a club, the `/api/execute-playbook` API fires (check DevTools Network tab — POST with `memberId: mbr_203`) | |
+| 12.10 | Select **New Member 90-Day Integration** | Track Record section shows Q4 2025 (8 runs, 7 integrated) and Q3 2025 data — **not empty** | |
+| 12.11 | Open DevTools Console, activate any playbook | No `console.error` messages. If API fails, error is logged (not silently swallowed) | |
+
+---
+
+## Test 13: Error Feedback on Failed Actions (NEW)
+
+**Page:** Automations (`#/automations`)
+
+| # | Step | Expected Result | Pass? |
+|---|------|-----------------|-------|
+| 13.1 | In Profile, set Email Delivery to **"Cloud"** and save | Cloud send mode active | |
+| 13.2 | Disconnect from internet (or use DevTools > Network > Offline) | Network offline | |
+| 13.3 | Go to Automations > Inbox, click **Approve** on any action | Error toast appears: "Failed to send action — please retry" | |
+| 13.4 | Reconnect to internet | Network restored | |
+| 13.5 | Click **Approve** on the same action again | Action succeeds normally (or shows "Action may not have been delivered" if server returns error) | |
+| 13.6 | Reset Email Delivery back to **"Gmail Draft"** in Profile | Ready for next tests | |
+
+---
+
+## Test 14: Actor Attribution in Activity Log (NEW)
+
+**Page:** Admin Hub (`#/admin`) + Member Profile Drawer
+
+| # | Step | Expected Result | Pass? |
+|---|------|-----------------|-------|
+| 14.1 | Open a member profile drawer, click "Draft personal note", send it | Action logged | |
+| 14.2 | Open the member profile drawer again, scroll to outreach history | The logged action shows "Initiated by: **GM**" (or your configured user name) — **not** "Sarah Mitchell" | |
+| 14.3 | Navigate to Admin Hub, check the Activity Log section | Recent entries show the correct actor name, not a hardcoded default | |
 
 ---
 
@@ -179,6 +246,8 @@
 - **SMS links** use `sms:` URI scheme — behavior varies by OS. On Mac/Windows desktop, this may open iMessage or the default SMS app. On mobile it opens the native messaging app.
 - **GM Greeting Alerts reset on page navigation** — they are simulated per page load, not persisted.
 - **Demo mode** uses static member data — the same members and scenarios appear every time.
+- **Playbook API calls** require a club ID in localStorage (set automatically in demo mode). If missing, the playbook activates in the UI but doesn't create a run in the database.
+- **Actor name** resolves from `swoop_user_name` or `swoop_demo_name` in localStorage. In demo mode this defaults to "GM".
 
 ---
 

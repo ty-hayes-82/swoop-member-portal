@@ -48,7 +48,7 @@ export default withAuth(async function handler(req, res) {
     `;
     await sql`CREATE INDEX IF NOT EXISTS idx_playbook_runs_club ON playbook_runs(club_id, status)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_playbook_steps_run ON playbook_steps(run_id, step_number)`;
-  } catch {}
+  } catch (e) { console.error('Playbook table init error:', e.message); }
 
   if (req.method === 'GET') {
     const { memberId, status } = req.query;
@@ -89,9 +89,7 @@ export default withAuth(async function handler(req, res) {
     }
 
     return res.status(200).json({ runs: enriched });
-  }
-
-  if (req.method === 'POST') {
+  } else if (req.method === 'POST') {
     const { playbookId, playbookName, memberId, triggeredBy, triggerReason, steps } = req.body;
 
     if (!playbookId || !memberId || !steps?.length) {
@@ -136,9 +134,9 @@ export default withAuth(async function handler(req, res) {
                     'high', ${memberId})
           `;
         }
-      } catch {}
+      } catch (e) { console.error('Playbook notification error:', e.message); }
 
-      res.status(201).json({
+      return res.status(201).json({
         runId,
         playbookName,
         memberId,
@@ -146,11 +144,9 @@ export default withAuth(async function handler(req, res) {
         message: `Playbook "${playbookName}" activated with ${steps.length} steps.`,
       });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      return res.status(500).json({ error: e.message });
     }
-  }
-
-  if (req.method === 'PUT') {
+  } else if (req.method === 'PUT') {
     const { stepId, status, completedBy, notes, runId } = req.body;
 
     if (stepId && status) {
@@ -198,7 +194,7 @@ export default withAuth(async function handler(req, res) {
                         ${`Playbook "${runInfo.rows[0]?.playbook_name}" — Step ${nextStep.rows[0].step_number}: ${nextStep.rows[0].title}`},
                         'normal', ${runInfo.rows[0]?.member_id})
               `;
-            } catch {}
+            } catch (e) { console.error('Playbook next-step notification error:', e.message); }
           }
         }
       }
@@ -207,9 +203,7 @@ export default withAuth(async function handler(req, res) {
     }
 
     return res.status(400).json({ error: 'stepId and status required' });
-  }
-
-  if (!['GET', 'POST', 'PUT'].includes(req.method)) {
-    res.status(405).json({ error: 'Method not allowed' });
+  } else {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 }, { allowDemo: true });
