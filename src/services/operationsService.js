@@ -2,6 +2,7 @@
 // Phase 2 swap: DataProvider calls _init() before render. All exports stay synchronous.
 
 import { apiFetch } from './apiClient';
+import { isSourceLoaded } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { dailyRevenue } from '@/data/revenue';
 import { paceDistribution, slowRoundStats, bottleneckHoles, paceFBImpact } from '@/data/pace';
@@ -57,6 +58,7 @@ export const _init = async () => {
 };
 
 export const getRevenueByDay = () => {
+  if (!isSourceLoaded('fb')) return [];
   if (_d) return _d.revenueByDay;
   return [];
 };

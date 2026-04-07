@@ -1,4 +1,5 @@
 import { apiFetch } from './apiClient';
+import { isSourceLoaded } from './demoGate';
 import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents';
 
 // Filter out decommissioned action types (waitlist removed from MVP)
@@ -27,6 +28,7 @@ const byNewest = (a, b) => {
 };
 
 export function getAgents() {
+  if (!isSourceLoaded('agents')) return [];
   return _d?.agents ?? agentDefinitions;
 }
 
@@ -40,6 +42,7 @@ export function getAgentById(id) {
 }
 
 export function getAllActions() {
+  if (!isSourceLoaded('agents')) return [];
   return [...actionStore].sort(byNewest);
 }
 

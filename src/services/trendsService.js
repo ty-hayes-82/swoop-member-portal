@@ -2,6 +2,7 @@
 // Narrative and chart helpers stay pure functions — they work on whatever data source is active.
 
 import { apiFetch } from './apiClient';
+import { isSourceLoaded } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { trends as staticTrends, MONTHS as STATIC_MONTHS, outletTrends as staticOutletTrends } from '@/data/trends.js';
 
@@ -24,6 +25,7 @@ const FORMAT_FNS = {
 };
 
 export function getTrendNarrative(metricKey, format = 'number') {
+  if (!isSourceLoaded('pipeline')) return null;
   const series = _trends()[metricKey];
   const months = _months();
   if (!series || series.length < 2) return null;

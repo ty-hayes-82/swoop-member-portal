@@ -1,4 +1,5 @@
 import { apiFetch, getClubId } from './apiClient';
+import { isSourceLoaded } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { getMemberSummary as _getMemberSummary } from '@/services/memberService';
 import {
@@ -41,6 +42,7 @@ const EMPTY_KPIS = [
 ];
 
 export const getKPIs = () => {
+  if (!isSourceLoaded('pipeline')) return [];
   if (_liveKpis) {
     return staticKpis.map(kpi => {
       if (kpi.label === 'Members Retained' && _liveKpis.membersSaved > 0) {

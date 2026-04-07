@@ -1,6 +1,7 @@
 // staffingService.js — Phase 1 static · Phase 2 /api/staffing
 
 import { apiFetch } from './apiClient';
+import { isSourceLoaded } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { understaffedDays, feedbackRecords, feedbackSummary, shiftCoverage } from '@/data/staffing';
 
@@ -108,21 +109,25 @@ const sanitizeFeedbackRecords = (source) => {
 };
 
 export const getUnderstaffedDays = () => {
+  if (!isSourceLoaded('complaints')) return [];
   const real = _d?.understaffedDays;
   if (Array.isArray(real) && real.length) return sanitizeUnderstaffedDays(real);
   return sanitizeUnderstaffedDays(understaffedDays);
 };
 export const getShiftCoverage = () => {
+  if (!isSourceLoaded('complaints')) return [];
   const real = _d?.shiftCoverage;
   if (Array.isArray(real) && real.length) return sanitizeShiftCoverage(real);
   return sanitizeShiftCoverage(shiftCoverage);
 };
 export const getFeedbackSummary = () => {
+  if (!isSourceLoaded('complaints')) return [];
   const real = _d?.feedbackSummary;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackSummary(real);
   return sanitizeFeedbackSummary(feedbackSummary);
 };
 export const getComplaintCorrelation = () => {
+  if (!isSourceLoaded('complaints')) return [];
   const real = _d?.feedbackRecords;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackRecords(real);
   return sanitizeFeedbackRecords(feedbackRecords);

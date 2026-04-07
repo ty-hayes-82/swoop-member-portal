@@ -75,12 +75,7 @@ export default function LoginPage({ onLogin }) {
   const [demoEmail, setDemoEmail] = useState('');
   const [demoPhone, setDemoPhone] = useState('');
 
-  const handleDemoLogin = () => {
-    if (!showDemoSetup) {
-      setShowDemoSetup(true);
-      return;
-    }
-    // Each demo session gets a unique club_id so cleanup doesn't affect others
+  const startDemo = (guided = false) => {
     const demoClubId = `demo_${Date.now()}`;
     const demoUser = {
       userId: 'demo', clubId: demoClubId, name: 'Demo User',
@@ -95,7 +90,21 @@ export default function LoginPage({ onLogin }) {
     localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
     if (demoEmail) localStorage.setItem('swoop_demo_email', demoEmail);
     if (demoPhone) localStorage.setItem('swoop_demo_phone', demoPhone);
+    if (guided) {
+      localStorage.setItem('swoop_demo_guided', 'true');
+      localStorage.removeItem('swoop_demo_sources');
+    } else {
+      localStorage.removeItem('swoop_demo_guided');
+    }
     onLogin?.(demoUser);
+  };
+
+  const handleDemoLogin = () => {
+    if (!showDemoSetup) {
+      setShowDemoSetup(true);
+      return;
+    }
+    startDemo(false);
   };
 
   if (showNewClub) {
@@ -284,8 +293,17 @@ export default function LoginPage({ onLogin }) {
             onClick={handleDemoLogin}
             className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors"
           >
-            {showDemoSetup ? 'Start Demo' : 'Enter Demo Mode (Pinetree CC)'}
+            {showDemoSetup ? 'Start Full Demo' : 'Enter Demo Mode (Pinetree CC)'}
           </button>
+
+          {showDemoSetup && (
+            <button
+              onClick={() => startDemo(true)}
+              className="w-full py-3 rounded-xl border border-brand-200 bg-brand-50 text-brand-600 text-sm font-semibold cursor-pointer hover:bg-brand-100 transition-colors mt-2"
+            >
+              Guided Demo (load data one at a time)
+            </button>
+          )}
 
           {/* Set up new club */}
           <button

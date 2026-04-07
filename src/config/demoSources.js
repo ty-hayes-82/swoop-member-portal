@@ -1,0 +1,98 @@
+/**
+ * Demo Source Definitions — defines the 8 data source groups for guided demo mode.
+ * Each source maps to one or more static data files and describes what it unlocks.
+ */
+
+export const DEMO_SOURCES = [
+  {
+    id: 'members',
+    name: 'Member Roster',
+    icon: '👥',
+    description: 'Member profiles, health scores, archetypes, and risk signals',
+    unlocks: ['Member Health page', 'At-risk member list', 'Health score distribution', 'Member profile drawers'],
+    previewExport: 'atRiskMembers',
+    previewColumns: ['name', 'score', 'archetype', 'topRisk', 'duesAnnual'],
+    previewFile: 'members',
+    category: 'Core',
+  },
+  {
+    id: 'tee-sheet',
+    name: 'Tee Sheet / POS',
+    icon: '⛳',
+    description: "Today's tee times, cart prep preferences, cancel risk predictions",
+    unlocks: ['Tee Sheet page', 'At-risk members on course', 'Cart prep recommendations', 'Cancel risk flags'],
+    previewExport: 'todayTeeSheet',
+    previewColumns: ['time', 'name', 'course', 'archetype', 'healthScore', 'cancelRisk'],
+    previewFile: 'teeSheet',
+    category: 'Core',
+  },
+  {
+    id: 'fb',
+    name: 'F&B / Dining',
+    icon: '🍽',
+    description: 'Outlet revenue, covers, avg check, and post-round dining conversion',
+    unlocks: ['F&B section on Service page', 'Revenue trends', 'Post-round dining conversion', 'Outlet performance comparison'],
+    previewExport: 'outlets',
+    previewColumns: ['outlet', 'revenue', 'covers', 'avgCheck'],
+    previewFile: 'outlets',
+    category: 'Revenue',
+  },
+  {
+    id: 'complaints',
+    name: 'Complaints & Feedback',
+    icon: '📋',
+    description: 'Member complaints, resolution tracking, and understaffed-day correlation',
+    unlocks: ['Service page complaints tab', 'Complaint patterns', 'Understaffed day flags', 'Service quality metrics'],
+    previewExport: 'feedbackRecords',
+    previewColumns: ['memberName', 'category', 'date', 'status'],
+    previewFile: 'staffing',
+    category: 'Service',
+  },
+  {
+    id: 'email',
+    name: 'Email & Engagement',
+    icon: '✉',
+    description: 'Email campaign performance, open rates by archetype, decaying engagement',
+    unlocks: ['Email engagement section', 'Decaying member alerts', 'Outreach playbooks per archetype', 'Campaign effectiveness'],
+    previewExport: 'emailCampaigns',
+    previewColumns: ['campaign', 'type', 'date'],
+    previewFile: 'email',
+    category: 'Engagement',
+  },
+  {
+    id: 'agents',
+    name: 'AI Agents',
+    icon: '🤖',
+    description: 'AI-powered action recommendations, briefings, and agent thought logs',
+    unlocks: ['Today page action queue', 'Automations inbox', 'Agent-generated actions', 'Morning briefing alerts'],
+    previewExport: 'agentDefinitions',
+    previewColumns: ['name', 'description', 'status'],
+    previewFile: 'agents',
+    category: 'Intelligence',
+  },
+  {
+    id: 'weather',
+    name: 'Weather & Operations',
+    icon: '🌤',
+    description: 'Weather forecasts, pace of play analytics, and member location tracking',
+    unlocks: ['Weather impact on service page', 'Pace of play bottlenecks', 'Member location map', 'Operational planning'],
+    previewExport: 'weatherDaily',
+    previewColumns: ['date', 'condition', 'tempHigh', 'wind', 'rain'],
+    previewFile: 'weather',
+    category: 'Operations',
+  },
+  {
+    id: 'pipeline',
+    name: 'Growth Pipeline',
+    icon: '📈',
+    description: 'Warm leads, waitlist, board report KPIs, industry benchmarks, trends',
+    unlocks: ['Pipeline / Growth page', 'Board report', 'Monthly trends', 'Industry benchmarks', 'Integration insights'],
+    previewExport: 'warmLeads',
+    previewColumns: ['guestName', 'visits', 'totalSpend', 'sponsorName', 'score'],
+    previewFile: 'pipeline',
+    category: 'Growth',
+  },
+];
+
+// Helper: get all source IDs
+export const ALL_SOURCE_IDS = DEMO_SOURCES.map(s => s.id);

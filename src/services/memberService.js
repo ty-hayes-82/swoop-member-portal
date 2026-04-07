@@ -363,7 +363,8 @@ export const getLiveDashboard = () => _live;
 let _apiLoaded = false;
 let _hasRealMembers = false;
 
-const _shouldReturnEmpty = () => isAuthenticatedClub() && !_hasRealMembers;
+import { isSourceLoaded } from './demoGate';
+const _shouldReturnEmpty = () => (isAuthenticatedClub() && !_hasRealMembers) || !isSourceLoaded('members');
 
 export const hasRealMemberData = () => _hasRealMembers;
 

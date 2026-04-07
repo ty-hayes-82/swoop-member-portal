@@ -4,6 +4,7 @@
 // Falls back to static data from src/data/weather.js when API is unavailable.
 
 import { weatherDaily as weatherData } from '../data/weather';
+import { isSourceLoaded } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 
 let _current = null;
@@ -31,6 +32,7 @@ export const _init = async () => {
 // ─── Current Conditions ───────────────────────────────────
 
 export function getCurrentWeather() {
+  if (!isSourceLoaded('weather')) return null;
   if (_current) return _current;
   // Static fallback: Jan 17 demo day
   const today = weatherData.find(d => d.date === '2026-01-17') || weatherData[16];

@@ -7,6 +7,8 @@ import { MemberProfileProvider, useMemberProfile } from '@/context/MemberProfile
 // Mobile app — lazy loaded, zero bundle impact on desktop
 const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 import { DataProvider } from '@/context/DataProvider';
+import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
+import DemoWizard from '@/components/ui/DemoWizard';
 import { MobileConversionBar } from '@/components/layout';
 import ActionsDrawer from '@/components/layout/ActionsDrawer';
 import SwoopLayout from '@/components/layout/SwoopLayout';
@@ -52,6 +54,8 @@ function AppShell() {
   const PageComponent = ROUTES[currentRoute] ?? TodayView;
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [actionsDrawerOpen, setActionsDrawerOpen] = useState(false);
+  const demoWizard = useDemoWizard();
+  const demoRenderKey = demoWizard?.renderKey ?? 0;
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -132,7 +136,7 @@ function AppShell() {
       mobileBar={isMobile ? <MobileConversionBar /> : null}
     >
       <Suspense fallback={null}>
-        <PageComponent key={currentRoute} />
+        <PageComponent key={`${currentRoute}-${demoRenderKey}`} />
       </Suspense>
     </SwoopLayout>
   );
@@ -140,12 +144,15 @@ function AppShell() {
 
 function PortalApplication() {
   return (
-    <NavigationProvider>
-      <MemberProfileProvider>
-        <AppShell />
-        <MemberProfileDrawer />
-      </MemberProfileProvider>
-    </NavigationProvider>
+    <DemoWizardProvider>
+      <NavigationProvider>
+        <MemberProfileProvider>
+          <AppShell />
+          <MemberProfileDrawer />
+          <DemoWizard />
+        </MemberProfileProvider>
+      </NavigationProvider>
+    </DemoWizardProvider>
   );
 }
 
