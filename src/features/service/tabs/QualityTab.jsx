@@ -1,6 +1,5 @@
 // QualityTab — service consistency by shift, outlet, and day of week
 import { useState } from 'react';
-import { isAuthenticatedClub } from '@/config/constants';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
 import { getSlowRoundRate } from '@/services/operationsService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
@@ -15,8 +14,8 @@ export default function QualityTab() {
   const understaffedDays = getUnderstaffedDays();
   const slowRoundStats = getSlowRoundRate();
 
-  if (isAuthenticatedClub() && feedbackRecords.length === 0) {
-    return <DataEmptyState icon="✅" title="No service quality data yet" description="Import POS and feedback data to see service consistency scores, complaint patterns, and quality correlations." dataType="POS + feedback" />;
+  if (feedbackRecords.length === 0 && feedbackSummary.length === 0 && understaffedDays.length === 0) {
+    return <DataEmptyState icon="✅" title="No service quality data yet" description="Import service requests and staffing data to see service consistency scores, complaint patterns, and quality correlations." dataType="service requests + staffing" />;
   }
 
   const totalComplaints = feedbackRecords.length;

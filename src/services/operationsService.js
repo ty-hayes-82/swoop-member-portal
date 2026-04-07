@@ -87,8 +87,10 @@ export const getPaceDistribution = () => {
   return paceDistribution ?? DEFAULT_PACE_DISTRIBUTION;
 };
 
+const EMPTY_SLOW_ROUND = { totalRounds: 0, slowRounds: 0, overallRate: 0, weekendRate: 0, weekdayRate: 0, threshold: 270 };
 export const getSlowRoundRate = () => {
-  if (!_d && !shouldUseStatic('pace')) return { totalRounds: 0, slowRounds: 0, overallRate: 0, weekendRate: 0, weekdayRate: 0, threshold: 270 };
+  if (_d?.slowRoundStats) { /* use API data */ }
+  else if (!shouldUseStatic('pace')) return EMPTY_SLOW_ROUND;
   const source = (_d?.slowRoundStats ?? slowRoundStats ?? DEFAULT_SLOW_ROUND_STATS);
   const totalRounds = Math.round(sanitizePositive(source?.totalRounds, DEFAULT_SLOW_ROUND_STATS.totalRounds));
   const slowRounds = Math.round(sanitizePositive(source?.slowRounds, DEFAULT_SLOW_ROUND_STATS.slowRounds));
@@ -103,7 +105,8 @@ export const getSlowRoundRate = () => {
 };
 
 export const getBottleneckHoles = () => {
-  if (!_d && !shouldUseStatic('pace')) return [];
+  if (_d?.bottleneckHoles) { /* use API data */ }
+  else if (!shouldUseStatic('pace')) return [];
   const source = (_d?.bottleneckHoles ?? bottleneckHoles ?? DEFAULT_BOTTLENECK_HOLES);
   if (!Array.isArray(source) || source.length === 0) return DEFAULT_BOTTLENECK_HOLES;
   return source.map((item, index) => {
@@ -117,8 +120,10 @@ export const getBottleneckHoles = () => {
   });
 };
 
+const EMPTY_PACE_FB = { fastConversionRate: 0, slowConversionRate: 0, avgCheckFast: 0, avgCheckSlow: 0, slowRoundsPerMonth: 0, revenueLostPerMonth: 0 };
 export const getPaceFBImpact = () => {
-  if (!_d && !shouldUseStatic('pace')) return { fastConversionRate: 0, slowConversionRate: 0, avgCheckFast: 0, avgCheckSlow: 0, slowRoundsPerMonth: 0, revenueLostPerMonth: 0 };
+  if (_d?.paceFBImpact) { /* use API data */ }
+  else if (!shouldUseStatic('pace')) return EMPTY_PACE_FB;
   const source = (_d?.paceFBImpact ?? paceFBImpact ?? DEFAULT_PACE_FB_IMPACT);
   return {
     fastConversionRate: sanitizeRate(source?.fastConversionRate, DEFAULT_PACE_FB_IMPACT.fastConversionRate),
@@ -131,8 +136,8 @@ export const getPaceFBImpact = () => {
 };
 
 export const getDemandGaps = () => {
-  if (_d) return _d.demandGaps;
-  if (isAuthenticatedClub()) return [];
+  if (_d?.demandGaps) return _d.demandGaps;
+  if (!shouldUseStatic('pipeline')) return [];
   return waitlistEntries.map(w => ({
     date: w.date, slot: w.slot,
     waitlistCount: w.count, eventOverlap: w.hasEventOverlap,
@@ -142,13 +147,15 @@ export const getDemandGaps = () => {
 // ── Tee Sheet ─────────────────────────────────────────────────
 
 export const getTodayTeeSheet = () => {
-  if (!shouldUseStatic('tee-sheet') && !_d) return [];
-  return _d?.todayTeeSheet ?? todayTeeSheet;
+  if (_d?.todayTeeSheet) return _d.todayTeeSheet;
+  if (!shouldUseStatic('tee-sheet')) return [];
+  return todayTeeSheet;
 };
 
 export const getTeeSheetSummary = () => {
-  if (!shouldUseStatic('tee-sheet') && !_d) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
-  return _d?.teeSheetSummary ?? teeSheetSummary;
+  if (_d?.teeSheetSummary) return _d.teeSheetSummary;
+  if (!shouldUseStatic('tee-sheet')) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
+  return teeSheetSummary;
 };
 
 export const sourceSystems = ['Tee Sheet', 'Weather API'];

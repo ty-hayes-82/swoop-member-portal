@@ -119,7 +119,7 @@ export default function BoardReport() {
       }, 0) / resolvedWithDates.length).toFixed(1)
     : null;
 
-  const isEmpty = isAuthenticatedClub() && kpis.every(k => k.value === 0);
+  const isEmpty = kpis.every(k => k.value === 0);
 
   if (isLoading) {
     return (

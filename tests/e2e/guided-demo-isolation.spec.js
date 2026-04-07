@@ -127,15 +127,28 @@ test.describe('Part A: Guided Demo — Zero Data Before Import', () => {
     await page.locator('nav >> text=/Tee Sheet/i').first().click();
     await page.waitForTimeout(2000);
     const text = await getVisibleText(page);
-    // Should not show tee time data
+    // Should show empty state, not tee time data
     expect(text).not.toContain('South Course');
     expect(text).not.toContain('North Course');
+    expect(text).not.toContain('7:00 AM');
+    expect(text).not.toContain('at-risk members playing');
     await assertNoDemoMembers(page, 'Tee Sheet page');
   });
 
-  test('A9: Service page — empty complaints', async ({ page }) => {
+  test('A9: Service page — no outlet data, no scores', async ({ page }) => {
     await page.locator('nav >> text=/Service/i').first().click();
     await page.waitForTimeout(2000);
+    const text = await getVisibleText(page);
+    // Should NOT show hardcoded outlet names
+    expect(text).not.toContain('Grill Room');
+    expect(text).not.toContain('The Terrace');
+    expect(text).not.toContain('Turn Stand');
+    expect(text).not.toContain('Banquet/Events');
+    // Should NOT show a service consistency score
+    expect(text).not.toContain('Service Consistency Score');
+    // Should show empty state
+    const hasEmpty = text.includes('No service quality data') || text.includes('No staffing data') || text.includes('No complaint data');
+    expect(hasEmpty).toBeTruthy();
     await assertNoDemoMembers(page, 'Service page');
   });
 
@@ -156,9 +169,15 @@ test.describe('Part A: Guided Demo — Zero Data Before Import', () => {
     }
   });
 
-  test('A11: Board Report page — empty or zeroed', async ({ page }) => {
+  test('A11: Board Report page — empty state', async ({ page }) => {
     await page.locator('nav >> text=/Board Report/i').first().click();
     await page.waitForTimeout(2000);
+    const text = await getVisibleText(page);
+    // Should show empty state — "Board report needs data"
+    const hasEmpty = text.includes('Board report needs data') || text.includes('needs data') || text.includes('Import');
+    expect(hasEmpty).toBeTruthy();
+    // Should NOT show executive summary content
+    expect(text).not.toContain('complaint resolution rate');
     await assertNoDemoMembers(page, 'Board Report');
   });
 });

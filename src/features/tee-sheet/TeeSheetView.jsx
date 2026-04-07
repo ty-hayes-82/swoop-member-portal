@@ -262,6 +262,19 @@ export default function TeeSheetView() {
     }
   };
 
+  if (teeData.length === 0) {
+    return (
+      <PageTransition>
+        <div className="flex flex-col gap-6">
+          <StoryHeadline variant="insight" headline="Who's on the course today — and who needs your attention?" context="Import tee sheet data to see today's rounds, at-risk members on course, and cart prep recommendations." />
+          <div className="py-12 px-4 text-center text-sm text-gray-400 border border-dashed border-gray-200 rounded-xl">
+            No tee sheet data available yet. Import tee sheet reservations to see today's schedule.
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition>
       <div className="flex flex-col gap-6">
