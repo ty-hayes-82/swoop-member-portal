@@ -24,6 +24,7 @@ const IntegrationsPage = lazy(() => import('@/features/integrations/Integrations
 const CsvImportPage = lazy(() => import('@/features/integrations/CsvImportPage'));
 const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
 const AutomationsHub = lazy(() => import('@/features/automations/AutomationsHub'));
+const TeeSheetView = lazy(() => import('@/features/tee-sheet/TeeSheetView'));
 const ProfilePage = lazy(() => import('@/features/profile/ProfilePage'));
 import LoginPage from '@/features/login/LoginPage';
 const ResetPasswordPage = lazy(() => import('@/features/login/ResetPasswordPage'));
@@ -32,6 +33,7 @@ const ResetPasswordPage = lazy(() => import('@/features/login/ResetPasswordPage'
 // All legacy routes handled by ROUTE_REDIRECTS in NavigationContext.
 const ROUTES = {
   'today': TodayView,
+  'tee-sheet': TeeSheetView,
   'service': ServiceView,
   'members': MembersView,
   'board-report': BoardReport,

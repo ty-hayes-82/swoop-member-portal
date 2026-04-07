@@ -6,7 +6,7 @@ const NavigationContext = createContext(null);
 // Valid route keys for hash routing — MVP 5-item navigation (V3 realignment)
 const VALID_ROUTES = new Set([
   // Primary MVP views (V3)
-  'today', 'service', 'members', 'board-report', 'admin',
+  'today', 'tee-sheet', 'service', 'members', 'board-report', 'admin',
   // V3 hidden but still routable for backward compat
   'revenue', 'insights', 'actions',
   // Accessible via direct navigation (not in nav)

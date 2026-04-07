@@ -17,6 +17,15 @@ export const navItems = [
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
   },
   {
+    key: 'tee-sheet',
+    label: 'Tee Sheet',
+    section: 'PRIMARY',
+    icon: '🏌️',
+    color: theme.colors.navOperations,
+    subtitle: "Today's bookings, at-risk golfers, and cart prep recommendations.",
+    sourceSystems: ['Tee Sheet', 'Member CRM', 'Weather', 'POS'],
+  },
+  {
     key: 'service',
     label: 'Service',
     section: 'PRIMARY',
