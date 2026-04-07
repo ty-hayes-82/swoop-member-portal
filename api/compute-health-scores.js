@@ -47,26 +47,34 @@ function classifyArchetype(golf, dining, email, events, joinDaysAgo, lastRoundDa
 }
 
 async function computeGolfScore(memberId, clubId) {
-  // Score based on rounds in last 90 days relative to club average
-  // Check both rounds table and bookings table (tee_times import → bookings)
-  const result = await sql`
-    SELECT COUNT(*) as round_count,
-           MAX(play_date) as last_round
-    FROM (
-      SELECT round_date as play_date FROM rounds
-        WHERE member_id = ${memberId} AND club_id = ${clubId}
-          AND round_date >= CURRENT_DATE - INTERVAL '90 days'
-          AND cancelled = FALSE AND no_show = FALSE
-      UNION ALL
-      SELECT booking_date as play_date FROM bookings
-        WHERE member_id = ${memberId} AND club_id = ${clubId}
-          AND booking_date >= CURRENT_DATE - INTERVAL '90 days'
-          AND (status IS NULL OR status != 'cancelled')
-    ) combined
-  `;
-  const { round_count, last_round } = result.rows[0];
-  const rounds = Number(round_count) || 0;
-  if (rounds === 0 && !last_round) return null; // No golf data at all
+  // Score based on rounds in last 90 days
+  // Try rounds table first, then bookings as fallback
+  let rounds = 0, last_round = null;
+
+  try {
+    const r1 = await sql`
+      SELECT COUNT(*) as round_count, MAX(round_date) as last_round
+      FROM rounds WHERE member_id = ${memberId} AND club_id = ${clubId}
+        AND round_date >= CURRENT_DATE - INTERVAL '90 days'
+        AND cancelled = FALSE AND no_show = FALSE
+    `;
+    rounds += Number(r1.rows[0]?.round_count) || 0;
+    if (r1.rows[0]?.last_round) last_round = r1.rows[0].last_round;
+  } catch { /* rounds table may not exist */ }
+
+  try {
+    const r2 = await sql`
+      SELECT COUNT(*) as round_count, MAX(booking_date) as last_round
+      FROM bookings WHERE member_id = ${memberId} AND club_id = ${clubId}
+        AND booking_date >= CURRENT_DATE - INTERVAL '90 days'
+        AND (status IS NULL OR status != 'cancelled')
+    `;
+    rounds += Number(r2.rows[0]?.round_count) || 0;
+    const bkLast = r2.rows[0]?.last_round;
+    if (bkLast && (!last_round || new Date(bkLast) > new Date(last_round))) last_round = bkLast;
+  } catch { /* bookings may not have member_id column */ }
+
+  if (rounds === 0 && !last_round) return null;
 
   // Benchmark: 12 rounds in 90 days = 100 score
   const frequencyScore = Math.min(100, (rounds / 12) * 100);
@@ -144,13 +152,11 @@ async function computeEventScore(memberId, clubId) {
     const result = await sql`
       SELECT COUNT(*) as event_count
       FROM event_registrations er
-      LEFT JOIN event_definitions ed ON er.event_id = ed.event_id
       WHERE er.member_id = ${memberId}
         AND (er.status = 'attended' OR er.status = 'registered')
-        AND (ed.start_date >= CURRENT_DATE - INTERVAL '90 days' OR er.registered_at >= (CURRENT_DATE - INTERVAL '90 days')::text)
     `;
     const events = Number(result.rows[0]?.event_count) || 0;
-    if (events === 0) return null; // No event attendance data
+    if (events === 0) return null;
     // Benchmark: 3 events in 90 days = 100
     return Math.min(100, Math.round((events / 3) * 100));
   } catch {
@@ -186,6 +192,9 @@ export default withAuth(async function handler(req, res) {
       await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS data_completeness INTEGER DEFAULT 0`;
       await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS last_health_update TIMESTAMPTZ`;
     } catch { /* columns may already exist */ }
+
+    // Ensure bookings has member_id column (may have been added by import)
+    try { await sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS member_id TEXT`; } catch {}
 
     // Ensure health_scores history table exists
     try {
@@ -266,13 +275,16 @@ export default withAuth(async function handler(req, res) {
           : 999;
 
         // Last round days ago (check both rounds and bookings tables)
-        const lastRoundResult = await sql`
-          SELECT MAX(play_date) as lr FROM (
-            SELECT round_date as play_date FROM rounds WHERE member_id = ${member.member_id} AND club_id = ${clubId} AND cancelled = FALSE
-            UNION ALL
-            SELECT booking_date as play_date FROM bookings WHERE member_id = ${member.member_id} AND club_id = ${clubId} AND (status IS NULL OR status != 'cancelled')
-          ) combined
-        `;
+        let lastRoundDate = null;
+        try {
+          const r = await sql`SELECT MAX(round_date) as lr FROM rounds WHERE member_id = ${member.member_id} AND club_id = ${clubId} AND cancelled = FALSE`;
+          if (r.rows[0]?.lr) lastRoundDate = r.rows[0].lr;
+        } catch {}
+        try {
+          const r = await sql`SELECT MAX(booking_date) as lr FROM bookings WHERE member_id = ${member.member_id} AND club_id = ${clubId} AND (status IS NULL OR status != 'cancelled')`;
+          if (r.rows[0]?.lr && (!lastRoundDate || new Date(r.rows[0].lr) > new Date(lastRoundDate))) lastRoundDate = r.rows[0].lr;
+        } catch {}
+        const lastRoundResult = { rows: [{ lr: lastRoundDate }] };
         const lastRoundDaysAgo = lastRoundResult.rows[0]?.lr
           ? Math.floor((Date.now() - new Date(lastRoundResult.rows[0].lr).getTime()) / 86400000)
           : 999;
