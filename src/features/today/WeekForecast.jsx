@@ -34,7 +34,7 @@ export default function WeekForecast() {
           const icon = conditionIcons[day.conditions] || conditionIcons.unknown;
           const precipProb = typeof day.precipProb === 'object' ? day.precipProb?.percent : day.precipProb;
           const hasRain = precipProb > 30;
-          const hasWind = (day.gusts || 0) > 15;
+          const hasWind = (day.wind || 0) > 15;
 
           return (
             <div
@@ -69,7 +69,7 @@ export default function WeekForecast() {
               {/* Wind */}
               {hasWind && (
                 <div className="text-xs font-semibold text-warning-500 flex-shrink-0">
-                  {day.gusts} mph
+                  {Math.round(day.wind)} mph
                 </div>
               )}
 
@@ -88,7 +88,7 @@ export default function WeekForecast() {
       {(() => {
         const precipProb = (d) => typeof d.precipProb === 'object' ? d.precipProb?.percent : d.precipProb;
         const rainDays = forecast.filter(d => precipProb(d) > 40);
-        const windDays = forecast.filter(d => (d.gusts || 0) > 20);
+        const windDays = forecast.filter(d => (d.wind || 0) > 20);
         if (!rainDays.length && !windDays.length) return null;
 
         return (
@@ -104,7 +104,7 @@ export default function WeekForecast() {
               )}
               {windDays.length > 0 && (
                 <div className="text-xs text-warning-500">
-                  {windDays.length} day{windDays.length > 1 ? 's' : ''} with high winds (20+ mph gusts) — cart path only conditions possible
+                  {windDays.length} day{windDays.length > 1 ? 's' : ''} with high winds (20+ mph) — cart path only conditions possible
                 </div>
               )}
             </div>
