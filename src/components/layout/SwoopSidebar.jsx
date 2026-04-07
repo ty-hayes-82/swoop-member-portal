@@ -30,11 +30,8 @@ const navIcons = {
   ),
   "tee-sheet": (
     <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 18V6" />
-      <path d="M12 6c2 0 4-1 4-3" />
-      <path d="M12 6c-2 0-4-1-4-3" />
-      <circle cx="12" cy="20" r="2" />
-      <path d="M4 12h16" />
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+      <line x1="4" y1="22" x2="4" y2="15" />
     </svg>
   ),
   automations: (
