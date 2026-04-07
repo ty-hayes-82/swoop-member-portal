@@ -62,17 +62,20 @@ async function computeGolfScore(memberId, clubId) {
     if (r1.rows[0]?.last_round) last_round = r1.rows[0].last_round;
   } catch { /* rounds table may not exist */ }
 
+  // Check bookings via booking_players join (tee_times import stores player→booking link)
   try {
     const r2 = await sql`
-      SELECT COUNT(*) as round_count, MAX(booking_date) as last_round
-      FROM bookings WHERE member_id = ${memberId} AND club_id = ${clubId}
-        AND booking_date >= CURRENT_DATE - INTERVAL '90 days'
-        AND (status IS NULL OR status != 'cancelled')
+      SELECT COUNT(*) as round_count, MAX(b.booking_date) as last_round
+      FROM booking_players bp
+      JOIN bookings b ON bp.booking_id = b.booking_id
+      WHERE bp.member_id = ${memberId} AND b.club_id = ${clubId}
+        AND b.booking_date >= CURRENT_DATE - INTERVAL '90 days'
+        AND (b.status IS NULL OR b.status != 'cancelled')
     `;
     rounds += Number(r2.rows[0]?.round_count) || 0;
     const bkLast = r2.rows[0]?.last_round;
     if (bkLast && (!last_round || new Date(bkLast) > new Date(last_round))) last_round = bkLast;
-  } catch { /* bookings may not have member_id column */ }
+  } catch { /* booking_players may not exist */ }
 
   if (rounds === 0 && !last_round) return null;
 
@@ -281,7 +284,7 @@ export default withAuth(async function handler(req, res) {
           if (r.rows[0]?.lr) lastRoundDate = r.rows[0].lr;
         } catch {}
         try {
-          const r = await sql`SELECT MAX(booking_date) as lr FROM bookings WHERE member_id = ${member.member_id} AND club_id = ${clubId} AND (status IS NULL OR status != 'cancelled')`;
+          const r = await sql`SELECT MAX(b.booking_date) as lr FROM booking_players bp JOIN bookings b ON bp.booking_id = b.booking_id WHERE bp.member_id = ${member.member_id} AND b.club_id = ${clubId} AND (b.status IS NULL OR b.status != 'cancelled')`;
           if (r.rows[0]?.lr && (!lastRoundDate || new Date(r.rows[0].lr) > new Date(lastRoundDate))) lastRoundDate = r.rows[0].lr;
         } catch {}
         const lastRoundResult = { rows: [{ lr: lastRoundDate }] };

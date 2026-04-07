@@ -19,6 +19,7 @@ const CSV_DIR = path.join(__dirname, '../../docs/jonas-exports');
 const IMPORTS = [
   { type: 'Members',              file: 'JCM_Members_F9.csv',         importType: 'members',             vendorBtn: 'Jonas Club Software', typeBtn: 'JCM_Members' },
   { type: 'Tee Times',            file: 'TTM_Tee_Sheet_SV.csv',       importType: 'tee_times',           vendorBtn: 'Jonas Club Software', typeBtn: 'TTM_Tee_Sheet' },
+  { type: 'Tee Sheet Players',   file: 'TTM_Tee_Sheet_Players_SV.csv', importType: 'booking_players',   vendorBtn: 'Jonas Club Software', typeBtn: 'TTM_Tee_Sheet_Players' },
   { type: 'F&B Transactions',     file: 'POS_Sales_Detail_SV.csv',    importType: 'transactions',        vendorBtn: 'Jonas Club Software', typeBtn: 'POS_Sales_Detail' },
   { type: 'Complaints',           file: 'JCM_Communications_RG.csv',  importType: 'complaints',          vendorBtn: 'Jonas Club Software', typeBtn: 'JCM_Communications' },
   { type: 'Events',               file: 'JAM_Event_List_SV.csv',      importType: 'events',              vendorBtn: 'Jonas Club Software', typeBtn: 'JAM_Event_List' },
@@ -182,6 +183,7 @@ const IMPORT_OVERRIDES = {
   event_registrations: { 'member #': 'member_id', 'event number': 'event_id' },
   complaints: { 'type': 'category', 'subject': 'description', 'date': 'reported_at', 'member #': 'member_id' },
   tee_times: { 'member #': 'member_id' },
+  booking_players: { 'member #': 'member_id', 'reservation id': 'reservation_id' },
   transactions: { 'member #': 'member_id' },
 };
 

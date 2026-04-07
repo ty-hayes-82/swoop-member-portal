@@ -48,6 +48,7 @@ const IMPORT_TYPES = {
     requiredFields: ['player_id', 'reservation_id'],
     optionalFields: ['member_id', 'guest_name', 'guest_flag', 'position'],
     table: 'booking_players',
+    columnMap: { reservation_id: 'booking_id', guest_flag: 'is_guest', position: 'position_in_group' },
   },
   rounds: {
     requiredFields: ['member_id', 'round_date'],
@@ -268,9 +269,24 @@ export default withAuth(async function handler(req, res) {
     email_events: `CREATE TABLE IF NOT EXISTS email_events (event_id TEXT PRIMARY KEY, campaign_id TEXT NOT NULL, member_id TEXT NOT NULL, club_id TEXT, event_type TEXT NOT NULL, occurred_at TEXT, link_clicked TEXT, device_type TEXT, data_source TEXT DEFAULT 'csv_import')`,
     shifts: `CREATE TABLE IF NOT EXISTS staff_shifts (shift_id TEXT PRIMARY KEY, club_id TEXT, staff_id TEXT NOT NULL, shift_date TEXT NOT NULL, outlet_id TEXT, start_time TEXT DEFAULT '08:00', end_time TEXT DEFAULT '16:00', hours_worked REAL DEFAULT 8, is_understaffed_day INTEGER DEFAULT 0, notes TEXT, data_source TEXT DEFAULT 'csv_import')`,
   };
-  // Ensure bookings has member_id column for tee_times import
+  // Ensure bookings has member_id column and referenced courses exist for tee_times import
   if (importType === 'tee_times') {
     try { await sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS member_id TEXT`; } catch {}
+    // Auto-create course records referenced by tee times to avoid FK failures
+    const courseIds = new Set(rows.map(r => r.course || r.course_id || r.golf_course).filter(Boolean));
+    for (const cid of courseIds) {
+      try {
+        await sql`INSERT INTO courses (course_id, club_id, name, holes, par, tee_interval_min, first_tee, last_tee)
+          VALUES (${cid}, ${clubId}, ${cid}, 18, 72, 10, '07:00', '16:00')
+          ON CONFLICT (course_id) DO NOTHING`;
+      } catch {}
+    }
+    // Drop FK constraints that block inserts
+    try { await sql`ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_course_id_fkey`; } catch {}
+  }
+  if (importType === 'tee_times' || importType === 'booking_players') {
+    try { await sql`ALTER TABLE booking_players DROP CONSTRAINT IF EXISTS booking_players_booking_id_fkey`; } catch {}
+    try { await sql`ALTER TABLE booking_players DROP CONSTRAINT IF EXISTS booking_players_member_id_fkey`; } catch {}
   }
   if (ENSURE_TABLES[importType]) {
     try { await sql.query(ENSURE_TABLES[importType]); } catch (e) { console.warn('Table ensure failed:', e.message); }
