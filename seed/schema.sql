@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS club (
     logo_url            TEXT,
     brand_voice         TEXT DEFAULT 'professional',
     timezone            TEXT DEFAULT 'America/New_York',
+    latitude            REAL,
+    longitude           REAL,
     created_at          TIMESTAMPTZ DEFAULT NOW(),
     updated_at          TIMESTAMPTZ DEFAULT NOW()
 );

@@ -17,10 +17,12 @@ def gen_club(cfg: dict) -> list[tuple]:
         'Pinetree Country Club',
         'Kennesaw', 'GA', '30144',
         1987, 100, 2, 5,
+        34.0234, -84.6155,
     )]
 
 CLUB_COLS = ['club_id', 'name', 'city', 'state', 'zip',
-             'founded_year', 'member_count', 'course_count', 'outlet_count']
+             'founded_year', 'member_count', 'course_count', 'outlet_count',
+             'latitude', 'longitude']
 
 
 def gen_courses(cfg: dict) -> list[tuple]:

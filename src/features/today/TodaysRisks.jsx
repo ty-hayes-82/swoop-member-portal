@@ -35,9 +35,29 @@ export default function TodaysRisks() {
     return null;
   }
 
-  const OUTLETS = shiftCoverage.length > 0
-    ? shiftCoverage.slice(0, 5).map(s => ({ name: s.outlet || s.department || 'Outlet', current: s.actual || s.current || 0, required: s.required || s.scheduled || 0 }))
-    : (isAuthenticatedClub() ? [] : DEMO_OUTLETS);
+  // Aggregate shift coverage by department — API returns per-date rows,
+  // roll up to department-level for display
+  const OUTLETS = (() => {
+    if (shiftCoverage.length === 0) return isAuthenticatedClub() ? [] : DEMO_OUTLETS;
+
+    // Group by department and compute avg staffing
+    const byDept = {};
+    for (const s of shiftCoverage) {
+      const dept = s.outlet || s.department || 'Outlet';
+      if (!byDept[dept]) byDept[dept] = { count: 0, total: 0, understaffed: 0 };
+      byDept[dept].count++;
+      byDept[dept].total += (s.staffCount || s.actual || s.current || s.scheduled || 0);
+      if (s.isUnderstaffed || s.isUnderstaffedDay) byDept[dept].understaffed++;
+    }
+
+    // Target staffing by department (based on typical club needs)
+    const targets = { 'F&B Service': 6, 'F&B Kitchen': 4, 'Golf Operations': 5, 'Grounds': 4, 'Pro Shop': 2, 'Administration': 2 };
+    return Object.entries(byDept).slice(0, 6).map(([dept, data]) => {
+      const avgStaff = Math.round(data.total / Math.max(1, data.count));
+      const required = targets[dept] || Math.ceil(avgStaff * 1.1);
+      return { name: dept, current: avgStaff, required };
+    });
+  })();
 
   // Unresolved complaints with aging
   const unresolvedComplaints = allComplaints

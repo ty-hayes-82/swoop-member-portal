@@ -10,16 +10,22 @@ import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import { isAuthenticatedClub } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
-// Member Health tabs — V3: reduced to 2 (At-Risk uses HealthOverview, search uses AllMembersView)
+// Member Health tabs
 import HealthOverview from '@/features/member-health/tabs/HealthOverview';
 import AllMembersView from '@/features/member-health/tabs/AllMembersView';
 import CohortTab from '@/features/member-health/tabs/CohortTab';
+import EmailTab from '@/features/member-health/tabs/EmailTab';
+import ArchetypeTab from '@/features/member-health/tabs/ArchetypeTab';
+import ResignationTimeline from '@/features/member-health/ResignationTimeline';
 
 
 const MODES = [
   { key: 'at-risk', label: 'At-Risk' },
-  { key: 'cohorts', label: 'First 90 Days' },
   { key: 'search', label: 'All Members' },
+  { key: 'email-decay', label: 'Email Engagement' },
+  { key: 'archetypes', label: 'Archetypes' },
+  { key: 'resignations', label: 'Resignations' },
+  { key: 'cohorts', label: 'First 90 Days' },
 ];
 
 const HEADLINES = {
@@ -43,6 +49,21 @@ const HEADLINES = {
     variant: 'insight',
     headline: `New member integration — track the first 90 days`,
     context: `Monitor engagement milestones, habit formation, and onboarding progress for recent joins.`,
+  }),
+  'email-decay': () => ({
+    variant: 'warning',
+    headline: `Email engagement decay — the earliest churn signal`,
+    context: `Members whose email open rates declined 25%+ over recent campaigns. Email decay precedes behavioral changes by 2-4 weeks.`,
+  }),
+  'archetypes': () => ({
+    variant: 'insight',
+    headline: `Member archetypes — behavioral profiles and engagement patterns`,
+    context: `8 behavioral archetypes showing how members interact with golf, dining, events, and communications.`,
+  }),
+  'resignations': () => ({
+    variant: 'warning',
+    headline: `Resignation analysis — patterns, signals, and prevention`,
+    context: `5 distinct resignation trajectories with different root causes and intervention strategies.`,
   }),
 };
 
@@ -164,6 +185,21 @@ export default function MembersView() {
           {/* Mode: Search */}
           {mode === 'search' && (
             <AllMembersView initialArchetype={archetype} />
+          )}
+
+          {/* Mode: Email Engagement Decay */}
+          {mode === 'email-decay' && (
+            <EmailTab />
+          )}
+
+          {/* Mode: Member Archetypes */}
+          {mode === 'archetypes' && (
+            <ArchetypeTab />
+          )}
+
+          {/* Mode: Resignation Analysis */}
+          {mode === 'resignations' && (
+            <ResignationTimeline />
           )}
 
           {/* Mode: First 90 Days */}
