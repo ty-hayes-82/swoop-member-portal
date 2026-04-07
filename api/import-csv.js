@@ -37,6 +37,7 @@ const IMPORT_TYPES = {
     requiredFields: ['course_code', 'course_name'],
     optionalFields: ['holes', 'par', 'interval_min', 'start_time', 'end_time'],
     table: 'courses',
+    columnMap: { course_code: 'course_id', course_name: 'name', interval_min: 'tee_interval_min', start_time: 'first_tee', end_time: 'last_tee' },
   },
   tee_times: {
     requiredFields: ['reservation_id', 'course', 'date', 'tee_time'],
@@ -65,6 +66,7 @@ const IMPORT_TYPES = {
     requiredFields: ['sales_area_id', 'description'],
     optionalFields: ['type', 'operating_hours', 'weekday_covers', 'weekend_covers'],
     table: 'dining_outlets',
+    columnMap: { sales_area_id: 'outlet_id', description: 'name' },
   },
   line_items: {
     requiredFields: ['line_item_id', 'check_id'],
@@ -85,6 +87,7 @@ const IMPORT_TYPES = {
     requiredFields: ['request_id', 'type', 'date'],
     optionalFields: ['member_id', 'booking_ref', 'response_time_min', 'resolution_date', 'notes'],
     table: 'service_requests',
+    columnMap: { type: 'request_type', date: 'requested_at', booking_ref: 'booking_id', resolution_date: 'resolved_at', notes: 'resolution_notes' },
   },
   // Phase 4: Events + Email
   events: {
@@ -136,6 +139,26 @@ const IMPORT_TYPES = {
     requiredFields: ['invoice_id', 'member_id', 'statement_date'],
     optionalFields: ['due_date', 'net_amount', 'billing_code_type', 'description', 'aging_bucket', 'last_payment', 'payment_amount', 'days_past_due', 'late_fee'],
     table: 'member_invoices',
+    columnMap: { statement_date: 'invoice_date', net_amount: 'amount', billing_code_type: 'type', aging_bucket: 'status', last_payment: 'paid_date', payment_amount: 'paid_amount' },
+  },
+  // Phase 6: POS Detail
+  pos_checks: {
+    requiredFields: ['check_id', 'sales_area'],
+    optionalFields: ['member_id', 'open_time', 'close_time', 'first_fire', 'last_fulfilled', 'net_amount', 'tax', 'gratuity', 'comp', 'discount', 'void', 'total_due', 'settlement_method'],
+    table: 'pos_checks',
+    columnMap: {
+      sales_area: 'outlet_id', open_time: 'opened_at', close_time: 'closed_at',
+      first_fire: 'first_item_fired_at', last_fulfilled: 'last_item_fulfilled_at',
+      net_amount: 'subtotal', tax: 'tax_amount', gratuity: 'tip_amount',
+      comp: 'comp_amount', discount: 'discount_amount', void: 'void_amount',
+      total_due: 'total', settlement_method: 'payment_method',
+    },
+  },
+  payments: {
+    requiredFields: ['payment_id', 'check_id'],
+    optionalFields: ['payment_method', 'amount', 'processed_at', 'is_split'],
+    table: 'pos_payments',
+    valueTransform: { is_split: v => (v === '1' || v === 'true') ? 1 : 0 },
   },
 };
 
@@ -190,6 +213,28 @@ const FIELD_ALIASES = {
   'shift id': 'shift_id', 'shift start': 'shift_start', 'shift end': 'shift_end',
   'act hrs': 'actual_hours', 'actual hours': 'actual_hours', 'hours worked': 'actual_hours',
   'shift date': 'date',
+  // POS Checks / Line Items / Payments
+  'chk#': 'check_id',
+  'item description': 'item_description', 'sales category': 'sales_category',
+  'regular price': 'regular_price', 'fire time': 'fire_time',
+  'payment id': 'payment_id', 'settlement time': 'processed_at',
+  // Courses
+  'course code': 'course_code', 'course name': 'course_name', 'interval (min)': 'interval_min',
+  // Sales Areas
+  'sales area id': 'sales_area_id', 'sales area description': 'description',
+  // Events
+  'pricing category': 'registration_fee',
+  // Invoices / Aged Receivables
+  'invoice #': 'invoice_id', 'statement date': 'statement_date',
+  'billing code type': 'billing_code_type', 'aging bucket': 'aging_bucket',
+  'last payment': 'last_payment', 'payment amount': 'payment_amount',
+  'days past due': 'days_past_due', 'late fee': 'late_fee',
+  // Service Requests
+  'request id': 'request_id', 'booking ref': 'booking_ref', 'response time (min)': 'response_time_min',
+  // Daily Close
+  'close id': 'closeout_id',
+  // Communications / Feedback
+  'communication id': 'feedback_id', 'complete': 'status',
 };
 
 // Per-import overrides (when a header maps differently based on context)
@@ -200,6 +245,12 @@ const IMPORT_ALIAS_OVERRIDES = {
   complaints: { 'type': 'category', 'subject': 'description', 'date': 'reported_at', 'member #': 'member_id' },
   tee_times: { 'member #': 'member_id' },
   transactions: { 'member #': 'member_id' },
+  pos_checks: { 'member #': 'member_id', 'chk#': 'check_id' },
+  line_items: { 'chk#': 'check_id', 'item description': 'item_description', 'sales category': 'sales_category', 'regular price': 'regular_price', 'qty': 'quantity', 'fire time': 'fire_time', 'comp': 'is_comp', 'void': 'is_void' },
+  payments: { 'chk#': 'check_id', 'settlement method': 'payment_method' },
+  invoices: { 'member #': 'member_id', 'invoice #': 'invoice_id' },
+  service_requests: { 'member #': 'member_id' },
+  daily_close: { 'close id': 'closeout_id' },
 };
 
 function resolveAliases(row, importType) {
@@ -290,6 +341,18 @@ export default withAuth(async function handler(req, res) {
   if (importType === 'tee_times' || importType === 'booking_players') {
     try { await sql`ALTER TABLE booking_players DROP CONSTRAINT IF EXISTS booking_players_booking_id_fkey`; } catch {}
     try { await sql`ALTER TABLE booking_players DROP CONSTRAINT IF EXISTS booking_players_member_id_fkey`; } catch {}
+  }
+  // Drop FK constraints for POS detail tables
+  if (importType === 'pos_checks') {
+    try { await sql`ALTER TABLE pos_checks DROP CONSTRAINT IF EXISTS pos_checks_outlet_id_fkey`; } catch {}
+    try { await sql`ALTER TABLE pos_checks DROP CONSTRAINT IF EXISTS pos_checks_member_id_fkey`; } catch {}
+    try { await sql`ALTER TABLE pos_checks DROP CONSTRAINT IF EXISTS pos_checks_linked_booking_id_fkey`; } catch {}
+  }
+  if (importType === 'line_items') {
+    try { await sql`ALTER TABLE pos_line_items DROP CONSTRAINT IF EXISTS pos_line_items_check_id_fkey`; } catch {}
+  }
+  if (importType === 'payments') {
+    try { await sql`ALTER TABLE pos_payments DROP CONSTRAINT IF EXISTS pos_payments_check_id_fkey`; } catch {}
   }
   if (ENSURE_TABLES[importType]) {
     try { await sql.query(ENSURE_TABLES[importType]); } catch (e) { console.warn('Table ensure failed:', e.message); }
@@ -442,7 +505,7 @@ export default withAuth(async function handler(req, res) {
 
   // Update data_source_status so Data Health dashboard reflects CSV imports
   if (successCount > 0) {
-    const IMPORT_TO_DOMAIN = { members: 'CRM', rounds: 'TEE_SHEET', tee_times: 'TEE_SHEET', transactions: 'POS', complaints: 'CRM', events: 'EMAIL', event_registrations: 'EMAIL', email_campaigns: 'EMAIL', email_events: 'EMAIL', staff: 'LABOR', shifts: 'LABOR' };
+    const IMPORT_TO_DOMAIN = { members: 'CRM', rounds: 'TEE_SHEET', tee_times: 'TEE_SHEET', transactions: 'POS', pos_checks: 'POS', line_items: 'POS', payments: 'POS', daily_close: 'POS', complaints: 'CRM', service_requests: 'CRM', invoices: 'CRM', events: 'EMAIL', event_registrations: 'EMAIL', email_campaigns: 'EMAIL', email_events: 'EMAIL', staff: 'LABOR', shifts: 'LABOR' };
     const domain = IMPORT_TO_DOMAIN[importType];
     if (domain) {
       try {
@@ -472,7 +535,7 @@ export default withAuth(async function handler(req, res) {
   }
 
   // Post-import: trigger health score recomputation (fire-and-forget)
-  if (successCount > 0 && ['members', 'tee_times', 'rounds', 'transactions', 'complaints', 'events', 'event_registrations', 'email_events'].includes(importType)) {
+  if (successCount > 0 && ['members', 'tee_times', 'rounds', 'transactions', 'pos_checks', 'complaints', 'events', 'event_registrations', 'email_events'].includes(importType)) {
     const token = req.headers.authorization;
     const host = req.headers.host || 'swoop-member-portal.vercel.app';
     const proto = host.includes('localhost') ? 'http' : 'https';
