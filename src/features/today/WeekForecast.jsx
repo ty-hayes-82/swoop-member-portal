@@ -37,12 +37,12 @@ export default function WeekForecast() {
               {source === 'google' ? 'Google Weather' : source === 'open_meteo' ? 'Open-Meteo' : source}
             </span>
           </div>
-          <div className="flex gap-1 overflow-x-auto pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="grid pb-1" style={{ gridTemplateColumns: `repeat(${Math.min(hourly.length, 12)}, 1fr)` }}>
             {hourly.slice(0, 12).map((h, i) => {
               const icon = conditionIcons[h.conditions] || conditionIcons.unknown;
               const prob = getPrecip(h);
               return (
-                <div key={i} className="flex flex-col items-center min-w-[48px] py-1">
+                <div key={i} className="flex flex-col items-center py-1">
                   <span className="text-[10px] text-gray-500 font-medium">{formatHour(h.time)}</span>
                   <span className="text-sm my-0.5 leading-none">{icon}</span>
                   <span className="text-xs font-bold text-gray-800 dark:text-white/90">{Math.round(h.temp)}°</span>
