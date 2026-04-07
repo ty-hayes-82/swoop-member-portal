@@ -26,11 +26,13 @@ const IMPORT_TYPES = {
     requiredFields: ['type_code', 'description'],
     optionalFields: ['annual_fee', 'fnb_minimum', 'golf_eligible'],
     table: 'membership_types',
+    columnMap: { description: 'name', annual_fee: 'annual_dues', fnb_minimum: 'fb_minimum' },
   },
   households: {
     requiredFields: ['household_id', 'primary_member_id'],
     optionalFields: ['dependent_count', 'home_address'],
     table: 'households',
+    columnMap: { dependent_count: 'member_count', home_address: 'address' },
   },
   // Phase 2: Golf Operations
   courses: {
@@ -66,15 +68,16 @@ const IMPORT_TYPES = {
     requiredFields: ['sales_area_id', 'description'],
     optionalFields: ['type', 'operating_hours', 'weekday_covers', 'weekend_covers'],
     table: 'dining_outlets',
-    columnMap: { sales_area_id: 'outlet_id', description: 'name' },
+    columnMap: { sales_area_id: 'outlet_id', description: 'name', operating_hours: 'meal_periods' },
   },
   line_items: {
     requiredFields: ['line_item_id', 'check_id'],
     optionalFields: ['item_description', 'sales_category', 'regular_price', 'qty', 'line_total', 'comp', 'void', 'fire_time'],
     table: 'pos_line_items',
+    columnMap: { item_description: 'item_name', sales_category: 'category', regular_price: 'unit_price', qty: 'quantity', comp: 'is_comp', void: 'is_void', fire_time: 'fired_at' },
   },
   daily_close: {
-    requiredFields: ['date'],
+    requiredFields: ['closeout_id', 'date'],
     optionalFields: ['golf_revenue', 'fb_revenue', 'total_revenue', 'rounds_played', 'covers', 'weather'],
     table: 'close_outs',
   },
@@ -353,6 +356,13 @@ export default withAuth(async function handler(req, res) {
   }
   if (importType === 'payments') {
     try { await sql`ALTER TABLE pos_payments DROP CONSTRAINT IF EXISTS pos_payments_check_id_fkey`; } catch {}
+  }
+  if (importType === 'sales_areas') {
+    try { await sql`ALTER TABLE dining_outlets DROP CONSTRAINT IF EXISTS dining_outlets_club_id_fkey`; } catch {}
+  }
+  if (importType === 'shifts') {
+    try { await sql`ALTER TABLE staff_shifts DROP CONSTRAINT IF EXISTS staff_shifts_outlet_id_fkey`; } catch {}
+    try { await sql`ALTER TABLE staff_shifts DROP CONSTRAINT IF EXISTS staff_shifts_staff_id_fkey`; } catch {}
   }
   if (ENSURE_TABLES[importType]) {
     try { await sql.query(ENSURE_TABLES[importType]); } catch (e) { console.warn('Table ensure failed:', e.message); }
