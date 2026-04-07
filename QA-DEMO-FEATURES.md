@@ -3,7 +3,7 @@
 **Environment:** https://swoop-member-portal-dev.vercel.app (or localhost:5173)
 **Login:** Click "Enter Demo Mode (Pinetree CC)" on the login page, then click "Start Demo"
 **Browser:** Chrome recommended (Gmail compose URLs open in new tab)
-**Time:** ~40 minutes for full pass
+**Time:** ~45 minutes for full pass (18 tests)
 
 ---
 
@@ -132,146 +132,166 @@
 
 ---
 
-## Test 8: Service Recovery (Tee Sheet)
+## Test 8: Inline Action Panel — Members List (NEW)
+
+**Page:** Member Health (`#/member-health`)
+
+| # | Step | Expected Result | Pass? |
+|---|------|-----------------|-------|
+| 8.1 | Find "Members Needing Attention" section | Priority-sorted list of at-risk members appears | |
+| 8.2 | Verify rows show **"Act"** indicator on the right | Each row has a "▸ Act" label instead of Call/Email/SMS icon buttons | |
+| 8.3 | Click any member row to expand | ActionPanel expands inline with "Recommended" section showing 2 context-specific actions, plus "Full Actions" section with QuickActions below | |
+| 8.4 | Verify **complaint member** recommendations | Members with complaints show: "Escalate to GM" + "Send Recovery Email" | |
+| 8.5 | Verify **Ghost member** recommendations | Ghost members show: "GM Personal Call" + "Send Personal Email" | |
+| 8.6 | Verify **golfer archetype** recommendations | Weekend Warrior / Die-Hard show: "Send Tee Time Offer" + "Pro Shop Check-in Call" | |
+| 8.7 | Verify **Social Butterfly** recommendations | Shows: "Send Event Invitation" + "Personal Event Nudge" | |
+| 8.8 | Click **"Approve"** on a recommended action | Toast confirms, action opens correct channel | |
+| 8.9 | Click **"More actions"** in ActionPanel | Full action picker appears (Email, SMS, Call, Staff Alert, etc.) | |
+| 8.10 | Verify QuickActions section below ActionPanel | "Full Actions" label visible. Draft personal note, Schedule a call, Assign to staff buttons work as before | |
+| 8.11 | Click **"▾ Collapse"** or click the row again | Panel collapses | |
+
+---
+
+## Test 9: Service Recovery (Tee Sheet)
 
 **Page:** Tee Sheet (`#/tee-sheet`)
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 8.1 | Find James Whitfield's at-risk card (CRITICAL complaint) | Shows "Send Recovery Email" (red) and "Send Apology Text" buttons | |
-| 8.2 | Click **"Send Recovery Email"** | Toast appears, Gmail compose opens with recovery content | |
-| 8.3 | Click **"Send Apology Text"** on a different member | SMS opens with apology/check-in text | |
-| 8.4 | Find a card WITHOUT a complaint (e.g., Sandra Chen) | Button reads "Personal Check-in Text" | |
+| 9.1 | Find James Whitfield's at-risk card (CRITICAL complaint) | Shows "Send Recovery Email" (red) and "Send Apology Text" buttons | |
+| 9.2 | Click **"Send Recovery Email"** | Toast appears, Gmail compose opens with recovery content | |
+| 9.3 | Click **"Send Apology Text"** on a different member | SMS opens with apology/check-in text | |
+| 9.4 | Find a card WITHOUT a complaint (e.g., Sandra Chen) | Button reads "Personal Check-in Text" | |
 
 ---
 
-## Test 9: Personal GM Call with Talking Points
+## Test 10: Personal GM Call with Talking Points
 
 **Page:** Any member profile drawer
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 9.1 | Open a member profile drawer | Drawer slides in | |
-| 9.2 | Click **"Schedule a call"** | Call panel expands with AI-Generated Talking Points | |
-| 9.3 | Wait for talking points (~2-3 seconds) | 4-5 personalized bullet points appear | |
-| 9.4 | Select a time, click "Add to calendar" | Toast "Call scheduled for [Name]" appears | |
+| 10.1 | Open a member profile drawer | Drawer slides in | |
+| 10.2 | Click **"Schedule a call"** | Call panel expands with AI-Generated Talking Points | |
+| 10.3 | Wait for talking points (~2-3 seconds) | 4-5 personalized bullet points appear | |
+| 10.4 | Select a time, click "Add to calendar" | Toast "Call scheduled for [Name]" appears | |
 
 ---
 
-## Test 10: AI-Powered Email Draft
+## Test 11: AI-Powered Email Draft
 
 **Page:** Any member profile drawer
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 10.1 | Click **"Draft personal note"** | Note panel expands, "Generating draft..." pulse shows | |
-| 10.2 | Wait for draft (~2-3 seconds) | Textarea populates with AI content, "AI-generated draft" label appears | |
-| 10.3 | Edit the text | Textarea is editable | |
-| 10.4 | Click send button | Gmail compose opens (or mailto/cloud depending on setting) | |
-| 10.5 | Navigate to **Automations > Inbox** | A "Personal note drafted for [Name]" action appears with source "Quick Action" | |
+| 11.1 | Click **"Draft personal note"** | Note panel expands, "Generating draft..." pulse shows | |
+| 11.2 | Wait for draft (~2-3 seconds) | Textarea populates with AI content, "AI-generated draft" label appears | |
+| 11.3 | Edit the text | Textarea is editable | |
+| 11.4 | Click send button | Gmail compose opens (or mailto/cloud depending on setting) | |
+| 11.5 | Navigate to **Automations > Inbox** | A "Personal note drafted for [Name]" action appears with source "Quick Action" | |
 
 ---
 
-## Test 11: Automations Inbox — Bulk Review
+## Test 12: Automations Inbox — Bulk Review
 
 **Page:** Automations (`#/automations`)
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 11.1 | Navigate to Automations page | Inbox tab shows pending actions with priority filters | |
-| 11.2 | Click **Approve** on any action | Correct channel opens. Action moves to "Recently Handled" with timestamp | |
-| 11.3 | Click **Dismiss** on any action | Action moves to "Recently Handled" with dismissed status | |
-| 11.4 | Click **"Recently handled"** expander | Shows list of approved/dismissed actions with timestamps | |
-| 11.5 | Use priority filter buttons (All/High/Medium/Low) | List filters correctly by priority level | |
+| 12.1 | Navigate to Automations page | Inbox tab shows pending actions with priority filters | |
+| 12.2 | Click **Approve** on any action | Correct channel opens. Action moves to "Recently Handled" with timestamp | |
+| 12.3 | Click **Dismiss** on any action | Action moves to "Recently Handled" with dismissed status | |
+| 12.4 | Click **"Recently handled"** expander | Shows list of approved/dismissed actions with timestamps | |
+| 12.5 | Use priority filter buttons (All/High/Medium/Low) | List filters correctly by priority level | |
 
 ---
 
-## Test 12: Action Logging & Audit Trail
+## Test 13: Action Logging & Audit Trail
 
 **Page:** Automations + Member Profile Drawer + DevTools Console
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 12.1 | Open DevTools Console (F12 > Console tab) | Console visible | |
-| 12.2 | In Automations Inbox, **Approve** an action | No `console.error` about failed persistence | |
-| 12.3 | **Dismiss** an action | No console errors | |
-| 12.4 | Open member drawer > "Draft personal note" > send | Toast confirms | |
-| 12.5 | Navigate to Automations Inbox | "Personal note drafted for [Name]" appears | |
-| 12.6 | Open member drawer > "Schedule a call" > pick time > send | "Call scheduled with [Name]" appears in inbox | |
-| 12.7 | Open member drawer > "Assign to staff" > pick staff > send | "Task assigned to [Staff]" appears in inbox | |
-| 12.8 | Verify Follow-up Tracker below QuickActions buttons | Shows all 3 actions with statuses (Completed/Scheduled/Assigned) | |
-| 12.9 | Click **"Mark done"** on a Scheduled entry | Status changes to "Completed" | |
+| 13.1 | Open DevTools Console (F12 > Console tab) | Console visible | |
+| 13.2 | In Automations Inbox, **Approve** an action | No `console.error` about failed persistence | |
+| 13.3 | **Dismiss** an action | No console errors | |
+| 13.4 | Open member drawer > "Draft personal note" > send | Toast confirms | |
+| 13.5 | Navigate to Automations Inbox | "Personal note drafted for [Name]" appears | |
+| 13.6 | Open member drawer > "Schedule a call" > pick time > send | "Call scheduled with [Name]" appears in inbox | |
+| 13.7 | Open member drawer > "Assign to staff" > pick staff > send | "Task assigned to [Staff]" appears in inbox | |
+| 13.8 | Verify Follow-up Tracker below QuickActions buttons | Shows all 3 actions with statuses (Completed/Scheduled/Assigned) | |
+| 13.9 | Click **"Mark done"** on a Scheduled entry | Status changes to "Completed" | |
 
 ---
 
-## Test 13: Playbook Activation & State
+## Test 14: Playbook Activation & State
 
 **Page:** Member Health (`#/member-health`) and Playbooks (`#/playbooks`)
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 13.1 | Navigate to Member Health page | Two response plans visible: "Service Save Protocol" and "Engagement Decay Intervention" | |
-| 13.2 | On **Service Save Protocol**, click "Activate this response plan" | Confirmation panel: "Confirm activation" with step preview | |
-| 13.3 | Click "Yes, activate this plan" | Trail animation fires (4 steps with checkmarks). Button changes to "Active — Deactivate". Monthly impact shows green | |
-| 13.4 | On **Engagement Decay Intervention**, click activate | Trail shows 3 steps. Monthly impact shows **$9K** (not $0) | |
-| 13.5 | Click "Active — Deactivate" on Service Save | Playbook deactivates, button returns to "Activate this response plan" | |
-| 13.6 | Verify **Track Record** sections | Service Save: Q4+Q3 2025 data. Engagement Decay: Q4 2025 data | |
-| 13.7 | Navigate to **Playbooks** page | Playbook catalog loads | |
-| 13.8 | Select **Service Save Protocol** | Triggered for "James Whitfield" with memberId visible in Network tab | |
-| 13.9 | Click **"Activate this playbook"** | Toast confirms. Action appears in Automations inbox. DevTools Network shows POST to `/api/execute-playbook` with `memberId: mbr_203` | |
-| 13.10 | Select **New Member 90-Day Integration** | Track Record shows Q4 2025 (8 runs, 7 integrated) and Q3 2025 data — **not empty** | |
+| 14.1 | Navigate to Member Health page | Two response plans visible: "Service Save Protocol" and "Engagement Decay Intervention" | |
+| 14.2 | On **Service Save Protocol**, click "Activate this response plan" | Confirmation panel: "Confirm activation" with step preview | |
+| 14.3 | Click "Yes, activate this plan" | Trail animation fires (4 steps with checkmarks). Button changes to "Active — Deactivate". Monthly impact shows green | |
+| 14.4 | On **Engagement Decay Intervention**, click activate | Trail shows 3 steps. Monthly impact shows **$9K** (not $0) | |
+| 14.5 | Click "Active — Deactivate" on Service Save | Playbook deactivates, button returns to "Activate this response plan" | |
+| 14.6 | Verify **Track Record** sections | Service Save: Q4+Q3 2025 data. Engagement Decay: Q4 2025 data | |
+| 14.7 | Navigate to **Playbooks** page | Playbook catalog loads | |
+| 14.8 | Select **Service Save Protocol** | Triggered for "James Whitfield" with memberId visible in Network tab | |
+| 14.9 | Click **"Activate this playbook"** | Toast confirms. Action appears in Automations inbox. DevTools Network shows POST to `/api/execute-playbook` with `memberId: mbr_203` | |
+| 14.10 | Select **New Member 90-Day Integration** | Track Record shows Q4 2025 (8 runs, 7 integrated) and Q3 2025 data — **not empty** | |
 
 ---
 
-## Test 14: Error Feedback on Failed Actions
+## Test 15: Error Feedback on Failed Actions
 
 **Page:** Automations (`#/automations`)
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 14.1 | In Profile, set Email Delivery to **"Cloud"** and save | Cloud send mode active | |
-| 14.2 | Disconnect from internet (DevTools > Network > Offline) | Network offline | |
-| 14.3 | Go to Automations > Inbox, click **Approve** on any action | Error toast: "Failed to send action — please retry" | |
-| 14.4 | Reconnect to internet | Network restored | |
-| 14.5 | Reset Email Delivery to **"Gmail Draft"** in Profile | Ready for next tests | |
+| 15.1 | In Profile, set Email Delivery to **"Cloud"** and save | Cloud send mode active | |
+| 15.2 | Disconnect from internet (DevTools > Network > Offline) | Network offline | |
+| 15.3 | Go to Automations > Inbox, click **Approve** on any action | Error toast: "Failed to send action — please retry" | |
+| 15.4 | Reconnect to internet | Network restored | |
+| 15.5 | Reset Email Delivery to **"Gmail Draft"** in Profile | Ready for next tests | |
 
 ---
 
-## Test 15: Actor Attribution
+## Test 16: Actor Attribution
 
 **Page:** Admin Hub (`#/admin`) + Member Profile Drawer
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 15.1 | Open a member drawer, click "Draft personal note", send it | Action logged | |
-| 15.2 | Open the member drawer again, scroll to outreach history | Logged action shows "Initiated by: **GM**" (or your configured name) — **not** "Sarah Mitchell" | |
-| 15.3 | Navigate to Admin Hub, check Activity Log | Recent entries show correct actor name | |
+| 16.1 | Open a member drawer, click "Draft personal note", send it | Action logged | |
+| 16.2 | Open the member drawer again, scroll to outreach history | Logged action shows "Initiated by: **GM**" (or your configured name) — **not** "Sarah Mitchell" | |
+| 16.3 | Navigate to Admin Hub, check Activity Log | Recent entries show correct actor name | |
 
 ---
 
-## Test 16: Toast Visibility
+## Test 17: Toast Visibility
 
 **Page:** Any page where toasts appear
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 16.1 | Trigger any toast (e.g., save Profile, approve an action) | Toast appears at bottom-right | |
-| 16.2 | Time the toast | Toast stays visible for approximately **4 seconds** before fading — long enough to read and screenshot | |
-| 16.3 | Trigger multiple toasts quickly (e.g., approve 2 actions) | Toasts stack or replace cleanly without visual glitch | |
+| 17.1 | Trigger any toast (e.g., save Profile, approve an action) | Toast appears at bottom-right | |
+| 17.2 | Time the toast | Toast stays visible for approximately **4 seconds** before fading — long enough to read and screenshot | |
+| 17.3 | Trigger multiple toasts quickly (e.g., approve 2 actions) | Toasts stack or replace cleanly without visual glitch | |
 
 ---
 
-## Test 17: Full Page Scroll (Regression)
+## Test 18: Full Page Scroll (Regression)
 
 **Page:** Profile, Member Health, Playbooks, Automations
 
 | # | Step | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 17.1 | Navigate to **Profile** page | Header and sidebar remain fixed while content scrolls | |
-| 17.2 | Navigate to **Member Health** page | Same: header/sidebar pinned, content scrolls independently | |
-| 17.3 | Navigate to **Playbooks** page | Same behavior | |
-| 17.4 | Navigate to **Automations** page | Same behavior | |
-| 17.5 | On any page, resize browser to narrow width (<768px) | Layout switches to mobile-responsive mode. Sidebar collapses. Content fills width | |
+| 18.1 | Navigate to **Profile** page | Header and sidebar remain fixed while content scrolls | |
+| 18.2 | Navigate to **Member Health** page | Same: header/sidebar pinned, content scrolls independently | |
+| 18.3 | Navigate to **Playbooks** page | Same behavior | |
+| 18.4 | Navigate to **Automations** page | Same behavior | |
+| 18.5 | On any page, resize browser to narrow width (<768px) | Layout switches to mobile-responsive mode. Sidebar collapses. Content fills width | |
 
 ---
 
