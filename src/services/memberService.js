@@ -281,19 +281,19 @@ const normalizeResignationScenarios = (raw) => {
   });
 };
 
-// All modes start empty — populated from API via _init().
-// Demo mode (club_001) fetches live DB data just like real clubs.
+// Start with static demo data — overwritten by API via _init() when available.
 function getInitialData() {
   return {
-    memberArchetypes: [],
-    healthDistribution: [],
-    atRiskMembers: [],
-    membersAtRisk: [],
-    resignationScenarios: [],
-    memberProfiles: {},
-    memberSummary: {},
-    emailHeatmap: [],
-    decayingMembers: [],
+    memberArchetypes: staticArchetypes,
+    healthDistribution: staticHealthDistribution,
+    atRiskMembers: staticAtRiskMembers,
+    membersAtRisk: staticAtRiskMembers,
+    resignationScenarios: staticResignationScenarios,
+    memberProfiles: staticMemberProfiles,
+    memberSummary: staticMemberSummary,
+    emailHeatmap: staticEmailHeatmap,
+    decayingMembers: staticDecayingMembers,
+    watchMembers: staticWatchMembers,
   };
 }
 

@@ -65,9 +65,9 @@ export const getKPIs = () => {
   return EMPTY_KPIS;
 };
 
-export const getMemberSaves = () => _liveKpis ? staticMemberSaves : [];
-export const getOperationalSaves = () => _liveKpis ? staticOperationalSaves : [];
-export const getMonthlyTrends = () => _liveKpis ? staticMonthlyTrends : [];
+export const getMemberSaves = () => _liveKpis ? staticMemberSaves : (isAuthenticatedClub() ? [] : staticMemberSaves);
+export const getOperationalSaves = () => _liveKpis ? staticOperationalSaves : (isAuthenticatedClub() ? [] : staticOperationalSaves);
+export const getMonthlyTrends = () => _liveKpis ? staticMonthlyTrends : (isAuthenticatedClub() ? [] : staticMonthlyTrends);
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

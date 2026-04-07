@@ -26,11 +26,33 @@ const EMPTY_BRIEFING = {
   topCancellationRiskMembers: [],
 };
 
+const DEMO_BRIEFING = {
+  keyMetrics: { atRiskMembers: 7, openComplaints: 4 },
+  teeSheet: { roundsToday: 220, utilization: 0.87 },
+  todayRisks: {
+    forecast: 'Wind advisory — gusts to 30-40 mph expected Saturday afternoon',
+    atRiskTeetimes: [
+      { memberId: 'mbr_203', name: 'James Whitfield', time: '9:20 AM', health: 42 },
+      { memberId: 'mbr_089', name: 'Anne Jordan', time: '10:15 AM', health: 38 },
+    ],
+    demandForecast: {
+      expectedRounds: 192,
+      golfModifier: 0.87,
+      recommendation: 'Saturday: Grill Room needs 4 servers — only 2 scheduled',
+      weatherSummary: 'Wind advisory may shift 32 afternoon tee times indoors',
+    },
+  },
+  yesterdayRecap: null,
+  comparisons: {},
+  topCancellationRiskMembers: [],
+};
+
 export const getDailyBriefing = (date = '2026-01-17') => {
   if (_d) return _d;
-  return EMPTY_BRIEFING;
+  if (isAuthenticatedClub()) return EMPTY_BRIEFING;
 
-  // Phase 1 static fallback — unreachable, kept for reference
+  // Demo mode: try to build from service data, fall back to static
+  try {
   const revData    = getRevenueByDay();
   const yesterday  = revData.find(d => d.date === '2026-01-16') ?? revData[15];
   const atRisk     = getAtRiskMembers();
@@ -173,6 +195,9 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       },
     ],
   };
+  } catch {
+    return DEMO_BRIEFING;
+  }
 };
 
 export const sourceSystems = ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Analytics'];

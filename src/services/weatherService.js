@@ -32,6 +32,9 @@ export const _init = async () => {
 
 export function getCurrentWeather() {
   if (_current) return _current;
+  // Static fallback: Jan 17 demo day
+  const today = weatherData.find(d => d.date === '2026-01-17') || weatherData[16];
+  if (today) return { temp: today.tempHigh, condition: today.condition, wind: today.wind, humidity: 35 };
   return null;
 }
 
@@ -46,6 +49,15 @@ export function getHourlyForecast() {
 
 export function getDailyForecast(numDays = 10) {
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
+  // Static fallback from weather data starting Jan 17
+  const startIdx = weatherData.findIndex(d => d.date === '2026-01-17');
+  if (startIdx >= 0) {
+    return weatherData.slice(startIdx, startIdx + numDays).map(d => ({
+      date: d.date, tempHigh: d.tempHigh, tempLow: d.tempHigh - 15,
+      condition: d.condition, wind: d.wind, rain: d.rain || false,
+      description: d.condition === 'sunny' ? 'Clear skies' : d.condition === 'rainy' ? 'Rain expected' : d.condition === 'windy' ? 'Wind advisory' : 'Partly cloudy',
+    }));
+  }
   return [];
 }
 
@@ -60,6 +72,15 @@ export function getTomorrowForecast() {
 
 export function getWeatherAlerts() {
   if (_forecast?.alerts?.length) return _forecast.alerts;
+  // Static fallback: wind advisory for demo day
+  if (!isAuthenticatedClub()) {
+    return [{
+      type: 'Wind Advisory',
+      severity: 'MODERATE',
+      headline: 'Wind Advisory — gusts to 30-40 mph expected Saturday afternoon',
+      description: 'Consider pre-notifying 32 afternoon tee times with reschedule options.',
+    }];
+  }
   return [];
 }
 

@@ -28,7 +28,8 @@ const TRAIL_STEPS = {
 const defaultAgents = getAgents();
 const defaultStatuses = Object.fromEntries(defaultAgents.map((agent) => [agent.id, agent.status]));
 
-// V4: All modes start empty — inbox populated from API via agentService._init()
+// Start with static agent actions as inbox; overwritten by API data when available
+const defaultInbox = getAllActions();
 const initialState = {
   currentDate: new Date().toISOString().split('T')[0],
   playbooks: {
@@ -41,8 +42,8 @@ const initialState = {
     'new-member-90day': 0,
     'staffing-gap': 0,
   },
-  inbox: [],
-  pendingCount: 0,
+  inbox: defaultInbox,
+  pendingCount: defaultInbox.filter(a => a.status === 'pending').length,
   agentStatuses: defaultStatuses,
   agentConfigs: {},
   teeSheetOps: {

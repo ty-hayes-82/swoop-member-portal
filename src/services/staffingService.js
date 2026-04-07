@@ -109,19 +109,23 @@ const sanitizeFeedbackRecords = (source) => {
 
 export const getUnderstaffedDays = () => {
   const real = _d?.understaffedDays;
-  return Array.isArray(real) && real.length ? sanitizeUnderstaffedDays(real) : [];
+  if (Array.isArray(real) && real.length) return sanitizeUnderstaffedDays(real);
+  return sanitizeUnderstaffedDays(understaffedDays);
 };
 export const getShiftCoverage = () => {
   const real = _d?.shiftCoverage;
-  return Array.isArray(real) && real.length ? sanitizeShiftCoverage(real) : [];
+  if (Array.isArray(real) && real.length) return sanitizeShiftCoverage(real);
+  return sanitizeShiftCoverage(shiftCoverage);
 };
 export const getFeedbackSummary = () => {
   const real = _d?.feedbackSummary;
-  return Array.isArray(real) && real.length ? sanitizeFeedbackSummary(real) : [];
+  if (Array.isArray(real) && real.length) return sanitizeFeedbackSummary(real);
+  return sanitizeFeedbackSummary(feedbackSummary);
 };
 export const getComplaintCorrelation = () => {
   const real = _d?.feedbackRecords;
-  return Array.isArray(real) && real.length ? sanitizeFeedbackRecords(real) : [];
+  if (Array.isArray(real) && real.length) return sanitizeFeedbackRecords(real);
+  return sanitizeFeedbackRecords(feedbackRecords);
 };
 
 export const getStaffingSummary = () => {
