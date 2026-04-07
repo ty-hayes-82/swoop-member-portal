@@ -121,20 +121,20 @@ export default function TodayView() {
           </div>
         ))}
 
-        {/* Section 2: Staffing vs Demand + Top 3 Complaints */}
-        <TodaysRisks />
-
-        {/* Section 3: Action Queue — hero alert merged with pending actions */}
+        {/* Section 2: Action Queue — hero alert merged with pending actions */}
         <PendingActionsInline topPriority={topPriority} />
 
-        {/* Section 4: Priority Member Alerts (top 3) */}
+        {/* Section 3: Priority Member Alerts (top 3) */}
         <MemberAlerts />
 
-        {/* Section 5: Tomorrow's Forecast */}
+        {/* Section 4: Tomorrow's Forecast */}
         <TomorrowForecast />
 
-        {/* Section 6: 10-Day Forecast */}
+        {/* Section 5: 10-Day Forecast */}
         <WeekForecast />
+
+        {/* Section 6: Staffing vs Demand + Open Complaints (lower priority — data still maturing) */}
+        <TodaysRisks />
 
       </div>
     </PageTransition>

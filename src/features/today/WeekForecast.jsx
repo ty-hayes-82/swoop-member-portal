@@ -39,42 +39,39 @@ export default function WeekForecast() {
           return (
             <div
               key={day.date}
-              className={`flex items-center gap-2 py-1.5 px-2.5 rounded-lg text-sm ${
+              className={`grid items-center py-1.5 px-2.5 rounded-lg text-sm ${
                 hasRain || hasWind
                   ? 'bg-warning-50/50 dark:bg-warning-500/5 border border-warning-200/50 dark:border-warning-500/10'
                   : 'hover:bg-gray-50 dark:hover:bg-white/[0.02]'
               }`}
+              style={{ gridTemplateColumns: '72px 24px 1fr auto auto auto' }}
             >
               {/* Day name */}
-              <div className="w-[72px] flex-shrink-0">
+              <div className="flex-shrink-0">
                 <span className="font-semibold text-gray-800 dark:text-white/90">{dayName}</span>
                 <span className="text-gray-400 ml-1 text-xs">{dateStr}</span>
               </div>
 
               {/* Icon */}
-              <div className="text-base w-6 text-center flex-shrink-0">{icon}</div>
+              <div className="text-base text-center">{icon}</div>
 
               {/* Conditions */}
-              <div className="flex-1 min-w-0 text-xs text-gray-500 truncate">
+              <div className="text-xs text-gray-500 truncate px-2">
                 {day.conditionsText || day.conditions}
               </div>
 
               {/* Precip */}
-              {precipProb > 0 && (
-                <div className={`text-xs font-semibold flex-shrink-0 ${hasRain ? 'text-blue-500' : 'text-gray-400'}`}>
-                  {precipProb}%
-                </div>
-              )}
+              <div className={`text-xs font-semibold text-right min-w-[32px] ${precipProb > 0 ? (hasRain ? 'text-blue-500' : 'text-gray-400') : 'text-transparent'}`}>
+                {precipProb > 0 ? `${precipProb}%` : ''}
+              </div>
 
               {/* Wind */}
-              {hasWind && (
-                <div className="text-xs font-semibold text-warning-500 flex-shrink-0">
-                  {Math.round(day.wind)} mph
-                </div>
-              )}
+              <div className={`text-xs font-semibold text-right min-w-[48px] ${hasWind ? 'text-warning-500' : 'text-transparent'}`}>
+                {hasWind ? `${Math.round(day.wind)} mph` : ''}
+              </div>
 
               {/* Temp range */}
-              <div className="w-[80px] flex-shrink-0 text-right">
+              <div className="text-right min-w-[68px]">
                 <span className="font-bold text-gray-800 dark:text-white/90">{Math.round(day.high)}°</span>
                 <span className="text-gray-400 mx-0.5">/</span>
                 <span className="text-gray-400">{Math.round(day.low)}°</span>
