@@ -3,6 +3,7 @@
 import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
+import ActionPanel from '@/components/ui/ActionPanel.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
 import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getVolatileMembers, getMemberSummary } from '@/services/memberService';
 import { getComplaintCorrelation } from '@/services/staffingService';
@@ -222,6 +223,31 @@ export default function HealthOverview() {
             const actionColor = ACTION_TYPE_COLORS[m.actionType] || '#ff8b00';
             const isExpanded = expandedId === m.memberId;
 
+            // Build contextual recommendations based on member's situation
+            const memberRecommended = [];
+            if (m.actionType === 'complaint') {
+              memberRecommended.push({ key: 'escalate', icon: '🔺', label: 'Escalate to GM', type: 'staff_task', description: m.reason });
+              memberRecommended.push({ key: 'recovery', icon: '✉', label: 'Send Recovery Email', type: 'email', description: 'Acknowledge complaint and offer resolution' });
+            } else if (m.actionType === 'ghost') {
+              memberRecommended.push({ key: 'call', icon: '📞', label: 'GM Personal Call', type: 'call', description: 'Re-engagement conversation' });
+              memberRecommended.push({ key: 'email', icon: '✉', label: 'Send Personal Email', type: 'email', description: 'Warm outreach from GM' });
+            } else if (m.actionType === 'golf') {
+              memberRecommended.push({ key: 'sms', icon: '💬', label: 'Send Tee Time Offer', type: 'sms', description: m.action });
+              memberRecommended.push({ key: 'call', icon: '📞', label: 'Pro Shop Check-in Call', type: 'call', description: 'Equipment/schedule check' });
+            } else if (m.actionType === 'social') {
+              memberRecommended.push({ key: 'email', icon: '✉', label: 'Send Event Invitation', type: 'email', description: m.action });
+              memberRecommended.push({ key: 'sms', icon: '💬', label: 'Personal Event Nudge', type: 'sms', description: 'Quick text about upcoming event' });
+            } else if (m.actionType === 'new-member') {
+              memberRecommended.push({ key: 'call', icon: '📞', label: 'Integration Check-in Call', type: 'call', description: m.action });
+              memberRecommended.push({ key: 'email', icon: '✉', label: 'Welcome Follow-up Email', type: 'email', description: 'Personalized onboarding content' });
+            } else if (m.actionType === 'snowbird') {
+              memberRecommended.push({ key: 'email', icon: '✉', label: 'Send Welcome-Back Package', type: 'email', description: m.action });
+              memberRecommended.push({ key: 'sms', icon: '💬', label: 'Tee Time Reservation Text', type: 'sms', description: 'Reserve preferred tee time' });
+            } else {
+              memberRecommended.push({ key: 'email', icon: '✉', label: 'Send Personal Email', type: 'email', description: m.action });
+              memberRecommended.push({ key: 'call', icon: '📞', label: 'Schedule Call', type: 'call', description: `Follow up with ${m.name}` });
+            }
+
             return (
               <div key={m.memberId}>
                 <div
@@ -229,7 +255,7 @@ export default function HealthOverview() {
                   className="px-[18px] py-[14px] bg-white border border-gray-200 rounded-xl cursor-pointer transition-all duration-150 hover:shadow-theme-md hover:-translate-y-px"
                   style={{ borderLeft: `3px solid ${sc}` }}
                 >
-                  {/* Row 1: Name + badges */}
+                  {/* Row 1: Name + badges + expand indicator */}
                   <div className="flex justify-between items-center mb-1.5">
                     <div className="flex items-center gap-2.5">
                       <span className="text-xs font-bold text-gray-400 font-mono w-5">
@@ -245,41 +271,9 @@ export default function HealthOverview() {
                         {m.archetype}
                       </span>
                     </div>
-                    <div className="flex gap-1.5">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          showToast?.(`Call scheduled for ${m.name}`, 'success');
-                          trackAction({ actionType: 'call', memberId: m.memberId, memberName: m.name });
-                        }}
-                        title="Call"
-                        className="w-7 h-7 rounded-full border border-green-500/20 bg-green-500/[0.08] text-green-600 text-[13px] cursor-pointer flex items-center justify-center"
-                      >
-                        {'\uD83D\uDCDE'}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          showToast?.(`Email drafted for ${m.name}`, 'success');
-                          trackAction({ actionType: 'email', memberId: m.memberId, memberName: m.name });
-                        }}
-                        title="Email"
-                        className="w-7 h-7 rounded-full border border-blue-500/20 bg-blue-500/[0.03] text-blue-500 text-[13px] cursor-pointer flex items-center justify-center"
-                      >
-                        {'\u2709\uFE0F'}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          showToast?.(`SMS sent to ${m.name}`, 'success');
-                          trackAction({ actionType: 'sms', memberId: m.memberId, memberName: m.name });
-                        }}
-                        title="SMS"
-                        className="w-7 h-7 rounded-full border border-brand-500/20 bg-brand-500/[0.03] text-brand-500 text-[13px] cursor-pointer flex items-center justify-center"
-                      >
-                        {'\uD83D\uDCF1'}
-                      </button>
-                    </div>
+                    <span className="text-[10px] font-semibold text-brand-500">
+                      {isExpanded ? '▾ Collapse' : '▸ Act'}
+                    </span>
                   </div>
 
                   {/* Row 2: Reason */}
@@ -298,10 +292,24 @@ export default function HealthOverview() {
                   </div>
                 </div>
 
-                {/* Expanded: Quick Actions */}
+                {/* Expanded: ActionPanel + QuickActions */}
                 {isExpanded && (
-                  <div className="p-4 bg-gray-100 rounded-b-xl border border-gray-200 border-t-0 -mt-px">
-                    <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk || m.signal} archetype={m.archetype} />
+                  <div className="bg-gray-100 rounded-b-xl border border-gray-200 border-t-0 -mt-px">
+                    <ActionPanel
+                      context={{
+                        memberId: m.memberId,
+                        memberName: m.name,
+                        description: m.reason,
+                        source: m.owner || 'Member Health',
+                      }}
+                      recommended={memberRecommended}
+                      onClose={() => setExpandedId(null)}
+                      compact
+                    />
+                    <div className="p-4 pt-2 border-t border-gray-200">
+                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">Full Actions</div>
+                      <QuickActions memberName={m.name} memberId={m.memberId} context={m.topRisk || m.signal} archetype={m.archetype} />
+                    </div>
                   </div>
                 )}
               </div>
