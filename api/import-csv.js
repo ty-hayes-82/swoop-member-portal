@@ -148,8 +148,10 @@ const FIELD_ALIASES = {
   'date joined': 'join_date', 'membership type': 'membership_type', 'mem type': 'membership_type',
   'household id': 'household_id', 'handicap #': 'handicap', 'current balance': 'current_balance',
   'date resigned': 'date_resigned', 'date of birth': 'birthday',
+  // Booking Players
+  'player id': 'player_id', 'reservation id': 'reservation_id',
   // Tee Times
-  'reservation id': 'reservation_id', 'confirmation #': 'reservation_id', 'tee sheet date': 'date',
+  'confirmation #': 'reservation_id', 'tee sheet date': 'date',
   'play date': 'date', 'tee time': 'tee_time', 'guest flag': 'guest_flag',
   'number of players': 'players', 'check-in time': 'check_in_time',
   'round start': 'round_start', 'round end': 'round_end', 'duration (min)': 'duration_min',

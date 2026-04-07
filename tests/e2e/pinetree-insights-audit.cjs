@@ -183,7 +183,7 @@ const IMPORT_OVERRIDES = {
   event_registrations: { 'member #': 'member_id', 'event number': 'event_id' },
   complaints: { 'type': 'category', 'subject': 'description', 'date': 'reported_at', 'member #': 'member_id' },
   tee_times: { 'member #': 'member_id' },
-  booking_players: { 'member #': 'member_id', 'reservation id': 'reservation_id' },
+  booking_players: { 'member #': 'member_id', 'reservation id': 'reservation_id', 'player id': 'player_id', 'guest flag': 'guest_flag' },
   transactions: { 'member #': 'member_id' },
 };
 
