@@ -231,12 +231,13 @@ export default withAuth(async function handler(req, res) {
     let computed = 0;
     let errors = 0;
     const alerts = []; // Members with 10+ point drop
+    const debugSamples = []; // First 3 members with detailed scores
 
     for (const member of members.rows) {
       try {
         // Each dimension defaults to null if its data source isn't available
         let golf = null, dining = null, email = null, events = null;
-        try { golf = await computeGolfScore(member.member_id, clubId); } catch { /* no rounds data */ }
+        try { golf = await computeGolfScore(member.member_id, clubId); } catch (e) { if (debugSamples.length < 3) debugSamples.push({ memberId: member.member_id, golfError: e.message }); }
         try { dining = await computeDiningScore(member.member_id, clubId); } catch { /* no POS data */ }
         try { email = await computeEmailScore(member.member_id, clubId); } catch { /* no email data */ }
         try { events = await computeEventScore(member.member_id, clubId); } catch { /* no event data */ }
@@ -245,6 +246,11 @@ export default withAuth(async function handler(req, res) {
         const dimensions = [golf, dining, email, events];
         const availableDimensions = dimensions.filter(d => d !== null);
         const dataCompleteness = availableDimensions.length;
+
+        // Debug: capture first 3 members' dimension scores
+        if (debugSamples.length < 3) {
+          debugSamples.push({ memberId: member.member_id, golf, dining, email, events, dataCompleteness });
+        }
 
         // If fewer than 2 dimensions have data, mark as "Insufficient Data"
         if (dataCompleteness < 2) {
@@ -349,6 +355,7 @@ export default withAuth(async function handler(req, res) {
       alerts: alerts.length,
       alertDetails: alerts.slice(0, 10),
       message: `Health scores computed for ${computed} members. ${alerts.length} members with significant score drops.`,
+      debugSamples,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
