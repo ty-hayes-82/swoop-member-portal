@@ -126,7 +126,7 @@ export default withAuth(async function handler(req, res) {
       });
     }
 
-    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, summaryStats] = await Promise.all([
+    const [healthDist, archetypes, atRisk, resignations, emailHeatmap, summaryStats, rosterResult] = await Promise.all([
       sql`
         WITH latest_scores AS (
           SELECT member_id, engagement_score AS score
@@ -144,6 +144,7 @@ export default withAuth(async function handler(req, res) {
         FROM members m
         LEFT JOIN latest_scores ls ON ls.member_id::text = m.member_id::text
         WHERE m.club_id = ${clubId}
+          AND COALESCE(m.membership_status, 'active') <> 'resigned'
         GROUP BY 1
         ORDER BY MIN(COALESCE(ls.score, 0)) DESC`,
 
@@ -243,6 +244,29 @@ export default withAuth(async function handler(req, res) {
         WHERE w.week_number = ${latestWeek}
           AND COALESCE(m.membership_status, 'active') <> 'resigned'
           AND m.club_id = ${clubId}`,
+
+      sql`
+        SELECT
+          m.member_id::text AS member_id,
+          COALESCE(NULLIF(TRIM(m.first_name || ' ' || m.last_name), ''), 'Member ' || RIGHT(m.member_id::text, 3)) AS name,
+          m.first_name, m.last_name, m.email, m.phone,
+          m.membership_type, m.annual_dues, m.join_date,
+          COALESCE(m.membership_status, 'active') AS status,
+          m.household_id, m.archetype,
+          w.engagement_score AS score,
+          CASE
+            WHEN w.engagement_score >= 70 THEN 'Healthy'
+            WHEN w.engagement_score >= 50 THEN 'Watch'
+            WHEN w.engagement_score >= 30 THEN 'At Risk'
+            ELSE 'Critical'
+          END AS tier
+        FROM members m
+        LEFT JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
+          AND w.week_number = ${latestWeek}
+        WHERE COALESCE(m.membership_status, 'active') <> 'resigned'
+          AND m.club_id = ${clubId}
+        ORDER BY m.last_name, m.first_name
+        LIMIT 1000`,
     ]);
 
     // Decaying members: find members whose email open rate dropped 25%+ over 3 weeks
@@ -308,6 +332,30 @@ export default withAuth(async function handler(req, res) {
     };
 
     res.status(200).json({
+      total,
+
+      memberRoster: rosterResult.rows.map((r) => ({
+        memberId: r.member_id,
+        name: r.name,
+        firstName: r.first_name,
+        lastName: r.last_name,
+        email: r.email,
+        phone: r.phone,
+        membershipType: r.membership_type,
+        annualDues: toNumber(r.annual_dues),
+        memberValueAnnual: toNumber(r.annual_dues),
+        joinDate: r.join_date,
+        status: r.status,
+        householdId: r.household_id,
+        score: toNumber(r.score),
+        archetype: r.archetype || null,
+        tier: r.tier || 'Insufficient Data',
+        trend: 'stable',
+        topRisk: r.score != null && toNumber(r.score) < 50
+          ? 'Engagement declining across systems'
+          : 'No current risks',
+      })),
+
       healthDistribution: dist.map((row) => ({
         level: row.level,
         count: toNumber(row.count),

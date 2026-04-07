@@ -20,8 +20,11 @@ import DataEmptyState from '@/components/ui/DataEmptyState';
 
 function getGreeting() {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good morning — here's what needs your attention today";
-  return "Afternoon check-in — here's where things stand";
+  const stored = localStorage.getItem('swoop_auth_user');
+  const firstName = stored ? (JSON.parse(stored).name || '').split(' ')[0] : '';
+  const nameStr = firstName ? `, ${firstName}` : '';
+  if (hour < 12) return `Good morning${nameStr} — here's what needs your attention today`;
+  return `Afternoon check-in${nameStr} — here's where things stand`;
 }
 
 function formatDate() {

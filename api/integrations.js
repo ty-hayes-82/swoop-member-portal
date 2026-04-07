@@ -12,7 +12,7 @@ export default withAuth(async function handler(req, res) {
         name: s.vendor_name,
         category: s.category,
         status: s.status,
-        lastSync: s.last_sync,
+        lastSync: s.last_sync ? new Date(s.last_sync).toISOString() : null,
         dataPointsSynced: Number(s.data_points_synced ?? 0),
         config: s.config,
       })),

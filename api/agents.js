@@ -42,9 +42,9 @@ export default withAuth(async function handler(req, res) {
       status: r.status,
       approvalAction: r.approval_action,
       dismissalReason: r.dismissal_reason,
-      timestamp: r.timestamp,
-      approvedAt: r.approved_at,
-      dismissedAt: r.dismissed_at,
+      timestamp: r.timestamp ? new Date(r.timestamp).toISOString() : new Date().toISOString(),
+      approvedAt: r.approved_at ? new Date(r.approved_at).toISOString() : null,
+      dismissedAt: r.dismissed_at ? new Date(r.dismissed_at).toISOString() : null,
     }));
 
     res.status(200).json({ agents, actions });

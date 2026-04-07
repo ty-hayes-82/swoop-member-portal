@@ -20,7 +20,11 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-const byNewest = (a, b) => b.timestamp.localeCompare(a.timestamp);
+const byNewest = (a, b) => {
+  const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+  const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+  return tb - ta;
+};
 
 export function getAgents() {
   return _d?.agents ?? agentDefinitions;
