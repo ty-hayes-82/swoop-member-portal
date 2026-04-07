@@ -129,7 +129,7 @@ export default function MemberProfile() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-10">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+      <div className="flex w-full flex-col gap-8">
         <button
           type="button"
           onClick={() => navigate('/', { replace: true })}

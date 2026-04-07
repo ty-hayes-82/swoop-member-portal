@@ -123,7 +123,7 @@ export default function BoardReport() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-[1100px] mx-auto">
+      <div className="p-6 w-full">
         <SkeletonGrid cards={6} columns={3} cardHeight={120} />
       </div>
     );
@@ -132,7 +132,7 @@ export default function BoardReport() {
   if (isEmpty) {
     return (
       <PageTransition>
-        <div className="p-6 max-w-[1100px] mx-auto">
+        <div className="p-6 w-full">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Board Report — Service, Members & Operations</h1>
@@ -151,7 +151,7 @@ export default function BoardReport() {
 
   return (
     <PageTransition>
-      <div className="p-6 max-w-[1100px] mx-auto">
+      <div className="p-6 w-full">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800">

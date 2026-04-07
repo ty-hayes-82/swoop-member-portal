@@ -75,7 +75,7 @@ export default function SettingsTab() {
   const selectedModel = AI_MODELS.find(m => m.value === settings.aiModel);
 
   return (
-    <div className="flex flex-col gap-8 max-w-3xl">
+    <div className="flex flex-col gap-8 w-full">
 
       {/* AI Model Selection */}
       <section>

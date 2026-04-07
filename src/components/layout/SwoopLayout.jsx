@@ -17,7 +17,7 @@ const LayoutContent = ({ children, footer, actionsDrawer, mobileBar }) => {
         }`}
       >
         <SwoopHeader />
-        <main className="flex-1 p-4 mx-auto w-full max-w-(--breakpoint-2xl) md:p-6 pb-20 md:pb-24">
+        <main className="flex-1 p-4 w-full md:p-6 pb-20 md:pb-24">
           <Suspense
             fallback={
               <div className="flex items-center justify-center min-h-[200px] text-gray-400">
