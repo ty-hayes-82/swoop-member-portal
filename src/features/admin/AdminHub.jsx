@@ -118,12 +118,12 @@ function DataHubTab({ clubId }) {
       </Card>
 
       {/* CSV Upload link */}
-      <div className="flex justify-between items-center rounded-xl p-4 bg-brand-50 border border-brand-200 dark:bg-brand-500/5 dark:border-brand-500/20">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 rounded-xl p-4 bg-brand-50 border border-brand-200 dark:bg-brand-500/5 dark:border-brand-500/20">
         <div>
           <div className="font-bold text-sm text-gray-800 dark:text-white/90">Manual Data Upload</div>
           <div className="text-xs text-gray-500">Upload CSV files for members, rounds, transactions, or complaints when API access isn't available.</div>
         </div>
-        <button onClick={() => navigate('csv-import')} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer">Open Upload Tool</button>
+        <button onClick={() => navigate('csv-import')} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0 self-start sm:self-auto">Open Upload Tool</button>
       </div>
     </div>
   );
@@ -191,8 +191,8 @@ function UserRolesTab() {
         </button>
       </div>
 
-      <div className="border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800">
-        <table className="w-full border-collapse text-sm">
+      <div className="border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800 overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <table className="w-full border-collapse text-sm min-w-[600px]">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
               {['Name', 'Email', 'Role', 'Status', 'Last Active'].map(h => (
@@ -349,8 +349,8 @@ function ClubManagementTab({ currentClubId }) {
           </div>
         </Card>
       ) : (
-        <div className="border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800">
-          <table className="w-full border-collapse text-sm">
+        <div className="border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800 overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full border-collapse text-sm min-w-[700px]">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                 {['Club ID', 'Name', 'Location', 'Members', 'Last Activity', 'Actions'].map(h => (

@@ -16,8 +16,9 @@ export default function DataSourceComparison() {
       <div className="text-lg font-bold text-gray-800 mt-1 mb-4 dark:text-white/90">
         Same data source. Deeper intelligence.
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse min-w-[500px]">
+      {/* Desktop table */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-50 dark:bg-gray-800">
               <th className="text-left px-3 py-2.5 text-xs font-bold text-gray-800 border-b border-gray-200 dark:text-white/90 dark:border-gray-800">Data Type</th>
@@ -35,6 +36,20 @@ export default function DataSourceComparison() {
             ))}
           </tbody>
         </table>
+      </div>
+      {/* Mobile stacked cards */}
+      <div className="sm:hidden flex flex-col gap-3">
+        {rows.map((row, i) => (
+          <div key={i} className="border border-gray-100 dark:border-gray-800 rounded-lg p-3">
+            <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-2">{row.dataType}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <span className="font-semibold text-gray-400">Single-System:</span> {row.competitors}
+            </div>
+            <div className="text-xs text-gray-800 dark:text-white/90 font-medium">
+              <span className="font-semibold text-brand-500">Swoop:</span> {row.swoop}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

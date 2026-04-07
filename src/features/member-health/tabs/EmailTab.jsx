@@ -33,7 +33,7 @@ export default function EmailTab() {
         <div className="text-xs text-gray-400 mb-4">
           Email engagement is an early health score input — decay here precedes golf and dining disengagement by 6-8 weeks
         </div>
-        <table className="border-collapse text-xs min-w-[600px]">
+        <table className="border-collapse text-xs w-full min-w-[400px]">
           <thead>
             <tr>
               <th className="py-1 px-2 text-gray-400 text-left min-w-[140px]">Campaign</th>

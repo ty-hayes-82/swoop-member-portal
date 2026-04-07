@@ -569,7 +569,7 @@ function StepImport({ importType, mapping, parsedRows, result, error, uploading,
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
               <div className="p-2 rounded-lg bg-white/60 dark:bg-gray-800/60">
                 <div className="text-lg font-bold text-gray-800 dark:text-white/90">{result.totalRows.toLocaleString()}</div>
                 <div className="text-[10px] text-gray-400">Total</div>

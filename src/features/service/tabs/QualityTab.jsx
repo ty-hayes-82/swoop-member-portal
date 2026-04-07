@@ -62,7 +62,7 @@ export default function QualityTab() {
     <div className="flex flex-col gap-6">
 
       {/* Service Consistency Score */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 flex items-center gap-6 flex-wrap">
+      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-wrap">
         <div className="flex items-center gap-4">
           <div
             className="w-[72px] h-[72px] rounded-full flex items-center justify-center shrink-0"
@@ -91,7 +91,7 @@ export default function QualityTab() {
           </div>
         </div>
 
-        <div className="flex gap-4 flex-wrap ml-auto">
+        <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-4 sm:flex-wrap sm:ml-auto">
           {[
             { label: 'Resolution Rate', value: `${resolutionRate}%`, color: resolutionRate >= 70 ? '#22c55e' : '#ca8a04' },
             { label: 'Understaffed Days', value: `${understaffedDays.length}`, color: understaffedDays.length <= 1 ? '#22c55e' : '#ef4444' },
@@ -279,7 +279,7 @@ export default function QualityTab() {
                     />
                     <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{o.name}</span>
                   </div>
-                  <div className="flex items-center gap-4 text-xs">
+                  <div className="flex items-center gap-2 sm:gap-4 text-xs flex-wrap">
                     {o.understaffedDays > 0 && (
                       <span className="text-error-500 font-semibold">
                         {o.understaffedDays} understaffed day{o.understaffedDays !== 1 ? 's' : ''}

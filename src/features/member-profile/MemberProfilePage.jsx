@@ -242,7 +242,7 @@ export default function MemberProfilePage() {
       </div>
 
       {/* Hero header */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-8 grid grid-cols-[1fr_auto] gap-6 items-center">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-8 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-6 items-center">
         <div>
           <div className="flex items-center gap-4 flex-wrap">
             <h1 className="m-0 text-[28px] font-bold text-[#1a1a2e]">
@@ -287,7 +287,7 @@ export default function MemberProfilePage() {
       </div>
 
       {/* Two-column grid: trend + risk signals */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Health trend chart */}
         <Section title="Health Score Trend">
           {trendData.length > 1 ? (
@@ -331,7 +331,7 @@ export default function MemberProfilePage() {
       </div>
 
       {/* Preferences & Family */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Preferences */}
         <Section title="Preferences & Notes">
           <div className="flex flex-col gap-4">
@@ -399,7 +399,7 @@ export default function MemberProfilePage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-2 p-4 bg-white border border-gray-200 rounded-xl">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-4 bg-white border border-gray-200 rounded-xl">
         {[
           { label: 'Schedule call', icon: '\uD83D\uDCDE', color: '#16a34a' },
           { label: 'Send email', icon: '\u2709\uFE0F', color: '#3B82F6' },
@@ -409,7 +409,7 @@ export default function MemberProfilePage() {
           <button
             key={action.label}
             onClick={() => {}}
-            className="flex-1 px-2.5 py-2.5 rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5"
+            className="px-2.5 py-2.5 rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5"
             style={{ border: `1px solid ${action.color}25`, background: `${action.color}06`, color: action.color }}
           >
             <span className="text-sm">{action.icon}</span>
@@ -577,8 +577,8 @@ function MemberRoster({ onSelect }) {
       <div className="text-xs text-gray-400">
         Showing {filtered.length} at-risk members {'\u00B7'} Click any row to view full profile
       </div>
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-        <table className="w-full border-collapse text-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <table className="w-full border-collapse text-sm min-w-[600px]">
           <thead>
             <tr className="border-b border-gray-200">
               {['Name', 'Score', 'Archetype', 'Type', 'Annual Dues', 'Top Risk'].map((h) => (

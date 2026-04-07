@@ -233,7 +233,7 @@ const SwoopHeader = () => {
         <div className="flex items-center gap-3">
           {/* Page context + badge */}
           <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span className="font-medium text-gray-800 dark:text-white/90">{currentNav.label}</span>
+            <span className="font-medium text-gray-800 dark:text-white/90 hidden sm:inline">{currentNav.label}</span>
             {clubId !== "demo" && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-xs font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
@@ -264,7 +264,7 @@ const SwoopHeader = () => {
               )}
             </button>
             {notifOpen && (
-              <div className="absolute right-0 top-12 w-80 max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-theme-lg z-50">
+              <div className="absolute right-0 top-12 w-[calc(100vw-2rem)] sm:w-80 max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-theme-lg z-50">
                 <div className="p-3 border-b border-gray-200 font-semibold text-sm text-gray-800">Notifications</div>
                 <div className="p-3 text-sm text-gray-500 text-center">No new notifications</div>
               </div>

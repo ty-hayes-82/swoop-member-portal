@@ -71,7 +71,7 @@ export default function RecoveryTab() {
           {memberSaves.map((save) => {
             const improvement = save.healthAfter - save.healthBefore;
             return (
-              <div key={save.name} className="grid grid-cols-[1.2fr_100px_1.8fr_1fr] gap-4 items-center px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-xs">
+              <div key={save.name} className="grid grid-cols-1 sm:grid-cols-[1.2fr_100px_1.8fr_1fr] gap-2 sm:gap-4 items-start sm:items-center px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-xs">
                 {/* Member + Trigger */}
                 <div>
                   <div className="font-bold text-[13px] text-[#1a1a2e]">{save.name}</div>

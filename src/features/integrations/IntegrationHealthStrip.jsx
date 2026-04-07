@@ -2,7 +2,7 @@ export function IntegrationHealthStrip({ health }) {
   const freshnessColor = health.dataFreshness === 'n/a' ? '#f59e0b' : '#22c55e';
 
   return (
-    <div className="grid grid-cols-3 gap-3 mb-[18px]">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-[18px]">
       <StatCard
         label="Connected Systems"
         value={`${health.connected}/${health.total}`}

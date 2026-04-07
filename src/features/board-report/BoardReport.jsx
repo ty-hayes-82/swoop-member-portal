@@ -152,23 +152,23 @@ export default function BoardReport() {
   return (
     <PageTransition>
       <div className="p-6 max-w-[1100px] mx-auto">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
             Board Report — Service, Members & Operations
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
             Monthly executive summary — service quality, member health, and operational response
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <button
             onClick={() => { setActiveTab(0); setTimeout(() => window.print(), 100); }}
-            className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none"
+            className="rounded-lg bg-brand-500 text-white px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold cursor-pointer border-none"
           >Export as PDF</button>
           <button
             onClick={() => window.print()}
-            className="rounded-lg border border-brand-500 bg-transparent text-brand-500 px-5 py-2 text-sm font-semibold cursor-pointer"
+            className="rounded-lg border border-brand-500 bg-transparent text-brand-500 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold cursor-pointer"
           >Print</button>
         </div>
       </div>
@@ -280,7 +280,7 @@ export default function BoardReport() {
             </div>
 
             {/* Staffing detail row */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
               <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{Math.max(0, 30 - understaffedDays.length)}</div>
                 <div className="text-[11px] text-[#BCC3CF]">Days Fully Staffed</div>
@@ -346,7 +346,7 @@ export default function BoardReport() {
 
               return (
                 <>
-                  <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                     <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
                       <div className={`text-[28px] font-bold ${totalWeatherDays > 3 ? 'text-warning-500' : 'text-blue-400'}`}>
                         {totalWeatherDays || '—'}
@@ -446,7 +446,7 @@ export default function BoardReport() {
               if (hasRevenue) {
                 const rev = live.weekOverWeek.revenue;
                 return (
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
                       <div className="text-2xl font-bold text-gray-800 dark:text-white/90">${Math.round(rev.current).toLocaleString()}</div>
                       <div className="text-xs text-gray-500">This Week Revenue</div>
@@ -468,7 +468,7 @@ export default function BoardReport() {
                     <span className="font-bold text-warning-500">Awaiting data</span>
                     <span className="text-gray-400">— Import F&B transactions via CSV Import or connect your POS system to unlock revenue metrics.</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-3 opacity-40">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 opacity-40">
                     {[
                       { label: 'Revenue per Cover', value: '—' },
                       { label: 'Covers vs Capacity', value: '—' },

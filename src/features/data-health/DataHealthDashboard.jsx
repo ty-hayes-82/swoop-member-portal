@@ -149,7 +149,7 @@ export default function DataHealthDashboard() {
       {features.length > 0 && (
         <div className="p-4 rounded-xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800">
           <div className="font-bold text-sm mb-2">Feature Availability</div>
-          <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             {[
               { label: 'Available', count: data?.availableFeatures ?? features.filter(f => f.status === 'available').length, color: 'text-success-500', bg: 'bg-success-500/[0.03]' },
               { label: 'Degraded', count: data?.degradedFeatures ?? features.filter(f => f.status === 'degraded').length, color: 'text-warning-500', bg: 'bg-warning-500/[0.03]' },

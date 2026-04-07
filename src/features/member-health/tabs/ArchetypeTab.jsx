@@ -54,7 +54,7 @@ export default function ArchetypeTab() {
       </div>
 
       {/* Main profile section */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left — visual */}
         <div className="bg-white rounded-xl p-4 border border-gray-200">
           <div className="font-serif text-lg text-[#1a1a2e] mb-1">{profile.archetype}</div>
@@ -145,7 +145,7 @@ function SpendPotentialCard({ archetype }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {categories.map(cat => {
           const potential = 100 - cat.engagement;
           return (

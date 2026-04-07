@@ -128,7 +128,7 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
         onMouseLeave={() => setHovered(false)}
         className={`border-t border-gray-200 cursor-pointer transition-all duration-150 ${index % 2 === 0 ? 'bg-[#F8F9FA]' : 'bg-gray-100'} hover:bg-gray-50 hover:translate-x-0.5`}
       >
-        <td className="px-4 py-2">
+        <td className="px-3 sm:px-4 py-2">
           <MemberLink
             mode="drawer"
             memberId={member.memberId}
@@ -137,30 +137,30 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
             {member.name}
           </MemberLink>
         </td>
-        <td className="px-4 py-2">
+        <td className="px-3 sm:px-4 py-2">
           <span className="font-mono font-bold" style={{ color: healthColor }}>
             {member.score}
           </span>
         </td>
-        <td className="px-4 py-2">
+        <td className="px-3 sm:px-4 py-2">
           <span className="text-xs font-semibold" style={{ color: healthColor }}>
             {healthLevel}
           </span>
         </td>
-        <td className="px-4 py-2">
+        <td className="px-4 py-2 hidden md:table-cell">
           <ArchetypeBadge archetype={member.archetype} size="xs" />
         </td>
-        <td className="px-4 py-2">
+        <td className="px-4 py-2 hidden sm:table-cell">
           <span className="text-xs text-gray-500">
             {member.tier}
           </span>
         </td>
-        <td className="px-4 py-2">
+        <td className="px-4 py-2 hidden lg:table-cell">
           <span className="font-mono text-xs text-gray-500">
             ${(member.memberValueAnnual || 0).toLocaleString()}
           </span>
         </td>
-        <td className="px-4 py-2 text-right">
+        <td className="px-3 sm:px-4 py-2 text-right">
           <span
             className={`text-sm font-semibold inline-block transition-all duration-150 ${isExpanded ? 'text-brand-500 rotate-90' : 'text-gray-400 rotate-0'}`}
           >
@@ -394,13 +394,13 @@ export default function AllMembersView({ initialArchetype = null }) {
   };
 
   const columns = [
-    { key: 'name', label: 'Member' },
-    { key: 'score', label: 'Score' },
-    { key: 'level', label: 'Level' },
-    { key: 'archetype', label: 'Archetype' },
-    { key: 'tier', label: 'Tier' },
-    { key: 'value', label: 'Annual Value' },
-    { key: 'expand', label: '', sortable: false },
+    { key: 'name', label: 'Member', hideClass: '' },
+    { key: 'score', label: 'Score', hideClass: '' },
+    { key: 'level', label: 'Level', hideClass: '' },
+    { key: 'archetype', label: 'Archetype', hideClass: 'hidden md:table-cell' },
+    { key: 'tier', label: 'Tier', hideClass: 'hidden sm:table-cell' },
+    { key: 'value', label: 'Annual Value', hideClass: 'hidden lg:table-cell' },
+    { key: 'expand', label: '', sortable: false, hideClass: '' },
   ];
 
   return (
@@ -521,8 +521,8 @@ export default function AllMembersView({ initialArchetype = null }) {
 
       {/* Member List Table */}
       <div className="bg-gray-100 rounded-xl border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <div className="flex items-center gap-4">
+        <div className="p-3 sm:p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+          <div className="flex items-center gap-3 sm:gap-4">
             <span className="text-sm font-semibold text-gray-800 dark:text-white/90">
               All Members
             </span>
@@ -531,7 +531,7 @@ export default function AllMembersView({ initialArchetype = null }) {
               placeholder="Search by name..."
               value={searchTerm}
               onChange={e => { setSearchTerm(e.target.value); setPage(0); }}
-              className="px-3 py-1.5 text-xs font-sans bg-gray-100 border border-gray-200 rounded-lg text-[#1a1a2e] outline-none min-w-[180px]"
+              className="px-3 py-1.5 text-xs font-sans bg-gray-100 border border-gray-200 rounded-lg text-[#1a1a2e] outline-none flex-1 sm:flex-none sm:min-w-[180px]"
             />
           </div>
           <span className="text-xs text-gray-400">
@@ -539,13 +539,13 @@ export default function AllMembersView({ initialArchetype = null }) {
           </span>
         </div>
         <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <table className="w-full min-w-[900px] border-collapse text-sm member-table">
+          <table className="w-full border-collapse text-sm member-table">
             <thead>
               <tr className="bg-gray-50">
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className={`px-4 py-2 text-xs text-gray-400 uppercase tracking-wider font-medium ${col.key === 'expand' ? 'text-right' : 'text-left'}`}
+                    className={`px-3 sm:px-4 py-2 text-xs text-gray-400 uppercase tracking-wider font-medium ${col.key === 'expand' ? 'text-right' : 'text-left'} ${col.hideClass}`}
                   >
                     {col.sortable === false ? (
                       <span>{col.label}</span>

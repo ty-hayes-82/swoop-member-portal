@@ -43,7 +43,7 @@ export default function TomorrowForecast() {
       </div>
 
       {/* Demand prediction */}
-      <div className="grid grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         <div className="text-center">
           <div className="text-lg font-bold text-gray-800 dark:text-white/90">
             {roundsBooked}

@@ -76,7 +76,7 @@ export default function TodayView() {
           <div className="text-lg font-bold text-gray-800 dark:text-white/90 mb-1 font-serif">
             {getGreeting()}
           </div>
-          <div className="flex items-center gap-4 text-xs text-gray-500">
+          <div className="flex items-center gap-2 sm:gap-4 text-xs text-gray-500 flex-wrap">
             <span>{formatDate()}</span>
             <span className="text-gray-200 dark:text-gray-700">|</span>
             <span>{roundsToday} rounds booked today</span>

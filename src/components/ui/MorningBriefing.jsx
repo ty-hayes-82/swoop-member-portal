@@ -38,7 +38,7 @@ export default function MorningBriefing() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-8">
+        <div className="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4 sm:p-8">
           <div className="bg-white text-gray-900 rounded-2xl w-full max-w-[640px] max-h-[90vh] overflow-auto shadow-theme-xl">
             {/* Print header */}
             <div className="px-8 py-6 border-b-2 border-blue-light-500 bg-gray-50">
