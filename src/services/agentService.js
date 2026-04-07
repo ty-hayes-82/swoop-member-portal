@@ -44,7 +44,8 @@ export function getAgentById(id) {
 
 export function getAllActions() {
   if (_d?.actions) return [...actionStore].sort(byNewest);
-  if (!shouldUseStatic('agents')) return [];
+  // Actions reference members — require both agents AND members gates
+  if (!shouldUseStatic('agents') || !shouldUseStatic('members')) return [];
   return [...actionStore].sort(byNewest);
 }
 

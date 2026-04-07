@@ -13,6 +13,7 @@ export const _init = async () => {
   }
 };
 
-export const getPriorityItems = () => _d?.priorities ?? (shouldUseStatic('agents') ? cockpitItems : []);
-export const getSinceLastLogin = () => _d?.sinceLastLogin ?? (shouldUseStatic('agents') ? staticSinceLastLogin : []);
+// Priority items reference members — require both agents AND members gates
+export const getPriorityItems = () => _d?.priorities ?? (shouldUseStatic('agents') && shouldUseStatic('members') ? cockpitItems : []);
+export const getSinceLastLogin = () => _d?.sinceLastLogin ?? (shouldUseStatic('agents') && shouldUseStatic('members') ? staticSinceLastLogin : []);
 export const sourceSystems = ['CRM', 'POS', 'Weather', 'Tee Sheet', 'Complaints'];
