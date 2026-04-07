@@ -1,5 +1,5 @@
-// WeekForecast — 5-day inline forecast strip
-import { getDailyForecast, getWeatherSource } from '@/services/weatherService';
+// WeekForecast — hourly strip + 5-day card forecast (inspired by Google Weather)
+import { getDailyForecast, getHourlyForecast, getWeatherSource } from '@/services/weatherService';
 
 const conditionIcons = {
   sunny: '☀️', partly_cloudy: '⛅', cloudy: '☁️',
@@ -9,69 +9,143 @@ const conditionIcons = {
 
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+function formatHour(iso) {
+  const d = new Date(iso);
+  const h = d.getHours();
+  if (h === 0) return '12a';
+  if (h === 12) return '12p';
+  return h > 12 ? `${h - 12}p` : `${h}a`;
+}
+
 export default function WeekForecast() {
   const forecast = getDailyForecast(5);
+  const hourly = getHourlyForecast();
   const source = getWeatherSource();
 
-  if (!forecast?.length || source === 'static') return null;
+  if ((!forecast?.length && !hourly?.length) || source === 'static') return null;
 
   const getPrecip = (d) => typeof d.precipProb === 'object' ? d.precipProb?.percent : d.precipProb;
 
   return (
-    <div className="flex items-center gap-2 bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3">
-      <div className="text-[10px] font-bold text-blue-600 uppercase tracking-wide whitespace-nowrap mr-1">
-        5-Day
-      </div>
-
-      <div className="flex-1 grid grid-cols-5 gap-2">
-        {forecast.map((day, i) => {
-          const date = new Date(day.date + 'T12:00:00');
-          const dayName = i === 0 ? 'Today' : dayNames[date.getDay()];
-          const icon = conditionIcons[day.conditions] || conditionIcons.unknown;
-          const precipProb = getPrecip(day);
-          const hasRain = precipProb > 30;
-          const hasWind = (day.wind || 0) > 15;
-          const flagged = hasRain || hasWind;
-
-          return (
-            <div
-              key={day.date}
-              className={`flex flex-col items-center rounded-lg py-1.5 ${
-                flagged
-                  ? 'bg-warning-50/70 dark:bg-warning-500/5'
-                  : ''
-              }`}
-            >
-              <div className={`text-[11px] font-semibold leading-tight ${i === 0 ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400'}`}>
-                {dayName}
-              </div>
-              <div className="text-lg leading-none my-0.5">{icon}</div>
-              <div className="text-[11px] font-bold text-gray-800 dark:text-white/90 leading-tight">
-                {Math.round(day.high)}°
-                <span className="text-gray-400 font-normal text-[10px]"> {Math.round(day.low)}°</span>
-              </div>
-              {(precipProb > 0 || hasWind) && (
-                <div className="flex items-center gap-1 mt-0.5">
-                  {precipProb > 0 && (
-                    <span className={`text-[9px] font-semibold ${hasRain ? 'text-blue-500' : 'text-gray-400'}`}>
-                      💧{precipProb}%
-                    </span>
-                  )}
-                  {hasWind && (
-                    <span className="text-[9px] font-semibold text-warning-500">
-                      💨{Math.round(day.wind)}
+    <div className="flex flex-col gap-3">
+      {/* Hourly strip */}
+      {hourly.length > 0 && (
+        <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Today's Hourly</span>
+            <span className="text-[9px] text-gray-400">
+              {source === 'google' ? 'Google Weather' : source === 'open_meteo' ? 'Open-Meteo' : source}
+            </span>
+          </div>
+          <div className="flex gap-1 overflow-x-auto pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {hourly.slice(0, 12).map((h, i) => {
+              const icon = conditionIcons[h.conditions] || conditionIcons.unknown;
+              const prob = getPrecip(h);
+              return (
+                <div key={i} className="flex flex-col items-center min-w-[48px] py-1">
+                  <span className="text-[10px] text-gray-500 font-medium">{formatHour(h.time)}</span>
+                  <span className="text-sm my-0.5 leading-none">{icon}</span>
+                  <span className="text-xs font-bold text-gray-800 dark:text-white/90">{Math.round(h.temp)}°</span>
+                  {prob > 0 && (
+                    <span className={`text-[9px] font-semibold mt-0.5 ${prob > 30 ? 'text-blue-500' : 'text-gray-400'}`}>
+                      {prob}%
                     </span>
                   )}
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-      <div className="text-[8px] text-gray-400 whitespace-nowrap">
-        {source === 'google' ? 'Google' : source === 'open_meteo' ? 'Open-Meteo' : source}
-      </div>
+      {/* 5-Day cards */}
+      {forecast.length > 0 && (
+        <div className="bg-gray-100/60 dark:bg-white/[0.02] rounded-xl p-2.5">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">5-Day Forecast</span>
+            {!hourly.length && (
+              <span className="text-[9px] text-gray-400">
+                {source === 'google' ? 'Google Weather' : source === 'open_meteo' ? 'Open-Meteo' : source}
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-5 gap-2">
+            {forecast.map((day, i) => {
+              const date = new Date(day.date + 'T12:00:00');
+              const dayName = i === 0 ? 'Today' : dayNames[date.getDay()];
+              const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
+              const icon = conditionIcons[day.conditions] || conditionIcons.unknown;
+              const precipProb = getPrecip(day);
+              const hasRain = precipProb > 30;
+              const wind = day.wind || 0;
+              const hasWind = wind > 15;
+
+              return (
+                <div
+                  key={day.date}
+                  className="bg-white dark:bg-white/[0.04] rounded-lg border border-gray-200/80 dark:border-gray-700/50 px-2 py-2.5 flex flex-col"
+                >
+                  {/* Date header */}
+                  <div className="text-center mb-1.5">
+                    <div className={`text-xs font-bold leading-tight ${i === 0 ? 'text-blue-600' : 'text-gray-700 dark:text-white/80'}`}>
+                      {dayName}
+                    </div>
+                    <div className="text-[9px] text-gray-400">{dateStr}</div>
+                  </div>
+
+                  {/* Day temp + icon */}
+                  <div className="flex flex-col items-center">
+                    <span className="text-xl leading-none mb-0.5">{icon}</span>
+                    <span className="text-lg font-bold text-gray-800 dark:text-white/90 leading-tight">
+                      {Math.round(day.high)}°
+                    </span>
+                    <span className="text-[10px] text-gray-500 leading-tight truncate w-full text-center">
+                      {day.conditionsText || day.conditions}
+                    </span>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-gray-100 dark:border-gray-700/50 my-1.5" />
+
+                  {/* Night */}
+                  <div className="flex flex-col items-center mb-1.5">
+                    <span className="text-[9px] text-gray-400 uppercase font-semibold tracking-wide">Night</span>
+                    <span className="text-sm font-bold text-gray-500 dark:text-gray-400 leading-tight">
+                      {Math.round(day.low)}°
+                    </span>
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex flex-col gap-0.5 mt-auto">
+                    {wind > 0 && (
+                      <div className="flex justify-between text-[9px]">
+                        <span className="text-gray-400">Wind</span>
+                        <span className={`font-semibold ${hasWind ? 'text-warning-500' : 'text-gray-500'}`}>
+                          {Math.round(wind)} mph
+                        </span>
+                      </div>
+                    )}
+                    {precipProb > 0 && (
+                      <div className="flex justify-between text-[9px]">
+                        <span className="text-gray-400">Precip</span>
+                        <span className={`font-semibold ${hasRain ? 'text-blue-500' : 'text-gray-500'}`}>
+                          {precipProb}%
+                        </span>
+                      </div>
+                    )}
+                    {day.humidity > 0 && (
+                      <div className="flex justify-between text-[9px]">
+                        <span className="text-gray-400">Humid</span>
+                        <span className="font-semibold text-gray-500">{day.humidity}%</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
