@@ -481,10 +481,12 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
     setNoteText('');
   };
 
+  const emailSendMode = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_email_send_mode') || 'local' : 'local';
+  const emailLabel = emailSendMode === 'gmail' ? 'Draft in Gmail' : emailSendMode === 'cloud' ? 'Send email' : 'Draft email';
   const quickActions = [
     { key: 'call', label: 'Schedule call', icon: '\uD83D\uDCDE' },
-    { key: 'email', label: 'Send email', icon: '\u2709\uFE0F' },
-    { key: 'sms', label: 'Send SMS', icon: '\uD83D\uDCAC' },
+    { key: 'email', label: emailLabel, icon: '\u2709\uFE0F' },
+    { key: 'sms', label: 'Draft SMS', icon: '\uD83D\uDCAC' },
     { key: 'comp', label: 'Offer comp', icon: '\uD83C\uDF81' },
   ];
 

@@ -5,6 +5,8 @@ import ArchetypeBadge from '@/components/ui/ArchetypeBadge';
 import MemberLink from '@/components/MemberLink';
 import PageTransition from '@/components/ui/PageTransition';
 import { todayTeeSheet, teeSheetSummary } from '@/data/teeSheet';
+import { useApp } from '@/context/AppContext';
+import { apiFetch } from '@/services/apiClient';
 
 const healthColor = (score) => {
   if (score >= 70) return '#22c55e';
@@ -20,9 +22,10 @@ const healthLabel = (score) => {
   return 'Critical';
 };
 
-function AlertCard({ teeTime }) {
+function AlertCard({ teeTime, onSendRecovery }) {
   const color = healthColor(teeTime.healthScore);
   const isVip = teeTime.duesAnnual >= 18000;
+  const hasComplaint = teeTime.cartPrep.note?.toLowerCase().includes('complaint') || teeTime.cartPrep.note?.toLowerCase().includes('critical');
   return (
     <div className="bg-white rounded-xl border-l-4 p-4 border border-gray-200" style={{ borderLeftColor: color }}>
       <div className="flex items-start justify-between gap-3 mb-2">
@@ -47,13 +50,31 @@ function AlertCard({ teeTime }) {
       <div className="text-xs text-gray-600 leading-relaxed">
         {teeTime.cartPrep.note}
       </div>
+      {/* Proactive recovery actions */}
+      <div className="flex gap-2 mt-3 flex-wrap">
+        {hasComplaint && (
+          <button
+            onClick={() => onSendRecovery(teeTime, 'email')}
+            className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-red-200 bg-red-50 text-red-600 inline-flex items-center gap-1"
+          >
+            <span>✉</span> Send Recovery Email
+          </button>
+        )}
+        <button
+          onClick={() => onSendRecovery(teeTime, 'sms')}
+          className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-200 bg-brand-50 text-brand-500 inline-flex items-center gap-1"
+        >
+          <span>💬</span> {hasComplaint ? 'Send Apology Text' : 'Personal Check-in Text'}
+        </button>
+      </div>
     </div>
   );
 }
 
-function CartPrepCard({ teeTime }) {
+function CartPrepCard({ teeTime, onSendCartText, onSendDiningNudge }) {
   const color = healthColor(teeTime.healthScore);
   const isAtRisk = teeTime.healthScore < 50;
+  const firstName = teeTime.name.split(' ')[0];
   return (
     <div className={`rounded-xl border p-4 ${isAtRisk ? 'bg-red-50/30 border-red-200' : 'bg-white border-gray-200'}`}>
       <div className="flex items-center justify-between mb-2">
@@ -86,14 +107,119 @@ function CartPrepCard({ teeTime }) {
           {teeTime.cartPrep.note}
         </div>
       )}
+      {/* Action buttons */}
+      <div className="flex gap-2 mt-3 flex-wrap">
+        <button
+          onClick={() => onSendCartText(teeTime)}
+          className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-200 bg-brand-50 text-brand-500 inline-flex items-center gap-1"
+        >
+          <span>💬</span> Send Cart Prep Text
+        </button>
+        <button
+          onClick={() => onSendDiningNudge(teeTime)}
+          className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-amber-200 bg-amber-50 text-amber-700 inline-flex items-center gap-1"
+        >
+          <span>🍽</span> Post-Round Dining Nudge
+        </button>
+      </div>
     </div>
   );
 }
 
 export default function TeeSheetView() {
   const [showCartPrep, setShowCartPrep] = useState(false);
+  const { showToast } = useApp();
   const atRiskTimes = todayTeeSheet.filter(t => t.healthScore < 50);
   const vipTimes = todayTeeSheet.filter(t => t.duesAnnual >= 18000 && t.healthScore >= 50);
+
+  const handleSendCartText = async (teeTime) => {
+    const firstName = teeTime.name.split(' ')[0];
+    const items = [teeTime.cartPrep.beverage, teeTime.cartPrep.snack].filter(Boolean).join(', ');
+    showToast('Generating cart prep text...', 'info');
+    try {
+      const draft = await apiFetch('/api/generate-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          memberId: teeTime.memberId,
+          draftType: 'sms',
+          context: `Cart prep confirmation for ${teeTime.time} tee time. Cart is ready with: ${items}. ${teeTime.cartPrep.note || ''}`,
+        }),
+      });
+      const body = encodeURIComponent(draft?.body || `Hi ${firstName}! Your cart is ready for your ${teeTime.time} tee time: ${items}. See you on the first tee!`);
+      const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
+      window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+    } catch {
+      const body = encodeURIComponent(`Hi ${firstName}! Your cart is ready for your ${teeTime.time} tee time: ${items}. See you on the first tee!`);
+      const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
+      window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+    }
+  };
+
+  const handleSendRecovery = async (teeTime, type) => {
+    const firstName = teeTime.name.split(' ')[0];
+    const hasComplaint = teeTime.cartPrep.note?.toLowerCase().includes('complaint');
+    const recoveryContext = hasComplaint
+      ? `Proactive service recovery message. This member had a recent complaint that is being resolved. Acknowledge the issue, explain what the club has changed, and invite them back with a specific offer. Be genuine and personal — not corporate.`
+      : `Proactive check-in for an at-risk member. Their engagement is declining. Reach out warmly, ask how things are going, and offer something specific to re-engage them.`;
+
+    showToast(`Generating ${hasComplaint ? 'recovery' : 'check-in'} message...`, 'info');
+    const emailSendMode = localStorage.getItem('swoop_email_send_mode') || 'local';
+    try {
+      const draft = await apiFetch('/api/generate-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          memberId: teeTime.memberId,
+          draftType: type,
+          context: recoveryContext,
+          templateHint: 'recovery_outreach',
+        }),
+      });
+      if (type === 'sms') {
+        const body = encodeURIComponent(draft?.body || `Hi ${firstName}, I wanted to personally reach out and make sure everything is to your satisfaction at the club. Would love to connect.`);
+        const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
+        window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+      } else {
+        const to = encodeURIComponent(localStorage.getItem('swoop_demo_email') || draft?.memberEmail || '');
+        const subject = encodeURIComponent(draft?.subject || `A personal note from your club`);
+        const body = encodeURIComponent(draft?.body || '');
+        if (emailSendMode === 'gmail') {
+          window.open(`https://mail.google.com/mail/?view=cm&to=${to}&su=${subject}&body=${body}`, '_blank');
+        } else {
+          window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_self');
+        }
+      }
+    } catch {
+      if (type === 'sms') {
+        const body = encodeURIComponent(`Hi ${firstName}, I wanted to personally reach out about your recent experience. We've made changes and I'd love to show you. Can we connect?`);
+        window.open(`sms:?&body=${body}`, '_self');
+      }
+    }
+  };
+
+  const handleSendDiningNudge = async (teeTime) => {
+    const firstName = teeTime.name.split(' ')[0];
+    showToast('Generating dining offer...', 'info');
+    try {
+      const draft = await apiFetch('/api/generate-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          memberId: teeTime.memberId,
+          draftType: 'sms',
+          context: `Post-round dining nudge. Member just finished their round from ${teeTime.time} tee time on the ${teeTime.course} course. Suggest dining at the Grill Room or Terrace. Make it personal and mention something they'd enjoy.`,
+        }),
+      });
+      const body = encodeURIComponent(draft?.body || `Great round today, ${firstName}! Chef has a special lunch menu — your usual table is open at the Grill Room. Want me to hold it?`);
+      const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
+      window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+    } catch {
+      const body = encodeURIComponent(`Great round today, ${firstName}! Chef has a special lunch menu — your usual table is open at the Grill Room. Want me to hold it?`);
+      const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
+      window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+    }
+  };
 
   return (
     <PageTransition>
@@ -113,7 +239,7 @@ export default function TeeSheetView() {
               At-Risk Members on Course Today ({atRiskTimes.length})
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {atRiskTimes.map(t => <AlertCard key={t.memberId} teeTime={t} />)}
+              {atRiskTimes.map(t => <AlertCard key={t.memberId} teeTime={t} onSendRecovery={handleSendRecovery} />)}
             </div>
           </div>
         )}
@@ -213,7 +339,7 @@ export default function TeeSheetView() {
           </button>
           {showCartPrep && (
             <div className="flex flex-col gap-3">
-              {todayTeeSheet.map(t => <CartPrepCard key={`prep-${t.memberId}`} teeTime={t} />)}
+              {todayTeeSheet.map(t => <CartPrepCard key={`prep-${t.memberId}`} teeTime={t} onSendCartText={handleSendCartText} onSendDiningNudge={handleSendDiningNudge} />)}
             </div>
           )}
         </div>

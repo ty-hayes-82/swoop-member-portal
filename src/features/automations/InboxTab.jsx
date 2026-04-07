@@ -46,7 +46,11 @@ function ActionCard({ action, onApprove, onDismiss }) {
 
       <div className="flex gap-2">
         <button
-          onClick={() => onApprove(action.id, { executionType: 'email', memberId: action.memberId })}
+          onClick={() => {
+            const channel = (action.recommendedChannel || 'email').toLowerCase();
+            const execType = channel === 'sms' || channel === 'push' ? 'sms' : channel === 'call' ? 'staff_task' : 'email';
+            onApprove(action.id, { executionType: execType, memberId: action.memberId, memberName: action.memberName });
+          }}
           className="px-4 py-1.5 rounded-lg bg-success-500 text-white border-none text-xs font-semibold cursor-pointer hover:bg-success-600 transition-colors"
         >
           Approve

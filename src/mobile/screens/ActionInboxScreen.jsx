@@ -344,7 +344,9 @@ export default function ActionInboxScreen() {
   const completedActions = useMemo(() => inbox.filter(i => i.status !== 'pending'), [inbox]);
 
   const handleApprove = useCallback((action) => {
-    approveAction(action.id, { approvalAction: 'Mobile Approve' });
+    const channel = (action.recommendedChannel || 'email').toLowerCase();
+    const execType = channel === 'sms' || channel === 'push' ? 'sms' : channel === 'call' ? 'staff_task' : 'email';
+    approveAction(action.id, { approvalAction: 'Mobile Approve', executionType: execType, memberId: action.memberId, memberName: action.memberName });
     showToast(`Approved: ${action.description}`, 'success');
     trackAction({ actionType: 'approve', description: action.description, referenceId: action.id });
     if (typeof localStorage !== 'undefined') localStorage.setItem('swoop_swipe_hint_seen', 'true');

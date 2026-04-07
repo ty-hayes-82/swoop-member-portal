@@ -50,7 +50,11 @@ export default function ActionsDrawer({ isOpen, onClose }) {
                   {action.source} &middot; {action.actionType?.replace(/_/g, ' ').toLowerCase()}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => approveAction(action.id, { executionType: 'email', memberId: action.memberId })} className="px-4 py-1.5 rounded-md bg-success-500 text-white border-none text-xs font-semibold cursor-pointer">Approve</button>
+                  <button onClick={() => {
+                      const channel = (action.recommendedChannel || 'email').toLowerCase();
+                      const execType = channel === 'sms' || channel === 'push' ? 'sms' : channel === 'call' ? 'staff_task' : 'email';
+                      approveAction(action.id, { executionType: execType, memberId: action.memberId, memberName: action.memberName });
+                    }} className="px-4 py-1.5 rounded-md bg-success-500 text-white border-none text-xs font-semibold cursor-pointer">Approve</button>
                   <button onClick={() => dismissAction(action.id)} className="px-4 py-1.5 rounded-md bg-transparent text-gray-500 border border-gray-200 text-xs font-semibold cursor-pointer dark:border-gray-700 dark:text-gray-400">Dismiss</button>
                 </div>
               </div>

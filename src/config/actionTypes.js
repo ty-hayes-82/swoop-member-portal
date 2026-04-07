@@ -21,6 +21,13 @@ export const AGENT_ACTION_TYPES = {
   RE_ENGAGEMENT: { icon: '🤝', label: 'Re-engagement', color: theme.colors.navMembers },
   DRAFT_MESSAGE: { icon: '✉', label: 'Draft Message', color: theme.colors.navBriefing },
   STAFFING_ALERT: { icon: '📢', label: 'Staffing Alert', color: theme.colors.navStaffing },
+  FOLLOW_UP: { icon: '🔄', label: 'Follow-Up', color: theme.colors.agentApproved },
+  POST_ROUND_DINING: { icon: '🍽', label: 'Post-Round Dining', color: theme.colors.navFb },
+  STAFF_PUSH_ALERT: { icon: '📲', label: 'Staff Alert', color: theme.colors.navStaffing },
+  SNOWBIRD_WELCOME: { icon: '🌴', label: 'Welcome Back', color: theme.colors.navMembers },
+  RAPID_RESPONSE: { icon: '⚡', label: 'Rapid Response', color: theme.colors.navStaffing },
+  DAY30_CHECKIN: { icon: '📞', label: 'Day-30 Check-in', color: theme.colors.agentCyan },
+  DINING_DORMANCY: { icon: '🍷', label: 'Dining Nudge', color: theme.colors.navFb },
 };
 
 export const PLAYBOOK_HISTORY = {

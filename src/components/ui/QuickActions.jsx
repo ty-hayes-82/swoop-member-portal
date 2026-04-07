@@ -1,8 +1,9 @@
 // QuickActions — connects insight to real-world action.
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getActionsForArchetype, outreachCategories } from '@/data/outreach';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
+import { apiFetch } from '@/services/apiClient';
 
 const STAFF = ['F&B Director', 'Head Golf Professional', 'Membership Director', 'Grill Room Manager', 'Club Manager'];
 
@@ -60,8 +61,55 @@ export default function QuickActions({ memberName, memberId, context = '', arche
     return createdAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   };
 
+  const [aiDraft, setAiDraft] = useState(null);
+  const [draftLoading, setDraftLoading] = useState(false);
+  const [talkingPoints, setTalkingPoints] = useState(null);
+  const [tpLoading, setTpLoading] = useState(false);
+
   const firstName = memberName?.split(' ')[0] ?? 'the member';
   const defaultNote = `Dear ${firstName},\n\nI wanted to reach out personally to apologize for your recent experience at the Grill Room. Your satisfaction is our top priority and I'm sorry we fell short.\n\nI'd love to have you as my guest for lunch this week \u2014 please let me know what works for your schedule.\n\nWarm regards,\n[GM Name]\nYour Club`;
+
+  // Fetch AI-generated draft when note mode opens
+  useEffect(() => {
+    if (mode !== 'note' || !memberId) return;
+    setDraftLoading(true);
+    setAiDraft(null);
+    apiFetch('/api/generate-draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memberId, draftType: 'email', context }),
+    })
+      .then(data => {
+        if (data?.body) {
+          setAiDraft(data);
+          setNote(data.body);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setDraftLoading(false));
+  }, [mode, memberId, context]);
+
+  // Fetch AI talking points when call mode opens
+  useEffect(() => {
+    if (mode !== 'call' || !memberId) return;
+    setTpLoading(true);
+    setTalkingPoints(null);
+    apiFetch('/api/generate-draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        memberId,
+        draftType: 'email',
+        context: `Generate 4-5 concise talking points for a personal GM phone call with this member. Focus on: their recent activity, any risk signals, what to acknowledge, what to offer, and how to close. Format as a numbered list. Keep each point to one sentence.`,
+      }),
+    })
+      .then(data => { if (data?.body) setTalkingPoints(data.body); })
+      .catch(() => {})
+      .finally(() => setTpLoading(false));
+  }, [mode, memberId]);
+
+  const emailSendMode = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_email_send_mode') || 'local' : 'local';
+  const sendBtnLabel = emailSendMode === 'gmail' ? 'Open in Gmail' : emailSendMode === 'cloud' ? 'Send via email' : 'Draft email';
 
   const handleSend = (type) => {
     setSent(type);
@@ -121,15 +169,24 @@ export default function QuickActions({ memberName, memberId, context = '', arche
         <div className="mt-3 p-4 bg-white border border-brand-200 rounded-xl dark:bg-white/[0.03] dark:border-brand-500/30">
           <div className="text-[11px] text-brand-500 font-bold tracking-wide mb-3">
             PERSONAL NOTE TO {memberName?.toUpperCase()}
+            {aiDraft && !aiDraft.fallback && (
+              <span className="ml-2 text-[10px] font-medium text-gray-400 normal-case">AI-generated draft</span>
+            )}
           </div>
-          <textarea
-            defaultValue={defaultNote}
-            onChange={e => setNote(e.target.value)}
-            className="w-full h-40 p-3 text-sm text-gray-800 bg-gray-100 border border-gray-200 rounded-lg resize-y leading-relaxed outline-none box-border dark:bg-gray-800 dark:border-gray-700 dark:text-white/90"
-          />
+          {draftLoading ? (
+            <div className="w-full h-40 p-3 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center dark:bg-gray-800 dark:border-gray-700">
+              <div className="text-sm text-gray-400 animate-pulse">Generating draft...</div>
+            </div>
+          ) : (
+            <textarea
+              value={note || (aiDraft?.body ?? defaultNote)}
+              onChange={e => setNote(e.target.value)}
+              className="w-full h-40 p-3 text-sm text-gray-800 bg-gray-100 border border-gray-200 rounded-lg resize-y leading-relaxed outline-none box-border dark:bg-gray-800 dark:border-gray-700 dark:text-white/90"
+            />
+          )}
           <div className="flex gap-3 mt-3">
-            <button onClick={() => handleSend('note')} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs">
-              Send via email
+            <button onClick={() => handleSend('note')} disabled={draftLoading} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs disabled:opacity-50">
+              {sendBtnLabel}
             </button>
             <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium">
               Dismiss
@@ -143,8 +200,28 @@ export default function QuickActions({ memberName, memberId, context = '', arche
           <div className="text-[11px] text-success-500 font-bold tracking-wide mb-3">
             SCHEDULE A CALL WITH {memberName?.toUpperCase()}
           </div>
+
+          {/* AI-Generated Talking Points */}
+          <div className="mb-4 bg-success-50/50 rounded-lg p-3 border border-success-100">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-success-600 mb-2">
+              AI-Generated Talking Points
+            </div>
+            {tpLoading ? (
+              <div className="text-xs text-gray-400 animate-pulse py-2">Generating personalized talking points...</div>
+            ) : talkingPoints ? (
+              <div className="text-xs text-gray-700 leading-relaxed whitespace-pre-line dark:text-gray-300">{talkingPoints}</div>
+            ) : (
+              <ul className="m-0 pl-4 space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                <li>Acknowledge recent experience and show you're aware of their feedback</li>
+                <li>Ask about {firstName}'s preferences — listen for what matters most</li>
+                <li>Mention a specific improvement or upcoming event they'd enjoy</li>
+                <li>Offer something tangible (comp lunch, preferred tee time, event invite)</li>
+              </ul>
+            )}
+          </div>
+
           <div className="text-sm text-gray-600 mb-4 leading-relaxed dark:text-gray-400">
-            Reminder: <strong className="text-gray-800 dark:text-white/90">James has a tee time Saturday 7:42 AM.</strong> A brief conversation at the first tee would be ideal \u2014 personal, not a formal call.
+            When would you like to call?
           </div>
           <div className="flex gap-3 flex-wrap mb-4">
             {['Today 4 PM', 'Friday AM', 'Saturday at the tee', 'Monday morning'].map(t => (

@@ -10,6 +10,7 @@ import {
   updateWaitlistConfig as updateTSOConfig,
 } from '@/services/teeSheetOpsService';
 import { useToast } from '@/components/ui/Toast.jsx';
+import { apiFetch } from '@/services/apiClient';
 
 // V3: Only 3 core playbooks. Removed slow-saturday (renamed to staffing-gap),
 // engagement-decay, peak-demand-capture.
@@ -261,7 +262,7 @@ export function AppProvider({ children }) {
     } catch {}
   }, [state.inbox, state.agentStatuses, state.agentConfigs]);
 
-  function approveAction(id, meta = {}) {
+  async function approveAction(id, meta = {}) {
     approveAgentServiceAction(id, meta);
     dispatch({ type: 'APPROVE_ACTION', id, meta });
 
@@ -279,23 +280,77 @@ export function AppProvider({ children }) {
     const memberName = actionItem?.memberName || meta.memberName || 'Member';
     const description = meta.customMessage || actionItem?.description || '';
 
-    // ── Local email: open mailto: link ──
-    if (execType === 'email' && emailSendMode === 'local') {
+    // ── Gmail draft: AI-generated content opened in Gmail compose ──
+    if (execType === 'email' && emailSendMode === 'gmail') {
       const toAddr = demoEmail || meta.memberEmail || '';
-      const subject = encodeURIComponent(`A personal note from your club`);
-      const body = encodeURIComponent(
-        `Dear ${memberName},\n\n${description}\n\nWe value your membership and would love to hear from you.\n\nWarm regards`
-      );
-      window.open(`mailto:${toAddr}?subject=${subject}&body=${body}`, '_self');
+      try {
+        const draft = await apiFetch('/api/generate-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            memberId: meta.memberId,
+            draftType: 'email',
+            context: description,
+            templateHint: meta.templateId,
+          }),
+        });
+        const subject = encodeURIComponent(draft?.subject || `A note from your club`);
+        const body = encodeURIComponent(draft?.body || description);
+        const to = encodeURIComponent(toAddr || draft?.memberEmail || '');
+        window.open(`https://mail.google.com/mail/?view=cm&to=${to}&su=${subject}&body=${body}`, '_blank');
+      } catch {
+        // Fallback: open Gmail with generic content
+        const subject = encodeURIComponent(`A personal note from your club`);
+        const body = encodeURIComponent(`Dear ${memberName},\n\n${description}\n\nWarm regards`);
+        window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(toAddr)}&su=${subject}&body=${body}`, '_blank');
+      }
       return;
     }
 
-    // ── Local SMS: open sms: link ──
+    // ── Local email: AI-generated content in mailto: ──
+    if (execType === 'email' && emailSendMode === 'local') {
+      const toAddr = demoEmail || meta.memberEmail || '';
+      try {
+        const draft = await apiFetch('/api/generate-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            memberId: meta.memberId,
+            draftType: 'email',
+            context: description,
+            templateHint: meta.templateId,
+          }),
+        });
+        const subject = encodeURIComponent(draft?.subject || `A personal note from your club`);
+        const body = encodeURIComponent(draft?.body || `Dear ${memberName},\n\n${description}\n\nWarm regards`);
+        window.open(`mailto:${toAddr}?subject=${subject}&body=${body}`, '_self');
+      } catch {
+        const subject = encodeURIComponent(`A personal note from your club`);
+        const body = encodeURIComponent(`Dear ${memberName},\n\n${description}\n\nWe value your membership and would love to hear from you.\n\nWarm regards`);
+        window.open(`mailto:${toAddr}?subject=${subject}&body=${body}`, '_self');
+      }
+      return;
+    }
+
+    // ── Local SMS: AI-generated content in sms: link ──
     if (execType === 'sms' && smsSendMode === 'local') {
       const toNum = demoPhone || meta.memberPhone || '';
-      const body = encodeURIComponent(description || `Hi ${memberName}, just checking in from the club.`);
-      // sms: URI — use & for iOS, ? for Android; &body= works on both modern platforms
-      window.open(`sms:${toNum}?&body=${body}`, '_self');
+      try {
+        const draft = await apiFetch('/api/generate-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            memberId: meta.memberId,
+            draftType: 'sms',
+            context: description,
+          }),
+        });
+        const body = encodeURIComponent(draft?.body || description || `Hi ${memberName}, just checking in from the club.`);
+        window.open(`sms:${toNum}?&body=${body}`, '_self');
+      } catch {
+        const body = encodeURIComponent(description || `Hi ${memberName}, just checking in from the club.`);
+        window.open(`sms:${toNum}?&body=${body}`, '_self');
+      }
       return;
     }
 

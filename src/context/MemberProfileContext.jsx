@@ -3,6 +3,7 @@ import { getMemberProfile } from '@/services/memberService';
 import { useApp } from '@/context/AppContext';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { trackAction } from '@/services/activityService';
+import { apiFetch } from '@/services/apiClient';
 
 const MemberProfileContext = createContext(null);
 
@@ -66,7 +67,7 @@ function normalizeApiProfile(data) {
 }
 
 export function MemberProfileProvider({ children }) {
-  const { showToast, addAction } = useApp();
+  const { showToast, addAction, approveAction } = useApp();
   const { navigate } = useNavigationContext();
   const [drawerMemberId, setDrawerMemberId] = useState(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
@@ -165,24 +166,38 @@ export function MemberProfileProvider({ children }) {
   );
 
   const triggerQuickAction = useCallback(
-    (memberId, actionType) => {
+    async (memberId, actionType) => {
       if (!memberId) return;
       const memberName = profile?.name ?? 'Member';
+      const memberEmail = profile?.contact?.email || '';
+      const memberPhone = profile?.contact?.phone || '';
+
+      // Route email and SMS through AI draft + approveAction flow
+      if (actionType === 'email' || actionType === 'sms') {
+        const actionId = `quick_${actionType}_${Date.now()}`;
+        showToast?.('Generating draft...', 'info');
+        trackAction({ actionType, memberId, memberName });
+        approveAction?.(actionId, {
+          executionType: actionType,
+          memberId,
+          memberName,
+          memberEmail,
+          memberPhone,
+        });
+        return;
+      }
+
       const label =
         actionType === 'call'
           ? 'Call scheduled'
-          : actionType === 'email'
-          ? 'Email draft queued'
-          : actionType === 'sms'
-          ? 'SMS drafted'
           : actionType === 'comp'
           ? 'Comp offer logged'
           : 'Action captured';
       showToast?.(`${label} for ${memberName}`, 'success');
-      trackAction({ actionType: actionType, memberId, memberName });
+      trackAction({ actionType, memberId, memberName });
       addAction?.({ description: `${label} — ${memberName}`, memberId, memberName, actionType: 'RETENTION_OUTREACH', source: 'Quick Action', priority: 'medium', impactMetric: label });
     },
-    [showToast, profile, addAction]
+    [showToast, profile, addAction, approveAction]
   );
 
   return (

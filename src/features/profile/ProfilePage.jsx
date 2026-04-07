@@ -9,6 +9,11 @@ const SEND_MODES = [
   { value: 'cloud', label: 'Cloud (SendGrid / Twilio)', desc: 'Sends automatically via SendGrid (email) and Twilio (SMS). No app needed.' },
 ];
 
+const EMAIL_SEND_MODES = [
+  ...SEND_MODES,
+  { value: 'gmail', label: 'Gmail Draft', desc: 'AI generates a draft and opens it in Gmail for you to review and send.' },
+];
+
 export default function ProfilePage() {
   const [user, setUser] = useState({ name: '', email: '', role: '' });
   const [clubName, setClubName] = useState('');
@@ -138,19 +143,19 @@ export default function ProfilePage() {
         {/* Email send mode */}
         <div className="mb-4">
           <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Email Delivery</label>
-          <div className="flex gap-2">
-            {SEND_MODES.map(mode => (
+          <div className="flex gap-2 flex-wrap">
+            {EMAIL_SEND_MODES.map(mode => (
               <button
                 key={mode.value}
                 onClick={() => setEmailSendMode(mode.value)}
-                className={`flex-1 p-3 rounded-lg border-2 text-left cursor-pointer transition-all ${
+                className={`flex-1 min-w-[140px] p-3 rounded-lg border-2 text-left cursor-pointer transition-all ${
                   emailSendMode === mode.value
                     ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10'
                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm">{mode.value === 'local' ? '📱' : '☁️'}</span>
+                  <span className="text-sm">{mode.value === 'local' ? '📱' : mode.value === 'gmail' ? '✉' : '☁️'}</span>
                   <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{mode.label}</span>
                 </div>
                 <p className="text-[10px] text-gray-400 m-0">{mode.desc}</p>
