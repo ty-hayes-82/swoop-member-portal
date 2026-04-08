@@ -72,12 +72,21 @@ function AppShell() {
   }, []);
 
   // Guided demo session expiry: if the tab was closed and reopened,
-  // just clear the guided flag — the real user stays logged in
+  // restore real club identity and clear the guided flag
   useEffect(() => {
     if (localStorage.getItem('swoop_was_guided') === 'true' && sessionStorage.getItem('swoop_demo_guided') !== 'true') {
       localStorage.removeItem('swoop_was_guided');
       localStorage.removeItem('swoop_agent_inbox');
-      // Don't touch auth — user stays logged in, just exits demo overlay
+      // Restore real club name/id if they were stashed (sessionStorage is gone after tab close,
+      // so we can't restore from there — but the clubId 'demo_guided' signals we need to clear)
+      const clubId = localStorage.getItem('swoop_club_id');
+      if (clubId === 'demo_guided') {
+        // Can't restore club name (sessionStorage cleared), but clear the demo marker
+        // so the app falls back to the user's real club from their auth record
+        const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+        localStorage.setItem('swoop_club_id', user.clubId || '');
+        localStorage.setItem('swoop_club_name', user.clubName || '');
+      }
       window.location.reload();
     }
   }, []);

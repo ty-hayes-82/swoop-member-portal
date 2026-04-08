@@ -343,6 +343,13 @@ const SwoopHeader = () => {
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
+                        // Restore real club name
+                        const realClubName = sessionStorage.getItem('swoop_real_club_name');
+                        const realClubId = sessionStorage.getItem('swoop_real_club_id');
+                        if (realClubName) localStorage.setItem('swoop_club_name', realClubName);
+                        if (realClubId) localStorage.setItem('swoop_club_id', realClubId);
+                        sessionStorage.removeItem('swoop_real_club_name');
+                        sessionStorage.removeItem('swoop_real_club_id');
                         sessionStorage.removeItem('swoop_demo_guided');
                         sessionStorage.removeItem('swoop_demo_sources');
                         sessionStorage.removeItem('swoop_demo_files');
@@ -362,6 +369,11 @@ const SwoopHeader = () => {
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
+                        // Stash real club identity, swap to demo club
+                        sessionStorage.setItem('swoop_real_club_name', localStorage.getItem('swoop_club_name') || '');
+                        sessionStorage.setItem('swoop_real_club_id', localStorage.getItem('swoop_club_id') || '');
+                        localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
+                        localStorage.setItem('swoop_club_id', 'demo_guided');
                         sessionStorage.setItem('swoop_demo_guided', 'true');
                         sessionStorage.removeItem('swoop_demo_sources');
                         sessionStorage.removeItem('swoop_demo_files');
