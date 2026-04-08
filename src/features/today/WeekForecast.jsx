@@ -1,6 +1,6 @@
 // WeekForecast — hourly strip + 5-day card forecast (Google Weather)
 import { useState, useEffect } from 'react';
-import { getDailyForecast, getHourlyForecast, getWeatherSource } from '@/services/weatherService';
+import { getDailyForecast, getHourlyForecast, getWeatherSource, getWeatherLocation } from '@/services/weatherService';
 
 const conditionIcons = {
   sunny: '☀️', partly_cloudy: '⛅', cloudy: '☁️',
@@ -29,6 +29,7 @@ export default function WeekForecast() {
   const forecast = getDailyForecast(5);
   const hourly = getHourlyForecast();
   const source = getWeatherSource();
+  const location = getWeatherLocation();
 
   if ((!forecast?.length && !hourly?.length) || source === 'static') return null;
 
@@ -40,7 +41,10 @@ export default function WeekForecast() {
       {hourly.length > 0 && (
         <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Today's Hourly</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Today's Hourly</span>
+              {location && <span className="text-[10px] text-gray-400">{location}</span>}
+            </div>
             <span className="text-[9px] text-gray-400">
               {source === 'google' ? 'Google Weather' : source}
             </span>

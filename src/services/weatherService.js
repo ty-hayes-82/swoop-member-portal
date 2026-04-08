@@ -233,3 +233,14 @@ export function getWeatherSource() {
 export function isWeatherStale() {
   return _forecast?.stale || false;
 }
+
+export function getWeatherLocation() {
+  if (_forecast?.location) return _forecast.location;
+  try {
+    const city = localStorage.getItem('swoop_club_city');
+    const state = localStorage.getItem('swoop_club_state');
+    if (city && state) return `${city}, ${state}`;
+    if (city) return city;
+  } catch {}
+  return null;
+}
