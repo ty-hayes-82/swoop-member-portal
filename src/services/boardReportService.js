@@ -62,13 +62,15 @@ export const getKPIs = () => {
       { label: 'At Risk', value: (summary.atRisk || 0) + (summary.critical || 0), unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
     ];
   }
-  if (!shouldUseStatic('pipeline')) return EMPTY_KPIS;
+  // Static KPIs require both pipeline AND members gates (need actual member data to be meaningful)
+  if (!shouldUseStatic('pipeline') || !shouldUseStatic('members')) return EMPTY_KPIS;
   return staticKpis;
 };
 
-export const getMemberSaves = () => shouldUseStatic('pipeline') ? staticMemberSaves : [];
-export const getOperationalSaves = () => shouldUseStatic('pipeline') ? staticOperationalSaves : [];
-export const getMonthlyTrends = () => shouldUseStatic('pipeline') ? staticMonthlyTrends : [];
+// Board report details require multiple data sources to be meaningful
+export const getMemberSaves = () => (shouldUseStatic('pipeline') && shouldUseStatic('members')) ? staticMemberSaves : [];
+export const getOperationalSaves = () => (shouldUseStatic('pipeline') && shouldUseStatic('complaints')) ? staticOperationalSaves : [];
+export const getMonthlyTrends = () => (shouldUseStatic('pipeline') && shouldUseStatic('members')) ? staticMonthlyTrends : [];
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

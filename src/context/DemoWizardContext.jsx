@@ -47,8 +47,10 @@ export function DemoWizardProvider({ children }) {
               localStorage.setItem('swoop_club_city', values[cityIdx]);
               if (stateIdx >= 0) localStorage.setItem('swoop_club_state', values[stateIdx]);
               if (nameIdx >= 0) localStorage.setItem('swoop_club_name', values[nameIdx]);
-              // Fetch real weather for this location
-              refreshWeatherForLocation();
+              // Fetch real weather for this location, then trigger re-render
+              refreshWeatherForLocation().then(() => {
+                setRenderKey(k => k + 1);
+              });
             }
           }
         }
