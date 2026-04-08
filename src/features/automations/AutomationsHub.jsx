@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { useApp } from '@/context/AppContext';
+import { getDataMode, isSourceLoaded } from '@/services/demoGate';
 import InboxTab from './InboxTab';
 import AgentsTab from './AgentsTab';
 import SettingsTab from './SettingsTab';
@@ -36,6 +37,9 @@ export default function AutomationsHub() {
     }
   }, [routeIntent]);
 
+  // In guided demo, hide automations content until agents gate is imported
+  const guidedNoAgents = getDataMode() === 'guided' && !isSourceLoaded('agents');
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -45,8 +49,18 @@ export default function AutomationsHub() {
         </p>
       </div>
 
+      {guidedNoAgents && (
+        <div className="rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 p-8 text-center">
+          <div className="text-3xl mb-3">🤖</div>
+          <h3 className="text-base font-semibold text-gray-700 dark:text-gray-200 mb-1">AI Agents not yet activated</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-0">
+            Import <strong>AI Agents</strong> from the Guided Demo panel to see automated playbooks, inbox actions, and agent settings.
+          </p>
+        </div>
+      )}
+
       {/* Tab navigation — mobile-optimized: equal-width tabs, hidden icons on small screens */}
-      <div role="tablist" aria-label="Automations tabs" className="flex gap-0.5 sm:gap-1 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+      {!guidedNoAgents && <div role="tablist" aria-label="Automations tabs" className="flex gap-0.5 sm:gap-1 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         {TABS.map(tab => (
           <button
             key={tab.key}
@@ -68,15 +82,17 @@ export default function AutomationsHub() {
             )}
           </button>
         ))}
-      </div>
+      </div>}
 
       {/* Tab content */}
-      <div role="tabpanel">
-        {activeTab === 'inbox' && <InboxTab />}
-        {activeTab === 'playbooks' && <PlaybooksPage embedded />}
-        {activeTab === 'agents' && <AgentsTab />}
-        {activeTab === 'settings' && <SettingsTab />}
-      </div>
+      {!guidedNoAgents && (
+        <div role="tabpanel">
+          {activeTab === 'inbox' && <InboxTab />}
+          {activeTab === 'playbooks' && <PlaybooksPage embedded />}
+          {activeTab === 'agents' && <AgentsTab />}
+          {activeTab === 'settings' && <SettingsTab />}
+        </div>
+      )}
     </div>
   );
 }

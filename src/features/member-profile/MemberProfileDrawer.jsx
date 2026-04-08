@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import SourceBadge from '@/components/ui/SourceBadge.jsx';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { getOutreachHistory } from '@/services/activityService';
-import { shouldUseStatic } from '@/services/demoGate';
+import { shouldUseStatic, getDataMode, isSourceLoaded } from '@/services/demoGate';
 import { getMemberChurnPrediction } from '@/services/memberService';
 
 const formatDate = (value) => {
@@ -675,7 +675,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <DrawerSnapshotSection profile={profile} />
 
       {/* Health Score Breakdown — only show when engagement data sources are imported */}
-      {(profile.golfScore || profile.diningScore || shouldUseStatic('tee-sheet') || shouldUseStatic('fb')) && (
+      {(profile.golfScore || profile.diningScore || (shouldUseStatic('tee-sheet') && isSourceLoaded('tee-sheet')) || (shouldUseStatic('fb') && isSourceLoaded('fb'))) && (
         <Section title="Health Score Breakdown" description="Weighted engagement across 4 dimensions">
           <HealthDimensionGrid profile={profile} />
         </Section>
@@ -737,8 +737,8 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </Section>
       )}
 
-      {/* Archetype Description — Call Prep */}
-      {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && (
+      {/* Archetype Description — Call Prep (requires engagement data beyond members) */}
+      {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && !(getDataMode() === 'guided' && !isSourceLoaded('tee-sheet') && !isSourceLoaded('fb') && !isSourceLoaded('email')) && (
         <Section title={`Archetype: ${profile.archetype}`} description="Behavioral profile">
           <div className="text-sm text-gray-500 leading-relaxed" style={{ fontSize: '10px', lineHeight: 1.4 }}>
             {ARCHETYPE_DESCRIPTIONS[profile.archetype]}
@@ -747,23 +747,25 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       )}
 
       {/* Spending Trend — only show when POS/F&B data is imported */}
-      {(shouldUseStatic('fb') || profile.spendHistory) && (
+      {((shouldUseStatic('fb') && isSourceLoaded('fb')) || profile.spendHistory) && (
         <Section title="Spending Trend" description="6-month direction">
           <SpendTrendSparkline profile={profile} />
         </Section>
       )}
 
-      {/* Recommended Talking Points */}
-      <Section title="Talking Points" description="Personalized for this call">
-        <div className="flex flex-col gap-1.5" style={{ fontSize: '12px', lineHeight: 1.4 }}>
-          {getTalkingPoints(profile).map((point, i) => (
-            <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]" style={{ fontSize: '11px', lineHeight: 1.4, padding: '6px 10px', marginBottom: '2px' }}>
-              <span className="text-brand-500 font-bold text-sm shrink-0" style={{ fontSize: '12px', lineHeight: 1.4 }}>{i + 1}.</span>
-              <span className="text-sm text-gray-500 leading-normal" style={{ fontSize: '10px', lineHeight: 1.4 }}>{point}</span>
-            </div>
-          ))}
-        </div>
-      </Section>
+      {/* Recommended Talking Points — only show when engagement data is available */}
+      {!(getDataMode() === 'guided' && !isSourceLoaded('tee-sheet') && !isSourceLoaded('fb') && !isSourceLoaded('email') && !isSourceLoaded('complaints')) && (
+        <Section title="Talking Points" description="Personalized for this call">
+          <div className="flex flex-col gap-1.5" style={{ fontSize: '12px', lineHeight: 1.4 }}>
+            {getTalkingPoints(profile).map((point, i) => (
+              <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]" style={{ fontSize: '11px', lineHeight: 1.4, padding: '6px 10px', marginBottom: '2px' }}>
+                <span className="text-brand-500 font-bold text-sm shrink-0" style={{ fontSize: '12px', lineHeight: 1.4 }}>{i + 1}.</span>
+                <span className="text-sm text-gray-500 leading-normal" style={{ fontSize: '10px', lineHeight: 1.4 }}>{point}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* Outreach History */}
       <Section title="Outreach History" description="Past communications">
