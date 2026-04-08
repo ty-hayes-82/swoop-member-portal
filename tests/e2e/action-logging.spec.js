@@ -279,6 +279,9 @@ test.describe('Action Logging & Duplicate Prevention', () => {
       await page.waitForTimeout(1500);
     }
 
+    // Wait a bit longer for the activation trail animation
+    await page.waitForTimeout(1000);
+
     const playbookLogs = logs.filter(l => l.actionType === 'playbook' && l.actionSubtype === 'activate');
     expect(playbookLogs.length).toBeGreaterThanOrEqual(1);
   });
@@ -288,6 +291,7 @@ test.describe('Action Logging & Duplicate Prevention', () => {
   // ──────────────────────────────────────────────
 
   test('Duplicate warning — inbox approve shows toast when member recently contacted', async ({ page }) => {
+    await page.waitForTimeout(500);
     await seedRecentOutreach(page, 'mbr_203', 'James Whitfield', 'email');
 
     await nav(page, 'Automations');

@@ -74,6 +74,9 @@ export function DemoWizardProvider({ children }) {
     localStorage.removeItem('swoop_agent_inbox');
     localStorage.removeItem('swoop_agent_statuses');
     localStorage.removeItem('swoop_agent_configs');
+    // Clear club location so weather doesn't re-fetch on reload
+    localStorage.removeItem('swoop_club_city');
+    localStorage.removeItem('swoop_club_state');
     // Re-enter guided mode
     sessionStorage.setItem('swoop_demo_guided', 'true');
     // Reload the page to reset all service singletons

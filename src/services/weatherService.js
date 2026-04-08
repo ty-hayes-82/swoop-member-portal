@@ -4,10 +4,15 @@
 // Falls back to static data from src/data/weather.js when API is unavailable.
 
 import { weatherDaily as weatherData } from '../data/weather';
-import { shouldUseStatic } from './demoGate';
+import { shouldUseStatic, isGuidedMode, isSourceLoaded } from './demoGate';
 
 let _current = null;
 let _forecast = null;
+
+// In guided demo, weather requires the Club Profile (gateId: 'pipeline') to be imported
+function isWeatherGated() {
+  return isGuidedMode() && !isSourceLoaded('pipeline');
+}
 
 function getClubId() {
   try {
@@ -141,6 +146,8 @@ export async function refreshWeatherForLocation() {
 
 export const _init = async () => {
   try {
+    // In guided demo, don't fetch weather until Club Profile is imported
+    if (isWeatherGated()) return;
     // Check if we have a stored city for demo mode
     const city = localStorage.getItem('swoop_club_city');
     if (city) {
@@ -160,6 +167,7 @@ export const _init = async () => {
 // ─── Current Conditions ───────────────────────────────────
 
 export function getCurrentWeather() {
+  if (isWeatherGated()) return null;
   if (_current) return _current;
   if (!shouldUseStatic('weather')) return null;
   // Static fallback: Jan 17 demo day
@@ -171,6 +179,7 @@ export function getCurrentWeather() {
 // ─── Hourly Forecast ──────────────────────────────────────
 
 export function getHourlyForecast() {
+  if (isWeatherGated()) return [];
   if (_forecast?.hourly?.length) return _forecast.hourly;
   if (!shouldUseStatic('weather')) return [];
   return [];
@@ -179,6 +188,7 @@ export function getHourlyForecast() {
 // ─── Daily Forecast (up to 5 days) ───────────────────────
 
 export function getDailyForecast(numDays = 5) {
+  if (isWeatherGated()) return [];
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
   if (!shouldUseStatic('weather')) return [];
   // Static fallback from weather data starting Jan 17
@@ -203,6 +213,7 @@ export function getTomorrowForecast() {
 // ─── Weather Alerts ───────────────────────────────────────
 
 export function getWeatherAlerts() {
+  if (isWeatherGated()) return [];
   if (_forecast?.alerts?.length) return _forecast.alerts;
   if (!shouldUseStatic('weather')) return [];
   return [{
