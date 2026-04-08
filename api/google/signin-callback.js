@@ -35,9 +35,8 @@ export default async function handler(req, res) {
     return res.redirect(302, '/#/login?error=google_not_configured');
   }
 
-  const host = req.headers['x-forwarded-host'] || req.headers.host;
-  const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const redirectUri = `${protocol}://${host}/api/google/signin-callback`;
+  const baseUrl = process.env.APP_URL || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+  const redirectUri = `${baseUrl}/api/google/signin-callback`;
 
   try {
     // Exchange code for tokens

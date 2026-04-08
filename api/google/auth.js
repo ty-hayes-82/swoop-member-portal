@@ -25,9 +25,8 @@ export default function handler(req, res) {
   }
 
   // Determine callback URL based on request origin
-  const host = req.headers['x-forwarded-host'] || req.headers.host;
-  const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const redirectUri = `${protocol}://${host}/api/google/callback`;
+  const baseUrl = process.env.APP_URL || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+  const redirectUri = `${baseUrl}/api/google/callback`;
 
   // Pass returnUrl and auth token through state param
   const returnUrl = req.query.returnUrl || '/';

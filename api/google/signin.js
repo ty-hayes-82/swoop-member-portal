@@ -25,9 +25,8 @@ export default function handler(req, res) {
     return res.status(500).json({ error: 'GOOGLE_CLIENT_ID not configured' });
   }
 
-  const host = req.headers['x-forwarded-host'] || req.headers.host;
-  const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const redirectUri = `${protocol}://${host}/api/google/signin-callback`;
+  const baseUrl = process.env.APP_URL || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+  const redirectUri = `${baseUrl}/api/google/signin-callback`;
 
   const params = new URLSearchParams({
     client_id: clientId,
