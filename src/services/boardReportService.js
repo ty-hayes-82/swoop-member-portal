@@ -66,9 +66,9 @@ export const getKPIs = () => {
   return staticKpis;
 };
 
-export const getMemberSaves = () => _liveKpis ? staticMemberSaves : (shouldUseStatic('pipeline') ? staticMemberSaves : []);
-export const getOperationalSaves = () => _liveKpis ? staticOperationalSaves : (shouldUseStatic('pipeline') ? staticOperationalSaves : []);
-export const getMonthlyTrends = () => _liveKpis ? staticMonthlyTrends : (shouldUseStatic('pipeline') ? staticMonthlyTrends : []);
+export const getMemberSaves = () => shouldUseStatic('pipeline') ? staticMemberSaves : [];
+export const getOperationalSaves = () => shouldUseStatic('pipeline') ? staticOperationalSaves : [];
+export const getMonthlyTrends = () => shouldUseStatic('pipeline') ? staticMonthlyTrends : [];
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

@@ -50,12 +50,12 @@ function getSuggestedAction(member) {
   return 'On track - continue monitoring';
 }
 
-import { isAuthenticatedClub } from '@/config/constants';
+import { shouldUseStatic } from '@/services/demoGate';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
 export default function CohortTab() {
-  // Real clubs need actual new member data — show empty state until available
-  if (isAuthenticatedClub()) {
+  // Show empty state until member data with join dates is available
+  if (!shouldUseStatic('members')) {
     return (
       <DataEmptyState
         icon="🎓"

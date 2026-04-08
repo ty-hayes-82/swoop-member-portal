@@ -152,7 +152,7 @@ export default function HealthOverview() {
   const { navigate } = useNavigation();
 
   // Authenticated club with no at-risk or watch members — show contextual message
-  if (isAuthenticatedClub() && atRisk.length === 0 && watchList.length === 0) {
+  if (atRisk.length === 0 && watchList.length === 0) {
     const summary = getMemberSummary();
     if (summary.total > 0) {
       return <DataEmptyState icon="✅" title="No members at risk" description={`${summary.total} members imported. Health scores require golf and dining data in addition to the member roster. Import tee sheet and POS data to see risk levels.`} dataType="engagement data" />;

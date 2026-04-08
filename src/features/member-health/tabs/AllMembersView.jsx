@@ -257,12 +257,12 @@ const ACTIVITY_FILTERS = [
 
 export default function AllMembersView({ initialArchetype = null }) {
   const allMembers = useMemo(() => {
-    const members = isAuthenticatedClub() ? getMemberRoster() : generateRoster();
-    if (!isAuthenticatedClub()) setRosterCache(members);
-    return members;
+    const roster = getMemberRoster();
+    if (roster.length > 0) return roster;
+    return generateRoster();
   }, []);
 
-  if (isAuthenticatedClub() && allMembers.length === 0) {
+  if (allMembers.length === 0) {
     return <DataEmptyState icon="👥" title="No members imported yet" description="Import your member roster to see health scores, archetypes, and engagement data for every member." dataType="members" />;
   }
 

@@ -70,8 +70,8 @@ export const getMonthlyRevenueSummary = () => {
 };
 
 export const getPaceDistribution = () => {
-  if (_d) {
-    const source = (_d?.paceDistribution ?? paceDistribution ?? DEFAULT_PACE_DISTRIBUTION);
+  if (_d?.paceDistribution) {
+    const source = _d.paceDistribution;
     if (!Array.isArray(source) || source.length === 0) return DEFAULT_PACE_DISTRIBUTION;
     return source.map((item, index) => {
       const fallback = DEFAULT_PACE_DISTRIBUTION[index] ?? DEFAULT_PACE_DISTRIBUTION[DEFAULT_PACE_DISTRIBUTION.length - 1];

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import SourceBadge from '@/components/ui/SourceBadge.jsx';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { getOutreachHistory } from '@/services/activityService';
+import { shouldUseStatic } from '@/services/demoGate';
 import { getMemberChurnPrediction } from '@/services/memberService';
 
 const formatDate = (value) => {
@@ -545,10 +546,12 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
       </div>
 
-      {/* Health Score Breakdown — uses real dimensions from health_scores table when available */}
-      <Section title="Health Score Breakdown" description="Weighted engagement across 4 dimensions">
-        <HealthDimensionGrid profile={profile} />
-      </Section>
+      {/* Health Score Breakdown — only show when engagement data sources are imported */}
+      {(profile.golfScore || profile.diningScore || shouldUseStatic('tee-sheet') || shouldUseStatic('fb')) && (
+        <Section title="Health Score Breakdown" description="Weighted engagement across 4 dimensions">
+          <HealthDimensionGrid profile={profile} />
+        </Section>
+      )}
 
       {/* Resignation Risk — from predict-churn API */}
       <ChurnPredictionBadge profile={profile} />
@@ -614,10 +617,12 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </Section>
       )}
 
-      {/* Spending Trend */}
-      <Section title="Spending Trend" description="6-month direction">
-        <SpendTrendSparkline profile={profile} />
-      </Section>
+      {/* Spending Trend — only show when POS/F&B data is imported */}
+      {(shouldUseStatic('fb') || profile.spendHistory) && (
+        <Section title="Spending Trend" description="6-month direction">
+          <SpendTrendSparkline profile={profile} />
+        </Section>
+      )}
 
       {/* Recommended Talking Points */}
       <Section title="Talking Points" description="Personalized for this call">
