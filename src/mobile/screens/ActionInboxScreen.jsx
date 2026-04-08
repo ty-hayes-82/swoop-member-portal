@@ -348,22 +348,22 @@ export default function ActionInboxScreen() {
     const execType = channel === 'sms' || channel === 'push' ? 'sms' : channel === 'call' ? 'staff_task' : 'email';
     approveAction(action.id, { approvalAction: 'Mobile Approve', executionType: execType, memberId: action.memberId, memberName: action.memberName });
     showToast(`Approved: ${action.description}`, 'success');
-    trackAction({ actionType: 'approve', description: action.description, referenceId: action.id });
+    trackAction({ actionType: 'approve', memberId: action.memberId, memberName: action.memberName, description: action.description, referenceId: action.id });
     if (typeof localStorage !== 'undefined') localStorage.setItem('swoop_swipe_hint_seen', 'true');
   }, [approveAction, showToast]);
 
   const handleDismiss = useCallback((action) => {
     dismissAction(action.id, { reason: 'Dismissed from mobile' });
     showToast(`Dismissed: ${action.description}`, 'warning');
-    trackAction({ actionType: 'dismiss', description: action.description, referenceId: action.id });
+    trackAction({ actionType: 'dismiss', memberId: action.memberId, memberName: action.memberName, description: action.description, referenceId: action.id });
     if (typeof localStorage !== 'undefined') localStorage.setItem('swoop_swipe_hint_seen', 'true');
   }, [dismissAction, showToast]);
 
   const handleApproveAll = useCallback((priority) => {
     const actions = pendingByPriority[priority] || [];
     actions.forEach(action => {
-      approveAction(action.id, { approvalAction: `Mobile Batch Approve (${priority})` });
-      trackAction({ actionType: 'approve', description: action.description, referenceId: action.id });
+      approveAction(action.id, { approvalAction: `Mobile Batch Approve (${priority})`, memberId: action.memberId, memberName: action.memberName });
+      trackAction({ actionType: 'approve', memberId: action.memberId, memberName: action.memberName, description: action.description, referenceId: action.id });
     });
     showToast(`Approved ${actions.length} ${priority} priority actions`, 'success');
     if (navigator.vibrate) navigator.vibrate(50);

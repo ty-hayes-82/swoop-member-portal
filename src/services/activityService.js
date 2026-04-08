@@ -71,3 +71,22 @@ export function getOutreachHistory(memberId) {
     return [];
   }
 }
+
+/**
+ * Check if a member was recently contacted via outreach.
+ * Returns { recentlyContacted, lastContact, hoursAgo }
+ */
+export function checkRecentOutreach(memberId, windowHours = 48) {
+  if (!memberId) return { recentlyContacted: false, lastContact: null, hoursAgo: null };
+  const history = getOutreachHistory(memberId);
+  if (!history.length) return { recentlyContacted: false, lastContact: null, hoursAgo: null };
+
+  const last = history[0]; // already sorted newest-first
+  const hoursAgo = Math.round((Date.now() - new Date(last.timestamp).getTime()) / (1000 * 60 * 60));
+
+  return {
+    recentlyContacted: hoursAgo < windowHours,
+    lastContact: last,
+    hoursAgo,
+  };
+}

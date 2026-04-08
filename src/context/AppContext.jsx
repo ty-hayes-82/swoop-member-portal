@@ -11,7 +11,7 @@ import {
 } from '@/services/teeSheetOpsService';
 import { useToast } from '@/components/ui/Toast.jsx';
 import { apiFetch } from '@/services/apiClient';
-import { trackAction } from '@/services/activityService';
+import { trackAction, checkRecentOutreach } from '@/services/activityService';
 
 const PLAYBOOK_DEFS = {
   'service-save': { monthly: 18000, annual: 216000 },
@@ -289,6 +289,14 @@ export function AppProvider({ children }) {
     if (!clubId) return;
 
     const execType = meta.executionType || 'staff_task';
+
+    // Warn if member was recently contacted
+    if (['email', 'sms', 'call'].includes(execType)) {
+      const check = checkRecentOutreach(meta.memberId || actionItem?.memberId);
+      if (check.recentlyContacted) {
+        showToast(`Warning: ${meta.memberName || actionItem?.memberName || 'This member'} was last contacted ${check.hoursAgo}h ago (${check.lastContact?.type}). Proceeding anyway.`, 'warning');
+      }
+    }
     const demoEmail = localStorage.getItem('swoop_demo_email') || '';
     const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
     const emailSendMode = localStorage.getItem('swoop_email_send_mode') || 'local';

@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { getMemberProfile } from '@/services/memberService';
 import { useApp } from '@/context/AppContext';
 import { useNavigationContext } from '@/context/NavigationContext';
-import { trackAction } from '@/services/activityService';
+import { trackAction, checkRecentOutreach } from '@/services/activityService';
 import { apiFetch } from '@/services/apiClient';
 
 const MemberProfileContext = createContext(null);
@@ -171,6 +171,14 @@ export function MemberProfileProvider({ children }) {
       const memberName = profile?.name ?? 'Member';
       const memberEmail = profile?.contact?.email || '';
       const memberPhone = profile?.contact?.phone || '';
+
+      // Warn if member was recently contacted
+      if (['email', 'sms', 'call', 'comp'].includes(actionType)) {
+        const check = checkRecentOutreach(memberId);
+        if (check.recentlyContacted) {
+          showToast?.(`Heads up: ${memberName} was contacted ${check.hoursAgo}h ago (${check.lastContact?.type})`, 'warning');
+        }
+      }
 
       // Route email and SMS through AI draft + approveAction flow
       if (actionType === 'email' || actionType === 'sms') {

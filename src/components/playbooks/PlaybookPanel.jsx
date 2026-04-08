@@ -24,7 +24,7 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
   const handleActivate = () => {
     if (!confirming) { setConfirming(true); return; }
     activatePlaybook(id);
-    trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: title, referenceId: id, referenceType: 'playbook' });
+    trackAction({ actionType: 'playbook', actionSubtype: 'activate', memberId: memberContext?.memberId, memberName: memberContext?.name, description: title, referenceId: id, referenceType: 'playbook' });
     setConfirming(false);
   };
 
@@ -117,7 +117,7 @@ export default function PlaybookPanel({ id, title, scenario, steps = [], beforeM
             onClick={() => {
               if (active) {
                 deactivatePlaybook(id);
-                trackAction({ actionType: 'playbook', actionSubtype: 'deactivate', description: title, referenceId: id, referenceType: 'playbook' });
+                trackAction({ actionType: 'playbook', actionSubtype: 'deactivate', memberId: memberContext?.memberId, memberName: memberContext?.name, description: title, referenceId: id, referenceType: 'playbook' });
               } else {
                 handleActivate();
               }

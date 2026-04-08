@@ -55,6 +55,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
 
   const markActionCompleted = (id) => {
     setActionLog((prev) => prev.map((entry) => (entry.id === id ? { ...entry, status: 'Completed' } : entry)));
+    trackAction({ actionType: 'task', actionSubtype: 'complete', memberId, memberName, description: 'Follow-up marked complete' });
   };
 
   const formatLoggedAt = (createdAt) => {
@@ -308,7 +309,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
                         e.stopPropagation();
                         addActionEntry('note');
                         showToast(action.label + ' triggered for ' + memberName, 'info');
-                        trackAction({ actionType: 'email', actionSubtype: 'outreach', memberId, memberName, description: action.label });
+                        trackAction({ actionType: 'outreach', actionSubtype: action.category || 'general', memberId, memberName, description: action.label });
                       }}
                       className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-200 bg-brand-50 text-brand-500 whitespace-nowrap shrink-0 dark:bg-brand-500/10 dark:border-brand-500/30"
                     >Deploy</button>

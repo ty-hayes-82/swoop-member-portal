@@ -12,7 +12,7 @@
  */
 import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { trackAction } from '@/services/activityService';
+import { trackAction, checkRecentOutreach } from '@/services/activityService';
 
 const MORE_ACTIONS = [
   { key: 'email', icon: '✉', label: 'Send Email', type: 'email' },
@@ -71,11 +71,24 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
       onDismiss(action.id);
     } else if (action.id) {
       dismissAction(action.id);
+    } else {
+      // Ad-hoc recommendation without a persisted ID — log directly
+      trackAction({
+        actionType: 'dismiss',
+        actionSubtype: 'inline',
+        memberId: context.memberId,
+        memberName: context.memberName,
+        description: `Dismissed: ${action.label}`,
+      });
     }
     setHandled(prev => new Set(prev).add(action.id || action.key));
   };
 
   const handleQuickAction = (actionDef) => {
+    const check = checkRecentOutreach(context.memberId);
+    if (check.recentlyContacted) {
+      showToast(`Note: ${context.memberName || 'Member'} was contacted ${check.hoursAgo}h ago (${check.lastContact?.type})`, 'warning');
+    }
     const meta = {
       executionType: actionDef.type,
       memberId: context.memberId,
