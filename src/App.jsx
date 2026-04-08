@@ -191,8 +191,35 @@ function RouterViews() {
   );
 }
 
+// Process Google OAuth callback synchronously before first render
+function processGoogleAuthCallback() {
+  const hash = window.location.hash;
+  if (!hash.startsWith('#/google-auth')) return false;
+  try {
+    const params = new URLSearchParams(hash.split('?')[1] || '');
+    const token = params.get('token');
+    const user = JSON.parse(decodeURIComponent(params.get('user') || '{}'));
+    if (token && user.userId) {
+      localStorage.setItem('swoop_auth_token', token);
+      localStorage.setItem('swoop_auth_user', JSON.stringify(user));
+      localStorage.setItem('swoop_club_id', user.clubId);
+      if (user.clubName) localStorage.setItem('swoop_club_name', user.clubName);
+      window.location.hash = '#/today';
+      return true;
+    }
+  } catch (e) {
+    console.error('Google auth callback error:', e);
+    window.location.hash = '#/';
+  }
+  return false;
+}
+
 export default function App() {
   const [authed, setAuthed] = useState(() => {
+    // Handle Google OAuth redirect before checking auth state
+    if (window.location.hash.startsWith('#/google-auth')) {
+      processGoogleAuthCallback();
+    }
     try { return !!(localStorage.getItem('swoop_auth_user') && localStorage.getItem('swoop_auth_token')); } catch { return false; }
   });
 
@@ -212,27 +239,6 @@ export default function App() {
       </Suspense>
     );
   }
-
-  // Google OAuth callback — store token and redirect to app
-  useEffect(() => {
-    if (!currentHash.startsWith('#/google-auth')) return;
-    try {
-      const params = new URLSearchParams(currentHash.split('?')[1] || '');
-      const token = params.get('token');
-      const user = JSON.parse(decodeURIComponent(params.get('user') || '{}'));
-      if (token && user.userId) {
-        localStorage.setItem('swoop_auth_token', token);
-        localStorage.setItem('swoop_auth_user', JSON.stringify(user));
-        localStorage.setItem('swoop_club_id', user.clubId);
-        if (user.clubName) localStorage.setItem('swoop_club_name', user.clubName);
-        setAuthed(true);
-        window.location.hash = '#/today';
-      }
-    } catch (e) {
-      console.error('Google auth callback error:', e);
-      window.location.hash = '#/';
-    }
-  }, [currentHash]);
 
   if (!authed) {
     return <LoginPage onLogin={() => setAuthed(true)} />;

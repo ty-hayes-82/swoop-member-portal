@@ -105,8 +105,8 @@ export default async function handler(req, res) {
 
       // Create user (no password — Google-only auth)
       await sql`
-        INSERT INTO users (user_id, club_id, email, name, role, title, active, auth_provider, created_at)
-        VALUES (${userId}, ${clubId}, ${profile.email.toLowerCase()}, ${userName}, ${userRole}, ${userTitle}, TRUE, 'google', NOW())
+        INSERT INTO users (user_id, club_id, email, name, role, title, active, created_at)
+        VALUES (${userId}, ${clubId}, ${profile.email.toLowerCase()}, ${userName}, ${userRole}, ${userTitle}, TRUE, NOW())
       `;
     }
 
