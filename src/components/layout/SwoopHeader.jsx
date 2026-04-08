@@ -331,6 +331,53 @@ const SwoopHeader = () => {
                   </button>
                 </div>
 
+                {/* Switch to demo modes */}
+                <div className="border-t border-gray-100 dark:border-gray-800 py-1">
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      const demoClubId = `demo_${Date.now()}`;
+                      const demoUser = { userId: 'demo', clubId: demoClubId, name: 'Demo User', email: 'demo@swoopgolf.com', phone: '', role: 'gm', title: 'General Manager', isDemoSession: true };
+                      localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
+                      localStorage.setItem('swoop_auth_token', 'demo');
+                      localStorage.setItem('swoop_club_id', demoClubId);
+                      localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
+                      sessionStorage.removeItem('swoop_demo_guided');
+                      localStorage.removeItem('swoop_was_guided');
+                      window.location.hash = '#/today';
+                      window.location.reload();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-2.5"
+                  >
+                    <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" />
+                    </svg>
+                    Switch to Full Demo
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      const demoClubId = `demo_${Date.now()}`;
+                      const demoUser = { userId: 'demo', clubId: demoClubId, name: 'Demo User', email: 'demo@swoopgolf.com', phone: '', role: 'gm', title: 'General Manager', isDemoSession: true };
+                      localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
+                      localStorage.setItem('swoop_auth_token', 'demo');
+                      localStorage.setItem('swoop_club_id', demoClubId);
+                      localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
+                      sessionStorage.setItem('swoop_demo_guided', 'true');
+                      sessionStorage.removeItem('swoop_demo_sources');
+                      localStorage.setItem('swoop_was_guided', 'true');
+                      window.location.hash = '#/today';
+                      window.location.reload();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-2.5"
+                  >
+                    <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                    Guided Demo
+                  </button>
+                </div>
+
                 {/* Sign out */}
                 <div className="border-t border-gray-100 dark:border-gray-800 py-1">
                   <button
