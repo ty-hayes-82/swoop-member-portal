@@ -296,14 +296,12 @@ export default function LoginPage({ onLogin }) {
             {showDemoSetup ? 'Start Full Demo' : 'Enter Demo Mode (Pinetree CC)'}
           </button>
 
-          {showDemoSetup && (
-            <button
-              onClick={() => startDemo(true)}
-              className="w-full py-3 rounded-xl border border-brand-200 bg-brand-50 text-brand-600 text-sm font-semibold cursor-pointer hover:bg-brand-100 transition-colors mt-2"
-            >
-              Guided Demo (load data one at a time)
-            </button>
-          )}
+          <button
+            onClick={() => startDemo(true)}
+            className="w-full py-3 rounded-xl border border-brand-200 bg-brand-50 text-brand-600 text-sm font-semibold cursor-pointer hover:bg-brand-100 transition-colors mt-2"
+          >
+            Guided Demo (load data one at a time)
+          </button>
 
           {/* Set up new club */}
           <button

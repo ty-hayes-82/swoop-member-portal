@@ -136,17 +136,18 @@ export default function DemoWizard() {
               onClick={() => {
                 if (!ctx.isGateOpen('agents')) {
                   importFile('_agents');
-                  // Manually open agents gate
+                  // Manually open agents gate via sessionStorage
                   try {
-                    const gates = JSON.parse(localStorage.getItem('swoop_demo_gates') || '[]');
+                    const store = sessionStorage;
+                    const gates = JSON.parse(store.getItem('swoop_demo_gates') || '[]');
                     if (!gates.includes('agents')) {
                       gates.push('agents');
-                      localStorage.setItem('swoop_demo_gates', JSON.stringify(gates));
+                      store.setItem('swoop_demo_gates', JSON.stringify(gates));
                     }
-                    const files = JSON.parse(localStorage.getItem('swoop_demo_files') || '[]');
+                    const files = JSON.parse(store.getItem('swoop_demo_files') || '[]');
                     if (!files.includes('_agents')) {
                       files.push('_agents');
-                      localStorage.setItem('swoop_demo_files', JSON.stringify(files));
+                      store.setItem('swoop_demo_files', JSON.stringify(files));
                     }
                     window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed'));
                   } catch {}

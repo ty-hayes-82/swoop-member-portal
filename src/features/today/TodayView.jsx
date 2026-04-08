@@ -154,10 +154,8 @@ export default function TodayView() {
     return <SkeletonDashboard />;
   }
 
-  // Real club with no operational data — show welcome state instead of demo data
-  // Don't show empty state if we have imported member data
-  const hasNoData = isAuthenticatedClub() && !briefing?.teeSheet?.roundsToday && priorities.length === 0 && !hasRealMemberData();
-  if (hasNoData) {
+  // Real authenticated club with no operational data — show welcome state
+  if (isAuthenticatedClub() && !briefing?.teeSheet?.roundsToday && priorities.length === 0 && !hasRealMemberData()) {
     return (
       <PageTransition>
         <div className="flex flex-col gap-6 w-full">
