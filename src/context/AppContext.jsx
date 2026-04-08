@@ -376,11 +376,13 @@ export function AppProvider({ children }) {
         if (result?.draftId) {
           showToast(`Gmail draft created for ${memberName}`, 'info');
         } else {
-          showToast('Draft created but could not verify', 'warning');
+          // Gmail API unavailable (not connected) — fall back to Gmail compose with AI draft
+          showToast('Opening Gmail with AI draft...', 'info');
+          window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
         }
       } catch (e) {
         // Fallback: open Gmail compose window
-        showToast('Gmail API draft failed — opening Gmail compose instead', 'warning');
+        showToast('Opening Gmail compose...', 'info');
         const subject = encodeURIComponent(`A personal note from your club`);
         const body = encodeURIComponent(`Dear ${memberName},\n\n${description}\n\nWarm regards`);
         window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(toAddr)}&su=${subject}&body=${body}`, '_blank');
