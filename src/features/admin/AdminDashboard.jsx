@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Panel } from '@/components/ui';
 import PageTransition from '@/components/ui/PageTransition';
 import { useNavigationContext } from '@/context/NavigationContext';
+import { refreshWeatherForLocation } from '@/services/weatherService';
 
 // ── Tab definitions ──────────────────────────────────────────────────
 const TABS = [
@@ -688,16 +689,36 @@ function NotificationsTab() {
 // CLUB PROFILE TAB
 // ═══════════════════════════════════════════════════════════════════════
 function ClubProfileTab() {
+  const storedName = localStorage.getItem('swoop_club_name') || 'Pinetree Country Club';
+  const storedCity = localStorage.getItem('swoop_club_city') || '';
+  const storedState = localStorage.getItem('swoop_club_state') || '';
+  const [clubName, setClubName] = useState(storedName);
+  const [city, setCity] = useState(storedCity);
+  const [state, setState] = useState(storedState);
+  const [weatherStatus, setWeatherStatus] = useState(null);
+
+  const handleLocationSave = useCallback(async () => {
+    localStorage.setItem('swoop_club_name', clubName);
+    localStorage.setItem('swoop_club_city', city);
+    localStorage.setItem('swoop_club_state', state);
+    if (city) {
+      setWeatherStatus('connecting');
+      await refreshWeatherForLocation();
+      setWeatherStatus('connected');
+      setTimeout(() => setWeatherStatus(null), 3000);
+    }
+  }, [clubName, city, state]);
+
   return (
     <div>
       <div style={s.sectionTitle}>Club Information</div>
-      <div style={s.sectionDesc}>Basic details about your club. These appear in reports and member-facing communications.</div>
+      <div style={s.sectionDesc}>Basic details about your club. Changing the city/state will automatically update the weather feed.</div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         <Panel>
           <div style={s.fieldGroup}>
             <label style={s.label}>Club Name</label>
-            <input style={s.input} defaultValue="Pinetree Country Club" />
+            <input style={s.input} value={clubName} onChange={e => setClubName(e.target.value)} />
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Address</label>
@@ -706,17 +727,30 @@ function ClubProfileTab() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
             <div style={s.fieldGroup}>
               <label style={s.label}>City</label>
-              <input style={s.input} defaultValue="Kennesaw" />
+              <input style={s.input} value={city} onChange={e => setCity(e.target.value)} placeholder="Enter city" />
             </div>
             <div style={s.fieldGroup}>
               <label style={s.label}>State</label>
-              <input style={s.input} defaultValue="GA" />
+              <input style={s.input} value={state} onChange={e => setState(e.target.value)} placeholder="e.g. GA" />
             </div>
             <div style={s.fieldGroup}>
               <label style={s.label}>Zip</label>
-              <input style={s.input} defaultValue="30144" />
+              <input style={s.input} defaultValue="" />
             </div>
           </div>
+          {(city !== storedCity || state !== storedState || clubName !== storedName) && (
+            <button
+              onClick={handleLocationSave}
+              style={{ marginTop: 8, padding: '8px 20px', borderRadius: 8, border: 'none', background: '#6366f1', color: '#fff', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
+            >
+              {weatherStatus === 'connecting' ? 'Connecting weather...' : 'Save & Update Weather'}
+            </button>
+          )}
+          {weatherStatus === 'connected' && (
+            <div style={{ marginTop: 8, fontSize: 12, color: '#22c55e', fontWeight: 600 }}>
+              Weather connected for {city}, {state}
+            </div>
+          )}
           <div style={s.fieldGroup}>
             <label style={s.label}>Phone</label>
             <input style={s.input} defaultValue="(770) 427-4322" />

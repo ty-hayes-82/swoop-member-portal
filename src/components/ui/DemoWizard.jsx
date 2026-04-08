@@ -10,6 +10,7 @@ import DemoDataPreview from './DemoDataPreview';
 
 export default function DemoWizard() {
   const ctx = useDemoWizard();
+  const { startOver } = ctx;
   const [previewFile, setPreviewFile] = useState(null);
 
   if (!ctx?.isGuided) return null;
@@ -58,14 +59,24 @@ export default function DemoWizard() {
             <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">
               {allLoaded ? 'All files imported' : `${fileCount} of ${totalFiles} files imported`}
             </span>
-            {!allLoaded && (
-              <button
-                onClick={importAll}
-                className="text-[10px] font-bold text-brand-500 bg-transparent border-none cursor-pointer hover:text-brand-600"
-              >
-                Import All
-              </button>
-            )}
+            <div className="flex gap-2">
+              {fileCount > 0 && (
+                <button
+                  onClick={startOver}
+                  className="text-[10px] font-bold text-error-500 bg-transparent border-none cursor-pointer hover:text-error-600"
+                >
+                  Start Over
+                </button>
+              )}
+              {!allLoaded && (
+                <button
+                  onClick={importAll}
+                  className="text-[10px] font-bold text-brand-500 bg-transparent border-none cursor-pointer hover:text-brand-600"
+                >
+                  Import All
+                </button>
+              )}
+            </div>
           </div>
           <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
