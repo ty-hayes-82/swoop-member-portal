@@ -7,7 +7,7 @@ import { getMemberSummary } from '@/services/memberService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
-import { isAuthenticatedClub } from '@/config/constants';
+import { shouldUseStatic } from '@/services/demoGate';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
 // Member Health tabs
@@ -117,7 +117,19 @@ export default function MembersView() {
     );
   }
 
-  const headlineData = HEADLINES[mode]();
+  // Check if engagement data sources are available (tee sheet, POS, email)
+  // Without these, health scores can't be computed — show roster-only mode
+  const hasEngagementData = shouldUseStatic('tee-sheet') || shouldUseStatic('fb') || shouldUseStatic('email');
+
+  // If members imported but no engagement data, force "All Members" tab (roster view)
+  const activeMode = hasEngagementData ? mode : 'search';
+  const headlineData = hasEngagementData
+    ? HEADLINES[activeMode]()
+    : {
+        variant: 'insight',
+        headline: 'Member directory — roster imported',
+        context: `${memberCount} members loaded. Import tee sheet, POS, or email data to unlock health scores, archetypes, and at-risk alerts.`,
+      };
 
   return (
     <PageTransition>
@@ -131,27 +143,35 @@ export default function MembersView() {
 
         <EvidenceStrip systems={['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email']} />
 
-        {/* Mode switcher */}
+        {/* Mode switcher — disable engagement tabs when no activity data */}
         <div role="tablist" aria-label="Member views" className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
-          {MODES.map(({ key, label }) => (
-            <button
-              key={key}
-              role="tab"
-              aria-selected={mode === key}
-              onClick={() => setMode(key)}
-              className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
-                mode === key
-                  ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
-                  : 'bg-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+          {MODES.map(({ key, label }) => {
+            const engagementOnly = ['at-risk', 'email-decay', 'archetypes', 'resignations', 'cohorts'].includes(key);
+            const disabled = engagementOnly && !hasEngagementData;
+            return (
+              <button
+                key={key}
+                role="tab"
+                aria-selected={activeMode === key}
+                onClick={() => !disabled && setMode(key)}
+                disabled={disabled}
+                className={`px-5 py-1.5 rounded-lg text-sm font-semibold border-none transition-all duration-150 whitespace-nowrap ${
+                  disabled
+                    ? 'bg-transparent text-gray-300 cursor-not-allowed'
+                    : activeMode === key
+                      ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white cursor-pointer'
+                      : 'bg-transparent text-gray-500 hover:text-gray-700 cursor-pointer'
+                }`}
+                title={disabled ? 'Import tee sheet, POS, or email data to unlock this view' : ''}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Archetype filter chips — only in All Members mode (HealthOverview has its own filters) */}
-        {mode === 'search' && (
+        {activeMode === 'search' && (
           <div className="flex gap-1.5 flex-wrap overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             <button
               onClick={() => setArchetype(null)}
@@ -176,37 +196,18 @@ export default function MembersView() {
         )}
 
         <div role="tabpanel">
-          {/* Mode: At-Risk — V3: simplified to HealthOverview + ResignationTimeline */}
-          {mode === 'at-risk' && (
+          {activeMode === 'at-risk' && (
             <div className="flex flex-col gap-6">
               <HealthOverview />
             </div>
           )}
-
-          {/* Mode: Search */}
-          {mode === 'search' && (
+          {activeMode === 'search' && (
             <AllMembersView initialArchetype={archetype} />
           )}
-
-          {/* Mode: Email Engagement Decay */}
-          {mode === 'email-decay' && (
-            <EmailTab />
-          )}
-
-          {/* Mode: Member Archetypes */}
-          {mode === 'archetypes' && (
-            <ArchetypeTab />
-          )}
-
-          {/* Mode: Resignation Analysis */}
-          {mode === 'resignations' && (
-            <ResignationTimeline />
-          )}
-
-          {/* Mode: First 90 Days */}
-          {mode === 'cohorts' && (
-            <CohortTab />
-          )}
+          {activeMode === 'email-decay' && <EmailTab />}
+          {activeMode === 'archetypes' && <ArchetypeTab />}
+          {activeMode === 'resignations' && <ResignationTimeline />}
+          {activeMode === 'cohorts' && <CohortTab />}
         </div>
       </div>
     </PageTransition>
