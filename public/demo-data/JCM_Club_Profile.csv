@@ -1,9 +1,2 @@
-﻿Club Name,City,State,ZIP,Founded Year,Member Count,Course Count,Outlet Count
-Oakmont Hills Country Club,Scottsdale,AZ,85255,1987,300,2,5
-Oakmont Hills Country Club,Scottsdale,AZ,85255,,300,1,3
-Test QA Club,Denver,CO,80202,,150,1,3
-Full Data Test Club,Austin,TX,78701,,40,1,3
-Rounds Test Club,Unknown,US,00000,,50,1,3
-Skip Upload Club,Unknown,US,00000,,50,1,3
-Edge Case Club,Unknown,US,00000,,50,1,3
-Pine Valley Country Club,Unknown,US,00000,,50,1,3
+Club Name,City,State,ZIP,Founded Year,Member Count,Course Count,Outlet Count
+Pinetree Country Club,Kennesaw,GA,30144,1962,300,2,5

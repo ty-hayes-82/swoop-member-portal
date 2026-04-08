@@ -38,7 +38,7 @@ export const DEMO_FILES = [
   { id: 'ADP_Staff_Roster', file: 'ADP_Staff_Roster.csv', name: 'Staff Roster', system: 'ADP', icon: '🪪', gateId: 'weather', rows: 35, description: 'Employee names, roles, departments', unlocks: ['Staff names in assignments'] },
 
   // ── CLUB PROFILE ─────────────────────────────────────
-  { id: 'JCM_Club_Profile', file: 'JCM_Club_Profile.csv', name: 'Club Profile', system: 'Jonas Club Management', icon: '🏌️‍♂️', gateId: 'pipeline', rows: 1, description: 'Club name, location, membership capacity', unlocks: ['Board report', 'Industry benchmarks', 'Club profile overview'] },
+  { id: 'JCM_Club_Profile', file: 'JCM_Club_Profile.csv', name: 'Club Profile', system: 'Jonas Club Management', icon: '🏌️‍♂️', gateId: 'pipeline', rows: 1, description: 'Club name, location, membership capacity, weather connection', unlocks: ['Board report', 'Industry benchmarks', 'Club profile overview', 'Live weather feed'] },
 ];
 
 // Group files by gateId for display
