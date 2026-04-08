@@ -98,6 +98,8 @@ export function loadFile(fileId, gateId) {
   files.add(fileId);
   if (gateId) gates.add(gateId);
   persistFiles(files, gates);
+  // Invalidate guided scoring cache so scores recalculate with new data
+  try { import('./guidedScoring').then(m => m.invalidateGuidedScores()); } catch {}
   window.dispatchEvent(new CustomEvent(SOURCES_CHANGED_EVENT, { detail: { fileId, gateId, action: 'load' } }));
 }
 

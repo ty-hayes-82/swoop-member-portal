@@ -213,8 +213,22 @@ export default function App() {
     );
   }
 
+  // Auto-start guided demo for first-time visitors (no login required)
   if (!authed) {
-    return <LoginPage onLogin={() => { setAuthed(true); window.location.reload(); }} />;
+    const demoClubId = `demo_${Date.now()}`;
+    const demoUser = {
+      userId: 'demo', clubId: demoClubId, name: 'Demo User',
+      email: 'demo@swoopgolf.com', phone: '', role: 'gm',
+      title: 'General Manager', isDemoSession: true,
+    };
+    localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
+    localStorage.setItem('swoop_auth_token', 'demo');
+    localStorage.setItem('swoop_club_id', demoClubId);
+    localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
+    sessionStorage.setItem('swoop_demo_guided', 'true');
+    localStorage.setItem('swoop_was_guided', 'true');
+    setAuthed(true);
+    return null;
   }
 
   return (

@@ -363,23 +363,47 @@ export const getLiveDashboard = () => _live;
 let _apiLoaded = false;
 let _hasRealMembers = false;
 
-import { shouldUseStatic } from './demoGate';
+import { shouldUseStatic, getDataMode } from './demoGate';
+import {
+  hasEngagementGates,
+  getOpenGatesForScoring,
+  getMemberDimensions,
+  computeScore,
+  classifyArchetype,
+  computeHealthDistribution as computeGuidedHealthDist,
+  computeArchetypeDistribution as computeGuidedArchetypes,
+} from './guidedScoring';
 const _shouldReturnEmpty = () => !shouldUseStatic('members') && !_hasRealMembers;
 
 export const hasRealMemberData = () => _hasRealMembers;
 
 export const getHealthDistribution = () => {
   if (_shouldReturnEmpty()) return [];
+  // In guided mode, health distribution is computed dynamically from scored members
+  // (AllMembersView computes this from the roster via filteredHealthDist)
+  if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
   const archetypes = normalizeArchetypes(_d?.memberArchetypes);
   const totalMembers = archetypes.reduce((sum, item) => sum + item.count, 0);
   return normalizeHealthDistribution(_d?.healthDistribution, totalMembers);
 };
 export const getAtRiskMembers       = () => {
   if (_shouldReturnEmpty()) return [];
-  return normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
+  const raw = normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
+  // In guided mode, recalculate scores from available dimensions
+  if (getDataMode() === 'guided') {
+    if (!hasEngagementGates()) return [];
+    const gates = getOpenGatesForScoring();
+    return raw.map(m => {
+      const dims = getMemberDimensions(m.memberId, m.archetype);
+      const score = computeScore(dims, gates);
+      return score != null ? { ...m, score } : null;
+    }).filter(Boolean).filter(m => m.score < 45); // only at-risk + critical
+  }
+  return raw;
 };
 export const getArchetypeProfiles   = () => {
   if (_shouldReturnEmpty()) return [];
+  if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
   return normalizeArchetypes(_d?.memberArchetypes);
 };
 export const getAllMemberProfiles   = () => {
@@ -409,6 +433,11 @@ export const getMemberSummary = () => {
   if (_shouldReturnEmpty()) {
     return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
   }
+  // In guided mode without engagement data, return member count only (roster mode)
+  if (getDataMode() === 'guided' && !hasEngagementGates()) {
+    const total = toNumber(_d?.memberSummary?.total ?? _d?.memberSummary?.totalMembers, 300);
+    return { total, totalMembers: total, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0 };
+  }
   const summary = _d?.memberSummary ?? {};
   const total = Math.max(0, Math.round(toNumber(summary.total, 0)));
   const totalMembers = Math.max(0, Math.round(toNumber(summary.totalMembers || summary.total, 0)));
@@ -427,7 +456,16 @@ export const getMemberSummary = () => {
 
 export const getWatchMembers = () => {
   if (_shouldReturnEmpty()) return [];
+  if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
   const apiWatch = _d?.watchMembers ?? [];
+  if (getDataMode() === 'guided') {
+    const gates = getOpenGatesForScoring();
+    return (Array.isArray(apiWatch) ? apiWatch : []).map(m => {
+      const dims = getMemberDimensions(m.memberId, m.archetype);
+      const score = computeScore(dims, gates);
+      return score != null ? { ...m, score, trend: 'watch', riskLevel: 'Watch' } : null;
+    }).filter(Boolean).filter(m => m.score >= 45 && m.score < 67);
+  }
   return Array.isArray(apiWatch) ? apiWatch.map((m) => ({ ...m, trend: 'watch', riskLevel: 'Watch' })) : [];
 };
 
@@ -485,7 +523,21 @@ export const setRosterCache = (roster) => { _rosterCache = roster; };
 
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
-  if (_d?.memberProfiles?.[memberId]) return normalizeMemberProfile(_d.memberProfiles[memberId]);
+  if (_d?.memberProfiles?.[memberId]) {
+    const profile = normalizeMemberProfile(_d.memberProfiles[memberId]);
+    // In guided mode, recalculate the health score from available dimensions
+    if (getDataMode() === 'guided' && profile) {
+      if (!hasEngagementGates()) {
+        return { ...profile, healthScore: '—', trend: [] };
+      }
+      const dims = getMemberDimensions(memberId, _d.memberProfiles[memberId].archetype);
+      const score = computeScore(dims, getOpenGatesForScoring());
+      if (score != null) {
+        return { ...profile, healthScore: score };
+      }
+    }
+    return profile;
+  }
   // Fallback 1: build basic profile from at-risk member data
   const allAtRisk = normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? []);
   const found = allAtRisk.find(m => m.memberId === memberId);

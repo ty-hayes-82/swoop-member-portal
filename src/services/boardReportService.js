@@ -1,5 +1,5 @@
 import { apiFetch, getClubId } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { shouldUseStatic, getDataMode } from './demoGate';
 import { getMemberSummary as _getMemberSummary } from '@/services/memberService';
 import {
   kpis as staticKpis,
@@ -48,6 +48,12 @@ export const getKPIs = () => {
       }
       return kpi;
     });
+  }
+  // In guided mode, always require both pipeline AND members gates
+  const mode = getDataMode();
+  if (mode === 'guided') {
+    if (!shouldUseStatic('pipeline') || !shouldUseStatic('members')) return EMPTY_KPIS;
+    return staticKpis;
   }
   // Build KPIs from member health data (works for both demo and real clubs)
   const summary = _getMemberSummary();

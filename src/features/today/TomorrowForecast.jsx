@@ -25,7 +25,9 @@ export default function TomorrowForecast() {
   const briefing = getDailyBriefing();
   const tomorrowWeather = getTomorrowForecast();
   const tomorrow = briefing?.todayRisks?.tomorrow || tomorrowWeather;
-  const roundsBooked = briefing?.teeSheet?.roundsToday || 0;
+  // Only show rounds when tee-sheet data is actually loaded
+  const hasTeeSheet = shouldUseStatic('tee-sheet') || !!briefing?.teeSheet?.roundsToday;
+  const roundsBooked = hasTeeSheet ? (briefing?.teeSheet?.roundsToday || 0) : 0;
 
   // Only show forecast when tee-sheet or weather data sources are loaded
   if (!shouldUseStatic('tee-sheet') && !shouldUseStatic('weather') && !briefing?.teeSheet?.roundsToday) return null;
@@ -47,9 +49,11 @@ export default function TomorrowForecast() {
           ? 'Rain expected — prepare for indoor overflow'
           : 'No weather disruptions expected';
 
-  const diningImpact = highDemand
-    ? `${roundsBooked} rounds booked — expect 15% higher dining traffic`
-    : `${roundsBooked} rounds booked — standard dining demand`;
+  const diningImpact = !hasTeeSheet
+    ? null
+    : highDemand
+      ? `${roundsBooked} rounds booked — expect 15% higher dining traffic`
+      : `${roundsBooked} rounds booked — standard dining demand`;
 
   return (
     <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl p-4">
@@ -58,15 +62,15 @@ export default function TomorrowForecast() {
       </div>
 
       {/* Demand prediction */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <div className="text-center">
+      <div className={`grid ${hasTeeSheet ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'} gap-3 mb-4`}>
+        {hasTeeSheet && <div className="text-center">
           <div className="text-lg font-bold text-gray-800 dark:text-white/90">
             {roundsBooked}
           </div>
           <div className="text-xs text-gray-400">
             Rounds booked
           </div>
-        </div>
+        </div>}
         <div className="text-center">
           <div className="text-lg font-bold text-gray-800 dark:text-white/90">
             {tempHigh}°F
@@ -121,9 +125,9 @@ export default function TomorrowForecast() {
 
       {/* Event & weather impact notes */}
       <div className="flex flex-col gap-1">
-        <div className="text-xs text-gray-500 leading-snug">
+        {diningImpact && <div className="text-xs text-gray-500 leading-snug">
           {diningImpact}
-        </div>
+        </div>}
         <div className={`text-xs leading-snug ${gusts > 15 || precipProb > 40 ? 'text-warning-500' : 'text-gray-500'}`}>
           {weatherImpact}
         </div>

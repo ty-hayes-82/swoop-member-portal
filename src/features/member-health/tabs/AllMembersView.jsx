@@ -5,7 +5,8 @@ import QuickActions from '@/components/ui/QuickActions.jsx';
 import { PlaybookActionCard } from '@/components/ui';
 import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, getAllMemberProfiles, setRosterCache, getMemberRoster } from '@/services/memberService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { shouldUseStatic } from '@/services/demoGate';
+import { shouldUseStatic, getDataMode } from '@/services/demoGate';
+import { scoreMember, getOpenGatesForScoring, hasEngagementGates } from '@/services/guidedScoring';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
 // Generate full 300-member roster from all available data sources
@@ -15,6 +16,7 @@ const ARCHETYPES = ['Die-Hard Golfer','Social Butterfly','Balanced Active','Week
 const ARCHETYPE_WEIGHTS = [60, 45, 55, 45, 25, 30, 15, 25]; // matches memberArchetypes counts
 const TRENDS = ['up','down','stable','stable','up','stable','down','stable'];
 const LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
+const MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-Resident','Corporate','Full Golf','Social','Full Golf'];
 
 function generateRoster() {
   if (!shouldUseStatic('members')) return [];
@@ -29,12 +31,12 @@ function generateRoster() {
   // Include at-risk and watch members
   (atRisk || []).forEach(m => {
     if (!roster.find(r => r.memberId === m.memberId)) {
-      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: m.score < 30 ? 'Critical' : 'At Risk', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || 'Engagement declining' });
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || 'Engagement declining' });
     }
   });
   (watch || []).forEach(m => {
     if (!roster.find(r => r.memberId === m.memberId)) {
-      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: 'Watch', joinDate: '2021-06-01', trend: 'stable', topRisk: m.signal || 'Minor engagement shift' });
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2021-06-01', trend: 'stable', topRisk: m.signal || 'Minor engagement shift' });
     }
   });
   // Generate remaining to reach 300, matching healthDistribution exactly
@@ -74,13 +76,21 @@ function generateRoster() {
         score,
         archetype: ARCHETYPES[archIdx],
         duesAnnual: dues,
-        tier: level,
+        tier: MEMBERSHIP_TIERS[idx % MEMBERSHIP_TIERS.length],
         joinDate: `${yr}-${mo}-01`,
         trend: level === 'Healthy' ? 'stable' : level === 'Watch' ? 'stable' : 'down',
         topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Minor engagement shift' : 'Engagement declining',
         lastSeenLocation: LOCATIONS[idx % LOCATIONS.length],
       });
     }
+  }
+  // In guided mode, recalculate all scores from available dimensions
+  if (getDataMode() === 'guided') {
+    const gates = getOpenGatesForScoring();
+    return roster.map(m => {
+      const scored = scoreMember(m, gates);
+      return scored;
+    });
   }
   return roster;
 }
