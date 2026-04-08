@@ -1,19 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/e2e',
-  testIgnore: ['**/14-insights-capture*'],
+  testDir: './tests/e2e/combinations',
+  testMatch: '15-vision-capture.spec.js',
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: 0,
   workers: 8,
-  reporter: [['list'], ['json', { outputFile: 'test-results/results.json' }]],
-  timeout: 60000,
+  reporter: [['list']],
+  timeout: 120000,
   expect: { timeout: 10000 },
   use: {
     baseURL: process.env.APP_URL || 'http://localhost:5173',
     trace: 'off',
-    screenshot: 'only-on-failure',
+    screenshot: 'off',
     video: 'off',
   },
   projects: [

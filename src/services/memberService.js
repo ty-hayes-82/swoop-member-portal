@@ -43,7 +43,16 @@ const resolveOverrideSignal = (member) => {
   if (member.name) keys.push(String(member.name).toLowerCase());
   for (const key of keys) {
     if (key && RISK_SIGNAL_OVERRIDES.has(key)) {
-      return RISK_SIGNAL_OVERRIDES.get(key);
+      let signal = RISK_SIGNAL_OVERRIDES.get(key);
+      // Filter signal parts based on open gates
+      const parts = signal.split(' • ').filter(part => {
+        if (!shouldUseStatic('tee-sheet') && /round|golf/i.test(part)) return false;
+        if (!shouldUseStatic('fb') && /dining|F&B|spend/i.test(part)) return false;
+        if (!shouldUseStatic('complaints') && /complaint/i.test(part)) return false;
+        if (!shouldUseStatic('email') && /email|open/i.test(part)) return false;
+        return true;
+      });
+      return parts.length > 0 ? parts.join(' • ') : null;
     }
   }
   return null;

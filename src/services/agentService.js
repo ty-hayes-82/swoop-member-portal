@@ -42,11 +42,33 @@ export function getAgentById(id) {
   return agents.find((agent) => agent.id === id) ?? null;
 }
 
+// Map signal systems to gate IDs for filtering
+const SYSTEM_TO_GATE = {
+  'Complaint Log': 'complaints',
+  'Tee Sheet': 'tee-sheet',
+  'POS': 'fb',
+  'Email': 'email',
+};
+
+function actionMatchesGates(action) {
+  const signals = action.signals || [];
+  for (const sig of signals) {
+    const gate = SYSTEM_TO_GATE[sig.system];
+    if (gate && !shouldUseStatic(gate)) return false;
+  }
+  // Also check description/impact text for ungated references
+  const text = `${action.description || ''} ${action.impactMetric || ''}`;
+  if (!shouldUseStatic('complaints') && /complaint/i.test(text)) return false;
+  if (!shouldUseStatic('fb') && /F&B|dining|food|beverage/i.test(text)) return false;
+  if (!shouldUseStatic('tee-sheet') && /tee sheet|tee time|round/i.test(text)) return false;
+  return true;
+}
+
 export function getAllActions() {
   if (_d?.actions) return [...actionStore].sort(byNewest);
   // Actions reference members — require both agents AND members gates
   if (!shouldUseStatic('agents') || !shouldUseStatic('members')) return [];
-  return [...actionStore].sort(byNewest);
+  return [...actionStore].filter(actionMatchesGates).sort(byNewest);
 }
 
 export function getPendingActions() {

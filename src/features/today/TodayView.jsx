@@ -15,6 +15,7 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
+import { shouldUseStatic } from '@/services/demoGate';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { getTodayTeeSheet } from '@/services/operationsService';
@@ -40,7 +41,7 @@ function buildCheckinAlerts() {
       isVip: t.duesAnnual >= 20000,
       talkingPoints: t.healthScore < 50
         ? [
-            t.cartPrep.note?.includes('complaint') ? 'Acknowledge recent complaint — show you\'re aware and it\'s being fixed' : 'Ask about their recent experience — listen for friction points',
+            shouldUseStatic('complaints') && t.cartPrep.note?.includes('complaint') ? 'Acknowledge recent complaint — show you\'re aware and it\'s being fixed' : 'Ask about their recent experience — listen for friction points',
             `Playing ${t.course} course at ${t.time} — ${t.group.length > 1 ? `with ${t.group.filter(g => g !== t.name).join(', ')}` : 'solo today'}`,
             t.archetype === 'Declining' ? 'Invite to upcoming event to re-engage' : 'Mention a specific improvement the club has made recently',
           ]
@@ -87,9 +88,13 @@ function GmGreetingAlert({ onDismiss }) {
                   <span className="text-xs text-gray-400">Just now</span>
                 </div>
                 <div className="text-sm font-bold text-gray-800 mb-0.5">
-                  <MemberLink memberId={alert.memberId} mode="drawer" className="text-gray-800 hover:text-brand-500 no-underline">
-                    {alert.name}
-                  </MemberLink>
+                  {shouldUseStatic('members') ? (
+                    <MemberLink memberId={alert.memberId} mode="drawer" className="text-gray-800 hover:text-brand-500 no-underline">
+                      {alert.name}
+                    </MemberLink>
+                  ) : (
+                    <span>Member</span>
+                  )}
                   {' '}just checked in
                 </div>
                 <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
@@ -250,10 +255,10 @@ export default function TodayView() {
         <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
           {[
             { icon: courseCondition?.icon || '🌤️', bg: '#ecfdf5', label: 'Course Condition', value: courseCondition?.label || '—', color: courseCondition?.color || '#9ca3af' },
-            { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: roundsToday > 0 ? String(roundsToday) : '—', color: '#6366f1' },
+            shouldUseStatic('tee-sheet') && { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: roundsToday > 0 ? String(roundsToday) : '—', color: '#6366f1' },
             { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732' },
             { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: String(priorities.length), color: '#8b5cf6' },
-          ].map((stat) => (
+          ].filter(Boolean).map((stat) => (
             <div
               key={stat.label}
               className="today-stat-card"
@@ -279,6 +284,44 @@ export default function TodayView() {
             </div>
           ))}
         </div>
+
+        {/* F&B Quick Stats — when fb gate is open */}
+        {shouldUseStatic('fb') && (
+          <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+            {[
+              { icon: '🍽️', label: 'Dining Covers Today', value: '126', color: '#ea580c' },
+              { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#16a34a' },
+              { icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' },
+            ].map(s => (
+              <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <span className="text-lg">{s.icon}</span>
+                <div>
+                  <div className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">{s.label}</div>
+                  <div className="text-base font-bold" style={{ color: s.color }}>{s.value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Email Engagement Stats — when email gate is open */}
+        {shouldUseStatic('email') && (
+          <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+            {[
+              { icon: '📧', label: 'Email Open Rate', value: '42%', color: '#7c3aed' },
+              { icon: '🖱️', label: 'Click-Through Rate', value: '12%', color: '#0891b2' },
+              { icon: '📉', label: 'Engagement Decay', value: '8 members', color: '#dc2626' },
+            ].map(s => (
+              <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <span className="text-lg">{s.icon}</span>
+                <div>
+                  <div className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">{s.label}</div>
+                  <div className="text-base font-bold" style={{ color: s.color }}>{s.value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Weather Alerts Banner */}
         {weatherAlerts.filter(a => !dismissedAlerts.includes(a.headline)).map((alert, i) => (

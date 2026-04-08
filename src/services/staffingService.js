@@ -111,7 +111,8 @@ const sanitizeFeedbackRecords = (source) => {
 export const getUnderstaffedDays = () => {
   const real = _d?.understaffedDays;
   if (Array.isArray(real) && real.length) return sanitizeUnderstaffedDays(real);
-  if (!shouldUseStatic('complaints')) return [];
+  // Understaffed days correlate complaints with staffing — require both gates
+  if (!shouldUseStatic('complaints') || !shouldUseStatic('members')) return [];
   return sanitizeUnderstaffedDays(understaffedDays);
 };
 export const getShiftCoverage = () => {
@@ -123,13 +124,15 @@ export const getShiftCoverage = () => {
 export const getFeedbackSummary = () => {
   const real = _d?.feedbackSummary;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackSummary(real);
-  if (!shouldUseStatic('complaints')) return [];
+  // Complaints reference members — require both gates
+  if (!shouldUseStatic('complaints') || !shouldUseStatic('members')) return [];
   return sanitizeFeedbackSummary(feedbackSummary);
 };
 export const getComplaintCorrelation = () => {
   const real = _d?.feedbackRecords;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackRecords(real);
-  if (!shouldUseStatic('complaints')) return [];
+  // Complaints reference members — require both gates
+  if (!shouldUseStatic('complaints') || !shouldUseStatic('members')) return [];
   return sanitizeFeedbackRecords(feedbackRecords);
 };
 

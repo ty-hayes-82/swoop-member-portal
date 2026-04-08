@@ -49,13 +49,13 @@ export const getKPIs = () => {
       return kpi;
     });
   }
-  // In guided mode, always require both pipeline AND members gates
+  // In guided mode, pipeline+members gets full static KPIs; members alone gets computed KPIs
   const mode = getDataMode();
   if (mode === 'guided') {
-    if (!shouldUseStatic('pipeline') || !shouldUseStatic('members')) return EMPTY_KPIS;
-    return staticKpis;
+    if (shouldUseStatic('pipeline') && shouldUseStatic('members')) return staticKpis;
+    // Fall through to build KPIs from member data if members gate is open
   }
-  // Build KPIs from member health data (works for both demo and real clubs)
+  // Build KPIs from member health data (works for guided with members, demo, and real clubs)
   const summary = _getMemberSummary();
   if (summary.totalMembers > 0 || summary.total > 0) {
     const total = summary.totalMembers || summary.total;
@@ -73,10 +73,10 @@ export const getKPIs = () => {
   return staticKpis;
 };
 
-// Board report details require multiple data sources to be meaningful
-export const getMemberSaves = () => (shouldUseStatic('pipeline') && shouldUseStatic('members')) ? staticMemberSaves : [];
-export const getOperationalSaves = () => (shouldUseStatic('pipeline') && shouldUseStatic('complaints')) ? staticOperationalSaves : [];
-export const getMonthlyTrends = () => (shouldUseStatic('pipeline') && shouldUseStatic('members')) ? staticMonthlyTrends : [];
+// Board report details — member saves need members, operational saves need complaints
+export const getMemberSaves = () => shouldUseStatic('members') ? staticMemberSaves : [];
+export const getOperationalSaves = () => (shouldUseStatic('members') && shouldUseStatic('complaints')) ? staticOperationalSaves : [];
+export const getMonthlyTrends = () => shouldUseStatic('members') ? staticMonthlyTrends : [];
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

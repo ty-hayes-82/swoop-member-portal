@@ -62,18 +62,19 @@ const Section = ({ title, description, children, defaultCollapsed = false, colla
   const isCollapsed = collapsible && collapsed;
 
   return (
-    <section {...rest} className="border border-gray-200 rounded-xl p-4 bg-white">
+    <section {...rest} className="border border-gray-200 rounded-xl p-4 bg-white" style={{ padding: '10px 12px', borderRadius: '10px' }}>
       <div
         onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
         className={`flex justify-between items-baseline ${isCollapsed ? '' : 'mb-2'} ${collapsible ? 'cursor-pointer' : 'cursor-default'}`}
+        style={{ fontSize: '12px', lineHeight: 1.4 }}
       >
-        <div className="flex items-baseline gap-2">
-          <h3 className="m-0 text-base">{title}</h3>
-          {isCollapsed && summary && <span className="text-xs text-gray-400">{summary}</span>}
+        <div className="flex items-baseline gap-2" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
+          <h3 className="m-0 text-base" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px', letterSpacing: '0.02em' }}>{title}</h3>
+          {isCollapsed && summary && <span className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>{summary}</span>}
         </div>
-        <div className="flex items-center gap-2">
-          {description && !isCollapsed && <span className="text-xs text-gray-400">{description}</span>}
-          {collapsible && <span className="text-xs text-gray-400 transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
+        <div className="flex items-center gap-2" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
+          {description && !isCollapsed && <span className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>{description}</span>}
+          {collapsible && <span className="text-xs text-gray-400 transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)', fontSize: '10px', lineHeight: 1.4 }}>{'\u25BC'}</span>}
         </div>
       </div>
       {!isCollapsed && children}
@@ -411,14 +412,14 @@ function OutreachHistory({ profile }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
       {outreachEvents.map((evt, i) => (
-        <div key={evt.id || i} className="flex justify-between items-start gap-3 px-2.5 py-2 rounded-lg bg-gray-100 border border-gray-200">
-          <div>
-            <div className="font-semibold text-sm">{evt.type}</div>
-            <div className="text-xs text-gray-500">{evt.detail}</div>
+        <div key={evt.id || i} className="flex justify-between items-start gap-3 px-2.5 py-2 rounded-lg bg-gray-100 border border-gray-200" style={{ fontSize: '11px', lineHeight: 1.4 }}>
+          <div style={{ lineHeight: 1.4 }}>
+            <div className="font-semibold text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>{evt.type}</div>
+            <div className="text-xs text-gray-500" style={{ fontSize: '10px', lineHeight: 1.4 }}>{evt.detail}</div>
           </div>
-          <div className="text-xs text-gray-400 whitespace-nowrap">
+          <div className="text-xs text-gray-400 whitespace-nowrap" style={{ fontSize: '10px', lineHeight: 1.4 }}>
             {formatDateTime(evt.timestamp)}
           </div>
         </div>
@@ -526,36 +527,36 @@ function DrawerSnapshotSection({ profile }) {
 
   return (
     <Section title="Member Habits" description="Quick reference">
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2.5" style={{ fontSize: '12px', lineHeight: 1.4, gap: '4px' }}>
         {activeCats.map(cat => {
           const items = groups[cat.key];
           const hint = hints[cat.key];
           const fam = famHints[cat.key];
           return (
-            <div key={cat.key} className="px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50">
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-sm">{cat.icon}</span>
-                <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: cat.color }}>{cat.label}</span>
+            <div key={cat.key} className="px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50" style={{ fontSize: '11px', lineHeight: 1.4 }}>
+              <div className="flex items-center gap-1.5 mb-1" style={{ lineHeight: 1.4, gap: '4px' }}>
+                <span className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>{cat.icon}</span>
+                <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: cat.color, lineHeight: 1.4 }}>{cat.label}</span>
                 {items.length > 0 && (
-                  <span className="ml-auto text-[10px] text-gray-400 bg-white rounded-full px-1.5 py-px border border-gray-200">{items.length}</span>
+                  <span className="ml-auto text-[10px] text-gray-400 bg-white rounded-full px-1.5 py-px border border-gray-200" style={{ lineHeight: 1.4, fontSize: '10px' }}>{items.length}</span>
                 )}
               </div>
               {hint && (
-                <div className="text-xs text-gray-500 italic border-l-2 pl-2 mb-1" style={{ borderColor: `${cat.color}60` }}>
+                <div className="text-xs text-gray-500 italic border-l-2 pl-2 mb-1" style={{ borderColor: `${cat.color}60`, fontSize: '10px', lineHeight: 1.4 }}>
                   {hint}
                 </div>
               )}
               {fam && fam.map((fm, i) => (
-                <div key={i} className="text-[11px] text-gray-400 italic border-l-2 pl-2 mb-1 border-purple-300">
+                <div key={i} className="text-[11px] text-gray-400 italic border-l-2 pl-2 mb-1 border-purple-300" style={{ lineHeight: 1.4, fontSize: '10px' }}>
                   {fm.name}: {fm.notes}
                 </div>
               ))}
               {items.length > 0 && (
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1" style={{ lineHeight: 1.4, gap: '4px' }}>
                   {items.slice(0, 2).map((evt, i) => (
-                    <div key={i} className="flex gap-2 items-start text-[11px]">
-                      <span className="shrink-0 text-gray-400 font-mono whitespace-nowrap">{evt.timestamp || formatDate(evt.date)}</span>
-                      <span className="text-gray-600">{evt.detail || evt.event || evt.description}</span>
+                    <div key={i} className="flex gap-2 items-start text-[11px]" style={{ lineHeight: 1.4, gap: '4px' }}>
+                      <span className="shrink-0 text-gray-400 font-mono whitespace-nowrap" style={{ lineHeight: 1.4, fontSize: '10px' }}>{evt.timestamp || formatDate(evt.date)}</span>
+                      <span className="text-gray-600" style={{ lineHeight: 1.4 }}>{evt.detail || evt.event || evt.description}</span>
                     </div>
                   ))}
                   {items.length > 2 && (
@@ -567,9 +568,9 @@ function DrawerSnapshotSection({ profile }) {
           );
         })}
         {emptyCats.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-1 border-t border-gray-100">
+          <div className="flex flex-wrap gap-2 pt-1 border-t border-gray-100" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
             {emptyCats.map(c => (
-              <span key={c.key} className="text-[10px] text-gray-300 flex items-center gap-0.5">
+              <span key={c.key} className="text-[10px] text-gray-300 flex items-center gap-0.5" style={{ lineHeight: 1.4, gap: '4px' }}>
                 {c.icon} {c.label}: No data
               </span>
             ))}
@@ -621,39 +622,39 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
   }, [profile.riskSignals]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4" style={{ gap: '10px' }}>
       {/* Why am I looking at this member? — context banner */}
       {contextReason && (
-        <div className="px-3.5 py-2.5 rounded-lg bg-red-500/[0.04] border border-red-500/[0.13] border-l-[3px] border-l-red-500 text-sm text-[#1a1a2e]">
+        <div className="px-3.5 py-2.5 rounded-lg bg-red-500/[0.04] border border-red-500/[0.13] border-l-[3px] border-l-red-500 text-sm text-[#1a1a2e]" style={{ padding: '6px 10px', fontSize: '12px', borderRadius: '8px' }}>
           <span className="font-bold text-error-500 mr-1.5">Flagged:</span>
           {contextReason}
         </div>
       )}
 
-      <div className="flex justify-between items-start gap-4 flex-wrap">
+      <div className="flex justify-between items-start gap-4 flex-wrap" style={{ flexWrap: 'nowrap', gap: '8px' }}>
         <div className="flex gap-4 items-center">
-          <div className={`${layout === 'page' ? 'w-20 h-20 text-[28px]' : 'w-16 h-16 text-xl'} rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center font-bold text-[#1a1a2e]`}>
+          <div className={`${layout === 'page' ? 'w-20 h-20 text-[28px]' : 'w-10 h-10 text-sm'} rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center font-bold text-[#1a1a2e]`}>
             {initials}
           </div>
           <div>
-          <div className="text-sm text-gray-400 tracking-wide uppercase">Member Snapshot</div>
-          <h2 className={`my-1 ${layout === 'page' ? 'text-[32px]' : 'text-2xl'}`}>{profile.name}</h2>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-400 tracking-wide uppercase" style={{ display: 'none', fontSize: '10px' }}>Member Snapshot</div>
+          <h2 className={`${layout === 'page' ? 'text-[32px]' : ''}`} style={{ fontSize: layout === 'page' ? undefined : '18px', fontWeight: 700, margin: '0px', lineHeight: 1.2 }}>{profile.name}</h2>
+          <div className="text-sm text-gray-500" style={{ fontSize: '10px' }}>
             {profile.tier} {'\u2022'} Joined {formatDate(profile.joinDate)}
           </div>
-          <div className="flex gap-3 mt-2 flex-wrap">
+          <div className="flex gap-3 mt-2 flex-wrap" style={{ gap: '6px', marginTop: '6px' }}>
             {topMetrics.map((metric) => (
-              <div key={metric.label} className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-200">
-                <div className="text-xs text-gray-400 uppercase tracking-wider">{metric.label}</div>
-                <div className="text-sm font-semibold">{metric.value}</div>
+              <div key={metric.label} className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-200" style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '11px' }}>
+                <div className="text-xs text-gray-400 uppercase tracking-wider" style={{ fontSize: '10px', letterSpacing: '0.05em', marginBottom: '1px' }}>{metric.label}</div>
+                <div className="text-sm font-semibold" style={{ fontSize: '13px', lineHeight: 1.2, fontWeight: 600 }}>{metric.value}</div>
               </div>
             ))}
           </div>
         </div>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">Health score</div>
-          <div className="text-[42px] font-mono" style={{ color: profile.healthScore > 69 ? '#22c55e' : profile.healthScore > 40 ? '#f59e0b' : '#ef4444' }}>
+        <div className="text-right" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
+          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1" style={{ fontSize: '10px' }}>Health score</div>
+          <div className="text-[42px] font-mono" style={{ color: profile.healthScore > 69 ? '#22c55e' : profile.healthScore > 40 ? '#f59e0b' : '#ef4444', fontSize: '24px', lineHeight: 1 }}>
             {profile.healthScore ?? '\u2014'}
           </div>
           <Sparkline data={profile.trend ?? []} />
@@ -662,6 +663,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               type="button"
               onClick={() => onOpenFullPage(profile.memberId)}
               className="mt-2 border-none bg-transparent text-brand-500 font-semibold cursor-pointer"
+              style={{ fontSize: '11px', marginTop: '2px', padding: '3px 8px', borderRadius: '4px', background: 'rgba(234, 127, 55, 0.08)' }}
             >
               Open full profile {'\u2192'}
             </button>
@@ -683,32 +685,32 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <ChurnPredictionBadge profile={profile} />
 
       <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '\u2014'}`}>
-        <div className="flex flex-col gap-1.5 text-sm">
-          <span><strong>Phone:</strong> {profile.contact?.phone && profile.contact.phone !== '\u2014'
+        <div className="flex flex-col gap-1.5 text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
+          <span style={{ fontSize: '11px', lineHeight: 1.4 }}><strong>Phone:</strong> {profile.contact?.phone && profile.contact.phone !== '\u2014'
             ? <a href={`tel:${profile.contact.phone}`} className="text-brand-500 no-underline">{profile.contact.phone}</a>
             : '\u2014'}</span>
-          <span><strong>Email:</strong> {profile.contact?.email && profile.contact.email !== '\u2014'
+          <span style={{ fontSize: '11px', lineHeight: 1.4 }}><strong>Email:</strong> {profile.contact?.email && profile.contact.email !== '\u2014'
             ? <a href={`mailto:${profile.contact.email}`} className="text-brand-500 no-underline">{profile.contact.email}</a>
             : '\u2014'}</span>
-          <span><strong>Last outreach:</strong> {formatDateTime(profile.contact?.lastOutreach)}</span>
+          <span style={{ fontSize: '11px', lineHeight: 1.4 }}><strong>Last outreach:</strong> {formatDateTime(profile.contact?.lastOutreach)}</span>
         </div>
       </Section>
 
       {/* Household / Family Unit View */}
       {profile.family && profile.family.length > 0 && (
         <Section title="Household" description={`${profile.family.length + 1} members`}>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
             {/* Aggregate household value */}
-            <div className="flex gap-4 px-3 py-2 bg-gray-100 rounded-lg border border-gray-200">
-              <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wide">Household value</div>
-                <div className="text-base font-bold font-mono">
+            <div className="flex gap-4 px-3 py-2 bg-gray-100 rounded-lg border border-gray-200" style={{ fontSize: '11px', lineHeight: 1.4 }}>
+              <div style={{ lineHeight: 1.4 }}>
+                <div className="text-xs text-gray-400 uppercase tracking-wide" style={{ fontSize: '10px', lineHeight: 1.4 }}>Household value</div>
+                <div className="text-base font-bold font-mono" style={{ fontSize: '12px', lineHeight: 1.4 }}>
                   ${Math.round((profile.duesAnnual || 0) * (1 + (profile.family?.length ?? 0) * 0.6)).toLocaleString()}/yr
                 </div>
               </div>
-              <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wide">Health (lowest)</div>
-                <div className="text-base font-bold font-mono" style={{ color: (profile.healthScore ?? 50) > 69 ? '#22c55e' : (profile.healthScore ?? 50) > 40 ? '#f59e0b' : '#ef4444' }}>
+              <div style={{ lineHeight: 1.4 }}>
+                <div className="text-xs text-gray-400 uppercase tracking-wide" style={{ fontSize: '10px', lineHeight: 1.4 }}>Health (lowest)</div>
+                <div className="text-base font-bold font-mono" style={{ color: (profile.healthScore ?? 50) > 69 ? '#22c55e' : (profile.healthScore ?? 50) > 40 ? '#f59e0b' : '#ef4444', fontSize: '12px', lineHeight: 1.4 }}>
                   {profile.healthScore ?? '\u2014'}
                 </div>
               </div>
@@ -718,13 +720,14 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               <div key={i}
                 onClick={() => f.memberId && onClose?.()}
                 className={`flex justify-between items-center px-3 py-2 rounded-lg border border-gray-200 transition-colors duration-100 ${f.memberId ? 'cursor-pointer hover:bg-gray-100' : 'cursor-default'}`}
+                style={{ fontSize: '11px', lineHeight: 1.4 }}
               >
-                <div>
-                  <div className={`font-semibold text-sm ${f.memberId ? 'text-brand-500' : 'text-[#1a1a2e]'}`}>{f.name}</div>
-                  <div className="text-xs text-gray-400">{f.relation}</div>
+                <div style={{ lineHeight: 1.4 }}>
+                  <div className={`font-semibold text-sm ${f.memberId ? 'text-brand-500' : 'text-[#1a1a2e]'}`} style={{ fontSize: '12px', lineHeight: 1.4 }}>{f.name}</div>
+                  <div className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>{f.relation}</div>
                 </div>
                 {f.notes && (
-                  <div className="text-xs text-gray-500 max-w-[50%] text-right">
+                  <div className="text-xs text-gray-500 max-w-[50%] text-right" style={{ fontSize: '10px', lineHeight: 1.4 }}>
                     {f.notes}
                   </div>
                 )}
@@ -737,7 +740,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       {/* Archetype Description — Call Prep */}
       {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && (
         <Section title={`Archetype: ${profile.archetype}`} description="Behavioral profile">
-          <div className="text-sm text-gray-500 leading-relaxed">
+          <div className="text-sm text-gray-500 leading-relaxed" style={{ fontSize: '10px', lineHeight: 1.4 }}>
             {ARCHETYPE_DESCRIPTIONS[profile.archetype]}
           </div>
         </Section>
@@ -752,11 +755,11 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
       {/* Recommended Talking Points */}
       <Section title="Talking Points" description="Personalized for this call">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {getTalkingPoints(profile).map((point, i) => (
-            <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]">
-              <span className="text-brand-500 font-bold text-sm shrink-0">{i + 1}.</span>
-              <span className="text-sm text-gray-500 leading-normal">{point}</span>
+            <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]" style={{ fontSize: '11px', lineHeight: 1.4, padding: '6px 10px', marginBottom: '2px' }}>
+              <span className="text-brand-500 font-bold text-sm shrink-0" style={{ fontSize: '12px', lineHeight: 1.4 }}>{i + 1}.</span>
+              <span className="text-sm text-gray-500 leading-normal" style={{ fontSize: '10px', lineHeight: 1.4 }}>{point}</span>
             </div>
           ))}
         </div>
@@ -768,24 +771,24 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </Section>
 
       <Section title="Preferences & insights">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {profile.preferences?.favoriteSpots && (
-            <div className="text-sm">
+            <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
               <strong>Favorite spots:</strong> {profile.preferences.favoriteSpots.join(', ')}
             </div>
           )}
           {profile.preferences?.teeWindows && (
-            <div className="text-sm">
+            <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
               <strong>Tee time window:</strong> {profile.preferences.teeWindows}
             </div>
           )}
           {profile.preferences?.dining && (
-            <div className="text-sm">
+            <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
               <strong>Dining:</strong> {profile.preferences.dining}
             </div>
           )}
           {profile.preferences?.notes && (
-            <div className="text-sm text-gray-500">{profile.preferences.notes}</div>
+            <div className="text-sm text-gray-500" style={{ fontSize: '10px', lineHeight: 1.4 }}>{profile.preferences.notes}</div>
           )}
         </div>
       </Section>
@@ -801,7 +804,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </Section>
 
       <Section title="Risk signals">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {(profile.riskSignals ?? []).map((signal) => (
             <div
               key={signal.id}
@@ -811,12 +814,13 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               }}
               className="border border-gray-200 rounded-lg px-3 py-2.5 cursor-pointer transition-colors hover:bg-gray-100"
               title="Click to view related activity"
+              style={{ fontSize: '11px', lineHeight: 1.4 }}
             >
-              <div className="flex justify-between items-center">
-                <div className="font-semibold">{signal.label}</div>
+              <div className="flex justify-between items-center" style={{ lineHeight: 1.4 }}>
+                <div className="font-semibold" style={{ lineHeight: 1.4 }}>{signal.label}</div>
                 <SourceBadge system={signal.source ?? 'Member CRM'} size="xs" />
               </div>
-              <div className="text-xs text-gray-400">{formatDateTime(signal.timestamp)} {'\u00B7'} Confidence {signal.confidence ?? '\u2014'}</div>
+              <div className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>{formatDateTime(signal.timestamp)} {'\u00B7'} Confidence {signal.confidence ?? '\u2014'}</div>
             </div>
           ))}
           {!(profile.riskSignals ?? []).length && <span className="text-gray-500">No active risks.</span>}
@@ -824,28 +828,30 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </Section>
 
       <Section title="Staff notes">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           <textarea
             value={noteText}
             onChange={(event) => setNoteText(event.target.value)}
             placeholder="Add a quick staff note..."
             className="w-full min-h-24 rounded-lg border border-gray-200 p-2 text-sm font-sans bg-gray-100 text-[#1a1a2e]"
+            style={{ fontSize: '12px', lineHeight: 1.4, minHeight: '48px', height: '48px' }}
           />
           <button
             type="button"
             onClick={handleAddNote}
             className="self-end px-3.5 py-1.5 rounded-lg border-none bg-brand-500 text-white font-semibold cursor-pointer"
+            style={{ fontSize: '11px', padding: '4px 12px' }}
           >
             Save note
           </button>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2" style={{ fontSize: '11px', lineHeight: 1.4 }}>
             {(profile.staffNotes ?? []).map((note) => (
-              <div key={note.id} className="border border-gray-200 rounded-lg px-3 py-2.5">
-                <div className="font-semibold">{note.author}</div>
-                <div className="text-xs text-gray-400">
+              <div key={note.id} className="border border-gray-200 rounded-lg px-3 py-2.5" style={{ lineHeight: 1.4 }}>
+                <div className="font-semibold" style={{ lineHeight: 1.4 }}>{note.author}</div>
+                <div className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>
                   {note.department ?? 'General'} {'\u00B7'} {formatDateTime(note.timestamp)}
                 </div>
-                <div className="mt-1.5">{note.text}</div>
+                <div className="mt-1.5" style={{ lineHeight: 1.4 }}>{note.text}</div>
               </div>
             ))}
             {!(profile.staffNotes ?? []).length && <span className="text-gray-500">No notes yet.</span>}
@@ -853,7 +859,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
       </Section>
 
-      <div className={isDrawerLayout ? 'sticky bottom-0 bg-white pt-4 pb-2 shadow-[0_-12px_32px_rgba(15,23,42,0.08)] z-[5]' : ''}>
+      <div className={isDrawerLayout ? 'sticky bottom-0 bg-white pt-4 pb-2 shadow-[0_-12px_32px_rgba(15,23,42,0.08)] z-[5]' : ''} style={{ paddingTop: '8px', paddingBottom: '6px' }}>
         <Section title="Quick actions">
           <div className="flex flex-wrap gap-2">
             {quickActions.map((action) => (
@@ -862,6 +868,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                 type="button"
                 onClick={() => onQuickAction?.(profile.memberId, action.key)}
                 className="px-3.5 py-2 rounded-xl border border-gray-200 bg-gray-100 cursor-pointer font-semibold"
+                style={{ fontSize: '11px', padding: '5px 10px', borderRadius: '6px' }}
               >
                 {action.icon} {action.label}
               </button>
@@ -876,6 +883,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             type="button"
             onClick={onClose}
             className="border-none bg-transparent text-gray-400 cursor-pointer font-semibold"
+            style={{ fontSize: '10px' }}
           >
             Close
           </button>
@@ -954,8 +962,8 @@ export default function MemberProfileDrawer() {
     borderTopRightRadius: isMobile ? '16px' : 0,
     display: 'flex',
     flexDirection: 'column',
-    padding: '24px',
-    gap: '16px',
+    padding: '16px',
+    gap: '10px',
     transition: 'transform 0.25s ease',
     zIndex: 1002,
     overflowY: 'auto',

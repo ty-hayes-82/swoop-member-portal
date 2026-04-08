@@ -6,24 +6,26 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
+import { shouldUseStatic } from '@/services/demoGate';
 import QualityTab from './tabs/QualityTab';
 import StaffingTab from './tabs/StaffingTab';
 import ComplaintsTab from './tabs/ComplaintsTab';
 
-const TABS = [
+const ALL_TABS = [
   { key: 'quality', label: 'Quality' },
   { key: 'staffing', label: 'Staffing' },
-  { key: 'complaints', label: 'Complaints' },
+  { key: 'complaints', label: 'Complaints', gate: 'complaints' },
 ];
 
 export default function ServiceView() {
   const { routeIntent, clearRouteIntent } = useNavigationContext();
+  const tabs = ALL_TABS.filter(t => !t.gate || shouldUseStatic(t.gate));
   const [activeTab, setActiveTab] = useState('quality');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!routeIntent) return;
-    if (routeIntent.tab && TABS.some(t => t.key === routeIntent.tab)) {
+    if (routeIntent.tab && tabs.some(t => t.key === routeIntent.tab)) {
       setActiveTab(routeIntent.tab);
     }
     clearRouteIntent();
@@ -47,11 +49,11 @@ export default function ServiceView() {
           context="Cross-domain view connecting staffing levels, complaint patterns, and pace of play to service quality outcomes."
         />
 
-        <EvidenceStrip systems={['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather']} />
+        <EvidenceStrip systems={['Scheduling', 'POS', 'Tee Sheet', ...(shouldUseStatic('complaints') ? ['Complaints'] : []), 'Weather']} />
 
         {/* Tab switcher */}
         <div role="tablist" aria-label="Service tabs" className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
-          {TABS.map(({ key, label }) => (
+          {tabs.map(({ key, label }) => (
             <button
               key={key}
               role="tab"

@@ -8,6 +8,7 @@ import PageTransition from '@/components/ui/PageTransition';
 import { getTodayTeeSheet, getTeeSheetSummary } from '@/services/operationsService';
 import { useApp } from '@/context/AppContext';
 import { apiFetch } from '@/services/apiClient';
+import { shouldUseStatic } from '@/services/demoGate';
 
 const healthColor = (score) => {
   if (score >= 70) return '#22c55e';
@@ -22,6 +23,8 @@ const healthLabel = (score) => {
   if (score >= 30) return 'At Risk';
   return 'Critical';
 };
+
+const showMemberNames = () => shouldUseStatic('members');
 
 function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
   const color = healthColor(teeTime.healthScore);
@@ -49,9 +52,13 @@ function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
         <div className="flex items-start justify-between gap-3 mb-2">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <MemberLink memberId={teeTime.memberId} mode="drawer" className="font-bold text-sm text-gray-800">
-                {teeTime.name}
-              </MemberLink>
+              {showMemberNames() ? (
+                <MemberLink memberId={teeTime.memberId} mode="drawer" className="font-bold text-sm text-gray-800">
+                  {teeTime.name}
+                </MemberLink>
+              ) : (
+                <span className="font-bold text-sm text-gray-800">Member</span>
+              )}
               <span className="text-xs text-gray-400">{teeTime.time} - {teeTime.course}</span>
               {isVip && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200">VIP</span>}
             </div>
@@ -65,9 +72,11 @@ function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
             {Math.round(teeTime.cancelRisk * 100)}% cancel risk
           </span>
         </div>
-        <div className="text-xs text-gray-600 leading-relaxed">
-          {teeTime.cartPrep.note}
-        </div>
+        {showMemberNames() && (
+          <div className="text-xs text-gray-600 leading-relaxed">
+            {teeTime.cartPrep.note}
+          </div>
+        )}
       </div>
       {/* Quick action buttons (always visible) */}
       <div className="flex gap-2 mt-3 flex-wrap">
@@ -118,7 +127,7 @@ function CartPrepCard({ teeTime, onSendCartText, onSendDiningNudge }) {
     <div className={`rounded-xl border p-4 ${isAtRisk ? 'bg-red-50/30 border-red-200' : 'bg-white border-gray-200'}`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-gray-800">{teeTime.name}</span>
+          <span className="text-sm font-bold text-gray-800">{showMemberNames() ? teeTime.name : 'Member'}</span>
           <span className="text-xs text-gray-400">{teeTime.time}</span>
         </div>
         <span className="font-mono text-xs font-bold" style={{ color }}>{teeTime.healthScore}</span>
@@ -347,9 +356,13 @@ export default function TeeSheetView() {
                       <td className="px-4 py-2.5 font-mono text-xs font-semibold text-gray-700 whitespace-nowrap">{t.time}</td>
                       <td className="px-4 py-2.5 text-xs text-gray-500">{t.course}</td>
                       <td className="px-4 py-2.5">
-                        <MemberLink memberId={t.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 hover:text-brand-500">
-                          {t.name}
-                        </MemberLink>
+                        {showMemberNames() ? (
+                          <MemberLink memberId={t.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 hover:text-brand-500">
+                            {t.name}
+                          </MemberLink>
+                        ) : (
+                          <span className="font-semibold text-sm text-gray-800">Member</span>
+                        )}
                       </td>
                       <td className="px-4 py-2.5 hidden sm:table-cell">
                         <ArchetypeBadge archetype={t.archetype} size="xs" />

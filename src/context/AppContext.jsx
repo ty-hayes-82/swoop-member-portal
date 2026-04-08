@@ -33,6 +33,11 @@ function getDefaultInbox() {
   return getAllActions();
 }
 
+// Pre-populate inbox if gates are already set (e.g., after page reload in guided demo)
+const initialInbox = (() => {
+  try { return getAllActions(); } catch { return []; }
+})();
+
 const initialState = {
   currentDate: new Date().toISOString().split('T')[0],
   playbooks: {
@@ -47,8 +52,8 @@ const initialState = {
     'staffing-gap': 0,
     'engagement-decay': 0,
   },
-  inbox: [],
-  pendingCount: 0,
+  inbox: initialInbox,
+  pendingCount: initialInbox.filter(i => i.status === 'pending').length,
   agentStatuses: {},
   agentConfigs: {},
   teeSheetOps: {
@@ -253,17 +258,43 @@ export function AppProvider({ children }) {
     annual: activePlaybooks.reduce((sum, [id]) => sum + (PLAYBOOK_DEFS[id]?.annual ?? 0), 0),
   };
 
-  // Lazy-load agent inbox after mount so gate checks are evaluated correctly
+  // Lazy-load agent inbox — poll until gates are ready (handles post-reload timing)
   useEffect(() => {
-    const inbox = getDefaultInbox();
-    const agents = getAgents();
-    if (inbox.length > 0 && state.inbox.length === 0) {
-      dispatch({ type: 'SET_INBOX', inbox });
+    const loadInbox = () => {
+      const inbox = getDefaultInbox();
+      const agents = getAgents();
+      if (inbox.length > 0) {
+        dispatch({ type: 'SET_INBOX', inbox });
+      }
+      if (agents.length > 0) {
+        const statuses = Object.fromEntries(agents.map(a => [a.id, a.status]));
+        dispatch({ type: 'SET_AGENT_STATUSES', statuses });
+      }
+      return inbox.length > 0;
+    };
+    // Try immediately, then poll every 500ms up to 5 times
+    if (!loadInbox()) {
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts++;
+        if (loadInbox() || attempts >= 5) clearInterval(interval);
+      }, 500);
+      return () => clearInterval(interval);
     }
-    if (agents.length > 0 && Object.keys(state.agentStatuses).length === 0) {
-      const statuses = Object.fromEntries(agents.map(a => [a.id, a.status]));
-      dispatch({ type: 'SET_AGENT_STATUSES', statuses });
-    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Also reload inbox when demo gates change (e.g., after importGates + page reload)
+  useEffect(() => {
+    const handler = () => {
+      const inbox = getDefaultInbox();
+      if (inbox.length > 0) dispatch({ type: 'SET_INBOX', inbox });
+      const agents = getAgents();
+      if (agents.length > 0) {
+        dispatch({ type: 'SET_AGENT_STATUSES', statuses: Object.fromEntries(agents.map(a => [a.id, a.status])) }); // eslint-disable-line
+      }
+    };
+    window.addEventListener('swoop:demo-sources-changed', handler);
+    return () => window.removeEventListener('swoop:demo-sources-changed', handler);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

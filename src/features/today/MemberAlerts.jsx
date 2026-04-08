@@ -2,6 +2,7 @@
 // Uses live API data from memberService (not static demo data)
 import { getAtRiskMembers, getWatchMembers } from '@/services/memberService';
 import { getComplaintCorrelation } from '@/services/staffingService';
+import { shouldUseStatic } from '@/services/demoGate';
 import MemberLink from '@/components/MemberLink';
 import { useNavigation } from '@/context/NavigationContext';
 
@@ -17,6 +18,7 @@ const ACTION_OWNERS = {
 };
 
 function getComplaintDays(memberId) {
+  if (!shouldUseStatic('complaints')) return null;
   const records = getComplaintCorrelation();
   const complaint = records.find(
     f => f.memberId === memberId && f.status !== 'resolved'
@@ -24,6 +26,18 @@ function getComplaintDays(memberId) {
   if (!complaint) return null;
   const days = Math.round((Date.now() - new Date(complaint.date || complaint.reported_at).getTime()) / (1000 * 60 * 60 * 24));
   return { days: Math.max(0, days), category: complaint.category };
+}
+
+// Filter risk signal text to only reference data from open gates
+function filterRiskSignal(text) {
+  if (!text) return text;
+  const hasTeeSheet = shouldUseStatic('tee-sheet');
+  const hasFb = shouldUseStatic('fb');
+  const hasComplaints = shouldUseStatic('complaints');
+  if (!hasTeeSheet && /round|golf visit|tee time|course/i.test(text)) return null;
+  if (!hasFb && /F&B|dining|food|beverage|spending.*minimum/i.test(text)) return null;
+  if (!hasComplaints && /complaint|service request/i.test(text)) return null;
+  return text;
 }
 
 function buildPriorityList() {
@@ -58,35 +72,35 @@ function buildPriorityList() {
         action = `Schedule GM call — complaint unresolved ${complaint.days} days`;
         owner = complaint.days > 14 ? 'GM' : (ACTION_OWNERS[archetype] || 'GM');
       } else if (archetype === 'Ghost') {
-        reason = m.topRisk || m.signal || 'Engagement fully lapsed';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Engagement fully lapsed';
         action = 'GM personal call — re-engagement conversation';
         owner = 'GM';
       } else if (archetype === 'Declining') {
-        reason = m.topRisk || m.signal || 'Activity declining across golf + dining';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Activity declining';
         action = 'Membership Director outreach — identify root cause';
         owner = 'Membership Director';
       } else if (archetype === 'Weekend Warrior') {
-        reason = m.topRisk || m.signal || 'Weekend golf frequency declining';
-        action = 'Priority Saturday tee time offer';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Engagement frequency declining';
+        action = shouldUseStatic('tee-sheet') ? 'Priority Saturday tee time offer' : 'Personalized outreach based on engagement pattern';
         owner = 'Pro Shop';
       } else if (archetype === 'Die-Hard Golfer') {
-        reason = m.topRisk || m.signal || 'Golf activity declining';
-        action = 'Pro shop outreach — check equipment/injury/schedule';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Activity declining';
+        action = shouldUseStatic('tee-sheet') ? 'Pro shop outreach — check equipment/injury/schedule' : 'Personalized outreach based on engagement pattern';
         owner = 'Pro Shop';
       } else if (archetype === 'Social Butterfly') {
-        reason = m.topRisk || m.signal || 'Dining and event engagement dropping';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Event engagement dropping';
         action = 'Invite to upcoming wine dinner or social event';
         owner = 'Events Coordinator';
       } else if (isNewMember) {
-        reason = m.topRisk || m.signal || 'No habits forming in first 60 days';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'No habits forming in first 60 days';
         action = 'New member integration check-in — identify engagement gaps';
         owner = 'Membership Director';
       } else if (archetype === 'Snowbird') {
-        reason = m.topRisk || m.signal || 'Seasonal return expected — no reactivation';
-        action = 'Send welcome-back package + tee time reservation';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Seasonal return expected — no reactivation';
+        action = 'Send welcome-back package';
         owner = 'Front Desk';
       } else {
-        reason = m.topRisk || m.signal || 'Health score declining';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Health score declining';
         action = m.action || 'Personalized outreach based on engagement pattern';
         owner = ACTION_OWNERS[archetype] || 'Membership Director';
       }

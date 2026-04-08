@@ -50,7 +50,7 @@ function getTier(score) {
 }
 
 // ── Archetype classification (match backend decision tree) ──
-function classifyArchetype(dims, joinDate) {
+export function classifyArchetype(dims, joinDate) {
   const { golf, dining, email, events } = dims;
   const joinDaysAgo = joinDate
     ? Math.floor((Date.now() - new Date(joinDate).getTime()) / 86400000)

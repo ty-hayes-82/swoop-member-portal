@@ -119,7 +119,7 @@ export default function BoardReport() {
       }, 0) / resolvedWithDates.length).toFixed(1)
     : null;
 
-  const isEmpty = kpis.every(k => k.value === 0);
+  const isEmpty = kpis.every(k => k.value === 0) && memberSaves.length === 0;
 
   if (isLoading) {
     return (
@@ -243,6 +243,31 @@ export default function BoardReport() {
               operational response improvements continue to compound, with response times improving 48% since launch.
             </p>
           </Panel>
+
+          {/* Recent Member Saves Preview */}
+          {memberSaves.length > 0 && (
+            <Panel>
+              <h2 className="text-lg font-bold text-gray-800 mb-1.5">Recent Member Saves</h2>
+              <p className="text-xs text-gray-500 mb-3">Members retained through proactive intervention</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {memberSaves.slice(0, 4).map((m, i) => (
+                  <div key={i} className="border border-gray-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-sm text-gray-800">{m.memberName}</span>
+                      <span className="text-xs font-bold text-green-600">{m.healthBefore} → {m.healthAfter}</span>
+                    </div>
+                    <div className="text-xs text-gray-500 leading-relaxed">{m.trigger}</div>
+                    <div className="text-xs text-brand-500 font-semibold mt-1">{m.action}</div>
+                  </div>
+                ))}
+              </div>
+              {memberSaves.length > 4 && (
+                <button onClick={() => setActiveTab(1)} className="mt-2 text-xs text-brand-500 font-semibold cursor-pointer bg-transparent border-none p-0">
+                  View all {memberSaves.length} member saves →
+                </button>
+              )}
+            </Panel>
+          )}
 
           {/* Service & Operations — unified section */}
           <Panel>
