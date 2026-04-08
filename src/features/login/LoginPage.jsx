@@ -91,10 +91,10 @@ export default function LoginPage({ onLogin }) {
     if (demoEmail) localStorage.setItem('swoop_demo_email', demoEmail);
     if (demoPhone) localStorage.setItem('swoop_demo_phone', demoPhone);
     if (guided) {
-      localStorage.setItem('swoop_demo_guided', 'true');
-      localStorage.removeItem('swoop_demo_sources');
+      sessionStorage.setItem('swoop_demo_guided', 'true');
+      sessionStorage.removeItem('swoop_demo_sources');
     } else {
-      localStorage.removeItem('swoop_demo_guided');
+      sessionStorage.removeItem('swoop_demo_guided');
     }
     onLogin?.(demoUser);
   };

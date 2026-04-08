@@ -17,15 +17,6 @@ export const navItems = [
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
   },
   {
-    key: 'service',
-    label: 'Service',
-    section: 'PRIMARY',
-    icon: '⚙️',
-    color: theme.colors.navOperations,
-    subtitle: 'Service quality, staffing intelligence, and complaint patterns.',
-    sourceSystems: ['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather'],
-  },
-  {
     key: 'members',
     label: 'Members',
     section: 'PRIMARY',
@@ -42,6 +33,15 @@ export const navItems = [
     color: theme.colors.navOperations,
     subtitle: "Today's bookings, at-risk golfers, and cart prep recommendations.",
     sourceSystems: ['Tee Sheet', 'Member CRM', 'Weather', 'POS'],
+  },
+  {
+    key: 'service',
+    label: 'Service',
+    section: 'PRIMARY',
+    icon: '⚙️',
+    color: theme.colors.navOperations,
+    subtitle: 'Service quality, staffing intelligence, and complaint patterns.',
+    sourceSystems: ['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather'],
   },
   {
     key: 'automations',

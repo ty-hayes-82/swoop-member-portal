@@ -199,8 +199,8 @@ test.describe('Part B: Progressive Import', () => {
       const gates = JSON.parse(localStorage.getItem('swoop_demo_gates') || '[]');
       files.push('JCM_Members_F9');
       gates.push('members');
-      localStorage.setItem('swoop_demo_files', JSON.stringify(files));
-      localStorage.setItem('swoop_demo_gates', JSON.stringify(gates));
+      sessionStorage.setItem('swoop_demo_files', JSON.stringify(files));
+      sessionStorage.setItem('swoop_demo_gates', JSON.stringify(gates));
       window.dispatchEvent(event);
     });
     await page.waitForTimeout(1000);
@@ -223,8 +223,8 @@ test.describe('Part B: Progressive Import', () => {
     await page.evaluate(() => {
       const files = ['JCM_Members_F9'];
       const gates = ['members'];
-      localStorage.setItem('swoop_demo_files', JSON.stringify(files));
-      localStorage.setItem('swoop_demo_gates', JSON.stringify(gates));
+      sessionStorage.setItem('swoop_demo_files', JSON.stringify(files));
+      sessionStorage.setItem('swoop_demo_gates', JSON.stringify(gates));
       window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed', { detail: { action: 'load' } }));
     });
     await page.reload();
@@ -247,8 +247,8 @@ test.describe('Part B: Progressive Import', () => {
     await page.evaluate(() => {
       const files = ['JCM_Members_F9', 'TTM_Tee_Sheet_SV'];
       const gates = ['members', 'tee-sheet'];
-      localStorage.setItem('swoop_demo_files', JSON.stringify(files));
-      localStorage.setItem('swoop_demo_gates', JSON.stringify(gates));
+      sessionStorage.setItem('swoop_demo_files', JSON.stringify(files));
+      sessionStorage.setItem('swoop_demo_gates', JSON.stringify(gates));
       window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed', { detail: { action: 'load' } }));
     });
     await page.reload();

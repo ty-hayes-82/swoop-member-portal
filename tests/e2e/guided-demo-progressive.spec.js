@@ -43,8 +43,8 @@ async function importGates(page, gateIds) {
       agents: [],
     };
     const files = gates.flatMap(g => gateToFiles[g] || []);
-    localStorage.setItem('swoop_demo_files', JSON.stringify(files));
-    localStorage.setItem('swoop_demo_gates', JSON.stringify(gates));
+    sessionStorage.setItem('swoop_demo_files', JSON.stringify(files));
+    sessionStorage.setItem('swoop_demo_gates', JSON.stringify(gates));
     window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed', { detail: { action: 'load' } }));
   }, gateIds);
   await page.reload();

@@ -15,18 +15,13 @@ const GUIDED_KEY = 'swoop_demo_guided';
 // Event name dispatched when files change (DemoWizardContext listens)
 export const SOURCES_CHANGED_EVENT = 'swoop:demo-sources-changed';
 
-// File-to-gate mapping (loaded lazily to avoid circular imports)
-let _fileGateMap = null;
-function getFileGateMap() {
-  if (_fileGateMap) return _fileGateMap;
-  // Build map from config — but avoid importing at module load to prevent circular deps
-  // Instead, read from localStorage where we also store the gateId per file
-  return {};
-}
+// Use sessionStorage for guided demo state — clears when browser closes
+// This ensures each demo session starts fresh
+const _store = typeof sessionStorage !== 'undefined' ? sessionStorage : localStorage;
 
 export function isGuidedMode() {
   try {
-    return localStorage.getItem(GUIDED_KEY) === 'true';
+    return _store.getItem(GUIDED_KEY) === 'true';
   } catch { return false; }
 }
 
@@ -58,22 +53,22 @@ export function shouldUseStatic(gateId) {
 
 function getLoadedFileSet() {
   try {
-    const raw = localStorage.getItem(FILES_KEY);
+    const raw = _store.getItem(FILES_KEY);
     return raw ? new Set(JSON.parse(raw)) : new Set();
   } catch { return new Set(); }
 }
 
 function getLoadedGateSet() {
   try {
-    const raw = localStorage.getItem('swoop_demo_gates');
+    const raw = _store.getItem('swoop_demo_gates');
     return raw ? new Set(JSON.parse(raw)) : new Set();
   } catch { return new Set(); }
 }
 
 function persistFiles(fileSet, gateSet) {
   try {
-    localStorage.setItem(FILES_KEY, JSON.stringify([...fileSet]));
-    localStorage.setItem('swoop_demo_gates', JSON.stringify([...gateSet]));
+    _store.setItem(FILES_KEY, JSON.stringify([...fileSet]));
+    _store.setItem('swoop_demo_gates', JSON.stringify([...gateSet]));
   } catch {}
 }
 
@@ -148,8 +143,8 @@ export function getLoadedGates() {
  */
 export function resetGuidedMode() {
   try {
-    localStorage.removeItem(FILES_KEY);
-    localStorage.removeItem('swoop_demo_gates');
-    localStorage.removeItem(GUIDED_KEY);
+    _store.removeItem(FILES_KEY);
+    _store.removeItem('swoop_demo_gates');
+    _store.removeItem(GUIDED_KEY);
   } catch {}
 }

@@ -202,7 +202,7 @@ function loadPersistedState(base) {
   try {
     // In guided demo mode, don't load persisted inbox from a previous session
     // — start fresh so only activated gates produce data
-    const isGuided = localStorage.getItem('swoop_demo_guided') === 'true';
+    const isGuided = sessionStorage.getItem('swoop_demo_guided') === 'true';
 
     const inbox = isGuided ? null : JSON.parse(localStorage.getItem('swoop_agent_inbox') || 'null');
     const agentStatuses = JSON.parse(localStorage.getItem('swoop_agent_statuses') || 'null');
