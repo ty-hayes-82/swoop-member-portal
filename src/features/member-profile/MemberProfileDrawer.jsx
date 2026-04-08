@@ -457,6 +457,129 @@ function SpendTrendSparkline({ profile }) {
   );
 }
 
+// --- Snapshot categories for quick-view habits panel ---
+const SNAPSHOT_CATS = [
+  { key: 'dining',  label: 'Food & Dining', types: ['dining', 'f&b', 'lounge', 'grill'],    icon: '\uD83C\uDF7D\uFE0F', color: '#f59e0b' },
+  { key: 'golf',    label: 'Golf',          types: ['golf', 'practice', 'tee', 'round'],     icon: '\u26F3',             color: '#22c55e' },
+  { key: 'events',  label: 'Events',        types: ['event', 'social'],                       icon: '\uD83C\uDF89',       color: '#8b5cf6' },
+  { key: 'spa',     label: 'Spa & Wellness',types: ['spa', 'wellness', 'pool', 'fitness'],    icon: '\uD83E\uDDD6',       color: '#ec4899' },
+  { key: 'courts',  label: 'Courts',        types: ['tennis', 'pickleball', 'court'],         icon: '\uD83C\uDFBE',       color: '#06b6d4' },
+  { key: 'email',   label: 'Email',         types: ['email', 'newsletter'],                   icon: '\u2709\uFE0F',       color: '#3B82F6' },
+];
+
+function buildDrawerSnapshot(profile) {
+  const activity = profile.activity || [];
+  const prefs = profile.preferences || {};
+  const family = profile.family || [];
+  const staffNotes = profile.staffNotes || [];
+
+  const groups = {};
+  SNAPSHOT_CATS.forEach(c => { groups[c.key] = []; });
+
+  activity.forEach(evt => {
+    const t = (evt.type || evt.domain || '').toLowerCase();
+    for (const cat of SNAPSHOT_CATS) {
+      if (cat.types.some(ct => t.includes(ct))) { groups[cat.key].push(evt); break; }
+    }
+  });
+
+  // Preference hints per category
+  const hints = {};
+  if (prefs.dining) hints.dining = prefs.dining;
+  if (prefs.teeWindows) hints.golf = prefs.teeWindows;
+  const notesLower = (prefs.notes || '').toLowerCase();
+  if (notesLower.includes('spa') || notesLower.includes('pool')) hints.spa = prefs.notes;
+  if (notesLower.includes('court') || notesLower.includes('tennis')) hints.courts = prefs.notes;
+
+  // Family hints
+  const famHints = {};
+  family.forEach(fm => {
+    const n = (fm.notes || '').toLowerCase();
+    if (n.includes('wine') || n.includes('dinner') || n.includes('grill') || n.includes('dining')) (famHints.dining = famHints.dining || []).push(fm);
+    if (n.includes('golf') || n.includes('tee') || n.includes('clinic')) (famHints.golf = famHints.golf || []).push(fm);
+    if (n.includes('event') || n.includes('camp') || n.includes('social')) (famHints.events = famHints.events || []).push(fm);
+    if (n.includes('spa') || n.includes('pool') || n.includes('wellness')) (famHints.spa = famHints.spa || []).push(fm);
+    if (n.includes('court') || n.includes('tennis') || n.includes('pickleball')) (famHints.courts = famHints.courts || []).push(fm);
+  });
+
+  // Staff note hints
+  staffNotes.forEach(note => {
+    const text = (typeof note === 'string' ? note : note.text || '').toLowerCase();
+    if (text.includes('spa') || text.includes('pool') || text.includes('massage')) hints.spa = hints.spa || (typeof note === 'string' ? note : note.text);
+    if (text.includes('court') || text.includes('tennis')) hints.courts = hints.courts || (typeof note === 'string' ? note : note.text);
+  });
+
+  return { groups, hints, famHints };
+}
+
+function DrawerSnapshotSection({ profile }) {
+  const { groups, hints, famHints } = useMemo(() => buildDrawerSnapshot(profile), [profile]);
+
+  const activeCats = SNAPSHOT_CATS.filter(c =>
+    groups[c.key].length > 0 || hints[c.key] || (famHints[c.key] && famHints[c.key].length > 0)
+  );
+  const emptyCats = SNAPSHOT_CATS.filter(c =>
+    groups[c.key].length === 0 && !hints[c.key] && (!famHints[c.key] || famHints[c.key].length === 0)
+  );
+
+  if (activeCats.length === 0) return null;
+
+  return (
+    <Section title="Member Habits" description="Quick reference">
+      <div className="flex flex-col gap-2.5">
+        {activeCats.map(cat => {
+          const items = groups[cat.key];
+          const hint = hints[cat.key];
+          const fam = famHints[cat.key];
+          return (
+            <div key={cat.key} className="px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-sm">{cat.icon}</span>
+                <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: cat.color }}>{cat.label}</span>
+                {items.length > 0 && (
+                  <span className="ml-auto text-[10px] text-gray-400 bg-white rounded-full px-1.5 py-px border border-gray-200">{items.length}</span>
+                )}
+              </div>
+              {hint && (
+                <div className="text-xs text-gray-500 italic border-l-2 pl-2 mb-1" style={{ borderColor: `${cat.color}60` }}>
+                  {hint}
+                </div>
+              )}
+              {fam && fam.map((fm, i) => (
+                <div key={i} className="text-[11px] text-gray-400 italic border-l-2 pl-2 mb-1 border-purple-300">
+                  {fm.name}: {fm.notes}
+                </div>
+              ))}
+              {items.length > 0 && (
+                <div className="flex flex-col gap-1">
+                  {items.slice(0, 2).map((evt, i) => (
+                    <div key={i} className="flex gap-2 items-start text-[11px]">
+                      <span className="shrink-0 text-gray-400 font-mono whitespace-nowrap">{evt.timestamp || formatDate(evt.date)}</span>
+                      <span className="text-gray-600">{evt.detail || evt.event || evt.description}</span>
+                    </div>
+                  ))}
+                  {items.length > 2 && (
+                    <div className="text-[10px] text-gray-400">+{items.length - 2} more</div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {emptyCats.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-1 border-t border-gray-100">
+            {emptyCats.map(c => (
+              <span key={c.key} className="text-[10px] text-gray-300 flex items-center gap-0.5">
+                {c.icon} {c.label}: No data
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </Section>
+  );
+}
+
 export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNote, onQuickAction, layout = 'drawer' }) {
   if (!profile) {
     return (
@@ -545,6 +668,9 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           )}
         </div>
       </div>
+
+      {/* Member Habits Snapshot — key activity by category at the top */}
+      <DrawerSnapshotSection profile={profile} />
 
       {/* Health Score Breakdown — only show when engagement data sources are imported */}
       {(profile.golfScore || profile.diningScore || shouldUseStatic('tee-sheet') || shouldUseStatic('fb')) && (
