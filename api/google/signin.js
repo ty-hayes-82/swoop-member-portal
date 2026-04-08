@@ -10,9 +10,6 @@ const SCOPES = [
   'openid',
   'email',
   'profile',
-  'https://www.googleapis.com/auth/calendar.events',
-  'https://www.googleapis.com/auth/gmail.compose',
-  'https://www.googleapis.com/auth/gmail.modify',
 ];
 
 export default function handler(req, res) {
