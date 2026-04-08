@@ -3,7 +3,7 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import { PlaybookActionCard } from '@/components/ui';
-import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, getAllMemberProfiles, setRosterCache, getMemberRoster } from '@/services/memberService';
+import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, getAllMemberProfiles, setRosterCache, getMemberRoster, getFullRoster } from '@/services/memberService';
 import { isAuthenticatedClub } from '@/config/constants';
 import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 import { scoreMember, getOpenGatesForScoring, hasEngagementGates } from '@/services/guidedScoring';
@@ -269,11 +269,7 @@ const ACTIVITY_FILTERS = [
 ];
 
 export default function AllMembersView({ initialArchetype = null, rosterOnly = false }) {
-  const allMembers = useMemo(() => {
-    const roster = getMemberRoster();
-    if (roster.length > 0) return roster;
-    return generateRoster();
-  }, []);
+  const allMembers = useMemo(() => getFullRoster(), []);
 
   if (allMembers.length === 0) {
     return <DataEmptyState icon="👥" title="No members imported yet" description="Import your member roster to see health scores, archetypes, and engagement data for every member." dataType="members" />;

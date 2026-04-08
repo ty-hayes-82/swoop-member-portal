@@ -370,6 +370,7 @@ import {
   getMemberDimensions,
   computeScore,
   classifyArchetype,
+  scoreMember,
   computeHealthDistribution as computeGuidedHealthDist,
   computeArchetypeDistribution as computeGuidedArchetypes,
 } from './guidedScoring';
@@ -379,9 +380,26 @@ export const hasRealMemberData = () => _hasRealMembers;
 
 export const getHealthDistribution = () => {
   if (_shouldReturnEmpty()) return [];
-  // In guided mode, health distribution is computed dynamically from scored members
-  // (AllMembersView computes this from the roster via filteredHealthDist)
   if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
+  // Compute distribution from the full roster so both pages agree
+  const roster = getFullRoster();
+  if (roster.length > 0) {
+    const counts = { Healthy: 0, Watch: 0, 'At Risk': 0, Critical: 0 };
+    roster.forEach(m => {
+      const s = m.score ?? 0;
+      if (s >= 70) counts.Healthy++;
+      else if (s >= 50) counts.Watch++;
+      else if (s >= 30) counts['At Risk']++;
+      else counts.Critical++;
+    });
+    const total = roster.length || 1;
+    return [
+      { level: 'Healthy',  min: 70, count: counts.Healthy,      percentage: counts.Healthy / total,      color: '#22c55e', delta: -4 },
+      { level: 'Watch',    min: 50, count: counts.Watch,         percentage: counts.Watch / total,         color: '#f59e0b', delta: 5  },
+      { level: 'At Risk',  min: 30, count: counts['At Risk'],    percentage: counts['At Risk'] / total,    color: '#ea580c', delta: 6  },
+      { level: 'Critical', min: 0,  count: counts.Critical,      percentage: counts.Critical / total,      color: '#ef4444', delta: 3  },
+    ];
+  }
   const archetypes = normalizeArchetypes(_d?.memberArchetypes);
   const totalMembers = archetypes.reduce((sum, item) => sum + item.count, 0);
   return normalizeHealthDistribution(_d?.healthDistribution, totalMembers);
@@ -517,9 +535,85 @@ export const getMemberChurnPrediction = async (memberId) => {
   return null;
 };
 
-// Shared roster cache for generated members — populated by AllMembersView
+// Shared roster cache — lazily generated, used by both HealthOverview and AllMembersView
 let _rosterCache = [];
 export const setRosterCache = (roster) => { _rosterCache = roster; };
+
+const _FIRST_NAMES = ['James','Robert','John','Michael','David','William','Richard','Joseph','Thomas','Christopher','Charles','Daniel','Matthew','Anthony','Mark','Steven','Paul','Andrew','Joshua','Kenneth','Kevin','Brian','George','Timothy','Ronald','Edward','Jason','Jeffrey','Ryan','Jacob','Gary','Nicholas','Eric','Jonathan','Stephen','Larry','Justin','Scott','Brandon','Benjamin','Samuel','Patrick','Alexander','Frank','Raymond','Jack','Dennis','Jerry','Tyler','Aaron','Jose','Nathan','Henry','Douglas','Peter','Zachary','Kyle','Noah','Ethan','Jeremy','Walter','Christian','Keith','Roger','Terry','Harry','Ralph','Sean','Jesse','Roy','Louis','Alan','Eugene','Russell','Randy','Philip','Howard','Vincent','Bobby','Dylan','Johnny','Phillip','Victor','Clarence','Travis','Austin','Martha','Donna','Sandra','Gloria','Teresa','Sara','Debra','Alice','Rachel','Emma','Lisa','Nancy','Betty','Margaret','Dorothy','Kimberly','Emily','Donna','Michelle','Carol','Amanda','Melissa','Deborah','Stephanie','Rebecca','Sharon','Laura','Cynthia','Kathleen','Amy','Angela','Shirley','Anna','Brenda','Pamela','Nicole','Samantha','Katherine','Christine','Helen','Debbie','Janet','Catherine','Maria','Heather','Diane','Olivia','Julie','Joyce','Virginia','Victoria','Kelly','Lauren','Christina','Joan','Evelyn','Judith','Andrea','Hannah','Megan','Cheryl','Jacqueline','Martha','Gloria','Teresa','Ann','Sara','Madison','Frances','Kathryn','Janice','Jean','Abigail','Julia','Grace','Judy'];
+const _LAST_NAMES = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Hernandez','Lopez','Gonzalez','Wilson','Anderson','Thomas','Taylor','Moore','Jackson','Martin','Lee','Perez','Thompson','White','Harris','Sanchez','Clark','Ramirez','Lewis','Robinson','Walker','Young','Allen','King','Wright','Scott','Torres','Nguyen','Hill','Flores','Green','Adams','Nelson','Baker','Hall','Rivera','Campbell','Mitchell','Carter','Roberts','Gomez','Phillips','Evans','Turner','Diaz','Parker','Cruz','Edwards','Collins','Reyes','Stewart','Morris','Morales','Murphy','Cook','Rogers','Gutierrez','Ortiz','Morgan','Cooper','Peterson','Bailey','Reed','Kelly','Howard','Ramos','Kim','Cox','Ward','Richardson','Watson','Brooks','Chavez','Wood','James','Bennett','Gray','Mendoza','Ruiz','Hughes','Price','Alvarez','Castillo','Sanders','Patel','Myers','Long','Ross','Foster','Jimenez','Powell','Jenkins','Perry','Russell','Sullivan','Bell','Coleman','Butler','Henderson','Barnes','Gonzales','Fisher','Vasquez','Simmons','Marks','Fox','Dean','Walsh','Burke'];
+const _ARCHETYPES = ['Die-Hard Golfer','Social Butterfly','Balanced Active','Weekend Warrior','Declining','New Member','Ghost','Snowbird'];
+const _MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-Resident','Corporate','Full Golf','Social','Full Golf'];
+const _LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
+
+function _generateRoster() {
+  if (!shouldUseStatic('members')) return [];
+  const roster = [];
+  const atRisk = getAtRiskMembers();
+  const watch = getWatchMembers();
+  const profiles = getAllMemberProfiles();
+  Object.values(profiles).forEach(p => {
+    roster.push({ memberId: p.memberId, name: p.name, score: p.healthScore, archetype: p.archetype, duesAnnual: p.duesAnnual, memberValueAnnual: p.memberValueAnnual, tier: p.tier, joinDate: p.joinDate, trend: p.trend, topRisk: p.riskSignals?.[0]?.label || 'No current risks', lastSeenLocation: p.lastSeenLocation });
+  });
+  (atRisk || []).forEach(m => {
+    if (!roster.find(r => r.memberId === m.memberId)) {
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || 'Engagement declining' });
+    }
+  });
+  (watch || []).forEach(m => {
+    if (!roster.find(r => r.memberId === m.memberId)) {
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2021-06-01', trend: 'stable', topRisk: m.signal || 'Minor engagement shift' });
+    }
+  });
+  const currentCounts = { Healthy: 0, Watch: 0, 'At Risk': 0, Critical: 0 };
+  roster.forEach(m => {
+    const lvl = (m.score ?? m.healthScore ?? 70) >= 70 ? 'Healthy' : (m.score ?? 70) >= 50 ? 'Watch' : (m.score ?? 70) >= 30 ? 'At Risk' : 'Critical';
+    currentCounts[lvl] = (currentCounts[lvl] || 0) + 1;
+  });
+  const targets = { Healthy: 200, Watch: 35, 'At Risk': 39, Critical: 26 };
+  const needed = {
+    Healthy: Math.max(0, targets.Healthy - currentCounts.Healthy),
+    Watch: Math.max(0, targets.Watch - currentCounts.Watch),
+    'At Risk': Math.max(0, targets['At Risk'] - currentCounts['At Risk']),
+    Critical: Math.max(0, targets.Critical - currentCounts.Critical),
+  };
+  let id = 400;
+  const scoreRanges = { Healthy: [70, 98], Watch: [50, 69], 'At Risk': [30, 49], Critical: [5, 29] };
+  for (const level of ['Healthy', 'Watch', 'At Risk', 'Critical']) {
+    for (let i = 0; i < needed[level]; i++) {
+      const idx = id - 400;
+      const [lo, hi] = scoreRanges[level];
+      const score = lo + (((idx * 7 + 13) % (hi - lo + 1)));
+      const archIdx = ((idx * 3 + 5) % _ARCHETYPES.length);
+      const fn = _FIRST_NAMES[((idx * 11 + 3) % _FIRST_NAMES.length)];
+      const ln = _LAST_NAMES[((idx * 7 + 1) % _LAST_NAMES.length)];
+      const dues = [12000, 14000, 15000, 16000, 18000, 20000, 22000, 25000, 28000, 31000][idx % 10];
+      const yr = 2015 + (idx % 10);
+      const mo = String(1 + (idx % 12)).padStart(2, '0');
+      roster.push({
+        memberId: `mbr_${id++}`, name: `${fn} ${ln}`, score,
+        archetype: _ARCHETYPES[archIdx], duesAnnual: dues,
+        tier: _MEMBERSHIP_TIERS[idx % _MEMBERSHIP_TIERS.length],
+        joinDate: `${yr}-${mo}-01`,
+        trend: level === 'Healthy' ? 'stable' : level === 'Watch' ? 'stable' : 'down',
+        topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Minor engagement shift' : 'Engagement declining',
+        lastSeenLocation: _LOCATIONS[idx % _LOCATIONS.length],
+      });
+    }
+  }
+  if (getDataMode() === 'guided') {
+    const gates = getOpenGatesForScoring();
+    return roster.map(m => scoreMember(m, gates));
+  }
+  return roster;
+}
+
+/** Lazily generate and cache the full member roster. Both pages use this. */
+export function getFullRoster() {
+  if (_rosterCache.length > 0) return _rosterCache;
+  const apiRoster = getMemberRoster();
+  _rosterCache = apiRoster.length > 0 ? apiRoster : _generateRoster();
+  return _rosterCache;
+}
 
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
