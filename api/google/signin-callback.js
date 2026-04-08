@@ -98,8 +98,8 @@ export default async function handler(req, res) {
 
       // Create club
       await sql`
-        INSERT INTO club (club_id, name, created_at)
-        VALUES (${clubId}, ${clubName}, NOW())
+        INSERT INTO club (club_id, name)
+        VALUES (${clubId}, ${clubName})
         ON CONFLICT (club_id) DO NOTHING
       `;
 
