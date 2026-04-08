@@ -72,6 +72,93 @@ function Section({ title, children, cols, collapsible = false, defaultCollapsed 
   );
 }
 
+// --- Category icons & colors for snapshot ---
+const SNAPSHOT_CATEGORIES = [
+  { key: 'dining',  label: 'Food & Dining', types: ['Dining', 'F&B', 'Lounge'],              icon: '\uD83C\uDF7D\uFE0F', color: '#f59e0b' },
+  { key: 'golf',    label: 'Golf',          types: ['Golf', 'Practice', 'Tee Sheet'],         icon: '\u26F3',             color: '#22c55e' },
+  { key: 'events',  label: 'Events',        types: ['Event', 'Events', 'Social'],             icon: '\uD83C\uDF89',       color: '#8b5cf6' },
+  { key: 'spa',     label: 'Spa & Wellness',types: ['Spa', 'Wellness', 'Pool', 'Fitness'],    icon: '\uD83E\uDDD6',       color: '#ec4899' },
+  { key: 'courts',  label: 'Courts',        types: ['Tennis', 'Pickleball', 'Courts', 'Court'],icon: '\uD83C\uDFBE',      color: '#06b6d4' },
+  { key: 'email',   label: 'Email',         types: ['Email'],                                  icon: '\u2709\uFE0F',       color: '#3B82F6' },
+];
+
+function buildSnapshot(activity, preferences, staffNotes) {
+  const groups = {};
+  SNAPSHOT_CATEGORIES.forEach((cat) => { groups[cat.key] = []; });
+
+  // Group activity entries by category
+  (activity || []).forEach((evt) => {
+    const t = (evt.type || evt.domain || '').toLowerCase();
+    for (const cat of SNAPSHOT_CATEGORIES) {
+      if (cat.types.some((ct) => t.includes(ct.toLowerCase()))) {
+        groups[cat.key].push(evt);
+        break;
+      }
+    }
+  });
+
+  // Attach preference hints
+  const prefHints = {};
+  if (preferences.dining) prefHints.dining = preferences.dining;
+  if (preferences.teeWindows) prefHints.golf = preferences.teeWindows;
+  if (preferences.notes) {
+    // Check if notes mention spa, courts, etc.
+    const notesLower = preferences.notes.toLowerCase();
+    if (notesLower.includes('spa') || notesLower.includes('pool') || notesLower.includes('wellness')) prefHints.spa = preferences.notes;
+    if (notesLower.includes('court') || notesLower.includes('tennis') || notesLower.includes('pickleball')) prefHints.courts = preferences.notes;
+  }
+
+  // Pull hints from staff notes too
+  (staffNotes || []).forEach((note) => {
+    const text = (typeof note === 'string' ? note : note.text || note.note || '').toLowerCase();
+    if (text.includes('spa') || text.includes('pool') || text.includes('massage')) prefHints.spa = prefHints.spa || (typeof note === 'string' ? note : note.text || note.note);
+    if (text.includes('court') || text.includes('tennis') || text.includes('pickleball')) prefHints.courts = prefHints.courts || (typeof note === 'string' ? note : note.text || note.note);
+  });
+
+  // Also check family notes for hints
+  return { groups, prefHints };
+}
+
+function SnapshotCard({ cat, items, prefHint, familyHints }) {
+  const hasContent = items.length > 0 || prefHint || (familyHints && familyHints.length > 0);
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-2">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-base">{cat.icon}</span>
+        <span className="text-xs font-bold uppercase tracking-wide" style={{ color: cat.color }}>{cat.label}</span>
+        {items.length > 0 && (
+          <span className="ml-auto text-[10px] text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">{items.length} recent</span>
+        )}
+      </div>
+      {prefHint && (
+        <div className="text-xs text-gray-500 italic border-l-2 pl-2 mb-1" style={{ borderColor: `${cat.color}60` }}>
+          {prefHint}
+        </div>
+      )}
+      {familyHints && familyHints.length > 0 && familyHints.map((fh, i) => (
+        <div key={i} className="text-xs text-gray-400 italic border-l-2 pl-2 mb-1 border-purple-300">
+          {fh.name}: {fh.note}
+        </div>
+      ))}
+      {items.length > 0 ? (
+        <div className="flex flex-col gap-1.5">
+          {items.slice(0, 3).map((evt, i) => (
+            <div key={i} className="flex gap-2 items-start text-xs">
+              <span className="shrink-0 text-gray-400 font-mono whitespace-nowrap">{evt.timestamp || fmtDate(evt.date)}</span>
+              <span className="text-gray-700">{evt.detail || evt.event || evt.description}</span>
+            </div>
+          ))}
+          {items.length > 3 && (
+            <div className="text-[10px] text-gray-400">+{items.length - 3} more in timeline</div>
+          )}
+        </div>
+      ) : !prefHint && (!familyHints || familyHints.length === 0) ? (
+        <div className="text-xs text-gray-300">No recent activity</div>
+      ) : null}
+    </div>
+  );
+}
+
 // --- Main component ---
 export default function MemberProfilePage() {
   const { memberRouteId } = useNavigationContext();
@@ -221,6 +308,38 @@ export default function MemberProfilePage() {
 
   const contextReason = riskSignals.length > 0 ? riskSignals[0]?.label : null;
 
+  // Build snapshot data for habits section
+  const { groups: snapshotGroups, prefHints } = buildSnapshot(activity, preferences, staffNotes);
+
+  // Collect family hints relevant to each category
+  const familyHintsByCategory = {};
+  family.forEach((fm) => {
+    const note = (fm.notes || '').toLowerCase();
+    if (note.includes('spa') || note.includes('pool') || note.includes('wellness')) {
+      (familyHintsByCategory.spa = familyHintsByCategory.spa || []).push({ name: fm.name, note: fm.notes });
+    }
+    if (note.includes('court') || note.includes('tennis') || note.includes('pickleball')) {
+      (familyHintsByCategory.courts = familyHintsByCategory.courts || []).push({ name: fm.name, note: fm.notes });
+    }
+    if (note.includes('golf') || note.includes('tee') || note.includes('clinic')) {
+      (familyHintsByCategory.golf = familyHintsByCategory.golf || []).push({ name: fm.name, note: fm.notes });
+    }
+    if (note.includes('wine') || note.includes('dinner') || note.includes('grill') || note.includes('dining')) {
+      (familyHintsByCategory.dining = familyHintsByCategory.dining || []).push({ name: fm.name, note: fm.notes });
+    }
+    if (note.includes('event') || note.includes('camp') || note.includes('social')) {
+      (familyHintsByCategory.events = familyHintsByCategory.events || []).push({ name: fm.name, note: fm.notes });
+    }
+  });
+
+  // Determine which categories have any content (activity, pref hint, or family hint)
+  const activeCategories = SNAPSHOT_CATEGORIES.filter((cat) => {
+    return snapshotGroups[cat.key].length > 0 || prefHints[cat.key] || (familyHintsByCategory[cat.key] && familyHintsByCategory[cat.key].length > 0);
+  });
+  const emptyCategories = SNAPSHOT_CATEGORIES.filter((cat) => {
+    return snapshotGroups[cat.key].length === 0 && !prefHints[cat.key] && (!familyHintsByCategory[cat.key] || familyHintsByCategory[cat.key].length === 0);
+  });
+
   return (
     <div className="flex flex-col gap-6">
       {/* Why am I looking at this member? — context banner */}
@@ -285,6 +404,32 @@ export default function MemberProfilePage() {
         <Stat label="Rounds (30d)" value={profile.roundsPlayed ?? '\u2014'} accent={'#22c55e'} mono />
         <Stat label="Dining Spend (30d)" value={fmt$(profile.diningSpend)} accent={'#f59e0b'} />
       </div>
+
+      {/* Member Habits & Activity Snapshot */}
+      {(activeCategories.length > 0 || emptyCategories.length > 0) && (
+        <Section title="Member Snapshot">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {activeCategories.map((cat) => (
+              <SnapshotCard
+                key={cat.key}
+                cat={cat}
+                items={snapshotGroups[cat.key]}
+                prefHint={prefHints[cat.key]}
+                familyHints={familyHintsByCategory[cat.key]}
+              />
+            ))}
+          </div>
+          {emptyCategories.length > 0 && activeCategories.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
+              {emptyCategories.map((cat) => (
+                <span key={cat.key} className="text-[11px] text-gray-300 flex items-center gap-1">
+                  <span>{cat.icon}</span> {cat.label}: No data
+                </span>
+              ))}
+            </div>
+          )}
+        </Section>
+      )}
 
       {/* Two-column grid: trend + risk signals */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
