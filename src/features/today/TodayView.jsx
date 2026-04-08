@@ -358,19 +358,19 @@ export default function TodayView() {
         {/* Section 3: Priority Member Alerts */}
         <MemberAlerts />
 
-        {/* Section 4: Weather — Hourly + 5-Day Forecast */}
-        <div className="flex flex-col gap-3 fade-in-up fade-delay-2">
-          <WeekForecast />
-        </div>
+        {/* Section 4: Staffing vs Demand + Open Complaints (moved up for visibility) */}
+        <TodaysRisks />
 
         {/* Section 5: Action Queue */}
         <PendingActionsInline topPriority={topPriority} />
 
-        {/* Section 6: Tomorrow's Forecast */}
-        <TomorrowForecast />
+        {/* Section 6: Weather — Hourly + 5-Day Forecast */}
+        <div className="flex flex-col gap-3 fade-in-up fade-delay-2">
+          <WeekForecast />
+        </div>
 
-        {/* Section 7: Staffing vs Demand + Open Complaints */}
-        <TodaysRisks />
+        {/* Section 7: Tomorrow's Forecast */}
+        <TomorrowForecast />
 
       </div>
     </PageTransition>

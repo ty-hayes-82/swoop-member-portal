@@ -67,12 +67,23 @@ export async function createCalendarEvent({ memberName, memberId, scheduledTime,
 }
 
 /**
- * Create a Gmail draft.
+ * Create a Gmail draft. Throws on failure so callers can fall back.
  */
 export async function createGmailDraft({ to, subject, body }) {
-  return apiFetch('/api/google/gmail-draft', {
+  const token = localStorage.getItem('swoop_auth_token') || '';
+  const headers = { 'Content-Type': 'application/json' };
+  if (token && token !== 'demo') headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch('/api/google/gmail-draft', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ to, subject, body }),
   });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Gmail API error ${res.status}`);
+  }
+
+  return res.json();
 }

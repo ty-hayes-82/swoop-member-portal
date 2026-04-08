@@ -54,29 +54,22 @@ for (const combo of COMBINATIONS) {
       // Wait for content to settle
       await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(2500);
-      // Automations has a known blank-page issue — always use hash navigation as backup
-      if (p.name === 'Automations') {
-        await page.evaluate(() => { window.location.hash = '#/automations'; });
-        await page.waitForTimeout(4000);
-      }
       const filename = `${combo.id}__${p.name.replace(/\s+/g, '-')}.png`;
       const filepath = path.join(SCREENSHOT_DIR, filename);
 
-      // Expand the main scrollable content area so fullPage captures below-the-fold content
+      // Scroll to bottom then back to top to force lazy content to load
       try {
         await page.evaluate(() => {
-          // Target the main content scroll container (typically the element with overflow-y-auto inside the layout)
-          const scrollContainers = document.querySelectorAll('[class*="overflow-y"], [class*="overflow-auto"]');
-          scrollContainers.forEach(el => {
-            if (el.scrollHeight > el.clientHeight) {
-              el.style.overflow = 'visible';
-              el.style.maxHeight = 'none';
-              el.style.height = 'auto';
-            }
-          });
+          const main = document.querySelector('main') || document.documentElement;
+          main.scrollTop = main.scrollHeight;
+        });
+        await page.waitForTimeout(500);
+        await page.evaluate(() => {
+          const main = document.querySelector('main') || document.documentElement;
+          main.scrollTop = 0;
         });
         await page.waitForTimeout(300);
-      } catch { /* navigation race — continue with screenshot */ }
+      } catch {}
       await page.screenshot({ path: filepath, fullPage: true });
       screenshots.push({ page: p.name, file: filename });
     }

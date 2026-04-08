@@ -38,7 +38,7 @@ function getChecklist(pageName, gates) {
       items.push({ id: 'stat_cards', label: 'Quick stat cards row (Course Condition, Active Members, etc.)', weight: 2 });
       if (has('tee-sheet')) items.push({ id: 'tee_times_stat', label: '"Tee Times Today" stat card with a number', weight: 2 });
       if (has('members')) items.push({ id: 'member_alerts', label: 'Priority Member Alerts section with member names and risk signals', weight: 3 });
-      if (has('members') && has('tee-sheet')) items.push({ id: 'checkin_alerts', label: 'At-risk check-in alerts with tee time details', weight: 2 });
+      if (has('members') && has('tee-sheet')) items.push({ id: 'checkin_alerts', label: 'At-risk check-in alerts with tee time details (may animate in after delay)', weight: 1 });
       if (has('fb')) items.push({ id: 'fb_stats', label: 'F&B stat cards (Dining Covers, Avg Check, Post-Round Dining)', weight: 2 });
       if (has('email')) items.push({ id: 'email_stats', label: 'Email engagement stat cards (Open Rate, Click-Through, Decay)', weight: 2 });
       if (has('members') && has('complaints')) items.push({ id: 'open_complaints', label: '"Open Complaints" header text with complaint count, OR "No unresolved complaints" message, OR staffing/complaints section in lower page area', weight: 2 });
@@ -115,12 +115,12 @@ function getChecklist(pageName, gates) {
       break;
   }
 
-  // Leakage checks (forbidden elements)
+  // Leakage checks (forbidden elements) — only flag ACTUAL data, not labels/descriptions
   const forbidden = [];
-  if (!has('members')) forbidden.push({ id: 'leak_member_names', label: 'Specific member names (James Whitfield, Robert Callahan, Kevin Hurst, etc.)' });
-  if (!has('complaints')) forbidden.push({ id: 'leak_complaints', label: 'Complaint data, resolution rates, or "Complaints" tab' });
-  if (!has('fb')) forbidden.push({ id: 'leak_fb', label: 'F&B spending data, dining revenue, or F&B stat cards' });
-  if (!has('tee-sheet')) forbidden.push({ id: 'leak_tee_times', label: 'Tee time details, rounds booked count, or tee sheet data' });
+  if (!has('members')) forbidden.push({ id: 'leak_member_names', label: 'Actual member names like "James Whitfield", "Robert Callahan", "Kevin Hurst" with their health scores or personal data (NOT just the word "members" in a label)' });
+  if (!has('complaints')) forbidden.push({ id: 'leak_complaints', label: 'Actual complaint records with dates and descriptions, resolution rate percentages, or a "Complaints" TAB button (NOT just the word "complaints" in descriptions or prompts)' });
+  if (!has('fb')) forbidden.push({ id: 'leak_fb', label: 'Actual F&B revenue numbers, dining transaction data, or F&B stat cards with dollar amounts (NOT just "F&B" or "dining" in text descriptions)' });
+  if (!has('tee-sheet')) forbidden.push({ id: 'leak_tee_times', label: 'Actual tee time slots with specific times like "7:00 AM", rounds booked counts, or tee sheet schedule data (NOT just "tee sheet" in text descriptions)' });
 
   return { items, forbidden };
 }

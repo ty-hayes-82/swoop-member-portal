@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useNavigationContext } from '@/context/NavigationContext';
+import { getAllActions } from '@/services/agentService';
 import MemberLink from '@/components/MemberLink';
 import ActionPanel from '@/components/ui/ActionPanel';
 
@@ -46,7 +47,9 @@ function buildRecommended(action) {
 }
 
 export default function PendingActionsInline({ topPriority = null }) {
-  const { inbox, pendingAgentCount, approveAction, dismissAction } = useApp();
+  const { inbox: contextInbox, pendingAgentCount, approveAction, dismissAction } = useApp();
+  // Fallback: if context inbox empty due to timing, load directly
+  const inbox = contextInbox.length > 0 ? contextInbox : getAllActions();
   const { navigate } = useNavigationContext();
   const [expandedId, setExpandedId] = useState(null);
 
