@@ -4,6 +4,7 @@
 // Components never change — they call the same synchronous service functions as always.
 
 import { useState, useEffect, createContext, useContext } from 'react';
+import { getDataMode } from '@/services/demoGate';
 import { _init as initOps }      from '@/services/operationsService';
 import { _init as initFB }       from '@/services/fbService';
 import { _init as initMembers }  from '@/services/memberService';
@@ -44,6 +45,14 @@ export function DataProvider({ children }) {
 
     // In Phase 1 (explicitly disabled), skip fetching — go straight to static data
     if (!apiEnabled) {
+      setReady(true);
+      return;
+    }
+
+    // Demo/guided modes use static data — skip API calls entirely
+    // API calls return 401 for demo tokens and would corrupt static _d
+    const mode = getDataMode();
+    if (mode === 'demo' || mode === 'guided') {
       setReady(true);
       return;
     }
