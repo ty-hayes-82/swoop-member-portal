@@ -1,4 +1,5 @@
-// WeekForecast — hourly strip + 5-day card forecast (inspired by Google Weather)
+// WeekForecast — hourly strip + 5-day card forecast (Google Weather)
+import { useState, useEffect } from 'react';
 import { getDailyForecast, getHourlyForecast, getWeatherSource } from '@/services/weatherService';
 
 const conditionIcons = {
@@ -18,6 +19,13 @@ function formatHour(iso) {
 }
 
 export default function WeekForecast() {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const handler = () => setTick(t => t + 1);
+    window.addEventListener('swoop:weather-updated', handler);
+    return () => window.removeEventListener('swoop:weather-updated', handler);
+  }, []);
+
   const forecast = getDailyForecast(5);
   const hourly = getHourlyForecast();
   const source = getWeatherSource();
@@ -34,7 +42,7 @@ export default function WeekForecast() {
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Today's Hourly</span>
             <span className="text-[9px] text-gray-400">
-              {source === 'google' ? 'Google Weather' : source === 'open_meteo' ? 'Open-Meteo' : source}
+              {source === 'google' ? 'Google Weather' : source}
             </span>
           </div>
           <div className="grid pb-1" style={{ gridTemplateColumns: `repeat(${Math.min(hourly.length, 12)}, 1fr)` }}>
@@ -65,7 +73,7 @@ export default function WeekForecast() {
             <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">5-Day Forecast</span>
             {!hourly.length && (
               <span className="text-[9px] text-gray-400">
-                {source === 'google' ? 'Google Weather' : source === 'open_meteo' ? 'Open-Meteo' : source}
+                {source === 'google' ? 'Google Weather' : source}
               </span>
             )}
           </div>

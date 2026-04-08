@@ -17,85 +17,103 @@ function getClubId() {
 }
 
 /**
- * Fetch weather from Open-Meteo by city name (used for demo/guided mode).
- * No API key needed. Geocodes city → lat/lng, then fetches forecast.
+ * Fetch weather from Google Weather API by city/state.
+ * Geocodes city → lat/lon via Nominatim, then calls Google Weather via Vite proxy
+ * (browser can't call weather.googleapis.com directly due to CORS).
  */
 async function fetchWeatherByCity(city, state) {
   if (!city) return null;
+  const apiKey = import.meta.env?.VITE_GOOGLE_WEATHER_API_KEY;
+  if (!apiKey) return null;
   try {
-    // Geocode city → lat/lng via Open-Meteo geocoding
-    const query = encodeURIComponent(`${city}${state ? ', ' + state : ''}`);
-    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=1&language=en&format=json`);
+    // Geocode city → lat/lon via Nominatim (supports CORS)
+    const query = encodeURIComponent(`${city}${state ? ' ' + state : ''} US`);
+    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`);
     if (!geoRes.ok) return null;
-    const geo = await geoRes.json();
-    if (!geo.results?.length) return null;
-    const { latitude, longitude, name } = geo.results[0];
+    const geoResults = await geoRes.json();
+    if (!geoResults.length) return null;
+    const lat = parseFloat(geoResults[0].lat);
+    const lon = parseFloat(geoResults[0].lon);
+    const locationName = geoResults[0].display_name?.split(',')[0] || city;
 
-    // Fetch current + hourly + daily forecast
-    const wxRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
-      `&current=temperature_2m,wind_speed_10m,wind_gusts_10m,relative_humidity_2m,weather_code` +
-      `&hourly=temperature_2m,weather_code,precipitation_probability` +
-      `&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,wind_gusts_10m_max,precipitation_probability_max,relative_humidity_2m_max` +
-      `&temperature_unit=fahrenheit&wind_speed_unit=mph&forecast_days=7&timezone=auto`
-    );
-    if (!wxRes.ok) return null;
-    const wx = await wxRes.json();
+    // In production (Vercel), use backend API; locally, use Vite proxy to bypass CORS
+    const isLocal = import.meta.env?.DEV;
+    if (!isLocal) {
+      // Production: use serverless /api/weather endpoint
+      const params = new URLSearchParams({ city, state: state || '', days: '5' });
+      const apiRes = await fetch(`/api/weather?${params}`);
+      if (!apiRes.ok) return null;
+      const apiData = await apiRes.json();
+      if (apiData.source === 'none' || !apiData.daily?.length) return null;
+      return apiData;
+    }
+    const base = '/google-weather-proxy';
+    const commonParams = { key: apiKey, 'location.latitude': lat, 'location.longitude': lon, languageCode: 'en', unitsSystem: 'IMPERIAL' };
 
-    // Normalize to our format
-    const codeToCondition = (c) => {
-      if (c <= 1) return 'sunny';
-      if (c <= 3) return 'partly_cloudy';
-      if (c <= 48) return 'cloudy';
-      if (c <= 67) return 'rainy';
-      if (c <= 77) return 'snow';
-      if (c <= 82) return 'rainy';
-      if (c >= 95) return 'thunderstorm';
-      return 'cloudy';
+    const condMap = {
+      CLEAR: 'sunny', MOSTLY_CLEAR: 'sunny',
+      PARTLY_CLOUDY: 'partly_cloudy', MOSTLY_CLOUDY: 'cloudy', CLOUDY: 'cloudy',
+      FOG: 'fog', LIGHT_FOG: 'fog',
+      DRIZZLE: 'rainy', RAIN: 'rainy', LIGHT_RAIN: 'rainy', HEAVY_RAIN: 'rainy',
+      SNOW: 'snow', LIGHT_SNOW: 'snow', HEAVY_SNOW: 'snow',
+      THUNDERSTORM: 'thunderstorm', THUNDERSTORMS: 'thunderstorm',
+      WINDY: 'windy',
     };
-    const codeToText = (c) => {
-      if (c <= 1) return 'Sunny';
-      if (c <= 3) return 'Partly Cloudy';
-      if (c <= 48) return 'Cloudy';
-      if (c <= 55) return 'Light Rain';
-      if (c <= 67) return 'Rain';
-      if (c <= 77) return 'Snow';
-      if (c <= 82) return 'Heavy Rain';
-      if (c >= 95) return 'Thunderstorm';
-      return 'Cloudy';
-    };
+    const normCond = (type) => condMap[type] || type?.toLowerCase() || 'unknown';
 
-    const current = wx.current ? {
-      temp: Math.round(wx.current.temperature_2m),
-      condition: codeToCondition(wx.current.weather_code),
-      conditionsText: codeToText(wx.current.weather_code),
-      wind: Math.round(wx.current.wind_speed_10m),
-      gusts: Math.round(wx.current.wind_gusts_10m || wx.current.wind_speed_10m),
-      humidity: wx.current.relative_humidity_2m,
+    // Fetch all three in parallel
+    const [curRes, hRes, dRes] = await Promise.all([
+      fetch(`${base}/v1/currentConditions:lookup?${new URLSearchParams(commonParams)}`),
+      fetch(`${base}/v1/forecast/hours:lookup?${new URLSearchParams({ ...commonParams, hours: 24 })}`),
+      fetch(`${base}/v1/forecast/days:lookup?${new URLSearchParams({ ...commonParams, days: 5 })}`),
+    ]);
+
+    const curData = curRes.ok ? await curRes.json() : null;
+    const hData = hRes.ok ? await hRes.json() : null;
+    const dData = dRes.ok ? await dRes.json() : null;
+
+    if (!curData && !hData && !dData) return null;
+
+    const current = curData ? {
+      temp: curData.temperature?.degrees,
+      feelsLike: curData.feelsLikeTemperature?.degrees,
+      humidity: curData.relativeHumidity,
+      wind: curData.wind?.speed?.value,
+      gusts: curData.wind?.gust?.value || 0,
+      conditions: normCond(curData.weatherCondition?.type),
+      conditionsText: curData.weatherCondition?.description?.text || curData.weatherCondition?.type,
     } : null;
 
-    const hourly = (wx.hourly?.time || []).slice(0, 24).map((t, i) => ({
-      time: t,
-      temp: Math.round(wx.hourly.temperature_2m[i]),
-      conditions: codeToCondition(wx.hourly.weather_code[i]),
-      conditionsText: codeToText(wx.hourly.weather_code[i]),
-      precipProb: wx.hourly.precipitation_probability?.[i] || 0,
+    const hourly = (hData?.forecastHours || []).map(h => ({
+      time: h.interval?.startTime,
+      temp: h.temperature?.degrees,
+      wind: h.wind?.speed?.value,
+      gusts: h.wind?.gust?.value || 0,
+      precipProb: h.precipitation?.probability?.percent ?? 0,
+      conditions: normCond(h.weatherCondition?.type),
+      conditionsText: h.weatherCondition?.description?.text || h.weatherCondition?.type,
     }));
 
-    const daily = (wx.daily?.time || []).map((d, i) => ({
-      date: d,
-      high: Math.round(wx.daily.temperature_2m_max[i]),
-      low: Math.round(wx.daily.temperature_2m_min[i]),
-      conditions: codeToCondition(wx.daily.weather_code[i]),
-      conditionsText: codeToText(wx.daily.weather_code[i]),
-      wind: Math.round(wx.daily.wind_speed_10m_max[i]),
-      gusts: Math.round(wx.daily.wind_gusts_10m_max?.[i] || wx.daily.wind_speed_10m_max[i]),
-      precipProb: wx.daily.precipitation_probability_max?.[i] || 0,
-      humidity: wx.daily.relative_humidity_2m_max?.[i] || 0,
-    }));
+    const daily = (dData?.forecastDays || []).map(day => {
+      const df = day.daytimeForecast || {};
+      const dd = day.displayDate;
+      const dateStr = dd ? `${dd.year}-${String(dd.month).padStart(2,'0')}-${String(dd.day).padStart(2,'0')}` : day.interval?.startTime?.split('T')[0];
+      return {
+        date: dateStr,
+        high: day.maxTemperature?.degrees,
+        low: day.minTemperature?.degrees,
+        wind: df.wind?.speed?.value || 0,
+        gusts: df.wind?.gust?.value || 0,
+        precipProb: df.precipitation?.probability?.percent ?? 0,
+        conditions: normCond(df.weatherCondition?.type),
+        conditionsText: df.weatherCondition?.description?.text || df.weatherCondition?.type,
+        humidity: df.relativeHumidity || 0,
+      };
+    });
 
-    return { current, hourly, daily, alerts: [], source: 'open_meteo', location: name };
-  } catch {
+    return { current, hourly, daily, alerts: [], source: 'google', location: locationName };
+  } catch (e) {
+    console.warn('Google Weather fetch failed:', e);
     return null;
   }
 }
@@ -156,9 +174,9 @@ export function getHourlyForecast() {
   return [];
 }
 
-// ─── Daily Forecast (up to 10 days) ──────────────────────
+// ─── Daily Forecast (up to 5 days) ───────────────────────
 
-export function getDailyForecast(numDays = 10) {
+export function getDailyForecast(numDays = 5) {
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
   if (!shouldUseStatic('weather')) return [];
   // Static fallback from weather data starting Jan 17

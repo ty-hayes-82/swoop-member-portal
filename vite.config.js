@@ -5,6 +5,15 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react(), svgr()],
+  server: {
+    proxy: {
+      '/google-weather-proxy': {
+        target: 'https://weather.googleapis.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/google-weather-proxy/, ''),
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

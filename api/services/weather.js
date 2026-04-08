@@ -224,107 +224,6 @@ async function googleForecast(lat, lon, { hours, days } = {}) {
   return result;
 }
 
-// ─── Open-Meteo API (free, no key) ───────────────────────
-
-function normalizeWMOCode(code) {
-  // WMO weather interpretation codes → simple categories
-  if (code <= 1) return 'sunny';
-  if (code <= 3) return 'partly_cloudy';
-  if (code <= 48) return 'cloudy'; // fog codes 45-48
-  if (code <= 67) return 'rainy';  // drizzle + rain codes
-  if (code <= 77) return 'snow';
-  if (code <= 82) return 'rainy';  // rain showers
-  if (code <= 86) return 'snow';   // snow showers
-  if (code >= 95) return 'thunderstorm';
-  return 'cloudy';
-}
-
-function wmoCodeText(code) {
-  const map = {
-    0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
-    45: 'Fog', 48: 'Depositing rime fog',
-    51: 'Light drizzle', 53: 'Moderate drizzle', 55: 'Dense drizzle',
-    61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
-    71: 'Slight snow', 73: 'Moderate snow', 75: 'Heavy snow',
-    80: 'Slight rain showers', 81: 'Moderate rain showers', 82: 'Violent rain showers',
-    95: 'Thunderstorm', 96: 'Thunderstorm with slight hail', 99: 'Thunderstorm with heavy hail',
-  };
-  return map[code] || 'Unknown';
-}
-
-async function openMeteoCurrent(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,cloud_cover,uv_index&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Open-Meteo current: ${res.status}`);
-  const d = await res.json();
-  const c = d.current;
-  if (!c) throw new Error('No current conditions from Open-Meteo');
-
-  return {
-    temp: Math.round(c.temperature_2m),
-    feelsLike: Math.round(c.apparent_temperature),
-    humidity: Math.round(c.relative_humidity_2m || 0),
-    wind: Math.round(c.wind_speed_10m || 0),
-    gusts: Math.round(c.wind_gusts_10m || 0),
-    uvIndex: Math.round(c.uv_index || 0),
-    cloudCover: Math.round(c.cloud_cover || 0),
-    conditions: normalizeWMOCode(c.weather_code),
-    conditionsText: wmoCodeText(c.weather_code),
-    precipProbability: 0, // current doesn't include precip prob
-    thunderstormProbability: c.weather_code >= 95 ? 80 : 0,
-  };
-}
-
-async function openMeteoForecast(lat, lon, { hours = 24, days = 10 } = {}) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,cloud_cover,uv_index,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto&forecast_hours=${Math.min(hours, 240)}&forecast_days=${Math.min(days, 16)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Open-Meteo forecast: ${res.status}`);
-  const d = await res.json();
-
-  const hourly = [];
-  if (d.hourly?.time) {
-    for (let i = 0; i < Math.min(d.hourly.time.length, hours); i++) {
-      hourly.push({
-        time: d.hourly.time[i],
-        temp: Math.round(d.hourly.temperature_2m[i]),
-        feelsLike: Math.round(d.hourly.apparent_temperature[i]),
-        wind: Math.round(d.hourly.wind_speed_10m[i] || 0),
-        gusts: Math.round(d.hourly.wind_gusts_10m[i] || 0),
-        precipProb: d.hourly.precipitation_probability[i] || 0,
-        precipAmount: d.hourly.precipitation[i] || 0,
-        humidity: Math.round(d.hourly.relative_humidity_2m[i] || 0),
-        conditions: normalizeWMOCode(d.hourly.weather_code[i]),
-        conditionsText: wmoCodeText(d.hourly.weather_code[i]),
-        cloudCover: Math.round(d.hourly.cloud_cover[i] || 0),
-        uvIndex: Math.round(d.hourly.uv_index[i] || 0),
-        thunderstormProb: d.hourly.weather_code[i] >= 95 ? 80 : 0,
-      });
-    }
-  }
-
-  const daily = [];
-  if (d.daily?.time) {
-    for (let i = 0; i < Math.min(d.daily.time.length, days); i++) {
-      daily.push({
-        date: d.daily.time[i],
-        high: Math.round(d.daily.temperature_2m_max[i]),
-        low: Math.round(d.daily.temperature_2m_min[i]),
-        wind: Math.round(d.daily.wind_speed_10m_max[i] || 0),
-        gusts: Math.round(d.daily.wind_gusts_10m_max[i] || 0),
-        precipProb: d.daily.precipitation_probability_max[i] || 0,
-        precipAmount: d.daily.precipitation_sum[i] || 0,
-        conditions: normalizeWMOCode(d.daily.weather_code[i]),
-        conditionsText: wmoCodeText(d.daily.weather_code[i]),
-        humidity: 0, // daily doesn't include avg humidity
-        uvIndex: Math.round(d.daily.uv_index_max[i] || 0),
-        thunderstormProb: d.daily.weather_code[i] >= 95 ? 80 : 0,
-      });
-    }
-  }
-
-  return { hourly, daily, alerts: [] };
-}
-
 // ─── Visual Crossing API ──────────────────────────────────
 
 async function visualCrossingHistorical(lat, lon, date) {
@@ -386,11 +285,24 @@ async function visualCrossingCurrent(lat, lon) {
   };
 }
 
+// ─── Geocoding ───────────────────────────────────────────
+
+async function geocodeCity(city, state) {
+  const query = encodeURIComponent(`${city}${state ? ' ' + state : ''} US`);
+  const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`, {
+    headers: { 'User-Agent': 'SwoopGolf/1.0' },
+  });
+  if (!res.ok) throw new Error(`Geocoding failed: ${res.status}`);
+  const results = await res.json();
+  if (!results.length) throw new Error(`No location found for ${city}, ${state}`);
+  return { lat: parseFloat(results[0].lat), lon: parseFloat(results[0].lon) };
+}
+
 // ─── Public Interface ─────────────────────────────────────
 
 /**
  * Get current weather conditions for a club.
- * Falls back: Google → Open-Meteo → Visual Crossing → cached
+ * Falls back: Google → Visual Crossing → cached
  */
 export async function getCurrentConditions(clubId) {
   const { lat, lon } = await getClubCoordinates(clubId);
@@ -401,14 +313,6 @@ export async function getCurrentConditions(clubId) {
     return { ...data, source: 'google', stale: false };
   } catch (e) {
     console.warn('Google Weather current failed:', e.message);
-  }
-
-  // Fallback to Open-Meteo (free, no key)
-  try {
-    const data = await openMeteoCurrent(lat, lon);
-    return { ...data, source: 'open_meteo', stale: false };
-  } catch (e) {
-    console.warn('Open-Meteo current failed:', e.message);
   }
 
   // Fallback to Visual Crossing
@@ -433,28 +337,18 @@ export async function getCurrentConditions(clubId) {
  * @param {string} clubId
  * @param {{ hours?: number, days?: number }} opts
  */
-export async function getForecast(clubId, { hours = 24, days = 10 } = {}) {
+export async function getForecast(clubId, { hours = 24, days = 5 } = {}) {
   // Check cache first
   const cached = await getCachedForecast(clubId);
   if (cached) return { ...cached.data, source: 'cache', stale: false };
 
   const { lat, lon } = await getClubCoordinates(clubId);
 
-  // Try Google first
-  let googleData = null;
+  // Google Weather
   try {
-    googleData = await googleForecast(lat, lon, { hours, days });
+    const googleData = await googleForecast(lat, lon, { hours, days });
     const current = await googleCurrentConditions(lat, lon).catch(() => null);
-
-    // Google may return fewer days than requested — supplement with Open-Meteo
-    if (googleData.daily.length < days) {
-      try {
-        const supplement = await openMeteoForecast(lat, lon, { hours: 0, days });
-        const googleDates = new Set(googleData.daily.map(d => d.date));
-        const extraDays = supplement.daily.filter(d => !googleDates.has(d.date));
-        googleData.daily = [...googleData.daily, ...extraDays].slice(0, days);
-      } catch { /* supplement is best-effort */ }
-    }
+    googleData.daily = googleData.daily.slice(0, days);
 
     const result = { current, ...googleData, source: 'google', stale: false };
     await cacheForecast(clubId, result);
@@ -463,22 +357,25 @@ export async function getForecast(clubId, { hours = 24, days = 10 } = {}) {
     console.warn('Google Weather forecast failed:', e.message);
   }
 
-  // Fallback to Open-Meteo (free, no key)
-  try {
-    const data = await openMeteoForecast(lat, lon, { hours, days });
-    const current = await openMeteoCurrent(lat, lon).catch(() => null);
-    const result = { current, ...data, source: 'open_meteo', stale: false };
-    await cacheForecast(clubId, result);
-    return result;
-  } catch (e) {
-    console.warn('Open-Meteo forecast failed:', e.message);
-  }
-
   // Fallback: stale cache
   const stale = await getCachedForecastStale(clubId);
   if (stale) return { ...stale.data, source: 'cache', stale: true };
 
   throw new Error('Forecast unavailable');
+}
+
+/**
+ * Get forecast by city/state (for demo mode — no clubId needed).
+ * Geocodes city → lat/lon, then fetches from Google Weather.
+ */
+export async function getForecastByCity(city, state, { hours = 24, days = 5 } = {}) {
+  const { lat, lon } = await geocodeCity(city, state);
+
+  const googleData = await googleForecast(lat, lon, { hours, days });
+  const current = await googleCurrentConditions(lat, lon).catch(() => null);
+  googleData.daily = googleData.daily.slice(0, days);
+
+  return { current, ...googleData, source: 'google', stale: false, location: city };
 }
 
 /**

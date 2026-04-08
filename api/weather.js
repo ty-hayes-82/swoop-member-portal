@@ -10,13 +10,33 @@
 import {
   getCurrentConditions,
   getForecast,
+  getForecastByCity,
   getHistoricalDay,
   assessWeatherImpact,
 } from './services/weather.js';
 import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
-  const { clubId } = req.query;
+  const { clubId, city, state } = req.query;
+
+  // City/state-based lookup (for demo mode — no clubId needed)
+  if (req.method === 'GET' && city) {
+    try {
+      const { days, hours } = req.query;
+      const data = await getForecastByCity(city, state, {
+        hours: hours ? parseInt(hours) : 24,
+        days: days ? parseInt(days) : 5,
+      });
+      return res.json(data);
+    } catch (e) {
+      console.error('Weather by city error:', e);
+      return res.status(200).json({
+        temp: null, conditions: 'unavailable', conditionsText: 'Weather data unavailable',
+        source: 'none', stale: true, error: e.message,
+      });
+    }
+  }
+
   if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
   // ─── GET: Weather data lookups ──────────────────────────
@@ -33,7 +53,7 @@ export default async function handler(req, res) {
         case 'forecast': {
           const data = await getForecast(clubId, {
             hours: hours ? parseInt(hours) : 24,
-            days: days ? parseInt(days) : 10,
+            days: days ? parseInt(days) : 5,
           });
           return res.json(data);
         }

@@ -141,6 +141,13 @@ export default function TodayView() {
   const briefing = getDailyBriefing();
   const roundsToday = briefing?.teeSheet?.roundsToday || 0;
 
+  const [, setWeatherTick] = useState(0);
+  useEffect(() => {
+    const handler = () => setWeatherTick(t => t + 1);
+    window.addEventListener('swoop:weather-updated', handler);
+    return () => window.removeEventListener('swoop:weather-updated', handler);
+  }, []);
+
   const weatherAlerts = getWeatherAlerts();
   const [dismissedAlerts, setDismissedAlerts] = useState([]);
 
@@ -236,7 +243,7 @@ export default function TodayView() {
         {/* Section 4: Tomorrow's Forecast */}
         <TomorrowForecast />
 
-        {/* Section 5: 10-Day Forecast */}
+        {/* Section 5: 5-Day Forecast */}
         <WeekForecast />
 
         {/* Section 6: Staffing vs Demand + Open Complaints (lower priority — data still maturing) */}

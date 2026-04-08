@@ -1,4 +1,5 @@
 // TomorrowForecast — demand prediction for tomorrow
+import { useState, useEffect } from 'react';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getTomorrowForecast } from '@/services/weatherService';
 import { shouldUseStatic } from '@/services/demoGate';
@@ -14,6 +15,13 @@ function getOutlets() {
 }
 
 export default function TomorrowForecast() {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const handler = () => setTick(t => t + 1);
+    window.addEventListener('swoop:weather-updated', handler);
+    return () => window.removeEventListener('swoop:weather-updated', handler);
+  }, []);
+
   const briefing = getDailyBriefing();
   const tomorrowWeather = getTomorrowForecast();
   const tomorrow = briefing?.todayRisks?.tomorrow || tomorrowWeather;

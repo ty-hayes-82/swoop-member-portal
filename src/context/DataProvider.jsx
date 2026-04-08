@@ -51,8 +51,12 @@ export function DataProvider({ children }) {
 
     // Demo/guided modes use static data — skip API calls entirely
     // API calls return 401 for demo tokens and would corrupt static _d
+    // Exception: weather can load via Google Weather API if city is stored
     const mode = getDataMode();
     if (mode === 'demo' || mode === 'guided') {
+      if (localStorage.getItem('swoop_club_city')) {
+        initWeather().catch(() => {});
+      }
       setReady(true);
       return;
     }
