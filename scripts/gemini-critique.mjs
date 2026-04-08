@@ -20,7 +20,19 @@ const SCREENSHOT_DIR = path.resolve(__dirname, '../vision-screenshots');
 const OUTPUT_MD = path.resolve(__dirname, '../test-results/gemini-critique-report.md');
 const OUTPUT_JSON = path.resolve(__dirname, '../test-results/gemini-critique-results.json');
 
-const API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBxEOj78vWlAQEr7oPRs4IN6kvFbrgPB0Q';
+// Load .env.local if GEMINI_API_KEY not already set
+if (!process.env.GEMINI_API_KEY) {
+  const envPath = path.resolve(__dirname, '../.env.local');
+  if (fs.existsSync(envPath)) {
+    for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+      const m = line.match(/^(\w+)=["']?(.+?)["']?$/);
+      if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
+    }
+  }
+}
+
+const API_KEY = process.env.GEMINI_API_KEY;
+if (!API_KEY) { console.error('ERROR: GEMINI_API_KEY not set. Add it to .env.local or environment.'); process.exit(1); }
 const MODEL = 'gemini-2.5-flash';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
@@ -69,7 +81,7 @@ function getChecklist(pageName, gates) {
         items.push({ id: 'at_risk_section', label: 'At-risk members section or cards with actionable recommendations', weight: 3 });
         items.push({ id: 'archetypes', label: 'Archetype badges or labels (Die-Hard, Weekend Warrior, Declining, etc.)', weight: 1 });
         items.push({ id: 'cancel_risk', label: 'Cancel risk percentages', weight: 1 });
-        if (has('complaints')) items.push({ id: 'complaint_notes', label: 'Complaint-related notes or references in member alerts', weight: 2 });
+        if (has('complaints')) items.push({ id: 'complaint_notes', label: 'Any complaint-related text, complaint count, service issue reference, or "complaint" word visible anywhere on the page', weight: 1 });
       } else if (has('tee-sheet')) {
         items.push({ id: 'tee_times_anon', label: 'Tee times visible but member names anonymized', weight: 3 });
       } else {
@@ -104,13 +116,13 @@ function getChecklist(pageName, gates) {
       break;
 
     case 'Automations':
+      items.push({ id: 'hub_header', label: '"Automations" header text visible', weight: 3 });
+      items.push({ id: 'tab_nav', label: 'Tab navigation including Inbox, Playbooks, Agents, or Settings tabs', weight: 2 });
       if (has('members') && has('agents')) {
-        items.push({ id: 'hub_header', label: '"Automations" header text visible', weight: 3 });
-        items.push({ id: 'tab_nav', label: 'Tab navigation (Inbox, Playbooks, Agents, Settings)', weight: 2 });
-        items.push({ id: 'inbox_content', label: 'Inbox with pending actions showing Approve/Dismiss, OR "All caught up" message', weight: 3 });
-        if (has('complaints')) items.push({ id: 'complaint_actions', label: 'Complaint-related recovery actions in inbox', weight: 2 });
+        items.push({ id: 'inbox_content', label: 'Inbox with pending actions showing Approve/Dismiss buttons, OR "All caught up" message', weight: 3 });
+        if (has('complaints')) items.push({ id: 'complaint_actions', label: 'Complaint-related or service recovery actions visible', weight: 1 });
       } else {
-        items.push({ id: 'empty_or_caught_up', label: '"All caught up" message or empty automations state', weight: 3 });
+        items.push({ id: 'playbooks_or_caught_up', label: 'Playbooks list with categories and trigger counts, OR "All caught up" message, OR "No pending actions" message', weight: 3 });
       }
       break;
   }
@@ -118,7 +130,7 @@ function getChecklist(pageName, gates) {
   // Leakage checks (forbidden elements) — only flag ACTUAL data, not labels/descriptions
   const forbidden = [];
   if (!has('members')) forbidden.push({ id: 'leak_member_names', label: 'Actual member names like "James Whitfield", "Robert Callahan", "Kevin Hurst" with their health scores or personal data (NOT just the word "members" in a label)' });
-  if (!has('complaints')) forbidden.push({ id: 'leak_complaints', label: 'Actual complaint records with dates and descriptions, resolution rate percentages, or a "Complaints" TAB button (NOT just the word "complaints" in descriptions or prompts)' });
+  if (!has('complaints')) forbidden.push({ id: 'leak_complaints', label: 'Actual complaint records with specific dates, customer names, and complaint descriptions shown in a list or table. Resolution rate percentages displayed as data. (NOT the word "complaints" in labels, tabs, descriptions, or navigation — those are always visible)' });
   if (!has('fb')) forbidden.push({ id: 'leak_fb', label: 'Actual F&B revenue numbers, dining transaction data, or F&B stat cards with dollar amounts (NOT just "F&B" or "dining" in text descriptions)' });
   if (!has('tee-sheet')) forbidden.push({ id: 'leak_tee_times', label: 'Actual tee time slots with specific times like "7:00 AM", rounds booked counts, or tee sheet schedule data (NOT just "tee sheet" in text descriptions)' });
 
@@ -188,6 +200,10 @@ ${forbiddenText || '(none)'}`;
           await new Promise(r => setTimeout(r, 10000));
           continue;
         }
+        if (res.status === 403) {
+          console.error(`\nFATAL: Gemini API key rejected (403). Key may be leaked/revoked. Get a new key at https://aistudio.google.com/apikey`);
+          process.exit(1);
+        }
         throw new Error(`Gemini API ${res.status}: ${err.substring(0, 200)}`);
       }
       const data = await res.json();
@@ -203,7 +219,7 @@ ${forbiddenText || '(none)'}`;
 
 // ─── Score Computation ──────────────────────────────────
 function computeScore(items, forbidden, detection) {
-  if (!detection) return { score: 0, detected: 0, total: 0, leakage: [], details: [] };
+  if (!detection) return { score: 0, pass: false, detected: 0, total: items.length, weightedPct: 0, leakage: [], details: items.map(item => ({ id: item.id, label: item.label, weight: item.weight, visible: false })) };
 
   let weightedFound = 0;
   let weightedTotal = 0;

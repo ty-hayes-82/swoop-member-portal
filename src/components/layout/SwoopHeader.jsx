@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useNavigationContext } from "@/context/NavigationContext";
 import { NAV_ITEMS } from "@/config/navigation";
+import { stashRealAuth, restoreRealAuth, clearRealAuthStash, hasStashedAuth } from "@/services/demoGate";
 
 const SwoopHeader = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -81,6 +82,7 @@ const SwoopHeader = () => {
 
   const handleSignOut = () => {
     setUserMenuOpen(false);
+    clearRealAuthStash();
     localStorage.removeItem("swoop_auth_token");
     localStorage.removeItem("swoop_auth_user");
     localStorage.removeItem("swoop_club_id");
@@ -333,9 +335,28 @@ const SwoopHeader = () => {
 
                 {/* Switch to demo modes */}
                 <div className="border-t border-gray-100 dark:border-gray-800 py-1">
+                  {hasStashedAuth() && (
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        restoreRealAuth();
+                        localStorage.removeItem('swoop_was_guided');
+                        sessionStorage.removeItem('swoop_demo_guided');
+                        window.location.hash = '#/today';
+                        window.location.reload();
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10 cursor-pointer flex items-center gap-2.5 font-medium"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" />
+                      </svg>
+                      Return to My Account
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
+                      stashRealAuth();
                       const demoClubId = `demo_${Date.now()}`;
                       const demoUser = { userId: 'demo', clubId: demoClubId, name: 'Demo User', email: 'demo@swoopgolf.com', phone: '', role: 'gm', title: 'General Manager', isDemoSession: true };
                       localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
@@ -357,6 +378,7 @@ const SwoopHeader = () => {
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
+                      stashRealAuth();
                       const demoClubId = `demo_${Date.now()}`;
                       const demoUser = { userId: 'demo', clubId: demoClubId, name: 'Demo User', email: 'demo@swoopgolf.com', phone: '', role: 'gm', title: 'General Manager', isDemoSession: true };
                       localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
