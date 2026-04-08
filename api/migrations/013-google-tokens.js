@@ -34,5 +34,8 @@ export default async function handler(req, res) {
     )
   `);
 
+  // Add auth_provider column to users table for Google sign-in
+  await run('users_auth_provider', sql.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider TEXT DEFAULT \'email\''));
+
   res.status(200).json({ migration: '013-google-tokens', results });
 }

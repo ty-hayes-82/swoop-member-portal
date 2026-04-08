@@ -213,22 +213,29 @@ export default function App() {
     );
   }
 
-  // Auto-start guided demo for first-time visitors (no login required)
+  // Google OAuth callback — store token and redirect to app
+  useEffect(() => {
+    if (!currentHash.startsWith('#/google-auth')) return;
+    try {
+      const params = new URLSearchParams(currentHash.split('?')[1] || '');
+      const token = params.get('token');
+      const user = JSON.parse(decodeURIComponent(params.get('user') || '{}'));
+      if (token && user.userId) {
+        localStorage.setItem('swoop_auth_token', token);
+        localStorage.setItem('swoop_auth_user', JSON.stringify(user));
+        localStorage.setItem('swoop_club_id', user.clubId);
+        if (user.clubName) localStorage.setItem('swoop_club_name', user.clubName);
+        setAuthed(true);
+        window.location.hash = '#/today';
+      }
+    } catch (e) {
+      console.error('Google auth callback error:', e);
+      window.location.hash = '#/';
+    }
+  }, [currentHash]);
+
   if (!authed) {
-    const demoClubId = `demo_${Date.now()}`;
-    const demoUser = {
-      userId: 'demo', clubId: demoClubId, name: 'Demo User',
-      email: 'demo@swoopgolf.com', phone: '', role: 'gm',
-      title: 'General Manager', isDemoSession: true,
-    };
-    localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
-    localStorage.setItem('swoop_auth_token', 'demo');
-    localStorage.setItem('swoop_club_id', demoClubId);
-    localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
-    sessionStorage.setItem('swoop_demo_guided', 'true');
-    localStorage.setItem('swoop_was_guided', 'true');
-    setAuthed(true);
-    return null;
+    return <LoginPage onLogin={() => setAuthed(true)} />;
   }
 
   return (
