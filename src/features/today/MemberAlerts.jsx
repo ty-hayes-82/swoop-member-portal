@@ -114,20 +114,23 @@ export default function MemberAlerts() {
 
   if (members.length === 0) {
     return (
-      <div>
-        <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-3">
-          Priority Member Alerts
-        </div>
-        <div className="py-6 px-4 text-center text-sm text-gray-400 border border-dashed border-gray-200 rounded-xl">
-          No at-risk members detected yet. Import member data and engagement sources to see priority alerts.
+      <div className="alerts-section-enhanced fade-in-up fade-delay-1">
+        <div className="alerts-header">Priority Member Alerts</div>
+        <div className="alerts-empty" style={{ flexWrap: 'wrap' }}>
+          <div className="alerts-empty-icon">✅</div>
+          <div style={{ flex: '1 1 0%', minWidth: 200 }}>
+            <div className="alerts-empty-title">All Members in Good Standing</div>
+            <div className="alerts-empty-desc">No at-risk members detected. Import member data and engagement sources to activate priority alerts.</div>
+          </div>
+          <button className="alerts-cta" onClick={() => navigate('settings')}>📥 Import Member Data</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="text-[11px] font-bold text-error-500 uppercase tracking-wide mb-3">
+    <div className="alerts-section-enhanced fade-in-up fade-delay-1">
+      <div className="alerts-header" style={{ color: '#ef4444' }}>
         Priority Member Alerts
       </div>
 

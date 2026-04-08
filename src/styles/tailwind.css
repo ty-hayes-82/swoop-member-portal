@@ -276,3 +276,152 @@ layer(base);
 .tableCheckbox:checked ~ span {
   @apply border-brand-500 bg-brand-500;
 }
+
+/* ========================================
+   TODAY VIEW — Enhanced Dashboard Styles
+   ======================================== */
+
+/* Fade-in-up animation */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+.fade-delay-1 { animation-delay: 0.1s; }
+.fade-delay-2 { animation-delay: 0.2s; }
+.fade-delay-3 { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse dot for Live Dashboard badge */
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e8a732;
+  display: inline-block;
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* Alerts section */
+.alerts-section-enhanced {
+  /* wrapper */
+}
+.alerts-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+  margin-bottom: 8px;
+  padding-left: 12px;
+  border-left: 3px solid #e8a732;
+}
+.alerts-empty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.dark .alerts-empty {
+  background: rgba(255,255,255,0.03);
+  border-color: #374151;
+}
+.alerts-empty-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.alerts-empty-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1px;
+}
+.dark .alerts-empty-title {
+  color: rgba(255,255,255,0.9);
+}
+.alerts-empty-desc {
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+.alerts-cta {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #1a1a2e;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.alerts-cta:hover {
+  background: #16213e;
+}
+
+/* Weather hourly enhanced */
+.weather-hourly-enhanced {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.weather-hourly-enhanced .flex.flex-col.items-center:hover {
+  background: rgba(0,0,0,0.02);
+  border-radius: 8px;
+}
+.hourly-peak {
+  background: rgba(232,167,50,0.06);
+  border-radius: 10px;
+}
+
+/* Forecast enhanced */
+.forecast-enhanced {
+  background: rgba(243,244,246,0.6);
+  border-radius: 12px;
+  padding: 10px;
+}
+.dark .forecast-enhanced {
+  background: rgba(255,255,255,0.02);
+}
+.forecast-card {
+  transition: all 0.2s ease;
+}
+.forecast-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-color: #ff8b00 !important;
+  transform: translateY(-1px);
+}
+.forecast-card-today {
+  background: rgba(232,167,50,0.06) !important;
+  border-top: 2px solid #e8a732 !important;
+}
+
+/* Quick stats card hover */
+.today-stat-card {
+  transition: all 0.2s ease;
+}
+.today-stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-up { animation: none; opacity: 1; transform: none; }
+  .pulse-dot { animation: none; }
+  .forecast-card:hover, .today-stat-card:hover { transform: none; }
+}

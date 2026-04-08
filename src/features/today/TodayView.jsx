@@ -18,6 +18,8 @@ import { isAuthenticatedClub } from '@/config/constants';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { getTodayTeeSheet } from '@/services/operationsService';
+import { getMemberSummary } from '@/services/memberService';
+import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
 
 // GM Greeting Alert — simulates real-time member check-in notifications
 function buildCheckinAlerts() {
@@ -176,30 +178,106 @@ export default function TodayView() {
     );
   }
 
+  // Derive quick stats
+  const memberSummary = getMemberSummary();
+  const totalMembers = memberSummary.totalMembers || memberSummary.total || 0;
+  const hourlyData = getHourlyForecast();
+  const dailyData = getDailyForecast(1);
+
+  // Course condition derived from weather
+  const courseCondition = (() => {
+    const today = dailyData?.[0];
+    if (!today && !hourlyData?.length) return null;
+    const wind = today?.wind || 0;
+    const precip = typeof today?.precipProb === 'object' ? today?.precipProb?.percent : (today?.precipProb || 0);
+    if (precip > 50 || wind > 25) return { label: 'Poor', color: '#ef4444', icon: '🌧️' };
+    if (precip > 30 || wind > 15) return { label: 'Fair', color: '#f59e0b', icon: '⛅' };
+    return { label: 'Good', color: '#10b981', icon: '🌤️' };
+  })();
+
   return (
     <PageTransition>
-      <div className="flex flex-col gap-6 w-full">
+      <div className="flex flex-col w-full" style={{ gap: 12 }}>
 
-        {/* Section 1: Morning Briefing Header */}
-        <div className="rounded-xl border border-brand-100 bg-brand-25 px-6 py-5 dark:border-gray-800 dark:bg-white/[0.03]">
-          <div className="text-lg font-bold text-gray-800 dark:text-white/90 mb-1 font-serif">
-            {getGreeting()}
+        {/* Section 1: Compact Greeting Bar */}
+        <div
+          className="rounded-xl dark:border-gray-800 dark:bg-white/[0.03] today-greeting-enhanced fade-in-up"
+          style={{
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+            border: 'none',
+            padding: '14px 24px',
+            borderRadius: 12,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            overflow: 'hidden',
+            position: 'relative',
+            boxShadow: '0 2px 12px rgba(15,52,96,0.2)',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <div className="greeting-text" style={{ fontSize: 16, fontWeight: 600, color: 'white', letterSpacing: -0.2, margin: 0, whiteSpace: 'nowrap' }}>
+              {getGreeting()}
+            </div>
+            <div className="greeting-date" style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: '2px 0 0', fontWeight: 500 }}>
+              {formatDate()}
+            </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4 text-xs text-gray-500 flex-wrap">
-            <span>{formatDate()}</span>
-            {roundsToday > 0 && (
-              <>
-                <span className="text-gray-200 dark:text-gray-700">|</span>
-                <span>{roundsToday} rounds booked today</span>
-              </>
-            )}
-            {briefing?.todayRisks?.forecast && (
-              <>
-                <span className="text-gray-200 dark:text-gray-700">|</span>
-                <span className="text-warning-500">{briefing.todayRisks.forecast}</span>
-              </>
-            )}
+          <div
+            className="greeting-badge"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              background: 'rgba(232,167,50,0.12)',
+              border: '1px solid rgba(232,167,50,0.2)',
+              color: '#e8a732',
+              fontSize: 10,
+              fontWeight: 600,
+              padding: '3px 10px',
+              borderRadius: 16,
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              flexShrink: 0,
+            }}
+          >
+            <span className="pulse-dot" /> Live Dashboard
           </div>
+        </div>
+
+        {/* Section 2: Quick Stats Row */}
+        <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          {[
+            { icon: courseCondition?.icon || '🌤️', bg: '#ecfdf5', label: 'Course Condition', value: courseCondition?.label || '—', color: courseCondition?.color || '#9ca3af' },
+            { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: roundsToday > 0 ? String(roundsToday) : '—', color: '#6366f1' },
+            { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732' },
+            { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: String(priorities.length), color: '#8b5cf6' },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="today-stat-card"
+              style={{
+                background: 'white',
+                border: '1px solid #e5e7eb',
+                borderRadius: 14,
+                padding: '16px 18px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                cursor: 'default',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              }}
+            >
+              <div style={{ width: 42, height: 42, background: stat.bg, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                {stat.icon}
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 2 }}>{stat.label}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, letterSpacing: -0.3 }}>{stat.value}</div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Weather Alerts Banner */}
@@ -234,19 +312,21 @@ export default function TodayView() {
         {/* GM Greeting Alerts — real-time check-in notifications */}
         <GmGreetingAlert />
 
-        {/* Section 2: Action Queue — hero alert merged with pending actions */}
-        <PendingActionsInline topPriority={topPriority} />
-
-        {/* Section 3: Priority Member Alerts (top 3) */}
+        {/* Section 3: Priority Member Alerts */}
         <MemberAlerts />
 
-        {/* Section 4: Tomorrow's Forecast */}
+        {/* Section 4: Weather — Hourly + 5-Day Forecast */}
+        <div className="flex flex-col gap-3 fade-in-up fade-delay-2">
+          <WeekForecast />
+        </div>
+
+        {/* Section 5: Action Queue */}
+        <PendingActionsInline topPriority={topPriority} />
+
+        {/* Section 6: Tomorrow's Forecast */}
         <TomorrowForecast />
 
-        {/* Section 5: 5-Day Forecast */}
-        <WeekForecast />
-
-        {/* Section 6: Staffing vs Demand + Open Complaints (lower priority — data still maturing) */}
+        {/* Section 7: Staffing vs Demand + Open Complaints */}
         <TodaysRisks />
 
       </div>

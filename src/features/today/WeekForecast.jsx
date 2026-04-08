@@ -38,41 +38,50 @@ export default function WeekForecast() {
   return (
     <div className="flex flex-col gap-3">
       {/* Hourly strip */}
-      {hourly.length > 0 && (
-        <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Today's Hourly</span>
-              {location && <span className="text-[10px] text-gray-400">{location}</span>}
+      {hourly.length > 0 && (() => {
+        const slice = hourly.slice(0, 12);
+        const peakTemp = Math.max(...slice.map(h => h.temp));
+        return (
+          <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 weather-hourly-enhanced">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Today's Hourly</span>
+                {location && <span className="text-[10px] text-gray-400">{location}</span>}
+              </div>
+              <span className="text-[9px] text-gray-400">
+                {source === 'google' ? 'Google Weather' : source}
+              </span>
             </div>
-            <span className="text-[9px] text-gray-400">
-              {source === 'google' ? 'Google Weather' : source}
-            </span>
+            <div className="grid pb-1" style={{ gridTemplateColumns: `repeat(${Math.min(slice.length, 12)}, 1fr)` }}>
+              {slice.map((h, i) => {
+                const icon = conditionIcons[h.conditions] || conditionIcons.unknown;
+                const prob = getPrecip(h);
+                const isPeak = Math.round(h.temp) === Math.round(peakTemp);
+                return (
+                  <div
+                    key={i}
+                    className={`flex flex-col items-center py-1${isPeak ? ' hourly-peak' : ''}`}
+                    style={isPeak ? { background: 'rgba(232,167,50,0.06)', borderRadius: 10 } : undefined}
+                  >
+                    <span className="text-[10px] text-gray-500 font-medium">{formatHour(h.time)}</span>
+                    <span className="text-sm my-0.5 leading-none">{icon}</span>
+                    <span className="text-xs font-bold text-gray-800 dark:text-white/90">{Math.round(h.temp)}°</span>
+                    {prob > 0 && (
+                      <span className={`text-[9px] font-semibold mt-0.5 ${prob > 30 ? 'text-blue-500' : 'text-gray-400'}`}>
+                        {prob}%
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="grid pb-1" style={{ gridTemplateColumns: `repeat(${Math.min(hourly.length, 12)}, 1fr)` }}>
-            {hourly.slice(0, 12).map((h, i) => {
-              const icon = conditionIcons[h.conditions] || conditionIcons.unknown;
-              const prob = getPrecip(h);
-              return (
-                <div key={i} className="flex flex-col items-center py-1">
-                  <span className="text-[10px] text-gray-500 font-medium">{formatHour(h.time)}</span>
-                  <span className="text-sm my-0.5 leading-none">{icon}</span>
-                  <span className="text-xs font-bold text-gray-800 dark:text-white/90">{Math.round(h.temp)}°</span>
-                  {prob > 0 && (
-                    <span className={`text-[9px] font-semibold mt-0.5 ${prob > 30 ? 'text-blue-500' : 'text-gray-400'}`}>
-                      {prob}%
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 5-Day cards */}
       {forecast.length > 0 && (
-        <div className="bg-gray-100/60 dark:bg-white/[0.02] rounded-xl p-2.5">
+        <div className="forecast-enhanced rounded-xl p-2.5">
           <div className="flex items-center justify-between mb-2 px-1">
             <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">5-Day Forecast</span>
             {!hourly.length && (
@@ -95,7 +104,7 @@ export default function WeekForecast() {
               return (
                 <div
                   key={day.date}
-                  className="bg-white dark:bg-white/[0.04] rounded-lg border border-gray-200/80 dark:border-gray-700/50 px-2 py-2.5 flex flex-col"
+                  className={`bg-white dark:bg-white/[0.04] rounded-lg border border-gray-200/80 dark:border-gray-700/50 px-2 py-2.5 flex flex-col forecast-card${i === 0 ? ' forecast-card-today' : ''}`}
                 >
                   {/* Date header */}
                   <div className="text-center mb-1.5">
