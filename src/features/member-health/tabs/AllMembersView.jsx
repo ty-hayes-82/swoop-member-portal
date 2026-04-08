@@ -111,15 +111,14 @@ function FilterChip({ label, onRemove, color }) {
   );
 }
 
-function MemberRow({ member, isExpanded, onToggle, index }) {
+function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) {
   const [hovered, setHovered] = useState(false);
-  const healthLevel = getHealthLevel(member.score);
-  const healthColor = member.score >= 70
-    ? '#22c55e'
-    : member.score >= 50
-    ? '#f59e0b'
-    : member.score >= 30
-    ? '#ea580c'
+  const hasScore = member.score != null && !rosterOnly;
+  const healthLevel = hasScore ? getHealthLevel(member.score) : '—';
+  const healthColor = !hasScore ? '#9CA3AF'
+    : member.score >= 70 ? '#22c55e'
+    : member.score >= 50 ? '#f59e0b'
+    : member.score >= 30 ? '#ea580c'
     : '#ef4444';
 
   return (
@@ -139,27 +138,31 @@ function MemberRow({ member, isExpanded, onToggle, index }) {
             {member.name}
           </MemberLink>
         </td>
-        <td className="px-3 sm:px-4 py-2">
-          <span className="font-mono font-bold" style={{ color: healthColor }}>
-            {member.score}
-          </span>
-        </td>
-        <td className="px-3 sm:px-4 py-2">
-          <span className="text-xs font-semibold" style={{ color: healthColor }}>
-            {healthLevel}
-          </span>
-        </td>
-        <td className="px-4 py-2 hidden md:table-cell">
-          <ArchetypeBadge archetype={member.archetype} size="xs" />
-        </td>
+        {!rosterOnly && (
+          <>
+            <td className="px-3 sm:px-4 py-2">
+              <span className="font-mono font-bold" style={{ color: healthColor }}>
+                {hasScore ? member.score : '—'}
+              </span>
+            </td>
+            <td className="px-3 sm:px-4 py-2">
+              <span className="text-xs font-semibold" style={{ color: healthColor }}>
+                {healthLevel}
+              </span>
+            </td>
+            <td className="px-4 py-2 hidden md:table-cell">
+              {member.archetype ? <ArchetypeBadge archetype={member.archetype} size="xs" /> : <span className="text-xs text-gray-400">—</span>}
+            </td>
+          </>
+        )}
         <td className="px-4 py-2 hidden sm:table-cell">
           <span className="text-xs text-gray-500">
-            {member.tier}
+            {member.tier || '—'}
           </span>
         </td>
         <td className="px-4 py-2 hidden lg:table-cell">
           <span className="font-mono text-xs text-gray-500">
-            ${(member.memberValueAnnual || 0).toLocaleString()}
+            {(member.duesAnnual || member.memberValueAnnual) ? `$${(member.duesAnnual || member.memberValueAnnual || 0).toLocaleString()}` : '—'}
           </span>
         </td>
         <td className="px-3 sm:px-4 py-2 text-right">
@@ -255,7 +258,7 @@ const ACTIVITY_FILTERS = [
   { key: 'dormant', label: 'Dormant (60d+)' },
 ];
 
-export default function AllMembersView({ initialArchetype = null }) {
+export default function AllMembersView({ initialArchetype = null, rosterOnly = false }) {
   const allMembers = useMemo(() => {
     const roster = getMemberRoster();
     if (roster.length > 0) return roster;
@@ -395,20 +398,27 @@ export default function AllMembersView({ initialArchetype = null }) {
     }
   };
 
-  const columns = [
-    { key: 'name', label: 'Member', hideClass: '' },
-    { key: 'score', label: 'Score', hideClass: '' },
-    { key: 'level', label: 'Level', hideClass: '' },
-    { key: 'archetype', label: 'Archetype', hideClass: 'hidden md:table-cell' },
-    { key: 'tier', label: 'Tier', hideClass: 'hidden sm:table-cell' },
-    { key: 'value', label: 'Annual Value', hideClass: 'hidden lg:table-cell' },
-    { key: 'expand', label: '', sortable: false, hideClass: '' },
-  ];
+  const columns = rosterOnly
+    ? [
+        { key: 'name', label: 'Member', hideClass: '' },
+        { key: 'tier', label: 'Tier', hideClass: 'hidden sm:table-cell' },
+        { key: 'value', label: 'Annual Dues', hideClass: 'hidden lg:table-cell' },
+        { key: 'expand', label: '', sortable: false, hideClass: '' },
+      ]
+    : [
+        { key: 'name', label: 'Member', hideClass: '' },
+        { key: 'score', label: 'Score', hideClass: '' },
+        { key: 'level', label: 'Level', hideClass: '' },
+        { key: 'archetype', label: 'Archetype', hideClass: 'hidden md:table-cell' },
+        { key: 'tier', label: 'Tier', hideClass: 'hidden sm:table-cell' },
+        { key: 'value', label: 'Annual Value', hideClass: 'hidden lg:table-cell' },
+        { key: 'expand', label: '', sortable: false, hideClass: '' },
+      ];
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Health Distribution Cards - Clickable */}
-      <div>
+      {/* Health Distribution Cards - Clickable (hidden in roster-only mode) */}
+      {!rosterOnly && <div>
         <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
           Filter by Health Level (click to filter)
         </div>
@@ -441,49 +451,53 @@ export default function AllMembersView({ initialArchetype = null }) {
             );
           })}
         </div>
-      </div>
+      </div>}
 
-      {/* Archetype Filter - Clickable */}
-      <div>
-        <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
-          Filter by Archetype (click to filter)
+      {/* Archetype Filter - Clickable (hidden in roster-only) */}
+      {!rosterOnly && (
+        <div>
+          <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
+            Filter by Archetype (click to filter)
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {getArchetypeProfiles().map((arch) => {
+              const isActive = archetypeFilter === arch.archetype;
+              return (
+                <div
+                  key={arch.archetype}
+                  onClick={() => setArchetypeFilter(isActive ? null : arch.archetype)}
+                  className={`cursor-pointer transition-all duration-200 ${isActive ? 'opacity-100 scale-105' : 'opacity-70 hover:opacity-100 hover:scale-105'}`}
+                >
+                  <ArchetypeBadge archetype={arch.archetype} size="md" />
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {getArchetypeProfiles().map((arch) => {
-            const isActive = archetypeFilter === arch.archetype;
-            return (
-              <div
-                key={arch.archetype}
-                onClick={() => setArchetypeFilter(isActive ? null : arch.archetype)}
-                className={`cursor-pointer transition-all duration-200 ${isActive ? 'opacity-100 scale-105' : 'opacity-70 hover:opacity-100 hover:scale-105'}`}
-              >
-                <ArchetypeBadge archetype={arch.archetype} size="md" />
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      )}
 
-      {/* Activity Filter */}
-      <div>
-        <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
-          Filter by Last Activity
+      {/* Activity Filter (hidden in roster-only) */}
+      {!rosterOnly && (
+        <div>
+          <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
+            Filter by Last Activity
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {ACTIVITY_FILTERS.map((f) => {
+              const isActive = activityFilter === f.key;
+              return (
+                <button
+                  key={f.key ?? 'all'}
+                  onClick={() => { setActivityFilter(isActive ? null : f.key); setPage(0); }}
+                  className={`px-3.5 py-1.5 text-[13px] font-semibold rounded-xl cursor-pointer transition-all duration-150 ${isActive ? 'border border-brand-500 bg-brand-500/10 text-brand-500' : 'border border-gray-200 bg-gray-50 text-gray-500'}`}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {ACTIVITY_FILTERS.map((f) => {
-            const isActive = activityFilter === f.key;
-            return (
-              <button
-                key={f.key ?? 'all'}
-                onClick={() => { setActivityFilter(isActive ? null : f.key); setPage(0); }}
-                className={`px-3.5 py-1.5 text-[13px] font-semibold rounded-xl cursor-pointer transition-all duration-150 ${isActive ? 'border border-brand-500 bg-brand-500/10 text-brand-500' : 'border border-gray-200 bg-gray-50 text-gray-500'}`}
-              >
-                {f.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      )}
 
       {/* Active Filters */}
       {(healthFilter || archetypeFilter || activityFilter) && (
@@ -579,10 +593,11 @@ export default function AllMembersView({ initialArchetype = null }) {
                 sortedMembers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((member, index) => (
                   <MemberRow
                     key={member.memberId}
-                    member={member}
+                    member={rosterOnly ? { ...member, score: null, archetype: null } : member}
                     index={index}
                     isExpanded={expandedMember === member.memberId}
                     onToggle={() => setExpandedMember(expandedMember === member.memberId ? null : member.memberId)}
+                    rosterOnly={rosterOnly}
                   />
                 ))
               )}

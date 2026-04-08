@@ -170,8 +170,8 @@ export default function MembersView() {
           })}
         </div>
 
-        {/* Archetype filter chips — only in All Members mode (HealthOverview has its own filters) */}
-        {activeMode === 'search' && (
+        {/* Archetype filter chips — only with engagement data */}
+        {activeMode === 'search' && hasEngagementData && (
           <div className="flex gap-1.5 flex-wrap overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             <button
               onClick={() => setArchetype(null)}
@@ -202,7 +202,7 @@ export default function MembersView() {
             </div>
           )}
           {activeMode === 'search' && (
-            <AllMembersView initialArchetype={archetype} />
+            <AllMembersView initialArchetype={archetype} rosterOnly={!hasEngagementData} />
           )}
           {activeMode === 'email-decay' && <EmailTab />}
           {activeMode === 'archetypes' && <ArchetypeTab />}
