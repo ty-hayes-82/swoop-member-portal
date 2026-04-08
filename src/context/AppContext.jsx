@@ -347,7 +347,9 @@ export function AppProvider({ children }) {
     }
     const demoEmail = localStorage.getItem('swoop_demo_email') || '';
     const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
-    const emailSendMode = localStorage.getItem('swoop_email_send_mode') || 'local';
+    const authToken = localStorage.getItem('swoop_auth_token') || '';
+    const isGoogleUser = authToken && authToken !== 'demo';
+    const emailSendMode = localStorage.getItem('swoop_email_send_mode') || (isGoogleUser ? 'gmail_api' : 'local');
     const smsSendMode = localStorage.getItem('swoop_sms_send_mode') || 'local';
 
     // Use actionItem found above for local send
@@ -357,7 +359,11 @@ export function AppProvider({ children }) {
     // ── Gmail API draft: AI-generated content saved directly as Gmail draft ──
     if (execType === 'email' && emailSendMode === 'gmail_api') {
       const toAddr = demoEmail || meta.memberEmail || '';
+      let aiSubject = '';
+      let aiBody = '';
+      let aiTo = toAddr;
       try {
+        showToast('Generating AI draft...', 'info');
         const draft = await apiFetch('/api/generate-draft', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -368,24 +374,21 @@ export function AppProvider({ children }) {
             templateHint: meta.templateId,
           }),
         });
-        const subject = draft?.subject || 'A note from your club';
-        const body = draft?.body || description;
-        const to = toAddr || draft?.memberEmail || '';
-
-        const result = await createGmailDraft({ to, subject, body });
-        if (result?.draftId) {
-          showToast(`Gmail draft created for ${memberName}`, 'info');
-        } else {
-          // Gmail API unavailable (not connected) — fall back to Gmail compose with AI draft
-          showToast('Opening Gmail with AI draft...', 'info');
-          window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
-        }
+        aiSubject = draft?.subject || `A personal note from your club`;
+        aiBody = draft?.body || `Dear ${memberName},\n\n${description || 'I wanted to reach out personally to see how things are going at the club.'}\n\nWarm regards`;
+        aiTo = toAddr || draft?.memberEmail || '';
       } catch (e) {
-        // Fallback: open Gmail compose window
-        showToast('Opening Gmail compose...', 'info');
-        const subject = encodeURIComponent(`A personal note from your club`);
-        const body = encodeURIComponent(`Dear ${memberName},\n\n${description}\n\nWarm regards`);
-        window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(toAddr)}&su=${subject}&body=${body}`, '_blank');
+        console.warn('[approveAction] AI draft generation failed:', e.message);
+        aiSubject = `A personal note from your club`;
+        aiBody = `Dear ${memberName},\n\n${description || 'I wanted to reach out personally to see how things are going at the club.'}\n\nWarm regards`;
+      }
+      try {
+        const result = await createGmailDraft({ to: aiTo, subject: aiSubject, body: aiBody });
+        showToast(`Gmail draft created for ${memberName}`, 'info');
+      } catch (e) {
+        console.warn('[approveAction] Gmail API draft failed:', e.message);
+        showToast('Gmail API unavailable — opening compose instead', 'warning');
+        window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(aiTo)}&su=${encodeURIComponent(aiSubject)}&body=${encodeURIComponent(aiBody)}`, '_blank');
       }
       return;
     }
