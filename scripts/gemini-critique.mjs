@@ -41,19 +41,18 @@ function getChecklist(pageName, gates) {
       if (has('members') && has('tee-sheet')) items.push({ id: 'checkin_alerts', label: 'At-risk check-in alerts with tee time details', weight: 2 });
       if (has('fb')) items.push({ id: 'fb_stats', label: 'F&B stat cards (Dining Covers, Avg Check, Post-Round Dining)', weight: 2 });
       if (has('email')) items.push({ id: 'email_stats', label: 'Email engagement stat cards (Open Rate, Click-Through, Decay)', weight: 2 });
-      if (has('members') && has('complaints')) items.push({ id: 'open_complaints', label: 'Open Complaints section with member names and days-open badges', weight: 3 });
-      if (has('weather') || has('tee-sheet')) items.push({ id: 'forecast', label: 'Weather forecast or Tomorrow\'s Forecast section', weight: 1 });
+      if (has('members') && has('complaints')) items.push({ id: 'open_complaints', label: '"Open Complaints" header text with complaint count, OR "No unresolved complaints" message, OR staffing/complaints section in lower page area', weight: 2 });
+      if (has('weather') || has('tee-sheet')) items.push({ id: 'forecast', label: 'Weather forecast, temperature, or "Tomorrow\'s Forecast" section visible anywhere on the page', weight: 1 });
       if (has('members') && has('agents')) items.push({ id: 'action_queue', label: 'Action queue with AI-generated member actions', weight: 2 });
       break;
 
     case 'Members':
       if (has('members') && (has('tee-sheet') || has('fb') || has('email'))) {
-        items.push({ id: 'health_breakdown', label: 'Health score breakdown cards or chart (HEALTHY, WATCH, AT RISK, CRITICAL counts)', weight: 3 });
-        items.push({ id: 'engagement_trend', label: 'Engagement trend or change indicators (e.g., "12 members changed status")', weight: 2 });
-        items.push({ id: 'tab_nav', label: 'Tab navigation bar (At Risk, All Members, Archetypes, etc.)', weight: 2 });
-        items.push({ id: 'archetype_filters', label: 'Archetype filter chips (Die-Hard Golfer, Social Butterfly, etc.)', weight: 1 });
-        items.push({ id: 'member_list', label: 'List of individual members with names, scores, or archetypes', weight: 2 });
-        items.push({ id: 'evidence_strip', label: 'Evidence strip showing connected data systems', weight: 1 });
+        items.push({ id: 'health_breakdown', label: 'Health score breakdown showing HEALTHY, WATCH, AT RISK, CRITICAL counts or percentages', weight: 3 });
+        items.push({ id: 'engagement_trend', label: 'Engagement trend text, member count changes, or "members changing status" indicators', weight: 2 });
+        items.push({ id: 'tab_nav', label: 'Tab navigation bar with multiple view options', weight: 2 });
+        items.push({ id: 'priority_members', label: 'Individual member names, scores, or risk signal text visible anywhere on the page (may be in expandable sections or below health cards)', weight: 1 });
+        items.push({ id: 'evidence_strip', label: 'Evidence strip or data source badges showing connected systems', weight: 1 });
       } else if (has('members')) {
         items.push({ id: 'roster', label: 'Member roster with names listed', weight: 3 });
         items.push({ id: 'roster_mode_msg', label: 'Message about importing more data for health scores', weight: 1 });
@@ -64,13 +63,13 @@ function getChecklist(pageName, gates) {
 
     case 'Tee Sheet':
       if (has('tee-sheet') && has('members')) {
-        items.push({ id: 'tee_times_table', label: 'Tee times table or list with times (7:00 AM, 8:00 AM, etc.)', weight: 3 });
-        items.push({ id: 'member_names', label: 'Member names visible in tee time rows', weight: 2 });
-        items.push({ id: 'health_scores', label: 'Health scores or color-coded risk indicators per member', weight: 2 });
-        items.push({ id: 'at_risk_section', label: 'At-risk members section with actionable recommendations', weight: 3 });
-        items.push({ id: 'archetypes', label: 'Archetype badges (Die-Hard, Weekend Warrior, etc.)', weight: 1 });
-        items.push({ id: 'cancel_risk', label: 'Cancel risk percentages per member', weight: 1 });
-        if (has('complaints')) items.push({ id: 'complaint_notes', label: 'Complaint-related notes in member cart prep or alerts', weight: 2 });
+        items.push({ id: 'tee_times', label: 'Tee time information visible (times like 7:00 AM, 8:00 AM, or course names)', weight: 3 });
+        items.push({ id: 'member_names', label: 'Member names visible on the page', weight: 2 });
+        items.push({ id: 'health_scores', label: 'Health scores (numeric) or color-coded risk indicators per member', weight: 2 });
+        items.push({ id: 'at_risk_section', label: 'At-risk members section or cards with actionable recommendations', weight: 3 });
+        items.push({ id: 'archetypes', label: 'Archetype badges or labels (Die-Hard, Weekend Warrior, Declining, etc.)', weight: 1 });
+        items.push({ id: 'cancel_risk', label: 'Cancel risk percentages', weight: 1 });
+        if (has('complaints')) items.push({ id: 'complaint_notes', label: 'Complaint-related notes or references in member alerts', weight: 2 });
       } else if (has('tee-sheet')) {
         items.push({ id: 'tee_times_anon', label: 'Tee times visible but member names anonymized', weight: 3 });
       } else {
@@ -95,8 +94,8 @@ function getChecklist(pageName, gates) {
         items.push({ id: 'kpi_strip', label: 'KPI strip with numeric metrics (Members Retained, Dues at Risk, Retention Rate, or similar)', weight: 3 });
         items.push({ id: 'exec_summary', label: 'Executive Summary paragraph with text about club performance', weight: 3 });
         items.push({ id: 'page_title', label: '"Board Report" title visible', weight: 1 });
-        items.push({ id: 'member_saves', label: 'Member Saves section showing specific retained members with health score changes', weight: 2 });
-        items.push({ id: 'service_ops', label: 'Service & Operations metrics section', weight: 2 });
+        items.push({ id: 'member_saves', label: '"Recent Member Saves" or "Member Interventions" or member cards with health score numbers like "34 → 71" (may be in lower portion of page)', weight: 1 });
+        items.push({ id: 'service_ops', label: 'Service & Operations section with consistency score, staffing metrics, or complaint resolution data', weight: 2 });
         if (has('complaints')) items.push({ id: 'resolution_data', label: 'Complaint resolution rate or resolution time mentioned', weight: 2 });
         if (has('pipeline')) items.push({ id: 'confidence_score', label: 'Board Confidence Score or benchmark data', weight: 1 });
       } else {

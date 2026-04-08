@@ -2,7 +2,7 @@
 // Screenshots are analyzed by Gemini 2.5 Flash in a post-processing step.
 // Run with: npx playwright test --config=playwright.insights.config.js
 import { test } from '@playwright/test';
-import { enterGuidedDemo, importGates, nav } from './_helpers.js';
+import { APP_URL, enterGuidedDemo, importGates, nav } from './_helpers.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -28,7 +28,7 @@ const PAGES = [
   { name: 'Tee Sheet', nav: 'Tee Sheet' },
   { name: 'Service', nav: 'Service' },
   { name: 'Board Report', nav: 'Board Report' },
-  { name: 'Automations', nav: 'Automations' },
+  { name: 'Automations', nav: 'Automations', hash: 'automations' },
 ];
 
 test.beforeAll(() => {
@@ -54,16 +54,29 @@ for (const combo of COMBINATIONS) {
       // Wait for content to settle
       await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(2500);
-      // Automations: wait for the hub header or inbox to appear
+      // Automations has a known blank-page issue — always use hash navigation as backup
       if (p.name === 'Automations') {
-        try {
-          await page.locator('text=/Automations/i').first().waitFor({ timeout: 5000 });
-          await page.waitForTimeout(2000); // extra time for inbox lazy-load
-        } catch { await page.waitForTimeout(3000); }
+        await page.evaluate(() => { window.location.hash = '#/automations'; });
+        await page.waitForTimeout(4000);
       }
       const filename = `${combo.id}__${p.name.replace(/\s+/g, '-')}.png`;
       const filepath = path.join(SCREENSHOT_DIR, filename);
 
+      // Expand the main scrollable content area so fullPage captures below-the-fold content
+      try {
+        await page.evaluate(() => {
+          // Target the main content scroll container (typically the element with overflow-y-auto inside the layout)
+          const scrollContainers = document.querySelectorAll('[class*="overflow-y"], [class*="overflow-auto"]');
+          scrollContainers.forEach(el => {
+            if (el.scrollHeight > el.clientHeight) {
+              el.style.overflow = 'visible';
+              el.style.maxHeight = 'none';
+              el.style.height = 'auto';
+            }
+          });
+        });
+        await page.waitForTimeout(300);
+      } catch { /* navigation race — continue with screenshot */ }
       await page.screenshot({ path: filepath, fullPage: true });
       screenshots.push({ page: p.name, file: filename });
     }

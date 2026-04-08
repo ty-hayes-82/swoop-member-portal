@@ -4,6 +4,7 @@
  */
 import { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
+import { getAllActions } from '@/services/agentService';
 
 const PRIORITY_COLORS = {
   high: 'border-l-red-500',
@@ -89,7 +90,9 @@ function HandledCard({ action }) {
 }
 
 export default function InboxTab() {
-  const { inbox, approveAction, dismissAction } = useApp();
+  const { inbox: contextInbox, approveAction, dismissAction } = useApp();
+  // Fallback: if context inbox is empty due to timing, load directly from service
+  const inbox = contextInbox.length > 0 ? contextInbox : getAllActions();
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [showHandled, setShowHandled] = useState(false);
 

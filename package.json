@@ -8,7 +8,15 @@
     "build": "node scripts/prebuild-safe-clean.mjs && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint-theme": "node scripts/lint-theme.mjs"
+    "lint-theme": "node scripts/lint-theme.mjs",
+    "test:e2e": "npx playwright test",
+    "test:insights": "npx playwright test --config=playwright.insights.config.js",
+    "insights:report": "node scripts/generate-insights-report.mjs",
+    "insights:critique": "node scripts/critique-insights.mjs",
+    "insights:full": "npm run test:insights && npm run insights:report && npm run insights:critique",
+    "vision:capture": "npx playwright test --config=playwright.insights.config.js",
+    "vision:critique": "node scripts/gemini-critique.mjs",
+    "vision:full": "npm run vision:capture && npm run vision:critique"
   },
   "dependencies": {
     "@vercel/postgres": "^0.10.0",
