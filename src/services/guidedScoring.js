@@ -125,7 +125,9 @@ export function scoreMember(member, openGates) {
   const score = computeScore(dims, openGates);
   if (score == null) return { ...member, score: null, tier: null, archetype: null };
 
-  const computedArchetype = classifyArchetype(dims, member.joinDate);
+  // Archetype requires golf + dining data to classify meaningfully
+  const hasGolfAndDining = openGates.has('tee-sheet') && openGates.has('fb');
+  const computedArchetype = hasGolfAndDining ? classifyArchetype(dims, member.joinDate) : null;
   return {
     ...member,
     score,

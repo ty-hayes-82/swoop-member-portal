@@ -667,6 +667,11 @@ function stripUngatedProfileData(profile) {
     p.riskSignals = (p.riskSignals || []).filter(r => !/complaint|crm|service/i.test(r.source + ' ' + r.label));
   }
 
+  // Archetype requires golf + dining data to classify meaningfully
+  if (!isSourceLoaded('tee-sheet') || !isSourceLoaded('fb')) {
+    p.archetype = undefined;
+  }
+
   // Drafts / talking points require at least one engagement gate beyond members
   if (!hasEngagementGates()) {
     p.drafts = undefined;
