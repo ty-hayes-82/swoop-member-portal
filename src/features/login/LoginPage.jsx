@@ -10,7 +10,13 @@ export default function LoginPage({ onLogin }) {
   const [screen, setScreen] = useState('signin'); // 'signin' | 'explore'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(() => {
+    // Show Google OAuth errors from redirect
+    const hash = window.location.hash || '';
+    const params = new URLSearchParams(hash.split('?')[1] || '');
+    const googleError = params.get('error');
+    return googleError ? `Google sign-in error: ${googleError}` : null;
+  });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
