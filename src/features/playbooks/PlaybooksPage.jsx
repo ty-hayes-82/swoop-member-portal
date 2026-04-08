@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import PageTransition from '@/components/ui/PageTransition';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
@@ -422,54 +422,23 @@ const PLAYBOOKS = [
 
 const CATEGORY_FILTERS = ['All', 'Service Recovery', 'New Member Success', 'Member Engagement', 'Events & Programming', 'Revenue', 'Operations'];
 
+const CATEGORY_META = {
+  'Service Recovery':      { icon: '\uD83D\uDEE1\uFE0F', color: '#DC2626', dotColor: '#EF4444', bg: '#FEF2F2' },
+  'New Member Success':    { icon: '\uD83C\uDFAF', color: '#EA580C', dotColor: '#F97316', bg: '#FFF7ED' },
+  'Member Engagement':     { icon: '\uD83D\uDCAC', color: '#2563EB', dotColor: '#3B82F6', bg: '#EFF6FF' },
+  'Events & Programming':  { icon: '\uD83D\uDCC5', color: '#16A34A', dotColor: '#22C55E', bg: '#F0FDF4' },
+  'Revenue':               { icon: '\uD83D\uDCB0', color: '#9333EA', dotColor: '#A855F7', bg: '#FDF4FF' },
+  'Operations':            { icon: '\u2699\uFE0F',  color: '#0284C7', dotColor: '#0EA5E9', bg: '#F0F9FF' },
+};
+
 // ────────────────────────────────────────────────
 // Components
 // ────────────────────────────────────────────────
 
-function PlaybookCard({ playbook, onSelect, isSelected }) {
-  const stepCount = playbook.steps.length;
-  return (
-    <div
-      onClick={() => onSelect(playbook.id)}
-      className={`bg-white rounded-xl p-3 sm:p-4 lg:p-5 cursor-pointer transition-all flex flex-col gap-2 dark:bg-gray-900 ${
-        isSelected
-          ? 'border-2 border-brand-500 shadow-[0_0_0_3px_rgba(232,119,46,0.12)]'
-          : 'border border-gray-200 shadow-sm hover:border-gray-300 dark:border-gray-800'
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <span
-          className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded"
-          style={{ color: playbook.categoryColor, background: playbook.categoryColor + '12' }}
-        >
-          {playbook.category}
-        </span>
-        <div className="flex items-center gap-1.5">
-          {playbook.triggeredCount > 0 && (
-            <span className="text-[10px] font-bold text-brand-500 bg-brand-500/10 px-1.5 py-0.5 rounded">
-              {playbook.triggeredCount} triggered
-            </span>
-          )}
-          <span className="text-[11px] text-gray-400">{stepCount} steps</span>
-        </div>
-      </div>
-      <div className="text-sm sm:text-base font-bold text-gray-800 dark:text-white/90 leading-snug">{playbook.name}</div>
-      <div className="text-xs sm:text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
-        {playbook.description}
-      </div>
-      <div className="flex items-center justify-between mt-auto pt-1.5 border-t border-gray-100 dark:border-gray-800">
-        <span className="text-xs sm:text-[13px] font-semibold text-green-600">{playbook.trackRecord[0]?.result}</span>
-        <span className="text-[10px] sm:text-[11px] text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded">{playbook.trackRecord[0]?.runs}</span>
-      </div>
-    </div>
-  );
-}
-
-function PlaybookDetail({ playbook }) {
+function PlaybookDetail({ playbook, onClose }) {
   const { showToast, addAction, dispatch } = useApp();
   const [editingSteps, setEditingSteps] = useState(false);
 
-  // Load customized steps if they exist
   const customSteps = (() => {
     try {
       const all = JSON.parse(localStorage.getItem('swoop_playbook_customizations') || '{}');
@@ -493,11 +462,13 @@ function PlaybookDetail({ playbook }) {
       <div className="mb-6 sm:mb-8">
         <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
           <span className="text-[11px] font-bold tracking-wider text-brand-500 uppercase">Playbook</span>
-          <span className="bg-brand-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">TRIGGERED</span>
           {playbook.triggeredCount > 0 && (
-            <span className="text-[11px] font-semibold text-brand-500 bg-brand-500/10 px-2.5 py-0.5 rounded-md">
-              Triggered for {playbook.triggeredCount} members
-            </span>
+            <>
+              <span className="bg-brand-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">TRIGGERED</span>
+              <span className="text-[11px] font-semibold text-brand-500 bg-brand-500/10 px-2.5 py-0.5 rounded-md">
+                Triggered for {playbook.triggeredCount} members
+              </span>
+            </>
           )}
         </div>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white/90 m-0 mb-2">{playbook.name}</h2>
@@ -596,10 +567,9 @@ function PlaybookDetail({ playbook }) {
           onClick={() => {
             showToast(`${playbook.name} activated`, 'success');
             trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: playbook.name });
-            addAction({ description: `${playbook.name} activated — ${playbook.triggeredCount || 0} members triggered`, actionType: 'RETENTION_OUTREACH', source: 'Playbook Engine', priority: 'high', impactMetric: playbook.impact || '' });
+            addAction({ description: `${playbook.name} activated \u2014 ${playbook.triggeredCount || 0} members triggered`, actionType: 'RETENTION_OUTREACH', source: 'Playbook Engine', priority: 'high', impactMetric: playbook.impact || '' });
             dispatch({ type: 'ACTIVATE_PLAYBOOK', id: playbook.id });
 
-            // Wire to real playbook execution API
             const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
             if (clubId && playbook.triggeredFor?.memberId) {
               fetch('/api/execute-playbook', {
@@ -621,6 +591,7 @@ function PlaybookDetail({ playbook }) {
                 }),
               }).catch((err) => { console.error('Playbook execution API error:', err); });
             }
+            if (onClose) onClose();
           }}
           className="w-full text-white border-none py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold cursor-pointer transition-opacity hover:opacity-90"
           style={{ background: playbook.categoryColor || '#c0392b' }}
@@ -632,63 +603,123 @@ function PlaybookDetail({ playbook }) {
   );
 }
 
+// ────────────────────────────────────────────────
+// Slide-over detail panel
+// ────────────────────────────────────────────────
+
+function DetailSlideOver({ playbook, onClose }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger enter animation
+    requestAnimationFrame(() => setVisible(true));
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setVisible(false);
+    setTimeout(onClose, 250);
+  }, [onClose]);
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') handleClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [handleClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      {/* Backdrop */}
+      <div
+        onClick={handleClose}
+        className="absolute inset-0 transition-opacity duration-250"
+        style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: visible ? 'blur(4px)' : 'none', opacity: visible ? 1 : 0 }}
+      />
+      {/* Panel */}
+      <div
+        className="relative w-full max-w-[600px] bg-white dark:bg-gray-900 shadow-2xl overflow-y-auto transition-transform duration-250 ease-out"
+        style={{ transform: visible ? 'translateX(0)' : 'translateX(100%)' }}
+      >
+        {/* Close bar */}
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 bg-white/95 dark:bg-gray-900/95 border-b border-gray-200 dark:border-gray-800 backdrop-blur-sm">
+          <span className="text-[13px] font-semibold text-gray-700 dark:text-white/80">Playbook Details</span>
+          <button
+            onClick={handleClose}
+            className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white cursor-pointer bg-transparent border-none px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          >
+            {'\u2715'} Close
+          </button>
+        </div>
+        <div className="p-5 sm:p-6 lg:p-8">
+          <PlaybookDetail playbook={playbook} onClose={handleClose} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────
+// Main Page
+// ────────────────────────────────────────────────
+
 export default function PlaybooksPage({ embedded = false }) {
-  // V5: Show all playbooks (hidden flag removed — all are operational-category playbooks now)
   const visiblePlaybooks = useMemo(() => PLAYBOOKS, []);
-  const [selectedId, setSelectedId] = useState(visiblePlaybooks[0]?.id);
+  const [selectedId, setSelectedId] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('All');
-  const selected = visiblePlaybooks.find(p => p.id === selectedId);
 
   const filtered = useMemo(() => {
     if (categoryFilter === 'All') return visiblePlaybooks;
     return visiblePlaybooks.filter(p => p.category === categoryFilter);
   }, [categoryFilter, visiblePlaybooks]);
 
-  // Auto-select first in filtered list if current selection is filtered out
-  const effectiveSelected = filtered.find(p => p.id === selectedId) ? selected : filtered[0];
+  const selectedPlaybook = selectedId ? visiblePlaybooks.find(p => p.id === selectedId) : null;
+
+  // Build category summaries
+  const categorySummaries = useMemo(() => {
+    const cats = {};
+    for (const pb of visiblePlaybooks) {
+      if (!cats[pb.category]) cats[pb.category] = { count: 0, triggered: 0 };
+      cats[pb.category].count++;
+      cats[pb.category].triggered += pb.triggeredCount || 0;
+    }
+    return CATEGORY_FILTERS.slice(1).map(cat => ({
+      name: cat,
+      ...CATEGORY_META[cat],
+      count: cats[cat]?.count || 0,
+      triggered: cats[cat]?.triggered || 0,
+    }));
+  }, [visiblePlaybooks]);
+
+  const totalTriggers = useMemo(() => visiblePlaybooks.reduce((s, p) => s + (p.triggeredCount || 0), 0), [visiblePlaybooks]);
+
+  // Group filtered playbooks by category (preserving category order)
+  const groupedPlaybooks = useMemo(() => {
+    const groups = [];
+    const catOrder = CATEGORY_FILTERS.slice(1);
+    for (const cat of catOrder) {
+      const items = filtered.filter(p => p.category === cat);
+      if (items.length > 0) groups.push({ category: cat, items, meta: CATEGORY_META[cat] });
+    }
+    return groups;
+  }, [filtered]);
+
+  // Total runs for a playbook (sum of trackRecord runs)
+  const getRuns = (pb) => {
+    const first = pb.trackRecord[0];
+    if (!first) return '0x run';
+    const total = pb.trackRecord.reduce((s, tr) => {
+      const m = tr.runs.match(/(\d+)/);
+      return s + (m ? parseInt(m[1], 10) : 0);
+    }, 0);
+    return `${total}x run`;
+  };
 
   const Wrapper = embedded ? ({ children }) => <>{children}</> : PageTransition;
 
   return (
     <Wrapper>
-      <div className="flex flex-col gap-5 sm:gap-6">
-        {/* Page Header — hidden when embedded in AutomationsHub */}
-        {!embedded && (
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-          <div>
-            <div className="text-[11px] font-bold tracking-widest text-brand-500 uppercase mb-1.5">
-              Outreach Playbooks
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white/90 m-0 mb-1.5 font-serif">
-              Automated Response Protocols
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 m-0 leading-relaxed">
-              Step-by-step playbooks that activate automatically when patterns are detected.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            {[
-              { cat: 'Service Recovery', color: '#c0392b' },
-              { cat: 'New Member Success', color: '#0ea5e9' },
-              { cat: 'Member Engagement', color: '#6b7280' },
-              { cat: 'Events & Programming', color: '#8b5cf6' },
-              { cat: 'Revenue', color: '#2563eb' },
-              { cat: 'Operations', color: '#7c3aed' },
-            ].map(({ cat, color }) => {
-              const count = visiblePlaybooks.filter(p => p.category === cat).length;
-              if (count === 0) return null;
-              return (
-                <div key={cat} className="text-center px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                  <div className="text-lg sm:text-xl font-bold" style={{ color }}>{count}</div>
-                  <div className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wide">{cat}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        )}
-
-        {/* Category Filter — horizontally scrollable on mobile */}
+      <div className="flex flex-col gap-4 sm:gap-5">
+        {/* Category Filter Pills */}
         <div className="overflow-x-auto -mx-1 px-1 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="inline-flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
             {CATEGORY_FILTERS.map(cat => (
@@ -705,43 +736,118 @@ export default function PlaybooksPage({ embedded = false }) {
           </div>
         </div>
 
-        {/* Two-column layout: cards left, detail right.
-            Mobile: show cards OR detail (not both). Tap card → show detail + back button.
-            Desktop (lg+): show both side by side. */}
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 lg:items-start">
-          {/* Left: Playbook Cards — hidden on mobile when a card is selected */}
-          <div className={`w-full lg:w-[380px] lg:shrink-0 lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto flex flex-col gap-3 lg:pr-1 ${
-            selectedId ? 'hidden lg:flex' : 'flex'
-          }`}>
-            {filtered.map(pb => (
-              <PlaybookCard
-                key={pb.id}
-                playbook={pb}
-                onSelect={(id) => setSelectedId(id)}
-                isSelected={effectiveSelected?.id === pb.id}
-              />
-            ))}
+        {/* ── Category Summary Cards ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+          {categorySummaries.map(cat => (
+            <button
+              key={cat.name}
+              onClick={() => setCategoryFilter(prev => prev === cat.name ? 'All' : cat.name)}
+              className={`flex flex-col items-start gap-1.5 p-3 sm:p-4 rounded-xl border-none cursor-pointer text-left transition-all ${
+                categoryFilter === cat.name ? 'ring-2 ring-offset-1 scale-[1.02]' : 'hover:scale-[1.01]'
+              }`}
+              style={{
+                background: cat.bg,
+                ...(categoryFilter === cat.name ? { ringColor: cat.color } : {}),
+              }}
+            >
+              <div className="text-lg sm:text-xl">{cat.icon}</div>
+              <div className="text-[11px] sm:text-xs font-bold leading-tight" style={{ color: cat.color }}>{cat.name}</div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-lg sm:text-xl font-bold tabular-nums" style={{ color: cat.color }}>{cat.triggered}</span>
+                <span className="text-[10px] sm:text-[11px] font-medium" style={{ color: cat.color }}>triggered</span>
+              </div>
+              <div className="text-[10px] sm:text-[11px] font-medium" style={{ color: cat.color }}>
+                {cat.count} playbook{cat.count !== 1 ? 's' : ''}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* ── Total Bar ── */}
+        <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-xs text-gray-500 dark:text-gray-400">
+          <span>Showing <strong className="text-gray-700 dark:text-white/80">{filtered.length} playbooks</strong> across {groupedPlaybooks.length} categories</span>
+          <span><span className="font-bold text-gray-700 dark:text-white/80 tabular-nums">{totalTriggers}</span> total triggers</span>
+        </div>
+
+        {/* ── Grouped Table ── */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+          {/* Table Header */}
+          <div className="hidden sm:grid grid-cols-[1fr_120px_80px_1fr_70px] gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+            <div>Playbook</div>
+            <div>Triggered</div>
+            <div>Steps</div>
+            <div>Track Record</div>
+            <div className="text-right">Runs</div>
           </div>
 
-          {/* Right: Selected Playbook Detail — always visible on desktop, conditional on mobile */}
-          {effectiveSelected && (
-            <div className={`flex-1 min-w-0 bg-white border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto dark:bg-gray-900 dark:border-gray-800 ${
-              selectedId ? 'block' : 'hidden lg:block'
-            }`}>
-              {/* Back button — mobile only */}
-              <button
-                onClick={() => setSelectedId(null)}
-                className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-4 cursor-pointer bg-transparent border-none p-0 hover:text-gray-700 dark:text-gray-400"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
-                </svg>
-                Back to playbooks
-              </button>
-              <PlaybookDetail playbook={effectiveSelected} />
+          {/* Category Groups */}
+          {groupedPlaybooks.map(group => (
+            <div key={group.category}>
+              {/* Category Label */}
+              <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-100 dark:border-gray-800">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: group.meta.dotColor }} />
+                <span className="text-xs font-bold" style={{ color: group.meta.color }}>{group.category}</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: group.meta.bg, color: group.meta.color }}>{group.items.length}</span>
+              </div>
+
+              {/* Rows */}
+              {group.items.map(pb => (
+                <div
+                  key={pb.id}
+                  onClick={() => setSelectedId(pb.id)}
+                  className={`group grid grid-cols-1 sm:grid-cols-[1fr_120px_80px_1fr_70px] gap-1 sm:gap-2 px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors ${
+                    selectedId === pb.id
+                      ? 'bg-brand-50 dark:bg-brand-500/5'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  }`}
+                >
+                  {/* Playbook Name */}
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold transition-colors ${
+                      selectedId === pb.id ? 'text-brand-500' : 'text-gray-800 dark:text-white/90 group-hover:text-brand-500'
+                    }`}>{pb.name}</span>
+                    <svg className="w-3.5 h-3.5 text-brand-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+
+                  {/* Triggered */}
+                  <div className="flex items-center">
+                    {pb.triggeredCount > 0 ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-600 dark:text-brand-400">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500" />
+                        </span>
+                        {pb.triggeredCount} triggered
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">0 triggered</span>
+                    )}
+                  </div>
+
+                  {/* Steps */}
+                  <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center">{pb.steps.length} steps</div>
+
+                  {/* Track Record */}
+                  <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center leading-snug">{pb.trackRecord[0]?.result}</div>
+
+                  {/* Runs */}
+                  <div className="text-xs text-gray-400 text-right flex items-center justify-end sm:justify-end">{getRuns(pb)}</div>
+                </div>
+              ))}
             </div>
-          )}
+          ))}
         </div>
+
+        {/* ── Slide-Over Detail Panel ── */}
+        {selectedPlaybook && (
+          <DetailSlideOver
+            key={selectedPlaybook.id}
+            playbook={selectedPlaybook}
+            onClose={() => setSelectedId(null)}
+          />
+        )}
       </div>
     </Wrapper>
   );
