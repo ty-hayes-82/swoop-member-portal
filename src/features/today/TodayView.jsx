@@ -203,7 +203,7 @@ export default function TodayView() {
         <div
           className="rounded-xl dark:border-gray-800 dark:bg-white/[0.03] today-greeting-enhanced fade-in-up"
           style={{
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+            background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%)',
             border: 'none',
             padding: '14px 24px',
             borderRadius: 12,
@@ -213,7 +213,7 @@ export default function TodayView() {
             gap: 16,
             overflow: 'hidden',
             position: 'relative',
-            boxShadow: '0 2px 12px rgba(15,52,96,0.2)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
