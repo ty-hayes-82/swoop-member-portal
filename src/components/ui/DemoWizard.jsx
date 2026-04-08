@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useDemoWizard } from '@/context/DemoWizardContext';
 import { DEMO_FILES, FILE_GROUPS } from '@/config/demoSources';
+import { loadFile } from '@/services/demoGate';
 import DemoDataPreview from './DemoDataPreview';
 
 export default function DemoWizard() {
@@ -135,22 +136,8 @@ export default function DemoWizard() {
             <button
               onClick={() => {
                 if (!ctx.isGateOpen('agents')) {
-                  importFile('_agents');
-                  // Manually open agents gate via sessionStorage
-                  try {
-                    const store = sessionStorage;
-                    const gates = JSON.parse(store.getItem('swoop_demo_gates') || '[]');
-                    if (!gates.includes('agents')) {
-                      gates.push('agents');
-                      store.setItem('swoop_demo_gates', JSON.stringify(gates));
-                    }
-                    const files = JSON.parse(store.getItem('swoop_demo_files') || '[]');
-                    if (!files.includes('_agents')) {
-                      files.push('_agents');
-                      store.setItem('swoop_demo_files', JSON.stringify(files));
-                    }
-                    window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed'));
-                  } catch {}
+                  // Use demoGate's loadFile directly — writes to sessionStorage + dispatches event
+                  loadFile('_agents', 'agents');
                 }
               }}
               className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 mb-0.5 border-none cursor-pointer transition-all ${

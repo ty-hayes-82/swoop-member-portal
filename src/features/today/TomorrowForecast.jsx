@@ -19,10 +19,8 @@ export default function TomorrowForecast() {
   const tomorrow = briefing?.todayRisks?.tomorrow || tomorrowWeather;
   const roundsBooked = briefing?.teeSheet?.roundsToday || 0;
 
-  // If no data sources are loaded, don't render
-  const hasBriefing = briefing?.teeSheet?.roundsToday > 0;
-  const hasWeather = !!tomorrowWeather;
-  if (!hasBriefing && !hasWeather && !shouldUseStatic('tee-sheet') && !shouldUseStatic('weather')) return null;
+  // Only show forecast when tee-sheet or weather data sources are loaded
+  if (!shouldUseStatic('tee-sheet') && !shouldUseStatic('weather') && !briefing?.teeSheet?.roundsToday) return null;
 
   const weather = tomorrow?.conditions || briefing?.todayRisks?.weather || 'clear';
   const wind = tomorrow?.wind || briefing?.todayRisks?.wind || 0;

@@ -313,12 +313,14 @@ export const _init = async () => {
         (Array.isArray(apiData.memberRoster) && apiData.memberRoster.length > 0) ||
         (apiData.memberProfiles && Object.keys(apiData.memberProfiles).length > 0);
       if (hasMemberData) _hasRealMembers = true;
-      _d = {
-        ..._d,
-        ...apiData,
-        healthDistribution: apiData.healthDistribution || _d.healthDistribution,
-        memberProfiles: apiData.memberProfiles || _d.memberProfiles,
-      };
+      // Merge API data but preserve static fields when API returns empty/null
+      const merged = { ..._d };
+      for (const [key, val] of Object.entries(apiData)) {
+        if (val != null && val !== '' && !(Array.isArray(val) && val.length === 0) && !(typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0)) {
+          merged[key] = val;
+        }
+      }
+      _d = merged;
       // Ensure memberSummary.totalMembers is populated from apiData.total or roster length
       if (_d.memberSummary) {
         _d.memberSummary.totalMembers = _d.memberSummary.totalMembers || apiData.total || (Array.isArray(apiData.memberRoster) ? apiData.memberRoster.length : 0);

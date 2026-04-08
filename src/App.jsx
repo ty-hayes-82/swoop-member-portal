@@ -70,6 +70,19 @@ function AppShell() {
     return () => window.removeEventListener('swoop:open-actions', handler);
   }, []);
 
+  // Guided demo session expiry: if the tab was closed and reopened, log out
+  useEffect(() => {
+    if (localStorage.getItem('swoop_was_guided') === 'true' && sessionStorage.getItem('swoop_demo_guided') !== 'true') {
+      localStorage.removeItem('swoop_was_guided');
+      localStorage.removeItem('swoop_auth_user');
+      localStorage.removeItem('swoop_auth_token');
+      localStorage.removeItem('swoop_club_id');
+      localStorage.removeItem('swoop_club_name');
+      localStorage.removeItem('swoop_agent_inbox');
+      window.location.reload();
+    }
+  }, []);
+
   // Demo session cleanup: delete demo club data from DB on sign-out or page close
   useEffect(() => {
     const cleanupDemo = () => {
@@ -101,6 +114,8 @@ function AppShell() {
     localStorage.removeItem('swoop_club_name');
     localStorage.removeItem('swoop_demo_email');
     localStorage.removeItem('swoop_demo_phone');
+    localStorage.removeItem('swoop_was_guided');
+    sessionStorage.clear();
     window.location.reload();
   };
 

@@ -2,7 +2,7 @@
 
 import { apiFetch } from './apiClient';
 import { shouldUseStatic } from './demoGate';
-import { getMonthlyRevenueSummary, getRevenueByDay } from './operationsService';
+import { getMonthlyRevenueSummary, getRevenueByDay, getTodayTeeSheet } from './operationsService';
 import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
 import { getCancellationSummary, getWaitlistSummary }  from './waitlistService';
@@ -85,8 +85,10 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   const lastSaturday = revData.find(d => d.date === '2026-01-10') ?? revData[9];
   const revenueVsLastWeek = ((yesterday.total - lastSaturday.total) / lastSaturday.total * 100).toFixed(1);
   
+  const teeSheet = getTodayTeeSheet();
   return {
     currentDate: date,
+    teeSheet: { roundsToday: teeSheet.length > 0 ? teeSheet.length : DEMO_BRIEFING.teeSheet.roundsToday, utilization: 0.87 },
     yesterdayRecap: {
       date:           yesterday.date,
       revenue:        yesterday.total,

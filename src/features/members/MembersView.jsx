@@ -96,7 +96,8 @@ export default function MembersView() {
 
   // Real club with no member data — show welcome state
   const summary = getMemberSummary();
-  if (!summary.totalMembers || summary.totalMembers === 0) {
+  const memberCount = summary.totalMembers || summary.total || 0;
+  if (memberCount === 0) {
     return (
       <PageTransition>
         <div className="flex flex-col gap-6">

@@ -93,8 +93,10 @@ export default function LoginPage({ onLogin }) {
     if (guided) {
       sessionStorage.setItem('swoop_demo_guided', 'true');
       sessionStorage.removeItem('swoop_demo_sources');
+      localStorage.setItem('swoop_was_guided', 'true');
     } else {
       sessionStorage.removeItem('swoop_demo_guided');
+      localStorage.removeItem('swoop_was_guided');
     }
     onLogin?.(demoUser);
   };
