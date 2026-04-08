@@ -10,6 +10,9 @@ const SCOPES = [
   'openid',
   'email',
   'profile',
+  'https://www.googleapis.com/auth/gmail.compose',
+  'https://www.googleapis.com/auth/gmail.modify',
+  'https://www.googleapis.com/auth/calendar.events',
 ];
 
 export default function handler(req, res) {
@@ -30,6 +33,8 @@ export default function handler(req, res) {
     redirect_uri: redirectUri,
     response_type: 'code',
     scope: SCOPES.join(' '),
+    access_type: 'offline',
+    prompt: 'consent',
   });
 
   res.redirect(302, `https://accounts.google.com/o/oauth2/v2/auth?${params}`);
