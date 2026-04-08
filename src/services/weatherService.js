@@ -23,9 +23,22 @@ function getClubId() {
  */
 async function fetchWeatherByCity(city, state) {
   if (!city) return null;
-  const apiKey = import.meta.env?.VITE_GOOGLE_WEATHER_API_KEY;
-  if (!apiKey) return null;
   try {
+    // In production (Vercel), use backend API; locally, use Vite proxy to bypass CORS
+    const isLocal = import.meta.env?.DEV;
+    if (!isLocal) {
+      const params = new URLSearchParams({ city, state: state || '', days: '5' });
+      const apiRes = await fetch(`/api/weather?${params}`);
+      if (!apiRes.ok) return null;
+      const apiData = await apiRes.json();
+      if (apiData.source === 'none' || !apiData.daily?.length) return null;
+      return apiData;
+    }
+
+    // Local dev: call Google Weather via Vite proxy (CORS bypass)
+    const apiKey = import.meta.env?.VITE_GOOGLE_WEATHER_API_KEY;
+    if (!apiKey) return null;
+
     // Geocode city → lat/lon via Nominatim (supports CORS)
     const query = encodeURIComponent(`${city}${state ? ' ' + state : ''} US`);
     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`);
@@ -36,17 +49,6 @@ async function fetchWeatherByCity(city, state) {
     const lon = parseFloat(geoResults[0].lon);
     const locationName = geoResults[0].display_name?.split(',')[0] || city;
 
-    // In production (Vercel), use backend API; locally, use Vite proxy to bypass CORS
-    const isLocal = import.meta.env?.DEV;
-    if (!isLocal) {
-      // Production: use serverless /api/weather endpoint
-      const params = new URLSearchParams({ city, state: state || '', days: '5' });
-      const apiRes = await fetch(`/api/weather?${params}`);
-      if (!apiRes.ok) return null;
-      const apiData = await apiRes.json();
-      if (apiData.source === 'none' || !apiData.daily?.length) return null;
-      return apiData;
-    }
     const base = '/google-weather-proxy';
     const commonParams = { key: apiKey, 'location.latitude': lat, 'location.longitude': lon, languageCode: 'en', unitsSystem: 'IMPERIAL' };
 
