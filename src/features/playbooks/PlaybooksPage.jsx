@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import PageTransition from '@/components/ui/PageTransition';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
+import { getDataMode } from '@/services/demoGate';
 
 // ────────────────────────────────────────────────
 // Playbook data
@@ -663,7 +664,8 @@ function DetailSlideOver({ playbook, onClose }) {
 // ────────────────────────────────────────────────
 
 export default function PlaybooksPage({ embedded = false }) {
-  const visiblePlaybooks = useMemo(() => PLAYBOOKS, []);
+  // In guided mode, don't show static playbook data — only real DB data would show
+  const visiblePlaybooks = useMemo(() => getDataMode() === 'guided' ? [] : PLAYBOOKS, []);
   const [selectedId, setSelectedId] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('All');
 
