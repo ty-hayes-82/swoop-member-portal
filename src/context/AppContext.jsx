@@ -12,6 +12,7 @@ import {
 import { useToast } from '@/components/ui/Toast.jsx';
 import { apiFetch } from '@/services/apiClient';
 import { trackAction, checkRecentOutreach } from '@/services/activityService';
+import { createGmailDraft } from '@/services/googleService';
 
 const PLAYBOOK_DEFS = {
   'service-save': { monthly: 18000, annual: 216000 },
@@ -27,11 +28,11 @@ const TRAIL_STEPS = {
   'engagement-decay': ['📊 Weekly health scan flagged 30 declining members', '✉ 30 personalized re-engagement emails queued', '🚩 Non-responders flagged for GM personal outreach'],
 };
 
-const defaultAgents = getAgents();
-const defaultStatuses = Object.fromEntries(defaultAgents.map((agent) => [agent.id, agent.status]));
+// Defer agent/inbox loading — called lazily after gates are initialized
+function getDefaultInbox() {
+  return getAllActions();
+}
 
-// Start with static agent actions as inbox; overwritten by API data when available
-const defaultInbox = getAllActions();
 const initialState = {
   currentDate: new Date().toISOString().split('T')[0],
   playbooks: {
@@ -46,9 +47,9 @@ const initialState = {
     'staffing-gap': 0,
     'engagement-decay': 0,
   },
-  inbox: defaultInbox,
-  pendingCount: defaultInbox.filter(a => a.status === 'pending').length,
-  agentStatuses: defaultStatuses,
+  inbox: [],
+  pendingCount: 0,
+  agentStatuses: {},
   agentConfigs: {},
   teeSheetOps: {
     confirmations: [],
@@ -89,6 +90,9 @@ function reducer(state, action) {
         inbox: action.inbox,
         pendingCount: computePendingCount(action.inbox),
       };
+    }
+    case 'SET_AGENT_STATUSES': {
+      return { ...state, agentStatuses: action.statuses };
     }
     case 'APPROVE_ACTION':
     case 'APPROVE_AGENT_ACTION': {
@@ -249,6 +253,19 @@ export function AppProvider({ children }) {
     annual: activePlaybooks.reduce((sum, [id]) => sum + (PLAYBOOK_DEFS[id]?.annual ?? 0), 0),
   };
 
+  // Lazy-load agent inbox after mount so gate checks are evaluated correctly
+  useEffect(() => {
+    const inbox = getDefaultInbox();
+    const agents = getAgents();
+    if (inbox.length > 0 && state.inbox.length === 0) {
+      dispatch({ type: 'SET_INBOX', inbox });
+    }
+    if (agents.length > 0 && Object.keys(state.agentStatuses).length === 0) {
+      const statuses = Object.fromEntries(agents.map(a => [a.id, a.status]));
+      dispatch({ type: 'SET_AGENT_STATUSES', statuses });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     activePlaybooks.forEach(([id]) => {
       const total = TRAIL_STEPS[id]?.length ?? 0;
@@ -305,6 +322,40 @@ export function AppProvider({ children }) {
     // Use actionItem found above for local send
     const memberName = actionItem?.memberName || meta.memberName || 'Member';
     const description = meta.customMessage || actionItem?.description || '';
+
+    // ── Gmail API draft: AI-generated content saved directly as Gmail draft ──
+    if (execType === 'email' && emailSendMode === 'gmail_api') {
+      const toAddr = demoEmail || meta.memberEmail || '';
+      try {
+        const draft = await apiFetch('/api/generate-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            memberId: meta.memberId,
+            draftType: 'email',
+            context: description,
+            templateHint: meta.templateId,
+          }),
+        });
+        const subject = draft?.subject || 'A note from your club';
+        const body = draft?.body || description;
+        const to = toAddr || draft?.memberEmail || '';
+
+        const result = await createGmailDraft({ to, subject, body });
+        if (result?.draftId) {
+          showToast(`Gmail draft created for ${memberName}`, 'info');
+        } else {
+          showToast('Draft created but could not verify', 'warning');
+        }
+      } catch (e) {
+        // Fallback: open Gmail compose window
+        showToast('Gmail API draft failed — opening Gmail compose instead', 'warning');
+        const subject = encodeURIComponent(`A personal note from your club`);
+        const body = encodeURIComponent(`Dear ${memberName},\n\n${description}\n\nWarm regards`);
+        window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(toAddr)}&su=${subject}&body=${body}`, '_blank');
+      }
+      return;
+    }
 
     // ── Gmail draft: AI-generated content opened in Gmail compose ──
     if (execType === 'email' && emailSendMode === 'gmail') {

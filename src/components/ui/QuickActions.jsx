@@ -5,6 +5,7 @@ import { shouldUseStatic } from '@/services/demoGate';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
 import { apiFetch } from '@/services/apiClient';
+import { getGoogleStatus, createCalendarEvent } from '@/services/googleService';
 
 const STAFF = ['F&B Director', 'Head Golf Professional', 'Membership Director', 'Grill Room Manager', 'Club Manager'];
 
@@ -67,6 +68,13 @@ export default function QuickActions({ memberName, memberId, context = '', arche
   const [draftLoading, setDraftLoading] = useState(false);
   const [talkingPoints, setTalkingPoints] = useState(null);
   const [tpLoading, setTpLoading] = useState(false);
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [calendarBusy, setCalendarBusy] = useState(false);
+
+  // Check Google connection status on mount
+  useEffect(() => {
+    getGoogleStatus().then(s => setGoogleConnected(s?.connected || false)).catch(() => {});
+  }, []);
 
   const firstName = memberName?.split(' ')[0] ?? 'the member';
   const defaultNote = `Dear ${firstName},\n\nI wanted to reach out personally to apologize for your recent experience at the Grill Room. Your satisfaction is our top priority and I'm sorry we fell short.\n\nI'd love to have you as my guest for lunch this week \u2014 please let me know what works for your schedule.\n\nWarm regards,\n[GM Name]\nYour Club`;
@@ -113,11 +121,10 @@ export default function QuickActions({ memberName, memberId, context = '', arche
   const emailSendMode = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_email_send_mode') || 'local' : 'local';
   const sendBtnLabel = emailSendMode === 'gmail' ? 'Open in Gmail' : emailSendMode === 'cloud' ? 'Send via email' : 'Draft email';
 
-  const handleSend = (type) => {
+  const handleSend = async (type) => {
     setSent(type);
     setMode(null);
     addActionEntry(type);
-    if (type === 'call') setTime('');
     const message = type === 'note'
       ? `Draft ready for ${memberName}`
       : type === 'call'
@@ -131,6 +138,26 @@ export default function QuickActions({ memberName, memberId, context = '', arche
     if (type === 'call') {
       trackAction({ actionType: 'call', actionSubtype: 'schedule', memberId, memberName });
       addAction({ description: `Call scheduled with ${memberName}`, memberId, memberName, actionType: 'FOLLOW_UP', source: 'Quick Action', priority: 'medium', impactMetric: 'Call scheduled' });
+
+      // Create Google Calendar event if connected
+      if (googleConnected) {
+        setCalendarBusy(true);
+        try {
+          const result = await createCalendarEvent({
+            memberName,
+            memberId,
+            scheduledTime: time || 'Tomorrow morning',
+            talkingPoints: talkingPoints || undefined,
+          });
+          if (result?.htmlLink) {
+            showToast('Added to Google Calendar', 'info');
+          }
+        } catch (e) {
+          showToast('Calendar event could not be created', 'error');
+        }
+        setCalendarBusy(false);
+      }
+      setTime('');
     }
     if (type === 'task') {
       trackAction({ actionType: 'task', actionSubtype: 'assign', memberId, memberName, meta: { assignedTo: staff } });
@@ -243,11 +270,14 @@ export default function QuickActions({ memberName, memberId, context = '', arche
               }`}>{t}</button>
             ))}
           </div>
-          <div className="flex gap-3">
-            <button onClick={() => handleSend('call')} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs">
-              Add to calendar
+          <div className="flex gap-3 items-center">
+            <button onClick={() => handleSend('call')} disabled={calendarBusy} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs disabled:opacity-50">
+              {calendarBusy ? 'Adding...' : googleConnected ? 'Add to Google Calendar' : 'Add to calendar'}
             </button>
             <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium">Dismiss</button>
+            {googleConnected && (
+              <span className="text-[10px] text-success-500 font-medium ml-1">Google Calendar connected</span>
+            )}
           </div>
         </div>
       )}

@@ -3,6 +3,7 @@
  * Accessible via #/profile (from user dropdown menu)
  */
 import { useState, useEffect } from 'react';
+import { getGoogleStatus, getGoogleAuthUrl, disconnectGoogle, clearGoogleStatusCache } from '@/services/googleService';
 
 const SEND_MODES = [
   { value: 'local', label: 'Local (Phone/Desktop)', desc: 'Opens your default email app or SMS app to send. You control the send.' },
@@ -12,6 +13,7 @@ const SEND_MODES = [
 const EMAIL_SEND_MODES = [
   ...SEND_MODES,
   { value: 'gmail', label: 'Gmail Draft', desc: 'AI generates a draft and opens it in Gmail for you to review and send.' },
+  { value: 'gmail_api', label: 'Gmail API Draft', desc: 'AI generates a draft and saves it directly to your Gmail Drafts folder. Requires Google connection.', requiresGoogle: true },
 ];
 
 export default function ProfilePage() {
@@ -31,6 +33,10 @@ export default function ProfilePage() {
   const [emailSendMode, setEmailSendMode] = useState('local');
   const [smsSendMode, setSmsSendMode] = useState('local');
 
+  // Google connection
+  const [googleStatus, setGoogleStatus] = useState({ connected: false });
+  const [googleLoading, setGoogleLoading] = useState(false);
+
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
@@ -44,7 +50,32 @@ export default function ProfilePage() {
       setEmailSendMode(localStorage.getItem('swoop_email_send_mode') || 'local');
       setSmsSendMode(localStorage.getItem('swoop_sms_send_mode') || 'local');
     } catch {}
+
+    // Check Google connection status
+    getGoogleStatus().then(s => setGoogleStatus(s || { connected: false })).catch(() => {});
+
+    // Handle redirect back from Google OAuth
+    const params = new URLSearchParams(window.location.search || window.location.hash?.split('?')[1] || '');
+    if (params.get('google_connected') === 'true') {
+      clearGoogleStatusCache();
+      getGoogleStatus().then(s => setGoogleStatus(s || { connected: false })).catch(() => {});
+    }
   }, []);
+
+  const handleGoogleConnect = () => {
+    window.location.href = getGoogleAuthUrl();
+  };
+
+  const handleGoogleDisconnect = async () => {
+    setGoogleLoading(true);
+    try {
+      await disconnectGoogle();
+      setGoogleStatus({ connected: false });
+      // Reset to gmail compose mode if currently using gmail_api
+      if (emailSendMode === 'gmail_api') setEmailSendMode('gmail');
+    } catch {}
+    setGoogleLoading(false);
+  };
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -133,6 +164,43 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Google Integration */}
+      <div className="mb-8 p-4 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Google Integration</h3>
+        <p className="text-xs text-gray-400 mb-4">
+          Connect your Google account to create Gmail drafts and Google Calendar events directly from Swoop.
+        </p>
+        {googleStatus.connected ? (
+          <div className="flex items-center justify-between p-3 rounded-lg bg-success-50 border border-success-200 dark:bg-success-500/10 dark:border-success-500/30">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-success-500 text-sm font-semibold">Connected</span>
+                {googleStatus.googleEmail && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{googleStatus.googleEmail}</span>
+                )}
+              </div>
+              <div className="text-[10px] text-gray-400 mt-1">
+                {googleStatus.scopes?.calendar && 'Calendar'}{googleStatus.scopes?.calendar && googleStatus.scopes?.gmail && ' + '}{googleStatus.scopes?.gmail && 'Gmail'}
+              </div>
+            </div>
+            <button
+              onClick={handleGoogleDisconnect}
+              disabled={googleLoading}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border border-red-200 bg-red-50 text-red-600 dark:bg-red-500/10 dark:border-red-500/30 disabled:opacity-50"
+            >
+              {googleLoading ? 'Disconnecting...' : 'Disconnect'}
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleGoogleConnect}
+            className="w-full p-3 rounded-lg border-2 border-dashed border-gray-300 text-sm font-semibold text-gray-600 cursor-pointer hover:border-brand-400 hover:text-brand-500 transition-all dark:border-gray-600 dark:text-gray-400 dark:hover:border-brand-500 dark:hover:text-brand-400"
+          >
+            Connect Google Account (Calendar + Gmail)
+          </button>
+        )}
+      </div>
+
       {/* Send Mode Settings */}
       <div className="mb-8 p-4 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Message Delivery</h3>
@@ -144,23 +212,29 @@ export default function ProfilePage() {
         <div className="mb-4">
           <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Email Delivery</label>
           <div className="flex gap-2 flex-wrap">
-            {EMAIL_SEND_MODES.map(mode => (
-              <button
-                key={mode.value}
-                onClick={() => setEmailSendMode(mode.value)}
-                className={`flex-1 min-w-[140px] p-3 rounded-lg border-2 text-left cursor-pointer transition-all ${
-                  emailSendMode === mode.value
-                    ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10'
-                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm">{mode.value === 'local' ? '📱' : mode.value === 'gmail' ? '✉' : '☁️'}</span>
-                  <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{mode.label}</span>
-                </div>
-                <p className="text-[10px] text-gray-400 m-0">{mode.desc}</p>
-              </button>
-            ))}
+            {EMAIL_SEND_MODES.map(mode => {
+              const disabled = mode.requiresGoogle && !googleStatus.connected;
+              return (
+                <button
+                  key={mode.value}
+                  onClick={() => !disabled && setEmailSendMode(mode.value)}
+                  disabled={disabled}
+                  className={`flex-1 min-w-[140px] p-3 rounded-lg border-2 text-left transition-all ${
+                    disabled
+                      ? 'border-gray-200 opacity-50 cursor-not-allowed dark:border-gray-700'
+                      : emailSendMode === mode.value
+                        ? 'border-brand-500 bg-brand-500/5 cursor-pointer dark:bg-brand-500/10'
+                        : 'border-gray-200 hover:border-gray-300 cursor-pointer dark:border-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm">{mode.value === 'local' ? '📱' : mode.value === 'gmail_api' ? '📨' : mode.value === 'gmail' ? '✉' : '☁️'}</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{mode.label}</span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 m-0">{mode.desc}</p>
+                </button>
+              );
+            })}
           </div>
         </div>
 
