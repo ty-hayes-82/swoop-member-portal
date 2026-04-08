@@ -5,7 +5,6 @@
  */
 import { useState } from 'react';
 import NewClubSetup from './NewClubSetup';
-import { stashRealAuth } from '@/services/demoGate';
 
 export default function LoginPage({ onLogin }) {
   const [screen, setScreen] = useState('signin'); // 'signin' | 'explore'
@@ -83,7 +82,6 @@ export default function LoginPage({ onLogin }) {
   const [demoPhone, setDemoPhone] = useState('');
 
   const startDemo = (guided = false) => {
-    stashRealAuth(); // Preserve real user session before overwriting with demo
     const demoClubId = `demo_${Date.now()}`;
     const demoUser = {
       userId: 'demo', clubId: demoClubId, name: 'Demo User',

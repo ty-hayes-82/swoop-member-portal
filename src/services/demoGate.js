@@ -28,13 +28,19 @@ export function isGuidedMode() {
 /**
  * Returns the current data mode: 'live' | 'demo' | 'guided'
  * Every service should branch on this instead of ad-hoc checks.
+ *
+ * A real (authenticated) user can activate guided mode as an overlay —
+ * they stay logged in (Gmail/Calendar still work) but see demo data
+ * gated by file imports. This is triggered by the GUIDED_KEY flag in
+ * sessionStorage, which takes priority over the real clubId check.
  */
 export function getDataMode() {
   try {
+    // Guided mode overlay takes priority — lets real users see guided demo data
+    if (isGuidedMode()) return 'guided';
     const clubId = localStorage.getItem('swoop_club_id');
     const isReal = !!clubId && clubId !== 'demo' && !clubId.startsWith('demo_');
     if (isReal) return 'live';
-    if (isGuidedMode()) return 'guided';
     return 'demo';
   } catch { return 'demo'; }
 }

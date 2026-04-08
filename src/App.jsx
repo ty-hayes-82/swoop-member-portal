@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '@/context/AppContext';
 import { NavigationProvider, useNavigationContext } from '@/context/NavigationContext';
 import { MemberProfileProvider, useMemberProfile } from '@/context/MemberProfileContext';
-import { restoreRealAuth } from '@/services/demoGate';
+// demoGate guided mode is managed via sessionStorage flags
 
 // Mobile app — lazy loaded, zero bundle impact on desktop
 const MobileApp = lazy(() => import('@/mobile/MobileApp'));
@@ -72,18 +72,12 @@ function AppShell() {
   }, []);
 
   // Guided demo session expiry: if the tab was closed and reopened,
-  // restore real user session if one was stashed, otherwise log out
+  // just clear the guided flag — the real user stays logged in
   useEffect(() => {
     if (localStorage.getItem('swoop_was_guided') === 'true' && sessionStorage.getItem('swoop_demo_guided') !== 'true') {
       localStorage.removeItem('swoop_was_guided');
       localStorage.removeItem('swoop_agent_inbox');
-      if (!restoreRealAuth()) {
-        // No stashed session — clear demo auth completely
-        localStorage.removeItem('swoop_auth_user');
-        localStorage.removeItem('swoop_auth_token');
-        localStorage.removeItem('swoop_club_id');
-        localStorage.removeItem('swoop_club_name');
-      }
+      // Don't touch auth — user stays logged in, just exits demo overlay
       window.location.reload();
     }
   }, []);
