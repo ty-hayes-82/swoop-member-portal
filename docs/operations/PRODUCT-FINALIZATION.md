@@ -270,6 +270,23 @@ Audit found **24 literal `$` figures in JSX**, of which **8 surfaces have pillar
 | §12.2 Database backup & recovery | ⚠️ stub — blocked on Vercel support ticket re: retention window |
 | §12.3 Cron observability | ⚠️ stub — `/api/health.integrations` is the live signal source; doc needs to reference it |
 
+### 11.6 Pillar score lift recommendations (criterion 2)
+
+Audit agent recommendations 2026-04-09 — every proposal reuses existing services, no new APIs needed. Each is sized as a single 1-day ticket.
+
+| # | Page | Current → Target | Proposal | Existing service | Pillar |
+|---|---|---|---|---|---|
+| 1 | **Admin Hub** | 4 → 6–7 | Add a "Next Intelligence Unlock" card in the Data Hub tab showing which single missing domain would unlock the most value | `DataHealthDashboard.jsx` already defines `DOMAIN_PILLAR_IMPACT` (CRM, TEE_SHEET, POS, etc. with $5,760 / $9,580 dollar mappings) | **See It** |
+| 2 | **Integrations** | 5 → 7–8 | In "What your connected systems unlock" section (lines 207–234), replace generic combo tags with **dollar values per missing integration**. E.g., "Connect POS → unlock $5,760/mo pace-to-dining attribution" | `revenueService.getLeakageData()` + `src/data/integrations.js` COMBOS array (already has KPIs like `$128K`, `$3.4x`) | **Prove It** |
+| 3 | **Profile / Settings** | 2 → 4–5 | Replace empty "Test Overrides" section with a "Your Role & Club Permissions" card showing accessible features (e.g., `✅ Revenue Page · ⚠️ Board Report (view only)`) | Role-based feature gates already exist; pull from `localStorage.swoop_auth_user.role` and `useNavigationContext()` | **See It** |
+| 4 | **Member Profile (full page)** | 9 → 10 | Add a "Recovery Timeline" line below the decay chain: "If {current trend reverses}, health score recovers in ~{N weeks}" | `MemberDecayChain.jsx` already computes `daysInCurrentDomino` and decay arithmetic | **Fix It** |
+
+**Recommended sequence:** #2 (Integrations) first — biggest pillar lift (5 → 7–8), uses the most existing infrastructure, and dovetails with the new `apiHealthService` shipped 2026-04-09. Then #1 (Admin Hub) since it can also consume `apiHealthService.getHealthRollup()` for the new "Cron Health" section — combine both into one Admin sprint. #3 and #4 can wait until a Designer + Frontend pair is available.
+
+**Composite forecast** if all 4 ship: average pillar score across the 12 audited pages would lift from ~7.0 to ~7.7, putting **8 of 12 pages at ≥ 8**. Criterion 2 still wouldn't fully flip green (Profile would still be 4–5, Admin Hub 6–7) but the *gap* would be closed.
+
+---
+
 ### 11.5 Open from this session — handoff
 
 When picking this up next, the immediate punch list is:
