@@ -171,6 +171,65 @@ function DecayChainAction({ profile }) {
   );
 }
 
+// RiskSignalRow — Phase H1: per-signal one-tap action
+function RiskSignalRow({ signal, profile }) {
+  const [addressed, setAddressed] = React.useState(false);
+
+  const handleAction = (kind) => {
+    trackAction({
+      actionType: kind,
+      actionSubtype: 'risk_signal',
+      memberId: profile?.memberId,
+      memberName: profile?.name,
+      referenceType: 'risk_signal',
+      referenceId: signal.id,
+      description: `${kind === 'mark_addressed' ? 'Marked addressed' : 'Action recommended'}: ${signal.label}`,
+    });
+    setAddressed(true);
+  };
+
+  return (
+    <div
+      className="border border-gray-200 rounded-lg px-3 py-2.5"
+      style={{ fontSize: '11px', lineHeight: 1.4 }}
+    >
+      <div className="flex justify-between items-center" style={{ lineHeight: 1.4 }}>
+        <div className="font-semibold flex-1 min-w-0" style={{ lineHeight: 1.4 }}>{signal.label}</div>
+        <SourceBadge system={signal.source ?? 'Member CRM'} size="xs" />
+      </div>
+      <div className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>
+        {formatDateTime(signal.timestamp)} {'\u00B7'} Confidence {signal.confidence ?? '\u2014'}
+      </div>
+      <div className="flex gap-1.5 mt-1.5">
+        <button
+          type="button"
+          onClick={() => handleAction('mark_addressed')}
+          disabled={addressed}
+          className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer border ${
+            addressed
+              ? 'bg-success-100 text-success-700 border-success-300 cursor-default'
+              : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          {addressed ? '\u2713 Addressed' : 'Mark addressed'}
+        </button>
+        <button
+          type="button"
+          onClick={() => handleAction('recommend_action')}
+          disabled={addressed}
+          className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer border ${
+            addressed
+              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-default'
+              : 'bg-brand-50 border-brand-300 text-brand-600 hover:bg-brand-100'
+          }`}
+        >
+          Recommend action
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Member Journey — longitudinal cross-domain timeline showing engagement decay sequence
 // P6 "First Domino": shows per-member decay chain (Email dropped → Golf dropped → Dining dropped)
 function MemberJourneyTimeline({ profile }) {
@@ -293,7 +352,14 @@ function MemberJourneyTimeline({ profile }) {
               const color = domainColors[step.domain] ?? '#9CA3AF';
               const system = domainToSystem[step.domain];
               return (
-                <div key={step.domain} className="flex items-start">
+                <div
+                  key={step.domain}
+                  className="flex items-start"
+                  style={{
+                    // Phase J4 — sequential reveal animation
+                    animation: `slideIn 400ms ease-out ${i * 300}ms backwards`,
+                  }}
+                >
                   <div className="flex flex-col gap-1">
                     <div className="px-2.5 py-1 rounded-md" style={{ background: color + '16', border: `1px solid ${color}40` }}>
                       <div className="text-[10px] font-bold uppercase tracking-tight" style={{ color }}>{step.domain} dropped</div>
@@ -307,12 +373,23 @@ function MemberJourneyTimeline({ profile }) {
                     )}
                   </div>
                   {i < decayChain.length - 1 && (
-                    <span className="mx-1.5 mt-2 text-sm text-gray-400 font-bold">&rarr;</span>
+                    <span
+                      className="mx-1.5 mt-2 text-sm text-gray-400 font-bold"
+                      style={{ animation: `slideIn 200ms ease-out ${(i * 300) + 200}ms backwards` }}
+                    >
+                      &rarr;
+                    </span>
                   )}
                 </div>
               );
             })}
           </div>
+          <style>{`
+            @keyframes slideIn {
+              0% { opacity: 0; transform: translateX(-8px); }
+              100% { opacity: 1; transform: translateX(0); }
+            }
+          `}</style>
           <div className="mt-2 pt-2 border-t border-red-500/10 text-[10px] text-gray-500 italic leading-snug">
             Cross-domain decay pattern. No single system would have flagged this in time.
           </div>
@@ -791,6 +868,21 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               ${Math.round(profile.duesAnnual / 1000)}K/yr at risk
             </div>
           )}
+          {/* Phase I4 — Revenue page link for high-value at-risk members */}
+          {(profile.healthScore ?? 100) < 50 && profile.duesAnnual >= 20000 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.location.hash = '#/revenue';
+                }
+              }}
+              className="mt-1 text-[10px] font-bold text-brand-500 bg-brand-500/[0.06] border border-brand-500/20 px-2 py-0.5 rounded cursor-pointer hover:bg-brand-500/[0.12]"
+              title="See full revenue breakdown including high-value member exposure"
+            >
+              See full revenue breakdown →
+            </button>
+          )}
           {layout !== 'page' && onOpenFullPage && (
             <button
               type="button"
@@ -946,22 +1038,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <Section title="Risk signals" sourceSystems={['Analytics', 'Tee Sheet', 'POS', 'Email']}>
         <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {(profile.riskSignals ?? []).map((signal) => (
-            <div
-              key={signal.id}
-              onClick={() => {
-                const activitySection = document.querySelector('[data-section="recent-activity"]');
-                if (activitySection) activitySection.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="border border-gray-200 rounded-lg px-3 py-2.5 cursor-pointer transition-colors hover:bg-gray-100"
-              title="Click to view related activity"
-              style={{ fontSize: '11px', lineHeight: 1.4 }}
-            >
-              <div className="flex justify-between items-center" style={{ lineHeight: 1.4 }}>
-                <div className="font-semibold" style={{ lineHeight: 1.4 }}>{signal.label}</div>
-                <SourceBadge system={signal.source ?? 'Member CRM'} size="xs" />
-              </div>
-              <div className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>{formatDateTime(signal.timestamp)} {'\u00B7'} Confidence {signal.confidence ?? '\u2014'}</div>
-            </div>
+            <RiskSignalRow key={signal.id} signal={signal} profile={profile} />
           ))}
           {!(profile.riskSignals ?? []).length && <span className="text-gray-500">No active risks.</span>}
         </div>

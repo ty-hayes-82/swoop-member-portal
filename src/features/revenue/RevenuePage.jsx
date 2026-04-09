@@ -163,13 +163,18 @@ export default function RevenuePage() {
             </div>
             <SourceBadge system="Tee Sheet" size="xs" />
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
-            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Understaffed Days</div>
+          <button
+            type="button"
+            onClick={() => navigate('service', { tab: 'staffing' })}
+            className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800 cursor-pointer text-left hover:border-brand-500 hover:shadow-md transition-all"
+            title="View Staffing tab in Service for the underlying detail"
+          >
+            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Understaffed Days →</div>
             <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
               $<AnimatedNumber value={leakage.STAFFING_LOSS} duration={1200} />
             </div>
             <SourceBadge system="Scheduling" size="xs" />
-          </div>
+          </button>
           <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
             <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Weather No-Shows</div>
             <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">

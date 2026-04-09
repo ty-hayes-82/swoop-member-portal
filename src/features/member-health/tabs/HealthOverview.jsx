@@ -197,11 +197,16 @@ export default function HealthOverview() {
           </div>
           <div className="text-xs text-gray-500 mt-0.5">annual dues exposure</div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Saves This Month</div>
+        <button
+          type="button"
+          onClick={() => navigate('board-report', { tab: 1 })}
+          className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800 cursor-pointer text-left hover:border-success-500 hover:shadow-md transition-all"
+          title="View Member Saves in Board Report"
+        >
+          <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Saves This Month →</div>
           <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{savesThisMonth.length}</div>
           <div className="text-xs text-gray-500 mt-0.5">retained through intervention</div>
-        </div>
+        </button>
       </div>
 
       {/* Health Distribution KPI Cards */}

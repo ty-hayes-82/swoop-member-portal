@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getResignationScenarios } from '@/services/memberService';
+import { useNavigation } from '@/context/NavigationContext';
 const DOMAIN_COLORS = {
   Golf: '#22c55e',
   'F&B': '#f59e0b',
@@ -20,9 +21,20 @@ const AGENT_ANNOTATIONS = {
 
 const formatDues = (value) => (Number.isFinite(value) ? `$${(value / 1000).toFixed(0)}K` : '—');
 
+// Map a scenario pattern to a symptom filter chip
+function patternToSymptom(pattern = '') {
+  const p = pattern.toLowerCase();
+  if (p.includes('multi') || p.includes('all domain') || p.includes('cross-domain')) return 'multi';
+  if (p.includes('email')) return 'email';
+  if (p.includes('golf') || p.includes('round')) return 'golf';
+  if (p.includes('dining') || p.includes('f&b') || p.includes('food')) return 'dining';
+  return 'multi';
+}
+
 export default function ResignationTimeline() {
   const scenarios = getResignationScenarios();
   const [expanded, setExpanded] = useState(null);
+  const { navigate } = useNavigation();
 
   return (
     <div className="flex flex-col gap-4">
@@ -80,6 +92,20 @@ export default function ResignationTimeline() {
                       <span className="text-xs text-cyan-500 leading-normal opacity-90">{annotation.note}</span>
                     </div>
                   )}
+                </div>
+
+                {/* Phase H4 — search current members for this pattern */}
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between flex-wrap gap-2">
+                  <div className="text-[11px] text-gray-500 italic leading-snug">
+                    This pattern may be repeating in current members.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('members', { tab: 'all-members', symptom: patternToSymptom(scenario.pattern) })}
+                    className="px-3 py-1 rounded-md bg-brand-500 text-white text-[10px] font-bold cursor-pointer border-none hover:bg-brand-600"
+                  >
+                    Find current members with this pattern →
+                  </button>
                 </div>
               </div>
             )}

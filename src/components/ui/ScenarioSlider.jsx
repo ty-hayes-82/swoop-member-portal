@@ -72,6 +72,36 @@ export default function ScenarioSlider({
           <span>40%</span>
           <span>50%</span>
         </div>
+
+        {/* Phase J5 — preset buttons */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
+          {[
+            { label: 'Conservative', value: 10, color: '#9CA3AF' },
+            { label: 'Realistic', value: 20, color: '#22c55e' },
+            { label: 'Aggressive', value: 30, color: '#f59e0b' },
+            { label: 'Best case', value: 40, color: '#8b5cf6' },
+          ].map(preset => {
+            const isActive = reductionPct === preset.value;
+            return (
+              <button
+                key={preset.value}
+                type="button"
+                onClick={() => setReductionPct(preset.value)}
+                className={`px-2 py-1.5 rounded-md text-[10px] font-bold cursor-pointer transition-all border-2 ${
+                  isActive ? 'scale-105 shadow-md' : 'hover:scale-105'
+                }`}
+                style={{
+                  borderColor: preset.color,
+                  background: isActive ? preset.color : `${preset.color}10`,
+                  color: isActive ? '#fff' : preset.color,
+                }}
+              >
+                <div>{preset.label}</div>
+                <div className="font-mono">{preset.value}%</div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Breakdown */}

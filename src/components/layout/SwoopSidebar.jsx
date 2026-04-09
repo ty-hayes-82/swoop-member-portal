@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useNavigationContext } from "@/context/NavigationContext";
 import { useMemberProfile } from "@/context/MemberProfileContext";
+import { useApp } from "@/context/AppContext";
 import { NAV_ITEMS } from "@/config/navigation";
 import { shouldUseStatic } from "@/services/demoGate";
 import { getAtRiskMembers } from "@/services/memberService";
@@ -62,6 +63,7 @@ const SwoopSidebar = () => {
     useSidebar();
   const { currentRoute, navigate } = useNavigationContext();
   const { openProfile } = useMemberProfile();
+  const { pendingAgentCount } = useApp() || {};
 
   const handleStartStory = (storyId) => {
     if (storyId === 'briefing') {
@@ -172,7 +174,21 @@ const SwoopSidebar = () => {
                     {showFull && (
                       <span className="menu-item-text">{item.label}</span>
                     )}
-                    {showFull && isActive(item.key) && (
+                    {/* Phase K6 — pending count badge for Today + Automations */}
+                    {showFull && (item.key === 'today' || item.key === 'automations') && pendingAgentCount > 0 && (
+                      <span className="ml-auto min-w-[20px] h-[18px] inline-flex items-center justify-center rounded-full bg-brand-500 text-white text-[10px] font-bold px-1.5">
+                        {pendingAgentCount}
+                      </span>
+                    )}
+                    {/* Phase L9 — Data Health stale indicator on Admin nav */}
+                    {showFull && item.key === 'admin' && (
+                      <span
+                        className="ml-auto inline-flex items-center justify-center w-2 h-2 rounded-full"
+                        style={{ background: '#22c55e' }}
+                        title="Data Health: monitor connection freshness"
+                      />
+                    )}
+                    {showFull && isActive(item.key) && item.key !== 'today' && item.key !== 'automations' && item.key !== 'admin' && (
                       <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-400" />
                     )}
                   </button>

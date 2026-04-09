@@ -51,6 +51,17 @@ export default function DataHealthDashboard() {
   const features = data?.features || [];
   const nextDomain = data?.nextDomainToConnect;
 
+  // Phase L1 — what's blocking pillar features (per-domain → pillar feature impact)
+  const DOMAIN_PILLAR_IMPACT = {
+    CRM: { features: ['Today Morning Briefing', 'Member Health Scores', 'First Domino visualization'], dollar: 'Required for all member-level intelligence' },
+    TEE_SHEET: { features: ['Today briefing rounds count', 'Hole 12 bottleneck drill-down', 'At-risk on tee sheet detection'], dollar: '$5,760/mo pace-to-dining attribution' },
+    POS: { features: ['F&B revenue decomposition', 'Dining conversion correlation', 'Post-round dining stats'], dollar: '$9,580/mo full F&B leakage decomposition' },
+    EMAIL: { features: ['First Domino email signal', 'Engagement decay watch list', 'Cohort heatmap'], dollar: 'Earliest decay signal — typically the first domino to fall' },
+    LABOR: { features: ['Tomorrow staffing risk', 'Pace-to-Revenue connection card', 'Understaffed days correlation'], dollar: '$3,400/mo staffing-driven F&B loss' },
+  };
+  const blockedDomains = domains.filter(d => !d.connected && !d.is_connected);
+  const hasBlocking = blockedDomains.length > 0;
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -59,6 +70,37 @@ export default function DataHealthDashboard() {
           Connection status, data freshness, and feature availability across all data domains.
         </p>
       </div>
+
+      {/* Phase L1 — What's Blocking Insights callout */}
+      {hasBlocking && (
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-warning-500/[0.06] to-warning-500/[0.02] border border-warning-500/30">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-warning-600">⚠️ What's Blocking Insights</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {blockedDomains.slice(0, 4).map(domain => {
+              const impact = DOMAIN_PILLAR_IMPACT[domain.code];
+              if (!impact) return null;
+              return (
+                <div key={domain.code} className="bg-white border border-warning-500/20 rounded-xl p-3">
+                  <div className="text-xs font-bold text-gray-800 dark:text-white/90 mb-1">
+                    {DOMAIN_INFO[domain.code]?.icon} {DOMAIN_INFO[domain.code]?.label || domain.code} disconnected
+                  </div>
+                  <div className="text-[10px] text-gray-500 mb-2">Blocks:</div>
+                  <ul className="text-[11px] text-gray-700 dark:text-gray-300 m-0 pl-4 leading-snug">
+                    {impact.features.map(f => (
+                      <li key={f}>{f}</li>
+                    ))}
+                  </ul>
+                  <div className="mt-2 pt-2 border-t border-warning-500/15 text-[11px] font-bold text-warning-700">
+                    💰 {impact.dollar}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Value Score */}
       <div className="p-6 rounded-2xl bg-gradient-to-br from-brand-500/[0.03] to-brand-500/[0.01] border border-brand-500/20 flex justify-between items-center">

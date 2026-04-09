@@ -1,11 +1,13 @@
 // MemberAlerts — Top 5 priority members needing attention this week
 // Uses live API data from memberService (not static demo data)
+import { useState } from 'react';
 import { getAtRiskMembers, getWatchMembers } from '@/services/memberService';
 import { getComplaintCorrelation } from '@/services/staffingService';
 import { shouldUseStatic } from '@/services/demoGate';
 import MemberLink from '@/components/MemberLink';
 import { useNavigation } from '@/context/NavigationContext';
 import SourceBadge from '@/components/ui/SourceBadge';
+import { trackAction } from '@/services/activityService';
 
 const ACTION_OWNERS = {
   'Ghost': 'GM',
@@ -127,6 +129,29 @@ const ARCHETYPE_COLORS = {
 export default function MemberAlerts() {
   const { navigate } = useNavigation();
   const members = buildPriorityList();
+  const [bulkApproved, setBulkApproved] = useState(false);
+
+  const handleBulkApprove = () => {
+    if (members.length === 0) return;
+    const totalDues = members.reduce((s, m) => s + (m.duesAnnual || 0), 0);
+    const proceed = window.confirm(
+      `Approve recommended outreach for all ${members.length} priority members?` +
+      (totalDues > 0 ? `\n\nProtects $${totalDues.toLocaleString()}/yr in dues.` : '')
+    );
+    if (!proceed) return;
+    members.forEach(m => {
+      trackAction({
+        actionType: 'approve',
+        actionSubtype: 'bulk_outreach',
+        memberId: m.memberId,
+        memberName: m.name,
+        referenceType: 'priority_member',
+        referenceId: `bulk_today_${m.memberId}`,
+        description: `Bulk approved (Today): ${m.action}`,
+      });
+    });
+    setBulkApproved(true);
+  };
 
   if (members.length === 0) {
     return (
@@ -145,16 +170,33 @@ export default function MemberAlerts() {
   }
 
   return (
-    <div className="alerts-section-enhanced fade-in-up fade-delay-1">
+    <div className="alerts-section-enhanced fade-in-up fade-delay-1" data-section="member-alerts">
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-        <div className="alerts-header" style={{ color: '#ef4444', margin: 0 }}>
-          Priority Member Alerts
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="alerts-header" style={{ color: '#ef4444', margin: 0 }}>
+            Priority Member Alerts
+          </div>
+          <div className="flex gap-1 flex-wrap">
+            <SourceBadge system="Member CRM" size="xs" />
+            <SourceBadge system="Analytics" size="xs" />
+            {shouldUseStatic('complaints') && <SourceBadge system="Complaint Log" size="xs" />}
+          </div>
         </div>
-        <div className="flex gap-1 flex-wrap">
-          <SourceBadge system="Member CRM" size="xs" />
-          <SourceBadge system="Analytics" size="xs" />
-          {shouldUseStatic('complaints') && <SourceBadge system="Complaint Log" size="xs" />}
-        </div>
+        {/* Phase I5 — bulk approve */}
+        {members.length > 0 && (
+          <button
+            type="button"
+            onClick={handleBulkApprove}
+            disabled={bulkApproved}
+            className={`px-3 py-1 rounded-md text-[10px] font-bold cursor-pointer border-none whitespace-nowrap ${
+              bulkApproved
+                ? 'bg-success-100 text-success-700 cursor-default'
+                : 'bg-success-500 text-white hover:bg-success-600'
+            }`}
+          >
+            {bulkApproved ? '✓ All approved' : `Approve all ${members.length} →`}
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">

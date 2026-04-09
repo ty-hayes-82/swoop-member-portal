@@ -233,7 +233,7 @@ export default function IntegrationsPage() {
         </div>
       </div>
 
-      <section className="grid-responsive-4" className="grid gap-4">
+      <section className="grid-responsive-4 grid gap-4">
         {summaryCards.map((card) => (
           <div key={card.label} style={{
             borderRadius: '12px',

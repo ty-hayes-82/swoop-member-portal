@@ -14,6 +14,7 @@ import WeekForecast from './WeekForecast';
 import MorningBriefingSentence from './MorningBriefingSentence';
 import DemoStoriesLauncher from './DemoStoriesLauncher';
 import SourceBadge from '@/components/ui/SourceBadge';
+import { AnimatedNumber } from '@/components/ui/PageTransition';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
@@ -24,6 +25,7 @@ import DataEmptyState from '@/components/ui/DataEmptyState';
 import { getTodayTeeSheet } from '@/services/operationsService';
 import { getMemberSummary } from '@/services/memberService';
 import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
+import { trackAction } from '@/services/activityService';
 
 // GM Greeting Alert — simulates real-time member check-in notifications
 function buildCheckinAlerts() {
@@ -287,8 +289,11 @@ export default function TodayView() {
                 {stat.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 2 }}>{stat.label}</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, letterSpacing: -0.3 }}>{stat.value}</div>
+                <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 2 }} title={stat.label === 'Pending Actions' ? 'Total actions awaiting your approval across all agents' : stat.label}>{stat.label}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, letterSpacing: -0.3 }}>
+                  {/* Phase K1 — AnimatedNumber for numeric stats */}
+                  {/^\d+$/.test(stat.value) ? <AnimatedNumber value={parseInt(stat.value, 10)} duration={800} /> : stat.value}
+                </div>
                 {stat.source && (
                   <div style={{ marginTop: 4 }}>
                     <SourceBadge system={stat.source} size="xs" />
@@ -375,17 +380,31 @@ export default function TodayView() {
         )}
 
         {/* Weather Alerts Banner */}
-        {weatherAlerts.filter(a => !dismissedAlerts.includes(a.headline)).map((alert, i) => (
-          <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border ${
-            alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
+        {weatherAlerts.filter(a => !dismissedAlerts.includes(a.headline)).map((alert, i) => {
+          const isSevere = alert.severity === 'EXTREME' || alert.severity === 'SEVERE';
+          const handleNotify = () => {
+            const teeSheet = getTodayTeeSheet();
+            const affected = teeSheet.length;
+            // Phase H3 — bulk notification
+            trackAction({
+              actionType: 'approve',
+              actionSubtype: 'weather_notify',
+              referenceType: 'weather_alert',
+              referenceId: alert.headline || `alert_${i}`,
+              description: `Notify ${affected} affected tee times of ${alert.headline || alert.type}`,
+            });
+            setDismissedAlerts(prev => [...prev, alert.headline]);
+          };
+          return (
+          <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border flex-wrap gap-2 ${
+            isSevere
               ? 'border-error-500/40 bg-error-50 dark:bg-error-500/10'
               : 'border-warning-500/40 bg-warning-50 dark:bg-warning-500/10'
           }`}>
             <div className="flex items-center gap-2 flex-wrap">
               <SourceBadge system="Weather API" size="xs" />
               <span className={`text-sm font-semibold ${
-                alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
-                  ? 'text-error-500' : 'text-warning-500'
+                isSevere ? 'text-error-500' : 'text-warning-500'
               }`}>
                 {alert.headline || `${alert.type} Warning`}
               </span>
@@ -395,14 +414,26 @@ export default function TodayView() {
                 </span>
               )}
             </div>
-            <button
-              onClick={() => setDismissedAlerts(prev => [...prev, alert.headline])}
-              className="bg-transparent border-none cursor-pointer text-gray-400 text-sm px-1.5 py-0.5"
-            >
-              Dismiss
-            </button>
+            <div className="flex items-center gap-2">
+              {isSevere && shouldUseStatic('tee-sheet') && (
+                <button
+                  onClick={handleNotify}
+                  className="bg-error-500 text-white border-none cursor-pointer text-xs font-bold px-3 py-1 rounded-md hover:bg-error-600"
+                  title="Send weather alert to affected tee times"
+                >
+                  Notify affected tee times →
+                </button>
+              )}
+              <button
+                onClick={() => setDismissedAlerts(prev => [...prev, alert.headline])}
+                className="bg-transparent border-none cursor-pointer text-gray-400 text-sm px-1.5 py-0.5"
+              >
+                Dismiss
+              </button>
+            </div>
           </div>
-        ))}
+          );
+        })}
 
         {/* GM Greeting Alerts — real-time check-in notifications */}
         <GmGreetingAlert />

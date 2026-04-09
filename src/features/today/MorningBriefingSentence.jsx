@@ -121,6 +121,13 @@ export default function MorningBriefingSentence() {
 
   if (segments.length === 0) return null;
 
+  // Phase I2 — make the at-risk segment a clickable scroll target
+  const hasAtRisk = segments.some(s => s.key === 'at-risk');
+  const handleScrollToAlerts = () => {
+    const el = document.querySelector('[data-section="member-alerts"]');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   // Build the synthesized sentence
   const sentence = segments.map(s => s.text).join('. ') + '.';
 
@@ -138,6 +145,18 @@ export default function MorningBriefingSentence() {
 
   return (
     <div className="fade-in-up">
+      {/* Phase J3 — Layer 3 tag */}
+      {sources.length >= 3 && (
+        <div className="flex items-center gap-2 mb-1 px-1">
+          <span
+            className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
+            style={{ background: 'rgba(167,139,250,0.15)', color: '#8b5cf6' }}
+          >
+            ⬢ LAYER 3 · {sources.length} SYSTEMS
+          </span>
+          <span className="text-[10px] text-gray-400 italic">Cross-domain synthesis no single vendor can produce</span>
+        </div>
+      )}
       <StoryHeadline
         variant={variant}
         headline={sentence}
@@ -146,15 +165,26 @@ export default function MorningBriefingSentence() {
       {sources.length > 0 && (
         <div className="-mt-2 mb-2 px-1 flex items-center justify-between gap-2 flex-wrap">
           <EvidenceStrip systems={sources} compact />
-          {hasDollarExposure && (
-            <button
-              type="button"
-              onClick={() => navigate('revenue')}
-              className="text-[11px] font-bold text-brand-500 bg-brand-500/[0.06] border border-brand-500/20 px-3 py-1 rounded-md cursor-pointer hover:bg-brand-500/[0.12] whitespace-nowrap"
-            >
-              See full revenue breakdown →
-            </button>
-          )}
+          <div className="flex gap-2 flex-wrap">
+            {hasAtRisk && (
+              <button
+                type="button"
+                onClick={handleScrollToAlerts}
+                className="text-[11px] font-bold text-error-500 bg-error-500/[0.06] border border-error-500/20 px-3 py-1 rounded-md cursor-pointer hover:bg-error-500/[0.12] whitespace-nowrap"
+              >
+                View at-risk alerts ↓
+              </button>
+            )}
+            {hasDollarExposure && (
+              <button
+                type="button"
+                onClick={() => navigate('revenue')}
+                className="text-[11px] font-bold text-brand-500 bg-brand-500/[0.06] border border-brand-500/20 px-3 py-1 rounded-md cursor-pointer hover:bg-brand-500/[0.12] whitespace-nowrap"
+              >
+                See full revenue breakdown →
+              </button>
+            )}
+          </div>
         </div>
       )}
       {/* Trust math — how is this computed? */}

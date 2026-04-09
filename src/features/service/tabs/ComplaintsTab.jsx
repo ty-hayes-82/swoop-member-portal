@@ -228,6 +228,28 @@ export default function ComplaintsTab() {
                         {statusStyle.label}
                       </span>
                       {complaint.status !== 'resolved' && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Phase H5 — schedule resolution call inline
+                            trackAction({
+                              actionType: 'approve',
+                              actionSubtype: 'schedule_resolution',
+                              memberId: complaint.memberId,
+                              memberName: complaint.memberName,
+                              referenceType: 'complaint',
+                              referenceId: complaint.id,
+                              description: `Schedule resolution call for ${complaint.category} (${daysSince}d open)`,
+                            });
+                          }}
+                          className="text-[10px] font-bold text-white bg-brand-500 hover:bg-brand-600 px-2 py-0.5 rounded cursor-pointer border-none"
+                          title="Schedule a resolution call (one-tap)"
+                        >
+                          Schedule call
+                        </button>
+                      )}
+                      {complaint.status !== 'resolved' && (
                         <span className="text-[10px] font-semibold text-brand-500">
                           {isComplaintExpanded ? '▾' : '▸ Act'}
                         </span>
