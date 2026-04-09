@@ -106,7 +106,7 @@ test.describe('Mobile conference demo walkthrough', () => {
 
     // Capture handshake baseline value ($XXK)
     const barBefore = await page
-      .locator('[role="status"][aria-label*="dollars saved"]')
+      .locator('[role="button"][aria-label*="dollars saved"]')
       .first()
       .innerText();
     const beforeK = parseBarK(barBefore);
@@ -160,7 +160,7 @@ test.describe('Mobile conference demo walkthrough', () => {
 
     // --- 7. Verify handshake bar ticked ---
     const barAfter = await page
-      .locator('[role="status"][aria-label*="dollars saved"]')
+      .locator('[role="button"][aria-label*="dollars saved"]')
       .first()
       .innerText();
     const afterK = parseBarK(barAfter);

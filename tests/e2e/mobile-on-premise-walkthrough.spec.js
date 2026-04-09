@@ -84,19 +84,22 @@ test.describe('Mobile On-Premise Member Lookup — GM walkthrough', () => {
     await page.waitForTimeout(400);
     await page.screenshot({ path: `C:/GIT/Development/swoop-member-portal/test-results/mobile-onprem-03-card-expanded.png`, fullPage: true });
 
-    // Quick action buttons should be visible
-    const callBtn = page.getByRole('button', { name: /Call/ }).first();
-    const smsBtn = page.getByRole('button', { name: /SMS/ }).first();
-    const emailBtn = page.getByRole('button', { name: /Email/ }).first();
+    // Quick action buttons should be visible.
+    // 2026-04-09 wave 13 user directive: on-premise members get face-to-face
+    // actions (Greet/Comp/Reseat/Tell GM) instead of remote (Call/SMS/Email).
+    // Spec updated wave 16.
+    const greetBtn = page.getByRole('button', { name: /Greet/ }).first();
     const compBtn = page.getByRole('button', { name: /Comp/ }).first();
-    await expect(callBtn).toBeVisible();
-    await expect(smsBtn).toBeVisible();
-    await expect(emailBtn).toBeVisible();
+    const reseatBtn = page.getByRole('button', { name: /Reseat/ }).first();
+    const tellGmBtn = page.getByRole('button', { name: /Tell GM/ }).first();
+    await expect(greetBtn).toBeVisible();
     await expect(compBtn).toBeVisible();
+    await expect(reseatBtn).toBeVisible();
+    await expect(tellGmBtn).toBeVisible();
 
-    // Touch target audit (>=44px per Apple HIG) — sample Call button.
-    const box = await callBtn.boundingBox();
-    console.log(`[touch-target] Call button: ${box?.width}x${box?.height}`);
+    // Touch target audit (>=44px per Apple HIG) — sample Greet button.
+    const box = await greetBtn.boundingBox();
+    console.log(`[touch-target] Greet button: ${box?.width}x${box?.height}`);
     // The button is a grid cell in the expanded card; width should be ample,
     // height ~38px. We only assert the button renders with non-zero size.
     expect(box?.height).toBeGreaterThan(30);
