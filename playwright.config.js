@@ -18,5 +18,10 @@ export default defineConfig({
   },
   projects: [
     { name: 'Desktop Chrome', use: { ...devices['Desktop Chrome'] } },
+    // 2026-04-09 wave 12: iPhone 13 emulator profile so GM agents can audit
+    // the conference demo (#/m/conference) and the on-premise lookup
+    // (#/m/members) in a real mobile viewport with touch events. Used by
+    // tests under tests/e2e/mobile-* and ad-hoc GM-agent walkthroughs.
+    { name: 'iPhone 13', use: { ...devices['iPhone 13'] } },
   ],
 });
