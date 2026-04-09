@@ -227,7 +227,7 @@ If any of steps 1-2 fails, fall back to `PICKUP-HERE.md` §6 (the sprint-level v
 |---|---|---|---|---|---|
 | **v1** | 2026-04-09 (morning) | 5 / 4 / 5 | GO with caveat (S2 narration gap) | 5 demo-data bumps (`bf87504`); 3 audit polish fixes (`781486e`) | 2 cascading $ proposals; 7 verbatim-locked values |
 | **v2** | 2026-04-09 (mid-day) | 5 / **5** / 5 | GO (clean) — S2 advanced 4→5 | 5 fixes (`025d65f`): chip-suppress drawer/page, `weeksAgo` fallback, teeSheet weather sync, cockpit bullets rename, wind stakes bump | 4 v2-held items: James $22K sync, Feb monthlyTrends, Chen cascade, pace cascade |
-| **v3** | 2026-04-09 (afternoon) | _(populate when v3 audit lands)_ | | | |
+| **v3** | 2026-04-09 (afternoon) | 5 / 5 / 5 (held) | GO (clean) | 8 fixes (`baccb71`): chip removal complete (drawer + page small chips deleted), weather.js Jan 17 sync, revenue.js Jan 17 weather label, briefingService secondary atRiskTeetimes block sync, outlets.js Grill Room −$4,120, boardReport.js Wind Feb 8 $12,400, members.js potentialDuesAtRisk $868K (bug fix). v3 audit caught 1 wrong-recommendation (staffing.js bump would have broken $9,580 anchor) — verified + reverted | All v2-held items still held + 1 new flag (Robert Callaway / Callahan name collision is a live-demo risk; recommend rename before next all-hands) |
 
 **Each cycle appends a row.** The cycle is the recurring quality bar: a GM agent walks the storyboard paths, scores against the rubric, files a punch list, and the highest-leverage low-risk items ship in the next commit. Items held for human GM design discussion accumulate in the "Items held" column until the human GM (or a pilot conversation) un-blocks them.
 
