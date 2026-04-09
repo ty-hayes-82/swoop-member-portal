@@ -11,6 +11,8 @@ import PendingActionsInline from './PendingActionsInline';
 import MemberAlerts from './MemberAlerts';
 import TomorrowForecast from './TomorrowForecast';
 import WeekForecast from './WeekForecast';
+import MorningBriefingSentence from './MorningBriefingSentence';
+import SourceBadge from '@/components/ui/SourceBadge';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
@@ -251,13 +253,16 @@ export default function TodayView() {
           </div>
         </div>
 
+        {/* Section 1.5: Morning Briefing Synthesis (Pillar 1: SEE IT) */}
+        <MorningBriefingSentence />
+
         {/* Section 2: Quick Stats Row */}
         <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
           {[
-            { icon: courseCondition?.icon || '🌤️', bg: '#ecfdf5', label: 'Course Condition', value: courseCondition?.label || '—', color: courseCondition?.color || '#9ca3af' },
-            shouldUseStatic('tee-sheet') && { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: roundsToday > 0 ? String(roundsToday) : '—', color: '#6366f1' },
-            { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732' },
-            { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: String(priorities.length), color: '#8b5cf6' },
+            { icon: courseCondition?.icon || '🌤️', bg: '#ecfdf5', label: 'Course Condition', value: courseCondition?.label || '—', color: courseCondition?.color || '#9ca3af', source: 'Weather API' },
+            shouldUseStatic('tee-sheet') && { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: roundsToday > 0 ? String(roundsToday) : '—', color: '#6366f1', source: 'Tee Sheet' },
+            { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732', source: 'Member CRM' },
+            { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: String(priorities.length), color: '#8b5cf6', source: 'Analytics' },
           ].filter(Boolean).map((stat) => (
             <div
               key={stat.label}
@@ -277,9 +282,14 @@ export default function TodayView() {
               <div style={{ width: 42, height: 42, background: stat.bg, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                 {stat.icon}
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 2 }}>{stat.label}</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, letterSpacing: -0.3 }}>{stat.value}</div>
+                {stat.source && (
+                  <div style={{ marginTop: 4 }}>
+                    <SourceBadge system={stat.source} size="xs" />
+                  </div>
+                )}
               </div>
             </div>
           ))}

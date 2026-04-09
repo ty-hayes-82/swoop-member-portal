@@ -28,7 +28,7 @@ const PAGES = [
   { name: 'Tee Sheet', nav: 'Tee Sheet' },
   { name: 'Service', nav: 'Service' },
   { name: 'Board Report', nav: 'Board Report' },
-  { name: 'Automations', nav: 'Automations' },
+  { name: 'Automations', nav: 'Automations', hash: 'automations' },
 ];
 
 test.beforeAll(() => {
@@ -43,52 +43,34 @@ for (const combo of COMBINATIONS) {
       await importGates(page, combo.gates);
     }
 
+    // The Guided Demo wizard panel may appear as a floating overlay on the right.
+    // Gemini is instructed to ignore it in its analysis prompt.
+
     const screenshots = [];
     for (const p of PAGES) {
       if (p.nav) {
         await nav(page, p.nav);
       }
-
-      // Wait for content to settle (Today needs extra time for animated check-in alerts)
+      // Wait for content to settle
       await page.waitForLoadState('domcontentloaded');
-      await page.waitForTimeout(p.name === 'Today' ? 5000 : 2500);
-
-      // Automations is lazy-loaded and nav click sometimes fails silently.
-      // Detect blank page and retry via hash navigation.
-      if (p.name === 'Automations') {
-        try {
-          const text = await page.evaluate(() => document.querySelector('main')?.innerText?.trim() || '');
-          if (text.length < 20) {
-            await page.evaluate(() => { window.location.hash = '#/automations'; });
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(3000);
-          }
-        } catch {
-          // Hash change may trigger navigation — wait for page to settle
-          await page.waitForLoadState('domcontentloaded');
-          await page.waitForTimeout(3000);
-        }
-      }
-
+      await page.waitForTimeout(2500);
       const filename = `${combo.id}__${p.name.replace(/\s+/g, '-')}.png`;
       const filepath = path.join(SCREENSHOT_DIR, filename);
 
-      // Measure main content scroll height, then resize viewport to capture it all.
-      // This avoids DOM manipulation (overflow hacks) which corrupts navigation.
-      const scrollHeight = await page.evaluate(() => {
-        const main = document.querySelector('main');
-        return main ? main.scrollHeight : document.documentElement.scrollHeight;
-      });
-      const viewportHeight = Math.max(768, scrollHeight + 100);
-      await page.setViewportSize({ width: 1280, height: viewportHeight });
-      await page.waitForTimeout(500);
-
+      // Scroll to bottom then back to top to force lazy content to load
+      try {
+        await page.evaluate(() => {
+          const main = document.querySelector('main') || document.documentElement;
+          main.scrollTop = main.scrollHeight;
+        });
+        await page.waitForTimeout(500);
+        await page.evaluate(() => {
+          const main = document.querySelector('main') || document.documentElement;
+          main.scrollTop = 0;
+        });
+        await page.waitForTimeout(300);
+      } catch {}
       await page.screenshot({ path: filepath, fullPage: true });
-
-      // Restore normal viewport for next navigation
-      await page.setViewportSize({ width: 1280, height: 720 });
-      await page.waitForTimeout(200);
-
       screenshots.push({ page: p.name, file: filename });
     }
 

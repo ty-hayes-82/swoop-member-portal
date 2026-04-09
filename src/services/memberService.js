@@ -372,7 +372,7 @@ export const getLiveDashboard = () => _live;
 let _apiLoaded = false;
 let _hasRealMembers = false;
 
-import { shouldUseStatic, getDataMode, isSourceLoaded } from './demoGate';
+import { shouldUseStatic, getDataMode } from './demoGate';
 import {
   hasEngagementGates,
   getOpenGatesForScoring,
@@ -624,62 +624,6 @@ export function getFullRoster() {
   return _rosterCache;
 }
 
-/**
- * In guided demo mode, strip profile fields that belong to gates the user hasn't imported yet.
- * This ensures the member profile only shows data from imported sources.
- */
-function stripUngatedProfileData(profile) {
-  if (!profile || getDataMode() !== 'guided') return profile;
-  const p = { ...profile };
-
-  // Golf / Tee Sheet data
-  if (!isSourceLoaded('tee-sheet')) {
-    p.golfScore = undefined;
-    p.roundsPlayed = undefined;
-    p.lastSeenLocation = undefined;
-    if (p.preferences) p.preferences = { ...p.preferences, teeWindows: undefined, favoriteSpots: undefined };
-    p.activity = (p.activity || []).filter(a => !/golf|tee|round|hole|course|pace/i.test(a.type + ' ' + (a.detail || '')));
-    p.riskSignals = (p.riskSignals || []).filter(r => !/tee sheet|rounds|golf|pace/i.test(r.source + ' ' + r.label));
-  }
-
-  // F&B / Dining data
-  if (!isSourceLoaded('fb')) {
-    p.diningScore = undefined;
-    p.diningSpend = undefined;
-    p.spendHistory = undefined;
-    p.memberValueAnnual = p.duesAnnual; // Without F&B, value = dues only
-    if (p.preferences) p.preferences = { ...p.preferences, dining: undefined };
-    p.activity = (p.activity || []).filter(a => !/dining|f&b|restaurant|grill|patio|lounge|chef|wine|menu|check/i.test(a.type + ' ' + (a.detail || '')));
-    p.riskSignals = (p.riskSignals || []).filter(r => !/pos|f&b|spend|dining/i.test(r.source + ' ' + r.label));
-  }
-
-  // Email data
-  if (!isSourceLoaded('email')) {
-    p.emailOpenRate = undefined;
-    p.emailScore = undefined;
-    p.activity = (p.activity || []).filter(a => !/email|newsletter|campaign|open.*rate|click/i.test(a.type + ' ' + (a.detail || '')));
-    p.riskSignals = (p.riskSignals || []).filter(r => !/email/i.test(r.source + ' ' + r.label));
-  }
-
-  // Complaints / Service data
-  if (!isSourceLoaded('complaints')) {
-    p.activity = (p.activity || []).filter(a => !/complaint|feedback|service request/i.test(a.type + ' ' + (a.detail || '')));
-    p.riskSignals = (p.riskSignals || []).filter(r => !/complaint|crm|service/i.test(r.source + ' ' + r.label));
-  }
-
-  // Archetype requires golf + dining data to classify meaningfully
-  if (!isSourceLoaded('tee-sheet') || !isSourceLoaded('fb')) {
-    p.archetype = undefined;
-  }
-
-  // Drafts / talking points require at least one engagement gate beyond members
-  if (!hasEngagementGates()) {
-    p.drafts = undefined;
-  }
-
-  return p;
-}
-
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
   if (_d?.memberProfiles?.[memberId]) {
@@ -687,15 +631,15 @@ export const getMemberProfile = (memberId) => {
     // In guided mode, recalculate the health score from available dimensions
     if (getDataMode() === 'guided' && profile) {
       if (!hasEngagementGates()) {
-        return stripUngatedProfileData({ ...profile, healthScore: '—', trend: [] });
+        return { ...profile, healthScore: '—', trend: [] };
       }
       const dims = getMemberDimensions(memberId, _d.memberProfiles[memberId].archetype);
       const score = computeScore(dims, getOpenGatesForScoring());
       if (score != null) {
-        return stripUngatedProfileData({ ...profile, healthScore: score });
+        return { ...profile, healthScore: score };
       }
     }
-    return stripUngatedProfileData(profile);
+    return profile;
   }
   // Fallback 1: build basic profile from at-risk member data
   const allAtRisk = normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? []);

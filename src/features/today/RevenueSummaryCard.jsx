@@ -1,21 +1,8 @@
 import { useNavigation } from '@/context/NavigationContext';
 import { isRealClub } from '@/config/constants';
-import { shouldUseStatic } from '@/services/demoGate';
-import { getPaceFBImpact } from '@/services/operationsService';
-import { getUnderstaffedDays } from '@/services/staffingService';
 import { archetypeSpendGaps } from '@/services/experienceInsightsService';
 import { getMemberSummary } from '@/services/memberService';
-
-function getLeakageData() {
-  if (!shouldUseStatic('fb') && !shouldUseStatic('complaints')) return null;
-  const paceFB = getPaceFBImpact();
-  const staffDays = getUnderstaffedDays();
-  const PACE_LOSS = shouldUseStatic('fb') ? paceFB.revenueLostPerMonth : 0;
-  const STAFFING_LOSS = shouldUseStatic('complaints') ? staffDays.reduce((sum, day) => sum + day.revenueLoss, 0) : 0;
-  const WEATHER_LOSS = 420;
-  const PROSHOP_LOSS = Math.round((72000 + 45000) / 12);
-  return { PACE_LOSS, STAFFING_LOSS, WEATHER_LOSS, PROSHOP_LOSS, TOTAL: PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS + PROSHOP_LOSS };
-}
+import { getLeakageData } from '@/services/revenueService';
 
 export default function RevenueSummaryCard() {
   const { navigate } = useNavigation();

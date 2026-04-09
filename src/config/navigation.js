@@ -44,6 +44,15 @@ export const navItems = [
     sourceSystems: ['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather'],
   },
   {
+    key: 'revenue',
+    label: 'Revenue',
+    section: 'PRIMARY',
+    icon: '💰',
+    color: theme.colors.navFb,
+    subtitle: 'Revenue leakage decomposition, scenario modeling, and board-ready attribution.',
+    sourceSystems: ['Tee Sheet', 'POS', 'Scheduling', 'Weather'],
+  },
+  {
     key: 'automations',
     label: 'Automations',
     section: 'PRIMARY',
@@ -70,17 +79,7 @@ export const navItems = [
     subtitle: 'Integrations and data health monitoring.',
     sourceSystems: ['Postgres'],
   },
-  // Moved to HIDDEN (V3): revenue, insights, actions
-  {
-    key: 'revenue',
-    label: 'Revenue',
-    section: 'HIDDEN',
-    icon: '💰',
-    color: theme.colors.navFb,
-    subtitle: 'Revenue signals — redirects to Service.',
-    sourceSystems: ['POS', 'Tee Sheet', 'Scheduling', 'Weather'],
-    hidden: true,
-  },
+  // Hidden routes (insights, actions)
   {
     key: 'insights',
     label: 'Insights',

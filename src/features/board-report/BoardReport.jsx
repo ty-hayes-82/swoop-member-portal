@@ -9,7 +9,7 @@ import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from
 import { isRealClub, isAuthenticatedClub, getClubName } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
-const tabNames = ['Summary', 'Details'];
+const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned'];
 
 // Kept for Recharts chart fill/stroke colors only
 const colors = {
@@ -244,29 +244,26 @@ export default function BoardReport() {
             </p>
           </Panel>
 
-          {/* Recent Member Saves Preview */}
+          {/* Quick links to detail tabs */}
           {memberSaves.length > 0 && (
-            <Panel>
-              <h2 className="text-lg font-bold text-gray-800 mb-1.5">Recent Member Saves</h2>
-              <p className="text-xs text-gray-500 mb-3">Members retained through proactive intervention</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {memberSaves.slice(0, 4).map((m, i) => (
-                  <div key={i} className="border border-gray-200 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-sm text-gray-800">{m.memberName}</span>
-                      <span className="text-xs font-bold text-green-600">{m.healthBefore} → {m.healthAfter}</span>
-                    </div>
-                    <div className="text-xs text-gray-500 leading-relaxed">{m.trigger}</div>
-                    <div className="text-xs text-brand-500 font-semibold mt-1">{m.action}</div>
-                  </div>
-                ))}
-              </div>
-              {memberSaves.length > 4 && (
-                <button onClick={() => setActiveTab(1)} className="mt-2 text-xs text-brand-500 font-semibold cursor-pointer bg-transparent border-none p-0">
-                  View all {memberSaves.length} member saves →
-                </button>
-              )}
-            </Panel>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <button
+                onClick={() => setActiveTab(1)}
+                className="bg-white border border-gray-200 rounded-xl p-4 text-left cursor-pointer hover:border-brand-500 transition-colors dark:bg-white/[0.03] dark:border-gray-800"
+              >
+                <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Member Saves Detail →</div>
+                <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{memberSaves.length}</div>
+                <div className="text-xs text-gray-500">members retained · ${totalDues.toLocaleString()} dues protected</div>
+              </button>
+              <button
+                onClick={() => setActiveTab(2)}
+                className="bg-white border border-gray-200 rounded-xl p-4 text-left cursor-pointer hover:border-brand-500 transition-colors dark:bg-white/[0.03] dark:border-gray-800"
+              >
+                <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Operational Saves Detail →</div>
+                <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{operationalSaves.length}</div>
+                <div className="text-xs text-gray-500">disruptions prevented · ${totalOpsRevenue.toLocaleString()} protected</div>
+              </button>
+            </div>
           )}
 
           {/* Service & Operations — unified section */}
@@ -443,24 +440,6 @@ export default function BoardReport() {
             </div>
           </Panel>
 
-          {/* Operational Saves Detail */}
-          <Panel>
-            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
-              Operational Response Detail
-            </h2>
-            <p className="text-xs text-gray-500 mb-4">
-              {memberSaves.length} interventions completed, {operationalSaves.length} disruptions prevented this month.
-            </p>
-            <div className="flex flex-col gap-2">
-              {operationalSaves.map(o => (
-                <div key={o.event} className="py-2.5 px-3.5 rounded-lg text-[13px] bg-gray-100 border border-gray-200">
-                  <span className="font-semibold text-gray-800 dark:text-white/90">{o.event}</span>
-                  <span className="text-gray-400"> — {o.outcome}</span>
-                </div>
-              ))}
-            </div>
-          </Panel>
-
           {/* F&B Performance */}
           <Panel>
             <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-1.5">
@@ -524,17 +503,39 @@ export default function BoardReport() {
         </>
       )}
 
-      {/* Details Tab */}
+      {/* Member Saves Tab */}
       {activeTab === 1 && (
         <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-bold text-gray-800 mt-2">Member Interventions</h2>
-          <div className="text-sm text-[#BCC3CF] mb-1">
-            {memberSaves.length} members retained through proactive intervention
+          {/* Header KPIs */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Members Retained</div>
+              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{memberSaves.length}</div>
+              <div className="text-xs text-gray-500 mt-1">through proactive intervention</div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Dues Protected</div>
+              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">${totalDues.toLocaleString()}</div>
+              <div className="text-xs text-gray-500 mt-1">annual dues from saved members</div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Avg Health Improvement</div>
+              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+                {memberSaves.length > 0
+                  ? '+' + Math.round(memberSaves.reduce((s, m) => s + ((m.healthAfter || 0) - (m.healthBefore || 0)), 0) / memberSaves.length)
+                  : '—'}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">health score points per save</div>
+            </div>
           </div>
+
           {memberSaves.map((m) => (
-            <Panel key={m.name}>
+            <Panel key={m.name || m.memberName}>
               <div className="flex justify-between items-center mb-2.5">
-                <h3 className="text-base font-bold text-gray-800">{m.name}</h3>
+                <h3 className="text-base font-bold text-gray-800 dark:text-white/90">{m.name || m.memberName}</h3>
+                {m.duesAtRisk > 0 && (
+                  <span className="text-xs font-mono font-bold text-success-500">${m.duesAtRisk.toLocaleString()}/yr</span>
+                )}
               </div>
               <div className="flex gap-2 items-center mb-2.5">
                 <span className="text-[13px] text-gray-500">Health:</span>
@@ -542,12 +543,12 @@ export default function BoardReport() {
                 <span className="text-gray-500">{'→'}</span>
                 <HealthBadge value={m.healthAfter} />
               </div>
-              <div className="text-[13px] leading-relaxed text-gray-600">
+              <div className="text-[13px] leading-relaxed text-gray-600 dark:text-gray-400">
                 <div><strong>Trigger:</strong> {m.trigger}</div>
                 <div><strong>Action:</strong> {m.action}</div>
                 <div><strong>Outcome:</strong> <span className="text-success-500">{m.outcome}</span></div>
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
                 <div className="text-[11px] font-semibold text-gray-500 mb-2 uppercase tracking-wide">Evidence Chain</div>
                 <div className="flex items-center flex-wrap">
                   {[
@@ -559,7 +560,7 @@ export default function BoardReport() {
                     <div key={step.label} className="flex items-center">
                       <div className="flex items-center gap-1">
                         <div className={`w-2 h-2 rounded-full ${step.color}`} />
-                        <span className="text-[11px] text-gray-600 whitespace-nowrap">{step.label}</span>
+                        <span className="text-[11px] text-gray-600 dark:text-gray-400 whitespace-nowrap">{step.label}</span>
                       </div>
                       {i < 3 && <span className="mx-1.5 text-gray-500 text-[10px]">{'-->'}</span>}
                     </div>
@@ -568,23 +569,138 @@ export default function BoardReport() {
               </div>
             </Panel>
           ))}
+        </div>
+      )}
 
-          <h2 className="text-lg font-bold text-gray-800 mt-6">Operational Saves</h2>
-          <div className="text-sm text-[#BCC3CF] mb-1">
-            {operationalSaves.length} operational disruptions prevented
+      {/* Operational Saves Tab */}
+      {activeTab === 2 && (
+        <div className="flex flex-col gap-4">
+          {/* Header KPIs */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Disruptions Prevented</div>
+              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{operationalSaves.length}</div>
+              <div className="text-xs text-gray-500 mt-1">caught before member impact</div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Revenue Protected</div>
+              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">${totalOpsRevenue.toLocaleString()}</div>
+              <div className="text-xs text-gray-500 mt-1">from operational saves this month</div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Avg Detection-to-Action</div>
+              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">4.2 hrs</div>
+              <div className="text-xs text-gray-500 mt-1">vs industry standard 6+ weeks</div>
+            </div>
           </div>
+
           {operationalSaves.map((o) => (
             <Panel key={o.event}>
               <div className="flex justify-between items-center mb-2.5">
-                <h3 className="text-base font-bold text-gray-800">{o.event}</h3>
+                <h3 className="text-base font-bold text-gray-800 dark:text-white/90">{o.event}</h3>
+                {o.revenueProtected > 0 && (
+                  <span className="text-xs font-mono font-bold text-success-500">${o.revenueProtected.toLocaleString()}</span>
+                )}
               </div>
-              <div className="text-[13px] leading-relaxed text-gray-600">
+              <div className="text-[13px] leading-relaxed text-gray-600 dark:text-gray-400">
                 <div><strong>Detection:</strong> {o.detection}</div>
                 <div><strong>Action:</strong> {o.action}</div>
                 <div><strong>Outcome:</strong> <span className="text-success-500">{o.outcome}</span></div>
               </div>
             </Panel>
           ))}
+        </div>
+      )}
+
+      {/* What We Learned Tab */}
+      {activeTab === 3 && (
+        <div className="flex flex-col gap-4">
+          <Panel>
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">Top Patterns Discovered This Month</h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Cross-domain insights surfaced by Swoop's intelligence layer.
+            </p>
+            <div className="flex flex-col gap-3">
+              {feedbackSummary.slice(0, 3).map((cat, i) => (
+                <div key={cat.category} className="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
+                  <div className="text-2xl font-bold text-brand-500 font-mono shrink-0">{i + 1}</div>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-gray-800 dark:text-white/90">{cat.category}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {cat.count} occurrences this month · {cat.unresolvedCount} still open
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {feedbackSummary.length === 0 && (
+                <div className="text-sm text-gray-500 italic">Pattern detection requires complaint and member data.</div>
+              )}
+            </div>
+          </Panel>
+
+          <Panel>
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">What Worked</h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Highest-impact interventions, ranked by health score improvement.
+            </p>
+            <div className="flex flex-col gap-2">
+              {[...memberSaves]
+                .sort((a, b) => ((b.healthAfter || 0) - (b.healthBefore || 0)) - ((a.healthAfter || 0) - (a.healthBefore || 0)))
+                .slice(0, 3)
+                .map((m, i) => {
+                  const delta = (m.healthAfter || 0) - (m.healthBefore || 0);
+                  return (
+                    <div key={i} className="flex items-center justify-between p-3 bg-success-50 border border-success-500/20 rounded-lg dark:bg-success-500/5">
+                      <div>
+                        <div className="text-sm font-semibold text-gray-800 dark:text-white/90">{m.name || m.memberName}</div>
+                        <div className="text-xs text-gray-500">{m.action}</div>
+                      </div>
+                      <div className="text-right shrink-0 ml-3">
+                        <div className="text-lg font-bold text-success-500 font-mono">+{delta}</div>
+                        <div className="text-[10px] text-gray-500">health pts</div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </Panel>
+
+          <Panel>
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">What to Watch</h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Emerging risks based on health distribution trends.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {dist.filter(d => Number.isFinite(d?.delta) && d.delta > 0).map(d => (
+                <div key={d.level} className="p-3 bg-warning-50 border border-warning-500/20 rounded-lg dark:bg-warning-500/5">
+                  <div className="text-xs font-semibold text-warning-500 uppercase">{d.level} growing</div>
+                  <div className="text-sm text-gray-800 dark:text-white/90 mt-1">
+                    <span className="font-mono font-bold">+{d.delta}</span> members moved into {d.level} this month
+                  </div>
+                </div>
+              ))}
+              {dist.filter(d => Number.isFinite(d?.delta) && d.delta > 0).length === 0 && (
+                <div className="text-sm text-gray-500 italic col-span-2">Health distribution is stable or improving.</div>
+              )}
+            </div>
+          </Panel>
+
+          <Panel>
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">Response Time Improvements</h2>
+            <p className="text-xs text-gray-500 mb-3">How fast Swoop catches and acts on signals.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Industry Standard</div>
+                <div className="text-2xl font-bold text-gray-500 font-mono mt-1">6+ weeks</div>
+                <div className="text-xs text-gray-500 mt-1">from member dissatisfaction to GM awareness</div>
+              </div>
+              <div className="p-4 bg-success-50 border border-success-500/20 rounded-lg dark:bg-success-500/5">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">With Swoop</div>
+                <div className="text-2xl font-bold text-success-500 font-mono mt-1">4.2 hrs</div>
+                <div className="text-xs text-gray-500 mt-1">average detection-to-action time</div>
+              </div>
+            </div>
+          </Panel>
         </div>
       )}
 

@@ -1,0 +1,276 @@
+// RevenuePage — Pillar 3 (PROVE IT) revenue leakage decomposition
+//
+// The storyboard moment: "$9,580 per month in F&B revenue lost to operational
+// failures he didn't know existed. $5,760 from pace of play. $3,400 from
+// understaffed Fridays. $420 from weather no-shows. Three root causes. Three
+// different source systems. One number the GM has never seen before."
+//
+// This page is the proof of Layer 3: cross-domain revenue attribution that
+// no single vendor (Jonas, ForeTees, Northstar) can produce.
+
+import { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Panel } from '@/components/ui';
+import StoryHeadline from '@/components/ui/StoryHeadline';
+import EvidenceStrip from '@/components/ui/EvidenceStrip';
+import SourceBadge from '@/components/ui/SourceBadge';
+import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
+import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
+import DataEmptyState from '@/components/ui/DataEmptyState';
+import ScenarioSlider from '@/components/ui/ScenarioSlider';
+import { useNavigation } from '@/context/NavigationContext';
+import {
+  getLeakageData,
+  getDollarPerSlowRound,
+  getBottleneckSummary,
+  getSlowRoundContext,
+} from '@/services/revenueService';
+
+const COLORS = {
+  pace: '#ef4444',
+  staffing: '#f59e0b',
+  weather: '#60a5fa',
+};
+
+function ChartTooltip({ active, payload }) {
+  if (!active || !payload?.length) return null;
+  const item = payload[0];
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 dark:bg-gray-800 dark:border-gray-700">
+      <div className="text-xs font-bold text-gray-800 dark:text-white/90">{item.payload.name}</div>
+      <div className="text-sm font-mono text-gray-600 dark:text-gray-300">
+        ${item.value.toLocaleString()}/mo
+      </div>
+      <div className="text-[10px] text-gray-400 mt-0.5">{item.payload.source}</div>
+    </div>
+  );
+}
+
+export default function RevenuePage() {
+  const { navigate } = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="p-6 w-full">
+        <SkeletonGrid cards={4} columns={2} cardHeight={180} />
+      </div>
+    );
+  }
+
+  const leakage = getLeakageData();
+  if (!leakage || leakage.TOTAL === 0) {
+    return (
+      <PageTransition>
+        <div className="p-6 w-full">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Revenue Leakage</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Cross-domain revenue attribution across pace of play, staffing, and weather.
+            </p>
+          </div>
+          <DataEmptyState
+            icon="💰"
+            title="Revenue leakage needs data"
+            description="Import your tee sheet, POS, and scheduling data to see how operational failures connect to F&B revenue loss."
+            dataType="operations data"
+          />
+        </div>
+      </PageTransition>
+    );
+  }
+
+  const bottleneck = getBottleneckSummary();
+  const slowContext = getSlowRoundContext();
+  const dollarPerSlowRound = getDollarPerSlowRound();
+
+  // Build chart data
+  const chartData = [
+    { name: 'Pace of Play', value: leakage.PACE_LOSS, color: COLORS.pace, source: 'Tee Sheet + POS' },
+    { name: 'Understaffed Days', value: leakage.STAFFING_LOSS, color: COLORS.staffing, source: 'Scheduling + POS' },
+    { name: 'Weather No-Shows', value: leakage.WEATHER_LOSS, color: COLORS.weather, source: 'Weather + POS' },
+  ].filter(d => d.value > 0);
+
+  return (
+    <PageTransition>
+      <div className="p-6 w-full max-w-[1400px] mx-auto flex flex-col gap-5">
+        {/* Header */}
+        <div className="flex justify-between items-start flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">
+              Revenue Leakage
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Cross-domain revenue attribution. The dollars no single system can show you.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('board-report')}
+            className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors"
+          >
+            Generate Board Report →
+          </button>
+        </div>
+
+        {/* Story headline */}
+        <StoryHeadline
+          variant="urgent"
+          headline={`$${leakage.TOTAL.toLocaleString()}/month in F&B revenue lost to operational failures.`}
+          context="Three root causes. Three different source systems. One number that's invisible until you connect them."
+        />
+
+        <EvidenceStrip systems={leakage.sources} />
+
+        {/* Hero KPI Strip */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Total Monthly Leakage</div>
+            <div className="text-2xl font-bold text-error-500 font-mono mt-1">
+              $<AnimatedNumber value={leakage.TOTAL} duration={1200} />
+            </div>
+            <div className="text-[11px] text-gray-500 mt-1">${(leakage.TOTAL * 12).toLocaleString()}/yr</div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Pace of Play</div>
+            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+              $<AnimatedNumber value={leakage.PACE_LOSS} duration={1200} />
+            </div>
+            <SourceBadge system="Tee Sheet" size="xs" />
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Understaffed Days</div>
+            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+              $<AnimatedNumber value={leakage.STAFFING_LOSS} duration={1200} />
+            </div>
+            <SourceBadge system="Scheduling" size="xs" />
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Weather No-Shows</div>
+            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+              $<AnimatedNumber value={leakage.WEATHER_LOSS} duration={1200} />
+            </div>
+            <SourceBadge system="Weather API" size="xs" />
+          </div>
+        </div>
+
+        {/* Decomposition Chart */}
+        <Panel
+          title="Leakage Decomposition"
+          subtitle="Where the $9,580 is going — and which systems prove it"
+          sourceSystems={['Tee Sheet', 'POS', 'Scheduling', 'Weather']}
+        >
+          <div style={{ height: 280 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} layout="vertical" margin={{ top: 10, right: 30, left: 80, bottom: 10 }}>
+                <XAxis type="number" tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `$${v.toLocaleString()}`} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: '#6b7280' }} width={140} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(0,0,0,0.04)' }} />
+                <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                  {chartData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+
+        {/* Hole 12 Bottleneck Drill-down */}
+        {bottleneck && (
+          <Panel
+            title={`The Hole ${bottleneck.hole} Bottleneck`}
+            subtitle="Pace of play → dining conversion → dollar gap. The Layer 3 connection."
+            sourceSystems={['Tee Sheet', 'POS']}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-error-50 border border-error-500/20 rounded-xl p-4 dark:bg-error-500/5">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Bottleneck</div>
+                <div className="text-2xl font-bold text-gray-800 dark:text-white/90 mt-1">
+                  Hole {bottleneck.hole}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">{bottleneck.course} course</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300 mt-2 font-mono">
+                  {bottleneck.avgDelay.toFixed(1)} min avg delay
+                </div>
+                <div className="text-xs text-gray-500">
+                  {bottleneck.roundsAffected} rounds affected
+                </div>
+              </div>
+
+              <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Dining Conversion</div>
+                <div className="flex items-baseline gap-3 mt-1">
+                  <div>
+                    <div className="text-xs text-success-500 font-semibold">Fast rounds</div>
+                    <div className="text-2xl font-bold text-success-500 font-mono">{bottleneck.fastConversionPct}%</div>
+                  </div>
+                  <div className="text-gray-300 text-2xl">vs</div>
+                  <div>
+                    <div className="text-xs text-error-500 font-semibold">Slow rounds</div>
+                    <div className="text-2xl font-bold text-error-500 font-mono">{bottleneck.slowConversionPct}%</div>
+                  </div>
+                </div>
+                <div className="text-[11px] text-gray-500 mt-2">
+                  Post-round dining conversion gap from POS data
+                </div>
+              </div>
+
+              <div className="bg-warning-50 border border-warning-500/20 rounded-xl p-4 dark:bg-warning-500/5">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-warning-500">Per-Round Impact</div>
+                <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+                  ${dollarPerSlowRound}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">per slow round</div>
+                <div className="text-[11px] text-gray-600 dark:text-gray-400 mt-2 leading-snug">
+                  {slowContext.slowRounds.toLocaleString()} slow rounds/month ={' '}
+                  <span className="font-mono font-bold text-error-500">
+                    ${(slowContext.slowRounds * dollarPerSlowRound).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
+              <p className="text-xs text-gray-600 dark:text-gray-400 italic leading-relaxed m-0">
+                <strong className="text-gray-800 dark:text-white/90">Layer 3 insight:</strong>{' '}
+                Nobody at this club has ever connected pace of play on Hole {bottleneck.hole} to dining revenue.
+                The tee sheet knows the pace. The POS knows the dining. Neither knows the other exists. Swoop sees both.
+              </p>
+            </div>
+          </Panel>
+        )}
+
+        {/* Scenario Slider */}
+        <ScenarioSlider
+          baseSlowRounds={slowContext.slowRounds || 668}
+          dollarPerSlowRound={dollarPerSlowRound}
+          staffingRecoveryPotential={leakage.STAFFING_LOSS}
+        />
+
+        {/* CTA */}
+        <div className="bg-gradient-to-r from-brand-500/10 to-brand-500/5 border border-brand-500/30 rounded-2xl p-6 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h3 className="text-base font-bold text-gray-800 dark:text-white/90">
+              Take this story to the board
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 max-w-xl">
+              The Board Report turns this analysis into a 4-tab executive summary with member saves,
+              operational saves, and what we learned this month.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('board-report')}
+            className="rounded-lg bg-brand-500 text-white px-6 py-3 text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors shrink-0"
+          >
+            Generate Board Report →
+          </button>
+        </div>
+      </div>
+    </PageTransition>
+  );
+}

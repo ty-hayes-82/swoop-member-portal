@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import SourceBadge from '@/components/ui/SourceBadge.jsx';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { getOutreachHistory } from '@/services/activityService';
-import { shouldUseStatic, getDataMode, isSourceLoaded } from '@/services/demoGate';
+import { shouldUseStatic } from '@/services/demoGate';
 import { getMemberChurnPrediction } from '@/services/memberService';
 
 const formatDate = (value) => {
@@ -194,30 +194,69 @@ function MemberJourneyTimeline({ profile }) {
     return <span className="text-sm text-gray-500">No journey data available.</span>;
   }
 
+  // Map decay domains to source systems for badge display
+  const domainToSystem = {
+    Golf: 'Tee Sheet',
+    Dining: 'POS',
+    Email: 'Email',
+    Events: 'Events',
+  };
+
+  // Compute days since the first decay signal
+  const daysSinceFirstSignal = (() => {
+    if (!decayChain.length) return null;
+    const firstDateStr = decayChain[0].date;
+    if (!firstDateStr) return null;
+    // Parse "Oct 2025" / "Nov 2025" etc
+    const parsed = Date.parse(firstDateStr + ' 1');
+    if (Number.isNaN(parsed)) return null;
+    const diff = Date.now() - parsed;
+    return Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)));
+  })();
+
   return (
     <div className="flex flex-col">
       {/* Decay Chain — "First Domino" visualization */}
       {decayChain.length >= 2 && (
-        <div className="flex items-center flex-wrap px-3.5 py-2.5 mb-3.5 bg-red-500/[0.04] border border-red-500/15 rounded-xl">
-          <div className="w-full mb-2">
+        <div className="px-3.5 py-3 mb-3.5 bg-red-500/[0.04] border border-red-500/15 rounded-xl">
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
             <span className="text-[10px] font-bold tracking-wider uppercase text-error-500">
-              Engagement Decay Sequence
+              First Domino — Engagement Decay Sequence
             </span>
+            {daysSinceFirstSignal != null && (
+              <span className="text-[10px] font-mono font-semibold text-error-500 bg-error-500/10 px-2 py-0.5 rounded">
+                First signal: {daysSinceFirstSignal} days ago
+              </span>
+            )}
           </div>
-          {decayChain.map((step, i) => {
-            const color = domainColors[step.domain] ?? '#9CA3AF';
-            return (
-              <div key={step.domain} className="flex items-center">
-                <div className="px-2.5 py-1 rounded-md" style={{ background: color + '16', border: `1px solid ${color}40` }}>
-                  <div className="text-[10px] font-bold uppercase tracking-tight" style={{ color }}>{step.domain} dropped</div>
-                  <div className="text-[10px] text-gray-400">{step.date}</div>
+          <div className="flex items-start flex-wrap">
+            {decayChain.map((step, i) => {
+              const color = domainColors[step.domain] ?? '#9CA3AF';
+              const system = domainToSystem[step.domain];
+              return (
+                <div key={step.domain} className="flex items-start">
+                  <div className="flex flex-col gap-1">
+                    <div className="px-2.5 py-1 rounded-md" style={{ background: color + '16', border: `1px solid ${color}40` }}>
+                      <div className="text-[10px] font-bold uppercase tracking-tight" style={{ color }}>{step.domain} dropped</div>
+                      <div className="text-[10px] text-gray-400">{step.date}</div>
+                    </div>
+                    {system && (
+                      <div className="flex items-center gap-1 text-[9px] text-gray-500 px-1">
+                        <span className="opacity-60">source:</span>
+                        <span className="font-semibold">{system}</span>
+                      </div>
+                    )}
+                  </div>
+                  {i < decayChain.length - 1 && (
+                    <span className="mx-1.5 mt-2 text-sm text-gray-400 font-bold">&rarr;</span>
+                  )}
                 </div>
-                {i < decayChain.length - 1 && (
-                  <span className="mx-1.5 text-sm text-gray-400 font-bold">&rarr;</span>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+          <div className="mt-2 pt-2 border-t border-red-500/10 text-[10px] text-gray-500 italic leading-snug">
+            Cross-domain decay pattern. No single system would have flagged this in time.
+          </div>
         </div>
       )}
     <div className="flex flex-col relative pl-5">
@@ -675,7 +714,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <DrawerSnapshotSection profile={profile} />
 
       {/* Health Score Breakdown — only show when engagement data sources are imported */}
-      {(profile.golfScore || profile.diningScore || (shouldUseStatic('tee-sheet') && isSourceLoaded('tee-sheet')) || (shouldUseStatic('fb') && isSourceLoaded('fb'))) && (
+      {(profile.golfScore || profile.diningScore || shouldUseStatic('tee-sheet') || shouldUseStatic('fb')) && (
         <Section title="Health Score Breakdown" description="Weighted engagement across 4 dimensions">
           <HealthDimensionGrid profile={profile} />
         </Section>
@@ -737,8 +776,8 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </Section>
       )}
 
-      {/* Archetype Description — Call Prep (requires engagement data beyond members) */}
-      {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && !(getDataMode() === 'guided' && !isSourceLoaded('tee-sheet') && !isSourceLoaded('fb') && !isSourceLoaded('email')) && (
+      {/* Archetype Description — Call Prep */}
+      {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && (
         <Section title={`Archetype: ${profile.archetype}`} description="Behavioral profile">
           <div className="text-sm text-gray-500 leading-relaxed" style={{ fontSize: '10px', lineHeight: 1.4 }}>
             {ARCHETYPE_DESCRIPTIONS[profile.archetype]}
@@ -747,25 +786,23 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       )}
 
       {/* Spending Trend — only show when POS/F&B data is imported */}
-      {((shouldUseStatic('fb') && isSourceLoaded('fb')) || profile.spendHistory) && (
+      {(shouldUseStatic('fb') || profile.spendHistory) && (
         <Section title="Spending Trend" description="6-month direction">
           <SpendTrendSparkline profile={profile} />
         </Section>
       )}
 
-      {/* Recommended Talking Points — only show when engagement data is available */}
-      {!(getDataMode() === 'guided' && !isSourceLoaded('tee-sheet') && !isSourceLoaded('fb') && !isSourceLoaded('email') && !isSourceLoaded('complaints')) && (
-        <Section title="Talking Points" description="Personalized for this call">
-          <div className="flex flex-col gap-1.5" style={{ fontSize: '12px', lineHeight: 1.4 }}>
-            {getTalkingPoints(profile).map((point, i) => (
-              <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]" style={{ fontSize: '11px', lineHeight: 1.4, padding: '6px 10px', marginBottom: '2px' }}>
-                <span className="text-brand-500 font-bold text-sm shrink-0" style={{ fontSize: '12px', lineHeight: 1.4 }}>{i + 1}.</span>
-                <span className="text-sm text-gray-500 leading-normal" style={{ fontSize: '10px', lineHeight: 1.4 }}>{point}</span>
-              </div>
-            ))}
-          </div>
-        </Section>
-      )}
+      {/* Recommended Talking Points */}
+      <Section title="Talking Points" description="Personalized for this call">
+        <div className="flex flex-col gap-1.5" style={{ fontSize: '12px', lineHeight: 1.4 }}>
+          {getTalkingPoints(profile).map((point, i) => (
+            <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]" style={{ fontSize: '11px', lineHeight: 1.4, padding: '6px 10px', marginBottom: '2px' }}>
+              <span className="text-brand-500 font-bold text-sm shrink-0" style={{ fontSize: '12px', lineHeight: 1.4 }}>{i + 1}.</span>
+              <span className="text-sm text-gray-500 leading-normal" style={{ fontSize: '10px', lineHeight: 1.4 }}>{point}</span>
+            </div>
+          ))}
+        </div>
+      </Section>
 
       {/* Outreach History */}
       <Section title="Outreach History" description="Past communications">
@@ -800,8 +837,13 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         <ActivityTimeline activity={profile.activity} />
       </Section>
 
-      <Section title="Member Journey" description="Cross-domain timeline"
-        collapsible defaultCollapsed summary="Expand to view">
+      <Section
+        title="First Domino — Engagement Decay Sequence"
+        description="Cross-domain timeline · Pillar 2: FIX IT"
+        collapsible
+        defaultCollapsed={(profile.healthScore ?? 100) >= 50}
+        summary="Expand to view"
+      >
         <MemberJourneyTimeline profile={profile} />
       </Section>
 

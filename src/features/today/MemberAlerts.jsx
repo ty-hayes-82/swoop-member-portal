@@ -5,6 +5,7 @@ import { getComplaintCorrelation } from '@/services/staffingService';
 import { shouldUseStatic } from '@/services/demoGate';
 import MemberLink from '@/components/MemberLink';
 import { useNavigation } from '@/context/NavigationContext';
+import SourceBadge from '@/components/ui/SourceBadge';
 
 const ACTION_OWNERS = {
   'Ghost': 'GM',
@@ -144,8 +145,15 @@ export default function MemberAlerts() {
 
   return (
     <div className="alerts-section-enhanced fade-in-up fade-delay-1">
-      <div className="alerts-header" style={{ color: '#ef4444' }}>
-        Priority Member Alerts
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <div className="alerts-header" style={{ color: '#ef4444', margin: 0 }}>
+          Priority Member Alerts
+        </div>
+        <div className="flex gap-1 flex-wrap">
+          <SourceBadge system="Member CRM" size="xs" />
+          <SourceBadge system="Analytics" size="xs" />
+          {shouldUseStatic('complaints') && <SourceBadge system="Complaint Log" size="xs" />}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">

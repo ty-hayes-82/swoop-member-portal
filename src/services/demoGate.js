@@ -28,19 +28,13 @@ export function isGuidedMode() {
 /**
  * Returns the current data mode: 'live' | 'demo' | 'guided'
  * Every service should branch on this instead of ad-hoc checks.
- *
- * A real (authenticated) user can activate guided mode as an overlay —
- * they stay logged in (Gmail/Calendar still work) but see demo data
- * gated by file imports. This is triggered by the GUIDED_KEY flag in
- * sessionStorage, which takes priority over the real clubId check.
  */
 export function getDataMode() {
   try {
-    // Guided mode overlay takes priority — lets real users see guided demo data
-    if (isGuidedMode()) return 'guided';
     const clubId = localStorage.getItem('swoop_club_id');
     const isReal = !!clubId && clubId !== 'demo' && !clubId.startsWith('demo_');
     if (isReal) return 'live';
+    if (isGuidedMode()) return 'guided';
     return 'demo';
   } catch { return 'demo'; }
 }
@@ -155,43 +149,4 @@ export function resetGuidedMode() {
     _store.removeItem('swoop_demo_gates');
     _store.removeItem(GUIDED_KEY);
   } catch {}
-}
-
-// ─── Real auth stash/restore ─────────────────────────────
-// When switching from a real (Google/email) session to demo mode,
-// stash the real credentials so they can be restored later.
-
-const STASH_KEYS = ['swoop_real_auth_token', 'swoop_real_auth_user', 'swoop_real_club_id', 'swoop_real_club_name'];
-
-export function stashRealAuth() {
-  const token = localStorage.getItem('swoop_auth_token');
-  const user = localStorage.getItem('swoop_auth_user');
-  if (token && token !== 'demo' && user) {
-    localStorage.setItem('swoop_real_auth_token', token);
-    localStorage.setItem('swoop_real_auth_user', user);
-    localStorage.setItem('swoop_real_club_id', localStorage.getItem('swoop_club_id') || '');
-    localStorage.setItem('swoop_real_club_name', localStorage.getItem('swoop_club_name') || '');
-  }
-}
-
-export function restoreRealAuth() {
-  const token = localStorage.getItem('swoop_real_auth_token');
-  const user = localStorage.getItem('swoop_real_auth_user');
-  if (token && user) {
-    localStorage.setItem('swoop_auth_token', token);
-    localStorage.setItem('swoop_auth_user', user);
-    localStorage.setItem('swoop_club_id', localStorage.getItem('swoop_real_club_id') || '');
-    localStorage.setItem('swoop_club_name', localStorage.getItem('swoop_real_club_name') || '');
-    clearRealAuthStash();
-    return true;
-  }
-  return false;
-}
-
-export function clearRealAuthStash() {
-  STASH_KEYS.forEach(k => localStorage.removeItem(k));
-}
-
-export function hasStashedAuth() {
-  return !!localStorage.getItem('swoop_real_auth_token');
 }

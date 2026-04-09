@@ -3,6 +3,7 @@ import { getComplaintCorrelation, getShiftCoverage } from '@/services/staffingSe
 import { shouldUseStatic } from '@/services/demoGate';
 import { useNavigation } from '@/context/NavigationContext';
 import MemberLink from '@/components/MemberLink';
+import SourceBadge from '@/components/ui/SourceBadge';
 
 const REF_DATE = new Date();
 
@@ -78,8 +79,15 @@ export default function TodaysRisks() {
     <div className="flex flex-col gap-4">
       {/* Staffing Status Grid */}
       <div>
-        <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wide mb-2.5">
-          Today's Staffing vs Demand
+        <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
+          <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wide">
+            Today's Staffing vs Demand
+          </div>
+          <div className="flex gap-1 flex-wrap">
+            <SourceBadge system="Scheduling" size="xs" />
+            <SourceBadge system="Tee Sheet" size="xs" />
+            <SourceBadge system="Weather API" size="xs" />
+          </div>
         </div>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2.5">
           {OUTLETS.map(outlet => {

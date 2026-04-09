@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useNavigationContext } from "@/context/NavigationContext";
 import { NAV_ITEMS } from "@/config/navigation";
-import { isGuidedMode, clearRealAuthStash } from "@/services/demoGate";
 
 const SwoopHeader = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -82,11 +81,6 @@ const SwoopHeader = () => {
 
   const handleSignOut = () => {
     setUserMenuOpen(false);
-    clearRealAuthStash();
-    sessionStorage.removeItem('swoop_demo_guided');
-    sessionStorage.removeItem('swoop_demo_files');
-    sessionStorage.removeItem('swoop_demo_gates');
-    localStorage.removeItem('swoop_was_guided');
     localStorage.removeItem("swoop_auth_token");
     localStorage.removeItem("swoop_auth_user");
     localStorage.removeItem("swoop_club_id");
@@ -337,59 +331,51 @@ const SwoopHeader = () => {
                   </button>
                 </div>
 
-                {/* Demo mode toggle */}
+                {/* Switch to demo modes */}
                 <div className="border-t border-gray-100 dark:border-gray-800 py-1">
-                  {isGuidedMode() ? (
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        // Restore real club name
-                        const realClubName = sessionStorage.getItem('swoop_real_club_name');
-                        const realClubId = sessionStorage.getItem('swoop_real_club_id');
-                        if (realClubName) localStorage.setItem('swoop_club_name', realClubName);
-                        if (realClubId) localStorage.setItem('swoop_club_id', realClubId);
-                        sessionStorage.removeItem('swoop_real_club_name');
-                        sessionStorage.removeItem('swoop_real_club_id');
-                        sessionStorage.removeItem('swoop_demo_guided');
-                        sessionStorage.removeItem('swoop_demo_sources');
-                        sessionStorage.removeItem('swoop_demo_files');
-                        sessionStorage.removeItem('swoop_demo_gates');
-                        localStorage.removeItem('swoop_was_guided');
-                        window.location.hash = '#/today';
-                        window.location.reload();
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10 cursor-pointer flex items-center gap-2.5 font-medium"
-                    >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
-                      </svg>
-                      Exit Guided Demo
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        // Stash real club identity, swap to demo club
-                        sessionStorage.setItem('swoop_real_club_name', localStorage.getItem('swoop_club_name') || '');
-                        sessionStorage.setItem('swoop_real_club_id', localStorage.getItem('swoop_club_id') || '');
-                        localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
-                        localStorage.setItem('swoop_club_id', 'demo_guided');
-                        sessionStorage.setItem('swoop_demo_guided', 'true');
-                        sessionStorage.removeItem('swoop_demo_sources');
-                        sessionStorage.removeItem('swoop_demo_files');
-                        sessionStorage.removeItem('swoop_demo_gates');
-                        localStorage.setItem('swoop_was_guided', 'true');
-                        window.location.hash = '#/today';
-                        window.location.reload();
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-2.5"
-                    >
-                      <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-                      </svg>
-                      Guided Demo
-                    </button>
-                  )}
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      const demoClubId = `demo_${Date.now()}`;
+                      const demoUser = { userId: 'demo', clubId: demoClubId, name: 'Demo User', email: 'demo@swoopgolf.com', phone: '', role: 'gm', title: 'General Manager', isDemoSession: true };
+                      localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
+                      localStorage.setItem('swoop_auth_token', 'demo');
+                      localStorage.setItem('swoop_club_id', demoClubId);
+                      localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
+                      sessionStorage.removeItem('swoop_demo_guided');
+                      localStorage.removeItem('swoop_was_guided');
+                      window.location.hash = '#/today';
+                      window.location.reload();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-2.5"
+                  >
+                    <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" />
+                    </svg>
+                    Switch to Full Demo
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      const demoClubId = `demo_${Date.now()}`;
+                      const demoUser = { userId: 'demo', clubId: demoClubId, name: 'Demo User', email: 'demo@swoopgolf.com', phone: '', role: 'gm', title: 'General Manager', isDemoSession: true };
+                      localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
+                      localStorage.setItem('swoop_auth_token', 'demo');
+                      localStorage.setItem('swoop_club_id', demoClubId);
+                      localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
+                      sessionStorage.setItem('swoop_demo_guided', 'true');
+                      sessionStorage.removeItem('swoop_demo_sources');
+                      localStorage.setItem('swoop_was_guided', 'true');
+                      window.location.hash = '#/today';
+                      window.location.reload();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-2.5"
+                  >
+                    <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                    Guided Demo
+                  </button>
                 </div>
 
                 {/* Sign out */}

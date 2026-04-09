@@ -38,10 +38,9 @@ const ROUTE_REDIRECTS = {
   'member-health': 'members',
   'waitlist-demand': 'members',
   'location-intelligence': 'members',
-  // Revenue-related → Service (V3)
-  'revenue': 'service',
-  'revenue-leakage': 'service',
-  'fb-performance': 'service',
+  // Revenue routes → Revenue page (Pillar 3: PROVE IT)
+  'revenue-leakage': 'revenue',
+  'fb-performance': 'revenue',
   'operations': 'service',
   'staffing-service': 'service',
   // Insights-related → Service (V3)

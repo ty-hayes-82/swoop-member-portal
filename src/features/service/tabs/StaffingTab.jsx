@@ -5,14 +5,22 @@ import { useState } from 'react';
 import { getUnderstaffedDays, getComplaintCorrelation } from '@/services/staffingService';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getDailyForecast } from '@/services/weatherService';
+import { getDollarPerSlowRound, getLeakageData } from '@/services/revenueService';
+import { getPaceFBImpact } from '@/services/operationsService';
+import { shouldUseStatic } from '@/services/demoGate';
+import { useNavigation } from '@/context/NavigationContext';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import MemberLink from '@/components/MemberLink';
 
 export default function StaffingTab() {
   const [expandedDay, setExpandedDay] = useState(null);
+  const { navigate } = useNavigation();
   const briefing = getDailyBriefing();
   const understaffedDays = getUnderstaffedDays();
   const feedbackRecords = getComplaintCorrelation();
+  const paceFB = shouldUseStatic('fb') ? getPaceFBImpact() : null;
+  const dollarPerSlowRound = shouldUseStatic('fb') ? getDollarPerSlowRound() : 0;
+  const leakage = shouldUseStatic('fb') ? getLeakageData() : null;
 
   if (understaffedDays.length === 0 && feedbackRecords.length === 0) {
     return <DataEmptyState icon="📋" title="No staffing data yet" description="Import staffing and shift data to see coverage gaps, demand forecasting, and complaint correlation." dataType="staffing" />;
@@ -66,6 +74,61 @@ export default function StaffingTab() {
           <MetricCard label="Ticket Time Impact" value="+20%" sublabel="Average increase when short-staffed" />
         </div>
       </div>
+
+      {/* Pace-to-Revenue Connection — Pillar 3: PROVE IT */}
+      {paceFB && dollarPerSlowRound > 0 && (
+        <div className="rounded-2xl p-6 bg-gradient-to-br from-error-500/[0.06] to-warning-500/[0.04] border border-error-500/30">
+          <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
+            <div>
+              <div className="text-xs font-bold text-error-500 uppercase tracking-widest mb-1">
+                Pace-to-Revenue Connection · Layer 3 Insight
+              </div>
+              <div className="text-lg font-bold text-gray-800 dark:text-white/90">
+                ${dollarPerSlowRound} revenue gap per slow round
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('revenue')}
+              className="rounded-lg bg-brand-500 text-white px-4 py-2 text-xs font-semibold cursor-pointer border-none whitespace-nowrap"
+            >
+              Full revenue breakdown →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+            <div className="bg-white border border-gray-200 rounded-xl p-3 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Slow Rounds</div>
+              <div className="text-2xl font-bold text-error-500 font-mono mt-1">
+                {Math.round((paceFB.slowConversionRate || 0) * 100)}%
+              </div>
+              <div className="text-[11px] text-gray-500">post-round dining conversion</div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-3 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Fast Rounds</div>
+              <div className="text-2xl font-bold text-success-500 font-mono mt-1">
+                {Math.round((paceFB.fastConversionRate || 0) * 100)}%
+              </div>
+              <div className="text-[11px] text-gray-500">post-round dining conversion</div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-3 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Monthly Impact</div>
+              <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+                ${(paceFB.revenueLostPerMonth || 0).toLocaleString()}
+              </div>
+              <div className="text-[11px] text-gray-500">
+                {paceFB.slowRoundsPerMonth?.toLocaleString() || 0} slow rounds/mo
+              </div>
+            </div>
+          </div>
+
+          <div className="text-xs text-gray-600 dark:text-gray-400 italic leading-relaxed bg-white/50 dark:bg-white/[0.02] border border-gray-200/50 dark:border-gray-800 rounded-lg p-3">
+            <strong className="text-gray-800 dark:text-white/90">The Layer 3 connection:</strong>{' '}
+            Slow rounds skip the dining room. The tee sheet knows the pace.
+            The POS knows the dining. Neither knows the other exists. Swoop sees both —
+            and {leakage ? `that's $${leakage.PACE_LOSS.toLocaleString()}/mo of the $${leakage.TOTAL.toLocaleString()} total leakage` : 'that\'s why $5,760/mo is slipping through the cracks'}.
+          </div>
+        </div>
+      )}
 
       {/* Understaffed Days Detail */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
