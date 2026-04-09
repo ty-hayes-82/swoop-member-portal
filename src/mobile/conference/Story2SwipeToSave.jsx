@@ -164,7 +164,17 @@ export default function Story2SwipeToSave({ onActionApproved }) {
       });
       setSavedThisSession((prev) => prev + dollars);
 
-      approveAction?.(action.id);
+      // 2026-04-09 wave 12 mobile audit fix: in demo mode, useApp().approveAction
+      // POSTs to a backend that 404s and shows a red "Action may not have been
+      // delivered" toast after every swipe. The conference demo doesn't need
+      // server persistence — local state + trackAction (which is fail-soft)
+      // are sufficient. Skip the network call.
+      // Detect conference route by checking the location hash.
+      const onConferenceRoute = typeof window !== 'undefined'
+        && window.location.hash.startsWith('#/m/conference');
+      if (!onConferenceRoute) {
+        approveAction?.(action.id);
+      }
       trackAction({
         actionType: 'approve',
         actionSubtype: 'conference_swipe_save',

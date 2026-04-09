@@ -40,6 +40,13 @@ function healthColor(score) {
 }
 
 function MemberCard({ risk }) {
+  // 2026-04-09 wave 12 mobile audit fix: briefingService DEMO_BRIEFING uses
+  // `health` (lines 41-43, the static fallback path) but the dynamic build
+  // path at briefingService.js:163-168 emits `score`. Either may reach this
+  // component depending on which code path the briefing took. Coalesce so
+  // both shapes work — without this, the Story 1 health number renders blank
+  // ("/100") on the dynamic path.
+  const healthValue = risk.score ?? risk.health ?? 0;
   const [calling, setCalling] = useState(false);
 
   // Try to hydrate a full profile so buildDecayChain has activity/riskSignals
@@ -61,7 +68,7 @@ function MemberCard({ risk }) {
   const steps = decayChain.slice(0, 3);
 
   const initial = (risk.name || '?').trim().charAt(0).toUpperCase();
-  const color = healthColor(risk.health);
+  const color = healthColor(healthValue);
 
   const handleCall = (e) => {
     e.stopPropagation();
@@ -145,7 +152,7 @@ function MemberCard({ risk }) {
               Health score
             </div>
             <div style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1.1, marginTop: 2 }}>
-              {risk.health}
+              {healthValue}
               <span style={{ fontSize: 14, color: '#9CA3AF', fontWeight: 600, marginLeft: 4 }}>/100</span>
             </div>
           </div>

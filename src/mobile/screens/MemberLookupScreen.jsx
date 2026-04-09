@@ -110,6 +110,10 @@ const HEALTH_FILTERS = [
 ];
 
 const SORT_OPTIONS = [
+  // 2026-04-09 wave 12: 'time' added as the default for on-premise mode.
+  // Sorts by parsed tee/dining time from currentContext (e.g. "Tee time
+  // 9:20 AM") so a floor-walking GM sees the next-up members first.
+  { key: 'time', label: 'Time' },
   { key: 'health', label: 'Health' },
   { key: 'dues', label: 'Dues' },
   { key: 'name', label: 'Name' },
@@ -179,7 +183,21 @@ function MobileMemberCard({ member, expanded, onToggle, showContext }) {
           {profile && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
               <InfoItem label="Member since" value={profile.joinDate ? new Date(profile.joinDate).getFullYear() : '—'} />
-              <InfoItem label="Last visit" value={profile.activity?.[0]?.timestamp ? new Date(profile.activity[0].timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'} />
+              {/* 2026-04-09 wave 12 mobile audit fix: was rendering "Invalid Date"
+                  when activity[0].timestamp wasn't a parseable ISO string (some
+                  demo activity rows use "Jan 16 · 1:12 PM" relative format).
+                  Null-guard + NaN check + relative-string fallback. */}
+              <InfoItem label="Last visit" value={(() => {
+                const raw = profile.activity?.[0]?.timestamp;
+                if (!raw) return '—';
+                const parsed = new Date(raw);
+                if (Number.isNaN(parsed.getTime())) {
+                  // Activity row uses a non-ISO label like "Jan 16 · 1:12 PM" —
+                  // surface the leading date portion as-is.
+                  return String(raw).split('·')[0].trim() || '—';
+                }
+                return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              })()} />
               <InfoItem label="Archetype" value={member.archetype} />
               <InfoItem label="Annual value" value={`$${(profile.duesAnnual || member.duesAnnual || 0).toLocaleString()}`} />
             </div>
@@ -226,11 +244,15 @@ function InfoItem({ label, value }) {
 
 function QuickBtn({ icon, label, onClick }) {
   return (
+    // 2026-04-09 wave 12 mobile audit fix: was padding 10px → ~41.5px tall,
+    // under the 44pt Apple HIG minimum. Bumped to padding 13px → ~47.5px,
+    // safer for floor walks and gloved/sweaty hands.
     <button onClick={onClick} style={{
-      padding: '10px', borderRadius: '10px', border: '1px solid #E5E7EB',
+      padding: '13px 10px', borderRadius: '10px', border: '1px solid #E5E7EB',
       background: '#FAFAFA', cursor: 'pointer', display: 'flex',
       alignItems: 'center', justifyContent: 'center', gap: '6px',
       fontSize: '13px', fontWeight: 600, color: '#374151',
+      minHeight: '44px',
     }}>
       {icon} {label}
     </button>
@@ -260,7 +282,12 @@ export default function MemberLookupScreen() {
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [healthFilter, setHealthFilter] = useState(null);
-  const [sortBy, setSortBy] = useState('health');
+  // 2026-04-09 wave 12 mobile audit fix: was 'health' across all modes,
+  // which sorted on-premise list by lowest-health-first. A floor-walking
+  // GM thinks "it's 10:15am, who's teeing off in the next 30 min" — that's
+  // chronological. Default to 'time' for on-premise; keep 'health' as the
+  // default for at-risk and all-members. The user can still toggle.
+  const [sortBy, setSortBy] = useState('time');
 
   // Source roster depends on mode
   const sourceList = useMemo(() => {
@@ -302,6 +329,24 @@ export default function MemberLookupScreen() {
       if (sortBy === 'health') return a.score - b.score;
       if (sortBy === 'dues') return (b.duesAnnual || 0) - (a.duesAnnual || 0);
       if (sortBy === 'name') return a.name.localeCompare(b.name);
+      // 2026-04-09 wave 12 audit: 'time' sort for on-premise mode.
+      // Parses tee/dining time from currentContext like "Tee time 9:20 AM"
+      // or falls back to a synthetic time field if present. Members
+      // without a parseable time sink to the bottom.
+      if (sortBy === 'time') {
+        const parseTime = (m) => {
+          const ctx = m.currentContext || m.time || '';
+          const match = String(ctx).match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+          if (!match) return Infinity;
+          let h = parseInt(match[1], 10);
+          const min = parseInt(match[2], 10);
+          const ampm = (match[3] || '').toUpperCase();
+          if (ampm === 'PM' && h !== 12) h += 12;
+          if (ampm === 'AM' && h === 12) h = 0;
+          return h * 60 + min;
+        };
+        return parseTime(a) - parseTime(b);
+      }
       return 0;
     });
 
@@ -317,18 +362,22 @@ export default function MemberLookupScreen() {
 
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {/* Mode toggle — staff-facing: On Premise / At-Risk / All */}
+      {/* Mode toggle — staff-facing: On Premise / At-Risk / All
+          2026-04-09 wave 12 mobile audit fix: pills were 38px tall (padding
+          10px 8px + 12px font), under HIG 44pt minimum. Bumped to padding
+          13px 10px + minHeight 44px for safer floor-walk taps. */}
       <div style={{ display: 'flex', gap: '6px', background: '#F3F4F6', padding: '4px', borderRadius: '12px' }}>
         {MODE_OPTIONS.map(opt => (
           <button
             key={opt.key}
             onClick={() => { setMode(opt.key); setExpandedId(null); setArchetypeFilter(null); setHealthFilter(null); }}
             style={{
-              flex: 1, padding: '10px 8px', borderRadius: '9px', border: 'none',
+              flex: 1, padding: '13px 10px', borderRadius: '9px', border: 'none',
               background: mode === opt.key ? '#0F0F0F' : 'transparent',
               color: mode === opt.key ? '#fff' : '#6B7280',
               fontSize: '12px', fontWeight: 700, cursor: 'pointer',
               transition: 'all 120ms ease',
+              minHeight: '44px',
             }}
           >
             {opt.label}
