@@ -20,8 +20,8 @@ async function enterGuidedDemo(page) {
   await page.reload();
   await page.waitForLoadState('networkidle');
 
-  // Click "Enter Demo Mode" to get to the demo setup screen
-  await page.getByRole('button', { name: /Enter Demo Mode/i }).click();
+  // Click "Explore without an account" to get to the demo setup screen
+  await page.getByRole('button', { name: /Explore without an account/i }).click();
   await page.waitForTimeout(500);
 
   // Click "Guided Demo" button
@@ -270,9 +270,9 @@ test.describe('Part C: Full Demo Mode', () => {
     await page.reload();
     await page.waitForLoadState('networkidle');
 
-    await page.getByRole('button', { name: /Enter Demo Mode/i }).click();
+    await page.getByRole('button', { name: /Explore without an account/i }).click();
     await page.waitForTimeout(500);
-    await page.getByRole('button', { name: /Start Full Demo/i }).click();
+    await page.getByRole('button', { name: /Full Demo \(Pinetree CC\)/i }).click();
     await page.waitForTimeout(3000);
 
     // Greeting should appear with rounds
@@ -298,9 +298,9 @@ test.describe('Part E: Mode Switching', () => {
     await page.goto(APP_URL);
     await page.evaluate(() => localStorage.clear());
     await page.reload();
-    await page.getByRole('button', { name: /Enter Demo Mode/i }).click();
+    await page.getByRole('button', { name: /Explore without an account/i }).click();
     await page.waitForTimeout(500);
-    await page.getByRole('button', { name: /Start Full Demo/i }).click();
+    await page.getByRole('button', { name: /Full Demo \(Pinetree CC\)/i }).click();
     await page.waitForTimeout(3000);
 
     // Verify full demo has data
@@ -312,7 +312,7 @@ test.describe('Part E: Mode Switching', () => {
     await signOut.click();
     await page.waitForTimeout(1000);
 
-    await page.getByRole('button', { name: /Enter Demo Mode/i }).click();
+    await page.getByRole('button', { name: /Explore without an account/i }).click();
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: /Guided Demo/i }).click();
     await page.waitForTimeout(3000);

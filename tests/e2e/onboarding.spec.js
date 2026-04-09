@@ -42,9 +42,9 @@ async function enterDemoMode(page) {
   await page.goto(APP_URL);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  await page.getByRole('button', { name: /Enter Demo Mode/i }).click();
+  await page.getByRole('button', { name: /Explore without an account/i }).click();
   await page.waitForTimeout(500);
-  await page.getByRole('button', { name: /Start Demo/i }).click();
+  await page.getByRole('button', { name: /Full Demo \(Pinetree CC\)/i }).click();
   await page.waitForTimeout(3000);
 }
 
@@ -67,7 +67,7 @@ test.describe('1 — Login Page', () => {
     await expect(page.locator('#login-password')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Set Up New Club' })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Enter Demo Mode/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Explore without an account/i })).toBeVisible();
   });
 
   test('1.2 — Empty login is rejected gracefully', async ({ page }) => {

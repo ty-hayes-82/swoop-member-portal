@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  testIgnore: ['**/14-insights-capture*'],
+  testIgnore: ['**/14-insights-capture*', '**/15-vision-capture*'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,

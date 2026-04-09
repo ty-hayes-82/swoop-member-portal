@@ -23,7 +23,7 @@ async function enterGuidedDemo(page) {
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.waitForLoadState('networkidle');
-  await page.getByRole('button', { name: /Enter Demo Mode/i }).click();
+  await page.getByRole('button', { name: /Explore without an account/i }).click();
   await page.waitForTimeout(500);
   await page.getByRole('button', { name: /Guided Demo/i }).click();
   await page.waitForTimeout(2000);

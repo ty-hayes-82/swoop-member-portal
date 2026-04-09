@@ -8,11 +8,11 @@ async function enterDemoMode(page) {
   await page.goto(APP_URL);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  // Click "Enter Demo Mode"
-  await page.getByRole('button', { name: /Enter Demo Mode/i }).click();
+  // Click "Explore without an account"
+  await page.getByRole('button', { name: /Explore without an account/i }).click();
   await page.waitForTimeout(500);
-  // Click "Start Demo"
-  await page.getByRole('button', { name: /Start Demo/i }).click();
+  // Click "Full Demo (Pinetree CC)"
+  await page.getByRole('button', { name: /Full Demo \(Pinetree CC\)/i }).click();
   await page.waitForTimeout(3000);
 }
 
