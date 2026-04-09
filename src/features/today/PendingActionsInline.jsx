@@ -5,6 +5,7 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { getAllActions } from '@/services/agentService';
 import MemberLink from '@/components/MemberLink';
 import ActionPanel from '@/components/ui/ActionPanel';
+import SourceBadge from '@/components/ui/SourceBadge';
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const PRIORITY_COLORS = { high: '#ef4444', medium: '#f59e0b', low: '#9CA3AF' };
@@ -155,7 +156,7 @@ export default function PendingActionsInline({ topPriority = null }) {
                 style={{ borderLeft: `4px solid ${prioColor}` }}
               >
                 <div className="flex justify-between items-center mb-1">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span
                       className="text-[10px] font-bold uppercase tracking-wide py-0.5 px-2 rounded-[10px]"
                       style={{ background: `${prioColor}15`, color: prioColor }}
@@ -165,6 +166,9 @@ export default function PendingActionsInline({ topPriority = null }) {
                     <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight">
                       {getActionOwner(action)}
                     </span>
+                    {action.source && (
+                      <SourceBadge system={action.source} size="xs" />
+                    )}
                   </div>
                   <span className="text-[10px] font-semibold text-brand-500 py-0.5 px-2 rounded-[10px] bg-brand-500/[0.06]">
                     {isExpanded ? 'Collapse' : 'Take action'}

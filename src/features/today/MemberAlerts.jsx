@@ -106,7 +106,8 @@ function buildPriorityList() {
         owner = ACTION_OWNERS[archetype] || 'Membership Director';
       }
 
-      return { memberId, name, score, archetype, priorityScore, reason, action, owner };
+      const duesAnnual = m.duesAnnual || m.dues_annual || m.dues || 0;
+      return { memberId, name, score, archetype, priorityScore, reason, action, owner, duesAnnual };
     })
     .sort((a, b) => b.priorityScore - a.priorityScore)
     .slice(0, 5);
@@ -186,6 +187,18 @@ export default function MemberAlerts() {
                   >
                     {m.archetype}
                   </span>
+                  {m.duesAnnual > 0 && (
+                    <span
+                      className="text-[10px] font-mono font-bold py-0.5 px-2 rounded-[10px]"
+                      style={{
+                        background: m.score < 50 ? '#fef2f2' : '#fef3c7',
+                        color: m.score < 50 ? '#b91c1c' : '#b45309',
+                      }}
+                      title={`$${m.duesAnnual.toLocaleString()}/yr ${m.score < 50 ? 'at risk' : 'in dues'}`}
+                    >
+                      ${Math.round(m.duesAnnual / 1000)}K{m.score < 50 ? ' at risk' : '/yr'}
+                    </span>
+                  )}
                 </div>
               </div>
 

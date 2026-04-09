@@ -87,12 +87,21 @@ export default function StaffingTab() {
                 ${dollarPerSlowRound} revenue gap per slow round
               </div>
             </div>
-            <button
-              onClick={() => navigate('revenue')}
-              className="rounded-lg bg-brand-500 text-white px-4 py-2 text-xs font-semibold cursor-pointer border-none whitespace-nowrap"
-            >
-              Full revenue breakdown →
-            </button>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => navigate('revenue')}
+                className="rounded-lg bg-white border border-brand-500 text-brand-500 px-4 py-2 text-xs font-semibold cursor-pointer whitespace-nowrap hover:bg-brand-50"
+              >
+                Full breakdown →
+              </button>
+              <button
+                onClick={() => navigate('revenue')}
+                className="rounded-lg bg-brand-500 text-white px-4 py-2 text-xs font-semibold cursor-pointer border-none whitespace-nowrap"
+                title="Approve ranger deployment from the Revenue page"
+              >
+                Approve: Deploy Ranger →
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">

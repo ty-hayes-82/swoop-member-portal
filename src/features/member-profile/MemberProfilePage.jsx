@@ -392,6 +392,20 @@ export default function MemberProfilePage() {
             <span className="text-[32px] font-bold font-mono" style={{ color }}>{score}</span>
           </div>
           <div className="text-xs text-gray-400 mt-1.5">Health Score</div>
+          {/* Pillar 3: PROVE IT — dues at risk callout */}
+          {score < 50 && profile.duesAnnual > 0 && (
+            <div
+              className="mt-2 px-2 py-1 rounded-md font-mono font-bold text-[11px]"
+              style={{
+                background: '#fef2f2',
+                color: '#b91c1c',
+                border: '1px solid #fecaca',
+              }}
+              title={`$${profile.duesAnnual.toLocaleString()}/yr in dues at risk`}
+            >
+              ${Math.round(profile.duesAnnual / 1000)}K/yr at risk
+            </div>
+          )}
         </div>
       </div>
 

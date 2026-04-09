@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import SourceBadge from '@/components/ui/SourceBadge.jsx';
 import { useMemberProfile } from '@/context/MemberProfileContext';
-import { getOutreachHistory } from '@/services/activityService';
+import { getOutreachHistory, trackAction } from '@/services/activityService';
 import { shouldUseStatic } from '@/services/demoGate';
 import { getMemberChurnPrediction } from '@/services/memberService';
+import { getMemberSaves } from '@/services/boardReportService';
 
 const formatDate = (value) => {
   if (!value) return '\u2014';
@@ -57,7 +58,7 @@ const Sparkline = ({ data = [], color = '#06b6d4' }) => {
   );
 };
 
-const Section = ({ title, description, children, defaultCollapsed = false, collapsible = false, summary, ...rest }) => {
+const Section = ({ title, description, children, defaultCollapsed = false, collapsible = false, summary, sourceSystems, ...rest }) => {
   const [collapsed, setCollapsed] = React.useState(defaultCollapsed);
   const isCollapsed = collapsible && collapsed;
 
@@ -77,6 +78,13 @@ const Section = ({ title, description, children, defaultCollapsed = false, colla
           {collapsible && <span className="text-xs text-gray-400 transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)', fontSize: '10px', lineHeight: 1.4 }}>{'\u25BC'}</span>}
         </div>
       </div>
+      {!isCollapsed && Array.isArray(sourceSystems) && sourceSystems.length > 0 && (
+        <div className="flex gap-1 flex-wrap mb-1.5">
+          {sourceSystems.map(s => (
+            <SourceBadge key={s} system={s} size="xs" />
+          ))}
+        </div>
+      )}
       {!isCollapsed && children}
     </section>
   );
@@ -108,6 +116,57 @@ function ActivityTimeline({ activity = [] }) {
           Show all {activity.length} entries {'\u2192'}
         </button>
       )}
+    </div>
+  );
+}
+
+// DecayChainAction — one-tap approval for the recommended outreach
+// Pillar 2: FIX IT — bridges the decay viz to immediate action
+function DecayChainAction({ profile }) {
+  const [approved, setApproved] = React.useState(false);
+
+  // Choose recommended action based on archetype
+  const recommendation = (() => {
+    const archetype = profile.archetype || '';
+    if (archetype === 'Ghost') return 'GM personal call · re-engagement conversation';
+    if (archetype === 'Declining') return 'Membership Director outreach · identify root cause';
+    if (archetype === 'Weekend Warrior') return 'Pro shop priority Saturday tee time offer';
+    if (archetype === 'Die-Hard Golfer') return 'Pro shop check-in · equipment/injury/schedule';
+    if (archetype === 'Social Butterfly') return 'Invite to upcoming wine dinner or social event';
+    if (archetype === 'New Member') return 'Membership Director integration check-in';
+    if (archetype === 'Snowbird') return 'Welcome-back package + tee time reservation';
+    return 'GM personal call · check-in and complimentary round offer';
+  })();
+
+  const handleApprove = () => {
+    trackAction({
+      actionType: 'approve',
+      actionSubtype: 'first_domino_outreach',
+      memberId: profile.memberId,
+      memberName: profile.name,
+      referenceType: 'first_domino',
+      referenceId: `outreach_${profile.memberId}`,
+      description: `First Domino outreach: ${recommendation}`,
+    });
+    setApproved(true);
+  };
+
+  return (
+    <div className="mt-3 pt-3 border-t border-red-500/10 flex items-center justify-between gap-2 flex-wrap">
+      <div className="flex-1 min-w-0">
+        <div className="text-[9px] font-bold uppercase tracking-wider text-success-600">Recommended Outreach</div>
+        <div className="text-[11px] text-gray-700 dark:text-gray-300 mt-0.5">{recommendation}</div>
+      </div>
+      <button
+        type="button"
+        onClick={handleApprove}
+        disabled={approved}
+        className={`px-3 py-1.5 rounded-md text-[11px] font-bold cursor-pointer border-none whitespace-nowrap transition-colors ${
+          approved ? 'bg-success-100 text-success-700 cursor-default' : 'bg-success-500 text-white hover:bg-success-600'
+        }`}
+      >
+        {approved ? '\u2713 Approved' : 'Approve & Log \u2192'}
+      </button>
     </div>
   );
 }
@@ -257,6 +316,8 @@ function MemberJourneyTimeline({ profile }) {
           <div className="mt-2 pt-2 border-t border-red-500/10 text-[10px] text-gray-500 italic leading-snug">
             Cross-domain decay pattern. No single system would have flagged this in time.
           </div>
+          {/* Inline Fix It action — Pillar 2 */}
+          <DecayChainAction profile={profile} />
         </div>
       )}
     <div className="flex flex-col relative pl-5">
@@ -677,7 +738,25 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           </div>
           <div>
           <div className="text-sm text-gray-400 tracking-wide uppercase" style={{ display: 'none', fontSize: '10px' }}>Member Snapshot</div>
-          <h2 className={`${layout === 'page' ? 'text-[32px]' : ''}`} style={{ fontSize: layout === 'page' ? undefined : '18px', fontWeight: 700, margin: '0px', lineHeight: 1.2 }}>{profile.name}</h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className={`${layout === 'page' ? 'text-[32px]' : ''}`} style={{ fontSize: layout === 'page' ? undefined : '18px', fontWeight: 700, margin: '0px', lineHeight: 1.2 }}>{profile.name}</h2>
+            {/* Cross-pillar bridge: featured-in-board-report badge */}
+            {(() => {
+              try {
+                const saves = getMemberSaves() || [];
+                const isFeatured = saves.some(s => (s.memberId && s.memberId === profile.memberId) || (s.name && s.name === profile.name) || (s.memberName && s.memberName === profile.name));
+                if (!isFeatured) return null;
+                return (
+                  <span
+                    className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-success-50 text-success-700 border border-success-500/30"
+                    title="This member is featured in this month's Board Report"
+                  >
+                    ★ FEATURED IN BOARD REPORT
+                  </span>
+                );
+              } catch { return null; }
+            })()}
+          </div>
           <div className="text-sm text-gray-500" style={{ fontSize: '10px' }}>
             {profile.tier} {'\u2022'} Joined {formatDate(profile.joinDate)}
           </div>
@@ -697,6 +776,21 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             {profile.healthScore ?? '\u2014'}
           </div>
           <Sparkline data={profile.trend ?? []} />
+          {/* Dues at risk callout — Pillar 3: PROVE IT */}
+          {(profile.healthScore ?? 100) < 50 && profile.duesAnnual > 0 && (
+            <div
+              className="mt-1 px-2 py-1 rounded-md font-mono font-bold"
+              style={{
+                background: '#fef2f2',
+                color: '#b91c1c',
+                fontSize: '10px',
+                border: '1px solid #fecaca',
+              }}
+              title={`$${profile.duesAnnual.toLocaleString()}/yr in dues at risk`}
+            >
+              ${Math.round(profile.duesAnnual / 1000)}K/yr at risk
+            </div>
+          )}
           {layout !== 'page' && onOpenFullPage && (
             <button
               type="button"
@@ -833,7 +927,8 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </Section>
 
       <Section title="Recent activity" description="Last 30 days" data-section="recent-activity"
-        collapsible defaultCollapsed summary={`${(profile.activity ?? []).length} entries`}>
+        collapsible defaultCollapsed summary={`${(profile.activity ?? []).length} entries`}
+        sourceSystems={['Tee Sheet', 'POS', 'Email', 'Events']}>
         <ActivityTimeline activity={profile.activity} />
       </Section>
 
@@ -843,6 +938,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         collapsible
         defaultCollapsed={(profile.healthScore ?? 100) >= 50}
         summary="Expand to view"
+        sourceSystems={['Tee Sheet', 'POS', 'Email', 'Analytics']}
       >
         <MemberJourneyTimeline profile={profile} />
       </Section>

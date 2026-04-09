@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
 import { getSlowRoundRate } from '@/services/operationsService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
+import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import { useNavigationContext } from '@/context/NavigationContext';
 
 export default function QualityTab() {
@@ -59,6 +60,7 @@ export default function QualityTab() {
 
   return (
     <div className="flex flex-col gap-6">
+      <EvidenceStrip systems={['Complaints', 'Scheduling', 'POS', 'Tee Sheet', 'Weather']} compact />
 
       {/* Service Consistency Score */}
       <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-wrap">
@@ -87,6 +89,17 @@ export default function QualityTab() {
                   ? `Driven down by ${understaffedDays.length > 2 ? 'staffing gaps' : (totalComplaints - resolvedCount) > 3 ? 'unresolved complaints' : 'pace of play issues'} — see recommendation below`
                   : `Critical: ${understaffedDays.length > 2 ? 'staffing gaps' : 'complaint backlog'} requires immediate attention — see recommendation below`}
             </div>
+            {/* Cross-pillar bridge — link to Revenue page */}
+            {consistencyScore < 80 && (
+              <button
+                type="button"
+                onClick={() => navigate('revenue')}
+                className="mt-1.5 text-[11px] font-bold text-brand-500 bg-brand-500/[0.06] border border-brand-500/20 px-2.5 py-1 rounded-md cursor-pointer hover:bg-brand-500/[0.12]"
+                title="See the dollar impact of service inconsistency"
+              >
+                See $ impact in Revenue →
+              </button>
+            )}
           </div>
         </div>
 

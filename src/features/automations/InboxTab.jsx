@@ -5,6 +5,19 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getAllActions } from '@/services/agentService';
+import SourceBadge, { SourceBadgeRow } from '@/components/ui/SourceBadge';
+
+// Extract a dollar value from impactMetric strings like "$32K dues protected"
+function extractDollar(metricStr) {
+  if (!metricStr) return 0;
+  const match = String(metricStr).match(/\$(\d+(?:[\.,]\d+)?)\s*([KMk]?)/);
+  if (!match) return 0;
+  let value = parseFloat(match[1].replace(',', ''));
+  const suffix = (match[2] || '').toUpperCase();
+  if (suffix === 'K') value *= 1000;
+  else if (suffix === 'M') value *= 1000000;
+  return value;
+}
 
 const PRIORITY_COLORS = {
   high: 'border-l-red-500',
@@ -33,15 +46,25 @@ function ActionCard({ action, onApprove, onDismiss }) {
         </span>
       </div>
 
-      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1">
-        {action.source && <span>{action.source}</span>}
-        {action.source && action.actionType && <span>&middot;</span>}
-        {action.actionType && <span>{action.actionType.replace(/_/g, ' ').toLowerCase()}</span>}
+      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex-wrap">
+        {action.source && (
+          <SourceBadge system={action.source} size="xs" />
+        )}
+        {action.actionType && <span className="text-[10px] uppercase tracking-wide text-gray-400">{action.actionType.replace(/_/g, ' ').toLowerCase()}</span>}
       </div>
 
+      {/* Signal sources — Pillar 1: SEE IT */}
+      {Array.isArray(action.signals) && action.signals.length > 0 && (
+        <div className="mb-2">
+          <SourceBadgeRow systems={action.signals.map(s => typeof s === 'string' ? s : (s.source || s.system)).filter(Boolean)} />
+        </div>
+      )}
+
       {action.impactMetric && (
-        <div className="text-xs text-brand-600 dark:text-brand-400 font-medium mb-2.5">
-          {action.impactMetric}
+        <div className="inline-flex items-center gap-1 mb-2.5 px-2 py-1 rounded-md bg-success-50 border border-success-500/20 dark:bg-success-500/10">
+          <span className="text-xs font-mono font-bold text-success-600 dark:text-success-400">
+            {action.impactMetric}
+          </span>
         </div>
       )}
 
@@ -112,8 +135,40 @@ export default function InboxTab() {
 
   const totalPending = inbox.filter(i => i.status === 'pending').length;
 
+  // Pillar 3 PROVE IT — total dollar impact rollup
+  const allPending = inbox.filter(i => i.status === 'pending');
+  const totalDollarImpact = allPending.reduce((sum, a) => sum + extractDollar(a.impactMetric), 0);
+  const topImpactAction = allPending
+    .map(a => ({ ...a, _dollar: extractDollar(a.impactMetric) }))
+    .sort((a, b) => b._dollar - a._dollar)[0];
+
   return (
     <div className="flex flex-col gap-4">
+      {/* Pillar 3 PROVE IT — Impact rollup */}
+      {totalPending > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500">Pending</div>
+            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{totalPending}</div>
+            <div className="text-xs text-gray-500 mt-0.5">awaiting your approval</div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Total Dollar Impact</div>
+            <div className="text-2xl font-bold text-success-600 dark:text-success-400 font-mono mt-1">
+              ${totalDollarImpact.toLocaleString()}
+            </div>
+            <div className="text-xs text-gray-500 mt-0.5">if all approved</div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-warning-500">Highest Impact</div>
+            <div className="text-base font-bold text-gray-800 dark:text-white/90 font-mono mt-1 truncate" title={topImpactAction?.description}>
+              {topImpactAction?.impactMetric || (topImpactAction?._dollar ? `$${topImpactAction._dollar.toLocaleString()}` : '—')}
+            </div>
+            <div className="text-xs text-gray-500 mt-0.5 truncate">{topImpactAction?.description || 'No actions'}</div>
+          </div>
+        </div>
+      )}
+
       {/* Filter bar */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">

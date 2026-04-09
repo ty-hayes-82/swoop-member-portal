@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Panel } from '@/components/ui';
+import SourceBadge from '@/components/ui/SourceBadge';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import { useNavigationContext } from '@/context/NavigationContext';
@@ -43,6 +44,18 @@ function HealthBadge({ value }) {
   );
 }
 
+// Map KPI labels to their underlying source systems
+const KPI_SOURCES = {
+  'Members Retained': ['Member CRM', 'Analytics'],
+  'Dues Protected': ['Member CRM', 'POS'],
+  'Dues at Risk': ['Member CRM', 'Analytics'],
+  'Service Consistency': ['Complaints', 'Scheduling'],
+  'Operational Response': ['All Systems'],
+  'Retention Rate': ['Member CRM', 'Analytics'],
+  'At Risk': ['Member CRM', 'Analytics'],
+  'Board Confidence Score': ['All Systems'],
+};
+
 function KPIStrip({ kpis, onDrillDown }) {
   const colorMap = {
     green: 'text-success-500',
@@ -52,26 +65,35 @@ function KPIStrip({ kpis, onDrillDown }) {
   };
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-      {kpis.map((kpi) => (
-        <div
-          key={kpi.label}
-          onClick={() => onDrillDown?.()}
-          className="bg-gray-900 rounded-xl p-4 text-center border border-[#2d2d44] cursor-pointer transition-all duration-150 hover:shadow-lg hover:-translate-y-px"
-        >
-          <div className={`text-[28px] font-bold ${colorMap[kpi.color] || 'text-success-500'}`}>
-            {kpi.prefix}
-            <AnimatedNumber value={kpi.value} duration={1200} decimals={kpi.value % 1 !== 0 ? 1 : 0} />
-            {kpi.suffix}
-          </div>
+      {kpis.map((kpi) => {
+        const sources = KPI_SOURCES[kpi.label] || ['All Systems'];
+        return (
           <div
-            className="text-xs text-[#BCC3CF] mt-1"
-            title={kpi.label === 'Board Confidence Score' ? 'Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.' : undefined}
+            key={kpi.label}
+            onClick={() => onDrillDown?.()}
+            className="bg-gray-900 rounded-xl p-4 text-center border border-[#2d2d44] cursor-pointer transition-all duration-150 hover:shadow-lg hover:-translate-y-px"
           >
-            {kpi.label}
-            {kpi.label === 'Board Confidence Score' && <span className="ml-1 cursor-help opacity-60" title="Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.">&#9432;</span>}
+            <div className={`text-[28px] font-bold ${colorMap[kpi.color] || 'text-success-500'}`}>
+              {kpi.prefix}
+              <AnimatedNumber value={kpi.value} duration={1200} decimals={kpi.value % 1 !== 0 ? 1 : 0} />
+              {kpi.suffix}
+            </div>
+            <div
+              className="text-xs text-[#BCC3CF] mt-1"
+              title={kpi.label === 'Board Confidence Score' ? 'Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.' : undefined}
+            >
+              {kpi.label}
+              {kpi.label === 'Board Confidence Score' && <span className="ml-1 cursor-help opacity-60" title="Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.">&#9432;</span>}
+            </div>
+            {/* Source badges — Pillar 1: SEE IT */}
+            <div className="flex gap-1 justify-center mt-2 flex-wrap">
+              {sources.map(s => (
+                <SourceBadge key={s} system={s} size="xs" />
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -151,6 +173,21 @@ export default function BoardReport() {
 
   return (
     <PageTransition>
+      {/* Print stylesheet — show all 4 tabs simultaneously when printing */}
+      <style>{`
+        @media print {
+          .br-tab-switcher { display: none !important; }
+          .br-tab-panel { display: block !important; page-break-before: always; }
+          .br-tab-panel:first-of-type { page-break-before: auto; }
+          .br-tab-heading { display: block !important; font-size: 18pt; font-weight: 700; margin-top: 24pt; margin-bottom: 12pt; color: #1a1a2e; }
+          body { background: white !important; color: #1a1a2e !important; }
+          .bg-gray-900 { background: #f3f4f6 !important; color: #1a1a2e !important; }
+          button { display: none !important; }
+          .br-print-only { display: block !important; }
+        }
+        .br-tab-heading { display: none; }
+        .br-print-only { display: none; }
+      `}</style>
       <div className="p-6 w-full">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
         <div>
@@ -205,7 +242,7 @@ export default function BoardReport() {
       </details>
 
       {/* Tab switcher */}
-      <div className="flex gap-2 mb-5">
+      <div className="br-tab-switcher flex gap-2 mb-5">
         {tabNames.map((tab, i) => (
           <button
             key={tab}
@@ -219,8 +256,9 @@ export default function BoardReport() {
         ))}
       </div>
 
-      {/* Summary Tab */}
-      {activeTab === 0 && (
+      {/* Summary Tab — always rendered for print, hidden on screen when not active */}
+      <div className={`br-tab-panel ${activeTab === 0 ? 'block' : 'hidden'}`}>
+        <h2 className="br-tab-heading">Summary</h2>
         <>
           {/* Executive Summary — covers service, operations, and member health */}
           <Panel>
@@ -501,10 +539,11 @@ export default function BoardReport() {
             })()}
           </Panel>
         </>
-      )}
+      </div>
 
       {/* Member Saves Tab */}
-      {activeTab === 1 && (
+      <div className={`br-tab-panel ${activeTab === 1 ? 'block' : 'hidden'}`}>
+        <h2 className="br-tab-heading">Member Saves</h2>
         <div className="flex flex-col gap-4">
           {/* Header KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -570,10 +609,11 @@ export default function BoardReport() {
             </Panel>
           ))}
         </div>
-      )}
+      </div>
 
       {/* Operational Saves Tab */}
-      {activeTab === 2 && (
+      <div className={`br-tab-panel ${activeTab === 2 ? 'block' : 'hidden'}`}>
+        <h2 className="br-tab-heading">Operational Saves</h2>
         <div className="flex flex-col gap-4">
           {/* Header KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -610,10 +650,11 @@ export default function BoardReport() {
             </Panel>
           ))}
         </div>
-      )}
+      </div>
 
       {/* What We Learned Tab */}
-      {activeTab === 3 && (
+      <div className={`br-tab-panel ${activeTab === 3 ? 'block' : 'hidden'}`}>
+        <h2 className="br-tab-heading">What We Learned</h2>
         <div className="flex flex-col gap-4">
           <Panel>
             <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">Top Patterns Discovered This Month</h2>
@@ -701,8 +742,78 @@ export default function BoardReport() {
               </div>
             </div>
           </Panel>
+
+          {/* Next Month Priorities — auto-derived from emerging risks */}
+          <Panel>
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">Recommended Focus for Next Month</h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Auto-derived from emerging risks, top complaint patterns, and recoverable revenue.
+            </p>
+            <div className="flex flex-col gap-3">
+              {(() => {
+                const priorities = [];
+
+                // Priority 1: Top emerging risk (largest delta in distribution)
+                const worsening = dist
+                  .filter(d => Number.isFinite(d?.delta) && d.delta > 0)
+                  .sort((a, b) => b.delta - a.delta)[0];
+                if (worsening) {
+                  priorities.push({
+                    rank: 1,
+                    title: `Address growing ${worsening.level} segment`,
+                    detail: `${worsening.delta} more members moved into ${worsening.level} this month. Schedule outreach via Membership Director.`,
+                    owner: 'Membership Director',
+                    color: '#ef4444',
+                  });
+                }
+
+                // Priority 2: Top complaint category
+                const topComplaint = feedbackSummary[0];
+                if (topComplaint) {
+                  priorities.push({
+                    rank: priorities.length + 1,
+                    title: `Resolve ${topComplaint.category} backlog`,
+                    detail: `${topComplaint.unresolvedCount || 0} of ${topComplaint.count || 0} unresolved. Largest active issue category.`,
+                    owner: 'F&B Director',
+                    color: '#f59e0b',
+                  });
+                }
+
+                // Priority 3: Revenue recovery opportunity
+                priorities.push({
+                  rank: priorities.length + 1,
+                  title: 'Deploy ranger to bottleneck holes on weekends',
+                  detail: 'Projected $1,150/mo recovery at 20% slow-round reduction. Review on Revenue page.',
+                  owner: 'GM',
+                  color: '#22c55e',
+                });
+
+                if (priorities.length === 0) {
+                  return <div className="text-sm text-gray-500 italic">No emerging priorities detected. Maintain current trajectory.</div>;
+                }
+
+                return priorities.map(p => (
+                  <div key={p.rank} className="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
+                    <div
+                      className="text-2xl font-bold font-mono shrink-0"
+                      style={{ color: p.color }}
+                    >
+                      {p.rank}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-gray-800 dark:text-white/90">{p.title}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{p.detail}</div>
+                    </div>
+                    <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight shrink-0">
+                      {p.owner}
+                    </span>
+                  </div>
+                ));
+              })()}
+            </div>
+          </Panel>
         </div>
-      )}
+      </div>
 
       </div>
     </PageTransition>

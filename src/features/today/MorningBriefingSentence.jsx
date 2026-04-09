@@ -14,6 +14,9 @@ import { getDailyBriefing } from '@/services/briefingService';
 import { getDailyForecast } from '@/services/weatherService';
 import { getTodayTeeSheet } from '@/services/operationsService';
 import { getShiftCoverage, getStaffingSummary } from '@/services/staffingService';
+import { getLeakageData } from '@/services/revenueService';
+import { getMemberSummary } from '@/services/memberService';
+import { useNavigation } from '@/context/NavigationContext';
 
 function describeWeather(forecast) {
   if (!forecast) return null;
@@ -58,27 +61,39 @@ function buildSegments() {
   // 3. At-risk members on today's sheet (Tee Sheet ∩ Member CRM)
   if (shouldUseStatic('tee-sheet') && shouldUseStatic('members')) {
     const teeSheet = getTodayTeeSheet();
-    const atRiskOnSheet = teeSheet.filter(t => (t.healthScore ?? 100) < 50).length;
+    const atRiskList = teeSheet.filter(t => (t.healthScore ?? 100) < 50);
+    const atRiskOnSheet = atRiskList.length;
     if (atRiskOnSheet > 0) {
+      // Sum dues at risk for at-risk members on today's sheet
+      const duesAtRisk = atRiskList.reduce((sum, t) => sum + (t.duesAnnual || 0), 0);
+      const dueText = duesAtRisk > 0 ? ` ($${Math.round(duesAtRisk / 1000)}K dues at risk)` : '';
       segments.push({
         key: 'at-risk',
-        text: `${atRiskOnSheet} at-risk member${atRiskOnSheet === 1 ? '' : 's'} on today's tee sheet`,
+        text: `${atRiskOnSheet} at-risk member${atRiskOnSheet === 1 ? '' : 's'} on today's tee sheet${dueText}`,
         urgent: true,
       });
       if (!sources.includes('Member CRM')) sources.push('Member CRM');
     }
   }
 
-  // 4. Staffing gap (Scheduling)
+  // 4. Staffing gap (Scheduling) — with dollar exposure from revenue leakage
   if (shouldUseStatic('complaints')) {
     const coverage = getShiftCoverage();
     const todayGap = coverage
       .filter(s => (s.required ?? 0) - (s.scheduled ?? 0) > 0)
       .reduce((sum, s) => sum + ((s.required ?? 0) - (s.scheduled ?? 0)), 0);
+
+    // Pull staffing dollar exposure from revenue leakage
+    const leakage = shouldUseStatic('fb') ? getLeakageData() : null;
+    const staffingDollarExposure = leakage?.STAFFING_LOSS || 0;
+    const dollarText = staffingDollarExposure > 0
+      ? ` — $${staffingDollarExposure.toLocaleString()}/mo at risk`
+      : '';
+
     if (todayGap > 0) {
       segments.push({
         key: 'staffing',
-        text: `Staffing gap: ${todayGap} short for projected post-round dining demand`,
+        text: `Staffing gap: ${todayGap} short for projected post-round dining demand${dollarText}`,
         urgent: true,
       });
       sources.push('Scheduling');
@@ -89,7 +104,7 @@ function buildSegments() {
       if (summary?.understaffedDaysCount > 0) {
         segments.push({
           key: 'staffing',
-          text: `${summary.understaffedDaysCount} understaffed shifts this month at risk`,
+          text: `${summary.understaffedDaysCount} understaffed shifts this month at risk${dollarText}`,
           urgent: false,
         });
         sources.push('Scheduling');
@@ -101,6 +116,7 @@ function buildSegments() {
 }
 
 export default function MorningBriefingSentence() {
+  const { navigate } = useNavigation();
   const { segments, sources } = useMemo(buildSegments, []);
 
   if (segments.length === 0) return null;
@@ -117,6 +133,9 @@ export default function MorningBriefingSentence() {
     ? `Cross-domain synthesis: ${sources.length} systems connected. No single source produces this view.`
     : null;
 
+  // Cross-pillar bridge: if any segment carries dollar exposure, link to Revenue
+  const hasDollarExposure = segments.some(s => /\$/.test(s.text));
+
   return (
     <div className="fade-in-up">
       <StoryHeadline
@@ -125,10 +144,41 @@ export default function MorningBriefingSentence() {
         context={context}
       />
       {sources.length > 0 && (
-        <div className="-mt-2 mb-3 px-1">
+        <div className="-mt-2 mb-2 px-1 flex items-center justify-between gap-2 flex-wrap">
           <EvidenceStrip systems={sources} compact />
+          {hasDollarExposure && (
+            <button
+              type="button"
+              onClick={() => navigate('revenue')}
+              className="text-[11px] font-bold text-brand-500 bg-brand-500/[0.06] border border-brand-500/20 px-3 py-1 rounded-md cursor-pointer hover:bg-brand-500/[0.12] whitespace-nowrap"
+            >
+              See full revenue breakdown →
+            </button>
+          )}
         </div>
       )}
+      {/* Trust math — how is this computed? */}
+      <details className="px-1 mb-2">
+        <summary className="text-[11px] text-gray-500 cursor-pointer list-none flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-300">
+          <span className="opacity-60">ⓘ</span>
+          <span className="font-semibold">How is this computed?</span>
+        </summary>
+        <div className="mt-2 ml-4 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-l-2 border-gray-200 dark:border-gray-700 pl-3">
+          <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Today's briefing computed from:</div>
+          <ul className="m-0 p-0 list-none space-y-1">
+            {segments.map(s => (
+              <li key={s.key} className="flex items-start gap-1.5">
+                <span className="text-gray-400">•</span>
+                <span>{s.text}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-2 italic text-gray-500">
+            Each segment cross-references {sources.length} source system{sources.length === 1 ? '' : 's'}: {sources.join(', ')}.
+            No single system can produce this sentence on its own.
+          </div>
+        </div>
+      </details>
     </div>
   );
 }

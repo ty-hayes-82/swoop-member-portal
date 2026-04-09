@@ -19,6 +19,8 @@ import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import ScenarioSlider from '@/components/ui/ScenarioSlider';
 import { useNavigation } from '@/context/NavigationContext';
+import { useApp } from '@/context/AppContext';
+import { trackAction } from '@/services/activityService';
 import {
   getLeakageData,
   getDollarPerSlowRound,
@@ -48,12 +50,31 @@ function ChartTooltip({ active, payload }) {
 
 export default function RevenuePage() {
   const { navigate } = useNavigation();
+  const { showToast } = useApp() || {};
   const [isLoading, setIsLoading] = useState(true);
+  const [rangerDeployed, setRangerDeployed] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 400);
     return () => clearTimeout(t);
   }, []);
+
+  const handleDeployRanger = (hole, estimatedRecovery) => {
+    trackAction({
+      actionType: 'approve',
+      actionSubtype: 'deploy_ranger',
+      referenceType: 'revenue_recommendation',
+      referenceId: `ranger_hole_${hole}`,
+      description: `Deploy ranger to Hole ${hole} on weekends — projected $${estimatedRecovery.toLocaleString()}/mo recovery`,
+    });
+    setRangerDeployed(true);
+    if (showToast) {
+      showToast({
+        type: 'success',
+        message: `Ranger deployment approved for Hole ${hole}. Logged to action history.`,
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -164,6 +185,21 @@ export default function RevenuePage() {
           subtitle="Where the $9,580 is going — and which systems prove it"
           sourceSystems={['Tee Sheet', 'POS', 'Scheduling', 'Weather']}
         >
+          {/* Trend context — Pillar 3: PROVE IT depth */}
+          <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800 flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Tracking Since</div>
+              <div className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">First month of cross-domain attribution</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">This Month</div>
+              <div className="text-sm font-bold font-mono text-error-500">${leakage.TOTAL.toLocaleString()}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Recoverable at 20%</div>
+              <div className="text-sm font-bold font-mono text-success-500">~${Math.round(leakage.TOTAL * 0.2).toLocaleString()}/mo</div>
+            </div>
+          </div>
           <div style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} layout="vertical" margin={{ top: 10, right: 30, left: 80, bottom: 10 }}>
@@ -242,6 +278,32 @@ export default function RevenuePage() {
                 The tee sheet knows the pace. The POS knows the dining. Neither knows the other exists. Swoop sees both.
               </p>
             </div>
+
+            {/* Inline Fix It action — Pillar 2 */}
+            <div className="mt-4 flex items-center justify-between gap-3 flex-wrap p-4 bg-gradient-to-r from-success-500/[0.06] to-success-500/[0.02] border border-success-500/20 rounded-xl">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-success-600 dark:text-success-400">
+                  Recommended Action
+                </div>
+                <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mt-0.5">
+                  Deploy ranger to Hole {bottleneck.hole} on weekends
+                </div>
+                <div className="text-xs text-gray-500 mt-0.5">
+                  Projected recovery: ${Math.round(leakage.PACE_LOSS * 0.2).toLocaleString()}/mo at 20% slow-round reduction
+                </div>
+              </div>
+              <button
+                onClick={() => handleDeployRanger(bottleneck.hole, Math.round(leakage.PACE_LOSS * 0.2))}
+                disabled={rangerDeployed}
+                className={`rounded-lg px-5 py-2.5 text-sm font-semibold cursor-pointer border-none whitespace-nowrap transition-colors ${
+                  rangerDeployed
+                    ? 'bg-success-100 text-success-700 cursor-default'
+                    : 'bg-success-500 text-white hover:bg-success-600'
+                }`}
+              >
+                {rangerDeployed ? '✓ Approved' : 'Approve & Deploy →'}
+              </button>
+            </div>
           </Panel>
         )}
 
@@ -252,23 +314,43 @@ export default function RevenuePage() {
           staffingRecoveryPotential={leakage.STAFFING_LOSS}
         />
 
-        {/* CTA */}
-        <div className="bg-gradient-to-r from-brand-500/10 to-brand-500/5 border border-brand-500/30 rounded-2xl p-6 flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h3 className="text-base font-bold text-gray-800 dark:text-white/90">
-              Take this story to the board
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 max-w-xl">
-              The Board Report turns this analysis into a 4-tab executive summary with member saves,
-              operational saves, and what we learned this month.
-            </p>
+        {/* CTA — with 4-tab preview */}
+        <div className="bg-gradient-to-r from-brand-500/10 to-brand-500/5 border border-brand-500/30 rounded-2xl p-6 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+              <h3 className="text-base font-bold text-gray-800 dark:text-white/90">
+                Take this story to the board
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 max-w-xl">
+                The Board Report turns this analysis into a 4-tab executive summary.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('board-report')}
+              className="rounded-lg bg-brand-500 text-white px-6 py-3 text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors shrink-0"
+            >
+              Generate Board Report →
+            </button>
           </div>
-          <button
-            onClick={() => navigate('board-report')}
-            className="rounded-lg bg-brand-500 text-white px-6 py-3 text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors shrink-0"
-          >
-            Generate Board Report →
-          </button>
+          {/* 4-tab preview cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { label: 'Summary', icon: '📊', detail: 'Executive overview' },
+              { label: 'Member Saves', icon: '🎯', detail: 'Retained members + dues' },
+              { label: 'Operational Saves', icon: '⚡', detail: 'Disruptions prevented' },
+              { label: 'What We Learned', icon: '💡', detail: 'Patterns + next priorities' },
+            ].map((tab, i) => (
+              <button
+                key={tab.label}
+                onClick={() => navigate('board-report', { tab: i })}
+                className="bg-white/80 dark:bg-white/[0.04] border border-brand-500/20 rounded-lg p-2.5 text-left cursor-pointer hover:border-brand-500/50 transition-colors"
+              >
+                <div className="text-sm">{tab.icon}</div>
+                <div className="text-[11px] font-bold text-gray-800 dark:text-white/90 mt-0.5">{tab.label}</div>
+                <div className="text-[10px] text-gray-500 dark:text-gray-400">{tab.detail}</div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </PageTransition>

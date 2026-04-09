@@ -479,6 +479,19 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
               );
             })}
           </div>
+          {/* Pillar 1: SEE IT — cross-domain decay legend */}
+          <div className="mt-3 p-2 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
+            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Cross-Domain Decay Patterns to Watch</div>
+            <div className="flex flex-wrap gap-2 text-[11px] text-gray-600 dark:text-gray-400">
+              <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">📧 Email decay</span>
+              <span className="px-2 py-0.5 rounded bg-green-50 text-green-700 border border-green-200">⛳ Golf drop</span>
+              <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">🍽️ Dining drop</span>
+              <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">⚠️ Multi-domain decay</span>
+            </div>
+            <div className="text-[10px] text-gray-500 mt-1.5 italic">
+              Click any at-risk member to see their First Domino sequence in the profile drawer.
+            </div>
+          </div>
         </div>
       )}
 

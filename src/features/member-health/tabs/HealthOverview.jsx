@@ -7,6 +7,7 @@ import ActionPanel from '@/components/ui/ActionPanel.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
 import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getVolatileMembers, getMemberSummary } from '@/services/memberService';
 import { getComplaintCorrelation } from '@/services/staffingService';
+import { getMemberSaves } from '@/services/boardReportService';
 import { isAuthenticatedClub } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { useMemo, useState } from 'react';
@@ -171,8 +172,38 @@ export default function HealthOverview() {
     : score < 50 ? '#f59e0b'
     : '#6B7280';
 
+  // Pillar 3 PROVE IT — dollar exposure and saves rollup
+  const summaryForKpi = getMemberSummary();
+  const totalAtRiskCount = atRisk.length;
+  const totalDuesAtRisk = (atRisk || []).reduce(
+    (sum, m) => sum + (m.duesAnnual || m.dues_annual || m.dues || 0),
+    0
+  );
+  const savesThisMonth = getMemberSaves() || [];
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Pillar 3 PROVE IT — dollar exposure & saves rollup */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Members at Risk</div>
+          <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{totalAtRiskCount}</div>
+          <div className="text-xs text-gray-500 mt-0.5">priority outreach needed</div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Dues at Risk</div>
+          <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+            ${totalDuesAtRisk > 0 ? totalDuesAtRisk.toLocaleString() : (summaryForKpi.potentialDuesAtRisk || 0).toLocaleString()}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">annual dues exposure</div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Saves This Month</div>
+          <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{savesThisMonth.length}</div>
+          <div className="text-xs text-gray-500 mt-0.5">retained through intervention</div>
+        </div>
+      </div>
+
       {/* Health Distribution KPI Cards */}
       <div className="grid-responsive-4">
         {dist.map((d) => {
@@ -206,7 +237,7 @@ export default function HealthOverview() {
 
       {/* Members Needing Attention — single priority list */}
       <div>
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
           <div>
             <div className="text-[11px] font-bold text-error-500 uppercase tracking-wider mb-1">
               Members Needing Attention
@@ -215,6 +246,37 @@ export default function HealthOverview() {
               Priority-sorted by health score, complaints, and engagement signals
             </div>
           </div>
+          {/* Bulk approve — Pillar 2: FIX IT */}
+          {priorityMembers.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                const totalDues = priorityMembers.reduce((s, m) => s + (m.duesAnnual || 0), 0);
+                const proceed = window.confirm(
+                  `Approve recommended outreach for all ${priorityMembers.length} priority members?` +
+                  (totalDues > 0 ? `\n\nProtects $${totalDues.toLocaleString()}/yr in dues.` : '')
+                );
+                if (!proceed) return;
+                priorityMembers.forEach(m => {
+                  trackAction({
+                    actionType: 'approve',
+                    actionSubtype: 'bulk_outreach',
+                    memberId: m.memberId,
+                    memberName: m.name,
+                    referenceType: 'priority_member',
+                    referenceId: `bulk_${m.memberId}`,
+                    description: `Bulk approved: ${m.action}`,
+                  });
+                });
+                if (showToast) {
+                  showToast({ type: 'success', message: `Approved outreach for ${priorityMembers.length} members.` });
+                }
+              }}
+              className="px-4 py-2 rounded-lg bg-success-500 text-white text-xs font-semibold cursor-pointer border-none whitespace-nowrap hover:bg-success-600"
+            >
+              Approve all {priorityMembers.length} →
+            </button>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">

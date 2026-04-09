@@ -204,6 +204,35 @@ export default function IntegrationsPage() {
         </p>
       </header>
 
+      {/* Pillar 3: PROVE IT — what each connection unlocks */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02))',
+        border: '1px solid rgba(34,197,94,0.25)',
+        borderRadius: '14px',
+        padding: '16px 20px',
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+          What your connected systems unlock
+        </div>
+        <div style={{ fontSize: 14, color: '#1a1a2e', lineHeight: 1.5 }}>
+          Every system you connect deepens Swoop's cross-domain intelligence. Together they unlock:
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#16a34a' }}>
+            ⛳ + 🍽️ → $5,760/mo pace-to-dining attribution
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#16a34a' }}>
+            👥 + 🍽️ + 📧 → First Domino decay detection
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#16a34a' }}>
+            📅 + ⛳ + 🍽️ → $3,400/mo staffing recovery
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#16a34a' }}>
+            ⛅ + 📅 → Demand-driven scheduling
+          </span>
+        </div>
+      </div>
+
       <section className="grid-responsive-4" className="grid gap-4">
         {summaryCards.map((card) => (
           <div key={card.label} style={{

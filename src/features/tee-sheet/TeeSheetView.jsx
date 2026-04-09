@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StoryHeadline } from '@/components/ui';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
+import SourceBadge from '@/components/ui/SourceBadge';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge';
 import MemberLink from '@/components/MemberLink';
 import ActionPanel from '@/components/ui/ActionPanel';
@@ -94,6 +95,16 @@ function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
         >
           <span>💬</span> {hasComplaint ? 'Send Apology Text' : 'Personal Check-in Text'}
         </button>
+        {/* Cross-pillar bridge — link to First Domino in profile drawer */}
+        {showMemberNames() && (
+          <MemberLink
+            memberId={teeTime.memberId}
+            mode="drawer"
+            className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-purple-200 bg-purple-50 text-purple-600 inline-flex items-center gap-1 no-underline"
+          >
+            <span>🔗</span> View Decay Sequence
+          </MemberLink>
+        )}
         <button
           onClick={onToggle}
           className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-gray-200 bg-white text-gray-500 inline-flex items-center gap-1"
@@ -321,6 +332,13 @@ export default function TeeSheetView() {
             <div>
               <div className="text-sm font-bold text-gray-800">Today's Tee Sheet</div>
               <div className="text-xs text-gray-400">Friday, January 17, 2026 - {teeData.length} groups</div>
+              {/* Source badges for the underlying columns — Pillar 1: SEE IT */}
+              <div className="flex gap-1 mt-1.5 flex-wrap">
+                <SourceBadge system="Tee Sheet" size="xs" />
+                <SourceBadge system="Member CRM" size="xs" />
+                <SourceBadge system="Analytics" size="xs" />
+                <SourceBadge system="POS" size="xs" />
+              </div>
             </div>
             <div className="flex items-center gap-3 text-xs text-gray-500">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> At Risk</span>
@@ -390,6 +408,23 @@ export default function TeeSheetView() {
                           )}
                           {t.group.some(g => g === 'Guest' || g.includes('guest') || g === 'Client' || g.includes('Client')) && (
                             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200">GUEST</span>
+                          )}
+                          {/* Dues exposure — Pillar 3: PROVE IT */}
+                          {isAtRisk && t.duesAnnual > 0 && (
+                            <span
+                              className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200"
+                              title={`$${t.duesAnnual.toLocaleString()}/yr in dues at risk`}
+                            >
+                              ${Math.round(t.duesAnnual / 1000)}K AT RISK
+                            </span>
+                          )}
+                          {isVip && t.duesAnnual > 0 && (
+                            <span
+                              className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200"
+                              title={`$${t.duesAnnual.toLocaleString()}/yr VIP dues`}
+                            >
+                              ${Math.round(t.duesAnnual / 1000)}K VIP
+                            </span>
                           )}
                         </div>
                       </td>
