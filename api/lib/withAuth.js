@@ -15,22 +15,31 @@
  *   allowDemo: boolean — if true, allows unauthenticated access in demo mode (sets req.auth.isDemo = true)
  */
 import { sql } from '@vercel/postgres';
+import { logError } from './logger.js';
 
 /**
  * Pure session validator — no side effects, no throws.
  * Reads Bearer token from req.headers.authorization and looks up the
- * sessions table. Returns the session row (camelCased) on success, or
- * null on any failure (missing/invalid token, expired session, DB error).
+ * sessions table.
+ *
+ * Returns a discriminated union so callers can distinguish a real
+ * "this user is not logged in" (401) from an infrastructure failure
+ * during the session lookup (500). Collapsing the two into a single
+ * null return (pre-B28) hid Postgres outages behind spurious 401s,
+ * silently telling users to re-login when the real problem was the DB.
+ *
+ * Return shapes:
+ *   { status: 'ok', session: { userId, clubId, role, name, email } }
+ *   { status: 'expired' }                 — missing/malformed token, no row, expired row
+ *   { status: 'error', error: Error }     — DB query threw / infra failure
  *
  * This is the single source of truth for token→session resolution.
  * Both the withAuth() wrapper and handlers that need hybrid public/authed
  * behavior (e.g. api/weather.js) should use this.
- *
- * Returns: { userId, clubId, role, name, email } | null
  */
 export async function verifySession(req) {
   const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) return null;
+  if (!authHeader?.startsWith('Bearer ')) return { status: 'expired' };
   const token = authHeader.slice(7);
 
   try {
@@ -40,18 +49,20 @@ export async function verifySession(req) {
       JOIN users u ON s.user_id = u.user_id
       WHERE s.token = ${token} AND s.expires_at > NOW()
     `;
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) return { status: 'expired' };
     const row = result.rows[0];
     return {
-      userId: row.user_id,
-      clubId: row.club_id,
-      role: row.role,
-      name: row.name,
-      email: row.email,
+      status: 'ok',
+      session: {
+        userId: row.user_id,
+        clubId: row.club_id,
+        role: row.role,
+        name: row.name,
+        email: row.email,
+      },
     };
   } catch (e) {
-    console.error('[verifySession] Session validation error:', e.message);
-    return null;
+    return { status: 'error', error: e };
   }
 }
 
@@ -65,14 +76,18 @@ export function withAuth(handler, options = {}) {
     if (allowDemo && !authHeader) {
       const demoClubId = req.query?.demoClubId || req.headers['x-demo-club'];
       if (demoClubId) {
-        req.auth = { clubId: demoClubId, userId: 'demo', role: 'viewer', isDemo: true };
+        // Demo sessions use role='demo' (NOT 'viewer') so any future endpoint
+        // that gates on `roles: ['viewer']` won't accidentally accept demo
+        // traffic. The canonical demo check is `req.auth.isDemo === true`;
+        // role distinction is the belt-and-suspenders layer (B35).
+        req.auth = { clubId: demoClubId, userId: 'demo', role: 'demo', isDemo: true };
         return handler(req, res);
       }
     }
 
     // Allow demo_ cleanup requests without auth (sendBeacon has no headers)
     if (allowDemo && req.query?.cleanup === 'true' && req.query?.clubId?.startsWith('demo_')) {
-      req.auth = { clubId: req.query.clubId, userId: 'demo', role: 'viewer', isDemo: true };
+      req.auth = { clubId: req.query.clubId, userId: 'demo', role: 'demo', isDemo: true };
       return handler(req, res);
     }
 
@@ -80,10 +95,15 @@ export function withAuth(handler, options = {}) {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const session = await verifySession(req);
-    if (!session) {
+    const result = await verifySession(req);
+    if (result.status === 'error') {
+      logError('/api/withAuth', result.error, { phase: 'session-lookup' });
+      return res.status(500).json({ error: 'Authentication service error' });
+    }
+    if (result.status !== 'ok') {
       return res.status(401).json({ error: 'Session expired or invalid' });
     }
+    const session = result.session;
 
     // Role-based access control
     if (roles.length > 0 && !roles.includes(session.role) && session.role !== 'swoop_admin') {

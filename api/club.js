@@ -140,6 +140,13 @@ export default withAuth(async function handler(req, res) {
 
   // ─── PUT: update club details ───
   if (req.method === 'PUT') {
+    // Demo sessions are read-only on club metadata. The helper role gate
+    // already prevents demo from triggering the admin override path, but
+    // we add an explicit local 403 here for parity with DELETE (B34) and
+    // to make the demo immutability contract obvious in the handler body.
+    if (req.auth?.isDemo) {
+      return res.status(403).json({ error: 'Demo sessions cannot update club metadata' });
+    }
     const { name, city, state, zip } = req.body;
     // swoop_admin may update any club by passing clubId in body or query;
     // everyone else is locked to their session club. getWriteClubId honors

@@ -145,6 +145,7 @@ that default-exports a Vercel serverless handler `(req, res)`.
 | 013 | `013-google-tokens.js`                  | Creates `google_tokens` table for per-user Google OAuth; adds `users.auth_provider`. |
 | 014 | `014-member-invoices-table.js`          | Creates `member_invoices` table with `club_id` from day 1. Closes the gap where `seed/schema.sql` was the only source of this table. |
 | 015 | `015-cross-club-audit-table.js`         | Creates `cross_club_audit` table + indexes for SEC-2 observability of swoop_admin cross-tenant writes. Populated by the `withAdminOverride` wrapper in `api/lib/withAdminOverride.js`. Forensic metadata only — no request bodies are stored (SHA-256 hash only). |
+| 016 | `016-pause-state-table.js`              | Creates `pause_state` table (PK `club_id, target_type, target_id`) + partial index on `(club_id, resume_at)` for scheduled auto-resume scans. Moves the inline `CREATE TABLE IF NOT EXISTS` bootstrap out of the `api/pause-resume.js` request hot path (SEC-2 follow-up). `club_id` was already present in the original inline CREATE and is preserved here. |
 
 ## 4. Running migrations
 

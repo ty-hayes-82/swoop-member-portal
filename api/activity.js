@@ -1,13 +1,26 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
+import { withAdminOverride } from './lib/withAdminOverride.js';
 import { logWarn } from './lib/logger.js';
 
-export default withAuth(async function handler(req, res) {
+async function handler(req, res) {
   // B25: reads (GET activity feed) keep swoop_admin ?clubId= override; writes
-  // (POST insert, DELETE audit-log wipe) are default-deny and always scope to
-  // the authenticated session's club. SEC-3 role-gate + confirm token on DELETE
+  // (POST insert) are default-deny and always scope to the authenticated
+  // session's club. DELETE (audit-log wipe) allows swoop_admin cross-club
+  // override — every divergence is logged to cross_club_audit by the
+  // withAdminOverride wrapper. SEC-3 role-gate + confirm token on DELETE
   // are still enforced below.
-  const clubId = req.method === 'GET' ? getReadClubId(req) : getWriteClubId(req);
+  let clubId;
+  if (req.method === 'GET') {
+    clubId = getReadClubId(req);
+  } else if (req.method === 'DELETE') {
+    clubId = getWriteClubId(req, {
+      allowAdminOverride: true,
+      reason: 'swoop_admin audit-log wipe (logged to cross_club_audit)',
+    });
+  } else {
+    clubId = getWriteClubId(req);
+  }
   try {
     if (req.method === 'POST') {
       // SEC-4: audit actor must come from the authenticated session, never the client body.
@@ -87,4 +100,12 @@ export default withAuth(async function handler(req, res) {
     console.error('Activity API error:', error);
     res.status(500).json({ error: error.message });
   }
-}, { allowDemo: true });
+}
+
+export default withAuth(
+  withAdminOverride(handler, {
+    adminTool: 'activity',
+    reason: 'audit-log read/write/delete',
+  }),
+  { allowDemo: true },
+);

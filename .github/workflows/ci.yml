@@ -5,8 +5,10 @@
 #   - lint        : theme/color-token lint (npm run lint-theme)
 #   - unit        : vitest unit tests (npm test)
 #   - build       : production Vite build, uploads dist/ as artifact
-#   - e2e         : Playwright smoke — storyboard-flows + polish-final specs
-#                   depends on build passing first
+#   - e2e-smoke   : Playwright smoke — storyboard-flows + polish-final specs
+#                   (fast ~1min, gates the merge; depends on build)
+#   - e2e-full    : Playwright full suite — all tests/e2e/*.spec.js
+#                   (slow ~15-25min, informational, depends on build)
 #
 # IMPORTANT: This workflow deliberately does NOT deploy to Vercel.
 # Vercel's native GitHub integration handles preview deploys on the `dev` branch.
@@ -103,11 +105,11 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  e2e:
-    name: E2E (Playwright smoke)
+  e2e-smoke:
+    name: E2E smoke (storyboard + polish-final)
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -166,7 +168,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: dev-server-log-${{ github.sha }}
+          name: dev-server-log-smoke-${{ github.sha }}
           path: dev-server.log
           retention-days: 7
           if-no-files-found: ignore
@@ -175,7 +177,85 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-test-results-${{ github.sha }}
+          name: playwright-test-results-smoke-${{ github.sha }}
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  e2e-full:
+    name: E2E full suite (all tests/e2e/*.spec.js)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start dev server
+        # Playwright config + specs default APP_URL to http://localhost:5174,
+        # so pin Vite to that port explicitly.
+        run: |
+          nohup npm run dev -- --port 5174 --strictPort --host 127.0.0.1 \
+            > dev-server.log 2>&1 &
+          echo "DEV_SERVER_PID=$!" >> $GITHUB_ENV
+
+      - name: Wait for dev server
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf -o /dev/null http://localhost:5174; then
+              echo "Dev server is up after ${i}s"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Dev server did not become ready within 120s"
+          tail -n 200 dev-server.log || true
+          exit 1
+
+      - name: Run Playwright full suite
+        env:
+          APP_URL: http://localhost:5174
+          CI: 'true'
+        # Auto-discovers all tests/e2e/*.spec.js per playwright.config.js.
+        # Worker count comes from playwright.config.js (currently 8).
+        # Covers: storyboard-flows, polish-final, guided-demo-*,
+        # demo-story, action-logging, onboarding.
+        run: |
+          npx playwright test --reporter=list
+
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -n "${DEV_SERVER_PID:-}" ]; then
+            kill "$DEV_SERVER_PID" 2>/dev/null || true
+          fi
+
+      - name: Upload dev server log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-server-log-full-${{ github.sha }}
+          path: dev-server.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload test-results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results-full-${{ github.sha }}
           path: test-results/
           retention-days: 7
           if-no-files-found: ignore

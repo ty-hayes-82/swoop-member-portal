@@ -5,6 +5,7 @@
 
 import { weatherDaily as weatherData } from '../data/weather';
 import { shouldUseStatic, isGuidedMode, isSourceLoaded } from './demoGate';
+import { apiFetch } from './apiClient';
 
 let _current = null;
 let _forecast = null;
@@ -156,9 +157,12 @@ export const _init = async () => {
     }
     const cid = getClubId();
     if (!cid) return;
-    const res = await fetch(`/api/weather?clubId=${cid}&type=forecast`);
-    if (res.ok) {
-      _forecast = await res.json();
+    // apiFetch sends the Bearer token (or X-Demo-Club header for demo sessions)
+    // and returns null on 401, so we fall back to static cleanly. The raw
+    // /api/weather?clubId= path now requires auth (B19); apiFetch is mandatory.
+    const data = await apiFetch(`/api/weather?clubId=${cid}&type=forecast`);
+    if (data) {
+      _forecast = data;
       _current = _forecast.current || null;
     }
   } catch { /* keep static fallback */ }

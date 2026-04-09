@@ -22,24 +22,19 @@ async function handler(req, res) {
     return res.status(400).json({ error: 'clubId, targetType, targetId, and action required' });
   }
 
-  // Ensure pause tracking table exists
-  try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS pause_state (
-        club_id TEXT NOT NULL,
-        target_type TEXT NOT NULL,
-        target_id TEXT NOT NULL,
-        paused BOOLEAN DEFAULT FALSE,
-        paused_at TIMESTAMPTZ,
-        resume_at TIMESTAMPTZ,
-        paused_by TEXT,
-        PRIMARY KEY (club_id, target_type, target_id)
-      )
-    `;
-  } catch {}
+  // pause_state table is created by migration 016 — see api/migrations/016-pause-state-table.js
 
   try {
     if (action === 'pause') {
+      // Read the current state BEFORE writing the new one so the feature_state_log
+      // row accurately records the from→to transition. If no row exists, the
+      // target is considered 'active' (default for any unpaused target).
+      const existingPause = await sql`
+        SELECT paused FROM pause_state
+        WHERE club_id = ${clubId} AND target_type = ${targetType} AND target_id = ${targetId}
+      `;
+      const previousState = existingPause.rows[0]?.paused ? 'paused' : 'active';
+
       await sql`
         INSERT INTO pause_state (club_id, target_type, target_id, paused, paused_at, resume_at, paused_by)
         VALUES (${clubId}, ${targetType}, ${targetId}, TRUE, NOW(), ${resumeAt || null}, ${pausedBy})
@@ -63,16 +58,26 @@ async function handler(req, res) {
         `;
       }
 
-      // Log
+      // Log — use the previously-read state so the audit trail is accurate
+      // even when a target is re-paused (e.g. paused→paused with a new resume time).
       await sql`
         INSERT INTO feature_state_log (club_id, feature_type, feature_key, previous_state, new_state, reason)
-        VALUES (${clubId}, ${targetType}, ${targetId}, 'active', 'paused', ${resumeAt ? `Paused until ${resumeAt}` : 'Manually paused'})
+        VALUES (${clubId}, ${targetType}, ${targetId}, ${previousState}, 'paused', ${resumeAt ? `Paused until ${resumeAt}` : 'Manually paused'})
       `;
 
       return res.status(200).json({ ok: true, message: `${targetType} ${targetId} paused${resumeAt ? ` until ${resumeAt}` : ''}` });
     }
 
     if (action === 'resume') {
+      // Read current state BEFORE writing so feature_state_log records the
+      // real from-state. A resume on an already-active target still logs
+      // 'active'→'active' rather than a misleading 'paused'→'active'.
+      const existingResume = await sql`
+        SELECT paused FROM pause_state
+        WHERE club_id = ${clubId} AND target_type = ${targetType} AND target_id = ${targetId}
+      `;
+      const previousState = existingResume.rows[0]?.paused ? 'paused' : 'active';
+
       await sql`
         INSERT INTO pause_state (club_id, target_type, target_id, paused, paused_at, resume_at)
         VALUES (${clubId}, ${targetType}, ${targetId}, FALSE, NULL, NULL)
@@ -96,7 +101,7 @@ async function handler(req, res) {
 
       await sql`
         INSERT INTO feature_state_log (club_id, feature_type, feature_key, previous_state, new_state, reason)
-        VALUES (${clubId}, ${targetType}, ${targetId}, 'paused', 'active', 'Manually resumed')
+        VALUES (${clubId}, ${targetType}, ${targetId}, ${previousState}, 'active', 'Manually resumed')
       `;
 
       return res.status(200).json({ ok: true, message: `${targetType} ${targetId} resumed` });

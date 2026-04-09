@@ -354,7 +354,7 @@ HAVING count(*) > 20
 ORDER BY bucket DESC;
 ```
 
-**Retention — TODO.** There is no TTL job yet. A future sprint should add a cron that deletes rows older than ~90 days (or archives them to cold storage) so the table does not grow unbounded. Until then, the indexes on `(user_id, occurred_at DESC)`, `(target_club_id, occurred_at DESC)`, and `(occurred_at DESC)` keep forensic queries cheap even as the table grows.
+**Retention:** The `cross_club_audit` table is auto-purged nightly by `/api/cron/purge-cross-club-audit` (cron schedule `0 4 * * *`). Rows older than **90 days** are deleted. If you need a longer retention window for a specific incident investigation, snapshot the table to S3 before the next purge runs. The indexes on `(user_id, occurred_at DESC)`, `(target_club_id, occurred_at DESC)`, and `(occurred_at DESC)` keep both forensic queries and the nightly purge cheap.
 
 The wrapper is fire-and-forget: if the audit insert fails the handler still runs and a `warn`-level structured log line is emitted with the same fields. So even if Postgres is temporarily unreachable, divergent writes remain visible in Vercel function logs — grep for `"context":"withAdminOverride"`.
 
@@ -421,9 +421,12 @@ Destructive endpoints are locked down so a single fat-fingered click cannot wipe
 
 - **Clear a club's activity log** — `DELETE /api/activity`
   - **Required role:** `swoop_admin` only (demo mode blocked).
-  - **Required query params:** `?clubId=<id>` AND `?confirm=YES_DELETE_AUDIT_LOG_FOR_<id>` where `<id>` matches the target club exactly. The confirm token is validated server-side; a mismatch returns 400.
-  - **Audit trail:** forced `logWarn('/api/activity', 'audit log DELETE', ...)` fires BEFORE the DELETE runs, and a `... complete` line with `deletedRows` fires after. Rejected attempts (wrong role, missing/invalid confirm) are also logged.
-  - **Example:** `curl -X DELETE "https://.../api/activity?clubId=club_abc&confirm=YES_DELETE_AUDIT_LOG_FOR_club_abc" -H "Authorization: Bearer <swoop_admin session>"`
+  - **Cross-club:** `swoop_admin` may target ANY club by passing `?clubId=<target>` — the session's own clubId is not required to match. Omitting `?clubId=` falls back to the session's own club.
+  - **Required query params:** `?confirm=YES_DELETE_AUDIT_LOG_FOR_<targetClubId>` where `<targetClubId>` is the EFFECTIVE target (the `?clubId=` you passed, or — if omitted — your session clubId). The confirm token is validated server-side against the resolved target, not the session; a mismatch returns 400.
+  - **Audit trail (local):** forced `logWarn('/api/activity', 'audit log DELETE', ...)` fires BEFORE the DELETE runs, and a `... complete` line with `deletedRows` fires after. Rejected attempts (wrong role, missing/invalid confirm) are also logged.
+  - **Audit trail (cross-club):** the handler is wrapped in `withAdminOverride({ adminTool: 'activity', reason: 'audit-log read/write/delete' })`. Any request where the body/query `clubId` diverges from `req.auth.clubId` is written to the `cross_club_audit` table. Query by `target_club_id` to list every wipe performed against a given tenant by a swoop_admin operating out of a different session.
+  - **Example (own club):** `curl -X DELETE "https://.../api/activity?confirm=YES_DELETE_AUDIT_LOG_FOR_club_self" -H "Authorization: Bearer <swoop_admin session for club_self>"`
+  - **Example (cross-club, GDPR/pilot-reset):** `curl -X DELETE "https://.../api/activity?clubId=club_other&confirm=YES_DELETE_AUDIT_LOG_FOR_club_other" -H "Authorization: Bearer <swoop_admin session>"` — note the token matches `club_other` (the target), NOT the session's clubId. The wipe is logged to both the local paper trail AND `cross_club_audit`.
 
 ---
 

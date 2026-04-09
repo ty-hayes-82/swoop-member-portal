@@ -3,11 +3,12 @@
  *
  * PUBLIC (no auth):
  *   GET  /api/weather?city=xxx[&state=xx]              → forecast by city (demo mode)
+ *
+ * AUTHED (session required, clubId sourced from session — NEVER from request
+ *         except for swoop_admin, which may target arbitrary clubs):
  *   GET  /api/weather?clubId=xxx&type=current          → live current conditions
  *   GET  /api/weather?clubId=xxx&type=forecast         → hourly + daily forecast
  *   GET  /api/weather?clubId=xxx&type=historical&date= → historical day lookup
- *
- * AUTHED (session required, clubId sourced from session — NEVER from request):
  *   POST /api/weather?action=tag-complaint             → tag a complaint with weather
  *   POST /api/weather?action=batch-tag                 → batch-tag untagged complaints
  */
@@ -24,7 +25,7 @@ import { verifySession } from './lib/withAuth.js';
 import { rateLimit } from './lib/rateLimit.js';
 
 export default async function handler(req, res) {
-  const { clubId: queryClubId, city, state } = req.query; // lint-clubid-allow: public GET weather lookup, POST write path uses verifyWriteSession
+  const { city, state } = req.query;
 
   // ─── PUBLIC: City/state-based lookup (demo mode — no clubId needed) ──
   if (req.method === 'GET' && city) {
@@ -60,20 +61,45 @@ export default async function handler(req, res) {
     }
   }
 
-  // ─── PUBLIC: GET weather data lookups (by clubId query param) ────────
+  // ─── AUTHED: GET per-club weather data lookups ───────────────────────
   if (req.method === 'GET') {
-    if (!queryClubId) return res.status(400).json({ error: 'clubId required' });
+    // Per-club weather lookups require authentication. Previously public
+    // (B19): anyone could poll forecasts/historical data for any club by
+    // guessing IDs. verifySession is the shared helper from ./lib/withAuth.js;
+    // we can't wrap the whole handler with withAuth() because the ?city=
+    // branch above must stay open.
+    const authResult = await verifySession(req);
+    if (authResult.status === 'error') {
+      logError('/api/weather', authResult.error, { phase: 'session-lookup' });
+      return res.status(500).json({ error: 'Authentication service error' });
+    }
+    if (authResult.status !== 'ok') {
+      logWarn('/api/weather', 'unauthenticated per-club weather lookup', {
+        ip: req.headers['x-forwarded-for'] || null,
+        requestedClubId: req.query.clubId, // lint-clubid-allow: diagnostic log only, not used for data access
+      });
+      return res.status(401).json({ error: 'Authentication required for per-club weather lookups' });
+    }
+    const session = authResult.session;
+
+    // CRITICAL: clubId comes from the verified session, NEVER from req.query,
+    // except for swoop_admin — who is intentionally allowed to target any
+    // club for cross-club observability.
+    const requestedClubId = req.query.clubId; // lint-clubid-allow: swoop_admin per-club lookup, role-gated below
+    const clubId = (session.role === 'swoop_admin' && requestedClubId) ? requestedClubId : session.clubId;
+
+    if (!clubId) return res.status(400).json({ error: 'clubId required' });
     const { type, date, hours, days } = req.query;
     if (!type) return res.status(400).json({ error: 'type required (current|forecast|historical)' });
 
     try {
       switch (type) {
         case 'current': {
-          const data = await getCurrentConditions(queryClubId);
+          const data = await getCurrentConditions(clubId);
           return res.json(data);
         }
         case 'forecast': {
-          const data = await getForecast(queryClubId, {
+          const data = await getForecast(clubId, {
             hours: hours ? parseInt(hours) : 24,
             days: days ? parseInt(days) : 5,
           });
@@ -81,7 +107,7 @@ export default async function handler(req, res) {
         }
         case 'historical': {
           if (!date) return res.status(400).json({ error: 'date required for historical lookup' });
-          const data = await getHistoricalDay(queryClubId, date);
+          const data = await getHistoricalDay(clubId, date);
           const impact = assessWeatherImpact(data);
           return res.json({ ...data, ...impact });
         }
@@ -108,14 +134,19 @@ export default async function handler(req, res) {
     // Verify session manually. We can't use withAuth() as a wrapper because
     // the public GET path above must stay open. verifySession is the shared
     // helper exported by ./lib/withAuth.js.
-    const session = await verifySession(req);
-    if (!session) {
+    const authResult = await verifySession(req);
+    if (authResult.status === 'error') {
+      logError('/api/weather', authResult.error, { phase: 'session-lookup' });
+      return res.status(500).json({ error: 'Authentication service error' });
+    }
+    if (authResult.status !== 'ok') {
       logWarn('/api/weather', 'unauthorized write attempt', {
         action,
         ip: req.headers['x-forwarded-for'] || null,
       });
       return res.status(401).json({ error: 'Authentication required' });
     }
+    const session = authResult.session;
 
     // CRITICAL: clubId ALWAYS comes from the verified session, NEVER from
     // req.query.clubId or req.body.clubId. A valid user from club A could
