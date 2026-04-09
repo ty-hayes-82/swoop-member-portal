@@ -54,6 +54,9 @@ jobs:
       - name: Run theme lint
         run: npm run lint-theme
 
+      - name: Run clubId lint
+        run: npm run lint-clubid
+
   unit:
     name: Unit tests (vitest)
     runs-on: ubuntu-latest

@@ -273,7 +273,7 @@ Rollback URL pattern (old deployments remain accessible): `https://swoop-member-
 
 - **Vercel function logs** — default log sink for every serverless function. Vercel dashboard → Project → **Logs** tab. Filter by function path (e.g. `/api/execute-action`).
 - **Vercel runtime logs for specific deployments** — accessible per deployment via the dashboard or the `mcp__claude_ai_Vercel__get_runtime_logs` tool when debugging from Claude Code.
-- **Cron logs** — visible under Vercel → Project → Cron Jobs. The only cron today is `/api/cron/weather-daily` at `0 3 * * *` (3 AM UTC).
+- **Cron logs** — visible under Vercel → Project → Cron Jobs. The only cron today is `/api/cron/weather-daily` at `0 3 * * *` (3 AM UTC). The handler requires `CRON_SECRET` (set in Vercel project env vars, Production + Preview) — Vercel passes it as `Authorization: Bearer <CRON_SECRET>` automatically on each tick. The handler is fail-closed: if the secret is missing or the header doesn't match, it returns 401 and does nothing. Rotate by generating a new value (`openssl rand -hex 32`), adding it in Vercel env vars, redeploying, then removing the old value.
 - **Console error reporting** — [`api/lib/logger.js`](../../api/lib/logger.js) writes structured logs to stdout.
 
 ### What is NOT wired yet (TODO)

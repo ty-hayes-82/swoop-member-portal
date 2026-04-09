@@ -1,6 +1,16 @@
 import { sql } from '@vercel/postgres';
+import { cors } from './lib/cors.js';
+import { logWarn } from './lib/logger.js';
+
+const ALLOW_DEBUG = process.env.ALLOW_DEBUG === 'true';
+const IS_PROD = process.env.NODE_ENV === 'production';
+
 export default async function handler(req, res) {
-  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
+  if (cors(req, res)) return;
+  if (IS_PROD && !ALLOW_DEBUG) {
+    logWarn('/api/schema-check', 'operator endpoint blocked in production', { ip: req.headers['x-forwarded-for'] });
+    return res.status(404).json({ error: 'Not found' });
+  }
   const tables = ['members','member_engagement_weekly','feedback','email_events','email_campaigns','visit_sessions','event_registrations','event_definitions','pos_checks','bookings','close_outs','pace_of_play','pace_hole_segments','weather_daily','waitlist_entries'];
   const result = {};
   for (const t of tables) {

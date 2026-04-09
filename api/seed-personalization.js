@@ -1,4 +1,9 @@
 import { sql } from '@vercel/postgres';
+import { cors } from './lib/cors.js';
+import { logWarn } from './lib/logger.js';
+
+const ALLOW_DEBUG = process.env.ALLOW_DEBUG === 'true';
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 function seededRand(seed) {
   let s = ((seed * 1103515245 + 12345) & 0x7fffffff);
@@ -256,7 +261,11 @@ function getDiningPreference(memberIndex, archetype) {
 }
 
 export default async function handler(req, res) {
-  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
+  if (cors(req, res)) return;
+  if (IS_PROD && !ALLOW_DEBUG) {
+    logWarn('/api/seed-personalization', 'operator endpoint blocked in production', { ip: req.headers['x-forwarded-for'] });
+    return res.status(404).json({ error: 'Not found' });
+  }
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }

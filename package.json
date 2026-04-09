@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "lint-theme": "node scripts/lint-theme.mjs",
+    "lint-clubid": "node scripts/lint-clubid.mjs",
+    "lint": "npm run lint-theme && npm run lint-clubid",
     "db:migrate": "node scripts/migrate.mjs",
     "test:e2e": "npx playwright test",
     "test:insights": "npx playwright test --config=playwright.insights.config.js",

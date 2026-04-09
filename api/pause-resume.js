@@ -5,12 +5,13 @@
  * Pause or resume agents and playbook runs with optional scheduled resume.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth } from './lib/withAuth.js';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  const { clubId, targetType, targetId, action, resumeAt } = req.body;
+  const { targetType, targetId, action, resumeAt } = req.body;
+  const clubId = getClubId(req);
   if (!clubId || !targetType || !targetId || !action) {
     return res.status(400).json({ error: 'clubId, targetType, targetId, and action required' });
   }

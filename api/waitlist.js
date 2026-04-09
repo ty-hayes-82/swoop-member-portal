@@ -40,14 +40,14 @@ export default withAuth(async function handler(req, res) {
                WHEN w.engagement_score >= 30 THEN 'At Risk'
                ELSE 'Critical' END AS risk_level,
           (SELECT MAX(b.booking_date) FROM bookings b
-           JOIN booking_players bp ON b.booking_id = bp.booking_id
-           WHERE bp.member_id::text = mw.member_id::text AND b.status = 'completed') AS last_round,
+           JOIN booking_players bp ON b.booking_id = bp.booking_id AND bp.club_id = ${clubId}
+           WHERE bp.member_id::text = mw.member_id::text AND b.status = 'completed' AND b.club_id = ${clubId}) AS last_round,
           (SELECT COUNT(*) FILTER (WHERE pc.post_round_dining = 1)::float /
                   NULLIF(COUNT(*), 0)
-           FROM pos_checks pc WHERE pc.member_id::text = mw.member_id::text) AS dining_history_rate
+           FROM pos_checks pc WHERE pc.member_id::text = mw.member_id::text AND pc.club_id = ${clubId}) AS dining_history_rate
         FROM member_waitlist mw
         JOIN members m ON mw.member_id::text = m.member_id::text AND m.club_id = ${clubId}
-        JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text
+        JOIN member_engagement_weekly w ON m.member_id::text = w.member_id::text AND w.club_id = ${clubId}
           AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly WHERE club_id = ${clubId})
         WHERE mw.club_id = ${clubId}
         ORDER BY CASE mw.retention_priority WHEN 'HIGH' THEN 0 ELSE 1 END, w.engagement_score ASC`,
@@ -60,8 +60,8 @@ export default withAuth(async function handler(req, res) {
                cr.cancel_probability, cr.drivers, cr.recommended_action,
                cr.estimated_revenue_lost, cr.action_taken, cr.outcome
         FROM cancellation_risk cr
-        JOIN bookings b ON cr.booking_id = b.booking_id
-        JOIN members m ON cr.member_id::text = m.member_id::text
+        JOIN bookings b ON cr.booking_id = b.booking_id AND b.club_id = ${clubId}
+        JOIN members m ON cr.member_id::text = m.member_id::text AND m.club_id = ${clubId}
         WHERE cr.club_id = ${clubId} AND b.booking_date::date >= '2026-01-01'::date AND b.status = 'confirmed'
         ORDER BY cr.cancel_probability DESC LIMIT 20`,
 
@@ -70,6 +70,7 @@ export default withAuth(async function handler(req, res) {
                dh.fill_rate, dh.unmet_rounds, dh.demand_level
         FROM demand_heatmap dh
         JOIN courses c ON dh.course_id = c.course_id AND c.club_id = ${clubId}
+        WHERE dh.club_id = ${clubId}
         ORDER BY c.name,
           ARRAY_POSITION(ARRAY['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], dh.day_of_week),
           dh.time_block`,

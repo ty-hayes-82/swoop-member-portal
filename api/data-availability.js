@@ -4,7 +4,7 @@
  * Returns: { members: true, rounds: false, transactions: false, ... }
  */
 import { sql } from '@vercel/postgres';
-import { withAuth } from './lib/withAuth.js';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 const TABLES = [
   { key: 'members', table: 'members', filter: 'club_id' },
@@ -19,7 +19,7 @@ const TABLES = [
 export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
 
-  const { clubId } = req.query;
+  const clubId = getClubId(req);
   if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
   const availability = {};

@@ -9,6 +9,8 @@
  * Every service getter should call getDataMode() and branch accordingly.
  */
 
+import { invalidateGuidedScores } from './guidedScoring';
+
 const FILES_KEY = 'swoop_demo_files';
 const GUIDED_KEY = 'swoop_demo_guided';
 
@@ -98,8 +100,10 @@ export function loadFile(fileId, gateId) {
   files.add(fileId);
   if (gateId) gates.add(gateId);
   persistFiles(files, gates);
-  // Invalidate guided scoring cache so scores recalculate with new data
-  try { import('./guidedScoring').then(m => m.invalidateGuidedScores()); } catch {}
+  // Invalidate guided scoring cache so scores recalculate with new data.
+  // Static import below; the guidedScoring <-> demoGate cycle is safe because
+  // guidedScoring only references demoGate exports inside function bodies.
+  try { invalidateGuidedScores(); } catch {}
   window.dispatchEvent(new CustomEvent(SOURCES_CHANGED_EVENT, { detail: { fileId, gateId, action: 'load' } }));
 }
 

@@ -3,9 +3,18 @@
 // Run once via: /api/fix-decay-curves
 
 import { sql } from '@vercel/postgres';
+import { cors } from './lib/cors.js';
+import { logWarn } from './lib/logger.js';
+
+const ALLOW_DEBUG = process.env.ALLOW_DEBUG === 'true';
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 export default async function handler(req, res) {
-  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) return res.status(403).json({ error: 'Disabled in production' });
+  if (cors(req, res)) return;
+  if (IS_PROD && !ALLOW_DEBUG) {
+    logWarn('/api/fix-decay-curves', 'operator endpoint blocked in production', { ip: req.headers['x-forwarded-for'] });
+    return res.status(404).json({ error: 'Not found' });
+  }
   try {
     const maxWeekResult = await sql`SELECT MAX(week_number) AS mw FROM member_engagement_weekly`;
     const maxWeek = Number(maxWeekResult.rows[0]?.mw ?? 12);

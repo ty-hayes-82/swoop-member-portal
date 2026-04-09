@@ -15,8 +15,24 @@ import {
   archiveDailyWeather,
   assessWeatherImpact,
 } from '../services/weather.js';
+import { logWarn, logInfo } from '../lib/logger.js';
 
 export default async function handler(req, res) {
+  // Vercel cron sends `Authorization: Bearer <CRON_SECRET>` automatically
+  // when the scheduled tick fires. Reject every other invocation. This is
+  // fail-closed: if CRON_SECRET isn't provisioned in the Vercel project env,
+  // the cron does not run.
+  const auth = req.headers['authorization'] || '';
+  const expected = `Bearer ${process.env.CRON_SECRET || ''}`;
+  if (!process.env.CRON_SECRET || auth !== expected) {
+    logWarn('/api/cron/weather-daily', 'unauthorized cron invocation', {
+      ip: req.headers['x-forwarded-for'],
+      hasAuthHeader: !!req.headers['authorization'],
+    });
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  logInfo('/api/cron/weather-daily', 'cron tick start');
+
   // Accept GET (Vercel cron) or POST (manual trigger)
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'GET or POST only' });

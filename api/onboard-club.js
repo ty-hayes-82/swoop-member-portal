@@ -54,7 +54,12 @@ export default async function handler(req, res) {
   } catch {}
 
   if (req.method === 'GET') {
-    const { clubId } = req.query;
+    // Intentionally public: the onboarding wizard polls progress for a
+    // newly-created club before the user is fully authenticated. The read is
+    // bounded to the `onboarding_progress` table only — no member data —
+    // so reading the clubId from the query string here is safe.
+    const pendingClubId = req.query?.clubId; // lint-clubid-allow: public onboarding wizard GET, bounded to onboarding_progress
+    const clubId = pendingClubId;
     if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
     const progress = await sql`
@@ -183,7 +188,13 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'PUT') {
-    const { clubId, stepKey, completed, notes } = req.body;
+    // Intentionally public: the onboarding wizard updates step progress
+    // before the user is fully authenticated. Writes are bounded to the
+    // `onboarding_progress` table only — no member data — so reading the
+    // clubId from the request body here is safe.
+    const pendingClubId = req.body?.clubId; // lint-clubid-allow: public onboarding wizard PUT, bounded to onboarding_progress
+    const { stepKey, completed, notes } = req.body;
+    const clubId = pendingClubId;
     if (!clubId || !stepKey) return res.status(400).json({ error: 'clubId and stepKey required' });
 
     await sql`

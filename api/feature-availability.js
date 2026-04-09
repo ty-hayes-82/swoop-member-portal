@@ -6,7 +6,7 @@
  * Returns per-feature availability based on connected data domains.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth } from './lib/withAuth.js';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
 // Agent dependency matrix from the resilience audit
 const AGENT_DEPENDENCIES = [
@@ -39,7 +39,7 @@ const DOMAINS = ['CRM', 'TEE_SHEET', 'POS', 'EMAIL', 'LABOR'];
 
 export default withAuth(async function handler(req, res) {
   if (req.method === 'GET') {
-    const { clubId } = req.query;
+    const clubId = getClubId(req);
     if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
     try {
@@ -104,7 +104,8 @@ export default withAuth(async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { clubId, action } = req.body;
+    const { action } = req.body;
+    const clubId = getClubId(req);
     if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
     // Seed initial domain status for a new club
