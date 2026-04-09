@@ -2,7 +2,9 @@
 // Generates a real personalized message draft for a given agent action
 // Called when GM clicks "View Draft" on an AgentActionCard with DRAFT_NOTE type
 
-export default async function handler(req, res) {
+import { withAuth } from '../lib/withAuth.js';
+
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { memberContext, actionContext, tone } = req.body ?? {};
@@ -52,4 +54,4 @@ Rules:
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-}
+})

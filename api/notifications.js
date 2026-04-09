@@ -41,10 +41,11 @@ export default withAuth(async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       await ensureTable();
-      const qClubId = req.query.clubId || clubId;
+      // clubId is always the authenticated caller's club (swoop_admin override
+      // handled centrally by getClubId); NEVER trust req.query.clubId here.
       const result = req.query.unreadOnly === 'true'
-        ? await sql`SELECT * FROM notifications WHERE club_id = ${qClubId} AND read_at IS NULL ORDER BY created_at DESC LIMIT 50`
-        : await sql`SELECT * FROM notifications WHERE club_id = ${qClubId} ORDER BY created_at DESC LIMIT 50`;
+        ? await sql`SELECT * FROM notifications WHERE club_id = ${clubId} AND read_at IS NULL ORDER BY created_at DESC LIMIT 50`
+        : await sql`SELECT * FROM notifications WHERE club_id = ${clubId} ORDER BY created_at DESC LIMIT 50`;
       return res.status(200).json({ notifications: result.rows });
     } catch {
       return res.status(200).json({ notifications: [] });
@@ -60,7 +61,8 @@ export default withAuth(async function handler(req, res) {
     if (req.body?.action === 'mark_read') {
       try {
         const { notificationId } = req.body;
-        await sql`UPDATE notifications SET read_at = NOW() WHERE notification_id = ${notificationId}`;
+        // Double-scope: notification must belong to caller's club.
+        await sql`UPDATE notifications SET read_at = NOW() WHERE notification_id = ${notificationId} AND club_id = ${clubId}`;
         return res.status(200).json({ ok: true });
       } catch (e) {
         return res.status(500).json({ error: e.message });

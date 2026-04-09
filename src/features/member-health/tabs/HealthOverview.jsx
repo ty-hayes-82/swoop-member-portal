@@ -214,7 +214,7 @@ export default function HealthOverview() {
         {dist.map((d) => {
           const delta = Number.isFinite(d?.delta) ? d.delta : 0;
           const descriptor = levelDescriptions[d.level] ?? 'are in this state';
-          const deltaColor = delta > 0 ? '#ef4444' : delta < 0 ? '#22c55e' : '#9CA3AF';
+          const deltaColor = delta > 0 ? '#ef4444' : delta < 0 ? '#12b76a' : '#9CA3AF';
           const deltaCopy = delta === 0
             ? 'same as last month.'
             : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;
@@ -451,7 +451,7 @@ export default function HealthOverview() {
                   </div>
                   <div className="flex gap-2 pl-0.5">
                     {MILESTONES.map(ms => (
-                      <span key={ms.key} className={`text-[10px] px-2 py-0.5 rounded font-semibold flex items-center gap-1 ${m.milestones[ms.key] ? 'bg-green-500/[0.08] text-green-500' : 'bg-gray-400/[0.06] text-gray-400'}`}>
+                      <span key={ms.key} className={`text-[10px] px-2 py-0.5 rounded font-semibold flex items-center gap-1 ${m.milestones[ms.key] ? 'bg-success-500/[0.08] text-success-500' : 'bg-gray-400/[0.06] text-gray-400'}`}>
                         {m.milestones[ms.key] ? '\u2713' : '\u25CB'} {ms.label}
                       </span>
                     ))}

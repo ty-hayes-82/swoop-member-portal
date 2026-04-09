@@ -32,7 +32,7 @@ export default function QualityTab() {
     ((100 - understaffedPct) * 0.3) +
     ((100 - (slowRoundStats.overallRate || 0) * 100) * 0.3)
   );
-  const scoreColor = consistencyScore >= 70 ? '#22c55e' : consistencyScore >= 50 ? '#ca8a04' : '#ef4444';
+  const scoreColor = consistencyScore >= 70 ? '#12b76a' : consistencyScore >= 50 ? '#ca8a04' : '#ef4444';
 
   // Weather-adjusted score: exclude complaints that occurred on weather-impacted days
   const weatherImpactedComplaints = feedbackRecords.filter(f => f.weatherContext?.isWeatherImpacted || f.weatherContext?.is_weather_impacted).length;
@@ -105,12 +105,12 @@ export default function QualityTab() {
 
         <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-4 sm:flex-wrap sm:ml-auto">
           {[
-            { label: 'Resolution Rate', value: `${resolutionRate}%`, color: resolutionRate >= 70 ? '#22c55e' : '#ca8a04' },
-            { label: 'Understaffed Days', value: `${understaffedDays.length}`, color: understaffedDays.length <= 1 ? '#22c55e' : '#ef4444' },
+            { label: 'Resolution Rate', value: `${resolutionRate}%`, color: resolutionRate >= 70 ? '#12b76a' : '#ca8a04' },
+            { label: 'Understaffed Days', value: `${understaffedDays.length}`, color: understaffedDays.length <= 1 ? '#12b76a' : '#ef4444' },
             { label: 'Open Complaints', value: `${totalComplaints - resolvedCount}`, color: (totalComplaints - resolvedCount) <= 2 ? '#ca8a04' : '#ef4444' },
             ...(adjustedScore != null ? [{
               label: 'Weather-Adj Score', value: `${adjustedScore}`,
-              color: adjustedScore >= 70 ? '#22c55e' : adjustedScore >= 50 ? '#ca8a04' : '#ef4444',
+              color: adjustedScore >= 70 ? '#12b76a' : adjustedScore >= 50 ? '#ca8a04' : '#ef4444',
             }] : []),
           ].map(m => (
             <div key={m.label} className="text-center min-w-[80px] py-1.5 px-3 rounded-lg" style={{ background: `${m.color}08`, border: `1px solid ${m.color}20` }}>
@@ -225,7 +225,7 @@ export default function QualityTab() {
                   className="h-full rounded flex items-center pl-2 transition-all duration-300"
                   style={{
                     width: `${(cat.count / maxCatCount) * 100}%`,
-                    background: cat.unresolvedCount > 2 ? '#ef4444' : '#22c55e',
+                    background: cat.unresolvedCount > 2 ? '#ef4444' : '#12b76a',
                   }}
                 >
                   <span className="text-[10px] font-bold text-white">{cat.count}</span>
@@ -234,7 +234,7 @@ export default function QualityTab() {
               <div
                 className="text-xs font-semibold min-w-[80px] text-right"
                 style={{
-                  color: cat.unresolvedCount > 0 ? '#ef4444' : '#22c55e',
+                  color: cat.unresolvedCount > 0 ? '#ef4444' : '#12b76a',
                   textDecoration: cat.unresolvedCount > 0 ? 'underline' : 'none',
                 }}
               >
@@ -272,7 +272,7 @@ export default function QualityTab() {
             { name: 'Banquet/Events', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
             { name: 'Pool Bar', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
           ];
-          const riskColors = { high: '#ef4444', medium: '#ca8a04', low: '#22c55e' };
+          const riskColors = { high: '#ef4444', medium: '#ca8a04', low: '#12b76a' };
           return (
             <div className="flex flex-col gap-2">
               {allOutlets.map(o => {
@@ -339,7 +339,7 @@ export default function QualityTab() {
         </p>
         <div className="grid grid-cols-2 gap-4">
           {[
-            { label: 'AM Shift (6am-12pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h <= 15; }).length, color: '#22c55e' },
+            { label: 'AM Shift (6am-12pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h <= 15; }).length, color: '#12b76a' },
             { label: 'PM Shift (12pm-9pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h > 15; }).length, color: '#ef4444' },
           ].map(shift => (
             <div key={shift.label} className="p-4 rounded-lg text-center" style={{ background: `${shift.color}08`, border: `1px solid ${shift.color}20` }}>

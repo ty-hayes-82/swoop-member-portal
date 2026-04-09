@@ -4,6 +4,7 @@ import SourceBadge from '@/components/ui/SourceBadge';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { getMemberProfile } from '@/services/memberService';
+import MemberDecayChain from './MemberDecayChain.jsx';
 import {
   AreaChart, Area,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -18,7 +19,7 @@ const fmtDate = (v) => {
 };
 
 const HEALTH_COLORS = {
-  healthy: '#22c55e',
+  healthy: '#12b76a',
   watch: '#f59e0b',
   'at-risk': '#ef4444',
   critical: '#8E1C17',
@@ -80,162 +81,16 @@ function Section({ title, children, cols, collapsible = false, defaultCollapsed 
   );
 }
 
-// --- First Domino panel for at-risk members (Phase H2 — mirrors drawer) ---
-const FIRST_DOMINO_DOMAIN_COLORS = {
-  Email: '#2563eb',
-  Golf: '#22c55e',
-  Dining: '#f59e0b',
-  Events: '#ff8b00',
-};
-const FIRST_DOMINO_DOMAIN_TO_SYSTEM = {
-  Golf: 'Tee Sheet',
-  Dining: 'POS',
-  Email: 'Email',
-  Events: 'Events',
-};
-
-function FirstDominoPanel({ profile }) {
-  const [approved, setApproved] = useState(false);
-
-  // Build decay chain from profile (matches drawer logic)
-  const decayChain = (() => {
-    const events = [];
-    (profile.activity ?? []).forEach(a => {
-      events.push({
-        date: a.timestamp ?? a.date ?? '',
-        domain: a.type?.includes('Golf') || a.type?.includes('Round') ? 'Golf'
-          : a.type?.includes('Dining') || a.type?.includes('F&B') ? 'Dining'
-          : a.type?.includes('Event') ? 'Events'
-          : a.type?.includes('Email') ? 'Email'
-          : 'Activity',
-        type: 'activity',
-      });
-    });
-    if (events.length < 4) {
-      events.push(
-        { date: 'Oct 2025', domain: 'Email', type: 'warning', decayOrder: 1 },
-        { date: 'Nov 2025', domain: 'Golf', type: 'warning', decayOrder: 2 },
-        { date: 'Nov 2025', domain: 'Dining', type: 'warning', decayOrder: 3 },
-      );
-    }
-    const seen = new Set();
-    const chain = [];
-    events
-      .filter(e => (e.type === 'warning' || e.type === 'risk') && e.domain !== 'Activity')
-      .sort((a, b) => (a.decayOrder ?? 99) - (b.decayOrder ?? 99))
-      .forEach(evt => {
-        if (!seen.has(evt.domain)) {
-          seen.add(evt.domain);
-          chain.push({ domain: evt.domain, date: evt.date });
-        }
-      });
-    return chain;
-  })();
-
-  if (decayChain.length < 2) return null;
-
-  const daysSinceFirstSignal = (() => {
-    const parsed = Date.parse(decayChain[0].date + ' 1');
-    if (Number.isNaN(parsed)) return null;
-    return Math.max(0, Math.round((Date.now() - parsed) / (1000 * 60 * 60 * 24)));
-  })();
-
-  const archetype = profile.archetype || '';
-  const recommendation = (() => {
-    if (archetype === 'Ghost') return 'GM personal call · re-engagement conversation';
-    if (archetype === 'Declining') return 'Membership Director outreach · identify root cause';
-    if (archetype === 'Weekend Warrior') return 'Pro shop priority Saturday tee time offer';
-    if (archetype === 'Die-Hard Golfer') return 'Pro shop check-in · equipment/injury/schedule';
-    if (archetype === 'Social Butterfly') return 'Invite to upcoming wine dinner or social event';
-    if (archetype === 'New Member') return 'Membership Director integration check-in';
-    if (archetype === 'Snowbird') return 'Welcome-back package + tee time reservation';
-    return 'GM personal call · check-in and complimentary round offer';
-  })();
-
-  const handleApprove = () => {
-    trackAction({
-      actionType: 'approve',
-      actionSubtype: 'first_domino_outreach',
-      memberId: profile.memberId,
-      memberName: profile.name,
-      referenceType: 'first_domino',
-      referenceId: `outreach_${profile.memberId}`,
-      description: `First Domino outreach: ${recommendation}`,
-    });
-    setApproved(true);
-  };
-
-  return (
-    <div className="bg-red-500/[0.04] border border-red-500/25 rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <div>
-          <div className="text-xs font-bold tracking-wider uppercase text-error-500">
-            First Domino — Engagement Decay Sequence
-          </div>
-          <div className="text-[11px] text-gray-500 mt-0.5">Cross-domain timeline · Pillar 2: FIX IT</div>
-        </div>
-        {daysSinceFirstSignal != null && (
-          <span className="text-xs font-mono font-semibold text-error-500 bg-error-500/10 px-2.5 py-1 rounded">
-            First signal: {daysSinceFirstSignal} days ago
-          </span>
-        )}
-      </div>
-
-      <div className="flex items-start flex-wrap mb-3">
-        {decayChain.map((step, i) => {
-          const color = FIRST_DOMINO_DOMAIN_COLORS[step.domain] ?? '#9CA3AF';
-          const system = FIRST_DOMINO_DOMAIN_TO_SYSTEM[step.domain];
-          return (
-            <div key={step.domain} className="flex items-start">
-              <div className="flex flex-col gap-1">
-                <div className="px-3 py-1.5 rounded-md" style={{ background: color + '16', border: `1px solid ${color}40` }}>
-                  <div className="text-[11px] font-bold uppercase tracking-tight" style={{ color }}>{step.domain} dropped</div>
-                  <div className="text-[10px] text-gray-400">{step.date}</div>
-                </div>
-                {system && (
-                  <div className="flex items-center gap-1 text-[9px] text-gray-500 px-1">
-                    <span className="opacity-60">source:</span>
-                    <span className="font-semibold">{system}</span>
-                  </div>
-                )}
-              </div>
-              {i < decayChain.length - 1 && (
-                <span className="mx-2 mt-2.5 text-base text-gray-400 font-bold">&rarr;</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="text-[11px] text-gray-500 italic leading-snug pb-2 border-b border-red-500/15">
-        Cross-domain decay pattern. No single system would have flagged this in time.
-      </div>
-
-      {/* Inline Fix It action */}
-      <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex-1 min-w-0">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-success-600">Recommended Outreach</div>
-          <div className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{recommendation}</div>
-        </div>
-        <button
-          type="button"
-          onClick={handleApprove}
-          disabled={approved}
-          className={`px-4 py-2 rounded-md text-xs font-bold cursor-pointer border-none whitespace-nowrap transition-colors ${
-            approved ? 'bg-success-100 text-success-700 cursor-default' : 'bg-success-500 text-white hover:bg-success-600'
-          }`}
-        >
-          {approved ? '\u2713 Approved & Logged' : 'Approve & Log \u2192'}
-        </button>
-      </div>
-    </div>
-  );
-}
+// --- First Domino panel — now sourced from shared MemberDecayChain ---
+// The previous inline FirstDominoPanel has been replaced by <MemberDecayChain />
+// (see ./MemberDecayChain.jsx) so the drawer and full page share one source
+// of truth for the decay-chain card, source labels, first-signal counter,
+// and the inline Approve & Log action.
 
 // --- Category icons & colors for snapshot ---
 const SNAPSHOT_CATEGORIES = [
   { key: 'dining',  label: 'Food & Dining', types: ['Dining', 'F&B', 'Lounge'],              icon: '\uD83C\uDF7D\uFE0F', color: '#f59e0b' },
-  { key: 'golf',    label: 'Golf',          types: ['Golf', 'Practice', 'Tee Sheet'],         icon: '\u26F3',             color: '#22c55e' },
+  { key: 'golf',    label: 'Golf',          types: ['Golf', 'Practice', 'Tee Sheet'],         icon: '\u26F3',             color: '#12b76a' },
   { key: 'events',  label: 'Events',        types: ['Event', 'Events', 'Social'],             icon: '\uD83C\uDF89',       color: '#8b5cf6' },
   { key: 'spa',     label: 'Spa & Wellness',types: ['Spa', 'Wellness', 'Pool', 'Fitness'],    icon: '\uD83E\uDDD6',       color: '#ec4899' },
   { key: 'courts',  label: 'Courts',        types: ['Tennis', 'Pickleball', 'Courts', 'Court'],icon: '\uD83C\uDFBE',      color: '#06b6d4' },
@@ -569,13 +424,18 @@ export default function MemberProfilePage() {
         </div>
       </div>
 
+      {/* First Domino — Engagement Decay Sequence (shared component, mirrors drawer hierarchy) */}
+      {score < 50 && (
+        <MemberDecayChain member={profile} variant="page" />
+      )}
+
       {/* Key metrics row */}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
         <Stat label="Annual Dues" value={fmt$(profile.duesAnnual)} accent={'#1a1a2e'} />
         <Stat label="Total Value" value={fmt$(profile.memberValueAnnual)} accent={'#ff8b00'} />
-        <Stat label="Account Balance" value={fmt$(profile.accountBalance)} accent={profile.accountBalance < 0 ? '#ef4444' : '#22c55e'} />
+        <Stat label="Account Balance" value={fmt$(profile.accountBalance)} accent={profile.accountBalance < 0 ? '#ef4444' : '#12b76a'} />
         <Stat label="Email Open Rate" value={fmtPct(profile.emailOpenRate)} accent={'#ff8b00'} mono />
-        <Stat label="Rounds (30d)" value={profile.roundsPlayed ?? '\u2014'} accent={'#22c55e'} mono />
+        <Stat label="Rounds (30d)" value={profile.roundsPlayed ?? '\u2014'} accent={'#12b76a'} mono />
         <Stat label="Dining Spend (30d)" value={fmt$(profile.diningSpend)} accent={'#f59e0b'} />
       </div>
 
@@ -605,10 +465,7 @@ export default function MemberProfilePage() {
         </Section>
       )}
 
-      {/* First Domino — Engagement Decay Sequence (Phase H2) */}
-      {score < 50 && (
-        <FirstDominoPanel profile={profile} />
-      )}
+      {/* First Domino panel moved up next to the hero header; see <MemberDecayChain /> above */}
 
       {/* Two-column grid: trend + risk signals */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -649,7 +506,7 @@ export default function MemberProfilePage() {
               ))}
             </div>
           ) : (
-            <div className="text-green-500 text-sm">No active risk signals</div>
+            <div className="text-success-500 text-sm">No active risk signals</div>
           )}
         </Section>
       </div>
@@ -709,8 +566,8 @@ export default function MemberProfilePage() {
                   </div>
                   {member.memberStatus && (
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{
-                      background: member.memberStatus === 'Active' ? '#22c55e20' : '#f59e0b20',
-                      color: member.memberStatus === 'Active' ? '#22c55e' : '#f59e0b',
+                      background: member.memberStatus === 'Active' ? '#12b76a20' : '#f59e0b20',
+                      color: member.memberStatus === 'Active' ? '#12b76a' : '#f59e0b',
                     }}>{member.memberStatus}</span>
                   )}
                 </div>
@@ -725,7 +582,7 @@ export default function MemberProfilePage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-4 bg-white border border-gray-200 rounded-xl">
         {[
-          { label: 'Schedule call', icon: '\uD83D\uDCDE', color: '#16a34a' },
+          { label: 'Schedule call', icon: '\uD83D\uDCDE', color: '#039855' },
           { label: 'Send email', icon: '\u2709\uFE0F', color: '#3B82F6' },
           { label: 'Send SMS', icon: '\uD83D\uDCF1', color: '#ff8b00' },
           { label: 'Offer comp', icon: '\uD83C\uDF81', color: '#8b5cf6' },
@@ -774,7 +631,7 @@ export default function MemberProfilePage() {
                 </div>
                 <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
                   <div className="text-[10px] text-gray-400 uppercase">Total Paid</div>
-                  <div className="text-base font-bold font-mono text-green-500">{fmt$(invoices.summary.totalPaid)}</div>
+                  <div className="text-base font-bold font-mono text-success-500">{fmt$(invoices.summary.totalPaid)}</div>
                 </div>
                 <div className="p-2 rounded-lg border" style={{ background: invoices.summary.outstanding > 0 ? '#ef444410' : '#F3F4F6', borderColor: invoices.summary.outstanding > 0 ? '#ef444430' : '#E5E7EB' }}>
                   <div className="text-[10px] text-gray-400 uppercase">Outstanding</div>
@@ -782,7 +639,7 @@ export default function MemberProfilePage() {
                 </div>
                 <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
                   <div className="text-[10px] text-gray-400 uppercase">Payment Status</div>
-                  <div className="text-sm font-bold mt-0.5" style={{ color: invoices.summary.paymentStatus === 'current' ? '#22c55e' : invoices.summary.paymentStatus === 'chronic' ? '#ef4444' : '#f59e0b' }}>
+                  <div className="text-sm font-bold mt-0.5" style={{ color: invoices.summary.paymentStatus === 'current' ? '#12b76a' : invoices.summary.paymentStatus === 'chronic' ? '#ef4444' : '#f59e0b' }}>
                     {(invoices.summary.paymentStatus || 'unknown').charAt(0).toUpperCase() + (invoices.summary.paymentStatus || 'unknown').slice(1)}
                   </div>
                 </div>
@@ -799,7 +656,7 @@ export default function MemberProfilePage() {
                 </thead>
                 <tbody>
                   {invoiceItems.slice(0, 20).map((inv, i) => {
-                    const statusColor = inv.status === 'paid' ? '#22c55e' : inv.status === 'current' ? '#f59e0b' : '#ef4444';
+                    const statusColor = inv.status === 'paid' ? '#12b76a' : inv.status === 'current' ? '#f59e0b' : '#ef4444';
                     return (
                       <tr key={i} className="border-b border-gray-200">
                         <td className="px-2.5 py-2 font-mono">{fmtDate(inv.dueDate || inv.invoiceDate)}</td>
@@ -811,7 +668,7 @@ export default function MemberProfilePage() {
                             {inv.status?.replace(/_/g, ' ')}
                           </span>
                         </td>
-                        <td className="px-2.5 py-2 font-mono text-green-500">{inv.paidAmount > 0 ? fmt$(inv.paidAmount) : '\u2014'}</td>
+                        <td className="px-2.5 py-2 font-mono text-success-500">{inv.paidAmount > 0 ? fmt$(inv.paidAmount) : '\u2014'}</td>
                         <td className="px-2.5 py-2 font-mono" style={{ color: inv.lateFee > 0 ? '#ef4444' : '#9CA3AF' }}>{inv.lateFee > 0 ? fmt$(inv.lateFee) : '\u2014'}</td>
                       </tr>
                     );

@@ -163,7 +163,7 @@ export function computeHealthDistribution(members) {
   });
   const total = members.length || 1;
   return [
-    { level: 'Healthy',  min: 67, count: counts.Healthy,    percentage: counts.Healthy / total,    color: '#22c55e', delta: deltas.Healthy },
+    { level: 'Healthy',  min: 67, count: counts.Healthy,    percentage: counts.Healthy / total,    color: '#12b76a', delta: deltas.Healthy },
     { level: 'Watch',    min: 45, count: counts.Watch,      percentage: counts.Watch / total,      color: '#f59e0b', delta: deltas.Watch },
     { level: 'At Risk',  min: 25, count: counts['At Risk'], percentage: counts['At Risk'] / total, color: '#ea580c', delta: deltas['At Risk'] },
     { level: 'Critical', min: 0,  count: counts.Critical,   percentage: counts.Critical / total,   color: '#ef4444', delta: deltas.Critical },

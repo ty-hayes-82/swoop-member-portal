@@ -6,7 +6,7 @@ export const outreachCategories = [
   { key: 'social', label: 'Social & Community', icon: '\uD83E\uDD1D', color: '#7c3aed' },
   { key: 'engagement', label: 'Re-Engagement', icon: '\u26A1', color: '#f59e0b' },
   { key: 'service', label: 'Service Recovery', icon: '\uD83D\uDEE0\uFE0F', color: '#0ea5e9' },
-  { key: 'milestone', label: 'Milestones & Celebrations', icon: '\uD83C\uDF89', color: '#16a34a' },
+  { key: 'milestone', label: 'Milestones & Celebrations', icon: '\uD83C\uDF89', color: '#039855' },
 ];
 
 export const defaultOutreachActions = [

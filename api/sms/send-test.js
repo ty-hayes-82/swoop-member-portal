@@ -3,6 +3,10 @@
  * POST /api/sms/send-test
  */
 export default async function handler(req, res) {
+  // Debug-only endpoint: disabled in production unless ALLOW_DEBUG is set.
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) {
+    return res.status(403).json({ error: 'Disabled in production' });
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const sid = process.env.TWILIO_ACCOUNT_SID;

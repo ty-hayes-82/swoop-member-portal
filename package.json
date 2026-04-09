@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "lint-theme": "node scripts/lint-theme.mjs",
+    "db:migrate": "node scripts/migrate.mjs",
     "test:e2e": "npx playwright test",
     "test:insights": "npx playwright test --config=playwright.insights.config.js",
     "insights:report": "node scripts/generate-insights-report.mjs",

@@ -3,8 +3,8 @@ import QuickActions from '@/components/ui/QuickActions.jsx';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getEmailHeatmap, getDecayingMembers } from '@/services/memberService';
 function heatColor(rate) {
-  if (rate >= 0.65) return '#22c55e';
-  if (rate >= 0.45) return '#22c55e';
+  if (rate >= 0.65) return '#12b76a';
+  if (rate >= 0.45) return '#12b76a';
   if (rate >= 0.25) return '#f59e0b';
   if (rate >= 0.10) return '#f59e0b';
   return '#ef4444';

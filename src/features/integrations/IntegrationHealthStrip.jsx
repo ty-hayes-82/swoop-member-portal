@@ -1,12 +1,12 @@
 export function IntegrationHealthStrip({ health }) {
-  const freshnessColor = health.dataFreshness === 'n/a' ? '#f59e0b' : '#22c55e';
+  const freshnessColor = health.dataFreshness === 'n/a' ? '#f59e0b' : '#12b76a';
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-[18px]">
       <StatCard
         label="Connected Systems"
         value={`${health.connected}/${health.total}`}
-        accent={'#22c55e'}
+        accent={'#12b76a'}
       />
       <StatCard
         label="Data Freshness"
@@ -16,7 +16,7 @@ export function IntegrationHealthStrip({ health }) {
       <StatCard
         label="Sync Status"
         value={health.syncStatus}
-        accent={health.syncStatus === 'Healthy' ? '#22c55e' : '#f59e0b'}
+        accent={health.syncStatus === 'Healthy' ? '#12b76a' : '#f59e0b'}
       />
     </div>
   );

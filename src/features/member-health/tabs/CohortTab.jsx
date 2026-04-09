@@ -20,7 +20,7 @@ const MILESTONES = [
 const PHASES = [
   { label: 'Orientation', weeks: '1-4', color: '#3b82f6' },
   { label: 'Habit Building', weeks: '5-8', color: '#8b5cf6' },
-  { label: 'Integration', weeks: '9-12', color: '#16a34a' },
+  { label: 'Integration', weeks: '9-12', color: '#039855' },
 ];
 
 function getPhase(daysIn) {
@@ -30,7 +30,7 @@ function getPhase(daysIn) {
 }
 
 function getScoreColor(score) {
-  if (score >= 70) return '#16a34a';
+  if (score >= 70) return '#039855';
   if (score >= 50) return '#ca8a04';
   if (score >= 30) return '#ea580c';
   return '#b91c1c';
@@ -82,12 +82,12 @@ export default function CohortTab() {
             </p>
           </div>
           <div className="flex gap-2">
-            <div className="text-center px-3.5 py-1.5 rounded-lg bg-green-500/[0.06] border border-green-500/15">
-              <div className="text-lg font-bold text-green-600" style={{ fontFamily: mono }}>{newMembers.length}</div>
+            <div className="text-center px-3.5 py-1.5 rounded-lg bg-success-500/[0.06] border border-success-500/15">
+              <div className="text-lg font-bold text-success-600" style={{ fontFamily: mono }}>{newMembers.length}</div>
               <div className="text-[10px] text-gray-400">New Members</div>
             </div>
-            <div className={`text-center px-3.5 py-1.5 rounded-lg ${flaggedCount > 0 ? 'bg-orange-600/[0.06] border border-orange-600/15' : 'bg-green-500/[0.06] border border-green-500/15'}`}>
-              <div className="text-lg font-bold" style={{ fontFamily: mono, color: flaggedCount > 0 ? '#ea580c' : '#16a34a' }}>{flaggedCount}</div>
+            <div className={`text-center px-3.5 py-1.5 rounded-lg ${flaggedCount > 0 ? 'bg-orange-600/[0.06] border border-orange-600/15' : 'bg-success-500/[0.06] border border-success-500/15'}`}>
+              <div className="text-lg font-bold" style={{ fontFamily: mono, color: flaggedCount > 0 ? '#ea580c' : '#039855' }}>{flaggedCount}</div>
               <div className="text-[10px] text-gray-400">Falling Behind</div>
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function CohortTab() {
               {MILESTONES.map((ms) => {
                 const done = member.milestones[ms.key];
                 return (
-                  <div key={ms.key} className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${done ? 'bg-green-500/[0.08] border border-green-500/20 text-green-600' : 'bg-red-500/[0.06] border border-red-500/15 text-red-600'}`}>
+                  <div key={ms.key} className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${done ? 'bg-success-500/[0.08] border border-success-500/20 text-success-600' : 'bg-red-500/[0.06] border border-red-500/15 text-red-600'}`}>
                     <span>{ms.icon}</span>
                     <span>{ms.label}</span>
                     <span>{done ? '\u2713' : '\u2717'}</span>

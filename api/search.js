@@ -1,25 +1,12 @@
 import { sql } from '@vercel/postgres';
-import { cors } from './lib/cors.js';
+import { withAuth, getClubId } from './lib/withAuth.js';
 
-export default async function handler(req, res) {
-  if (cors(req, res)) return;
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
 
-  // Accept clubId from auth session or query param
-  let clubId = req.query.clubId;
-
-  // Try to get clubId from auth token if available
-  const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith('Bearer ')) {
-    try {
-      const token = authHeader.slice(7);
-      const result = await sql`
-        SELECT s.club_id FROM sessions s WHERE s.token = ${token} AND s.expires_at > NOW()
-      `;
-      if (result.rows.length > 0) clubId = result.rows[0].club_id;
-    } catch { /* use query param fallback */ }
-  }
-
+  // clubId comes from the authenticated session (swoop_admin can override via
+  // ?clubId=... handled in getClubId). Never trust raw req.query.clubId.
+  let clubId = getClubId(req);
   if (!clubId) return res.status(200).json({ results: [] });
   // Demo mode uses seeded club_001 data
   if (clubId === 'demo') clubId = 'club_001';
@@ -60,4 +47,4 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-}
+}, { allowDemo: true });

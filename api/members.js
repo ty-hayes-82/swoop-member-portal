@@ -5,6 +5,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getClubId } from './lib/withAuth.js';
 import { theme } from '../src/config/theme.js';
+import { logError } from './lib/logger.js';
 
 const toNumber = (value, fallback = 0) => {
   const numeric = Number(value);
@@ -528,7 +529,7 @@ export default withAuth(async function handler(req, res) {
       })(),
     });
   } catch (err) {
-    console.error('/api/members error:', err);
+    logError('/api/members', err);
     res.status(500).json({ error: err.message });
   }
 }, { allowDemo: true });

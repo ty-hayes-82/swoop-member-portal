@@ -116,7 +116,7 @@ function buildPriorityList() {
 }
 
 const ARCHETYPE_COLORS = {
-  'Die-Hard Golfer': '#22c55e',
+  'Die-Hard Golfer': '#12b76a',
   'Social Butterfly': '#2563eb',
   'Balanced Active': '#ff8b00',
   'Weekend Warrior': '#f59e0b',
@@ -170,7 +170,7 @@ export default function MemberAlerts() {
   }
 
   return (
-    <div className="alerts-section-enhanced fade-in-up fade-delay-1" data-section="member-alerts">
+    <div id="today-member-alerts" className="alerts-section-enhanced fade-in-up fade-delay-1" data-section="member-alerts">
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
         <div className="flex items-center gap-2 flex-wrap">
           <div className="alerts-header" style={{ color: '#ef4444', margin: 0 }}>

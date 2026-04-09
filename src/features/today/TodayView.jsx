@@ -77,7 +77,7 @@ function GmGreetingAlert({ onDismiss }) {
   return (
     <div className="flex flex-col gap-3">
       {visible.map(alert => {
-        const scoreColor = alert.healthScore >= 70 ? '#22c55e' : alert.healthScore >= 50 ? '#f59e0b' : '#ef4444';
+        const scoreColor = alert.healthScore >= 70 ? '#12b76a' : alert.healthScore >= 50 ? '#f59e0b' : '#ef4444';
         return (
           <div
             key={alert.memberId}
@@ -118,10 +118,12 @@ function GmGreetingAlert({ onDismiss }) {
                 </div>
               </div>
               <button
+                type="button"
+                aria-label={`Dismiss check-in alert for ${alert.name}`}
                 onClick={() => setDismissed(prev => [...prev, alert.memberId])}
                 className="bg-transparent border-none cursor-pointer text-gray-300 hover:text-gray-500 text-lg p-1"
               >
-                x
+                <span aria-hidden="true">x</span>
               </button>
             </div>
           </div>
@@ -202,7 +204,7 @@ export default function TodayView() {
     const precip = typeof today?.precipProb === 'object' ? today?.precipProb?.percent : (today?.precipProb || 0);
     if (precip > 50 || wind > 25) return { label: 'Poor', color: '#ef4444', icon: '🌧️' };
     if (precip > 30 || wind > 15) return { label: 'Fair', color: '#f59e0b', icon: '⛅' };
-    return { label: 'Good', color: '#10b981', icon: '🌤️' };
+    return { label: 'Good', color: '#12b76a', icon: '🌤️' };
   })();
 
   return (
@@ -310,7 +312,7 @@ export default function TodayView() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               {[
                 { icon: '🍽️', label: 'Dining Covers Today', value: '126', color: '#ea580c' },
-                { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#16a34a' },
+                { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#039855' },
                 { icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' },
               ].map(s => (
                 <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>

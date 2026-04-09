@@ -8,7 +8,7 @@ import SourceBadge from '@/components/ui/SourceBadge';
 const REF_DATE = new Date();
 
 function getStaffingColor(current, required) {
-  if (current >= required) return '#22c55e';
+  if (current >= required) return '#12b76a';
   if (current >= required - 1) return '#ca8a04';
   return '#ef4444';
 }

@@ -10,6 +10,7 @@ import { sql } from '@vercel/postgres';
 import crypto from 'crypto';
 import { rateLimit } from './lib/rateLimit.js';
 import { cors } from './lib/cors.js';
+import { logError, logInfo, redactEmail } from './lib/logger.js';
 
 function hashPassword(password, salt) {
   return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
@@ -30,11 +31,13 @@ const ONBOARDING_STEPS = [
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
-  // Rate limit disabled during testing — re-enable before production
-  // const rl = rateLimit(req, { maxAttempts: 3, windowMs: 3600000 });
-  // if (rl.limited) {
-  //   return res.status(429).json({ error: 'Too many requests. Try again later.', retryAfter: rl.retryAfter });
-  // }
+  // Rate limit: 3 onboarding attempts per IP per hour. Re-enabled for production
+  // (was commented out during early testing). The in-memory limiter resets per
+  // cold-start; durable limiting requires the B7 follow-up (Vercel KV / Upstash).
+  const rl = rateLimit(req, { maxAttempts: 3, windowMs: 3600000 });
+  if (rl.limited) {
+    return res.status(429).json({ error: 'Too many requests. Try again later.', retryAfter: rl.retryAfter });
+  }
 
   // Ensure onboarding table exists
   try {
@@ -158,6 +161,8 @@ export default async function handler(req, res) {
         VALUES (${token}, ${userId}, ${clubId}, 'gm', ${expiresAt.toISOString()})
       `;
 
+      logInfo('/api/onboard-club', 'club created', { clubId, userId, clubName, adminEmailDomain: redactEmail(adminEmail) });
+
       res.status(201).json({
         clubId,
         userId,
@@ -169,8 +174,10 @@ export default async function handler(req, res) {
     } catch (e) {
       const msg = e.message || '';
       if (msg.includes('users_email_key') || msg.includes('duplicate key')) {
+        logInfo('/api/onboard-club', 'duplicate email rejected', { adminEmailDomain: redactEmail(adminEmail) });
         return res.status(409).json({ error: 'An account with this email already exists. Please use a different email or sign in.' });
       }
+      logError('/api/onboard-club', e, { phase: 'create-club', clubName });
       res.status(500).json({ error: 'Something went wrong creating your club. Please try again.' });
     }
   }

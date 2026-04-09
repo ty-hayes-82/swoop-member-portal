@@ -426,7 +426,7 @@ const CATEGORY_META = {
   'Service Recovery':      { icon: '\uD83D\uDEE1\uFE0F', color: '#DC2626', dotColor: '#EF4444', bg: '#FEF2F2' },
   'New Member Success':    { icon: '\uD83C\uDFAF', color: '#EA580C', dotColor: '#F97316', bg: '#FFF7ED' },
   'Member Engagement':     { icon: '\uD83D\uDCAC', color: '#2563EB', dotColor: '#3B82F6', bg: '#EFF6FF' },
-  'Events & Programming':  { icon: '\uD83D\uDCC5', color: '#16A34A', dotColor: '#22C55E', bg: '#F0FDF4' },
+  'Events & Programming':  { icon: '\uD83D\uDCC5', color: '#039855', dotColor: '#12b76a', bg: '#F0FDF4' },
   'Revenue':               { icon: '\uD83D\uDCB0', color: '#9333EA', dotColor: '#A855F7', bg: '#FDF4FF' },
   'Operations':            { icon: '\u2699\uFE0F',  color: '#0284C7', dotColor: '#0EA5E9', bg: '#F0F9FF' },
 };
@@ -486,7 +486,7 @@ function PlaybookDetail({ playbook, onClose }) {
         </div>
         <div className="sm:text-right">
           <div className="text-xs text-gray-400">Track record</div>
-          <div className="text-base font-bold text-green-600">{playbook.trackRecord[0]?.result}</div>
+          <div className="text-base font-bold text-success-600">{playbook.trackRecord[0]?.result}</div>
           <div className="text-xs text-gray-400">{playbook.trackRecord[0]?.period}</div>
         </div>
       </div>
@@ -522,8 +522,8 @@ function PlaybookDetail({ playbook, onClose }) {
       {/* Track Record */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 mt-6 sm:mt-8 dark:bg-gray-900 dark:border-gray-800">
         <div className="flex items-center gap-2 mb-3 sm:mb-4">
-          <span className="text-green-600 font-bold">{'\u2713'}</span>
-          <span className="text-xs font-bold tracking-wider text-green-600 uppercase">Track Record</span>
+          <span className="text-success-600 font-bold">{'\u2713'}</span>
+          <span className="text-xs font-bold tracking-wider text-success-600 uppercase">Track Record</span>
         </div>
         {playbook.trackRecord.map((tr, idx) => (
           <div key={idx} className={`flex flex-col sm:flex-row sm:justify-between sm:items-center py-2.5 gap-1 sm:gap-2 ${
@@ -534,7 +534,7 @@ function PlaybookDetail({ playbook, onClose }) {
               <span className="text-[10px] sm:text-[11px] bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded">{tr.runs}</span>
               <span className="text-xs sm:text-[13px] text-gray-500">{tr.result}</span>
             </div>
-            <span className="text-xs sm:text-[13px] font-semibold text-green-600">{tr.impact}</span>
+            <span className="text-xs sm:text-[13px] font-semibold text-success-600">{tr.impact}</span>
           </div>
         ))}
       </div>
@@ -551,7 +551,7 @@ function PlaybookDetail({ playbook, onClose }) {
           ))}
         </div>
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 dark:bg-gray-800 dark:border-gray-700">
-          <div className="text-xs font-semibold text-green-500 mb-3">{'\u25CF'} AFTER</div>
+          <div className="text-xs font-semibold text-success-500 mb-3">{'\u25CF'} AFTER</div>
           {playbook.after.map((item, idx) => (
             <div key={idx} className="flex justify-between gap-2 mb-2 last:mb-0">
               <span className="text-xs sm:text-[13px] text-gray-500">{item.label}</span>

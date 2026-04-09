@@ -1,4 +1,4 @@
-const trendColor = (trend) => (trend === 'down' ? '#ef4444' : '#22c55e');
+const trendColor = (trend) => (trend === 'down' ? '#ef4444' : '#12b76a');
 
 export function ComboInsightCard({ combo, systemsById }) {
   const [leftId, rightId] = combo.systems;

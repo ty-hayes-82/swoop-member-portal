@@ -2,7 +2,9 @@
 // Returns natural language rationale for any proposed action
 // Used when GM taps "Why is this recommended?" on a complex action
 
-export default async function handler(req, res) {
+import { withAuth } from '../lib/withAuth.js';
+
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { action, clubContext } = req.body ?? {};
@@ -42,4 +44,4 @@ Keep it to 3–5 sentences.`,
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-}
+})

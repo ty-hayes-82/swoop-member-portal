@@ -32,7 +32,7 @@ Composite score is the **best fit pillar score** (a feature only needs to nail o
 | **Automations Hub** | 6 | 9 | 6 | **8** |
 | **Admin Hub** | 4 | 2 | 1 | **4** |
 | **Integrations Page** | 6 | 2 | 1 | **5** |
-| **Member Profile Page (full)** | 7 | 5 | 4 | **6** |
+| **Member Profile Page (full)** | 8 | 8 | 7 | **9** |
 | **Profile / Settings** | 1 | 1 | 1 | **2** |
 
 Pages scored ≥8 directly serve the storyboard moments. Pages 4–7 are supporting/enabling work. Pages ≤4 are infrastructure (necessary but not pillar work).
@@ -225,11 +225,11 @@ The "First Domino" decay sequence is the strongest single-feature win in the app
 
 ---
 
-## Member Profile Page (full route) — Composite **6 / 10**
+## Member Profile Page (full route) — Composite **9 / 10**
 
 The full-page version (separate from the drawer). Has the activity timeline + charts but lacks the First Domino visualization that the drawer now leads with.
 
-**What would push it to 9+:** Mirror the drawer's First Domino enhancements onto the full page, and add the "$ dues at risk" headline near the health score.
+**What would push it to 9+:** Mirror the drawer's First Domino enhancements onto the full page, and add the "$ dues at risk" headline near the health score. ✅ Shipped Polish-Final
 
 ---
 
@@ -265,7 +265,7 @@ User configuration. Email/SMS send modes, Google OAuth, club selection. **N/A �
 | Today → Morning Briefing sentence | ❌ No (recommended improvement) |
 | Today → Revenue Summary Card | ✅ |
 | Today → Member Alerts | ⚠️ Implicit (dues data exists) |
-| Tee Sheet → at-risk alerts | ⚠️ Health score only, no dollars |
+| Tee Sheet → at-risk alerts | ✅ Visible $XK badge (at-risk/VIP) + hover tooltip on healthy/watch 🆕 |
 | Members → at-risk list | ⚠️ Implicit |
 | Member Profile Drawer → header | ⚠️ Dues shown but not "at risk" |
 | Revenue Page | ✅ Dollar everywhere |
@@ -297,7 +297,7 @@ Ranked by storyboard alignment + effort:
 
 3. **Print stylesheet for Board Report 4-tab PDF export.** `@media print` block that renders all 4 tabs simultaneously. The "6 hours → 1 click" promise breaks if PDF only captures the active tab. **+1 point to Board Report.**
 
-4. **Show dues-at-risk per row in Tee Sheet table.** The data is there (`duesAnnual` field), just not shown inline. Adds dollar grounding to the at-risk highlight. **+2 points to Tee Sheet Prove It dimension.**
+4. ✅ DONE — **Show dues-at-risk per row in Tee Sheet table.** Visible badge on at-risk/VIP rows (Phase A2) plus a `$XK/yr dues` hover tooltip on healthy/watch rows (Polish-Final). **+2 points to Tee Sheet Prove It dimension.**
 
 5. **Source badge per Automations inbox item.** Show which agent + which underlying signal triggered each action. Closes the "trust by transparency" loop the rest of the app delivers. **+2 points to Automations See It dimension.**
 
@@ -307,7 +307,7 @@ Ranked by storyboard alignment + effort:
 
 | Pillar | Where it lives strongest | Where it's weakest |
 |---|---|---|
-| **SEE IT** (Cross-domain visibility) | Today → Morning Briefing 🆕 · Revenue → Decomposition · Tee Sheet → header | Admin · Profile · Member Profile (full page) |
+| **SEE IT** (Cross-domain visibility) | Today → Morning Briefing 🆕 · Revenue → Decomposition · Tee Sheet → header · Member Profile (full page) 🆕 | Admin · Profile |
 | **FIX IT** (Proactive action) | Member Profile Drawer → First Domino 🆕 · Automations → Inbox · Tee Sheet → Alert cards · Today → Action queue | Revenue Page (no inline action) · Board Report (passive) |
 | **PROVE IT** (Dollar attribution) | Revenue Page 🆕 · Board Report · Service → Staffing → Pace card 🆕 | Tee Sheet (data exists, not shown) · Member Alerts (implicit) |
 

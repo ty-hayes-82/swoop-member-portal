@@ -93,7 +93,7 @@ export default function MemberProfile() {
 
   const healthColor = useMemo(() => {
     const score = profile?.member?.healthScore ?? 0;
-    if (score >= 75) return '#16a34a';
+    if (score >= 75) return '#039855';
     if (score >= 50) return '#facc15';
     if (score >= 30) return '#fb923c';
     return '#ef4444';
@@ -165,7 +165,7 @@ export default function MemberProfile() {
                       <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Member Profile</p>
                       <div className="mt-1 flex flex-wrap items-center gap-3">
                         <h1 className="text-3xl font-semibold text-slate-900 md:text-4xl">{profile.member.name}</h1>
-                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                        <span className="rounded-full bg-success-50 px-3 py-1 text-sm font-semibold text-success-700">
                           {profile.member.membershipType || 'Member'}
                         </span>
                       </div>
@@ -191,7 +191,7 @@ export default function MemberProfile() {
                     </div>
                     <div className="text-sm text-slate-500">
                       <div className="text-xs uppercase tracking-wider text-slate-400">Δ vs last week</div>
-                      <div className={`text-lg font-semibold ${profile.member.scoreDelta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                      <div className={`text-lg font-semibold ${profile.member.scoreDelta >= 0 ? 'text-success-600' : 'text-red-500'}`}>
                         {profile.member.scoreDelta >= 0 ? '▲' : '▼'} {Math.abs(profile.member.scoreDelta ?? 0).toFixed(1)} pts
                       </div>
                     </div>
@@ -254,7 +254,7 @@ export default function MemberProfile() {
                     <div key={metric.id} className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
                       <p className="text-xs uppercase tracking-widest text-slate-400">{metric.label}</p>
                       <div className="mt-2 text-3xl font-semibold text-slate-900">{metricValue(metric)}</div>
-                      <div className={`mt-1 text-sm font-semibold ${positive ? 'text-emerald-600' : 'text-red-500'}`}>{trendCopy(metric)}</div>
+                      <div className={`mt-1 text-sm font-semibold ${positive ? 'text-success-600' : 'text-red-500'}`}>{trendCopy(metric)}</div>
                     </div>
                   );
                 })}
@@ -393,7 +393,7 @@ export default function MemberProfile() {
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
                   <p className="text-xs uppercase tracking-widest text-slate-400">YTD total spend</p>
                   <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(financials.ytdTotal)}</p>
-                  <p className={`text-sm font-semibold ${financials.deltaVsPrior >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                  <p className={`text-sm font-semibold ${financials.deltaVsPrior >= 0 ? 'text-success-600' : 'text-red-500'}`}>
                     {financials.deltaVsPrior >= 0 ? '▲' : '▼'} {formatCurrency(Math.abs(financials.deltaVsPrior || 0))} vs prior year
                   </p>
                 </div>

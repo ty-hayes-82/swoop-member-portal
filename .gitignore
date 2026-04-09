@@ -12,4 +12,14 @@ oakmont_hills_jan2026.db
 
 dist.locked-*
 .env*.local
+.env.vercel
 .vercel
+
+# Debug / capture artifacts (local-only)
+debug*.png
+vision-screenshots/
+vision-manifest.jsonl
+insights-capture.jsonl
+test-results/
+playwright-report/
+.claude/worktrees/

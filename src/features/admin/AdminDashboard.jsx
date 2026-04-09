@@ -153,7 +153,7 @@ function UsersTab() {
             <div style={{ fontSize: '14px', color: '#6B7280' }}>{user.role}</div>
             <div>
               <span style={s.badge(
-                user.status === 'active' ? '#15803D' : '#B45309',
+                user.status === 'active' ? '#027a48' : '#B45309',
                 user.status === 'active' ? '#F0FDF4' : '#FFFBEB'
               )}>
                 {user.status}
@@ -281,7 +281,7 @@ const INTEGRATION_CATEGORIES = [
 ];
 
 const STATUS_CONFIG = {
-  connected: { label: 'Connected', color: '#15803D', bg: '#F0FDF4' },
+  connected: { label: 'Connected', color: '#027a48', bg: '#F0FDF4' },
   available: { label: 'Available', color: '#1D4ED8', bg: '#EFF6FF' },
   'coming-soon': { label: 'Coming Soon', color: '#B45309', bg: '#FFFBEB' },
 };
@@ -332,7 +332,7 @@ function IntegrationCard({ integration }) {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button style={s.btn('ghost')}>Configure</button>
               <button style={{ ...s.btn('ghost'), color: '#ef4444' }}>Disconnect</button>
-              <span style={{ fontSize: '11px', color: '#22c55e', marginLeft: 'auto' }}>Last synced: 5 min ago</span>
+              <span style={{ fontSize: '11px', color: '#12b76a', marginLeft: 'auto' }}>Last synced: 5 min ago</span>
             </div>
           ) : integration.status === 'available' ? (
             <button style={s.btn('primary')}>Connect</button>
@@ -457,11 +457,11 @@ function OnboardingTab({ setActiveTab, navigate }) {
           <div key={step.id} style={{
             display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px',
             background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px',
-            borderLeft: `3px solid ${step.done ? '#22c55e' : '#f59e0b'}`,
+            borderLeft: `3px solid ${step.done ? '#12b76a' : '#f59e0b'}`,
           }}>
             <div style={{
               width: 24, height: 24, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: step.done ? '#22c55e' : '#F3F4F6', color: step.done ? '#fff' : '#9CA3AF',
+              background: step.done ? '#12b76a' : '#F3F4F6', color: step.done ? '#fff' : '#9CA3AF',
               fontSize: '12px', fontWeight: 700,
             }}>
               {step.done ? '\u2713' : '\u2022'}
@@ -593,7 +593,7 @@ function NotificationsTab() {
           <div key={ch.key} style={{ padding: '12px', background: '#ffffff', border: '1px solid ' + '#E5E7EB', borderRadius: '8px', textAlign: 'center' }}>
             <div style={{ fontSize: '20px', marginBottom: '6px' }}>{ch.icon}</div>
             <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a2e' }}>{ch.label}</div>
-            <div style={{ fontSize: '10px', color: ch.configured ? '#22c55e' : '#9CA3AF', marginTop: '2px' }}>
+            <div style={{ fontSize: '10px', color: ch.configured ? '#12b76a' : '#9CA3AF', marginTop: '2px' }}>
               {ch.configured ? ch.detail : 'Not configured'}
             </div>
             <button
@@ -603,7 +603,7 @@ function NotificationsTab() {
                 marginTop: '8px', padding: '4px 12px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', cursor: ch.configured ? 'pointer' : 'default',
                 border: 'none', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                 background: testStatus[ch.key] === 'sent' ? '#f0fdf4' : ch.configured ? `${'#ff8b00'}15` : '#F3F4F6',
-                color: testStatus[ch.key] === 'sent' ? '#22c55e' : ch.configured ? '#ff8b00' : '#9CA3AF',
+                color: testStatus[ch.key] === 'sent' ? '#12b76a' : ch.configured ? '#ff8b00' : '#9CA3AF',
               }}
             >
               {testStatus[ch.key] === 'sending' ? 'Sending...' : testStatus[ch.key] === 'sent' ? 'Sent!' : 'Send Test'}
@@ -747,7 +747,7 @@ function ClubProfileTab() {
             </button>
           )}
           {weatherStatus === 'connected' && (
-            <div style={{ marginTop: 8, fontSize: 12, color: '#22c55e', fontWeight: 600 }}>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#12b76a', fontWeight: 600 }}>
               Weather connected for {city}, {state}
             </div>
           )}
@@ -946,7 +946,7 @@ function BillingTab() {
                 <div style={{ height: '100%', borderRadius: '2px', background: pctUsed > 80 ? '#ef4444' : '#ff8b00', width: `${Math.min(pctUsed, 100)}%`, transition: 'width 0.3s' }} />
               </div>
               <div style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '4px' }}>{pctUsed}% consumed</div>
-              {metric.alert && <div style={{ fontSize: '10px', color: '#22c55e', marginTop: '2px' }}>{metric.alert}</div>}
+              {metric.alert && <div style={{ fontSize: '10px', color: '#12b76a', marginTop: '2px' }}>{metric.alert}</div>}
             </div>
           );
         })}
@@ -966,7 +966,7 @@ function BillingTab() {
           }}>
             <div style={{ fontSize: '14px', color: '#1a1a2e' }}>{inv.date}</div>
             <div style={{ fontSize: '14px', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: '#1a1a2e' }}>{inv.amount}</div>
-            <div><span style={s.badge('#15803D', '#F0FDF4')}>{inv.status}</span></div>
+            <div><span style={s.badge('#027a48', '#F0FDF4')}>{inv.status}</span></div>
             <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{inv.invoice}</div>
             <button style={{ ...s.btn('ghost'), padding: '4px 10px', fontSize: '12px' }}>Download</button>
           </div>
@@ -1085,7 +1085,7 @@ function SecurityTab() {
             <div style={{ fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", color: '#9CA3AF' }}>{log.ip}</div>
             <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{log.device}</div>
             <span style={s.badge(
-              log.status === 'success' ? '#15803D' : '#B91C1C',
+              log.status === 'success' ? '#027a48' : '#B91C1C',
               log.status === 'success' ? '#F0FDF4' : '#FEF2F2'
             )}>{log.status}</span>
           </div>

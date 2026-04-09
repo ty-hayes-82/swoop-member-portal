@@ -83,7 +83,7 @@ function SwipeableActionCard({ action, onApprove, onDismiss, showHint }) {
             onClick={handleApprove}
             style={{
               flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
-              background: '#22C55E', color: '#fff', fontSize: '13px', fontWeight: 700,
+              background: '#12b76a', color: '#fff', fontSize: '13px', fontWeight: 700,
               cursor: 'pointer',
             }}
           >Approve</button>
@@ -114,7 +114,7 @@ function CompletedCard({ action, expanded, onToggle }) {
       style={{
         padding: '10px 16px', borderRadius: '12px', background: '#F9FAFB',
         border: '1px solid #E5E7EB', cursor: 'pointer',
-        borderLeft: `3px solid ${action.status === 'approved' ? '#22C55E' : '#EF4444'}`,
+        borderLeft: `3px solid ${action.status === 'approved' ? '#12b76a' : '#EF4444'}`,
       }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
@@ -142,11 +142,11 @@ function CompletedCard({ action, expanded, onToggle }) {
       {expanded && (
         <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #E5E7EB' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: action.status === 'approved' ? '#22C55E' : '#EF4444' }}>{action.status}</span>
+            <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: action.status === 'approved' ? '#12b76a' : '#EF4444' }}>{action.status}</span>
             <span style={{ fontSize: '12px', color: '#9CA3AF' }}>{action.source}</span>
           </div>
           {action.impactMetric && (
-            <div style={{ fontSize: '12px', color: '#22C55E', marginTop: '4px', fontWeight: 500 }}>{action.impactMetric}</div>
+            <div style={{ fontSize: '12px', color: '#12b76a', marginTop: '4px', fontWeight: 500 }}>{action.impactMetric}</div>
           )}
         </div>
       )}
@@ -210,7 +210,7 @@ function PriorityGroup({ priority, actions, onApprove, onDismiss, onApproveAll, 
                 onClick={() => onApproveAll(priority)}
                 style={{
                   padding: '8px 14px', borderRadius: '10px', border: 'none',
-                  background: '#22C55E', color: '#fff', fontSize: '12px',
+                  background: '#12b76a', color: '#fff', fontSize: '12px',
                   fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
                 }}
               >
@@ -313,7 +313,7 @@ function BatchCard({ memberName, actions, onApproveAll, onDismissAll }) {
       <div style={{ display: 'flex', gap: '8px' }}>
         <button onClick={onApproveAll} style={{
           flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
-          background: '#22C55E', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+          background: '#12b76a', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
         }}>Approve All</button>
         <button onClick={onDismissAll} style={{
           flex: 1, padding: '10px', borderRadius: '10px',

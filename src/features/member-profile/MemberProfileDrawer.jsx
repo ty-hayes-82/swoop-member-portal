@@ -6,6 +6,7 @@ import { getOutreachHistory, trackAction } from '@/services/activityService';
 import { shouldUseStatic } from '@/services/demoGate';
 import { getMemberChurnPrediction } from '@/services/memberService';
 import { getMemberSaves } from '@/services/boardReportService';
+import MemberDecayChain from './MemberDecayChain.jsx';
 
 const formatDate = (value) => {
   if (!value) return '\u2014';
@@ -120,56 +121,8 @@ function ActivityTimeline({ activity = [] }) {
   );
 }
 
-// DecayChainAction — one-tap approval for the recommended outreach
-// Pillar 2: FIX IT — bridges the decay viz to immediate action
-function DecayChainAction({ profile }) {
-  const [approved, setApproved] = React.useState(false);
-
-  // Choose recommended action based on archetype
-  const recommendation = (() => {
-    const archetype = profile.archetype || '';
-    if (archetype === 'Ghost') return 'GM personal call · re-engagement conversation';
-    if (archetype === 'Declining') return 'Membership Director outreach · identify root cause';
-    if (archetype === 'Weekend Warrior') return 'Pro shop priority Saturday tee time offer';
-    if (archetype === 'Die-Hard Golfer') return 'Pro shop check-in · equipment/injury/schedule';
-    if (archetype === 'Social Butterfly') return 'Invite to upcoming wine dinner or social event';
-    if (archetype === 'New Member') return 'Membership Director integration check-in';
-    if (archetype === 'Snowbird') return 'Welcome-back package + tee time reservation';
-    return 'GM personal call · check-in and complimentary round offer';
-  })();
-
-  const handleApprove = () => {
-    trackAction({
-      actionType: 'approve',
-      actionSubtype: 'first_domino_outreach',
-      memberId: profile.memberId,
-      memberName: profile.name,
-      referenceType: 'first_domino',
-      referenceId: `outreach_${profile.memberId}`,
-      description: `First Domino outreach: ${recommendation}`,
-    });
-    setApproved(true);
-  };
-
-  return (
-    <div className="mt-3 pt-3 border-t border-red-500/10 flex items-center justify-between gap-2 flex-wrap">
-      <div className="flex-1 min-w-0">
-        <div className="text-[9px] font-bold uppercase tracking-wider text-success-600">Recommended Outreach</div>
-        <div className="text-[11px] text-gray-700 dark:text-gray-300 mt-0.5">{recommendation}</div>
-      </div>
-      <button
-        type="button"
-        onClick={handleApprove}
-        disabled={approved}
-        className={`px-3 py-1.5 rounded-md text-[11px] font-bold cursor-pointer border-none whitespace-nowrap transition-colors ${
-          approved ? 'bg-success-100 text-success-700 cursor-default' : 'bg-success-500 text-white hover:bg-success-600'
-        }`}
-      >
-        {approved ? '\u2713 Approved' : 'Approve & Log \u2192'}
-      </button>
-    </div>
-  );
-}
+// DecayChainAction was extracted into ./MemberDecayChain.jsx — kept there
+// so drawer and MemberProfilePage share a single implementation.
 
 // RiskSignalRow — Phase H1: per-signal one-tap action
 function RiskSignalRow({ signal, profile }) {
@@ -233,8 +186,10 @@ function RiskSignalRow({ signal, profile }) {
 // Member Journey — longitudinal cross-domain timeline showing engagement decay sequence
 // P6 "First Domino": shows per-member decay chain (Email dropped → Golf dropped → Dining dropped)
 function MemberJourneyTimeline({ profile }) {
-  // Build journey from activity + risk signals + static demo events
-  const { journeyEvents, decayChain } = useMemo(() => {
+  // Build journey from activity + risk signals + static demo events.
+  // Note: decay-chain computation now lives in MemberDecayChain (shared
+  // component). This hook only builds the vertical timeline event list.
+  const journeyEvents = useMemo(() => {
     const events = [];
 
     // Add activity items
@@ -276,24 +231,11 @@ function MemberJourneyTimeline({ profile }) {
       events.push(...demoEvents);
     }
 
-    // Build decay chain from warning/risk events in chronological domain order
-    const decayDomains = [];
-    const seen = new Set();
-    const decayItems = events
-      .filter(e => (e.type === 'warning' || e.type === 'risk') && e.domain !== 'Risk' && e.domain !== 'Activity')
-      .sort((a, b) => (a.decayOrder ?? 99) - (b.decayOrder ?? 99));
-    for (const evt of decayItems) {
-      if (!seen.has(evt.domain)) {
-        seen.add(evt.domain);
-        decayDomains.push({ domain: evt.domain, date: evt.date, label: evt.label });
-      }
-    }
-
-    return { journeyEvents: events, decayChain: decayDomains };
+    return events;
   }, [profile]);
 
   const domainColors = {
-    Golf: '#22c55e',
+    Golf: '#12b76a',
     Dining: '#f59e0b',
     Events: '#ff8b00',
     Email: '#2563eb',
@@ -312,91 +254,10 @@ function MemberJourneyTimeline({ profile }) {
     return <span className="text-sm text-gray-500">No journey data available.</span>;
   }
 
-  // Map decay domains to source systems for badge display
-  const domainToSystem = {
-    Golf: 'Tee Sheet',
-    Dining: 'POS',
-    Email: 'Email',
-    Events: 'Events',
-  };
-
-  // Compute days since the first decay signal
-  const daysSinceFirstSignal = (() => {
-    if (!decayChain.length) return null;
-    const firstDateStr = decayChain[0].date;
-    if (!firstDateStr) return null;
-    // Parse "Oct 2025" / "Nov 2025" etc
-    const parsed = Date.parse(firstDateStr + ' 1');
-    if (Number.isNaN(parsed)) return null;
-    const diff = Date.now() - parsed;
-    return Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)));
-  })();
-
   return (
     <div className="flex flex-col">
-      {/* Decay Chain — "First Domino" visualization */}
-      {decayChain.length >= 2 && (
-        <div className="px-3.5 py-3 mb-3.5 bg-red-500/[0.04] border border-red-500/15 rounded-xl">
-          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-error-500">
-              First Domino — Engagement Decay Sequence
-            </span>
-            {daysSinceFirstSignal != null && (
-              <span className="text-[10px] font-mono font-semibold text-error-500 bg-error-500/10 px-2 py-0.5 rounded">
-                First signal: {daysSinceFirstSignal} days ago
-              </span>
-            )}
-          </div>
-          <div className="flex items-start flex-wrap">
-            {decayChain.map((step, i) => {
-              const color = domainColors[step.domain] ?? '#9CA3AF';
-              const system = domainToSystem[step.domain];
-              return (
-                <div
-                  key={step.domain}
-                  className="flex items-start"
-                  style={{
-                    // Phase J4 — sequential reveal animation
-                    animation: `slideIn 400ms ease-out ${i * 300}ms backwards`,
-                  }}
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="px-2.5 py-1 rounded-md" style={{ background: color + '16', border: `1px solid ${color}40` }}>
-                      <div className="text-[10px] font-bold uppercase tracking-tight" style={{ color }}>{step.domain} dropped</div>
-                      <div className="text-[10px] text-gray-400">{step.date}</div>
-                    </div>
-                    {system && (
-                      <div className="flex items-center gap-1 text-[9px] text-gray-500 px-1">
-                        <span className="opacity-60">source:</span>
-                        <span className="font-semibold">{system}</span>
-                      </div>
-                    )}
-                  </div>
-                  {i < decayChain.length - 1 && (
-                    <span
-                      className="mx-1.5 mt-2 text-sm text-gray-400 font-bold"
-                      style={{ animation: `slideIn 200ms ease-out ${(i * 300) + 200}ms backwards` }}
-                    >
-                      &rarr;
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          <style>{`
-            @keyframes slideIn {
-              0% { opacity: 0; transform: translateX(-8px); }
-              100% { opacity: 1; transform: translateX(0); }
-            }
-          `}</style>
-          <div className="mt-2 pt-2 border-t border-red-500/10 text-[10px] text-gray-500 italic leading-snug">
-            Cross-domain decay pattern. No single system would have flagged this in time.
-          </div>
-          {/* Inline Fix It action — Pillar 2 */}
-          <DecayChainAction profile={profile} />
-        </div>
-      )}
+      {/* Decay Chain — "First Domino" visualization (shared component) */}
+      <MemberDecayChain member={profile} variant="drawer" />
     <div className="flex flex-col relative pl-5">
       {/* Vertical timeline line */}
       <div className="absolute left-2 top-1 bottom-1 w-0.5 bg-gray-200" />
@@ -447,7 +308,7 @@ function HealthDimensionGrid({ profile }) {
   // Use real dimensions from profile if available (populated by health_scores API), else approximate
   const dimensions = [
     { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#ff8b00' },
-    { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#22c55e' },
+    { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#12b76a' },
     { label: 'Email Engagement', weight: '25%', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: '#3B82F6' },
     { label: 'Event Attendance', weight: '20%', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
   ];
@@ -458,10 +319,10 @@ function HealthDimensionGrid({ profile }) {
         <div key={d.label} className="px-2.5 py-2 rounded-lg border border-gray-200 bg-gray-50">
           <div className="flex justify-between mb-1">
             <span className="text-[11px] text-gray-400">{d.label} ({d.weight})</span>
-            <span className="text-[11px] font-bold font-mono" style={{ color: d.value >= 60 ? '#22c55e' : d.value >= 35 ? '#f59e0b' : '#ef4444' }}>{d.value}</span>
+            <span className="text-[11px] font-bold font-mono" style={{ color: d.value >= 60 ? '#12b76a' : d.value >= 35 ? '#f59e0b' : '#ef4444' }}>{d.value}</span>
           </div>
           <div className="h-1 rounded-sm bg-gray-100">
-            <div className="h-full rounded-sm" style={{ background: d.value >= 60 ? '#22c55e' : d.value >= 35 ? '#f59e0b' : '#ef4444', width: `${d.value}%` }} />
+            <div className="h-full rounded-sm" style={{ background: d.value >= 60 ? '#12b76a' : d.value >= 35 ? '#f59e0b' : '#ef4444', width: `${d.value}%` }} />
           </div>
         </div>
       ))}
@@ -480,7 +341,7 @@ function ChurnPredictionBadge({ profile }) {
   if (!prediction || !prediction.prob_90d) return null;
 
   const prob = prediction.prob_90d;
-  const color = prob >= 60 ? '#ef4444' : prob >= 30 ? '#f59e0b' : '#22c55e';
+  const color = prob >= 60 ? '#ef4444' : prob >= 30 ? '#f59e0b' : '#12b76a';
   const factors = prediction.risk_factors || [];
 
   return (
@@ -623,7 +484,7 @@ function SpendTrendSparkline({ profile }) {
   }, [profile]);
 
   const trend = spendData.length >= 2 ? spendData[spendData.length - 1] - spendData[0] : 0;
-  const trendColor = trend >= 0 ? '#22c55e' : '#ef4444';
+  const trendColor = trend >= 0 ? '#12b76a' : '#ef4444';
 
   return (
     <div className="flex items-center gap-3">
@@ -638,7 +499,7 @@ function SpendTrendSparkline({ profile }) {
 // --- Snapshot categories for quick-view habits panel ---
 const SNAPSHOT_CATS = [
   { key: 'dining',  label: 'Food & Dining', types: ['dining', 'f&b', 'lounge', 'grill'],    icon: '\uD83C\uDF7D\uFE0F', color: '#f59e0b' },
-  { key: 'golf',    label: 'Golf',          types: ['golf', 'practice', 'tee', 'round'],     icon: '\u26F3',             color: '#22c55e' },
+  { key: 'golf',    label: 'Golf',          types: ['golf', 'practice', 'tee', 'round'],     icon: '\u26F3',             color: '#12b76a' },
   { key: 'events',  label: 'Events',        types: ['event', 'social'],                       icon: '\uD83C\uDF89',       color: '#8b5cf6' },
   { key: 'spa',     label: 'Spa & Wellness',types: ['spa', 'wellness', 'pool', 'fitness'],    icon: '\uD83E\uDDD6',       color: '#ec4899' },
   { key: 'courts',  label: 'Courts',        types: ['tennis', 'pickleball', 'court'],         icon: '\uD83C\uDFBE',       color: '#06b6d4' },
@@ -759,6 +620,11 @@ function DrawerSnapshotSection({ profile }) {
 }
 
 export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNote, onQuickAction, layout = 'drawer' }) {
+  // Pull openProfile from context so household rows can navigate to a relative's drawer.
+  // Safe to call here unconditionally — MemberProfileContent is always rendered inside
+  // MemberProfileProvider via the drawer wrapper below.
+  const { openProfile } = useMemberProfile();
+
   if (!profile) {
     return (
       <div className="p-6 text-gray-400">
@@ -849,7 +715,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
         <div className="text-right" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
           <div className="text-xs text-gray-400 uppercase tracking-wider mb-1" style={{ fontSize: '10px' }}>Health score</div>
-          <div className="text-[42px] font-mono" style={{ color: profile.healthScore > 69 ? '#22c55e' : profile.healthScore > 40 ? '#f59e0b' : '#ef4444', fontSize: '24px', lineHeight: 1 }}>
+          <div className="text-[42px] font-mono" style={{ color: profile.healthScore > 69 ? '#12b76a' : profile.healthScore > 40 ? '#f59e0b' : '#ef4444', fontSize: '24px', lineHeight: 1 }}>
             {profile.healthScore ?? '\u2014'}
           </div>
           <Sparkline data={profile.trend ?? []} />
@@ -935,16 +801,25 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               </div>
               <div style={{ lineHeight: 1.4 }}>
                 <div className="text-xs text-gray-400 uppercase tracking-wide" style={{ fontSize: '10px', lineHeight: 1.4 }}>Health (lowest)</div>
-                <div className="text-base font-bold font-mono" style={{ color: (profile.healthScore ?? 50) > 69 ? '#22c55e' : (profile.healthScore ?? 50) > 40 ? '#f59e0b' : '#ef4444', fontSize: '12px', lineHeight: 1.4 }}>
+                <div className="text-base font-bold font-mono" style={{ color: (profile.healthScore ?? 50) > 69 ? '#12b76a' : (profile.healthScore ?? 50) > 40 ? '#f59e0b' : '#ef4444', fontSize: '12px', lineHeight: 1.4 }}>
                   {profile.healthScore ?? '\u2014'}
                 </div>
               </div>
             </div>
-            {/* Family members */}
+            {/* Family members — clicking a linkable household member opens their drawer */}
             {profile.family.map((f, i) => (
               <div key={i}
-                onClick={() => f.memberId && onClose?.()}
-                className={`flex justify-between items-center px-3 py-2 rounded-lg border border-gray-200 transition-colors duration-100 ${f.memberId ? 'cursor-pointer hover:bg-gray-100' : 'cursor-default'}`}
+                role={f.memberId ? 'button' : undefined}
+                tabIndex={f.memberId ? 0 : undefined}
+                aria-label={f.memberId ? `Open profile for ${f.name}` : undefined}
+                onClick={() => { if (f.memberId) openProfile(f.memberId); }}
+                onKeyDown={(e) => {
+                  if (f.memberId && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    openProfile(f.memberId);
+                  }
+                }}
+                className={`flex justify-between items-center px-3 py-2 rounded-lg border border-gray-200 transition-colors duration-100 ${f.memberId ? 'cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500' : 'cursor-default'}`}
                 style={{ fontSize: '11px', lineHeight: 1.4 }}
               >
                 <div style={{ lineHeight: 1.4 }}>
@@ -1202,7 +1077,13 @@ export default function MemberProfileDrawer() {
 
   return createPortal(
     <>
-      <div style={overlayStyle} onClick={handleClose} />
+      <div
+        style={overlayStyle}
+        onClick={handleClose}
+        role="button"
+        tabIndex={-1}
+        aria-label="Close member profile"
+      />
       <div style={panelStyle}>
         <DrawerErrorBoundary onClose={handleClose}>
           <MemberProfileContent

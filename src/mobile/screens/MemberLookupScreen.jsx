@@ -4,7 +4,7 @@ import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
 import { useMobileNav } from '../context/MobileNavContext';
 
-const HEALTH_COLORS = { critical: '#EF4444', atRisk: '#F59E0B', watch: '#3B82F6', healthy: '#22C55E' };
+const HEALTH_COLORS = { critical: '#EF4444', atRisk: '#F59E0B', watch: '#3B82F6', healthy: '#12b76a' };
 function getHealthColor(score) {
   if (score < 30) return HEALTH_COLORS.critical;
   if (score < 50) return HEALTH_COLORS.atRisk;
@@ -68,7 +68,7 @@ function MobileMemberCard({ member, expanded, onToggle }) {
           <div style={{ fontSize: '13px', color: '#374151', padding: '10px 0', lineHeight: 1.5 }}>
             {member.topRisk && member.topRisk !== 'No current risks' && member.topRisk !== 'Monitoring'
               ? <span>⚠ {member.topRisk}</span>
-              : <span style={{ color: '#22C55E' }}>✓ No current risks</span>
+              : <span style={{ color: '#12b76a' }}>✓ No current risks</span>
             }
           </div>
 

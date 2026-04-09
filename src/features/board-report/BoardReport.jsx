@@ -5,6 +5,7 @@ import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { useMemberProfile } from '@/context/MemberProfileContext';
+import MemberLink from '@/components/MemberLink';
 import { getKPIs, getMemberSaves, getOperationalSaves } from '@/services/boardReportService';
 import { getHealthDistribution, getLiveDashboard } from '@/services/memberService';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
@@ -229,7 +230,7 @@ export default function BoardReport() {
         </summary>
         <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2.5">
           {[
-            { label: 'Service Quality', weight: '30%', value: '87%', benchmark: 'Complaint resolution + consistency', color: 'text-green-500' },
+            { label: 'Service Quality', weight: '30%', value: '87%', benchmark: 'Complaint resolution + consistency', color: 'text-success-500' },
             { label: 'Member Health', weight: '25%', value: '14 retained', benchmark: 'Health scores + interventions', color: 'text-blue-500' },
             { label: 'Operational Response', weight: '25%', value: '4.2 hrs avg', benchmark: 'Detection to action time', color: 'text-amber-500' },
             { label: 'Financial Performance', weight: '20%', value: 'On budget', benchmark: 'Dues + F&B vs plan', color: 'text-violet-500' },
@@ -531,7 +532,7 @@ export default function BoardReport() {
                       <div className="text-xs text-gray-500">Revenue Lost (Understaffed)</div>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
-                      <div className="text-2xl font-bold text-[#22c55e]">{prdRate}</div>
+                      <div className="text-2xl font-bold text-[#12b76a]">{prdRate}</div>
                       <div className="text-xs text-gray-500">Post-Round Dining Rate</div>
                     </div>
                   </div>
@@ -593,7 +594,9 @@ export default function BoardReport() {
             <Panel key={m.name || m.memberName}>
               <div className="flex justify-between items-center mb-2.5 cursor-pointer" onClick={() => m.memberId && openProfile(m.memberId)} title="Click to open member profile">
                 <h3 className="text-base font-bold text-gray-800 dark:text-white/90 hover:text-brand-500 transition-colors">
-                  {m.name || m.memberName}
+                  <MemberLink memberId={m.memberId} mode="drawer" className="!text-inherit !no-underline hover:!text-brand-500">
+                    {m.name || m.memberName}
+                  </MemberLink>
                   {m.memberId && <span className="ml-2 text-[11px] text-brand-500 font-normal">View profile →</span>}
                 </h3>
                 {m.duesAtRisk > 0 && (
@@ -618,7 +621,7 @@ export default function BoardReport() {
                     { label: 'Signal detected', color: 'bg-red-500' },
                     { label: 'GM alerted', color: 'bg-amber-500' },
                     { label: 'Action taken', color: 'bg-blue-500' },
-                    { label: 'Member retained', color: 'bg-green-500' },
+                    { label: 'Member retained', color: 'bg-success-500' },
                   ].map((step, i) => (
                     <div key={step.label} className="flex items-center">
                       <div className="flex items-center gap-1">
@@ -809,7 +812,7 @@ export default function BoardReport() {
                   title: 'Deploy ranger to bottleneck holes on weekends',
                   detail: 'Projected $1,150/mo recovery at 20% slow-round reduction. Review on Revenue page.',
                   owner: 'GM',
-                  color: '#22c55e',
+                  color: '#12b76a',
                 });
 
                 if (priorities.length === 0) {

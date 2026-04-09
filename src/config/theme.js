@@ -19,8 +19,8 @@ const PAPER        = '#FFFFFF';
 
 // Semantic color scales (DES-P03)
 const SUCCESS_50   = '#F0FDF4';
-const SUCCESS_500  = '#22C55E';
-const SUCCESS_700  = '#15803D';
+const SUCCESS_500  = '#12b76a';
+const SUCCESS_700  = '#027a48';
 const WARNING_50   = '#FFFBEB';
 const WARNING_500  = '#F59E0B';
 const WARNING_700  = '#B45309';

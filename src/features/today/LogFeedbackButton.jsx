@@ -49,10 +49,12 @@ export default function LogFeedbackButton() {
           Log Feedback
         </span>
         <button
+          type="button"
+          aria-label="Close feedback form"
           onClick={() => setOpen(false)}
           className="bg-transparent border-none cursor-pointer text-gray-400 text-base"
         >
-          ×
+          <span aria-hidden="true">×</span>
         </button>
       </div>
 

@@ -11,6 +11,7 @@ import { sql } from '@vercel/postgres';
 import crypto from 'crypto';
 import { rateLimit } from './lib/rateLimit.js';
 import { cors } from './lib/cors.js';
+import { logError, logInfo, logWarn, redactEmail } from './lib/logger.js';
 
 const SESSION_TTL_HOURS = 24;
 
@@ -37,14 +38,20 @@ export default async function handler(req, res) {
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `;
-  } catch {}
+  } catch (e) {
+    // Sessions table create-if-not-exists failure is non-fatal here (the
+    // INSERT below will surface the real error) but worth observing.
+    logWarn('/api/auth', 'sessions table ensure failed', { err: e.message });
+  }
 
   if (req.method === 'POST') {
-    // Rate limit disabled during testing — re-enable before production
-    // const rl = rateLimit(req, { maxAttempts: 5, windowMs: 3600000 });
-    // if (rl.limited) {
-    //   return res.status(429).json({ error: 'Too many login attempts. Try again later.', retryAfter: rl.retryAfter });
-    // }
+    // Rate limit login attempts: 5 per hour per IP+URL. In-memory store —
+    // see api/lib/rateLimit.js for known cold-start limitation (ADR-001).
+    const rl = rateLimit(req, { maxAttempts: 5, windowMs: 3600000 });
+    if (rl.limited) {
+      logWarn('/api/auth', 'login rate-limited', { retryAfter: rl.retryAfter });
+      return res.status(429).json({ error: 'Too many login attempts. Try again later.', retryAfter: rl.retryAfter });
+    }
 
     const { email, password } = req.body;
     if (!email || !password) {
@@ -59,6 +66,7 @@ export default async function handler(req, res) {
       `;
 
       if (result.rows.length === 0) {
+        logInfo('/api/auth', 'login failed: unknown user', { emailDomain: redactEmail(email) });
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
@@ -66,10 +74,12 @@ export default async function handler(req, res) {
 
       // Require password hash — no bypass
       if (!user.password_hash || !user.password_salt) {
+        logWarn('/api/auth', 'login blocked: account not configured', { emailDomain: redactEmail(email) });
         return res.status(401).json({ error: 'Account not configured. Contact your administrator.' });
       }
       const hash = hashPassword(password, user.password_salt);
       if (hash !== user.password_hash) {
+        logInfo('/api/auth', 'login failed: bad password', { emailDomain: redactEmail(email), userId: user.user_id });
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
@@ -84,12 +94,15 @@ export default async function handler(req, res) {
 
       await sql`UPDATE users SET last_login = NOW() WHERE user_id = ${user.user_id}`;
 
+      logInfo('/api/auth', 'login success', { userId: user.user_id, clubId: user.club_id, role: user.role });
+
       return res.status(200).json({
         token,
         user: { userId: user.user_id, clubId: user.club_id, name: user.name, email, role: user.role, title: user.title, clubName: user.club_name || null },
         expiresAt: expiresAt.toISOString(),
       });
     } catch (e) {
+      logError('/api/auth', e, { phase: 'login', emailDomain: redactEmail(email) });
       return res.status(500).json({ error: e.message });
     }
   }
@@ -118,6 +131,7 @@ export default async function handler(req, res) {
         expiresAt: session.expires_at,
       });
     } catch (e) {
+      logError('/api/auth', e, { phase: 'session-validate' });
       return res.status(500).json({ error: e.message });
     }
   }

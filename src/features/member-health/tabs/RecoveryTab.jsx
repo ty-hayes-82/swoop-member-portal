@@ -16,7 +16,7 @@ const formatCurrency = (value) => {
 };
 
 const recoveryMethods = [
-  { method: 'Personal GM Call', success: 95, count: 6, color: '#22c55e' },
+  { method: 'Personal GM Call', success: 95, count: 6, color: '#12b76a' },
   { method: 'Event Invitation', success: 91, count: 3, color: '#2563eb' },
   { method: 'Billing Resolution', success: 100, count: 2, color: '#8b5cf6' },
   { method: 'Engagement Autopilot', success: 87, count: 4, color: '#ff8b00' },
@@ -43,9 +43,9 @@ export default function RecoveryTab() {
       {/* Recovery Summary KPIs */}
       <div className="grid-responsive-4">
         {[
-          { label: 'Members Saved', value: kpis.totalSaved, color: '#22c55e', subtitle: 'at-risk members retained' },
-          { label: 'Avg Health Improvement', value: `+${kpis.avgImprovement} pts`, color: '#22c55e', subtitle: 'average score recovery' },
-          { label: 'Retention Rate', value: '100%', color: '#22c55e', subtitle: 'of intervened members' },
+          { label: 'Members Saved', value: kpis.totalSaved, color: '#12b76a', subtitle: 'at-risk members retained' },
+          { label: 'Avg Health Improvement', value: `+${kpis.avgImprovement} pts`, color: '#12b76a', subtitle: 'average score recovery' },
+          { label: 'Retention Rate', value: '100%', color: '#12b76a', subtitle: 'of intervened members' },
           { label: 'Avg Response Time', value: '4.2 hrs', color: '#2563eb', subtitle: 'from alert to first action' },
         ].map((kpi) => (
           <div key={kpi.label} className="bg-white shadow-theme-xs rounded-2xl border border-gray-200 p-4">
@@ -59,7 +59,7 @@ export default function RecoveryTab() {
       {/* Recovery Timeline */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-theme-xs">
         <div className="mb-5">
-          <div className="text-[11px] font-bold text-green-500 uppercase tracking-[1.5px] mb-1">Recovery Timeline</div>
+          <div className="text-[11px] font-bold text-success-500 uppercase tracking-[1.5px] mb-1">Recovery Timeline</div>
           <h3 className="text-xl font-bold text-[#1a1a2e] m-0 leading-tight">Intervention Outcomes</h3>
           <p className="text-xs text-gray-400 mt-1.5 mb-0">
             Each intervention below turned an at-risk member into a retained, re-engaged member.
@@ -83,9 +83,9 @@ export default function RecoveryTab() {
                   <div className="flex items-center justify-center gap-1">
                     <span className="font-mono font-bold text-[13px] text-error-500">{save.healthBefore}</span>
                     <span className="text-gray-400 text-sm">{'\u2192'}</span>
-                    <span className="font-mono font-bold text-[13px] text-green-500">{save.healthAfter}</span>
+                    <span className="font-mono font-bold text-[13px] text-success-500">{save.healthAfter}</span>
                   </div>
-                  <div className="text-[10px] font-bold text-green-500 mt-0.5">+{improvement} pts</div>
+                  <div className="text-[10px] font-bold text-success-500 mt-0.5">+{improvement} pts</div>
                 </div>
 
                 {/* Action + Outcome */}
@@ -100,7 +100,7 @@ export default function RecoveryTab() {
 
                 {/* Member Retained */}
                 <div className="text-right">
-                  <div className="font-mono font-bold text-sm text-green-500">Retained</div>
+                  <div className="font-mono font-bold text-sm text-success-500">Retained</div>
                   <div className="text-[10px] text-gray-400 mt-0.5">member saved</div>
                 </div>
               </div>
@@ -152,8 +152,8 @@ export default function RecoveryTab() {
             const barHeight = Math.max((t.membersSaved / maxSaved) * 140, 8);
             return (
               <div key={t.month} className="flex-1 flex flex-col items-center gap-1.5">
-                <div className="font-mono text-xs font-bold text-green-500">{t.membersSaved}</div>
-                <div className="w-full max-w-[48px] rounded-t-md rounded-b-sm relative" style={{ height: `${barHeight}px`, background: 'linear-gradient(180deg, #22c55e, #22c55ee6)' }}>
+                <div className="font-mono text-xs font-bold text-success-500">{t.membersSaved}</div>
+                <div className="w-full max-w-[48px] rounded-t-md rounded-b-sm relative" style={{ height: `${barHeight}px`, background: 'linear-gradient(180deg, #12b76a, #12b76ae6)' }}>
                   <div className="absolute -bottom-5 left-0 right-0 text-center text-[10px] text-gray-400 font-semibold">{t.month}</div>
                 </div>
               </div>
@@ -166,21 +166,21 @@ export default function RecoveryTab() {
           {trends.map((t) => (
             <div key={t.month} className="text-center p-2 bg-gray-50 rounded-lg border border-gray-200">
               <div className="text-[11px] font-semibold text-gray-400">{t.month}</div>
-              <div className="font-mono text-sm font-bold text-green-500 mt-0.5">{formatCurrency(t.duesProtected)}</div>
+              <div className="font-mono text-sm font-bold text-success-500 mt-0.5">{formatCurrency(t.duesProtected)}</div>
               <div className="text-[10px] text-gray-400">protected</div>
-              <div className="text-[11px] font-semibold mt-1" style={{ color: t.responseTime <= 4.5 ? '#22c55e' : '#f59e0b' }}>{t.responseTime}h response</div>
+              <div className="text-[11px] font-semibold mt-1" style={{ color: t.responseTime <= 4.5 ? '#12b76a' : '#f59e0b' }}>{t.responseTime}h response</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Bottom callout */}
-      <div className="px-5 py-4 bg-gradient-to-br from-green-500/[0.06] to-green-500/[0.02] border border-green-500/20 rounded-xl flex items-start gap-3.5">
-        <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-lg shrink-0">
+      <div className="px-5 py-4 bg-gradient-to-br from-success-500/[0.06] to-success-500/[0.02] border border-success-500/20 rounded-xl flex items-start gap-3.5">
+        <div className="w-10 h-10 rounded-full bg-success-500/10 flex items-center justify-center text-lg shrink-0">
           {'\u2705'}
         </div>
         <div>
-          <div className="text-sm font-bold text-green-500 mb-1">
+          <div className="text-sm font-bold text-success-500 mb-1">
             Every intervention here started as an alert on the Health Overview tab
           </div>
           <div className="text-xs text-gray-500 leading-relaxed">

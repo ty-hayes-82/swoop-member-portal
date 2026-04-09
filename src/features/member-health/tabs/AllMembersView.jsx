@@ -126,7 +126,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
   const hasScore = member.score != null && !rosterOnly;
   const healthLevel = hasScore ? getHealthLevel(member.score) : '—';
   const healthColor = !hasScore ? '#9CA3AF'
-    : member.score >= 70 ? '#22c55e'
+    : member.score >= 70 ? '#12b76a'
     : member.score >= 50 ? '#f59e0b'
     : member.score >= 30 ? '#ea580c'
     : '#ef4444';
@@ -224,7 +224,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                         className="w-2 rounded-sm"
                         style={{
                           height: `${Math.max(4, score / 2)}px`,
-                          background: score >= 70 ? '#22c55e' : score >= 50 ? '#f59e0b' : score >= 30 ? '#ea580c' : '#ef4444',
+                          background: score >= 70 ? '#12b76a' : score >= 50 ? '#f59e0b' : score >= 30 ? '#ea580c' : '#ef4444',
                           opacity: 0.4 + (i * 0.1),
                         }}
                       />
@@ -352,7 +352,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
     });
     const total = filteredMembers.length || 1;
     return [
-      { level: 'Healthy', count: counts.Healthy, percentage: counts.Healthy / total, color: '#22c55e', min: 70 },
+      { level: 'Healthy', count: counts.Healthy, percentage: counts.Healthy / total, color: '#12b76a', min: 70 },
       { level: 'Watch', count: counts.Watch, percentage: counts.Watch / total, color: '#f59e0b', min: 50 },
       { level: 'At Risk', count: counts['At Risk'], percentage: counts['At Risk'] / total, color: '#ea580c', min: 30 },
       { level: 'Critical', count: counts.Critical, percentage: counts.Critical / total, color: '#ef4444', min: 0 },
@@ -502,7 +502,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
             <div className="flex flex-wrap gap-2 text-[11px] text-gray-600 dark:text-gray-400">
               {[
                 { key: 'email', label: '📧 Email decay', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-                { key: 'golf', label: '⛳ Golf drop', bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
+                { key: 'golf', label: '⛳ Golf drop', bg: 'bg-success-50', text: 'text-success-700', border: 'border-success-200' },
                 { key: 'dining', label: '🍽️ Dining drop', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
                 { key: 'multi', label: '⚠️ Multi-domain decay', bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
               ].map(chip => {

@@ -26,23 +26,56 @@ const EMPTY_BRIEFING = {
   topCancellationRiskMembers: [],
 };
 
+// DEMO_BRIEFING is the safety fallback if the dynamic build path throws.
+// It must satisfy the same contract as the dynamic build so that downstream
+// components and tests don't see a half-shape. Every required field is populated.
 const DEMO_BRIEFING = {
-  keyMetrics: { atRiskMembers: 7, openComplaints: 4 },
+  keyMetrics: { atRiskMembers: 7, openComplaints: 4, monthlyRevenue: 142000, revenueVsPlan: 4.2, understaffedDays: 3 },
   teeSheet: { roundsToday: 220, utilization: 0.87 },
   todayRisks: {
+    weather: 'wind-advisory',
+    tempHigh: 68,
+    wind: 32,
     forecast: 'Wind advisory — gusts to 30-40 mph expected Saturday afternoon',
     atRiskTeetimes: [
       { memberId: 'mbr_203', name: 'James Whitfield', time: '9:20 AM', health: 42 },
       { memberId: 'mbr_089', name: 'Anne Jordan', time: '10:15 AM', health: 38 },
     ],
+    staffingGaps: [],
+    fullyStaffed: false,
     demandForecast: {
       expectedRounds: 192,
       golfModifier: 0.87,
       recommendation: 'Saturday: Grill Room needs 4 servers — only 2 scheduled',
       weatherSummary: 'Wind advisory may shift 32 afternoon tee times indoors',
     },
+    cancellationRisk: {
+      highRiskBookings: 0,
+      totalRevAtRisk: 0,
+      driverSummary: '',
+      suggestedAction: '',
+      estimatedRevenueSaved: 0,
+      topAtRiskMembers: [],
+    },
   },
-  yesterdayRecap: null,
+  yesterdayRecap: {
+    date: '2026-01-16',
+    revenue: 18420,
+    revenueVsPlan: -0.12,
+    revenueVsLastWeek: -8.4,
+    rounds: 82,
+    roundsVsLastWeek: 8,
+    incidents: [
+      'Grill Room understaffed — 2 service speed complaints',
+      'James Whitfield filed a slow-service complaint — left unhappy, no follow-up',
+    ],
+    weather: 'overcast',
+    isUnderstaffed: true,
+  },
+  pendingActions: [
+    { playbookId: 'service-save', title: 'Service Save Protocol', status: 'recommended', urgency: 'high', reason: 'James Whitfield complaint unresolved' },
+    { playbookId: 'peak-demand-capture', title: 'Peak Demand Capture', status: 'recommended', urgency: 'high', reason: 'Wind advisory + at-risk bookings' },
+  ],
   comparisons: {},
   topCancellationRiskMembers: [],
 };
@@ -54,6 +87,9 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   // Demo mode: try to build from service data, fall back to static
   try {
   const revData    = getRevenueByDay();
+  // dailyRevenue rows expose `golf` and `fb` fields. Compute the daily total
+  // here so the briefing's yesterdayRecap.revenue is a single dollar number.
+  const totalFor = (row) => (row ? (Number(row.golf) || 0) + (Number(row.fb) || 0) : 0);
   const yesterday  = revData.find(d => d.date === '2026-01-16') ?? revData[15];
   const atRisk     = getAtRiskMembers();
   const staffing   = getStaffingSummary();
@@ -83,7 +119,11 @@ export const getDailyBriefing = (date = '2026-01-17') => {
 
   // Comparative context - vs last week
   const lastSaturday = revData.find(d => d.date === '2026-01-10') ?? revData[9];
-  const revenueVsLastWeek = ((yesterday.total - lastSaturday.total) / lastSaturday.total * 100).toFixed(1);
+  const yesterdayTotal = totalFor(yesterday);
+  const lastSaturdayTotal = totalFor(lastSaturday);
+  const revenueVsLastWeek = lastSaturdayTotal
+    ? ((yesterdayTotal - lastSaturdayTotal) / lastSaturdayTotal * 100).toFixed(1)
+    : '0.0';
   
   const teeSheet = getTodayTeeSheet();
   return {
@@ -91,7 +131,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     teeSheet: { roundsToday: teeSheet.length > 0 ? teeSheet.length : DEMO_BRIEFING.teeSheet.roundsToday, utilization: 0.87 },
     yesterdayRecap: {
       date:           yesterday.date,
-      revenue:        yesterday.total,
+      revenue:        yesterdayTotal,
       revenueVsPlan:  -0.12,
       revenueVsLastWeek: parseFloat(revenueVsLastWeek),
       rounds:         82,

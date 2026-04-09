@@ -1,0 +1,178 @@
+# Swoop Member Portal — CI
+#
+# Runs on every push to `dev` and on every pull request targeting `dev` or `main`.
+# Jobs:
+#   - lint        : theme/color-token lint (npm run lint-theme)
+#   - unit        : vitest unit tests (npm test)
+#   - build       : production Vite build, uploads dist/ as artifact
+#   - e2e         : Playwright smoke — storyboard-flows + polish-final specs
+#                   depends on build passing first
+#
+# IMPORTANT: This workflow deliberately does NOT deploy to Vercel.
+# Vercel's native GitHub integration handles preview deploys on the `dev` branch.
+# Never add `vercel deploy` or `vercel --prod` steps here.
+#
+# Secrets referenced (add these under repo Settings -> Secrets and variables -> Actions
+# if/when the corresponding code path needs them at CI time; currently none are required
+# for build/lint/unit/e2e on the demo data set):
+#   - GEMINI_API_KEY   (only needed for vision:critique scripts — NOT run in this workflow)
+#
+name: CI
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev, main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  # Port the storyboard-flows.spec.js + polish-final.spec.js default to.
+  APP_URL: http://localhost:5174
+
+jobs:
+  lint:
+    name: Lint (theme tokens)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run theme lint
+        run: npm run lint-theme
+
+  unit:
+    name: Unit tests (vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run vitest
+        run: npm test
+
+  build:
+    name: Build (vite)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+
+  e2e:
+    name: E2E (Playwright smoke)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start dev server
+        # The target specs default APP_URL to http://localhost:5174, so we pin
+        # Vite to that port explicitly instead of Vite's default 5173.
+        run: |
+          nohup npm run dev -- --port 5174 --strictPort --host 127.0.0.1 \
+            > dev-server.log 2>&1 &
+          echo "DEV_SERVER_PID=$!" >> $GITHUB_ENV
+
+      - name: Wait for dev server
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf -o /dev/null http://localhost:5174; then
+              echo "Dev server is up after ${i}s"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Dev server did not become ready within 120s"
+          tail -n 200 dev-server.log || true
+          exit 1
+
+      - name: Run Playwright smoke specs
+        env:
+          APP_URL: http://localhost:5174
+          CI: 'true'
+        run: |
+          npx playwright test \
+            tests/e2e/storyboard-flows.spec.js \
+            tests/e2e/polish-final.spec.js \
+            --reporter=list
+
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -n "${DEV_SERVER_PID:-}" ]; then
+            kill "$DEV_SERVER_PID" 2>/dev/null || true
+          fi
+
+      - name: Upload dev server log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-server-log-${{ github.sha }}
+          path: dev-server.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload test-results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results-${{ github.sha }}
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore

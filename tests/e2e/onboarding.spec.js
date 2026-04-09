@@ -18,7 +18,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const APP_URL = process.env.APP_URL || 'https://swoop-member-portal.vercel.app';
+// Default to localhost for safety — onboarding spec must NEVER hit production by accident.
+// Set APP_URL=https://swoop-member-portal.vercel.app explicitly to run against the dev preview.
+const APP_URL = process.env.APP_URL || 'http://localhost:5174';
 const TEMPLATE_DIR = path.resolve(__dirname, '../../docs/jonas-exports');
 
 const testId = Date.now().toString(36);

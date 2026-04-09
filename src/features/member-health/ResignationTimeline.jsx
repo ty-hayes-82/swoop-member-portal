@@ -3,7 +3,7 @@ import MemberLink from '@/components/MemberLink.jsx';
 import { getResignationScenarios } from '@/services/memberService';
 import { useNavigation } from '@/context/NavigationContext';
 const DOMAIN_COLORS = {
-  Golf: '#22c55e',
+  Golf: '#12b76a',
   'F&B': '#f59e0b',
   Email: '#ff8b00',
   Feedback: '#ef4444',

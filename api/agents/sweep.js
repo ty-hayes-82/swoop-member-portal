@@ -4,6 +4,7 @@
 // agentService.js calls this when Phase C flag is enabled
 
 import { sql } from '@vercel/postgres';
+import { withAuth } from '../lib/withAuth.js';
 
 async function getClubName(clubId) {
   if (!clubId) return 'your club';
@@ -15,14 +16,14 @@ async function getClubName(clubId) {
   }
 }
 
-export default async function handler(req, res) {
+export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { agentId, context, clubId } = req.body ?? {};
+  const { agentId, context } = req.body ?? {};
   if (!agentId) return res.status(400).json({ error: 'agentId required' });
 
-  // Resolve club name dynamically — no hardcoded club references
-  const clubName = await getClubName(clubId || req.auth?.clubId);
+  // Always resolve club from authenticated session — never trust req.body.clubId.
+  const clubName = await getClubName(req.auth.clubId);
 
   const SYSTEM_PROMPTS = {
     'chief-of-staff': `You are the Morning Chief of Staff for ${clubName}.
@@ -123,4 +124,4 @@ Return format: same JSON array format as chief-of-staff.`,
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-}
+})

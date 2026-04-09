@@ -124,12 +124,37 @@ export default function MorningBriefingSentence() {
   // Phase I2 — make the at-risk segment a clickable scroll target
   const hasAtRisk = segments.some(s => s.key === 'at-risk');
   const handleScrollToAlerts = () => {
-    const el = document.querySelector('[data-section="member-alerts"]');
+    const el = document.getElementById('today-member-alerts')
+      || document.querySelector('[data-section="member-alerts"]');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Build the synthesized sentence
-  const sentence = segments.map(s => s.text).join('. ') + '.';
+  // Build the synthesized sentence as JSX so the at-risk segment can be
+  // a clickable scroll target to the Member Alerts section. Phase I2 (audit #5).
+  const sentence = (
+    <>
+      {segments.map((s, i) => {
+        const isLast = i === segments.length - 1;
+        const suffix = isLast ? '.' : '. ';
+        if (s.key === 'at-risk') {
+          return (
+            <span key={s.key}>
+              <button
+                type="button"
+                onClick={handleScrollToAlerts}
+                className="font-serif text-lg text-brand-500 font-normal leading-snug bg-transparent border-none cursor-pointer p-0 m-0 underline decoration-dotted underline-offset-4 hover:decoration-solid"
+                title="Jump to Priority Member Alerts"
+              >
+                {s.text}
+              </button>
+              {suffix}
+            </span>
+          );
+        }
+        return <span key={s.key}>{s.text}{suffix}</span>;
+      })}
+    </>
+  );
 
   // Choose variant based on urgency: any "urgent" segment elevates to warning style
   const hasUrgent = segments.some(s => s.urgent);

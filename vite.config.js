@@ -60,6 +60,15 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.js'],
+    // Only include unit tests colocated in src/. Playwright e2e specs live in
+    // tests/e2e/ and use @playwright/test, so they must be excluded from vitest.
+    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      'tests/**',
+      '.claude/**',
+    ],
     environmentOptions: {
       jsdom: {
         url: 'https://swoop.local/#/',

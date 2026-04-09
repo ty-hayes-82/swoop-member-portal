@@ -10,6 +10,7 @@ export const kpis = [
 
 export const memberSaves = [
   {
+    memberId: 'mbr_203',
     name: 'James Whitfield',
     healthBefore: 34,
     healthAfter: 71,
@@ -19,6 +20,7 @@ export const memberSaves = [
     duesAtRisk: 18500,
   },
   {
+    memberId: 'mbr_214',
     name: 'Catherine Morales',
     healthBefore: 41,
     healthAfter: 68,
@@ -28,6 +30,7 @@ export const memberSaves = [
     duesAtRisk: 14200,
   },
   {
+    memberId: 'mbr_099',
     name: 'Robert & Linda Chen',
     healthBefore: 28,
     healthAfter: 62,
@@ -37,6 +40,7 @@ export const memberSaves = [
     duesAtRisk: 31000,
   },
   {
+    memberId: 'mbr_218',
     name: 'David Harrington',
     healthBefore: 38,
     healthAfter: 74,
@@ -46,6 +50,7 @@ export const memberSaves = [
     duesAtRisk: 16800,
   },
   {
+    memberId: 'mbr_104',
     name: 'Patricia Nguyen',
     healthBefore: 45,
     healthAfter: 77,
@@ -55,6 +60,7 @@ export const memberSaves = [
     duesAtRisk: 12500,
   },
   {
+    memberId: 'mbr_088',
     name: 'Michael Torres',
     healthBefore: 31,
     healthAfter: 65,

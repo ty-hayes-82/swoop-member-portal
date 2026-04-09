@@ -24,7 +24,7 @@ export default function SettingsScreen() {
           sub={notifyRequested ? 'We\'ll notify you when available' : 'Coming soon'}
           action={
             notifyRequested ? (
-              <span style={{ fontSize: '12px', color: '#22C55E', fontWeight: 600 }}>Requested</span>
+              <span style={{ fontSize: '12px', color: '#12b76a', fontWeight: 600 }}>Requested</span>
             ) : (
               <button
                 onClick={handleNotifyMe}

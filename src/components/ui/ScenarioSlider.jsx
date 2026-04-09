@@ -77,7 +77,7 @@ export default function ScenarioSlider({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
           {[
             { label: 'Conservative', value: 10, color: '#9CA3AF' },
-            { label: 'Realistic', value: 20, color: '#22c55e' },
+            { label: 'Realistic', value: 20, color: '#12b76a' },
             { label: 'Aggressive', value: 30, color: '#f59e0b' },
             { label: 'Best case', value: 40, color: '#8b5cf6' },
           ].map(preset => {

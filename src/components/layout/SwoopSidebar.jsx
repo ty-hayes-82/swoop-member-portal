@@ -184,7 +184,7 @@ const SwoopSidebar = () => {
                     {showFull && item.key === 'admin' && (
                       <span
                         className="ml-auto inline-flex items-center justify-center w-2 h-2 rounded-full"
-                        style={{ background: '#22c55e' }}
+                        style={{ background: '#12b76a' }}
                         title="Data Health: monitor connection freshness"
                       />
                     )}
@@ -213,7 +213,7 @@ const SwoopSidebar = () => {
                   type="button"
                   onClick={() => handleStartStory('briefing')}
                   className="text-left w-full px-2 py-1.5 rounded-md cursor-pointer bg-transparent border border-transparent hover:bg-white/5 hover:border-white/10 transition-colors"
-                  style={{ borderLeftWidth: '3px', borderLeftColor: '#34D399' }}
+                  style={{ borderLeftWidth: '3px', borderLeftColor: '#32d583' }}
                 >
                   <div className="text-[11px] font-bold text-white leading-tight">01 · Saturday Briefing</div>
                   <div className="text-[9px] text-gray-400">Daniel · ~4 min</div>

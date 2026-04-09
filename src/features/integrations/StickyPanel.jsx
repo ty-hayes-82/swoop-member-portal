@@ -137,9 +137,9 @@ function ComboResult({ idA, idB }) {
 
       {/* Automations */}
       <div className="px-5">
-        <SectionLabel color={'#22c55e'}>Automations Enabled</SectionLabel>
+        <SectionLabel color={'#12b76a'}>Automations Enabled</SectionLabel>
         {combo.automations.map((text, i) => (
-          <ListItem key={i} color={'#22c55e'} text={text} last={i === combo.automations.length - 1} />
+          <ListItem key={i} color={'#12b76a'} text={text} last={i === combo.automations.length - 1} />
         ))}
       </div>
 

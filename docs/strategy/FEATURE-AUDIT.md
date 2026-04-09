@@ -4,6 +4,8 @@
 > **Reference:** [NORTH-STAR.md](./NORTH-STAR.md), [DEVELOPMENT-PRIORITIES.md](./DEVELOPMENT-PRIORITIES.md), [POLISH-PLAN.md](./POLISH-PLAN.md)
 > **Branch:** `dev` (post-A/B/C/D polish, partial E)
 
+> **Polish-Final update — April 9, 2026:** Member Profile Page parity, Tee Sheet dues tooltip, Board Report saves clickable, briefing scroll-to-alerts, drawer source-badge consistency confirmed.
+
 This document scores **every feature, functionality, and page** in the app against the 3 North Star pillars. The earlier `NORTH-STAR-AUDIT.md` is page-level; this is exhaustive.
 
 ## Scoring Method
@@ -398,7 +400,7 @@ Each row is scored 1–10 against each pillar:
 | Revenue Page → EvidenceStrip + per-card badges | ✅ | Initial 🆕 |
 | Board Report → KPI cards | ✅ | Phase B1 🆕 |
 | Automations Inbox → action items | ✅ | Phase B2 🆕 |
-| Member Profile Drawer → header / other sections | ⚠️ Partial | — |
+| Member Profile Drawer → header / other sections | ✅ | Polish-Final 🆕 |
 | Member Profile Page (full) → most sections | ⚠️ Partial | — |
 
 ## 15.2 Dollar Quantification Coverage
@@ -448,7 +450,7 @@ Each row is scored 1–10 against each pillar:
 | Service → Staffing → Revenue page link | ✅ | Initial 🆕 |
 | Today → Automations (action queue badge) | ✅ | Initial |
 | Members → Member Profile (drawer click) | ✅ | Initial |
-| Board Report → Member Profile (link from member saves) | ⚠️ Partial | — |
+| Board Report → Member Profile (link from member saves) | ✅ | Polish-Final 🆕 |
 
 ---
 
@@ -504,10 +506,10 @@ These are all **Tier 2 enabling work** per `DEVELOPMENT-PRIORITIES.md` and shoul
 
 Now that all pillar pages score ≥9, the remaining gains are deepening:
 
-1. **Member Profile Page (full)** — mirror the drawer's First Domino enhancements
-2. **Member Profile Drawer** — section-level source badges on remaining sections (Risk Signals, Family, Outreach, Preferences)
-3. **Board Report → Member Saves** — clickable per-member rows that open the profile drawer
-4. **Tee Sheet** — show $ dues at risk in a tooltip on hover for healthy/watch members too (currently only on at-risk/VIP rows)
-5. **Today View → MorningBriefingSentence** — make "X at-risk members" segment clickable to scroll to Member Alerts section
+1. ✅ DONE — **Member Profile Page (full)** — mirror the drawer's First Domino enhancements
+2. ✅ DONE — **Member Profile Drawer** — section-level source badges on remaining sections (Risk Signals, Family, Outreach, Preferences)
+3. ✅ DONE — **Board Report → Member Saves** — clickable per-member rows that open the profile drawer
+4. ✅ DONE — **Tee Sheet** — show $ dues at risk in a tooltip on hover for healthy/watch members too (currently only on at-risk/VIP rows)
+5. ✅ DONE — **Today View → MorningBriefingSentence** — make "X at-risk members" segment clickable to scroll to Member Alerts section
 
 None of these are blockers. The app already meets all 3 storyboard acceptance tests.

@@ -2,12 +2,12 @@ const CATEGORY_COLORS = {
   'tee-sheet': '#1a7a3c',
   pos: '#8b6420',
   crm: '#4a6fa5',
-  staffing: '#22c55e',
+  staffing: '#12b76a',
   waitlist: '#7c3aed',
 };
 
 const STATUS_COLORS = {
-  connected: '#22c55e',
+  connected: '#12b76a',
   available: '#8b6420',
   'coming-soon': '#94a3b8',
 };

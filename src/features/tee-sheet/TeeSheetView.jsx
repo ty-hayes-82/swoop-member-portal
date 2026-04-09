@@ -12,7 +12,7 @@ import { apiFetch } from '@/services/apiClient';
 import { shouldUseStatic } from '@/services/demoGate';
 
 const healthColor = (score) => {
-  if (score >= 70) return '#22c55e';
+  if (score >= 70) return '#12b76a';
   if (score >= 50) return '#f59e0b';
   if (score >= 30) return '#ea580c';
   return '#ef4444';
@@ -343,7 +343,7 @@ export default function TeeSheetView() {
             <div className="flex items-center gap-3 text-xs text-gray-500">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> At Risk</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> Watch</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Healthy</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-success-500" /> Healthy</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-200 border border-amber-400" /> VIP</span>
             </div>
           </div>
@@ -366,9 +366,13 @@ export default function TeeSheetView() {
                   const color = healthColor(t.healthScore);
                   const isAtRisk = t.healthScore < 50;
                   const isVip = t.duesAnnual >= 18000 && t.healthScore >= 50;
+                  // Polish #4: healthy/watch rows with no visible dues badge get a subtle hover tooltip
+                  const showHoverDuesTip = !isAtRisk && !isVip && t.duesAnnual > 0;
+                  const rowTitle = showHoverDuesTip ? `$${Math.round(t.duesAnnual / 1000)}K/yr dues` : undefined;
                   return (
                     <tr
                       key={`${t.memberId}-${t.time}`}
+                      title={rowTitle}
                       className={`border-t border-gray-100 transition-colors ${isAtRisk ? 'bg-red-50/30' : i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-gray-50`}
                     >
                       <td className="px-4 py-2.5 font-mono text-xs font-semibold text-gray-700 whitespace-nowrap">{t.time}</td>

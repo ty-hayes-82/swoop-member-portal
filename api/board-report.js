@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getClubId } from './lib/withAuth.js';
+import { logError } from './lib/logger.js';
 
 export default withAuth(async function handler(req, res) {
   const clubId = getClubId(req);
@@ -85,7 +86,7 @@ export default withAuth(async function handler(req, res) {
 
     res.status(200).json({ kpis, memberSaves, operationalSaves, monthlyTrends });
   } catch (err) {
-    console.error('/api/board-report error:', err);
+    logError('/api/board-report', err, { clubId });
     res.status(500).json({ error: err.message });
   }
 }, { allowDemo: true });

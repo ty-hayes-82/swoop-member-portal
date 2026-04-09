@@ -10,7 +10,7 @@ import ActionPanel from '@/components/ui/ActionPanel';
 import { trackAction } from '@/services/activityService';
 
 const STATUS_STYLES = {
-  resolved: { bg: `${'#22c55e'}12`, color: '#22c55e', label: 'Resolved' },
+  resolved: { bg: `${'#12b76a'}12`, color: '#12b76a', label: 'Resolved' },
   in_progress: { bg: '#ca8a0412', color: '#ca8a04', label: 'In Progress' },
   acknowledged: { bg: `${'#2563eb' || '#3B82F6'}12`, color: '#2563eb' || '#3B82F6', label: 'Acknowledged' },
   escalated: { bg: `${'#ef4444'}12`, color: '#ef4444', label: 'Escalated' },
@@ -357,7 +357,7 @@ export default function ComplaintsTab() {
               <div className="text-gray-800 dark:text-white/90 font-medium">{cat.category}</div>
               <div className="flex items-center gap-4 text-[13px] text-gray-500">
                 <div>{cat.count} complaints</div>
-                <div className="font-semibold" style={{ color: cat.unresolvedCount > 0 ? '#ef4444' : '#22c55e' }}>
+                <div className="font-semibold" style={{ color: cat.unresolvedCount > 0 ? '#ef4444' : '#12b76a' }}>
                   {cat.unresolvedCount} unresolved
                 </div>
               </div>

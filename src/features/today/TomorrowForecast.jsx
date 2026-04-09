@@ -105,7 +105,7 @@ export default function TomorrowForecast() {
       <div className="flex flex-col gap-1.5 mb-3">
         {getOutlets().map(outlet => {
           const isFull = outlet.status === 'full';
-          const color = isFull ? '#22c55e' : '#ef4444';
+          const color = isFull ? '#12b76a' : '#ef4444';
           return (
             <div key={outlet.name}
               className="flex justify-between items-center py-2 px-3 rounded-lg"

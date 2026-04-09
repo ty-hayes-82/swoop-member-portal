@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getClubId } from './lib/withAuth.js';
+import { logError } from './lib/logger.js';
 
 const numberOr = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -319,7 +320,7 @@ export default withAuth(async function handler(req, res) {
       activitySummary: {},
     });
   } catch (error) {
-    console.error('member-detail error', error);
+    logError('/api/member-detail', error);
     res.status(500).json({ error: 'Failed to load member detail' });
   }
 }, { allowDemo: true });

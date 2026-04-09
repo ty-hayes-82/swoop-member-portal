@@ -8,6 +8,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getClubId } from './lib/withAuth.js';
+import { logError, logInfo, logWarn } from './lib/logger.js';
 import { cors } from './lib/cors.js';
 
 const IMPORT_TYPES = {
@@ -365,7 +366,7 @@ export default withAuth(async function handler(req, res) {
     try { await sql`ALTER TABLE staff_shifts DROP CONSTRAINT IF EXISTS staff_shifts_staff_id_fkey`; } catch {}
   }
   if (ENSURE_TABLES[importType]) {
-    try { await sql.query(ENSURE_TABLES[importType]); } catch (e) { console.warn('Table ensure failed:', e.message); }
+    try { await sql.query(ENSURE_TABLES[importType]); } catch (e) { logWarn('/api/import-csv', 'table ensure failed', { importType, err: e.message }); }
     // email_events also needs email_campaigns table
     if (importType === 'email_events' && ENSURE_TABLES.email_campaigns) {
       try { await sql.query(ENSURE_TABLES.email_campaigns); } catch { /* already exists */ }
@@ -540,7 +541,7 @@ export default withAuth(async function handler(req, res) {
             is_connected = TRUE, row_count = data_source_status.row_count + ${successCount},
             health_status = 'healthy', last_sync_at = NOW(), source_vendor = COALESCE(data_source_status.source_vendor, 'csv_import')
         `;
-      } catch (e) { console.error('[import-csv] data_source_status update failed:', e.message); }
+      } catch (e) { logError('/api/import-csv', e, { phase: 'data_source_status_update' }); }
     }
   }
 
@@ -553,7 +554,7 @@ export default withAuth(async function handler(req, res) {
       method: 'POST',
       headers: { Authorization: token, 'Content-Type': 'application/json' },
       body: JSON.stringify({ clubId }),
-    }).catch(e => console.warn('[import-csv] Health score recompute trigger failed:', e.message));
+    }).catch(e => logWarn('/api/import-csv', 'health score recompute trigger failed', { err: e.message }));
   }
 
   return res.status(200).json({
@@ -566,7 +567,7 @@ export default withAuth(async function handler(req, res) {
     status: errorCount === rows.length ? 'failed' : errorCount > 0 ? 'partial' : 'completed',
   });
   } catch (e) {
-    console.error('[import-csv] Unhandled error:', e);
+    logError('/api/import-csv', e, { phase: 'unhandled' });
     return res.status(500).json({ error: e.message || 'Internal import error' });
   }
 }, { roles: ['gm', 'assistant_gm', 'swoop_admin'] });

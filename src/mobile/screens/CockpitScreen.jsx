@@ -101,7 +101,7 @@ export default function CockpitScreen() {
         <KpiTile label="At-Risk Members" value={atRiskCount} sub={`$${Math.round(duesAtRisk / 1000)}K exposure`} color="#EF4444" onClick={() => navigateTab('members')} />
         <KpiTile label="Complaints" value={complaints || 3} sub="unresolved" color="#F59E0B" onClick={() => navigateTab('inbox')} />
         <KpiTile label="Pending Actions" value={pendingAgentCount} sub="awaiting approval" color="#F3922D" onClick={() => navigateTab('inbox')} />
-        <KpiTile label="Revenue" value="↑ 10.7%" sub="vs last week" color="#22C55E" onClick={() => navigateTab('inbox')} />
+        <KpiTile label="Revenue" value="↑ 10.7%" sub="vs last week" color="#12b76a" onClick={() => navigateTab('inbox')} />
       </div>
 
       {/* Highest-impact action */}

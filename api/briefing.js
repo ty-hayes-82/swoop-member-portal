@@ -7,6 +7,7 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getClubId } from './lib/withAuth.js';
 import { getCurrentConditions, getForecast, generateAdvisory } from './services/weather.js';
 import { computeWeatherModifier, computeStaffingNeed } from './services/demand.js';
+import { logError, logWarn } from './lib/logger.js';
 
 export default withAuth(async function handler(req, res) {
   const clubId = getClubId(req);
@@ -136,7 +137,7 @@ export default withAuth(async function handler(req, res) {
         weatherData.demandForecast = demandForecast;
       }
     } catch (e) {
-      console.warn('Live weather unavailable, using defaults:', e.message);
+      logWarn('/api/briefing', 'live weather unavailable; using defaults', { err: e.message });
       weatherData.forecast = 'Weather data temporarily unavailable';
     }
 
@@ -229,7 +230,7 @@ export default withAuth(async function handler(req, res) {
       },
     });
   } catch (err) {
-    console.error('/api/briefing error:', err);
+    logError('/api/briefing', err, { clubId, date });
     res.status(500).json({ error: err.message });
   }
 }, { allowDemo: true });

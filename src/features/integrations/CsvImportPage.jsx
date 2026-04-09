@@ -91,7 +91,7 @@ function StepIndicator({ current }) {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
                 i < current
-                  ? 'bg-green-500 text-white'
+                  ? 'bg-success-500 text-white'
                   : i === current
                   ? 'bg-brand-500 text-white'
                   : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
@@ -104,7 +104,7 @@ function StepIndicator({ current }) {
             </span>
           </div>
           {i < STEPS.length - 1 && (
-            <div className={`w-12 h-0.5 mx-1 mb-4 ${i < current ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}`} />
+            <div className={`w-12 h-0.5 mx-1 mb-4 ${i < current ? 'bg-success-500' : 'bg-gray-200 dark:bg-gray-700'}`} />
           )}
         </div>
       ))}
@@ -180,7 +180,7 @@ function StepSelectData({ vendor, setVendor, importType, setImportType, onNext }
                     {vendor === 'jonas' && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {t.unlocks.slice(0, 2).map(u => (
-                          <span key={u} className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400">
+                          <span key={u} className="text-[10px] px-1.5 py-0.5 rounded-full bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400">
                             {u}
                           </span>
                         ))}
@@ -275,7 +275,7 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
           dragOver
             ? 'border-brand-400 bg-brand-500/5'
             : file
-            ? 'border-green-400 bg-green-50 dark:bg-green-500/5 dark:border-green-500/40'
+            ? 'border-success-400 bg-success-50 dark:bg-success-500/5 dark:border-success-500/40'
             : 'border-gray-300 bg-gray-50 hover:border-brand-400 dark:bg-gray-800 dark:border-gray-600'
         }`}
       >
@@ -372,7 +372,7 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
           </div>
         )}
         {requiredMissing.length === 0 && (
-          <div className="text-xs text-green-500 font-medium">All required fields mapped</div>
+          <div className="text-xs text-success-500 font-medium">All required fields mapped</div>
         )}
       </div>
 
@@ -413,7 +413,7 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
                     className={`w-full px-2 py-1.5 rounded-lg border text-xs ${
                       isMapped
                         ? isRequired
-                          ? 'border-green-300 bg-green-50 text-green-800 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-400'
+                          ? 'border-success-300 bg-success-50 text-success-800 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400'
                           : 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-400'
                         : 'border-gray-200 bg-white text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-500'
                     }`}
@@ -551,7 +551,7 @@ function StepImport({ importType, mapping, parsedRows, result, error, uploading,
         <div className="py-6">
           <div className={`p-4 rounded-xl border ${
             result.status === 'completed'
-              ? 'bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/30'
+              ? 'bg-success-50 border-success-200 dark:bg-success-500/10 dark:border-success-500/30'
               : result.status === 'partial'
               ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/30'
               : 'bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/30'
@@ -575,7 +575,7 @@ function StepImport({ importType, mapping, parsedRows, result, error, uploading,
                 <div className="text-[10px] text-gray-400">Total</div>
               </div>
               <div className="p-2 rounded-lg bg-white/60 dark:bg-gray-800/60">
-                <div className="text-lg font-bold text-green-600 dark:text-green-400">{result.success.toLocaleString()}</div>
+                <div className="text-lg font-bold text-success-600 dark:text-success-400">{result.success.toLocaleString()}</div>
                 <div className="text-[10px] text-gray-400">Imported</div>
               </div>
               <div className="p-2 rounded-lg bg-white/60 dark:bg-gray-800/60">

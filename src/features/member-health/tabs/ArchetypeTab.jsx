@@ -41,7 +41,7 @@ export default function ArchetypeTab() {
         {profiles.map(p => {
           const isSelected = selected === p.archetype;
           const churnColor = ['Declining','Ghost','Social Butterfly'].includes(p.archetype) ? '#f59e0b'
-            : p.archetype === 'Balanced Active' ? '#22c55e' : '#9CA3AF';
+            : p.archetype === 'Balanced Active' ? '#12b76a' : '#9CA3AF';
           return (
             <button key={p.archetype} onClick={() => setSelected(p.archetype)}
               className={`px-3.5 py-1.5 rounded-xl cursor-pointer text-xs ${isSelected ? 'border border-brand-500 bg-brand-500/[0.05] text-brand-500 font-bold' : 'border border-gray-200 bg-white text-gray-500 font-normal'}`}
@@ -89,8 +89,8 @@ export default function ArchetypeTab() {
             </div>
           )}
           {intel.opportunity && (
-            <div className="bg-white rounded-xl px-4 py-2 border border-green-500/15">
-              <div className="text-[10px] font-bold text-green-500 tracking-wider uppercase mb-1">Opportunity</div>
+            <div className="bg-white rounded-xl px-4 py-2 border border-success-500/15">
+              <div className="text-[10px] font-bold text-success-500 tracking-wider uppercase mb-1">Opportunity</div>
               <div className="text-sm text-gray-500 leading-relaxed">{intel.opportunity}</div>
             </div>
           )}
@@ -115,7 +115,7 @@ function SpendPotentialCard({ archetype }) {
   if (!current) return null;
 
   const categories = [
-    { key: 'golf', label: 'Golf', engagement: current.engagement.golf, color: '#22c55e' },
+    { key: 'golf', label: 'Golf', engagement: current.engagement.golf, color: '#12b76a' },
     { key: 'dining', label: 'Dining', engagement: current.engagement.dining, color: '#f59e0b' },
     { key: 'events', label: 'Events', engagement: current.engagement.events, color: '#ff8b00' },
     { key: 'email', label: 'Email', engagement: current.engagement.email, color: '#2563eb' },
@@ -139,7 +139,7 @@ function SpendPotentialCard({ archetype }) {
           <div className="text-xl font-bold font-mono text-[#1a1a2e]">
             ${current.avgAnnualSpend.toLocaleString()}
           </div>
-          <div className="text-xs" style={{ color: current.avgAnnualSpend >= avgAll ? '#22c55e' : '#f59e0b' }}>
+          <div className="text-xs" style={{ color: current.avgAnnualSpend >= avgAll ? '#12b76a' : '#f59e0b' }}>
             {current.avgAnnualSpend >= avgAll ? 'Above' : 'Below'} club avg (${Math.round(avgAll).toLocaleString()})
           </div>
         </div>
@@ -159,7 +159,7 @@ function SpendPotentialCard({ archetype }) {
               </div>
               <div className="text-[10px] text-gray-400">engaged</div>
               {potential > 30 && (
-                <div className="mt-1 text-[10px] font-semibold text-green-500 bg-green-500/[0.08] px-1.5 py-0.5 rounded inline-block">
+                <div className="mt-1 text-[10px] font-semibold text-success-500 bg-success-500/[0.08] px-1.5 py-0.5 rounded inline-block">
                   {potential}% untapped
                 </div>
               )}
@@ -169,7 +169,7 @@ function SpendPotentialCard({ archetype }) {
       </div>
 
       {current.spendPotential > 0 && (
-        <div className="mt-4 p-2 bg-green-500/[0.05] border border-green-500/[0.13] rounded-lg text-xs text-gray-500 leading-normal">
+        <div className="mt-4 p-2 bg-success-500/[0.05] border border-success-500/[0.13] rounded-lg text-xs text-gray-500 leading-normal">
           <strong className="text-success-500">Untapped potential:</strong>{' '}
           ${current.spendPotential.toLocaleString()}/member/year in dining and events.{' '}
           Across {current.count} {archetype} members, that&rsquo;s{' '}

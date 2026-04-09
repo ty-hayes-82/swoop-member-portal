@@ -130,7 +130,7 @@ const VENDOR_POWERS = {
 };
 
 const STATUS_COLORS = {
-  connected: '#16a34a',
+  connected: '#039855',
   available: '#475569',
   'coming-soon': '#c2410c',
 };
@@ -150,7 +150,7 @@ export default function IntegrationsPage() {
   const getScoreColor = (score) => {
     if (score < 40) return '#ef4444'; // red
     if (score < 70) return '#f59e0b'; // yellow
-    return '#22c55e'; // green
+    return '#12b76a'; // green
   };
 
   const getScoreLabel = (score) => {
@@ -163,13 +163,13 @@ export default function IntegrationsPage() {
   const [expandedVendor, setExpandedVendor] = useState(null);
 
   const summaryCards = [
-    { label: 'Systems Connected', value: `${connectedSystems}`, sub: 'All Healthy', color: '#22c55e' },
+    { label: 'Systems Connected', value: `${connectedSystems}`, sub: 'All Healthy', color: '#12b76a' },
     { label: 'Data Points Synced', value: dataPointsSynced >= 1000 ? `${(dataPointsSynced / 1000).toFixed(1)}K` : dataPointsSynced.toLocaleString(), sub: 'This week' },
     {
       label: 'System Status',
       value: 'All Healthy',
       sub: 'Last sync: 11 min ago',
-      color: '#22c55e',
+      color: '#12b76a',
     },
   ];
 
@@ -206,28 +206,28 @@ export default function IntegrationsPage() {
 
       {/* Pillar 3: PROVE IT — what each connection unlocks */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02))',
-        border: '1px solid rgba(34,197,94,0.25)',
+        background: 'linear-gradient(135deg, rgba(18, 183, 106,0.06), rgba(18, 183, 106,0.02))',
+        border: '1px solid rgba(18, 183, 106,0.25)',
         borderRadius: '14px',
         padding: '16px 20px',
       }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#039855', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
           What your connected systems unlock
         </div>
         <div style={{ fontSize: 14, color: '#1a1a2e', lineHeight: 1.5 }}>
           Every system you connect deepens Swoop's cross-domain intelligence. Together they unlock:
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#16a34a' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#039855' }}>
             ⛳ + 🍽️ → $5,760/mo pace-to-dining attribution
           </span>
-          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#16a34a' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#039855' }}>
             👥 + 🍽️ + 📧 → First Domino decay detection
           </span>
-          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#16a34a' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#039855' }}>
             📅 + ⛳ + 🍽️ → $3,400/mo staffing recovery
           </span>
-          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#16a34a' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#039855' }}>
             ⛅ + 📅 → Demand-driven scheduling
           </span>
         </div>
@@ -374,7 +374,7 @@ export default function IntegrationsPage() {
                         </div>
                         <div style={{ padding: '6px 8px', background: '#ffffff', borderRadius: '6px', border: `1px solid ${'#E5E7EB'}` }}>
                           <div style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>Data Quality</div>
-                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#22c55e' }}>98.5%</div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#12b76a' }}>98.5%</div>
                         </div>
                       </div>
                       <div style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Recent Syncs</div>
@@ -382,7 +382,7 @@ export default function IntegrationsPage() {
                         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px', borderBottom: i < syncInfo.history.length - 1 ? `1px solid ${'#E5E7EB'}` : 'none' }}>
                           <span className="text-gray-400">{h.time}</span>
                           <span style={{ fontFamily: '"JetBrains Mono", monospace', color: '#6B7280' }}>{h.records} records</span>
-                          <span style={{ color: h.ok ? '#22c55e' : '#ef4444', fontWeight: 600 }}>{h.ok ? 'OK' : 'Error'}</span>
+                          <span style={{ color: h.ok ? '#12b76a' : '#ef4444', fontWeight: 600 }}>{h.ok ? 'OK' : 'Error'}</span>
                         </div>
                       ))}
                       <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
