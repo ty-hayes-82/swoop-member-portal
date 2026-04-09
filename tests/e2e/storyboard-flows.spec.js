@@ -60,8 +60,12 @@ test.describe('Storyboard North Star Flows', () => {
     const firstDomino = page.locator('text=/First Domino|Engagement Decay Sequence|dropped/i');
     await expect(firstDomino.first()).toBeVisible({ timeout: 10000 });
 
-    // Should show source labels (Tee Sheet, POS, Email)
-    const sources = page.locator('text=/source:/i');
+    // Should show source badges per decay step. As of 2026-04-09 these are
+    // rendered as <SourceBadge> components (with system name + icon) instead
+    // of a "source: <name>" text label, so assert against the system names
+    // directly inside the decay chain card.
+    const decayCard = page.locator('text=/First Domino|Engagement Decay Sequence/i').locator('..').locator('..');
+    const sources = decayCard.locator('text=/Tee Sheet|POS|Email|Events/');
     expect(await sources.count()).toBeGreaterThanOrEqual(1);
 
     // Should show Approve & Log button
