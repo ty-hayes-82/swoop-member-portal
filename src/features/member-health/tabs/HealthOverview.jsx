@@ -286,7 +286,13 @@ export default function HealthOverview() {
                   });
                 });
                 if (showToast) {
-                  showToast({ type: 'success', message: `Approved outreach for ${priorityMembers.length} members.` });
+                  // 2026-04-09 wave 14 web button audit P0 fix: was passing
+                  // an object literal as the first arg. The Toast component
+                  // expects (message: string, variant: string) — passing an
+                  // object caused "Objects are not valid as a React child"
+                  // and crashed the toast container, propagating up
+                  // ErrorBoundary and blanking the screen.
+                  showToast(`Approved outreach for ${priorityMembers.length} members.`, 'success');
                 }
               }}
               className="px-4 py-2 rounded-lg bg-success-500 text-white text-xs font-semibold cursor-pointer border-none whitespace-nowrap hover:bg-success-600"

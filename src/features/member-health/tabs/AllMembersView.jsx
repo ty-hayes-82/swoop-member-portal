@@ -135,6 +135,10 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
   return (
     <>
       <tr
+        role="row"
+        data-member-id={member.memberId}
+        data-testid={`member-row-${member.memberId}`}
+        aria-label={`${member.name}${hasScore ? `, health ${member.score}` : ''}`}
         onClick={onToggle}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
