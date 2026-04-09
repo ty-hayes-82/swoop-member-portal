@@ -347,9 +347,13 @@ test.describe('2 — Setup Wizard', () => {
       await page.waitForTimeout(2000);
     }
 
-    // Now on the import step — click "Start Import"
+    // Now on the import step — click "Start Import".
+    // 2026-04-09: bumped timeout 5s → 12s. Earlier piecewise runs of this
+    // spec passed, but in the full-suite run the wizard step transition is
+    // slower under load. The button is reliably visible within 8-10s; 12s
+    // gives a comfortable margin without masking a real hang.
     const startBtn = page.locator('button:has-text("Start Import")');
-    await expect(startBtn).toBeVisible({ timeout: 5000 });
+    await expect(startBtn).toBeVisible({ timeout: 12000 });
 
     const importPromise = page.waitForResponse(
       resp => resp.url().includes('/api/import-csv') && resp.request().method() === 'POST',
@@ -592,9 +596,12 @@ test.describe('2B — Progressive Import Insights', () => {
   test('Import 1 — Members: health scores visible', async () => {
     await page.goto(`${APP_URL}/#/members`);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
-    const content = await page.locator('body').textContent();
-    expect(/healthy|watch|at-risk|critical/i.test(content)).toBeTruthy();
+    // 2026-04-09: was a 3s sleep + body innerText match, which is fragile.
+    // Use a Playwright locator that waits for the text to render (up to 10s)
+    // and reads from the accessibility tree, not document.body.innerText.
+    // Health-tier labels render in uppercase as ArchetypeBadge content.
+    const healthLabel = page.locator('text=/HEALTHY|WATCH|AT RISK|CRITICAL|healthy|watch|at-risk|critical/i').first();
+    await expect(healthLabel).toBeVisible({ timeout: 10000 });
   });
 
   test('Import 1 — Members: dashboard not empty', async () => {
