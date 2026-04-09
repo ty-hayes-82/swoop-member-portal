@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { getLiveDashboard } from '@/services/memberService';
 import { isRealClub } from '@/config/constants';
 
+// TODO: derive from interventionsService when added (criterion 4)
 const STATIC_INTERVENTIONS = [
   { date: 'Mar 8', action: 'Recovery outreach sent to Sarah Mitchell via Swoop app', outcome: 'Response received Mar 9', impact: 'Health score 38 \u2192 52', status: 'resolved' },
   { date: 'Mar 6', action: 'Staffing gap alert \u2014 added server to Grill Room Friday shift', outcome: 'Average check held at $47 (vs $28 prior understaffed Friday)', impact: '$3,400 revenue protected', status: 'resolved' },

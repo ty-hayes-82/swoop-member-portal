@@ -686,16 +686,67 @@ These are not gating, but run them before major UI ships.
 - Restore-from-backup checklist + replay-migrations playbook
 - Owner: DevOps lead. Critical pre-pilot.
 
-### 12.3 Cron job observability & failure recovery — TODO
+### 12.3 Cron job observability & failure recovery
 
 **Belongs in:** Section 6 (Monitoring and alerting).
-**Anchor:** the existing weather-daily cron (Section 6, line 293) and the SEC-2a `cross_club_audit` purge cron from Sprint 4.
-**What's missing:**
-- Per-cron table: name, schedule, SLA (must run within X minutes of scheduled tick), alerting threshold (zero successes in 48 h)
-- Manual recovery procedure: how to re-run weather-daily from CLI or the Vercel dashboard if the scheduled tick fails
-- Specific failure mode for the audit purge: if the purge cron fails for > 10 days the table grows unbounded — escalate immediately
-- The new `/api/health` integrations block (added 2026-04-09) is the live signal source for cron freshness; this section should document how to read it
-- Owner: DevOps lead.
+**Live signal source:** `GET /api/health` → `integrations` block (see [`api/health.js`](../../api/health.js) L53–L91). Safe to poll publicly; always returns HTTP 200.
+
+#### Cron inventory
+
+Schedules are declared in [`vercel.json`](../../vercel.json) L5–L8. Both crons are `CRON_SECRET`-gated and fail-closed if the secret is unset.
+
+| Name | Path | Schedule (UTC) | Owner | Purpose | Freshness budget |
+|---|---|---|---|---|---|
+| Weather daily | [`/api/cron/weather-daily`](../../api/cron/weather-daily.js) | `0 3 * * *` (3 AM UTC ≈ 11 PM ET) | DevOps lead | Archive today's conditions to `weather_daily_log`, refresh forecast cache, auto-create severe-weather `operational_interventions` | 36 h since newest `weather_daily_log.created_at` (one missed tick) — see `WEATHER_FRESH_MAX_HOURS` in `api/health.js` L50 |
+| Cross-club audit purge (SEC-2a) | [`/api/cron/purge-cross-club-audit`](../../api/cron/purge-cross-club-audit.js) | `0 4 * * *` (4 AM UTC, 1 h after weather so they don't contend) | DevOps lead | Delete `cross_club_audit` rows older than 90 days (`RETENTION_DAYS`, L15) to cap forensic table growth | `MIN(occurred_at)` ≤ 100 days (retention + 10-day grace; `api/health.js` L51, L86) |
+
+#### Reading `/api/health.integrations`
+
+```
+integrations: {
+  weather: { status, lastSync, ageMin },
+  audit:   { status, rows,     oldestRow },
+}
+```
+
+- **`status: 'ok'`** — most recent sync/oldest row is within budget. No action.
+- **`status: 'stale'`** — DB is reachable but the cron has not produced a fresh row within its budget. `/api/health.status` flips to `degraded` (see L128–L129). Investigate within the same business day.
+- **`status: 'unknown'`** — DB unreachable, the underlying table is empty, or the freshness query threw. Check `db: 'ok'` first; if DB is healthy, an `unknown` weather means no clubs have lat/long configured (weather cron exits early per `weather-daily.js` L51–L53); an `unknown` audit means the query failed — check Vercel runtime logs.
+- **`weather.lastSync`** — ISO timestamp of `MAX(weather_daily_log.created_at)` across all clubs. **`ageMin`** is minutes since then. If `ageMin > 2160` (36 h), status is `stale`.
+- **`audit.oldestRow`** — ISO timestamp of `MIN(cross_club_audit.occurred_at)`. If older than ~100 days, the purge is failing. **`audit.rows`** is the full row count — watch for unbounded growth.
+
+When `weather` goes stale:
+1. Check Vercel dashboard → Project → Logs, filter on `/api/cron/weather-daily`. The handler logs `cron tick start` at L34 and per-club step results in the response body.
+2. Confirm `CRON_SECRET` is still set in project env (cron is fail-closed per L27).
+3. Confirm the Google Weather API is up (the cron calls `getCurrentConditions` / `getForecast` from `api/services/weather.js`).
+4. Manually re-trigger (next section).
+
+When `audit` goes stale: jump to Escalation below.
+
+#### Manual recovery — re-run weather-daily
+
+The handler accepts GET or POST (`weather-daily.js` L37–L39) and requires `Authorization: Bearer $CRON_SECRET` (L25–L33). From an operator workstation with `CRON_SECRET` exported from Vercel env:
+
+```bash
+curl -sS -X POST \
+  -H "Authorization: Bearer $CRON_SECRET" \
+  https://<prod-deploy>.vercel.app/api/cron/weather-daily | jq .
+```
+
+Expected: `{ date, clubsProcessed, results: [...] }` with `steps[].status === 'ok'` for `archive_today` and `refresh_forecast`. A per-club `error` in `results` is recoverable — the cron is idempotent per `(club_id, date)` via `archiveDailyWeather`, so re-running is safe. After a successful manual run, re-hit `/api/health` and confirm `integrations.weather.status === 'ok'` and `ageMin` is near zero.
+
+The purge cron can be re-run the same way against `/api/cron/purge-cross-club-audit`; the delete is bounded by a cutoff computed in JS (`purge-cross-club-audit.js` L36–L41) and is safe to invoke repeatedly.
+
+#### Escalation — audit purge failing > 10 days
+
+The `cross_club_audit` table is written on every cross-club write (SEC-2, migration 015) and is **only bounded by this cron**. If `integrations.audit.status === 'stale'` or `oldestRow` is > 100 days old:
+
+1. **Page the DevOps lead immediately.** The table grows unbounded and will eventually impact write latency on every audited path.
+2. Check Vercel logs for `/api/cron/purge-cross-club-audit`. The handler emits `logInfo` with `deletedRows` and `elapsedMs` on success (L44–L49) and `logError` with `phase: 'delete'` on failure (L58).
+3. If the cron is not firing at all, verify `vercel.json` still lists it under `crons` and that the most recent deploy picked up the schedule (Vercel only re-registers crons on deploy).
+4. As a one-shot mitigation, manually invoke the purge endpoint (see curl above). Capture the returned `deleted` count for the incident report.
+5. If the cron keeps failing, do **not** delete `cross_club_audit` rows by hand outside the 90-day window without DevOps lead sign-off — this table is the SEC-2 forensic record for cross-club writes and is referenced by the Sprint 4 tenant-safety audit (see §3 of this runbook and Sprint 4 commit log).
+6. File an incident; link SEC-2 / SEC-2a and this section.
 
 ---
 

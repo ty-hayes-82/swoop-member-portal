@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigation } from '@/context/NavigationContext';
 import { apiFetch } from '@/services/apiClient';
+import { getLeakageData } from '@/services/revenueService';
 
 const DOMAIN_INFO = {
   CRM: { icon: '👥', label: 'CRM / Members', desc: 'Member profiles, dues, tenure, household data', vendor: 'Jonas Club, Clubessential' },
@@ -52,9 +53,17 @@ export default function DataHealthDashboard() {
   const nextDomain = data?.nextDomainToConnect;
 
   // Phase L1 — what's blocking pillar features (per-domain → pillar feature impact)
+  // Dollar figures derive from revenueService.getLeakageData() (Pillar 3 Prove-It).
+  // PACE_LOSS wires through exactly; STAFFING_LOSS and TOTAL fall back to
+  // canonical demo literals ($3,400 / $9,580) where service values diverge slightly.
+  // TODO: reconcile revenueService demo constants with canonical punch-list values (criterion 4)
+  const leakage = getLeakageData();
+  const paceDollars = leakage?.PACE_LOSS
+    ? `$${leakage.PACE_LOSS.toLocaleString()}/mo pace-to-dining attribution`
+    : '$5,760/mo pace-to-dining attribution';
   const DOMAIN_PILLAR_IMPACT = {
     CRM: { features: ['Today Morning Briefing', 'Member Health Scores', 'First Domino visualization'], dollar: 'Required for all member-level intelligence' },
-    TEE_SHEET: { features: ['Today briefing rounds count', 'Hole 12 bottleneck drill-down', 'At-risk on tee sheet detection'], dollar: '$5,760/mo pace-to-dining attribution' },
+    TEE_SHEET: { features: ['Today briefing rounds count', 'Hole 12 bottleneck drill-down', 'At-risk on tee sheet detection'], dollar: paceDollars },
     POS: { features: ['F&B revenue decomposition', 'Dining conversion correlation', 'Post-round dining stats'], dollar: '$9,580/mo full F&B leakage decomposition' },
     EMAIL: { features: ['First Domino email signal', 'Engagement decay watch list', 'Cohort heatmap'], dollar: 'Earliest decay signal — typically the first domino to fall' },
     LABOR: { features: ['Tomorrow staffing risk', 'Pace-to-Revenue connection card', 'Understaffed days correlation'], dollar: '$3,400/mo staffing-driven F&B loss' },

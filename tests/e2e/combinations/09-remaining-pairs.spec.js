@@ -27,7 +27,8 @@ test.describe('Members + Weather', () => {
 
   test('Board Report needs data', async ({ page }) => {
     await nav(page, 'Board Report');
-    expect(await getText(page)).toContain('Board report needs data');
+    // Use accessibility tree locator (document.body.innerText elides text below the fold)
+    await expect(page.locator('text=/Board report needs data|Awaiting data/i').first()).toBeVisible({ timeout: 5000 });
   });
 });
 

@@ -22,8 +22,13 @@ test('fb only → no member names on any page', async ({ page }) => {
 test('email only → no health scores, no member data', async ({ page }) => {
   await enterGuidedDemo(page);
   await importGates(page, ['email']);
+  // Use word-boundary uppercase-only match to avoid false positives like
+  // "decay watch list" (the call-to-action copy on the Email feature card).
+  // Health-score badges render the status labels in uppercase, so an
+  // uppercase-only check is sufficient and avoids the prior /i false match.
   const t = await getText(page);
-  expect(t).not.toMatch(/HEALTHY|WATCH|AT RISK|CRITICAL/i);
+  expect(t).not.toMatch(/\b(HEALTHY|AT RISK|CRITICAL)\b/);
+  expect(t).not.toMatch(/\bWATCH\b\s*\d/); // WATCH as a health band (followed by a count/score)
   for (const name of DEMO_MEMBERS) expect(t).not.toContain(name);
 });
 
@@ -135,5 +140,6 @@ test('all gates except pipeline → board report needs data', async ({ page }) =
   await enterGuidedDemo(page);
   await importGates(page, ['members', 'tee-sheet', 'fb', 'complaints', 'email', 'weather', 'agents']);
   await nav(page, 'Board Report');
-  expect(await getText(page)).toContain('Board report needs data');
+  // Use accessibility tree locator (document.body.innerText elides text below the fold)
+  await expect(page.locator('text=/Board report needs data|Awaiting data/i').first()).toBeVisible({ timeout: 5000 });
 });

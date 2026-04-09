@@ -1,4 +1,5 @@
 import { PlaybookPanel } from '@/components/playbooks';
+// TODO: derive from playbookService when added (criterion 4)
 const SERVICE_SAVE_STEPS = [
   {
     title: 'Auto-escalate high-sentiment complaints',

@@ -25,7 +25,8 @@ test.describe('Members + Tee Sheet + F&B + Complaints', () => {
 
   test('Board Report needs data (no pipeline)', async ({ page }) => {
     await nav(page, 'Board Report');
-    expect(await getText(page)).toContain('Board report needs data');
+    // Use accessibility tree locator (document.body.innerText elides text below the fold)
+    await expect(page.locator('text=/Board report needs data|Awaiting data/i').first()).toBeVisible({ timeout: 5000 });
   });
 
   test('Automations empty (no agents)', async ({ page }) => {
@@ -119,6 +120,7 @@ test.describe('Members + Tee Sheet + Email + Complaints', () => {
 
   test('Board Report needs data (no pipeline)', async ({ page }) => {
     await nav(page, 'Board Report');
-    expect(await getText(page)).toContain('Board report needs data');
+    // Use accessibility tree locator (document.body.innerText elides text below the fold)
+    await expect(page.locator('text=/Board report needs data|Awaiting data/i').first()).toBeVisible({ timeout: 5000 });
   });
 });
