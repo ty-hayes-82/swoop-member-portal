@@ -407,30 +407,9 @@ export default function MemberProfilePage() {
             <span className="text-[32px] font-bold font-mono" style={{ color }}>{score}</span>
           </div>
           <div className="text-xs text-gray-400 mt-1.5">Health Score</div>
-          {/* Pillar 3: PROVE IT — dues at risk callout.
-              2026-04-09 v2 audit fix: when MemberDecayChain renders below
-              (score < 50 path), its own dollar anchor chip is the
-              storyboard-aligned position. Suppressing this chip when the
-              chain will render avoids the duplicate-anchor flagged by the
-              audit. Keep this fallback for edge cases where the chain has
-              fewer than 2 decay events (chain returns null then). */}
-          {score < 50 && profile.duesAnnual > 0 && (() => {
-            const events = (profile.activity ?? []).length + (profile.riskSignals ?? []).length;
-            if (events >= 2) return null;
-            return (
-              <div
-                className="mt-2 px-2 py-1 rounded-md font-mono font-bold text-[11px]"
-                style={{
-                  background: '#fef2f2',
-                  color: '#b91c1c',
-                  border: '1px solid #fecaca',
-                }}
-                title={`$${profile.duesAnnual.toLocaleString()}/yr in dues at risk`}
-              >
-                ${Math.round(profile.duesAnnual / 1000)}K/yr at risk
-              </div>
-            );
-          })()}
+          {/* Dues at risk dollar anchor lives inside MemberDecayChain (rendered
+              below) — see drawer comment for the v2/v3 history. Single source
+              of truth for the Story 2 "$32K/yr" beat. */}
         </div>
       </div>
 

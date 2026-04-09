@@ -16,7 +16,12 @@ export const weatherDaily = [
   { date: '2026-01-14', condition: 'sunny',   tempHigh: 74, wind: 6,  rain: false },
   { date: '2026-01-15', condition: 'windy',   tempHigh: 66, wind: 24, rain: false },
   { date: '2026-01-16', condition: 'sunny',   tempHigh: 71, wind: 8,  rain: false }, // understaffed
-  { date: '2026-01-17', condition: 'sunny',   tempHigh: 73, wind: 5,  rain: false }, // DEMO TODAY
+  // 2026-04-09 v3 audit fix: was sunny/73/5, contradicting the Story 1
+  // wind-advisory narrative on every other surface (briefingService,
+  // cockpit, teeSheet, all now wind/68/32). The week-grid weather widget
+  // (WeekForecast.jsx) reads this row and would surface the contradiction
+  // on any view that consumes the weekly forecast. Synced to wind advisory.
+  { date: '2026-01-17', condition: 'windy',   tempHigh: 68, wind: 32, rain: false }, // DEMO TODAY · wind advisory
   { date: '2026-01-18', condition: 'cloudy',  tempHigh: 68, wind: 12, rain: false }, // mbr_203 complaint
   { date: '2026-01-19', condition: 'sunny',   tempHigh: 74, wind: 6,  rain: false }, // MLK Day
   { date: '2026-01-20', condition: 'rainy',   tempHigh: 55, wind: 20, rain: true  },

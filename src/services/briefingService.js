@@ -152,12 +152,19 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       isUnderstaffed: yesterday.isUnderstaffed,
     },
     todayRisks: {
-      weather:    'perfect', tempHigh: 72, wind: 18,
-      forecast:   'Wind advisory — 18 mph gusts expected by noon',
+      // 2026-04-09 v3 audit fix: secondary block previously had
+      //   weather 'perfect' / 72 / 18, Anne 9:14 / 28, Robert 10:02 / 27
+      // which contradicted the canonical DEMO_BRIEFING block at line 32-44
+      // (wind advisory / 68 / 32, James 9:20 / 42, Anne 10:15 / 38,
+      // Robert 10:42 / 36) and the cockpit + teeSheet narrative. Synced.
+      weather:    'wind advisory', tempHigh: 68, wind: 32,
+      forecast:   'Wind advisory — gusts to 30-40 mph expected Saturday afternoon',
       atRiskTeetimes: [
-        { memberId: 'mbr_089', name: 'Anne Jordan',  archetype: 'Weekend Warrior', time: '9:14 AM', score: 28,
+        { memberId: 'mbr_203', name: 'James Whitfield', archetype: 'Snowbird',         time: '9:20 AM', score: 42,
+          topRisk: 'Service complaint unresolved — slow lunch on Jan 16' },
+        { memberId: 'mbr_089', name: 'Anne Jordan',     archetype: 'Weekend Warrior',  time: '10:15 AM', score: 38,
           topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
-        { memberId: 'mbr_271', name: 'Robert Callahan',   archetype: 'Declining',       time: '10:02 AM', score: 27,
+        { memberId: 'mbr_271', name: 'Robert Callahan', archetype: 'Declining',        time: '10:42 AM', score: 36,
           topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
       ],
       staffingGaps: [], fullyStaffed: true,

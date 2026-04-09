@@ -28,7 +28,13 @@ export const memberSummary = {
   critical: 26,
   riskCount: 65,
   avgHealthScore: 68,
-  potentialDuesAtRisk: 733000,
+  // 2026-04-09 v3 audit fix: was $733,000 which implied an $11,277 blended
+  // dues per at-risk member — BELOW the Anne Jordan / Patricia Nguyen tier
+  // ($12K). Numerically inconsistent with the at-risk roster which skews
+  // $15-$22K. $868,000 = 65 × $13,354 blended, which matches the actual
+  // tier mix (some Social $12K, lots of Full Golf $18-22K, some family
+  // $28K-$48K). Bug fix framed as a bump.
+  potentialDuesAtRisk: 868000,
 };
 
 // Watch tier members — early-stage decay signals, not yet At Risk

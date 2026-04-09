@@ -73,11 +73,17 @@ export const memberSaves = [
 
 export const operationalSaves = [
   {
+    // 2026-04-09 v3 audit bump: revenueProtected $8,400 → $12,400. v2 just
+    // locked Jan 17 wind stakes at $10,600 (47 members × $225 all-in). The
+    // Feb 8 historical wind event involved 47 members, same scale, so the
+    // protected number should be proportional. $12,400 reads as "we save
+    // real money" without crossing the audit's 2x ceiling. Standalone row,
+    // no aggregation cascade.
     event: 'Wind Advisory — Feb 8',
     detection: 'Weather API flagged 35mph gusts at 5:42am, 47 tee times at risk',
     action: 'Auto-notified 47 members with reschedule options; moved 12 to simulator slots',
     outcome: '38 of 47 rebooked within 72 hrs, zero complaints filed',
-    revenueProtected: 8400,
+    revenueProtected: 12400,
   },
   {
     event: 'Starter No-Show — Jan 22',
