@@ -380,6 +380,28 @@ export default function LoginPage({ onLogin }) {
               Set Up New Club
               <span className="block text-xs font-normal text-gray-400 mt-0.5">Import your own member data</span>
             </button>
+
+            {/* Conference Demo — phone-optimized scene navigator built on the
+                existing mobile shell. Tap-to-enter, no login. Loads the
+                full-demo dataset so the storyboard scenes have data.
+                2026-04-09 wave 10. */}
+            <button
+              onClick={() => {
+                startDemo(false);
+                // Brief delay so the auth/state writes settle, then deep-link
+                // to the conference shell
+                setTimeout(() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.hash = '#/m/conference';
+                  }
+                }, 100);
+              }}
+              className="w-full py-3 rounded-xl border border-purple-200 bg-purple-50 text-purple-700 text-sm font-semibold cursor-pointer hover:bg-purple-100 transition-colors"
+              style={{ borderColor: '#c4b5fd', background: '#f5f3ff', color: '#6d28d9' }}
+            >
+              📱 Conference Demo (mobile)
+              <span className="block text-xs font-normal mt-0.5" style={{ color: '#8b5cf6' }}>Phone-optimized · 3 storyboard scenes · best on a phone</span>
+            </button>
           </div>
 
           {/* Back to sign in */}

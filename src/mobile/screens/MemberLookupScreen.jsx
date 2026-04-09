@@ -1,8 +1,99 @@
 import { useState, useMemo } from 'react';
-import { getAtRiskMembers, getMemberProfile } from '@/services/memberService';
+import { getAtRiskMembers, getMemberProfile, getFullRoster } from '@/services/memberService';
+import { getTodayTeeSheet } from '@/services/operationsService';
+import { DEMO_BRIEFING } from '@/services/briefingService';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
 import { useMobileNav } from '../context/MobileNavContext';
+
+const MODE_OPTIONS = [
+  { key: 'onPremise', label: 'On Premise Now' },
+  { key: 'atRisk', label: 'At-Risk' },
+  { key: 'all', label: 'All Members' },
+];
+
+/**
+ * Build the "On Premise Now" roster by combining:
+ *   1) getTodayTeeSheet() — real tee sheet rows for today
+ *   2) DEMO_BRIEFING.todayRisks.atRiskTeetimes — 3 at-risk tee times with times
+ *   3) A SYNTHESIZED lunch/dining reservation list pulled from full roster
+ *      members whose archetype is dining-heavy (Social Butterfly / Balanced Active)
+ *
+ * TODO(dining-reservations): Replace the synthesized lunch set with a real
+ * getDiningReservations() service once one exists. The tee-sheet half of this
+ * function is already wired to live data and can stay as-is.
+ *
+ * Each returned member carries a `currentContext` string (e.g. "Tee time 9:20 AM ·
+ * North course" or "Lunch reservation 12:30 · Grill Room") that the card renders
+ * prominently when mode === 'onPremise'.
+ */
+function buildOnPremiseRoster() {
+  const teeSheet = getTodayTeeSheet() || [];
+  const atRiskTeetimes = DEMO_BRIEFING?.todayRisks?.atRiskTeetimes || [];
+  const roster = getFullRoster() || [];
+  const rosterById = new Map(roster.map(m => [m.memberId, m]));
+
+  const out = new Map();
+
+  // 1) Tee sheet rows — these already have memberId, name, time, course, healthScore, duesAnnual
+  teeSheet.forEach(row => {
+    if (!row.memberId) return;
+    const rosterHit = rosterById.get(row.memberId);
+    out.set(row.memberId, {
+      memberId: row.memberId,
+      name: row.name,
+      archetype: row.archetype || rosterHit?.archetype || '—',
+      score: row.healthScore ?? rosterHit?.score ?? 70,
+      duesAnnual: row.duesAnnual ?? rosterHit?.duesAnnual ?? 0,
+      topRisk: rosterHit?.topRisk || 'No current risks',
+      lastSeenLocation: rosterHit?.lastSeenLocation,
+      currentContext: `Tee time ${row.time} · ${row.course} course`,
+      _onPremiseKind: 'tee',
+    });
+  });
+
+  // 2) At-risk tee times from the daily briefing (may overlap with tee sheet)
+  atRiskTeetimes.forEach(t => {
+    if (out.has(t.memberId)) return; // already covered by tee sheet
+    const rosterHit = rosterById.get(t.memberId);
+    out.set(t.memberId, {
+      memberId: t.memberId,
+      name: t.name,
+      archetype: rosterHit?.archetype || 'At-Risk',
+      score: t.health ?? rosterHit?.score ?? 40,
+      duesAnnual: rosterHit?.duesAnnual ?? 0,
+      topRisk: rosterHit?.topRisk || 'At-risk tee time',
+      lastSeenLocation: rosterHit?.lastSeenLocation,
+      currentContext: `Tee time ${t.time} · tee sheet`,
+      _onPremiseKind: 'tee',
+    });
+  });
+
+  // 3) SYNTHESIZED lunch reservations — pick up to 6 dining-heavy roster members
+  //    not already on premise via tee sheet. Assign staggered lunch slots.
+  // TODO(dining-reservations): replace with real getDiningReservations() source.
+  const diningArchetypes = new Set(['Social Butterfly', 'Balanced Active']);
+  const diningSpots = ['Grill Room', 'Terrace', 'Main Dining', 'Grill Room bar'];
+  const lunchSlots = ['11:45 AM', '12:00 PM', '12:15 PM', '12:30 PM', '12:45 PM', '1:00 PM'];
+  const synthesizedLunch = roster
+    .filter(m => diningArchetypes.has(m.archetype) && !out.has(m.memberId))
+    .slice(0, 6);
+  synthesizedLunch.forEach((m, i) => {
+    out.set(m.memberId, {
+      memberId: m.memberId,
+      name: m.name,
+      archetype: m.archetype,
+      score: m.score ?? 70,
+      duesAnnual: m.duesAnnual ?? 0,
+      topRisk: m.topRisk || 'No current risks',
+      lastSeenLocation: m.lastSeenLocation,
+      currentContext: `Lunch reservation ${lunchSlots[i % lunchSlots.length]} · ${diningSpots[i % diningSpots.length]}`,
+      _onPremiseKind: 'dining',
+    });
+  });
+
+  return Array.from(out.values());
+}
 
 const HEALTH_COLORS = { critical: '#EF4444', atRisk: '#F59E0B', watch: '#3B82F6', healthy: '#12b76a' };
 function getHealthColor(score) {
@@ -24,10 +115,12 @@ const SORT_OPTIONS = [
   { key: 'name', label: 'Name' },
 ];
 
-function MobileMemberCard({ member, expanded, onToggle }) {
+function MobileMemberCard({ member, expanded, onToggle, showContext }) {
   const { showToast, addAction } = useApp();
   const color = getHealthColor(member.score);
   const profile = expanded ? getMemberProfile(member.memberId) : null;
+  const prefs = profile?.preferences || {};
+  const hasPrefs = !!(prefs.favoriteSpots?.length || prefs.teeWindows || prefs.dining || prefs.notes);
 
   const quickAction = (type, label) => {
     showToast(`${label} for ${member.name}`, 'success');
@@ -55,9 +148,19 @@ function MobileMemberCard({ member, expanded, onToggle }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F0F0F' }}>{member.name}</div>
+          {showContext && member.currentContext ? (
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0F0F0F', marginTop: '3px', lineHeight: 1.3 }}>
+              {member.currentContext}
+            </div>
+          ) : null}
           <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '2px' }}>
             {member.archetype} · ${(member.duesAnnual || 0).toLocaleString()}/yr
           </div>
+          {member.lastSeenLocation ? (
+            <div style={{ fontSize: '11px', color: '#12b76a', marginTop: '3px', fontWeight: 600 }}>
+              📍 {member.lastSeenLocation}
+            </div>
+          ) : null}
         </div>
         <span style={{ fontSize: '14px', color: '#9CA3AF' }}>{expanded ? '▲' : '▼'}</span>
       </div>
@@ -79,6 +182,23 @@ function MobileMemberCard({ member, expanded, onToggle }) {
               <InfoItem label="Last visit" value={profile.activity?.[0]?.timestamp ? new Date(profile.activity[0].timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'} />
               <InfoItem label="Archetype" value={member.archetype} />
               <InfoItem label="Annual value" value={`$${(profile.duesAnnual || member.duesAnnual || 0).toLocaleString()}`} />
+            </div>
+          )}
+
+          {/* Preferences — only when at least one field is present */}
+          {hasPrefs && (
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>
+                Preferences
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {prefs.favoriteSpots?.length ? (
+                  <InfoItem label="Favorite spots" value={prefs.favoriteSpots.join(', ')} />
+                ) : null}
+                {prefs.teeWindows ? <InfoItem label="Tee windows" value={prefs.teeWindows} /> : null}
+                {prefs.dining ? <InfoItem label="Dining" value={prefs.dining} /> : null}
+                {prefs.notes ? <InfoItem label="Notes" value={prefs.notes} /> : null}
+              </div>
             </div>
           )}
 
@@ -136,22 +256,29 @@ function FilterChip({ label, active, color, onClick }) {
 }
 
 export default function MemberLookupScreen() {
+  const [mode, setMode] = useState('onPremise');
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [healthFilter, setHealthFilter] = useState(null);
   const [sortBy, setSortBy] = useState('health');
-  const atRisk = getAtRiskMembers();
+
+  // Source roster depends on mode
+  const sourceList = useMemo(() => {
+    if (mode === 'atRisk') return getAtRiskMembers();
+    if (mode === 'all') return getFullRoster();
+    return buildOnPremiseRoster();
+  }, [mode]);
 
   const archetypes = useMemo(() => {
-    const set = new Set(atRisk.map(m => m.archetype).filter(Boolean));
+    const set = new Set(sourceList.map(m => m.archetype).filter(Boolean));
     return [...set];
-  }, [atRisk]);
+  }, [sourceList]);
 
   const [archetypeFilter, setArchetypeFilter] = useState(null);
   const [showArchetypes, setShowArchetypes] = useState(false);
 
   const filtered = useMemo(() => {
-    let items = atRisk;
+    let items = sourceList;
 
     // Text search
     if (search) {
@@ -179,12 +306,36 @@ export default function MemberLookupScreen() {
     });
 
     return items.slice(0, 30);
-  }, [atRisk, search, healthFilter, archetypeFilter, sortBy]);
+  }, [sourceList, search, healthFilter, archetypeFilter, sortBy]);
 
   const hasActiveFilter = healthFilter || archetypeFilter;
 
+  const modeLabel = MODE_OPTIONS.find(m => m.key === mode)?.label || '';
+  const countSuffix = mode === 'onPremise' ? 'on premise now'
+    : mode === 'atRisk' ? 'at-risk members'
+    : 'total members';
+
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {/* Mode toggle — staff-facing: On Premise / At-Risk / All */}
+      <div style={{ display: 'flex', gap: '6px', background: '#F3F4F6', padding: '4px', borderRadius: '12px' }}>
+        {MODE_OPTIONS.map(opt => (
+          <button
+            key={opt.key}
+            onClick={() => { setMode(opt.key); setExpandedId(null); setArchetypeFilter(null); setHealthFilter(null); }}
+            style={{
+              flex: 1, padding: '10px 8px', borderRadius: '9px', border: 'none',
+              background: mode === opt.key ? '#0F0F0F' : 'transparent',
+              color: mode === opt.key ? '#fff' : '#6B7280',
+              fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+              transition: 'all 120ms ease',
+            }}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       <input
         type="text"
         placeholder="Search members..."
@@ -253,7 +404,7 @@ export default function MemberLookupScreen() {
       {/* Sort + count row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: '12px', color: '#9CA3AF' }}>
-          {search || hasActiveFilter ? `${filtered.length} results` : `${atRisk.length} at-risk members`}
+          {search || hasActiveFilter ? `${filtered.length} results` : `${sourceList.length} ${countSuffix}`}
         </div>
         <div style={{ display: 'flex', gap: '4px' }}>
           {SORT_OPTIONS.map(opt => (
@@ -282,6 +433,7 @@ export default function MemberLookupScreen() {
           key={member.memberId}
           member={member}
           expanded={expandedId === member.memberId}
+          showContext={mode === 'onPremise'}
           onToggle={() => setExpandedId(expandedId === member.memberId ? null : member.memberId)}
         />
       ))}

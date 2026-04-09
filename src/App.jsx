@@ -6,6 +6,9 @@ import { MemberProfileProvider, useMemberProfile } from '@/context/MemberProfile
 
 // Mobile app — lazy loaded, zero bundle impact on desktop
 const MobileApp = lazy(() => import('@/mobile/MobileApp'));
+// Conference-floor demo shell — sub-route #/m/conference. Lazy for the
+// same reason: it ships alongside MobileApp but shouldn't inflate desktop.
+const ConferenceShell = lazy(() => import('@/mobile/conference/ConferenceShell'));
 import { DataProvider } from '@/context/DataProvider';
 import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
 import DemoWizard from '@/components/ui/DemoWizard';
@@ -177,6 +180,15 @@ function RouterViews() {
   // Mobile routes: exactly #/m or #/m/... — NOT #/members, #/member-profile, etc.
   const hash = window.location.hash;
   const isMobileRoute = hash === '#/m' || hash.startsWith('#/m/');
+  const isConferenceRoute = hash.startsWith('#/m/conference');
+
+  if (isConferenceRoute) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Swoop Conference Demo...</div>}>
+        <ConferenceShell />
+      </Suspense>
+    );
+  }
 
   if (isMobileRoute) {
     return (
