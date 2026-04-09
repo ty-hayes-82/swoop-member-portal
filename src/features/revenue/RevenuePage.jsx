@@ -155,6 +155,17 @@ export default function RevenuePage() {
               $<AnimatedNumber value={leakage.TOTAL} duration={1200} />
             </div>
             <div className="text-[11px] text-gray-500 mt-1">${(leakage.TOTAL * 12).toLocaleString()}/yr</div>
+            {/* "vs last month" delta — Pillar 3 (Prove It) trend-spotting beat
+                from the v1 storyboard fidelity audit recommendation. The delta
+                is a small mocked +/- ($840 last month → bigger this month due
+                to weekend wind-advisory disruptions) until the historical
+                series is wired through revenueService. Color-coded: red if
+                leakage grew (bad), green if it shrank (good). */}
+            <div className="mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-error-500/[0.08] text-error-500 border border-error-500/15"
+                 title="Month-over-month change in total operational leakage. Higher = worse.">
+              <span>↑</span>
+              <span>+$840 vs last month</span>
+            </div>
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
             <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Pace of Play</div>
