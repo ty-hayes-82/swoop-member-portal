@@ -26,6 +26,7 @@ import { getTodayTeeSheet } from '@/services/operationsService';
 import { getMemberSummary } from '@/services/memberService';
 import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
 import { trackAction } from '@/services/activityService';
+import { getHealthRollup } from '@/services/apiHealthService';
 
 // GM Greeting Alert — simulates real-time member check-in notifications
 function buildCheckinAlerts() {
@@ -171,6 +172,20 @@ export default function TodayView() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Pillar 1 (SEE IT): tiny data trust pulse — polls /api/health rollup.
+  // Null-safe: getHealthRollup never throws and returns overall:'unknown' on failure.
+  const [healthRollup, setHealthRollup] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const r = await getHealthRollup();
+      if (!cancelled) setHealthRollup(r);
+    };
+    load();
+    const id = setInterval(load, 60_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
   if (isLoading) {
     return <SkeletonDashboard />;
   }
@@ -236,25 +251,68 @@ export default function TodayView() {
               {formatDate()}
             </div>
           </div>
-          <div
-            className="greeting-badge"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5,
-              background: 'rgba(232,167,50,0.12)',
-              border: '1px solid rgba(232,167,50,0.2)',
-              color: '#e8a732',
-              fontSize: 10,
-              fontWeight: 600,
-              padding: '3px 10px',
-              borderRadius: 16,
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              flexShrink: 0,
-            }}
-          >
-            <span className="pulse-dot" /> Live Dashboard
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {(() => {
+              const overall = healthRollup?.overall || 'unknown';
+              const color = overall === 'ok' ? '#12b76a' : overall === 'degraded' ? '#f59e0b' : '#9ca3af';
+              const ints = healthRollup?.integrations || [];
+              const title = ints.length
+                ? `Data pulse: ${ints.length} integration${ints.length === 1 ? '' : 's'} · ${ints.map(i => `${i.name.replace(/ sync$/i,'').replace(/Cross-club audit purge/,'Audit')} ${i.status}`).join(' · ')}`
+                : 'Data pulse: health unknown (offline or fresh DB)';
+              return (
+                <button
+                  type="button"
+                  aria-label={title}
+                  title={title}
+                  onClick={() => navigate('admin', { tab: 'data-hub' })}
+                  data-testid="today-data-pulse"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 18,
+                    height: 18,
+                    padding: 0,
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    borderRadius: 9,
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      display: 'inline-block',
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      background: color,
+                      boxShadow: `0 0 0 2px rgba(255,255,255,0.08)`,
+                    }}
+                  />
+                </button>
+              );
+            })()}
+            <div
+              className="greeting-badge"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                background: 'rgba(232,167,50,0.12)',
+                border: '1px solid rgba(232,167,50,0.2)',
+                color: '#e8a732',
+                fontSize: 10,
+                fontWeight: 600,
+                padding: '3px 10px',
+                borderRadius: 16,
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
+                flexShrink: 0,
+              }}
+            >
+              <span className="pulse-dot" /> Live Dashboard
+            </div>
           </div>
         </div>
 
