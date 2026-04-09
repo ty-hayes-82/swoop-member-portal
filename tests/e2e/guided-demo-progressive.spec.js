@@ -123,11 +123,18 @@ test.describe('1. Members Only', () => {
   test('Board Report — shows member KPIs only (no F&B, no operational)', async ({ page }) => {
     await page.locator('nav >> text=/Board Report/i').first().click();
     await page.waitForTimeout(2000);
+    // With members imported, the board report should show member-based KPIs.
+    // Use Playwright locators (which read the rendered accessibility tree) instead
+    // of document.body.innerText, which is too conservative about what counts as
+    // "visible" — it elides text inside cards positioned below the fold even
+    // though the tree shows the elements are rendered. (Audit fix 2026-04-09.)
+    const memberKpi = page.locator(
+      'text=/Members Retained|Retention Rate|At Risk/i'
+    ).first();
+    await expect(memberKpi).toBeVisible({ timeout: 5000 });
+    // But should NOT show F&B data (not imported) — body text is fine here
+    // because we're asserting absence/presence of the empty-state phrase.
     const text = await getVisibleText(page);
-    // With members imported, board report should show member-based KPIs
-    const hasMemberData = text.includes('Members Retained') || text.includes('Retention') || text.includes('At Risk');
-    expect(hasMemberData).toBeTruthy();
-    // But should NOT show F&B data (not imported)
     expect(text).toContain('Awaiting data');
   });
 

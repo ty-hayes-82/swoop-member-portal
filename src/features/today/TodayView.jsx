@@ -261,8 +261,12 @@ export default function TodayView() {
         {/* Section 1.5: Morning Briefing Synthesis (Pillar 1: SEE IT) */}
         <MorningBriefingSentence />
 
-        {/* Section 1.6: Demo Story Flows — 3 storyboard moments, one click to start */}
-        <DemoStoriesLauncher />
+        {/* Section 1.6: Demo Story Flows — 3 storyboard moments, one click to start.
+            Hidden in guided demo mode until at least one data source has been imported,
+            so the launcher's teaser copy ("220 rounds...") doesn't bleed demo content
+            into a clean guided session. The cards are storyboard marketing — only show
+            them when the underlying data exists to back them up. */}
+        {(shouldUseStatic('tee-sheet') || shouldUseStatic('members')) && <DemoStoriesLauncher />}
 
         {/* Section 2: Quick Stats Row */}
         <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>

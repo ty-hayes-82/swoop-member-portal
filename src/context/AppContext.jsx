@@ -33,7 +33,13 @@ function getDefaultInbox() {
   return getAllActions();
 }
 
-// Pre-populate inbox if gates are already set (e.g., after page reload in guided demo)
+// Pre-populate inbox if gates are already set (e.g., after page reload in guided demo).
+// IMPORTANT: this runs at MODULE EVAL time, before any login. On a fresh page load
+// the user has not yet chosen a mode, so getDataMode() returns 'demo' by default
+// and getAllActions() returns the full demo inbox. That's fine for full-demo mode,
+// but means we MUST re-evaluate this once the user actually picks guided mode —
+// see the SOURCES_CHANGED_EVENT listener and lazy-load effect below, both of which
+// must be allowed to CLEAR the inbox (not just populate it).
 const initialInbox = (() => {
   try { return getAllActions(); } catch { return []; }
 })();
@@ -258,21 +264,28 @@ export function AppProvider({ children }) {
     annual: activePlaybooks.reduce((sum, [id]) => sum + (PLAYBOOK_DEFS[id]?.annual ?? 0), 0),
   };
 
-  // Lazy-load agent inbox — poll until gates are ready (handles post-reload timing)
+  // Lazy-load agent inbox — poll until gates are ready (handles post-reload timing).
+  // Always reconcile state on first run (even when the result is empty) so that an
+  // AppProvider mounting in guided mode after login does NOT keep the demo-mode
+  // initialInbox that was computed at module-eval time.
   useEffect(() => {
+    let firstRun = true;
     const loadInbox = () => {
       const inbox = getDefaultInbox();
       const agents = getAgents();
-      if (inbox.length > 0) {
+      if (firstRun || inbox.length > 0) {
         dispatch({ type: 'SET_INBOX', inbox });
       }
-      if (agents.length > 0) {
-        const statuses = Object.fromEntries(agents.map(a => [a.id, a.status]));
+      if (firstRun || agents.length > 0) {
+        const statuses = agents.length > 0
+          ? Object.fromEntries(agents.map(a => [a.id, a.status]))
+          : {};
         dispatch({ type: 'SET_AGENT_STATUSES', statuses });
       }
+      firstRun = false;
       return inbox.length > 0;
     };
-    // Try immediately, then poll every 500ms up to 5 times
+    // Try immediately, then poll every 500ms up to 5 times for the populate case.
     if (!loadInbox()) {
       let attempts = 0;
       const interval = setInterval(() => {
@@ -283,15 +296,20 @@ export function AppProvider({ children }) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Also reload inbox when demo gates change (e.g., after importGates + page reload)
+  // Also reload inbox when demo gates change (e.g., after importGates + page reload,
+  // or when the user enters guided demo from a fresh page where AppContext was
+  // initialized in 'demo' mode and pre-loaded the full demo inbox).
+  // Always dispatch — even when the new inbox is empty — so transitions from
+  // demo → guided correctly CLEAR stale state instead of leaving it in place.
   useEffect(() => {
     const handler = () => {
       const inbox = getDefaultInbox();
-      if (inbox.length > 0) dispatch({ type: 'SET_INBOX', inbox });
+      dispatch({ type: 'SET_INBOX', inbox });
       const agents = getAgents();
-      if (agents.length > 0) {
-        dispatch({ type: 'SET_AGENT_STATUSES', statuses: Object.fromEntries(agents.map(a => [a.id, a.status])) }); // eslint-disable-line
-      }
+      dispatch({
+        type: 'SET_AGENT_STATUSES',
+        statuses: agents.length > 0 ? Object.fromEntries(agents.map(a => [a.id, a.status])) : {},
+      });
     };
     window.addEventListener('swoop:demo-sources-changed', handler);
     return () => window.removeEventListener('swoop:demo-sources-changed', handler);

@@ -282,6 +282,37 @@ Rollback URL pattern (old deployments remain accessible): `https://swoop-member-
 
 **What rollback does NOT undo:** database migrations, external state changes (sent emails/SMS, Google Calendar events created, CSV imports). For those, you need a forward-fix, not a rollback.
 
+### Rollback drill (quarterly tabletop)
+
+> **Added 2026-04-09 — PRODUCT-FINALIZATION criterion 9 (Phase F1).**
+
+We rehearse the rollback procedure once a quarter so that on the day a real
+SEV1 hits, nobody is reading this runbook for the first time.
+
+**Owner:** DevOps lead. **Cadence:** quarterly. **Duration:** 30–45 min.
+
+Drill checklist:
+1. Pick a recent good deploy on `dev` and a known-bad commit (or a deliberate
+   "scratch" commit on a throwaway branch). Treat the bad commit as the deploy
+   that broke production.
+2. Walk through promoting the prior known-good deployment via the Vercel
+   dashboard (steps above). Time how long it takes from "decision to roll back"
+   to "production back on the old SHA."
+3. Run the storyboard smoke tests against the rolled-back URL — confirm green.
+4. Practice the announcement template in the deploy channel:
+   `🚨 ROLLBACK · from <SHA-bad> → <SHA-good> · reason: <one-line> · follow-up: <ticket>`.
+5. Attempt one thing the rollback should NOT cover (e.g. an emailed user) and
+   verify the team correctly identifies it as needing a forward-fix.
+
+Drill debrief (5 min, append to `docs/operations/drills/YYYY-MM-DD-rollback.md`):
+- Time to roll back?
+- Did the smoke tests catch a regression?
+- Anything in the runbook that was missing or wrong?
+- Action items (file as tickets before closing the drill).
+
+If a drill reveals a runbook gap, **fix the runbook before closing the drill** —
+that's the whole point.
+
 ---
 
 ## 6. Monitoring and alerting
@@ -386,6 +417,26 @@ When paged (or when a pilot club reports a problem):
 6. **If SEV1 and the cause is not a deploy: open a war room** (Slack huddle or equivalent), page the product owner, keep a timeline in a shared doc.
 7. **Communicate to affected clubs.** Even a one-line "we see it, we're on it, ETA X" is infinitely better than silence.
 8. **After resolution:** write a 5-line postmortem (see stub below) within 48 hours.
+
+### Postmortem SLA & review process
+
+> **Added 2026-04-09 — PRODUCT-FINALIZATION criterion 9 (Phase F1).**
+
+Postmortems are not optional. The SLA is enforced by the GM as part of the
+release-readiness sign-off bar.
+
+| Phase | Owner | Deadline | Output |
+|---|---|---|---|
+| **Draft** | Incident commander | within 48 h of incident close | PR to `docs/operations/postmortems/` using the stub below |
+| **Review** | PM + DevOps lead | within 5 business days | Comments + sign-off on PR |
+| **Approve & merge** | GM (Product & Ops) | within 7 business days of incident | PR merged; postmortem becomes the historical record |
+| **Action items filed** | Incident commander | before postmortem PR is merged | Each action item becomes a tracked Linear/B-ticket with owner + due date |
+
+**No postmortem is "closed" until every action item has a tracked ticket.** This
+prevents the "we'll get to it" trap where postmortems become write-only history.
+
+If a SEV1 occurs and a draft is not posted within 48 h, the GM may freeze
+non-critical merges until the draft is posted — same gate as a missed pilot demo.
 
 ### Postmortem stub
 
@@ -602,6 +653,49 @@ These are not gating, but run them before major UI ships.
 - E2E specs go under `tests/e2e/`. Use `APP_URL` env var for the base.
 - Do not hit production in automated CI runs (onboarding.spec.js currently defaults to production — audit and change it before CI enables full suite).
 - Every new storyboard page or flow that ships to production MUST have a corresponding storyboard-flows test.
+
+---
+
+## 12. Phase F1 gaps — TODO playbooks
+
+> **Added 2026-04-09 — PRODUCT-FINALIZATION criterion 9.**
+>
+> The playbooks in this section are stubs filed against gaps surfaced in the
+> April 2026 runbook audit. Each one should be expanded into a full subsection
+> of the appropriate parent section before Phase F1 closes. The GM tracks them
+> on the Phase F1 punch list.
+
+### 12.1 Secret rotation calendar — TODO
+
+**Belongs in:** Section 3 (Environment variables).
+**Anchor:** the existing 7-step secret rotation procedure (CRON_SECRET example, line 293).
+**What's missing:**
+- A single inventory table of every credential the project uses (Twilio, SendGrid, Google OAuth, OpenAI, Anthropic, Vercel Postgres, CRON_SECRET, etc.)
+- Recommended rotation cadence per vendor (quarterly for SMS/email vendors; annual for OAuth refresh tokens)
+- A tracker (calendar invite or spreadsheet) for next-rotation date per secret
+- Owner: DevOps lead. Cadence: review at every quarterly rollback drill.
+
+### 12.2 Database backup & recovery runbook — TODO
+
+**Belongs in:** Section 4 (Database).
+**Anchor:** the existing migration safety guard (`scripts/migrate.mjs --apply`) and the Vercel Postgres TODO from §4.
+**What's missing:**
+- Confirmed backup retention window from Vercel Postgres support (currently unknown — file the support ticket)
+- Point-in-time recovery procedure: which Vercel feature, how to initiate, expected RTO/RPO
+- Logical backup bootstrap: `pg_dump` → S3 schedule if Vercel retention is < 7 days
+- Restore-from-backup checklist + replay-migrations playbook
+- Owner: DevOps lead. Critical pre-pilot.
+
+### 12.3 Cron job observability & failure recovery — TODO
+
+**Belongs in:** Section 6 (Monitoring and alerting).
+**Anchor:** the existing weather-daily cron (Section 6, line 293) and the SEC-2a `cross_club_audit` purge cron from Sprint 4.
+**What's missing:**
+- Per-cron table: name, schedule, SLA (must run within X minutes of scheduled tick), alerting threshold (zero successes in 48 h)
+- Manual recovery procedure: how to re-run weather-daily from CLI or the Vercel dashboard if the scheduled tick fails
+- Specific failure mode for the audit purge: if the purge cron fails for > 10 days the table grows unbounded — escalate immediately
+- The new `/api/health` integrations block (added 2026-04-09) is the live signal source for cron freshness; this section should document how to read it
+- Owner: DevOps lead.
 
 ---
 

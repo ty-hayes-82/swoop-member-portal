@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { trackAction } from '@/services/activityService';
+import SourceBadge from '@/components/ui/SourceBadge';
 
 // MemberDecayChain — shared "First Domino" engagement decay sequence card.
 // Used by both MemberProfileDrawer (inside its Section wrapper) and
@@ -210,9 +211,8 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
                   <div className="text-[10px] text-gray-400">{step.date}</div>
                 </div>
                 {system && (
-                  <div className="flex items-center gap-1 text-[9px] text-gray-500 px-1">
-                    <span className="opacity-60">source:</span>
-                    <span className="font-semibold">{system}</span>
+                  <div className="px-1">
+                    <SourceBadge system={system} size="xs" />
                   </div>
                 )}
               </div>

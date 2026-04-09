@@ -99,11 +99,23 @@ export default function LoginPage({ onLogin }) {
     if (guided) {
       sessionStorage.setItem('swoop_demo_guided', 'true');
       sessionStorage.removeItem('swoop_demo_sources');
+      sessionStorage.removeItem('swoop_demo_files');
+      sessionStorage.removeItem('swoop_demo_gates');
       localStorage.setItem('swoop_was_guided', 'true');
+      // Clear any stale persisted inbox from a prior 'demo' mode AppContext mount
+      // on this same page load. Without this, the in-memory inbox keeps the
+      // 15 demo actions that were preloaded before the user chose Guided Demo.
+      localStorage.removeItem('swoop_agent_inbox');
     } else {
       sessionStorage.removeItem('swoop_demo_guided');
       localStorage.removeItem('swoop_was_guided');
     }
+    // Notify AppContext (and any other listeners) that the data mode just
+    // changed so they can re-evaluate the inbox / agents under the new gates.
+    // For guided mode this CLEARS the inbox; for full demo it's a no-op refresh.
+    try {
+      window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed', { detail: { action: 'mode-change', guided } }));
+    } catch {}
     onLogin?.(demoUser);
   };
 

@@ -5,6 +5,7 @@ import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import ActionPanel from '@/components/ui/ActionPanel.jsx';
 import TrendChart from '@/components/charts/TrendChart.jsx';
+import SourceBadge, { SourceBadgeRow } from '@/components/ui/SourceBadge.jsx';
 import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getVolatileMembers, getMemberSummary } from '@/services/memberService';
 import { getComplaintCorrelation } from '@/services/staffingService';
 import { getMemberSaves } from '@/services/boardReportService';
@@ -183,12 +184,17 @@ export default function HealthOverview() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Pillar 3 PROVE IT — dollar exposure & saves rollup */}
+      {/* Pillar 3 PROVE IT — dollar exposure & saves rollup.
+          Source badges show that these are CROSS-DOMAIN insights (Member CRM × Tee Sheet ×
+          POS × Email Engagement) — Layer 3 synthesis no single vendor can produce. */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
           <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Members at Risk</div>
           <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{totalAtRiskCount}</div>
           <div className="text-xs text-gray-500 mt-0.5">priority outreach needed</div>
+          <div className="mt-2">
+            <SourceBadgeRow systems={['Member CRM', 'Tee Sheet', 'POS', 'Email']} size="xs" />
+          </div>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
           <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Dues at Risk</div>
@@ -196,6 +202,9 @@ export default function HealthOverview() {
             ${totalDuesAtRisk > 0 ? totalDuesAtRisk.toLocaleString() : (summaryForKpi.potentialDuesAtRisk || 0).toLocaleString()}
           </div>
           <div className="text-xs text-gray-500 mt-0.5">annual dues exposure</div>
+          <div className="mt-2">
+            <SourceBadgeRow systems={['Member CRM', 'Analytics']} size="xs" />
+          </div>
         </div>
         <button
           type="button"
@@ -206,6 +215,9 @@ export default function HealthOverview() {
           <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Saves This Month →</div>
           <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{savesThisMonth.length}</div>
           <div className="text-xs text-gray-500 mt-0.5">retained through intervention</div>
+          <div className="mt-2">
+            <SourceBadgeRow systems={['Member CRM', 'Analytics']} size="xs" />
+          </div>
         </button>
       </div>
 

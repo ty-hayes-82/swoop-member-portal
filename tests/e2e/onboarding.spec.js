@@ -65,13 +65,13 @@ test.describe('1 — Login Page', () => {
   test('1.1 — Login page renders with all entry points', async ({ page }) => {
     await expect(page.locator('#login-email')).toBeVisible();
     await expect(page.locator('#login-password')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Set Up New Club' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
+    // "Set Up New Club" lives behind the Explore screen now, not directly on login
     await expect(page.getByRole('button', { name: /Explore without an account/i })).toBeVisible();
   });
 
   test('1.2 — Empty login is rejected gracefully', async ({ page }) => {
-    await page.getByRole('button', { name: 'Sign In' }).click();
+    await page.getByRole('button', { name: 'Sign In', exact: true }).click();
     await page.waitForTimeout(1000);
     expect(page.url()).not.toContain('#/today');
   });
@@ -79,7 +79,7 @@ test.describe('1 — Login Page', () => {
   test('1.3 — Invalid credentials show error (not a crash)', async ({ page }) => {
     await page.locator('#login-email').fill('fake@invalid.com');
     await page.locator('#login-password').fill('wrongPassword99');
-    await page.getByRole('button', { name: 'Sign In' }).click();
+    await page.getByRole('button', { name: 'Sign In', exact: true }).click();
     // Error message could be "Invalid credentials", "Login failed", "Too many login attempts", etc.
     // Key check: user sees a readable error message, not a crash or blank page.
     await expect(

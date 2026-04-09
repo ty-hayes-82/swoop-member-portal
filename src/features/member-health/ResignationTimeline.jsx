@@ -2,6 +2,18 @@ import { useState } from 'react';
 import MemberLink from '@/components/MemberLink.jsx';
 import { getResignationScenarios } from '@/services/memberService';
 import { useNavigation } from '@/context/NavigationContext';
+import { SourceBadgeRow } from '@/components/ui/SourceBadge.jsx';
+
+// Map domain labels (used in scenario timelines) to source-system names so the
+// timeline can carry the same source-attribution badges as the rest of the
+// member-health surface. PRODUCT-FINALIZATION criterion 5 cleanup (2026-04-09).
+const DOMAIN_TO_SYSTEM = {
+  Golf: 'Tee Sheet',
+  'F&B': 'POS',
+  Email: 'Email',
+  Feedback: 'Complaint Log',
+  Membership: 'Member CRM',
+};
 const DOMAIN_COLORS = {
   Golf: '#12b76a',
   'F&B': '#f59e0b',
@@ -69,8 +81,24 @@ export default function ResignationTimeline() {
 
             {isOpen && (
               <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-800">
-                <div className="text-xs text-gray-400 py-2 mb-2">
-                  Pattern: {scenario.pattern}
+                <div className="flex items-center justify-between flex-wrap gap-2 py-2 mb-2">
+                  <div className="text-xs text-gray-400">
+                    Pattern: {scenario.pattern}
+                  </div>
+                  {/* Source attribution — every timeline entry below is sourced
+                      from one of these systems. Pillar 1 (Show your sources). */}
+                  {(() => {
+                    const systems = Array.from(
+                      new Set(
+                        (scenario.timeline || [])
+                          .map((p) => DOMAIN_TO_SYSTEM[p.domain])
+                          .filter(Boolean)
+                      )
+                    );
+                    return systems.length > 0 ? (
+                      <SourceBadgeRow systems={systems} size="xs" />
+                    ) : null;
+                  })()}
                 </div>
                 <div className="flex flex-col gap-2">
                   {scenario.timeline.map((point, index) => (

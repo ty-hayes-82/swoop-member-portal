@@ -53,7 +53,7 @@ test.describe('Part A: Guided Demo — Zero Data Before Import', () => {
   });
 
   test('A1: Today page — no rounds count in header', async ({ page }) => {
-    const header = page.locator('.rounded-xl.border-brand-100, [class*="bg-brand-25"]').first();
+    const header = page.locator('.today-greeting-enhanced, .greeting-text, .rounded-xl.border-brand-100, [class*="bg-brand-25"]').first();
     await expect(header).toBeVisible({ timeout: 10000 });
     const headerText = await header.innerText();
     expect(headerText).not.toContain('rounds booked');
@@ -235,7 +235,7 @@ test.describe('Part B: Progressive Import', () => {
     await expect(alertSection).toBeVisible({ timeout: 10000 });
 
     // But should NOT show rounds booked (tee-sheet not imported)
-    const header = page.locator('.rounded-xl.border-brand-100, [class*="bg-brand-25"]').first();
+    const header = page.locator('.today-greeting-enhanced, .greeting-text, .rounded-xl.border-brand-100, [class*="bg-brand-25"]').first();
     const headerText = await header.innerText();
     expect(headerText).not.toContain('rounds booked');
   });
@@ -254,9 +254,12 @@ test.describe('Part B: Progressive Import', () => {
     await page.reload();
     await page.waitForTimeout(3000);
 
-    const header = page.locator('.rounded-xl.border-brand-100, [class*="bg-brand-25"]').first();
-    const headerText = await header.innerText();
-    expect(headerText).toContain('rounds booked');
+    // The "rounds booked" string is rendered by MorningBriefingSentence (a <StoryHeadline>
+    // synthesis banner) once the tee-sheet gate is open. Assert against the body text
+    // rather than a stale class selector — the synthesis banner does not own a stable
+    // selector class today.
+    const text = await getVisibleText(page);
+    expect(text).toContain('rounds booked');
   });
 });
 

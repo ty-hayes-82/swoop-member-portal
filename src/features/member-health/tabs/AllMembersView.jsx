@@ -3,6 +3,7 @@ import MemberLink from '@/components/MemberLink.jsx';
 import ArchetypeBadge from '@/components/ui/ArchetypeBadge.jsx';
 import QuickActions from '@/components/ui/QuickActions.jsx';
 import { PlaybookActionCard } from '@/components/ui';
+import { SourceBadgeRow } from '@/components/ui/SourceBadge.jsx';
 import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, getAllMemberProfiles, setRosterCache, getMemberRoster, getFullRoster } from '@/services/memberService';
 import { isAuthenticatedClub } from '@/config/constants';
 import { shouldUseStatic, getDataMode } from '@/services/demoGate';
@@ -614,6 +615,13 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
           <span className="text-xs text-gray-400">
             Showing {Math.min(page * PAGE_SIZE + 1, sortedMembers.length)}–{Math.min((page + 1) * PAGE_SIZE, sortedMembers.length)} of {sortedMembers.length} members{searchTerm && ` matching "${searchTerm}"`}
           </span>
+        </div>
+        {/* Source attribution — every health score, dues, and archetype shown
+            below is a CROSS-DOMAIN composite. Pillar 1 (Show your sources). */}
+        <div className="px-3 sm:px-4 py-2 border-b border-gray-200 flex items-center gap-2 flex-wrap text-[10px] text-gray-500">
+          <span className="font-semibold uppercase tracking-wide">Sources:</span>
+          <SourceBadgeRow systems={['Member CRM', 'Tee Sheet', 'POS', 'Email']} size="xs" />
+          <span className="text-gray-400">— health scores synthesize all four signals</span>
         </div>
         <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="w-full border-collapse text-sm member-table">
