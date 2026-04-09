@@ -169,14 +169,8 @@ function RecoveryTimeline({ member, decayChainLength }) {
   const score = Number(member?.healthScore) || 0;
   const archetype = member?.archetype || '';
   const TARGET = 70;
-  const gap = Math.max(0, TARGET - score);
-  const baseWeeks = gap / 8;
-  const dominoDrag = Math.max(0, (decayChainLength - 2)) * 0.5;
-  let archetypeMod = 0;
-  if (archetype === 'Ghost' || archetype === 'Declining') archetypeMod = 1;
-  else if (archetype === 'Weekend Warrior' || archetype === 'Social Butterfly') archetypeMod = -0.5;
-  const rawWeeks = baseWeeks + dominoDrag + archetypeMod;
-  const weeks = Math.max(2, Math.min(12, Math.round(rawWeeks)));
+  const { gap, baseWeeks, dominoDrag, archetypeMod, rawWeeks, weeks } =
+    computeRecoveryWeeks({ score, archetype, decayChainLength });
 
   // Pick an archetype-flavored "reversal" phrase
   const reversalPhrase = (() => {
@@ -364,3 +358,21 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
 // Named export for the helper in case callers (e.g. MemberJourneyTimeline)
 // want the parsed events/chain data without re-rendering the card.
 export { buildDecayChain };
+
+// Pure helper extracted from <RecoveryTimeline> so the deterministic linear
+// model can be unit-tested in isolation. See the component's model-assumption
+// comment for the rationale behind each constant.
+export function computeRecoveryWeeks({ score, archetype, decayChainLength }) {
+  const safeScore = Number(score) || 0;
+  const safeLen = Number(decayChainLength) || 0;
+  const TARGET = 70;
+  const gap = Math.max(0, TARGET - safeScore);
+  const baseWeeks = gap / 8;
+  const dominoDrag = Math.max(0, safeLen - 2) * 0.5;
+  let archetypeMod = 0;
+  if (archetype === 'Ghost' || archetype === 'Declining') archetypeMod = 1;
+  else if (archetype === 'Weekend Warrior' || archetype === 'Social Butterfly') archetypeMod = -0.5;
+  const rawWeeks = baseWeeks + dominoDrag + archetypeMod;
+  const weeks = Math.max(2, Math.min(12, Math.round(rawWeeks)));
+  return { gap, baseWeeks, dominoDrag, archetypeMod, rawWeeks, weeks };
+}

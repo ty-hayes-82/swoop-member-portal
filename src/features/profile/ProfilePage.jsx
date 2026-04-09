@@ -74,7 +74,7 @@ const ROLE_PERMISSIONS = {
   },
 };
 
-function getRolePermissions(role) {
+export function getRolePermissions(role) {
   return ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.gm;
 }
 

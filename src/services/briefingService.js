@@ -29,7 +29,7 @@ const EMPTY_BRIEFING = {
 // DEMO_BRIEFING is the safety fallback if the dynamic build path throws.
 // It must satisfy the same contract as the dynamic build so that downstream
 // components and tests don't see a half-shape. Every required field is populated.
-const DEMO_BRIEFING = {
+export const DEMO_BRIEFING = {
   // Apply-now bumps from 2026-04-09 demo-data audit (storyboard-audits/2026-04-09-demo-data.md):
   // - monthlyRevenue $142K → $168K (Today hero punches up; still credible
   //   for a $5M / 350-member club running F&B at typical mid-club margins)
