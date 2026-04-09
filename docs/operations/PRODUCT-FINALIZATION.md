@@ -217,6 +217,95 @@ If any of steps 1-2 fails, fall back to `PICKUP-HERE.md` §6 (the sprint-level v
 
 ---
 
+## 10b. Storyboard fidelity audit (GM agent task)
+
+> **Added 2026-04-09.** This is a standing assignment for the **General Manager (Product & Ops)** role (or any GM-acting agent during the autonomous-sweep window). It runs at least once per release-readiness review (§4 Friday cadence) and is a **mandatory input** to the GM's sign-off on criterion 10.
+
+The 3 storyboard flows in [`docs/swoop_demo_storyboard.html`](../swoop_demo_storyboard.html) (canonical source — also mirrored at `docs/strategy/swoop_demo_storyboard.html` and `docs/swoop_demo_storyboard.md`) are not just sales narratives. Per [`NORTH-STAR.md`](../strategy/NORTH-STAR.md) §"The Three Demo Stories as Product Tests", they are **acceptance tests for the product**: if the live app cannot deliver these experiences end-to-end, the product is not ready.
+
+The GM agent must walk every storyboard path on the live dev preview and answer two distinct questions:
+
+### Part A — Path fidelity ("can the GM follow it?")
+
+For each of the 3 storyboard moments, score the live experience against the storyboard's narrative:
+
+| Story | Storyboard moment | What the GM agent must verify |
+|---|---|---|
+| **1. Saturday Morning Briefing** | Daniel opens the app at 7:15 AM. One screen shows: 220 rounds booked, weather, 3 at-risk members on the tee sheet, staffing gap, $X dining recovery opportunity. He acts on the briefing in under 4 minutes. | Today View renders the morning briefing sentence with **all 4 cross-domain signals** (tee sheet × weather × member CRM × scheduling). Source badges visible on every claim. The "Layer 3" tag fires when ≥3 systems are connected. The Quick Stats Row populates without error. The "Demo Stories Launcher" Story 1 button scrolls correctly. **Time to insight ≤ 30 seconds.** |
+| **2. The Quiet Resignation Catch** | Tuesday review. The GM clicks an at-risk member. The First Domino visualization tells the decay story: email dropped → golf dropped → dining dropped. Recommended action card with one-tap approval. $32K/yr dues saved. | Story 2 launcher button opens the right member drawer. The `MemberDecayChain` renders ≥ 2 dominoes with source badges per step. The new `RecoveryTimeline` (shipped 2026-04-09) renders below the chain on the full member page. "Approve & Log" button works and writes to `activity_log`. **Time from launcher click to actionable card ≤ 15 seconds.** |
+| **3. Revenue Leakage Discovery** | Board prep. The GM opens Revenue. $9,580/mo F&B leakage decomposed. $31/slow round attribution. Hole 12 bottleneck drilldown. Scenario slider models recovery. Board Report generates in one click. | Story 3 launcher navigates to Revenue page. Leakage decomposition card carries source badges. Bottleneck drill-down renders. Scenario slider math reconciles with decomposition. Board Report tab opens, all 4 tabs render, "Auto-Generated Narrative" present. **Time from launcher click to a printable Board Report ≤ 60 seconds.** |
+
+For each path, the GM agent emits a row in this table:
+
+| Story | Score (1–5) | Time to insight | Source-badge coverage | "Feels off" notes | Storyboard fidelity verdict |
+|---|---|---|---|---|---|
+| Story 1 — Saturday Briefing | _(populate after walkthrough)_ | | | | |
+| Story 2 — Quiet Resignation | _(populate after walkthrough)_ | | | | |
+| Story 3 — Revenue Leakage | _(populate after walkthrough)_ | | | | |
+
+**Scoring rubric:**
+- **5 / Storyboard-faithful:** every claim in the storyboard moment renders correctly with source attribution and the time-to-insight target is met. No caveats. GM would show this to a paying club today.
+- **4 / Mostly green:** all storyboard claims render but with minor friction (one selector slow, one badge missing). GM would show this with a light caveat.
+- **3 / Demoable with hand-holding:** the path technically works but requires the GM to "narrate around" missing or wrong content. NOT pilot-ready.
+- **2 / Broken in places:** at least one storyboard claim is missing, wrong, or crashes. Demo would visibly fail.
+- **1 / Not following the storyboard:** the live app does not match the storyboard at all on this path. Stop and fix before any pilot.
+
+**Sign-off rule:** the GM cannot mark criterion 10 (GM-signed demo build) green unless **all 3 paths score ≥ 4**.
+
+### Part B — Demo data dramatic-effect audit
+
+The current demo seed data is calibrated to one club (Pinetree CC) with a fixed cast of members and specific dollar figures. Some of those figures are *deliberately understated* to be defensible; others are *intentionally dramatic* to make the storyboard land. The GM agent must inventory which numbers in the demo data could be **mocked differently with realistic but more dramatic values** to make pilot demos more compelling — without crossing the line into "this isn't credible to a CFO."
+
+For each candidate, the GM agent writes a row in this table:
+
+| File / surface | Current value | Dramatic-but-realistic value | Storyboard moment it improves | Risk assessment |
+|---|---|---|---|---|
+| _(populate during the audit — see seed list below)_ | | | | |
+
+**Files to inventory** (the canonical demo seeds):
+- `src/data/boardReport.js` — `memberSaves` dues values, `operationalSaves.revenueProtected`
+- `src/data/pace.js` — `revenueLostPerMonth`, `avgCheckFast` vs `avgCheckSlow`
+- `src/data/pipeline.js` — cancellation probabilities, dollar figures
+- `src/services/briefingService.js` — `DEMO_BRIEFING.keyMetrics` (atRisk count, monthly revenue, leakage figures)
+- `src/services/revenueService.js` — `getLeakageData()` constants (PACE_LOSS, STAFFING_LOSS, WEATHER_LOSS, TOTAL)
+- `src/data/agents.js` — agent `impactMetric` strings
+- `src/config/actionTypes.js` — `PLAYBOOK_HISTORY` impact figures
+- `src/data/cockpit.js` — priority items dollar exposures
+- `src/data/staffing.js` — understaffed days impact
+
+**The audit question for each row:**
+> "If a real GM walked into a board meeting with this number, would the CFO believe it AND care about it?"
+
+**Believe-it bar:**
+- Member health scores must reflect realistic dimensions (an "at-risk" member should look at-risk in their tee sheet × dining × email pattern)
+- Dollar figures must reconcile to the math the GM can defend ("$31/slow round" should derive from real pace × dining conversion data)
+- Member counts and tier mixes should match a believable club profile (200 members, $15K avg dues — not 2,000 at $50K each unless that matches the prospect club)
+
+**Care-about-it bar:**
+- A $9,580/mo leakage figure is believable but small for a $5M club. Ask whether $18K-22K/mo would still be defensible AND more dramatic — stress-test with a realistic but larger pace-of-play penalty.
+- A "$32K/yr dues at risk" save is concrete but small. Ask whether the storyboard could highlight a higher-dues member ($45K-60K range) and whether that's a believable Pinetree-tier dues bracket.
+- "3 at-risk members on today's tee sheet" lands. Ask whether 5 (still believable for a Saturday) creates more urgency.
+- Pace-of-play check: a 32% slow-round rate is dramatic. A 24% rate is more typical but less alarming. Pick the realistic-AND-dramatic point.
+
+**Rules of thumb (do NOT cross these):**
+- Never inflate numbers beyond what is plausible for the prospect club's real size, region, and economic tier
+- Never mock data that contradicts the source-system layer (you cannot show "$X from POS" without also showing the POS connection in Admin Hub)
+- Always stress-test the number against a real CFO mental model: revenue, payroll, cost of goods, member churn rates
+- The GM's reputation depends on the demo numbers being defensible after a real ground-truth audit
+
+### Output: deliverables for the GM agent
+
+Each storyboard fidelity audit produces **two artifacts**, both committed to `dev`:
+
+1. **`docs/operations/storyboard-audits/YYYY-MM-DD-fidelity.md`** — populated Part A scoring tables for all 3 stories, with screenshots from the live walkthrough, "feels off" notes, and a final go/no-go verdict
+2. **`docs/operations/storyboard-audits/YYYY-MM-DD-demo-data.md`** — populated Part B dramatic-effect table with proposed mock value changes per file, risk assessments, and a recommended diff to apply (or explicit reason not to)
+
+The GM agent may then dispatch follow-up agents to apply any approved changes from artifact #2 to the seed files.
+
+**Cadence:** at least once per Friday release-readiness review (§4), and always before any new pilot demo. The audit is the standing input to criterion 10 (GM-signed demo build).
+
+---
+
 ## 11. Punch lists (working — append-only)
 
 ### 11.1 B36 — full e2e suite triage
