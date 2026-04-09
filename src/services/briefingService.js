@@ -30,16 +30,24 @@ const EMPTY_BRIEFING = {
 // It must satisfy the same contract as the dynamic build so that downstream
 // components and tests don't see a half-shape. Every required field is populated.
 const DEMO_BRIEFING = {
-  keyMetrics: { atRiskMembers: 7, openComplaints: 4, monthlyRevenue: 142000, revenueVsPlan: 4.2, understaffedDays: 3 },
+  // Apply-now bumps from 2026-04-09 demo-data audit (storyboard-audits/2026-04-09-demo-data.md):
+  // - monthlyRevenue $142K → $168K (Today hero punches up; still credible
+  //   for a $5M / 350-member club running F&B at typical mid-club margins)
+  keyMetrics: { atRiskMembers: 7, openComplaints: 4, monthlyRevenue: 168000, revenueVsPlan: 4.2, understaffedDays: 3 },
   teeSheet: { roundsToday: 220, utilization: 0.87 },
   todayRisks: {
     weather: 'wind-advisory',
     tempHigh: 68,
     wind: 32,
     forecast: 'Wind advisory — gusts to 30-40 mph expected Saturday afternoon',
+    // 3rd at-risk entry added 2026-04-09 to fix Story 1 script/data mismatch
+    // (storyboard says "3 at-risk members on today's tee sheet"; previously
+    // only 2 entries appeared here). Robert Callahan is the canonical 3rd
+    // at-risk member from cockpit.js + agents.js ($24K renewal risk).
     atRiskTeetimes: [
       { memberId: 'mbr_203', name: 'James Whitfield', time: '9:20 AM', health: 42 },
       { memberId: 'mbr_089', name: 'Anne Jordan', time: '10:15 AM', health: 38 },
+      { memberId: 'mbr_271', name: 'Robert Callahan', time: '10:42 AM', health: 36 },
     ],
     staffingGaps: [],
     fullyStaffed: false,

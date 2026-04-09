@@ -91,7 +91,10 @@ export const cockpitItems = [
       'David Harrington (health: 38) \u2014 billing dispute unresolved, plays at 10:48am.',
       'Michael Torres (health: 31) \u2014 guest policy incident last month, plays at 1:24pm.',
     ],
-    stakes: '$62,000 combined annual dues at risk',
+    // 2026-04-09 demo-data audit bump: was $62,000. Three members at $28K
+    // blended (one family + two singles) lands harder while still being
+    // believable for Pinetree-tier dues math. Stays under the 2x ceiling.
+    stakes: '$84,000 combined annual dues at risk',
     memberName: null,
     memberId: null,
     context: 'Three members flagged as at-risk by health scoring are on the tee sheet today.',

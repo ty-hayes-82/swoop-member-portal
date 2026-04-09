@@ -174,7 +174,10 @@ export const agentActions = [
     actionType: 'DRAFT_MESSAGE',
     description: 'Prepare sponsor outreach script for David Chen membership conversation.',
     status: 'approved',
-    impactMetric: '$18K new-member opportunity',
+    // 2026-04-09 demo-data audit fix: was '$18K new-member opportunity'.
+    // pipeline.js:5 lists David Chen at $42,000 potentialDues — these were
+    // out of sync. Aligning to the canonical pipeline number.
+    impactMetric: '$42K new-member opportunity',
     priority: 'low',
     memberId: 'mbr_146',
     auditTrail: [
@@ -206,7 +209,10 @@ export const agentActions = [
     actionType: 'SERVICE_ESCALATION',
     description: 'Assign same-day owner for Robert Callahan complaint aged 9 days.',
     status: 'pending',
-    impactMetric: '$9.6K renewal risk mitigation',
+    // 2026-04-09 demo-data audit fix: was '$9.6K renewal risk mitigation'.
+    // pipeline.js:107 lists Robert Callahan at $21K-24K memberValueAnnual —
+    // $9.6K understated him by >50%. Aligning to canonical pipeline tier.
+    impactMetric: '$24K renewal risk mitigation',
     priority: 'high',
     memberId: 'mbr_271',
     dueBy: '2026-01-17T12:00:00Z',
