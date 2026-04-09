@@ -25,15 +25,15 @@ Composite score is the **best fit pillar score** (a feature only needs to nail o
 | **Today View** | 10 | 9 | 7 | **9** |
 | **Revenue** 🆕 | 9 | 6 | 10 | **10** |
 | **Board Report** | 8 | 5 | 9 | **9** |
-| **Member Profile Drawer** | 9 | 10 | 7 | **10** |
+| **Member Profile Drawer** | 9 | 10 | 8 | **10** _(Updated 2026-04-09 — wave 3 pillar lifts applied)_ |
 | **Members View** | 8 | 9 | 7 | **9** |
 | **Tee Sheet View** | 9 | 8 | 5 | **8** |
 | **Service View** | 8 | 7 | 8 | **8** |
 | **Automations Hub** | 6 | 9 | 6 | **8** |
-| **Admin Hub** | 4 | 2 | 1 | **4** |
-| **Integrations Page** | 6 | 2 | 1 | **5** |
+| **Admin Hub** | 6 | 5 | 4 | **6** _(Updated 2026-04-09 — wave 3 pillar lifts applied: Next Intelligence Unlock + Live System Health)_ |
+| **Integrations Page** | 8 | 5 | 7 | **7** _(Updated 2026-04-09 — wave 3 pillar lifts applied: 4 unlock cards with dollar attribution)_ |
 | **Member Profile Page (full)** | 8 | 8 | 7 | **9** |
-| **Profile / Settings** | 1 | 1 | 1 | **2** |
+| **Profile / Settings** | 3 | 3 | 2 | **4** _(Updated 2026-04-09 — wave 3 pillar lifts applied: Role & Club Permissions card)_ |
 
 Pages scored ≥8 directly serve the storyboard moments. Pages 4–7 are supporting/enabling work. Pages ≤4 are infrastructure (necessary but not pillar work).
 

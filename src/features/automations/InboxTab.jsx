@@ -177,9 +177,12 @@ export default function InboxTab() {
           </span>
         </div>
         <div className="flex gap-1">
-          {['all', 'high', 'medium', 'low'].map(p => (
+          {['all', 'high', 'medium', 'low'].map(p => {
+            const chipLabel = p === 'all' ? 'All' : p.charAt(0).toUpperCase() + p.slice(1);
+            return (
             <button
               key={p}
+              aria-label={chipLabel}
               onClick={() => setPriorityFilter(p)}
               className={`px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold cursor-pointer border transition-colors ${
                 priorityFilter === p
@@ -189,7 +192,8 @@ export default function InboxTab() {
             >
               {p === 'all' ? 'All' : p.charAt(0).toUpperCase() + p.slice(1)}
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 

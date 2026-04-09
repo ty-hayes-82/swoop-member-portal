@@ -462,6 +462,7 @@ export default function IntegrationsPage() {
                   {vendor.status === 'available' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
                       <button
+                        aria-label={`Connect to ${vendor.name}`}
                         onClick={() => alert(`Connect ${vendor.name} - Integration setup will be available in the next release`)}
                         style={{
                           padding: '6px 12px',

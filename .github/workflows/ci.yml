@@ -182,6 +182,10 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # TODO: re-gate as required once residual ~13 failures triaged — see PRODUCT-FINALIZATION §11.5 item 2.
+  # Currently informational-only: this job runs on every push/PR but is NOT listed as a required
+  # status check in branch protection. Do NOT add `continue-on-error: true` here — we want real
+  # failures to surface in the Actions tab, we just don't block merges on them yet.
   e2e-full:
     name: E2E full suite (all tests/e2e/*.spec.js)
     needs: build

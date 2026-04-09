@@ -208,6 +208,7 @@ function DataHubTab({ clubId }) {
             </div>
             <button
               onClick={() => navigate('integrations')}
+              aria-label={`Connect ${unlockImpact.label}`}
               className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0"
             >
               Connect {unlockImpact.label}

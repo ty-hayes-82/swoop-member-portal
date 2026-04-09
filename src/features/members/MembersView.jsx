@@ -152,6 +152,7 @@ export default function MembersView() {
               <button
                 key={key}
                 role="tab"
+                aria-label={label}
                 aria-selected={activeMode === key}
                 onClick={() => !disabled && setMode(key)}
                 disabled={disabled}
@@ -175,6 +176,7 @@ export default function MembersView() {
           <div className="flex gap-1.5 flex-wrap overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             <button
               onClick={() => setArchetype(null)}
+              aria-label="All Archetypes"
               className={`px-3.5 py-1 rounded-full text-xs font-semibold cursor-pointer border whitespace-nowrap transition-all duration-100 ${
                 !archetype
                   ? 'border-brand-500 bg-brand-50 text-brand-500 dark:bg-brand-500/10'
@@ -184,6 +186,7 @@ export default function MembersView() {
             {['Die-Hard Golfer', 'Social Butterfly', 'Balanced Active', 'Weekend Warrior', 'Declining', 'New Member', 'Ghost', 'Snowbird'].map((a) => (
               <button
                 key={a}
+                aria-label={a}
                 onClick={() => setArchetype(archetype === a ? null : a)}
                 className={`px-3.5 py-1 rounded-full text-xs font-semibold cursor-pointer border whitespace-nowrap transition-all duration-100 ${
                   archetype === a

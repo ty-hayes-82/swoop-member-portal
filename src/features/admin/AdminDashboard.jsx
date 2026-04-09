@@ -330,12 +330,12 @@ function IntegrationCard({ integration }) {
           </div>
           {integration.status === 'connected' ? (
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <button style={s.btn('ghost')}>Configure</button>
-              <button style={{ ...s.btn('ghost'), color: '#ef4444' }}>Disconnect</button>
+              <button aria-label={`Configure ${integration.name}`} style={s.btn('ghost')}>Configure</button>
+              <button aria-label={`Disconnect ${integration.name}`} style={{ ...s.btn('ghost'), color: '#ef4444' }}>Disconnect</button>
               <span style={{ fontSize: '11px', color: '#12b76a', marginLeft: 'auto' }}>Last synced: 5 min ago</span>
             </div>
           ) : integration.status === 'available' ? (
-            <button style={s.btn('primary')}>Connect</button>
+            <button aria-label={`Connect to ${integration.name}`} style={s.btn('primary')}>Connect</button>
           ) : (
             <div style={{ fontSize: '12px', color: '#9CA3AF', fontStyle: 'italic' }}>This integration is on our roadmap. Contact support to express interest.</div>
           )}
