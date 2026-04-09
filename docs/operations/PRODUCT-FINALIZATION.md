@@ -221,6 +221,20 @@ If any of steps 1-2 fails, fall back to `PICKUP-HERE.md` §6 (the sprint-level v
 
 > **Added 2026-04-09.** This is a standing assignment for the **General Manager (Product & Ops)** role (or any GM-acting agent during the autonomous-sweep window). It runs at least once per release-readiness review (§4 Friday cadence) and is a **mandatory input** to the GM's sign-off on criterion 10.
 
+### Audit cycle ledger (append-only)
+
+| Cycle | Date | Part A score (S1/S2/S3) | Criterion 10 verdict | Apply-now items shipped | Items held |
+|---|---|---|---|---|---|
+| **v1** | 2026-04-09 (morning) | 5 / 4 / 5 | GO with caveat (S2 narration gap) | 5 demo-data bumps (`bf87504`); 3 audit polish fixes (`781486e`) | 2 cascading $ proposals; 7 verbatim-locked values |
+| **v2** | 2026-04-09 (mid-day) | 5 / **5** / 5 | GO (clean) — S2 advanced 4→5 | 5 fixes (`025d65f`): chip-suppress drawer/page, `weeksAgo` fallback, teeSheet weather sync, cockpit bullets rename, wind stakes bump | 4 v2-held items: James $22K sync, Feb monthlyTrends, Chen cascade, pace cascade |
+| **v3** | 2026-04-09 (afternoon) | _(populate when v3 audit lands)_ | | | |
+
+**Each cycle appends a row.** The cycle is the recurring quality bar: a GM agent walks the storyboard paths, scores against the rubric, files a punch list, and the highest-leverage low-risk items ship in the next commit. Items held for human GM design discussion accumulate in the "Items held" column until the human GM (or a pilot conversation) un-blocks them.
+
+**Cycle hygiene rule:** the v3 audit must verify the v2 fixes worked AND look for new frictions introduced by them. The v2 audit caught 2 real bugs that the v1 fixes had introduced (the `Date.parse('~12 weeks ago')` regression that hid the "First signal" counter, and the duplicate `$XXK/yr at risk` chip in drawer + page). Without the v2 cycle those would have shipped to a pilot. The audit-then-fix loop is the safety net.
+
+
+
 The 3 storyboard flows in [`docs/swoop_demo_storyboard.html`](../swoop_demo_storyboard.html) (canonical source — also mirrored at `docs/strategy/swoop_demo_storyboard.html` and `docs/swoop_demo_storyboard.md`) are not just sales narratives. Per [`NORTH-STAR.md`](../strategy/NORTH-STAR.md) §"The Three Demo Stories as Product Tests", they are **acceptance tests for the product**: if the live app cannot deliver these experiences end-to-end, the product is not ready.
 
 The GM agent must walk every storyboard path on the live dev preview and answer two distinct questions:
