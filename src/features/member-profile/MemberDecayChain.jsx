@@ -145,6 +145,91 @@ function DecayChainAction({ profile }) {
   );
 }
 
+// RecoveryTimeline — Pillar 2 FIX IT closure.
+// Shown BELOW the decay chain on the full member page only.
+// Honest linear model: estimates weeks to return from current health score
+// toward a "healthy" target (70) assuming engagement trend reverses.
+//
+// Model assumptions (documented inline for transparency):
+//   - Baseline recovery velocity: ~8 health points per week (calibrated so a
+//     score-30 member reaches 70 in ~5 weeks — matching the 4-6 week window
+//     the product team aligned on in §11.6).
+//   - Each additional broken decay domino adds +0.5 weeks of drag
+//     (cross-domain re-engagement is harder than single-domain).
+//   - Archetype modifier: Ghost / Declining get +1 week (deeper rut);
+//     Weekend Warrior / Social Butterfly get -0.5 week (easier wins).
+//   - Floor at 2 weeks, ceiling at 12 weeks. Clamped, never promised.
+function RecoveryTimeline({ member, decayChainLength }) {
+  const [showMath, setShowMath] = React.useState(false);
+  const score = Number(member?.healthScore) || 0;
+  const archetype = member?.archetype || '';
+  const TARGET = 70;
+  const gap = Math.max(0, TARGET - score);
+  const baseWeeks = gap / 8;
+  const dominoDrag = Math.max(0, (decayChainLength - 2)) * 0.5;
+  let archetypeMod = 0;
+  if (archetype === 'Ghost' || archetype === 'Declining') archetypeMod = 1;
+  else if (archetype === 'Weekend Warrior' || archetype === 'Social Butterfly') archetypeMod = -0.5;
+  const rawWeeks = baseWeeks + dominoDrag + archetypeMod;
+  const weeks = Math.max(2, Math.min(12, Math.round(rawWeeks)));
+
+  // Pick an archetype-flavored "reversal" phrase
+  const reversalPhrase = (() => {
+    if (archetype === 'Ghost') return 'member accepts re-engagement outreach';
+    if (archetype === 'Declining') return 'root-cause conversation lands';
+    if (archetype === 'Weekend Warrior') return 'a Saturday tee time is booked';
+    if (archetype === 'Social Butterfly') return 'member RSVPs to the next event';
+    if (archetype === 'Die-Hard Golfer') return 'equipment/schedule blocker is cleared';
+    if (archetype === 'New Member') return 'onboarding check-in is completed';
+    if (archetype === 'Snowbird') return 'welcome-back outreach is accepted';
+    return 'recommended outreach is accepted';
+  })();
+
+  return (
+    <div className="mt-3 pt-3 border-t border-red-500/10">
+      <div className="flex items-center justify-between gap-2 flex-wrap mb-1.5">
+        <div className="text-[9px] font-bold uppercase tracking-wider text-success-600">
+          Recovery Timeline &middot; Model Estimate
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowMath((v) => !v)}
+          className="text-[9px] text-gray-500 hover:text-gray-700 underline decoration-dotted bg-transparent border-none cursor-pointer p-0"
+        >
+          {showMath ? 'Hide math' : 'How is this computed?'}
+        </button>
+      </div>
+      <div className="text-[12px] text-gray-700 dark:text-gray-300 leading-snug">
+        If the {reversalPhrase}, health score is modeled to recover from{' '}
+        <span className="font-bold text-error-500">{score}</span> toward{' '}
+        <span className="font-bold text-success-600">~{TARGET}</span> in{' '}
+        <span className="font-bold">~{weeks} weeks</span>.
+      </div>
+      <div className="text-[10px] text-gray-500 italic mt-0.5">
+        Directional forecast, not a promise. Actual recovery depends on member response.
+      </div>
+      {showMath && (
+        <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded text-[10px] text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
+          <div>gap = {TARGET} &minus; {score} = {gap} pts</div>
+          <div>base = gap / 8 pts-per-week = {baseWeeks.toFixed(1)}w</div>
+          <div>+ domino drag ({decayChainLength} dominoes) = +{dominoDrag.toFixed(1)}w</div>
+          <div>+ archetype mod ({archetype || 'n/a'}) = {archetypeMod >= 0 ? '+' : ''}{archetypeMod}w</div>
+          <div className="mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
+            total = {rawWeeks.toFixed(1)}w &rarr; clamped [2, 12] = <span className="font-bold">{weeks}w</span>
+          </div>
+        </div>
+      )}
+      <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+        <span className="text-[9px] uppercase tracking-wider text-gray-400 font-semibold">Systems that drive recovery:</span>
+        <SourceBadge system="Tee Sheet" size="xs" />
+        <SourceBadge system="POS" size="xs" />
+        <SourceBadge system="Email" size="xs" />
+        <SourceBadge system="Member CRM" size="xs" />
+      </div>
+    </div>
+  );
+}
+
 export default function MemberDecayChain({ member, variant = 'drawer' }) {
   const profile = member;
   const { decayChain } = useMemo(() => buildDecayChain(profile), [profile]);
@@ -239,6 +324,10 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
       </div>
       {/* Inline Fix It action — Pillar 2 */}
       <DecayChainAction profile={profile} />
+      {/* Recovery Timeline — full page only; closes the Pillar 2 loop with a forecast */}
+      {isPage && (
+        <RecoveryTimeline member={profile} decayChainLength={decayChain.length} />
+      )}
     </div>
   );
 }

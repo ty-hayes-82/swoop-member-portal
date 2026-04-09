@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
 import { getConnectedSystems } from '@/services/integrationsService';
+import { getLeakageData } from '@/services/revenueService';
+import { COMBOS } from '@/data/integrations';
 import { useNavigationContext } from '@/context/NavigationContext';
 import PageTransition from '@/components/ui/PageTransition';
+import SourceBadge from '@/components/ui/SourceBadge';
 
 function timeAgo(val) {
   if (!val) return 'Never';
@@ -141,6 +144,50 @@ export default function IntegrationsPage() {
   const systemMap = useMemo(() => Object.fromEntries(systems.map((system) => [system.id, system])), [systems]);
   const [statusFilter, setStatusFilter] = useState('connected');
 
+  // Pillar 3 (Prove It) — quantify each missing integration in dollars.
+  // Dollar values flow from revenueService.getLeakageData() (pace + staffing + weather)
+  // with COMBOS (src/data/integrations.js) providing member-CRM KPI fallback.
+  // Canonical fallbacks match DataHealthDashboard: PACE $5,760 / STAFFING $3,400 /
+  // WEATHER $420 / TOTAL $9,580 if the demo gates are closed.
+  const leakage = getLeakageData();
+  const paceDollars = leakage?.PACE_LOSS || 5760;
+  const staffingDollars = leakage?.STAFFING_LOSS || 3400;
+  const weatherDollars = leakage?.WEATHER_LOSS || 420;
+  const totalLeakage = leakage?.TOTAL || 9580;
+  const memberCrmCombo = COMBOS.find((c) => c.id === 'member-crm-pos');
+  const memberCrmKpi = memberCrmCombo?.kpi?.value || '$128K';
+
+  const unlockCards = useMemo(() => ([
+    {
+      systems: '\u26F3 Tee Sheet + \uD83C\uDF7D POS',
+      dollars: `$${paceDollars.toLocaleString()}/mo`,
+      unlocks: 'pace-to-dining attribution',
+      reason: 'Slow rounds suppress post-round grill conversion — every minute over pace costs dining spend.',
+      sources: ['Tee Sheet', 'POS'],
+    },
+    {
+      systems: '\u2605 Member CRM + \uD83C\uDF7D POS',
+      dollars: `${memberCrmKpi}/yr`,
+      unlocks: 'unactivated F&B revenue',
+      reason: 'High-visit members under-index on F&B spend vs. peers in the same tenure band.',
+      sources: ['Member CRM', 'POS'],
+    },
+    {
+      systems: '\uD83D\uDCC5 Scheduling + \uD83C\uDF7D POS',
+      dollars: `$${staffingDollars.toLocaleString()}/mo`,
+      unlocks: 'staffing-driven F&B recovery',
+      reason: 'Understaffed prime dining windows drop satisfaction 19 pts and leak check revenue the next day.',
+      sources: ['Scheduling', 'POS'],
+    },
+    {
+      systems: '\u2601 Weather + \u26F3 Tee Sheet',
+      dollars: `$${weatherDollars.toLocaleString()}/mo`,
+      unlocks: 'weather no-show recovery',
+      reason: 'Weather-driven cancellations skip dining entirely — backfilled via waitlist priority.',
+      sources: ['Weather API', 'Tee Sheet'],
+    },
+  ]), [paceDollars, staffingDollars, weatherDollars, memberCrmKpi]);
+
   const connectedSystems = systems.filter((system) => system.status === 'connected').length;
   const totalSystems = systems.length;
   const intelligenceScore = totalSystems ? Math.round((connectedSystems / totalSystems) * 100) : 94;
@@ -215,21 +262,39 @@ export default function IntegrationsPage() {
           What your connected systems unlock
         </div>
         <div style={{ fontSize: 14, color: '#1a1a2e', lineHeight: 1.5 }}>
-          Every system you connect deepens Swoop's cross-domain intelligence. Together they unlock:
+          Every system you connect deepens Swoop's cross-domain intelligence. Each pairing below is already
+          quantified from live leakage data — <strong>${totalLeakage.toLocaleString()}/mo total recoverable F&amp;B revenue</strong>:
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#039855' }}>
-            ⛳ + 🍽️ → $5,760/mo pace-to-dining attribution
-          </span>
-          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#039855' }}>
-            👥 + 🍽️ + 📧 → First Domino decay detection
-          </span>
-          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#039855' }}>
-            📅 + ⛳ + 🍽️ → $3,400/mo staffing recovery
-          </span>
-          <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: '#fff', border: '1px solid #d1fae5', color: '#039855' }}>
-            ⛅ + 📅 → Demand-driven scheduling
-          </span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 10, marginTop: 12 }}>
+          {unlockCards.map((card) => (
+            <div
+              key={card.systems}
+              style={{
+                background: '#fff',
+                border: '1px solid #d1fae5',
+                borderRadius: 10,
+                padding: '10px 12px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+              }}
+            >
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {card.systems}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#039855', lineHeight: 1.3 }}>
+                Unlock {card.dollars} {card.unlocks}
+              </div>
+              <div style={{ fontSize: 11, color: '#6B7280', lineHeight: 1.4 }}>
+                {card.reason}
+              </div>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 2 }}>
+                {card.sources.map((s) => (
+                  <SourceBadge key={s} system={s} size="xs" />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

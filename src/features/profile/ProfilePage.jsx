@@ -4,6 +4,79 @@
  */
 import { useState, useEffect } from 'react';
 import { getGoogleStatus, getGoogleAuthUrl, disconnectGoogle, clearGoogleStatusCache } from '@/services/googleService';
+import SourceBadge from '@/components/ui/SourceBadge';
+
+// Role → feature access map. The "scope" column drives the new
+// "Your Role & Club Permissions" card (PRODUCT-FINALIZATION criterion 2 #3).
+// Read by getRolePermissions() below; mirrors how the navigation/router
+// gates each feature today, derived from inspection of the existing
+// feature components — keep in sync if a feature flips its access bar.
+const ROLE_PERMISSIONS = {
+  swoop_admin: {
+    label: 'Swoop Admin',
+    scope: 'Full access across every club in the platform',
+    features: [
+      { name: 'Today View', access: 'full' },
+      { name: 'Members & Health Scores', access: 'full' },
+      { name: 'Tee Sheet', access: 'full' },
+      { name: 'Service & Complaints', access: 'full' },
+      { name: 'Revenue Page', access: 'full' },
+      { name: 'Automations Inbox', access: 'full' },
+      { name: 'Board Report', access: 'full' },
+      { name: 'Admin Hub & Data Health', access: 'full' },
+      { name: 'Cross-club operations (audited)', access: 'full' },
+    ],
+  },
+  gm: {
+    label: 'General Manager',
+    scope: 'Full access within your own club',
+    features: [
+      { name: 'Today View', access: 'full' },
+      { name: 'Members & Health Scores', access: 'full' },
+      { name: 'Tee Sheet', access: 'full' },
+      { name: 'Service & Complaints', access: 'full' },
+      { name: 'Revenue Page', access: 'full' },
+      { name: 'Automations Inbox', access: 'full' },
+      { name: 'Board Report', access: 'full' },
+      { name: 'Admin Hub & Data Health', access: 'full' },
+      { name: 'Cross-club operations', access: 'none' },
+    ],
+  },
+  assistant_gm: {
+    label: 'Assistant GM',
+    scope: 'Full operational access; reduced admin privileges',
+    features: [
+      { name: 'Today View', access: 'full' },
+      { name: 'Members & Health Scores', access: 'full' },
+      { name: 'Tee Sheet', access: 'full' },
+      { name: 'Service & Complaints', access: 'full' },
+      { name: 'Revenue Page', access: 'full' },
+      { name: 'Automations Inbox', access: 'full' },
+      { name: 'Board Report', access: 'view' },
+      { name: 'Admin Hub & Data Health', access: 'view' },
+      { name: 'Cross-club operations', access: 'none' },
+    ],
+  },
+  demo: {
+    label: 'Demo / Viewer',
+    scope: 'Read-only walk-through of demo data',
+    features: [
+      { name: 'Today View', access: 'view' },
+      { name: 'Members & Health Scores', access: 'view' },
+      { name: 'Tee Sheet', access: 'view' },
+      { name: 'Service & Complaints', access: 'view' },
+      { name: 'Revenue Page', access: 'view' },
+      { name: 'Automations Inbox', access: 'view' },
+      { name: 'Board Report', access: 'view' },
+      { name: 'Admin Hub & Data Health', access: 'view' },
+      { name: 'Cross-club operations', access: 'none' },
+    ],
+  },
+};
+
+function getRolePermissions(role) {
+  return ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.gm;
+}
 
 const SEND_MODES = [
   { value: 'local', label: 'Local (Phone/Desktop)', desc: 'Opens your default email app or SMS app to send. You control the send.' },
@@ -123,7 +196,7 @@ export default function ProfilePage() {
       </p>
 
       {/* Avatar + role summary */}
-      <div className="flex items-center gap-4 mb-8 p-4 rounded-xl bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+      <div className="flex items-center gap-4 mb-6 p-4 rounded-xl bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         <div className="flex items-center justify-center w-16 h-16 rounded-full bg-brand-100 text-brand-600 font-bold text-xl">
           {initials}
         </div>
@@ -131,6 +204,42 @@ export default function ProfilePage() {
           <div className="font-semibold text-gray-800 dark:text-white/90">{formName || 'Club Manager'}</div>
           <div className="text-sm text-gray-500 dark:text-gray-400">{roleLabel}</div>
           <div className="text-xs text-gray-400 mt-0.5">{clubName || (isDemo ? 'Demo Environment' : 'Connected Club')}</div>
+        </div>
+      </div>
+
+      {/* Your Role & Club Permissions
+          (PRODUCT-FINALIZATION criterion 2 #3 — Pillar 1 See It: every operator
+          should be able to answer "what can I do in this product?" without
+          having to click around and discover gates by trial and error.) */}
+      <div className="mb-8 p-4 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
+        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Your Role & Club Permissions</h3>
+          <SourceBadge system="Member CRM" size="xs" />
+        </div>
+        <p className="text-xs text-gray-400 mb-3">{getRolePermissions(user.role).scope}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          {getRolePermissions(user.role).features.map((f) => {
+            const icon = f.access === 'full' ? '✅' : f.access === 'view' ? '👁' : '🚫';
+            const color = f.access === 'full'
+              ? 'text-success-700 dark:text-success-400'
+              : f.access === 'view'
+                ? 'text-gray-600 dark:text-gray-400'
+                : 'text-gray-400 dark:text-gray-600';
+            const suffix = f.access === 'view' ? ' (view only)' : f.access === 'none' ? ' (no access)' : '';
+            return (
+              <div
+                key={f.name}
+                className={`flex items-center gap-2 text-xs px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800 ${color}`}
+                title={`Access: ${f.access}`}
+              >
+                <span className="shrink-0 text-sm leading-none">{icon}</span>
+                <span className="font-medium">{f.name}{suffix}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-3 text-[10px] text-gray-400 italic leading-snug">
+          Permissions are derived from your assigned role ({roleLabel}). Contact your Swoop admin if you need a higher access level.
         </div>
       </div>
 

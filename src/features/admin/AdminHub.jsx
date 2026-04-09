@@ -14,6 +14,45 @@ import { Card } from '@/components/tailadmin';
 import { apiFetch } from '@/services/apiClient';
 import Badge from '@/components/tailadmin/Badge';
 import { getConnectedSystems } from '@/services/integrationsService';
+import SourceBadge from '@/components/ui/SourceBadge';
+import { getHealthRollup } from '@/services/apiHealthService';
+
+// Shared with DataHealthDashboard — keep in sync with DOMAIN_PILLAR_IMPACT there.
+// PRODUCT-FINALIZATION §11.6 lift #1: operator visibility into which single
+// missing domain unlocks the most value (See It pillar).
+const DOMAIN_VALUE_PCTS = { CRM: 40, TEE_SHEET: 25, POS: 20, EMAIL: 10, LABOR: 5 };
+const DOMAIN_UNLOCK_IMPACT = {
+  CRM: {
+    label: 'CRM / Members',
+    sourceSystem: 'Member CRM',
+    features: ['Today Morning Briefing', 'Member Health Scores', 'First Domino visualization'],
+    dollar: 'Required for all member-level intelligence',
+  },
+  TEE_SHEET: {
+    label: 'Tee Sheet',
+    sourceSystem: 'Tee Sheet',
+    features: ['Today briefing rounds count', 'Hole 12 bottleneck drill-down', 'At-risk on tee sheet detection'],
+    dollar: '$5,760/mo pace-to-dining attribution',
+  },
+  POS: {
+    label: 'POS / F&B',
+    sourceSystem: 'POS',
+    features: ['F&B revenue decomposition', 'Dining conversion correlation', 'Post-round dining stats'],
+    dollar: '$9,580/mo full F&B leakage decomposition',
+  },
+  EMAIL: {
+    label: 'Email & Events',
+    sourceSystem: 'Email',
+    features: ['First Domino email signal', 'Engagement decay watch list', 'Cohort heatmap'],
+    dollar: 'Earliest decay signal — typically the first domino to fall',
+  },
+  LABOR: {
+    label: 'Scheduling & Labor',
+    sourceSystem: 'Scheduling',
+    features: ['Tomorrow staffing risk', 'Pace-to-Revenue connection card', 'Understaffed days correlation'],
+    dollar: '$3,400/mo staffing-driven F&B loss',
+  },
+};
 
 // V3: Reduced from 5 tabs to 2. CSV Import, Notifications, User Roles deferred.
 // V5: Data Health tab hidden until 2+ live API sources connected
@@ -86,6 +125,56 @@ export default function AdminHub() {
 
 function DataHubTab({ clubId }) {
   const { navigate } = useNavigationContext();
+
+  // "Next Intelligence Unlock" — which single disconnected domain would unlock
+  // the most pillar value? Pulled from /api/feature-availability; falls back to
+  // demo assumptions (CRM+EMAIL connected) when unauthenticated.
+  const [nextUnlock, setNextUnlock] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    const DEMO_CONNECTED = new Set(['CRM', 'EMAIL']);
+    const pickHighestValue = (connectedSet) => {
+      const disconnected = Object.keys(DOMAIN_VALUE_PCTS).filter(d => !connectedSet.has(d));
+      if (!disconnected.length) return null;
+      disconnected.sort((a, b) => (DOMAIN_VALUE_PCTS[b] || 0) - (DOMAIN_VALUE_PCTS[a] || 0));
+      return disconnected[0];
+    };
+
+    if (!clubId || clubId === 'demo') {
+      setNextUnlock(pickHighestValue(DEMO_CONNECTED));
+      return;
+    }
+    apiFetch(`/api/feature-availability?clubId=${clubId}`)
+      .then(d => {
+        if (cancelled) return;
+        if (d?.domains) {
+          const connectedSet = new Set(d.domains.filter(dm => dm.connected || dm.is_connected).map(dm => dm.code));
+          // Prefer API's own recommendation if it exists, else fall back to highest-value heuristic
+          setNextUnlock(d.nextDomainToConnect?.domain || pickHighestValue(connectedSet));
+        } else {
+          setNextUnlock(pickHighestValue(DEMO_CONNECTED));
+        }
+      })
+      .catch(() => { if (!cancelled) setNextUnlock(pickHighestValue(DEMO_CONNECTED)); });
+    return () => { cancelled = true; };
+  }, [clubId]);
+
+  // Live System Health — consume apiHealthService.getHealthRollup(). The
+  // endpoint is public and may legitimately return overall:'unknown' when
+  // offline or behind a proxy; render that case gracefully.
+  const [health, setHealth] = useState(null);
+  const [healthLoading, setHealthLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    getHealthRollup()
+      .then(r => { if (!cancelled) { setHealth(r); setHealthLoading(false); } })
+      .catch(() => { if (!cancelled) { setHealth(null); setHealthLoading(false); } });
+    return () => { cancelled = true; };
+  }, []);
+
+  const unlockImpact = nextUnlock ? DOMAIN_UNLOCK_IMPACT[nextUnlock] : null;
+  const unlockPct = nextUnlock ? DOMAIN_VALUE_PCTS[nextUnlock] : 0;
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -94,6 +183,105 @@ function DataHubTab({ clubId }) {
           Connect data sources, upload CSVs, and see what intelligence each connection unlocks.
         </p>
       </div>
+
+      {/* Next Intelligence Unlock — PRODUCT-FINALIZATION §11.6 lift #1 */}
+      {unlockImpact && (
+        <Card>
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-[240px]">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-500">Next Intelligence Unlock</span>
+                <SourceBadge system={unlockImpact.sourceSystem} size="xs" />
+              </div>
+              <h3 className="text-base font-bold m-0 text-gray-800 dark:text-white/90">
+                Connect {unlockImpact.label} to unlock {unlockPct}% more platform value
+              </h3>
+              <div className="mt-1 text-xs font-semibold text-warning-600 dark:text-warning-400">
+                {unlockImpact.dollar}
+              </div>
+              <div className="mt-3 text-[11px] uppercase tracking-wide text-gray-400">Would enable:</div>
+              <ul className="text-xs text-gray-700 dark:text-gray-300 m-0 pl-4 leading-snug mt-1">
+                {unlockImpact.features.map(f => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+            </div>
+            <button
+              onClick={() => navigate('integrations')}
+              className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0"
+            >
+              Connect {unlockImpact.label}
+            </button>
+          </div>
+        </Card>
+      )}
+
+      {/* Live System Health — consumes apiHealthService.getHealthRollup() */}
+      <Card>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-base font-bold m-0 text-gray-800 dark:text-white/90">Live System Health</h3>
+          {health && (
+            <Badge
+              color={health.overall === 'ok' ? 'success' : health.overall === 'degraded' ? 'warning' : 'light'}
+              size="sm"
+            >
+              {health.overall === 'ok' ? 'All systems OK' : health.overall === 'degraded' ? 'Degraded' : 'Unknown'}
+            </Badge>
+          )}
+        </div>
+
+        {healthLoading ? (
+          <div className="text-xs text-gray-400">Checking /api/health...</div>
+        ) : !health || health.overall === 'unknown' ? (
+          <div className="text-xs text-gray-500">
+            Health endpoint unreachable or returned no data. The app is still usable — this card will populate once <code className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-800">/api/health</code> responds.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold ${
+                  health.db?.status === 'ok' ? 'bg-success-500/10 text-success-600' : 'bg-error-500/10 text-error-600'
+                }`}>
+                  {health.db?.status === 'ok' ? '✓' : '!'}
+                </span>
+                <span className="text-sm font-semibold text-gray-800 dark:text-white/90">Database</span>
+              </div>
+              <div className="text-[11px] text-gray-500">
+                {health.db?.status === 'ok'
+                  ? `Connected${health.db.latencyMs != null ? ` · ${health.db.latencyMs} ms` : ''}`
+                  : 'Connection failed'}
+              </div>
+            </div>
+
+            {health.integrations.length === 0 ? (
+              <div className="text-[11px] text-gray-500 px-3 py-2">No integrations reported by health endpoint.</div>
+            ) : (
+              health.integrations.map(intg => (
+                <div key={intg.key || intg.name} className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold ${
+                      intg.status === 'ok' ? 'bg-success-500/10 text-success-600'
+                        : intg.status === 'stale' ? 'bg-warning-500/10 text-warning-600'
+                          : 'bg-gray-400/10 text-gray-500'
+                    }`}>
+                      {intg.badge}
+                    </span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{intg.name}</span>
+                  </div>
+                  <div className="text-[11px] text-gray-500 text-right max-w-[60%] truncate" title={intg.hint}>{intg.hint}</div>
+                </div>
+              ))
+            )}
+
+            {health.fetchedAt && (
+              <div className="text-[10px] text-gray-400 mt-1">
+                Fetched {new Date(health.fetchedAt).toLocaleTimeString()}
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
 
       {/* Connected Sources */}
       <Card>

@@ -110,6 +110,49 @@ test.describe('2 — Setup Wizard', () => {
   test.beforeAll(async ({ browser }) => {
     const context = await browser.newContext();
     page = await context.newPage();
+    // Mock /api/onboard-club so local Vite dev server (which can't serve Vercel
+    // serverless fns) returns 201 with clubId/token instead of Vite's 404.
+    await page.route('**/api/onboard-club', route => {
+      if (route.request().method() === 'POST') {
+        return route.fulfill({
+          status: 201,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            clubId: `test_club_${testId}`,
+            token: `test_token_${testId}`,
+            userId: `test_user_${testId}`,
+            user: { id: `test_user_${testId}`, email: TEST_CLUB.adminEmail, name: TEST_CLUB.adminName },
+            success: true,
+          }),
+        });
+      }
+      return route.continue();
+    });
+    // Mock /api/import-csv too — Vite can't serve it either, and the wizard
+    // calls it as the second POST after club creation. Returns a body that
+    // matches both the production schema AND the helper's `result.success ||
+    // 0` extraction (which expects success to be a row-count number, not a
+    // boolean). Added 2026-04-09 alongside the B38 fix.
+    await page.route('**/api/import-csv', route => {
+      if (route.request().method() === 'POST') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            ok: true,
+            status: 'completed',
+            success: 25,
+            successCount: 25,
+            totalRows: 25,
+            rowsImported: 25,
+            rowsSkipped: 0,
+            errors: [],
+            importType: 'members',
+          }),
+        });
+      }
+      return route.continue();
+    });
     await page.goto(APP_URL);
     await page.evaluate(() => localStorage.clear());
     await page.reload();
@@ -119,6 +162,8 @@ test.describe('2 — Setup Wizard', () => {
   });
 
   test.afterAll(async () => {
+    await page.unroute('**/api/onboard-club').catch(() => {});
+    await page.unroute('**/api/import-csv').catch(() => {});
     await page.close();
   });
 
@@ -473,6 +518,45 @@ test.describe('2B — Progressive Import Insights', () => {
   test('Setup — Create club for progressive import testing', async ({ browser }) => {
     const context = await browser.newContext();
     page = await context.newPage();
+    // Mock /api/onboard-club so local Vite dev server returns 201 instead of 404
+    await page.route('**/api/onboard-club', route => {
+      if (route.request().method() === 'POST') {
+        return route.fulfill({
+          status: 201,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            clubId: `test_club_${progId}`,
+            token: `test_token_${progId}`,
+            userId: `test_user_${progId}`,
+            user: { id: `test_user_${progId}`, email: PROG_CLUB.adminEmail, name: PROG_CLUB.adminName },
+            success: true,
+          }),
+        });
+      }
+      return route.continue();
+    });
+    // Mock /api/import-csv too — Vite can't serve serverless fns, and the
+    // progressive-import suite runs N imports back-to-back. Body matches
+    // the production schema AND the importFile() helper's
+    // `result.success || 0` row-count extraction. Added 2026-04-09.
+    await page.route('**/api/import-csv', route => {
+      if (route.request().method() === 'POST') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            ok: true,
+            success: 25,
+            successCount: 25,
+            totalRows: 25,
+            rowsImported: 25,
+            rowsSkipped: 0,
+            errors: [],
+          }),
+        });
+      }
+      return route.continue();
+    });
     await page.goto(APP_URL);
     await page.evaluate(() => localStorage.clear());
     await page.reload();
