@@ -251,7 +251,7 @@ export default function LoginPage({ onLogin }) {
                 aria-label="Forgot password"
                 className="text-sm text-brand-500 hover:text-brand-600 font-medium bg-transparent border-none cursor-pointer"
               >
-                Forgot your password?
+                Forgot password?
               </button>
             </div>
 

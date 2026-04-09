@@ -335,10 +335,17 @@ test.describe('Web Button Audit (Desktop Chrome)', () => {
     }
 
     // First member row click -> drawer opens
+    // Default Members landing is the at-risk Health Overview dashboard
+    // (no <tr> rows). Switch to the All Members search mode first.
     await page.goto('/#/members');
     await page.waitForTimeout(1200);
+    const allMembersTab = page.getByRole('tab', { name: /All Members/i }).first();
+    if (await allMembersTab.count()) {
+      await allMembersTab.click({ timeout: 2000 }).catch(() => {});
+      await page.waitForTimeout(800);
+    }
     // Target a member row - try rows, then clickable divs
-    const firstRow = page.locator('[role="row"], tr, [data-member-id], .member-row').first();
+    const firstRow = page.locator('[data-member-id], [role="row"], tbody tr, .member-row').first();
     if (await firstRow.count()) {
       try {
         await firstRow.click({ timeout: 2000 });

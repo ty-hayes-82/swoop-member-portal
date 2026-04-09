@@ -223,7 +223,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                     Health Trend
                   </div>
                   <div className="flex gap-0.5 items-center">
-                    {member.trend?.slice(-7).map((score, i) => (
+                    {(Array.isArray(member.trend) ? member.trend : []).slice(-7).map((score, i) => (
                       <div
                         key={i}
                         className="w-2 rounded-sm"
