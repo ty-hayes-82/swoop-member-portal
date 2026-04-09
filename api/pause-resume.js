@@ -5,13 +5,19 @@
  * Pause or resume agents and playbook runs with optional scheduled resume.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getWriteClubId } from './lib/withAuth.js';
+import { withAdminOverride } from './lib/withAdminOverride.js';
 
-export default withAuth(async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const { targetType, targetId, action, resumeAt } = req.body;
-  const clubId = getClubId(req);
+  const clubId = getWriteClubId(req, {
+    allowAdminOverride: true,
+    reason: 'swoop_admin pause/resume console manages any tenant (handler is role-gated to swoop_admin)',
+  });
+  // SEC-4: audit actor must come from the authenticated session, not a hardcoded 'GM'.
+  const pausedBy = req.auth?.userId || 'unknown';
   if (!clubId || !targetType || !targetId || !action) {
     return res.status(400).json({ error: 'clubId, targetType, targetId, and action required' });
   }
@@ -36,7 +42,7 @@ export default withAuth(async function handler(req, res) {
     if (action === 'pause') {
       await sql`
         INSERT INTO pause_state (club_id, target_type, target_id, paused, paused_at, resume_at, paused_by)
-        VALUES (${clubId}, ${targetType}, ${targetId}, TRUE, NOW(), ${resumeAt || null}, 'GM')
+        VALUES (${clubId}, ${targetType}, ${targetId}, TRUE, NOW(), ${resumeAt || null}, ${pausedBy})
         ON CONFLICT (club_id, target_type, target_id) DO UPDATE SET
           paused = TRUE, paused_at = NOW(), resume_at = ${resumeAt || null}
       `;
@@ -122,4 +128,12 @@ export default withAuth(async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}, { roles: ['swoop_admin'] });
+}
+
+export default withAuth(
+  withAdminOverride(handler, {
+    adminTool: 'pause-resume',
+    reason: 'swoop_admin pause/resume console',
+  }),
+  { roles: ['swoop_admin'] }
+);

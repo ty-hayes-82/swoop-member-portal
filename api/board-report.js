@@ -1,9 +1,9 @@
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 import { logError } from './lib/logger.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   try {
     const [snapshots, interventions, opInterventions, trends] = await Promise.all([
       sql`

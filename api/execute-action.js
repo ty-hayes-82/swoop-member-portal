@@ -9,7 +9,7 @@
  * executionType: 'email' | 'sms' | 'staff_task' | 'schedule_call' | 'comp_offer'
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getWriteClubId } from './lib/withAuth.js';
 
 // Email templates — Phase 1 hardcoded, Phase 2 from database
 const EMAIL_TEMPLATES = {
@@ -44,14 +44,17 @@ export default withAuth(async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const clubId = getClubId(req);
+  const clubId = getWriteClubId(req);
   const {
     actionId, executionType, memberId, memberEmail, memberPhone,
     staffEmail, staffName, templateId, customMessage, senderName, senderTitle, senderEmail,
   } = req.body;
 
-  if (!actionId || !clubId || !executionType) {
-    return res.status(400).json({ error: 'actionId, clubId, and executionType are required' });
+  // clubId is guaranteed by getWriteClubId (returns req.auth.clubId by default).
+  // The legacy "clubId" check was a leftover from when callers passed it in body —
+  // SEC-1 made that source-of-truth req.auth, so the check is dead.
+  if (!actionId || !executionType) {
+    return res.status(400).json({ error: 'actionId and executionType are required' });
   }
 
   try {

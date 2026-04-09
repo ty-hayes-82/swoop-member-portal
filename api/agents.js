@@ -1,8 +1,10 @@
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  // B25: GET is a read (swoop_admin may cross-club view), POST approves/dismisses
+  // agent_actions which is a mutation — default-deny, session club only.
+  const clubId = req.method === 'POST' ? getWriteClubId(req) : getReadClubId(req);
   try {
     if (req.method === 'POST') {
       const { actionId, operation, meta } = req.body;

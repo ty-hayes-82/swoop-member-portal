@@ -8,7 +8,7 @@
  * DELETE is restricted to swoop_admin role (or demo cleanup).
  */
 import { sql } from '@vercel/postgres';
-import { withAuth } from './lib/withAuth.js';
+import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
 
 // All tables with a club_id column, ordered so FKs delete before parents
 const CLUB_TABLES = [
@@ -100,13 +100,17 @@ export default withAuth(async function handler(req, res) {
   // ─── GET: list clubs or get single club ───
   if (req.method === 'GET') {
     try {
-      // swoop_admin may query any club via ?clubId; other roles are scoped
-      // to their own authenticated club by getClubId. For the list branch
-      // (no ?clubId passed), we still want to return all clubs for admins —
-      // so only treat the query param as meaningful when the caller is admin.
-      const adminTargetClubId = req.query?.clubId; // lint-clubid-allow: swoop_admin cross-club lookup, role gate on next line
-      const clubId =
-        req.auth.role === 'swoop_admin' ? adminTargetClubId : req.auth.clubId;
+      // swoop_admin gets two modes:
+      //   ?clubId=X  → fetch that club's details (list-of-one)
+      //   no clubId  → list ALL clubs
+      // Non-admins always see only their session club. We can't use
+      // getReadClubId here because the helper has no "list everything"
+      // sentinel — admins legitimately need to detect the absence of a
+      // query param to switch modes. The role gate on the next line keeps
+      // non-admins safe.
+      const isAdmin = req.auth.role === 'swoop_admin';
+      const adminTargetClubId = isAdmin ? (req.query?.clubId || null) : null; // lint-clubid-allow: swoop_admin list-vs-single mode switch (role-gated)
+      const clubId = isAdmin ? adminTargetClubId : getReadClubId(req);
       if (clubId) {
         const result = await sql`SELECT * FROM club WHERE club_id = ${clubId}`;
         if (result.rows.length === 0) return res.status(404).json({ error: 'Club not found' });
@@ -137,13 +141,14 @@ export default withAuth(async function handler(req, res) {
   // ─── PUT: update club details ───
   if (req.method === 'PUT') {
     const { name, city, state, zip } = req.body;
-    // swoop_admin may update any club via body.clubId; everyone else is
-    // locked to their own authenticated club.
-    const targetClubId = req.body?.clubId; // lint-clubid-allow: swoop_admin cross-club update, validated below
-    const clubId =
-      req.auth.role === 'swoop_admin' && targetClubId
-        ? targetClubId
-        : req.auth.clubId;
+    // swoop_admin may update any club by passing clubId in body or query;
+    // everyone else is locked to their session club. getWriteClubId honors
+    // both query and body when allowAdminOverride is set (B27), and falls
+    // back to req.auth.clubId for non-admins.
+    const clubId = getWriteClubId(req, {
+      allowAdminOverride: true,
+      reason: 'swoop_admin club metadata update',
+    });
     if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
     try {
@@ -168,13 +173,19 @@ export default withAuth(async function handler(req, res) {
 
   // ─── DELETE: cascade-delete all club data ───
   if (req.method === 'DELETE') {
-    // swoop_admin may delete any club via ?clubId; demo cleanup flows pass
-    // a demo_* id via the existing allowDemo bypass in withAuth (see below).
-    const targetClubId = req.query?.clubId; // lint-clubid-allow: swoop_admin/demo cleanup, role checked below
-    const clubId =
-      req.auth.role === 'swoop_admin' || req.auth.isDemo
-        ? targetClubId
-        : req.auth.clubId;
+    // swoop_admin may delete any club via ?clubId; demo cleanup flows use
+    // the allowDemo bypass with a demo_* id. Both paths route through
+    // getWriteClubId for the admin path; demo branch reads ?clubId directly
+    // because the helper does not honor the demo role.
+    let clubId;
+    if (req.auth.isDemo) {
+      clubId = req.query?.clubId; // lint-clubid-allow: demo cleanup branch, gated to demo_* below
+    } else {
+      clubId = getWriteClubId(req, {
+        allowAdminOverride: true,
+        reason: 'swoop_admin club cascade delete',
+      });
+    }
     if (!clubId) return res.status(400).json({ error: 'clubId query param required' });
 
     // Only swoop_admin can delete (or demo cleanup of demo club)

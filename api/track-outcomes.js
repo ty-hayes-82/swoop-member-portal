@@ -7,14 +7,14 @@
  * Auto-flags "Member Saves" for the Board Report.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getWriteClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const clubId = getClubId(req);
+  const clubId = getWriteClubId(req);
   if (!clubId) {
     return res.status(400).json({ error: 'clubId query param required' });
   }

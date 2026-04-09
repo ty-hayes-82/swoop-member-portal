@@ -4,13 +4,13 @@
 // Return shape IDENTICAL to briefingService.js getDailyBriefing()
 
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 import { getCurrentConditions, getForecast, generateAdvisory } from './services/weather.js';
 import { computeWeatherModifier, computeStaffingNeed } from './services/demand.js';
 import { logError, logWarn } from './lib/logger.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   const date = req.query.date ?? new Date().toISOString().slice(0, 10);
 
   try {

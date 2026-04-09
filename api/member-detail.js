@@ -1,5 +1,5 @@
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 import { logError } from './lib/logger.js';
 
 const numberOr = (value, fallback = 0) => {
@@ -34,7 +34,7 @@ const safeJsonParse = (str, fallback = []) => {
 };
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   const memberId = req.query.memberId || req.query.id;
 
   if (!memberId) {

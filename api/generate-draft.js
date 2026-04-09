@@ -9,7 +9,7 @@
  * Returns: { subject?, body, memberEmail, memberPhone, memberName }
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 import { generateText } from './lib/aiClient.js';
 
 // Demo member data for demo mode (mirrors static data in src/data/members.js)
@@ -119,7 +119,7 @@ export default withAuth(async function handler(req, res) {
     return res.status(400).json({ error: 'draftType must be "email" or "sms"' });
   }
 
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   const sender = { name: req.auth.name || 'Club Manager', title: 'General Manager', email: req.auth.email };
 
   // Fetch member context

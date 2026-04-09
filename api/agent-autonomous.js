@@ -8,7 +8,7 @@
  * GM approval and go to the Inbox.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
 
 const AGENTS = {
   demand_optimizer: {
@@ -50,7 +50,9 @@ const AGENTS = {
 };
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  // B25: GET returns agent configs/activity (read); POST runs the agent sweep
+  // which writes agent_activity + agent_configs — default-deny on the write path.
+  const clubId = req.method === 'POST' ? getWriteClubId(req) : getReadClubId(req);
   // Ensure agent activity table exists
   try {
     await sql`

@@ -143,6 +143,8 @@ that default-exports a Vercel serverless handler `(req, res)`.
 | 011 | `011-unique-constraints.js`             | Creates UNIQUE indexes on `users.email` (lowercased), `members(club_id, external_id)` (partial), `password_resets.token`, `sessions.token`. |
 | 012 | `012-rebrand-pinetree.js`               | Rebrands `club_001` from Oakmont Hills to Pinetree Country Club, Kennesaw GA. Supports `?cleanup=true` to delete all non-`club_001` rows (destructive — only when called via URL). |
 | 013 | `013-google-tokens.js`                  | Creates `google_tokens` table for per-user Google OAuth; adds `users.auth_provider`. |
+| 014 | `014-member-invoices-table.js`          | Creates `member_invoices` table with `club_id` from day 1. Closes the gap where `seed/schema.sql` was the only source of this table. |
+| 015 | `015-cross-club-audit-table.js`         | Creates `cross_club_audit` table + indexes for SEC-2 observability of swoop_admin cross-tenant writes. Populated by the `withAdminOverride` wrapper in `api/lib/withAdminOverride.js`. Forensic metadata only — no request bodies are stored (SHA-256 hash only). |
 
 ## 4. Running migrations
 

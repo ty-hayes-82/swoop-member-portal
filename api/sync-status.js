@@ -6,14 +6,14 @@
  * including last successful sync per source type.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'GET only' });
   }
 
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   if (!clubId) {
     return res.status(400).json({ error: 'clubId is required' });
   }

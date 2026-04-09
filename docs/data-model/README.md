@@ -170,4 +170,4 @@
 | `src/data/schema/vercelPostgresSchema.js` | Frontend schema introspection (75 tables with sample rows) |
 | `api/migrations/001-core-tables.js` | Production table creation (idempotent) |
 | `api/migrations/002-alter-members.js` | Adds production columns to seed members table |
-| `api/create-invoices-table.js` | Creates and seeds member_invoices |
+| `api/migrations/014-member-invoices-table.js` | Creates `member_invoices` table (run via `npm run db:migrate`) |

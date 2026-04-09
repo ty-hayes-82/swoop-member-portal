@@ -1,8 +1,8 @@
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   try {
     const segment = req.query.segment || 'all';
     const archetype = req.query.archetype || null;

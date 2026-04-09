@@ -1,6 +1,6 @@
 // api/pipeline.js — Phase 2 backend for pipelineService.js
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 
 const normalizeHealthScore = (value) => {
   const numeric = Number(value);
@@ -25,7 +25,7 @@ const inferPotentialDues = (visits, totalSpend) => {
 };
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   try {
     const [leads, waitlist] = await Promise.all([
       sql`

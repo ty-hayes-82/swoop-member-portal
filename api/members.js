@@ -3,7 +3,7 @@
 // Return shapes IDENTICAL to memberService.js
 
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 import { theme } from '../src/config/theme.js';
 import { logError } from './lib/logger.js';
 
@@ -31,7 +31,7 @@ const archetypeBaselines = {
 };
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   try {
     const latestWeekResult = await sql`SELECT MAX(week_number) AS latest_week FROM member_engagement_weekly WHERE club_id = ${clubId}`;
     const latestWeek = toNumber(latestWeekResult.rows[0]?.latest_week, 0);

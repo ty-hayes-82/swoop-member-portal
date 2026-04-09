@@ -1,9 +1,9 @@
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 import { getCurrentConditions } from './services/weather.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   try {
     const [complaints, , atRisk, sessions] = await Promise.all([
       // Priority 1: Oldest unresolved complaint

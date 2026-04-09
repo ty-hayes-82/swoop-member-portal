@@ -7,10 +7,12 @@
  * Creates sequenced action plans with steps, owners, and deadlines.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  // B25: GET lists playbook runs/steps (read); POST starts a run and PUT updates
+  // step status — both mutate, so default-deny, session club only.
+  const clubId = req.method === 'GET' ? getReadClubId(req) : getWriteClubId(req);
   // Ensure playbook execution tables exist
   try {
     await sql`

@@ -3,7 +3,7 @@
 // Return shapes IDENTICAL to waitlistService.js
 
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 
 const normalizeHealthScore = (value) => {
   const numeric = Number(value);
@@ -20,7 +20,7 @@ const deriveRiskLevel = (score) => {
 };
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   try {
     const [queue, predictions, heatmap, revenueAttr] = await Promise.all([
 

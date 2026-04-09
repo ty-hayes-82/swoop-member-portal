@@ -4,7 +4,7 @@
  * POST /api/notifications — send notification or actions (mark_read, generate_digest, check_escalations)
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
 
 let _tableChecked = false;
 
@@ -36,13 +36,15 @@ async function ensureTable() {
 }
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  // B25: GET lists notifications (read, may cross-club for swoop_admin);
+  // POST mark_read / send-notification are writes — default-deny.
+  const clubId = req.method === 'GET' ? getReadClubId(req) : getWriteClubId(req);
 
   if (req.method === 'GET') {
     try {
       await ensureTable();
       // clubId is always the authenticated caller's club (swoop_admin override
-      // handled centrally by getClubId); NEVER trust req.query.clubId here.
+      // handled centrally by getReadClubId); NEVER trust req.query.clubId here.
       const result = req.query.unreadOnly === 'true'
         ? await sql`SELECT * FROM notifications WHERE club_id = ${clubId} AND read_at IS NULL ORDER BY created_at DESC LIMIT 50`
         : await sql`SELECT * FROM notifications WHERE club_id = ${clubId} ORDER BY created_at DESC LIMIT 50`;

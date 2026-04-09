@@ -9,10 +9,12 @@
  * Returns: 30/60/90 day resignation probability + contributing factors.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  // B25: GET fetches a single member's prediction (read);
+  // POST recomputes and writes churn_predictions for the whole club (write).
+  const clubId = req.method === 'POST' ? getWriteClubId(req) : getReadClubId(req);
   // Ensure predictions table exists
   try {
     await sql`

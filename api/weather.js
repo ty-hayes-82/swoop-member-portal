@@ -20,40 +20,30 @@ import {
 } from './services/weather.js';
 import { sql } from '@vercel/postgres';
 import { logInfo, logWarn, logError } from './lib/logger.js';
-
-/**
- * Inline session verification for POST write paths.
- * We intentionally do NOT wrap this handler in withAuth(), because that would
- * break the public GET (?city=) lookup used by demo mode. This mirrors the
- * token-validation logic from api/lib/withAuth.js verbatim.
- *
- * Returns: { userId, clubId, role } on success, or null on failure.
- */
-async function verifyWriteSession(req) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  try {
-    const result = await sql`
-      SELECT s.user_id, s.club_id, s.role, s.expires_at
-      FROM sessions s
-      WHERE s.token = ${token} AND s.expires_at > NOW()
-    `;
-    if (result.rows.length === 0) return null;
-    const row = result.rows[0];
-    return { userId: row.user_id, clubId: row.club_id, role: row.role };
-  } catch (e) {
-    logError('/api/weather', e, { phase: 'verifyWriteSession' });
-    return null;
-  }
-}
+import { verifySession } from './lib/withAuth.js';
+import { rateLimit } from './lib/rateLimit.js';
 
 export default async function handler(req, res) {
   const { clubId: queryClubId, city, state } = req.query; // lint-clubid-allow: public GET weather lookup, POST write path uses verifyWriteSession
 
   // ─── PUBLIC: City/state-based lookup (demo mode — no clubId needed) ──
   if (req.method === 'GET' && city) {
+    // 30 city lookups per IP per hour. Catches burst abuse of the
+    // unauthenticated Visual Crossing passthrough; per-instance limit,
+    // see docs/operations/ADR-001-rate-limit-persistence.md for the
+    // durable (KV-backed) plan.
+    const rl = rateLimit(req, { maxAttempts: 30, windowMs: 3600000 });
+    if (rl.limited) {
+      logWarn('/api/weather', 'city lookup rate-limited', {
+        ip: req.headers['x-forwarded-for'],
+        city,
+        retryAfter: rl.retryAfter,
+      });
+      return res.status(429).json({
+        error: 'Too many weather lookups. Try again later.',
+        retryAfter: rl.retryAfter,
+      });
+    }
     try {
       const { days, hours } = req.query;
       const data = await getForecastByCity(city, state, {
@@ -116,8 +106,9 @@ export default async function handler(req, res) {
     const { action } = req.query;
 
     // Verify session manually. We can't use withAuth() as a wrapper because
-    // the public GET path above must stay open.
-    const session = await verifyWriteSession(req);
+    // the public GET path above must stay open. verifySession is the shared
+    // helper exported by ./lib/withAuth.js.
+    const session = await verifySession(req);
     if (!session) {
       logWarn('/api/weather', 'unauthorized write attempt', {
         action,

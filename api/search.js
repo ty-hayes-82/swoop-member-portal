@@ -1,12 +1,12 @@
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
 
   // clubId comes from the authenticated session (swoop_admin can override via
-  // ?clubId=... handled in getClubId). Never trust raw req.query.clubId.
-  let clubId = getClubId(req);
+  // ?clubId=... handled in getReadClubId). Never trust raw req.query.clubId.
+  let clubId = getReadClubId(req);
   if (!clubId) return res.status(200).json({ results: [] });
   // Demo mode uses seeded club_001 data
   if (clubId === 'demo') clubId = 'club_001';

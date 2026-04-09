@@ -6,14 +6,14 @@
  * Replaces all hardcoded values with live queries.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'GET only' });
   }
 
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
 
   try {
     // Health tier counts

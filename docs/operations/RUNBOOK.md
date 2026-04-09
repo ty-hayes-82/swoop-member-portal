@@ -123,8 +123,8 @@ The table below was built by grepping `process.env.*` across [`api/`](../../api)
 | `TWILIO_API_KEY_SECRET` | Twilio API Key secret | same | recommended | string |
 | `TWILIO_MESSAGING_SERVICE_SID` | Twilio Messaging Service SID (preferred over per-number `From`) | same | recommended | `MG...` |
 | `TWILIO_PHONE_NUMBER` | Fallback sending number if no Messaging Service SID | same | optional | `+1...` |
-| `NODE_ENV` | Vercel sets this to `production` on the prod deployment | gating in `check-*.js`, `debug-db.js`, `schema-*.js`, seed endpoints, `fix-*.js` | auto | `production` \| `development` |
-| `ALLOW_DEBUG` | Escape hatch to re-enable debug/seed endpoints in production. **Do not set in production except for a short, audited window.** | all files guarded with `NODE_ENV === 'production' && !ALLOW_DEBUG` | optional | `1` |
+| `NODE_ENV` | Vercel sets this to `production` on the prod deployment | gating in operator CLI scripts under [`scripts/operator/`](../../scripts/operator/) (`check-*`, `debug-db`, `schema-*`, `seed-*`, `fix-*`) | auto | `production` \| `development` |
+| `ALLOW_DEBUG` | Escape hatch that lets operator scripts under `scripts/operator/` run against a production DB. **Do not set in production except for a short, audited window.** Required when invoking any `scripts/operator/*.js` via CLI. | all files guarded with `NODE_ENV === 'production' && !ALLOW_DEBUG` | optional | `1` |
 | `VERCEL_URL` | Vercel auto-injected per-deploy URL | `api/notifications.js` (fallback base URL) | auto | `<host>` |
 | `VERCEL_OIDC_TOKEN` | Vercel OIDC token (short-lived, auto-rotated) | infra tooling only | auto | JWT |
 | `CI` | Playwright sets `forbidOnly: true` in CI | [`playwright.config.js`](../../playwright.config.js) | auto in CI | `1` |
@@ -185,6 +185,23 @@ curl -X POST https://<deployment-url>/api/migrations/007-add-club-id-tenant-isol
 Each migration returns JSON with one result row per step; a successful run has every step `status: ok`. If a step reports `status: error`, stop and investigate before running later migrations.
 
 Confirm behavior of `scripts/migrate.mjs` before relying on it for production: verify it runs migrations in filename order, fails fast on the first error, and reports per-step status. If it does not, file a bug.
+
+### Operator scripts (seed / fix / check / schema / debug)
+
+One-shot operator scripts live in [`scripts/operator/`](../../scripts/operator/), **not** in `api/`. These used to ship as Vercel serverless routes but are now CLI-only so they do not bloat the deployed API surface. Run one with:
+
+```bash
+ALLOW_DEBUG=true node scripts/operator/<script-name>.js
+```
+
+Categories:
+- `seed-*` — one-shot data seeders for demo clubs and pipelines
+- `fix-*` — one-shot data repair (destructive; read the source before running)
+- `check-*` — read-only diagnostics
+- `schema-*` — schema introspection
+- `debug-db` — ad-hoc DB probing
+
+For actual schema migrations, use `scripts/migrate.mjs` — not these scripts. See [`scripts/operator/README.md`](../../scripts/operator/README.md) for the full inventory.
 
 ### Multi-tenancy rules
 
@@ -297,6 +314,50 @@ Do not claim any of these exist. If an incident requires alerting, today's answe
 - **Cron success** — `/api/cron/weather-daily` should succeed once per day. If it fails two days in a row, weather signals go stale.
 - **Auth session count** — `SELECT count(*) FROM sessions WHERE expires_at > now()` — sanity check during pilots.
 
+### Cross-club admin audit (`cross_club_audit`)
+
+SEC-2 observability: every time a `swoop_admin` makes a write whose effective clubId (from `req.query.clubId` or `req.body.clubId`) diverges from their session clubId, the `withAdminOverride` wrapper in [`api/lib/withAdminOverride.js`](../../api/lib/withAdminOverride.js) inserts a row into `cross_club_audit`. Today the only opted-in endpoint is `POST /api/pause-resume`; additional admin tools can opt in by wrapping their handler the same way.
+
+Captured per divergent write:
+
+- `user_id`, `session_club_id`, `target_club_id` — the actor and the clubId pair
+- `method`, `path` — HTTP method and URL path (no query string)
+- `reason` — the `adminTool` / `reason` label the wrapper was configured with
+- `body_hash` — SHA-256 hex of the JSON-serialized request body. **The body itself is never stored** — this keeps PII out of the audit table while still allowing forensic correlation against application logs.
+- `ip` — first hop from `x-forwarded-for`
+- `user_agent` — raw UA string
+- `occurred_at` — insert timestamp
+
+Forensics queries:
+
+```sql
+-- Recent cross-club activity by a specific admin
+SELECT occurred_at, session_club_id, target_club_id, method, path, reason
+FROM cross_club_audit
+WHERE user_id = $1
+ORDER BY occurred_at DESC
+LIMIT 100;
+
+-- Who has been touching a specific tenant from outside
+SELECT occurred_at, user_id, session_club_id, method, path, reason, ip
+FROM cross_club_audit
+WHERE target_club_id = $1
+ORDER BY occurred_at DESC
+LIMIT 100;
+
+-- Burst detection (>N divergent writes per admin in a 15-min window)
+SELECT user_id, date_trunc('minute', occurred_at) AS bucket, count(*)
+FROM cross_club_audit
+WHERE occurred_at > now() - interval '24 hours'
+GROUP BY user_id, bucket
+HAVING count(*) > 20
+ORDER BY bucket DESC;
+```
+
+**Retention — TODO.** There is no TTL job yet. A future sprint should add a cron that deletes rows older than ~90 days (or archives them to cold storage) so the table does not grow unbounded. Until then, the indexes on `(user_id, occurred_at DESC)`, `(target_club_id, occurred_at DESC)`, and `(occurred_at DESC)` keep forensic queries cheap even as the table grows.
+
+The wrapper is fire-and-forget: if the audit insert fails the handler still runs and a `warn`-level structured log line is emitted with the same fields. So even if Postgres is temporarily unreachable, divergent writes remain visible in Vercel function logs — grep for `"context":"withAdminOverride"`.
+
 ---
 
 ## 7. Incident response
@@ -353,6 +414,16 @@ Copy this into a new file under `docs/operations/postmortems/YYYY-MM-DD-<slug>.m
 ## Action items
 - [ ] <owner> — <action> — <due>
 ```
+
+### Destructive operations
+
+Destructive endpoints are locked down so a single fat-fingered click cannot wipe a customer's data. Always logged via `logWarn` with actor, session clubId, target clubId, and IP.
+
+- **Clear a club's activity log** — `DELETE /api/activity`
+  - **Required role:** `swoop_admin` only (demo mode blocked).
+  - **Required query params:** `?clubId=<id>` AND `?confirm=YES_DELETE_AUDIT_LOG_FOR_<id>` where `<id>` matches the target club exactly. The confirm token is validated server-side; a mismatch returns 400.
+  - **Audit trail:** forced `logWarn('/api/activity', 'audit log DELETE', ...)` fires BEFORE the DELETE runs, and a `... complete` line with `deletedRows` fires after. Rejected attempts (wrong role, missing/invalid confirm) are also logged.
+  - **Example:** `curl -X DELETE "https://.../api/activity?clubId=club_abc&confirm=YES_DELETE_AUDIT_LOG_FOR_club_abc" -H "Authorization: Bearer <swoop_admin session>"`
 
 ---
 

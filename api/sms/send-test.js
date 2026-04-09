@@ -2,10 +2,17 @@
  * SMS Test Send — sends a test SMS via Twilio
  * POST /api/sms/send-test
  */
+import { cors } from '../lib/cors.js';
+import { logWarn } from '../lib/logger.js';
+
+const ALLOW_DEBUG = process.env.ALLOW_DEBUG === 'true';
+const IS_PROD = process.env.NODE_ENV === 'production';
+
 export default async function handler(req, res) {
-  // Debug-only endpoint: disabled in production unless ALLOW_DEBUG is set.
-  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEBUG) {
-    return res.status(403).json({ error: 'Disabled in production' });
+  if (cors(req, res)) return;
+  if (IS_PROD && !ALLOW_DEBUG) {
+    logWarn('/api/sms/send-test', 'operator endpoint blocked in production', { ip: req.headers['x-forwarded-for'] });
+    return res.status(404).json({ error: 'Not found' });
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 

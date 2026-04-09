@@ -4,7 +4,7 @@
 // MONTHS array: ['Aug','Sep','Oct','Nov','Dec','Jan'] — Jan = current (index 5)
 
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId } from './lib/withAuth.js';
 
 // The DB only has January 2026 data. Aug–Dec are static prior-period values
 // (identical to data/trends.js). This function merges them so chart shapes are unchanged.
@@ -31,7 +31,7 @@ const PRIOR_OUTLET_TRENDS = {
 };
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  const clubId = getReadClubId(req);
   try {
     // January actuals
     const [monthlyRevenue, paceData, members, email, fbData, eventsData, outletRev] = await Promise.all([

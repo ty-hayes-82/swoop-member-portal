@@ -1,11 +1,19 @@
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
+import { logWarn } from './lib/logger.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  // B25: reads (GET activity feed) keep swoop_admin ?clubId= override; writes
+  // (POST insert, DELETE audit-log wipe) are default-deny and always scope to
+  // the authenticated session's club. SEC-3 role-gate + confirm token on DELETE
+  // are still enforced below.
+  const clubId = req.method === 'GET' ? getReadClubId(req) : getWriteClubId(req);
   try {
     if (req.method === 'POST') {
-      const { actionType, actionSubtype, actor, memberId, memberName, agentId, referenceId, referenceType, description, meta } = req.body;
+      // SEC-4: audit actor must come from the authenticated session, never the client body.
+      // Any body.actor is ignored so clients can't spoof activity_log entries.
+      const { actionType, actionSubtype, memberId, memberName, agentId, referenceId, referenceType, description, meta } = req.body;
+      const actor = req.auth?.userId || 'unknown';
 
       if (!actionType) {
         return res.status(400).json({ error: 'actionType is required' });
@@ -13,15 +21,49 @@ export default withAuth(async function handler(req, res) {
 
       await sql`
         INSERT INTO activity_log (action_type, action_subtype, actor, member_id, member_name, agent_id, reference_id, reference_type, description, meta, club_id)
-        VALUES (${actionType}, ${actionSubtype ?? null}, ${actor ?? 'gm_default'}, ${memberId ?? null}, ${memberName ?? null}, ${agentId ?? null}, ${referenceId ?? null}, ${referenceType ?? null}, ${description ?? null}, ${JSON.stringify(meta ?? {})}, ${clubId})
+        VALUES (${actionType}, ${actionSubtype ?? null}, ${actor}, ${memberId ?? null}, ${memberName ?? null}, ${agentId ?? null}, ${referenceId ?? null}, ${referenceType ?? null}, ${description ?? null}, ${JSON.stringify(meta ?? {})}, ${clubId})
       `;
 
       return res.status(201).json({ success: true });
     }
 
     if (req.method === 'DELETE') {
-      await sql`DELETE FROM activity_log WHERE club_id = ${clubId}`;
-      return res.status(200).json({ success: true, message: 'All activity history cleared' });
+      // SEC-3: Destructive audit-log wipe. Lock down with hard role gate,
+      // confirm-token matching the target clubId, and a forced paper trail.
+      const actor = req.auth?.userId || 'unknown';
+      const sessionClubId = req.auth?.clubId || null;
+      const isDemo = req.auth?.isDemo === true;
+      const ip = req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || null;
+
+      if (isDemo || req.auth?.role !== 'swoop_admin') {
+        logWarn('/api/activity', 'audit log DELETE rejected (role gate)', {
+          actor, sessionClubId, targetClubId: clubId, role: req.auth?.role, isDemo, ip,
+        });
+        return res.status(403).json({ error: 'Forbidden: swoop_admin role required to clear activity log' });
+      }
+
+      const expectedToken = `YES_DELETE_AUDIT_LOG_FOR_${clubId}`;
+      if (req.query?.confirm !== expectedToken) {
+        logWarn('/api/activity', 'audit log DELETE rejected (confirm token)', {
+          actor, sessionClubId, targetClubId: clubId, provided: req.query?.confirm || null, ip,
+        });
+        return res.status(400).json({
+          error: 'Missing or invalid confirm token',
+          message: `To clear the activity log for club ${clubId}, pass ?confirm=${expectedToken}`,
+        });
+      }
+
+      // Force-log BEFORE the destructive op so the paper trail exists even if the DELETE fails.
+      logWarn('/api/activity', 'audit log DELETE', {
+        actor, sessionClubId, targetClubId: clubId, ip,
+      });
+
+      const delResult = await sql`DELETE FROM activity_log WHERE club_id = ${clubId}`;
+      const deletedRows = delResult?.rowCount ?? 0;
+      logWarn('/api/activity', 'audit log DELETE complete', {
+        actor, sessionClubId, targetClubId: clubId, deletedRows, ip,
+      });
+      return res.status(200).json({ success: true, message: 'All activity history cleared', deletedRows });
     }
 
     // GET — fetch activity feed

@@ -149,6 +149,30 @@ function stripCommentsAndStrings(content) {
   return out.join('');
 }
 
+// SEC-6: Detect SQL writes (INSERT/UPDATE/DELETE). We scan the RAW source
+// (not the comment-stripped version) because SQL typically lives inside
+// template literals, which stripCommentsAndStrings masks out. We use a
+// coarse, case-insensitive regex that catches the common shapes:
+//   INSERT INTO <table>
+//   UPDATE <table> ... SET
+//   DELETE FROM <table>
+// Matches inside line/block comments are filtered out below.
+const SQL_WRITE_REGEX =
+  /\b(?:INSERT\s+INTO\s+[`"'\w.]+|UPDATE\s+[`"'\w.]+[\s\S]{0,200}?\bSET\b|DELETE\s+FROM\s+[`"'\w.]+)/i;
+
+// Matches bare `getClubId(` calls but NOT `getReadClubId(` / `getWriteClubId(`.
+// Negative lookbehind ensures we don't match the Read/Write variants.
+const GET_CLUB_ID_CALL_REGEX = /(?<![A-Za-z0-9_])getClubId\s*\(/g;
+
+function fileHasSqlWrite(raw) {
+  // Strip comments (but keep string/template contents) so SQL in comments
+  // doesn't trigger. We do a minimal pass: remove // line comments and
+  // /* ... */ block comments.
+  const withoutLineComments = raw.replace(/\/\/[^\n]*/g, '');
+  const withoutComments = withoutLineComments.replace(/\/\*[\s\S]*?\*\//g, '');
+  return SQL_WRITE_REGEX.test(withoutComments);
+}
+
 function scanFile(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   const content = stripCommentsAndStrings(raw);
@@ -156,24 +180,53 @@ function scanFile(filePath) {
   const rawLines = raw.split(/\r?\n/);
   const findings = [];
 
+  const isWritingFile = fileHasSqlWrite(raw);
+
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
+    const rawLine = rawLines[index] || '';
+
     // Same-line exemption pragma: `// lint-clubid-allow: <reason>`
     // Only honored when a reason follows the colon. Used sparingly for
     // intentional public / cross-club admin reads that are documented inline.
-    const rawLine = rawLines[index] || '';
     const pragmaMatch = rawLine.match(/\/\/\s*lint-clubid-allow:\s*(\S.*)$/);
-    if (pragmaMatch) continue;
-    for (const { regex, label } of FORBIDDEN_PATTERNS) {
-      regex.lastIndex = 0;
+
+    // SEC-6 pragma: `// cross-club-write-allow: <reason>` — exempts a
+    // `getClubId(` call in a writing file from the new check only.
+    const writePragmaMatch = rawLine.match(
+      /\/\/\s*cross-club-write-allow:\s*(\S.*)$/,
+    );
+
+    if (!pragmaMatch) {
+      for (const { regex, label } of FORBIDDEN_PATTERNS) {
+        regex.lastIndex = 0;
+        let match;
+        while ((match = regex.exec(line)) !== null) {
+          findings.push({
+            filePath,
+            line: index + 1,
+            col: match.index + 1,
+            text: rawLine.trim(),
+            label,
+            category: 'client-clubid-read',
+          });
+        }
+      }
+    }
+
+    // SEC-6: forbid `getClubId(` in any file that issues SQL writes.
+    if (isWritingFile && !writePragmaMatch) {
+      GET_CLUB_ID_CALL_REGEX.lastIndex = 0;
       let match;
-      while ((match = regex.exec(line)) !== null) {
+      while ((match = GET_CLUB_ID_CALL_REGEX.exec(line)) !== null) {
         findings.push({
           filePath,
           line: index + 1,
           col: match.index + 1,
-          text: (rawLines[index] || '').trim(),
-          label,
+          text: rawLine.trim(),
+          label:
+            'getClubId(...) in writing file — use getWriteClubId(...) explicitly. Pragma to allow: // cross-club-write-allow: <reason>',
+          category: 'write-alias-in-writing-file',
         });
       }
     }
@@ -191,18 +244,56 @@ const files = walk(API_DIR).filter((f) => !isExempt(f));
 const findings = files.flatMap(scanFile);
 
 if (findings.length === 0) {
-  console.log('lint-clubid: no forbidden req.body.clubId / req.query.clubId reads found');
+  console.log(
+    'lint-clubid: no forbidden req.body.clubId / req.query.clubId reads found',
+  );
+  console.log(
+    'lint-clubid: no forbidden getClubId(...) calls in SQL-writing files found',
+  );
   process.exit(0);
 }
 
-console.error(`lint-clubid: found ${findings.length} forbidden clubId read(s):`);
-for (const finding of findings) {
-  const rel = path.relative(process.cwd(), finding.filePath);
-  console.error(`- ${rel}:${finding.line}:${finding.col}  forbidden: ${finding.label}`);
-  console.error(`  ${finding.text}`);
+const clientReadFindings = findings.filter(
+  (f) => f.category === 'client-clubid-read',
+);
+const writeAliasFindings = findings.filter(
+  (f) => f.category === 'write-alias-in-writing-file',
+);
+
+console.error(`lint-clubid: found ${findings.length} violation(s):`);
+
+if (clientReadFindings.length > 0) {
+  console.error('');
+  console.error(
+    `[client-clubid-read] ${clientReadFindings.length} forbidden client-supplied clubId read(s):`,
+  );
+  for (const finding of clientReadFindings) {
+    const rel = path.relative(process.cwd(), finding.filePath);
+    console.error(
+      `- ${rel}:${finding.line}:${finding.col}  forbidden: ${finding.label}`,
+    );
+    console.error(`  ${finding.text}`);
+  }
 }
+
+if (writeAliasFindings.length > 0) {
+  console.error('');
+  console.error(
+    `[write-alias-in-writing-file] ${writeAliasFindings.length} forbidden getClubId(...) call(s) in SQL-writing file(s):`,
+  );
+  for (const finding of writeAliasFindings) {
+    const rel = path.relative(process.cwd(), finding.filePath);
+    console.error(
+      `- ${rel}:${finding.line}:${finding.col}  ${finding.label}`,
+    );
+    console.error(`  ${finding.text}`);
+  }
+}
+
+console.error('');
 console.error(
   `lint-clubid: ${findings.length} violation(s). ` +
-    'Use req.auth.clubId (populated by withAuth) as the source of truth.'
+    'Use req.auth.clubId (populated by withAuth) for reads and ' +
+    'getWriteClubId(req) for writes.',
 );
 process.exit(1);

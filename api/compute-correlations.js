@@ -13,10 +13,11 @@
  * Results stored in correlations table and served to Insights tab.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  // B25: GET reads precomputed correlations; POST recomputes and writes them.
+  const clubId = req.method === 'POST' ? getWriteClubId(req) : getReadClubId(req);
 
   // GET: Return precomputed correlations from the database
   if (req.method === 'GET') {

@@ -79,7 +79,7 @@ Core member entity. Seed schema has 300 simulated members. Production schema add
 
 Quarterly dues invoices and F&B minimum shortfall charges per member.
 
-**Schema source:** api/create-invoices-table.js | **PK:** `invoice_id`
+**Schema source:** api/migrations/014-member-invoices-table.js | **PK:** `invoice_id`
 **Indexes:** idx_invoices_member(member_id), idx_invoices_status(status)
 
 | Column | Type | Null | Default | Description | Jonas Source |

@@ -1,8 +1,10 @@
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
 
 export default withAuth(async function handler(req, res) {
-  const clubId = getClubId(req);
+  // B25: GET lists confirmations/reassignments (read); POST mutates
+  // booking_confirmations / slot_reassignments — default-deny on writes.
+  const clubId = req.method === 'POST' ? getWriteClubId(req) : getReadClubId(req);
   try {
     if (req.method === 'POST') {
       const { operation, confirmationId, reassignmentId, ...fields } = req.body;

@@ -7,7 +7,7 @@
  * and imports them into the appropriate table with validation.
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getWriteClubId } from './lib/withAuth.js';
 import { logError, logInfo, logWarn } from './lib/logger.js';
 import { cors } from './lib/cors.js';
 
@@ -294,8 +294,11 @@ export default withAuth(async function handler(req, res) {
   }
 
   try {
-  const clubId = getClubId(req);
-  const { importType, rows, uploadedBy } = req.body;
+  const clubId = getWriteClubId(req);
+  // SEC-4: uploaded_by must come from the authenticated session, not req.body.
+  // Any body.uploadedBy from legacy clients is ignored.
+  const { importType, rows } = req.body;
+  const uploadedBy = req.auth?.userId || 'unknown';
 
   if (!importType || !rows || !Array.isArray(rows)) {
     return res.status(400).json({ error: 'Missing required fields: importType, rows[]' });
@@ -311,7 +314,7 @@ export default withAuth(async function handler(req, res) {
   try {
     await sql`
       INSERT INTO csv_imports (import_id, club_id, uploaded_by, import_type, status, total_rows)
-      VALUES (${importId}, ${clubId}, ${uploadedBy || 'system'}, ${importType}, 'processing', ${rows.length})
+      VALUES (${importId}, ${clubId}, ${uploadedBy}, ${importType}, 'processing', ${rows.length})
     `;
   } catch {
     // csv_imports table may not exist — non-critical, continue with import

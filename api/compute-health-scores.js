@@ -15,7 +15,7 @@
  * Archetypes: Die-Hard Golfer, Social Butterfly, Balanced Active, Weekend Warrior, Declining, New Member, Ghost, Snowbird
  */
 import { sql } from '@vercel/postgres';
-import { withAuth, getClubId } from './lib/withAuth.js';
+import { withAuth, getWriteClubId } from './lib/withAuth.js';
 
 const WEIGHTS = { golf: 0.30, dining: 0.25, email: 0.25, events: 0.20 };
 
@@ -184,7 +184,7 @@ export default withAuth(async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const clubId = getClubId(req);
+  const clubId = getWriteClubId(req);
 
   try {
     // Ensure health score columns exist on members table
