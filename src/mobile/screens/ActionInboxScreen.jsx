@@ -160,8 +160,12 @@ function PriorityGroup({ priority, actions, onApprove, onDismiss, onApproveAll, 
   const color = PRIORITY_COLORS[priority] || '#6B7280';
   const count = actions.length;
 
-  if (count === 0) return null;
-
+  // 2026-04-09 wave 13 mobile audit fix: this useMemo USED TO BE below the
+  // `if (count === 0) return null` early return, which violated rules-of-hooks
+  // — when count went 0 → >0, the useMemo would suddenly be called on a
+  // render after 2 useStates had already executed, producing the
+  // "Rendered fewer hooks than expected" page error caught by the audit.
+  // Moved BEFORE the early return so all 3 hooks always run.
   // Group duplicate member actions
   const grouped = useMemo(() => {
     const memberCounts = {};
@@ -185,6 +189,9 @@ function PriorityGroup({ priority, actions, onApprove, onDismiss, onApproveAll, 
     });
     return result;
   }, [actions]);
+
+  // Early-return AFTER all hooks have run (rules-of-hooks compliant)
+  if (count === 0) return null;
 
   const displayLimit = showAll ? grouped.length : 5;
 

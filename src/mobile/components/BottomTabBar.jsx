@@ -2,18 +2,23 @@ import { useState } from 'react';
 import { useMobileNav } from '../context/MobileNavContext';
 import { useApp } from '@/context/AppContext';
 
+// 2026-04-09 wave 13 mobile audit fix: PRIMARY_TABS used to declare a
+// 'revenue' tab and MORE_ITEMS declared 'insights' and 'board-report',
+// but MobileShell.SCREENS only maps cockpit/inbox/members/settings.
+// Tapping any of the 3 unwired tabs silently fell back to CockpitScreen
+// — a demo-killer (audit P0). Removed the orphan tabs so the bar only
+// shows surfaces that actually exist on mobile. Future Tier-2 features
+// (Revenue, Insights, Board Report) should add their own MobileShell
+// SCREENS entries before being re-added to this list.
 const PRIMARY_TABS = [
   { key: 'cockpit', label: 'Today', icon: '\uD83C\uDFAF' },
   { key: 'members', label: 'Members', icon: '\uD83D\uDC65' },
-  { key: 'revenue', label: 'Revenue', icon: '\uD83D\uDCB0' },
   { key: 'inbox', label: 'Actions', icon: '\u26A1' },
   { key: 'more', label: 'More', icon: '\u2022\u2022\u2022' },
 ];
 
 const MORE_ITEMS = [
-  { key: 'insights', label: 'Insights', icon: '\uD83D\uDD17' },
-  { key: 'board-report', label: 'Board Report', icon: '\uD83D\uDCCA' },
-  { key: 'settings', label: 'Admin', icon: '\u2699\uFE0F' },
+  { key: 'settings', label: 'Settings', icon: '\u2699\uFE0F' },
 ];
 
 export default function BottomTabBar() {

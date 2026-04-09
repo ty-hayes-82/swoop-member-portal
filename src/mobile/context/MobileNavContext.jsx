@@ -1,19 +1,53 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const MobileNavContext = createContext(null);
 
+// 2026-04-09 wave 13 mobile audit fix: hash deep-links (`#/m/inbox`,
+// `#/m/members`, `#/m/settings`, etc.) used to be ignored — the shell
+// always opened on the cockpit tab regardless of the URL the user
+// typed/bookmarked. Now we seed activeTab from the hash on mount AND
+// listen for hashchange events so back-button navigation works too.
+const VALID_TABS = new Set(['cockpit', 'inbox', 'members', 'settings']);
+
+function tabFromHash() {
+  if (typeof window === 'undefined') return 'cockpit';
+  const hash = window.location.hash || '';
+  // Pattern: #/m, #/m/inbox, #/m/members, #/m/settings, #/m/conference (handled upstream)
+  const match = hash.match(/^#\/m\/([a-z-]+)$/i);
+  if (!match) return 'cockpit';
+  const candidate = match[1].toLowerCase();
+  return VALID_TABS.has(candidate) ? candidate : 'cockpit';
+}
+
 export function MobileNavProvider({ children }) {
-  const [activeTab, setActiveTab] = useState('cockpit');
+  const [activeTab, setActiveTab] = useState(tabFromHash);
   const [selectedMemberId, setSelectedMemberId] = useState(null);
+
+  // Re-read the hash whenever it changes (browser back/forward, manual edit)
+  useEffect(() => {
+    const onHashChange = () => setActiveTab(tabFromHash());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   const navigateTab = useCallback((tab) => {
     setActiveTab(tab);
     if (tab !== 'members') setSelectedMemberId(null);
+    // Push the hash so the URL stays in sync — also enables back-button.
+    if (typeof window !== 'undefined' && VALID_TABS.has(tab)) {
+      const targetHash = tab === 'cockpit' ? '#/m' : `#/m/${tab}`;
+      if (window.location.hash !== targetHash) {
+        window.history.pushState(null, '', targetHash);
+      }
+    }
   }, []);
 
   const openMember = useCallback((memberId) => {
     setSelectedMemberId(memberId);
     setActiveTab('members');
+    if (typeof window !== 'undefined' && window.location.hash !== '#/m/members') {
+      window.history.pushState(null, '', '#/m/members');
+    }
   }, []);
 
   return (

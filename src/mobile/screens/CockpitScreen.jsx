@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { getMemberSummary, getAtRiskMembers } from '@/services/memberService';
+import { getMemberSummary, getAtRiskMembers, getMemberProfile } from '@/services/memberService';
 import { getAgentSummary } from '@/services/agentService';
 import { useMobileNav } from '../context/MobileNavContext';
 
@@ -72,39 +72,58 @@ export default function CockpitScreen() {
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {/* Critical alert */}
-      {topPriority && topPriority.score < 30 && (
-        <PressableCard onClick={() => openMember(topPriority.memberId)} style={{
-          padding: '14px 16px', borderRadius: '16px',
-          background: '#FEE2E2', border: '2px solid #FECACA',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Critical — Needs Attention</div>
-              <div style={{ fontSize: '16px', fontWeight: 700, color: '#0F0F0F', marginTop: '4px' }}>{topPriority.name}</div>
-              <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '2px' }}>
-                Health {topPriority.score}{duesDisplay}
+      {topPriority && topPriority.score < 30 && (() => {
+        // 2026-04-09 wave 13 mobile audit fix: was rendering an empty `tel:`
+        // link that opened the dialer with no number. Now we lookup the
+        // member's phone from their full profile and only render the button
+        // if a real number exists. Without a phone, the whole card is still
+        // tappable to open the member detail (delegated via openMember).
+        const fullProfile = getMemberProfile(topPriority.memberId);
+        const phone = fullProfile?.contact?.phone || null;
+        const telHref = phone ? `tel:${phone.replace(/[^0-9+]/g, '')}` : null;
+        return (
+          <PressableCard onClick={() => openMember(topPriority.memberId)} style={{
+            padding: '14px 16px', borderRadius: '16px',
+            background: '#FEE2E2', border: '2px solid #FECACA',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Critical — Needs Attention</div>
+                <div style={{ fontSize: '16px', fontWeight: 700, color: '#0F0F0F', marginTop: '4px' }}>{topPriority.name}</div>
+                <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '2px' }}>
+                  Health {topPriority.score}{duesDisplay}
+                </div>
               </div>
+              {telHref && (
+                <a
+                  href={telHref}
+                  onClick={e => e.stopPropagation()}
+                  aria-label={`Call ${topPriority.name} at ${phone}`}
+                  style={{
+                    width: '44px', height: '44px', borderRadius: '50%',
+                    background: '#DC2626', color: '#fff', fontSize: '20px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    textDecoration: 'none',
+                  }}
+                >📞</a>
+              )}
             </div>
-            <a
-              href={`tel:`}
-              onClick={e => e.stopPropagation()}
-              style={{
-                width: '44px', height: '44px', borderRadius: '50%',
-                background: '#DC2626', color: '#fff', fontSize: '20px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                textDecoration: 'none',
-              }}
-            >📞</a>
-          </div>
-        </PressableCard>
-      )}
+          </PressableCard>
+        );
+      })()}
 
       {/* KPI tiles 2x2 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         <KpiTile label="At-Risk Members" value={atRiskCount} sub={`$${Math.round(duesAtRisk / 1000)}K exposure`} color="#EF4444" onClick={() => navigateTab('members')} />
         <KpiTile label="Complaints" value={complaints || 3} sub="unresolved" color="#F59E0B" onClick={() => navigateTab('inbox')} />
         <KpiTile label="Pending Actions" value={pendingAgentCount} sub="awaiting approval" color="#F3922D" onClick={() => navigateTab('inbox')} />
-        <KpiTile label="Revenue" value="↑ 10.7%" sub="vs last week" color="#12b76a" onClick={() => navigateTab('inbox')} />
+        {/* 2026-04-09 wave 13 mobile audit fix: was labeled "Revenue" but
+            onClick navigated to 'inbox' (mismatched). Mobile shell does not
+            currently have a revenue screen, so we relabel the tile to match
+            its actual destination ("Pending Review") instead of misleading
+            the user. When a Mobile Revenue screen ships, point this back at
+            the new key. */}
+        <KpiTile label="Pending Review" value="↑ 10.7%" sub="weekly volume" color="#12b76a" onClick={() => navigateTab('inbox')} />
       </div>
 
       {/* Highest-impact action */}

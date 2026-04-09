@@ -220,13 +220,30 @@ function MobileMemberCard({ member, expanded, onToggle, showContext }) {
             </div>
           )}
 
-          {/* Quick actions */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <QuickBtn icon="📞" label="Call" onClick={(e) => { e.stopPropagation(); quickAction('call', 'Call scheduled'); }} />
-            <QuickBtn icon="💬" label="SMS" onClick={(e) => { e.stopPropagation(); quickAction('sms', 'SMS drafted'); }} />
-            <QuickBtn icon="✉️" label="Email" onClick={(e) => { e.stopPropagation(); quickAction('email', 'Email queued'); }} />
-            <QuickBtn icon="🎁" label="Comp" onClick={(e) => { e.stopPropagation(); quickAction('comp', 'Comp offer logged'); }} />
-          </div>
+          {/* Quick actions — context-aware.
+              2026-04-09 wave 13 user directive: when the member is currently
+              ON PREMISE (showContext=true), Call/SMS/Email are pointless
+              because the staff member can walk up to them. Replace the action
+              set with face-to-face actions: Greet (log a personal touchpoint),
+              Comp (free drink/dessert/range balls), Move seat (service
+              recovery), Hand-off (escalate to GM in person). When the member
+              is NOT on premise (At-Risk or All Members modes), keep the
+              original remote action set. */}
+          {showContext ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <QuickBtn icon="🤝" label="Greet" onClick={(e) => { e.stopPropagation(); quickAction('greet_in_person', 'Greeting logged'); }} />
+              <QuickBtn icon="🎁" label="Comp" onClick={(e) => { e.stopPropagation(); quickAction('comp_in_person', 'Comp offered'); }} />
+              <QuickBtn icon="🪑" label="Reseat" onClick={(e) => { e.stopPropagation(); quickAction('move_seat', 'Better seat assigned'); }} />
+              <QuickBtn icon="📣" label="Tell GM" onClick={(e) => { e.stopPropagation(); quickAction('handoff_to_gm', 'GM hand-off requested'); }} />
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <QuickBtn icon="📞" label="Call" onClick={(e) => { e.stopPropagation(); quickAction('call', 'Call scheduled'); }} />
+              <QuickBtn icon="💬" label="SMS" onClick={(e) => { e.stopPropagation(); quickAction('sms', 'SMS drafted'); }} />
+              <QuickBtn icon="✉️" label="Email" onClick={(e) => { e.stopPropagation(); quickAction('email', 'Email queued'); }} />
+              <QuickBtn icon="🎁" label="Comp" onClick={(e) => { e.stopPropagation(); quickAction('comp', 'Comp offer logged'); }} />
+            </div>
+          )}
         </div>
       )}
     </div>
