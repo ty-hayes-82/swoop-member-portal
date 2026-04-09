@@ -66,17 +66,22 @@ function buildDecayChain(profile) {
     });
   });
 
-  // If few events, add demo journey points based on member scenario
+  // If few events, add demo journey points based on member scenario.
+  // 2026-04-09 storyboard fidelity audit fix: was hardcoded "Oct 2025" -
+  // "Jan 2026" string literals, which would age awkwardly on a fresh
+  // pilot import dated outside that window. Now uses RELATIVE date
+  // labels ("~12 weeks ago", "~3 weeks ago", etc.) that read as a
+  // decay journey regardless of when the demo is run.
   if (events.length < 4) {
     const demoEvents = [
-      { date: 'Oct 2025', domain: 'Email', label: 'Newsletter open rate dropped below 20%', type: 'warning', decayOrder: 1 },
-      { date: 'Oct 2025', domain: 'Golf', label: 'Regular rounds: 3-4x/month', type: 'positive' },
-      { date: 'Nov 2025', domain: 'Golf', label: 'Rounds dropped to 2x/month', type: 'warning', decayOrder: 2 },
-      { date: 'Nov 2025', domain: 'Dining', label: 'Post-round dining stopped', type: 'warning', decayOrder: 3 },
-      { date: 'Dec 2025', domain: 'Email', label: 'Newsletter open rate below 10%', type: 'risk' },
-      { date: 'Dec 2025', domain: 'Golf', label: 'Only 1 round played', type: 'risk' },
-      { date: 'Jan 2026', domain: 'Events', label: 'Skipped member-guest invite', type: 'risk', decayOrder: 4 },
-      { date: 'Jan 2026', domain: 'Risk', label: 'Resignation risk: high', type: 'risk' },
+      { date: '~12 weeks ago', domain: 'Email', label: 'Newsletter open rate dropped below 20%', type: 'warning', decayOrder: 1 },
+      { date: '~12 weeks ago', domain: 'Golf', label: 'Regular rounds: 3-4x/month', type: 'positive' },
+      { date: '~8 weeks ago', domain: 'Golf', label: 'Rounds dropped to 2x/month', type: 'warning', decayOrder: 2 },
+      { date: '~8 weeks ago', domain: 'Dining', label: 'Post-round dining stopped', type: 'warning', decayOrder: 3 },
+      { date: '~4 weeks ago', domain: 'Email', label: 'Newsletter open rate below 10%', type: 'risk' },
+      { date: '~4 weeks ago', domain: 'Golf', label: 'Only 1 round played', type: 'risk' },
+      { date: 'this week', domain: 'Events', label: 'Skipped member-guest invite', type: 'risk', decayOrder: 4 },
+      { date: 'this week', domain: 'Risk', label: 'Resignation risk: high', type: 'risk' },
     ];
     events.push(...demoEvents);
   }
@@ -260,6 +265,18 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
   const stepPad = isPage ? 'px-3 py-1.5' : 'px-2.5 py-1';
   const stepLabelSize = isPage ? 'text-[11px]' : 'text-[10px]';
 
+  // 2026-04-09 storyboard fidelity audit fix: surface the dollar anchor
+  // ($XXK/yr at risk) inside the decay-chain card so the Story 2 narrator
+  // can land "$32K/yr in dues" in the same viewport as the decay viz.
+  // Reads from the canonical member CRM fields. Only renders when the
+  // member has dues data — never invents a number.
+  const duesAnnual = profile?.duesAnnual ?? profile?.dues_annual ?? profile?.dues ?? profile?.memberValueAnnual ?? null;
+  const duesAnchor = (() => {
+    if (!duesAnnual || duesAnnual <= 0) return null;
+    const k = Math.round(duesAnnual / 1000);
+    return `$${k}K/yr at risk`;
+  })();
+
   return (
     <div className={outerClass}>
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
@@ -271,11 +288,23 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
             <div className="text-[11px] text-gray-500 mt-0.5">Cross-domain timeline &middot; Pillar 2: FIX IT</div>
           )}
         </div>
-        {daysSinceFirstSignal != null && (
-          <span className={counterClass}>
-            First signal: {daysSinceFirstSignal} days ago
-          </span>
-        )}
+        <div className="flex items-center gap-1.5 flex-wrap justify-end">
+          {duesAnchor && (
+            <span
+              className={isPage
+                ? 'text-xs font-bold text-error-600 bg-error-500/[0.12] border border-error-500/30 px-2.5 py-1 rounded-md'
+                : 'text-[11px] font-bold text-error-600 bg-error-500/[0.12] border border-error-500/25 px-2 py-0.5 rounded'}
+              title="Annual dues exposure if this member resigns"
+            >
+              {duesAnchor}
+            </span>
+          )}
+          {daysSinceFirstSignal != null && (
+            <span className={counterClass}>
+              First signal: {daysSinceFirstSignal} days ago
+            </span>
+          )}
+        </div>
       </div>
       <div className="flex items-start flex-wrap">
         {decayChain.map((step, i) => {
