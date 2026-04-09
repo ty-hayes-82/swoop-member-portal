@@ -25,9 +25,9 @@ export const todayTeeSheet = [
     cartPrep: { beverage: 'Sparkling water', snack: 'Mixed nuts', note: 'At-risk — starter greet warmly. Husband Marcus playing too. Suggest post-round brunch.' },
   },
   {
-    time: '7:16 AM', course: 'South', memberId: 'mbr_022', name: 'Robert Callaway',
+    time: '7:16 AM', course: 'South', memberId: 'mbr_022', name: 'Rob Callaway',
     archetype: 'Die-Hard Golfer', healthScore: 92, tier: 'Full Golf', duesAnnual: 22000,
-    group: ['Robert Callaway', 'Steve Whitmore', 'Phil Egan'],
+    group: ['Rob Callaway', 'Steve Whitmore', 'Phil Egan'],
     cancelRisk: 0.04,
     cartPrep: { beverage: 'Coffee with cream', snack: null, note: 'VIP — $22K member. Prefers South course. Towels + extra tees.' },
   },
