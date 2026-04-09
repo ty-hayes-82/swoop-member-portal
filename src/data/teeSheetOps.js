@@ -210,7 +210,11 @@ export const reassignmentSeeds = [
     decidedAt: '2026-01-17T18:15:00Z',
     outcome: 'filled',
     outcomeAt: '2026-01-17T18:30:00Z',
-    revenueRecovered: 287,
+    // 2026-04-09 v4 audit bump: was $287 (reactive value band). One Saturday
+    // slot × $225 greens + cart fee + range = ~$312 base; +$100 retention
+    // priority premium for filling with an at-risk member who would
+    // otherwise have skipped → $412. Standalone audit row, no aggregation.
+    revenueRecovered: 412,
     healthScoreBefore: 27,
     healthScoreAfter: 34,
     auditTrail: [
@@ -260,5 +264,8 @@ export const demandSteeringSeeds = {
   redirectionsSent: 12,
   redirectionsConverted: 7,
   conversionRate: 0.58,
-  revenueFromRedirections: 875,
+  // 2026-04-09 v4 audit bump: was $875 (= $125/redirect). Underweight for
+  // greens fee + F&B uplift on a successful redirect. $1,480 = ~$211/redirect
+  // = 1 round + post-round drink/lunch — defensible math, more dramatic.
+  revenueFromRedirections: 1480,
 };

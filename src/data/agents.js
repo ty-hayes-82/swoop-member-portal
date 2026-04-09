@@ -236,7 +236,10 @@ export const agentActions = [
     actionType: 'REVENUE_CAPTURE',
     description: 'Recommend dynamic twilight pricing adjustment for underfilled Tuesday block.',
     status: 'pending',
-    impactMetric: '$780 incremental weekly revenue',
+    // 2026-04-09 v4 audit bump: was $780. A 42% fill gap on Tue PM at
+    // Pinetree tier ($47/round F&B avg + $50 twilight greens) realistically
+    // yields $1,200-$1,500/week. Picked $1,340 as the credible mid-point.
+    impactMetric: '$1,340 incremental weekly revenue',
     priority: 'low',
     memberId: 'mbr_312',
     signals: [

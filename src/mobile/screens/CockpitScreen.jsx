@@ -20,7 +20,10 @@ export default function CockpitScreen() {
   }, []);
 
   const atRiskCount = (summary.atRisk ?? 0) + (summary.critical ?? 0);
-  const duesAtRisk = summary.potentialDuesAtRisk || 733000;
+  // 2026-04-09 v4 audit fix: was || 733000 stale fallback. v3 bumped the
+  // canonical members.js potentialDuesAtRisk to 868000; this mobile fallback
+  // was never synced. Now matches the seed value.
+  const duesAtRisk = summary.potentialDuesAtRisk || 868000;
 
   const topPriority = useMemo(() => {
     const critical = atRisk.filter(m => m.score < 30).sort((a, b) => a.score - b.score);

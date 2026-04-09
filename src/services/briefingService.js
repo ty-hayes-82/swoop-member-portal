@@ -224,18 +224,29 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         impact: '+20-30% lunch covers',
         effort: '5 min',
         conversionRate: null,
-        detail: 'Wind advisory (18 mph gusts by noon) historically reduces golf bookings by 15% but increases Grill Room lunch covers by 20-30% as members stay indoors. Add 2 servers, prep 15 extra grilled items.',
+        // 2026-04-09 v4 audit fix: was "18 mph gusts by noon" which contradicted
+        // the canonical 32 mph wind-advisory narrative everywhere else in this
+        // file (lines 39, 161). Synced.
+        detail: 'Wind advisory (32 mph gusts by afternoon) historically reduces golf bookings by 15% but increases Grill Room lunch covers by 20-30% as members stay indoors. Add 2 servers, prep 15 extra grilled items.',
         action: 'View F&B operations',
         link: 'fb-performance',
       },
       {
         id: 'at-risk-touchpoints',
         icon: '👋',
-        title: '2 at-risk members playing today — greet personally',
-        impact: '$36K dues at stake',
-        effort: '10 min',
+        // 2026-04-09 v4 audit fix: was "2 at-risk members" / $36K stale.
+        // The canonical at-risk-on-today's-tee-sheet roster (briefingService
+        // primary block + cockpit + storyboard) is now 3 members:
+        // James (9:20), Anne (10:15), Robert (10:42). Total dues exposure
+        // James $22K + Anne $14K + Robert $24K ≈ $60K. The mini-card's
+        // "$36K" was stale (Anne $12K + old Robert $18K = $30K, after my
+        // v3 sync it should land at $30K not $36K). Updated to "$60K
+        // dues at stake" and detail names all 3 members with correct times.
+        title: '3 at-risk members playing today — greet personally',
+        impact: '$60K dues at stake',
+        effort: '15 min',
         conversionRate: null,
-        detail: 'Anne Jordan (8:14 AM) and Robert Callahan (10:40 AM) are both at-risk members with tee times today. Personal GM greeting + brief conversation can prevent further disengagement.',
+        detail: 'James Whitfield (9:20 AM), Anne Jordan (10:15 AM), and Robert Callahan (10:42 AM) are all at-risk members with tee times today. Personal GM greeting + brief conversation can prevent further disengagement.',
         action: 'View member details',
         link: 'member-health',
       },
