@@ -387,14 +387,21 @@ export default function LoginPage({ onLogin }) {
                 2026-04-09 wave 10. */}
             <button
               onClick={() => {
+                // 2026-04-09 wave 12 fix: previous version called startDemo(false)
+                // then setTimeout(() => set hash). That created a race where the
+                // auth re-render routed to #/today FIRST and RouterViews (which
+                // reads window.location.hash without subscribing to hashchange)
+                // never re-evaluated for the deferred hash write.
+                //
+                // Fix: write the hash BEFORE startDemo so the mount of
+                // RouterViews after the auth state change reads the correct
+                // hash on its very first render. The Conference shell route
+                // check (`#/m/conference`) is the first branch in RouterViews,
+                // so as long as the hash is right at mount time, we land cleanly.
+                if (typeof window !== 'undefined') {
+                  window.location.hash = '#/m/conference';
+                }
                 startDemo(false);
-                // Brief delay so the auth/state writes settle, then deep-link
-                // to the conference shell
-                setTimeout(() => {
-                  if (typeof window !== 'undefined') {
-                    window.location.hash = '#/m/conference';
-                  }
-                }, 100);
               }}
               className="w-full py-3 rounded-xl border border-purple-200 bg-purple-50 text-purple-700 text-sm font-semibold cursor-pointer hover:bg-purple-100 transition-colors"
               style={{ borderColor: '#c4b5fd', background: '#f5f3ff', color: '#6d28d9' }}
