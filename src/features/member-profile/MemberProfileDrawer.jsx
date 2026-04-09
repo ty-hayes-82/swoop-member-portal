@@ -831,7 +831,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
       {/* Household / Family Unit View */}
       {profile.family && profile.family.length > 0 && (
-        <Section title="Household" description={`${profile.family.length + 1} members`}>
+        <Section title="Household" description={`${profile.family.length + 1} members`} sourceSystems={['Member CRM']}>
           <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
             {/* Aggregate household value */}
             <div className="flex gap-4 px-3 py-2 bg-gray-100 rounded-lg border border-gray-200" style={{ fontSize: '11px', lineHeight: 1.4 }}>
@@ -899,11 +899,11 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </Section>
 
       {/* Outreach History */}
-      <Section title="Outreach History" description="Past communications">
+      <Section title="Outreach History" description="Past communications" sourceSystems={['Swoop App']}>
         <OutreachHistory profile={profile} />
       </Section>
 
-      <Section title="Preferences & insights">
+      <Section title="Preferences & insights" sourceSystems={['Member CRM']}>
         <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {profile.preferences?.favoriteSpots && (
             <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
@@ -943,7 +943,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         <MemberJourneyTimeline profile={profile} />
       </Section>
 
-      <Section title="Risk signals">
+      <Section title="Risk signals" sourceSystems={['Analytics', 'Tee Sheet', 'POS', 'Email']}>
         <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {(profile.riskSignals ?? []).map((signal) => (
             <div

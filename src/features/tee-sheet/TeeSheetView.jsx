@@ -351,14 +351,14 @@ export default function TeeSheetView() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="bg-gray-50 text-xs text-gray-400 uppercase tracking-wider">
-                  <th className="px-4 py-2.5 text-left font-medium">Time</th>
-                  <th className="px-4 py-2.5 text-left font-medium">Course</th>
-                  <th className="px-4 py-2.5 text-left font-medium">Member</th>
-                  <th className="px-4 py-2.5 text-left font-medium hidden sm:table-cell">Archetype</th>
-                  <th className="px-4 py-2.5 text-center font-medium">Health</th>
-                  <th className="px-4 py-2.5 text-left font-medium hidden md:table-cell">Group</th>
-                  <th className="px-4 py-2.5 text-center font-medium hidden lg:table-cell">Cancel Risk</th>
-                  <th className="px-4 py-2.5 text-left font-medium">Flags</th>
+                  <th className="px-4 py-2.5 text-left font-medium" title="Source: Tee Sheet">Time ⛳</th>
+                  <th className="px-4 py-2.5 text-left font-medium" title="Source: Tee Sheet">Course ⛳</th>
+                  <th className="px-4 py-2.5 text-left font-medium" title="Source: Member CRM">Member ★</th>
+                  <th className="px-4 py-2.5 text-left font-medium hidden sm:table-cell" title="Source: Analytics">Archetype ◉</th>
+                  <th className="px-4 py-2.5 text-center font-medium" title="Source: Analytics (cross-domain composite)">Health ◉</th>
+                  <th className="px-4 py-2.5 text-left font-medium hidden md:table-cell" title="Source: Tee Sheet">Group ⛳</th>
+                  <th className="px-4 py-2.5 text-center font-medium hidden lg:table-cell" title="Source: Analytics ML prediction">Cancel Risk ◉</th>
+                  <th className="px-4 py-2.5 text-left font-medium" title="Source: Member CRM + POS">Flags ★</th>
                 </tr>
               </thead>
               <tbody>
@@ -375,8 +375,14 @@ export default function TeeSheetView() {
                       <td className="px-4 py-2.5 text-xs text-gray-500">{t.course}</td>
                       <td className="px-4 py-2.5">
                         {showMemberNames() ? (
-                          <MemberLink memberId={t.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 hover:text-brand-500">
-                            {t.name}
+                          <MemberLink
+                            memberId={t.memberId}
+                            mode="drawer"
+                            className="font-semibold text-sm text-gray-800 hover:text-brand-500"
+                          >
+                            <span title={t.duesAnnual > 0 ? `$${t.duesAnnual.toLocaleString()}/yr in dues — click to view full profile` : 'Click to view profile'}>
+                              {t.name}
+                            </span>
                           </MemberLink>
                         ) : (
                           <span className="font-semibold text-sm text-gray-800">Member</span>
@@ -386,7 +392,13 @@ export default function TeeSheetView() {
                         <ArchetypeBadge archetype={t.archetype} size="xs" />
                       </td>
                       <td className="px-4 py-2.5 text-center">
-                        <span className="font-mono font-bold text-xs" style={{ color }}>{t.healthScore}</span>
+                        <span
+                          className="font-mono font-bold text-xs cursor-help"
+                          style={{ color }}
+                          title={`Cross-domain health score · 4 dimensions:\nGolf · Dining · Email · Events\nClick member name to see breakdown`}
+                        >
+                          {t.healthScore}
+                        </span>
                       </td>
                       <td className="px-4 py-2.5 hidden md:table-cell text-xs text-gray-500 max-w-[200px] truncate">
                         {t.group.join(', ')}

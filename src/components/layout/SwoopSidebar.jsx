@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useNavigationContext } from "@/context/NavigationContext";
+import { useMemberProfile } from "@/context/MemberProfileContext";
 import { NAV_ITEMS } from "@/config/navigation";
+import { shouldUseStatic } from "@/services/demoGate";
+import { getAtRiskMembers } from "@/services/memberService";
 
 const primaryItems = NAV_ITEMS.filter(
   (item) => item.section === "PRIMARY" && !item.hidden
@@ -58,6 +61,30 @@ const SwoopSidebar = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered, setIsMobileOpen } =
     useSidebar();
   const { currentRoute, navigate } = useNavigationContext();
+  const { openProfile } = useMemberProfile();
+
+  const handleStartStory = (storyId) => {
+    if (storyId === 'briefing') {
+      if (currentRoute !== 'today') {
+        navigate('today');
+      } else {
+        // Already on today — scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else if (storyId === 'catch') {
+      if (shouldUseStatic('members')) {
+        const atRisk = getAtRiskMembers() || [];
+        const member = [...atRisk].sort((a, b) => (a.score ?? a.healthScore ?? 100) - (b.score ?? b.healthScore ?? 100))[0];
+        if (member?.memberId) {
+          openProfile(member.memberId);
+          return;
+        }
+      }
+      navigate('members', { tab: 'at-risk' });
+    } else if (storyId === 'revenue') {
+      navigate('revenue');
+    }
+  };
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -155,16 +182,45 @@ const SwoopSidebar = () => {
           </div>
         </nav>
 
-        {/* Bottom widget */}
+        {/* Demo Story Flows — always available navigation to the 3 storyboard moments */}
         {showFull && (
           <div className="mt-auto mb-6">
-            <div className="rounded-xl bg-white/5 p-4">
-              <p className="text-sm font-medium text-white mb-1">
-                Swoop Intelligence
-              </p>
-              <p className="text-xs text-gray-400">
-                Operational insights powered by your integrated club data.
-              </p>
+            <div className="rounded-xl bg-white/5 p-3 border border-white/10">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400">
+                  ⚡ Demo Stories
+                </p>
+                <span className="text-[9px] text-gray-500 font-mono">~10 min</span>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handleStartStory('briefing')}
+                  className="text-left w-full px-2 py-1.5 rounded-md cursor-pointer bg-transparent border border-transparent hover:bg-white/5 hover:border-white/10 transition-colors"
+                  style={{ borderLeftWidth: '3px', borderLeftColor: '#34D399' }}
+                >
+                  <div className="text-[11px] font-bold text-white leading-tight">01 · Saturday Briefing</div>
+                  <div className="text-[9px] text-gray-400">Daniel · ~4 min</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStartStory('catch')}
+                  className="text-left w-full px-2 py-1.5 rounded-md cursor-pointer bg-transparent border border-transparent hover:bg-white/5 hover:border-white/10 transition-colors"
+                  style={{ borderLeftWidth: '3px', borderLeftColor: '#F59E0B' }}
+                >
+                  <div className="text-[11px] font-bold text-white leading-tight">02 · Quiet Resignation</div>
+                  <div className="text-[9px] text-gray-400">First Domino · ~3 min</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStartStory('revenue')}
+                  className="text-left w-full px-2 py-1.5 rounded-md cursor-pointer bg-transparent border border-transparent hover:bg-white/5 hover:border-white/10 transition-colors"
+                  style={{ borderLeftWidth: '3px', borderLeftColor: '#60A5FA' }}
+                >
+                  <div className="text-[11px] font-bold text-white leading-tight">03 · Revenue Leakage</div>
+                  <div className="text-[9px] text-gray-400">$9,580/mo · ~3 min</div>
+                </button>
+              </div>
             </div>
           </div>
         )}

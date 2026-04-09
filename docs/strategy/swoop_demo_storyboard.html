@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swoop Golf — Pilot Demo Storyboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0F0D;
+  --surface: #111A16;
+  --surface2: #182420;
+  --border: #243830;
+  --text: #E4EDE8;
+  --text-dim: #8FA69A;
+  --text-muted: #5A7368;
+
+  /* Story accents */
+  --accent-daniel: #34D399;
+  --accent-daniel-dim: rgba(52,211,153,0.12);
+  --accent-gm: #F59E0B;
+  --accent-gm-dim: rgba(245,158,11,0.12);
+  --accent-revenue: #60A5FA;
+  --accent-revenue-dim: rgba(96,165,250,0.12);
+
+  /* Status */
+  --critical: #EF4444;
+  --critical-dim: rgba(239,68,68,0.10);
+  --high: #F97316;
+  --high-dim: rgba(249,115,22,0.10);
+  --green: #34D399;
+  --green-dim: rgba(52,211,153,0.10);
+  --blue: #60A5FA;
+  --blue-dim: rgba(96,165,250,0.10);
+
+  --radius: 10px;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Playfair Display', serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Header ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,15,13,0.88);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  background: var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bg);
+}
+
+.logo-text {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.logo-text span {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-family: var(--font);
+  font-size: 13px;
+  margin-left: 12px;
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.header-meta .tag {
+  background: var(--green-dim);
+  color: var(--green);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.header-meta .version {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 32px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  max-width: 1264px;
+  margin: 0 auto;
+}
+
+.tab {
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.tab:hover { color: var(--text); }
+.tab.active { border-bottom-color: var(--accent); color: var(--text); }
+
+.tab .tab-num {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  background: var(--surface2);
+  color: var(--text-dim);
+  transition: all 0.2s;
+}
+.tab.active .tab-num { background: var(--accent); color: var(--bg); }
+.tab .tab-time { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+.tab .tab-theme {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ── Main ── */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+/* ── Story Header ── */
+.story-header {
+  margin-bottom: 32px;
+  padding: 28px 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--accent);
+}
+
+.story-header h1 {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+
+.story-header .subtitle {
+  color: var(--text-dim);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.story-header .pillars {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pillar-tag {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.pillar-see { background: var(--accent-daniel-dim); color: var(--accent-daniel); }
+.pillar-fix { background: var(--accent-gm-dim); color: var(--accent-gm); }
+.pillar-prove { background: var(--accent-revenue-dim); color: var(--accent-revenue); }
+.pillar-layer3 { background: rgba(167,139,250,0.12); color: #A78BFA; }
+
+.story-header .scenario {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.story-header .scenario strong { color: var(--text); }
+
+.story-header .kpi-bar {
+  margin-top: 12px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.kpi-bar .kpi {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text-dim);
+}
+
+.kpi-bar .kpi b { color: var(--accent); font-weight: 600; }
+
+/* ── Step Cards ── */
+.steps { display: flex; flex-direction: column; gap: 20px; }
+
+.step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.step:hover { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+.step-header {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+}
+
+.step-num {
+  width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bg);
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.step-title-area {
+  flex: 1;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.step-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.step-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-slides { background: #1E3A5F; color: #60A5FA; }
+.badge-live { background: #1A3A2A; color: #34D399; }
+.badge-mockup { background: var(--high-dim); color: var(--high); }
+.badge-layer3 { background: rgba(139,92,246,0.15); color: #A78BFA; }
+.badge-data { background: rgba(236,72,153,0.12); color: #F472B6; }
+
+.step-body {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ── Panels ── */
+.panel {
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.panel-script {
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.panel-tech {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.panel-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.panel-label.script-label { color: var(--green); }
+.panel-label.tech-label { color: var(--text-muted); }
+.panel-label .icon { font-size: 14px; }
+
+.panel-script p { color: var(--text); margin-bottom: 8px; }
+.panel-script .say {
+  color: var(--text);
+  font-style: italic;
+  padding-left: 12px;
+  border-left: 2px solid var(--accent);
+  margin: 10px 0;
+}
+
+.panel-tech p { color: var(--text-dim); margin-bottom: 8px; }
+.panel-tech .click-path {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--green);
+  background: rgba(52,211,153,0.06);
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin: 8px 0;
+  display: block;
+}
+
+.panel-tech .data-note {
+  background: rgba(139,92,246,0.08);
+  border: 1px solid rgba(139,92,246,0.15);
+  color: #A78BFA;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.panel-tech .key-moment {
+  background: var(--accent-gm-dim);
+  border: 1px solid rgba(245,158,11,0.2);
+  color: var(--accent-gm);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.panel-tech .ready-flag {
+  background: var(--green-dim);
+  border: 1px solid rgba(52,211,153,0.2);
+  color: var(--green);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ── Differentiator ── */
+.differentiator {
+  margin-top: 24px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--green);
+}
+
+.differentiator h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+
+.differentiator p {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+/* ── Outcome ── */
+.outcome {
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.outcome h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.outcome p {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+/* ── Buyer Quote ── */
+.buyer-quote {
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--accent-gm);
+  font-style: italic;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.buyer-quote .attribution {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Story Transition ── */
+.story-panel { display: none; }
+.story-panel.active { display: block; }
+
+/* ── Responsive ── */
+@media (max-width: 800px) {
+  .step-body { grid-template-columns: 1fr; }
+  .header-inner { flex-direction: column; height: auto; padding: 12px 0; gap: 8px; }
+  .tabs { overflow-x: auto; }
+  .main { padding: 16px; }
+  .tab { padding: 12px 14px; font-size: 12px; }
+}
+
+@media print {
+  .header { position: static; }
+  .story-panel { display: block !important; page-break-before: always; }
+  .step { break-inside: avoid; }
+  body { background: white; color: black; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">Swoop Golf <span>Pilot Demo Storyboard</span></div>
+    </div>
+    <div class="header-meta">
+      <span class="version">v1.0 — Apr 2026</span>
+      <span>~10 min total</span>
+      <span>|</span>
+      <span class="tag">See It &rarr; Fix It &rarr; Prove It</span>
+    </div>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-story="daniel" onclick="switchStory('daniel')">
+    <span class="tab-num">1</span>
+    Daniel — Saturday Briefing
+    <span class="tab-time">~4 min</span>
+  </div>
+  <div class="tab" data-story="catch" onclick="switchStory('catch')">
+    <span class="tab-num">2</span>
+    The Quiet Resignation
+    <span class="tab-time">~3 min</span>
+  </div>
+  <div class="tab" data-story="revenue" onclick="switchStory('revenue')">
+    <span class="tab-num">3</span>
+    Revenue Leakage Discovery
+    <span class="tab-time">~3 min</span>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- STORY 1: DANIEL — THE SATURDAY MORNING BRIEFING        -->
+<!-- Theme 1: Operational Visibility + Theme 3: Staffing     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="story-panel active" id="story-daniel">
+  <div class="story-header" style="--accent: var(--accent-daniel);">
+    <h1>The Saturday Morning Briefing</h1>
+    <div class="subtitle">Bowling Green CC — Daniel Soehren, Director of Golf</div>
+    <div class="pillars">
+      <span class="pillar-tag pillar-see">See It</span>
+      <span class="pillar-tag pillar-fix">Fix It</span>
+      <span class="pillar-tag pillar-layer3">Cross-Domain</span>
+    </div>
+    <div class="scenario">
+      <strong>Setup:</strong> It's 7:15 AM Saturday. Daniel opens Swoop before heading to the club. The Today view immediately tells him what his tee sheet, weather, staffing, and member health data are saying together. 220 rounds booked, 3 at-risk members on the tee sheet, and he's 2 servers short for projected dining demand. No single system told him any of this. Swoop connected the dots overnight.
+    </div>
+    <div class="kpi-bar">
+      <span class="kpi">Cockpit preference: <b>50% of GMs</b></span>
+      <span class="kpi">Service consistency: <b>70% top-3</b></span>
+      <span class="kpi">Staffing alignment: <b>60% top-3</b></span>
+    </div>
+  </div>
+
+  <div class="steps" style="--accent: var(--accent-daniel);">
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">01</div>
+        <div class="step-title-area">
+          <span class="step-title">Set the Scene — Saturday at the Club</span>
+          <div class="step-badges">
+            <span class="badge badge-slides">Slides</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Meet Daniel. He's the Director of Golf at Bowling Green Country Club. It's 7:15 on a Saturday morning. 220 rounds are booked, the weather is 82 and clear, and he has no idea that three of his at-risk members have tee times today, or that his dining room is about to be short two servers."</div>
+          <p>Pause. Let the audience picture the chaos.</p>
+          <div class="say">"Right now, Daniel would need to check his tee sheet, pull up the POS schedule, cross-reference his CRM, and check the weather app. Four systems. Four logins. On a Saturday morning. Nobody does that."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <p>Opening slide: split-screen showing 4 separate club systems (Jonas tee sheet, POS schedule, member CRM, weather) vs. one Swoop screen. Emphasize the "4 logins" friction.</p>
+          <div class="data-note">💡 Survey data: 70% of GMs spend 2-5 hrs/wk bridging system gaps manually. 90% are only partially connected. 0% fully integrated.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">02</div>
+        <div class="step-title-area">
+          <span class="step-title">Today View — The Morning Briefing</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+            <span class="badge badge-layer3">Layer 3</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Daniel opens Swoop and sees one screen. The Today view. Right at the top: '220 rounds booked. Weather: 82°F, clear. 3 at-risk members on today's tee sheet. Staffing gap: 2 servers short for projected post-round dining demand.'"</div>
+          <p>Point to each data element. Let the cross-domain connection sink in.</p>
+          <div class="say">"Notice what just happened. Tee sheet data, weather data, member health data, and staffing data all came together in one sentence. No single system at this club can produce that sentence. That's the Layer 3 difference."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Swoop → Today view → Morning Briefing banner</span>
+          <p>Walk through each banner element slowly. The hero is the cross-domain synthesis, not any single metric.</p>
+          <div class="key-moment">⚡ KEY MOMENT: This is the "See It" wedge. The audience should feel the relief of one screen replacing four systems.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">03</div>
+        <div class="step-title-area">
+          <span class="step-title">At-Risk Members on Today's Sheet</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Daniel clicks into the at-risk alert. Three members. One has a 9:20 AM tee time. Her health score dropped from 82 to 61 over the past three weeks. Email opens fell first, then golf frequency dipped, and her last dining visit was 18 days ago."</div>
+          <p>Point to the decay sequence visualization. This is the member health score in action.</p>
+          <div class="say">"The CRM says she's an active member. The tee sheet says she booked today. Only the composite health score reveals that she's pulling away. This is the first domino insight that Jonas MetricsFirst cannot produce, because it can't see email engagement, dining frequency, and golf behavior together."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Today → At-Risk Members → Member card with health score + decay sequence</span>
+          <p>Show the source system badges: Tee Sheet + POS + Email + CRM. This builds trust by making the cross-domain synthesis visible.</p>
+          <div class="data-note">💡 Survey data: 90% value daily health score. 43.5/100 budget points to member visibility. Two clubs allocated 100% to visibility alone.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">04</div>
+        <div class="step-title-area">
+          <span class="step-title">Staffing Gap — The $31 Per Slow Round Insight</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+            <span class="badge badge-data">$ Impact</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Now Daniel sees the staffing recommendation. 220 rounds with post-round dining projected at 41% conversion on properly staffed days. But he's 2 servers short. Swoop knows from historical data that understaffed Saturdays drop dining conversion to 22%. That's a $31 revenue gap per slow round."</div>
+          <p>Let the dollar number land. This is the staffing-to-revenue connection.</p>
+          <div class="say">"This isn't a guess. This is tee sheet volume, cross-referenced with weather demand, cross-referenced with POS dining conversion rates, cross-referenced with staffing coverage. Four data sources. One actionable recommendation: call in one more server."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Today → Staffing Gap card → Revenue impact projection</span>
+          <p>Highlight the $31/slow round figure prominently. This is the demo-stopping data point from the audit.</p>
+          <div class="key-moment">⚡ KEY MOMENT: The audience should think "wait, slow rounds cost us dining revenue?" This is the cross-domain insight no single vendor delivers.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">05</div>
+        <div class="step-title-area">
+          <span class="step-title">Take Action — Approve from the Queue</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Daniel opens the Actions queue. Two recommended actions are waiting. First: 'Call in one additional server for Saturday lunch.' Second: 'Send personalized welcome-back touch to the at-risk member with the 9:20 tee time.' Daniel approves both with one tap each."</div>
+          <p>Emphasize: manual approval. No auto-execution. The GM stays in control.</p>
+          <div class="say">"Notice: Swoop recommended. Daniel decided. The system doesn't act on its own. 3 out of 4 club operators told us they want full manual control, especially at launch. This is intelligence with a human in the loop."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Today → Actions queue → Approve staffing action → Approve member touch action</span>
+          <p>Keep this fast. Two taps. The speed is the point.</p>
+          <div class="ready-flag">✅ Survey validation: 3/4 qualitative respondents want full manual control. Auto-execution is OFF by default.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="differentiator" style="--accent: var(--accent-daniel);">
+    <h3>Layer 3 Differentiator — What to hammer home</h3>
+    <p>Four data sources (tee sheet + weather + POS + member health) synthesized into one morning briefing with dollar-quantified staffing recommendations and at-risk member alerts. Jonas shows tee times. ForeTees shows bookings. Swoop shows what's about to go wrong and what to do about it. That's the difference between a system of record and a system of intelligence.</p>
+  </div>
+
+  <div class="outcome" style="--accent: var(--accent-daniel);">
+    <h3>Outcome — Close the story</h3>
+    <p>Saturday runs smoothly. The at-risk member gets a personal greeting from the pro shop. Post-round dining captures 41% conversion instead of the 22% from understaffed days. Zero complaints. Daniel went from guessing to knowing, and his Saturday was the best in a month. All before his first cup of coffee.</p>
+  </div>
+
+  <div class="buyer-quote" style="--accent: var(--accent-daniel);">
+    "I went from guessing to knowing. I staffed correctly, caught an at-risk member, and my Saturday was the best in a month."
+    <div class="attribution">What Daniel tells his GM on Monday morning</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- STORY 2: THE QUIET RESIGNATION CATCH                   -->
+<!-- Theme 2: Member Health & Early Warning                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="story-panel" id="story-catch">
+  <div class="story-header" style="--accent: var(--accent-gm);">
+    <h1>The Quiet Resignation Catch</h1>
+    <div class="subtitle">400-Member Club — GM, Tuesday Morning Review</div>
+    <div class="pillars">
+      <span class="pillar-tag pillar-see">See It</span>
+      <span class="pillar-tag pillar-fix">Fix It</span>
+      <span class="pillar-tag pillar-layer3">Cross-Domain</span>
+    </div>
+    <div class="scenario">
+      <strong>Setup:</strong> A GM opens the Today view on a Tuesday and sees a member who just moved from Healthy to At-Risk. No single system flagged the change. CRM shows an active member. Tee sheet shows reduced but present activity. Only the composite health score, drawing on email + golf + dining + events, reveals a decay pattern that started three weeks ago. The GM catches it before the resignation letter is written.
+    </div>
+    <div class="kpi-bar">
+      <span class="kpi">Health score value: <b>90% of GMs</b></span>
+      <span class="kpi">Visibility budget: <b>43.5/100 pts</b></span>
+      <span class="kpi">Currently reactive: <b>70%</b></span>
+    </div>
+  </div>
+
+  <div class="steps" style="--accent: var(--accent-gm);">
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">01</div>
+        <div class="step-title-area">
+          <span class="step-title">Set the Scene — The Invisible Churn</span>
+          <div class="step-badges">
+            <span class="badge badge-slides">Slides</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Here's a question every GM has asked: 'Why didn't I see that coming?' A member who was playing twice a week, dining regularly, opening every email. Then one day the resignation letter lands on your desk. Blindsided. But if you look at the data, the signals were there for weeks."</div>
+          <p>Pause.</p>
+          <div class="say">"The problem is that the signals were scattered across four different systems. Your CRM said 'active member.' Your tee sheet said 'booked last week.' Your POS said 'dined 18 days ago.' None of them raised a flag. But together, they tell a very different story."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <p>Opening slide: a timeline showing a member's engagement across 4 systems over 6 weeks. Each system looks fine individually. Together, the decay is obvious.</p>
+          <div class="data-note">💡 70% of GMs learn about member dissatisfaction only after complaints. This story shows proactive intelligence.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">02</div>
+        <div class="step-title-area">
+          <span class="step-title">Today View — Status Change Alert</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Tuesday morning. The GM opens Swoop and the Today view shows a status change: 'Member 203 moved from Healthy to At-Risk.' Health score dropped from 78 to 54."</div>
+          <p>Click into the member card.</p>
+          <div class="say">"Here's the decay sequence. Email opens dropped first, three weeks ago. Then golf frequency dipped two weeks ago. Last dining visit was 18 days ago. This is a multi-domain pattern. The first domino was email. Then golf. Then dining. It's a textbook disengagement arc."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Swoop → Today → Status Changes → Member 203 card → Decay sequence timeline</span>
+          <p>The decay sequence visualization is the hero. Show the "first domino" clearly: email → golf → dining. Walk it slowly.</p>
+          <div class="key-moment">⚡ KEY MOMENT: "The CRM says active. The tee sheet says present. Only the composite view reveals the trajectory." This line should land hard.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">03</div>
+        <div class="step-title-area">
+          <span class="step-title">Member Profile — The Full Cross-Domain Picture</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+            <span class="badge badge-layer3">Layer 3</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Click into the full profile. Here's everything Swoop knows about this member. Golf: 2 rounds/week down to 1 in the last month. Dining: average 1.5 visits/week, now zero for 18 days. Email: 85% open rate, dropped to 20%. Events: attended the Spring Social, but nothing since. Source system badges on every data point: Tee Sheet, POS, Email, CRM."</div>
+          <p>Point to the source system badges. This is the trust-building mechanism.</p>
+          <div class="say">"Every insight shows you where it came from. 'How do you know this?' is the first question a skeptical GM will ask. Swoop answers it automatically."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Member 203 card → Full profile → Multi-domain engagement chart</span>
+          <p>Highlight source system badges on each data point: [Tee Sheet] [POS] [Email] [CRM]. This addresses trust and transparency.</p>
+          <div class="ready-flag">✅ Audit strength: "Source System Transparency builds trust by making cross-domain synthesis visible."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">04</div>
+        <div class="step-title-area">
+          <span class="step-title">Take Action — GM Personal Call Playbook</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Swoop recommends an action: 'GM Personal Call. Check in, offer complimentary round with guest.' Daniel approves it. After the call, he marks it complete and logs a note: 'Member frustrated with pace of play on weekends. Rerouted to weekday morning tee times.'"</div>
+          <p>Show the action completion flow.</p>
+          <div class="say">"That member is worth $32,000 a year in dues. Without Swoop, the GM would have found out when the resignation letter hit his desk. Instead, he caught it in the first week of decay."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Member profile → Recommended action → Approve "GM Call" → Mark complete → Log note</span>
+          <p>The $32K/year figure is the anchor. Let it land. This connects the human action to the dollar value of the save.</p>
+          <div class="key-moment">⚡ KEY MOMENT: The dollar quantification. "$32K/year in dues. Found out from a phone call, not a resignation letter."</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="differentiator" style="--accent: var(--accent-gm);">
+    <h3>Layer 3 Differentiator — What to hammer home</h3>
+    <p>The CRM says active. The tee sheet says booked. Only Swoop's cross-domain health score reveals the decay trajectory. The "first domino" insight (email drops → golf drops → dining drops) is unique to Layer 3. Jonas MetricsFirst has a member risk score, but it's display-only and single-ecosystem. Swoop is real-time, action-oriented, and cross-domain.</p>
+  </div>
+
+  <div class="outcome" style="--accent: var(--accent-gm);">
+    <h3>Outcome — Close the story</h3>
+    <p>Member appreciates the call. Mentions frustration with pace of play on weekends. GM reroutes them to weekday morning tee times with faster pace. Health score stabilizes over the next month. Member renews 4 months later. $32K in annual dues protected from one phone call that Swoop recommended.</p>
+  </div>
+
+  <div class="buyer-quote" style="--accent: var(--accent-gm);">
+    "That member is worth $32,000 a year. Without Swoop, I would have found out when the resignation letter hit my desk."
+    <div class="attribution">What the GM tells the board</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- STORY 3: THE REVENUE LEAKAGE DISCOVERY                 -->
+<!-- Theme 3: Staffing-to-Service-to-Revenue Connection      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="story-panel" id="story-revenue">
+  <div class="story-header" style="--accent: var(--accent-revenue);">
+    <h1>The Revenue Leakage Discovery</h1>
+    <div class="subtitle">Monthly Board Prep — GM with F&B Committee</div>
+    <div class="pillars">
+      <span class="pillar-tag pillar-see">See It</span>
+      <span class="pillar-tag pillar-prove">Prove It</span>
+      <span class="pillar-tag pillar-layer3">Cross-Domain</span>
+    </div>
+    <div class="scenario">
+      <strong>Setup:</strong> A GM is preparing for a board meeting. He opens the Revenue view and discovers that $9,580/month in F&B revenue is being lost to operational failures he didn't know existed. The decomposition traces the loss to three root causes: slow rounds skipping dining, understaffed Fridays, and weather-driven no-shows. He presents the board with a specific remediation plan, dollar-quantified, with scenario projections. Budget approved.
+    </div>
+    <div class="kpi-bar">
+      <span class="kpi">F&B running at loss: <b>80% of clubs</b></span>
+      <span class="kpi">Staffing pain: <b>60% top-3</b></span>
+      <span class="kpi">Board #1 concern: <b>Financial perf (40%)</b></span>
+    </div>
+  </div>
+
+  <div class="steps" style="--accent: var(--accent-revenue);">
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">01</div>
+        <div class="step-title-area">
+          <span class="step-title">Set the Scene — Board Meeting in 3 Days</span>
+          <div class="step-badges">
+            <span class="badge badge-slides">Slides</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Board meeting is Thursday. The F&B committee wants to know why the dining operation is losing money. The GM knows it's losing money. Everybody knows it's losing money. 80% of private clubs run F&B at a loss. But nobody can tell the board exactly where the money is going and what to do about it."</div>
+          <p>Pause.</p>
+          <div class="say">"That's because the answer lives across three systems. The tee sheet knows pace of play. The POS knows dining revenue. The schedule knows staffing levels. Nobody has ever connected all three."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <p>Opening slide: "80% of private clubs run F&B at a loss." Then: "But how much is operational vs. structural?" This frames the discovery.</p>
+          <div class="data-note">💡 Survey: 80% negative or subsidized F&B. 30% cite labor mismatch as biggest leakage source. 40% say financial performance is #1 board concern.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">02</div>
+        <div class="step-title-area">
+          <span class="step-title">Revenue View — The $9,580/Month Decomposition</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+            <span class="badge badge-layer3">Layer 3</span>
+            <span class="badge badge-data">$ Impact</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"The GM opens the Revenue view. Right at the top: '$9,580 per month in F&B revenue lost to operational failures.' And here's the decomposition."</div>
+          <p>Walk through each line item slowly.</p>
+          <div class="say">"$5,760 from pace of play. Slow rounds are skipping the dining room. $3,400 from understaffed Fridays. And $420 from weather-driven no-shows with no cancellation outreach. Three root causes. Three different source systems. One number the GM has never seen before."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Swoop → Revenue → F&B Revenue Leakage → Decomposition chart</span>
+          <p>This is the hero visualization. The stacked bar or waterfall chart showing $5,760 + $3,400 + $420 = $9,580.</p>
+          <div class="key-moment">⚡ KEY MOMENT: Slow down on the $9,580 total. The GM has never seen this number. It was invisible until Swoop connected the systems.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">03</div>
+        <div class="step-title-area">
+          <span class="step-title">The Hole 12 Bottleneck — Pace-to-Dining Link</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+            <span class="badge badge-layer3">Layer 3</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Let's drill into the $5,760. Swoop identified that Hole 12 is the primary bottleneck. 9.1 minute average delay. And here's the cross-domain insight: slow rounds produce 22% post-round dining conversion. Fast rounds produce 41%. That's a $31 revenue gap per slow round."</div>
+          <p>This is THE demo-stopping data point. Let the $31/round figure land.</p>
+          <div class="say">"Nobody at this club has ever connected pace of play on Hole 12 to dining revenue. The tee sheet knows the pace. The POS knows the dining. Neither knows the other exists. Swoop sees both."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Revenue → Leakage → Pace of Play → Hole 12 detail → Dining conversion comparison</span>
+          <p>Show the 22% vs 41% dining conversion side by side. The $31/round figure is the anchor for everything that follows.</p>
+          <div class="key-moment">⚡ DEMO-STOPPING MOMENT: "$31 per slow round. Every slow round that skips dining costs you $31." Repeat this once. Let the board math happen in the audience's heads.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">04</div>
+        <div class="step-title-area">
+          <span class="step-title">Scenario Slider — What Recovery Looks Like</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"Now the GM uses the scenario slider. 'If we reduce slow rounds by 20%, we recover $1,152 per month.' Add one server to Friday lunch based on weather-demand correlation, that's another $850. Deploy a ranger to Hole 12 on high-demand days. Total recoverable: $2,000+ per month from two operational changes."</div>
+          <p>Move the slider in real-time. The number should update dynamically.</p>
+          <div class="say">"This is what the GM takes to the board. Not 'we have a dining problem.' But 'here's exactly where we're losing, here's why, here's the fix, and here's what it's worth.' Budget approved."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Revenue → Scenario section → Drag "Slow Round Reduction" slider to 20% → Show monthly recovery amount</span>
+          <p>The dynamic slider is the interaction moment. Move it slowly. Let the audience see the dollars change.</p>
+          <div class="ready-flag">✅ This transitions directly to the Board Report. If time allows, click into "Generate Board Report" to show the pre-structured 4-tab output.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">05</div>
+        <div class="step-title-area">
+          <span class="step-title">Board Report — The Story Writes Itself</span>
+          <div class="step-badges">
+            <span class="badge badge-live">Live UI</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="panel panel-script">
+          <div class="panel-label script-label"><span class="icon">🎙</span> Presenter Script</div>
+          <div class="say">"One click: 'Generate Board Report.' Four tabs are pre-structured. Summary: 14 members saved, $168K in protected dues, 23 service failures caught early, 4.2-hour average response time versus the industry standard of 6+ weeks. Member Saves. Operational Saves. What We Learned."</div>
+          <p>Click through the tabs quickly. The breadth is the point.</p>
+          <div class="say">"The GM used to spend 6 hours pulling reports from 4 systems. Now he opens one page and the story is already there. Board meeting runs 20 minutes instead of 45 because every number has a source and every insight has a dollar value."</div>
+        </div>
+        <div class="panel panel-tech">
+          <div class="panel-label tech-label"><span class="icon">⚙</span> Demo Notes</div>
+          <span class="click-path">Revenue → "Generate Board Report" → Board Report → Summary / Member Saves / Operational Saves / What We Learned tabs</span>
+          <p>Don't linger on every tab. The message is: the work is already done. Click through briskly.</p>
+          <div class="ready-flag">✅ Audit: "The Board Report alone could justify a subscription for many clubs." 4-tab structure is complete and validated.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="differentiator" style="--accent: var(--accent-revenue);">
+    <h3>Layer 3 Differentiator — What to hammer home</h3>
+    <p>Revenue leakage decomposition connecting pace of play (tee sheet) to dining conversion (POS) to staffing gaps (scheduling) is genuinely Layer 3. No single vendor can produce this insight. The $31 per slow round figure is proprietary cross-domain intelligence. Jonas sees tee times. Northstar sees POS. Swoop sees the $9,580/month they're losing together.</p>
+  </div>
+
+  <div class="outcome" style="--accent: var(--accent-revenue);">
+    <h3>Outcome — Close the story</h3>
+    <p>Board sees exact dollar impact, specific root cause, and concrete remediation plan. Ranger deployed to Hole 12. One server added to Friday lunch. Dining conversion recovers. Budget approved based on data, not anecdote. The GM's credibility with the board increased because the numbers came with sources.</p>
+  </div>
+
+  <div class="buyer-quote" style="--accent: var(--accent-revenue);">
+    "I used to spend 6 hours pulling reports from 4 systems. Now I open one page and the story is already there."
+    <div class="attribution">What GMs say after seeing the Board Report</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function switchStory(storyId) {
+  const accents = {
+    daniel: 'var(--accent-daniel)',
+    catch: 'var(--accent-gm)',
+    revenue: 'var(--accent-revenue)'
+  };
+  const accentDims = {
+    daniel: 'var(--accent-daniel-dim)',
+    catch: 'var(--accent-gm-dim)',
+    revenue: 'var(--accent-revenue-dim)'
+  };
+
+  document.querySelectorAll('.tab').forEach(t => {
+    const isActive = t.dataset.story === storyId;
+    t.classList.toggle('active', isActive);
+    t.style.setProperty('--accent', accents[t.dataset.story]);
+    t.style.setProperty('--accent-dim', accentDims[t.dataset.story]);
+  });
+
+  document.querySelectorAll('.story-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'story-' + storyId);
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+switchStory('daniel');
+</script>
+
+</body>
+</html>

@@ -12,6 +12,7 @@ import MemberAlerts from './MemberAlerts';
 import TomorrowForecast from './TomorrowForecast';
 import WeekForecast from './WeekForecast';
 import MorningBriefingSentence from './MorningBriefingSentence';
+import DemoStoriesLauncher from './DemoStoriesLauncher';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
@@ -256,6 +257,9 @@ export default function TodayView() {
         {/* Section 1.5: Morning Briefing Synthesis (Pillar 1: SEE IT) */}
         <MorningBriefingSentence />
 
+        {/* Section 1.6: Demo Story Flows — 3 storyboard moments, one click to start */}
+        <DemoStoriesLauncher />
+
         {/* Section 2: Quick Stats Row */}
         <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
           {[
@@ -297,39 +301,76 @@ export default function TodayView() {
 
         {/* F&B Quick Stats — when fb gate is open */}
         {shouldUseStatic('fb') && (
-          <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-            {[
-              { icon: '🍽️', label: 'Dining Covers Today', value: '126', color: '#ea580c' },
-              { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#16a34a' },
-              { icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' },
-            ].map(s => (
-              <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                <span className="text-lg">{s.icon}</span>
-                <div>
-                  <div className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">{s.label}</div>
-                  <div className="text-base font-bold" style={{ color: s.color }}>{s.value}</div>
+          <div className="fade-in-up fade-delay-1 flex flex-col gap-2">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+              {[
+                { icon: '🍽️', label: 'Dining Covers Today', value: '126', color: '#ea580c' },
+                { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#16a34a' },
+                { icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' },
+              ].map(s => (
+                <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <span className="text-lg">{s.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">{s.label}</div>
+                    <div className="text-base font-bold" style={{ color: s.color }}>{s.value}</div>
+                    <div style={{ marginTop: 2 }}>
+                      <SourceBadge system="POS" size="xs" />
+                    </div>
+                  </div>
                 </div>
+              ))}
+            </div>
+            {/* Cross-domain footer — Phase G1 */}
+            {shouldUseStatic('pace') && (
+              <div className="text-[11px] text-gray-500 px-2 leading-snug italic">
+                Post-round dining is linked to pace of play —{' '}
+                <span className="font-semibold text-error-600">slow rounds drop conversion to 22%</span>{' '}
+                vs 41% for fast rounds.{' '}
+                <button
+                  type="button"
+                  onClick={() => navigate('revenue')}
+                  className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline"
+                >
+                  See Revenue →
+                </button>
               </div>
-            ))}
+            )}
           </div>
         )}
 
         {/* Email Engagement Stats — when email gate is open */}
         {shouldUseStatic('email') && (
-          <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-            {[
-              { icon: '📧', label: 'Email Open Rate', value: '42%', color: '#7c3aed' },
-              { icon: '🖱️', label: 'Click-Through Rate', value: '12%', color: '#0891b2' },
-              { icon: '📉', label: 'Engagement Decay', value: '8 members', color: '#dc2626' },
-            ].map(s => (
-              <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                <span className="text-lg">{s.icon}</span>
-                <div>
-                  <div className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">{s.label}</div>
-                  <div className="text-base font-bold" style={{ color: s.color }}>{s.value}</div>
+          <div className="fade-in-up fade-delay-1 flex flex-col gap-2">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+              {[
+                { icon: '📧', label: 'Email Open Rate', value: '42%', color: '#7c3aed' },
+                { icon: '🖱️', label: 'Click-Through Rate', value: '12%', color: '#0891b2' },
+                { icon: '📉', label: 'Engagement Decay', value: '8 members', color: '#dc2626' },
+              ].map(s => (
+                <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <span className="text-lg">{s.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">{s.label}</div>
+                    <div className="text-base font-bold" style={{ color: s.color }}>{s.value}</div>
+                    <div style={{ marginTop: 2 }}>
+                      <SourceBadge system="Email" size="xs" />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            {/* Cross-domain footer — Phase G2 */}
+            <div className="text-[11px] text-gray-500 px-2 leading-snug italic">
+              Email decay is the <span className="font-bold text-error-600">first domino</span>{' '}
+              in member disengagement.{' '}
+              <button
+                type="button"
+                onClick={() => navigate('members', { tab: 'email' })}
+                className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline"
+              >
+                View decay watch list →
+              </button>
+            </div>
           </div>
         )}
 
@@ -340,7 +381,8 @@ export default function TodayView() {
               ? 'border-error-500/40 bg-error-50 dark:bg-error-500/10'
               : 'border-warning-500/40 bg-warning-50 dark:bg-warning-500/10'
           }`}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <SourceBadge system="Weather API" size="xs" />
               <span className={`text-sm font-semibold ${
                 alert.severity === 'EXTREME' || alert.severity === 'SEVERE'
                   ? 'text-error-500' : 'text-warning-500'

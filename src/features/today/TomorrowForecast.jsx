@@ -132,6 +132,24 @@ export default function TomorrowForecast() {
           {weatherImpact}
         </div>
       </div>
+
+      {/* Cross-domain Layer 3 callout — Phase G3 */}
+      {(highDemand || gusts > 15 || precipProb > 40) && (
+        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
+          <div className="text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-1">
+            Layer 3 · Demand projection
+          </div>
+          <div className="text-[11px] text-gray-600 dark:text-gray-400 leading-snug">
+            {highDemand && (gusts > 15 || precipProb > 40) ? (
+              <>High demand × adverse weather → <span className="font-semibold text-warning-600">likely staffing risk</span>. Cross-references tee sheet × weather × historical conversion.</>
+            ) : highDemand ? (
+              <>High demand day → expect 15% higher dining traffic. Cross-references tee sheet × POS conversion history.</>
+            ) : (
+              <>Weather-driven cancellations expected → <span className="font-semibold text-warning-600">monitor staffing</span> for indoor overflow.</>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

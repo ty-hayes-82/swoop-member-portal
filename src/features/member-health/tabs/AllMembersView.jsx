@@ -279,6 +279,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
   const [healthFilter, setHealthFilter] = useState(null);
   const [archetypeFilter, setArchetypeFilter] = useState(initialArchetype);
   const [activityFilter, setActivityFilter] = useState(null);
+  const [symptomFilter, setSymptomFilter] = useState(null); // Phase G7
   const [searchTerm, setSearchTerm] = useState('');
 
   // Sync with parent archetype chip selection
@@ -320,8 +321,24 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
       });
     }
 
+    // Phase G7 — symptom-based filter
+    if (symptomFilter) {
+      filtered = filtered.filter(m => {
+        const risk = (m.topRisk || '').toLowerCase();
+        if (symptomFilter === 'email') return /email|open rate|newsletter/.test(risk);
+        if (symptomFilter === 'golf') return /golf|round|tee|frequency/.test(risk);
+        if (symptomFilter === 'dining') return /dining|f&b|food|beverage|spend/.test(risk);
+        if (symptomFilter === 'multi') {
+          // Multi-domain decay = at-risk score AND topRisk mentions 2+ domains
+          const domains = ['email', 'golf', 'dining'].filter(d => new RegExp(d).test(risk));
+          return m.score < 50 && domains.length >= 2;
+        }
+        return true;
+      });
+    }
+
     return filtered;
-  }, [allMembers, healthFilter, archetypeFilter, activityFilter, searchTerm]);
+  }, [allMembers, healthFilter, archetypeFilter, activityFilter, symptomFilter, searchTerm]);
 
   // Reactive health distribution — updates when any filter changes
   const filteredHealthDist = useMemo(() => {
@@ -479,17 +496,42 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
               );
             })}
           </div>
-          {/* Pillar 1: SEE IT — cross-domain decay legend */}
+          {/* Pillar 1: SEE IT — cross-domain decay legend (Phase E8 + G7 — chips now filter) */}
           <div className="mt-3 p-2 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Cross-Domain Decay Patterns to Watch</div>
+            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filter by Cross-Domain Decay Pattern</div>
             <div className="flex flex-wrap gap-2 text-[11px] text-gray-600 dark:text-gray-400">
-              <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">📧 Email decay</span>
-              <span className="px-2 py-0.5 rounded bg-green-50 text-green-700 border border-green-200">⛳ Golf drop</span>
-              <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">🍽️ Dining drop</span>
-              <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">⚠️ Multi-domain decay</span>
+              {[
+                { key: 'email', label: '📧 Email decay', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+                { key: 'golf', label: '⛳ Golf drop', bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
+                { key: 'dining', label: '🍽️ Dining drop', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+                { key: 'multi', label: '⚠️ Multi-domain decay', bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
+              ].map(chip => {
+                const isActive = symptomFilter === chip.key;
+                return (
+                  <button
+                    key={chip.key}
+                    type="button"
+                    onClick={() => { setSymptomFilter(isActive ? null : chip.key); setPage(0); }}
+                    className={`px-2 py-0.5 rounded border cursor-pointer font-semibold transition-all ${chip.bg} ${chip.text} ${chip.border} ${isActive ? 'ring-2 ring-offset-1 ring-current scale-105' : 'hover:scale-105'}`}
+                  >
+                    {chip.label}
+                  </button>
+                );
+              })}
+              {symptomFilter && (
+                <button
+                  type="button"
+                  onClick={() => { setSymptomFilter(null); setPage(0); }}
+                  className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-300 cursor-pointer text-[10px]"
+                >
+                  Clear
+                </button>
+              )}
             </div>
             <div className="text-[10px] text-gray-500 mt-1.5 italic">
-              Click any at-risk member to see their First Domino sequence in the profile drawer.
+              {symptomFilter
+                ? `Showing members with ${symptomFilter === 'multi' ? 'multi-domain' : symptomFilter} decay signals. Click any to see their First Domino sequence.`
+                : 'Click any chip to filter by cross-domain symptom. Click any at-risk member to see their First Domino sequence.'}
             </div>
           </div>
         </div>

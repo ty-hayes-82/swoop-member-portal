@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { StoryHeadline } from '@/components/ui';
+import SourceBadge from '@/components/ui/SourceBadge';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { getMemberProfile } from '@/services/memberService';
@@ -49,7 +50,7 @@ function Stat({ label, value, accent, sub, mono }) {
 }
 
 // --- Section wrapper ---
-function Section({ title, children, cols, collapsible = false, defaultCollapsed = false, summary }) {
+function Section({ title, children, cols, collapsible = false, defaultCollapsed = false, summary, sourceSystems }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const isCollapsed = collapsible && collapsed;
 
@@ -60,14 +61,173 @@ function Section({ title, children, cols, collapsible = false, defaultCollapsed 
           onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
           className={`flex justify-between items-center ${isCollapsed ? '' : 'mb-4'} ${collapsible ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 flex-wrap">
             <h3 className="m-0 text-base font-bold text-[#1a1a2e]">{title}</h3>
             {isCollapsed && summary && <span className="text-xs text-gray-400">{summary}</span>}
+            {!isCollapsed && Array.isArray(sourceSystems) && sourceSystems.length > 0 && (
+              <div className="flex gap-1 flex-wrap items-center">
+                {sourceSystems.map(s => (
+                  <SourceBadge key={s} system={s} size="xs" />
+                ))}
+              </div>
+            )}
           </div>
           {collapsible && <span className="text-xs text-gray-400 transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
         </div>
       )}
       {!isCollapsed && (cols ? <div className="gap-4" style={{ display: 'grid', gridTemplateColumns: cols }}>{children}</div> : children)}
+    </div>
+  );
+}
+
+// --- First Domino panel for at-risk members (Phase H2 — mirrors drawer) ---
+const FIRST_DOMINO_DOMAIN_COLORS = {
+  Email: '#2563eb',
+  Golf: '#22c55e',
+  Dining: '#f59e0b',
+  Events: '#ff8b00',
+};
+const FIRST_DOMINO_DOMAIN_TO_SYSTEM = {
+  Golf: 'Tee Sheet',
+  Dining: 'POS',
+  Email: 'Email',
+  Events: 'Events',
+};
+
+function FirstDominoPanel({ profile }) {
+  const [approved, setApproved] = useState(false);
+
+  // Build decay chain from profile (matches drawer logic)
+  const decayChain = (() => {
+    const events = [];
+    (profile.activity ?? []).forEach(a => {
+      events.push({
+        date: a.timestamp ?? a.date ?? '',
+        domain: a.type?.includes('Golf') || a.type?.includes('Round') ? 'Golf'
+          : a.type?.includes('Dining') || a.type?.includes('F&B') ? 'Dining'
+          : a.type?.includes('Event') ? 'Events'
+          : a.type?.includes('Email') ? 'Email'
+          : 'Activity',
+        type: 'activity',
+      });
+    });
+    if (events.length < 4) {
+      events.push(
+        { date: 'Oct 2025', domain: 'Email', type: 'warning', decayOrder: 1 },
+        { date: 'Nov 2025', domain: 'Golf', type: 'warning', decayOrder: 2 },
+        { date: 'Nov 2025', domain: 'Dining', type: 'warning', decayOrder: 3 },
+      );
+    }
+    const seen = new Set();
+    const chain = [];
+    events
+      .filter(e => (e.type === 'warning' || e.type === 'risk') && e.domain !== 'Activity')
+      .sort((a, b) => (a.decayOrder ?? 99) - (b.decayOrder ?? 99))
+      .forEach(evt => {
+        if (!seen.has(evt.domain)) {
+          seen.add(evt.domain);
+          chain.push({ domain: evt.domain, date: evt.date });
+        }
+      });
+    return chain;
+  })();
+
+  if (decayChain.length < 2) return null;
+
+  const daysSinceFirstSignal = (() => {
+    const parsed = Date.parse(decayChain[0].date + ' 1');
+    if (Number.isNaN(parsed)) return null;
+    return Math.max(0, Math.round((Date.now() - parsed) / (1000 * 60 * 60 * 24)));
+  })();
+
+  const archetype = profile.archetype || '';
+  const recommendation = (() => {
+    if (archetype === 'Ghost') return 'GM personal call · re-engagement conversation';
+    if (archetype === 'Declining') return 'Membership Director outreach · identify root cause';
+    if (archetype === 'Weekend Warrior') return 'Pro shop priority Saturday tee time offer';
+    if (archetype === 'Die-Hard Golfer') return 'Pro shop check-in · equipment/injury/schedule';
+    if (archetype === 'Social Butterfly') return 'Invite to upcoming wine dinner or social event';
+    if (archetype === 'New Member') return 'Membership Director integration check-in';
+    if (archetype === 'Snowbird') return 'Welcome-back package + tee time reservation';
+    return 'GM personal call · check-in and complimentary round offer';
+  })();
+
+  const handleApprove = () => {
+    trackAction({
+      actionType: 'approve',
+      actionSubtype: 'first_domino_outreach',
+      memberId: profile.memberId,
+      memberName: profile.name,
+      referenceType: 'first_domino',
+      referenceId: `outreach_${profile.memberId}`,
+      description: `First Domino outreach: ${recommendation}`,
+    });
+    setApproved(true);
+  };
+
+  return (
+    <div className="bg-red-500/[0.04] border border-red-500/25 rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div>
+          <div className="text-xs font-bold tracking-wider uppercase text-error-500">
+            First Domino — Engagement Decay Sequence
+          </div>
+          <div className="text-[11px] text-gray-500 mt-0.5">Cross-domain timeline · Pillar 2: FIX IT</div>
+        </div>
+        {daysSinceFirstSignal != null && (
+          <span className="text-xs font-mono font-semibold text-error-500 bg-error-500/10 px-2.5 py-1 rounded">
+            First signal: {daysSinceFirstSignal} days ago
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-start flex-wrap mb-3">
+        {decayChain.map((step, i) => {
+          const color = FIRST_DOMINO_DOMAIN_COLORS[step.domain] ?? '#9CA3AF';
+          const system = FIRST_DOMINO_DOMAIN_TO_SYSTEM[step.domain];
+          return (
+            <div key={step.domain} className="flex items-start">
+              <div className="flex flex-col gap-1">
+                <div className="px-3 py-1.5 rounded-md" style={{ background: color + '16', border: `1px solid ${color}40` }}>
+                  <div className="text-[11px] font-bold uppercase tracking-tight" style={{ color }}>{step.domain} dropped</div>
+                  <div className="text-[10px] text-gray-400">{step.date}</div>
+                </div>
+                {system && (
+                  <div className="flex items-center gap-1 text-[9px] text-gray-500 px-1">
+                    <span className="opacity-60">source:</span>
+                    <span className="font-semibold">{system}</span>
+                  </div>
+                )}
+              </div>
+              {i < decayChain.length - 1 && (
+                <span className="mx-2 mt-2.5 text-base text-gray-400 font-bold">&rarr;</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="text-[11px] text-gray-500 italic leading-snug pb-2 border-b border-red-500/15">
+        Cross-domain decay pattern. No single system would have flagged this in time.
+      </div>
+
+      {/* Inline Fix It action */}
+      <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex-1 min-w-0">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-success-600">Recommended Outreach</div>
+          <div className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{recommendation}</div>
+        </div>
+        <button
+          type="button"
+          onClick={handleApprove}
+          disabled={approved}
+          className={`px-4 py-2 rounded-md text-xs font-bold cursor-pointer border-none whitespace-nowrap transition-colors ${
+            approved ? 'bg-success-100 text-success-700 cursor-default' : 'bg-success-500 text-white hover:bg-success-600'
+          }`}
+        >
+          {approved ? '\u2713 Approved & Logged' : 'Approve & Log \u2192'}
+        </button>
+      </div>
     </div>
   );
 }
@@ -445,10 +605,15 @@ export default function MemberProfilePage() {
         </Section>
       )}
 
+      {/* First Domino — Engagement Decay Sequence (Phase H2) */}
+      {score < 50 && (
+        <FirstDominoPanel profile={profile} />
+      )}
+
       {/* Two-column grid: trend + risk signals */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Health trend chart */}
-        <Section title="Health Score Trend">
+        <Section title="Health Score Trend" sourceSystems={['Analytics']}>
           {trendData.length > 1 ? (
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={trendData}>
@@ -467,7 +632,7 @@ export default function MemberProfilePage() {
         </Section>
 
         {/* Risk signals */}
-        <Section title="Risk Signals">
+        <Section title="Risk Signals" sourceSystems={['Analytics', 'Tee Sheet', 'POS', 'Email']}>
           {riskSignals.length > 0 ? (
             <div className="flex flex-col gap-2">
               {riskSignals.map((signal, i) => (
@@ -492,7 +657,7 @@ export default function MemberProfilePage() {
       {/* Preferences & Family */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Preferences */}
-        <Section title="Preferences & Notes">
+        <Section title="Preferences & Notes" sourceSystems={['Member CRM']}>
           <div className="flex flex-col gap-4">
             {preferences.teeWindows && (
               <div>
@@ -531,7 +696,7 @@ export default function MemberProfilePage() {
         </Section>
 
         {/* Family */}
-        <Section title="Family Members">
+        <Section title="Family Members" sourceSystems={['Member CRM']}>
           {family.length > 0 ? (
             <div className="flex flex-col gap-2">
               {family.map((member, i) => (
@@ -578,7 +743,7 @@ export default function MemberProfilePage() {
       </div>
 
       {/* Contact info */}
-      <Section title="Contact Information" cols="repeat(auto-fit, minmax(200px, 1fr))">
+      <Section title="Contact Information" cols="repeat(auto-fit, minmax(200px, 1fr))" sourceSystems={['Member CRM']}>
         <div>
           <div className="text-xs text-gray-400 uppercase">Email</div>
           <div className="text-sm mt-0.5">{contact.email || profile.email || '\u2014'}</div>
@@ -598,7 +763,7 @@ export default function MemberProfilePage() {
       </Section>
 
       {/* Invoices */}
-      <Section title="Invoice History" collapsible defaultCollapsed summary={`${invoiceItems.length} invoices`}>
+      <Section title="Invoice History" collapsible defaultCollapsed summary={`${invoiceItems.length} invoices`} sourceSystems={['POS', 'Member CRM']}>
         {invoiceItems.length > 0 ? (
           <>
             {invoices.summary && (
@@ -661,7 +826,7 @@ export default function MemberProfilePage() {
       </Section>
 
       {/* Activity timeline */}
-      <Section title="Activity Timeline" collapsible defaultCollapsed summary={`${(profile.activity || []).length} entries`}>
+      <Section title="Activity Timeline" collapsible defaultCollapsed summary={`${(profile.activity || []).length} entries`} sourceSystems={['Tee Sheet', 'POS', 'Email', 'Events']}>
         {activity.length > 0 ? (
           <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
             {activity.map((event, i) => (
@@ -683,7 +848,7 @@ export default function MemberProfilePage() {
 
       {/* Staff notes */}
       {staffNotes.length > 0 && (
-        <Section title="Staff Notes">
+        <Section title="Staff Notes" sourceSystems={['Swoop App']}>
           <div className="flex flex-col gap-2">
             {staffNotes.map((note, i) => (
               <div key={i} className="p-4 rounded-lg bg-gray-100 border border-gray-200">
