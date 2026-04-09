@@ -163,15 +163,35 @@ const Story5HandshakeBar = forwardRef(function Story5HandshakeBar(props, ref) {
   // hue shifts from teal (190) toward green (140) as we near the goal
   const barHue = 190 - Math.round(50 * pct);
 
+  // 2026-04-09 wave 13 mobile audit P2 fix: handshake bar had no tap
+  // behavior — taps bubbled to the ConferenceShell tap-to-advance handler
+  // and unexpectedly moved the user forward a scene. Now the bar tap
+  // navigates to the regular mobile Members tab in All Members mode so
+  // the user can drill into the actual saved-members list. We use
+  // window.location.hash directly (the conference shell is mounted
+  // outside the regular mobile shell, so we need a hash navigation that
+  // crosses both routes). stopPropagation prevents the underlying shell's
+  // tap-to-advance from firing.
+  const handleBarTap = (e) => {
+    e.stopPropagation();
+    if (typeof window !== 'undefined') {
+      window.location.hash = '#/m/members';
+    }
+  };
+
   return (
     <>
       <style>{keyframes}</style>
       <div
         key={`pulse-${pulseKey}`}
-        role="status"
+        role="button"
+        tabIndex={0}
+        onClick={handleBarTap}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleBarTap(e); } }}
+        title="Tap to view the saved members"
         aria-label={`${savedK} thousand dollars saved this quarter, ${Math.round(
           displayCount
-        )} members rescued`}
+        )} members rescued. Tap to view saved members.`}
         style={{
           position: 'sticky',
           top: 0,
@@ -190,6 +210,7 @@ const Story5HandshakeBar = forwardRef(function Story5HandshakeBar(props, ref) {
             pulseKey > 0 ? `story5Pulse ${PULSE_MS}ms ease-out` : undefined,
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          cursor: 'pointer',
         }}
       >
         <div

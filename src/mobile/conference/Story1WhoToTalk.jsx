@@ -70,6 +70,15 @@ function MemberCard({ risk }) {
   const initial = (risk.name || '?').trim().charAt(0).toUpperCase();
   const color = healthColor(healthValue);
 
+  // 2026-04-09 wave 13 mobile audit P2 fix: was firing trackAction silently
+  // and flipping the button to "✓ Logged" — looked fake to a demo audience.
+  // Now we ALSO open a real `tel:` link when the member's profile carries
+  // a phone number. The button stays as a <button> (not <a>) so the
+  // trackAction call still fires for the audit log; the tel: navigation
+  // is triggered imperatively via window.location.href so we keep both
+  // behaviors. If no phone is on file, the button stays in "Logged" mode
+  // (graceful degradation, never opens an empty dialer).
+  const phone = profile?.contact?.phone || null;
   const handleCall = (e) => {
     e.stopPropagation();
     trackAction({
@@ -83,6 +92,13 @@ function MemberCard({ risk }) {
     });
     setCalling(true);
     setTimeout(() => setCalling(false), 2000);
+    if (phone && typeof window !== 'undefined') {
+      // Strip everything except digits and + for the tel: scheme
+      const dialable = phone.replace(/[^0-9+]/g, '');
+      if (dialable) {
+        window.location.href = `tel:${dialable}`;
+      }
+    }
   };
 
   return (

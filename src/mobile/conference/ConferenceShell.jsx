@@ -56,10 +56,23 @@ export default function ConferenceShell() {
   }, [sceneIdx]);
 
   // Keyboard nav for desktop conference kiosks.
+  // 2026-04-09 wave 13 mobile audit P2 fix: previous version captured the
+  // outer-scope `advance` / `retreat` references in a `[]`-deps useEffect.
+  // The audit reported ArrowLeft retreat doesn't fire while ArrowRight does
+  // — symptoms of stale closure even though both functions use the
+  // functional setState form. Inlining the setSceneIdx calls inside the
+  // event handler removes any closure ambiguity and makes the bidirectional
+  // navigation behave consistently. preventDefault() also stops space-bar
+  // scrolling on the conference kiosk.
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') advance();
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') retreat();
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+        e.preventDefault();
+        setSceneIdx((i) => Math.min(SCENES.length - 1, i + 1));
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSceneIdx((i) => Math.max(0, i - 1));
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
