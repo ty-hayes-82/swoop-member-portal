@@ -1,8 +1,10 @@
 # PICK UP HERE — Sprint 5 Starting State
 
-> **Last updated:** 2026-04-09 (end of Sprint 4)
-> **Latest commit on `dev`:** `1dbd7ed` — "Sprint 4: lock down weather GET, audit cron, full e2e CI, defense-in-depth"
+> **Last updated:** 2026-04-09 (mid-day, autonomous F1 sweep in flight)
+> **Latest commit on `dev`:** `8b8b54e` — "test: update storyboard-flows Story 2 source assertion"
+> **Previous milestone commit:** `58b1774` — "F1 autonomous sweep: B36 root cause + criterion 5/7/9 advances"
 > **For:** Director of Engineering returning fresh after a break
+> **Companion doc:** [`PRODUCT-FINALIZATION.md`](./PRODUCT-FINALIZATION.md) — the finalization arc and current state of the 10 release-readiness criteria
 
 Read this file first when picking up. It's a complete handoff: where things stand, what's safe, what's risky, and what to do next.
 
@@ -10,65 +12,61 @@ Read this file first when picking up. It's a complete handoff: where things stan
 
 ## 1. Current state in 60 seconds
 
-**Branch:** `dev`. Latest commit `1dbd7ed`. Working tree clean except `.claude/settings.local.json` (personal, intentionally unstaged).
+**Branch:** `dev`. Latest commit `8b8b54e`. Working tree clean except `.claude/settings.local.json` (personal, intentionally unstaged) plus any in-flight uncommitted work from background agents — see §11 below.
 
-**Live dev preview:** https://swoop-member-portal-dev.vercel.app (Vercel auto-deploys from the `dev` branch). `/api/health` should return `status: ok`.
+**Live dev preview:** https://swoop-member-portal-dev.vercel.app (Vercel auto-deploys from the `dev` branch). `/api/health` now returns `{ status, db, integrations: { weather, audit }, ... }` per the criterion 7 work shipped 2026-04-09.
 
-**Sprints 1-4 shipped on `dev`** in this order (most recent first):
-| Commit | Sprint | One-line description |
+**Recent commits on `dev`** (most recent first):
+| Commit | Date | One-line description |
 |---|---|---|
-| `1dbd7ed` | Sprint 4 | Weather lockdown, audit cron, full e2e CI, defense-in-depth |
-| `f62f065` | Sprint 3 | Tenant safety: getClubId split, cross-club audit, ops script relocation |
-| `de9fd29` | Sprint 2 | Backend hardening: gate operator endpoints, lint clubId, secure cron + webhooks |
-| `d22b7ac` | Sprint 1 | Productionization: CI, security, observability, runbook, polish |
-| `bb26343` | Pre-sprint | Add development team structure document |
+| `8b8b54e` | 2026-04-09 | test: update storyboard-flows Story 2 source assertion (smoke fix after MemberDecayChain badge upgrade) |
+| `58b1774` | 2026-04-09 | F1 autonomous sweep: B36 root cause + criterion 5/7/9 advances |
+| `801abbb` | 2026-04-09 | docs: add PRODUCT-FINALIZATION.md and expand team structure to 12 roles |
+| `a378fbe` | 2026-04-09 | B36 Waves A+B: fix e2e cascade from renamed login flow |
+| `1878570` | 2026-04-09 | docs: add PICKUP-HERE.md handoff doc |
+| `1dbd7ed` | (Sprint 4) | Weather lockdown, audit cron, full e2e CI, defense-in-depth |
+| `f62f065` | (Sprint 3) | Tenant safety: getClubId split, cross-club audit, ops script relocation |
+| `de9fd29` | (Sprint 2) | Backend hardening: gate operator endpoints, lint clubId, secure cron + webhooks |
+| `d22b7ac` | (Sprint 1) | Productionization: CI, security, observability, runbook, polish |
 
-**Local gates as of last verification:**
+**Local gates as of last verification (after `8b8b54e`):**
 - `npm run build` ✅
 - `npm run lint-theme` ✅ 0 violations
 - `npm run lint-clubid` ✅ 0 violations
 - `npm test` (vitest) ✅ 51/51
-- `npx playwright test storyboard-flows polish-final` ✅ **12/12** (the smoke set CI gates on)
-- `npx playwright test` (FULL suite) ❌ **134/258 pass, 81 fail, 38 didn't run** — see §4
+- `npx playwright test tests/e2e/storyboard-flows.spec.js` ✅ **7/7** (smoke gate)
+- `npx playwright test` (FULL suite) ⚠️ **197/258 pass, 14 fail, 1 skipped, 38 didn't run** — see §4 (improved from 134/258 in Sprint 4 thanks to the B36 root-cause fix)
 
-**CI jobs on GitHub Actions** (run on every push to `dev`): `lint`, `unit`, `build`, `e2e-smoke` (gates merge), `e2e-full` (informational, will be RED until B36 is closed — see §4).
+**CI jobs on GitHub Actions** (run on every push to `dev`): `lint`, `unit`, `build`, `e2e-smoke` (gates merge), `e2e-full` (informational, **almost green** — only 14 failures left, mostly brittle text assertions and B37 onboarding cluster).
 
 ---
 
-## 2. The biggest finding from Sprint 4 — READ THIS FIRST
+## 2. B36 status — READ THIS FIRST
 
-When B32 extended CI to run the **full** Playwright suite (was only running 12 smoke tests before), it surfaced **81 pre-existing test failures** in the broader e2e suite that nobody has been catching. These are NOT regressions from Sprint 1-4 work — they predate the productionization effort. They're surfaced now because we finally point CI at the full suite.
+> **Updated 2026-04-09 (post-autonomous-sweep):** B36 root cause **fixed**. The remaining failures are unrelated cleanup, not cascade.
 
-**Failures by file:**
-| Spec | Failures |
-|---|---|
-| `tests/e2e/guided-demo-progressive.spec.js` | 21 |
-| `tests/e2e/guided-demo-isolation.spec.js` | 16 |
-| `tests/e2e/onboarding.spec.js` | 11 |
-| `tests/e2e/guided-demo-refresh.spec.js` | 8 |
-| `tests/e2e/combinations/13-negative-leakage.spec.js` | 8 |
-| `tests/e2e/demo-story.spec.js` | 5 |
-| `tests/e2e/combinations/15-vision-capture.spec.js` | 5 |
-| `tests/e2e/combinations/12-cross-page.spec.js` | 2 |
-| `tests/e2e/combinations/11-quads.spec.js` | 2 |
-| `tests/e2e/combinations/10-more-triples.spec.js` | 1 |
-| `tests/e2e/combinations/09-remaining-pairs.spec.js` | 1 |
-| `tests/e2e/action-logging.spec.js` | 1 |
+The Sprint 4 finding was that 81 e2e tests were failing due to a presumed `beforeAll` cascade. The 2026-04-09 investigation revealed the actual root cause: a **product bug in the guided demo entry flow** (`AppContext` pre-loaded the demo inbox at module-eval time and refused to clear it on the demo→guided transition; `LoginPage.startDemo` never notified `AppContext` of the mode change). See commit `58b1774` for the full diagnosis.
 
-**Many of these look like cascade failures from a broken `beforeAll` setup** — a single root cause may fix dozens. The 38 tests that "didn't run" are downstream of beforeAll failures.
+**The numbers, before vs after:**
 
-**Tracked as ticket B36 in the task list. P1.**
+| State | Pass | Fail | Skipped | Did not run |
+|---|---:|---:|---:|---:|
+| Sprint 4 baseline (b32 CI extension) | 134 | 81 | 5 | 38 |
+| After autonomous F1 sweep (`58b1774`) | **197** | **14** | **1** | 38 |
+| Net change | **+63** | **−67** | −4 | 0 |
+
+**The 14 remaining failures, by category:**
+- **8 brittle text-includes assertions** in `tests/e2e/combinations/*.spec.js` and `tests/e2e/action-logging.spec.js` — same `document.body.innerText` pattern I fixed in `guided-demo-isolation` B3 and `guided-demo-progressive` Board Report KPIs. **A wave-2 background agent is fixing these.**
+- **5 unrelated `onboarding.spec.js` failures** (wizard launch, XSS escape, mobile, unauth API rejection) — these are NOT B36 cascade. Tracked as **B37**, also being worked by a wave-2 agent.
+- **1 flaky-ish `storyboard-flows.spec.js:54`** that passed in standalone re-runs (Story 2 — Quiet Resignation) — fixed in `8b8b54e` after the MemberDecayChain `<SourceBadge>` upgrade.
+
+**The 38 "did not run":** these are tests downstream of failing parents in the same `describe.serial` block. They will start running once B37 (onboarding wizard cluster) is fixed.
 
 ### What to do RIGHT NOW about it
 
-**Option A — exclude e2e-full from required checks (recommended):**
-1. Go to https://github.com/ty-hayes-82/swoop-member-portal/settings/branches
-2. For the `dev` branch (and `main` if protected), under "Status checks that are required to pass before merging", make sure **`E2E full suite (all tests/e2e/*.spec.js)`** is **NOT** in the required list. Keep `E2E smoke (storyboard + polish-final)` required.
-3. Without this, every PR will be blocked by 81 failing tests until B36 is fixed.
-
-**Option B — leave it required and triage immediately:** dispatch a triage agent (B36) to investigate the cascade. Likely 1-2 hours of work. The fix is probably small (one shared helper), but the surface is large.
-
-**My recommendation: do A first (1 minute), then schedule B as Sprint 5's Wave A first ticket.**
+1. **`e2e-full` is now informational-only-for-now** — but the failure count is small enough (14) that you should plan to make it `required` again after the wave-2 agents land.
+2. **Wait for the wave-2 agents to finish** (see §4 for ticket-level breakdown).
+3. **Triage B37 separately** if the wave-2 onboarding agent doesn't get all 5 remaining wizard failures.
 
 ---
 
@@ -95,18 +93,32 @@ CI workflow (didn't exist before), `/api/health`, `.env.example`, runbook, datab
 - **B35**: demo role renamed `viewer` → `demo` (prevents future viewer-role gates from accidentally accepting demo traffic)
 - **SEC-7**: read-only audit of allowDemo + getClubId combos — verdict: zero footguns
 
+### Sprint 5 — F1 autonomous sweep (`58b1774`, `8b8b54e`) — 2026-04-09
+- **B36 (root cause + fix)**: AppContext pre-loaded the demo inbox at module-eval time and refused to clear it on the demo→guided transition; LoginPage.startDemo never notified AppContext of the mode change. Three small edits in 2 files fixed the entire cascade family — `guided-demo-isolation` 16/16 ✅, `guided-demo-progressive` 21/21 ✅, `guided-demo-refresh` + `demo-story` cascaded green. Net: full suite went from 134 → 197 passing.
+- **DemoStoriesLauncher gating**: hidden in guided demo until at least one source is imported (its teaser copy was bleeding "220 rounds. 82°F clear..." into clean guided sessions).
+- **Criterion 5 source-badge sweep**: `SourceBadgeRow` added to `HealthOverview` KPI cards (Members at Risk / Dues at Risk / Saves) and `AllMembersView` table header; `SourceBadge` per step in `MemberDecayChain`; `SourceBadgeRow` per scenario in `ResignationTimeline`.
+- **Criterion 7 — `/api/health` per-integration sync**: new `integrations: { weather, audit }` block reports freshness from `weather_daily_log` and `cross_club_audit`. Status flips to `degraded` if any integration is `stale`. **Verified live** on dev preview.
+- **Criterion 9 — runbook**: §5.1 Rollback drill (quarterly tabletop), §7.2 Postmortem SLA & review, §12 stub playbooks for secret-rotation calendar / DB recovery / cron observability.
+- **PRODUCT-FINALIZATION.md**: §2 status table updated, §9 sign-off ledger, §11 punch lists with B36 / hardcoded $ / source badge / runbook follow-ups.
+- **Story 2 smoke fix** (`8b8b54e`): test selector update after the MemberDecayChain badge upgrade (no more `source: <name>` text label).
+
 ---
 
-## 4. Open backlog (Sprint 5 candidates)
+## 4. Open backlog (after F1 autonomous sweep)
 
 | ID | Priority | Title | Notes |
 |---|---|---|---|
-| **B36** | **P1** | Triage 81 e2e regressions | NEW from B32. Likely cascade from a few shared helpers. Start here. |
+| **B37** | **P1** | Triage 5 onboarding wizard failures | NEW. wizard launch / XSS / mobile / unauth API rejection. NOT B36 cascade — separate root cause. **Wave-2 background agent in flight 2026-04-09.** |
+| **Combinations brittleness** | P1 | Fix 8 brittle text-includes assertions | Same pattern as `guided-demo-isolation` B3 — replace with `page.locator(...).toBeVisible()`. **Wave-2 background agent in flight 2026-04-09.** |
+| **Criterion 4 — hardcoded $** | P2 | Migrate DataHealthDashboard / RecentInterventions / MemberPlaybooks JSX literals to services | **Wave-2 background agent in flight 2026-04-09.** |
+| **Criterion 2 — pillar score lift** | P2 | Lift Admin Hub (4), Integrations (5), Profile (2) to ≥7 | Wave-2 audit in flight; will return small-ticket recommendations. |
+| **Runbook §12.3 cron observability** | P2 | Expand cron observability stub into real playbook | **Wave-2 background agent in flight 2026-04-09.** |
 | **B23** | low | Delete v1 fix-cancel.js / seed-fix.js duplicates | Time-gated to 2026-04-19 |
 | **SEC-5** | P2 | Admin UI confirmation modal on cross-club writes | Needs design discussion |
 
-Lower-priority items I'd carry but not block on:
-- Tighten `e2e-full` once B36 is clean and add it back to required checks.
+Lower-priority items to carry but not block on:
+- Tighten `e2e-full` to `required` once B37 + combinations brittleness land. The arithmetic: if both wave-2 agents close cleanly, the e2e-full count goes from 14 → ~0 and the gate becomes safe to require.
+- Schedule the first quarterly **rollback drill** per RUNBOOK §5.1. DevOps lead owns.
 
 ---
 
