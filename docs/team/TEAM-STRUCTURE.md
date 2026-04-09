@@ -10,7 +10,9 @@
 
 Today, Swoop is a strategy-aligned prototype with an ~98% pillar-aligned UX and 7 passing storyboard E2E tests. To take it to market, we need a structured team that converts that polish into a **scalable, reliable, secure** product with predictable delivery cadence and 24/7 operational confidence.
 
-This document defines the **8 core roles**, their responsibilities, how they collaborate around the North Star, and what changes about our day-to-day workflow once the team is in place.
+This document defines the **12 core roles**, their responsibilities, how they collaborate around the North Star, and what changes about our day-to-day workflow once the team is in place.
+
+> **Update — April 9, 2026:** Added a **General Manager (Product & Operations)** as a cross-functional quality/strategy/QA owner, plus four additional roles surfaced by Sprints 1–4 (Data/Analytics Engineer for the Layer 3 moat, Security & Compliance Engineer for the hardening work, Solutions / Pilot Engineer for white-glove onboarding, and Technical Writer for the runbook/ADR/onboarding surface). Total team grows from 8 → 12 core roles.
 
 ---
 
@@ -244,33 +246,149 @@ This document defines the **8 core roles**, their responsibilities, how they col
 
 ---
 
+### 1.9 General Manager — Product & Operations *(NEW)*
+**Mission:** Be the single human accountable for "is the product actually working, end-to-end, every day?" Bridge strategy, quality, and pilot operations so nothing falls between PM, EM, and QA.
+
+**Owns:**
+- **Strategy execution oversight** — translates the North Star and quarterly OKRs into a weekly operating cadence; chairs the weekly North Star review
+- **End-to-end QA orchestration** — owns the *user-perceived* quality bar across all 3 storyboard moments, not just unit/E2E pass rates. Personally walks the demo flows weekly on staging and on production-like data
+- **Release readiness sign-off** — final go/no-go before any pilot demo, board presentation, or `dev → main` promotion
+- **Cross-functional unblocking** — when PM, EM, Design, and DevOps disagree, the GM owns the call (or escalates to the Director)
+- **Pilot health scorecard** — weekly review of every pilot club's data freshness, login activity, and time-to-first-insight
+- **Operating rhythms** — owns Monday strategy huddle, Friday release review, monthly North Star Audit
+- **The "demo-readiness" bar** — every pilot meeting has a named GM-approved build
+
+**Day-to-day:**
+- 9:00 AM walk-through of the live dev preview; logs anything that "feels off"
+- Pairs with QA each morning to triage anything new in the failure list
+- Joins PM customer calls 2x/week to hear the unfiltered feedback
+- Maintains the **Release Readiness Checklist** (see new `PRODUCT-FINALIZATION.md`)
+- Owns the standing "ship it / hold it" call before every pilot demo
+- Sits in on architecture reviews as the user advocate
+
+**North Star alignment:**
+- Treats the 3 storyboard flows as the GM's personal scorecard — if any of them degrades, the GM owns getting it back to green that day
+- Refuses to ship any release where the FEATURE-AUDIT.md composite scores have regressed
+- Owns the **definition of done** for "the perfect working Swoop member portal": every pillar ≥ 9/10, every storyboard flow rendering correctly on real pilot data, every release accompanied by a sign-off note
+
+**Why we need this role now:**
+The Director sets vision, the EM runs sprints, the PM owns the roadmap, and QA owns test pass rates — but no one currently owns the *holistic* answer to "is the product ready to put in front of a paying customer this week?" The GM closes that gap. This role becomes indispensable the moment we have ≥2 pilot clubs simultaneously.
+
+---
+
+### 1.10 Data / Analytics Engineer *(NEW)*
+**Mission:** Own the Layer 3 data pipeline — the cross-domain joins, transformations, and attribution math that make Swoop "Swoop."
+
+**Owns:**
+- ETL/ELT from Jonas, ForeTees, Northstar, ADP, and email systems into the Swoop warehouse
+- Composite member health score model (the engine behind Pillar 2)
+- Revenue leakage attribution math ($31/slow round, $9,580/mo, etc.) — model definition, validation against ground truth, drift monitoring
+- Data freshness SLAs, sync monitoring, and the Data Health dashboard
+- Backfill jobs and historical data reconciliation for new pilot clubs
+- Ground-truth validation: working with pilot clubs to verify dollar figures match their books
+
+**Distinct from the Senior Backend Engineer:** Backend owns the *application* layer (APIs, services, request handling). Data Engineer owns the *analytical* layer (models, pipelines, reconciliation). Backend ships features. Data ships trustworthy numbers.
+
+**North Star alignment:**
+- The single most important non-frontend role for **Pillar 3 (Prove It)** — without trustworthy attribution math, the Board Report is just a demo
+- Owns the credibility moat: every dollar figure must be defensible to a CFO
+
+---
+
+### 1.11 Security & Compliance Engineer *(NEW)*
+**Mission:** Own the security posture and tenant isolation guarantees that let private clubs trust Swoop with their member data.
+
+**Owns:**
+- Multi-tenant isolation guarantees (`getReadClubId` / `getWriteClubId`, `cross_club_audit`, lint-clubid linter)
+- Authentication and session management (`api/lib/withAuth.js`, OAuth flows, token rotation)
+- Secrets management and rotation
+- Penetration testing (internal + external) and bug bounty triage
+- SOC 2 / data privacy compliance prep (clubs will demand this within 12 months)
+- Security ADRs and the Security Review gate on every PR that touches `api/`
+- Incident response for any security event; owns the post-mortem
+
+**Why we need this role now:**
+Sprints 2–4 surfaced 30+ security tickets (SEC-1 through SEC-7, plus the operator endpoint hardening) and we caught real footguns (`waitlist` query missing `club_id`, `getClubId` allowing admin override by default). One person needs to own this surface area or we will regress. Until headcount allows, this is a 50% allocation of the Senior Backend Engineer with explicit time blocked for it.
+
+**North Star alignment:**
+- Trust is the precondition for See It / Fix It / Prove It — none of the pillars matter if a club's data leaks to a peer club
+- Owns the answer to "what happens when a pilot's compliance officer asks for our security documentation?"
+
+---
+
+### 1.12 Solutions / Pilot Engineer *(NEW)*
+**Mission:** Be the technical hands inside every pilot club. Convert "this is a polished demo" into "this is running on your real data."
+
+**Owns:**
+- Per-club data import: CSV mapping, schema reconciliation, first sync
+- White-glove onboarding alongside the Customer Success Lead (CS owns the relationship; Pilot Engineer owns the wires)
+- Vendor-side credential collection and OAuth setup with each club's IT contact
+- The 30-day "from import to first board report" technical playbook
+- Field bug reports — first responder when a pilot says "this number looks wrong"
+- Demo build preparation: snapshot a known-good build for every pilot meeting
+
+**Distinct from Customer Success:** CS is relationship-first (training, change management, success metrics). Pilot Engineer is technical-first (data, integrations, reproducing reported bugs).
+
+**North Star alignment:**
+- Owns the **first 30 days** of every pilot — the period that makes or breaks the See It moment
+- Brings real-world pain back to the Data Engineer and PM — the loop that keeps Layer 3 honest
+
+---
+
+### 1.13 Technical Writer / Documentation Lead *(NEW, part-time OK)*
+**Mission:** Make the runbook, ADRs, and onboarding docs so good that a new engineer is productive on day two and an on-call engineer is unblocked at 2 AM.
+
+**Owns:**
+- `docs/operations/RUNBOOK.md` curation (560+ lines today; needs continuous love)
+- ADR template, ADR backlog, and ADR review cadence
+- Onboarding playbook for new engineers and new pilot clubs
+- Internal help center / FAQ
+- Customer-facing release notes for pilot clubs
+- Every screenshot in the demo storyboard stays current with the live UI
+
+**Why we need this role:**
+Engineering documentation rots within 2 sprints unless someone owns it. The PICKUP-HERE.md / runbook / ADR pattern only scales if a Technical Writer keeps it tidy. Part-time / contractor is fine until headcount allows full-time.
+
+**North Star alignment:**
+- Owns the *documentation* side of "Show your sources" — every claim in the docs traces back to code
+
+---
+
 ## 2. Reporting Structure
 
 ```
-              Founder / CEO
-                   |
-        ┌──────────┼──────────┐
-        |          |          |
-   Director of    PM        Customer
-   Engineering              Success Lead
+                       Founder / CEO
+                            |
+        ┌───────────────────┼───────────────────┐
+        |                   |                   |
+   Director of           General             Customer
+   Engineering          Manager (GM)        Success Lead
+        |                   |                   |
+        |                   ├─ PM (dotted)      └─ Solutions /
+        |                   ├─ QA (dotted)         Pilot Engineer
+        |                   └─ Pilot Eng (dotted)
         |
-   ┌────┴────┐
-   |         |
-   EM      DevOps
-   |
+   ┌────┼────────┬──────────┐
+   |    |        |          |
+   EM  DevOps  Security   Data Eng
+   |          Engineer
    ├─ Senior Frontend
    ├─ Senior Backend
    ├─ Full-Stack #1
    ├─ Full-Stack #2
    ├─ UI/UX Designer (dotted line to PM)
-   └─ QA Engineer (dotted line to PM)
+   ├─ QA Engineer (dotted line to PM and GM)
+   └─ Technical Writer (dotted line to GM)
 ```
 
 **Notes:**
+- The **General Manager** is a peer to the Director of Engineering. Director owns *how we build*; GM owns *whether what we built actually works for the customer*. They co-sign every release.
+- PM, QA, and the Solutions / Pilot Engineer have dotted lines into the GM for daily operating cadence even though they report through other functions.
 - UI/UX Designer reports solid line to EM but works closely with PM on roadmap design.
-- QA Engineer reports solid line to EM but is empowered by PM to block releases that fail acceptance criteria.
-- DevOps is a peer to EM, both report to Director.
-- Customer Success is a separate function that reports to CEO directly during pilot phase, then folds under a future Head of Customer Success or VP Sales.
+- QA Engineer reports solid line to EM but is empowered by PM and GM to block releases that fail acceptance criteria.
+- DevOps, Security Engineer, and Data Engineer are peers to EM under the Director.
+- Customer Success is a separate function reporting to CEO during the pilot phase, then folds under a future Head of Customer Success or VP Sales. Solutions / Pilot Engineer reports through CS for relationship rhythm but escalates technical issues to EM.
+- Technical Writer can be part-time/contractor; reports through GM since documentation health is part of the release-readiness bar.
 
 ---
 
@@ -339,21 +457,26 @@ Customer Success ensures every pilot club gets to value within 30 days. PM track
 
 If hiring incrementally rather than all at once:
 
-| Order | Role | Why first |
+| Order | Role | Why this slot |
 |---|---|---|
 | 1 | **Director of Engineering** | Sets vision, hires the rest |
-| 2 | **PM** | Locks down roadmap, owns customer discovery |
-| 3 | **Senior Backend Engineer** | Owns the Layer 3 moat — the data algorithms |
-| 4 | **QA Engineer** | Locks in quality before the codebase grows |
-| 5 | **Senior Frontend Engineer** | Owns the storyboard pages |
-| 6 | **UI/UX Designer** | Maintains design fidelity as features grow |
-| 7 | **DevOps Engineer** | When we have ≥3 production clubs |
-| 8 | **Engineering Manager** | When the team reaches 5+ engineers |
-| 9 | **Full-Stack Engineers (×2)** | As feature velocity becomes the bottleneck |
-| 10 | **Customer Success Lead** | When pilot count exceeds 5 |
+| 2 | **General Manager (Product & Ops)** | Owns the holistic "is it working for customers?" question from day one |
+| 3 | **PM** | Locks down roadmap, owns customer discovery |
+| 4 | **Senior Backend Engineer** | Owns the API/service layer |
+| 5 | **Data / Analytics Engineer** | Owns the Layer 3 moat — attribution and health-score math |
+| 6 | **QA Engineer** | Locks in quality before the codebase grows |
+| 7 | **Senior Frontend Engineer** | Owns the storyboard pages |
+| 8 | **UI/UX Designer** | Maintains design fidelity as features grow |
+| 9 | **Security & Compliance Engineer** | When the first pilot signs an MSA / DPA |
+| 10 | **Solutions / Pilot Engineer** | When the second pilot starts onboarding |
+| 11 | **DevOps Engineer** | When we have ≥3 production clubs |
+| 12 | **Engineering Manager** | When the team reaches 5+ engineers |
+| 13 | **Full-Stack Engineers (×2)** | As feature velocity becomes the bottleneck |
+| 14 | **Customer Success Lead** | When pilot count exceeds 5 |
+| 15 | **Technical Writer** *(part-time OK)* | Can join earlier as a contractor; full-time when docs surface > 1500 lines |
 
-**Minimum viable team for first paid pilot:** Director + PM + Senior Backend + QA + Senior Frontend (5 people).
-**Full team for scale:** all 10 roles (8 core + Director + CS).
+**Minimum viable team for first paid pilot:** Director + GM + PM + Senior Backend + Data Engineer + QA + Senior Frontend (7 people).
+**Full team for scale:** all 12 core roles + Director + GM + CS.
 
 ---
 
@@ -362,6 +485,7 @@ If hiring incrementally rather than all at once:
 | Role | Primary metric | Secondary metric |
 |---|---|---|
 | Director | Engineering org health (eNPS, retention, hiring velocity) | Architecture decisions documented |
+| **GM (Product & Ops)** | **Release-readiness pass rate** (% of pilot demos with zero GM-flagged issues) | **Composite pillar score trend** (FEATURE-AUDIT.md average — must be flat or rising) |
 | EM | Sprint velocity, cycle time | Sprint commit-to-deliver ratio |
 | PM | Pilot count + pilot retention | Roadmap items shipped per quarter |
 | Senior Frontend | Lighthouse perf score, Core Web Vitals | Visual regression test pass rate |
@@ -370,6 +494,10 @@ If hiring incrementally rather than all at once:
 | Designer | Design system adoption rate | Storyboard moments matching Figma |
 | QA | Bug escape rate (production bugs / total bugs) | Test suite pass rate, Gemini critique score |
 | DevOps | Uptime, deployment success rate | MTTR (mean time to recovery), cost per club |
+| **Data / Analytics Engineer** | Data freshness SLA hit rate | Attribution accuracy vs. ground truth (per club) |
+| **Security & Compliance Engineer** | Cross-tenant audit log integrity, open SEC tickets | Time-to-rotation for any leaked secret |
+| **Solutions / Pilot Engineer** | Time from contract to first sync | First-30-day pilot bug count |
+| **Technical Writer** | Doc freshness (% of docs reviewed in last 60 days) | New-engineer time-to-first-PR |
 | Customer Success | Time-to-first-insight (per club) | Pilot-to-paid conversion rate |
 
 ---
@@ -383,7 +511,7 @@ Every quarter, the team conducts a **North Star Audit**:
 4. Run the Gemini critique pipeline on the latest screenshots
 5. Identify any pillar score regressions and assign owners to fix
 
-**Owner of the North Star Audit:** Engineering Manager (operational) + PM (strategic). Director is the final approver.
+**Owner of the North Star Audit:** Engineering Manager (operational) + PM (strategic) + **GM (release readiness sign-off)**. Director is the final approver.
 
 ---
 
