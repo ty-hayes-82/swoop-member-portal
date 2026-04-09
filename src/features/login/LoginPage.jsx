@@ -248,6 +248,7 @@ export default function LoginPage({ onLogin }) {
             <div className="text-center mt-3">
               <button
                 onClick={() => setShowForgotPassword(true)}
+                aria-label="Forgot password"
                 className="text-sm text-brand-500 hover:text-brand-600 font-medium bg-transparent border-none cursor-pointer"
               >
                 Forgot your password?
@@ -359,6 +360,7 @@ export default function LoginPage({ onLogin }) {
           <div className="flex flex-col gap-3">
             <button
               onClick={() => startDemo(true)}
+              aria-label="Guided Demo"
               className="w-full py-3.5 rounded-xl border-none bg-brand-500 text-white text-sm font-bold cursor-pointer hover:bg-brand-600 transition-colors"
             >
               Guided Demo
