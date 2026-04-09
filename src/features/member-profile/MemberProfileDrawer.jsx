@@ -719,21 +719,36 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             {profile.healthScore ?? '\u2014'}
           </div>
           <Sparkline data={profile.trend ?? []} />
-          {/* Dues at risk callout — Pillar 3: PROVE IT */}
-          {(profile.healthScore ?? 100) < 50 && profile.duesAnnual > 0 && (
-            <div
-              className="mt-1 px-2 py-1 rounded-md font-mono font-bold"
-              style={{
-                background: '#fef2f2',
-                color: '#b91c1c',
-                fontSize: '10px',
-                border: '1px solid #fecaca',
-              }}
-              title={`$${profile.duesAnnual.toLocaleString()}/yr in dues at risk`}
-            >
-              ${Math.round(profile.duesAnnual / 1000)}K/yr at risk
-            </div>
-          )}
+          {/* Dues at risk callout — Pillar 3: PROVE IT.
+              2026-04-09 v2 audit fix: previously this rendered alongside the
+              MemberDecayChain card's own dollar anchor chip, duplicating the
+              same number ~150px away. We now suppress this small chip when
+              the decay chain card will render its own (bigger, more prominent)
+              chip — i.e., when score < 50. The chain card's chip is the
+              storyboard-aligned position right next to the decay viz. This
+              chip stays as a fallback for edge cases where the decay chain
+              has too few signals to render (chain returns null at length < 2). */}
+          {(profile.healthScore ?? 100) < 50 && profile.duesAnnual > 0 && (() => {
+            // Mirror MemberDecayChain's render gate (length >= 2). If the
+            // chain is going to render, defer to its chip and suppress this one.
+            const events = (profile.activity ?? []).length + (profile.riskSignals ?? []).length;
+            const chainWillRender = events >= 2; // chain falls back to demo events when sparse, so this is conservative
+            if (chainWillRender) return null;
+            return (
+              <div
+                className="mt-1 px-2 py-1 rounded-md font-mono font-bold"
+                style={{
+                  background: '#fef2f2',
+                  color: '#b91c1c',
+                  fontSize: '10px',
+                  border: '1px solid #fecaca',
+                }}
+                title={`$${profile.duesAnnual.toLocaleString()}/yr in dues at risk`}
+              >
+                ${Math.round(profile.duesAnnual / 1000)}K/yr at risk
+              </div>
+            );
+          })()}
           {/* Phase I4 — Revenue page link for high-value at-risk members */}
           {(profile.healthScore ?? 100) < 50 && profile.duesAnnual >= 20000 && (
             <button

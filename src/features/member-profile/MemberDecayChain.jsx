@@ -72,16 +72,21 @@ function buildDecayChain(profile) {
   // pilot import dated outside that window. Now uses RELATIVE date
   // labels ("~12 weeks ago", "~3 weeks ago", etc.) that read as a
   // decay journey regardless of when the demo is run.
+  //
+  // 2026-04-09 v2 audit follow-up: each demo event also carries a
+  // numeric `weeksAgo` field so the "First signal: N days ago" counter
+  // (which used to parse the date string) can compute from the structured
+  // value when Date.parse() returns NaN on the relative label.
   if (events.length < 4) {
     const demoEvents = [
-      { date: '~12 weeks ago', domain: 'Email', label: 'Newsletter open rate dropped below 20%', type: 'warning', decayOrder: 1 },
-      { date: '~12 weeks ago', domain: 'Golf', label: 'Regular rounds: 3-4x/month', type: 'positive' },
-      { date: '~8 weeks ago', domain: 'Golf', label: 'Rounds dropped to 2x/month', type: 'warning', decayOrder: 2 },
-      { date: '~8 weeks ago', domain: 'Dining', label: 'Post-round dining stopped', type: 'warning', decayOrder: 3 },
-      { date: '~4 weeks ago', domain: 'Email', label: 'Newsletter open rate below 10%', type: 'risk' },
-      { date: '~4 weeks ago', domain: 'Golf', label: 'Only 1 round played', type: 'risk' },
-      { date: 'this week', domain: 'Events', label: 'Skipped member-guest invite', type: 'risk', decayOrder: 4 },
-      { date: 'this week', domain: 'Risk', label: 'Resignation risk: high', type: 'risk' },
+      { date: '~12 weeks ago', weeksAgo: 12, domain: 'Email', label: 'Newsletter open rate dropped below 20%', type: 'warning', decayOrder: 1 },
+      { date: '~12 weeks ago', weeksAgo: 12, domain: 'Golf', label: 'Regular rounds: 3-4x/month', type: 'positive' },
+      { date: '~8 weeks ago', weeksAgo: 8, domain: 'Golf', label: 'Rounds dropped to 2x/month', type: 'warning', decayOrder: 2 },
+      { date: '~8 weeks ago', weeksAgo: 8, domain: 'Dining', label: 'Post-round dining stopped', type: 'warning', decayOrder: 3 },
+      { date: '~4 weeks ago', weeksAgo: 4, domain: 'Email', label: 'Newsletter open rate below 10%', type: 'risk' },
+      { date: '~4 weeks ago', weeksAgo: 4, domain: 'Golf', label: 'Only 1 round played', type: 'risk' },
+      { date: 'this week', weeksAgo: 0, domain: 'Events', label: 'Skipped member-guest invite', type: 'risk', decayOrder: 4 },
+      { date: 'this week', weeksAgo: 0, domain: 'Risk', label: 'Resignation risk: high', type: 'risk' },
     ];
     events.push(...demoEvents);
   }
@@ -94,7 +99,11 @@ function buildDecayChain(profile) {
   for (const evt of decayItems) {
     if (!seen.has(evt.domain)) {
       seen.add(evt.domain);
-      decayDomains.push({ domain: evt.domain, date: evt.date, label: evt.label });
+      // Carry the structured `weeksAgo` (when present) through to the
+      // decay step so the "First signal: N days ago" counter can fall
+      // back to it when Date.parse() returns NaN on a relative label.
+      // 2026-04-09 v2 audit fix.
+      decayDomains.push({ domain: evt.domain, date: evt.date, label: evt.label, weeksAgo: evt.weeksAgo });
     }
   }
   return { events, decayChain: decayDomains };
@@ -236,9 +245,21 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
   // Return null when we don't have enough decay signal to tell a story
   if (!decayChain || decayChain.length < 2) return null;
 
-  // Compute days since the first decay signal
+  // Compute days since the first decay signal.
+  // 2026-04-09 v2 audit fix: when the date label is a relative string
+  // ("~12 weeks ago"), Date.parse() returns NaN — fall back to the
+  // structured `weeksAgo` field carried through from the demo events.
+  // Without this fallback the "First signal: N days ago" counter
+  // disappears on demo-fallback chains, losing the temporal beat.
   const daysSinceFirstSignal = (() => {
-    const firstDateStr = decayChain[0].date;
+    const first = decayChain[0];
+    if (!first) return null;
+    // Prefer structured weeksAgo (set by the demo-event seeds)
+    if (typeof first.weeksAgo === 'number' && first.weeksAgo >= 0) {
+      return first.weeksAgo * 7;
+    }
+    // Fall back to parsing a real date string from real activity
+    const firstDateStr = first.date;
     if (!firstDateStr) return null;
     const parsed = Date.parse(firstDateStr + ' 1');
     if (Number.isNaN(parsed)) return null;

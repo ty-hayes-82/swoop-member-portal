@@ -56,7 +56,12 @@ export const cockpitItems = [
       'Proactive notification reduced complaint rate 91% during Feb 8 event.',
       'Simulator availability can absorb ~6 groups if offered early.',
     ],
-    stakes: '$4,800 in green fees + $2,100 estimated F&B at risk',
+    // 2026-04-09 v2 audit bump: was "$4,800 + $2,100" ($6,900 combined).
+    // 32 tee times × $225 all-in = $7,200 greens supports the higher number,
+    // and indoor dining demand spike (per the wind-recovery playbook) puts
+    // F&B exposure at $3,400. Punches up the "wind can break your day"
+    // story beat without crossing the 2x ceiling.
+    stakes: '$7,200 in green fees + $3,400 estimated F&B at risk',
     memberName: null,
     memberId: null,
     context: 'Wind advisory issued by NWS for the local area, affecting afternoon play.',
@@ -81,15 +86,22 @@ export const cockpitItems = [
     headline: '3 at-risk members have tee times today \u2014 opportunity for personal touchpoints.',
     recommendation:
       'Brief starter and pro shop staff on these members. GM or Head Pro to greet at least one personally. Log interaction in CRM by end of day.',
+    // 2026-04-09 v2 audit bug fix: the bullets list previously named
+    // Catherine Morales / David Harrington / Michael Torres, but the canonical
+    // 3 at-risk members per briefingService.atRiskTeetimes (and the storyboard
+    // script) are James Whitfield, Anne Jordan, Robert Callahan. The cockpit
+    // and the briefing now name the SAME three members so the Story 1
+    // narrator's "3 at-risk on tee sheet" beat lands consistently across
+    // adjacent screens.
     evidenceSignals: [
       { source: 'Health Score', detail: '3 members below 50 with today bookings' },
-      { source: 'Tee Sheet', detail: 'Catherine Morales 9:12am, David Harrington 10:48am, Michael Torres 1:24pm' },
+      { source: 'Tee Sheet', detail: 'James Whitfield 9:20am, Anne Jordan 10:15am, Robert Callahan 10:42am' },
       { source: 'CRM', detail: 'All 3 had recent negative interactions in past 30 days' },
     ],
     bullets: [
-      'Catherine Morales (health: 41) \u2014 dining complaint 2 weeks ago, plays at 9:12am.',
-      'David Harrington (health: 38) \u2014 billing dispute unresolved, plays at 10:48am.',
-      'Michael Torres (health: 31) \u2014 guest policy incident last month, plays at 1:24pm.',
+      'James Whitfield (health: 42) \u2014 unresolved service complaint, plays at 9:20am.',
+      'Anne Jordan (health: 38) \u2014 declining: golf visits dropped Oct\u2192Nov\u2192Dec, plays at 10:15am.',
+      'Robert Callahan (health: 36) \u2014 obligation-only F&B spending pattern, plays at 10:42am.',
     ],
     // 2026-04-09 demo-data audit bump: was $62,000. Three members at $28K
     // blended (one family + two singles) lands harder while still being
