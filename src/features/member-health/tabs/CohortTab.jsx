@@ -2,7 +2,7 @@ const mono = "'JetBrains Mono', monospace";
 
 // Simulated new members within last 90 days
 const newMembers = [
-  { name: 'James Whitfield', joinDate: '2026-01-15', daysIn: 73, milestones: { firstRound: true, firstDining: true, firstEvent: false, emailOpen: true }, healthScore: 64, archetype: 'Balanced Active' },
+  { name: 'Emily Dawson', joinDate: '2026-01-15', daysIn: 73, milestones: { firstRound: true, firstDining: true, firstEvent: false, emailOpen: true }, healthScore: 64, archetype: 'Balanced Active' },
   { name: 'Sarah Chen', joinDate: '2026-01-28', daysIn: 60, milestones: { firstRound: true, firstDining: true, firstEvent: true, emailOpen: true }, healthScore: 81, archetype: 'Social Butterfly' },
   { name: 'Michael Torres', joinDate: '2026-02-10', daysIn: 47, milestones: { firstRound: true, firstDining: false, firstEvent: false, emailOpen: true }, healthScore: 45, archetype: 'Weekend Warrior' },
   { name: 'Lisa Park', joinDate: '2026-02-22', daysIn: 35, milestones: { firstRound: false, firstDining: true, firstEvent: false, emailOpen: false }, healthScore: 32, archetype: 'New Member' },

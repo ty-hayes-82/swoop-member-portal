@@ -37,8 +37,14 @@ export const DEMO_FILES = [
   { id: '7shifts_Staff_Shifts', file: '7shifts_Staff_Shifts.csv', name: 'Staff Shifts', system: '7shifts', icon: '📅', gateId: 'weather', rows: 450, description: 'Scheduled shifts, locations, actual hours', unlocks: ['Staffing vs demand', 'Understaffed day flags'] },
   { id: 'ADP_Staff_Roster', file: 'ADP_Staff_Roster.csv', name: 'Staff Roster', system: 'ADP', icon: '🪪', gateId: 'weather', rows: 35, description: 'Employee names, roles, departments', unlocks: ['Staff names in assignments'] },
 
+  // ── PACE OF PLAY (derived from tee sheet data) ───────
+  { id: 'TTM_Pace_Analysis', file: 'TTM_Tee_Sheet_SV.csv', name: 'Pace of Play Analysis', system: 'Jonas Tee Time Manager', icon: '⏱', gateId: 'pace', rows: 4200, description: 'Slow round distribution, bottleneck holes, pace-F&B impact', unlocks: ['Slow round stats', 'Bottleneck holes', 'Pace vs F&B revenue impact'] },
+
   // ── CLUB PROFILE ─────────────────────────────────────
   { id: 'JCM_Club_Profile', file: 'JCM_Club_Profile.csv', name: 'Club Profile', system: 'Jonas Club Management', icon: '🏌️‍♂️', gateId: 'pipeline', rows: 1, description: 'Club name, location, membership capacity, weather connection', unlocks: ['Board report', 'Industry benchmarks', 'Club profile overview', 'Live weather feed'] },
+
+  // ── AGENTS (cross-cutting — auto-opens with club profile) ──
+  { id: 'JCM_Club_Profile_Agents', file: 'JCM_Club_Profile.csv', name: 'AI Agent Activation', system: 'Jonas Club Management', icon: '🤖', gateId: 'agents', rows: 1, description: 'Activates AI agent features (priority items, since-last-login)', unlocks: ['Cockpit priority items', 'Since last login insights'] },
 ];
 
 // Group files by gateId for display
@@ -48,12 +54,14 @@ export const FILE_GROUPS = [
   { gateId: 'fb', label: 'F&B / Point of Sale', icon: '🍽' },
   { gateId: 'complaints', label: 'Service & Financials', icon: '📋' },
   { gateId: 'email', label: 'Email & Events', icon: '✉' },
+  { gateId: 'pace', label: 'Pace of Play', icon: '⏱' },
   { gateId: 'weather', label: 'Staffing', icon: '📅' },
   { gateId: 'pipeline', label: 'Club Profile', icon: '🏌️‍♂️' },
+  { gateId: 'agents', label: 'AI Agents', icon: '🤖' },
 ];
 
 // All unique gate IDs (for "load all" and agent activation)
-export const ALL_SOURCE_IDS = [...new Set(DEMO_FILES.map(f => f.gateId)), 'agents'];
+export const ALL_SOURCE_IDS = [...new Set(DEMO_FILES.map(f => f.gateId))];
 
 // All file IDs
 export const ALL_FILE_IDS = DEMO_FILES.map(f => f.id);

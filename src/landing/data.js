@@ -12,7 +12,7 @@ export const problemCards = [
     freshness: 'Updated 12 min ago',
     why: 'Engagement down 28% across six weeks',
     confidence: '91% confidence',
-    metric: { value: '6-day', label: 'warning missed' },
+    metric: { value: '1-day', label: 'warning missed' },
   },
   {
     title: 'Complaint follow-up gap',

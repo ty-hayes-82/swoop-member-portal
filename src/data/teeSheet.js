@@ -77,7 +77,7 @@ export const todayTeeSheet = [
   // 9:00 AM block
   {
     time: '9:00 AM', course: 'North', memberId: 'mbr_271', name: 'Robert Callahan',
-    archetype: 'Declining', healthScore: 27, tier: 'Corporate', duesAnnual: 18000,
+    archetype: 'Declining', healthScore: 22, tier: 'Corporate', duesAnnual: 18000,
     group: ['Robert Callahan'],
     cancelRisk: 0.59,
     cartPrep: { beverage: 'Sparkling water', snack: null, note: 'AT-RISK — Playing solo. 9-day-old complaint unresolved. F&B Director should check in at turn. Comp beverage cart on back nine.' },

@@ -43,9 +43,9 @@ const DEFAULT_DIMS = { golf: 50, dining: 50, events: 50, email: 50 };
 // ── Tier assignment (match backend) ──
 function getTier(score) {
   if (score == null) return null;
-  if (score >= 67) return 'Healthy';
-  if (score >= 45) return 'Watch';
-  if (score >= 25) return 'At Risk';
+  if (score >= 70) return 'Healthy';
+  if (score >= 50) return 'Watch';
+  if (score >= 30) return 'At Risk';
   return 'Critical';
 }
 

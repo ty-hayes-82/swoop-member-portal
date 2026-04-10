@@ -64,7 +64,7 @@ export const agentActions = [
     agentId: 'member-pulse',
     source: 'Member Pulse',
     actionType: 'RETENTION_OUTREACH',
-    description: 'Prioritize personal outreach to James Whitfield before his 9:20 AM tee time.',
+    description: 'Prioritize personal outreach to James Whitfield before his 8:00 AM tee time.',
     status: 'pending',
     impactMetric: '$18K dues retention at risk',
     priority: 'high',
@@ -75,7 +75,7 @@ export const agentActions = [
     confidence: 0.93,
     signals: [
       { system: 'Complaint Log', signal: 'Unresolved complaint', timestamp: 'Jan 16' },
-      { system: 'Tee Sheet', signal: 'Tee time 9:20 AM', timestamp: 'Today' },
+      { system: 'Tee Sheet', signal: 'Tee time 8:00 AM', timestamp: 'Today' },
       { system: 'Member CRM', signal: 'Health score 42', timestamp: 'Now' },
     ],
     auditTrail: [
@@ -122,9 +122,9 @@ export const agentActions = [
     recommendedChannel: 'Email',
     confidence: 0.82,
     signals: [
-      { system: 'Complaint Log', signal: '40-min wait complaint', timestamp: 'Jan 14' },
-      { system: 'POS', signal: 'Lunch order #4721', timestamp: 'Jan 14 12:23 PM' },
-      { system: 'Scheduling', signal: 'Understaffed shift', timestamp: 'Jan 14' },
+      { system: 'Complaint Log', signal: '40-min wait complaint', timestamp: 'Jan 16' },
+      { system: 'POS', signal: 'Lunch order #4721', timestamp: 'Jan 16 12:23 PM' },
+      { system: 'Scheduling', signal: 'Understaffed shift', timestamp: 'Jan 16' },
     ],
     auditTrail: [
       { id: 'rec', status: 'Queued for drafting', owner: 'Labor Optimizer', timestamp: '2026-01-17T06:09:00Z' },
@@ -276,9 +276,9 @@ export const agentActions = [
     recommendedChannel: 'Call',
     confidence: 0.91,
     signals: [
-      { system: 'Complaint Log', signal: 'SLA breach 6 days', timestamp: 'Jan 16' },
+      { system: 'Complaint Log', signal: 'SLA breach 1 day', timestamp: 'Jan 16' },
       { system: 'Member CRM', signal: '$18K dues at risk', timestamp: 'Today' },
-      { system: 'Tee Sheet', signal: 'Tee time 9:20 AM', timestamp: 'Today' },
+      { system: 'Tee Sheet', signal: 'Tee time 8:00 AM', timestamp: 'Today' },
     ],
     auditTrail: [
       { id: 'rec', status: 'Escalated', owner: 'Service Recovery', timestamp: '2026-01-17T08:43:00Z' },

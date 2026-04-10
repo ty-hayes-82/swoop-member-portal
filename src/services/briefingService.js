@@ -2,7 +2,7 @@
 
 import { apiFetch } from './apiClient';
 import { shouldUseStatic } from './demoGate';
-import { getMonthlyRevenueSummary, getRevenueByDay, getTodayTeeSheet } from './operationsService';
+import { getMonthlyRevenueSummary, getRevenueByDay, getTodayTeeSheet, getTeeSheetSummary } from './operationsService';
 import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
 import { getCancellationSummary, getWaitlistSummary }  from './waitlistService';
@@ -111,7 +111,7 @@ const EMPTY_BRIEFING = {
 // It must satisfy the same contract as the dynamic build so that downstream
 // components and tests don't see a half-shape. Every required field is populated.
 export const DEMO_BRIEFING = {
-  keyMetrics: { atRiskMembers: 7, openComplaints: 4, monthlyRevenue: 168000, revenueVsPlan: 4.2, understaffedDays: 3 },
+  keyMetrics: { atRiskMembers: 7, openComplaints: 4, monthlyRevenue: 375200, revenueVsPlan: 4.2, understaffedDays: 3 },
   teeSheet: { roundsToday: 220, utilization: 0.87 },
   todayRisks: {
     weather: 'clear',
@@ -120,9 +120,9 @@ export const DEMO_BRIEFING = {
     forecast: 'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
     // Must stay at 3 entries — Story 1 narration says "3 at-risk members on today's tee sheet". Locked by briefingService.demo.test.js.
     atRiskTeetimes: [
-      { memberId: 'mbr_203', name: 'James Whitfield', time: '9:20 AM', health: 42 },
-      { memberId: 'mbr_089', name: 'Anne Jordan', time: '10:15 AM', health: 38 },
-      { memberId: 'mbr_271', name: 'Robert Callahan', time: '10:42 AM', health: 36 },
+      { memberId: 'mbr_203', name: 'James Whitfield', time: '8:00 AM', health: 42 },
+      { memberId: 'mbr_089', name: 'Anne Jordan', time: '7:08 AM', health: 28 },
+      { memberId: 'mbr_271', name: 'Robert Callahan', time: '9:00 AM', health: 22 },
     ],
     staffingGaps: [],
     fullyStaffed: false,
@@ -152,7 +152,7 @@ export const DEMO_BRIEFING = {
       'Grill Room understaffed — 2 service speed complaints',
       'James Whitfield filed a slow-service complaint — left unhappy, no follow-up',
     ],
-    weather: 'overcast',
+    weather: 'sunny',
     isUnderstaffed: true,
   },
   pendingActions: [
@@ -213,9 +213,10 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     : '0.0';
   
   const teeSheet = getTodayTeeSheet();
+  const summary = getTeeSheetSummary();
   return {
     currentDate: date,
-    teeSheet: { roundsToday: teeSheet.length > 0 ? teeSheet.length : DEMO_BRIEFING.teeSheet.roundsToday, utilization: 0.87 },
+    teeSheet: { roundsToday: summary.totalRounds || DEMO_BRIEFING.teeSheet.roundsToday, utilization: 0.87 },
     yesterdayRecap: {
       date:           yesterday.date,
       revenue:        yesterdayTotal,
@@ -235,11 +236,11 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       weather:    'clear', tempHigh: 82, wind: 8,
       forecast:   'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
       atRiskTeetimes: [
-        { memberId: 'mbr_203', name: 'James Whitfield', archetype: 'Snowbird',         time: '9:20 AM', score: 42,
+        { memberId: 'mbr_203', name: 'James Whitfield', archetype: 'Balanced Active',   time: '8:00 AM', score: 42,
           topRisk: 'Service complaint unresolved — slow lunch on Jan 16' },
-        { memberId: 'mbr_089', name: 'Anne Jordan',     archetype: 'Weekend Warrior',  time: '10:15 AM', score: 38,
+        { memberId: 'mbr_089', name: 'Anne Jordan',     archetype: 'Weekend Warrior',  time: '7:08 AM', score: 28,
           topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
-        { memberId: 'mbr_271', name: 'Robert Callahan', archetype: 'Declining',        time: '10:42 AM', score: 36,
+        { memberId: 'mbr_271', name: 'Robert Callahan', archetype: 'Declining',        time: '9:00 AM', score: 22,
           topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
       ],
       staffingGaps: [], fullyStaffed: true,
@@ -310,7 +311,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         impact: '$60K dues at stake',
         effort: '15 min',
         conversionRate: null,
-        detail: 'James Whitfield (9:20 AM), Anne Jordan (10:15 AM), and Robert Callahan (10:42 AM) are all at-risk members with tee times today. Personal GM greeting + brief conversation can prevent further disengagement.',
+        detail: 'James Whitfield (8:00 AM), Anne Jordan (7:08 AM), and Robert Callahan (9:00 AM) are all at-risk members with tee times today. Personal GM greeting + brief conversation can prevent further disengagement.',
         action: 'View member details',
         link: 'member-health',
       },

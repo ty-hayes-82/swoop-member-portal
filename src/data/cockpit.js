@@ -8,7 +8,7 @@ export const cockpitItems = [
     questionDomain: 'Operational Command',
     questionLabel: 'Where is today at risk of breaking?',
     icon: '\u26A0',
-    headline: 'James Whitfield filed a complaint 6 days ago. No one has followed up.',
+    headline: 'James Whitfield filed a complaint yesterday. No one has followed up.',
     recommendation:
       'GM to call James personally with apology + complimentary round. Send recovery note via Swoop app within 2 hours.',
     evidenceSignals: [
@@ -17,7 +17,7 @@ export const cockpitItems = [
       { source: 'POS', detail: 'Grill Room visits dropped to zero' },
     ],
     bullets: [
-      'Complaint acknowledged but unresolved \u2014 timer exceeded 6-day SLA.',
+      'Complaint acknowledged but unresolved \u2014 timer exceeded 1-day SLA.',
       'Average Grill Room check dropped from $47 \u2192 $28 since January 3.',
       'Health score fell 78 \u2192 42 once the third complaint hit.',
     ],
@@ -33,8 +33,8 @@ export const cockpitItems = [
       freshness: 'Updated 11 min ago',
       urgency: 'Act Now',
       urgencyColor: '#ef4444',
-      why: 'Complaint aging 6d & spend down 42%',
-      metric: { value: '6-day', label: 'warning lead time' },
+      why: 'Complaint aging 1d & spend down 42%',
+      metric: { value: '1-day', label: 'warning lead time' },
     },
   },
   {
@@ -84,15 +84,15 @@ export const cockpitItems = [
     // Names must stay in sync with briefingService.atRiskTeetimes and the Story 1 script.
     evidenceSignals: [
       { source: 'Health Score', detail: '3 members below 50 with today bookings' },
-      { source: 'Tee Sheet', detail: 'James Whitfield 9:20am, Anne Jordan 10:15am, Robert Callahan 10:42am' },
+      { source: 'Tee Sheet', detail: 'James Whitfield 8:00am, Anne Jordan 7:08am, Robert Callahan 9:00am' },
       { source: 'CRM', detail: 'All 3 had recent negative interactions in past 30 days' },
     ],
     bullets: [
-      'James Whitfield (health: 42) \u2014 unresolved service complaint, plays at 9:20am.',
-      'Anne Jordan (health: 38) \u2014 declining: golf visits dropped Oct\u2192Nov\u2192Dec, plays at 10:15am.',
-      'Robert Callahan (health: 36) \u2014 obligation-only F&B spending pattern, plays at 10:42am.',
+      'James Whitfield (health: 42) \u2014 unresolved service complaint, plays at 8:00am.',
+      'Anne Jordan (health: 28) \u2014 declining: golf visits dropped Oct\u2192Nov\u2192Dec, plays at 7:08am.',
+      'Robert Callahan (health: 22) \u2014 obligation-only F&B spending pattern, plays at 9:00am.',
     ],
-    stakes: '$84,000 combined annual dues at risk',
+    stakes: '$48,000 combined annual dues at risk',
     memberName: null,
     memberId: null,
     context: 'Three members flagged as at-risk by health scoring are on the tee sheet today.',
