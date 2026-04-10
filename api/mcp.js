@@ -1,5 +1,5 @@
 // api/mcp.js — MCP server for Managed Agent POC
-// Exposes 23 tools over JSON-RPC (HTTP transport) for the Managed Agent fleet.
+// Exposes 30 tools over JSON-RPC (HTTP transport) for the Managed Agent fleet.
 // Auth: x-mcp-token header validated against MCP_AUTH_TOKEN env var.
 
 import { sql } from '@vercel/postgres';
@@ -388,6 +388,192 @@ const TOOL_DEFINITIONS = [
         conflict_details: { type: 'object', description: 'Details of conflicts and resolutions (JSON)' },
       },
       required: ['club_id', 'log_date', 'agents_contributing', 'actions_input', 'actions_output'],
+    },
+  },
+  // --- Phase 6: F&B Intelligence tools ---
+  {
+    name: 'get_daily_fb_performance',
+    description: 'Pull daily F&B performance: revenue, covers, margin by outlet and meal period.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        date: { type: 'string', description: 'Date (YYYY-MM-DD)' },
+      },
+      required: ['club_id', 'date'],
+    },
+  },
+  {
+    name: 'get_menu_mix_analysis',
+    description: 'Pull menu mix analysis: item-level sales, margin contribution, and category mix for a given date.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        date: { type: 'string', description: 'Date (YYYY-MM-DD)' },
+      },
+      required: ['club_id', 'date'],
+    },
+  },
+  {
+    name: 'get_cover_vs_reservation_delta',
+    description: 'Compare reservation covers vs actual covers to measure no-show and walk-in rates.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        date: { type: 'string', description: 'Date (YYYY-MM-DD)' },
+      },
+      required: ['club_id', 'date'],
+    },
+  },
+  // --- Phase 6: Board Report Compiler tools ---
+  {
+    name: 'get_monthly_intervention_summary',
+    description: 'Pull monthly intervention summary: all interventions, outcomes, and member saves for a given month.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        month: { type: 'string', description: 'Month (YYYY-MM)' },
+      },
+      required: ['club_id', 'month'],
+    },
+  },
+  {
+    name: 'get_monthly_staffing_outcomes',
+    description: 'Pull monthly staffing recommendation outcomes: recommendations, approval rates, and actual results.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        month: { type: 'string', description: 'Month (YYYY-MM)' },
+      },
+      required: ['club_id', 'month'],
+    },
+  },
+  {
+    name: 'get_monthly_revenue_attribution',
+    description: 'Pull monthly revenue attribution: approved agent actions and their dollar impact, grouped by agent.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        month: { type: 'string', description: 'Month (YYYY-MM)' },
+      },
+      required: ['club_id', 'month'],
+    },
+  },
+  {
+    name: 'save_draft_board_report',
+    description: 'Save a draft board report for GM review. Upserts on (club_id, report_month).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        month: { type: 'string', description: 'Report month (YYYY-MM)' },
+        report: { type: 'object', description: 'Full report object with content, metrics, and attribution chain' },
+      },
+      required: ['club_id', 'month', 'report'],
+    },
+  },
+  // --- Phase 7: Member Concierge tools ---
+  {
+    name: 'book_tee_time',
+    description: 'Check tee time availability and create a booking for a member. Returns the new booking ID or an error if the slot is taken.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        course_id: { type: 'string', description: 'Course ID' },
+        member_id: { type: 'string', description: 'Member ID of the booker' },
+        booking_date: { type: 'string', description: 'Date (YYYY-MM-DD)' },
+        tee_time: { type: 'string', description: 'Tee time (HH:MM)' },
+        player_count: { type: 'integer', description: 'Number of players (1-4)', default: 1 },
+        guest_names: { type: 'array', items: { type: 'string' }, description: 'Names of any guests in the group' },
+      },
+      required: ['club_id', 'course_id', 'member_id', 'booking_date', 'tee_time'],
+    },
+  },
+  {
+    name: 'make_dining_reservation',
+    description: 'Check dining outlet availability and create a reservation for a member.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        outlet_id: { type: 'string', description: 'Dining outlet ID' },
+        member_id: { type: 'string', description: 'Member ID' },
+        reservation_date: { type: 'string', description: 'Date (YYYY-MM-DD)' },
+        reservation_time: { type: 'string', description: 'Time (HH:MM)' },
+        party_size: { type: 'integer', description: 'Number of guests including member', default: 2 },
+        special_requests: { type: 'string', description: 'Any special requests or dietary needs' },
+      },
+      required: ['club_id', 'outlet_id', 'member_id', 'reservation_date', 'reservation_time'],
+    },
+  },
+  {
+    name: 'rsvp_event',
+    description: 'Register a member for a club event.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        event_id: { type: 'string', description: 'Event ID' },
+        member_id: { type: 'string', description: 'Member ID' },
+        guest_count: { type: 'integer', description: 'Number of additional guests', default: 0 },
+      },
+      required: ['club_id', 'event_id', 'member_id'],
+    },
+  },
+  {
+    name: 'get_my_schedule',
+    description: "Get a member's upcoming bookings, dining reservations, and event registrations.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        member_id: { type: 'string', description: 'Member ID' },
+        club_id: { type: 'string', description: 'Club ID' },
+      },
+      required: ['member_id', 'club_id'],
+    },
+  },
+  {
+    name: 'get_club_calendar',
+    description: 'Get upcoming club events, specials, and weather forecasts.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        limit: { type: 'integer', description: 'Max events to return', default: 10 },
+      },
+      required: ['club_id'],
+    },
+  },
+  {
+    name: 'send_request_to_club',
+    description: 'Escalate a member request to club staff for follow-up. Creates a visible request in the staff queue.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        member_id: { type: 'string', description: 'Member ID' },
+        request_type: { type: 'string', enum: ['general', 'maintenance', 'billing', 'membership', 'complaint', 'suggestion'], description: 'Category of request' },
+        description: { type: 'string', description: 'Detailed description of the request' },
+      },
+      required: ['club_id', 'member_id', 'request_type', 'description'],
+    },
+  },
+  {
+    name: 'get_my_profile',
+    description: "Get a member-safe view of their own profile: name, preferences, household, upcoming schedule. Does NOT include health scores or risk classifications.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        member_id: { type: 'string', description: 'Member ID' },
+        club_id: { type: 'string', description: 'Club ID' },
+      },
+      required: ['member_id', 'club_id'],
     },
   },
 ];
@@ -1161,6 +1347,273 @@ async function saveCoordinationLogTool({ club_id, log_date, agents_contributing,
   return { log_id: result.rows[0].log_id, saved: true };
 }
 
+// --- Phase 7: Member Concierge tool handlers ---
+
+async function bookTeeTime({ club_id, course_id, member_id, booking_date, tee_time, player_count, guest_names }) {
+  const players = player_count || 1;
+
+  // Check if slot is already taken
+  const check = await sql`
+    SELECT COUNT(*)::int AS cnt FROM bookings
+    WHERE booking_date = ${booking_date} AND tee_time = ${tee_time}
+      AND course_id = ${course_id} AND club_id = ${club_id}
+      AND status = 'confirmed'
+  `;
+  if (Number(check.rows[0]?.cnt) > 0) {
+    return { error: 'slot_taken', message: `The ${tee_time} slot on ${booking_date} is already booked.` };
+  }
+
+  const bookingId = `bkg_c_${Date.now()}`;
+  await sql`
+    INSERT INTO bookings (booking_id, club_id, course_id, booking_date, tee_time, player_count, status)
+    VALUES (${bookingId}, ${club_id}, ${course_id}, ${booking_date}, ${tee_time}, ${players}, 'confirmed')
+  `;
+
+  // Insert the member as player 1
+  const playerId = `bp_c_${Date.now()}_1`;
+  await sql`
+    INSERT INTO booking_players (player_id, booking_id, member_id, is_guest, position_in_group)
+    VALUES (${playerId}, ${bookingId}, ${member_id}, 0, 1)
+  `;
+
+  // Insert any guests
+  const guests = guest_names || [];
+  for (let i = 0; i < guests.length; i++) {
+    const guestPlayerId = `bp_c_${Date.now()}_${i + 2}`;
+    await sql`
+      INSERT INTO booking_players (player_id, booking_id, guest_name, is_guest, position_in_group)
+      VALUES (${guestPlayerId}, ${bookingId}, ${guests[i]}, 1, ${i + 2})
+    `;
+  }
+
+  return { booking_id: bookingId, status: 'confirmed', date: booking_date, tee_time, player_count: players };
+}
+
+async function makeDiningReservation({ club_id, outlet_id, member_id, reservation_date, reservation_time, party_size, special_requests }) {
+  const size = party_size || 2;
+
+  // Check outlet capacity
+  const outletResult = await sql`
+    SELECT name, weekday_covers, weekend_covers FROM dining_outlets
+    WHERE outlet_id = ${outlet_id} AND club_id = ${club_id}
+  `;
+  if (outletResult.rows.length === 0) {
+    return { error: 'outlet_not_found', message: `Dining outlet ${outlet_id} not found.` };
+  }
+
+  const outlet = outletResult.rows[0];
+  const dayOfWeek = new Date(reservation_date).getDay();
+  const maxCovers = (dayOfWeek === 0 || dayOfWeek === 6) ? outlet.weekend_covers : outlet.weekday_covers;
+
+  // Count existing covers for this date
+  const coverCheck = await sql`
+    SELECT COALESCE(SUM(
+      CASE WHEN subtotal = 0 AND status = 'reserved' THEN 1 ELSE 0 END
+    ), 0)::int AS reserved_covers
+    FROM pos_checks
+    WHERE outlet_id = ${outlet_id} AND opened_at::date = ${reservation_date}::date
+  `;
+  const currentCovers = Number(coverCheck.rows[0]?.reserved_covers ?? 0);
+  if (currentCovers + size > maxCovers) {
+    return { error: 'no_availability', message: `${outlet.name} is fully booked on ${reservation_date}.` };
+  }
+
+  const checkId = `chk_c_${Date.now()}`;
+  await sql`
+    INSERT INTO pos_checks (check_id, outlet_id, member_id, opened_at, subtotal, total, status)
+    VALUES (${checkId}, ${outlet_id}, ${member_id}, ${reservation_date + 'T' + reservation_time}, 0, 0, 'reserved')
+  `;
+
+  return {
+    reservation_id: checkId,
+    outlet: outlet.name,
+    date: reservation_date,
+    time: reservation_time,
+    party_size: size,
+    special_requests: special_requests || null,
+    status: 'reserved',
+  };
+}
+
+async function rsvpEvent({ club_id, event_id, member_id, guest_count }) {
+  const guests = guest_count || 0;
+
+  // Check event exists and has capacity
+  const eventResult = await sql`
+    SELECT name, event_date, capacity, registration_fee FROM event_definitions
+    WHERE event_id = ${event_id} AND club_id = ${club_id}
+  `;
+  if (eventResult.rows.length === 0) {
+    return { error: 'event_not_found', message: `Event ${event_id} not found.` };
+  }
+
+  const evt = eventResult.rows[0];
+
+  // Check current registration count
+  const regCount = await sql`
+    SELECT COUNT(*)::int AS cnt FROM event_registrations
+    WHERE event_id = ${event_id} AND status = 'registered'
+  `;
+  const currentRegs = Number(regCount.rows[0]?.cnt ?? 0);
+  if (currentRegs + 1 + guests > evt.capacity) {
+    return { error: 'event_full', message: `${evt.name} is at capacity.` };
+  }
+
+  // Check if already registered
+  const existing = await sql`
+    SELECT registration_id FROM event_registrations
+    WHERE event_id = ${event_id} AND member_id = ${member_id} AND status = 'registered'
+  `;
+  if (existing.rows.length > 0) {
+    return { error: 'already_registered', message: `You are already registered for ${evt.name}.` };
+  }
+
+  const regId = `reg_c_${Date.now()}`;
+  await sql`
+    INSERT INTO event_registrations (registration_id, event_id, member_id, status, guest_count, fee_paid, registered_at)
+    VALUES (${regId}, ${event_id}, ${member_id}, 'registered', ${guests}, ${Number(evt.registration_fee)}, NOW()::text)
+  `;
+
+  return {
+    registration_id: regId,
+    event_name: evt.name,
+    event_date: evt.event_date,
+    guest_count: guests,
+    fee: Number(evt.registration_fee),
+    status: 'registered',
+  };
+}
+
+async function getMySchedule({ member_id, club_id }) {
+  const bookingsResult = await sql`
+    SELECT b.booking_id, b.booking_date, b.tee_time, b.player_count, b.status, c.name AS course_name
+    FROM bookings b
+    JOIN booking_players bp ON bp.booking_id = b.booking_id
+    LEFT JOIN courses c ON c.course_id = b.course_id
+    WHERE bp.member_id = ${member_id} AND b.club_id = ${club_id}
+      AND b.booking_date >= CURRENT_DATE AND b.status = 'confirmed'
+    ORDER BY b.booking_date, b.tee_time
+  `;
+
+  const eventsResult = await sql`
+    SELECT er.registration_id, er.status, er.guest_count, ed.name AS event_name, ed.event_date, ed.type
+    FROM event_registrations er
+    JOIN event_definitions ed ON ed.event_id = er.event_id
+    WHERE er.member_id = ${member_id} AND ed.club_id = ${club_id}
+      AND er.status = 'registered' AND ed.event_date >= CURRENT_DATE::text
+    ORDER BY ed.event_date
+  `;
+
+  return {
+    tee_times: bookingsResult.rows.map(r => ({
+      booking_id: r.booking_id,
+      date: r.booking_date,
+      tee_time: r.tee_time,
+      course: r.course_name,
+      players: Number(r.player_count),
+    })),
+    events: eventsResult.rows.map(r => ({
+      registration_id: r.registration_id,
+      event_name: r.event_name,
+      date: r.event_date,
+      type: r.type,
+      guests: Number(r.guest_count),
+    })),
+  };
+}
+
+async function getClubCalendar({ club_id, limit }) {
+  const maxEvents = limit || 10;
+  const eventsResult = await sql`
+    SELECT event_id, name, type, event_date, capacity, registration_fee, description
+    FROM event_definitions
+    WHERE club_id = ${club_id} AND event_date >= CURRENT_DATE::text
+    ORDER BY event_date
+    LIMIT ${maxEvents}
+  `;
+
+  const weatherResult = await sql`
+    SELECT date, condition, temp_high, temp_low, wind_mph
+    FROM weather_daily
+    WHERE club_id = ${club_id} AND date >= CURRENT_DATE::text
+    ORDER BY date
+    LIMIT 7
+  `;
+
+  return {
+    events: eventsResult.rows.map(r => ({
+      event_id: r.event_id,
+      name: r.name,
+      type: r.type,
+      date: r.event_date,
+      capacity: Number(r.capacity),
+      fee: Number(r.registration_fee),
+      description: r.description,
+    })),
+    weather: weatherResult.rows.map(r => ({
+      date: r.date,
+      condition: r.condition,
+      high: Number(r.temp_high),
+      low: Number(r.temp_low),
+      wind: Number(r.wind_mph),
+    })),
+  };
+}
+
+async function sendRequestToClub({ club_id, member_id, request_type, description }) {
+  const result = await sql`
+    INSERT INTO member_requests (club_id, member_id, request_type, description, source)
+    VALUES (${club_id}, ${member_id}, ${request_type}, ${description}, 'concierge')
+    RETURNING request_id
+  `;
+  return { request_id: result.rows[0].request_id, status: 'pending', message: 'Your request has been sent to the club staff.' };
+}
+
+async function getMyProfile({ member_id, club_id }) {
+  const memberResult = await sql`
+    SELECT member_id::text AS member_id, first_name, last_name, email, phone,
+      membership_type, join_date, membership_status, household_id, archetype,
+      preferred_channel, annual_dues
+    FROM members
+    WHERE member_id = ${member_id} AND club_id = ${club_id}
+  `;
+  if (memberResult.rows.length === 0) {
+    return { error: `Member ${member_id} not found` };
+  }
+
+  const m = memberResult.rows[0];
+
+  // Get household members
+  const householdResult = m.household_id ? await sql`
+    SELECT member_id::text AS member_id, first_name, last_name, membership_type
+    FROM members
+    WHERE household_id = ${m.household_id} AND club_id = ${club_id} AND member_id != ${member_id}
+  ` : { rows: [] };
+
+  // Get preferences from concierge session
+  const sessionResult = await sql`
+    SELECT preferences_cache FROM member_concierge_sessions
+    WHERE member_id = ${member_id} AND club_id = ${club_id}
+  `;
+
+  return {
+    member_id: m.member_id,
+    name: `${m.first_name} ${m.last_name}`.trim(),
+    email: m.email,
+    phone: m.phone,
+    membership_type: m.membership_type,
+    join_date: m.join_date,
+    status: m.membership_status,
+    preferred_channel: m.preferred_channel,
+    household: householdResult.rows.map(h => ({
+      member_id: h.member_id,
+      name: `${h.first_name} ${h.last_name}`.trim(),
+      membership_type: h.membership_type,
+    })),
+    preferences: sessionResult.rows[0]?.preferences_cache || null,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Tool dispatch
 // ---------------------------------------------------------------------------
@@ -1195,6 +1648,14 @@ const TOOL_HANDLERS = {
   resolve_conflict: resolveConflictTool,
   get_agent_confidence_scores: getAgentConfidenceScores,
   save_coordination_log: saveCoordinationLogTool,
+  // Phase 7 — Member Concierge
+  book_tee_time: bookTeeTime,
+  make_dining_reservation: makeDiningReservation,
+  rsvp_event: rsvpEvent,
+  get_my_schedule: getMySchedule,
+  get_club_calendar: getClubCalendar,
+  send_request_to_club: sendRequestToClub,
+  get_my_profile: getMyProfile,
 };
 
 // ---------------------------------------------------------------------------

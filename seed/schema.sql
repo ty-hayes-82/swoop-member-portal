@@ -1296,6 +1296,38 @@ CREATE INDEX IF NOT EXISTS idx_coordination_logs_club_date ON coordination_logs(
 ALTER TABLE agent_actions ADD COLUMN IF NOT EXISTS contributing_agents TEXT[];
 ALTER TABLE agent_actions ADD COLUMN IF NOT EXISTS coordination_log_id TEXT;
 
+-- ---------------------------------------------------------------------------
+-- 3.15 MEMBER CONCIERGE SESSIONS (Agent Phase 7 — Member Concierge)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS member_concierge_sessions (
+  session_id          TEXT PRIMARY KEY,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT NOT NULL,
+  last_active         TIMESTAMPTZ DEFAULT NOW(),
+  preferences_cache   JSONB,
+  conversation_summary TEXT,
+  created_at          TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(club_id, member_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_concierge_sessions_member ON member_concierge_sessions(club_id, member_id);
+
+-- Member requests table for concierge escalations to staff
+CREATE TABLE IF NOT EXISTS member_requests (
+  request_id          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT NOT NULL,
+  request_type        TEXT NOT NULL,
+  description         TEXT NOT NULL,
+  status              TEXT DEFAULT 'pending',
+  source              TEXT DEFAULT 'concierge',
+  created_at          TIMESTAMPTZ DEFAULT NOW(),
+  resolved_at         TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_member_requests_club ON member_requests(club_id, status);
+
 -- =============================================================================
 -- End of schema
 -- =============================================================================
