@@ -22,7 +22,7 @@ describe('cockpitService', () => {
     items.forEach((item) => {
       expect(item.headline).toBeTruthy();
       expect(item.urgency).toBeTruthy();
-      expect(['urgent', 'warning', 'neutral', 'insight']).toContain(item.urgency);
+      expect(['urgent', 'high', 'warning', 'neutral', 'insight']).toContain(item.urgency);
     });
   });
 

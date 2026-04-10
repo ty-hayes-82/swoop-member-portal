@@ -38,6 +38,10 @@ async function copyMembers(client, clubId) {
   `, [clubId, SEED_CLUB]);
   copied.households = hh.rowCount;
 
+  // Copy directory fields only — health_score, health_tier, archetype, and
+  // data_completeness are left NULL/0 because they are computed outputs,
+  // not imported data. They populate when the user explicitly triggers
+  // "Update Health Scores" (button click or cron job in production).
   const m = await client.query(`
     INSERT INTO members (
       member_id, member_number, club_id, external_id, first_name, last_name,
@@ -49,9 +53,9 @@ async function copyMembers(client, clubId) {
     SELECT
       member_id || '_' || $1, member_number, $1, external_id, first_name, last_name,
       email, phone, date_of_birth, gender, membership_type || '_' || $1, membership_status,
-      join_date, resigned_on, household_id || '_' || $1, archetype, annual_dues, account_balance,
-      ghin_number, communication_opt_in, health_score, health_tier, last_health_update,
-      data_completeness, preferred_channel, 'guided_copy'
+      join_date, resigned_on, household_id || '_' || $1, NULL, annual_dues, account_balance,
+      ghin_number, communication_opt_in, NULL, NULL, NULL,
+      0, preferred_channel, 'guided_copy'
     FROM members WHERE club_id = $2
     ON CONFLICT (member_id) DO NOTHING
   `, [clubId, SEED_CLUB]);
@@ -479,19 +483,9 @@ export default withAuth(async function handler(req, res) {
       logError('/api/guided-copy', e, { phase: 'audit-log' });
     }
 
-    // Trigger health score recomputation after member data copy
-    if (category === 'members') {
-      try {
-        const host = req.headers.host || 'localhost:3000';
-        const proto = host.includes('localhost') ? 'http' : 'https';
-        fetch(`${proto}://${host}/api/compute-health-scores?clubId=${clubId}`, {
-          method: 'POST',
-          headers: { Authorization: req.headers.authorization, 'Content-Type': 'application/json' },
-        }).catch(() => {});
-      } catch {
-        // non-critical
-      }
-    }
+    // Health scores and archetypes are NOT auto-computed here.
+    // They stay NULL until the user explicitly triggers computation
+    // (button click in the UI, or cron job in production).
 
     logInfo('/api/guided-copy', `${category} copied`, { clubId, copied, duration_ms });
 

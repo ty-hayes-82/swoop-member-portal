@@ -3,32 +3,36 @@
 import { theme } from '@/config/theme';
 
 export const memberArchetypes = [
-  { archetype: 'Die-Hard Golfer',  count: 60, golf: 88, dining: 42, events: 28, email: 32, trend: +4  },
-  { archetype: 'Social Butterfly', count: 45, golf: 18, dining: 82, events: 78, email: 72, trend: +6  },
-  { archetype: 'Balanced Active',  count: 55, golf: 68, dining: 62, events: 54, email: 55, trend: -2  },
-  { archetype: 'Weekend Warrior',  count: 45, golf: 52, dining: 44, events: 32, email: 28, trend: -8  },
-  { archetype: 'Declining',        count: 25, golf: 24, dining: 18, events: 8,  email: 22, trend: -18 },
-  { archetype: 'New Member',       count: 30, golf: 42, dining: 48, events: 38, email: 68, trend: +14 },
-  { archetype: 'Ghost',            count: 15, golf: 4,  dining: 6,  events: 2,  email: 8,  trend: -4  },
-  { archetype: 'Snowbird',         count: 25, golf: 62, dining: 52, events: 34, email: 44, trend: +2  },
+  { archetype: 'Die-Hard Golfer',  count: 78, golf: 88, dining: 42, events: 28, email: 32, trend: +4,  action: 'Tee time priority + post-round dining comp' },
+  { archetype: 'Social Butterfly', count: 58, golf: 18, dining: 82, events: 78, email: 72, trend: +6,  action: 'Event invite + dining comp' },
+  { archetype: 'Balanced Active',  count: 72, golf: 68, dining: 62, events: 54, email: 55, trend: -2,  action: 'Cross-amenity engagement check-in' },
+  { archetype: 'Weekend Warrior',  count: 58, golf: 52, dining: 44, events: 32, email: 28, trend: -8,  action: 'Saturday tee time hold + personal invite' },
+  { archetype: 'Declining',        count: 32, golf: 24, dining: 18, events: 8,  email: 22, trend: -18, action: 'Membership Director outreach within 1 week' },
+  { archetype: 'New Member',       count: 39, golf: 42, dining: 48, events: 38, email: 68, trend: +14, action: 'Welcome event + mentor pairing' },
+  { archetype: 'Ghost',            count: 20, golf: 4,  dining: 6,  events: 2,  email: 8,  trend: -4,  action: 'Personal GM call within 48h' },
+  { archetype: 'Snowbird',         count: 33, golf: 62, dining: 52, events: 34, email: 44, trend: +2,  action: 'Welcome-back call at season start' },
 ];
 
 export const healthDistribution = [
-  { level: 'Healthy',  min: 70,  count: 200, percentage: 0.667, color: theme.colors.success, delta: -4 },
-  { level: 'Watch',    min: 50,  count: 35,  percentage: 0.117, color: theme.colors.warning, delta: 5 },
-  { level: 'At Risk',  min: 30,  count: 39,  percentage: 0.130, color: theme.colors.riskAtRiskAlt, delta: 6 },
-  { level: 'Critical', min: 0,   count: 26,  percentage: 0.087, color: theme.colors.urgent, delta: 3 },
+  { level: 'Healthy',  min: 70,  count: 265, percentage: 0.679, color: theme.colors.success, delta: -4 },
+  { level: 'Watch',    min: 50,  count: 50,  percentage: 0.128, color: theme.colors.warning, delta: 5 },
+  { level: 'At Risk',  min: 30,  count: 45,  percentage: 0.115, color: theme.colors.riskAtRiskAlt, delta: 6 },
+  { level: 'Critical', min: 0,   count: 30,  percentage: 0.077, color: theme.colors.urgent, delta: 3 },
 ];
 
 export const memberSummary = {
-  total: 300,
-  healthy: 200,
-  watch: 35,
-  atRisk: 39,
-  critical: 26,
-  riskCount: 65,
+  total: 390,
+  healthy: 265,
+  watch: 50,
+  atRisk: 45,
+  critical: 30,
+  riskCount: 75,
   avgHealthScore: 68,
+  // 75 at-risk + critical members × $11,573 avg dues = $868K (7 visible below sum to $111K; 68 others in full roster)
   potentialDuesAtRisk: 868000,
+  avgTenure: 6.2,
+  avgDues: 16400,
+  renewalRate: 0.91,
 };
 
 // Watch tier members — early-stage decay signals, not yet At Risk
@@ -54,7 +58,7 @@ export const atRiskMembers = [
   { memberId: 'mbr_203', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active', duesAnnual: 18000 },
   { memberId: 'mbr_089', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior', duesAnnual: 12000 },
   { memberId: 'mbr_271', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining', duesAnnual: 18000 },
-  { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining visits down 60% and events skipped', archetype: 'Social Butterfly', duesAnnual: 9000 },
+  { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining spend dropped 87% ($18 last visit vs $142 avg). Declined 3 consecutive event invites. $9K annual dues — last 2 renewals were late.', archetype: 'Social Butterfly', duesAnnual: 9000 },
   { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Practicing but skipping clubhouse spend; slow-play complaints unresolved', archetype: 'Balanced Active', duesAnnual: 18000 },
 ];
 
