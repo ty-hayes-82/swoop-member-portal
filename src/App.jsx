@@ -9,6 +9,7 @@ const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 // Conference-floor demo shell — sub-route #/m/conference. Lazy for the
 // same reason: it ships alongside MobileApp but shouldn't inflate desktop.
 const ConferenceShell = lazy(() => import('@/mobile/conference/ConferenceShell'));
+const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatPage'));
 import { DataProvider } from '@/context/DataProvider';
 import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
 import DemoWizard from '@/components/ui/DemoWizard';
@@ -190,6 +191,15 @@ function RouterViews() {
   const hash = window.location.hash;
   const isMobileRoute = hash === '#/m' || hash.startsWith('#/m/');
   const isConferenceRoute = hash.startsWith('#/m/conference');
+  const isConciergeRoute = hash === '#/concierge' || hash.startsWith('#/concierge?');
+
+  if (isConciergeRoute) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Concierge...</div>}>
+        <ConciergeChatPage />
+      </Suspense>
+    );
+  }
 
   if (isConferenceRoute) {
     return (
@@ -253,6 +263,15 @@ export default function App() {
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+
+  // Concierge chat — accessible without auth (demo/testing mode)
+  if (currentHash === '#/concierge' || currentHash.startsWith('#/concierge?')) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Concierge...</div>}>
+        <ConciergeChatPage />
+      </Suspense>
+    );
+  }
 
   // Password reset page — accessible without auth
   if (currentHash.startsWith('#/reset-password')) {

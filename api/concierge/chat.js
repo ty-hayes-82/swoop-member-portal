@@ -253,4 +253,4 @@ function generateSimulatedResponse(profile, message) {
   return `Hi ${name}! How can I help you today? I can book tee times, make dining reservations, RSVP to events, or answer questions about the club.`;
 }
 
-export default withAuth(chatHandler);
+export default withAuth(chatHandler, { allowDemo: true });
