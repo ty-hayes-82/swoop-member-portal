@@ -145,16 +145,23 @@ const sanitizeFeedbackSummary = (source) => {
 
 const sanitizeFeedbackRecords = (source) => {
   if (!Array.isArray(source) || source.length === 0) return [];
-  return source.map((record) => ({
-    date: record?.date ?? (record?.submitted_at ? String(record.submitted_at).split('T')[0] : 'Unknown date'),
-    sentiment: toNumber(record?.sentiment, -0.15),
-    status: toString(record?.status, 'acknowledged'),
-    category: toString(record?.category, 'Service'),
-    memberId: toString(record?.memberId ?? record?.member_id ?? 'unknown'),
-    memberName: toString(record?.memberName ?? record?.member_name ?? ''),
-    isUnderstaffed: Boolean(record?.isUnderstaffed ?? record?.is_understaffed_day ?? record?.isUnderstaffedDay),
-    isUnderstaffedDay: Boolean(record?.isUnderstaffed ?? record?.is_understaffed_day ?? record?.isUnderstaffedDay),
-  }));
+  const now = Date.now();
+  return source.map((record) => {
+    const dateStr = record?.date ?? (record?.submitted_at ? String(record.submitted_at).split('T')[0] : null);
+    const daysOpen = dateStr ? Math.max(0, Math.round((now - new Date(dateStr).getTime()) / 86400000)) : (record?.daysOpen ?? record?.ageDays ?? 0);
+    return {
+      date: dateStr ?? 'Unknown date',
+      daysOpen,
+      ageDays: daysOpen,
+      sentiment: toNumber(record?.sentiment, -0.15),
+      status: toString(record?.status, 'acknowledged'),
+      category: toString(record?.category, 'Service'),
+      memberId: toString(record?.memberId ?? record?.member_id ?? 'unknown'),
+      memberName: toString(record?.memberName ?? record?.member_name ?? ''),
+      isUnderstaffed: Boolean(record?.isUnderstaffed ?? record?.is_understaffed_day ?? record?.isUnderstaffedDay),
+      isUnderstaffedDay: Boolean(record?.isUnderstaffed ?? record?.is_understaffed_day ?? record?.isUnderstaffedDay),
+    };
+  });
 };
 
 /** @returns {UnderstaffedDay[]} */
