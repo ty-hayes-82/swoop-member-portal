@@ -6,7 +6,55 @@
 
 ---
 
-## Final Verification — 2026-04-10
+## Round 2 Audit — Guided Demo Insight Quality (2026-04-10)
+
+5 GM auditor personas tested the guided demo experience. Systemic finding: **named + dollarized = compelling; anonymous + aggregate = forgettable.**
+
+### Cycle Scores
+
+| Cycle | Persona | Score | Top recommendation |
+|---|---|---|---|
+| 1 | Saturday morning GM | 3.2/5 | Replace "Active Members" stat with "At-Risk on Sheet: 3"; add "TEES OFF IN 45 MIN" badges |
+| 2 | Member profile deep-dive | 4.3/5 | Add 1 activity entry to Jordan/Callahan/Chen/Mills; create Hurst + Leonard profiles |
+| 3 | CFO stress-test | 2.7/5 | $5,760 pace loss has $583 math gap; $420 weather is placeholder; add derivation fields |
+| 4 | Board report | 3.4/5 | Add ROI KPI card: "4.2x — $133K protected vs $32K subscription" |
+| 5 | Progressive import | 3.0/5 | Steps 4+5 banners are generic — name a member + dollarize in every banner |
+
+### Priority Seed Data Changes (from this round)
+
+**P0 — Credibility (CFO would catch):**
+1. Compute `revenueLostPerMonth` from conversion rates instead of hardcoding 5760 (bottom-up = $5,177, gap = $583)
+2. Replace $420 weather constant with computation from rainy-day revenue delta
+3. Add `derivation` field to each understaffed day explaining the dollar amount
+4. Add `benchmark` field to each board report KPI (e.g., "vs industry avg 82%")
+5. Add ROI KPI: `{ label: 'Swoop ROI', value: 4.2, suffix: 'x', description: '$133K protected / $32K subscription' }`
+6. Fix "48% improvement" hardcode in board narrative — compute from monthlyTrends (real = 53%)
+
+**P1 — Story completeness (profile deep-dive):**
+7. Add Hurst (mbr_t03) full memberProfile (tier, family, 5 activity entries, risk signals, drafts, staff note)
+8. Add Leonard (mbr_t07) full memberProfile (backstory, activity showing ghost pattern, bridge partner ref)
+9. Add 1 activity entry each to Jordan (historical positive), Callahan (complaint content), Chen (email abandoned), Mills (dining before/after)
+
+**P2 — Progressive import banners (name + dollarize every step):**
+10. Complaints banner: "James Whitfield's complaint is 6 days old — $18K dues at risk" (not "2 linked to at-risk members")
+11. Email banner: "Diane Prescott's email opens dropped 22% — $15K dues. 8 members match Kevin Hurst's pre-resignation pattern"
+12. F&B stat row: add named card "Robert Callahan: $3,020 spent (exact minimum)"
+13. MorningBriefingSentence: render members-only segment when no tee-sheet yet ("75 members need attention — $868K at risk")
+
+**P2 — Saturday morning UX:**
+14. Replace "Active Members: 390" stat card with "At-Risk on Sheet: 3" (member count is static census)
+15. Add "ON COURSE NOW" / "TEES OFF IN 45 MIN" badge to MemberAlerts cards with tee times
+16. Add yesterday delta to greeting bar ("3 things changed since yesterday")
+17. Story 2 teaser: name Kevin Hurst ("Kevin Hurst: email dropped → golf dropped → dining dropped")
+
+**P3 — Board report polish:**
+18. Add `daysToIntervention` to each member save (speed = Swoop's value prop)
+19. Add `patternInsight` to each feedbackSummary category ("72% of pace complaints on Saturday AM with no ranger")
+20. Compute responseTimeImprovement dynamically from monthlyTrends (53%, not hardcoded 48%)
+
+---
+
+## Previous Round — Final Verification (2026-04-10)
 
 All 4 GM auditor paths scored **5/5 across every insight**:
 
