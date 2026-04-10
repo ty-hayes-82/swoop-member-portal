@@ -55,8 +55,15 @@ export async function createManagedSession(agentId = MANAGED_AGENT_ID, envId = M
  */
 export async function sendSessionEvent(sessionId, event) {
   const client = getAnthropicClient();
-  const response = await client.post(`/v1/agents/sessions/${sessionId}/events`, {
-    body: event,
-  });
-  return response;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await client.post(`/v1/agents/sessions/${sessionId}/events`, {
+        body: event,
+      });
+      return response;
+    } catch (err) {
+      if (attempt === 0) await new Promise(r => setTimeout(r, 2000));
+      else throw err;
+    }
+  }
 }

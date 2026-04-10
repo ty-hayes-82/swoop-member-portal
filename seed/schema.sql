@@ -1084,10 +1084,12 @@ CREATE TABLE IF NOT EXISTS playbook_steps (
   status              TEXT DEFAULT 'pending',             -- pending | in_progress | completed | skipped
   completed_at        TIMESTAMPTZ,
   completed_by        TEXT,
-  notes               TEXT
+  notes               TEXT,
+  step_key            VARCHAR(50)
 );
 
 CREATE INDEX IF NOT EXISTS idx_playbook_steps_run ON playbook_steps(run_id, step_number);
+CREATE INDEX IF NOT EXISTS idx_playbook_steps_key ON playbook_steps(run_id, step_key);
 
 -- Onboarding step completion tracking
 CREATE TABLE IF NOT EXISTS onboarding_progress (

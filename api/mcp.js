@@ -3,6 +3,7 @@
 // Auth: x-mcp-token header validated against MCP_AUTH_TOKEN env var.
 
 import { sql } from '@vercel/postgres';
+import { getAnthropicClient } from './agents/managed-config.js';
 
 // ---------------------------------------------------------------------------
 // Auth
@@ -145,11 +146,11 @@ const TOOL_DEFINITIONS = [
 
 const PLAYBOOK_STEPS = {
   'service-save': [
-    { step_number: 1, title: 'Route complaint to F&B Director', description: 'Escalate the complaint to the relevant department head with full member context.' },
-    { step_number: 2, title: 'GM personal outreach', description: 'GM calls or sends a personal note acknowledging the issue.' },
-    { step_number: 3, title: 'Follow-up survey (Day 7)', description: 'Send a brief satisfaction check-in 7 days after the incident.' },
-    { step_number: 4, title: 'Check-in note (Day 14)', description: 'Send a warm personal note 14 days after the incident.' },
-    { step_number: 5, title: 'Outcome measurement (Day 30)', description: 'Measure health score delta and determine if member was saved.' },
+    { step_number: 1, step_key: 'route_complaint', title: 'Route complaint to F&B Director', description: 'Escalate the complaint to the relevant department head with full member context.' },
+    { step_number: 2, step_key: 'gm_outreach', title: 'GM personal outreach', description: 'GM calls or sends a personal note acknowledging the issue.' },
+    { step_number: 3, step_key: 'day_7_survey', title: 'Follow-up survey (Day 7)', description: 'Send a brief satisfaction check-in 7 days after the incident.' },
+    { step_number: 4, step_key: 'day_14_checkin', title: 'Check-in note (Day 14)', description: 'Send a warm personal note 14 days after the incident.' },
+    { step_number: 5, step_key: 'day_30_outcome', title: 'Outcome measurement (Day 30)', description: 'Measure health score delta and determine if member was saved.' },
   ],
 };
 
@@ -343,8 +344,8 @@ async function startPlaybookRun({ club_id, playbook_id, member_id, triggered_by,
   const insertedSteps = [];
   for (const step of steps) {
     const stepResult = await sql`
-      INSERT INTO playbook_steps (run_id, club_id, step_number, title, description, status)
-      VALUES (${runId}, ${club_id}, ${step.step_number}, ${step.title}, ${step.description}, 'pending')
+      INSERT INTO playbook_steps (run_id, club_id, step_number, step_key, title, description, status)
+      VALUES (${runId}, ${club_id}, ${step.step_number}, ${step.step_key || null}, ${step.title}, ${step.description}, 'pending')
       RETURNING step_id
     `;
     insertedSteps.push({
@@ -435,30 +436,17 @@ Rules:
 - The message should feel handwritten and sincere, not corporate.
 - Focus on acknowledgment, care, and a specific next step.`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
-      system: systemPrompt,
-      messages: [{
-        role: 'user',
-        content: `Write a personal outreach message for this member:\n\nMember: ${JSON.stringify(memberContext)}\nContext: ${context}\nChannel: ${channel || 'email'}`,
-      }],
-    }),
+  const client = getAnthropicClient();
+  const data = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 500,
+    system: systemPrompt,
+    messages: [{
+      role: 'user',
+      content: `Write a personal outreach message for this member:\n\nMember: ${JSON.stringify(memberContext)}\nContext: ${context}\nChannel: ${channel || 'email'}`,
+    }],
   });
 
-  if (!response.ok) {
-    const err = await response.text();
-    return { error: 'Draft generation failed', detail: err };
-  }
-
-  const data = await response.json();
   const draft = data.content?.[0]?.text ?? '';
 
   return { draft, channel: channel || 'email', tone: tone || 'warm' };

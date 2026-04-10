@@ -43,7 +43,40 @@ export default withAuth(async function handler(req, res) {
       return res.status(200).json({ triggered: false, reason: reasons.join('; ') });
     }
 
-    // 3. Triggered — create session and playbook run
+    // 3. Idempotency check — reject if active run already exists (Fix 2)
+    const activeRunResult = await sql`
+      SELECT run_id FROM playbook_runs
+      WHERE club_id = ${clubId} AND member_id = ${member_id}
+        AND playbook_id = 'service-save' AND status = 'active'
+    `;
+    if (activeRunResult.rows.length > 0) {
+      return res.status(200).json({
+        triggered: false,
+        reason: 'Active run already exists',
+        existing_run_id: activeRunResult.rows[0].run_id,
+      });
+    }
+
+    // 4. Rate limit — max 1 trigger per member per hour (Fix 6)
+    const recentRunResult = await sql`
+      SELECT started_at FROM playbook_runs
+      WHERE club_id = ${clubId} AND member_id = ${member_id}
+        AND playbook_id = 'service-save'
+      ORDER BY started_at DESC LIMIT 1
+    `;
+    if (recentRunResult.rows.length > 0) {
+      const lastStarted = new Date(recentRunResult.rows[0].started_at);
+      const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      if (lastStarted > hourAgo) {
+        return res.status(200).json({
+          triggered: false,
+          reason: 'Rate limited — last run started less than 1 hour ago',
+          last_started_at: lastStarted.toISOString(),
+        });
+      }
+    }
+
+    // 5. Triggered — create session and playbook run
     let sessionId = null;
 
     if (!SIMULATION_MODE) {
@@ -86,6 +119,21 @@ export default withAuth(async function handler(req, res) {
         ${sessionId}, NOW()
       )
     `;
+
+    // Create playbook steps immediately (Fix 5)
+    const SERVICE_SAVE_STEPS = [
+      { step_number: 1, step_key: 'route_complaint', title: 'Route complaint to F&B Director', description: 'Escalate the complaint to the relevant department head with full member context.' },
+      { step_number: 2, step_key: 'gm_outreach', title: 'GM personal outreach', description: 'GM calls or sends a personal note acknowledging the issue.' },
+      { step_number: 3, step_key: 'day_7_survey', title: 'Follow-up survey (Day 7)', description: 'Send a brief satisfaction check-in 7 days after the incident.' },
+      { step_number: 4, step_key: 'day_14_checkin', title: 'Check-in note (Day 14)', description: 'Send a warm personal note 14 days after the incident.' },
+      { step_number: 5, step_key: 'day_30_outcome', title: 'Outcome measurement (Day 30)', description: 'Measure health score delta and determine if member was saved.' },
+    ];
+    for (const step of SERVICE_SAVE_STEPS) {
+      await sql`
+        INSERT INTO playbook_steps (run_id, club_id, step_number, step_key, title, description, status)
+        VALUES (${runId}, ${clubId}, ${step.step_number}, ${step.step_key}, ${step.title}, ${step.description}, 'pending')
+      `;
+    }
 
     return res.status(200).json({
       triggered: true,
