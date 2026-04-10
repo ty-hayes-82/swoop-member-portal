@@ -47,6 +47,8 @@ export function getDataMode() {
  * Returns false if mode is live (never use static) or gate is closed.
  */
 export function shouldUseStatic(gateId) {
+  // 'events' is an alias — event files use the 'email' gate
+  if (gateId === 'events') gateId = 'email';
   const mode = getDataMode();
   if (mode === 'live') return false;
   if (mode === 'guided') return isSourceLoaded(gateId);

@@ -559,7 +559,18 @@ export const getAtRiskMembers       = () => {
 export const getArchetypeProfiles   = () => {
   if (_shouldReturnEmpty()) return [];
   if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
-  return normalizeArchetypes(_d?.memberArchetypes);
+  const rows = normalizeArchetypes(_d?.memberArchetypes);
+  const fbClosed = !shouldUseStatic('fb');
+  const emailClosed = !shouldUseStatic('email');
+  if (fbClosed || emailClosed) {
+    return rows.map(r => ({
+      ...r,
+      dining: fbClosed ? 0 : r.dining,
+      events: emailClosed ? 0 : r.events,
+      email: emailClosed ? 0 : r.email,
+    }));
+  }
+  return rows;
 };
 /** @returns {Record<string, MemberProfile>} */
 export const getAllMemberProfiles   = () => {
@@ -574,6 +585,7 @@ export const getResignationScenarios= () => {
 /** @returns {EmailHeatmapRow[]} */
 export const getEmailHeatmap        = () => {
   if (_shouldReturnEmpty()) return [];
+  if (!shouldUseStatic('email')) return [];
   const raw = Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
   return raw.map(e => ({
     campaign: e.campaign ?? e.subject ?? 'Unknown',
@@ -585,6 +597,7 @@ export const getEmailHeatmap        = () => {
 /** @returns {DecayingMemberRow[]} */
 export const getDecayingMembers     = () => {
   if (_shouldReturnEmpty()) return [];
+  if (!shouldUseStatic('email')) return [];
   return normalizeDecayingMembers(_d?.decayingMembers);
 };
 
@@ -727,7 +740,7 @@ function _generateRoster() {
         joinDate: `${yr}-${mo}-01`,
         trend: level === 'Healthy' ? 'stable' : level === 'Watch' ? 'stable' : 'down',
         topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Minor engagement shift' : 'Engagement declining',
-        lastSeenLocation: _LOCATIONS[idx % _LOCATIONS.length],
+        lastSeenLocation: shouldUseStatic('tee-sheet') ? _LOCATIONS[idx % _LOCATIONS.length] : null,
       });
     }
   }

@@ -1,5 +1,6 @@
 import { apiFetch } from './apiClient';
 import { SYSTEMS } from '@/data/integrations';
+import { getDataMode, shouldUseStatic } from './demoGate';
 import { useServiceCache } from '@/hooks/useServiceCache';
 
 /**
@@ -20,15 +21,38 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
+// Map system category to the demo gate that controls it
+const CATEGORY_GATE = {
+  'tee-sheet': 'tee-sheet',
+  'pos': 'fb',
+  'crm': 'members',
+  'staffing': 'weather',
+  'waitlist': 'tee-sheet',
+  'analytics': null, // no gate — always shown
+};
+
 /** @returns {IntegrationSystem[]} */
 export function getConnectedSystems() {
+  let systems;
   if (!_d?.systems || _d.systems.length === 0) {
-    return SYSTEMS.map(s => ({ ...s, status: 'available', lastSync: null }));
+    systems = SYSTEMS.map(s => ({ ...s, status: 'available', lastSync: null }));
+  } else {
+    systems = SYSTEMS.map(s => {
+      const live = _d.systems.find(ls => ls.id === s.id);
+      return live ? { ...s, status: live.status, lastSync: live.lastSync } : { ...s, status: 'available', lastSync: null };
+    });
   }
-  return SYSTEMS.map(s => {
-    const live = _d.systems.find(ls => ls.id === s.id);
-    return live ? { ...s, status: live.status, lastSync: live.lastSync } : { ...s, status: 'available', lastSync: null };
-  });
+  // In guided mode, override status based on whether the gate is open
+  if (getDataMode() === 'guided') {
+    systems = systems.map(s => {
+      const gateId = CATEGORY_GATE[s.category];
+      if (gateId && !shouldUseStatic(gateId)) {
+        return { ...s, status: 'available', lastSync: null };
+      }
+      return s;
+    });
+  }
+  return systems;
 }
 
 /**

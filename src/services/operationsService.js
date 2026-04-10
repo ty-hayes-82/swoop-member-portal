@@ -131,8 +131,11 @@ export const getRevenueByDay = () => {
 /** @returns {MonthlyRevenueSummary} */
 export const getMonthlyRevenueSummary = () => {
   if (_d) return _d.monthlySummary;
-  const golfTotal = dailyRevenue.reduce((s, r) => s + (r.golf || 0), 0);
-  const fbTotal = dailyRevenue.reduce((s, r) => s + (r.fb || 0), 0);
+  const fbOpen = shouldUseStatic('fb');
+  const teeOpen = shouldUseStatic('tee-sheet');
+  if (!fbOpen && !teeOpen) return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
+  const golfTotal = teeOpen ? dailyRevenue.reduce((s, r) => s + (r.golf || 0), 0) : 0;
+  const fbTotal = fbOpen ? dailyRevenue.reduce((s, r) => s + (r.fb || 0), 0) : 0;
   const total = golfTotal + fbTotal;
   const dailyAvg = dailyRevenue.length ? Math.round(total / dailyRevenue.length) : 0;
   return { total, golfTotal, fbTotal, dailyAvg, weekendAvg: 0, weekdayAvg: 0 };

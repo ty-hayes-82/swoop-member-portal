@@ -169,14 +169,17 @@ export function updateWaitlistConfig(updates) {
 // ── Historical & Steering Data ─────────────────────────────────
 
 export function getHistoricalPatterns() {
+  if (!shouldUseStatic('tee-sheet')) return [];
   return historicalPatterns;
 }
 
 export function getWeeklyQueuePressure() {
+  if (!shouldUseStatic('tee-sheet')) return [];
   return weeklyQueuePressure;
 }
 
 export function getDemandSteeringStats() {
+  if (!shouldUseStatic('tee-sheet')) return { redirectionsSent: 0, acceptanceRate: 0, revenueSaved: 0, avgResponseTime: 0 };
   return { ...steeringData };
 }
 

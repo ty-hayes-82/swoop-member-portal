@@ -1,6 +1,6 @@
 import { useNavigation } from '@/context/NavigationContext';
 import { isRealClub } from '@/config/constants';
-import { archetypeSpendGaps } from '@/services/experienceInsightsService';
+import { getArchetypeSpendGaps } from '@/services/experienceInsightsService';
 import { getMemberSummary } from '@/services/memberService';
 import { getLeakageData } from '@/services/revenueService';
 
@@ -17,7 +17,7 @@ export default function RevenueSummaryCard() {
   const leakage = getLeakageData();
   if (!leakage) return null;
 
-  const spendTotal = archetypeSpendGaps.reduce((s, a) => s + a.totalUntapped, 0);
+  const spendTotal = getArchetypeSpendGaps().reduce((s, a) => s + a.totalUntapped, 0);
   const spendMonthly = Math.round(spendTotal / 12);
   const memberSummary = getMemberSummary();
   const duesAtRisk = memberSummary.potentialDuesAtRisk || 868000;

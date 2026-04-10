@@ -1,6 +1,7 @@
 // experienceInsightsService.js — correlation calculations from existing data
 // _init() hydrates from Postgres; arrays/objects are mutated in-place so imports stay current.
 import { apiFetch, getClubId } from './apiClient';
+import { shouldUseStatic } from './demoGate';
 import { memberArchetypes } from '@/data/members';
 
 // Touchpoint correlations with retention — derived from cross-domain analysis
@@ -392,3 +393,36 @@ export const _init = async () => {
     }
   } catch { /* live correlations not available yet */ }
 };
+
+// ─── Gated getters ─────────────────────────────────────────────────────────
+// Each checks the appropriate gate(s) and returns [] when closed.
+
+/** touchpointCorrelations needs fb + tee-sheet */
+export function getTouchpointCorrelations() {
+  if (!shouldUseStatic('fb') || !shouldUseStatic('tee-sheet')) return [];
+  return touchpointCorrelations;
+}
+
+/** correlationInsights needs fb + email */
+export function getCorrelationInsights() {
+  if (!shouldUseStatic('fb') || !shouldUseStatic('email')) return [];
+  return correlationInsights;
+}
+
+/** eventROI needs email (events alias) */
+export function getEventROI() {
+  if (!shouldUseStatic('events')) return [];
+  return eventROI;
+}
+
+/** complaintLoyaltyStats needs complaints */
+export function getComplaintLoyaltyStats() {
+  if (!shouldUseStatic('complaints')) return null;
+  return complaintLoyaltyStats;
+}
+
+/** archetypeSpendGaps needs fb */
+export function getArchetypeSpendGaps() {
+  if (!shouldUseStatic('fb')) return [];
+  return archetypeSpendGaps;
+}

@@ -1,4 +1,4 @@
-import { correlationInsights } from '@/services/experienceInsightsService';
+import { getCorrelationInsights } from '@/services/experienceInsightsService';
 import { theme } from '@/config/theme';
 
 const impactColors = {
@@ -8,7 +8,7 @@ const impactColors = {
 };
 
 export default function InsightCards({ onDeepDive }) {
-  const insights = correlationInsights.slice(0, 5);
+  const insights = getCorrelationInsights().slice(0, 5);
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: theme.spacing.md }}>
