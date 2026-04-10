@@ -19,7 +19,7 @@ export default function MorningBriefing() {
   const SectionHeader = ({ label, colorCls, sectionKey }) => (
     <button
       onClick={() => toggleSection(sectionKey)}
-      className="flex justify-between items-center w-full py-1.5 border-none bg-transparent cursor-pointer text-left"
+      className="flex justify-between items-center w-full py-1.5 border-none bg-transparent cursor-pointer text-left focus-visible:ring-2 focus-visible:ring-brand-500"
     >
       <div className={`text-[11px] font-bold tracking-widest uppercase ${colorCls}`}>
         {label}
@@ -32,7 +32,7 @@ export default function MorningBriefing() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer border-none bg-blue-light-500 text-white flex items-center gap-2 shadow-theme-sm transition-opacity duration-150 hover:bg-blue-light-600"
+        className="px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer border-none bg-blue-light-500 text-white flex items-center gap-2 shadow-theme-sm transition-opacity duration-150 hover:bg-blue-light-600 focus-visible:ring-2 focus-visible:ring-brand-500"
       >
         \uD83D\uDDA8 Print Today's Briefing
       </button>
@@ -52,7 +52,7 @@ export default function MorningBriefing() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={handlePrint} className="px-4 py-2 rounded-md text-sm font-semibold cursor-pointer border-none bg-blue-light-500 text-white">
+                  <button onClick={handlePrint} className="px-4 py-2 rounded-md text-sm font-semibold cursor-pointer border-none bg-blue-light-500 text-white focus-visible:ring-2 focus-visible:ring-brand-500">
                     Print / Save PDF
                   </button>
                   <button onClick={() => setOpen(false)} className="px-3.5 py-2 rounded-md text-sm cursor-pointer border border-gray-300 bg-transparent text-gray-500">

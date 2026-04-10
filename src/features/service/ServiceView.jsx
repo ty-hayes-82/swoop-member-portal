@@ -59,7 +59,7 @@ export default function ServiceView() {
               role="tab"
               aria-selected={activeTab === key}
               onClick={() => setActiveTab(key)}
-              className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
+              className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500 ${
                 activeTab === key
                   ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
                   : 'bg-transparent text-gray-500 hover:text-gray-700'

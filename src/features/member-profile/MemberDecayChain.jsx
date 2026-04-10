@@ -136,7 +136,7 @@ function DecayChainAction({ profile }) {
         type="button"
         onClick={handleApprove}
         disabled={approved}
-        className={`px-3 py-1.5 rounded-md text-[11px] font-bold cursor-pointer border-none whitespace-nowrap transition-colors ${
+        className={`px-3 py-1.5 rounded-md text-[11px] font-bold cursor-pointer border-none whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${
           approved ? 'bg-success-100 text-success-700 cursor-default' : 'bg-success-500 text-white hover:bg-success-600'
         }`}
       >
@@ -189,7 +189,7 @@ function RecoveryTimeline({ member, decayChainLength }) {
         <button
           type="button"
           onClick={() => setShowMath((v) => !v)}
-          className="text-[9px] text-gray-500 hover:text-gray-700 underline decoration-dotted bg-transparent border-none cursor-pointer p-0"
+          className="text-[9px] text-gray-500 hover:text-gray-700 underline decoration-dotted bg-transparent border-none cursor-pointer p-0 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           {showMath ? 'Hide math' : 'How is this computed?'}
         </button>

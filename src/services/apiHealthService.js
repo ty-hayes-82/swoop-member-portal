@@ -202,3 +202,99 @@ export function _clearHealthCache() {
   _cache = null;
   _cacheAt = 0;
 }
+
+// ─── React hook (useServiceCache migration — SHIP_PLAN §2.3) ────────────
+
+import { useServiceCache } from '@/hooks/useServiceCache';
+
+/**
+ * Merge a raw HealthSnapshot into the same HealthRollup shape that
+ * getHealthRollup() returns, so hook consumers get the identical contract.
+ */
+function buildRollup(snap) {
+  if (!snap) {
+    return {
+      overall: 'unknown',
+      db: { status: 'unknown', latencyMs: null },
+      integrations: [],
+      fetchedAt: null,
+    };
+  }
+
+  const ints = snap.integrations || {};
+
+  const formatAge = (ageMin) => {
+    if (ageMin == null) return null;
+    if (ageMin < 60) return `${ageMin} min ago`;
+    const h = Math.round(ageMin / 60);
+    if (h < 48) return `${h} h ago`;
+    return `${Math.round(h / 24)} d ago`;
+  };
+
+  const integrations = [];
+
+  if (ints.weather) {
+    const w = ints.weather;
+    integrations.push({
+      name: 'Weather sync',
+      key: 'weather',
+      status: w.status,
+      lastSync: w.lastSync,
+      ageMin: w.ageMin,
+      badge: w.status === 'ok' ? '\u2713' : w.status === 'stale' ? '!' : '?',
+      hint: w.status === 'ok'
+        ? `Last synced ${formatAge(w.ageMin) || 'recently'}`
+        : w.status === 'stale'
+          ? `Stale — last sync ${formatAge(w.ageMin) || 'over budget'}`
+          : 'No sync data yet (fresh DB or cron has not run)',
+    });
+  }
+
+  if (ints.audit) {
+    const a = ints.audit;
+    integrations.push({
+      name: 'Cross-club audit purge',
+      key: 'audit',
+      status: a.status,
+      rows: a.rows,
+      oldestRow: a.oldestRow,
+      badge: a.status === 'ok' ? '\u2713' : a.status === 'stale' ? '!' : '?',
+      hint: a.status === 'ok'
+        ? `${a.rows ?? 0} rows in audit table${a.oldestRow ? `, oldest ${new Date(a.oldestRow).toLocaleDateString()}` : ''}`
+        : a.status === 'stale'
+          ? `Purge cron may be failing — oldest row is older than the 90-day retention budget`
+          : 'No audit data yet',
+    });
+  }
+
+  return {
+    overall: snap.status || 'unknown',
+    db: { status: snap.db, latencyMs: snap.dbLatencyMs },
+    integrations,
+    fetchedAt: snap.timestamp,
+  };
+}
+
+/**
+ * useApiHealthData — React hook wrapping /api/health via useServiceCache.
+ * Returns {data, isLoading, error, refetch} where `data` is a HealthRollup.
+ * NOT clubId-scoped — /api/health is a global, unauthenticated endpoint.
+ */
+export function useApiHealthData() {
+  const fetcher = () =>
+    fetch(HEALTH_PATH, { method: 'GET', cache: 'no-store' })
+      .then(res => (res.ok ? res.json() : null))
+      .catch(() => null);
+
+  const { data, isLoading, error, refetch } = useServiceCache(
+    'apiHealth',
+    fetcher,
+    { clubIdScoped: false },
+  );
+  return {
+    data: data !== undefined ? buildRollup(data) : null,
+    isLoading,
+    error,
+    refetch,
+  };
+}

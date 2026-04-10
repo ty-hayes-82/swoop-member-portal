@@ -245,7 +245,7 @@ export default function ComplaintsTab() {
                               description: `Schedule resolution call for ${complaint.category} (${daysSince}d open)`,
                             });
                           }}
-                          className="text-[10px] font-bold text-white bg-brand-500 hover:bg-brand-600 px-2 py-0.5 rounded cursor-pointer border-none"
+                          className="text-[10px] font-bold text-white bg-brand-500 hover:bg-brand-600 px-2 py-0.5 rounded cursor-pointer border-none focus-visible:ring-2 focus-visible:ring-brand-500"
                           title="Schedule a resolution call (one-tap)"
                         >
                           Schedule call

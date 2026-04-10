@@ -96,7 +96,7 @@ export default function StaffingTab() {
               </button>
               <button
                 onClick={() => navigate('revenue')}
-                className="rounded-lg bg-brand-500 text-white px-4 py-2 text-xs font-semibold cursor-pointer border-none whitespace-nowrap"
+                className="rounded-lg bg-brand-500 text-white px-4 py-2 text-xs font-semibold cursor-pointer border-none whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500"
                 title="Approve ranger deployment from the Revenue page"
               >
                 Approve: Deploy Ranger →

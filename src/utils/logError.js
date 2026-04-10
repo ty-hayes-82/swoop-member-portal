@@ -12,19 +12,24 @@
 import * as Sentry from '@sentry/react';
 
 export function logError(err, context = {}) {
+  const { level, ...extra } = context;
   try {
     const client = Sentry.getClient?.();
     if (client) {
-      Sentry.captureException(err, { extra: context });
+      Sentry.captureException(err, {
+        level: level || 'error',
+        extra,
+      });
     }
   } catch {
     // Never let telemetry crash the caller
   }
   // Always surface in dev console so the existing debug flow is unchanged
+  const logFn = level === 'warning' ? console.warn : console.error;
   if (import.meta.env?.DEV) {
-    console.error(err, context);
+    logFn(err, context);
   } else {
     // In prod, still log to console for Vercel log capture
-    console.error(err);
+    logFn(err);
   }
 }

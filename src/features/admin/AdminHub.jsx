@@ -15,7 +15,7 @@ import { apiFetch } from '@/services/apiClient';
 import Badge from '@/components/tailadmin/Badge';
 import { getConnectedSystems, useIntegrationsData } from '@/services/integrationsService';
 import SourceBadge from '@/components/ui/SourceBadge';
-import { getHealthRollup } from '@/services/apiHealthService';
+import { getHealthRollup, useApiHealthData } from '@/services/apiHealthService';
 import { useCurrentClub } from '@/hooks/useCurrentClub';
 import { getDataMode } from '@/services/demoGate';
 
@@ -100,7 +100,7 @@ export default function AdminHub() {
             role="tab"
             aria-selected={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500 ${
               activeTab === tab.key
                 ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
                 : 'bg-transparent text-gray-500 hover:text-gray-700'
@@ -159,18 +159,10 @@ function DataHubTab({ clubId }) {
     return () => { cancelled = true; };
   }, [clubId]);
 
-  // Live System Health — consume apiHealthService.getHealthRollup(). The
-  // endpoint is public and may legitimately return overall:'unknown' when
+  // Live System Health — migrated to useServiceCache (SHIP_PLAN §2.3).
+  // The endpoint is public and may legitimately return overall:'unknown' when
   // offline or behind a proxy; render that case gracefully.
-  const [health, setHealth] = useState(null);
-  const [healthLoading, setHealthLoading] = useState(true);
-  useEffect(() => {
-    let cancelled = false;
-    getHealthRollup()
-      .then(r => { if (!cancelled) { setHealth(r); setHealthLoading(false); } })
-      .catch(() => { if (!cancelled) { setHealth(null); setHealthLoading(false); } });
-    return () => { cancelled = true; };
-  }, []);
+  const { data: health, isLoading: healthLoading } = useApiHealthData();
 
   const unlockImpact = nextUnlock ? DOMAIN_UNLOCK_IMPACT[nextUnlock] : null;
   const unlockPct = nextUnlock ? DOMAIN_VALUE_PCTS[nextUnlock] : 0;
@@ -209,7 +201,7 @@ function DataHubTab({ clubId }) {
             <button
               onClick={() => navigate('integrations')}
               aria-label={`Connect ${unlockImpact.label}`}
-              className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0"
+              className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               Connect {unlockImpact.label}
             </button>
@@ -293,7 +285,7 @@ function DataHubTab({ clubId }) {
           <div className="font-bold text-sm text-gray-800 dark:text-white/90">Manual Data Upload</div>
           <div className="text-xs text-gray-500">Upload CSV files for members, rounds, transactions, or complaints when API access isn&rsquo;t available.</div>
         </div>
-        <button onClick={() => navigate('csv-import')} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0 self-start sm:self-auto">Open Upload Tool</button>
+        <button onClick={() => navigate('csv-import')} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0 self-start sm:self-auto focus-visible:ring-2 focus-visible:ring-brand-500">Open Upload Tool</button>
       </div>
     </div>
   );

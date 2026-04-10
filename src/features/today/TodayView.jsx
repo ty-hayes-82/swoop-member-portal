@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useNavigation } from '@/context/NavigationContext';
-import { getPriorityItems } from '@/services/cockpitService';
+import { getPriorityItems, useCockpitData } from '@/services/cockpitService';
 import { getDailyBriefing } from '@/services/briefingService';
 import MemberLink from '@/components/MemberLink';
 import TodaysRisks from './TodaysRisks';
@@ -123,7 +123,7 @@ function GmGreetingAlert({ onDismiss }) {
                 type="button"
                 aria-label={`Dismiss check-in alert for ${alert.name}`}
                 onClick={() => setDismissed(prev => [...prev, alert.memberId])}
-                className="bg-transparent border-none cursor-pointer text-gray-300 hover:text-gray-500 text-lg p-1"
+                className="bg-transparent border-none cursor-pointer text-gray-300 hover:text-gray-500 text-lg p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 <span aria-hidden="true">x</span>
               </button>
@@ -152,7 +152,9 @@ function formatDate() {
 
 export default function TodayView() {
   const { navigate } = useNavigation();
-  const priorities = getPriorityItems();
+  // Migrated to useServiceCache (SHIP_PLAN §2.3) — fall back to legacy getter
+  const { data: cockpitData, isLoading: cockpitLoading } = useCockpitData();
+  const priorities = cockpitData?.priorities ?? getPriorityItems();
   const topPriority = priorities[0];
   const briefing = getDailyBriefing();
   const roundsToday = briefing?.teeSheet?.roundsToday || 0;
@@ -344,7 +346,7 @@ export default function TodayView() {
             { icon: courseCondition?.icon || '🌤️', bg: '#ecfdf5', label: 'Course Condition', value: courseCondition?.label || '—', color: courseCondition?.color || '#9ca3af', source: 'Weather API' },
             shouldUseStatic('tee-sheet') && { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: roundsToday > 0 ? String(roundsToday) : '—', color: '#6366f1', source: 'Tee Sheet' },
             { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732', source: 'Member CRM' },
-            { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: String(priorities.length), color: '#8b5cf6', source: 'Analytics' },
+            { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: cockpitLoading && !cockpitData ? '...' : String(priorities.length), color: '#8b5cf6', source: 'Analytics' },
           ].filter(Boolean).map((stat) => (
             <div
               key={stat.label}
@@ -408,7 +410,7 @@ export default function TodayView() {
                 <button
                   type="button"
                   onClick={() => navigate('revenue')}
-                  className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline"
+                  className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
                 >
                   See Revenue →
                 </button>
@@ -444,7 +446,7 @@ export default function TodayView() {
               <button
                 type="button"
                 onClick={() => navigate('members', { tab: 'email' })}
-                className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline"
+                className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 View decay watch list →
               </button>
@@ -490,7 +492,7 @@ export default function TodayView() {
               {isSevere && shouldUseStatic('tee-sheet') && (
                 <button
                   onClick={handleNotify}
-                  className="bg-error-500 text-white border-none cursor-pointer text-xs font-bold px-3 py-1 rounded-md hover:bg-error-600"
+                  className="bg-error-500 text-white border-none cursor-pointer text-xs font-bold px-3 py-1 rounded-md hover:bg-error-600 focus-visible:ring-2 focus-visible:ring-brand-500"
                   title="Send weather alert to affected tee times"
                 >
                   Notify affected tee times →
@@ -499,7 +501,7 @@ export default function TodayView() {
               <button
                 onClick={() => setDismissedAlerts(prev => [...prev, alert.headline])}
                 aria-label={`Dismiss weather alert: ${alert.headline || alert.type}`}
-                className="bg-transparent border-none cursor-pointer text-gray-400 text-sm px-1.5 py-0.5"
+                className="bg-transparent border-none cursor-pointer text-gray-400 text-sm px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 Dismiss
               </button>

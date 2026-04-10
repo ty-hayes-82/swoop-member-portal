@@ -112,7 +112,7 @@ function ActivityTimeline({ activity = [] }) {
       {activity.length > 3 && !showAll && (
         <button
           onClick={() => setShowAll(true)}
-          className="bg-transparent border-none text-brand-500 text-xs font-semibold cursor-pointer text-left p-0"
+          className="bg-transparent border-none text-brand-500 text-xs font-semibold cursor-pointer text-left p-0 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           Show all {activity.length} entries {'\u2192'}
         </button>
@@ -739,7 +739,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             <button
               type="button"
               onClick={() => onOpenFullPage(profile.memberId)}
-              className="mt-2 border-none bg-transparent text-brand-500 font-semibold cursor-pointer"
+              className="mt-2 border-none bg-transparent text-brand-500 font-semibold cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500"
               style={{ fontSize: '11px', marginTop: '2px', padding: '3px 8px', borderRadius: '4px', background: 'rgba(234, 127, 55, 0.08)' }}
             >
               Open full profile {'\u2192'}
@@ -917,7 +917,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           <button
             type="button"
             onClick={handleAddNote}
-            className="self-end px-3.5 py-1.5 rounded-lg border-none bg-brand-500 text-white font-semibold cursor-pointer"
+            className="self-end px-3.5 py-1.5 rounded-lg border-none bg-brand-500 text-white font-semibold cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500"
             style={{ fontSize: '11px', padding: '4px 12px' }}
           >
             Save note
@@ -960,7 +960,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           <button
             type="button"
             onClick={onClose}
-            className="border-none bg-transparent text-gray-400 cursor-pointer font-semibold"
+            className="border-none bg-transparent text-gray-400 cursor-pointer font-semibold focus-visible:ring-2 focus-visible:ring-brand-500"
             style={{ fontSize: '10px' }}
           >
             Close

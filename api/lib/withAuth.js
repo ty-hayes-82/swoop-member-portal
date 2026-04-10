@@ -120,6 +120,18 @@ export function withAuth(handler, options = {}) {
       isDemo: false,
     };
 
+    // Belt-and-suspenders: reject non-admin requests where the supplied
+    // clubId (query or body) doesn't match the session's clubId.
+    // swoop_admin is exempt — getReadClubId/getWriteClubId already gate
+    // their cross-tenant access with explicit opt-in.
+    if (session.role !== 'swoop_admin') {
+      const qClub = req.query?.clubId;
+      const bClub = req.body?.clubId;
+      if ((qClub && qClub !== session.clubId) || (bClub && bClub !== session.clubId)) {
+        return res.status(403).json({ error: 'Club ID mismatch' });
+      }
+    }
+
     return handler(req, res);
   };
 }

@@ -145,7 +145,7 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
                 <div className="flex gap-1.5 shrink-0">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleApprove(action); }}
-                    className="px-3 py-1 rounded-md bg-success-500 text-white text-[11px] font-semibold border-none cursor-pointer"
+                    className="px-3 py-1 rounded-md bg-success-500 text-white text-[11px] font-semibold border-none cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500"
                   >
                     Approve
                   </button>
@@ -173,7 +173,7 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
       <div>
         <button
           onClick={(e) => { e.stopPropagation(); setShowMore(!showMore); }}
-          className="text-[11px] font-semibold text-brand-500 bg-transparent border-none cursor-pointer p-0 flex items-center gap-1"
+          className="text-[11px] font-semibold text-brand-500 bg-transparent border-none cursor-pointer p-0 flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           {showMore ? '▾' : '▸'} More actions
         </button>
@@ -196,7 +196,7 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
       {onClose && (
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="mt-2 text-[11px] text-gray-400 bg-transparent border-none cursor-pointer p-0 hover:text-gray-600"
+          className="mt-2 text-[11px] text-gray-400 bg-transparent border-none cursor-pointer p-0 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           Collapse
         </button>

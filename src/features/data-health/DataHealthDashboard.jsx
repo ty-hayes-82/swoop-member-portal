@@ -132,7 +132,7 @@ export default function DataHealthDashboard() {
             </div>
             <div className="text-xs text-gray-500">{nextDomain.message}</div>
           </div>
-          <button onClick={() => navigate('integrations')} className="py-2 px-4 rounded-lg border-none bg-blue-600 text-white font-bold text-xs cursor-pointer">Connect Now</button>
+          <button onClick={() => navigate('integrations')} className="py-2 px-4 rounded-lg border-none bg-blue-600 text-white font-bold text-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500">Connect Now</button>
         </div>
       )}
 

@@ -52,7 +52,7 @@ export default function LogFeedbackButton() {
           type="button"
           aria-label="Close feedback form"
           onClick={() => setOpen(false)}
-          className="bg-transparent border-none cursor-pointer text-gray-400 text-base"
+          className="bg-transparent border-none cursor-pointer text-gray-400 text-base focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           <span aria-hidden="true">×</span>
         </button>
@@ -93,7 +93,7 @@ export default function LogFeedbackButton() {
       <button
         onClick={handleSubmit}
         disabled={!memberName.trim() || !note.trim()}
-        className={`py-2 px-4 rounded-lg border-none text-white text-xs font-bold ${
+        className={`py-2 px-4 rounded-lg border-none text-white text-xs font-bold focus-visible:ring-2 focus-visible:ring-brand-500 ${
           memberName.trim() && note.trim()
             ? 'bg-brand-500 cursor-pointer'
             : 'bg-gray-200 cursor-default'

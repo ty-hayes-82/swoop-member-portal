@@ -223,10 +223,10 @@ export default function QuickActions({ memberName, memberId, context = '', arche
             />
           )}
           <div className="flex gap-3 mt-3">
-            <button onClick={() => handleSend('note')} disabled={draftLoading} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs disabled:opacity-50">
+            <button onClick={() => handleSend('note')} disabled={draftLoading} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-brand-500">
               {sendBtnLabel}
             </button>
-            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium">
+            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium focus-visible:ring-2 focus-visible:ring-brand-500">
               Dismiss
             </button>
           </div>
@@ -271,10 +271,10 @@ export default function QuickActions({ memberName, memberId, context = '', arche
             ))}
           </div>
           <div className="flex gap-3 items-center">
-            <button onClick={() => handleSend('call')} disabled={calendarBusy} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs disabled:opacity-50">
+            <button onClick={() => handleSend('call')} disabled={calendarBusy} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-brand-500">
               {calendarBusy ? 'Adding...' : googleConnected ? 'Add to Google Calendar' : 'Add to calendar'}
             </button>
-            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium">Dismiss</button>
+            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium focus-visible:ring-2 focus-visible:ring-brand-500">Dismiss</button>
             {googleConnected && (
               <span className="text-[10px] text-success-500 font-medium ml-1">Google Calendar connected</span>
             )}
@@ -297,10 +297,10 @@ export default function QuickActions({ memberName, memberId, context = '', arche
             </select>
           </div>
           <div className="flex gap-3">
-            <button onClick={() => handleSend('task')} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs">
+            <button onClick={() => handleSend('task')} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs focus-visible:ring-2 focus-visible:ring-brand-500">
               Assign task
             </button>
-            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium">Dismiss</button>
+            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium focus-visible:ring-2 focus-visible:ring-brand-500">Dismiss</button>
           </div>
         </div>
       )}

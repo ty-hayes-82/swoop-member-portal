@@ -5,7 +5,7 @@
  */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 const TOKEN_KEY = 'swoop_auth_token';
 const USER_KEY = 'swoop_auth_user';

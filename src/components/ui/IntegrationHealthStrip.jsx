@@ -30,7 +30,7 @@ export default function IntegrationHealthStrip({
         </div>
 
         {/* Connected stat */}
-        <button onClick={onClickConnected} className="flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer px-2 py-1 rounded-lg">
+        <button onClick={onClickConnected} className="flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-brand-500">
           <span className="text-xl font-bold text-success-500 font-mono">{connected}/{total}</span>
           <span className="text-[11px] text-gray-500 dark:text-gray-400">Systems Connected</span>
         </button>
@@ -38,7 +38,7 @@ export default function IntegrationHealthStrip({
         <div className="w-px h-8 bg-gray-100 dark:bg-gray-800" />
 
         {/* Combos stat */}
-        <button onClick={onClickCombos} className="flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer px-2 py-1 rounded-lg">
+        <button onClick={onClickCombos} className="flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-brand-500">
           <span className="text-xl font-bold text-brand-500 font-mono">{combosActive}/{totalCombos}</span>
           <span className="text-[11px] text-gray-500 dark:text-gray-400">Cross-System Insights</span>
         </button>

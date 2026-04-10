@@ -53,7 +53,7 @@ export default function AutomationsHub() {
             role="tab"
             aria-selected={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${
+            className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500 ${
               activeTab === tab.key
                 ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
                 : 'bg-transparent text-gray-500 hover:text-gray-700'

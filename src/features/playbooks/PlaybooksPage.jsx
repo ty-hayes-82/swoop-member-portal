@@ -594,7 +594,7 @@ function PlaybookDetail({ playbook, onClose }) {
             }
             if (onClose) onClose();
           }}
-          className="w-full text-white border-none py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold cursor-pointer transition-opacity hover:opacity-90"
+          className="w-full text-white border-none py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold cursor-pointer transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand-500"
           style={{ background: playbook.categoryColor || '#c0392b' }}
         >
           Activate this playbook
@@ -646,7 +646,7 @@ function DetailSlideOver({ playbook, onClose }) {
           <span className="text-[13px] font-semibold text-gray-700 dark:text-white/80">Playbook Details</span>
           <button
             onClick={handleClose}
-            className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white cursor-pointer bg-transparent border-none px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white cursor-pointer bg-transparent border-none px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             {'\u2715'} Close
           </button>
@@ -727,7 +727,7 @@ export default function PlaybooksPage({ embedded = false }) {
               <button
                 key={cat}
                 onClick={() => setCategoryFilter(cat)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer border-none whitespace-nowrap transition-all ${
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer border-none whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-brand-500 ${
                   categoryFilter === cat
                     ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
                     : 'bg-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
@@ -743,7 +743,7 @@ export default function PlaybooksPage({ embedded = false }) {
             <button
               key={cat.name}
               onClick={() => setCategoryFilter(prev => prev === cat.name ? 'All' : cat.name)}
-              className={`flex flex-col items-start gap-1.5 p-3 sm:p-4 rounded-xl border-none cursor-pointer text-left transition-all ${
+              className={`flex flex-col items-start gap-1.5 p-3 sm:p-4 rounded-xl border-none cursor-pointer text-left transition-all focus-visible:ring-2 focus-visible:ring-brand-500 ${
                 categoryFilter === cat.name ? 'ring-2 ring-offset-1 scale-[1.02]' : 'hover:scale-[1.01]'
               }`}
               style={{

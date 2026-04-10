@@ -22,7 +22,7 @@ export default function DemoWizard() {
     return (
       <button
         onClick={() => setWizardOpen(true)}
-        className="fixed bottom-6 right-6 z-[200] px-4 py-3 rounded-2xl bg-brand-500 text-white shadow-xl border-none cursor-pointer flex items-center gap-2.5 hover:bg-brand-600 transition-colors"
+        className="fixed bottom-6 right-6 z-[200] px-4 py-3 rounded-2xl bg-brand-500 text-white shadow-xl border-none cursor-pointer flex items-center gap-2.5 hover:bg-brand-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
       >
         <span className="text-lg">🧭</span>
         <span className="text-sm font-bold">Data Files</span>
@@ -48,7 +48,7 @@ export default function DemoWizard() {
           <button
             onClick={() => setWizardOpen(false)}
             aria-label="Minimize demo wizard"
-            className="w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center border-none cursor-pointer text-xs font-bold hover:bg-white/30"
+            className="w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center border-none cursor-pointer text-xs font-bold hover:bg-white/30 focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             —
           </button>
@@ -64,7 +64,7 @@ export default function DemoWizard() {
               {fileCount > 0 && (
                 <button
                   onClick={startOver}
-                  className="text-[10px] font-bold text-error-500 bg-transparent border-none cursor-pointer hover:text-error-600"
+                  className="text-[10px] font-bold text-error-500 bg-transparent border-none cursor-pointer hover:text-error-600 focus-visible:ring-2 focus-visible:ring-brand-500"
                 >
                   Start Over
                 </button>
@@ -72,7 +72,7 @@ export default function DemoWizard() {
               {!allLoaded && (
                 <button
                   onClick={importAll}
-                  className="text-[10px] font-bold text-brand-500 bg-transparent border-none cursor-pointer hover:text-brand-600"
+                  className="text-[10px] font-bold text-brand-500 bg-transparent border-none cursor-pointer hover:text-brand-600 focus-visible:ring-2 focus-visible:ring-brand-500"
                 >
                   Import All
                 </button>
@@ -109,7 +109,7 @@ export default function DemoWizard() {
                     <button
                       key={file.id}
                       onClick={() => isLoaded ? null : setPreviewFile(file)}
-                      className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 mb-0.5 border-none cursor-pointer transition-all ${
+                      className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 mb-0.5 border-none cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-brand-500 ${
                         isLoaded
                           ? 'bg-success-50 dark:bg-success-500/10'
                           : 'bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800'
@@ -152,7 +152,7 @@ export default function DemoWizard() {
                   loadFile('_agents', 'agents');
                 }
               }}
-              className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 mb-0.5 border-none cursor-pointer transition-all ${
+              className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 mb-0.5 border-none cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-brand-500 ${
                 ctx.isGateOpen('agents')
                   ? 'bg-success-50 dark:bg-success-500/10'
                   : 'bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800'

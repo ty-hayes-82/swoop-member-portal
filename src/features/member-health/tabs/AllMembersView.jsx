@@ -116,7 +116,7 @@ function FilterChip({ label, onRemove, color }) {
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${label} filter`}
-        className="bg-transparent border-none text-inherit cursor-pointer text-sm p-0 leading-none opacity-70 hover:opacity-100"
+        className="bg-transparent border-none text-inherit cursor-pointer text-sm p-0 leading-none opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-brand-500"
       >
         <span aria-hidden="true">×</span>
       </button>
@@ -642,7 +642,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
                     ) : (
                       <button
                         onClick={() => toggleSort(col.key)}
-                        className="bg-transparent border-none text-inherit font-inherit cursor-pointer inline-flex items-center gap-1"
+                        className="bg-transparent border-none text-inherit font-inherit cursor-pointer inline-flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-brand-500"
                       >
                         {col.label}
                         {sortColumn === col.key && (

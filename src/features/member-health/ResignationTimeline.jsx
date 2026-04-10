@@ -61,7 +61,7 @@ export default function ResignationTimeline() {
           >
             <button
               onClick={() => setExpanded(isOpen ? null : scenario.memberId)}
-              className="w-full p-4 bg-transparent border-none cursor-pointer flex justify-between items-center text-left"
+              className="w-full p-4 bg-transparent border-none cursor-pointer flex justify-between items-center text-left focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               <div>
                 <MemberLink
@@ -127,7 +127,7 @@ export default function ResignationTimeline() {
                   <button
                     type="button"
                     onClick={() => navigate('members', { tab: 'all-members', symptom: patternToSymptom(scenario.pattern) })}
-                    className="px-3 py-1 rounded-md bg-brand-500 text-white text-[10px] font-bold cursor-pointer border-none hover:bg-brand-600"
+                    className="px-3 py-1 rounded-md bg-brand-500 text-white text-[10px] font-bold cursor-pointer border-none hover:bg-brand-600 focus-visible:ring-2 focus-visible:ring-brand-500"
                   >
                     Find current members with this pattern →
                   </button>

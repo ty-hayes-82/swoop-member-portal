@@ -3,6 +3,7 @@
  * Reads auth token from localStorage. In demo mode, passes demo club header.
  * Falls back gracefully if no auth is available (Phase 1 static data mode).
  */
+import { logError } from '../utils/logError';
 
 function getAuthHeaders() {
   if (typeof localStorage === 'undefined') return {};
@@ -49,12 +50,12 @@ export async function apiFetch(url, options = {}) {
 
   if (res.status === 401) {
     // Session expired — clear auth and let static data take over
-    console.warn(`[apiFetch] 401 on ${url} — session may be expired`);
+    logError(new Error(`[apiFetch] 401 on ${url} — session may be expired`), { level: 'warning', service: 'apiClient' });
     return null;
   }
 
   if (!res.ok) {
-    console.warn(`[apiFetch] ${res.status} on ${url}`);
+    logError(new Error(`[apiFetch] ${res.status} on ${url}`), { level: 'warning', service: 'apiClient' });
     return null;
   }
 

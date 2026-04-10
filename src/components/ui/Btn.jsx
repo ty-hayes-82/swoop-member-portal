@@ -33,7 +33,7 @@ export default function Btn({
     <button
       type={type}
       onClick={disabled ? undefined : onClick}
-      className={`inline-flex items-center gap-1.5 font-semibold rounded-xl cursor-pointer transition-all duration-150 outline-none whitespace-nowrap ${sizeCls} ${variantCls}`}
+      className={`inline-flex items-center gap-1.5 font-semibold rounded-xl cursor-pointer transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand-500 whitespace-nowrap ${sizeCls} ${variantCls}`}
       style={style}
     >
       {children}

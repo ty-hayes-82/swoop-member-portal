@@ -75,7 +75,7 @@ function ActionCard({ action, onApprove, onDismiss }) {
             const execType = channel === 'sms' || channel === 'push' ? 'sms' : channel === 'call' ? 'staff_task' : 'email';
             onApprove(action.id, { executionType: execType, memberId: action.memberId, memberName: action.memberName });
           }}
-          className="px-4 py-1.5 rounded-lg bg-success-500 text-white border-none text-xs font-semibold cursor-pointer hover:bg-success-600 transition-colors"
+          className="px-4 py-1.5 rounded-lg bg-success-500 text-white border-none text-xs font-semibold cursor-pointer hover:bg-success-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           Approve
         </button>
@@ -222,7 +222,7 @@ export default function InboxTab() {
         <div className="mt-2">
           <button
             onClick={() => setShowHandled(!showHandled)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 cursor-pointer bg-transparent border-none p-0 hover:text-gray-700 dark:hover:text-gray-300"
+            className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 cursor-pointer bg-transparent border-none p-0 hover:text-gray-700 dark:hover:text-gray-300 focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             <svg className={`w-3 h-3 transition-transform ${showHandled ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />

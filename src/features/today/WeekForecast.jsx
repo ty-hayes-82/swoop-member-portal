@@ -1,6 +1,6 @@
 // WeekForecast — hourly strip + 5-day card forecast (Google Weather)
 import { useState, useEffect } from 'react';
-import { getDailyForecast, getHourlyForecast, getWeatherSource, getWeatherLocation } from '@/services/weatherService';
+import { getDailyForecast, getHourlyForecast, getWeatherSource, getWeatherLocation, useWeatherData } from '@/services/weatherService';
 
 const conditionIcons = {
   sunny: '☀️', partly_cloudy: '⛅', cloudy: '☁️',
@@ -19,6 +19,8 @@ function formatHour(iso) {
 }
 
 export default function WeekForecast() {
+  const { data: weatherData, isLoading: weatherLoading, error: weatherError } = useWeatherData();
+
   const [, setTick] = useState(0);
   useEffect(() => {
     const handler = () => setTick(t => t + 1);
@@ -26,10 +28,36 @@ export default function WeekForecast() {
     return () => window.removeEventListener('swoop:weather-updated', handler);
   }, []);
 
-  const forecast = getDailyForecast(5);
-  const hourly = getHourlyForecast();
-  const source = getWeatherSource();
-  const location = getWeatherLocation();
+  // Prefer hook data when available; fall back to legacy getters for backwards compat
+  const forecast = weatherData?.daily?.slice(0, 5) ?? getDailyForecast(5);
+  const hourly = weatherData?.hourly ?? getHourlyForecast();
+  const source = weatherData?.source ?? getWeatherSource();
+  const location = weatherData?.location ?? getWeatherLocation();
+
+  if (weatherLoading && !forecast?.length) {
+    return (
+      <div className="flex flex-col gap-3" aria-busy="true">
+        <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3">
+          <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-3" />
+          <div className="grid grid-cols-6 gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center gap-1.5">
+                <div className="h-2.5 w-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-5 w-5 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+                <div className="h-3 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (weatherError) {
+    return (
+      <div className="text-xs text-gray-400 px-2 py-3">Failed to load weather forecast.</div>
+    );
+  }
 
   if ((!forecast?.length && !hourly?.length) || source === 'static') return null;
 

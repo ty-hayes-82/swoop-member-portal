@@ -101,7 +101,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, ac
         <div className="flex items-center gap-2">
           <button
             onClick={() => { setShowSettings(!showSettings); if (showActions) setShowActions(false); }}
-            className={`flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-transparent border-none p-0 transition-colors ${
+            className={`flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-transparent border-none p-0 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${
               showSettings ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
@@ -113,7 +113,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, ac
           {agentActions.length > 0 && (
             <button
               onClick={() => { setShowActions(!showActions); if (showSettings) setShowSettings(false); }}
-              className={`flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-transparent border-none p-0 transition-colors ${
+              className={`flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-transparent border-none p-0 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${
                 showActions ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
@@ -213,7 +213,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, ac
 
           <button
             onClick={handleSaveConfig}
-            className="w-full py-1.5 rounded-lg bg-brand-500 text-white text-[11px] font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors"
+            className="w-full py-1.5 rounded-lg bg-brand-500 text-white text-[11px] font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             Save Agent Settings
           </button>

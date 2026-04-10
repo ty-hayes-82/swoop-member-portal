@@ -75,7 +75,7 @@ export function AnimatedButton({
         setIsPressed(false);
       }}
       onClick={onClick}
-      className={`cursor-pointer border-none bg-transparent p-0 transition-transform duration-150 ${className}`}
+      className={`cursor-pointer border-none bg-transparent p-0 transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-brand-500 ${className}`}
       style={{
         transform: isPressed
           ? `scale(${activeScale})`

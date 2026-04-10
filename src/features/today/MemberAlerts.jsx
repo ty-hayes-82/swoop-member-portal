@@ -187,7 +187,7 @@ export default function MemberAlerts() {
             type="button"
             onClick={handleBulkApprove}
             disabled={bulkApproved}
-            className={`px-3 py-1 rounded-md text-[10px] font-bold cursor-pointer border-none whitespace-nowrap ${
+            className={`px-3 py-1 rounded-md text-[10px] font-bold cursor-pointer border-none whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500 ${
               bulkApproved
                 ? 'bg-success-100 text-success-700 cursor-default'
                 : 'bg-success-500 text-white hover:bg-success-600'

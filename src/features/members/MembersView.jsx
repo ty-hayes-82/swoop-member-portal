@@ -155,7 +155,7 @@ export default function MembersView() {
                 aria-selected={activeMode === key}
                 onClick={() => !disabled && setMode(key)}
                 disabled={disabled}
-                className={`px-5 py-1.5 rounded-lg text-sm font-semibold border-none transition-all duration-150 whitespace-nowrap ${
+                className={`px-5 py-1.5 rounded-lg text-sm font-semibold border-none transition-all duration-150 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500 ${
                   disabled
                     ? 'bg-transparent text-gray-300 cursor-not-allowed'
                     : activeMode === key

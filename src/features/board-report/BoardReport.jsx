@@ -165,7 +165,7 @@ export default function BoardReport() {
               <p className="text-sm text-gray-500 mt-1">Monthly executive summary — service quality, member health, and operational response</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => window.print()} className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none">Export as PDF</button>
+              <button onClick={() => window.print()} className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none focus-visible:ring-2 focus-visible:ring-brand-500">Export as PDF</button>
               <button onClick={() => window.print()} className="rounded-lg border border-brand-500 bg-transparent text-brand-500 px-5 py-2 text-sm font-semibold cursor-pointer">Print</button>
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function BoardReport() {
         <div className="flex gap-2 shrink-0">
           <button
             onClick={() => { setActiveTab(0); setTimeout(() => window.print(), 100); }}
-            className="rounded-lg bg-brand-500 text-white px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold cursor-pointer border-none"
+            className="rounded-lg bg-brand-500 text-white px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold cursor-pointer border-none focus-visible:ring-2 focus-visible:ring-brand-500"
           >Export as PDF</button>
           <button
             onClick={() => window.print()}
@@ -251,7 +251,7 @@ export default function BoardReport() {
           <button
             key={tab}
             onClick={() => setActiveTab(i)}
-            className={`px-5 py-2 rounded-lg cursor-pointer font-semibold text-sm transition-all duration-150 ${
+            className={`px-5 py-2 rounded-lg cursor-pointer font-semibold text-sm transition-all duration-150 focus-visible:ring-2 focus-visible:ring-brand-500 ${
               activeTab === i
                 ? 'bg-brand-500 text-white border-none'
                 : 'bg-transparent text-gray-400 border border-gray-300'

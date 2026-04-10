@@ -57,7 +57,7 @@ export default function PlaybookActionCard({
           )}
           <button
             onClick={handleActivate}
-            className="px-3 py-1 rounded-md text-[11px] font-semibold cursor-pointer border-none bg-brand-500 text-white"
+            className="px-3 py-1 rounded-md text-[11px] font-semibold cursor-pointer border-none bg-brand-500 text-white focus-visible:ring-2 focus-visible:ring-brand-500"
           >{buttonLabel}</button>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function PlaybookActionCard({
       <div className="flex items-center gap-2.5 flex-wrap">
         <button
           onClick={handleActivate}
-          className="px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white transition-opacity duration-150"
+          className="px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-brand-500"
         >{buttonLabel}</button>
         <button
           onClick={handleViewPlaybook}

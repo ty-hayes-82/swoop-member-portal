@@ -140,7 +140,7 @@ export default function MorningBriefingSentence() {
               <button
                 type="button"
                 onClick={handleScrollToAlerts}
-                className="font-serif text-lg text-brand-500 font-normal leading-snug bg-transparent border-none cursor-pointer p-0 m-0 underline decoration-dotted underline-offset-4 hover:decoration-solid"
+                className="font-serif text-lg text-brand-500 font-normal leading-snug bg-transparent border-none cursor-pointer p-0 m-0 underline decoration-dotted underline-offset-4 hover:decoration-solid focus-visible:ring-2 focus-visible:ring-brand-500"
                 title="Jump to Priority Member Alerts"
               >
                 {s.text}

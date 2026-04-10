@@ -236,7 +236,7 @@ export default function LoginPage({ onLogin }) {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3.5 rounded-xl border-none bg-brand-500 text-white text-sm font-bold transition-all hover:bg-brand-600 ${
+                className={`w-full py-3.5 rounded-xl border-none bg-brand-500 text-white text-sm font-bold transition-all hover:bg-brand-600 focus-visible:ring-2 focus-visible:ring-brand-500 ${
                   loading ? 'cursor-wait opacity-70' : 'cursor-pointer opacity-100'
                 }`}
               >
@@ -248,7 +248,7 @@ export default function LoginPage({ onLogin }) {
             <div className="text-center mt-3">
               <button
                 onClick={() => setShowForgotPassword(true)}
-                className="text-sm text-brand-500 hover:text-brand-600 font-medium bg-transparent border-none cursor-pointer"
+                className="text-sm text-brand-500 hover:text-brand-600 font-medium bg-transparent border-none cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 Forgot password?
               </button>
@@ -360,7 +360,7 @@ export default function LoginPage({ onLogin }) {
             <button
               onClick={() => startDemo(true)}
               aria-label="Guided Demo"
-              className="w-full py-3.5 rounded-xl border-none bg-brand-500 text-white text-sm font-bold cursor-pointer hover:bg-brand-600 transition-colors"
+              className="w-full py-3.5 rounded-xl border-none bg-brand-500 text-white text-sm font-bold cursor-pointer hover:bg-brand-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               Guided Demo
               <span className="block text-xs font-normal text-white/70 mt-0.5">Load data one source at a time</span>
@@ -408,7 +408,7 @@ export default function LoginPage({ onLogin }) {
 
           <button
             onClick={() => setScreen('signin')}
-            className="w-full py-2.5 rounded-xl border-none bg-transparent text-brand-500 text-sm font-semibold cursor-pointer hover:text-brand-600 transition-colors"
+            className="w-full py-2.5 rounded-xl border-none bg-transparent text-brand-500 text-sm font-semibold cursor-pointer hover:text-brand-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             Back to Sign In
           </button>

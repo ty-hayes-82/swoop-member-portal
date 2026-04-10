@@ -53,7 +53,7 @@ export default function MemberHealth() {
           <button
             type="button"
             onClick={() => setShowInsight(false)}
-            className="absolute top-2 right-3 border-none bg-transparent text-gray-400 text-xs cursor-pointer"
+            className="absolute top-2 right-3 border-none bg-transparent text-gray-400 text-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             Dismiss
           </button>

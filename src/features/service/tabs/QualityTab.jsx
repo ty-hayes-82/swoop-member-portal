@@ -150,7 +150,7 @@ export default function QualityTab() {
             </div>
             <button
               onClick={() => navigate('service', { tab: top.link })}
-              className="text-xs font-semibold text-brand-500 bg-transparent border-none p-0 cursor-pointer underline"
+              className="text-xs font-semibold text-brand-500 bg-transparent border-none p-0 cursor-pointer underline focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               {top.label} →
             </button>

@@ -49,7 +49,7 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
             onClick={onMoveUp}
             disabled={index === 0}
             aria-label="Move step up"
-            className="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 disabled:opacity-20 cursor-pointer border-none bg-transparent dark:hover:bg-gray-800"
+            className="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 disabled:opacity-20 cursor-pointer border-none bg-transparent dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             <svg aria-hidden="true" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clipRule="evenodd" /></svg>
           </button>
@@ -58,7 +58,7 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
             onClick={onMoveDown}
             disabled={index === total - 1}
             aria-label="Move step down"
-            className="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 disabled:opacity-20 cursor-pointer border-none bg-transparent dark:hover:bg-gray-800"
+            className="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 disabled:opacity-20 cursor-pointer border-none bg-transparent dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             <svg aria-hidden="true" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" /></svg>
           </button>
@@ -88,7 +88,7 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
         {/* Expand/collapse */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-xs text-gray-400 hover:text-brand-500 cursor-pointer bg-transparent border-none p-1"
+          className="text-xs text-gray-400 hover:text-brand-500 cursor-pointer bg-transparent border-none p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           {expanded ? 'Close' : 'Edit'}
         </button>
@@ -99,7 +99,7 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
             type="button"
             onClick={onRemove}
             aria-label="Remove step"
-            className="text-xs text-gray-400 hover:text-red-500 cursor-pointer bg-transparent border-none p-1"
+            className="text-xs text-gray-400 hover:text-red-500 cursor-pointer bg-transparent border-none p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             <span aria-hidden="true">&times;</span>
           </button>
@@ -242,7 +242,7 @@ export default function PlaybookEditor({ playbook, onClose }) {
         </div>
         <button
           onClick={onClose}
-          className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer bg-transparent border-none dark:text-gray-400 dark:hover:text-gray-300"
+          className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer bg-transparent border-none dark:text-gray-400 dark:hover:text-gray-300 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           Done
         </button>

@@ -41,7 +41,7 @@ export default function FlowLink({ flowNum, persona, desc }) {
     <div className="inline-flex items-center gap-1.5">
       <button
         type="button"
-        className={`text-xs bg-transparent border-none cursor-pointer py-1 px-0 inline-flex items-center gap-1 transition-colors duration-150 ${
+        className={`text-xs bg-transparent border-none cursor-pointer py-1 px-0 inline-flex items-center gap-1 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-brand-500 ${
           hovered ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400'
         }`}
         onMouseEnter={() => setHovered(true)}
@@ -54,7 +54,7 @@ export default function FlowLink({ flowNum, persona, desc }) {
       <button
         type="button"
         onClick={handleDismiss}
-        className="text-[11px] text-gray-500 bg-transparent border-none cursor-pointer px-1 py-0.5 opacity-50 dark:text-gray-400"
+        className="text-[11px] text-gray-500 bg-transparent border-none cursor-pointer px-1 py-0.5 opacity-50 dark:text-gray-400 focus-visible:ring-2 focus-visible:ring-brand-500"
         aria-label="Dismiss guide prompt"
       >
         \u00D7

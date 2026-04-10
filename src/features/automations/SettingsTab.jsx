@@ -248,7 +248,7 @@ export default function SettingsTab() {
                     const next = settings.examples.filter((_, j) => j !== i);
                     update('examples', next);
                   }}
-                  className="text-xs text-gray-400 hover:text-red-500 cursor-pointer bg-transparent border-none p-1"
+                  className="text-xs text-gray-400 hover:text-red-500 cursor-pointer bg-transparent border-none p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
                 >
                   <span aria-hidden="true">&times;</span>
                 </button>

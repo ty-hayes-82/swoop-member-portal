@@ -63,7 +63,7 @@ export default function DemoDataPreview({ file, onLoad, onClose }) {
                 <p className="text-sm text-gray-500 m-0">{file.system}</p>
               </div>
             </div>
-            <button onClick={onClose} aria-label="Close preview" className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center border-none cursor-pointer text-lg font-bold hover:bg-gray-200">
+            <button onClick={onClose} aria-label="Close preview" className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center border-none cursor-pointer text-lg font-bold hover:bg-gray-200 focus-visible:ring-2 focus-visible:ring-brand-500">
               &times;
             </button>
           </div>
@@ -146,7 +146,7 @@ export default function DemoDataPreview({ file, onLoad, onClose }) {
             </button>
             <button
               onClick={() => onLoad(file.id)}
-              className="px-6 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-bold border-none cursor-pointer hover:bg-brand-600 transition-colors"
+              className="px-6 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-bold border-none cursor-pointer hover:bg-brand-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               Import This File
             </button>

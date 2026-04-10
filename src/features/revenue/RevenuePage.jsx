@@ -129,7 +129,7 @@ export default function RevenuePage() {
           </div>
           <button
             onClick={() => navigate('board-report')}
-            className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors"
+            className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             Generate Board Report →
           </button>
@@ -303,7 +303,7 @@ export default function RevenuePage() {
               <button
                 onClick={() => handleDeployRanger(bottleneck.hole, Math.round(leakage.PACE_LOSS * 0.2))}
                 disabled={rangerDeployed}
-                className={`rounded-lg px-5 py-2.5 text-sm font-semibold cursor-pointer border-none whitespace-nowrap transition-colors ${
+                className={`rounded-lg px-5 py-2.5 text-sm font-semibold cursor-pointer border-none whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${
                   rangerDeployed
                     ? 'bg-success-100 text-success-700 cursor-default'
                     : 'bg-success-500 text-white hover:bg-success-600'
@@ -335,7 +335,7 @@ export default function RevenuePage() {
             </div>
             <button
               onClick={() => navigate('board-report')}
-              className="rounded-lg bg-brand-500 text-white px-6 py-3 text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors shrink-0"
+              className="rounded-lg bg-brand-500 text-white px-6 py-3 text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               Generate Board Report →
             </button>

@@ -206,7 +206,7 @@ export default function PendingActionsInline({ topPriority = null }) {
         {hasActions && (
           <button
             onClick={() => navigate('automations')}
-            className="py-2.5 px-4 text-sm font-bold text-white bg-brand-500 border-none rounded-xl cursor-pointer text-center"
+            className="py-2.5 px-4 text-sm font-bold text-white bg-brand-500 border-none rounded-xl cursor-pointer text-center focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             Review all {pendingAgentCount} actions in Inbox →
           </button>

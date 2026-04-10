@@ -289,7 +289,7 @@ export default function HealthOverview() {
                   showToast(`Approved outreach for ${priorityMembers.length} members.`, 'success');
                 }
               }}
-              className="px-4 py-2 rounded-lg bg-success-500 text-white text-xs font-semibold cursor-pointer border-none whitespace-nowrap hover:bg-success-600"
+              className="px-4 py-2 rounded-lg bg-success-500 text-white text-xs font-semibold cursor-pointer border-none whitespace-nowrap hover:bg-success-600 focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               Approve all {priorityMembers.length} →
             </button>
@@ -438,7 +438,7 @@ export default function HealthOverview() {
               </div>
               <button
                 onClick={() => navigate('members', { mode: 'cohorts' })}
-                className="text-xs text-blue-600 bg-transparent border-none cursor-pointer font-semibold underline p-0"
+                className="text-xs text-blue-600 bg-transparent border-none cursor-pointer font-semibold underline p-0 focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in integration window {'\u2192'}
               </button>

@@ -6,6 +6,7 @@
 import { weatherDaily as weatherData } from '../data/weather';
 import { shouldUseStatic, isGuidedMode, isSourceLoaded } from './demoGate';
 import { apiFetch } from './apiClient';
+import { logError } from '../utils/logError';
 
 /**
  * @typedef {Object} HourlyForecastRow
@@ -156,7 +157,7 @@ async function fetchWeatherByCity(city, state) {
 
     return { current, hourly, daily, alerts: [], source: 'google', location: locationName };
   } catch (e) {
-    console.warn('Google Weather fetch failed:', e);
+    logError(e, { level: 'warning', service: 'weatherService', op: 'fetchGoogleWeather' });
     return null;
   }
 }
@@ -280,4 +281,29 @@ export function getWeatherLocation() {
     if (city) return city;
   } catch {}
   return null;
+}
+
+// ─── React hook (useServiceCache migration — SHIP_PLAN §2.3) ────────────
+
+import { useServiceCache } from '@/hooks/useServiceCache';
+
+/**
+ * useWeatherData — React hook wrapping /api/weather via useServiceCache.
+ * Returns {data, isLoading, error, refetch} where `data` is the raw forecast
+ * payload ({ current, hourly, daily, alerts, source, location }).
+ * Scoped by clubId so switching tenants invalidates the cache automatically.
+ */
+export function useWeatherData() {
+  const fetcher = async () => {
+    const cid = getClubId();
+    if (!cid) return null;
+    return apiFetch(`/api/weather?clubId=${cid}&type=forecast`);
+  };
+
+  const { data, isLoading, error, refetch } = useServiceCache(
+    'weather',
+    fetcher,
+    { clubIdScoped: true },
+  );
+  return { data: data ?? null, isLoading, error, refetch };
 }

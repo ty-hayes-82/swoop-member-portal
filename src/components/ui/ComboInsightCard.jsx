@@ -8,7 +8,7 @@ export default function ComboInsightCard({
   return (
     <div className="rounded-xl border border-gray-200 bg-white overflow-hidden transition-shadow duration-150 dark:border-gray-800 dark:bg-white/[0.03]">
       {/* Header */}
-      <button onClick={onToggle} className="flex w-full items-center justify-between p-4 bg-transparent border-none cursor-pointer text-left">
+      <button onClick={onToggle} className="flex w-full items-center justify-between p-4 bg-transparent border-none cursor-pointer text-left focus-visible:ring-2 focus-visible:ring-brand-500">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <SystemBadges systems={systems} allSystems={allSystems} />
           <div className="flex-1 min-w-0">
