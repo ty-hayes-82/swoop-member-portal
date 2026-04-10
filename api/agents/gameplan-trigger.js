@@ -173,7 +173,7 @@ export async function saveGamePlan(clubId, planDate, riskLevel, actionCount, pla
 /**
  * Synthesize risk level from data pulls (simulation mode).
  */
-function synthesizeRiskLevel(teeSheet, weather, staffing, complaints) {
+function synthesizeRiskLevel(teeSheet, weather, staffing, fbRes, complaints) {
   let score = 0;
   if (teeSheet.total_rounds > 120) score++;
   if (teeSheet.notable_members.length > 0) score++;
@@ -181,6 +181,8 @@ function synthesizeRiskLevel(teeSheet, weather, staffing, complaints) {
   if (weather.available && weather.golf_demand_modifier < -0.1) score++;
   if (staffing.total_staff === 0) score++;
   if (complaints.count > 2) score++;
+  // F&B demand: high covers with low staffing is a risk signal
+  if (fbRes.total_covers > 80 && staffing.total_staff < 8) score++;
 
   if (score >= 4) return 'high';
   if (score >= 3) return 'elevated';
@@ -318,7 +320,7 @@ async function gameplanHandler(req, res) {
 
     // Simulation mode: synthesize plan locally
     sessionId = `sim_gp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const riskLevel = synthesizeRiskLevel(teeSheet, weather, staffing, complaints);
+    const riskLevel = synthesizeRiskLevel(teeSheet, weather, staffing, fbRes, complaints);
     const planContent = buildSimulatedPlan(teeSheet, weather, staffing, fbRes, complaints, history);
 
     // 4. Save game plan

@@ -1249,6 +1249,53 @@ CREATE TABLE IF NOT EXISTS daily_game_plans (
 
 CREATE INDEX IF NOT EXISTS idx_game_plans_club_date ON daily_game_plans(club_id, plan_date);
 
+-- ---------------------------------------------------------------------------
+-- 3.13 STAFFING RECOMMENDATIONS (Agent Phase 4 — Staffing-Demand Alignment)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS staffing_recommendations (
+  rec_id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id TEXT NOT NULL,
+  target_date DATE NOT NULL,
+  outlet TEXT NOT NULL,
+  time_window TEXT NOT NULL,
+  current_staff INTEGER,
+  recommended_staff INTEGER,
+  demand_forecast INTEGER,
+  revenue_at_risk NUMERIC(10,2),
+  confidence REAL,
+  rationale TEXT,
+  status TEXT DEFAULT 'pending',
+  actual_outcome JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_staffing_recs_club_date ON staffing_recommendations(club_id, target_date);
+
+-- ---------------------------------------------------------------------------
+-- 3.14 COORDINATION LOGS (Agent Phase 5 — Chief of Staff)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS coordination_logs (
+  log_id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id TEXT NOT NULL,
+  log_date DATE NOT NULL,
+  agents_contributing TEXT[],
+  actions_input INTEGER,
+  actions_output INTEGER,
+  conflicts_detected INTEGER DEFAULT 0,
+  conflicts_resolved INTEGER DEFAULT 0,
+  conflict_details JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(club_id, log_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_coordination_logs_club_date ON coordination_logs(club_id, log_date);
+
+-- Provenance tracking for multi-agent coordination
+ALTER TABLE agent_actions ADD COLUMN IF NOT EXISTS contributing_agents TEXT[];
+ALTER TABLE agent_actions ADD COLUMN IF NOT EXISTS coordination_log_id TEXT;
+
 -- =============================================================================
 -- End of schema
 -- =============================================================================

@@ -1,5 +1,5 @@
 // api/mcp.js — MCP server for Managed Agent POC
-// Exposes 18 tools over JSON-RPC (HTTP transport) for the Managed Agent fleet.
+// Exposes 23 tools over JSON-RPC (HTTP transport) for the Managed Agent fleet.
 // Auth: x-mcp-token header validated against MCP_AUTH_TOKEN env var.
 
 import { sql } from '@vercel/postgres';
@@ -274,6 +274,120 @@ const TOOL_DEFINITIONS = [
         plan_content: { type: 'object', description: 'Full structured game plan (JSON)' },
       },
       required: ['club_id', 'plan_date', 'plan_content'],
+    },
+  },
+  // --- Phase 4: Staffing-Demand Alignment tools ---
+  {
+    name: 'get_staffing_vs_demand',
+    description: 'Get current staff schedule overlaid with demand forecast, gap analysis by outlet and time window. Includes cover-to-staff ratios and ideal staffing levels.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        date: { type: 'string', description: 'Target date (YYYY-MM-DD)' },
+      },
+      required: ['club_id', 'date'],
+    },
+  },
+  {
+    name: 'get_historical_staffing_outcomes',
+    description: 'Get past staffing recommendations with outcomes for feedback loop. Shows what was forecast, scheduled, and what actually happened.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        lookback_days: { type: 'integer', description: 'Number of days to look back (default 30)', default: 30 },
+      },
+      required: ['club_id'],
+    },
+  },
+  {
+    name: 'update_staffing_recommendation',
+    description: 'Write a staffing recommendation with confidence score to the staffing_recommendations table.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        target_date: { type: 'string', description: 'Target date (YYYY-MM-DD)' },
+        outlet: { type: 'string', description: 'Outlet name (e.g., Grill Room)' },
+        time_window: { type: 'string', description: 'Time window (e.g., 11:00 AM - 2:00 PM)' },
+        current_staff: { type: 'integer', description: 'Currently scheduled staff count' },
+        recommended_staff: { type: 'integer', description: 'Recommended staff count' },
+        demand_forecast: { type: 'integer', description: 'Projected covers or rounds' },
+        revenue_at_risk: { type: 'number', description: 'Dollar amount at risk (negative = savings)' },
+        confidence: { type: 'number', description: 'Confidence score 0-1' },
+        rationale: { type: 'string', description: 'Explanation citing consequence and cross-domain signals' },
+      },
+      required: ['club_id', 'target_date', 'outlet', 'time_window', 'recommended_staff', 'rationale'],
+    },
+  },
+  // --- Phase 5: Chief of Staff tools ---
+  {
+    name: 'get_all_pending_actions',
+    description: 'Pull all pending actions across all agents for a club. Returns actions ordered by priority then timestamp.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+      },
+      required: ['club_id'],
+    },
+  },
+  {
+    name: 'merge_actions',
+    description: 'Merge 2+ actions into a single combined action with multi-agent provenance. Dismisses the originals with reason "merged".',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        action_ids: { type: 'array', items: { type: 'string' }, description: 'Array of action IDs to merge' },
+        merged_description: { type: 'string', description: 'Description for the merged action' },
+        merged_priority: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Priority for the merged action' },
+        merged_impact: { type: 'string', description: 'Impact metric for the merged action' },
+      },
+      required: ['club_id', 'action_ids', 'merged_description', 'merged_priority'],
+    },
+  },
+  {
+    name: 'resolve_conflict',
+    description: 'Mark a conflict between two actions as resolved. The winning action stays pending; the losing action is dismissed with rationale.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        action_id_winner: { type: 'string', description: 'Action ID that wins the conflict' },
+        action_id_loser: { type: 'string', description: 'Action ID that loses the conflict' },
+        rationale: { type: 'string', description: 'Explanation for the resolution decision' },
+      },
+      required: ['action_id_winner', 'action_id_loser', 'rationale'],
+    },
+  },
+  {
+    name: 'get_agent_confidence_scores',
+    description: 'Pull historical accuracy per agent: average confidence and total action count. Used for tie-breaking in conflict resolution.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+      },
+      required: ['club_id'],
+    },
+  },
+  {
+    name: 'save_coordination_log',
+    description: 'Write a coordination summary to the coordination_logs table. Upserts on (club_id, log_date).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        log_date: { type: 'string', description: 'Coordination date (YYYY-MM-DD)' },
+        agents_contributing: { type: 'array', items: { type: 'string' }, description: 'Agent IDs that contributed' },
+        actions_input: { type: 'integer', description: 'Total actions received from agents' },
+        actions_output: { type: 'integer', description: 'Final actions after merge/dedup/prioritize' },
+        conflicts_detected: { type: 'integer', description: 'Number of conflicts detected' },
+        conflicts_resolved: { type: 'integer', description: 'Number of conflicts resolved' },
+        conflict_details: { type: 'object', description: 'Details of conflicts and resolutions (JSON)' },
+      },
+      required: ['club_id', 'log_date', 'agents_contributing', 'actions_input', 'actions_output'],
     },
   },
 ];
@@ -840,6 +954,213 @@ async function updateComplaintStatus({ feedback_id, status, resolution_notes }) 
   return { feedback_id, status, updated: true };
 }
 
+// --- Phase 4: Staffing-Demand Alignment tool handlers ---
+
+async function getStaffingVsDemand({ club_id, date }) {
+  const staffResult = await sql`
+    SELECT ss.outlet, ss.shift, ss.staff_count
+    FROM staff_shifts ss
+    WHERE ss.date = ${date} AND ss.club_id = ${club_id}
+    ORDER BY ss.outlet, ss.shift
+  `;
+
+  const demandResult = await sql`
+    SELECT outlet, meal_period, SUM(covers) AS projected_covers, COUNT(*) AS reservation_count
+    FROM fb_reservations
+    WHERE date = ${date} AND club_id = ${club_id}
+    GROUP BY outlet, meal_period
+    ORDER BY outlet, meal_period
+  `;
+
+  const roundsResult = await sql`
+    SELECT COUNT(*) AS total_rounds,
+      SUM(CASE WHEN tee_time < '12:00' THEN 1 ELSE 0 END) AS morning_rounds,
+      SUM(CASE WHEN tee_time >= '12:00' THEN 1 ELSE 0 END) AS afternoon_rounds
+    FROM bookings
+    WHERE booking_date = ${date} AND club_id = ${club_id} AND status = 'confirmed'
+  `;
+
+  const rounds = roundsResult.rows[0] || {};
+  const shifts = staffResult.rows.map(r => ({
+    outlet: r.outlet, shift: r.shift, staff_count: Number(r.staff_count),
+  }));
+  const demand = demandResult.rows.map(r => ({
+    outlet: r.outlet, meal_period: r.meal_period,
+    projected_covers: Number(r.projected_covers),
+    reservation_count: Number(r.reservation_count),
+  }));
+
+  const gaps = [];
+  for (const d of demand) {
+    const match = shifts.find(s => s.outlet === d.outlet && s.shift === d.meal_period);
+    const staffCount = match ? match.staff_count : 0;
+    const idealStaff = Math.ceil(d.projected_covers / 10);
+    gaps.push({
+      outlet: d.outlet, time_window: d.meal_period,
+      current_staff: staffCount, ideal_staff: idealStaff,
+      gap: staffCount - idealStaff,
+      projected_covers: d.projected_covers,
+      cover_to_staff_ratio: staffCount > 0 ? Math.round(d.projected_covers / staffCount * 10) / 10 : null,
+    });
+  }
+
+  return {
+    date,
+    total_rounds: Number(rounds.total_rounds ?? 0),
+    morning_rounds: Number(rounds.morning_rounds ?? 0),
+    afternoon_rounds: Number(rounds.afternoon_rounds ?? 0),
+    shifts, demand, gaps,
+    total_staff: shifts.reduce((sum, s) => sum + s.staff_count, 0),
+    total_covers: demand.reduce((sum, d) => sum + d.projected_covers, 0),
+  };
+}
+
+async function getHistoricalStaffingOutcomes({ club_id, lookback_days }) {
+  const days = lookback_days || 30;
+  const result = await sql`
+    SELECT rec_id, target_date, outlet, time_window,
+      current_staff, recommended_staff, demand_forecast,
+      revenue_at_risk, confidence, rationale, status, actual_outcome, created_at
+    FROM staffing_recommendations
+    WHERE club_id = ${club_id}
+      AND created_at > NOW() - INTERVAL '1 day' * ${days}
+    ORDER BY target_date DESC
+    LIMIT 30
+  `;
+  return {
+    recommendations: result.rows.map(r => ({
+      rec_id: r.rec_id,
+      target_date: r.target_date,
+      outlet: r.outlet,
+      time_window: r.time_window,
+      current_staff: Number(r.current_staff ?? 0),
+      recommended_staff: Number(r.recommended_staff ?? 0),
+      demand_forecast: Number(r.demand_forecast ?? 0),
+      revenue_at_risk: Number(r.revenue_at_risk ?? 0),
+      confidence: Number(r.confidence ?? 0.5),
+      rationale: r.rationale,
+      status: r.status,
+      actual_outcome: r.actual_outcome,
+    })),
+    count: result.rows.length,
+  };
+}
+
+async function updateStaffingRecommendationTool({ club_id, target_date, outlet, time_window, current_staff, recommended_staff, demand_forecast, revenue_at_risk, confidence, rationale }) {
+  const result = await sql`
+    INSERT INTO staffing_recommendations (
+      club_id, target_date, outlet, time_window,
+      current_staff, recommended_staff, demand_forecast,
+      revenue_at_risk, confidence, rationale, status
+    ) VALUES (
+      ${club_id}, ${target_date}, ${outlet}, ${time_window},
+      ${current_staff || null}, ${recommended_staff}, ${demand_forecast || null},
+      ${revenue_at_risk || null}, ${confidence || 0.5}, ${rationale}, 'pending'
+    )
+    RETURNING rec_id
+  `;
+  return { rec_id: result.rows[0].rec_id, saved: true };
+}
+
+// --- Phase 5: Chief of Staff tool handlers ---
+
+async function getAllPendingActions({ club_id }) {
+  const result = await sql`
+    SELECT action_id, club_id, agent_id, action_type, priority, source,
+      description, impact_metric, member_id, status, timestamp,
+      contributing_agents, coordination_log_id
+    FROM agent_actions
+    WHERE club_id = ${club_id} AND status = 'pending'
+    ORDER BY
+      CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END ASC,
+      timestamp DESC
+  `;
+  return {
+    actions: result.rows.map(r => ({
+      action_id: r.action_id,
+      agent_id: r.agent_id,
+      action_type: r.action_type,
+      priority: r.priority,
+      source: r.source,
+      description: r.description,
+      impact_metric: r.impact_metric,
+      member_id: r.member_id,
+      timestamp: r.timestamp,
+      contributing_agents: r.contributing_agents,
+    })),
+    count: result.rows.length,
+  };
+}
+
+async function mergeActionsTool({ club_id, action_ids, merged_description, merged_priority, merged_impact }) {
+  const contributingAgents = [];
+  for (const id of action_ids) {
+    const r = await sql`SELECT agent_id FROM agent_actions WHERE action_id = ${id}`;
+    if (r.rows.length > 0) contributingAgents.push(r.rows[0].agent_id);
+  }
+  const uniqueAgents = [...new Set(contributingAgents)];
+
+  const mergedId = `act_cos_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  await sql`
+    INSERT INTO agent_actions (action_id, club_id, agent_id, action_type, priority, source, description, impact_metric, status, timestamp, contributing_agents)
+    VALUES (${mergedId}, ${club_id}, 'chief-of-staff', 'alert_staff', ${merged_priority}, 'chief-of-staff', ${merged_description}, ${merged_impact || null}, 'pending', NOW(), ${uniqueAgents})
+  `;
+
+  for (const id of action_ids) {
+    await sql`
+      UPDATE agent_actions
+      SET status = 'dismissed', dismissal_reason = 'merged', dismissed_at = NOW()
+      WHERE action_id = ${id}
+    `;
+  }
+
+  return { merged_action_id: mergedId, contributing_agents: uniqueAgents, dismissed: action_ids };
+}
+
+async function resolveConflictTool({ action_id_winner, action_id_loser, rationale }) {
+  await sql`
+    UPDATE agent_actions
+    SET status = 'dismissed', dismissal_reason = ${`conflict_resolved: ${rationale}`}, dismissed_at = NOW()
+    WHERE action_id = ${action_id_loser}
+  `;
+  return { winner: action_id_winner, loser: action_id_loser, rationale, resolved: true };
+}
+
+async function getAgentConfidenceScores({ club_id }) {
+  const result = await sql`
+    SELECT agent_id,
+      AVG(confidence) AS avg_confidence,
+      COUNT(*) AS total_actions
+    FROM agent_activity
+    WHERE club_id = ${club_id}
+    GROUP BY agent_id
+  `;
+  return {
+    agents: result.rows.map(r => ({
+      agent_id: r.agent_id,
+      avg_confidence: r.avg_confidence != null ? Number(r.avg_confidence) : null,
+      total_actions: Number(r.total_actions),
+    })),
+  };
+}
+
+async function saveCoordinationLogTool({ club_id, log_date, agents_contributing, actions_input, actions_output, conflicts_detected, conflicts_resolved, conflict_details }) {
+  const result = await sql`
+    INSERT INTO coordination_logs (club_id, log_date, agents_contributing, actions_input, actions_output, conflicts_detected, conflicts_resolved, conflict_details)
+    VALUES (${club_id}, ${log_date}, ${agents_contributing}, ${actions_input}, ${actions_output}, ${conflicts_detected || 0}, ${conflicts_resolved || 0}, ${JSON.stringify(conflict_details || [])})
+    ON CONFLICT (club_id, log_date) DO UPDATE SET
+      agents_contributing = EXCLUDED.agents_contributing,
+      actions_input = EXCLUDED.actions_input,
+      actions_output = EXCLUDED.actions_output,
+      conflicts_detected = EXCLUDED.conflicts_detected,
+      conflicts_resolved = EXCLUDED.conflicts_resolved,
+      conflict_details = EXCLUDED.conflict_details,
+      created_at = NOW()
+    RETURNING log_id
+  `;
+  return { log_id: result.rows[0].log_id, saved: true };
+}
+
 // ---------------------------------------------------------------------------
 // Tool dispatch
 // ---------------------------------------------------------------------------
@@ -864,6 +1185,16 @@ const TOOL_HANDLERS = {
   get_fb_reservations: getFbReservations,
   get_daily_game_plan_history: getDailyGamePlanHistory,
   save_game_plan: saveGamePlanTool,
+  // Phase 4
+  get_staffing_vs_demand: getStaffingVsDemand,
+  get_historical_staffing_outcomes: getHistoricalStaffingOutcomes,
+  update_staffing_recommendation: updateStaffingRecommendationTool,
+  // Phase 5
+  get_all_pending_actions: getAllPendingActions,
+  merge_actions: mergeActionsTool,
+  resolve_conflict: resolveConflictTool,
+  get_agent_confidence_scores: getAgentConfidenceScores,
+  save_coordination_log: saveCoordinationLogTool,
 };
 
 // ---------------------------------------------------------------------------
