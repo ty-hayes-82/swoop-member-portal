@@ -16,7 +16,7 @@ export const warmLeads = [
   { guestName: 'Jennifer Walsh', visits: 4, totalSpend: 980, sponsor: 'mbr_201', sponsorName: 'Claire Houston',
     lastVisit: '2026-01-10', score: 72, tier: 'warm', rounds: 3, dining: 2, events: 2, potentialDues: 28000,
     likelyArchetype: 'Balanced Active' },
-  { guestName: 'Mark Patterson', visits: 4, totalSpend: 910, sponsor: 'mbr_089', sponsorName: 'Anne Jordan',
+  { guestName: 'Mark Patterson', visits: 4, totalSpend: 910, sponsor: 'mbr_t04', sponsorName: 'Anne Jordan',
     lastVisit: '2026-01-09', score: 69, tier: 'warm', rounds: 4, dining: 1, events: 0, potentialDues: 26000,
     likelyArchetype: 'Weekend Warrior' },
   { guestName: 'Lisa Yamamoto', visits: 3, totalSpend: 860, sponsor: 'mbr_112', sponsorName: 'Marcus Webb',
@@ -63,7 +63,7 @@ export const waitlistEntries = [
 // Includes retention context to support prioritization over first-come-first-served
 export const memberWaitlistEntries = [
   {
-    memberId: 'mbr_089',
+    memberId: 'mbr_t04',
     memberName: 'Anne Jordan',
     archetype: 'Weekend Warrior',
     healthScore: 38,
@@ -78,7 +78,7 @@ export const memberWaitlistEntries = [
     retentionPriority: 'HIGH',
   },
   {
-    memberId: 'mbr_042',
+    memberId: 'mbr_t03',
     memberName: 'Kevin Hurst',
     archetype: 'Declining',
     healthScore: 24,
@@ -93,7 +93,7 @@ export const memberWaitlistEntries = [
     retentionPriority: 'HIGH',
   },
   {
-    memberId: 'mbr_271',
+    memberId: 'mbr_t05',
     memberName: 'Robert Callahan',
     archetype: 'Declining',
     healthScore: 27,
@@ -108,7 +108,7 @@ export const memberWaitlistEntries = [
     retentionPriority: 'HIGH',
   },
   {
-    memberId: 'mbr_203',
+    memberId: 'mbr_t01',
     memberName: 'James Whitfield',
     archetype: 'Balanced Active',
     healthScore: 44,
@@ -218,7 +218,7 @@ export const memberWaitlistEntries = [
 export const cancellationProbabilities = [
   {
     bookingId: 'bkg_1704',
-    memberId: 'mbr_042',
+    memberId: 'mbr_t03',
     memberName: 'Kevin Hurst',
     archetype: 'Declining',
     teeTime: 'Sat Jan 18 · 7:00 AM',
@@ -229,7 +229,7 @@ export const cancellationProbabilities = [
   },
   {
     bookingId: 'bkg_1712',
-    memberId: 'mbr_089',
+    memberId: 'mbr_t04',
     memberName: 'Anne Jordan',
     archetype: 'Weekend Warrior',
     teeTime: 'Sat Jan 18 · 7:08 AM',
@@ -240,7 +240,7 @@ export const cancellationProbabilities = [
   },
   {
     bookingId: 'bkg_1719',
-    memberId: 'mbr_203',
+    memberId: 'mbr_t01',
     memberName: 'James Whitfield',
     archetype: 'Balanced Active',
     teeTime: 'Sat Jan 18 · 8:00 AM',
@@ -251,7 +251,7 @@ export const cancellationProbabilities = [
   },
   {
     bookingId: 'bkg_1731',
-    memberId: 'mbr_271',
+    memberId: 'mbr_t05',
     memberName: 'Robert Callahan',
     archetype: 'Declining',
     teeTime: 'Sat Jan 18 · 9:00 AM',

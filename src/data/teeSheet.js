@@ -4,7 +4,7 @@
 export const todayTeeSheet = [
   // 7:00 AM block — early birds, mostly Die-Hards
   {
-    time: '7:00 AM', course: 'North', memberId: 'mbr_042', name: 'Kevin Hurst',
+    time: '7:00 AM', course: 'North', memberId: 'mbr_t03', name: 'Kevin Hurst',
     archetype: 'Declining', healthScore: 18, tier: 'Full Golf', duesAnnual: 18000,
     group: ['Kevin Hurst', 'Guest'],
     cancelRisk: 0.82,
@@ -18,7 +18,7 @@ export const todayTeeSheet = [
     cartPrep: { beverage: 'Water + Gatorade', snack: 'Trail mix', note: 'Regular 4-some. Cart #7 preferred. Range balls pre-loaded.' },
   },
   {
-    time: '7:08 AM', course: 'North', memberId: 'mbr_089', name: 'Anne Jordan',
+    time: '7:08 AM', course: 'North', memberId: 'mbr_t04', name: 'Anne Jordan',
     archetype: 'Weekend Warrior', healthScore: 28, tier: 'Full Golf', duesAnnual: 12000,
     group: ['Anne Jordan', 'Marcus Jordan'],
     cancelRisk: 0.71,
@@ -47,7 +47,7 @@ export const todayTeeSheet = [
   },
   // 8:00 AM block — prime time
   {
-    time: '8:00 AM', course: 'North', memberId: 'mbr_203', name: 'James Whitfield',
+    time: '8:00 AM', course: 'North', memberId: 'mbr_t01', name: 'James Whitfield',
     archetype: 'Balanced Active', healthScore: 42, tier: 'Full Golf', duesAnnual: 18000,
     group: ['James Whitfield', 'Logan Whitfield'],
     cancelRisk: 0.68,
@@ -76,7 +76,7 @@ export const todayTeeSheet = [
   },
   // 9:00 AM block
   {
-    time: '9:00 AM', course: 'North', memberId: 'mbr_271', name: 'Robert Callahan',
+    time: '9:00 AM', course: 'North', memberId: 'mbr_t05', name: 'Robert Callahan',
     archetype: 'Declining', healthScore: 22, tier: 'Corporate', duesAnnual: 18000,
     group: ['Robert Callahan'],
     cancelRisk: 0.59,

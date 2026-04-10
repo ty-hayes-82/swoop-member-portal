@@ -33,5 +33,5 @@ export const paceFBImpact = {
   avgCheckFast: 34.20,
   avgCheckSlow: 28.50,
   slowRoundsPerMonth: 668,
-  revenueLostPerMonth: 20708,
+  revenueLostPerMonth: 5760,
 };

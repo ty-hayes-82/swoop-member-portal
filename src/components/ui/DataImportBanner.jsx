@@ -33,7 +33,7 @@ function buildMessage(category) {
     }
     case 'fb': {
       const rev = getMonthlyRevenueSummary();
-      const leakage = rev.total ? fmt$(rev.total * 0.03) + '/mo' : '$20.7K/mo';
+      const leakage = rev.total ? fmt$(rev.total * 0.03) + '/mo' : '$9.6K/mo'; // lint-no-hardcoded-dollars: allow — fallback before data loads
       const b = getDailyBriefing();
       const callahan = b?.todayRisks?.atRiskTeetimes?.find(m => m.name === 'Robert Callahan');
       const name = callahan?.name || 'Robert Callahan';
@@ -57,7 +57,7 @@ function buildMessage(category) {
     case 'staffing': {
       const staff = getStaffingSummary();
       const days = staff.understaffedDaysCount || 3;
-      const impact = staff.totalRevenueLoss ? fmt$(staff.totalRevenueLoss) : '$3,400';
+      const impact = staff.totalRevenueLoss ? fmt$(staff.totalRevenueLoss) : '$3,400'; // lint-no-hardcoded-dollars: allow — fallback before data loads
       return `Staff coverage mapped \u2014 ${days} understaffed days this month, ${impact} revenue impact.`;
     }
     case 'pipeline': // club-profile gate alias

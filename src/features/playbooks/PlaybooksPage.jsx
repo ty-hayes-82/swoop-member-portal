@@ -17,7 +17,7 @@ const PLAYBOOKS = [
     category: 'Service Recovery',
     categoryColor: '#c0392b',
     description: 'An engaged member files a complaint that goes unresolved, leading to resignation within days. One saved resignation protects $18K\u2013$22K in dues plus $3K\u2013$5K in ancillary revenue.', // lint-no-hardcoded-dollars: allow — playbook catalog teaser
-    triggeredFor: { name: 'James Whitfield', memberId: 'mbr_203', note: '6-year member in good standing \u2014 complaint from this profile is a red flag' },
+    triggeredFor: { name: 'James Whitfield', memberId: 'mbr_t01', note: '6-year member in good standing \u2014 complaint from this profile is a red flag' },
     monthlyImpact: '$18K', // lint-no-hardcoded-dollars: allow — playbook catalog teaser
     yearlyImpact: '$216K/yr', // lint-no-hardcoded-dollars: allow — playbook catalog teaser
     steps: [
@@ -111,7 +111,7 @@ const PLAYBOOKS = [
     category: 'Member Engagement',
     categoryColor: '#dc2626',
     description: '30 members trending down with $733K at risk. When a member\u2019s 90-day engagement drops below 30% of their personal baseline \u2014 rounds halved, dining flatlined \u2014 it\u2019s a quiet signal that something is wrong. This playbook catches the decline before the resignation.', // lint-no-hardcoded-dollars: allow — playbook catalog teaser
-    triggeredFor: { name: 'Robert Ashford', memberId: 'mbr_271', note: 'Rounds dropped from 8/mo to 2/mo. Dining visits from 6 to 1. Health score: 28 (was 74).' },
+    triggeredFor: { name: 'Robert Ashford', memberId: 'mbr_t05', note: 'Rounds dropped from 8/mo to 2/mo. Dining visits from 6 to 1. Health score: 28 (was 74).' },
     monthlyImpact: '$24K', // lint-no-hardcoded-dollars: allow — playbook catalog teaser
     yearlyImpact: '$290K/yr', // lint-no-hardcoded-dollars: allow — playbook catalog teaser
     steps: [

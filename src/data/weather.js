@@ -17,11 +17,11 @@ export const weatherDaily = [
   { date: '2026-01-15', condition: 'windy',   tempHigh: 66, wind: 24, rain: false },
   { date: '2026-01-16', condition: 'sunny',   tempHigh: 71, wind: 8,  rain: false }, // understaffed
   { date: '2026-01-17', condition: 'sunny',   tempHigh: 82, wind: 8,  rain: false }, // DEMO TODAY — 82°F clear per storyboard; wind advisory is a separate afternoon-gust alert
-  { date: '2026-01-18', condition: 'cloudy',  tempHigh: 68, wind: 12, rain: false }, // mbr_203 complaint
+  { date: '2026-01-18', condition: 'cloudy',  tempHigh: 68, wind: 12, rain: false }, // mbr_t01 complaint
   { date: '2026-01-19', condition: 'sunny',   tempHigh: 74, wind: 6,  rain: false }, // MLK Day
   { date: '2026-01-20', condition: 'rainy',   tempHigh: 55, wind: 20, rain: true  },
   { date: '2026-01-21', condition: 'cloudy',  tempHigh: 61, wind: 14, rain: false },
-  { date: '2026-01-22', condition: 'sunny',   tempHigh: 67, wind: 8,  rain: false }, // mbr_203 resignation
+  { date: '2026-01-22', condition: 'sunny',   tempHigh: 67, wind: 8,  rain: false }, // mbr_t01 resignation
   { date: '2026-01-23', condition: 'sunny',   tempHigh: 71, wind: 5,  rain: false },
   { date: '2026-01-24', condition: 'sunny',   tempHigh: 73, wind: 6,  rain: false },
   { date: '2026-01-25', condition: 'cloudy',  tempHigh: 69, wind: 11, rain: false },

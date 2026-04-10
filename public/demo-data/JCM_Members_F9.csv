@@ -117,7 +117,7 @@ mbr_060,60,Adriana,Harris,adriana.harris@aol.com,(602) 555-8149,1990-09-26,F,SOC
 mbr_062,62,Yuki,Lindqvist,yuki.lindqvist@outlook.com,(520) 555-7216,1998-07-21,F,SOC,active,2016-06-28,,hh_031,6000,1082,6511600,1
 mbr_064,64,Deepa,Ivanov,deepa.ivanov@aol.com,(602) 555-6240,1951-06-17,F,FG,active,2017-11-12,,hh_032,18000,2384,,1
 mbr_068,68,Charlotte,Stone,charlotte.stone@gmail.com,(480) 555-1030,1948-02-18,F,FG,active,2018-09-25,,hh_034,18000,2763,,1
-mbr_t03,0,Kevin,Hurst,kevin.h@email.com,480-555-0103,,,Full Golf,active,2015-09-20,,,18000,0,,1
+mbr_t03,503,Kevin,Hurst,kevin.h@email.com,480-555-0103,1970-03-22,M,FG,resigned,2015-09-20,2026-01-08,,18000,0,,1
 mbr_072,72,Marcus,Quincy,marcus.quincy@gmail.com,(480) 555-4821,1965-10-10,F,FG,active,2018-07-21,,hh_036,18000,1865,5739400,1
 mbr_076,76,Genevieve,Kane,genevieve.kane@icloud.com,(520) 555-8712,1983-11-01,M,SOC,active,2019-01-16,,hh_038,6000,2245,3460600,1
 mbr_079,79,Tatiana,Tate,tatiana.tate@icloud.com,(520) 555-1136,1968-02-09,F,FG,active,2018-05-15,,hh_040,18000,223,8713900,0
@@ -134,7 +134,7 @@ mbr_105,105,Kenji,Dean,kenji.dean@gmail.com,(602) 555-2638,1983-11-01,F,FG,activ
 mbr_108,108,Kofi,Nye,kofi.nye@icloud.com,(602) 555-4161,1968-02-08,M,SPT,active,2020-01-16,,hh_054,12000,2727,,1
 mbr_112,112,Owen,Castillo,owen.castillo@icloud.com,(480) 555-7952,1965-10-10,M,FG,active,2021-11-02,,hh_056,18000,-395,,1
 mbr_295,295,Takeshi,Todd,takeshi.todd@outlook.com,(623) 555-7989,1960-11-13,F,FG,suspended,2019-05-15,,hh_148,18000,1559,,1
-mbr_t01,0,James,Whitfield,james.w@email.com,480-555-0101,,,Full Golf,active,2019-03-15,,,18000,0,,1
+mbr_t01,501,James,Whitfield,james.w@email.com,480-555-0101,1978-06-14,M,FG,active,2019-03-15,,hh_t01,18000,0,,1
 mbr_116,116,Lamar,Dupont,lamar.dupont@outlook.com,(480) 555-2743,1982-07-01,M,FG,active,2022-09-25,,hh_058,18000,2209,9371800,1
 mbr_119,119,Eloise,Bailey,eloise.bailey@aol.com,(602) 555-4167,1967-02-09,F,FG,active,2021-09-24,,hh_060,18000,187,,1
 mbr_122,122,Giuseppe,Barnes,giuseppe.barnes@aol.com,(602) 555-5658,1952-05-16,M,FG,active,2023-08-05,,hh_061,18000,389,1878400,1
@@ -172,7 +172,7 @@ mbr_197,197,Ella,Johnson,ella.johnson@yahoo.com,(602) 555-2239,1958-12-13,M,SPT,
 mbr_200,200,Violet,Esposito,violet.esposito@yahoo.com,(623) 555-3663,1999-03-21,F,SOC,active,2023-03-11,,hh_100,6000,291,,0
 mbr_202,202,Tyrone,Becker,tyrone.becker@icloud.com,(480) 555-2730,1952-05-16,F,SPT,active,2020-08-23,,hh_101,12000,1593,,1
 mbr_296,296,Ryo,Ellis,ryo.ellis@icloud.com,(602) 555-1356,1992-04-24,M,SOC,suspended,2015-11-12,,hh_148,6000,459,,1
-mbr_t04,0,Anne,Jordan,anne.j@email.com,480-555-0104,,,Social,active,2020-01-10,,,12000,0,,1
+mbr_t04,504,Anne,Jordan,anne.j@email.com,480-555-0104,1972-09-18,F,FG,active,2016-03-15,,hh_t04,14000,0,,1
 mbr_206,206,Bjorn,Nash,bjorn.nash@icloud.com,(520) 555-6521,1969-02-08,F,SPT,active,2024-02-19,,hh_103,12000,1973,,0
 mbr_209,209,Giovanni,Xavier,giovanni.xavier@icloud.com,(520) 555-7912,1990-05-15,M,SPT,active,2024-06-17,,hh_105,12000,2175,7675300,1
 mbr_211,211,Min,Turner,min.turner@outlook.com,(602) 555-7069,1999-03-21,M,FG,active,2024-06-01,,hh_106,18000,1252,8177500,0
@@ -191,7 +191,7 @@ mbr_242,242,Claire,Kirk,claire.kirk@aol.com,(602) 555-5728,1952-01-16,M,LEG,acti
 mbr_244,244,Andre,Jett,andre.jett@gmail.com,(623) 555-1585,1961-11-12,M,SPT,active,2018-05-16,,hh_122,12000,635,,1
 mbr_246,246,Lonnie,Thornton,lonnie.thornton@aol.com,(480) 555-9519,1969-02-08,M,SOC,active,2019-10-28,,hh_123,6000,1936,,1
 mbr_248,248,Sven,Gutierrez,sven.gutierrez@aol.com,(623) 555-5376,1978-12-03,M,JR,active,2019-11-12,,hh_124,8000,-263,3118600,1
-mbr_t05,0,Robert,Callahan,robert.c@email.com,480-555-0105,,,Full Golf,active,2018-04-22,,,18000,0,,1
+mbr_t05,505,Robert,Callahan,robert.c@email.com,480-555-0105,1968-11-30,M,CORP,active,2015-02-10,,hh_t05,18000,0,,1
 mbr_005,5,Gary,Agarwal,gary.agarwal@aol.com,(602) 555-1254,1973-01-06,F,FG,active,2020-08-22,,hh_003,18000,700,4114900,1
 mbr_007,7,Alexander,Moreau,alexander.moreau@gmail.com,(480) 555-5978,1982-11-01,F,FG,active,2020-01-06,,hh_004,18000,-222,4617100,1
 mbr_250,250,Alexei,Reddy,alexei.reddy@gmail.com,(520) 555-4410,1987-10-27,M,FG,active,2016-04-23,,hh_125,18000,2316,3620800,1
@@ -389,3 +389,7 @@ mbr_1774823995441_21,0,Kevin,Anderson,kevin.anderson@email.com,(216) 574-3413,,,
 mbr_1774823995447_22,0,Linda,Liu,linda.liu@email.com,(507) 990-3398,,,Full Golf,active,2020-02-14,,,20327,0,,1
 mbr_1774823995452_23,0,Robert,Ward,robert.ward@email.com,(304) 276-6524,,,Non-Resident,active,2025-09-01,,,7831,0,,1
 mbr_1774823995456_24,0,Lisa,Brooks,lisa.brooks@email.com,(627) 479-6456,,,Sports,active,2021-06-21,,,14777,0,,1
+mbr_t06,506,Sandra,Chen,sandra.c@email.com,480-555-0106,1985-04-10,F,SOC,active,2021-06-15,,hh_t06,9000,0,,1
+mbr_t07,507,Linda,Leonard,linda.l@email.com,480-555-0107,1974-08-22,F,FG,resigned,2019-05-20,2026-01-15,hh_t07,18000,0,,1
+mbr_t07b,508,Richard,Leonard,richard.l@email.com,480-555-0108,1972-01-15,M,FG,active,2019-05-20,,hh_t07,18000,0,,1
+mbr_t08,509,Robert,Mills,robert.m@email.com,480-555-0109,1962-07-30,M,FG,active,2014-06-10,,hh_t08,18000,0,,1

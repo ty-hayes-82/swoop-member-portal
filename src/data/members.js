@@ -53,18 +53,18 @@ export const watchMembers = [
 
 export const atRiskMembers = [
   // ON-41 data model note: include duesAnnual on at-risk rows so UI can derive totals from row data.
-  { memberId: 'mbr_042', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:2},{month:'Nov',rounds:1},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_t03', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:2},{month:'Nov',rounds:1},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
   { memberId: 'mbr_117', name: 'Linda Leonard', score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:0},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
-  { memberId: 'mbr_203', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:3},{month:'Dec',rounds:2},{month:'Jan',rounds:1}] },
-  { memberId: 'mbr_089', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior', duesAnnual: 12000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
-  { memberId: 'mbr_271', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:1}] },
+  { memberId: 'mbr_t01', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:3},{month:'Dec',rounds:2},{month:'Jan',rounds:1}] },
+  { memberId: 'mbr_t04', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior', duesAnnual: 12000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_t05', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:1}] },
   { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining spend dropped 87% ($18 last visit vs $142 avg). Declined 3 consecutive event invites. $9K annual dues — last 2 renewals were late.', archetype: 'Social Butterfly', duesAnnual: 9000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:1},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
   { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Practicing but skipping clubhouse spend; slow-play complaints unresolved', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
 ];
 
 export const resignationScenarios = [
   {
-    memberId: 'mbr_042', name: 'Kevin Hurst', archetype: 'Declining', resignDate: '2026-01-08',
+    memberId: 'mbr_t03', name: 'Kevin Hurst', archetype: 'Declining', resignDate: '2026-01-08',
     pattern: 'Gradual multi-domain decay over 3 months', keySignal: 'Email open rate dropped 60% Nov→Dec',
     missedIntervention: 'November email open-rate drop should have triggered Watch-tier outreach — 8-week window missed',
     lifetimeValue: 72000, dues: 18000,
@@ -88,7 +88,7 @@ export const resignationScenarios = [
     ],
   },
   {
-    memberId: 'mbr_203', name: 'James Whitfield', archetype: 'Balanced Active', resignDate: '2026-01-22',
+    memberId: 'mbr_t01', name: 'James Whitfield', archetype: 'Balanced Active', resignDate: '2026-01-22',
     pattern: 'Service recovery failure — preventable departure', keySignal: 'Complaint Jan 18, unresolved → resign Jan 22',
     lifetimeValue: 54000, dues: 18000,
     timeline: [
@@ -100,7 +100,7 @@ export const resignationScenarios = [
     ],
   },
   {
-    memberId: 'mbr_089', name: 'Anne Jordan', archetype: 'Weekend Warrior', resignDate: '2026-01-27',
+    memberId: 'mbr_t04', name: 'Anne Jordan', archetype: 'Weekend Warrior', resignDate: '2026-01-27',
     pattern: 'Slow weekday-then-weekend withdrawal', keySignal: 'Rounds: Oct 4 → Nov 2 → Dec 1',
     missedIntervention: 'Oct round drop from 4 to 2/mo should have triggered priority Saturday slot offer',
     lifetimeValue: 48000, dues: 12000,
@@ -112,7 +112,7 @@ export const resignationScenarios = [
     ],
   },
   {
-    memberId: 'mbr_271', name: 'Robert Callahan', archetype: 'Declining', resignDate: '2026-01-31',
+    memberId: 'mbr_t05', name: 'Robert Callahan', archetype: 'Declining', resignDate: '2026-01-31',
     pattern: 'Obligation-only spending — F&B minimum hit then stop', keySignal: 'Spent exactly $3,020 F&B minimum then ceased',
     lifetimeValue: 54000, dues: 18000,
     timeline: [
@@ -126,8 +126,8 @@ export const resignationScenarios = [
 
 
 export const memberProfiles = {
-  mbr_203: {
-    memberId: 'mbr_203',
+  mbr_t01: {
+    memberId: 'mbr_t01',
     name: 'James Whitfield',
     tier: 'Full Golf',
     joinDate: '2019-04-12',
@@ -186,8 +186,8 @@ export const memberProfiles = {
       { id: 'queued', status: 'Queued for GM review', owner: 'Recommended Actions', timestamp: '2026-01-17T06:05:00Z' },
     ],
   },
-  mbr_089: {
-    memberId: 'mbr_089',
+  mbr_t04: {
+    memberId: 'mbr_t04',
     name: 'Anne Jordan',
     tier: 'Full Golf',
     joinDate: '2016-08-01',
@@ -241,8 +241,8 @@ export const memberProfiles = {
       { id: 'recommend', status: 'Recommended by Demand Optimizer', owner: 'Demand Optimizer', timestamp: '2026-01-17T06:04:00Z' },
     ],
   },
-  mbr_271: {
-    memberId: 'mbr_271',
+  mbr_t05: {
+    memberId: 'mbr_t05',
     name: 'Robert Callahan',
     tier: 'Corporate',
     joinDate: '2015-03-19',

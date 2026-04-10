@@ -80,11 +80,9 @@ export function getLeakageData() {
  * "Every slow round that skips dining costs $X."
  * Computed from pace-FB conversion gap × average check.
  *
- * The storyboard quotes $31/round which factors in full revenue impact
- * (dining + lost food retail + lost beverage). The pure dining-conversion
- * delta computes lower (~$8). We use the full-impact figure for demo
- * since it represents end-to-end business impact, with a fallback to
- * the computed conversion gap for real-data clubs.
+ * Computed from revenueLostPerMonth / slowRoundsPerMonth.
+ * With the dining-conversion gap data ($5,760/mo / 668 slow rounds),
+ * this yields ~$9/round. Fallback uses conversion-rate delta × avg check.
  *
  * @returns {number}
  */

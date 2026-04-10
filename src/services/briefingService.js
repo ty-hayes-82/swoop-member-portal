@@ -121,9 +121,9 @@ export const DEMO_BRIEFING = {
     forecast: 'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
     // Must stay at 3 entries — Story 1 narration says "3 at-risk members on today's tee sheet". Locked by briefingService.demo.test.js.
     atRiskTeetimes: [
-      { memberId: 'mbr_203', name: 'James Whitfield', time: '8:00 AM', health: 42 },
-      { memberId: 'mbr_089', name: 'Anne Jordan', time: '7:08 AM', health: 28 },
-      { memberId: 'mbr_271', name: 'Robert Callahan', time: '9:00 AM', health: 22 },
+      { memberId: 'mbr_t01', name: 'James Whitfield', time: '8:00 AM', health: 42 },
+      { memberId: 'mbr_t04', name: 'Anne Jordan', time: '7:08 AM', health: 28 },
+      { memberId: 'mbr_t05', name: 'Robert Callahan', time: '9:00 AM', health: 22 },
     ],
     staffingGaps: [],
     fullyStaffed: false,
@@ -239,11 +239,11 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       weather:    'clear', tempHigh: 82, wind: 8,
       forecast:   'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
       atRiskTeetimes: [
-        { memberId: 'mbr_203', name: 'James Whitfield', archetype: 'Balanced Active',   time: '8:00 AM', score: 42,
+        { memberId: 'mbr_t01', name: 'James Whitfield', archetype: 'Balanced Active',   time: '8:00 AM', score: 42,
           topRisk: 'Service complaint unresolved — slow lunch on Jan 16' },
-        { memberId: 'mbr_089', name: 'Anne Jordan',     archetype: 'Weekend Warrior',  time: '7:08 AM', score: 28,
+        { memberId: 'mbr_t04', name: 'Anne Jordan',     archetype: 'Weekend Warrior',  time: '7:08 AM', score: 28,
           topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
-        { memberId: 'mbr_271', name: 'Robert Callahan', archetype: 'Declining',        time: '9:00 AM', score: 22,
+        { memberId: 'mbr_t05', name: 'Robert Callahan', archetype: 'Declining',        time: '9:00 AM', score: 22,
           topRisk: isGateOpen('fb') ? 'Hitting F&B minimum only — obligation spending pattern' : 'Declining engagement pattern' },
       ],
       staffingGaps: [], fullyStaffed: true,
