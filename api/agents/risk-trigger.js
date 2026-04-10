@@ -29,7 +29,7 @@ const RISK_LIFECYCLE_STEPS = [
   { step_number: 5, step_key: 'day_30_outcome',         title: 'Day 30 outcome measurement',       description: 'Measure final health score delta and record intervention outcome.' },
 ];
 
-export default withAuth(async function handler(req, res) {
+async function riskHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -142,4 +142,17 @@ export default withAuth(async function handler(req, res) {
     console.error('/api/agents/risk-trigger error:', err);
     return res.status(500).json({ error: err.message });
   }
-}, { roles: ['gm', 'admin'] });
+}
+
+// ---------------------------------------------------------------------------
+// Export: cron-key bypass or standard withAuth
+// ---------------------------------------------------------------------------
+
+export default function handler(req, res) {
+  const cronKey = req.headers['x-cron-key'];
+  if (cronKey && process.env.CRON_SECRET && cronKey === process.env.CRON_SECRET) {
+    req.auth = req.auth || { clubId: req.body?.club_id || 'unknown', role: 'system' };
+    return riskHandler(req, res);
+  }
+  return withAuth(riskHandler, { roles: ['gm', 'admin'] })(req, res);
+}

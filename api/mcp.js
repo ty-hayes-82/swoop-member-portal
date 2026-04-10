@@ -1,5 +1,5 @@
 // api/mcp.js — MCP server for Managed Agent POC
-// Exposes 10 tools over JSON-RPC (HTTP transport) for the Service Save Orchestrator.
+// Exposes 12 tools over JSON-RPC (HTTP transport) for the Service Save Orchestrator.
 // Auth: x-mcp-token header validated against MCP_AUTH_TOKEN env var.
 
 import { sql } from '@vercel/postgres';
@@ -173,6 +173,32 @@ const TOOL_DEFINITIONS = [
         channel: { type: 'string', enum: ['email', 'sms', 'note'], default: 'email' },
       },
       required: ['member_id', 'context'],
+    },
+  },
+  // --- Phase 2: Service Recovery tools ---
+  {
+    name: 'get_complaint_history',
+    description: "Pull a member's complaint history (last 12 months). Returns all feedback entries sorted by most recent.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        member_id: { type: 'string', description: 'Member ID' },
+        club_id: { type: 'string', description: 'Club ID' },
+      },
+      required: ['member_id', 'club_id'],
+    },
+  },
+  {
+    name: 'update_complaint_status',
+    description: 'Write a resolution status back to a complaint/feedback record. Sets resolved_at to now.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        feedback_id: { type: 'string', description: 'Feedback/complaint ID to update' },
+        status: { type: 'string', description: "New status (e.g., 'resolved', 'in_progress')" },
+        resolution_notes: { type: 'string', description: 'Notes describing the resolution' },
+      },
+      required: ['feedback_id', 'status'],
     },
   },
 ];
@@ -562,6 +588,41 @@ Rules:
   return { draft, channel: channel || 'email', tone: tone || 'warm' };
 }
 
+async function getComplaintHistory({ member_id, club_id }) {
+  const result = await sql`
+    SELECT feedback_id, category, status, sentiment_score, description,
+      submitted_at, resolved_at, resolution_notes
+    FROM feedback
+    WHERE member_id = ${member_id} AND club_id = ${club_id}
+      AND submitted_at > NOW() - INTERVAL '12 months'
+    ORDER BY submitted_at DESC
+  `;
+  return {
+    complaints: result.rows.map(r => ({
+      feedback_id: r.feedback_id,
+      category: r.category,
+      status: r.status,
+      sentiment_score: r.sentiment_score != null ? Number(r.sentiment_score) : null,
+      description: r.description,
+      submitted_at: r.submitted_at,
+      resolved_at: r.resolved_at,
+      resolution_notes: r.resolution_notes,
+    })),
+    count: result.rows.length,
+  };
+}
+
+async function updateComplaintStatus({ feedback_id, status, resolution_notes }) {
+  await sql`
+    UPDATE feedback
+    SET status = ${status},
+        resolved_at = NOW(),
+        resolution_notes = ${resolution_notes || null}
+    WHERE feedback_id = ${feedback_id}
+  `;
+  return { feedback_id, status, updated: true };
+}
+
 // ---------------------------------------------------------------------------
 // Tool dispatch
 // ---------------------------------------------------------------------------
@@ -577,6 +638,8 @@ const TOOL_HANDLERS = {
   draft_member_message: draftMemberMessage,
   get_member_list: getMemberList,
   record_agent_activity: recordAgentActivity,
+  get_complaint_history: getComplaintHistory,
+  update_complaint_status: updateComplaintStatus,
 };
 
 // ---------------------------------------------------------------------------
