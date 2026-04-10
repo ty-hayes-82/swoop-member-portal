@@ -648,7 +648,7 @@ export const agentActions = [
     actionType: 'personal_outreach',
     priority: 'high',
     source: 'AI Recommendation (Claude)',
-    memberId: 'mbr_t08',
+    memberId: 'mbr_312',
     memberName: 'Robert Mills',
     description: 'Two slow-play complaints (Dec 3 and Dec 18) both ignored — Robert is a 6-handicap who values pace. Apologize directly, offer a reserved TrackMan bay for his Saturday practice sessions.',
     talkingPoints: [

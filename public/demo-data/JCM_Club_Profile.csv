@@ -1,2 +1,2 @@
-Club Name,City,State,ZIP,Founded Year,Member Count,Course Count,Outlet Count
-Pinetree Country Club,Kennesaw,GA,30144,1962,300,2,5
+Club Name,City,State,ZIP,Founded Year,Member Count,Course Count,Outlet Count,Latitude,Longitude,Timezone
+Pinetree Country Club,Kennesaw,GA,30144,1962,300,2,5,34.0234,-84.6155,America/New_York

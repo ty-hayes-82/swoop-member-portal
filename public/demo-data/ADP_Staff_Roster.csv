@@ -1,46 +1,46 @@
-﻿Employee ID,First Name,Last Name,Dept,Job Title,Hire Date,Hourly Rate,FT/PT
-stf_001,Jennifer,Sharp,Golf Operations,Ranger,2023-12-04,43.12,1
-stf_002,Sabrina,Wright,Golf Operations,Head Golf Professional,2023-04-30,37.18,0
-stf_003,Renee,Hoffman,Golf Operations,Starter,2022-07-25,15.34,1
-stf_004,Robert,Williams,Golf Operations,Assistant Golf Pro,2020-03-31,46.01,1
-stf_005,Jamie,Thompson,Golf Operations,Cart Attendant,2022-10-18,34.94,1
-stf_006,Jack,Sanders,Golf Operations,Cart Attendant,2025-05-02,47.75,1
-stf_007,Darius,Figueroa,Golf Operations,Ranger,2024-08-26,36.4,0
-stf_008,Jonathan,Perez,Golf Operations,Assistant Golf Pro,2020-10-03,26.21,0
-stf_009,Cynthia,Morales,Golf Operations,Starter,2020-11-16,28.29,0
-stf_010,Lauren,Ramos,Golf Operations,Head Golf Professional,2019-03-17,45.8,1
-stf_011,Justin,Gaines,F&B Service,Busser,2018-09-15,19.01,0
-stf_012,Steven,Nelson,F&B Service,Bartender,2023-06-26,15.32,1
-stf_013,Steven,Lambert,F&B Service,Lead Server,2019-10-31,28.11,0
-stf_014,Raymond,Gonzalez,F&B Service,Server,2017-11-27,23.94,1
-stf_015,Alan,Chan,F&B Service,Server,2020-01-12,17.79,1
-stf_016,Melissa,Morrison,F&B Service,Busser,2021-03-09,28.3,1
-stf_017,George,Lee,F&B Service,Food & Beverage Manager,2024-05-18,31.85,0
-stf_018,Cindy,Carter,F&B Service,Busser,2022-03-10,29.32,1
-stf_019,Melissa,Russell,F&B Service,Lead Server,2020-04-24,27.23,0
-stf_020,Monica,Rodriguez,F&B Service,Lead Server,2021-02-26,23.55,1
-stf_021,Kathy,Garcia,F&B Service,Bartender,2024-10-03,21.04,0
-stf_022,Amy,Huynh,F&B Service,Bartender,2021-08-30,22.31,1
-stf_023,Rhonda,Mayer,F&B Service,Bartender,2025-10-09,31.01,1
-stf_024,Christina,Jimenez,F&B Service,Busser,2018-09-06,13.86,0
-stf_025,Sheena,Morton,F&B Kitchen,Line Cook,2021-05-04,57.21,0
-stf_026,Michelle,Miller,F&B Kitchen,Sous Chef,2020-04-02,63.34,0
-stf_027,Ethan,White,F&B Kitchen,Line Cook,2019-08-31,29.79,1
-stf_028,Eric,Espinoza,F&B Kitchen,Dishwasher,2021-12-12,19.79,0
-stf_029,Jessica,Hall,F&B Kitchen,Executive Chef,2020-08-24,15.39,1
-stf_030,Brandon,Neal,F&B Kitchen,Executive Chef,2020-11-07,19.46,0
-stf_031,Debra,Davis,F&B Kitchen,Prep Cook,2023-07-14,13.04,0
-stf_032,Jacob,Fields,F&B Kitchen,Sous Chef,2022-09-23,58.87,1
-stf_033,Savannah,Young,Grounds,Superintendent,2021-08-18,35.91,1
-stf_034,Elizabeth,Owens,Grounds,Assistant Super,2017-12-16,14.81,1
-stf_035,Michelle,Cunningham,Grounds,Assistant Super,2024-09-25,28.02,1
-stf_036,Melissa,Hoffman,Grounds,Superintendent,2019-02-22,20.47,1
-stf_037,Michael,Rodriguez,Grounds,Assistant Super,2025-09-16,31.18,1
-stf_038,Julie,Lopez,Grounds,Equipment Operator,2021-01-24,41.6,0
-stf_039,Charles,Vazquez,Grounds,Assistant Super,2024-10-19,29.72,1
-stf_040,Michael,King,Pro Shop,Merchandise Coordinator,2021-09-05,25.28,1
-stf_041,Patrick,Washington,Pro Shop,Pro Shop Associate,2024-04-22,15.92,0
-stf_042,Angela,Robinson,Pro Shop,Merchandise Coordinator,2019-11-08,27.9,1
-stf_043,Angela,Conley,Administration,General Manager,2021-11-11,62.72,1
-stf_044,Sheila,Wiggins,Administration,Membership Director,2021-03-08,63.97,1
-stf_045,Jacqueline,Edwards,Administration,Marketing Coordinator,2024-09-03,80.2,1
+Employee ID,First Name,Last Name,Dept,Job Title,Hire Date,Hourly Rate,FT/PT
+stf_001,Jennifer,Sharp,Golf Operations,Ranger,2023-12-04,15.00,0
+stf_002,Sabrina,Wright,Golf Operations,Head Golf Professional,2023-04-30,36.00,1
+stf_003,Renee,Hoffman,Golf Operations,Starter,2022-07-25,14.00,0
+stf_004,Robert,Williams,Golf Operations,Assistant Golf Pro,2020-03-31,22.00,1
+stf_005,Jamie,Thompson,Golf Operations,Cart Attendant,2022-10-18,13.00,0
+stf_006,Jack,Sanders,Golf Operations,Cart Attendant,2025-05-02,13.00,0
+stf_007,Darius,Figueroa,Golf Operations,Ranger,2024-08-26,15.00,0
+stf_008,Jonathan,Perez,Golf Operations,Assistant Golf Pro,2020-10-03,22.00,1
+stf_009,Cynthia,Morales,Golf Operations,Starter,2020-11-16,14.00,0
+stf_010,Lauren,Ramos,Golf Operations,Head Golf Professional,2019-03-17,36.00,1
+stf_011,Justin,Gaines,F&B Service,Busser,2018-09-15,13.00,0
+stf_012,Steven,Nelson,F&B Service,Bartender,2023-06-26,15.00,0
+stf_013,Steven,Lambert,F&B Service,Lead Server,2019-10-31,15.00,1
+stf_014,Raymond,Gonzalez,F&B Service,Server,2017-11-27,13.00,0
+stf_015,Alan,Chan,F&B Service,Server,2020-01-12,13.00,0
+stf_016,Melissa,Morrison,F&B Service,Busser,2021-03-09,13.00,0
+stf_017,George,Lee,F&B Service,Food & Beverage Manager,2024-05-18,28.00,1
+stf_018,Cindy,Carter,F&B Service,Busser,2022-03-10,13.00,0
+stf_019,Melissa,Russell,F&B Service,Lead Server,2020-04-24,15.00,1
+stf_020,Monica,Rodriguez,F&B Service,Lead Server,2021-02-26,15.00,1
+stf_021,Kathy,Garcia,F&B Service,Bartender,2024-10-03,15.00,0
+stf_022,Amy,Huynh,F&B Service,Bartender,2021-08-30,15.00,0
+stf_023,Rhonda,Mayer,F&B Service,Bartender,2025-10-09,15.00,0
+stf_024,Christina,Jimenez,F&B Service,Busser,2018-09-06,13.00,0
+stf_025,Sheena,Morton,F&B Kitchen,Line Cook,2021-05-04,18.00,0
+stf_026,Michelle,Miller,F&B Kitchen,Sous Chef,2020-04-02,30.00,1
+stf_027,Ethan,White,F&B Kitchen,Line Cook,2019-08-31,18.00,0
+stf_028,Eric,Espinoza,F&B Kitchen,Dishwasher,2021-12-12,15.00,0
+stf_029,Jessica,Hall,F&B Kitchen,Executive Chef,2020-08-24,42.00,1
+stf_030,Brandon,Neal,F&B Kitchen,Executive Chef,2020-11-07,42.00,1
+stf_031,Debra,Davis,F&B Kitchen,Prep Cook,2023-07-14,16.00,0
+stf_032,Jacob,Fields,F&B Kitchen,Sous Chef,2022-09-23,30.00,1
+stf_033,Savannah,Young,Grounds,Superintendent,2021-08-18,35.00,1
+stf_034,Elizabeth,Owens,Grounds,Assistant Super,2017-12-16,22.00,1
+stf_035,Michelle,Cunningham,Grounds,Assistant Super,2024-09-25,22.00,1
+stf_036,Melissa,Hoffman,Grounds,Superintendent,2019-02-22,35.00,1
+stf_037,Michael,Rodriguez,Grounds,Assistant Super,2025-09-16,22.00,0
+stf_038,Julie,Lopez,Grounds,Equipment Operator,2021-01-24,18.00,0
+stf_039,Charles,Vazquez,Grounds,Assistant Super,2024-10-19,22.00,0
+stf_040,Michael,King,Pro Shop,Merchandise Coordinator,2021-09-05,18.00,0
+stf_041,Patrick,Washington,Pro Shop,Pro Shop Associate,2024-04-22,14.00,0
+stf_042,Angela,Robinson,Pro Shop,Merchandise Coordinator,2019-11-08,18.00,1
+stf_043,Angela,Conley,Administration,General Manager,2021-11-11,58.00,1
+stf_044,Sheila,Wiggins,Administration,Membership Director,2021-03-08,38.00,1
+stf_045,Jacqueline,Edwards,Administration,Marketing Coordinator,2024-09-03,28.00,1

@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       VALUES
         ('mbr_101', 'Course - Hole 14', 'Back 9', NOW() - INTERVAL '2 hours', 'at-risk', 'golf'),
         ('mbr_205', 'Grill Room', 'Main Floor', NOW() - INTERVAL '35 minutes', 'at-risk', 'dining'),
-        ('mbr_188', 'Driving Range', 'Bay 4', NOW() - INTERVAL '45 minutes', 'at-risk', 'range'),
+        ('mbr_312', 'Driving Range', 'Bay 4', NOW() - INTERVAL '45 minutes', 'at-risk', 'range'),
         ('mbr_102', 'Course - Hole 7', 'Front 9', NOW() - INTERVAL '80 minutes', 'healthy', 'golf'),
         ('mbr_201', 'Grill Room', 'Patio', NOW() - INTERVAL '50 minutes', 'healthy', 'dining')
       ON CONFLICT (member_id) DO NOTHING`;
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
       VALUES
         ('mbr_101', 'James Whitfield', 'high', 'Course - Hole 14', 'At-risk member (score 42) finishing round. Has not dined in 6 weeks.', 'F&B manager greet at Grill Room with usual order when he finishes.', NOW() - INTERVAL '15 minutes'),
         ('mbr_205', 'Sandra Chen', 'high', 'Grill Room', 'Filed complaint last week about slow service. Currently dining.', 'GM should stop by table for personal recovery check-in.', NOW() - INTERVAL '10 minutes'),
-        ('mbr_188', 'Robert Mills', 'medium', 'Driving Range', 'First visit in 3 weeks. Positive re-engagement signal.', 'Pro shop should offer complimentary lesson.', NOW() - INTERVAL '25 minutes')`;
+        ('mbr_312', 'Robert Mills', 'medium', 'Driving Range', 'First visit in 3 weeks. Positive re-engagement signal.', 'Pro shop should offer complimentary lesson.', NOW() - INTERVAL '25 minutes')`;
 
     res.status(200).json({ success: true, seeded: { member_location_current: 5, staff_location_current: 5, service_recovery_alerts: 3 } });
   } catch (err) {

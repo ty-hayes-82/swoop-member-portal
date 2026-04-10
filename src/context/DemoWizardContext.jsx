@@ -62,10 +62,16 @@ export function DemoWizardProvider({ children }) {
             const cityIdx = headers.indexOf('City');
             const stateIdx = headers.indexOf('State');
             const nameIdx = headers.indexOf('Club Name');
+            const latIdx = headers.indexOf('Latitude');
+            const lngIdx = headers.indexOf('Longitude');
+            const tzIdx = headers.indexOf('Timezone');
             if (cityIdx >= 0 && values[cityIdx] && values[cityIdx] !== 'Unknown') {
               localStorage.setItem('swoop_club_city', values[cityIdx]);
               if (stateIdx >= 0) localStorage.setItem('swoop_club_state', values[stateIdx]);
               if (nameIdx >= 0) localStorage.setItem('swoop_club_name', values[nameIdx]);
+              if (latIdx >= 0 && values[latIdx]) localStorage.setItem('swoop_club_lat', values[latIdx]);
+              if (lngIdx >= 0 && values[lngIdx]) localStorage.setItem('swoop_club_lng', values[lngIdx]);
+              if (tzIdx >= 0 && values[tzIdx]) localStorage.setItem('swoop_club_tz', values[tzIdx]);
               refreshWeatherForLocation().then(() => {
                 setRenderKey(k => k + 1);
               });
