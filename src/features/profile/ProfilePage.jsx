@@ -6,11 +6,8 @@ import { useState, useEffect } from 'react';
 import { getGoogleStatus, getGoogleAuthUrl, disconnectGoogle, clearGoogleStatusCache } from '@/services/googleService';
 import SourceBadge from '@/components/ui/SourceBadge';
 
-// Role → feature access map. The "scope" column drives the new
-// "Your Role & Club Permissions" card (PRODUCT-FINALIZATION criterion 2 #3).
-// Read by getRolePermissions() below; mirrors how the navigation/router
-// gates each feature today, derived from inspection of the existing
-// feature components — keep in sync if a feature flips its access bar.
+// Role → feature access map. "scope" drives the Role & Club Permissions card.
+// Must stay in sync with the navigation/router feature gates.
 const ROLE_PERMISSIONS = {
   swoop_admin: {
     label: 'Swoop Admin',
@@ -207,10 +204,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Your Role & Club Permissions
-          (PRODUCT-FINALIZATION criterion 2 #3 — Pillar 1 See It: every operator
-          should be able to answer "what can I do in this product?" without
-          having to click around and discover gates by trial and error.) */}
+      {/* Your Role & Club Permissions */}
       <div className="mb-8 p-4 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
         <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Your Role & Club Permissions</h3>

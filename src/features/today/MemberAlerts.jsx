@@ -182,7 +182,6 @@ export default function MemberAlerts() {
             {shouldUseStatic('complaints') && <SourceBadge system="Complaint Log" size="xs" />}
           </div>
         </div>
-        {/* Phase I5 — bulk approve */}
         {members.length > 0 && (
           <button
             type="button"

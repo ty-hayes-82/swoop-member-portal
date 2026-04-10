@@ -307,7 +307,6 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
               key={step.domain}
               className="flex items-start"
               style={{
-                // Phase J4 — sequential reveal animation
                 animation: `mdcSlideIn 400ms ease-out ${i * 300}ms backwards`,
               }}
             >

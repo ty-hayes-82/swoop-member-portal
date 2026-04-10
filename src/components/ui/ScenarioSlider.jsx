@@ -73,7 +73,6 @@ export default function ScenarioSlider({
           <span>50%</span>
         </div>
 
-        {/* Phase J5 — preset buttons */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
           {[
             { label: 'Conservative', value: 10, color: '#9CA3AF' },

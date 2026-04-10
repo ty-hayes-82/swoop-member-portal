@@ -18,8 +18,6 @@ import SourceBadge from '@/components/ui/SourceBadge';
 import { getHealthRollup } from '@/services/apiHealthService';
 
 // Shared with DataHealthDashboard — keep in sync with DOMAIN_PILLAR_IMPACT there.
-// PRODUCT-FINALIZATION §11.6 lift #1: operator visibility into which single
-// missing domain unlocks the most value (See It pillar).
 const DOMAIN_VALUE_PCTS = { CRM: 40, TEE_SHEET: 25, POS: 20, EMAIL: 10, LABOR: 5 };
 const DOMAIN_UNLOCK_IMPACT = {
   CRM: {
@@ -184,7 +182,7 @@ function DataHubTab({ clubId }) {
         </p>
       </div>
 
-      {/* Next Intelligence Unlock — PRODUCT-FINALIZATION §11.6 lift #1 */}
+      {/* Next Intelligence Unlock */}
       {unlockImpact && (
         <Card>
           <div className="flex items-start justify-between gap-4 flex-wrap">

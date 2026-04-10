@@ -120,7 +120,6 @@ export default function ResignationTimeline() {
                   )}
                 </div>
 
-                {/* Phase H4 — search current members for this pattern */}
                 <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between flex-wrap gap-2">
                   <div className="text-[11px] text-gray-500 italic leading-snug">
                     This pattern may be repeating in current members.

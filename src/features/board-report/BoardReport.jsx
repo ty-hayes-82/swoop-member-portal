@@ -262,7 +262,6 @@ export default function BoardReport() {
       {/* Summary Tab — always rendered for print, hidden on screen when not active */}
       <div className={`br-tab-panel ${activeTab === 0 ? 'block' : 'hidden'}`}>
         <h2 className="br-tab-heading">Summary</h2>
-        {/* Phase J6 — auto-generated narrative paragraph */}
         <div className="rounded-2xl bg-gradient-to-br from-brand-500/[0.05] to-brand-500/[0.02] border border-brand-500/30 p-5 mb-4">
           <div className="text-[10px] font-bold uppercase tracking-widest text-brand-500 mb-2">
             ⬢ Auto-Generated Executive Narrative

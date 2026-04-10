@@ -355,7 +355,6 @@ export default function TodayView() {
               <div className="flex-1 min-w-0">
                 <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 2 }} title={stat.label === 'Pending Actions' ? 'Total actions awaiting your approval across all agents' : stat.label}>{stat.label}</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, letterSpacing: -0.3 }}>
-                  {/* Phase K1 — AnimatedNumber for numeric stats */}
                   {/^\d+$/.test(stat.value) ? <AnimatedNumber value={parseInt(stat.value, 10)} duration={800} /> : stat.value}
                 </div>
                 {stat.source && (
@@ -389,7 +388,6 @@ export default function TodayView() {
                 </div>
               ))}
             </div>
-            {/* Cross-domain footer — Phase G1 */}
             {shouldUseStatic('pace') && (
               <div className="text-[11px] text-gray-500 px-2 leading-snug italic">
                 Post-round dining is linked to pace of play —{' '}
@@ -428,7 +426,6 @@ export default function TodayView() {
                 </div>
               ))}
             </div>
-            {/* Cross-domain footer — Phase G2 */}
             <div className="text-[11px] text-gray-500 px-2 leading-snug italic">
               Email decay is the <span className="font-bold text-error-600">first domino</span>{' '}
               in member disengagement.{' '}
@@ -449,7 +446,6 @@ export default function TodayView() {
           const handleNotify = () => {
             const teeSheet = getTodayTeeSheet();
             const affected = teeSheet.length;
-            // Phase H3 — bulk notification
             trackAction({
               actionType: 'approve',
               actionSubtype: 'weather_notify',

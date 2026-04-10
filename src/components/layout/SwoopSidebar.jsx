@@ -175,13 +175,11 @@ const SwoopSidebar = () => {
                     {showFull && (
                       <span className="menu-item-text">{item.label}</span>
                     )}
-                    {/* Phase K6 — pending count badge for Today + Automations */}
                     {showFull && (item.key === 'today' || item.key === 'automations') && pendingAgentCount > 0 && (
                       <span className="ml-auto min-w-[20px] h-[18px] inline-flex items-center justify-center rounded-full bg-brand-500 text-white text-[10px] font-bold px-1.5">
                         {pendingAgentCount}
                       </span>
                     )}
-                    {/* Phase L9 — Data Health stale indicator on Admin nav */}
                     {showFull && item.key === 'admin' && (
                       <span
                         className="ml-auto inline-flex items-center justify-center w-2 h-2 rounded-full"

@@ -52,11 +52,8 @@ export default function DataHealthDashboard() {
   const features = data?.features || [];
   const nextDomain = data?.nextDomainToConnect;
 
-  // Phase L1 — what's blocking pillar features (per-domain → pillar feature impact)
-  // Dollar figures derive from revenueService.getLeakageData() (Pillar 3 Prove-It).
-  // PACE_LOSS wires through exactly; STAFFING_LOSS and TOTAL fall back to
-  // canonical demo literals ($3,400 / $9,580) where service values diverge slightly.
-  // TODO: reconcile revenueService demo constants with canonical punch-list values (criterion 4)
+  // Dollar figures come from revenueService.getLeakageData(); PACE_LOSS wires through exactly,
+  // STAFFING_LOSS / TOTAL fall back to canonical demo literals ($3,400 / $9,580) on divergence.
   const leakage = getLeakageData();
   const paceDollars = leakage?.PACE_LOSS
     ? `$${leakage.PACE_LOSS.toLocaleString()}/mo pace-to-dining attribution`
@@ -80,7 +77,6 @@ export default function DataHealthDashboard() {
         </p>
       </div>
 
-      {/* Phase L1 — What's Blocking Insights callout */}
       {hasBlocking && (
         <div className="p-5 rounded-2xl bg-gradient-to-br from-warning-500/[0.06] to-warning-500/[0.02] border border-warning-500/30">
           <div className="flex items-center gap-2 mb-3">

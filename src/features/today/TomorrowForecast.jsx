@@ -133,7 +133,6 @@ export default function TomorrowForecast() {
         </div>
       </div>
 
-      {/* Cross-domain Layer 3 callout — Phase G3 */}
       {(highDemand || gusts > 15 || precipProb > 40) && (
         <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
           <div className="text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-1">

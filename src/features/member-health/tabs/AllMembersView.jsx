@@ -284,7 +284,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
   const [healthFilter, setHealthFilter] = useState(null);
   const [archetypeFilter, setArchetypeFilter] = useState(initialArchetype);
   const [activityFilter, setActivityFilter] = useState(null);
-  const [symptomFilter, setSymptomFilter] = useState(null); // Phase G7
+  const [symptomFilter, setSymptomFilter] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Sync with parent archetype chip selection
@@ -326,7 +326,6 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
       });
     }
 
-    // Phase G7 — symptom-based filter
     if (symptomFilter) {
       filtered = filtered.filter(m => {
         const risk = (m.topRisk || '').toLowerCase();
@@ -501,7 +500,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
               );
             })}
           </div>
-          {/* Pillar 1: SEE IT — cross-domain decay legend (Phase E8 + G7 — chips now filter) */}
+          {/* Cross-domain decay legend — chips filter the grid. */}
           <div className="mt-3 p-2 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filter by Cross-Domain Decay Pattern</div>
             <div className="flex flex-wrap gap-2 text-[11px] text-gray-600 dark:text-gray-400">

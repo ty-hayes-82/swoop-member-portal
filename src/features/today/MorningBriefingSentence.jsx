@@ -121,7 +121,6 @@ export default function MorningBriefingSentence() {
 
   if (segments.length === 0) return null;
 
-  // Phase I2 — make the at-risk segment a clickable scroll target
   const hasAtRisk = segments.some(s => s.key === 'at-risk');
   const handleScrollToAlerts = () => {
     const el = document.getElementById('today-member-alerts')
@@ -129,8 +128,7 @@ export default function MorningBriefingSentence() {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Build the synthesized sentence as JSX so the at-risk segment can be
-  // a clickable scroll target to the Member Alerts section. Phase I2 (audit #5).
+  // JSX (not a plain string) so the at-risk segment can be a clickable scroll target to Member Alerts.
   const sentence = (
     <>
       {segments.map((s, i) => {
@@ -171,7 +169,6 @@ export default function MorningBriefingSentence() {
   return (
     // #today-briefing is the scroll target for DemoStoriesLauncher.handleStartStory — do not rename.
     <div id="today-briefing" data-story="briefing" className="fade-in-up">
-      {/* Phase J3 — Layer 3 tag */}
       {sources.length >= 3 && (
         <div className="flex items-center gap-2 mb-1 px-1">
           <span

@@ -124,7 +124,7 @@ function ActivityTimeline({ activity = [] }) {
 // DecayChainAction was extracted into ./MemberDecayChain.jsx — kept there
 // so drawer and MemberProfilePage share a single implementation.
 
-// RiskSignalRow — Phase H1: per-signal one-tap action
+// RiskSignalRow — per-signal one-tap action
 function RiskSignalRow({ signal, profile }) {
   const [addressed, setAddressed] = React.useState(false);
 

@@ -54,7 +54,6 @@ export default function ComplaintsTab() {
   const { fastConversionRate, slowConversionRate } = paceFB;
   const conversionDrop = ((fastConversionRate - slowConversionRate) / fastConversionRate * 100).toFixed(0);
 
-  // Phase G6 — Cross-domain context computation
   const understaffedDays = getUnderstaffedDays();
   const understaffedPct = feedbackRecords.length > 0
     ? Math.round((understaffedComplaints / feedbackRecords.length) * 100)
@@ -70,7 +69,6 @@ export default function ComplaintsTab() {
   return (
     <div className="flex flex-col gap-6">
 
-      {/* Cross-domain context callout — Phase G6 */}
       <div className="rounded-2xl p-5 bg-gradient-to-br from-purple-500/[0.05] to-purple-500/[0.02] border border-purple-500/30">
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <div className="text-[10px] font-bold text-purple-600 uppercase tracking-widest">
@@ -232,7 +230,6 @@ export default function ComplaintsTab() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            // Phase H5 — schedule resolution call inline
                             trackAction({
                               actionType: 'approve',
                               actionSubtype: 'schedule_resolution',
