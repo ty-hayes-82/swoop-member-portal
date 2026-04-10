@@ -184,7 +184,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   const complaints = getComplaintCorrelation().filter(c => c.status !== 'resolved');
   const cancelSummary  = getCancellationSummary();
   const waitlistSummary = getWaitlistSummary();
-  const pipelineData = _d?.cancellationProbabilities ?? staticCancellationProbabilities;
+  const pipelineData = _d?.cancellationProbabilities ?? (getDataMode() === 'demo' ? staticCancellationProbabilities : []);
   const hasPipelineData = isGateOpen('pipeline');
   const topCancellationRiskMembers = !hasPipelineData ? [] : [...pipelineData]
     .sort((a, b) => b.cancelProbability - a.cancelProbability)
