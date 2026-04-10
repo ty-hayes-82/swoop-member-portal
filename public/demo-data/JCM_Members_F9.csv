@@ -117,7 +117,7 @@ mbr_060,60,Adriana,Harris,adriana.harris@aol.com,(602) 555-8149,1990-09-26,F,SOC
 mbr_062,62,Yuki,Lindqvist,yuki.lindqvist@outlook.com,(520) 555-7216,1998-07-21,F,SOC,active,2016-06-28,,hh_031,6000,1082,6511600,1
 mbr_064,64,Deepa,Ivanov,deepa.ivanov@aol.com,(602) 555-6240,1951-06-17,F,FG,active,2017-11-12,,hh_032,18000,2384,,1
 mbr_068,68,Charlotte,Stone,charlotte.stone@gmail.com,(480) 555-1030,1948-02-18,F,FG,active,2018-09-25,,hh_034,18000,2763,,1
-mbr_t03,503,Kevin,Hurst,kevin.h@email.com,480-555-0103,1970-03-22,M,FG,resigned,2015-09-20,2026-01-08,,18000,0,,1
+mbr_t03,503,Kevin,Hurst,kevin.h@email.com,(480) 555-0103,1970-03-22,M,FG,resigned,2015-09-20,2026-01-08,,18000,0,,1
 mbr_072,72,Marcus,Quincy,marcus.quincy@gmail.com,(480) 555-4821,1965-10-10,F,FG,active,2018-07-21,,hh_036,18000,1865,5739400,1
 mbr_076,76,Genevieve,Kane,genevieve.kane@icloud.com,(520) 555-8712,1983-11-01,M,SOC,active,2019-01-16,,hh_038,6000,2245,3460600,1
 mbr_079,79,Tatiana,Tate,tatiana.tate@icloud.com,(520) 555-1136,1968-02-09,F,FG,active,2018-05-15,,hh_040,18000,223,8713900,0
@@ -134,7 +134,7 @@ mbr_105,105,Kenji,Dean,kenji.dean@gmail.com,(602) 555-2638,1983-11-01,F,FG,activ
 mbr_108,108,Kofi,Nye,kofi.nye@icloud.com,(602) 555-4161,1968-02-08,M,SPT,active,2020-01-16,,hh_054,12000,2727,,1
 mbr_112,112,Owen,Castillo,owen.castillo@icloud.com,(480) 555-7952,1965-10-10,M,FG,active,2021-11-02,,hh_056,18000,-395,,1
 mbr_295,295,Takeshi,Todd,takeshi.todd@outlook.com,(623) 555-7989,1960-11-13,F,FG,suspended,2019-05-15,,hh_148,18000,1559,,1
-mbr_t01,501,James,Whitfield,james.w@email.com,480-555-0101,1978-06-14,M,FG,active,2019-03-15,,hh_t01,18000,0,,1
+mbr_t01,501,James,Whitfield,james.w@email.com,(480) 555-0101,1978-06-14,M,FG,active,2019-03-15,,hh_t01,18000,0,,1
 mbr_116,116,Lamar,Dupont,lamar.dupont@outlook.com,(480) 555-2743,1982-07-01,M,FG,active,2022-09-25,,hh_058,18000,2209,9371800,1
 mbr_119,119,Eloise,Bailey,eloise.bailey@aol.com,(602) 555-4167,1967-02-09,F,FG,active,2021-09-24,,hh_060,18000,187,,1
 mbr_122,122,Giuseppe,Barnes,giuseppe.barnes@aol.com,(602) 555-5658,1952-05-16,M,FG,active,2023-08-05,,hh_061,18000,389,1878400,1
@@ -151,7 +151,7 @@ mbr_149,149,Mio,Coleman,mio.coleman@outlook.com,(602) 555-9559,2000-07-20,F,FG,a
 mbr_152,152,Liam,Tucker,liam.tucker@outlook.com,(602) 555-1950,1965-10-28,M,FG,active,2018-03-21,,hh_076,18000,-431,,1
 mbr_155,155,Dylan,Donovan,dylan.donovan@aol.com,(623) 555-3474,1950-01-17,M,SOC,active,2018-02-20,,hh_078,6000,-229,4815100,1
 mbr_159,159,Cedric,Xu,cedric.xu@gmail.com,(623) 555-7265,1967-10-09,M,JR,active,2018-01-15,,hh_080,8000,150,2536300,1
-mbr_t02,0,Pamela,Ulrich,pamela.u@email.com,480-555-0102,,,Full Golf,active,2017-06-01,,,18000,0,,1
+mbr_t02,0,Pamela,Ulrich,pamela.u@email.com,(480) 555-0102,,,FG,active,2017-06-01,,,18000,0,,1
 mbr_161,161,Laurent,Vega,laurent.vega@aol.com,(480) 555-6232,1976-12-04,M,SPT,active,2019-06-17,,hh_081,12000,1452,3038500,1
 mbr_164,164,Ivan,Falk,ivan.falk@yahoo.com,(602) 555-7756,1961-03-12,F,SOC,active,2018-05-26,,hh_082,6000,2931,,1
 mbr_166,166,Elisa,Rodriguez,elisa.rodriguez@gmail.com,(602) 555-3480,1970-02-08,F,JR,active,2018-10-09,,hh_083,8000,732,8794000,1
@@ -172,7 +172,7 @@ mbr_197,197,Ella,Johnson,ella.johnson@yahoo.com,(602) 555-2239,1958-12-13,M,SPT,
 mbr_200,200,Violet,Esposito,violet.esposito@yahoo.com,(623) 555-3663,1999-03-21,F,SOC,active,2023-03-11,,hh_100,6000,291,,0
 mbr_202,202,Tyrone,Becker,tyrone.becker@icloud.com,(480) 555-2730,1952-05-16,F,SPT,active,2020-08-23,,hh_101,12000,1593,,1
 mbr_296,296,Ryo,Ellis,ryo.ellis@icloud.com,(602) 555-1356,1992-04-24,M,SOC,suspended,2015-11-12,,hh_148,6000,459,,1
-mbr_t04,504,Anne,Jordan,anne.j@email.com,480-555-0104,1972-09-18,F,FG,active,2016-03-15,,hh_t04,14000,0,,1
+mbr_t04,504,Anne,Jordan,anne.j@email.com,(480) 555-0104,1972-09-18,F,FG,active,2016-03-15,,hh_t04,14000,0,,1
 mbr_206,206,Bjorn,Nash,bjorn.nash@icloud.com,(520) 555-6521,1969-02-08,F,SPT,active,2024-02-19,,hh_103,12000,1973,,0
 mbr_209,209,Giovanni,Xavier,giovanni.xavier@icloud.com,(520) 555-7912,1990-05-15,M,SPT,active,2024-06-17,,hh_105,12000,2175,7675300,1
 mbr_211,211,Min,Turner,min.turner@outlook.com,(602) 555-7069,1999-03-21,M,FG,active,2024-06-01,,hh_106,18000,1252,8177500,0
@@ -191,7 +191,7 @@ mbr_242,242,Claire,Kirk,claire.kirk@aol.com,(602) 555-5728,1952-01-16,M,LEG,acti
 mbr_244,244,Andre,Jett,andre.jett@gmail.com,(623) 555-1585,1961-11-12,M,SPT,active,2018-05-16,,hh_122,12000,635,,1
 mbr_246,246,Lonnie,Thornton,lonnie.thornton@aol.com,(480) 555-9519,1969-02-08,M,SOC,active,2019-10-28,,hh_123,6000,1936,,1
 mbr_248,248,Sven,Gutierrez,sven.gutierrez@aol.com,(623) 555-5376,1978-12-03,M,JR,active,2019-11-12,,hh_124,8000,-263,3118600,1
-mbr_t05,505,Robert,Callahan,robert.c@email.com,480-555-0105,1968-11-30,M,CORP,active,2015-02-10,,hh_t05,18000,0,,1
+mbr_t05,505,Robert,Callahan,robert.c@email.com,(480) 555-0105,1968-11-30,M,CORP,active,2015-02-10,,hh_t05,18000,0,,1
 mbr_005,5,Gary,Agarwal,gary.agarwal@aol.com,(602) 555-1254,1973-01-06,F,FG,active,2020-08-22,,hh_003,18000,700,4114900,1
 mbr_007,7,Alexander,Moreau,alexander.moreau@gmail.com,(480) 555-5978,1982-11-01,F,FG,active,2020-01-06,,hh_004,18000,-222,4617100,1
 mbr_250,250,Alexei,Reddy,alexei.reddy@gmail.com,(520) 555-4410,1987-10-27,M,FG,active,2016-04-23,,hh_125,18000,2316,3620800,1
@@ -304,92 +304,92 @@ mbr_287,287,Malik,Chambers,malik.chambers@icloud.com,(480) 555-6017,1946-02-20,F
 mbr_290,290,Simone,Osborne,simone.osborne@icloud.com,(480) 555-7441,1986-10-27,M,SOC,resigned,2019-08-04,2024-04-24,hh_145,6000,2279,,1
 mbr_293,293,Marina,Vernon,marina.vernon@icloud.com,(480) 555-8865,1971-01-07,F,SOC,suspended,2016-12-03,,hh_147,6000,2481,2502100,1
 mbr_298,298,Suresh,Drake,suresh.drake@outlook.com,(520) 555-6022,2001-03-20,F,FG,suspended,2015-04-13,,hh_149,18000,1761,8257600,1
-mbr_1774822789713_4,0,Edward,Anderson,edward.anderson@email.com,(905) 662-5567,,,Sports,active,2019-11-06,,,13020,0,,1
-mbr_1774822789719_5,0,Cynthia,Murphy,cynthia.murphy@email.com,(761) 260-3836,,,Junior,active,2022-01-08,,,5919,0,,1
-mbr_1774822789728_6,0,Ashley,Henderson,ashley.henderson@email.com,(896) 587-6487,,,Junior,active,2022-11-13,,,7248,0,,1
-mbr_1774822789734_7,0,Christopher,Anderson,christopher.anderson@email.com,(576) 242-2920,,,Social,active,2020-11-11,,,11426,0,,1
-mbr_1774822789750_8,0,Laura,Mitchell,laura.mitchell@email.com,(911) 508-2073,,,Full Golf,active,2020-02-27,,,20740,0,,1
-mbr_1774822789769_10,0,Brian,Cooper,brian.cooper@email.com,(537) 239-5181,,,Sports,active,2020-12-07,,,10462,0,,1
-mbr_1774822789774_11,0,George,Simmons,george.simmons@email.com,(711) 255-4411,,,Junior,active,2019-11-07,,,6438,0,,1
-mbr_1774822789668_0,0,Michael,Cooper,michael.cooper@email.com,(616) 837-8648,,,Social,active,2023-07-30,,,11361,0,,1
-mbr_1774822789689_1,0,Mark,Wells,mark.wells@email.com,(318) 956-9507,,,Sports,active,2021-03-02,,,10121,0,,1
-mbr_1774822789696_2,0,Lisa,Anderson,lisa.anderson@email.com,(749) 872-7965,,,Sports,active,2024-04-25,,,10124,0,,1
-mbr_1774822789707_3,0,Edward,Murphy,edward.murphy@email.com,(993) 309-2607,,,Full Golf,active,2020-09-03,,,24590,0,,1
-mbr_1774822789756_9,0,Sarah,Ward,sarah.ward@email.com,(923) 838-9815,,,Social,active,2024-10-30,,,11772,0,,1
-mbr_1774822789788_12,0,David,Mitchell,david.mitchell@email.com,(796) 680-6301,,,Non-Resident,active,2021-07-16,,,7777,0,,1
-mbr_1774822789793_13,0,Joseph,Simmons,joseph.simmons@email.com,(695) 885-7782,,,Full Golf,active,2021-02-02,,,18446,0,,1
-mbr_1774822789798_14,0,Carol,Whitfield,carol.whitfield@email.com,(700) 610-3925,,,Social,active,2025-09-12,,,8294,0,,1
-mbr_1774822789812_15,0,Betty,Anderson,betty.anderson@email.com,(692) 702-9478,,,Social,active,2024-07-06,,,11650,0,,1
-mbr_1774822789817_16,0,Betty,Morgan,betty.morgan@email.com,(872) 587-2916,,,Sports,active,2020-05-28,,,11556,0,,1
-mbr_1774822789828_17,0,Christopher,Wells,christopher.wells@email.com,(786) 558-8777,,,Full Golf,active,2023-02-12,,,17831,0,,1
-mbr_1774822789834_18,0,Elizabeth,Simmons,elizabeth.simmons@email.com,(673) 617-2214,,,Junior,active,2019-11-25,,,7817,0,,1
-mbr_1774822789848_19,0,Steven,Kim,steven.kim@email.com,(328) 298-5451,,,Junior,active,2019-12-17,,,5337,0,,1
-mbr_1774823550465_0,0,Sarah,Park,sarah.park@email.com,(492) 522-8204,,,Full Golf,active,2020-08-06,,,16216,0,,1
-mbr_1774823550488_1,0,Jennifer,Wells,jennifer.wells@email.com,(754) 978-5185,,,Non-Resident,active,2019-12-22,,,9972,0,,1
-mbr_1774823550495_2,0,George,Cooper,george.cooper@email.com,(836) 730-1100,,,Junior,active,2019-01-02,,,7529,0,,1
-mbr_1774823550502_3,0,Laura,Coleman,laura.coleman@email.com,(296) 972-4502,,,Full Golf,active,2020-03-05,,,20452,0,,1
-mbr_1774823550509_4,0,Linda,Reed,linda.reed@email.com,(451) 206-1304,,,Non-Resident,active,2019-11-30,,,8781,0,,1
-mbr_1774823550522_5,0,Karen,Kim,karen.kim@email.com,(491) 403-3178,,,Sports,active,2020-07-26,,,11119,0,,1
-mbr_1774823550529_6,0,Thomas,Anderson,thomas.anderson@email.com,(862) 849-7256,,,Social,active,2018-07-04,,,10909,0,,1
-mbr_1774823550542_7,0,Ruth,Santos,ruth.santos@email.com,(581) 724-1546,,,Sports,active,2022-05-29,,,13498,0,,1
-mbr_1774823550552_8,0,Jennifer,Torres,jennifer.torres@email.com,(887) 621-2264,,,Junior,active,2019-08-06,,,7057,0,,1
-mbr_1774823550558_9,0,Nancy,Santos,nancy.santos@email.com,(849) 473-5399,,,Full Golf,active,2021-03-18,,,15670,0,,1
-mbr_1774823550570_10,0,Timothy,Price,timothy.price@email.com,(856) 992-1192,,,Full Golf,active,2020-03-23,,,16215,0,,1
-mbr_1774823550576_11,0,Susan,Russell,susan.russell@email.com,(293) 806-2607,,,Junior,active,2021-06-01,,,5755,0,,1
-mbr_1774823550583_12,0,Dorothy,Henderson,dorothy.henderson@email.com,(415) 798-3273,,,Junior,active,2025-01-28,,,7584,0,,1
-mbr_1774823550588_13,0,Jennifer,Bailey,jennifer.bailey@email.com,(763) 628-6889,,,Junior,active,2019-06-08,,,6976,0,,1
-mbr_1774823550593_14,0,Edward,Henderson,edward.henderson@email.com,(985) 642-9211,,,Full Golf,active,2022-04-17,,,17626,0,,1
-mbr_1774823550603_15,0,Ruth,Henderson,ruth.henderson@email.com,(347) 751-1039,,,Junior,active,2023-01-30,,,6847,0,,1
-mbr_1774823550609_16,0,Donna,Ward,donna.ward@email.com,(878) 437-5099,,,Non-Resident,active,2023-03-08,,,7070,0,,1
-mbr_1774823550614_17,0,Mark,Ward,mark.ward@email.com,(255) 900-8042,,,Junior,active,2025-05-08,,,7004,0,,1
-mbr_1774823550618_18,0,Margaret,Fox,margaret.fox@email.com,(958) 718-5439,,,Social,active,2022-05-17,,,10659,0,,1
-mbr_1774823550623_19,0,Timothy,Crawford,timothy.crawford@email.com,(940) 601-9672,,,Social,active,2020-06-07,,,9621,0,,1
-mbr_1774823550628_20,0,Nancy,Brooks,nancy.brooks@email.com,(940) 323-9376,,,Junior,active,2022-09-29,,,5781,0,,1
-mbr_1774823550633_21,0,Robert,Crawford,robert.crawford@email.com,(844) 529-1536,,,Sports,active,2024-04-08,,,10735,0,,1
-mbr_1774823550637_22,0,George,Lane,george.lane@email.com,(846) 287-1671,,,Sports,active,2023-02-05,,,13341,0,,1
-mbr_1774823550642_23,0,Susan,Murphy,susan.murphy@email.com,(591) 253-7240,,,Full Golf,active,2020-09-18,,,21964,0,,1
-mbr_1774823550646_24,0,Mark,Park,mark.park@email.com,(961) 842-9778,,,Sports,active,2018-11-12,,,10933,0,,1
-mbr_1774823550651_25,0,Patricia,Bell,patricia.bell@email.com,(881) 930-3302,,,Full Golf,active,2019-11-11,,,21651,0,,1
-mbr_1774823550656_26,0,Matthew,Russell,matthew.russell@email.com,(249) 336-9527,,,Non-Resident,active,2024-04-13,,,6885,0,,1
-mbr_1774823550662_27,0,Sharon,Russell,sharon.russell@email.com,(959) 952-4318,,,Sports,active,2018-05-26,,,11642,0,,1
-mbr_1774823550666_28,0,Brian,Bell,brian.bell@email.com,(226) 684-9194,,,Junior,active,2021-06-03,,,6559,0,,1
-mbr_1774823550671_29,0,Sandra,Whitfield,sandra.whitfield@email.com,(533) 442-4569,,,Full Golf,active,2018-08-11,,,18356,0,,1
-mbr_1774823550676_30,0,Andrew,Henderson,andrew.henderson@email.com,(275) 629-6862,,,Non-Resident,active,2021-12-16,,,6646,0,,1
-mbr_1774823550681_31,0,Matthew,Crawford,matthew.crawford@email.com,(875) 856-2503,,,Sports,active,2021-12-31,,,12586,0,,1
-mbr_1774823550686_32,0,Steven,Fox,steven.fox@email.com,(705) 247-8534,,,Junior,active,2021-07-30,,,6819,0,,1
-mbr_1774823550691_33,0,Sarah,Simmons,sarah.simmons@email.com,(315) 273-4699,,,Full Golf,active,2024-01-24,,,24144,0,,1
-mbr_1774823550696_34,0,Timothy,Bell,timothy.bell@email.com,(225) 502-2150,,,Junior,active,2025-04-29,,,6047,0,,1
-mbr_1774823550701_35,0,Mark,Hart,mark.hart@email.com,(703) 649-7993,,,Social,active,2023-04-08,,,8369,0,,1
-mbr_1774823550705_36,0,Christopher,Murphy,christopher.murphy@email.com,(767) 457-7464,,,Sports,active,2023-01-22,,,17462,0,,1
-mbr_1774823550710_37,0,Linda,Lane,linda.lane@email.com,(417) 602-2090,,,Sports,active,2021-10-19,,,13728,0,,1
-mbr_1774823550715_38,0,James,Torres,james.torres@email.com,(894) 432-7926,,,Non-Resident,active,2023-05-19,,,7879,0,,1
-mbr_1774823550721_39,0,Sharon,Hart,sharon.hart@email.com,(702) 962-7685,,,Junior,active,2022-03-27,,,5771,0,,1
-mbr_1774823995329_1,0,Andrew,Wells,andrew.wells@email.com,(833) 714-7334,,,Full Golf,active,2021-04-24,,,20656,0,,1
-mbr_1774823995335_2,0,Carol,Crawford,carol.crawford@email.com,(306) 585-7742,,,Full Golf,active,2020-08-05,,,22469,0,,1
-mbr_1774823995315_0,0,Betty,Kim,betty.kim@email.com,(811) 983-1051,,,Sports,active,2024-10-09,,,17431,0,,1
-mbr_1774823995340_3,0,Laura,Crawford,laura.crawford@email.com,(545) 851-7380,,,Sports,active,2022-12-27,,,11054,0,,1
-mbr_1774823995346_4,0,Brian,Lane,brian.lane@email.com,(522) 997-4043,,,Sports,active,2024-07-17,,,12356,0,,1
-mbr_1774823995351_5,0,Thomas,Simmons,thomas.simmons@email.com,(943) 245-6605,,,Junior,active,2020-08-28,,,5015,0,,1
-mbr_1774823995356_6,0,Betty,Wells,betty.wells@email.com,(836) 976-8865,,,Full Golf,active,2022-08-22,,,18998,0,,1
-mbr_1774823995361_7,0,Laura,Bailey,laura.bailey@email.com,(877) 492-7025,,,Non-Resident,active,2021-01-24,,,8929,0,,1
-mbr_1774823995372_8,0,Kevin,Brooks,kevin.brooks@email.com,(564) 231-1294,,,Full Golf,active,2022-10-17,,,16001,0,,1
-mbr_1774823995378_9,0,William,Cooper,william.cooper@email.com,(601) 640-3312,,,Junior,active,2018-06-26,,,5442,0,,1
-mbr_1774823995383_10,0,Daniel,Stone,daniel.stone@email.com,(383) 900-6907,,,Sports,active,2021-11-05,,,11470,0,,1
-mbr_1774823995388_11,0,Lisa,Richardson,lisa.richardson@email.com,(718) 818-5977,,,Non-Resident,active,2019-06-08,,,6669,0,,1
-mbr_1774823995392_12,0,Linda,Lane,linda.lane@email.com,(222) 450-6893,,,Non-Resident,active,2023-04-02,,,7909,0,,1
-mbr_1774823995396_13,0,Richard,Hart,richard.hart@email.com,(692) 249-5569,,,Sports,active,2024-10-31,,,14915,0,,1
-mbr_1774823995407_14,0,David,Reed,david.reed@email.com,(998) 219-1025,,,Sports,active,2020-05-20,,,12783,0,,1
-mbr_1774823995412_15,0,Steven,Murphy,steven.murphy@email.com,(871) 495-2539,,,Sports,active,2023-03-07,,,10198,0,,1
-mbr_1774823995416_16,0,Nancy,Ward,nancy.ward@email.com,(397) 605-9300,,,Sports,active,2020-10-19,,,16716,0,,1
-mbr_1774823995421_17,0,Susan,Richardson,susan.richardson@email.com,(246) 291-4808,,,Sports,active,2021-04-25,,,15027,0,,1
-mbr_1774823995427_18,0,Kevin,Henderson,kevin.henderson@email.com,(579) 596-3297,,,Non-Resident,active,2020-09-10,,,8430,0,,1
-mbr_1774823995432_19,0,Sarah,Lane,sarah.lane@email.com,(471) 983-6151,,,Full Golf,active,2023-04-17,,,18663,0,,1
-mbr_1774823995437_20,0,Betty,Richardson,betty.richardson@email.com,(369) 896-4538,,,Sports,active,2020-06-08,,,14542,0,,1
-mbr_1774823995441_21,0,Kevin,Anderson,kevin.anderson@email.com,(216) 574-3413,,,Sports,active,2021-09-01,,,12820,0,,1
-mbr_1774823995447_22,0,Linda,Liu,linda.liu@email.com,(507) 990-3398,,,Full Golf,active,2020-02-14,,,20327,0,,1
-mbr_1774823995452_23,0,Robert,Ward,robert.ward@email.com,(304) 276-6524,,,Non-Resident,active,2025-09-01,,,7831,0,,1
-mbr_1774823995456_24,0,Lisa,Brooks,lisa.brooks@email.com,(627) 479-6456,,,Sports,active,2021-06-21,,,14777,0,,1
-mbr_t06,506,Sandra,Chen,sandra.c@email.com,480-555-0106,1985-04-10,F,SOC,active,2021-06-15,,hh_t06,9000,0,,1
-mbr_t07,507,Linda,Leonard,linda.l@email.com,480-555-0107,1974-08-22,F,FG,resigned,2019-05-20,2026-01-15,hh_t07,18000,0,,1
-mbr_t07b,508,Richard,Leonard,richard.l@email.com,480-555-0108,1972-01-15,M,FG,active,2019-05-20,,hh_t07,18000,0,,1
-mbr_t08,509,Robert,Mills,robert.m@email.com,480-555-0109,1962-07-30,M,FG,active,2014-06-10,,hh_t08,18000,0,,1
+mbr_1774822789713_4,0,Edward,Anderson,edward.anderson@email.com,(905) 662-5567,,,SPT,active,2019-11-06,,,13020,0,,1
+mbr_1774822789719_5,0,Cynthia,Murphy,cynthia.murphy@email.com,(761) 260-3836,,,JR,active,2022-01-08,,,5919,0,,1
+mbr_1774822789728_6,0,Ashley,Henderson,ashley.henderson@email.com,(896) 587-6487,,,JR,active,2022-11-13,,,7248,0,,1
+mbr_1774822789734_7,0,Christopher,Anderson,christopher.anderson@email.com,(576) 242-2920,,,SOC,active,2020-11-11,,,11426,0,,1
+mbr_1774822789750_8,0,Laura,Mitchell,laura.mitchell@email.com,(911) 508-2073,,,FG,active,2020-02-27,,,20740,0,,1
+mbr_1774822789769_10,0,Brian,Cooper,brian.cooper@email.com,(537) 239-5181,,,SPT,active,2020-12-07,,,10462,0,,1
+mbr_1774822789774_11,0,George,Simmons,george.simmons@email.com,(711) 255-4411,,,JR,active,2019-11-07,,,6438,0,,1
+mbr_1774822789668_0,0,Michael,Cooper,michael.cooper@email.com,(616) 837-8648,,,SOC,active,2023-07-30,,,11361,0,,1
+mbr_1774822789689_1,0,Mark,Wells,mark.wells@email.com,(318) 956-9507,,,SPT,active,2021-03-02,,,10121,0,,1
+mbr_1774822789696_2,0,Lisa,Anderson,lisa.anderson@email.com,(749) 872-7965,,,SPT,active,2024-04-25,,,10124,0,,1
+mbr_1774822789707_3,0,Edward,Murphy,edward.murphy@email.com,(993) 309-2607,,,FG,active,2020-09-03,,,24590,0,,1
+mbr_1774822789756_9,0,Sarah,Ward,sarah.ward@email.com,(923) 838-9815,,,SOC,active,2024-10-30,,,11772,0,,1
+mbr_1774822789788_12,0,David,Mitchell,david.mitchell@email.com,(796) 680-6301,,,NR,active,2021-07-16,,,7777,0,,1
+mbr_1774822789793_13,0,Joseph,Simmons,joseph.simmons@email.com,(695) 885-7782,,,FG,active,2021-02-02,,,18446,0,,1
+mbr_1774822789798_14,0,Carol,Whitfield,carol.whitfield@email.com,(700) 610-3925,,,SOC,active,2025-09-12,,,8294,0,,1
+mbr_1774822789812_15,0,Betty,Anderson,betty.anderson@email.com,(692) 702-9478,,,SOC,active,2024-07-06,,,11650,0,,1
+mbr_1774822789817_16,0,Betty,Morgan,betty.morgan@email.com,(872) 587-2916,,,SPT,active,2020-05-28,,,11556,0,,1
+mbr_1774822789828_17,0,Christopher,Wells,christopher.wells@email.com,(786) 558-8777,,,FG,active,2023-02-12,,,17831,0,,1
+mbr_1774822789834_18,0,Elizabeth,Simmons,elizabeth.simmons@email.com,(673) 617-2214,,,JR,active,2019-11-25,,,7817,0,,1
+mbr_1774822789848_19,0,Steven,Kim,steven.kim@email.com,(328) 298-5451,,,JR,active,2019-12-17,,,5337,0,,1
+mbr_1774823550465_0,0,Sarah,Park,sarah.park@email.com,(492) 522-8204,,,FG,active,2020-08-06,,,16216,0,,1
+mbr_1774823550488_1,0,Jennifer,Wells,jennifer.wells@email.com,(754) 978-5185,,,NR,active,2019-12-22,,,9972,0,,1
+mbr_1774823550495_2,0,George,Cooper,george.cooper@email.com,(836) 730-1100,,,JR,active,2019-01-02,,,7529,0,,1
+mbr_1774823550502_3,0,Laura,Coleman,laura.coleman@email.com,(296) 972-4502,,,FG,active,2020-03-05,,,20452,0,,1
+mbr_1774823550509_4,0,Linda,Reed,linda.reed@email.com,(451) 206-1304,,,NR,active,2019-11-30,,,8781,0,,1
+mbr_1774823550522_5,0,Karen,Kim,karen.kim@email.com,(491) 403-3178,,,SPT,active,2020-07-26,,,11119,0,,1
+mbr_1774823550529_6,0,Thomas,Anderson,thomas.anderson@email.com,(862) 849-7256,,,SOC,active,2018-07-04,,,10909,0,,1
+mbr_1774823550542_7,0,Ruth,Santos,ruth.santos@email.com,(581) 724-1546,,,SPT,active,2022-05-29,,,13498,0,,1
+mbr_1774823550552_8,0,Jennifer,Torres,jennifer.torres@email.com,(887) 621-2264,,,JR,active,2019-08-06,,,7057,0,,1
+mbr_1774823550558_9,0,Nancy,Santos,nancy.santos@email.com,(849) 473-5399,,,FG,active,2021-03-18,,,15670,0,,1
+mbr_1774823550570_10,0,Timothy,Price,timothy.price@email.com,(856) 992-1192,,,FG,active,2020-03-23,,,16215,0,,1
+mbr_1774823550576_11,0,Susan,Russell,susan.russell@email.com,(293) 806-2607,,,JR,active,2021-06-01,,,5755,0,,1
+mbr_1774823550583_12,0,Dorothy,Henderson,dorothy.henderson@email.com,(415) 798-3273,,,JR,active,2025-01-28,,,7584,0,,1
+mbr_1774823550588_13,0,Jennifer,Bailey,jennifer.bailey@email.com,(763) 628-6889,,,JR,active,2019-06-08,,,6976,0,,1
+mbr_1774823550593_14,0,Edward,Henderson,edward.henderson@email.com,(985) 642-9211,,,FG,active,2022-04-17,,,17626,0,,1
+mbr_1774823550603_15,0,Ruth,Henderson,ruth.henderson@email.com,(347) 751-1039,,,JR,active,2023-01-30,,,6847,0,,1
+mbr_1774823550609_16,0,Donna,Ward,donna.ward@email.com,(878) 437-5099,,,NR,active,2023-03-08,,,7070,0,,1
+mbr_1774823550614_17,0,Mark,Ward,mark.ward@email.com,(255) 900-8042,,,JR,active,2025-05-08,,,7004,0,,1
+mbr_1774823550618_18,0,Margaret,Fox,margaret.fox@email.com,(958) 718-5439,,,SOC,active,2022-05-17,,,10659,0,,1
+mbr_1774823550623_19,0,Timothy,Crawford,timothy.crawford@email.com,(940) 601-9672,,,SOC,active,2020-06-07,,,9621,0,,1
+mbr_1774823550628_20,0,Nancy,Brooks,nancy.brooks@email.com,(940) 323-9376,,,JR,active,2022-09-29,,,5781,0,,1
+mbr_1774823550633_21,0,Robert,Crawford,robert.crawford@email.com,(844) 529-1536,,,SPT,active,2024-04-08,,,10735,0,,1
+mbr_1774823550637_22,0,George,Lane,george.lane@email.com,(846) 287-1671,,,SPT,active,2023-02-05,,,13341,0,,1
+mbr_1774823550642_23,0,Susan,Murphy,susan.murphy@email.com,(591) 253-7240,,,FG,active,2020-09-18,,,21964,0,,1
+mbr_1774823550646_24,0,Mark,Park,mark.park@email.com,(961) 842-9778,,,SPT,active,2018-11-12,,,10933,0,,1
+mbr_1774823550651_25,0,Patricia,Bell,patricia.bell@email.com,(881) 930-3302,,,FG,active,2019-11-11,,,21651,0,,1
+mbr_1774823550656_26,0,Matthew,Russell,matthew.russell@email.com,(249) 336-9527,,,NR,active,2024-04-13,,,6885,0,,1
+mbr_1774823550662_27,0,Sharon,Russell,sharon.russell@email.com,(959) 952-4318,,,SPT,active,2018-05-26,,,11642,0,,1
+mbr_1774823550666_28,0,Brian,Bell,brian.bell@email.com,(226) 684-9194,,,JR,active,2021-06-03,,,6559,0,,1
+mbr_1774823550671_29,0,Sandra,Whitfield,sandra.whitfield@email.com,(533) 442-4569,,,FG,active,2018-08-11,,,18356,0,,1
+mbr_1774823550676_30,0,Andrew,Henderson,andrew.henderson@email.com,(275) 629-6862,,,NR,active,2021-12-16,,,6646,0,,1
+mbr_1774823550681_31,0,Matthew,Crawford,matthew.crawford@email.com,(875) 856-2503,,,SPT,active,2021-12-31,,,12586,0,,1
+mbr_1774823550686_32,0,Steven,Fox,steven.fox@email.com,(705) 247-8534,,,JR,active,2021-07-30,,,6819,0,,1
+mbr_1774823550691_33,0,Sarah,Simmons,sarah.simmons@email.com,(315) 273-4699,,,FG,active,2024-01-24,,,24144,0,,1
+mbr_1774823550696_34,0,Timothy,Bell,timothy.bell@email.com,(225) 502-2150,,,JR,active,2025-04-29,,,6047,0,,1
+mbr_1774823550701_35,0,Mark,Hart,mark.hart@email.com,(703) 649-7993,,,SOC,active,2023-04-08,,,8369,0,,1
+mbr_1774823550705_36,0,Christopher,Murphy,christopher.murphy@email.com,(767) 457-7464,,,SPT,active,2023-01-22,,,17462,0,,1
+mbr_1774823550710_37,0,Linda,Lane,linda.lane@email.com,(417) 602-2090,,,SPT,active,2021-10-19,,,13728,0,,1
+mbr_1774823550715_38,0,James,Torres,james.torres@email.com,(894) 432-7926,,,NR,active,2023-05-19,,,7879,0,,1
+mbr_1774823550721_39,0,Sharon,Hart,sharon.hart@email.com,(702) 962-7685,,,JR,active,2022-03-27,,,5771,0,,1
+mbr_1774823995329_1,0,Andrew,Wells,andrew.wells@email.com,(833) 714-7334,,,FG,active,2021-04-24,,,20656,0,,1
+mbr_1774823995335_2,0,Carol,Crawford,carol.crawford@email.com,(306) 585-7742,,,FG,active,2020-08-05,,,22469,0,,1
+mbr_1774823995315_0,0,Betty,Kim,betty.kim@email.com,(811) 983-1051,,,SPT,active,2024-10-09,,,17431,0,,1
+mbr_1774823995340_3,0,Laura,Crawford,laura.crawford@email.com,(545) 851-7380,,,SPT,active,2022-12-27,,,11054,0,,1
+mbr_1774823995346_4,0,Brian,Lane,brian.lane@email.com,(522) 997-4043,,,SPT,active,2024-07-17,,,12356,0,,1
+mbr_1774823995351_5,0,Thomas,Simmons,thomas.simmons@email.com,(943) 245-6605,,,JR,active,2020-08-28,,,5015,0,,1
+mbr_1774823995356_6,0,Betty,Wells,betty.wells@email.com,(836) 976-8865,,,FG,active,2022-08-22,,,18998,0,,1
+mbr_1774823995361_7,0,Laura,Bailey,laura.bailey@email.com,(877) 492-7025,,,NR,active,2021-01-24,,,8929,0,,1
+mbr_1774823995372_8,0,Kevin,Brooks,kevin.brooks@email.com,(564) 231-1294,,,FG,active,2022-10-17,,,16001,0,,1
+mbr_1774823995378_9,0,William,Cooper,william.cooper@email.com,(601) 640-3312,,,JR,active,2018-06-26,,,5442,0,,1
+mbr_1774823995383_10,0,Daniel,Stone,daniel.stone@email.com,(383) 900-6907,,,SPT,active,2021-11-05,,,11470,0,,1
+mbr_1774823995388_11,0,Lisa,Richardson,lisa.richardson@email.com,(718) 818-5977,,,NR,active,2019-06-08,,,6669,0,,1
+mbr_1774823995392_12,0,Linda,Lane,linda.lane@email.com,(222) 450-6893,,,NR,active,2023-04-02,,,7909,0,,1
+mbr_1774823995396_13,0,Richard,Hart,richard.hart@email.com,(692) 249-5569,,,SPT,active,2024-10-31,,,14915,0,,1
+mbr_1774823995407_14,0,David,Reed,david.reed@email.com,(998) 219-1025,,,SPT,active,2020-05-20,,,12783,0,,1
+mbr_1774823995412_15,0,Steven,Murphy,steven.murphy@email.com,(871) 495-2539,,,SPT,active,2023-03-07,,,10198,0,,1
+mbr_1774823995416_16,0,Nancy,Ward,nancy.ward@email.com,(397) 605-9300,,,SPT,active,2020-10-19,,,16716,0,,1
+mbr_1774823995421_17,0,Susan,Richardson,susan.richardson@email.com,(246) 291-4808,,,SPT,active,2021-04-25,,,15027,0,,1
+mbr_1774823995427_18,0,Kevin,Henderson,kevin.henderson@email.com,(579) 596-3297,,,NR,active,2020-09-10,,,8430,0,,1
+mbr_1774823995432_19,0,Sarah,Lane,sarah.lane@email.com,(471) 983-6151,,,FG,active,2023-04-17,,,18663,0,,1
+mbr_1774823995437_20,0,Betty,Richardson,betty.richardson@email.com,(369) 896-4538,,,SPT,active,2020-06-08,,,14542,0,,1
+mbr_1774823995441_21,0,Kevin,Anderson,kevin.anderson@email.com,(216) 574-3413,,,SPT,active,2021-09-01,,,12820,0,,1
+mbr_1774823995447_22,0,Linda,Liu,linda.liu@email.com,(507) 990-3398,,,FG,active,2020-02-14,,,20327,0,,1
+mbr_1774823995452_23,0,Robert,Ward,robert.ward@email.com,(304) 276-6524,,,NR,active,2025-09-01,,,7831,0,,1
+mbr_1774823995456_24,0,Lisa,Brooks,lisa.brooks@email.com,(627) 479-6456,,,SPT,active,2021-06-21,,,14777,0,,1
+mbr_t06,506,Sandra,Chen,sandra.c@email.com,(480) 555-0106,1985-04-10,F,SOC,active,2021-06-15,,hh_t06,9000,0,,1
+mbr_t07,507,Linda,Leonard,linda.l@email.com,(480) 555-0107,1974-08-22,F,FG,resigned,2019-05-20,2026-01-15,hh_t07,18000,0,,1
+mbr_t07b,508,Richard,Leonard,richard.l@email.com,(480) 555-0108,1972-01-15,M,FG,active,2019-05-20,,hh_t07,18000,0,,1
+mbr_t08,509,Robert,Mills,robert.m@email.com,(480) 555-0109,1962-07-30,M,FG,active,2014-06-10,,hh_t08,18000,0,,1
