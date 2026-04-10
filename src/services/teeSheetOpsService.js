@@ -3,7 +3,7 @@
 // Pattern: in-memory mutable store (same as agentService.js)
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { shouldUseStatic, getDataMode } from './demoGate';
 import {
   confirmationSeeds,
   reassignmentSeeds,
@@ -16,7 +16,14 @@ import { revenuePerSlot } from '@/data/revenue';
 
 let _d = null;
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('teeSheetOpsService', { mergeData: _mergeData, resetData: _resetData });
+
 export const _init = async () => {
+  if (getDataMode() === 'guided') return; // guided mode — _mergeData populates _d
   try {
     const data = await apiFetch('/api/tee-sheet-ops');
     if (!data) return;
@@ -41,7 +48,8 @@ let steeringData = { ...demandSteeringSeeds };
 // ── Confirmations ──────────────────────────────────────────────
 
 export function getConfirmations() {
-  if (!shouldUseStatic('tee-sheet') && !_d) return [];
+  if (_d?.confirmations) return [..._d.confirmations].sort((a, b) => b.cancelProbability - a.cancelProbability);
+  if (!shouldUseStatic('tee-sheet')) return [];
   return [...confirmationStore].sort((a, b) => b.cancelProbability - a.cancelProbability);
 }
 
@@ -80,7 +88,13 @@ export function getConfirmationSummary() {
 // ── Re-Assignment Pipeline ─────────────────────────────────────
 
 export function getReassignments() {
-  if (!shouldUseStatic('tee-sheet') && !_d) return [];
+  if (_d?.reassignments) {
+    return [..._d.reassignments].sort((a, b) => {
+      const statusOrder = { pending: 0, approved: 1, completed: 2, overridden: 3, skipped: 4 };
+      return (statusOrder[a.status] ?? 5) - (statusOrder[b.status] ?? 5);
+    });
+  }
+  if (!shouldUseStatic('tee-sheet')) return [];
   return [...reassignmentStore].sort((a, b) => {
     const statusOrder = { pending: 0, approved: 1, completed: 2, overridden: 3, skipped: 4 };
     return (statusOrder[a.status] ?? 5) - (statusOrder[b.status] ?? 5);
@@ -169,16 +183,19 @@ export function updateWaitlistConfig(updates) {
 // ── Historical & Steering Data ─────────────────────────────────
 
 export function getHistoricalPatterns() {
+  if (_d?.historicalPatterns) return _d.historicalPatterns;
   if (!shouldUseStatic('tee-sheet')) return [];
   return historicalPatterns;
 }
 
 export function getWeeklyQueuePressure() {
+  if (_d?.weeklyQueuePressure) return _d.weeklyQueuePressure;
   if (!shouldUseStatic('tee-sheet')) return [];
   return weeklyQueuePressure;
 }
 
 export function getDemandSteeringStats() {
+  if (_d?.demandSteeringStats) return { ...(_d.demandSteeringStats) };
   if (!shouldUseStatic('tee-sheet')) return { redirectionsSent: 0, acceptanceRate: 0, revenueSaved: 0, avgResponseTime: 0 };
   return { ...steeringData };
 }

@@ -2,7 +2,7 @@
 // Phase 2 swap: DataProvider calls _init() before render. All exports stay synchronous.
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { shouldUseStatic, getDataMode } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { dailyRevenue } from '@/data/revenue';
 import { paceDistribution, slowRoundStats, bottleneckHoles, paceFBImpact } from '@/data/pace';
@@ -73,6 +73,12 @@ import { todayTeeSheet, teeSheetSummary } from '@/data/teeSheet';
  */
 
 let _d = null; // hydrated by _init()
+
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('operationsService', { mergeData: _mergeData, resetData: _resetData });
 const DEFAULT_PACE_DISTRIBUTION = [
   { bucket: '< 3:45', minutes: 225, count: 142, isSlow: false },
   { bucket: '3:45-4:00', minutes: 240, count: 318, isSlow: false },
@@ -115,6 +121,7 @@ const sanitizePositive = (value, fallback = 0) => Math.max(0, toNumber(value, fa
 const toBucket = (value, fallback) => (typeof value === 'string' && value.trim() ? value.trim() : fallback);
 
 export const _init = async () => {
+  if (getDataMode() === 'guided') return; // guided mode — _mergeData populates _d
   try {
     const data = await apiFetch('/api/operations');
     if (data) _d = data;
@@ -123,14 +130,14 @@ export const _init = async () => {
 
 /** @returns {DailyRevenueRow[]} */
 export const getRevenueByDay = () => {
-  if (_d) return _d.revenueByDay;
+  if (_d?.revenueByDay) return _d.revenueByDay;
   if (!shouldUseStatic('fb')) return [];
   return dailyRevenue;
 };
 
 /** @returns {MonthlyRevenueSummary} */
 export const getMonthlyRevenueSummary = () => {
-  if (_d) return _d.monthlySummary;
+  if (_d?.monthlySummary) return _d.monthlySummary;
   const fbOpen = shouldUseStatic('fb');
   const teeOpen = shouldUseStatic('tee-sheet');
   if (!fbOpen && !teeOpen) return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
@@ -144,9 +151,21 @@ export const getMonthlyRevenueSummary = () => {
 const EMPTY_SLOW_ROUND = { totalRounds: 0, slowRounds: 0, overallRate: 0, weekendRate: 0, weekdayRate: 0, threshold: 270 };
 /** @returns {SlowRoundStats} */
 export const getSlowRoundRate = () => {
-  if (_d?.slowRoundStats) { /* use API data */ }
-  else if (!shouldUseStatic('pace')) return EMPTY_SLOW_ROUND;
-  const source = (_d?.slowRoundStats ?? slowRoundStats ?? DEFAULT_SLOW_ROUND_STATS);
+  if (_d?.slowRoundStats) {
+    const source = _d.slowRoundStats;
+    const totalRounds = Math.round(sanitizePositive(source?.totalRounds, DEFAULT_SLOW_ROUND_STATS.totalRounds));
+    const slowRounds = Math.round(sanitizePositive(source?.slowRounds, DEFAULT_SLOW_ROUND_STATS.slowRounds));
+    return {
+      totalRounds,
+      slowRounds: Math.min(totalRounds || slowRounds, slowRounds),
+      overallRate: sanitizeRate(source?.overallRate, DEFAULT_SLOW_ROUND_STATS.overallRate),
+      weekendRate: sanitizeRate(source?.weekendRate, DEFAULT_SLOW_ROUND_STATS.weekendRate),
+      weekdayRate: sanitizeRate(source?.weekdayRate, DEFAULT_SLOW_ROUND_STATS.weekdayRate),
+      threshold: sanitizePositive(source?.threshold, DEFAULT_SLOW_ROUND_STATS.threshold),
+    };
+  }
+  if (!shouldUseStatic('pace')) return EMPTY_SLOW_ROUND;
+  const source = (slowRoundStats ?? DEFAULT_SLOW_ROUND_STATS);
   const totalRounds = Math.round(sanitizePositive(source?.totalRounds, DEFAULT_SLOW_ROUND_STATS.totalRounds));
   const slowRounds = Math.round(sanitizePositive(source?.slowRounds, DEFAULT_SLOW_ROUND_STATS.slowRounds));
   return {
@@ -161,9 +180,21 @@ export const getSlowRoundRate = () => {
 
 /** @returns {BottleneckHole[]} */
 export const getBottleneckHoles = () => {
-  if (_d?.bottleneckHoles) { /* use API data */ }
-  else if (!shouldUseStatic('pace')) return [];
-  const source = (_d?.bottleneckHoles ?? bottleneckHoles ?? DEFAULT_BOTTLENECK_HOLES);
+  if (_d?.bottleneckHoles) {
+    const source = _d.bottleneckHoles;
+    if (!Array.isArray(source) || source.length === 0) return DEFAULT_BOTTLENECK_HOLES;
+    return source.map((item, index) => {
+      const fallback = DEFAULT_BOTTLENECK_HOLES[index] ?? DEFAULT_BOTTLENECK_HOLES[DEFAULT_BOTTLENECK_HOLES.length - 1];
+      return {
+        hole: Math.max(1, Math.round(sanitizePositive(item?.hole, fallback.hole))),
+        course: toBucket(item?.course, fallback.course),
+        avgDelay: sanitizePositive(item?.avgDelay, fallback.avgDelay),
+        roundsAffected: Math.round(sanitizePositive(item?.roundsAffected, fallback.roundsAffected)),
+      };
+    });
+  }
+  if (!shouldUseStatic('pace')) return [];
+  const source = (bottleneckHoles ?? DEFAULT_BOTTLENECK_HOLES);
   if (!Array.isArray(source) || source.length === 0) return DEFAULT_BOTTLENECK_HOLES;
   return source.map((item, index) => {
     const fallback = DEFAULT_BOTTLENECK_HOLES[index] ?? DEFAULT_BOTTLENECK_HOLES[DEFAULT_BOTTLENECK_HOLES.length - 1];
@@ -179,9 +210,19 @@ export const getBottleneckHoles = () => {
 const EMPTY_PACE_FB = { fastConversionRate: 0, slowConversionRate: 0, avgCheckFast: 0, avgCheckSlow: 0, slowRoundsPerMonth: 0, revenueLostPerMonth: 0 };
 /** @returns {PaceFBImpact} */
 export const getPaceFBImpact = () => {
-  if (_d?.paceFBImpact) { /* use API data */ }
-  else if (!shouldUseStatic('pace')) return EMPTY_PACE_FB;
-  const source = (_d?.paceFBImpact ?? paceFBImpact ?? DEFAULT_PACE_FB_IMPACT);
+  if (_d?.paceFBImpact) {
+    const source = _d.paceFBImpact;
+    return {
+      fastConversionRate: sanitizeRate(source?.fastConversionRate, DEFAULT_PACE_FB_IMPACT.fastConversionRate),
+      slowConversionRate: sanitizeRate(source?.slowConversionRate, DEFAULT_PACE_FB_IMPACT.slowConversionRate),
+      avgCheckFast: sanitizePositive(source?.avgCheckFast, DEFAULT_PACE_FB_IMPACT.avgCheckFast),
+      avgCheckSlow: sanitizePositive(source?.avgCheckSlow, DEFAULT_PACE_FB_IMPACT.avgCheckSlow),
+      slowRoundsPerMonth: Math.round(sanitizePositive(source?.slowRoundsPerMonth, DEFAULT_PACE_FB_IMPACT.slowRoundsPerMonth)),
+      revenueLostPerMonth: Math.round(sanitizePositive(source?.revenueLostPerMonth, DEFAULT_PACE_FB_IMPACT.revenueLostPerMonth)),
+    };
+  }
+  if (!shouldUseStatic('pace')) return EMPTY_PACE_FB;
+  const source = (paceFBImpact ?? DEFAULT_PACE_FB_IMPACT);
   return {
     fastConversionRate: sanitizeRate(source?.fastConversionRate, DEFAULT_PACE_FB_IMPACT.fastConversionRate),
     slowConversionRate: sanitizeRate(source?.slowConversionRate, DEFAULT_PACE_FB_IMPACT.slowConversionRate),

@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { shouldUseStatic, getDataMode } from './demoGate';
 import {
   memberWaitlistEntries,
   cancellationProbabilities,
@@ -9,7 +9,14 @@ import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetr
 
 let _d = null;
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('waitlistService', { mergeData: _mergeData, resetData: _resetData });
+
 export const _init = async () => {
+  if (getDataMode() === 'guided') return; // guided mode — _mergeData populates _d
   try {
     const data = await apiFetch('/api/waitlist');
     if (data) _d = data;
@@ -19,9 +26,17 @@ export const _init = async () => {
 };
 
 export const getWaitlistQueue = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return [];
-  const entries = _d ? _d.queue : memberWaitlistEntries;
-  const normalized = Array.isArray(entries) ? entries.map((entry) => normalizeWaitlistEntry(entry)) : [];
+  if (_d?.queue) {
+    const normalized = Array.isArray(_d.queue) ? _d.queue.map((entry) => normalizeWaitlistEntry(entry)) : [];
+    return normalized.sort((a, b) => {
+      if (a.retentionPriority !== b.retentionPriority) {
+        return a.retentionPriority === 'HIGH' ? -1 : 1;
+      }
+      return a.healthScore - b.healthScore;
+    });
+  }
+  if (!shouldUseStatic('pipeline')) return [];
+  const normalized = Array.isArray(memberWaitlistEntries) ? memberWaitlistEntries.map((entry) => normalizeWaitlistEntry(entry)) : [];
   return normalized.sort((a, b) => {
     if (a.retentionPriority !== b.retentionPriority) {
       return a.retentionPriority === 'HIGH' ? -1 : 1;
@@ -31,20 +46,20 @@ export const getWaitlistQueue = () => {
 };
 
 export const getWaitlistSummary = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return { total: 0, highPriority: 0, normalPriority: 0, avgHealthScore: 0 };
   if (_d?.queue) return summarizeWaitlistEntries(_d.queue);
+  if (!shouldUseStatic('pipeline')) return { total: 0, highPriority: 0, normalPriority: 0, avgHealthScore: 0 };
   return summarizeWaitlistEntries(memberWaitlistEntries);
 };
 
 export const getCancellationPredictions = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return [];
-  const src = _d ? _d.cancellationPredictions : cancellationProbabilities;
-  return [...src].sort((a, b) => b.cancelProbability - a.cancelProbability);
+  if (_d?.cancellationPredictions) return [..._d.cancellationPredictions].sort((a, b) => b.cancelProbability - a.cancelProbability);
+  if (!shouldUseStatic('pipeline')) return [];
+  return [...cancellationProbabilities].sort((a, b) => b.cancelProbability - a.cancelProbability);
 };
 
 export const getCancellationSummary = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return { total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: '' };
-  if (_d) return _d.cancellationSummary;
+  if (_d?.cancellationSummary) return _d.cancellationSummary;
+  if (!shouldUseStatic('pipeline')) return { total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: '' };
   const preds = cancellationProbabilities;
   const highRisk = preds.filter((p) => p.cancelProbability >= 0.6);
   return {
@@ -56,8 +71,9 @@ export const getCancellationSummary = () => {
 };
 
 export const getDemandHeatmap = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return [];
-  return _d ? _d.demandHeatmap : demandHeatmap;
+  if (_d?.demandHeatmap) return _d.demandHeatmap;
+  if (!shouldUseStatic('pipeline')) return [];
+  return demandHeatmap;
 };
 
 export const sourceSystems = ['Tee Sheet', 'Member CRM', 'POS', 'Weather API'];

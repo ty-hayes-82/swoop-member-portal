@@ -14,6 +14,12 @@ import { useServiceCache } from '@/hooks/useServiceCache';
 
 let _d = null;
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('integrationsService', { mergeData: _mergeData, resetData: _resetData });
+
 export const _init = async () => {
   try {
     const data = await apiFetch('/api/integrations');

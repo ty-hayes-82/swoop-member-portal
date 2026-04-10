@@ -1,7 +1,7 @@
 // experienceInsightsService.js — correlation calculations from existing data
 // _init() hydrates from Postgres; arrays/objects are mutated in-place so imports stay current.
 import { apiFetch, getClubId } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+// shouldUseStatic removed — data-driven getters use _d
 import { memberArchetypes } from '@/data/members';
 
 // Touchpoint correlations with retention — derived from cross-domain analysis
@@ -331,6 +331,12 @@ export const archetypeSpendGaps = [
 // ─── Live data hydration ────────────────────────────────────────────────────
 let _d = null;
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('experienceInsightsService', { mergeData: _mergeData, resetData: _resetData });
+
 export const _init = async () => {
   try {
     const data = await apiFetch('/api/experience-insights');
@@ -394,35 +400,31 @@ export const _init = async () => {
   } catch { /* live correlations not available yet */ }
 };
 
-// ─── Gated getters ─────────────────────────────────────────────────────────
-// Each checks the appropriate gate(s) and returns [] when closed.
+// ─── Data-driven getters ──────────────────────────────────────────────────
+// In guided mode, data is pushed via _mergeData; getters return from _d.
+// In demo/live mode, _d is hydrated by _init() from the API.
 
-/** touchpointCorrelations needs fb + tee-sheet */
+/** touchpointCorrelations — returns from _d or falls back to static array */
 export function getTouchpointCorrelations() {
-  if (!shouldUseStatic('fb') || !shouldUseStatic('tee-sheet')) return [];
-  return touchpointCorrelations;
+  return _d?.touchpointCorrelations ?? touchpointCorrelations;
 }
 
-/** correlationInsights needs fb + email */
+/** correlationInsights — returns from _d or falls back to static array */
 export function getCorrelationInsights() {
-  if (!shouldUseStatic('fb') || !shouldUseStatic('email')) return [];
-  return correlationInsights;
+  return _d?.correlationInsights ?? correlationInsights;
 }
 
-/** eventROI needs email (events alias) */
+/** eventROI — returns from _d or falls back to static array */
 export function getEventROI() {
-  if (!shouldUseStatic('events')) return [];
-  return eventROI;
+  return _d?.eventROI ?? eventROI;
 }
 
-/** complaintLoyaltyStats needs complaints */
+/** complaintLoyaltyStats — returns from _d or falls back to static object */
 export function getComplaintLoyaltyStats() {
-  if (!shouldUseStatic('complaints')) return null;
-  return complaintLoyaltyStats;
+  return _d?.complaintLoyaltyStats ?? complaintLoyaltyStats;
 }
 
-/** archetypeSpendGaps needs fb */
+/** archetypeSpendGaps — returns from _d or falls back to static array */
 export function getArchetypeSpendGaps() {
-  if (!shouldUseStatic('fb')) return [];
-  return archetypeSpendGaps;
+  return _d?.archetypeSpendGaps ?? archetypeSpendGaps;
 }

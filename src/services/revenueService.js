@@ -2,7 +2,7 @@
 // Connects pace-of-play, staffing, and weather data to dollar-quantified
 // revenue leakage. Powers the Revenue page and the Today RevenueSummaryCard.
 
-import { shouldUseStatic } from './demoGate';
+// shouldUseStatic removed — data-driven: underlying services handle availability
 import { getPaceFBImpact, getBottleneckHoles, getSlowRoundRate } from './operationsService';
 import { getUnderstaffedDays } from './staffingService';
 
@@ -41,6 +41,15 @@ import { getUnderstaffedDays } from './staffingService';
  * @property {number} weekendRate              0-1
  */
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+// revenueService is a pure computation layer — it delegates to operationsService
+// and staffingService. We register it so the loader can push ancillary data in Phase 2.
+let _d = null;
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('revenueService', { mergeData: _mergeData, resetData: _resetData });
+
 // Static weather no-show estimate for demo. In production, derive from
 // weather_events × cancelled bookings × avg dining check.
 const WEATHER_NO_SHOW_LOSS_MONTHLY = 420;
@@ -54,22 +63,17 @@ const WEATHER_NO_SHOW_LOSS_MONTHLY = 420;
  * @returns {LeakageData|null}
  */
 export function getLeakageData() {
-  if (!shouldUseStatic('fb') && !shouldUseStatic('complaints') && !shouldUseStatic('pace')) {
-    return null;
-  }
-
+  // Data-driven: underlying services return empty/zero when data isn't loaded,
+  // so the math naturally produces null/zero — no explicit gate checks needed.
   const paceFB = getPaceFBImpact();
   const staffDays = getUnderstaffedDays();
 
-  const PACE_LOSS = shouldUseStatic('fb') || shouldUseStatic('pace')
-    ? (paceFB.revenueLostPerMonth || 0)
-    : 0;
-  const STAFFING_LOSS = shouldUseStatic('complaints')
-    ? staffDays.reduce((sum, day) => sum + (day.revenueLoss || 0), 0)
-    : 0;
-  const WEATHER_LOSS = shouldUseStatic('fb') ? WEATHER_NO_SHOW_LOSS_MONTHLY : 0;
+  const PACE_LOSS = paceFB.revenueLostPerMonth || 0;
+  const STAFFING_LOSS = staffDays.reduce((sum, day) => sum + (day.revenueLoss || 0), 0);
+  const WEATHER_LOSS = (PACE_LOSS > 0 || STAFFING_LOSS > 0) ? WEATHER_NO_SHOW_LOSS_MONTHLY : 0;
 
   const TOTAL = PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS;
+  if (TOTAL === 0) return null;
 
   return {
     PACE_LOSS,

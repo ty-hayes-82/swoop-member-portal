@@ -4,7 +4,8 @@
 // Components never change — they call the same synchronous service functions as always.
 
 import { useState, useEffect, createContext, useContext } from 'react';
-import { getDataMode } from '@/services/demoGate';
+import { getDataMode, SOURCES_CHANGED_EVENT } from '@/services/demoGate';
+import { rebuildAllData } from '@/services/guidedDataLoader';
 import { _init as initOps }      from '@/services/operationsService';
 import { _init as initMembers }  from '@/services/memberService';
 import { _init as initStaffing } from '@/services/staffingService';
@@ -56,6 +57,11 @@ export function DataProvider({ children }) {
       if (localStorage.getItem('swoop_club_city')) {
         initWeather().catch(() => {});
       }
+      // In guided mode, rebuild data from whatever gates are already open
+      // (handles page refresh with existing sessionStorage state)
+      if (mode === 'guided') {
+        rebuildAllData();
+      }
       setReady(true);
       return;
     }
@@ -88,6 +94,17 @@ export function DataProvider({ children }) {
     };
     window.addEventListener('swoop:data-imported', handler);
     return () => window.removeEventListener('swoop:data-imported', handler);
+  }, []);
+
+  // In guided mode, rebuild service data when gates change (file import/unload)
+  useEffect(() => {
+    if (getDataMode() !== 'guided') return;
+    const handler = () => {
+      rebuildAllData();
+      setRefreshKey(k => k + 1);
+    };
+    window.addEventListener(SOURCES_CHANGED_EVENT, handler);
+    return () => window.removeEventListener(SOURCES_CHANGED_EVENT, handler);
   }, []);
 
   if (!ready) {

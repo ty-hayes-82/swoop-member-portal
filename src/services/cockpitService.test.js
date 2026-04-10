@@ -49,8 +49,8 @@ describe('cockpitService — _init + mock contract', () => {
     await svc._init();
 
     expect(apiFetchMock).toHaveBeenCalledWith('/api/cockpit');
-    expect(svc.getPriorityItems()).toBe(payload.priorities);
-    expect(svc.getSinceLastLogin()).toBe(payload.sinceLastLogin);
+    expect(svc.getPriorityItems()).toStrictEqual(payload.priorities);
+    expect(svc.getSinceLastLogin()).toStrictEqual(payload.sinceLastLogin);
   });
 
   it('getPriorityItems() pre-_init returns the static fallback (demo mode default)', async () => {

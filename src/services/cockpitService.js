@@ -32,6 +32,12 @@ import { useServiceCache } from '@/hooks/useServiceCache';
 
 let _d = null;
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('cockpitService', { mergeData: _mergeData, resetData: _resetData });
+
 export const _init = async () => {
   try {
     const data = await apiFetch('/api/cockpit');
@@ -68,14 +74,13 @@ function gateFilterItem(item) {
   };
 }
 
-// Priority items reference members — require both agents AND members gates
 /** @returns {CockpitPriorityItem[]} */
 export const getPriorityItems = () => {
-  const raw = _d?.priorities ?? (shouldUseStatic('agents') && shouldUseStatic('members') ? cockpitItems : []);
+  const raw = _d?.priorities ?? cockpitItems;
   return raw.map(gateFilterItem);
 };
 /** @returns {SinceLastLoginItem[]} */
-export const getSinceLastLogin = () => _d?.sinceLastLogin ?? (shouldUseStatic('agents') && shouldUseStatic('members') ? staticSinceLastLogin : []);
+export const getSinceLastLogin = () => _d?.sinceLastLogin ?? staticSinceLastLogin;
 export const sourceSystems = ['CRM', 'POS', 'Weather', 'Tee Sheet', 'Complaints'];
 
 // ─── React hook (useServiceCache migration — SHIP_PLAN §2.3) ────────────

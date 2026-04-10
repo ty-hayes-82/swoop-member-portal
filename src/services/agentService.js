@@ -1,5 +1,4 @@
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
 import { logError } from '@/utils/logError';
 import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents';
 
@@ -52,6 +51,12 @@ let actionStore = agentActions
 
 let _d = null;
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('agentService', { mergeData: _mergeData, resetData: _resetData });
+
 export const _init = async () => {
   try {
     const data = await apiFetch('/api/agents');
@@ -71,9 +76,7 @@ const byNewest = (a, b) => {
 
 /** @returns {Agent[]} */
 export function getAgents() {
-  if (_d?.agents) return _d.agents;
-  if (!shouldUseStatic('agents')) return [];
-  return agentDefinitions;
+  return _d?.agents ?? agentDefinitions;
 }
 
 /**
@@ -85,34 +88,9 @@ export function getAgentById(id) {
   return agents.find((agent) => agent.id === id) ?? null;
 }
 
-// Map signal systems to gate IDs for filtering
-const SYSTEM_TO_GATE = {
-  'Complaint Log': 'complaints',
-  'Tee Sheet': 'tee-sheet',
-  'POS': 'fb',
-  'Email': 'email',
-};
-
-function actionMatchesGates(action) {
-  const signals = action.signals || [];
-  for (const sig of signals) {
-    const gate = SYSTEM_TO_GATE[sig.system];
-    if (gate && !shouldUseStatic(gate)) return false;
-  }
-  // Also check description/impact text for ungated references
-  const text = `${action.description || ''} ${action.impactMetric || ''}`;
-  if (!shouldUseStatic('complaints') && /complaint/i.test(text)) return false;
-  if (!shouldUseStatic('fb') && /F&B|dining|food|beverage/i.test(text)) return false;
-  if (!shouldUseStatic('tee-sheet') && /tee sheet|tee time|round/i.test(text)) return false;
-  return true;
-}
-
 /** @returns {AgentAction[]} */
 export function getAllActions() {
-  if (_d?.actions) return [...actionStore].sort(byNewest);
-  // Actions reference members — require both agents AND members gates
-  if (!shouldUseStatic('agents') || !shouldUseStatic('members')) return [];
-  return [...actionStore].filter(actionMatchesGates).sort(byNewest);
+  return [...actionStore].sort(byNewest);
 }
 
 /** @returns {AgentAction[]} */

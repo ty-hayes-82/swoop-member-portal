@@ -1,5 +1,4 @@
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
 import { alertsFeed, locationMembers, staffOnDuty, zoneAnalytics } from '@/data/location';
 
 const defaultMembers = locationMembers;
@@ -8,6 +7,12 @@ const defaultAlerts = alertsFeed;
 const defaultZones = zoneAnalytics;
 
 let _d = null;
+
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('locationService', { mergeData: _mergeData, resetData: _resetData });
 
 export const _init = async () => {
   try {
@@ -60,22 +65,13 @@ const normalizeStaff = (source) => {
 };
 
 export const getLiveMemberLocations = (payload = null) => {
-  if (!shouldUseStatic('weather') && !_d && !payload) return [];
-  // Location intelligence requires member roster — gate on 'members' in guided mode
-  if (!shouldUseStatic('members')) return [];
   return normalizeMembers(payload?.members ?? _d?.members ?? payload?.locationMembers);
 };
 export const getStaffLocations = (payload = null) => {
-  if (!shouldUseStatic('weather') && !_d && !payload) return [];
-  // Staff locations are meaningful only when member data is available
-  if (!shouldUseStatic('members')) return [];
   return normalizeStaff(payload?.staff ?? _d?.staff ?? payload?.staffOnDuty);
 };
 
 export const getServiceRecoveryAlerts = (payload = null) => {
-  if (!shouldUseStatic('weather') && !_d && !payload) return [];
-  // Alerts reference member context — gate on 'members' in guided mode
-  if (!shouldUseStatic('members')) return [];
   const source = payload?.alerts ?? _d?.alerts ?? payload?.alertsFeed;
   const list = Array.isArray(source) && source.length ? source : defaultAlerts;
   return list.map((alert, index) => ({

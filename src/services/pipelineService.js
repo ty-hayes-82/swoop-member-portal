@@ -7,6 +7,12 @@ import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetr
 
 let _d = null;
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('pipelineService', { mergeData: _mergeData, resetData: _resetData });
+
 const tierRank = { hot: 0, warm: 1, cold: 2 };
 
 const toNumber = (value, fallback = 0) => {
@@ -227,7 +233,6 @@ export const _init = async () => {
 };
 
 export const getPipelineSummary = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return buildPipelineSummary([]);
   return getPipelineSnapshot().summary;
 };
 

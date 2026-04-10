@@ -12,6 +12,15 @@ import {
 let _liveKpis = null;
 let _liveBenchmarks = null;
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+// boardReportService doesn't use _d for static data, but we add merge/reset
+// so the guided data loader can push board report data in Phase 2.
+let _d = null;
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('boardReportService', { mergeData: _mergeData, resetData: _resetData });
+
 export const _init = async () => {
   const clubId = getClubId();
   if (!clubId) return;
@@ -50,13 +59,9 @@ export const getKPIs = () => {
       return kpi;
     });
   }
-  // In guided mode, pipeline+members gets full static KPIs; members alone gets computed KPIs
-  const mode = getDataMode();
-  if (mode === 'guided') {
-    if (shouldUseStatic('pipeline') && shouldUseStatic('members')) return staticKpis;
-    // Fall through to build KPIs from member data if members gate is open
-  }
-  // Build KPIs from member health data (works for guided with members, demo, and real clubs)
+  // Data-driven: if _d has KPIs, use them
+  if (_d?.kpis) return _d.kpis;
+  // Build KPIs from member health data (works for guided, demo, and real clubs)
   const summary = _getMemberSummary();
   if (summary.totalMembers > 0 || summary.total > 0) {
     const total = summary.totalMembers || summary.total;
@@ -69,28 +74,31 @@ export const getKPIs = () => {
       { label: 'At Risk', value: (summary.atRisk || 0) + (summary.critical || 0), unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
     ];
   }
-  // Static KPIs require both pipeline AND members gates (need actual member data to be meaningful)
-  if (!shouldUseStatic('pipeline') || !shouldUseStatic('members')) return EMPTY_KPIS;
-  return staticKpis;
+  // No data available
+  return EMPTY_KPIS;
 };
 
-// Board report details — member saves need members, operational saves need complaints
-// V20: filter saves by domain — dining/F&B saves require fb gate, complaint saves require complaints gate
+// Board report details — data-driven from _d, with keyword filtering kept for guided mode
+// (boardReport data merges as one blob under 'pipeline' gate, so we can't split saves by domain at the data layer)
 const DINING_RE = /dining|grill room|f&b|food|beverage|chef|restaurant|kitchen|menu/i;
 const COMPLAINT_RE = /complaint|dispute|unresolved|service request/i;
 export const getMemberSaves = () => {
-  if (!shouldUseStatic('members')) return [];
-  if (getDataMode() !== 'guided') return staticMemberSaves;
-  return staticMemberSaves.filter(s => {
-    const text = `${s.trigger || ''} ${s.action || ''} ${s.outcome || ''}`;
-    if (DINING_RE.test(text) && !shouldUseStatic('fb')) return false;
-    if (COMPLAINT_RE.test(text) && !shouldUseStatic('complaints')) return false;
-    return true;
-  });
+  const saves = _d?.memberSaves ?? staticMemberSaves;
+  if (saves.length === 0) return [];
+  // Behavioral filter: in guided mode, filter saves by domain keyword
+  if (getDataMode() === 'guided') {
+    return saves.filter(s => {
+      const text = `${s.trigger || ''} ${s.action || ''} ${s.outcome || ''}`;
+      if (DINING_RE.test(text) && !shouldUseStatic('fb')) return false;
+      if (COMPLAINT_RE.test(text) && !shouldUseStatic('complaints')) return false;
+      return true;
+    });
+  }
+  return saves;
 };
-export const getOperationalSaves = () => (shouldUseStatic('members') && shouldUseStatic('complaints')) ? staticOperationalSaves : [];
-export const getMonthlyTrends = () => shouldUseStatic('members') ? staticMonthlyTrends : [];
-export const getDuesAtRiskNote = () => shouldUseStatic('members') ? staticDuesAtRiskNote : null;
+export const getOperationalSaves = () => _d?.operationalSaves ?? staticOperationalSaves;
+export const getMonthlyTrends = () => _d?.monthlyTrends ?? staticMonthlyTrends;
+export const getDuesAtRiskNote = () => _d?.duesAtRiskNote ?? staticDuesAtRiskNote;
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

@@ -2,12 +2,19 @@
 // Narrative and chart helpers stay pure functions — they work on whatever data source is active.
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { shouldUseStatic, getDataMode } from './demoGate';
 import { trends as staticTrends, MONTHS as STATIC_MONTHS, outletTrends as staticOutletTrends } from '@/data/trends.js';
 
 let _d = null; // { trends, outletTrends, months }
 
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
+export function _resetData() { _d = null; }
+registerService('trendsService', { mergeData: _mergeData, resetData: _resetData });
+
 export const _init = async () => {
+  if (getDataMode() === 'guided') return; // guided mode — _mergeData populates _d
   try {
     const data = await apiFetch('/api/trends');
     if (data) _d = data;

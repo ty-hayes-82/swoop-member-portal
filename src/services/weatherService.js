@@ -4,7 +4,7 @@
 // Falls back to static data from src/data/weather.js when API is unavailable.
 
 import { weatherDaily as weatherData } from '../data/weather';
-import { shouldUseStatic, isGuidedMode, isSourceLoaded } from './demoGate';
+import { isGuidedMode, isSourceLoaded } from './demoGate';
 import { apiFetch } from './apiClient';
 import { logError } from '../utils/logError';
 
@@ -45,6 +45,13 @@ import { logError } from '../utils/logError';
 
 let _current = null;
 let _forecast = null;
+
+// ── Guided data loader integration (Phase 1 — additive only) ──
+let _guidedData = null;
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _guidedData = { ...(_guidedData || {}), ...partial }; }
+export function _resetData() { _guidedData = null; }
+registerService('weatherService', { mergeData: _mergeData, resetData: _resetData });
 
 // In guided demo, weather requires the Club Profile (gateId: 'pipeline') to be imported
 function isWeatherGated() {
@@ -209,9 +216,7 @@ export const _init = async () => {
 /** @returns {HourlyForecastRow[]} */
 export function getHourlyForecast() {
   if (isWeatherGated()) return [];
-  if (_forecast?.hourly?.length) return _forecast.hourly;
-  if (!shouldUseStatic('weather')) return [];
-  return [];
+  return _forecast?.hourly ?? [];
 }
 
 // ─── Daily Forecast (up to 5 days) ───────────────────────
@@ -223,7 +228,6 @@ export function getHourlyForecast() {
 export function getDailyForecast(numDays = 5) {
   if (isWeatherGated()) return [];
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
-  if (!shouldUseStatic('weather')) return [];
   // Static fallback from weather data starting Jan 17
   const startIdx = weatherData.findIndex(d => d.date === '2026-01-17');
   if (startIdx >= 0) {
@@ -250,7 +254,6 @@ export function getTomorrowForecast() {
 export function getWeatherAlerts() {
   if (isWeatherGated()) return [];
   if (_forecast?.alerts?.length) return _forecast.alerts;
-  if (!shouldUseStatic('weather')) return [];
   return [{
     type: 'Wind Advisory',
     severity: 'MODERATE',

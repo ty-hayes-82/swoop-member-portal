@@ -408,6 +408,7 @@ const normalizeResignationScenarios = (raw) => {
 
 // Start with static demo data — overwritten by API via _init() when available.
 function getInitialData() {
+  if (getDataMode() === 'guided') return getEmptyData();
   return {
     memberArchetypes: staticArchetypes,
     healthDistribution: staticHealthDistribution,
@@ -422,7 +423,28 @@ function getInitialData() {
   };
 }
 
+function getEmptyData() {
+  return {
+    memberArchetypes: [],
+    healthDistribution: [],
+    atRiskMembers: [],
+    membersAtRisk: [],
+    resignationScenarios: [],
+    memberProfiles: {},
+    memberSummary: { total: 0, totalMembers: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0 },
+    emailHeatmap: [],
+    decayingMembers: [],
+    watchMembers: [],
+  };
+}
+
 let _d = getInitialData();
+
+// ── Guided data loader integration (Phase 1 — additive only) ──
+import { registerService } from './guidedDataLoader';
+export function _mergeData(partial) { _d = { ..._d, ...partial }; }
+export function _resetData() { _d = getEmptyData(); }
+registerService('memberService', { mergeData: _mergeData, resetData: _resetData });
 
 // Live dashboard data cache — populated by _init from /api/dashboard-live
 let _live = null;
@@ -508,7 +530,10 @@ import {
   computeHealthDistribution as computeGuidedHealthDist,
   computeArchetypeDistribution as computeGuidedArchetypes,
 } from './guidedScoring';
-const _shouldReturnEmpty = () => !shouldUseStatic('members') && !_hasRealMembers;
+const _shouldReturnEmpty = () => {
+  if (getDataMode() === 'guided') return (_d?.memberSummary?.total ?? 0) === 0;
+  return !shouldUseStatic('members') && !_hasRealMembers;
+};
 
 export const hasRealMemberData = () => _hasRealMembers;
 
@@ -585,7 +610,6 @@ export const getResignationScenarios= () => {
 /** @returns {EmailHeatmapRow[]} */
 export const getEmailHeatmap        = () => {
   if (_shouldReturnEmpty()) return [];
-  if (!shouldUseStatic('email')) return [];
   const raw = Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
   return raw.map(e => ({
     campaign: e.campaign ?? e.subject ?? 'Unknown',
@@ -597,7 +621,6 @@ export const getEmailHeatmap        = () => {
 /** @returns {DecayingMemberRow[]} */
 export const getDecayingMembers     = () => {
   if (_shouldReturnEmpty()) return [];
-  if (!shouldUseStatic('email')) return [];
   return normalizeDecayingMembers(_d?.decayingMembers);
 };
 
@@ -690,7 +713,8 @@ const _MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-
 const _LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
 
 function _generateRoster() {
-  if (!shouldUseStatic('members')) return [];
+  if (getDataMode() === 'guided' && (_d?.memberSummary?.total ?? 0) === 0) return [];
+  if (getDataMode() !== 'guided' && !shouldUseStatic('members')) return [];
   const roster = [];
   const atRisk = getAtRiskMembers();
   const watch = getWatchMembers();
