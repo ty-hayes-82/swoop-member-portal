@@ -169,10 +169,7 @@ export default function MorningBriefingSentence() {
   const hasDollarExposure = segments.some(s => /\$/.test(s.text));
 
   return (
-    // `today-briefing` id is the explicit scroll target for Story 1's
-    // Demo Stories Launcher (added 2026-04-09 per the storyboard fidelity
-    // audit). Do not remove or rename without updating
-    // src/features/today/DemoStoriesLauncher.jsx handleStartStory.
+    // #today-briefing is the scroll target for DemoStoriesLauncher.handleStartStory — do not rename.
     <div id="today-briefing" data-story="briefing" className="fade-in-up">
       {/* Phase J3 — Layer 3 tag */}
       {sources.length >= 3 && (

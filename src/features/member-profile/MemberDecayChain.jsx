@@ -66,17 +66,8 @@ function buildDecayChain(profile) {
     });
   });
 
-  // If few events, add demo journey points based on member scenario.
-  // 2026-04-09 storyboard fidelity audit fix: was hardcoded "Oct 2025" -
-  // "Jan 2026" string literals, which would age awkwardly on a fresh
-  // pilot import dated outside that window. Now uses RELATIVE date
-  // labels ("~12 weeks ago", "~3 weeks ago", etc.) that read as a
-  // decay journey regardless of when the demo is run.
-  //
-  // 2026-04-09 v2 audit follow-up: each demo event also carries a
-  // numeric `weeksAgo` field so the "First signal: N days ago" counter
-  // (which used to parse the date string) can compute from the structured
-  // value when Date.parse() returns NaN on the relative label.
+  // Use relative date labels so demo ages gracefully; `weeksAgo` is carried so the
+  // "First signal: N days ago" counter can compute when Date.parse() returns NaN.
   if (events.length < 4) {
     const demoEvents = [
       { date: '~12 weeks ago', weeksAgo: 12, domain: 'Email', label: 'Newsletter open rate dropped below 20%', type: 'warning', decayOrder: 1 },
@@ -99,10 +90,6 @@ function buildDecayChain(profile) {
   for (const evt of decayItems) {
     if (!seen.has(evt.domain)) {
       seen.add(evt.domain);
-      // Carry the structured `weeksAgo` (when present) through to the
-      // decay step so the "First signal: N days ago" counter can fall
-      // back to it when Date.parse() returns NaN on a relative label.
-      // 2026-04-09 v2 audit fix.
       decayDomains.push({ domain: evt.domain, date: evt.date, label: evt.label, weeksAgo: evt.weeksAgo });
     }
   }
@@ -245,12 +232,7 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
   // Return null when we don't have enough decay signal to tell a story
   if (!decayChain || decayChain.length < 2) return null;
 
-  // Compute days since the first decay signal.
-  // 2026-04-09 v2 audit fix: when the date label is a relative string
-  // ("~12 weeks ago"), Date.parse() returns NaN — fall back to the
-  // structured `weeksAgo` field carried through from the demo events.
-  // Without this fallback the "First signal: N days ago" counter
-  // disappears on demo-fallback chains, losing the temporal beat.
+  // Relative date strings like "~12 weeks ago" return NaN from Date.parse — prefer structured weeksAgo.
   const daysSinceFirstSignal = (() => {
     const first = decayChain[0];
     if (!first) return null;
@@ -280,11 +262,6 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
   const stepPad = isPage ? 'px-3 py-1.5' : 'px-2.5 py-1';
   const stepLabelSize = isPage ? 'text-[11px]' : 'text-[10px]';
 
-  // 2026-04-09 storyboard fidelity audit fix: surface the dollar anchor
-  // ($XXK/yr at risk) inside the decay-chain card so the Story 2 narrator
-  // can land "$32K/yr in dues" in the same viewport as the decay viz.
-  // Reads from the canonical member CRM fields. Only renders when the
-  // member has dues data — never invents a number.
   const duesAnnual = profile?.duesAnnual ?? profile?.dues_annual ?? profile?.dues ?? profile?.memberValueAnnual ?? null;
   const duesAnchor = (() => {
     if (!duesAnnual || duesAnnual <= 0) return null;

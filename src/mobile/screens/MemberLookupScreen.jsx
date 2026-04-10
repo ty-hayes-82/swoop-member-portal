@@ -110,9 +110,6 @@ const HEALTH_FILTERS = [
 ];
 
 const SORT_OPTIONS = [
-  // 2026-04-09 wave 12: 'time' added as the default for on-premise mode.
-  // Sorts by parsed tee/dining time from currentContext (e.g. "Tee time
-  // 9:20 AM") so a floor-walking GM sees the next-up members first.
   { key: 'time', label: 'Time' },
   { key: 'health', label: 'Health' },
   { key: 'dues', label: 'Dues' },
@@ -183,17 +180,12 @@ function MobileMemberCard({ member, expanded, onToggle, showContext }) {
           {profile && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
               <InfoItem label="Member since" value={profile.joinDate ? new Date(profile.joinDate).getFullYear() : '—'} />
-              {/* 2026-04-09 wave 12 mobile audit fix: was rendering "Invalid Date"
-                  when activity[0].timestamp wasn't a parseable ISO string (some
-                  demo activity rows use "Jan 16 · 1:12 PM" relative format).
-                  Null-guard + NaN check + relative-string fallback. */}
               <InfoItem label="Last visit" value={(() => {
                 const raw = profile.activity?.[0]?.timestamp;
                 if (!raw) return '—';
                 const parsed = new Date(raw);
                 if (Number.isNaN(parsed.getTime())) {
-                  // Activity row uses a non-ISO label like "Jan 16 · 1:12 PM" —
-                  // surface the leading date portion as-is.
+                  // Some demo rows use non-ISO labels like "Jan 16 · 1:12 PM" — surface the leading date portion.
                   return String(raw).split('·')[0].trim() || '—';
                 }
                 return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -220,15 +212,7 @@ function MobileMemberCard({ member, expanded, onToggle, showContext }) {
             </div>
           )}
 
-          {/* Quick actions — context-aware.
-              2026-04-09 wave 13 user directive: when the member is currently
-              ON PREMISE (showContext=true), Call/SMS/Email are pointless
-              because the staff member can walk up to them. Replace the action
-              set with face-to-face actions: Greet (log a personal touchpoint),
-              Comp (free drink/dessert/range balls), Move seat (service
-              recovery), Hand-off (escalate to GM in person). When the member
-              is NOT on premise (At-Risk or All Members modes), keep the
-              original remote action set. */}
+          {/* Quick actions — on-premise uses face-to-face actions; off-premise uses remote contact. */}
           {showContext ? (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <QuickBtn icon="🤝" label="Greet" onClick={(e) => { e.stopPropagation(); quickAction('greet_in_person', 'Greeting logged'); }} />
@@ -261,9 +245,7 @@ function InfoItem({ label, value }) {
 
 function QuickBtn({ icon, label, onClick }) {
   return (
-    // 2026-04-09 wave 12 mobile audit fix: was padding 10px → ~41.5px tall,
-    // under the 44pt Apple HIG minimum. Bumped to padding 13px → ~47.5px,
-    // safer for floor walks and gloved/sweaty hands.
+    // minHeight 44px — Apple HIG tap target minimum.
     <button onClick={onClick} style={{
       padding: '13px 10px', borderRadius: '10px', border: '1px solid #E5E7EB',
       background: '#FAFAFA', cursor: 'pointer', display: 'flex',
@@ -299,11 +281,6 @@ export default function MemberLookupScreen() {
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [healthFilter, setHealthFilter] = useState(null);
-  // 2026-04-09 wave 12 mobile audit fix: was 'health' across all modes,
-  // which sorted on-premise list by lowest-health-first. A floor-walking
-  // GM thinks "it's 10:15am, who's teeing off in the next 30 min" — that's
-  // chronological. Default to 'time' for on-premise; keep 'health' as the
-  // default for at-risk and all-members. The user can still toggle.
   const [sortBy, setSortBy] = useState('time');
 
   // Source roster depends on mode
@@ -346,10 +323,6 @@ export default function MemberLookupScreen() {
       if (sortBy === 'health') return a.score - b.score;
       if (sortBy === 'dues') return (b.duesAnnual || 0) - (a.duesAnnual || 0);
       if (sortBy === 'name') return a.name.localeCompare(b.name);
-      // 2026-04-09 wave 12 audit: 'time' sort for on-premise mode.
-      // Parses tee/dining time from currentContext like "Tee time 9:20 AM"
-      // or falls back to a synthetic time field if present. Members
-      // without a parseable time sink to the bottom.
       if (sortBy === 'time') {
         const parseTime = (m) => {
           const ctx = m.currentContext || m.time || '';
@@ -379,10 +352,7 @@ export default function MemberLookupScreen() {
 
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {/* Mode toggle — staff-facing: On Premise / At-Risk / All
-          2026-04-09 wave 12 mobile audit fix: pills were 38px tall (padding
-          10px 8px + 12px font), under HIG 44pt minimum. Bumped to padding
-          13px 10px + minHeight 44px for safer floor-walk taps. */}
+      {/* Mode toggle — staff-facing: On Premise / At-Risk / All. minHeight 44px for HIG tap target. */}
       <div style={{ display: 'flex', gap: '6px', background: '#F3F4F6', padding: '4px', borderRadius: '12px' }}>
         {MODE_OPTIONS.map(opt => (
           <button

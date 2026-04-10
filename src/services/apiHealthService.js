@@ -8,9 +8,7 @@
  *
  * This service exists so that any UI surface (Admin Hub, Data Health
  * Dashboard, Today View status row) can render data trust signals from the
- * SAME source the on-call engineer uses. PRODUCT-FINALIZATION criterion 7
- * shipped the integrations block on 2026-04-09; this service is the front-end
- * consumer that turns those signals into pillar-aligned visibility.
+ * SAME source the on-call engineer uses.
  *
  * Schema (mirrors api/health.js):
  *   {

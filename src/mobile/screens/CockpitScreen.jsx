@@ -20,9 +20,6 @@ export default function CockpitScreen() {
   }, []);
 
   const atRiskCount = (summary.atRisk ?? 0) + (summary.critical ?? 0);
-  // 2026-04-09 v4 audit fix: was || 733000 stale fallback. v3 bumped the
-  // canonical members.js potentialDuesAtRisk to 868000; this mobile fallback
-  // was never synced. Now matches the seed value.
   const duesAtRisk = summary.potentialDuesAtRisk || 868000;
 
   const topPriority = useMemo(() => {
@@ -73,11 +70,6 @@ export default function CockpitScreen() {
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {/* Critical alert */}
       {topPriority && topPriority.score < 30 && (() => {
-        // 2026-04-09 wave 13 mobile audit fix: was rendering an empty `tel:`
-        // link that opened the dialer with no number. Now we lookup the
-        // member's phone from their full profile and only render the button
-        // if a real number exists. Without a phone, the whole card is still
-        // tappable to open the member detail (delegated via openMember).
         const fullProfile = getMemberProfile(topPriority.memberId);
         const phone = fullProfile?.contact?.phone || null;
         const telHref = phone ? `tel:${phone.replace(/[^0-9+]/g, '')}` : null;
@@ -117,12 +109,6 @@ export default function CockpitScreen() {
         <KpiTile label="At-Risk Members" value={atRiskCount} sub={`$${Math.round(duesAtRisk / 1000)}K exposure`} color="#EF4444" onClick={() => navigateTab('members')} />
         <KpiTile label="Complaints" value={complaints || 3} sub="unresolved" color="#F59E0B" onClick={() => navigateTab('inbox')} />
         <KpiTile label="Pending Actions" value={pendingAgentCount} sub="awaiting approval" color="#F3922D" onClick={() => navigateTab('inbox')} />
-        {/* 2026-04-09 wave 13 mobile audit fix: was labeled "Revenue" but
-            onClick navigated to 'inbox' (mismatched). Mobile shell does not
-            currently have a revenue screen, so we relabel the tile to match
-            its actual destination ("Pending Review") instead of misleading
-            the user. When a Mobile Revenue screen ships, point this back at
-            the new key. */}
         <KpiTile label="Pending Review" value="↑ 10.7%" sub="weekly volume" color="#12b76a" onClick={() => navigateTab('inbox')} />
       </div>
 

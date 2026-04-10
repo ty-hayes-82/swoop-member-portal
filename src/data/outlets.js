@@ -13,12 +13,7 @@ export const outlets = [
     ],
   },
   {
-    // 2026-04-09 v3 audit bump: understaffedImpact -$2,760 → -$4,120 to make
-    // the Grill Room "staffing gap = real dollars" beat louder. -$4,120 on
-    // $34,600 monthly revenue = ~12% drag, ties cleanly to 3 understaffed
-    // Fridays. Verified that this field is rendered as a card metric only
-    // (fbService.js exposes outlets unmodified) — NOT aggregated into
-    // STAFFING_LOSS, so the $3,400/$9,580 storyboard anchors are unaffected.
+    // understaffedImpact is a card metric only — NOT aggregated into STAFFING_LOSS (fbService.js exposes outlets unmodified).
     outlet: 'Grill Room',
     revenue: 34600,
     covers: 1124,

@@ -5,17 +5,8 @@ import { buildDecayChain } from '@/features/member-profile/MemberDecayChain';
 import { trackAction } from '@/services/activityService';
 import SourceBadge from '@/components/ui/SourceBadge';
 
-// Story1WhoToTalk — Tier 1 #3 scene: "Who should I talk to today?"
-// Phone-native version of Stories 1+2's at-risk-member alert.
-//
-// Data source (canonical, post-2026-04-09 audit):
-//   getDailyBriefing().todayRisks.atRiskTeetimes
-//   → James Whitfield 9:20 / 42
-//   → Anne Jordan    10:15 / 38
-//   → Robert Callahan 10:42 / 36
-//
-// Decay steps come from buildDecayChain(profile) in MemberDecayChain.
-// NO new dollar literals — everything flows from services.
+// Story1WhoToTalk — phone-native at-risk member walk.
+// Data: getDailyBriefing().todayRisks.atRiskTeetimes + buildDecayChain(profile). No new dollar literals.
 
 const DOMAIN_COLORS = {
   Golf: '#12b76a',
@@ -40,12 +31,7 @@ function healthColor(score) {
 }
 
 function MemberCard({ risk }) {
-  // 2026-04-09 wave 12 mobile audit fix: briefingService DEMO_BRIEFING uses
-  // `health` (lines 41-43, the static fallback path) but the dynamic build
-  // path at briefingService.js:163-168 emits `score`. Either may reach this
-  // component depending on which code path the briefing took. Coalesce so
-  // both shapes work — without this, the Story 1 health number renders blank
-  // ("/100") on the dynamic path.
+  // briefingService emits `score` on the dynamic path and `health` on the static fallback — coalesce both.
   const healthValue = risk.score ?? risk.health ?? 0;
   const [calling, setCalling] = useState(false);
 
@@ -70,14 +56,7 @@ function MemberCard({ risk }) {
   const initial = (risk.name || '?').trim().charAt(0).toUpperCase();
   const color = healthColor(healthValue);
 
-  // 2026-04-09 wave 13 mobile audit P2 fix: was firing trackAction silently
-  // and flipping the button to "✓ Logged" — looked fake to a demo audience.
-  // Now we ALSO open a real `tel:` link when the member's profile carries
-  // a phone number. The button stays as a <button> (not <a>) so the
-  // trackAction call still fires for the audit log; the tel: navigation
-  // is triggered imperatively via window.location.href so we keep both
-  // behaviors. If no phone is on file, the button stays in "Logged" mode
-  // (graceful degradation, never opens an empty dialer).
+  // Kept as <button> (not <a>) so trackAction fires for the audit log; tel: nav is triggered imperatively.
   const phone = profile?.contact?.phone || null;
   const handleCall = (e) => {
     e.stopPropagation();

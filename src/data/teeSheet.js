@@ -156,11 +156,7 @@ export const teeSheetSummary = {
   totalGroups: todayTeeSheet.length,
   atRiskOnCourse: todayTeeSheet.filter(t => t.healthScore < 50).length,
   vipCount: todayTeeSheet.filter(t => t.duesAnnual >= 18000).length,
-  // 2026-04-09 v2 audit risk-flag fix: was sunny/73/5 which contradicted
-  // the Today view's "wind advisory, 68°F, 32 mph" narrative (briefingService
-  // and cockpit). During a live demo the GM clicks Today → Tee Sheet and
-  // sees contradictory weather across adjacent screens — a 3-second
-  // believability break. Synced with the wind-advisory storyboard beat.
+  // Weather must match briefingService / cockpit / weather.js — contradictory weather across adjacent screens breaks the demo.
   weatherCondition: 'wind advisory',
   weatherTemp: 68,
   weatherWind: 32,

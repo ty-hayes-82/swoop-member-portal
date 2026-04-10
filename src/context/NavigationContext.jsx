@@ -65,14 +65,8 @@ const DEFAULT_ROUTE = 'today';
 function parseHash() {
   const raw = window.location.hash.replace(/^#\/?/, '');
   if (!raw) return { route: DEFAULT_ROUTE, memberId: null };
-  // 2026-04-09 wave 12 mobile audit fix: the mobile shell routes
-  // (#/m, #/m/conference, #/m/members, #/m/inbox, etc.) are NOT
-  // part of the desktop NavigationContext route system. They're
-  // intercepted upstream in src/App.jsx RouterViews. Without this
-  // early bail-out, parseHash treats `m/conference` as an unknown
-  // route and replaceState's it back to `#/today`, racing the
-  // Conference Demo button click and never landing on the shell.
-  // The mobile router takes care of these routes — leave them alone.
+  // Mobile shell routes (#/m, #/m/*) are handled by App.jsx RouterViews, not this router.
+  // Without this early bail, parseHash would replaceState them back to #/today and race mobile navigation.
   if (raw === 'm' || raw.startsWith('m/')) {
     return { route: 'mobile', memberId: null };
   }

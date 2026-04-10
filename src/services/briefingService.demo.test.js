@@ -1,12 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { DEMO_BRIEFING } from './briefingService';
 
-// Lock in the 2026-04-09 demo-data audit fix: Story 1 narration says
-// "3 at-risk members on today's tee sheet" but the static DEMO_BRIEFING
-// fallback was previously only shipping 2 entries. Robert Callahan
-// (mbr_271, $24K renewal risk) is the canonical 3rd at-risk member per
-// cockpit.js + agents.js. If someone removes him again, this test blows
-// up before the storyboard does.
+// Story 1 narration says "3 at-risk members on today's tee sheet" — lock the static DEMO_BRIEFING
+// fallback at 3 entries, with Robert Callahan (mbr_271) as the canonical third per cockpit.js + agents.js.
 
 describe('DEMO_BRIEFING.todayRisks.atRiskTeetimes', () => {
   it('has exactly 3 at-risk tee times', () => {

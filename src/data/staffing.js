@@ -7,13 +7,7 @@ export const understaffedDays = [
     revenueLoss: 1140, scheduledStaff: 2, requiredStaff: 4,
   },
   {
-    // 2026-04-09 v3 audit considered bumping this from $1,280 to $2,140 to
-    // make the Story 2 staffing trigger land harder, but `revenueService.js:30`
-    // computes STAFFING_LOSS via `understaffedDays.reduce()` and that sum
-    // is the storyboard-locked $3,400 figure (which feeds the $9,580 TOTAL
-    // anchor). The audit's "low risk, single row, no cascade" claim was
-    // wrong — the cascade is real and reaches Story 3's hero number.
-    // Held until the broader pace.js cascade is done in a coordinated sprint.
+    // revenueLoss feeds revenueService.js STAFFING_LOSS (reduce over understaffedDays) → Story 3 $9,580 anchor. Do not edit in isolation.
     date: '2026-01-16', outlet: 'Grill Room',
     ticketTimeIncrease: 0.22, complaintMultiplier: 2.3,
     revenueLoss: 1280, scheduledStaff: 2, requiredStaff: 4,

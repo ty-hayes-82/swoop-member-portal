@@ -30,9 +30,6 @@ const EMPTY_BRIEFING = {
 // It must satisfy the same contract as the dynamic build so that downstream
 // components and tests don't see a half-shape. Every required field is populated.
 export const DEMO_BRIEFING = {
-  // Apply-now bumps from 2026-04-09 demo-data audit (storyboard-audits/2026-04-09-demo-data.md):
-  // - monthlyRevenue $142K → $168K (Today hero punches up; still credible
-  //   for a $5M / 350-member club running F&B at typical mid-club margins)
   keyMetrics: { atRiskMembers: 7, openComplaints: 4, monthlyRevenue: 168000, revenueVsPlan: 4.2, understaffedDays: 3 },
   teeSheet: { roundsToday: 220, utilization: 0.87 },
   todayRisks: {
@@ -40,10 +37,7 @@ export const DEMO_BRIEFING = {
     tempHigh: 68,
     wind: 32,
     forecast: 'Wind advisory — gusts to 30-40 mph expected Saturday afternoon',
-    // 3rd at-risk entry added 2026-04-09 to fix Story 1 script/data mismatch
-    // (storyboard says "3 at-risk members on today's tee sheet"; previously
-    // only 2 entries appeared here). Robert Callahan is the canonical 3rd
-    // at-risk member from cockpit.js + agents.js ($24K renewal risk).
+    // Must stay at 3 entries — Story 1 narration says "3 at-risk members on today's tee sheet". Locked by briefingService.demo.test.js.
     atRiskTeetimes: [
       { memberId: 'mbr_203', name: 'James Whitfield', time: '9:20 AM', health: 42 },
       { memberId: 'mbr_089', name: 'Anne Jordan', time: '10:15 AM', health: 38 },
@@ -152,11 +146,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       isUnderstaffed: yesterday.isUnderstaffed,
     },
     todayRisks: {
-      // 2026-04-09 v3 audit fix: secondary block previously had
-      //   weather 'perfect' / 72 / 18, Anne 9:14 / 28, Robert 10:02 / 27
-      // which contradicted the canonical DEMO_BRIEFING block at line 32-44
-      // (wind advisory / 68 / 32, James 9:20 / 42, Anne 10:15 / 38,
-      // Robert 10:42 / 36) and the cockpit + teeSheet narrative. Synced.
+      // Must match the canonical DEMO_BRIEFING block above and the cockpit / teeSheet narrative.
       weather:    'wind advisory', tempHigh: 68, wind: 32,
       forecast:   'Wind advisory — gusts to 30-40 mph expected Saturday afternoon',
       atRiskTeetimes: [
@@ -224,9 +214,6 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         impact: '+20-30% lunch covers',
         effort: '5 min',
         conversionRate: null,
-        // 2026-04-09 v4 audit fix: was "18 mph gusts by noon" which contradicted
-        // the canonical 32 mph wind-advisory narrative everywhere else in this
-        // file (lines 39, 161). Synced.
         detail: 'Wind advisory (32 mph gusts by afternoon) historically reduces golf bookings by 15% but increases Grill Room lunch covers by 20-30% as members stay indoors. Add 2 servers, prep 15 extra grilled items.',
         action: 'View F&B operations',
         link: 'fb-performance',
@@ -234,14 +221,6 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       {
         id: 'at-risk-touchpoints',
         icon: '👋',
-        // 2026-04-09 v4 audit fix: was "2 at-risk members" / $36K stale.
-        // The canonical at-risk-on-today's-tee-sheet roster (briefingService
-        // primary block + cockpit + storyboard) is now 3 members:
-        // James (9:20), Anne (10:15), Robert (10:42). Total dues exposure
-        // James $22K + Anne $14K + Robert $24K ≈ $60K. The mini-card's
-        // "$36K" was stale (Anne $12K + old Robert $18K = $30K, after my
-        // v3 sync it should land at $30K not $36K). Updated to "$60K
-        // dues at stake" and detail names all 3 members with correct times.
         title: '3 at-risk members playing today — greet personally',
         impact: '$60K dues at stake',
         effort: '15 min',

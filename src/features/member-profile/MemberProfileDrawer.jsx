@@ -719,19 +719,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             {profile.healthScore ?? '\u2014'}
           </div>
           <Sparkline data={profile.trend ?? []} />
-          {/* Dues at risk callout — Pillar 3: PROVE IT.
-              The dues-at-risk dollar anchor is now rendered exclusively
-              inside the MemberDecayChain card header (`MemberDecayChain.jsx`
-              renders a `$XXK/yr at risk` chip in the same viewport as the
-              decay sequence — that's the storyboard-aligned position).
-              History: v2 (2026-04-09) attempted to suppress this small
-              chip with a conditional gate, but the gate was wrong because
-              buildDecayChain falls back to seeded demo events whenever
-              real activity < 4 — meaning the chain always renders for
-              at-risk members with dues. The v3 audit caught this and
-              the small chip was removed entirely. The chain card's chip
-              is the single source of truth for the storyboard's $32K
-              anchor in Story 2. */}
+          {/* Dues-at-risk chip is rendered inside MemberDecayChain's card header (single source of truth). */}
           {/* Phase I4 — Revenue page link for high-value at-risk members */}
           {(profile.healthScore ?? 100) < 50 && profile.duesAnnual >= 20000 && (
             <button

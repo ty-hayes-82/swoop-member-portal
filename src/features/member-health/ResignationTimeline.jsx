@@ -4,9 +4,7 @@ import { getResignationScenarios } from '@/services/memberService';
 import { useNavigation } from '@/context/NavigationContext';
 import { SourceBadgeRow } from '@/components/ui/SourceBadge.jsx';
 
-// Map domain labels (used in scenario timelines) to source-system names so the
-// timeline can carry the same source-attribution badges as the rest of the
-// member-health surface. PRODUCT-FINALIZATION criterion 5 cleanup (2026-04-09).
+// Map domain labels to source-system names so the timeline carries source-attribution badges.
 const DOMAIN_TO_SYSTEM = {
   Golf: 'Tee Sheet',
   'F&B': 'POS',

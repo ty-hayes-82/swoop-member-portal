@@ -71,11 +71,6 @@ export default function DemoStoriesLauncher() {
 
   const handleStartStory = (storyId) => {
     if (storyId === 'briefing') {
-      // 2026-04-09 storyboard fidelity audit fix: was selecting `.fade-in-up`
-      // first match, which happened to land on the greeting bar but would
-      // break silently if any earlier element gained that class. Now uses
-      // the explicit `today-briefing` id (added to MorningBriefingSentence
-      // outer div) with a `.fade-in-up` fallback for resilience.
       const el = document.getElementById('today-briefing')
         || document.querySelector('[data-story="briefing"]')
         || document.querySelector('.fade-in-up');

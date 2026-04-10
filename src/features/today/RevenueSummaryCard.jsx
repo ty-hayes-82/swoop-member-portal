@@ -20,9 +20,6 @@ export default function RevenueSummaryCard() {
   const spendTotal = archetypeSpendGaps.reduce((s, a) => s + a.totalUntapped, 0);
   const spendMonthly = Math.round(spendTotal / 12);
   const memberSummary = getMemberSummary();
-  // 2026-04-09 v4 audit fix: was || 533000 stale fallback. v3 bumped the
-  // canonical members.js potentialDuesAtRisk to 868000; the legacy fallback
-  // was never synced. Now matches the seed value.
   const duesAtRisk = memberSummary.potentialDuesAtRisk || 868000;
   const duesMonthly = Math.round(duesAtRisk / 12);
   const totalOpportunity = leakage.TOTAL + spendMonthly + duesMonthly;

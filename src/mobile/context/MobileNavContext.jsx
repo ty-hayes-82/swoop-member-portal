@@ -2,11 +2,6 @@ import { createContext, useContext, useState, useCallback, useEffect } from 'rea
 
 const MobileNavContext = createContext(null);
 
-// 2026-04-09 wave 13 mobile audit fix: hash deep-links (`#/m/inbox`,
-// `#/m/members`, `#/m/settings`, etc.) used to be ignored — the shell
-// always opened on the cockpit tab regardless of the URL the user
-// typed/bookmarked. Now we seed activeTab from the hash on mount AND
-// listen for hashchange events so back-button navigation works too.
 const VALID_TABS = new Set(['cockpit', 'inbox', 'members', 'settings']);
 
 function tabFromHash() {

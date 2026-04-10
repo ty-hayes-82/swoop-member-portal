@@ -17,7 +17,7 @@ const TEXT = '#FFFFFF';
 const MUTED = '#9CA3AF';
 const BORDER = '#262626';
 const RED = '#F87171';
-const GREEN = '#4ADE80';
+const GREEN = '#12b76a';
 
 // Parse dollar amounts out of an impactMetric string.
 // "$22K dues at risk" -> 22000, "$2.1K F&B revenue protected" -> 2100,
@@ -164,12 +164,7 @@ export default function Story2SwipeToSave({ onActionApproved }) {
       });
       setSavedThisSession((prev) => prev + dollars);
 
-      // 2026-04-09 wave 12 mobile audit fix: in demo mode, useApp().approveAction
-      // POSTs to a backend that 404s and shows a red "Action may not have been
-      // delivered" toast after every swipe. The conference demo doesn't need
-      // server persistence — local state + trackAction (which is fail-soft)
-      // are sufficient. Skip the network call.
-      // Detect conference route by checking the location hash.
+      // On the conference route, skip approveAction() — its backend POST 404s in demo mode and surfaces a red toast.
       const onConferenceRoute = typeof window !== 'undefined'
         && window.location.hash.startsWith('#/m/conference');
       if (!onConferenceRoute) {

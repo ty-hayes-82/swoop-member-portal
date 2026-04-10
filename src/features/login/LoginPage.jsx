@@ -382,23 +382,11 @@ export default function LoginPage({ onLogin }) {
               <span className="block text-xs font-normal text-gray-400 mt-0.5">Import your own member data</span>
             </button>
 
-            {/* Conference Demo — phone-optimized scene navigator built on the
-                existing mobile shell. Tap-to-enter, no login. Loads the
-                full-demo dataset so the storyboard scenes have data.
-                2026-04-09 wave 10. */}
+            {/* Conference Demo — phone-optimized scene navigator on the mobile shell. Tap-to-enter, no login. */}
             <button
               onClick={() => {
-                // 2026-04-09 wave 12 fix: previous version called startDemo(false)
-                // then setTimeout(() => set hash). That created a race where the
-                // auth re-render routed to #/today FIRST and RouterViews (which
-                // reads window.location.hash without subscribing to hashchange)
-                // never re-evaluated for the deferred hash write.
-                //
-                // Fix: write the hash BEFORE startDemo so the mount of
-                // RouterViews after the auth state change reads the correct
-                // hash on its very first render. The Conference shell route
-                // check (`#/m/conference`) is the first branch in RouterViews,
-                // so as long as the hash is right at mount time, we land cleanly.
+                // Write hash BEFORE startDemo so RouterViews reads the correct hash on its first post-auth render.
+                // RouterViews doesn't subscribe to hashchange, so a deferred write would race with the auth re-render.
                 if (typeof window !== 'undefined') {
                   window.location.hash = '#/m/conference';
                 }

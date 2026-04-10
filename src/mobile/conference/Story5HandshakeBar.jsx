@@ -160,18 +160,10 @@ const Story5HandshakeBar = forwardRef(function Story5HandshakeBar(props, ref) {
 
   const savedK = Math.round(displaySaved / 1000);
   const pct = Math.max(0, Math.min(1, displaySaved / GOAL));
-  // hue shifts from teal (190) toward green (140) as we near the goal
+  // hue shifts from cyan (190) toward lime (140) as we near the goal
   const barHue = 190 - Math.round(50 * pct);
 
-  // 2026-04-09 wave 13 mobile audit P2 fix: handshake bar had no tap
-  // behavior — taps bubbled to the ConferenceShell tap-to-advance handler
-  // and unexpectedly moved the user forward a scene. Now the bar tap
-  // navigates to the regular mobile Members tab in All Members mode so
-  // the user can drill into the actual saved-members list. We use
-  // window.location.hash directly (the conference shell is mounted
-  // outside the regular mobile shell, so we need a hash navigation that
-  // crosses both routes). stopPropagation prevents the underlying shell's
-  // tap-to-advance from firing.
+  // stopPropagation prevents ConferenceShell's tap-to-advance from firing; hash nav crosses out of the conference shell.
   const handleBarTap = (e) => {
     e.stopPropagation();
     if (typeof window !== 'undefined') {

@@ -8,19 +8,10 @@ import Story5HandshakeBar from './Story5HandshakeBar';
 // paginated scene navigator for the conference-floor demo. Reuses the
 // existing useSwipeGesture hook (horizontal swipe) for advance/retreat.
 //
-// Coexists with the existing MobileShell at #/m. This is the
-// conference-floor version of docs/swoop_demo_storyboard.md: the 3 Tier-1
-// scenes anchored on canonical service data — no new dollar literals.
-//
-// Wave-10 wiring (2026-04-09):
-// - Story 1 ("Who should I talk to today?") is the at-risk member walk
-// - Story 2 ("Swipe to save") is the gesture-native action approval
-// - Story 5 ("$32K handshake") is the persistent saves bar (NOT a scene —
-//   it pins to the top across every scene so the audience watches the
-//   running tally tick up as Story 2 approvals fire)
-//
-// Story 5 is wired via an imperative ref so Story 2 can call
-// handshakeRef.current.addSave(dollars) when an action is approved.
+// Conference-floor shell. Coexists with MobileShell at #/m.
+// Scenes: Story1 (at-risk walk), Story2 (swipe approval).
+// Story5 "$32K handshake" is the persistent saves bar pinned across all scenes — wired via
+// imperative ref so Story2 can call handshakeRef.current.addSave(dollars) on each approve.
 const SCENES = [
   { key: 'story1', label: 'Who should I talk to today?', Component: Story1WhoToTalk },
   { key: 'story2', label: 'Swipe to save', Component: Story2SwipeToSave },
@@ -55,15 +46,7 @@ export default function ConferenceShell() {
     return () => clearTimeout(t);
   }, [sceneIdx]);
 
-  // Keyboard nav for desktop conference kiosks.
-  // 2026-04-09 wave 13 mobile audit P2 fix: previous version captured the
-  // outer-scope `advance` / `retreat` references in a `[]`-deps useEffect.
-  // The audit reported ArrowLeft retreat doesn't fire while ArrowRight does
-  // — symptoms of stale closure even though both functions use the
-  // functional setState form. Inlining the setSceneIdx calls inside the
-  // event handler removes any closure ambiguity and makes the bidirectional
-  // navigation behave consistently. preventDefault() also stops space-bar
-  // scrolling on the conference kiosk.
+  // Keyboard nav for desktop conference kiosks — setSceneIdx is inlined to avoid stale closures over advance/retreat.
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
