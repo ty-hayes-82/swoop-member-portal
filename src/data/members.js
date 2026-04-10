@@ -5,9 +5,9 @@ import { theme } from '@/config/theme';
 export const memberArchetypes = [
   { archetype: 'Die-Hard Golfer',  count: 78, golf: 88, dining: 42, events: 28, email: 32, trend: +4,  action: 'Tee time priority + post-round dining comp' },
   { archetype: 'Social Butterfly', count: 58, golf: 18, dining: 82, events: 78, email: 72, trend: +6,  action: 'Event invite + dining comp' },
-  { archetype: 'Balanced Active',  count: 72, golf: 68, dining: 62, events: 54, email: 55, trend: -2,  action: 'Cross-amenity engagement check-in' },
+  { archetype: 'Balanced Active',  count: 72, golf: 68, dining: 62, events: 54, email: 55, trend: -2,  action: 'Quarterly GM lunch — "How can we make the club better?" Balanced Actives are your product council.' },
   { archetype: 'Weekend Warrior',  count: 58, golf: 52, dining: 44, events: 32, email: 28, trend: -8,  action: 'Saturday tee time hold + personal invite' },
-  { archetype: 'Declining',        count: 32, golf: 24, dining: 18, events: 8,  email: 22, trend: -18, action: 'Membership Director outreach within 1 week' },
+  { archetype: 'Declining',        count: 32, golf: 24, dining: 18, events: 8,  email: 22, trend: -18, action: 'Membership Director personal call within 5 days — ask about satisfaction, offer complimentary guest round to re-engage' },
   { archetype: 'New Member',       count: 39, golf: 42, dining: 48, events: 38, email: 68, trend: +14, action: 'Welcome event + mentor pairing' },
   { archetype: 'Ghost',            count: 20, golf: 4,  dining: 6,  events: 2,  email: 8,  trend: -4,  action: 'Personal GM call within 48h' },
   { archetype: 'Snowbird',         count: 33, golf: 62, dining: 52, events: 34, email: 44, trend: +2,  action: 'Welcome-back call at season start' },
@@ -53,19 +53,20 @@ export const watchMembers = [
 
 export const atRiskMembers = [
   // ON-41 data model note: include duesAnnual on at-risk rows so UI can derive totals from row data.
-  { memberId: 'mbr_042', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining', duesAnnual: 18000 },
-  { memberId: 'mbr_117', name: 'Linda Leonard', score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost', duesAnnual: 18000 },
-  { memberId: 'mbr_203', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active', duesAnnual: 18000 },
-  { memberId: 'mbr_089', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior', duesAnnual: 12000 },
-  { memberId: 'mbr_271', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining', duesAnnual: 18000 },
-  { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining spend dropped 87% ($18 last visit vs $142 avg). Declined 3 consecutive event invites. $9K annual dues — last 2 renewals were late.', archetype: 'Social Butterfly', duesAnnual: 9000 },
-  { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Practicing but skipping clubhouse spend; slow-play complaints unresolved', archetype: 'Balanced Active', duesAnnual: 18000 },
+  { memberId: 'mbr_042', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:2},{month:'Nov',rounds:1},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_117', name: 'Linda Leonard', score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:0},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_203', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 18 — service speed', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:3},{month:'Dec',rounds:2},{month:'Jan',rounds:1}] },
+  { memberId: 'mbr_089', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Oct 4 rounds → Nov 2 → Dec 1 — steady withdrawal', archetype: 'Weekend Warrior', duesAnnual: 12000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_271', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact F&B minimum; no golf since November', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:1}] },
+  { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining spend dropped 87% ($18 last visit vs $142 avg). Declined 3 consecutive event invites. $9K annual dues — last 2 renewals were late.', archetype: 'Social Butterfly', duesAnnual: 9000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:1},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Practicing but skipping clubhouse spend; slow-play complaints unresolved', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
 ];
 
 export const resignationScenarios = [
   {
     memberId: 'mbr_042', name: 'Kevin Hurst', archetype: 'Declining', resignDate: '2026-01-08',
     pattern: 'Gradual multi-domain decay over 3 months', keySignal: 'Email open rate dropped 60% Nov→Dec',
+    missedIntervention: 'November email open-rate drop should have triggered Watch-tier outreach — 8-week window missed',
     lifetimeValue: 72000, dues: 18000,
     timeline: [
       { date: 'Oct 2025', event: 'Golf drops from 14 to 8 rounds/mo', domain: 'Golf' },
@@ -77,6 +78,7 @@ export const resignationScenarios = [
   {
     memberId: 'mbr_117', name: 'Linda Leonard', archetype: 'Ghost', resignDate: '2026-01-15',
     pattern: 'Complete disengagement; dues-only member for 3+ months', keySignal: 'No visits since October',
+    missedIntervention: '3+ weeks of zero visits should have triggered GM personal call — intervention window: mid-November',
     lifetimeValue: 36000, dues: 18000,
     timeline: [
       { date: 'Oct 2025', event: 'Last recorded visit', domain: 'Golf' },
@@ -100,6 +102,7 @@ export const resignationScenarios = [
   {
     memberId: 'mbr_089', name: 'Anne Jordan', archetype: 'Weekend Warrior', resignDate: '2026-01-27',
     pattern: 'Slow weekday-then-weekend withdrawal', keySignal: 'Rounds: Oct 4 → Nov 2 → Dec 1',
+    missedIntervention: 'Oct round drop from 4 to 2/mo should have triggered priority Saturday slot offer',
     lifetimeValue: 48000, dues: 12000,
     timeline: [
       { date: 'Oct 2025', event: '4 rounds played (Sat/Sun only)', domain: 'Golf' },

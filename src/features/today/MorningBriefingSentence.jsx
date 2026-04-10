@@ -59,10 +59,20 @@ function buildSegments() {
   const atRiskOnSheet = atRiskList.length;
   if (atRiskOnSheet > 0) {
     const duesAtRisk = atRiskList.reduce((sum, t) => sum + (t.duesAnnual || 0), 0);
-    const dueText = duesAtRisk > 0 ? ` ($${Math.round(duesAtRisk / 1000)}K dues at risk)` : '';
+    const dueText = duesAtRisk > 0 ? ` ($${Math.round(duesAtRisk / 1000)}K dues)` : '';
+
+    // Surface the top at-risk member name + tee time from briefing data
+    const atRiskTeetimes = briefing?.todayRisks?.atRiskTeetimes;
+    const topMember = Array.isArray(atRiskTeetimes) && atRiskTeetimes.length > 0
+      ? atRiskTeetimes.sort((a, b) => (a.health ?? 100) - (b.health ?? 100))[0]
+      : null;
+    const topMemberText = topMember
+      ? ` — ${topMember.name} tees off at ${topMember.time}`
+      : '';
+
     segments.push({
       key: 'at-risk',
-      text: `${atRiskOnSheet} at-risk member${atRiskOnSheet === 1 ? '' : 's'} on today's tee sheet${dueText}`,
+      text: `${atRiskOnSheet} at-risk member${atRiskOnSheet === 1 ? '' : 's'} on today's tee sheet${dueText}${topMemberText}`,
       urgent: true,
     });
     if (!sources.includes('Member CRM')) sources.push('Member CRM');

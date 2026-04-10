@@ -599,6 +599,9 @@ export const getMemberSummary = () => {
     riskCount: Math.max(0, Math.round(toNumber(summary.riskCount, 0))),
     avgHealthScore: toNumber(summary.avgHealthScore, 0),
     potentialDuesAtRisk: toNumber(summary.potentialDuesAtRisk, 0),
+    avgTenure: toNumber(summary.avgTenure, 0),
+    avgDues: toNumber(summary.avgDues, 0),
+    renewalRate: toNumber(summary.renewalRate, 0),
   };
 };
 

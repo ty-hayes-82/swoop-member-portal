@@ -7,6 +7,7 @@ import { getMemberSummary } from '@/services/memberService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
+import StatCard from '@/components/ui/StatCard';
 import { isGateOpen } from '@/services/demoGate';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
@@ -143,11 +144,33 @@ export default function MembersView() {
 
         <EvidenceStrip systems={['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email']} />
 
+        {/* Roster summary stats */}
+        {(summary.avgTenure > 0 || summary.avgDues > 0 || summary.renewalRate > 0) && (
+          <div className="grid grid-cols-3 gap-3">
+            {summary.avgTenure > 0 && (
+              <StatCard label="Avg Tenure" value={`${summary.avgTenure} years`} />
+            )}
+            {summary.avgDues > 0 && (
+              <StatCard label="Avg Annual Dues" value={summary.avgDues} format="currency" />
+            )}
+            {summary.renewalRate > 0 && (
+              <StatCard label="Renewal Rate" value={Math.round(summary.renewalRate * 100)} format="percent" />
+            )}
+          </div>
+        )}
+
         {/* Mode switcher — disable engagement tabs when no activity data */}
         <div role="tablist" aria-label="Member views" className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
           {MODES.map(({ key, label }) => {
             const engagementOnly = ['at-risk', 'email-decay', 'archetypes', 'resignations', 'cohorts'].includes(key);
             const disabled = engagementOnly && !hasEngagementData;
+            const disabledHints = {
+              'at-risk': 'Import tee sheet data to see at-risk member alerts',
+              'email-decay': 'Connect email integration to track engagement decay',
+              'archetypes': 'Import activity data to generate behavioral archetypes',
+              'resignations': 'Import tee sheet or POS data to detect resignation patterns',
+              'cohorts': 'Import activity data to track new member onboarding',
+            };
             return (
               <button
                 key={key}
@@ -162,7 +185,7 @@ export default function MembersView() {
                       ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white cursor-pointer'
                       : 'bg-transparent text-gray-500 hover:text-gray-700 cursor-pointer'
                 }`}
-                title={disabled ? 'Import tee sheet, POS, or email data to unlock this view' : ''}
+                title={disabled ? (disabledHints[key] || 'Import tee sheet, POS, or email data to unlock this view') : ''}
               >
                 {label}
               </button>

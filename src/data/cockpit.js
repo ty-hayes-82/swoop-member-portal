@@ -20,6 +20,7 @@ export const cockpitItems = [
       'Complaint acknowledged but unresolved \u2014 timer exceeded 1-day SLA.',
       'Average Grill Room check dropped from $47 \u2192 $28 since January 3.',
       'Health score fell 78 \u2192 42 once the third complaint hit.',
+      'Post-round dining conversion: 22% after slow rounds vs 41% after fast — $20.7K/mo leakage at stake',
     ],
     stakes: '$18,000/yr in dues ($90K lifetime value)',
     memberName: 'James Whitfield',

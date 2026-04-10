@@ -4,7 +4,7 @@
 export const kpis = [
   { label: 'Service Quality Score', value: 87, prefix: '', suffix: '%', color: 'green' },
   { label: 'Members Retained', value: 14, prefix: '', suffix: '', color: 'green' },
-  { label: 'Operational Efficiency', value: 4.2, prefix: '', suffix: ' hrs', color: 'green' },
+  { label: 'Staff Utilization', value: 87, prefix: '', suffix: '%', color: 'green', description: 'Peak-hour coverage vs demand' },
   { label: 'Avg Resolution Time', value: 4.2, prefix: '', suffix: ' hrs', color: 'green', description: 'Complaint to resolution' },
   { label: 'Monthly Revenue', value: 375200, prefix: '$', suffix: '', color: 'green' },
 ];

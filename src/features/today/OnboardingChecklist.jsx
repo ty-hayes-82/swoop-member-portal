@@ -12,7 +12,7 @@ import Btn from '@/components/ui/Btn';
 // needed. Exported so TodayView can gate on the same constant.
 export const LOW_DATA_THRESHOLD = 10;
 
-function ChecklistItem({ done, title, description, actionLabel, onAction }) {
+function ChecklistItem({ done, title, description, teaser, actionLabel, onAction }) {
   return (
     <div
       className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]"
@@ -34,6 +34,11 @@ function ChecklistItem({ done, title, description, actionLabel, onAction }) {
         <div className="text-xs text-gray-500 mt-1 dark:text-gray-400">
           {description}
         </div>
+        {teaser && !done && (
+          <div className="text-[11px] text-brand-500/70 mt-1.5 italic dark:text-brand-400/60">
+            {teaser}
+          </div>
+        )}
       </div>
       <Btn variant={done ? 'ghost' : 'primary'} size="sm" onClick={onAction}>
         {done ? 'Done' : actionLabel}
@@ -60,6 +65,7 @@ export default function OnboardingChecklist() {
       done: memberTotal >= LOW_DATA_THRESHOLD,
       title: '1. Connect your member roster',
       description: 'Import your members so Swoop can start scoring engagement and surfacing at-risk accounts.',
+      teaser: 'See your complete roster \u2014 tenure, dues, households at a glance',
       actionLabel: 'Import members',
       onAction: () => navigate('integrations/csv-import', { category: 'members' }),
     },
@@ -68,6 +74,7 @@ export default function OnboardingChecklist() {
       done: teeSheetConnected,
       title: '2. Connect your tee sheet',
       description: 'Connect your tee sheet to unlock today\u2019s rounds, pace of play, and demand forecasting.',
+      teaser: 'Discover which at-risk members are coming in TODAY and when to greet them',
       actionLabel: 'Connect tee sheet',
       onAction: () => navigate('integrations'),
     },
@@ -76,6 +83,7 @@ export default function OnboardingChecklist() {
       done: posConnected,
       title: '3. Connect your POS',
       description: 'Connect your POS to link spend to members and measure F&B conversion.',
+      teaser: 'Find out who\u2019s hitting their F&B minimum and which members stopped dining after complaints',
       actionLabel: 'Connect POS',
       onAction: () => navigate('integrations'),
     },
@@ -101,6 +109,7 @@ export default function OnboardingChecklist() {
               done={item.done}
               title={item.title}
               description={item.description}
+              teaser={item.teaser}
               actionLabel={item.actionLabel}
               onAction={item.onAction}
             />
