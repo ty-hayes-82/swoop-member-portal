@@ -1229,6 +1229,26 @@ CREATE TABLE IF NOT EXISTS data_source_status (
 
 CREATE INDEX IF NOT EXISTS idx_data_source_status_club ON data_source_status(club_id);
 
+-- ---------------------------------------------------------------------------
+-- 3.12 DAILY GAME PLANS (Agent Phase 3)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS daily_game_plans (
+  plan_id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  club_id TEXT NOT NULL,
+  plan_date DATE NOT NULL,
+  risk_level TEXT DEFAULT 'normal',
+  action_count INTEGER DEFAULT 0,
+  plan_content JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  gm_viewed_at TIMESTAMPTZ,
+  actions_approved INTEGER DEFAULT 0,
+  actions_dismissed INTEGER DEFAULT 0,
+  UNIQUE(club_id, plan_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_game_plans_club_date ON daily_game_plans(club_id, plan_date);
+
 -- =============================================================================
 -- End of schema
 -- =============================================================================

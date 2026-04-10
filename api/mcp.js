@@ -1,5 +1,5 @@
 // api/mcp.js — MCP server for Managed Agent POC
-// Exposes 12 tools over JSON-RPC (HTTP transport) for the Service Save Orchestrator.
+// Exposes 18 tools over JSON-RPC (HTTP transport) for the Managed Agent fleet.
 // Auth: x-mcp-token header validated against MCP_AUTH_TOKEN env var.
 
 import { sql } from '@vercel/postgres';
@@ -199,6 +199,81 @@ const TOOL_DEFINITIONS = [
         resolution_notes: { type: 'string', description: 'Notes describing the resolution' },
       },
       required: ['feedback_id', 'status'],
+    },
+  },
+  // --- Phase 3: Tomorrow's Game Plan tools ---
+  {
+    name: 'get_tee_sheet_summary',
+    description: "Get tomorrow's bookings summary: total rounds, peak windows (morning/afternoon split), and notable at-risk members playing.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        date: { type: 'string', description: 'Target date (YYYY-MM-DD)' },
+      },
+      required: ['club_id', 'date'],
+    },
+  },
+  {
+    name: 'get_weather_forecast',
+    description: "Get the weather forecast for a date including conditions, temperature, wind, precipitation, and golf/F&B demand modifiers.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        date: { type: 'string', description: 'Target date (YYYY-MM-DD)' },
+      },
+      required: ['club_id', 'date'],
+    },
+  },
+  {
+    name: 'get_staffing_schedule',
+    description: 'Get the scheduled staff by outlet and shift for a given date. Returns shift details and total staff count.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        date: { type: 'string', description: 'Target date (YYYY-MM-DD)' },
+      },
+      required: ['club_id', 'date'],
+    },
+  },
+  {
+    name: 'get_fb_reservations',
+    description: 'Get dining reservations and projected covers by outlet and meal period for a given date.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        date: { type: 'string', description: 'Target date (YYYY-MM-DD)' },
+      },
+      required: ['club_id', 'date'],
+    },
+  },
+  {
+    name: 'get_daily_game_plan_history',
+    description: 'Get the previous 7 days of game plans for continuity and outcome tracking.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+      },
+      required: ['club_id'],
+    },
+  },
+  {
+    name: 'save_game_plan',
+    description: 'Save a completed game plan to the daily_game_plans table. Upserts on (club_id, plan_date).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        plan_date: { type: 'string', description: 'Plan date (YYYY-MM-DD)' },
+        risk_level: { type: 'string', enum: ['low', 'normal', 'elevated', 'high'], description: 'Overall risk assessment' },
+        action_count: { type: 'integer', description: 'Number of action items in the plan' },
+        plan_content: { type: 'object', description: 'Full structured game plan (JSON)' },
+      },
+      required: ['club_id', 'plan_date', 'plan_content'],
     },
   },
 ];
@@ -612,6 +687,143 @@ async function getComplaintHistory({ member_id, club_id }) {
   };
 }
 
+// --- Phase 3: Game Plan tool handlers ---
+
+async function getTeeSheetSummary({ club_id, date }) {
+  const result = await sql`
+    SELECT COUNT(*) AS total_rounds,
+      SUM(CASE WHEN tee_time < '12:00' THEN 1 ELSE 0 END) AS morning_rounds,
+      SUM(CASE WHEN tee_time >= '12:00' THEN 1 ELSE 0 END) AS afternoon_rounds
+    FROM bookings
+    WHERE booking_date = ${date} AND club_id = ${club_id} AND status = 'confirmed'
+  `;
+  const row = result.rows[0] || {};
+
+  const notable = await sql`
+    SELECT b.member_id, m.first_name, m.last_name, m.health_score, m.annual_dues, b.tee_time
+    FROM bookings b
+    JOIN members m ON b.member_id = m.member_id AND b.club_id = m.club_id
+    WHERE b.booking_date = ${date} AND b.club_id = ${club_id} AND b.status = 'confirmed'
+      AND m.health_tier IN ('at-risk', 'critical')
+    ORDER BY m.annual_dues DESC
+    LIMIT 5
+  `;
+
+  return {
+    date,
+    total_rounds: Number(row.total_rounds ?? 0),
+    morning_rounds: Number(row.morning_rounds ?? 0),
+    afternoon_rounds: Number(row.afternoon_rounds ?? 0),
+    notable_members: notable.rows.map(r => ({
+      member_id: r.member_id,
+      name: `${r.first_name} ${r.last_name}`.trim(),
+      health_score: Number(r.health_score),
+      annual_dues: Number(r.annual_dues),
+      tee_time: r.tee_time,
+    })),
+  };
+}
+
+async function getWeatherForecast({ club_id, date }) {
+  const result = await sql`
+    SELECT condition, temp_high, temp_low, wind_mph, precipitation_in,
+      golf_demand_modifier, fb_demand_modifier
+    FROM weather_daily
+    WHERE date = ${date} AND club_id = ${club_id}
+    LIMIT 1
+  `;
+  if (result.rows.length === 0) {
+    return { available: false, date, message: 'No weather data for this date' };
+  }
+  const w = result.rows[0];
+  return {
+    available: true,
+    date,
+    condition: w.condition,
+    temp_high: Number(w.temp_high),
+    temp_low: Number(w.temp_low),
+    wind_mph: Number(w.wind_mph),
+    precipitation_in: Number(w.precipitation_in),
+    golf_demand_modifier: Number(w.golf_demand_modifier),
+    fb_demand_modifier: Number(w.fb_demand_modifier),
+  };
+}
+
+async function getStaffingSchedule({ club_id, date }) {
+  const result = await sql`
+    SELECT ss.outlet, ss.shift, ss.staff_count
+    FROM staff_shifts ss
+    WHERE ss.date = ${date} AND ss.club_id = ${club_id}
+    ORDER BY ss.outlet, ss.shift
+  `;
+  return {
+    date,
+    shifts: result.rows.map(r => ({
+      outlet: r.outlet,
+      shift: r.shift,
+      staff_count: Number(r.staff_count),
+    })),
+    total_staff: result.rows.reduce((sum, r) => sum + Number(r.staff_count), 0),
+  };
+}
+
+async function getFbReservations({ club_id, date }) {
+  const result = await sql`
+    SELECT outlet, meal_period, SUM(covers) AS total_covers, COUNT(*) AS reservation_count
+    FROM fb_reservations
+    WHERE date = ${date} AND club_id = ${club_id}
+    GROUP BY outlet, meal_period
+    ORDER BY outlet, meal_period
+  `;
+  return {
+    date,
+    reservations: result.rows.map(r => ({
+      outlet: r.outlet,
+      meal_period: r.meal_period,
+      total_covers: Number(r.total_covers),
+      reservation_count: Number(r.reservation_count),
+    })),
+    total_covers: result.rows.reduce((sum, r) => sum + Number(r.total_covers), 0),
+  };
+}
+
+async function getDailyGamePlanHistory({ club_id }) {
+  const result = await sql`
+    SELECT plan_id, plan_date, risk_level, action_count, plan_content,
+      created_at, actions_approved, actions_dismissed
+    FROM daily_game_plans
+    WHERE club_id = ${club_id}
+    ORDER BY plan_date DESC
+    LIMIT 7
+  `;
+  return {
+    plans: result.rows.map(r => ({
+      plan_id: r.plan_id,
+      plan_date: r.plan_date,
+      risk_level: r.risk_level,
+      action_count: Number(r.action_count),
+      plan_content: r.plan_content,
+      actions_approved: Number(r.actions_approved ?? 0),
+      actions_dismissed: Number(r.actions_dismissed ?? 0),
+    })),
+    count: result.rows.length,
+  };
+}
+
+async function saveGamePlanTool({ club_id, plan_date, risk_level, action_count, plan_content }) {
+  const result = await sql`
+    INSERT INTO daily_game_plans (club_id, plan_date, risk_level, action_count, plan_content)
+    VALUES (${club_id}, ${plan_date}, ${risk_level || 'normal'}, ${action_count || 0}, ${JSON.stringify(plan_content)})
+    ON CONFLICT (club_id, plan_date) DO UPDATE SET
+      risk_level = EXCLUDED.risk_level,
+      action_count = EXCLUDED.action_count,
+      plan_content = EXCLUDED.plan_content,
+      created_at = NOW()
+    RETURNING plan_id
+  `;
+  return { plan_id: result.rows[0].plan_id, saved: true };
+}
+
 async function updateComplaintStatus({ feedback_id, status, resolution_notes }) {
   const isResolved = status === 'resolved';
   const result = await sql`
@@ -645,6 +857,13 @@ const TOOL_HANDLERS = {
   record_agent_activity: recordAgentActivity,
   get_complaint_history: getComplaintHistory,
   update_complaint_status: updateComplaintStatus,
+  // Phase 3
+  get_tee_sheet_summary: getTeeSheetSummary,
+  get_weather_forecast: getWeatherForecast,
+  get_staffing_schedule: getStaffingSchedule,
+  get_fb_reservations: getFbReservations,
+  get_daily_game_plan_history: getDailyGamePlanHistory,
+  save_game_plan: saveGamePlanTool,
 };
 
 // ---------------------------------------------------------------------------
