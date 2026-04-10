@@ -4,6 +4,7 @@
 
 import { sql } from '@vercel/postgres';
 import { getAnthropicClient } from './agents/managed-config.js';
+import { notifyClubAgents } from './agents/agent-bridge.js';
 
 // ---------------------------------------------------------------------------
 // Auth
@@ -1386,7 +1387,18 @@ async function bookTeeTime({ club_id, course_id, member_id, booking_date, tee_ti
     `;
   }
 
-  return { booking_id: bookingId, status: 'confirmed', date: booking_date, tee_time, player_count: players };
+  const result = { booking_id: bookingId, status: 'confirmed', date: booking_date, tee_time, player_count: players };
+
+  // Phase 8: notify club-side agents via the bridge
+  try {
+    const bridge = await notifyClubAgents(club_id, member_id, {
+      type: 'book_tee_time',
+      details: { booking_date, tee_time, player_count: players, booking_id: bookingId },
+    });
+    result.bridge = { notified: true, notifications: bridge.notifications?.length ?? 0 };
+  } catch (_) { /* bridge errors are non-blocking */ }
+
+  return result;
 }
 
 async function makeDiningReservation({ club_id, outlet_id, member_id, reservation_date, reservation_time, party_size, special_requests }) {
@@ -1424,7 +1436,7 @@ async function makeDiningReservation({ club_id, outlet_id, member_id, reservatio
     VALUES (${checkId}, ${outlet_id}, ${member_id}, ${reservation_date + 'T' + reservation_time}, 0, 0, 'reserved')
   `;
 
-  return {
+  const result = {
     reservation_id: checkId,
     outlet: outlet.name,
     date: reservation_date,
@@ -1433,6 +1445,17 @@ async function makeDiningReservation({ club_id, outlet_id, member_id, reservatio
     special_requests: special_requests || null,
     status: 'reserved',
   };
+
+  // Phase 8: notify club-side agents via the bridge
+  try {
+    const bridge = await notifyClubAgents(club_id, member_id, {
+      type: 'make_dining_reservation',
+      details: { reservation_date, reservation_time, party_size: size, reservation_id: checkId },
+    });
+    result.bridge = { notified: true, notifications: bridge.notifications?.length ?? 0 };
+  } catch (_) { /* bridge errors are non-blocking */ }
+
+  return result;
 }
 
 async function rsvpEvent({ club_id, event_id, member_id, guest_count }) {
@@ -1474,7 +1497,7 @@ async function rsvpEvent({ club_id, event_id, member_id, guest_count }) {
     VALUES (${regId}, ${event_id}, ${member_id}, 'registered', ${guests}, ${Number(evt.registration_fee)}, NOW()::text)
   `;
 
-  return {
+  const result = {
     registration_id: regId,
     event_name: evt.name,
     event_date: evt.event_date,
@@ -1482,6 +1505,17 @@ async function rsvpEvent({ club_id, event_id, member_id, guest_count }) {
     fee: Number(evt.registration_fee),
     status: 'registered',
   };
+
+  // Phase 8: notify club-side agents via the bridge
+  try {
+    const bridge = await notifyClubAgents(club_id, member_id, {
+      type: 'rsvp_event',
+      details: { event_id, event_date: evt.event_date, guest_count: guests, registration_id: regId },
+    });
+    result.bridge = { notified: true, notifications: bridge.notifications?.length ?? 0 };
+  } catch (_) { /* bridge errors are non-blocking */ }
+
+  return result;
 }
 
 async function getMySchedule({ member_id, club_id }) {
