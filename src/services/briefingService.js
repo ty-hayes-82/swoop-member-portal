@@ -121,9 +121,9 @@ export const DEMO_BRIEFING = {
     forecast: 'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
     // Must stay at 3 entries — Story 1 narration says "3 at-risk members on today's tee sheet". Locked by briefingService.demo.test.js.
     atRiskTeetimes: [
-      { memberId: 'mbr_t01', name: 'James Whitfield', time: '8:00 AM', health: 42 },
-      { memberId: 'mbr_t04', name: 'Anne Jordan', time: '7:08 AM', health: 28 },
-      { memberId: 'mbr_t05', name: 'Robert Callahan', time: '9:00 AM', health: 22 },
+      { memberId: 'mbr_t01', name: 'James Whitfield', time: '8:00 AM', health: 42, topRisk: 'Unresolved complaint Jan 16 — 42-min Grill Room wait, felt ignored. $18K dues at risk' },
+      { memberId: 'mbr_t04', name: 'Anne Jordan', time: '7:08 AM', health: 28, topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace — zero rounds since. 10-year member' },
+      { memberId: 'mbr_t05', name: 'Robert Callahan', time: '9:00 AM', health: 22, topRisk: 'Hitting exact $3,020 F&B minimum then stopping. 9-day complaint unresolved. No golf since Nov' },
     ],
     staffingGaps: [],
     fullyStaffed: false,
@@ -240,11 +240,11 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       forecast:   'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
       atRiskTeetimes: [
         { memberId: 'mbr_t01', name: 'James Whitfield', archetype: 'Balanced Active',   time: '8:00 AM', score: 42,
-          topRisk: 'Service complaint unresolved — slow lunch on Jan 16' },
+          topRisk: 'Unresolved complaint Jan 16 — 42-min Grill Room wait, felt ignored. $18K dues at risk' },
         { memberId: 'mbr_t04', name: 'Anne Jordan',     archetype: 'Weekend Warrior',  time: '7:08 AM', score: 28,
-          topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
+          topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace — zero rounds since. 10-year member' },
         { memberId: 'mbr_t05', name: 'Robert Callahan', archetype: 'Declining',        time: '9:00 AM', score: 22,
-          topRisk: isGateOpen('fb') ? 'Hitting F&B minimum only — obligation spending pattern' : 'Declining engagement pattern' },
+          topRisk: 'Hitting exact $3,020 F&B minimum then stopping. 9-day complaint unresolved. No golf since Nov' },
       ],
       staffingGaps: [], fullyStaffed: true,
       cancellationRisk: {
