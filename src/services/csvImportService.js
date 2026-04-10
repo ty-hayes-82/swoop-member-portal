@@ -1,18 +1,5 @@
 // XLSX is lazy-loaded inside parseCSV to reduce initial bundle size
 
-// Maps integration categories (from SYSTEMS data) to CSV template keys
-export const CATEGORY_TEMPLATE_MAP = {
-  'tee-sheet': ['tee-times', 'golf-rounds'],
-  'pos':       ['fnb-transactions', 'reservations'],
-  'crm':       ['members'],
-  'staffing':  ['staffing'],
-  'email':     ['email-engagement'],
-  'events':    ['events'],
-  'feedback':  ['complaints'],
-  'fitness':   ['fitness-pool'],
-  'waitlist':  ['reservations'],
-};
-
 // Vendor-specific column aliases for better auto-mapping
 export const VENDOR_COLUMN_ALIASES = {
   'ForeTees':    { 'Booking Time': 'tee_time', 'Player Name': 'member_id', 'Tee Date': 'date', 'Course Name': 'course' },
