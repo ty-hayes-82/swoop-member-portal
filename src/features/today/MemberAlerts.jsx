@@ -21,7 +21,6 @@ const ACTION_OWNERS = {
 };
 
 function getComplaintDays(memberId) {
-  if (!shouldUseStatic('complaints')) return null;
   const records = getComplaintCorrelation();
   const complaint = records.find(
     f => f.memberId === memberId && f.status !== 'resolved'
@@ -84,11 +83,11 @@ function buildPriorityList() {
         owner = 'Membership Director';
       } else if (archetype === 'Weekend Warrior') {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Engagement frequency declining';
-        action = shouldUseStatic('tee-sheet') ? 'Priority Saturday tee time offer' : 'Personalized outreach based on engagement pattern';
+        action = 'Priority Saturday tee time offer';
         owner = 'Pro Shop';
       } else if (archetype === 'Die-Hard Golfer') {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Activity declining';
-        action = shouldUseStatic('tee-sheet') ? 'Pro shop outreach — check equipment/injury/schedule' : 'Personalized outreach based on engagement pattern';
+        action = 'Pro shop outreach — check equipment/injury/schedule';
         owner = 'Pro Shop';
       } else if (archetype === 'Social Butterfly') {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Event engagement dropping';
@@ -179,7 +178,7 @@ export default function MemberAlerts() {
           <div className="flex gap-1 flex-wrap">
             <SourceBadge system="Member CRM" size="xs" />
             <SourceBadge system="Analytics" size="xs" />
-            {shouldUseStatic('complaints') && <SourceBadge system="Complaint Log" size="xs" />}
+            <SourceBadge system="Complaint Log" size="xs" />
           </div>
         </div>
         {members.length > 0 && (

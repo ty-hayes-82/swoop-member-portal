@@ -2,7 +2,6 @@ import { useMemo, useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getMemberSummary, getAtRiskMembers, getMemberProfile } from '@/services/memberService';
 import { getAgentSummary } from '@/services/agentService';
-import { shouldUseStatic } from '@/services/demoGate';
 import { useMobileNav } from '../context/MobileNavContext';
 
 export default function CockpitScreen() {
@@ -36,10 +35,7 @@ export default function CockpitScreen() {
     return pending[0] || null;
   }, [inbox]);
 
-  const hasComplaintsGate = shouldUseStatic('complaints');
-  const complaints = hasComplaintsGate
-    ? atRisk.filter(m => m.topRisk?.toLowerCase().includes('complaint') || m.topRisk?.toLowerCase().includes('unresolved')).length
-    : 0;
+  const complaints = atRisk.filter(m => m.topRisk?.toLowerCase().includes('complaint') || m.topRisk?.toLowerCase().includes('unresolved')).length;
 
   // No service exposes a real "last refreshed" timestamp for the mobile cockpit yet.
   // See docs/operations/freshness-audit-2026-04-09.md.
@@ -106,7 +102,7 @@ export default function CockpitScreen() {
       {/* KPI tiles 2x2 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         <KpiTile label="At-Risk Members" value={atRiskCount} sub={`$${Math.round(duesAtRisk / 1000)}K exposure`} color="#EF4444" onClick={() => navigateTab('members')} />
-        {hasComplaintsGate && <KpiTile label="Complaints" value={complaints || 3} sub="unresolved" color="#F59E0B" onClick={() => navigateTab('inbox')} />}
+        <KpiTile label="Complaints" value={complaints || 3} sub="unresolved" color="#F59E0B" onClick={() => navigateTab('inbox')} />
         <KpiTile label="Pending Actions" value={pendingAgentCount} sub="awaiting approval" color="#F3922D" onClick={() => navigateTab('inbox')} />
         <KpiTile label="Pending Review" value="↑ 10.7%" sub="weekly volume" color="#12b76a" onClick={() => navigateTab('inbox')} />
       </div>

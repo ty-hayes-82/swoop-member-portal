@@ -19,7 +19,7 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { shouldUseStatic, getDataMode } from '@/services/demoGate';
+import { getDataMode } from '@/services/demoGate';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist, { LOW_DATA_THRESHOLD } from './OnboardingChecklist';
@@ -48,7 +48,7 @@ function buildCheckinAlerts() {
       isVip: t.duesAnnual >= 20000,
       talkingPoints: t.healthScore < 50
         ? [
-            shouldUseStatic('complaints') && t.cartPrep.note?.includes('complaint') ? 'Acknowledge recent complaint — show you\'re aware and it\'s being fixed' : 'Ask about their recent experience — listen for friction points',
+            t.cartPrep?.note?.includes('complaint') ? 'Acknowledge recent complaint — show you\'re aware and it\'s being fixed' : 'Ask about their recent experience — listen for friction points',
             `Playing ${t.course} course at ${t.time} — ${t.group.length > 1 ? `with ${t.group.filter(g => g !== t.name).join(', ')}` : 'solo today'}`,
             t.archetype === 'Declining' ? 'Invite to upcoming event to re-engage' : 'Mention a specific improvement the club has made recently',
           ]
@@ -95,7 +95,7 @@ function GmGreetingAlert({ onDismiss }) {
                   <span className="text-xs text-gray-400">&mdash;</span>
                 </div>
                 <div className="text-sm font-bold text-gray-800 mb-0.5">
-                  {shouldUseStatic('members') ? (
+                  {alert.name ? (
                     <MemberLink memberId={alert.memberId} mode="drawer" className="text-gray-800 hover:text-brand-500 no-underline">
                       {alert.name}
                     </MemberLink>
@@ -338,13 +338,13 @@ export default function TodayView() {
             so the launcher's teaser copy ("220 rounds...") doesn't bleed demo content
             into a clean guided session. The cards are storyboard marketing — only show
             them when the underlying data exists to back them up. */}
-        {(shouldUseStatic('tee-sheet') || shouldUseStatic('members')) && <DemoStoriesLauncher />}
+        <DemoStoriesLauncher />
 
         {/* Section 2: Quick Stats Row */}
         <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
           {[
             { icon: courseCondition?.icon || '🌤️', bg: '#ecfdf5', label: 'Course Condition', value: courseCondition?.label || '—', color: courseCondition?.color || '#9ca3af', source: 'Weather API' },
-            shouldUseStatic('tee-sheet') && { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: roundsToday > 0 ? String(roundsToday) : '—', color: '#6366f1', source: 'Tee Sheet' },
+            roundsToday > 0 ? { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: String(roundsToday), color: '#6366f1', source: 'Tee Sheet' } : null,
             { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732', source: 'Member CRM' },
             { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: cockpitLoading && !cockpitData ? '...' : String(priorities.length), color: '#8b5cf6', source: 'Analytics' },
           ].filter(Boolean).map((stat) => (
@@ -381,14 +381,14 @@ export default function TodayView() {
           ))}
         </div>
 
-        {/* F&B Quick Stats — when fb gate is open */}
-        {shouldUseStatic('fb') && (
+        {/* F&B Quick Stats — renders when briefing has F&B data */}
+        {briefing?.fb && (
           <div className="fade-in-up fade-delay-1 flex flex-col gap-2">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               {[
                 { icon: '🍽️', label: 'Dining Covers Today', value: '126', color: '#ea580c' },
-                { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#039855' }, // lint-no-hardcoded-dollars: allow — F&B demo stat inside shouldUseStatic gate
-                ...(shouldUseStatic('tee-sheet') ? [{ icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' }] : []),
+                { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#039855' }, // lint-no-hardcoded-dollars: allow — F&B demo stat
+                ...(roundsToday > 0 ? [{ icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' }] : []),
               ].map(s => (
                 <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                   <span className="text-lg">{s.icon}</span>
@@ -402,25 +402,23 @@ export default function TodayView() {
                 </div>
               ))}
             </div>
-            {shouldUseStatic('pace') && (
-              <div className="text-[11px] text-gray-500 px-2 leading-snug italic">
-                Post-round dining is linked to pace of play —{' '}
-                <span className="font-semibold text-error-600">slow rounds drop conversion to 22%</span>{' '}
-                vs 41% for fast rounds.{' '}
-                <button
-                  type="button"
-                  onClick={() => navigate('revenue')}
-                  className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
-                >
-                  See Revenue →
-                </button>
-              </div>
-            )}
+            <div className="text-[11px] text-gray-500 px-2 leading-snug italic">
+              Post-round dining is linked to pace of play —{' '}
+              <span className="font-semibold text-error-600">slow rounds drop conversion to 22%</span>{' '}
+              vs 41% for fast rounds.{' '}
+              <button
+                type="button"
+                onClick={() => navigate('revenue')}
+                className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
+              >
+                See Revenue →
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Email Engagement Stats — when email gate is open */}
-        {shouldUseStatic('email') && (
+        {/* Email Engagement Stats — renders when briefing has email data */}
+        {briefing?.email && (
           <div className="fade-in-up fade-delay-1 flex flex-col gap-2">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               {[
@@ -489,7 +487,7 @@ export default function TodayView() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              {isSevere && shouldUseStatic('tee-sheet') && (
+              {isSevere && getTodayTeeSheet().length > 0 && (
                 <button
                   onClick={handleNotify}
                   className="bg-error-500 text-white border-none cursor-pointer text-xs font-bold px-3 py-1 rounded-md hover:bg-error-600 focus-visible:ring-2 focus-visible:ring-brand-500"

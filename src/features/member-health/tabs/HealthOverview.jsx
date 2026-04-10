@@ -10,7 +10,6 @@ import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getVolatileMe
 import { getComplaintCorrelation } from '@/services/staffingService';
 import { getMemberSaves } from '@/services/boardReportService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
@@ -58,17 +57,9 @@ function getDifferentiatedAction(member, complaint) {
       return { action: 'GM personal call — re-engagement conversation', type: 'ghost', owner: 'GM' };
     case 'Declining':
       return { action: `Membership Director outreach — identify root cause of declining activity`, type: 'declining', owner: 'Membership Director' };
-    case 'Weekend Warrior': {
-      const _guided = getDataMode() === 'guided';
-      const _hasTee = !_guided || shouldUseStatic('tee-sheet');
-      return _hasTee
-        ? { action: 'Priority Saturday tee time offer from Pro Shop', type: 'golf', owner: 'Pro Shop' }
-        : { action: 'Personalized weekend engagement outreach', type: 'general', owner: 'Membership Director' };
-    }
+    case 'Weekend Warrior':
+      return { action: 'Priority Saturday tee time offer from Pro Shop', type: 'golf', owner: 'Pro Shop' };
     case 'Die-Hard Golfer': {
-      const _guided2 = getDataMode() === 'guided';
-      const _hasTee2 = !_guided2 || shouldUseStatic('tee-sheet');
-      if (!_hasTee2) return { action: 'Personalized outreach based on engagement pattern', type: 'general', owner: 'Membership Director' };
       const weeks = risk.match(/(\d+)\s*weeks?/)?.[1];
       return { action: `Pro shop outreach — ${weeks ? `check in, last round ${weeks} weeks ago` : 'check equipment/injury/schedule'}`, type: 'golf', owner: 'Pro Shop' };
     }

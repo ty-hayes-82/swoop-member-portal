@@ -6,7 +6,7 @@ import { PlaybookActionCard } from '@/components/ui';
 import { SourceBadgeRow } from '@/components/ui/SourceBadge.jsx';
 import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, getAllMemberProfiles, setRosterCache, getMemberRoster, getFullRoster } from '@/services/memberService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { shouldUseStatic, getDataMode } from '@/services/demoGate';
+import { getDataMode } from '@/services/demoGate';
 import { scoreMember, getOpenGatesForScoring, hasEngagementGates } from '@/services/guidedScoring';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
@@ -21,19 +21,10 @@ const MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-R
 
 // Filter risk signal text — hide labels referencing closed-gate data (reuses MemberAlerts logic)
 function filterRiskSignalForRoster(text) {
-  if (!text) return text;
-  if (getDataMode() !== 'guided') return text;
-  const hasTeeSheet = shouldUseStatic('tee-sheet');
-  const hasFb = shouldUseStatic('fb');
-  const hasComplaints = shouldUseStatic('complaints');
-  if (!hasTeeSheet && /round|golf visit|tee time|course/i.test(text)) return 'No current risks';
-  if (!hasFb && /F&B|dining|food|beverage|spending.*minimum/i.test(text)) return 'No current risks';
-  if (!hasComplaints && /complaint|service request/i.test(text)) return 'No current risks';
-  return text;
+  return text || 'No current risks';
 }
 
 function generateRoster() {
-  if (!shouldUseStatic('members')) return [];
   const roster = [];
   const atRisk = getAtRiskMembers();
   const watch = getWatchMembers();
@@ -216,7 +207,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                     Last Seen
                   </div>
                   <div className="text-sm text-[#1a1a2e]">
-                    {(getDataMode() === 'guided' && !shouldUseStatic('tee-sheet')) ? '—' : (member.lastSeenLocation || 'Unknown')}
+                    {member.lastSeenLocation || '—'}
                   </div>
                 </div>
                 <div>

@@ -2,11 +2,9 @@
 import { useState, useEffect } from 'react';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getTomorrowForecast } from '@/services/weatherService';
-import { shouldUseStatic } from '@/services/demoGate';
 import { getUnderstaffedDays } from '@/services/staffingService';
 
 function getOutlets() {
-  if (!shouldUseStatic('complaints') && !shouldUseStatic('weather')) return [];
   return [
     { name: 'Grill Room', requiredStaff: 4, scheduledStaff: 2, status: 'gap' },
     { name: 'Terrace', requiredStaff: 3, scheduledStaff: 3, status: 'full' },
@@ -25,12 +23,11 @@ export default function TomorrowForecast() {
   const briefing = getDailyBriefing();
   const tomorrowWeather = getTomorrowForecast();
   const tomorrow = briefing?.todayRisks?.tomorrow || tomorrowWeather;
-  // Only show rounds when tee-sheet data is actually loaded
-  const hasTeeSheet = shouldUseStatic('tee-sheet') || !!briefing?.teeSheet?.roundsToday;
-  const roundsBooked = hasTeeSheet ? (briefing?.teeSheet?.roundsToday || 0) : 0;
+  const roundsBooked = briefing?.teeSheet?.roundsToday || 0;
+  const hasTeeSheet = roundsBooked > 0;
 
-  // Only show forecast when tee-sheet or weather data sources are loaded
-  if (!shouldUseStatic('tee-sheet') && !shouldUseStatic('weather') && !briefing?.teeSheet?.roundsToday) return null;
+  // Only show forecast when we have weather or tee-sheet data
+  if (!tomorrow && !hasTeeSheet) return null;
 
   const weather = tomorrow?.conditions || briefing?.todayRisks?.weather || 'clear';
   const wind = tomorrow?.wind || briefing?.todayRisks?.wind || 0;

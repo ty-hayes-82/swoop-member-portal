@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { getAtRiskMembers, getMemberProfile, getFullRoster } from '@/services/memberService';
 import { getTodayTeeSheet } from '@/services/operationsService';
 import { DEMO_BRIEFING } from '@/services/briefingService';
-import { getDataMode, shouldUseStatic } from '@/services/demoGate';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
 import { useMobileNav } from '../context/MobileNavContext';
@@ -73,8 +72,7 @@ function buildOnPremiseRoster() {
   // 3) SYNTHESIZED lunch reservations — pick up to 6 dining-heavy roster members
   //    not already on premise via tee sheet. Assign staggered lunch slots.
   // TODO(dining-reservations): replace with real getDiningReservations() source.
-  // Gate: only show synthesized dining data when fb gate is open.
-  if (shouldUseStatic('fb')) {
+  {
     const diningArchetypes = new Set(['Social Butterfly', 'Balanced Active']);
     const diningSpots = ['Grill Room', 'Terrace', 'Main Dining', 'Grill Room bar'];
     const lunchSlots = ['11:45 AM', '12:00 PM', '12:15 PM', '12:30 PM', '12:45 PM', '1:00 PM'];
@@ -125,11 +123,7 @@ function MobileMemberCard({ member, expanded, onToggle, showContext }) {
   const color = getHealthColor(member.score);
   const profile = expanded ? getMemberProfile(member.memberId) : null;
   const prefs = profile?.preferences || {};
-  // Gate domain-specific preferences in guided mode
-  const guidedMode = getDataMode() === 'guided';
-  const showDiningPrefs = !guidedMode || shouldUseStatic('fb');
-  const showGolfPrefs = !guidedMode || shouldUseStatic('tee-sheet');
-  const hasPrefs = !!(prefs.favoriteSpots?.length || (showGolfPrefs && prefs.teeWindows) || (showDiningPrefs && prefs.dining) || prefs.notes);
+  const hasPrefs = !!(prefs.favoriteSpots?.length || prefs.teeWindows || prefs.dining || prefs.notes);
 
   const quickAction = (type, label) => {
     showToast(`${label} for ${member.name}`, 'success');
@@ -213,8 +207,8 @@ function MobileMemberCard({ member, expanded, onToggle, showContext }) {
                 {prefs.favoriteSpots?.length ? (
                   <InfoItem label="Favorite spots" value={prefs.favoriteSpots.join(', ')} />
                 ) : null}
-                {showGolfPrefs && prefs.teeWindows ? <InfoItem label="Tee windows" value={prefs.teeWindows} /> : null}
-                {showDiningPrefs && prefs.dining ? <InfoItem label="Dining" value={prefs.dining} /> : null}
+                {prefs.teeWindows ? <InfoItem label="Tee windows" value={prefs.teeWindows} /> : null}
+                {prefs.dining ? <InfoItem label="Dining" value={prefs.dining} /> : null}
                 {prefs.notes ? <InfoItem label="Notes" value={prefs.notes} /> : null}
               </div>
             </div>

@@ -6,7 +6,6 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
-import { shouldUseStatic } from '@/services/demoGate';
 import QualityTab from './tabs/QualityTab';
 import StaffingTab from './tabs/StaffingTab';
 import ComplaintsTab from './tabs/ComplaintsTab';
@@ -14,12 +13,12 @@ import ComplaintsTab from './tabs/ComplaintsTab';
 const ALL_TABS = [
   { key: 'quality', label: 'Quality' },
   { key: 'staffing', label: 'Staffing' },
-  { key: 'complaints', label: 'Complaints', gate: 'complaints' },
+  { key: 'complaints', label: 'Complaints' },
 ];
 
 export default function ServiceView() {
   const { routeIntent, clearRouteIntent } = useNavigationContext();
-  const tabs = ALL_TABS.filter(t => !t.gate || shouldUseStatic(t.gate));
+  const tabs = ALL_TABS;
   const [activeTab, setActiveTab] = useState('quality');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,7 +48,7 @@ export default function ServiceView() {
           context="Cross-domain view connecting staffing levels, complaint patterns, and pace of play to service quality outcomes."
         />
 
-        <EvidenceStrip systems={['Scheduling', 'POS', 'Tee Sheet', ...(shouldUseStatic('complaints') ? ['Complaints'] : []), 'Weather']} />
+        <EvidenceStrip systems={['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather']} />
 
         {/* Tab switcher */}
         <div role="tablist" aria-label="Service tabs" className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">

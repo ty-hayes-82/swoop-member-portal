@@ -3,7 +3,6 @@ import QuickActions from '@/components/ui/QuickActions.jsx';
 import MemberLink from '@/components/MemberLink.jsx';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { getEmailHeatmap, getDecayingMembers } from '@/services/memberService';
-import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 function heatColor(rate) {
   if (rate >= 0.65) return '#12b76a';
   if (rate >= 0.45) return '#12b76a';
@@ -16,10 +15,10 @@ const formatPercent = (value) => (Number.isFinite(value) ? `${(value * 100).toFi
 const formatTrend = (value) => (Number.isFinite(value) ? `${value}% trend` : '—');
 
 export default function EmailTab() {
-  if (getDataMode() === 'guided' && !shouldUseStatic('email')) {
-    return <DataEmptyState icon="📧" title="Email data not connected" description="Import email engagement data to see this tab." dataType="email" />;
-  }
   const heatmap = getEmailHeatmap();
+  if (heatmap.length === 0) {
+    return <DataEmptyState icon="📧" title="No email data" description="Import email engagement data to see this tab." dataType="email" />;
+  }
   const decaying = getDecayingMembers();
 
   const campaigns = [...new Set(heatmap.map(h => h.campaign))];

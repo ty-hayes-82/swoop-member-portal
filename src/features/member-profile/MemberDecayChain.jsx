@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { trackAction } from '@/services/activityService';
-import { getDataMode, shouldUseStatic } from '@/services/demoGate';
 import SourceBadge from '@/components/ui/SourceBadge';
 
 // MemberDecayChain — shared "First Domino" engagement decay sequence card.
@@ -42,29 +41,14 @@ const DOMAIN_TO_SYSTEM = {
 
 function buildDecayChain(profile) {
   const events = [];
-  const guided = getDataMode() === 'guided';
-  const _hasTeeSheet = !guided || shouldUseStatic('tee-sheet');
-  const _hasFb = !guided || shouldUseStatic('fb');
-  const _hasEmail = !guided || shouldUseStatic('email');
-  const _hasEvents = !guided || shouldUseStatic('events');
 
-  const domainAllowed = (domain) => {
-    if (!guided) return true;
-    if (domain === 'Golf' && !_hasTeeSheet) return false;
-    if (domain === 'Dining' && !_hasFb) return false;
-    if (domain === 'Email' && !_hasEmail) return false;
-    if (domain === 'Events' && !_hasEvents) return false;
-    return true;
-  };
-
-  // Add activity items (gated per source in guided mode)
+  // Add activity items — services already filter by loaded domains in data-driven mode
   (profile.activity ?? []).forEach((a) => {
     const domain = a.type?.includes('Golf') || a.type?.includes('Round') ? 'Golf'
       : a.type?.includes('Dining') || a.type?.includes('F&B') ? 'Dining'
       : a.type?.includes('Event') ? 'Events'
       : a.type?.includes('Email') ? 'Email'
       : 'Activity';
-    if (!domainAllowed(domain)) return;
     events.push({
       date: a.timestamp ?? a.date ?? '',
       domain,
@@ -73,10 +57,9 @@ function buildDecayChain(profile) {
     });
   });
 
-  // Add risk signal events (gated per source)
+  // Add risk signal events
   (profile.riskSignals ?? []).forEach((s) => {
     const domain = s.source ?? 'Risk';
-    if (!domainAllowed(domain)) return;
     events.push({
       date: s.timestamp ?? '',
       domain,
@@ -97,7 +80,7 @@ function buildDecayChain(profile) {
       { date: '~4 weeks ago', weeksAgo: 4, domain: 'Golf', label: 'Only 1 round played', type: 'risk' },
       { date: 'this week', weeksAgo: 0, domain: 'Events', label: 'Skipped member-guest invite', type: 'risk', decayOrder: 4 },
       { date: 'this week', weeksAgo: 0, domain: 'Risk', label: 'Resignation risk: high', type: 'risk' },
-    ].filter(evt => domainAllowed(evt.domain));
+    ];
     events.push(...demoEvents);
   }
 

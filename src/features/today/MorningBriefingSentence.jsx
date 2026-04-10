@@ -9,7 +9,6 @@
 import { useMemo } from 'react';
 import StoryHeadline from '@/components/ui/StoryHeadline';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
-import { shouldUseStatic } from '@/services/demoGate';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getDailyForecast } from '@/services/weatherService';
 import { getTodayTeeSheet } from '@/services/operationsService';
@@ -35,80 +34,69 @@ function buildSegments() {
   const segments = [];
   const sources = [];
 
-  // 1. Rounds booked (Tee Sheet)
-  if (shouldUseStatic('tee-sheet')) {
-    const briefing = getDailyBriefing();
-    const rounds = briefing?.teeSheet?.roundsToday || 0;
-    if (rounds > 0) {
-      segments.push({ key: 'rounds', text: `${rounds} rounds booked` });
-      sources.push('Tee Sheet');
-    }
+  // 1. Rounds booked (Tee Sheet) — returns 0 when data not loaded
+  const briefing = getDailyBriefing();
+  const rounds = briefing?.teeSheet?.roundsToday || 0;
+  if (rounds > 0) {
+    segments.push({ key: 'rounds', text: `${rounds} rounds booked` });
+    sources.push('Tee Sheet');
   }
 
   // 2. Weather
-  if (shouldUseStatic('weather') !== false) {
-    try {
-      const daily = getDailyForecast(1);
-      const today = Array.isArray(daily) ? daily[0] : null;
-      const desc = describeWeather(today);
-      if (desc) {
-        segments.push({ key: 'weather', text: `Weather: ${desc}` });
-        sources.push('Weather');
-      }
-    } catch { /* weather unavailable */ }
-  }
+  try {
+    const daily = getDailyForecast(1);
+    const today = Array.isArray(daily) ? daily[0] : null;
+    const desc = describeWeather(today);
+    if (desc) {
+      segments.push({ key: 'weather', text: `Weather: ${desc}` });
+      sources.push('Weather');
+    }
+  } catch { /* weather unavailable */ }
 
   // 3. At-risk members on today's sheet (Tee Sheet ∩ Member CRM)
-  if (shouldUseStatic('tee-sheet') && shouldUseStatic('members')) {
-    const teeSheet = getTodayTeeSheet();
-    const atRiskList = teeSheet.filter(t => (t.healthScore ?? 100) < 50);
-    const atRiskOnSheet = atRiskList.length;
-    if (atRiskOnSheet > 0) {
-      // Sum dues at risk for at-risk members on today's sheet
-      const duesAtRisk = atRiskList.reduce((sum, t) => sum + (t.duesAnnual || 0), 0);
-      const dueText = duesAtRisk > 0 ? ` ($${Math.round(duesAtRisk / 1000)}K dues at risk)` : '';
-      segments.push({
-        key: 'at-risk',
-        text: `${atRiskOnSheet} at-risk member${atRiskOnSheet === 1 ? '' : 's'} on today's tee sheet${dueText}`,
-        urgent: true,
-      });
-      if (!sources.includes('Member CRM')) sources.push('Member CRM');
-    }
+  const teeSheet = getTodayTeeSheet();
+  const atRiskList = teeSheet.filter(t => (t.healthScore ?? 100) < 50);
+  const atRiskOnSheet = atRiskList.length;
+  if (atRiskOnSheet > 0) {
+    const duesAtRisk = atRiskList.reduce((sum, t) => sum + (t.duesAnnual || 0), 0);
+    const dueText = duesAtRisk > 0 ? ` ($${Math.round(duesAtRisk / 1000)}K dues at risk)` : '';
+    segments.push({
+      key: 'at-risk',
+      text: `${atRiskOnSheet} at-risk member${atRiskOnSheet === 1 ? '' : 's'} on today's tee sheet${dueText}`,
+      urgent: true,
+    });
+    if (!sources.includes('Member CRM')) sources.push('Member CRM');
   }
 
   // 4. Staffing gap (Scheduling) — with dollar exposure from revenue leakage
-  if (shouldUseStatic('complaints')) {
-    const coverage = getShiftCoverage();
-    const todayGap = coverage
-      .filter(s => (s.required ?? 0) - (s.scheduled ?? 0) > 0)
-      .reduce((sum, s) => sum + ((s.required ?? 0) - (s.scheduled ?? 0)), 0);
+  const coverage = getShiftCoverage();
+  const todayGap = coverage
+    .filter(s => (s.required ?? 0) - (s.scheduled ?? 0) > 0)
+    .reduce((sum, s) => sum + ((s.required ?? 0) - (s.scheduled ?? 0)), 0);
 
-    // Pull staffing dollar exposure from revenue leakage
-    const leakage = shouldUseStatic('fb') ? getLeakageData() : null;
-    const staffingDollarExposure = leakage?.STAFFING_LOSS || 0;
-    const dollarText = staffingDollarExposure > 0
-      ? ` — $${staffingDollarExposure.toLocaleString()}/mo at risk`
-      : '';
+  const leakage = getLeakageData();
+  const staffingDollarExposure = leakage?.STAFFING_LOSS || 0;
+  const dollarText = staffingDollarExposure > 0
+    ? ` — $${staffingDollarExposure.toLocaleString()}/mo at risk`
+    : '';
 
-    if (todayGap > 0) {
+  if (todayGap > 0) {
+    segments.push({
+      key: 'staffing',
+      text: `Staffing gap: ${todayGap} short for projected post-round dining demand${dollarText}`,
+      urgent: true,
+    });
+    sources.push('Scheduling');
+    if (!sources.includes('POS')) sources.push('POS');
+  } else {
+    const summary = getStaffingSummary();
+    if (summary?.understaffedDaysCount > 0) {
       segments.push({
         key: 'staffing',
-        text: `Staffing gap: ${todayGap} short for projected post-round dining demand${dollarText}`,
-        urgent: true,
+        text: `${summary.understaffedDaysCount} understaffed shifts this month at risk${dollarText}`,
+        urgent: false,
       });
       sources.push('Scheduling');
-      if (!sources.includes('POS')) sources.push('POS');
-    } else {
-      // Fall back to understaffed days indicator
-      const summary = getStaffingSummary();
-      if (summary?.understaffedDaysCount > 0) {
-        segments.push({
-          key: 'staffing',
-          text: `${summary.understaffedDaysCount} understaffed shifts this month at risk${dollarText}`,
-          urgent: false,
-        });
-        sources.push('Scheduling');
-      }
     }
   }
 

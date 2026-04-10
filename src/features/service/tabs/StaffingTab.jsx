@@ -7,7 +7,7 @@ import { getDailyBriefing } from '@/services/briefingService';
 import { getDailyForecast } from '@/services/weatherService';
 import { getDollarPerSlowRound, getLeakageData } from '@/services/revenueService';
 import { getPaceFBImpact } from '@/services/operationsService';
-import { shouldUseStatic } from '@/services/demoGate';
+
 import { useNavigation } from '@/context/NavigationContext';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import MemberLink from '@/components/MemberLink';
@@ -18,9 +18,9 @@ export default function StaffingTab() {
   const briefing = getDailyBriefing();
   const understaffedDays = getUnderstaffedDays();
   const feedbackRecords = getComplaintCorrelation();
-  const paceFB = shouldUseStatic('fb') ? getPaceFBImpact() : null;
-  const dollarPerSlowRound = shouldUseStatic('fb') ? getDollarPerSlowRound() : 0;
-  const leakage = shouldUseStatic('fb') ? getLeakageData() : null;
+  const paceFB = getPaceFBImpact();
+  const dollarPerSlowRound = getDollarPerSlowRound();
+  const leakage = getLeakageData();
 
   if (understaffedDays.length === 0 && feedbackRecords.length === 0) {
     return <DataEmptyState icon="📋" title="No staffing data yet" description="Import staffing and shift data to see coverage gaps, demand forecasting, and complaint correlation." dataType="staffing" />;
