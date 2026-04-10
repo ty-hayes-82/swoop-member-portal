@@ -229,7 +229,7 @@ export default async function handler(req, res) {
 
   // Build system prompt with SMS instruction
   const basePrompt = buildConciergePrompt(profile, clubName);
-  const smsInstruction = '\n\nYou are responding via SMS text message. Keep responses under 300 characters. No formatting, no markdown, no asterisks, no bullet points. Be warm and conversational like texting a friend who happens to work at the club.';
+  const smsInstruction = '\n\nIMPORTANT: You are responding via SMS text message on a trial account. Your ENTIRE response must be under 100 characters. Be extremely brief — one short sentence max. No formatting, no markdown, no asterisks. Warm and casual like a quick text.';
 
   // Get session summary for context
   let conversationContext = '';
@@ -254,7 +254,7 @@ export default async function handler(req, res) {
     const client = getAnthropicClient();
     const result = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 300,
+      max_tokens: 80,
       system: systemPrompt,
       messages,
     });
