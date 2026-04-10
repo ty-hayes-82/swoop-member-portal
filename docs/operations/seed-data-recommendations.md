@@ -6,6 +6,32 @@
 
 ---
 
+## Final 5-Cycle Audit — ALL 20 PATHS AT 5/5 (2026-04-10)
+
+20 import-path combinations tested across 5 cycles. All scored 5/5 after seed data fixes.
+
+| Cycle | Paths tested | Fixes applied |
+|---|---|---|
+| 1 | Members, M+Tee, M+FB, Core 3 | CSV type normalization, dining conversion data file |
+| 2 | M+Email, M+Complaints, M+Tee+Email, M+FB+Complaints | Email CSV backdated to Oct, Hurst timeline fixed, Leonard ID aligned |
+| 3 | M+T+F+Complaints, M+T+F+Email, All-Agents, All 8 | Whitfield added to decayingMembers, cockpit suggestedActions |
+| 4 | M+Staffing, M+ClubProfile, M+T+Comp+Email, All 8 | Mills ID normalized, staffing rates realistic, club profile lat/lng |
+| 5 | Tee-only, FB-only, M+Agents, All 8+ProShop | Clean pass — no fixes needed |
+
+### What shipped during the cycles:
+- 8 backdated email campaigns (Oct-Nov) proving 6-8 week early warning
+- Pro shop outlet + 10 checks showing purchase personality per member
+- Enriched dining items (Arnold Palmer + Club Sandwich = Whitfield's usual)
+- Realistic staffing rates ($13-58/hr)
+- Club profile with lat/lng/timezone
+- AI recommendation playbook (8 archetypes × 3-4 actions)
+- /api/generate-recommendation + /api/generate-batch-recommendations (Claude API)
+- 7 pre-generated AI-format seed actions with talking points + dollar stakes
+- diningConversion.js (20 daily rows deriving 41%/22% rates)
+- Mills/Leonard ID alignment, Hurst/Whitfield timeline fixes
+
+---
+
 ## Round 2 Audit — Guided Demo Insight Quality (2026-04-10)
 
 5 GM auditor personas tested the guided demo experience. Systemic finding: **named + dollarized = compelling; anonymous + aggregate = forgettable.**
