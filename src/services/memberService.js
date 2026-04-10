@@ -519,20 +519,6 @@ export const getVolatileMembers = () => {
   }).sort((a, b) => a.score - b.score);
 };
 
-// Fetch real health score dimensions for a member from the health_scores table
-export const getMemberHealthDimensions = async (memberId) => {
-  try {
-    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
-    if (!clubId || !memberId) return null;
-    const res = await fetch(`/api/compute-health-scores?clubId=${clubId}&memberId=${memberId}&mode=get`);
-    if (res.ok) {
-      const data = await res.json();
-      return data; // { golf_score, dining_score, email_score, event_score }
-    }
-  } catch {}
-  return null;
-};
-
 // Fetch churn prediction for a member
 export const getMemberChurnPrediction = async (memberId) => {
   try {

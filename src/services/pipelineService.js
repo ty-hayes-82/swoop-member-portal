@@ -215,72 +215,9 @@ export const _init = async () => {
   }
 };
 
-export const getWarmLeads = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return [];
-  return getPipelineSnapshot().leads;
-};
-
 export const getPipelineSummary = () => {
   if (!shouldUseStatic('pipeline') && !_d) return buildPipelineSummary([]);
   return getPipelineSnapshot().summary;
-};
-
-export const getConversionInsights = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return { readyInvites: 0, dormantHotLeads: 0, avgDaysSinceVisit: 0, avgScore: 0, uniqueSponsors: 0 };
-  const leads = getSanitizedLeads();
-  const hotLeads = leads.filter((lead) => lead.tier === 'hot');
-  const avgScore = leads.length
-    ? Math.round(leads.reduce((sum, lead) => sum + lead.score, 0) / leads.length)
-    : 0;
-  const avgDaysSinceVisit = hotLeads.length
-    ? Math.round(
-      hotLeads.reduce((sum, lead) => {
-        const dt = ensureDate(lead.lastVisit);
-        if (!dt) return sum + 21; // treat missing last visit as stale
-        const diffDays = Math.max(0, (Date.now() - dt.getTime()) / 86400000);
-        return sum + diffDays;
-      }, 0) / hotLeads.length,
-    )
-    : 0;
-  const dormantHotLeads = hotLeads.filter((lead) => {
-    const dt = ensureDate(lead.lastVisit);
-    if (!dt) return true;
-    return (Date.now() - dt.getTime()) / 86400000 > 21;
-  }).length;
-  const uniqueSponsors = leads.reduce((set, lead) => {
-    const sponsor = (lead.sponsorName || lead.sponsor || '').trim();
-    if (sponsor) set.add(sponsor.toLowerCase());
-    return set;
-  }, new Set()).size;
-
-  return {
-    readyInvites: hotLeads.length,
-    dormantHotLeads,
-    avgDaysSinceVisit,
-    avgScore,
-    uniqueSponsors,
-  };
-};
-
-export const getWaitlistWithRiskScoring = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return [];
-  const source = Array.isArray(_d?.waitlistEntries) && _d.waitlistEntries.length
-    ? _d.waitlistEntries
-    : getStaticWaitlistEntries();
-  return [...normalizeWaitlistEntries(source)].sort((a, b) => {
-    if (a.retentionPriority !== b.retentionPriority) {
-      return a.retentionPriority === 'HIGH' ? -1 : 1;
-    }
-    return a.healthScore - b.healthScore;
-  });
-};
-
-export const getWaitlistSummary = () => {
-  if (!shouldUseStatic('pipeline') && !_d) return { total: 0, highPriority: 0, normalPriority: 0, avgHealthScore: 0 };
-  const source = Array.isArray(_d?.waitlistEntries) && _d.waitlistEntries.length
-    ? _d.waitlistEntries
-    : getStaticWaitlistEntries();
-  return summarizeWaitlistEntries(source);
 };
 
 export const sourceSystems = ['Tee Sheet', 'Analytics'];

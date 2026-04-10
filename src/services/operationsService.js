@@ -69,24 +69,6 @@ export const getMonthlyRevenueSummary = () => {
   return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
 };
 
-export const getPaceDistribution = () => {
-  if (_d?.paceDistribution) {
-    const source = _d.paceDistribution;
-    if (!Array.isArray(source) || source.length === 0) return DEFAULT_PACE_DISTRIBUTION;
-    return source.map((item, index) => {
-      const fallback = DEFAULT_PACE_DISTRIBUTION[index] ?? DEFAULT_PACE_DISTRIBUTION[DEFAULT_PACE_DISTRIBUTION.length - 1];
-      return {
-        bucket: toBucket(item?.bucket, fallback.bucket),
-        minutes: sanitizePositive(item?.minutes, fallback.minutes),
-        count: Math.round(sanitizePositive(item?.count, fallback.count)),
-        isSlow: typeof item?.isSlow === 'boolean' ? item.isSlow : fallback.isSlow,
-      };
-    });
-  }
-  if (!shouldUseStatic('pace')) return [];
-  return paceDistribution ?? DEFAULT_PACE_DISTRIBUTION;
-};
-
 const EMPTY_SLOW_ROUND = { totalRounds: 0, slowRounds: 0, overallRate: 0, weekendRate: 0, weekdayRate: 0, threshold: 270 };
 export const getSlowRoundRate = () => {
   if (_d?.slowRoundStats) { /* use API data */ }
@@ -133,15 +115,6 @@ export const getPaceFBImpact = () => {
     slowRoundsPerMonth: Math.round(sanitizePositive(source?.slowRoundsPerMonth, DEFAULT_PACE_FB_IMPACT.slowRoundsPerMonth)),
     revenueLostPerMonth: Math.round(sanitizePositive(source?.revenueLostPerMonth, DEFAULT_PACE_FB_IMPACT.revenueLostPerMonth)),
   };
-};
-
-export const getDemandGaps = () => {
-  if (_d?.demandGaps) return _d.demandGaps;
-  if (!shouldUseStatic('pipeline')) return [];
-  return waitlistEntries.map(w => ({
-    date: w.date, slot: w.slot,
-    waitlistCount: w.count, eventOverlap: w.hasEventOverlap,
-  }));
 };
 
 // ── Tee Sheet ─────────────────────────────────────────────────

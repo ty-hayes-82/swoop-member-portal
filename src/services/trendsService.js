@@ -17,39 +17,6 @@ export const _init = async () => {
 const _trends = () => _d?.trends ?? (shouldUseStatic('pipeline') ? staticTrends : {});
 const _months = () => _d?.months ?? (shouldUseStatic('pipeline') ? STATIC_MONTHS : []);
 
-const FORMAT_FNS = {
-  percent:  v => `${(v * 100).toFixed(0)}%`,
-  currency: v => `$${(v / 1000).toFixed(0)}K`,
-  number:   v => v.toLocaleString(),
-};
-
-export function getTrendNarrative(metricKey, format = 'number') {
-  if (!_d && !shouldUseStatic('pipeline')) return null;
-  const series = _trends()[metricKey];
-  const months = _months();
-  if (!series || series.length < 2) return null;
-  const fmt       = FORMAT_FNS[format] ?? FORMAT_FNS.number;
-  const current   = series[series.length - 1];
-  const prior     = series[series.length - 2];
-  const pctChange = prior !== 0 ? ((current - prior) / Math.abs(prior)) * 100 : 0;
-  const direction = current > prior ? 'up' : current < prior ? 'down' : 'flat';
-  let streak = 1;
-  for (let i = series.length - 2; i > 0; i--) {
-    if ((series[i] > series[i-1]) === (direction === 'up')) streak++;
-    else break;
-  }
-  const totalChange = series[0] !== 0 ? ((current - series[0]) / Math.abs(series[0])) * 100 : 0;
-  return {
-    current, prior, direction, pctChange,
-    priorMonth:   months[months.length - 2],
-    oldestMonth:  months[0],
-    streak, series, months,
-    currentFormatted: fmt(current),
-    priorFormatted:   fmt(prior),
-    totalChange,
-  };
-}
-
 export function getTrendChartData(metricKey) {
   const series = _trends()[metricKey];
   const months = _months();
@@ -68,12 +35,3 @@ export function getMultiSeriesTrendData(keys) {
   });
 }
 
-export function getOutletTrendData(outletName) {
-  const src = _d?.outletTrends ?? (shouldUseStatic('pipeline') ? staticOutletTrends : {});
-  const months = _months();
-  const series = src?.[outletName];
-  if (!series) return [];
-  return months.map((month, i) => ({
-    month, value: series[i] ?? 0, isCurrent: i === months.length - 1,
-  }));
-}

@@ -82,20 +82,4 @@ export const getServiceRecoveryAlerts = (payload = null) => {
   }));
 };
 
-export const getZoneDensity = (members = [], payload = null) => {
-  if (!shouldUseStatic('weather') && !_d && !payload) return [];
-  const liveMembers = normalizeMembers(Array.isArray(members) ? members : []);
-  const byZone = liveMembers.reduce((acc, member) => {
-    acc[member.zoneId] = (acc[member.zoneId] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  const source = payload?.zones ?? payload?.zoneAnalytics;
-  const zones = Array.isArray(source) && source.length ? source : defaultZones;
-  return zones.map((zone) => ({
-    ...zone,
-    count: byZone[zone.id] ?? zone.count ?? 0,
-  }));
-};
-
 export const locationSourceSystems = ['Swoop App', 'Member CRM', 'On-Property Sensors'];
