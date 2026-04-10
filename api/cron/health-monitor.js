@@ -9,6 +9,8 @@ import { sql } from '@vercel/postgres';
 import { logWarn, logInfo } from '../lib/logger.js';
 import { evaluateRiskTrigger } from '../agents/risk-config.js';
 
+const MAX_CANDIDATES_PER_RUN = 25;
+
 export default async function handler(req, res) {
   // Auth: same pattern as playbook-timers.js
   const auth = req.headers['authorization'] || '';
@@ -52,6 +54,8 @@ export default async function handler(req, res) {
             AND pr.playbook_id = 'member-risk-lifecycle'
             AND pr.status = 'active'
         )
+      ORDER BY m.annual_dues DESC
+      LIMIT ${MAX_CANDIDATES_PER_RUN}
     `;
 
     logInfo('/api/cron/health-monitor', `found ${candidates.length} crossing candidates`);

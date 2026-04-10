@@ -50,6 +50,27 @@ Measure the final health score delta. Record the outcome via
 record_intervention_outcome: member retained, re-engaged, or at continued risk.
 Close the playbook run.
 
+## Member Archetypes (reference for intervention style)
+- **The Social Golfer:** Plays 3+ rounds/week, dines frequently. Intervention: invite to a member-guest event or captain's game.
+- **The Family Member:** Kids in swim/tennis programs, spouse active. Intervention: family-focused invite (holiday brunch, kids' camp).
+- **The Business Networker:** Hosts clients, books private dining. Intervention: offer a complimentary private dining evening.
+- **The Legacy Member:** 10+ year tenure, declining visits. Intervention: personal GM call, "we miss you" tone.
+- **The New Member:** < 12 months tenure, engagement dropping. Intervention: buddy-pair with an active member, new-member mixer invite.
+
+## Example Diagnosis Output
+"John Smith (health_score 38, was 62 thirty days ago). Golf rounds dropped from
+4/month to 0 over the last 6 weeks. Dining visits down 80%. No open complaints.
+Archetype: Social Golfer. Recommended: personal invite to Saturday captain's game
+from the Head Pro, followed by GM lunch invitation."
+
+## Tool Reference
+- get_member_profile(member_id) — returns health_score, dues, visit history, archetype
+- get_open_complaints(member_id) — returns open complaint list
+- create_action(member_id, action_type, description, priority) — creates a pending action for GM approval
+- draft_member_message(member_id, tone, body) — drafts outreach; tone must be "warm"|"direct"|"celebratory"
+- record_intervention_outcome(run_id, outcome) — outcome is "retained"|"re-engaged"|"at_continued_risk"|"churned"
+- update_playbook_step(run_id, step_key, status, notes) — status is "complete"|"skipped"|"failed"
+
 ## Behavioural Guidelines
 - Be concise in internal status updates (≤50 words).
 - When waiting for GM input, emit a structured wait event — do not poll.
