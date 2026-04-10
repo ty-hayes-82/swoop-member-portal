@@ -13,6 +13,80 @@ import { buildConciergePrompt } from '../../src/config/conciergePrompt.js';
 import { getOrCreateSession, updateSessionSummary } from '../agents/concierge-session.js';
 import { getAnthropicClient } from '../agents/managed-config.js';
 
+// ---------------------------------------------------------------------------
+// SMS tool definitions (Anthropic tool_use format)
+// ---------------------------------------------------------------------------
+const SMS_TOOLS = [
+  {
+    name: 'get_club_calendar',
+    description: 'Get upcoming club events and activities',
+    input_schema: { type: 'object', properties: { days_ahead: { type: 'integer', default: 7 } } }
+  },
+  {
+    name: 'book_tee_time',
+    description: 'Book a tee time for the member',
+    input_schema: { type: 'object', properties: { date: { type: 'string' }, time: { type: 'string' }, course: { type: 'string' }, players: { type: 'integer' } }, required: ['date', 'time'] }
+  },
+  {
+    name: 'make_dining_reservation',
+    description: 'Make a dining reservation',
+    input_schema: { type: 'object', properties: { date: { type: 'string' }, time: { type: 'string' }, outlet: { type: 'string' }, party_size: { type: 'integer' }, preferences: { type: 'string' } }, required: ['date', 'outlet'] }
+  },
+  {
+    name: 'get_my_schedule',
+    description: 'Get the member upcoming tee times, reservations, and events',
+    input_schema: { type: 'object', properties: {} }
+  },
+];
+
+/**
+ * Execute an SMS tool call and return seed data.
+ */
+async function executeSmsTool(toolName, input, member) {
+  switch (toolName) {
+    case 'get_club_calendar': {
+      return {
+        events: [
+          { date: '2026-04-10', time: '6:00 PM', title: 'Wine Dinner — Spring Pairing Menu', location: 'Main Dining Room', capacity: '48 seats, 12 remaining' },
+          { date: '2026-04-12', time: '8:00 AM', title: 'Saturday Morning Shotgun — Member-Guest', location: 'North Course', capacity: '72 players, 8 spots left' },
+          { date: '2026-04-13', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment' },
+          { date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', capacity: '20 teams max, 6 remaining' },
+          { date: '2026-04-18', time: '7:00 AM', title: 'Club Championship Qualifier — Round 1', location: 'South Course', capacity: 'Registration open' },
+        ],
+      };
+    }
+    case 'book_tee_time': {
+      const course = input.course || 'North Course';
+      const players = input.players || 4;
+      return {
+        confirmation: `Tee time booked: ${input.date} at ${input.time} on the ${course} for ${players} players.`,
+        confirmation_number: `TT-${Date.now().toString(36).toUpperCase()}`,
+        member_name: member.first_name + ' ' + member.last_name,
+      };
+    }
+    case 'make_dining_reservation': {
+      const party = input.party_size || 2;
+      const time = input.time || '7:00 PM';
+      return {
+        confirmation: `Dining reservation confirmed: ${input.date} at ${time} at ${input.outlet} for ${party} guests.`,
+        confirmation_number: `DR-${Date.now().toString(36).toUpperCase()}`,
+        preferences_noted: input.preferences || 'Booth 12 (preferred)',
+        member_name: member.first_name + ' ' + member.last_name,
+      };
+    }
+    case 'get_my_schedule': {
+      return {
+        upcoming: [
+          { type: 'tee_time', date: '2026-04-12', time: '7:00 AM', course: 'North Course', players: 4, group: ['James Whitfield', 'Tom Gallagher', 'Mark Patterson', 'Greg Holloway'] },
+          { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing' },
+        ],
+      };
+    }
+    default:
+      return { error: `Unknown tool: ${toolName}` };
+  }
+}
+
 // In-memory conversation cache keyed by E.164 phone number.
 // Each entry: { messages: [{role, content}], lastActive: number }
 const conversationCache = new Map();
@@ -233,11 +307,9 @@ export default async function handler(req, res) {
 - You are responding via SMS text message. Your response will be sent directly as a text.
 - Keep responses concise — 2-3 sentences max (under 400 characters).
 - No formatting, no markdown, no asterisks, no bullet points, no XML, no code blocks.
-- Do NOT output function calls, tool calls, or any XML tags. Just plain text.
-- Do NOT say "let me check" or "let me look up" — just answer with what you know about the club.
 - Be warm and conversational like texting a friend who works at the club.
 - Use their first name.
-- Answer based on what you know about the member and club from your context. Do not attempt to call external tools.`;
+- Use the provided tools to look up schedules, book tee times, make dining reservations, and check the club calendar. Do not guess — call the tool.`;
 
   // Get session summary for context
   let conversationContext = '';
@@ -256,17 +328,42 @@ export default async function handler(req, res) {
   const history = getConversation(From);
   const messages = [...history, { role: 'user', content: Body || '' }];
 
-  // Call Claude
+  // Call Claude with tool use loop
   let responseText = '';
   try {
     const client = getAnthropicClient();
-    const result = await client.messages.create({
+    let result = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 300,
       system: systemPrompt,
       messages,
+      tools: SMS_TOOLS,
     });
-    responseText = result.content?.[0]?.text ?? '';
+
+    // Tool use loop — execute tool calls and feed results back to Claude
+    while (result.stop_reason === 'tool_use') {
+      const toolUse = result.content.find(c => c.type === 'tool_use');
+      if (!toolUse) break;
+
+      console.log('[twilio-inbound] tool call:', toolUse.name, JSON.stringify(toolUse.input));
+      const toolResult = await executeSmsTool(toolUse.name, toolUse.input, member);
+
+      messages.push({ role: 'assistant', content: result.content });
+      messages.push({
+        role: 'user',
+        content: [{ type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(toolResult) }],
+      });
+
+      result = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        system: systemPrompt,
+        messages,
+        tools: SMS_TOOLS,
+      });
+    }
+
+    responseText = result.content.find(c => c.type === 'text')?.text ?? '';
   } catch (err) {
     console.error('[twilio-inbound] Claude error:', err.message);
     responseText = `Hi ${profile.first_name}! I'm having a brief technical issue. Text me again in a moment and I'll be right with you.`;
