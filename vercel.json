@@ -4,7 +4,8 @@
   "outputDirectory": "dist",
   "crons": [
     { "path": "/api/cron/weather-daily", "schedule": "0 3 * * *" },
-    { "path": "/api/cron/purge-cross-club-audit", "schedule": "0 4 * * *" }
+    { "path": "/api/cron/purge-cross-club-audit", "schedule": "0 4 * * *" },
+    { "path": "/api/cron/playbook-timers", "schedule": "0 8 * * *" }
   ],
   "headers": [
     {
