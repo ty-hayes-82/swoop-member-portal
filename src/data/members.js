@@ -53,8 +53,8 @@ export const watchMembers = [
 
 export const atRiskMembers = [
   // ON-41 data model note: include duesAnnual on at-risk rows so UI can derive totals from row data.
-  { memberId: 'mbr_t03', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:2},{month:'Nov',rounds:1},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
-  { memberId: 'mbr_117', name: 'Linda Leonard', score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:0},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_t03', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:10},{month:'Nov',rounds:6},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_t07', name: 'Linda Leonard', score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:0},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
   { memberId: 'mbr_t01', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 16 — 42-min Grill Room wait, felt ignored. $18K dues at risk', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:3},{month:'Dec',rounds:2},{month:'Jan',rounds:1}] },
   { memberId: 'mbr_t04', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace — zero rounds since. 10-year member', archetype: 'Weekend Warrior', duesAnnual: 12000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
   { memberId: 'mbr_t05', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact $3,020 F&B minimum then stopping. 9-day complaint unresolved. No golf since Nov', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:1}] },
@@ -69,14 +69,14 @@ export const resignationScenarios = [
     missedIntervention: 'November email open-rate drop should have triggered Watch-tier outreach — 8-week window missed',
     lifetimeValue: 72000, dues: 18000,
     timeline: [
-      { date: 'Oct 2025', event: 'Golf drops from 14 to 8 rounds/mo', domain: 'Golf' },
-      { date: 'Nov 2025', event: 'Email open rate falls below 20%', domain: 'Email' },
+      { date: 'Oct 2025', event: 'Email open rate drops from 80% to 40% — first sign of disengagement', domain: 'Email' },
+      { date: 'Nov 2025', event: 'Golf drops from 10 to 6 rounds/mo; email open rate falls below 20%', domain: 'Golf' },
       { date: 'Dec 2025', event: 'Zero rounds played; one dining visit', domain: 'Golf' },
       { date: 'Jan 8', event: 'Resignation submitted', domain: 'Membership' },
     ],
   },
   {
-    memberId: 'mbr_117', name: 'Linda Leonard', archetype: 'Ghost', resignDate: '2026-01-15',
+    memberId: 'mbr_t07', name: 'Linda Leonard', archetype: 'Ghost', resignDate: '2026-01-15',
     pattern: 'Complete disengagement; dues-only member for 3+ months', keySignal: 'No visits since October',
     missedIntervention: '3+ weeks of zero visits should have triggered GM personal call — intervention window: mid-November',
     lifetimeValue: 36000, dues: 18000,
@@ -89,13 +89,13 @@ export const resignationScenarios = [
   },
   {
     memberId: 'mbr_t01', name: 'James Whitfield', archetype: 'Balanced Active', resignDate: '2026-01-22',
-    pattern: 'Service recovery failure — preventable departure', keySignal: 'Complaint Jan 18, unresolved → resign Jan 22',
+    pattern: 'Service recovery failure — preventable departure', keySignal: 'Complaint Jan 16, unresolved → resign Jan 22',
     lifetimeValue: 54000, dues: 18000,
     timeline: [
       { date: 'Dec 2025', event: 'Active, healthy member. 8 rounds, dining weekly.', domain: 'All' },
       { date: 'Jan 1–17', event: 'Normal activity continues', domain: 'All' },
-      { date: 'Jan 18', event: 'Complaint filed — slow lunch at Grill Room, felt ignored. Very unhappy.', domain: 'Feedback' },
-      { date: 'Jan 19–21', event: 'Complaint status: "Acknowledged" — never resolved', domain: 'Feedback' },
+      { date: 'Jan 16', event: 'Complaint filed — slow lunch at Grill Room, felt ignored. Very unhappy.', domain: 'Feedback' },
+      { date: 'Jan 17–21', event: 'Complaint status: "Acknowledged" — never resolved', domain: 'Feedback' },
       { date: 'Jan 22', event: 'Resignation submitted', domain: 'Membership' },
     ],
   },
@@ -107,7 +107,8 @@ export const resignationScenarios = [
     timeline: [
       { date: 'Oct 2025', event: '4 rounds played (Sat/Sun only)', domain: 'Golf' },
       { date: 'Nov 2025', event: 'Down to 2 rounds; skips 3 weekend events', domain: 'Golf' },
-      { date: 'Dec 2025', event: '1 round played; no dining or events', domain: 'All' },
+      { date: 'Nov 2025', event: 'Email open rate drops from 40% to 28%', domain: 'Email' },
+      { date: 'Dec 2025', event: '1 round played; email engagement falls to 11%; no dining or events', domain: 'All' },
       { date: 'Jan 27', event: 'Resignation submitted', domain: 'Membership' },
     ],
   },
@@ -466,8 +467,8 @@ export const memberProfiles = {
       { id: 'recommend', status: 'Resignation received — no prior outreach', owner: 'Member Pulse', timestamp: '2026-01-08T10:05:00Z' },
     ],
   },
-  mbr_117: {
-    memberId: 'mbr_117',
+  mbr_t07: {
+    memberId: 'mbr_t07',
     name: 'Linda Leonard',
     tier: 'Social',
     joinDate: '2025-06-10',
