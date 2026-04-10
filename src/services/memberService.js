@@ -746,7 +746,7 @@ export const getMemberProfile = (memberId) => {
     });
   }
   // Fallback 2: check watch members
-  const allWatch = (staticWatchMembers ?? []);
+  const allWatch = getDataMode() === 'demo' ? (staticWatchMembers ?? []) : [];
   const watchFound = allWatch.find(m => m.memberId === memberId);
   if (watchFound) {
     return normalizeMemberProfile({

@@ -1,7 +1,7 @@
 // briefingService.js — Phase 1 static · Phase 2 /api/briefing
 
 import { apiFetch } from './apiClient';
-import { isGateOpen } from './demoGate';
+import { isGateOpen, getDataMode } from './demoGate';
 import { getMonthlyRevenueSummary, getRevenueByDay, getTodayTeeSheet, getTeeSheetSummary } from './operationsService';
 import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';

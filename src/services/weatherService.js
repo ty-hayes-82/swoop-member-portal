@@ -5,6 +5,7 @@
 
 import { weatherDaily as weatherData } from '../data/weather';
 import { apiFetch } from './apiClient';
+import { getDataMode } from './demoGate';
 import { logError } from '../utils/logError';
 
 /**
@@ -212,6 +213,7 @@ export function getHourlyForecast() {
  */
 export function getDailyForecast(numDays = 5) {
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
+  if (getDataMode() !== 'demo') return [];
   // Static fallback from weather data starting Jan 17
   const startIdx = weatherData.findIndex(d => d.date === '2026-01-17');
   if (startIdx >= 0) {
@@ -237,6 +239,7 @@ export function getTomorrowForecast() {
 /** @returns {WeatherAlert[]} */
 export function getWeatherAlerts() {
   if (_forecast?.alerts?.length) return _forecast.alerts;
+  if (getDataMode() !== 'demo') return [];
   return [{
     type: 'Wind Advisory',
     severity: 'MODERATE',

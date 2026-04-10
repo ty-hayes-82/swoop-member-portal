@@ -5,7 +5,7 @@ import { getDataMode } from './demoGate';
 import { memberArchetypes } from '@/data/members';
 
 // Touchpoint correlations with retention — derived from cross-domain analysis
-export const touchpointCorrelations = [
+const touchpointCorrelations = [
   { touchpoint: 'Round Frequency', retentionImpact: 0.89, category: 'golf', description: 'Strongest predictor. Members playing 3+ rounds/month have 94% renewal rate vs. 61% for <1 round/month.' },
   { touchpoint: 'Post-Round Dining', retentionImpact: 0.78, category: 'dining', description: 'Members who dine after rounds have 2.3x higher renewal rates. The round-to-dining connection is the strongest cross-domain signal.' },
   { touchpoint: 'Event Attendance', retentionImpact: 0.72, category: 'events', description: '2nd strongest predictor of retention after round frequency. Members attending 2+ events/quarter renew at 91%.' },
@@ -17,7 +17,7 @@ export const touchpointCorrelations = [
 ];
 
 // At-risk member touchpoint correlations — reordered for recovery context
-export const touchpointCorrelationsAtRisk = [
+const touchpointCorrelationsAtRisk = [
   { touchpoint: 'Complaint Resolution', retentionImpact: 0.91, category: 'service', description: 'The #1 recovery lever. At-risk members whose complaints are resolved same-day recover at 74% vs. 31% for delayed resolution.' },
   { touchpoint: 'Round Frequency', retentionImpact: 0.85, category: 'golf', description: 'Re-engaging at-risk members with even 1 round/month improves recovery probability by 40%.' },
   { touchpoint: 'Staff Interactions', retentionImpact: 0.79, category: 'service', description: 'Personal GM outreach is 3.4x more effective than email for at-risk members. Name recognition matters most when members feel invisible.' },
@@ -29,7 +29,7 @@ export const touchpointCorrelationsAtRisk = [
 ];
 
 // Experience-to-outcome correlation cards
-export const correlationInsights = [
+const correlationInsights = [
   {
     id: 'dining-after-rounds',
     headline: 'Members who dine after rounds have 2.3x higher renewal rates',
@@ -87,7 +87,7 @@ export const correlationInsights = [
 ];
 
 // Event ROI data
-export const eventROI = [
+const eventROI = [
   { type: 'Member-Guest Tournament', attendance: 48, retentionRate: 96, avgSpend: 285, roi: 4.2, frequency: 'Quarterly' },
   { type: 'Wine Dinner', attendance: 32, retentionRate: 94, avgSpend: 125, roi: 3.8, frequency: 'Monthly' },
   { type: 'Family Pool Day', attendance: 28, retentionRate: 92, avgSpend: 85, roi: 3.1, frequency: 'Weekly (summer)' },
@@ -97,7 +97,7 @@ export const eventROI = [
 ];
 
 // Complaint-to-loyalty statistics
-export const complaintLoyaltyStats = {
+const complaintLoyaltyStats = {
   totalComplaints: 47,
   resolvedWithin24h: 31,
   renewalRateResolved: 89,
@@ -126,7 +126,7 @@ export const getArchetypeSpendPatterns = () => {
 };
 
 // Archetype-specific touchpoint correlations — each archetype has different retention drivers
-export const touchpointCorrelationsByArchetype = {
+const touchpointCorrelationsByArchetype = {
   'Die-Hard Golfer': [
     { touchpoint: 'Round Frequency', retentionImpact: 0.94, category: 'golf', description: 'The defining retention driver. Die-Hards who play 4+ rounds/month renew at 97%. Any drop below 2/month is an immediate warning.' },
     { touchpoint: 'Pace of Play Satisfaction', retentionImpact: 0.88, category: 'course', description: 'Die-Hards are the most pace-sensitive archetype. A single 5+ hour round triggers 3x more complaints than other members.' },
@@ -210,7 +210,7 @@ export const touchpointCorrelationsByArchetype = {
 };
 
 // Archetype-specific correlation insight headlines
-export const correlationInsightsByArchetype = {
+const correlationInsightsByArchetype = {
   'Die-Hard Golfer': [
     { id: 'dh-pace', headline: 'Pace of play is 2.8x more important to Die-Hards than any other archetype', detail: 'A single 5+ hour round generates 3x more complaints from Die-Hards. They value course access and playability above all else.', domains: ['Golf', 'Service'], impact: 'high', metric: { value: '2.8x', label: 'pace sensitivity vs. avg' } },
     { id: 'dh-dining', headline: 'Only 34% of Die-Hards dine after rounds — $14,976 untapped per year', detail: '52 Die-Hard Golfers are your biggest dining cross-sell opportunity. Post-round dining credit ($15 Grill Room credit) has 3.2x ROI in pilots.', domains: ['Golf', 'Dining'], impact: 'high', metric: { value: '$14.9K', label: 'untapped dining/yr' } },
@@ -245,10 +245,10 @@ export const correlationInsightsByArchetype = {
   ],
 };
 
-export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email', 'Complaints'];
+const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email', 'Complaints'];
 
 // Archetype spend gap analysis — dollar value of untapped potential
-export const archetypeSpendGaps = [
+const archetypeSpendGaps = [
   {
     archetype: 'Balanced Active',
     count: 55,

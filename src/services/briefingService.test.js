@@ -7,6 +7,11 @@ vi.mock('./apiClient', () => ({
   apiFetch: (...args) => apiFetchMock(...args),
   getClubId: () => null,
 }));
+vi.mock('./demoGate', () => ({
+  getDataMode: () => 'demo',
+  isGateOpen: () => true,
+  isGuidedMode: () => false,
+}));
 
 async function freshBriefing() {
   vi.resetModules();

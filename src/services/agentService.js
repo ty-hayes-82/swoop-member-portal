@@ -46,9 +46,16 @@ import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents'
 
 // Filter out decommissioned action types (waitlist removed from MVP)
 const MVP_EXCLUDED_ACTIONS = new Set(['WAITLIST_PRIORITY', 'WAITLIST_BACKFILL']);
-let actionStore = agentActions
+let actionStore = null;
+
+function getActionStore() {
+  if (!actionStore) {
+    actionStore = agentActions
       .filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType))
       .map((action) => ({ ...action }));
+  }
+  return actionStore;
+}
 
 let _d = null;
 
@@ -85,7 +92,9 @@ export function getAgentById(id) {
 
 /** @returns {AgentAction[]} */
 export function getAllActions() {
-  return [...actionStore].sort(byNewest);
+  if (_d?.actions) return [..._d.actions].sort(byNewest);
+  if (getDataMode() !== 'demo') return [];
+  return [...getActionStore()].sort(byNewest);
 }
 
 /** @returns {AgentAction[]} */
@@ -99,7 +108,8 @@ export function getPendingActions() {
  * @returns {AgentAction|null}
  */
 export function approveAction(id, meta = {}) {
-  actionStore = actionStore.map((action) =>
+  const store = getActionStore();
+  actionStore = store.map((action) =>
     action.id === id
       ? {
           ...action,
@@ -124,7 +134,8 @@ export function approveAction(id, meta = {}) {
  * @returns {AgentAction|null}
  */
 export function dismissAction(id, meta = {}) {
-  actionStore = actionStore.map((action) =>
+  const store = getActionStore();
+  actionStore = store.map((action) =>
     action.id === id
       ? {
           ...action,
@@ -171,5 +182,5 @@ export function getTopPendingAction() {
 }
 
 export function __resetAgentActions() {
-  actionStore = agentActions.filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType)).map((action) => ({ ...action }));
+  actionStore = null;
 }

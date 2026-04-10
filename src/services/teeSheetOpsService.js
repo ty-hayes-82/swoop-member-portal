@@ -3,7 +3,7 @@
 // Pattern: in-memory mutable store (same as agentService.js)
 
 import { apiFetch } from './apiClient';
-import { isGateOpen } from './demoGate';
+import { isGateOpen, getDataMode } from './demoGate';
 import {
   confirmationSeeds,
   reassignmentSeeds,
@@ -28,31 +28,50 @@ export const _init = async () => {
       reassignmentStore = _d.reassignments.map((r) => ({ ...r, auditTrail: [...(r.auditTrail || [])] }));
     }
     if (_d.config) {
-      Object.assign(waitlistConfig, _d.config);
+      Object.assign(initWaitlistConfig(), _d.config);
     }
   } catch { /* keep static fallback */ }
 };
 
-let confirmationStore = confirmationSeeds.map((c) => ({ ...c }));
-let reassignmentStore = reassignmentSeeds.map((r) => ({ ...r, auditTrail: [...r.auditTrail] }));
-let waitlistConfig = { ...defaultWaitlistConfig };
-let steeringData = { ...demandSteeringSeeds };
+let confirmationStore = null;
+let reassignmentStore = null;
+let waitlistConfig = null;
+let steeringData = null;
+
+function getConfirmationStore() {
+  if (!confirmationStore) confirmationStore = confirmationSeeds.map((c) => ({ ...c }));
+  return confirmationStore;
+}
+function getReassignmentStore() {
+  if (!reassignmentStore) reassignmentStore = reassignmentSeeds.map((r) => ({ ...r, auditTrail: [...r.auditTrail] }));
+  return reassignmentStore;
+}
+function initWaitlistConfig() {
+  if (!waitlistConfig) waitlistConfig = { ...defaultWaitlistConfig };
+  return waitlistConfig;
+}
+function initSteeringData() {
+  if (!steeringData) steeringData = { ...demandSteeringSeeds };
+  return steeringData;
+}
 
 // ── Confirmations ──────────────────────────────────────────────
 
 export function getConfirmations() {
   if (_d?.confirmations) return [..._d.confirmations].sort((a, b) => b.cancelProbability - a.cancelProbability);
   if (!isGateOpen('tee-sheet')) return [];
-  return [...confirmationStore].sort((a, b) => b.cancelProbability - a.cancelProbability);
+  return [...getConfirmationStore()].sort((a, b) => b.cancelProbability - a.cancelProbability);
 }
 
 export function getConfirmationById(id) {
-  return confirmationStore.find((c) => c.id === id) ?? null;
+  const all = _d?.confirmations ?? (getDataMode() === 'demo' ? getConfirmationStore() : []);
+  return all.find((c) => c.id === id) ?? null;
 }
 
 export function updateConfirmation(id, updates) {
   const now = new Date().toISOString();
-  confirmationStore = confirmationStore.map((c) =>
+  const store = getConfirmationStore();
+  confirmationStore = store.map((c) =>
     c.id === id
       ? {
           ...c,
@@ -62,11 +81,11 @@ export function updateConfirmation(id, updates) {
         }
       : c,
   );
-  return confirmationStore.find((c) => c.id === id) ?? null;
+  return getConfirmationStore().find((c) => c.id === id) ?? null;
 }
 
 export function getConfirmationSummary() {
-  const all = confirmationStore;
+  const all = _d?.confirmations ?? (getDataMode() === 'demo' ? getConfirmationStore() : []);
   return {
     total: all.length,
     pending: all.filter((c) => c.outreachStatus === 'pending').length,
@@ -88,23 +107,25 @@ export function getReassignments() {
     });
   }
   if (!isGateOpen('tee-sheet')) return [];
-  return [...reassignmentStore].sort((a, b) => {
+  return [...getReassignmentStore()].sort((a, b) => {
     const statusOrder = { pending: 0, approved: 1, completed: 2, overridden: 3, skipped: 4 };
     return (statusOrder[a.status] ?? 5) - (statusOrder[b.status] ?? 5);
   });
 }
 
 export function getReassignmentById(id) {
-  return reassignmentStore.find((r) => r.id === id) ?? null;
+  const all = _d?.reassignments ?? (getDataMode() === 'demo' ? getReassignmentStore() : []);
+  return all.find((r) => r.id === id) ?? null;
 }
 
 export function getReassignmentForBooking(bookingId) {
-  return reassignmentStore.find((r) => r.sourceBookingId === bookingId) ?? null;
+  const all = _d?.reassignments ?? (getDataMode() === 'demo' ? getReassignmentStore() : []);
+  return all.find((r) => r.sourceBookingId === bookingId) ?? null;
 }
 
 export function createReassignment(data) {
   const now = new Date().toISOString();
-  const id = `ra_${String(reassignmentStore.length + 1).padStart(3, '0')}`;
+  const id = `ra_${String(getReassignmentStore().length + 1).padStart(3, '0')}`;
   const entry = {
     id,
     sourceBookingId: data.sourceBookingId,
@@ -134,13 +155,13 @@ export function createReassignment(data) {
       { action: `Recommended ${data.recommendedFillMemberName} (retention priority)`, by: 'system', at: now },
     ],
   };
-  reassignmentStore = [...reassignmentStore, entry];
+  reassignmentStore = [...getReassignmentStore(), entry];
   return entry;
 }
 
 export function updateReassignment(id, updates) {
   const now = new Date().toISOString();
-  reassignmentStore = reassignmentStore.map((r) => {
+  reassignmentStore = getReassignmentStore().map((r) => {
     if (r.id !== id) return r;
     const trail = [...r.auditTrail];
     if (updates.status === 'approved') {
@@ -159,17 +180,17 @@ export function updateReassignment(id, updates) {
       auditTrail: trail,
     };
   });
-  return reassignmentStore.find((r) => r.id === id) ?? null;
+  return getReassignmentStore().find((r) => r.id === id) ?? null;
 }
 
 // ── Waitlist Configuration ─────────────────────────────────────
 
 export function getWaitlistConfig() {
-  return { ...waitlistConfig };
+  return { ...initWaitlistConfig() };
 }
 
 export function updateWaitlistConfig(updates) {
-  waitlistConfig = { ...waitlistConfig, ...updates };
+  waitlistConfig = { ...initWaitlistConfig(), ...updates };
   return { ...waitlistConfig };
 }
 
@@ -190,23 +211,25 @@ export function getWeeklyQueuePressure() {
 export function getDemandSteeringStats() {
   if (_d?.demandSteeringStats) return { ...(_d.demandSteeringStats) };
   if (!isGateOpen('tee-sheet')) return { redirectionsSent: 0, acceptanceRate: 0, revenueSaved: 0, avgResponseTime: 0 };
-  return { ...steeringData };
+  return { ...initSteeringData() };
 }
 
 export function recordRedirection() {
+  const s = initSteeringData();
   steeringData = {
-    ...steeringData,
-    redirectionsSent: steeringData.redirectionsSent + 1,
+    ...s,
+    redirectionsSent: s.redirectionsSent + 1,
   };
   return { ...steeringData };
 }
 
 export function recordRedirectionConversion() {
+  const s = initSteeringData();
   steeringData = {
-    ...steeringData,
-    redirectionsConverted: steeringData.redirectionsConverted + 1,
-    conversionRate: Math.round(((steeringData.redirectionsConverted + 1) / Math.max(steeringData.redirectionsSent, 1)) * 100) / 100,
-    revenueFromRedirections: steeringData.revenueFromRedirections + revenuePerSlot.upliftDollars,
+    ...s,
+    redirectionsConverted: s.redirectionsConverted + 1,
+    conversionRate: Math.round(((s.redirectionsConverted + 1) / Math.max(s.redirectionsSent, 1)) * 100) / 100,
+    revenueFromRedirections: s.revenueFromRedirections + revenuePerSlot.upliftDollars,
   };
   return { ...steeringData };
 }
