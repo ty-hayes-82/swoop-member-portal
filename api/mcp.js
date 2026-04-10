@@ -1417,6 +1417,18 @@ async function bookTeeTime({ club_id, course_id, member_id, booking_date, tee_ti
 
   const result = { booking_id: bookingId, status: 'confirmed', date: booking_date, tee_time, player_count: players };
 
+  // Write to activity_log so the dashboard live feed picks it up
+  try {
+    const memberRow = await sql`SELECT first_name, last_name FROM members WHERE member_id = ${member_id} AND club_id = ${club_id} LIMIT 1`;
+    const mName = memberRow.rows[0] ? `${memberRow.rows[0].first_name} ${memberRow.rows[0].last_name}`.trim() : member_id;
+    await sql`
+      INSERT INTO activity_log (club_id, action_type, action_subtype, actor, member_id, member_name, description, meta)
+      VALUES (${club_id}, 'concierge_booking', 'book_tee_time', 'concierge', ${member_id}, ${mName},
+        ${`Booked tee time ${tee_time} on ${booking_date} (${players} players)`},
+        ${JSON.stringify({ booking_id: bookingId, booking_date, tee_time, player_count: players })})
+    `;
+  } catch (_) { /* activity log errors are non-blocking */ }
+
   // Phase 8: notify club-side agents via the bridge
   try {
     const bridge = await notifyClubAgents(club_id, member_id, {
@@ -1473,6 +1485,18 @@ async function makeDiningReservation({ club_id, outlet_id, member_id, reservatio
     special_requests: special_requests || null,
     status: 'reserved',
   };
+
+  // Write to activity_log so the dashboard live feed picks it up
+  try {
+    const memberRow = await sql`SELECT first_name, last_name FROM members WHERE member_id = ${member_id} AND club_id = ${club_id} LIMIT 1`;
+    const mName = memberRow.rows[0] ? `${memberRow.rows[0].first_name} ${memberRow.rows[0].last_name}`.trim() : member_id;
+    await sql`
+      INSERT INTO activity_log (club_id, action_type, action_subtype, actor, member_id, member_name, description, meta)
+      VALUES (${club_id}, 'concierge_booking', 'make_dining_reservation', 'concierge', ${member_id}, ${mName},
+        ${`Reserved ${outlet.name} on ${reservation_date} at ${reservation_time} (party of ${size})`},
+        ${JSON.stringify({ reservation_id: checkId, outlet: outlet.name, reservation_date, reservation_time, party_size: size })})
+    `;
+  } catch (_) { /* activity log errors are non-blocking */ }
 
   // Phase 8: notify club-side agents via the bridge
   try {

@@ -13,6 +13,7 @@ import TomorrowForecast from './TomorrowForecast';
 import WeekForecast from './WeekForecast';
 import MorningBriefingSentence from './MorningBriefingSentence';
 import DemoStoriesLauncher from './DemoStoriesLauncher';
+import RecentActivityFeed from './RecentActivityFeed';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { AnimatedNumber } from '@/components/ui/PageTransition';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
@@ -404,6 +405,9 @@ export default function TodayView() {
             </div>
           ))}
         </div>
+
+        {/* Section 2.5: Live Activity Feed */}
+        <RecentActivityFeed />
 
         {/* F&B Quick Stats — renders when briefing has F&B data */}
         {briefing?.fb && (

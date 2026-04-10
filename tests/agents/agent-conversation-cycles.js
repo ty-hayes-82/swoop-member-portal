@@ -52,10 +52,12 @@ const MEMBER = {
     { member_id: 'mbr_t01c', name: 'Logan Whitfield', membership_type: 'Junior' },
   ],
   preferences: {
-    teeWindows: 'Thu/Fri 7:00-8:30 AM, Saturday 7:00 AM with regular foursome',
-    dining: 'Grill Room booth 12, Arnold Palmer + Club Sandwich, slow mornings with coffee refills',
+    teeWindows: 'Thu/Fri 7:00-8:30 AM, Saturday 7:00 AM with regular foursome (Tom Gallagher, Mark Patterson, Greg Holloway)',
+    dining: 'Grill Room booth 12, Arnold Palmer + Club Sandwich, slow mornings with coffee refills. For business dinners prefers Main Dining Room with wine service.',
     favoriteSpots: 'North Course back nine, Grill Room booth 12',
     channel: 'Call',
+    familyNotes: 'Logan (Junior member, age 13) plays in junior clinics. Erin (Social member) enjoys wine events and Sunday brunch.',
+    diningBudget: 'Avg $85/person weeknight, $120/person weekend. Tips generously.',
   },
 };
 
@@ -116,9 +118,9 @@ function executeSmsTool(toolName, input) {
     case 'get_club_calendar':
       return {
         events: [
-          { date: '2026-04-10', time: '6:00 PM', title: 'Wine Dinner — Spring Pairing Menu', location: 'Main Dining Room', capacity: '48 seats, 12 remaining' },
+          { date: '2026-04-09', time: '6:00 PM', title: 'Wine Dinner — Spring Pairing Menu', location: 'Main Dining Room', capacity: '48 seats, 12 remaining', day: 'Thursday' },
           { date: '2026-04-12', time: '8:00 AM', title: 'Saturday Morning Shotgun — Member-Guest', location: 'North Course', capacity: '72 players, 8 spots left' },
-          { date: '2026-04-13', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment' },
+          { date: '2026-04-11', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment', day: 'Saturday' },
           { date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', capacity: '20 teams max, 6 remaining' },
           { date: '2026-04-18', time: '7:00 AM', title: 'Club Championship Qualifier — Round 1', location: 'South Course', capacity: 'Registration open' },
         ],
@@ -146,7 +148,7 @@ function executeSmsTool(toolName, input) {
       return {
         upcoming: [
           { type: 'tee_time', date: '2026-04-12', time: '7:00 AM', course: 'North Course', players: 4, group: ['James Whitfield', 'Tom Gallagher', 'Mark Patterson', 'Greg Holloway'] },
-          { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing' },
+          { type: 'dining', date: '2026-04-09', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing' },
         ],
       };
     case 'rsvp_event': {
@@ -209,13 +211,24 @@ Your role is to make ${name}'s club experience seamless and enjoyable. You are w
 
 ## Behavioural Guidelines
 - Be warm and conversational, not robotic. Use the member's first name.
-- Sound like you're texting a friend, not writing a business email. Use contractions (I'll, you're, that's). React emotionally ('That stinks about the wait' not 'I'm sorry to hear about your experience'). Keep it human.
+- Sound like you're texting a friend, not writing a business email. Use contractions (I'll, you're, that's). React emotionally ('Ugh, that's rough' not 'I'm sorry to hear about your experience'). Keep it human.
+- Vary your openers. NEVER start with "Perfect" or "Perfect timing". Use casual variety: "You got it", "On it", "Nice", "Hey James!", "Love it", "All set". Only use "Done!" for simple confirmations, never for complaints or emotional topics.
 - Be proactive: "Would you like your usual Saturday 7 AM slot?" if you know their pattern.
 - When a slot is unavailable, suggest the nearest alternative times.
-- For dining, mention daily specials or popular dishes if relevant.
-- Never assume dates, times, or party sizes the member didn't specify. Always confirm: 'What time works?' or 'How many people?'
-- Always confirm details before finalizing a booking.
-- If a member says they haven't visited recently, acknowledge it warmly and make a specific, personalized suggestion to bring them back. Reference something they love (their booth, their usual round, an event their family would enjoy).
+- For dining, proactively suggest wine pairings, private dining, or specials — especially for business dinners. Mention a specific dish or wine when possible ("the ribeye is incredible" or "chef's doing a great spring menu").
+- For complaints: ALWAYS start with empathy ("Ugh, 40 minutes is rough" or "That's not OK"). Then mention you filed it. Then offer to make the next visit better. Never start a complaint response with "Done!" — that feels dismissive when someone is upset.
+- When a member vents without a specific request, suggest 1-2 specific things YOU can do right now. Always pair "I filed it" with a concrete alternative: "Want me to grab you a 6:30 slot next Saturday? Way less crowded." Don't end on "they'll want to hear about it" — that's passive.
+
+## STRICT: Confirm Before Booking
+- NEVER call book_tee_time or make_dining_reservation until the member has specified a time. Date and party size can be inferred from context but TIME must be explicit.
+- If time is missing, ask with 2 options: "7 or 8 PM?" not an open-ended question. Add something helpful in the same message (e.g., a wine or dish suggestion).
+- Exception: if their known preferences specify an exact recurring slot (like "Saturday 7 AM with regular foursome"), you may book that directly.
+- For events (rsvp_event), you may register immediately since events have fixed times.
+
+## STRICT: Date Accuracy
+- Always cross-reference dates with the calendar tool results. If the member says "Saturday" but the event is on Sunday, TELL THEM the correct day.
+- Always include the actual date (e.g., "Saturday 4/11") in confirmations so the member can verify.
+- Never say a date is Saturday if it falls on a different day of the week.
 
 ## Strict Privacy Rules
 - NEVER reveal health scores, risk tiers, or internal analytics.
@@ -223,13 +236,15 @@ Your role is to make ${name}'s club experience seamless and enjoyable. You are w
 
 CRITICAL SMS RULES:
 - You are responding via SMS text message.
-- Keep responses concise — 2-3 sentences max (under 400 characters).
-- No formatting, no markdown, no asterisks, no bullet points.
+- Keep responses to 1-2 sentences (under 300 characters). Brevity is king. For event lists, mention the top 2-3 most relevant ones, not all of them.
+- No formatting, no markdown, no asterisks, no bullet points, no numbered lists.
 - Be warm and conversational like texting a friend who works at the club.
 - Use their first name.
 - Use the provided tools to look up schedules, book tee times, make dining reservations, and check the club calendar. Do not guess — call the tool.
 
-Today's date is 2026-04-09 (Thursday).`;
+Today's date is 2026-04-09 (Thursday).
+
+IMPORTANT: If your tool call produces a result but you have nothing more to say, you MUST still respond with a text message. Never send an empty response.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -341,7 +356,7 @@ const SCENARIOS = [
   { cycle: 4, memberMessage: 'Cancel my Saturday round, weather looks bad', clubAgents: ['staffing-demand', 'game-plan'], testFocus: 'Cancellation cascade' },
   { cycle: 5, memberMessage: 'Book dinner for 6 at the Grill Room Saturday night, booth 12 if possible', clubAgents: ['staffing-demand', 'fb-intelligence'], testFocus: 'Large party impact' },
   { cycle: 6, memberMessage: "I haven't been to the club in a few weeks. What's new? Anything worth coming in for?", clubAgents: ['member-risk'], testFocus: 'Re-engagement of at-risk member' },
-  { cycle: 7, memberMessage: 'Can you get Logan signed up for the junior golf clinic next Saturday?', clubAgents: [], testFocus: 'Family member action' },
+  { cycle: 7, memberMessage: 'Can you get Logan signed up for the junior golf clinic this Saturday?', clubAgents: [], testFocus: 'Family member action' },
   { cycle: 8, memberMessage: 'I need to host a dinner for 4 clients from Meridian Partners next Wednesday. What do you recommend?', clubAgents: ['fb-intelligence'], testFocus: 'Corporate entertaining' },
   { cycle: 9, memberMessage: "Why is the course always so slow on Saturday mornings? It's really frustrating.", clubAgents: ['game-plan', 'staffing-demand'], testFocus: 'Pace feedback' },
   { cycle: 10, memberMessage: 'Erin and I want to come to the wine dinner Thursday. Can you get us in?', clubAgents: ['member-risk'], testFocus: 'Household re-engagement' },

@@ -10,6 +10,8 @@ const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 // same reason: it ships alongside MobileApp but shouldn't inflate desktop.
 const ConferenceShell = lazy(() => import('@/mobile/conference/ConferenceShell'));
 const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatPage'));
+const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
+const GamePlanDemo = lazy(() => import('@/features/demo/GamePlanDemo'));
 import { DataProvider } from '@/context/DataProvider';
 import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
 import DemoWizard from '@/components/ui/DemoWizard';
@@ -192,6 +194,24 @@ function RouterViews() {
   const isMobileRoute = hash === '#/m' || hash.startsWith('#/m/');
   const isConferenceRoute = hash.startsWith('#/m/conference');
   const isConciergeRoute = hash === '#/concierge' || hash.startsWith('#/concierge?');
+  const isDemoWeatherCascade = hash === '#/demo/weather-cascade';
+  const isDemoGameplan = hash === '#/demo/gameplan';
+
+  if (isDemoWeatherCascade) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <WeatherCascade />
+      </Suspense>
+    );
+  }
+
+  if (isDemoGameplan) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <GamePlanDemo />
+      </Suspense>
+    );
+  }
 
   if (isConciergeRoute) {
     return (
