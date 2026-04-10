@@ -33,10 +33,6 @@ export function getAgents() {
   return agentDefinitions;
 }
 
-export function getAgentDefinitions() {
-  return getAgents();
-}
-
 export function getAgentById(id) {
   const agents = getAgents();
   return agents.find((agent) => agent.id === id) ?? null;
@@ -133,28 +129,6 @@ export function getAgentSummary() {
 
 export function getTopPendingAction() {
   return getPendingActions()[0] ?? null;
-}
-
-export function getActivityLog() {
-  return getAllActions().map((action) => ({
-    id: `log_${action.id}`,
-    timestamp: action.timestamp,
-    type: action.actionType,
-    agentId: action.agentId,
-    summary: action.description,
-    details: `${action.source} · ${action.impactMetric} · ${action.status}`,
-    status: action.status,
-  }));
-}
-
-export async function draftAgentMessage(memberContext, actionContext) {
-  const recipientName = memberContext?.name ?? 'Member';
-  const actionDetail = actionContext?.description ?? 'an important update';
-  return `Hi ${recipientName},\n\nI wanted to personally follow up regarding ${actionDetail.toLowerCase()}.\n\nPlease reply if you would like me to handle this directly today.\n\nBest,\n[GM Name]`;
-}
-
-export async function explainAgentAction(action) {
-  return `${action.source} recommended this based on cross-system signal correlation and expected impact: ${action.impactMetric}.`;
 }
 
 export function __resetAgentActions() {

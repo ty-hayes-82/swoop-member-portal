@@ -168,18 +168,6 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-// ─── Current Conditions ───────────────────────────────────
-
-export function getCurrentWeather() {
-  if (isWeatherGated()) return null;
-  if (_current) return _current;
-  if (!shouldUseStatic('weather')) return null;
-  // Static fallback: Jan 17 demo day
-  const today = weatherData.find(d => d.date === '2026-01-17') || weatherData[16];
-  if (today) return { temp: today.tempHigh, condition: today.condition, wind: today.wind, humidity: 35 };
-  return null;
-}
-
 // ─── Hourly Forecast ──────────────────────────────────────
 
 export function getHourlyForecast() {

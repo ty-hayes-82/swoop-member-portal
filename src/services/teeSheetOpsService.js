@@ -155,47 +155,6 @@ export function updateReassignment(id, updates) {
   return reassignmentStore.find((r) => r.id === id) ?? null;
 }
 
-// ── Fill Report ────────────────────────────────────────────────
-
-export function getFillReport() {
-  const completed = reassignmentStore.filter((r) => r.status === 'completed' && r.outcome === 'filled');
-  const totalFills = completed.length;
-  const totalRevenueRecovered = completed.reduce((sum, r) => sum + (r.revenueRecovered ?? 0), 0);
-  const totalSlots = confirmationStore.length;
-  const fillConversionRate = totalSlots > 0 ? Math.round((totalFills / totalSlots) * 100) : 0;
-
-  const healthDeltas = completed
-    .filter((r) => r.healthScoreBefore != null && r.healthScoreAfter != null)
-    .map((r) => r.healthScoreAfter - r.healthScoreBefore);
-  const avgHealthDelta = healthDeltas.length > 0
-    ? Math.round(healthDeltas.reduce((s, d) => s + d, 0) / healthDeltas.length)
-    : 0;
-
-  const retentionFills = completed.filter((r) => !r.overrideMemberId);
-  const retentionRevenue = retentionFills.reduce((sum, r) => sum + (r.revenueRecovered ?? 0), 0);
-  const fifoBaselineRevenue = totalFills * revenuePerSlot.reactive;
-
-  return {
-    totalFills,
-    totalRevenueRecovered,
-    fillConversionRate,
-    avgHealthDelta,
-    retentionPriorityFills: retentionFills.length,
-    retentionRevenue,
-    fifoBaselineRevenue,
-    roiDelta: retentionRevenue - fifoBaselineRevenue,
-    memberSaves: completed.map((r) => ({
-      memberId: r.overrideMemberId ?? r.recommendedFillMemberId,
-      name: r.overrideMemberName ?? r.recommendedFillMemberName,
-      healthBefore: r.healthScoreBefore,
-      healthAfter: r.healthScoreAfter,
-      duesProtected: r.recommendedFillDuesAtRisk,
-      slot: r.sourceSlot,
-    })),
-    weeklyTrend: weeklyQueuePressure,
-  };
-}
-
 // ── Waitlist Configuration ─────────────────────────────────────
 
 export function getWaitlistConfig() {

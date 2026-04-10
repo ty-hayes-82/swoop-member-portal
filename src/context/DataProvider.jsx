@@ -6,7 +6,6 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { getDataMode } from '@/services/demoGate';
 import { _init as initOps }      from '@/services/operationsService';
-import { _init as initFB }       from '@/services/fbService';
 import { _init as initMembers }  from '@/services/memberService';
 import { _init as initStaffing } from '@/services/staffingService';
 import { _init as initTrends }   from '@/services/trendsService';
@@ -24,7 +23,7 @@ export const useDataContext = () => useContext(DataCtx);
 
 async function initAllServices() {
   return Promise.allSettled([
-    initOps(), initFB(), initMembers(), initStaffing(),
+    initOps(), initMembers(), initStaffing(),
     initTrends(), initBriefing(),
     initBoardReport(), initCockpit(), initExperience(),
     initAgents(), initIntegrations(), initWeather(),
