@@ -37,6 +37,21 @@ const SMS_TOOLS = [
     description: 'Get the member upcoming tee times, reservations, and events',
     input_schema: { type: 'object', properties: {} }
   },
+  {
+    name: 'rsvp_event',
+    description: 'Register the member (or a household member) for a club event',
+    input_schema: { type: 'object', properties: { event_title: { type: 'string', description: 'Event name or title to match' }, guest_count: { type: 'integer', default: 0 }, member_name: { type: 'string', description: 'Household member name if registering someone else' } }, required: ['event_title'] }
+  },
+  {
+    name: 'cancel_tee_time',
+    description: 'Cancel a previously booked tee time for the member',
+    input_schema: { type: 'object', properties: { booking_date: { type: 'string', description: 'Date of the tee time to cancel' }, tee_time: { type: 'string', description: 'Time of the tee time to cancel' } }, required: ['booking_date'] }
+  },
+  {
+    name: 'file_complaint',
+    description: 'File a complaint or feedback on behalf of the member',
+    input_schema: { type: 'object', properties: { category: { type: 'string', enum: ['food_and_beverage', 'golf_operations', 'facilities', 'staff', 'billing', 'other'] }, description: { type: 'string', description: 'What happened — the member complaint in their own words' } }, required: ['category', 'description'] }
+  },
 ];
 
 /**
@@ -80,6 +95,33 @@ async function executeSmsTool(toolName, input, member) {
           { type: 'tee_time', date: '2026-04-12', time: '7:00 AM', course: 'North Course', players: 4, group: ['James Whitfield', 'Tom Gallagher', 'Mark Patterson', 'Greg Holloway'] },
           { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing' },
         ],
+      };
+    }
+    case 'rsvp_event': {
+      const eventTitle = input.event_title || 'Event';
+      const who = input.member_name || (member.first_name + ' ' + member.last_name);
+      return {
+        registration_id: `ER-${Date.now().toString(36).toUpperCase()}`,
+        event: eventTitle,
+        registered_for: who,
+        guest_count: input.guest_count || 0,
+        status: 'registered',
+      };
+    }
+    case 'cancel_tee_time': {
+      return {
+        status: 'cancelled',
+        booking_date: input.booking_date,
+        tee_time: input.tee_time || '7:00 AM',
+        message: `Tee time on ${input.booking_date} has been cancelled. Your group has been notified.`,
+      };
+    }
+    case 'file_complaint': {
+      return {
+        complaint_id: `FB-${Date.now().toString(36).toUpperCase()}`,
+        category: input.category,
+        status: 'filed',
+        message: 'Your feedback has been filed and routed to the appropriate manager.',
       };
     }
     default:

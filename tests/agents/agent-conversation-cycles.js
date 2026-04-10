@@ -91,6 +91,21 @@ const SMS_TOOLS = [
     description: "Get the member's upcoming tee times, reservations, and events",
     input_schema: { type: 'object', properties: {} },
   },
+  {
+    name: 'rsvp_event',
+    description: 'Register the member (or a household member) for a club event',
+    input_schema: { type: 'object', properties: { event_title: { type: 'string', description: 'Event name or title to match' }, guest_count: { type: 'integer', default: 0 }, member_name: { type: 'string', description: 'Household member name if registering someone else' } }, required: ['event_title'] },
+  },
+  {
+    name: 'cancel_tee_time',
+    description: 'Cancel a previously booked tee time for the member',
+    input_schema: { type: 'object', properties: { booking_date: { type: 'string', description: 'Date of the tee time to cancel' }, tee_time: { type: 'string', description: 'Time of the tee time to cancel' } }, required: ['booking_date'] },
+  },
+  {
+    name: 'file_complaint',
+    description: 'File a complaint or feedback on behalf of the member',
+    input_schema: { type: 'object', properties: { category: { type: 'string', enum: ['food_and_beverage', 'golf_operations', 'facilities', 'staff', 'billing', 'other'] }, description: { type: 'string', description: 'What happened — the member complaint in their own words' } }, required: ['category', 'description'] },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -134,6 +149,31 @@ function executeSmsTool(toolName, input) {
           { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing' },
         ],
       };
+    case 'rsvp_event': {
+      const eventTitle = input.event_title || 'Event';
+      const who = input.member_name || 'James Whitfield';
+      return {
+        registration_id: `ER-${Date.now().toString(36).toUpperCase()}`,
+        event: eventTitle,
+        registered_for: who,
+        guest_count: input.guest_count || 0,
+        status: 'registered',
+      };
+    }
+    case 'cancel_tee_time':
+      return {
+        status: 'cancelled',
+        booking_date: input.booking_date,
+        tee_time: input.tee_time || '7:00 AM',
+        message: `Tee time on ${input.booking_date} has been cancelled. Your group has been notified.`,
+      };
+    case 'file_complaint':
+      return {
+        complaint_id: `FB-${Date.now().toString(36).toUpperCase()}`,
+        category: input.category,
+        status: 'filed',
+        message: 'Your feedback has been filed and routed to the appropriate manager.',
+      };
     default:
       return { error: `Unknown tool: ${toolName}` };
   }
@@ -153,7 +193,10 @@ Your role is to make ${name}'s club experience seamless and enjoyable. You are w
 
 ## What You Can Do
 - Book tee times (book_tee_time)
+- Cancel tee times (cancel_tee_time)
 - Make dining reservations (make_dining_reservation)
+- RSVP to club events (rsvp_event)
+- File a complaint or feedback (file_complaint)
 - Show their upcoming schedule (get_my_schedule)
 - Show the club calendar (get_club_calendar)
 
@@ -166,10 +209,13 @@ Your role is to make ${name}'s club experience seamless and enjoyable. You are w
 
 ## Behavioural Guidelines
 - Be warm and conversational, not robotic. Use the member's first name.
+- Sound like you're texting a friend, not writing a business email. Use contractions (I'll, you're, that's). React emotionally ('That stinks about the wait' not 'I'm sorry to hear about your experience'). Keep it human.
 - Be proactive: "Would you like your usual Saturday 7 AM slot?" if you know their pattern.
 - When a slot is unavailable, suggest the nearest alternative times.
 - For dining, mention daily specials or popular dishes if relevant.
+- Never assume dates, times, or party sizes the member didn't specify. Always confirm: 'What time works?' or 'How many people?'
 - Always confirm details before finalizing a booking.
+- If a member says they haven't visited recently, acknowledge it warmly and make a specific, personalized suggestion to bring them back. Reference something they love (their booth, their usual round, an event their family would enjoy).
 
 ## Strict Privacy Rules
 - NEVER reveal health scores, risk tiers, or internal analytics.

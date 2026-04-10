@@ -528,6 +528,34 @@ const TOOL_DEFINITIONS = [
     },
   },
   {
+    name: 'cancel_tee_time',
+    description: 'Cancel a previously booked tee time for a member.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        member_id: { type: 'string', description: 'Member ID' },
+        booking_date: { type: 'string', description: 'Date of the tee time to cancel' },
+        tee_time: { type: 'string', description: 'Time of the tee time to cancel' },
+      },
+      required: ['club_id', 'member_id', 'booking_date'],
+    },
+  },
+  {
+    name: 'file_complaint',
+    description: 'File a complaint or feedback on behalf of a member. Routes to the appropriate manager.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string', description: 'Club ID' },
+        member_id: { type: 'string', description: 'Member ID' },
+        category: { type: 'string', enum: ['food_and_beverage', 'golf_operations', 'facilities', 'staff', 'billing', 'other'] },
+        description: { type: 'string', description: 'What happened — the member complaint in their own words' },
+      },
+      required: ['club_id', 'member_id', 'category', 'description'],
+    },
+  },
+  {
     name: 'get_my_schedule',
     description: "Get a member's upcoming bookings, dining reservations, and event registrations.",
     inputSchema: {
@@ -1518,6 +1546,63 @@ async function rsvpEvent({ club_id, event_id, member_id, guest_count }) {
   return result;
 }
 
+async function cancelTeeTime({ club_id, member_id, booking_date, tee_time }) {
+  // Find the booking
+  const result = await sql`
+    SELECT b.booking_id, b.tee_time, b.player_count, b.status
+    FROM bookings b
+    JOIN booking_players bp ON bp.booking_id = b.booking_id
+    WHERE bp.member_id = ${member_id} AND b.club_id = ${club_id}
+      AND b.booking_date = ${booking_date}::date AND b.status = 'confirmed'
+    ORDER BY b.tee_time
+    LIMIT 1
+  `;
+  if (result.rows.length === 0) {
+    return { error: 'not_found', message: `No confirmed tee time found on ${booking_date}.` };
+  }
+  const booking = result.rows[0];
+  await sql`UPDATE bookings SET status = 'cancelled' WHERE booking_id = ${booking.booking_id}`;
+
+  const cancelResult = {
+    booking_id: booking.booking_id,
+    booking_date,
+    tee_time: booking.tee_time,
+    status: 'cancelled',
+  };
+
+  // Notify club-side agents
+  try {
+    await notifyClubAgents(club_id, member_id, {
+      type: 'cancel_booking',
+      details: { booking_id: booking.booking_id, booking_date, tee_time: booking.tee_time },
+    });
+  } catch (_) { /* non-blocking */ }
+
+  return cancelResult;
+}
+
+async function fileComplaint({ club_id, member_id, category, description }) {
+  const feedbackId = `fb_${Date.now()}`;
+  await sql`
+    INSERT INTO feedback (feedback_id, club_id, member_id, category, sentiment_score, status, submitted_at)
+    VALUES (${feedbackId}, ${club_id}, ${member_id}, ${category}, 2, 'open', NOW())
+  `;
+
+  // Notify club-side agents (service-recovery)
+  try {
+    await notifyClubAgents(club_id, member_id, {
+      type: 'complaint',
+      details: { feedback_id: feedbackId, category, description },
+    });
+  } catch (_) { /* non-blocking */ }
+
+  return {
+    complaint_id: feedbackId,
+    category,
+    status: 'filed',
+  };
+}
+
 async function getMySchedule({ member_id, club_id }) {
   const bookingsResult = await sql`
     SELECT b.booking_id, b.booking_date, b.tee_time, b.player_count, b.status, c.name AS course_name
@@ -1684,8 +1769,10 @@ const TOOL_HANDLERS = {
   save_coordination_log: saveCoordinationLogTool,
   // Phase 7 — Member Concierge
   book_tee_time: bookTeeTime,
+  cancel_tee_time: cancelTeeTime,
   make_dining_reservation: makeDiningReservation,
   rsvp_event: rsvpEvent,
+  file_complaint: fileComplaint,
   get_my_schedule: getMySchedule,
   get_club_calendar: getClubCalendar,
   send_request_to_club: sendRequestToClub,
