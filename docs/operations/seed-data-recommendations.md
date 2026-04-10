@@ -6,6 +6,19 @@
 
 ---
 
+## Final Verification — 2026-04-10
+
+All 4 GM auditor paths scored **5/5 across every insight**:
+
+| Auditor | Score | Key verification |
+|---|---|---|
+| Static demo mode | 6/6 | All topRisk strings match between members.js and briefingService |
+| Guided CSV→API pipeline | PASS | 441 FK alignments verified, zero orphans |
+| Progressive load (5 steps) | 25/25 | DataImportBanner fires with real data at every step |
+| Full 20-item scoring | 20/20 | Revenue $9,580/mo defensible, all stories specific + actionable |
+
+---
+
 ## Implementation Status
 
 ### SHIPPED (committed to guided-data-driven + dev)
