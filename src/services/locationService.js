@@ -1,4 +1,5 @@
 import { apiFetch } from './apiClient';
+import { getDataMode } from './demoGate';
 import { alertsFeed, locationMembers, staffOnDuty, zoneAnalytics } from '@/data/location';
 
 const defaultMembers = locationMembers;
@@ -6,12 +7,12 @@ const defaultStaff = staffOnDuty;
 const defaultAlerts = alertsFeed;
 const defaultZones = zoneAnalytics;
 
-let _d = null;
+let _d = getDataMode() === 'guided' ? {} : null;
 
 // ── Guided data loader integration (Phase 1 — additive only) ──
 import { registerService } from './guidedDataLoader';
 export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
+export function _resetData() { _d = getDataMode() === 'guided' ? {} : null; }
 registerService('locationService', { mergeData: _mergeData, resetData: _resetData });
 
 export const _init = async () => {
@@ -34,7 +35,7 @@ const normalizeStatus = (status) => {
 };
 
 const normalizeMembers = (source) => {
-  const list = Array.isArray(source) && source.length ? source : defaultMembers;
+  const list = Array.isArray(source) && source.length ? source : (getDataMode() === 'guided' ? [] : defaultMembers);
   return list.map((member, index) => ({
     memberId: member?.memberId ?? `mbr_live_${index + 1}`,
     name: member?.name ?? `Member ${index + 1}`,
@@ -51,7 +52,7 @@ const normalizeMembers = (source) => {
 };
 
 const normalizeStaff = (source) => {
-  const list = Array.isArray(source) && source.length ? source : defaultStaff;
+  const list = Array.isArray(source) && source.length ? source : (getDataMode() === 'guided' ? [] : defaultStaff);
   return list.map((staff, index) => ({
     id: staff?.id ?? `staff_${index + 1}`,
     name: staff?.name ?? `Staff ${index + 1}`,
@@ -73,7 +74,7 @@ export const getStaffLocations = (payload = null) => {
 
 export const getServiceRecoveryAlerts = (payload = null) => {
   const source = payload?.alerts ?? _d?.alerts ?? payload?.alertsFeed;
-  const list = Array.isArray(source) && source.length ? source : defaultAlerts;
+  const list = Array.isArray(source) && source.length ? source : (getDataMode() === 'guided' ? [] : defaultAlerts);
   return list.map((alert, index) => ({
     id: alert?.id ?? `alert_${index + 1}`,
     timestamp: alert?.timestamp ?? 'Now',

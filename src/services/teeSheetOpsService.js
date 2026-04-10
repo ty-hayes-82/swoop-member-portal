@@ -18,8 +18,20 @@ let _d = null;
 
 // ── Guided data loader integration (Phase 1 — additive only) ──
 import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
+export function _mergeData(partial) {
+  _d = { ...(_d || {}), ...partial };
+  if (_d.confirmations) confirmationStore = _d.confirmations.map(c => ({ ...c }));
+  if (_d.reassignments) reassignmentStore = _d.reassignments.map(r => ({ ...r, auditTrail: [...(r.auditTrail || [])] }));
+  if (_d.config) Object.assign(waitlistConfig, _d.config);
+  if (_d.steeringData) steeringData = { ..._d.steeringData };
+}
+export function _resetData() {
+  _d = _guided ? {} : null;
+  confirmationStore = _guided ? [] : confirmationSeeds.map(c => ({ ...c }));
+  reassignmentStore = _guided ? [] : reassignmentSeeds.map(r => ({ ...r, auditTrail: [...r.auditTrail] }));
+  waitlistConfig = _guided ? {} : { ...defaultWaitlistConfig };
+  steeringData = _guided ? {} : { ...demandSteeringSeeds };
+}
 registerService('teeSheetOpsService', { mergeData: _mergeData, resetData: _resetData });
 
 export const _init = async () => {
@@ -40,10 +52,11 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-let confirmationStore = confirmationSeeds.map((c) => ({ ...c }));
-let reassignmentStore = reassignmentSeeds.map((r) => ({ ...r, auditTrail: [...r.auditTrail] }));
-let waitlistConfig = { ...defaultWaitlistConfig };
-let steeringData = { ...demandSteeringSeeds };
+const _guided = getDataMode() === 'guided';
+let confirmationStore = _guided ? [] : confirmationSeeds.map((c) => ({ ...c }));
+let reassignmentStore = _guided ? [] : reassignmentSeeds.map((r) => ({ ...r, auditTrail: [...r.auditTrail] }));
+let waitlistConfig = _guided ? {} : { ...defaultWaitlistConfig };
+let steeringData = _guided ? {} : { ...demandSteeringSeeds };
 
 // ── Confirmations ──────────────────────────────────────────────
 

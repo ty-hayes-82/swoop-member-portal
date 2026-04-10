@@ -1,7 +1,7 @@
 // pipelineService.js — live data via /api/pipeline with static Pinetree fallback
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { shouldUseStatic, getDataMode } from './demoGate';
 import { warmLeads, memberWaitlistEntries } from '@/data/pipeline';
 import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetrics';
 
@@ -202,7 +202,7 @@ const normalizeWaitlistEntries = (entries) => {
 const getStaticWaitlistEntries = () => normalizeWaitlistEntries(memberWaitlistEntries);
 
 const getSanitizedLeads = () => {
-  const source = Array.isArray(_d?.warmLeads) && _d.warmLeads.length ? _d.warmLeads : warmLeads;
+  const source = Array.isArray(_d?.warmLeads) && _d.warmLeads.length ? _d.warmLeads : (getDataMode() === 'guided' ? [] : warmLeads);
   const leads = dedupeLeads(source);
   // In guided mode, suppress fields that depend on gates not yet opened
   const hasTeeSheet = shouldUseStatic('tee-sheet');
