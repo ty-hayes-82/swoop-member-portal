@@ -27,30 +27,30 @@ export default withAuth(async function handler(req, res) {
         WHERE club_id = ${clubId}
         ORDER BY date DESC LIMIT 2`,
 
-      // At-risk tee times today — members with score < 50 booked
+      // At-risk tee times today — members with health_score < 50 booked
       sql`
         SELECT
           m.member_id, m.first_name || ' ' || m.last_name AS name, m.archetype,
-          b.tee_time, w.engagement_score AS score,
-          CASE WHEN w.engagement_score >= 30 THEN 'At Risk' ELSE 'Critical' END AS risk_level
+          b.tee_time, m.health_score AS score,
+          CASE WHEN m.health_score >= 30 THEN 'At Risk' ELSE 'Critical' END AS risk_level
         FROM bookings b
         JOIN booking_players bp ON b.booking_id = bp.booking_id AND bp.is_guest = 0
         JOIN members m ON bp.member_id = m.member_id
-        JOIN member_engagement_weekly w ON m.member_id = w.member_id
-          AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
         WHERE b.booking_date = ${date}
           AND b.status = 'confirmed'
-          AND w.engagement_score < 50
+          AND m.health_score IS NOT NULL
+          AND m.health_score < 50
           AND m.club_id = ${clubId}
-        ORDER BY w.engagement_score ASC LIMIT 5`,
+        ORDER BY m.health_score ASC LIMIT 5`,
 
       // Active at-risk members
       sql`
         SELECT COUNT(*) AS cnt
         FROM members m
-        JOIN member_engagement_weekly w ON m.member_id = w.member_id
-          AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
-        WHERE w.engagement_score < 50 AND m.membership_status = 'active' AND m.club_id = ${clubId}`,
+        WHERE m.health_score IS NOT NULL
+          AND m.health_score < 50
+          AND m.membership_status = 'active'
+          AND m.club_id = ${clubId}`,
 
       // Open (unresolved) complaints
       sql`
