@@ -1,6 +1,7 @@
 // pipelineService.js — live data via /api/pipeline with static Pinetree fallback
 
 import { apiFetch } from './apiClient';
+import { getDataMode } from './demoGate';
 import { warmLeads, memberWaitlistEntries } from '@/data/pipeline';
 import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetrics';
 
@@ -196,7 +197,7 @@ const normalizeWaitlistEntries = (entries) => {
 const getStaticWaitlistEntries = () => normalizeWaitlistEntries(memberWaitlistEntries);
 
 const getSanitizedLeads = () => {
-  const source = Array.isArray(_d?.warmLeads) && _d.warmLeads.length ? _d.warmLeads : warmLeads;
+  const source = Array.isArray(_d?.warmLeads) && _d.warmLeads.length ? _d.warmLeads : (getDataMode() === 'demo' ? warmLeads : []);
   return dedupeLeads(source);
 };
 

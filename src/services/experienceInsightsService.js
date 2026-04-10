@@ -1,6 +1,7 @@
 // experienceInsightsService.js — correlation calculations from existing data
 // _init() hydrates from Postgres; arrays/objects are mutated in-place so imports stay current.
 import { apiFetch, getClubId } from './apiClient';
+import { getDataMode } from './demoGate';
 import { memberArchetypes } from '@/data/members';
 
 // Touchpoint correlations with retention — derived from cross-domain analysis
@@ -113,7 +114,7 @@ export const complaintLoyaltyStats = {
 
 // Archetype spend patterns for spend potential analysis
 export const getArchetypeSpendPatterns = () => {
-  const archetypes = _d?.memberArchetypes ?? memberArchetypes;
+  const archetypes = _d?.memberArchetypes ?? (getDataMode() === 'demo' ? memberArchetypes : []);
   return archetypes.map(a => ({
     archetype: a.archetype,
     count: a.count,
@@ -397,26 +398,24 @@ export const _init = async () => {
 // ─── Data-driven getters ──────────────────────────────────────────────────
 
 /** touchpointCorrelations — returns from _d or falls back to static array */
+const _demo = () => getDataMode() === 'demo';
+
 export function getTouchpointCorrelations() {
-  return _d?.touchpointCorrelations ?? touchpointCorrelations;
+  return _d?.touchpointCorrelations ?? (_demo() ? touchpointCorrelations : []);
 }
 
-/** correlationInsights — returns from _d or falls back to static array */
 export function getCorrelationInsights() {
-  return _d?.correlationInsights ?? correlationInsights;
+  return _d?.correlationInsights ?? (_demo() ? correlationInsights : []);
 }
 
-/** eventROI — returns from _d or falls back to static array */
 export function getEventROI() {
-  return _d?.eventROI ?? eventROI;
+  return _d?.eventROI ?? (_demo() ? eventROI : []);
 }
 
-/** complaintLoyaltyStats — returns from _d or falls back to static object */
 export function getComplaintLoyaltyStats() {
-  return _d?.complaintLoyaltyStats ?? complaintLoyaltyStats;
+  return _d?.complaintLoyaltyStats ?? (_demo() ? complaintLoyaltyStats : null);
 }
 
-/** archetypeSpendGaps — returns from _d or falls back to static array */
 export function getArchetypeSpendGaps() {
-  return _d?.archetypeSpendGaps ?? archetypeSpendGaps;
+  return _d?.archetypeSpendGaps ?? (_demo() ? archetypeSpendGaps : []);
 }

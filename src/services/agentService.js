@@ -1,5 +1,6 @@
 import { apiFetch } from './apiClient';
 import { logError } from '@/utils/logError';
+import { getDataMode } from './demoGate';
 import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents';
 
 /**
@@ -70,7 +71,7 @@ const byNewest = (a, b) => {
 
 /** @returns {Agent[]} */
 export function getAgents() {
-  return _d?.agents ?? agentDefinitions;
+  return _d?.agents ?? (getDataMode() === 'demo' ? agentDefinitions : []);
 }
 
 /**
@@ -147,7 +148,7 @@ export function dismissAction(id, meta = {}) {
  * @returns {ThoughtLogEntry[]}
  */
 export function getThoughtLog(agentId) {
-  const logs = _d?.thoughtLogs ?? agentThoughtLogs;
+  const logs = _d?.thoughtLogs ?? (getDataMode() === 'demo' ? agentThoughtLogs : {});
   return logs[agentId] ?? [];
 }
 
