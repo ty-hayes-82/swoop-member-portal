@@ -486,6 +486,7 @@ export default function TodayView() {
               )}
               <button
                 onClick={() => setDismissedAlerts(prev => [...prev, alert.headline])}
+                aria-label={`Dismiss weather alert: ${alert.headline || alert.type}`}
                 className="bg-transparent border-none cursor-pointer text-gray-400 text-sm px-1.5 py-0.5"
               >
                 Dismiss

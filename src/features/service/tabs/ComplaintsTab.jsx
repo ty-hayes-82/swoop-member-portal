@@ -64,7 +64,12 @@ export default function ComplaintsTab() {
   const weatherPct = feedbackRecords.length > 0
     ? Math.round((weatherImpactedComplaints / feedbackRecords.length) * 100)
     : 0;
-  const slowRoundPct = Math.round(((paceFB.slowRoundsPerMonth || 0) / Math.max(1, (paceFB.slowRoundsPerMonth || 0) * 3)) * 100);
+  const slowRoundComplaints = feedbackRecords.filter(f =>
+    f.category === 'Food Quality' || f.category === 'Service Speed'
+  ).length;
+  const slowRoundPct = feedbackRecords.length > 0
+    ? Math.round((slowRoundComplaints / feedbackRecords.length) * 100)
+    : 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -89,7 +94,7 @@ export default function ComplaintsTab() {
           </div>
           <div className="bg-white border border-purple-200 rounded-xl p-3">
             <div className="text-[10px] font-bold uppercase tracking-wide text-warning-500">Slow rounds</div>
-            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">~{Math.min(35, slowRoundPct + 12)}%</div>
+            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{slowRoundPct}%</div>
             <div className="text-[11px] text-gray-500">of dining complaints follow slow rounds</div>
           </div>
         </div>
@@ -156,7 +161,7 @@ export default function ComplaintsTab() {
         ) : (
           <div className="flex flex-col gap-2">
             {openComplaints.map(complaint => {
-              const daysSince = Math.round((new Date('2026-01-31') - new Date(complaint.date)) / (1000 * 60 * 60 * 24));
+              const daysSince = Math.max(0, Math.round((Date.now() - new Date(complaint.date).getTime()) / (1000 * 60 * 60 * 24)));
               const statusStyle = STATUS_STYLES[complaint.status] || STATUS_STYLES.acknowledged;
               const isComplaintExpanded = expandedComplaintId === complaint.id;
               const complaintRecommended = [];

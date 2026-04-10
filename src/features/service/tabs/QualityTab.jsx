@@ -329,27 +329,6 @@ export default function QualityTab() {
         })()}
       </div>
 
-      {/* Shift Comparison */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
-          AM vs PM Service Quality
-        </h3>
-        <p className="text-[13px] text-gray-500 mb-4">
-          Complaints categorized by time of day. Lunch service (11am-2pm) shows highest complaint density, correlating with staffing gaps.
-        </p>
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            { label: 'AM Shift (6am-12pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h <= 15; }).length, color: '#12b76a' },
-            { label: 'PM Shift (12pm-9pm)', complaints: feedbackRecords.filter(f => { const h = parseInt(f.date.split('-')[2]); return h > 15; }).length, color: '#ef4444' },
-          ].map(shift => (
-            <div key={shift.label} className="p-4 rounded-lg text-center" style={{ background: `${shift.color}08`, border: `1px solid ${shift.color}20` }}>
-              <div className="text-xs text-gray-400 font-semibold mb-1">{shift.label}</div>
-              <div className="font-mono text-2xl font-bold" style={{ color: shift.color }}>{shift.complaints}</div>
-              <div className="text-[11px] text-gray-500">complaints</div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

@@ -190,7 +190,7 @@ export default function RevenuePage() {
         {/* Decomposition Chart */}
         <Panel
           title="Leakage Decomposition"
-          subtitle="Where the $9,580 is going — and which systems prove it"
+          subtitle={`Where the $${leakage.TOTAL.toLocaleString()} is going — and which systems prove it`}
           sourceSystems={['Tee Sheet', 'POS', 'Scheduling', 'Weather']}
         >
           {/* Trend context — Pillar 3: PROVE IT depth */}

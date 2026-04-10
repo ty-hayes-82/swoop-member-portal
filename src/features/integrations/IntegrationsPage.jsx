@@ -37,7 +37,7 @@ const CATEGORY_CSV_MAP = {
   'CRM & Membership Management': 'crm',
   'Email Marketing': 'email',
   'Scheduling & Labor': 'staffing',
-  'Accounting & Finance': 'pos',
+  'Accounting & Finance': 'accounting',
 };
 
 const CATEGORY_CONFIG = [
@@ -193,30 +193,27 @@ export default function IntegrationsPage() {
   const intelligenceScore = totalSystems ? Math.round((connectedSystems / totalSystems) * 100) : 94;
   const dataPointsSynced = connectedSystems * 620;
 
-  // Intelligence Score color coding (GMC-04)
-  const getScoreColor = (score) => {
-    if (score < 40) return '#ef4444'; // red
-    if (score < 70) return '#f59e0b'; // yellow
-    return '#12b76a'; // green
-  };
-
-  const getScoreLabel = (score) => {
-    if (score < 40) return 'Getting Started';
-    if (score < 70) return 'Growing Intelligence';
-    return 'Full Intelligence';
-  };
-
   const [showMarketplace, setShowMarketplace] = useState(false);
   const [expandedVendor, setExpandedVendor] = useState(null);
 
+  const degradedSystems = systems.filter(s => s.status === 'connected' && s.health && s.health !== 'ok').length;
+  const statusLabel = degradedSystems > 0 ? `${degradedSystems} degraded` : connectedSystems > 0 ? 'All Healthy' : 'No data';
+  const statusColor = degradedSystems > 0 ? '#f59e0b' : '#12b76a';
+  const freshestSync = systems
+    .filter(s => s.status === 'connected' && s.lastSync)
+    .map(s => Number.parseInt(s.lastSync, 10))
+    .filter(n => Number.isFinite(n))
+    .reduce((min, n) => Math.min(min, n), Number.POSITIVE_INFINITY);
+  const lastSyncLabel = Number.isFinite(freshestSync) ? `Last sync: ${freshestSync} min ago` : 'Last sync: —';
+
   const summaryCards = [
-    { label: 'Systems Connected', value: `${connectedSystems}`, sub: 'All Healthy', color: '#12b76a' },
+    { label: 'Systems Connected', value: `${connectedSystems}`, sub: statusLabel, color: statusColor },
     { label: 'Data Points Synced', value: dataPointsSynced >= 1000 ? `${(dataPointsSynced / 1000).toFixed(1)}K` : dataPointsSynced.toLocaleString(), sub: 'This week' },
     {
       label: 'System Status',
-      value: 'All Healthy',
-      sub: 'Last sync: 11 min ago',
-      color: '#12b76a',
+      value: statusLabel,
+      sub: lastSyncLabel,
+      color: statusColor,
     },
   ];
 
