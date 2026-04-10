@@ -6,8 +6,6 @@ import { PlaybookActionCard } from '@/components/ui';
 import { SourceBadgeRow } from '@/components/ui/SourceBadge.jsx';
 import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, getAllMemberProfiles, setRosterCache, getMemberRoster, getFullRoster } from '@/services/memberService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { getDataMode } from '@/services/demoGate';
-import { scoreMember, getOpenGatesForScoring, hasEngagementGates } from '@/services/guidedScoring';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
 // Generate full 300-member roster from all available data sources
@@ -90,14 +88,6 @@ function generateRoster() {
         lastSeenLocation: LOCATIONS[idx % LOCATIONS.length],
       });
     }
-  }
-  // In guided mode, recalculate all scores from available dimensions
-  if (getDataMode() === 'guided') {
-    const gates = getOpenGatesForScoring();
-    return roster.map(m => {
-      const scored = scoreMember(m, gates);
-      return scored;
-    });
   }
   return roster;
 }

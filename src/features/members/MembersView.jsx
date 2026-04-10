@@ -7,7 +7,7 @@ import { getMemberSummary } from '@/services/memberService';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
-import { shouldUseStatic } from '@/services/demoGate';
+import { isGateOpen } from '@/services/demoGate';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 
 // Member Health tabs
@@ -119,7 +119,7 @@ export default function MembersView() {
 
   // Check if engagement data sources are available (tee sheet, POS, email)
   // Without these, health scores can't be computed — show roster-only mode
-  const hasEngagementData = shouldUseStatic('tee-sheet') || shouldUseStatic('fb') || shouldUseStatic('email');
+  const hasEngagementData = isGateOpen('tee-sheet') || isGateOpen('fb') || isGateOpen('email');
 
   // If members imported but no engagement data, force "All Members" tab (roster view)
   const activeMode = hasEngagementData ? mode : 'search';

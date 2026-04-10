@@ -1,6 +1,6 @@
 import { apiFetch } from './apiClient';
 import { SYSTEMS } from '@/data/integrations';
-import { getDataMode, shouldUseStatic } from './demoGate';
+import { getDataMode, isGateOpen } from './demoGate';
 import { useServiceCache } from '@/hooks/useServiceCache';
 
 /**
@@ -47,7 +47,7 @@ export function getConnectedSystems() {
   if (getDataMode() === 'guided') {
     systems = systems.map(s => {
       const gateId = CATEGORY_GATE[s.category];
-      if (gateId && !shouldUseStatic(gateId)) {
+      if (gateId && !isGateOpen(gateId)) {
         return { ...s, status: 'available', lastSync: null };
       }
       return s;

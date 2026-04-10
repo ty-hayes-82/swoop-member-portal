@@ -4,7 +4,7 @@ import { useNavigationContext } from "@/context/NavigationContext";
 import { useMemberProfile } from "@/context/MemberProfileContext";
 import { useApp } from "@/context/AppContext";
 import { NAV_ITEMS } from "@/config/navigation";
-import { shouldUseStatic } from "@/services/demoGate";
+import { isGateOpen } from "@/services/demoGate";
 import { getAtRiskMembers } from "@/services/memberService";
 
 const primaryItems = NAV_ITEMS.filter(
@@ -74,7 +74,7 @@ const SwoopSidebar = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } else if (storyId === 'catch') {
-      if (shouldUseStatic('members')) {
+      if (isGateOpen('members')) {
         const atRisk = getAtRiskMembers() || [];
         const member = [...atRisk].sort((a, b) => (a.score ?? a.healthScore ?? 100) - (b.score ?? b.healthScore ?? 100))[0];
         if (member?.memberId) {

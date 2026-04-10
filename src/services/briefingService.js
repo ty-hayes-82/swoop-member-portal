@@ -1,7 +1,7 @@
 // briefingService.js — Phase 1 static · Phase 2 /api/briefing
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { isGateOpen } from './demoGate';
 import { getMonthlyRevenueSummary, getRevenueByDay, getTodayTeeSheet, getTeeSheetSummary } from './operationsService';
 import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
@@ -170,7 +170,7 @@ export const DEMO_BRIEFING = {
  */
 export const getDailyBriefing = (date = '2026-01-17') => {
   if (_d) return _d;
-  if (!shouldUseStatic('tee-sheet')) return EMPTY_BRIEFING;
+  if (!isGateOpen('tee-sheet')) return EMPTY_BRIEFING;
 
   // Demo mode: try to build from service data, fall back to static
   try {
@@ -185,7 +185,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   const cancelSummary  = getCancellationSummary();
   const waitlistSummary = getWaitlistSummary();
   const pipelineData = _d?.cancellationProbabilities ?? staticCancellationProbabilities;
-  const hasPipelineData = shouldUseStatic('pipeline');
+  const hasPipelineData = isGateOpen('pipeline');
   const topCancellationRiskMembers = !hasPipelineData ? [] : [...pipelineData]
     .sort((a, b) => b.cancelProbability - a.cancelProbability)
     .slice(0, 3)
@@ -228,8 +228,8 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       rounds:         82,
       roundsVsLastWeek: +8,
       incidents: [
-        ...(shouldUseStatic('fb') ? ['Grill Room understaffed — 2 service speed complaints'] : []),
-        ...(shouldUseStatic('complaints') ? ['James Whitfield filed a slow-service complaint — left unhappy, no follow-up'] : []),
+        ...(isGateOpen('fb') ? ['Grill Room understaffed — 2 service speed complaints'] : []),
+        ...(isGateOpen('complaints') ? ['James Whitfield filed a slow-service complaint — left unhappy, no follow-up'] : []),
       ],
       weather:        yesterday.weather,
       isUnderstaffed: yesterday.isUnderstaffed,
@@ -244,7 +244,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         { memberId: 'mbr_089', name: 'Anne Jordan',     archetype: 'Weekend Warrior',  time: '7:08 AM', score: 28,
           topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
         { memberId: 'mbr_271', name: 'Robert Callahan', archetype: 'Declining',        time: '9:00 AM', score: 22,
-          topRisk: shouldUseStatic('fb') ? 'Hitting F&B minimum only — obligation spending pattern' : 'Declining engagement pattern' },
+          topRisk: isGateOpen('fb') ? 'Hitting F&B minimum only — obligation spending pattern' : 'Declining engagement pattern' },
       ],
       staffingGaps: [], fullyStaffed: true,
       cancellationRisk: {
@@ -275,7 +275,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       { playbookId: 'slow-saturday',      title: 'Slow Saturday Recovery',       status: 'available',   urgency: 'medium',
         reason: '28% slow round rate — weekend pace deteriorating' },
       { playbookId: 'engagement-decay',   title: 'Engagement Decay Intervention',status: 'available',   urgency: 'medium',
-        reason: shouldUseStatic('email') ? '5 members showing accelerated email decay' : 'Multiple members showing declining engagement signals' },
+        reason: isGateOpen('email') ? '5 members showing accelerated email decay' : 'Multiple members showing declining engagement signals' },
     ],
     keyMetrics: {
       monthlyRevenue: getMonthlyRevenueSummary().total,
@@ -296,7 +296,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         action: 'View waitlist queue',
         link: 'waitlist-demand',
       },
-      ...(shouldUseStatic('fb') ? [{
+      ...(isGateOpen('fb') ? [{
         id: 'wind-fb-prep',
         icon: '💨',
         title: 'Shift F&B prep for afternoon wind-driven indoor spike',

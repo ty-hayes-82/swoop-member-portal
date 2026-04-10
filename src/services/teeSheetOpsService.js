@@ -3,7 +3,7 @@
 // Pattern: in-memory mutable store (same as agentService.js)
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { isGateOpen } from './demoGate';
 import {
   confirmationSeeds,
   reassignmentSeeds,
@@ -42,7 +42,7 @@ let steeringData = { ...demandSteeringSeeds };
 
 export function getConfirmations() {
   if (_d?.confirmations) return [..._d.confirmations].sort((a, b) => b.cancelProbability - a.cancelProbability);
-  if (!shouldUseStatic('tee-sheet')) return [];
+  if (!isGateOpen('tee-sheet')) return [];
   return [...confirmationStore].sort((a, b) => b.cancelProbability - a.cancelProbability);
 }
 
@@ -87,7 +87,7 @@ export function getReassignments() {
       return (statusOrder[a.status] ?? 5) - (statusOrder[b.status] ?? 5);
     });
   }
-  if (!shouldUseStatic('tee-sheet')) return [];
+  if (!isGateOpen('tee-sheet')) return [];
   return [...reassignmentStore].sort((a, b) => {
     const statusOrder = { pending: 0, approved: 1, completed: 2, overridden: 3, skipped: 4 };
     return (statusOrder[a.status] ?? 5) - (statusOrder[b.status] ?? 5);
@@ -177,19 +177,19 @@ export function updateWaitlistConfig(updates) {
 
 export function getHistoricalPatterns() {
   if (_d?.historicalPatterns) return _d.historicalPatterns;
-  if (!shouldUseStatic('tee-sheet')) return [];
+  if (!isGateOpen('tee-sheet')) return [];
   return historicalPatterns;
 }
 
 export function getWeeklyQueuePressure() {
   if (_d?.weeklyQueuePressure) return _d.weeklyQueuePressure;
-  if (!shouldUseStatic('tee-sheet')) return [];
+  if (!isGateOpen('tee-sheet')) return [];
   return weeklyQueuePressure;
 }
 
 export function getDemandSteeringStats() {
   if (_d?.demandSteeringStats) return { ...(_d.demandSteeringStats) };
-  if (!shouldUseStatic('tee-sheet')) return { redirectionsSent: 0, acceptanceRate: 0, revenueSaved: 0, avgResponseTime: 0 };
+  if (!isGateOpen('tee-sheet')) return { redirectionsSent: 0, acceptanceRate: 0, revenueSaved: 0, avgResponseTime: 0 };
   return { ...steeringData };
 }
 

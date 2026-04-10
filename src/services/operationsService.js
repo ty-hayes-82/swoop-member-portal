@@ -2,7 +2,7 @@
 // Phase 2 swap: DataProvider calls _init() before render. All exports stay synchronous.
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { isGateOpen } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { dailyRevenue } from '@/data/revenue';
 import { paceDistribution, slowRoundStats, bottleneckHoles, paceFBImpact } from '@/data/pace';
@@ -125,15 +125,15 @@ export const _init = async () => {
 /** @returns {DailyRevenueRow[]} */
 export const getRevenueByDay = () => {
   if (_d?.revenueByDay) return _d.revenueByDay;
-  if (!shouldUseStatic('fb')) return [];
+  if (!isGateOpen('fb')) return [];
   return dailyRevenue;
 };
 
 /** @returns {MonthlyRevenueSummary} */
 export const getMonthlyRevenueSummary = () => {
   if (_d?.monthlySummary) return _d.monthlySummary;
-  const fbOpen = shouldUseStatic('fb');
-  const teeOpen = shouldUseStatic('tee-sheet');
+  const fbOpen = isGateOpen('fb');
+  const teeOpen = isGateOpen('tee-sheet');
   if (!fbOpen && !teeOpen) return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
   const golfTotal = teeOpen ? dailyRevenue.reduce((s, r) => s + (r.golf || 0), 0) : 0;
   const fbTotal = fbOpen ? dailyRevenue.reduce((s, r) => s + (r.fb || 0), 0) : 0;
@@ -158,7 +158,7 @@ export const getSlowRoundRate = () => {
       threshold: sanitizePositive(source?.threshold, DEFAULT_SLOW_ROUND_STATS.threshold),
     };
   }
-  if (!shouldUseStatic('pace')) return EMPTY_SLOW_ROUND;
+  if (!isGateOpen('pace')) return EMPTY_SLOW_ROUND;
   const source = (slowRoundStats ?? DEFAULT_SLOW_ROUND_STATS);
   const totalRounds = Math.round(sanitizePositive(source?.totalRounds, DEFAULT_SLOW_ROUND_STATS.totalRounds));
   const slowRounds = Math.round(sanitizePositive(source?.slowRounds, DEFAULT_SLOW_ROUND_STATS.slowRounds));
@@ -187,7 +187,7 @@ export const getBottleneckHoles = () => {
       };
     });
   }
-  if (!shouldUseStatic('pace')) return [];
+  if (!isGateOpen('pace')) return [];
   const source = (bottleneckHoles ?? DEFAULT_BOTTLENECK_HOLES);
   if (!Array.isArray(source) || source.length === 0) return DEFAULT_BOTTLENECK_HOLES;
   return source.map((item, index) => {
@@ -215,7 +215,7 @@ export const getPaceFBImpact = () => {
       revenueLostPerMonth: Math.round(sanitizePositive(source?.revenueLostPerMonth, DEFAULT_PACE_FB_IMPACT.revenueLostPerMonth)),
     };
   }
-  if (!shouldUseStatic('pace')) return EMPTY_PACE_FB;
+  if (!isGateOpen('pace')) return EMPTY_PACE_FB;
   const source = (paceFBImpact ?? DEFAULT_PACE_FB_IMPACT);
   return {
     fastConversionRate: sanitizeRate(source?.fastConversionRate, DEFAULT_PACE_FB_IMPACT.fastConversionRate),
@@ -232,14 +232,14 @@ export const getPaceFBImpact = () => {
 /** @returns {TeeSheetRow[]} */
 export const getTodayTeeSheet = () => {
   if (_d?.todayTeeSheet) return _d.todayTeeSheet;
-  if (!shouldUseStatic('tee-sheet')) return [];
+  if (!isGateOpen('tee-sheet')) return [];
   return todayTeeSheet;
 };
 
 /** @returns {TeeSheetSummary} */
 export const getTeeSheetSummary = () => {
   if (_d?.teeSheetSummary) return _d.teeSheetSummary;
-  if (!shouldUseStatic('tee-sheet')) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
+  if (!isGateOpen('tee-sheet')) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
   return teeSheetSummary;
 };
 

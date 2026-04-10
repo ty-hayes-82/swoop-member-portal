@@ -9,7 +9,7 @@ import PageTransition from '@/components/ui/PageTransition';
 import { getTodayTeeSheet, getTeeSheetSummary } from '@/services/operationsService';
 import { useApp } from '@/context/AppContext';
 import { apiFetch } from '@/services/apiClient';
-import { shouldUseStatic } from '@/services/demoGate';
+import { isGateOpen } from '@/services/demoGate';
 
 const healthColor = (score) => {
   if (score >= 70) return '#12b76a';
@@ -25,7 +25,7 @@ const healthLabel = (score) => {
   return 'Critical';
 };
 
-const showMemberNames = () => shouldUseStatic('members');
+const showMemberNames = () => isGateOpen('members');
 
 function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
   const color = healthColor(teeTime.healthScore);

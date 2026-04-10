@@ -1,6 +1,5 @@
 // TodaysRisks — Staffing status grid + Open complaints with aging
 import { getComplaintCorrelation, getShiftCoverage } from '@/services/staffingService';
-import { shouldUseStatic } from '@/services/demoGate';
 import { useNavigation } from '@/context/NavigationContext';
 import MemberLink from '@/components/MemberLink';
 import SourceBadge from '@/components/ui/SourceBadge';
@@ -23,13 +22,8 @@ export default function TodaysRisks() {
   const { navigate } = useNavigation();
   const allComplaints = getComplaintCorrelation();
   const shiftCoverage = getShiftCoverage();
-  const showMemberNames = shouldUseStatic('members');
-
-  const hasComplaintsGate = shouldUseStatic('complaints');
-  const hasWeatherGate = shouldUseStatic('weather');
-
-  // Hide section only if no data AND no relevant gates open
-  if (allComplaints.length === 0 && shiftCoverage.length === 0 && !hasComplaintsGate && !hasWeatherGate) {
+  // Hide section if no data
+  if (allComplaints.length === 0 && shiftCoverage.length === 0) {
     return null;
   }
 
@@ -121,18 +115,12 @@ export default function TodaysRisks() {
       </div>
 
       {/* Open Complaints with Aging */}
-      {(totalUnresolved > 0 || hasComplaintsGate) && (
+      {totalUnresolved > 0 && (
         <div>
           <div className="text-[11px] font-bold text-warning-500 uppercase tracking-wide mb-2.5">
             Open Complaints ({totalUnresolved})
           </div>
-          {totalUnresolved === 0 ? (
-            <div className="py-4 px-3.5 text-center text-sm text-gray-400 border border-dashed border-gray-200 rounded-lg">
-              No unresolved complaints — all issues resolved
-            </div>
-          ) : (
-            <>
-              <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5">
                 {displayComplaints.map(c => {
                   const isOld = c.daysOpen > 7;
                   const isCritical = c.daysOpen > 30;
@@ -144,13 +132,9 @@ export default function TodaysRisks() {
                       className={`flex flex-col sm:flex-row sm:items-center justify-between py-2.5 px-3.5 rounded-lg cursor-pointer transition-shadow duration-150 hover:shadow-md gap-1.5 sm:gap-0 ${isOld ? 'bg-red-500/[0.024] border border-red-500/[0.15]' : 'border border-gray-200'} ${isCritical ? 'animate-[pulse-border_2s_infinite]' : ''}`}
                     >
                       <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0 flex-wrap">
-                        {showMemberNames ? (
-                          <MemberLink memberId={c.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 dark:text-white/90 whitespace-nowrap">
+                        <MemberLink memberId={c.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 dark:text-white/90 whitespace-nowrap">
                             {c.memberName}
                           </MemberLink>
-                        ) : (
-                          <span className="font-semibold text-sm text-gray-800 dark:text-white/90 whitespace-nowrap">Member</span>
-                        )}
                         <span className="text-xs text-gray-500">{c.category}</span>
                         {c.isUnderstaffedDay && (
                           <span className="text-[9px] font-bold text-error-500 bg-error-500/[0.07] px-1.5 py-px rounded-full">Understaffed</span>
@@ -183,8 +167,6 @@ export default function TodaysRisks() {
                   View all {totalUnresolved} in Service →
                 </button>
               )}
-            </>
-          )}
         </div>
       )}
 

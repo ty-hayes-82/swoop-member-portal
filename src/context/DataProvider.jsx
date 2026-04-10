@@ -93,9 +93,8 @@ export function DataProvider({ children }) {
     return () => window.removeEventListener('swoop:data-imported', handler);
   }, []);
 
-  // In guided mode, bump refreshKey when gates change so services re-init with fresh DB data
+  // Bump refreshKey when sources change so services re-init with fresh DB data
   useEffect(() => {
-    if (getDataMode() !== 'guided') return;
     const handler = () => setRefreshKey(k => k + 1);
     window.addEventListener(SOURCES_CHANGED_EVENT, handler);
     return () => window.removeEventListener(SOURCES_CHANGED_EVENT, handler);

@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { isGateOpen } from './demoGate';
 import { cockpitItems, sinceLastLogin as staticSinceLastLogin } from '@/data/cockpit';
 import { useServiceCache } from '@/hooks/useServiceCache';
 
@@ -50,8 +50,8 @@ const COMPLAINT_PATTERN = /complaint/i;
  * Mutates nothing — returns a new item with filtered arrays.
  */
 function gateFilterItem(item) {
-  const hasFb = shouldUseStatic('fb');
-  const hasComplaints = shouldUseStatic('complaints');
+  const hasFb = isGateOpen('fb');
+  const hasComplaints = isGateOpen('complaints');
   if (hasFb && hasComplaints) return item;
 
   const filterText = (text) => {

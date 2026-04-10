@@ -9,7 +9,7 @@
 
 import { useNavigation } from '@/context/NavigationContext';
 import { useMemberProfile } from '@/context/MemberProfileContext';
-import { isSourceLoaded, getDataMode } from '@/services/demoGate';
+import { isGateOpen, getDataMode } from '@/services/demoGate';
 import { getAtRiskMembers } from '@/services/memberService';
 
 const STORIES = [
@@ -66,7 +66,7 @@ export default function DemoStoriesLauncher() {
 
   // Pick the most-decayed at-risk member for Story 2 deep link
   const pickStory2Member = () => {
-    if (!isSourceLoaded('members')) return null;
+    if (!isGateOpen('members')) return null;
     const atRisk = getAtRiskMembers() || [];
     if (atRisk.length === 0) return null;
     return [...atRisk].sort((a, b) => (a.score ?? a.healthScore ?? 100) - (b.score ?? b.healthScore ?? 100))[0];
@@ -103,7 +103,7 @@ export default function DemoStoriesLauncher() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {STORIES.filter(story => {
           if (getDataMode() !== 'guided') return true;
-          return (story.requiredGates || []).every(g => isSourceLoaded(g));
+          return (story.requiredGates || []).every(g => isGateOpen(g));
         }).map((story) => (
           <button
             key={story.id}

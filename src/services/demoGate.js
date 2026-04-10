@@ -42,17 +42,17 @@ export function getDataMode() {
 }
 
 /**
- * Shorthand: should this service return static data for the given gate?
- * Returns true if mode is demo, or mode is guided AND gate is open.
- * Returns false if mode is live (never use static) or gate is closed.
+ * Returns true if the gate is open (data is available for this domain).
+ * Demo mode: always open. Guided mode: open if the gate has been imported.
+ * Live mode: always closed (API data only, no static fallback).
  */
-export function shouldUseStatic(gateId) {
+export function isGateOpen(gateId) {
   // 'events' is an alias — event files use the 'email' gate
   if (gateId === 'events') gateId = 'email';
   const mode = getDataMode();
   if (mode === 'live') return false;
-  if (mode === 'guided') return isSourceLoaded(gateId);
-  return true; // demo mode — always use static
+  if (mode === 'guided') return _isGateLoaded(gateId);
+  return true; // demo mode — always open
 }
 
 function getLoadedFileSet() {
@@ -76,11 +76,8 @@ function persistFiles(fileSet, gateSet) {
   } catch {}
 }
 
-/**
- * Check if a service-level gate is open.
- * Returns true if: not in guided mode, OR at least one file for this gate has been imported.
- */
-export function isSourceLoaded(gateId) {
+/** Internal: check if a gate has been loaded in guided mode. */
+function _isGateLoaded(gateId) {
   if (!isGuidedMode()) return true;
   return getLoadedGateSet().has(gateId);
 }

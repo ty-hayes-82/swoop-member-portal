@@ -2,7 +2,7 @@
 // Narrative and chart helpers stay pure functions — they work on whatever data source is active.
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { isGateOpen } from './demoGate';
 import { trends as staticTrends, MONTHS as STATIC_MONTHS, outletTrends as staticOutletTrends } from '@/data/trends.js';
 
 let _d = null; // { trends, outletTrends, months }
@@ -14,8 +14,8 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
-const _trends = () => _d?.trends ?? (shouldUseStatic('pipeline') ? staticTrends : {});
-const _months = () => _d?.months ?? (shouldUseStatic('pipeline') ? STATIC_MONTHS : []);
+const _trends = () => _d?.trends ?? (isGateOpen('pipeline') ? staticTrends : {});
+const _months = () => _d?.months ?? (isGateOpen('pipeline') ? STATIC_MONTHS : []);
 
 export function getTrendChartData(metricKey) {
   const series = _trends()[metricKey];

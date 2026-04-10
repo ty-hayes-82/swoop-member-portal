@@ -1,7 +1,7 @@
 // staffingService.js — Phase 1 static · Phase 2 /api/staffing
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { isGateOpen } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { understaffedDays, feedbackRecords, feedbackSummary, shiftCoverage } from '@/data/staffing';
 
@@ -161,28 +161,28 @@ const sanitizeFeedbackRecords = (source) => {
 export const getUnderstaffedDays = () => {
   const real = _d?.understaffedDays;
   if (Array.isArray(real) && real.length) return sanitizeUnderstaffedDays(real);
-  if (!shouldUseStatic('complaints') || !shouldUseStatic('members')) return [];
+  if (!isGateOpen('complaints') || !isGateOpen('members')) return [];
   return sanitizeUnderstaffedDays(understaffedDays);
 };
 /** @returns {ShiftCoverageRow[]} */
 export const getShiftCoverage = () => {
   const real = _d?.shiftCoverage;
   if (Array.isArray(real) && real.length) return sanitizeShiftCoverage(real);
-  if (!shouldUseStatic('complaints')) return [];
+  if (!isGateOpen('complaints')) return [];
   return sanitizeShiftCoverage(shiftCoverage);
 };
 /** @returns {FeedbackSummaryRow[]} */
 export const getFeedbackSummary = () => {
   const real = _d?.feedbackSummary;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackSummary(real);
-  if (!shouldUseStatic('complaints') || !shouldUseStatic('members')) return [];
+  if (!isGateOpen('complaints') || !isGateOpen('members')) return [];
   return sanitizeFeedbackSummary(feedbackSummary);
 };
 /** @returns {FeedbackRecord[]} */
 export const getComplaintCorrelation = () => {
   const real = _d?.feedbackRecords;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackRecords(real);
-  if (!shouldUseStatic('complaints') || !shouldUseStatic('members')) return [];
+  if (!isGateOpen('complaints') || !isGateOpen('members')) return [];
   return sanitizeFeedbackRecords(feedbackRecords);
 };
 

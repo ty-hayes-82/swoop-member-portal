@@ -78,7 +78,7 @@ describe('memberService — _init + getter contract', () => {
 
   it('getter called before _init() returns the static demo fallback (does not throw, does not return null)', async () => {
     // No _init() call — assert current behavior: default data-mode is 'demo' so
-    // shouldUseStatic('members') is true, and getters return the static seed.
+    // isGateOpen('members') is true, and getters return the static seed.
     const svc = await freshService();
 
     const summary = svc.getMemberSummary();

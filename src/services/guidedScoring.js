@@ -12,7 +12,7 @@
  * Tier thresholds: Healthy 67+, Watch 45-66, At Risk 25-44, Critical 0-24
  */
 
-import { shouldUseStatic, getDataMode, getLoadedGates } from './demoGate';
+import { isGateOpen, getDataMode, getLoadedGates } from './demoGate';
 
 // ── Weights (match backend compute-health-scores.js) ──
 const WEIGHTS = { golf: 0.30, dining: 0.25, email: 0.25, events: 0.20 };
@@ -139,7 +139,7 @@ export function scoreMember(member, openGates) {
  * Check if any engagement gates are open (tee-sheet, fb, email).
  */
 export function hasEngagementGates() {
-  return shouldUseStatic('tee-sheet') || shouldUseStatic('fb') || shouldUseStatic('email');
+  return isGateOpen('tee-sheet') || isGateOpen('fb') || isGateOpen('email');
 }
 
 /**

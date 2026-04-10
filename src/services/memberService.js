@@ -162,10 +162,10 @@ const resolveOverrideSignal = (member) => {
       let signal = RISK_SIGNAL_OVERRIDES.get(key);
       // Filter signal parts based on open gates
       const parts = signal.split(' • ').filter(part => {
-        if (!shouldUseStatic('tee-sheet') && /round|golf/i.test(part)) return false;
-        if (!shouldUseStatic('fb') && /dining|F&B|spend/i.test(part)) return false;
-        if (!shouldUseStatic('complaints') && /complaint/i.test(part)) return false;
-        if (!shouldUseStatic('email') && /email|open/i.test(part)) return false;
+        if (!isGateOpen('tee-sheet') && /round|golf/i.test(part)) return false;
+        if (!isGateOpen('fb') && /dining|F&B|spend/i.test(part)) return false;
+        if (!isGateOpen('complaints') && /complaint/i.test(part)) return false;
+        if (!isGateOpen('email') && /email|open/i.test(part)) return false;
         return true;
       });
       return parts.length > 0 ? parts.join(' • ') : null;
@@ -497,9 +497,9 @@ export const getLiveDashboard = () => _live;
 let _apiLoaded = false;
 let _hasRealMembers = false;
 
-import { shouldUseStatic } from './demoGate';
+import { isGateOpen } from './demoGate';
 const _shouldReturnEmpty = () => {
-  return !shouldUseStatic('members') && !_hasRealMembers;
+  return !isGateOpen('members') && !_hasRealMembers;
 };
 
 export const hasRealMemberData = () => _hasRealMembers;
@@ -540,8 +540,8 @@ export const getAtRiskMembers       = () => {
 export const getArchetypeProfiles   = () => {
   if (_shouldReturnEmpty()) return [];
   const rows = normalizeArchetypes(_d?.memberArchetypes);
-  const fbClosed = !shouldUseStatic('fb');
-  const emailClosed = !shouldUseStatic('email');
+  const fbClosed = !isGateOpen('fb');
+  const emailClosed = !isGateOpen('email');
   if (fbClosed || emailClosed) {
     return rows.map(r => ({
       ...r,
@@ -655,7 +655,7 @@ const _MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-
 const _LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
 
 function _generateRoster() {
-  if (!shouldUseStatic('members')) return [];
+  if (!isGateOpen('members')) return [];
   const roster = [];
   const atRisk = getAtRiskMembers();
   const watch = getWatchMembers();
@@ -705,7 +705,7 @@ function _generateRoster() {
         joinDate: `${yr}-${mo}-01`,
         trend: level === 'Healthy' ? 'stable' : level === 'Watch' ? 'stable' : 'down',
         topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Minor engagement shift' : 'Engagement declining',
-        lastSeenLocation: shouldUseStatic('tee-sheet') ? _LOCATIONS[idx % _LOCATIONS.length] : null,
+        lastSeenLocation: isGateOpen('tee-sheet') ? _LOCATIONS[idx % _LOCATIONS.length] : null,
       });
     }
   }

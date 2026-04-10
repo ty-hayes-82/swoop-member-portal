@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { shouldUseStatic } from './demoGate';
+import { isGateOpen } from './demoGate';
 import {
   memberWaitlistEntries,
   cancellationProbabilities,
@@ -28,7 +28,7 @@ export const getWaitlistQueue = () => {
       return a.healthScore - b.healthScore;
     });
   }
-  if (!shouldUseStatic('pipeline')) return [];
+  if (!isGateOpen('pipeline')) return [];
   const normalized = Array.isArray(memberWaitlistEntries) ? memberWaitlistEntries.map((entry) => normalizeWaitlistEntry(entry)) : [];
   return normalized.sort((a, b) => {
     if (a.retentionPriority !== b.retentionPriority) {
@@ -40,19 +40,19 @@ export const getWaitlistQueue = () => {
 
 export const getWaitlistSummary = () => {
   if (_d?.queue) return summarizeWaitlistEntries(_d.queue);
-  if (!shouldUseStatic('pipeline')) return { total: 0, highPriority: 0, normalPriority: 0, avgHealthScore: 0 };
+  if (!isGateOpen('pipeline')) return { total: 0, highPriority: 0, normalPriority: 0, avgHealthScore: 0 };
   return summarizeWaitlistEntries(memberWaitlistEntries);
 };
 
 export const getCancellationPredictions = () => {
   if (_d?.cancellationPredictions) return [..._d.cancellationPredictions].sort((a, b) => b.cancelProbability - a.cancelProbability);
-  if (!shouldUseStatic('pipeline')) return [];
+  if (!isGateOpen('pipeline')) return [];
   return [...cancellationProbabilities].sort((a, b) => b.cancelProbability - a.cancelProbability);
 };
 
 export const getCancellationSummary = () => {
   if (_d?.cancellationSummary) return _d.cancellationSummary;
-  if (!shouldUseStatic('pipeline')) return { total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: '' };
+  if (!isGateOpen('pipeline')) return { total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: '' };
   const preds = cancellationProbabilities;
   const highRisk = preds.filter((p) => p.cancelProbability >= 0.6);
   return {
@@ -65,7 +65,7 @@ export const getCancellationSummary = () => {
 
 export const getDemandHeatmap = () => {
   if (_d?.demandHeatmap) return _d.demandHeatmap;
-  if (!shouldUseStatic('pipeline')) return [];
+  if (!isGateOpen('pipeline')) return [];
   return demandHeatmap;
 };
 

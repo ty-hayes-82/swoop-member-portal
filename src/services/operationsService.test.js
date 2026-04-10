@@ -61,7 +61,7 @@ describe('operationsService — _init + getter contract', () => {
   it('getters pre-_init return the static demo fallback (does not throw)', async () => {
     const svc = await freshService();
 
-    // Demo mode default — shouldUseStatic('fb') / ('pace') / ('tee-sheet') all true.
+    // Demo mode default — isGateOpen('fb') / ('pace') / ('tee-sheet') all true.
     expect(Array.isArray(svc.getRevenueByDay())).toBe(true);
     expect(svc.getRevenueByDay().length).toBeGreaterThan(0);
 

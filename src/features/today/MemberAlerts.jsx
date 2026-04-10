@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { getAtRiskMembers, getWatchMembers } from '@/services/memberService';
 import { getComplaintCorrelation } from '@/services/staffingService';
-import { shouldUseStatic } from '@/services/demoGate';
 import MemberLink from '@/components/MemberLink';
 import { useNavigation } from '@/context/NavigationContext';
 import SourceBadge from '@/components/ui/SourceBadge';
@@ -30,16 +29,9 @@ function getComplaintDays(memberId) {
   return { days: Math.max(0, days), category: complaint.category };
 }
 
-// Filter risk signal text to only reference data from open gates
+// Pass through risk signal text (services now return data-driven signals)
 function filterRiskSignal(text) {
-  if (!text) return text;
-  const hasTeeSheet = shouldUseStatic('tee-sheet');
-  const hasFb = shouldUseStatic('fb');
-  const hasComplaints = shouldUseStatic('complaints');
-  if (!hasTeeSheet && /round|golf visit|tee time|course/i.test(text)) return null;
-  if (!hasFb && /F&B|dining|food|beverage|spending.*minimum/i.test(text)) return null;
-  if (!hasComplaints && /complaint|service request/i.test(text)) return null;
-  return text;
+  return text || null;
 }
 
 function buildPriorityList() {
