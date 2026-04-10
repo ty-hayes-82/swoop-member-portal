@@ -37,6 +37,10 @@ export const cockpitItems = [
       why: 'Complaint aging 1d & spend down 42%',
       metric: { value: '1-day', label: 'warning lead time' },
     },
+    suggestedActions: [
+      'Call James Whitfield before his 8:00 AM tee time — apologize for the 42-min wait',
+      'Send written follow-up with comp lunch offer for the family',
+    ],
   },
   {
     priority: 2,
@@ -72,6 +76,10 @@ export const cockpitItems = [
       why: 'NWS advisory + 32 afternoon bookings',
       metric: { value: '32', label: 'tee times at risk' },
     },
+    suggestedActions: [
+      'Pre-notify 32 afternoon tee times with reschedule options by 10 AM',
+      'Open 6 simulator slots as backup — post to member app',
+    ],
   },
   {
     priority: 3,
@@ -108,6 +116,11 @@ export const cockpitItems = [
       why: '3 at-risk members on today\u2019s tee sheet',
       metric: { value: '3', label: 'at-risk members on-site' },
     },
+    suggestedActions: [
+      'Brief starter + pro shop staff on all 3 members before 7:00 AM',
+      'GM personally greet James Whitfield at 7:45 AM (before his 8:00 tee)',
+      'Have Membership Director call Robert Callahan about his complaint today',
+    ],
   },
 ];
 

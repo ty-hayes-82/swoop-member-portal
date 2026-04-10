@@ -37,6 +37,7 @@ export const emailHeatmap = [
 ];
 
 export const decayingMembers = [
+  { memberId: 'mbr_t01', name: 'James Whitfield', archetype: 'Balanced Active', nov: 0.65, dec: 0.38, jan: 0.12, trend: -82 },
   { memberId: 'mbr_t03', name: 'Kevin Hurst', archetype: 'Declining', nov: 0.32, dec: 0.14, jan: 0.03, trend: -91 },
   { memberId: 'mbr_t04', name: 'Anne Jordan', archetype: 'Weekend Warrior', nov: 0.40, dec: 0.28, jan: 0.11, trend: -73 },
   { memberId: 'mbr_t05', name: 'Robert Callahan', archetype: 'Declining', nov: 0.26, dec: 0.18, jan: 0.06, trend: -77 },
