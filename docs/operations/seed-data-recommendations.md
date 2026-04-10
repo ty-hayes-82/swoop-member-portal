@@ -6,6 +6,59 @@
 
 ---
 
+## Implementation Status
+
+### SHIPPED (committed to guided-data-driven + dev)
+
+| Change | Files | Commit |
+|---|---|---|
+| Member IDs aligned (mbr_203→mbr_t01, etc.) | 20 src/ files | 3994036 |
+| Revenue: $20.7K→$5.76K ($9/round) | pace.js, cockpit.js, DataImportBanner, DemoStoriesLauncher, revenueService | 3994036 |
+| 4 new members in CSV (Chen, Leonard, Mills) | JCM_Members_F9.csv | 3994036 |
+| 52 tee sheet bookings with decline arcs | TTM_Tee_Sheet_SV.csv, TTM_Tee_Sheet_Players_SV.csv | 3994036 |
+| topRisk text: Whitfield Jan16+42min, Jordan waitlists, Callahan $3,020, Mills complaints | members.js | f57a75c |
+| Briefing API: uses members.health_score instead of member_engagement_weekly | api/briefing.js | f57a75c |
+| Health scores NULL on members import (directory only) | api/guided-copy.js | 5782655 |
+| No auto-compute on import | api/guided-copy.js | 5782655 |
+| Board Report: Staff Utilization 87%, Avg Resolution Time 4.2 hrs | boardReport.js | db1e322 |
+| Cockpit item 3 urgency: urgent→high | cockpit.js | db1e322 |
+| Sandra Chen topRisk: specific dollars | members.js | 5782655 |
+| Archetype actions on all 8 types | members.js | 5782655 |
+| memberSummary: avgTenure, avgDues, renewalRate | members.js | 5782655 |
+| roundsTrend sparkline on MemberAlerts | MemberAlerts.jsx | 28dc28f |
+| DataImportBanner celebrations | DataImportBanner.jsx, App.jsx | 2c5c3e9 |
+| HealthDimensionGrid honest dimensions | MemberProfileDrawer.jsx | 2c5c3e9 |
+| Core-3 celebration banner | TodayView.jsx | 2c5c3e9 |
+| Context-aware empty states | RevenuePage.jsx, HealthOverview.jsx | 2c5c3e9 |
+| OnboardingChecklist inspirational teasers | OnboardingChecklist.jsx | db1e322 |
+| Members stat cards (tenure, dues, renewal) | MembersView.jsx | db1e322 |
+
+### IN PROGRESS (agent running)
+
+| Change | Status |
+|---|---|
+| POS checks for Callahan $3,020 pattern, Chen dining cliff, Whitfield 42-min ticket | Agent running |
+| Complaint CSV rows with specific content | Agent running |
+| Email decay events for Hurst + Leonard | Agent running |
+
+### NOT YET STARTED (from auditor recommendations)
+
+| Change | Priority | Source |
+|---|---|---|
+| Add 3 new resignation scenarios (Snowbird, 90-day failure, legacy aging out) | P1 | Auditor 3 |
+| Add Linda Leonard member profile (currently none) | P1 | Auditor 1+3 |
+| Add household dollar impact to resignation scenarios | P1 | Auditor 3 |
+| 6 new agent actions (course routing, Chef's Table, anniversary, buddy, staffing savings, waitlist) | P1 | Auditor 4 |
+| Rapid response action promoted to #1 cockpit/first-visible | P1 | Auditor 4 |
+| Fix agent attribution (agx_003, agx_006 mislabeled) | P2 | Auditor 4 |
+| sinceLastLogin items: story-driven not generic | P2 | Auditor 4 |
+| Board report: add roiSummary, YoY member trend, NPS, benchmarks | P2 | Auditor 5 |
+| Monthly trends: fix Feb contradiction (3 saves vs 6 in data) | P0 | Auditor 5 |
+| Clean up 5 dead "Board Confidence Score" JSX references | P3 | Verification auditor |
+| _generateRoster score leak (Cycle 3 finding) | P1 | Cycle 3 auditor |
+
+---
+
 ## Audit Results
 
 ---
