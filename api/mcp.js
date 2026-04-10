@@ -613,13 +613,18 @@ async function getComplaintHistory({ member_id, club_id }) {
 }
 
 async function updateComplaintStatus({ feedback_id, status, resolution_notes }) {
-  await sql`
+  const isResolved = status === 'resolved';
+  const result = await sql`
     UPDATE feedback
     SET status = ${status},
-        resolved_at = NOW(),
-        resolution_notes = ${resolution_notes || null}
+        resolved_at = CASE WHEN ${isResolved}::boolean THEN NOW() ELSE resolved_at END,
+        resolution_notes = COALESCE(${resolution_notes || null}, resolution_notes)
     WHERE feedback_id = ${feedback_id}
+    RETURNING feedback_id
   `;
+  if (result.rows.length === 0) {
+    return { error: `Feedback ${feedback_id} not found`, updated: false };
+  }
   return { feedback_id, status, updated: true };
 }
 
