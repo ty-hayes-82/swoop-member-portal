@@ -100,7 +100,8 @@ function buildPriorityList() {
       }
 
       const duesAnnual = m.duesAnnual || m.dues_annual || m.dues || 0;
-      return { memberId, name, score, archetype, priorityScore, reason, action, owner, duesAnnual };
+      const roundsTrend = m.roundsTrend || null;
+      return { memberId, name, score, archetype, priorityScore, reason, action, owner, duesAnnual, roundsTrend };
     })
     .sort((a, b) => b.priorityScore - a.priorityScore)
     .slice(0, 5);
@@ -234,8 +235,17 @@ export default function MemberAlerts() {
                 </div>
               </div>
 
-              <div className="text-xs text-gray-500 mb-1 leading-snug">
-                {m.reason}
+              <div className="text-xs text-gray-500 mb-1 leading-snug flex items-center gap-2">
+                <span>{m.reason}</span>
+                {m.roundsTrend?.length > 0 && (
+                  <span className="inline-flex items-end gap-px shrink-0" title={m.roundsTrend.map(t => `${t.month}: ${t.rounds}`).join(' → ')}>
+                    {m.roundsTrend.map((t, i) => {
+                      const max = Math.max(...m.roundsTrend.map(r => r.rounds), 1);
+                      const h = Math.max(Math.round((t.rounds / max) * 16), 2);
+                      return <span key={i} style={{ width: 4, height: h, borderRadius: 1, background: i === m.roundsTrend.length - 1 ? '#ef4444' : '#d1d5db' }} />;
+                    })}
+                  </span>
+                )}
               </div>
               <div className="text-xs font-semibold flex items-center gap-2">
                 {m.owner && (
