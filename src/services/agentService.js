@@ -43,30 +43,13 @@ import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents'
  * @property {number} dismissed
  */
 
-import { getDataMode } from './demoGate';
-
 // Filter out decommissioned action types (waitlist removed from MVP)
 const MVP_EXCLUDED_ACTIONS = new Set(['WAITLIST_PRIORITY', 'WAITLIST_BACKFILL']);
-let actionStore = getDataMode() === 'guided'
-  ? []
-  : agentActions
+let actionStore = agentActions
       .filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType))
       .map((action) => ({ ...action }));
 
-let _d = getDataMode() === 'guided' ? {} : null;
-
-// ── Guided data loader integration (Phase 1 — additive only) ──
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) {
-  _d = { ...(_d || {}), ...partial };
-  if (Array.isArray(partial.actions)) {
-    actionStore = partial.actions
-      .filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType))
-      .map((action) => ({ ...action }));
-  }
-}
-export function _resetData() { _d = getDataMode() === 'guided' ? {} : null; actionStore = getDataMode() === 'guided' ? [] : agentActions.filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType)).map((a) => ({ ...a })); }
-registerService('agentService', { mergeData: _mergeData, resetData: _resetData });
+let _d = null;
 
 export const _init = async () => {
   try {
@@ -87,7 +70,7 @@ const byNewest = (a, b) => {
 
 /** @returns {Agent[]} */
 export function getAgents() {
-  return _d?.agents ?? (getDataMode() === 'guided' ? [] : agentDefinitions);
+  return _d?.agents ?? agentDefinitions;
 }
 
 /**
@@ -164,7 +147,7 @@ export function dismissAction(id, meta = {}) {
  * @returns {ThoughtLogEntry[]}
  */
 export function getThoughtLog(agentId) {
-  const logs = _d?.thoughtLogs ?? (getDataMode() === 'guided' ? {} : agentThoughtLogs);
+  const logs = _d?.thoughtLogs ?? agentThoughtLogs;
   return logs[agentId] ?? [];
 }
 
@@ -187,5 +170,5 @@ export function getTopPendingAction() {
 }
 
 export function __resetAgentActions() {
-  actionStore = getDataMode() === 'guided' ? [] : agentActions.map((action) => ({ ...action }));
+  actionStore = agentActions.filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType)).map((action) => ({ ...action }));
 }

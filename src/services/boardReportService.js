@@ -1,5 +1,4 @@
 import { apiFetch, getClubId } from './apiClient';
-import { shouldUseStatic, getDataMode } from './demoGate';
 import { getMemberSummary as _getMemberSummary } from '@/services/memberService';
 import {
   kpis as staticKpis,
@@ -12,14 +11,7 @@ import {
 let _liveKpis = null;
 let _liveBenchmarks = null;
 
-// ── Guided data loader integration (Phase 1 — additive only) ──
-// boardReportService doesn't use _d for static data, but we add merge/reset
-// so the guided data loader can push board report data in Phase 2.
 let _d = null;
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
-registerService('boardReportService', { mergeData: _mergeData, resetData: _resetData });
 
 export const _init = async () => {
   const clubId = getClubId();
@@ -78,27 +70,10 @@ export const getKPIs = () => {
   return EMPTY_KPIS;
 };
 
-// Board report details — data-driven from _d, with keyword filtering kept for guided mode
-// (boardReport data merges as one blob under 'pipeline' gate, so we can't split saves by domain at the data layer)
-const DINING_RE = /dining|grill room|f&b|food|beverage|chef|restaurant|kitchen|menu/i;
-const COMPLAINT_RE = /complaint|dispute|unresolved|service request/i;
-export const getMemberSaves = () => {
-  const saves = _d?.memberSaves ?? (getDataMode() === 'guided' ? [] : staticMemberSaves);
-  if (saves.length === 0) return [];
-  // Behavioral filter: in guided mode, filter saves by domain keyword
-  if (getDataMode() === 'guided') {
-    return saves.filter(s => {
-      const text = `${s.trigger || ''} ${s.action || ''} ${s.outcome || ''}`;
-      if (DINING_RE.test(text) && !shouldUseStatic('fb')) return false;
-      if (COMPLAINT_RE.test(text) && !shouldUseStatic('complaints')) return false;
-      return true;
-    });
-  }
-  return saves;
-};
-export const getOperationalSaves = () => _d?.operationalSaves ?? (getDataMode() === 'guided' ? [] : staticOperationalSaves);
-export const getMonthlyTrends = () => _d?.monthlyTrends ?? (getDataMode() === 'guided' ? [] : staticMonthlyTrends);
-export const getDuesAtRiskNote = () => _d?.duesAtRiskNote ?? (getDataMode() === 'guided' ? '' : staticDuesAtRiskNote);
+export const getMemberSaves = () => _d?.memberSaves ?? staticMemberSaves;
+export const getOperationalSaves = () => _d?.operationalSaves ?? staticOperationalSaves;
+export const getMonthlyTrends = () => _d?.monthlyTrends ?? staticMonthlyTrends;
+export const getDuesAtRiskNote = () => _d?.duesAtRiskNote ?? staticDuesAtRiskNote;
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

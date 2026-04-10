@@ -41,14 +41,6 @@ import { getUnderstaffedDays } from './staffingService';
  * @property {number} weekendRate              0-1
  */
 
-// ── Guided data loader integration (Phase 1 — additive only) ──
-// revenueService is a pure computation layer — it delegates to operationsService
-// and staffingService. We register it so the loader can push ancillary data in Phase 2.
-let _d = null;
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
-registerService('revenueService', { mergeData: _mergeData, resetData: _resetData });
 
 // Static weather no-show estimate for demo. In production, derive from
 // weather_events × cancelled bookings × avg dining check.

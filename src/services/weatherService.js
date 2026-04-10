@@ -4,7 +4,6 @@
 // Falls back to static data from src/data/weather.js when API is unavailable.
 
 import { weatherDaily as weatherData } from '../data/weather';
-import { isGuidedMode, isSourceLoaded } from './demoGate';
 import { apiFetch } from './apiClient';
 import { logError } from '../utils/logError';
 
@@ -46,17 +45,6 @@ import { logError } from '../utils/logError';
 let _current = null;
 let _forecast = null;
 
-// ── Guided data loader integration (Phase 1 — additive only) ──
-let _guidedData = null;
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _guidedData = { ...(_guidedData || {}), ...partial }; }
-export function _resetData() { _guidedData = null; }
-registerService('weatherService', { mergeData: _mergeData, resetData: _resetData });
-
-// In guided demo, weather requires the Club Profile (gateId: 'pipeline') to be imported
-function isWeatherGated() {
-  return isGuidedMode() && !isSourceLoaded('pipeline');
-}
 
 function getClubId() {
   try {
@@ -190,8 +178,6 @@ export async function refreshWeatherForLocation() {
 
 export const _init = async () => {
   try {
-    // In guided demo, don't fetch weather until Club Profile is imported
-    if (isWeatherGated()) return;
     // Check if we have a stored city for demo mode
     const city = localStorage.getItem('swoop_club_city');
     if (city) {
@@ -215,7 +201,6 @@ export const _init = async () => {
 
 /** @returns {HourlyForecastRow[]} */
 export function getHourlyForecast() {
-  if (isWeatherGated()) return [];
   return _forecast?.hourly ?? [];
 }
 
@@ -226,7 +211,6 @@ export function getHourlyForecast() {
  * @returns {DailyForecastRow[]}
  */
 export function getDailyForecast(numDays = 5) {
-  if (isWeatherGated()) return [];
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
   // Static fallback from weather data starting Jan 17
   const startIdx = weatherData.findIndex(d => d.date === '2026-01-17');
@@ -252,7 +236,6 @@ export function getTomorrowForecast() {
 
 /** @returns {WeatherAlert[]} */
 export function getWeatherAlerts() {
-  if (isWeatherGated()) return [];
   if (_forecast?.alerts?.length) return _forecast.alerts;
   return [{
     type: 'Wind Advisory',

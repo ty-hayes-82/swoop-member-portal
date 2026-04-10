@@ -1,7 +1,7 @@
 // briefingService.js — Phase 1 static · Phase 2 /api/briefing
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic, getDataMode } from './demoGate';
+import { shouldUseStatic } from './demoGate';
 import { getMonthlyRevenueSummary, getRevenueByDay, getTodayTeeSheet, getTeeSheetSummary } from './operationsService';
 import { getAtRiskMembers }                          from './memberService';
 import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
@@ -91,11 +91,6 @@ import { cancellationProbabilities as staticCancellationProbabilities } from '..
 
 let _d = null;
 
-// ── Guided data loader integration (Phase 1 — additive only) ──
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
-registerService('briefingService', { mergeData: _mergeData, resetData: _resetData });
 
 export const _init = async () => {
   try {
@@ -175,7 +170,6 @@ export const DEMO_BRIEFING = {
  */
 export const getDailyBriefing = (date = '2026-01-17') => {
   if (_d) return _d;
-  if (getDataMode() === 'guided') return EMPTY_BRIEFING;
   if (!shouldUseStatic('tee-sheet')) return EMPTY_BRIEFING;
 
   // Demo mode: try to build from service data, fall back to static
@@ -190,8 +184,8 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   const complaints = getComplaintCorrelation().filter(c => c.status !== 'resolved');
   const cancelSummary  = getCancellationSummary();
   const waitlistSummary = getWaitlistSummary();
-  const pipelineData = _d?.cancellationProbabilities ?? (getDataMode() === 'guided' ? [] : staticCancellationProbabilities);
-  const hasPipelineData = getDataMode() === 'guided' ? pipelineData.length > 0 : shouldUseStatic('pipeline');
+  const pipelineData = _d?.cancellationProbabilities ?? staticCancellationProbabilities;
+  const hasPipelineData = shouldUseStatic('pipeline');
   const topCancellationRiskMembers = !hasPipelineData ? [] : [...pipelineData]
     .sort((a, b) => b.cancelProbability - a.cancelProbability)
     .slice(0, 3)

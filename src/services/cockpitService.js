@@ -30,14 +30,7 @@ import { useServiceCache } from '@/hooks/useServiceCache';
  * @property {string} [detail]
  */
 
-import { getDataMode } from './demoGate';
-let _d = getDataMode() === 'guided' ? {} : null;
-
-// ── Guided data loader integration (Phase 1 — additive only) ──
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = getDataMode() === 'guided' ? {} : null; }
-registerService('cockpitService', { mergeData: _mergeData, resetData: _resetData });
+let _d = null;
 
 export const _init = async () => {
   try {
@@ -77,11 +70,11 @@ function gateFilterItem(item) {
 
 /** @returns {CockpitPriorityItem[]} */
 export const getPriorityItems = () => {
-  const raw = _d?.priorities ?? (getDataMode() === 'guided' ? [] : cockpitItems);
+  const raw = _d?.priorities ?? cockpitItems;
   return raw.map(gateFilterItem);
 };
 /** @returns {SinceLastLoginItem[]} */
-export const getSinceLastLogin = () => _d?.sinceLastLogin ?? (getDataMode() === 'guided' ? [] : staticSinceLastLogin);
+export const getSinceLastLogin = () => _d?.sinceLastLogin ?? staticSinceLastLogin;
 export const sourceSystems = ['CRM', 'POS', 'Weather', 'Tee Sheet', 'Complaints'];
 
 // ─── React hook (useServiceCache migration — SHIP_PLAN §2.3) ────────────

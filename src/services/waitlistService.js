@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { shouldUseStatic, getDataMode } from './demoGate';
+import { shouldUseStatic } from './demoGate';
 import {
   memberWaitlistEntries,
   cancellationProbabilities,
@@ -9,14 +9,7 @@ import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetr
 
 let _d = null;
 
-// ── Guided data loader integration (Phase 1 — additive only) ──
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
-registerService('waitlistService', { mergeData: _mergeData, resetData: _resetData });
-
 export const _init = async () => {
-  if (getDataMode() === 'guided') return; // guided mode — _mergeData populates _d
   try {
     const data = await apiFetch('/api/waitlist');
     if (data) _d = data;

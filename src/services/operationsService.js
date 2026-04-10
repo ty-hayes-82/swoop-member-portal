@@ -2,7 +2,7 @@
 // Phase 2 swap: DataProvider calls _init() before render. All exports stay synchronous.
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic, getDataMode } from './demoGate';
+import { shouldUseStatic } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { dailyRevenue } from '@/data/revenue';
 import { paceDistribution, slowRoundStats, bottleneckHoles, paceFBImpact } from '@/data/pace';
@@ -74,11 +74,6 @@ import { todayTeeSheet, teeSheetSummary } from '@/data/teeSheet';
 
 let _d = null; // hydrated by _init()
 
-// ── Guided data loader integration (Phase 1 — additive only) ──
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
-registerService('operationsService', { mergeData: _mergeData, resetData: _resetData });
 const DEFAULT_PACE_DISTRIBUTION = [
   { bucket: '< 3:45', minutes: 225, count: 142, isSlow: false },
   { bucket: '3:45-4:00', minutes: 240, count: 318, isSlow: false },
@@ -121,7 +116,6 @@ const sanitizePositive = (value, fallback = 0) => Math.max(0, toNumber(value, fa
 const toBucket = (value, fallback) => (typeof value === 'string' && value.trim() ? value.trim() : fallback);
 
 export const _init = async () => {
-  if (getDataMode() === 'guided') return; // guided mode — _mergeData populates _d
   try {
     const data = await apiFetch('/api/operations');
     if (data) _d = data;

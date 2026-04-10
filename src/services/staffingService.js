@@ -1,7 +1,7 @@
 // staffingService.js — Phase 1 static · Phase 2 /api/staffing
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic, getDataMode } from './demoGate';
+import { shouldUseStatic } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { understaffedDays, feedbackRecords, feedbackSummary, shiftCoverage } from '@/data/staffing';
 
@@ -55,12 +55,6 @@ import { understaffedDays, feedbackRecords, feedbackSummary, shiftCoverage } fro
 
 let _d = null;
 
-// ── Guided data loader integration (Phase 1 — additive only) ──
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
-registerService('staffingService', { mergeData: _mergeData, resetData: _resetData });
-
 const FALLBACK_UNDERSTAFFED_DAYS = [
   {
     date: '2026-01-09',
@@ -99,7 +93,6 @@ const toNumber = (value, fallback = 0) => {
 const toString = (value, fallback = '') => (typeof value === 'string' && value.trim() ? value.trim() : fallback);
 
 export const _init = async () => {
-  if (getDataMode() === 'guided') return; // guided mode — _mergeData populates _d
   try {
     const data = await apiFetch('/api/staffing');
     if (data) _d = data;

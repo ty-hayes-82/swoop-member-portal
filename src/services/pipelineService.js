@@ -1,17 +1,11 @@
 // pipelineService.js — live data via /api/pipeline with static Pinetree fallback
 
 import { apiFetch } from './apiClient';
-import { shouldUseStatic, getDataMode } from './demoGate';
 import { warmLeads, memberWaitlistEntries } from '@/data/pipeline';
 import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetrics';
 
 let _d = null;
 
-// ── Guided data loader integration (Phase 1 — additive only) ──
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
-registerService('pipelineService', { mergeData: _mergeData, resetData: _resetData });
 
 const tierRank = { hot: 0, warm: 1, cold: 2 };
 
@@ -202,19 +196,8 @@ const normalizeWaitlistEntries = (entries) => {
 const getStaticWaitlistEntries = () => normalizeWaitlistEntries(memberWaitlistEntries);
 
 const getSanitizedLeads = () => {
-  const source = Array.isArray(_d?.warmLeads) && _d.warmLeads.length ? _d.warmLeads : (getDataMode() === 'guided' ? [] : warmLeads);
-  const leads = dedupeLeads(source);
-  // In guided mode, suppress fields that depend on gates not yet opened
-  const hasTeeSheet = shouldUseStatic('tee-sheet');
-  const hasFb = shouldUseStatic('fb');
-  if (!hasTeeSheet || !hasFb) {
-    return leads.map((lead) => ({
-      ...lead,
-      rounds: hasTeeSheet ? lead.rounds : 0,
-      dining: hasFb ? lead.dining : 0,
-    }));
-  }
-  return leads;
+  const source = Array.isArray(_d?.warmLeads) && _d.warmLeads.length ? _d.warmLeads : warmLeads;
+  return dedupeLeads(source);
 };
 
 const getPipelineSnapshot = () => {

@@ -408,7 +408,6 @@ const normalizeResignationScenarios = (raw) => {
 
 // Start with static demo data — overwritten by API via _init() when available.
 function getInitialData() {
-  if (getDataMode() === 'guided') return getEmptyData();
   return {
     memberArchetypes: staticArchetypes,
     healthDistribution: staticHealthDistribution,
@@ -423,28 +422,7 @@ function getInitialData() {
   };
 }
 
-function getEmptyData() {
-  return {
-    memberArchetypes: [],
-    healthDistribution: [],
-    atRiskMembers: [],
-    membersAtRisk: [],
-    resignationScenarios: [],
-    memberProfiles: {},
-    memberSummary: { total: 0, totalMembers: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0 },
-    emailHeatmap: [],
-    decayingMembers: [],
-    watchMembers: [],
-  };
-}
-
 let _d = getInitialData();
-
-// ── Guided data loader integration (Phase 1 — additive only) ──
-import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ..._d, ...partial }; }
-export function _resetData() { _d = getEmptyData(); }
-registerService('memberService', { mergeData: _mergeData, resetData: _resetData });
 
 // Live dashboard data cache — populated by _init from /api/dashboard-live
 let _live = null;
@@ -519,19 +497,8 @@ export const getLiveDashboard = () => _live;
 let _apiLoaded = false;
 let _hasRealMembers = false;
 
-import { shouldUseStatic, getDataMode } from './demoGate';
-import {
-  hasEngagementGates,
-  getOpenGatesForScoring,
-  getMemberDimensions,
-  computeScore,
-  classifyArchetype,
-  scoreMember,
-  computeHealthDistribution as computeGuidedHealthDist,
-  computeArchetypeDistribution as computeGuidedArchetypes,
-} from './guidedScoring';
+import { shouldUseStatic } from './demoGate';
 const _shouldReturnEmpty = () => {
-  if (getDataMode() === 'guided') return (_d?.memberSummary?.total ?? 0) === 0;
   return !shouldUseStatic('members') && !_hasRealMembers;
 };
 
@@ -540,7 +507,6 @@ export const hasRealMemberData = () => _hasRealMembers;
 /** @returns {HealthDistributionRow[]} */
 export const getHealthDistribution = () => {
   if (_shouldReturnEmpty()) return [];
-  if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
   // Compute distribution from the full roster so both pages agree
   const roster = getFullRoster();
   if (roster.length > 0) {
@@ -568,22 +534,11 @@ export const getHealthDistribution = () => {
 export const getAtRiskMembers       = () => {
   if (_shouldReturnEmpty()) return [];
   const raw = normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
-  // In guided mode, recalculate scores from available dimensions
-  if (getDataMode() === 'guided') {
-    if (!hasEngagementGates()) return [];
-    const gates = getOpenGatesForScoring();
-    return raw.map(m => {
-      const dims = getMemberDimensions(m.memberId, m.archetype);
-      const score = computeScore(dims, gates);
-      return score != null ? { ...m, score } : null;
-    }).filter(Boolean).filter(m => m.score < 45); // only at-risk + critical
-  }
   return raw;
 };
 /** @returns {ArchetypeRow[]} */
 export const getArchetypeProfiles   = () => {
   if (_shouldReturnEmpty()) return [];
-  if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
   const rows = normalizeArchetypes(_d?.memberArchetypes);
   const fbClosed = !shouldUseStatic('fb');
   const emailClosed = !shouldUseStatic('email');
@@ -631,12 +586,6 @@ export const getMemberSummary = () => {
   if (_shouldReturnEmpty()) {
     return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
   }
-  // In guided mode without engagement data, return member count only (roster mode)
-  if (getDataMode() === 'guided' && !hasEngagementGates()) {
-    const rosterFallback = (_d?.memberRoster ?? []).length || 0;
-    const total = toNumber(_d?.memberSummary?.total ?? _d?.memberSummary?.totalMembers, rosterFallback);
-    return { total, totalMembers: total, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0 };
-  }
   const summary = _d?.memberSummary ?? {};
   const total = Math.max(0, Math.round(toNumber(summary.total, 0)));
   const totalMembers = Math.max(0, Math.round(toNumber(summary.totalMembers || summary.total, 0)));
@@ -656,16 +605,7 @@ export const getMemberSummary = () => {
 /** @returns {AtRiskMember[]} */
 export const getWatchMembers = () => {
   if (_shouldReturnEmpty()) return [];
-  if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
   const apiWatch = _d?.watchMembers ?? [];
-  if (getDataMode() === 'guided') {
-    const gates = getOpenGatesForScoring();
-    return (Array.isArray(apiWatch) ? apiWatch : []).map(m => {
-      const dims = getMemberDimensions(m.memberId, m.archetype);
-      const score = computeScore(dims, gates);
-      return score != null ? { ...m, score, trend: 'watch', riskLevel: 'Watch' } : null;
-    }).filter(Boolean).filter(m => m.score >= 45 && m.score < 67);
-  }
   return Array.isArray(apiWatch) ? apiWatch.map((m) => ({ ...m, trend: 'watch', riskLevel: 'Watch' })) : [];
 };
 
@@ -715,8 +655,7 @@ const _MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-
 const _LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
 
 function _generateRoster() {
-  if (getDataMode() === 'guided' && (_d?.memberSummary?.total ?? 0) === 0) return [];
-  if (getDataMode() !== 'guided' && !shouldUseStatic('members')) return [];
+  if (!shouldUseStatic('members')) return [];
   const roster = [];
   const atRisk = getAtRiskMembers();
   const watch = getWatchMembers();
@@ -770,10 +709,6 @@ function _generateRoster() {
       });
     }
   }
-  if (getDataMode() === 'guided') {
-    const gates = getOpenGatesForScoring();
-    return roster.map(m => scoreMember(m, gates));
-  }
   return roster;
 }
 
@@ -794,17 +729,6 @@ export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
   if (_d?.memberProfiles?.[memberId]) {
     const profile = normalizeMemberProfile(_d.memberProfiles[memberId]);
-    // In guided mode, recalculate the health score from available dimensions
-    if (getDataMode() === 'guided' && profile) {
-      if (!hasEngagementGates()) {
-        return { ...profile, healthScore: '—', trend: [] };
-      }
-      const dims = getMemberDimensions(memberId, _d.memberProfiles[memberId].archetype);
-      const score = computeScore(dims, getOpenGatesForScoring());
-      if (score != null) {
-        return { ...profile, healthScore: score };
-      }
-    }
     return profile;
   }
   // Fallback 1: build basic profile from at-risk member data
