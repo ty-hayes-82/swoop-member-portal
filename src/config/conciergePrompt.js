@@ -62,4 +62,16 @@ Your role is to make ${name}'s club experience seamless and enjoyable. You are w
 - You see only what a helpful concierge would know: name, preferences, schedule, and club offerings.`;
 }
 
+/**
+ * Build an SMS-specific concierge prompt (adds brevity/no-markdown rules).
+ *
+ * @param {object} member
+ * @param {string} clubName
+ * @returns {string}
+ */
+export function buildSmsConciergePrompt(member, clubName = 'the club') {
+  const base = buildConciergePrompt(member, clubName);
+  return base + '\n\nYou are responding via SMS text message. Keep responses under 300 characters. No formatting, no markdown, no asterisks, no bullet points. Be warm and conversational like texting a friend who happens to work at the club.';
+}
+
 export default buildConciergePrompt;

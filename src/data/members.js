@@ -150,7 +150,7 @@ export const memberProfiles = {
       notes: 'Responds best to personal call from GM within 24h of any feedback.',
     },
     contact: {
-      phone: '(480) 555-0129',
+      phone: '(480) 225-9702',
       email: 'james.whitfield@example.com',
       preferredChannel: 'Call',
       lastOutreach: '2026-01-13T15:10:00Z',
