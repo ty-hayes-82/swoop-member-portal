@@ -16,7 +16,7 @@ export const weatherDaily = [
   { date: '2026-01-14', condition: 'sunny',   tempHigh: 74, wind: 6,  rain: false },
   { date: '2026-01-15', condition: 'windy',   tempHigh: 66, wind: 24, rain: false },
   { date: '2026-01-16', condition: 'sunny',   tempHigh: 71, wind: 8,  rain: false }, // understaffed
-  { date: '2026-01-17', condition: 'windy',   tempHigh: 68, wind: 32, rain: false }, // DEMO TODAY · wind advisory — must stay in sync with briefingService/cockpit/teeSheet
+  { date: '2026-01-17', condition: 'sunny',   tempHigh: 82, wind: 8,  rain: false }, // DEMO TODAY — 82°F clear per storyboard; wind advisory is a separate afternoon-gust alert
   { date: '2026-01-18', condition: 'cloudy',  tempHigh: 68, wind: 12, rain: false }, // mbr_203 complaint
   { date: '2026-01-19', condition: 'sunny',   tempHigh: 74, wind: 6,  rain: false }, // MLK Day
   { date: '2026-01-20', condition: 'rainy',   tempHigh: 55, wind: 20, rain: true  },

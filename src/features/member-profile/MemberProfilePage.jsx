@@ -4,6 +4,7 @@ import SourceBadge from '@/components/ui/SourceBadge';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { getMemberProfile } from '@/services/memberService';
+import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 import MemberDecayChain from './MemberDecayChain.jsx';
 import {
   AreaChart, Area,
@@ -347,11 +348,18 @@ export default function MemberProfilePage() {
     }
   });
 
+  // In guided mode, hide categories whose data source isn't connected yet.
+  const guidedMode = getDataMode() === 'guided';
+  const pageGateMap = { golf: 'tee-sheet', dining: 'fb' };
+  const visibleCategories = guidedMode
+    ? SNAPSHOT_CATEGORIES.filter(c => !pageGateMap[c.key] || shouldUseStatic(pageGateMap[c.key]))
+    : SNAPSHOT_CATEGORIES;
+
   // Determine which categories have any content (activity, pref hint, or family hint)
-  const activeCategories = SNAPSHOT_CATEGORIES.filter((cat) => {
+  const activeCategories = visibleCategories.filter((cat) => {
     return snapshotGroups[cat.key].length > 0 || prefHints[cat.key] || (familyHintsByCategory[cat.key] && familyHintsByCategory[cat.key].length > 0);
   });
-  const emptyCategories = SNAPSHOT_CATEGORIES.filter((cat) => {
+  const emptyCategories = visibleCategories.filter((cat) => {
     return snapshotGroups[cat.key].length === 0 && !prefHints[cat.key] && (!familyHintsByCategory[cat.key] || familyHintsByCategory[cat.key].length === 0);
   });
 
@@ -424,8 +432,8 @@ export default function MemberProfilePage() {
         <Stat label="Total Value" value={fmt$(profile.memberValueAnnual)} accent={'#ff8b00'} />
         <Stat label="Account Balance" value={fmt$(profile.accountBalance)} accent={profile.accountBalance < 0 ? '#ef4444' : '#12b76a'} />
         <Stat label="Email Open Rate" value={fmtPct(profile.emailOpenRate)} accent={'#ff8b00'} mono />
-        <Stat label="Rounds (30d)" value={profile.roundsPlayed ?? '\u2014'} accent={'#12b76a'} mono />
-        <Stat label="Dining Spend (30d)" value={fmt$(profile.diningSpend)} accent={'#f59e0b'} />
+        <Stat label="Rounds (30d)" value={getDataMode() === 'guided' && !shouldUseStatic('tee-sheet') ? '\u2014' : (profile.roundsPlayed ?? '\u2014')} accent={'#12b76a'} mono />
+        <Stat label="Dining Spend (30d)" value={getDataMode() === 'guided' && !shouldUseStatic('fb') ? '\u2014' : fmt$(profile.diningSpend)} accent={'#f59e0b'} />
       </div>
 
       {/* Member Habits & Activity Snapshot */}
@@ -505,13 +513,13 @@ export default function MemberProfilePage() {
         {/* Preferences */}
         <Section title="Preferences & Notes" sourceSystems={['Member CRM']}>
           <div className="flex flex-col gap-4">
-            {preferences.teeWindows && (
+            {preferences.teeWindows && (!guidedMode || shouldUseStatic('tee-sheet')) && (
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Tee Time Preference</div>
                 <div className="text-sm text-[#1a1a2e] mt-0.5">{preferences.teeWindows}</div>
               </div>
             )}
-            {preferences.dining && (
+            {preferences.dining && (!guidedMode || shouldUseStatic('fb')) && (
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Dining Preference</div>
                 <div className="text-sm text-[#1a1a2e] mt-0.5">{preferences.dining}</div>

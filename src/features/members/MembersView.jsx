@@ -43,7 +43,7 @@ const HEADLINES = {
   'search': () => ({
     variant: 'insight',
     headline: `Member directory — search by name, archetype, or health level`,
-    context: `${getMemberSummary().totalMembers || 300} members with health scores, archetypes, and engagement data.`,
+    context: `${getMemberSummary().totalMembers || getMemberSummary().total || 0} members with health scores, archetypes, and engagement data.`,
   }),
   'cohorts': () => ({
     variant: 'insight',

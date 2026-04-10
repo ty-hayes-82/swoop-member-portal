@@ -595,7 +595,8 @@ export const getMemberSummary = () => {
   }
   // In guided mode without engagement data, return member count only (roster mode)
   if (getDataMode() === 'guided' && !hasEngagementGates()) {
-    const total = toNumber(_d?.memberSummary?.total ?? _d?.memberSummary?.totalMembers, 300);
+    const rosterFallback = (_d?.memberRoster ?? []).length || 0;
+    const total = toNumber(_d?.memberSummary?.total ?? _d?.memberSummary?.totalMembers, rosterFallback);
     return { total, totalMembers: total, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0 };
   }
   const summary = _d?.memberSummary ?? {};

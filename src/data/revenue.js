@@ -18,7 +18,7 @@ export const dailyRevenue = [
   { date: '2026-01-14', day: 'Wed', golf: 6100, fb: 2300, weather: 'sunny',    isUnderstaffed: false },
   { date: '2026-01-15', day: 'Thu', golf: 7800, fb: 2800, weather: 'sunny',    isUnderstaffed: false },
   { date: '2026-01-16', day: 'Fri', golf: 7600, fb: 2600, weather: 'sunny',    isUnderstaffed: true  },
-  { date: '2026-01-17', day: 'Sat', golf: 14600, fb: 5400, weather: 'windy',   isUnderstaffed: false }, // weather must match wind-advisory narrative across surfaces
+  { date: '2026-01-17', day: 'Sat', golf: 14600, fb: 5400, weather: 'sunny',   isUnderstaffed: false }, // DEMO TODAY — 82°F clear per storyboard; wind advisory is afternoon-only alert
   { date: '2026-01-18', day: 'Sun', golf: 14100, fb: 5100, weather: 'sunny',   isUnderstaffed: false },
   { date: '2026-01-19', day: 'Mon', golf: 11200, fb: 4200, weather: 'sunny',   isUnderstaffed: false }, // MLK Day
   { date: '2026-01-20', day: 'Tue', golf: 5100, fb: 1800, weather: 'windy',    isUnderstaffed: false },

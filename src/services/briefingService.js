@@ -114,10 +114,10 @@ export const DEMO_BRIEFING = {
   keyMetrics: { atRiskMembers: 7, openComplaints: 4, monthlyRevenue: 168000, revenueVsPlan: 4.2, understaffedDays: 3 },
   teeSheet: { roundsToday: 220, utilization: 0.87 },
   todayRisks: {
-    weather: 'wind-advisory',
-    tempHigh: 68,
-    wind: 32,
-    forecast: 'Wind advisory — gusts to 30-40 mph expected Saturday afternoon',
+    weather: 'clear',
+    tempHigh: 82,
+    wind: 8,
+    forecast: 'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
     // Must stay at 3 entries — Story 1 narration says "3 at-risk members on today's tee sheet". Locked by briefingService.demo.test.js.
     atRiskTeetimes: [
       { memberId: 'mbr_203', name: 'James Whitfield', time: '9:20 AM', health: 42 },
@@ -130,7 +130,7 @@ export const DEMO_BRIEFING = {
       expectedRounds: 192,
       golfModifier: 0.87,
       recommendation: 'Saturday: Grill Room needs 4 servers — only 2 scheduled',
-      weatherSummary: 'Wind advisory may shift 32 afternoon tee times indoors',
+      weatherSummary: 'Afternoon wind advisory may shift 32 tee times indoors',
     },
     cancellationRisk: {
       highRiskBookings: 0,
@@ -232,8 +232,8 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     },
     todayRisks: {
       // Must match the canonical DEMO_BRIEFING block above and the cockpit / teeSheet narrative.
-      weather:    'wind advisory', tempHigh: 68, wind: 32,
-      forecast:   'Wind advisory — gusts to 30-40 mph expected Saturday afternoon',
+      weather:    'clear', tempHigh: 82, wind: 8,
+      forecast:   'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
       atRiskTeetimes: [
         { memberId: 'mbr_203', name: 'James Whitfield', archetype: 'Snowbird',         time: '9:20 AM', score: 42,
           topRisk: 'Service complaint unresolved — slow lunch on Jan 16' },
@@ -294,12 +294,12 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       },
       {
         id: 'wind-fb-prep',
-        icon: '☁️',
-        title: 'Shift F&B prep for wind-driven indoor spike',
+        icon: '💨',
+        title: 'Shift F&B prep for afternoon wind-driven indoor spike',
         impact: '+20-30% lunch covers',
         effort: '5 min',
         conversionRate: null,
-        detail: 'Wind advisory (32 mph gusts by afternoon) historically reduces golf bookings by 15% but increases Grill Room lunch covers by 20-30% as members stay indoors. Add 2 servers, prep 15 extra grilled items.',
+        detail: 'Afternoon wind advisory (gusts to 30-40 mph) historically reduces golf bookings by 15% but increases Grill Room lunch covers by 20-30% as members stay indoors. Add 2 servers, prep 15 extra grilled items.',
         action: 'View F&B operations',
         link: 'fb-performance',
       },

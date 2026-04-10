@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import SourceBadge from '@/components/ui/SourceBadge.jsx';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { getOutreachHistory, trackAction } from '@/services/activityService';
-import { shouldUseStatic } from '@/services/demoGate';
+import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 import { getMemberChurnPrediction } from '@/services/memberService';
 import { getMemberSaves } from '@/services/boardReportService';
 import MemberDecayChain from './MemberDecayChain.jsx';
@@ -216,8 +216,12 @@ function MemberJourneyTimeline({ profile }) {
       });
     });
 
-    // If few events, add demo journey points based on member scenario
+    // If few events, add demo journey points based on member scenario.
+    // In guided mode, filter out events whose data source isn't connected yet.
     if (events.length < 4) {
+      const guidedMode = getDataMode() === 'guided';
+      const guidedTeeSheet = shouldUseStatic('tee-sheet');
+      const guidedFb = shouldUseStatic('fb');
       const demoEvents = [
         { date: 'Oct 2025', domain: 'Email', label: 'Newsletter open rate dropped below 20%', type: 'warning', decayOrder: 1 },
         { date: 'Oct 2025', domain: 'Golf', label: 'Regular rounds: 3-4x/month', type: 'positive' },
@@ -227,7 +231,12 @@ function MemberJourneyTimeline({ profile }) {
         { date: 'Dec 2025', domain: 'Golf', label: 'Only 1 round played', type: 'risk' },
         { date: 'Jan 2026', domain: 'Events', label: 'Skipped member-guest invite', type: 'risk', decayOrder: 4 },
         { date: 'Jan 2026', domain: 'Risk', label: 'Resignation risk: high', type: 'risk' },
-      ];
+      ].filter(evt => {
+        if (!guidedMode) return true;
+        if (evt.domain === 'Golf' && !guidedTeeSheet) return false;
+        if (evt.domain === 'Dining' && !guidedFb) return false;
+        return true;
+      });
       events.push(...demoEvents);
     }
 
@@ -305,13 +314,18 @@ function HealthDimensionGrid({ profile }) {
   };
   const w = archetypeWeights[arch] || { golf: 0.9, dining: 0.8, email: 0.7, events: 0.6 };
 
-  // Use real dimensions from profile if available (populated by health_scores API), else approximate
+  // Use real dimensions from profile if available (populated by health_scores API), else approximate.
+  // In guided mode, hide dimensions whose data source hasn't been connected yet.
+  const guided = getDataMode() === 'guided';
+  const hasTeeSheet = shouldUseStatic('tee-sheet');
+  const hasFb = shouldUseStatic('fb');
+
   const dimensions = [
-    { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#ff8b00' },
-    { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#12b76a' },
+    (!guided || hasTeeSheet) && { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#ff8b00' },
+    (!guided || hasFb) && { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#12b76a' },
     { label: 'Email Engagement', weight: '25%', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: '#3B82F6' },
     { label: 'Event Attendance', weight: '20%', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
-  ];
+  ].filter(Boolean);
 
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -554,10 +568,17 @@ function buildDrawerSnapshot(profile) {
 function DrawerSnapshotSection({ profile }) {
   const { groups, hints, famHints } = useMemo(() => buildDrawerSnapshot(profile), [profile]);
 
-  const activeCats = SNAPSHOT_CATS.filter(c =>
+  // In guided mode, hide categories whose data source isn't connected yet.
+  const guidedMode = getDataMode() === 'guided';
+  const guidedGateMap = { golf: 'tee-sheet', dining: 'fb' };
+  const visibleCats = guidedMode
+    ? SNAPSHOT_CATS.filter(c => !guidedGateMap[c.key] || shouldUseStatic(guidedGateMap[c.key]))
+    : SNAPSHOT_CATS;
+
+  const activeCats = visibleCats.filter(c =>
     groups[c.key].length > 0 || hints[c.key] || (famHints[c.key] && famHints[c.key].length > 0)
   );
-  const emptyCats = SNAPSHOT_CATS.filter(c =>
+  const emptyCats = visibleCats.filter(c =>
     groups[c.key].length === 0 && !hints[c.key] && (!famHints[c.key] || famHints[c.key].length === 0)
   );
 
@@ -863,12 +884,12 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               <strong>Favorite spots:</strong> {profile.preferences.favoriteSpots.join(', ')}
             </div>
           )}
-          {profile.preferences?.teeWindows && (
+          {profile.preferences?.teeWindows && (getDataMode() !== 'guided' || shouldUseStatic('tee-sheet')) && (
             <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
               <strong>Tee time window:</strong> {profile.preferences.teeWindows}
             </div>
           )}
-          {profile.preferences?.dining && (
+          {profile.preferences?.dining && (getDataMode() !== 'guided' || shouldUseStatic('fb')) && (
             <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
               <strong>Dining:</strong> {profile.preferences.dining}
             </div>
@@ -898,7 +919,14 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
       <Section title="Risk signals" sourceSystems={['Analytics', 'Tee Sheet', 'POS', 'Email']}>
         <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
-          {(profile.riskSignals ?? []).map((signal) => (
+          {(profile.riskSignals ?? []).filter(signal => {
+            if (getDataMode() !== 'guided') return true;
+            const src = (signal.source || '').toLowerCase();
+            const lbl = (signal.label || '').toLowerCase();
+            if ((src.includes('tee') || src.includes('golf') || lbl.includes('round') || lbl.includes('golf') || lbl.includes('handicap')) && !shouldUseStatic('tee-sheet')) return false;
+            if ((src === 'pos' || lbl.includes('dining') || lbl.includes('f&b') || lbl.includes('food') || lbl.includes('spend')) && !shouldUseStatic('fb')) return false;
+            return true;
+          }).map((signal) => (
             <RiskSignalRow key={signal.id} signal={signal} profile={profile} />
           ))}
           {!(profile.riskSignals ?? []).length && <span className="text-gray-500">No active risks.</span>}
