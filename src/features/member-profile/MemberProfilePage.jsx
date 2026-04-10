@@ -322,7 +322,27 @@ export default function MemberProfilePage() {
   const invoiceItems = Array.isArray(invoices.items) ? invoices.items : [];
   const contact = profile.contact || {};
 
-  const contextReason = riskSignals.length > 0 ? riskSignals[0]?.label : null;
+  // Guided-mode gate flags
+  const guidedMode = getDataMode() === 'guided';
+  const hasTeeSheet = !guidedMode || shouldUseStatic('tee-sheet');
+  const hasFb = !guidedMode || shouldUseStatic('fb');
+  const hasEmail = !guidedMode || shouldUseStatic('email');
+  const hasEvents = !guidedMode || shouldUseStatic('events');
+
+  // Gate: hide top risk signal if its source integration isn't connected
+  const contextReason = (() => {
+    if (!riskSignals.length) return null;
+    const topSignal = riskSignals[0];
+    if (!topSignal?.label) return null;
+    if (guidedMode) {
+      const src = (topSignal.source || '').toLowerCase();
+      const lbl = (topSignal.label || '').toLowerCase();
+      if ((src.includes('tee') || src.includes('golf') || lbl.includes('round') || lbl.includes('golf')) && !hasTeeSheet) return null;
+      if ((src === 'pos' || lbl.includes('dining') || lbl.includes('f&b') || lbl.includes('food') || lbl.includes('spend')) && !hasFb) return null;
+      if ((src.includes('email') || lbl.includes('email') || lbl.includes('newsletter') || lbl.includes('open rate')) && !hasEmail) return null;
+    }
+    return topSignal.label;
+  })();
 
   // Build snapshot data for habits section
   const { groups: snapshotGroups, prefHints } = buildSnapshot(activity, preferences, staffNotes);
@@ -349,8 +369,8 @@ export default function MemberProfilePage() {
   });
 
   // In guided mode, hide categories whose data source isn't connected yet.
-  const guidedMode = getDataMode() === 'guided';
-  const pageGateMap = { golf: 'tee-sheet', dining: 'fb' };
+  // (guidedMode already defined above with gate flags)
+  const pageGateMap = { golf: 'tee-sheet', dining: 'fb', email: 'email', events: 'events', spa: 'spa', courts: 'courts' };
   const visibleCategories = guidedMode
     ? SNAPSHOT_CATEGORIES.filter(c => !pageGateMap[c.key] || shouldUseStatic(pageGateMap[c.key]))
     : SNAPSHOT_CATEGORIES;
@@ -403,7 +423,7 @@ export default function MemberProfilePage() {
               <span className="text-error-500 font-semibold">{profile.membershipStatus.toUpperCase()}</span>
             )}
           </div>
-          {contact.lastSeenLocation && (
+          {contact.lastSeenLocation && hasTeeSheet && (
             <div className="mt-2 text-xs text-gray-400">
               Last seen: {contact.lastSeenLocation}
             </div>
@@ -429,11 +449,11 @@ export default function MemberProfilePage() {
       {/* Key metrics row */}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
         <Stat label="Annual Dues" value={fmt$(profile.duesAnnual)} accent={'#1a1a2e'} />
-        <Stat label="Total Value" value={fmt$(profile.memberValueAnnual)} accent={'#ff8b00'} />
+        <Stat label="Total Value" value={(hasTeeSheet && hasFb) ? fmt$(profile.memberValueAnnual) : '\u2014'} accent={'#ff8b00'} />
         <Stat label="Account Balance" value={fmt$(profile.accountBalance)} accent={profile.accountBalance < 0 ? '#ef4444' : '#12b76a'} />
-        <Stat label="Email Open Rate" value={fmtPct(profile.emailOpenRate)} accent={'#ff8b00'} mono />
-        <Stat label="Rounds (30d)" value={getDataMode() === 'guided' && !shouldUseStatic('tee-sheet') ? '\u2014' : (profile.roundsPlayed ?? '\u2014')} accent={'#12b76a'} mono />
-        <Stat label="Dining Spend (30d)" value={getDataMode() === 'guided' && !shouldUseStatic('fb') ? '\u2014' : fmt$(profile.diningSpend)} accent={'#f59e0b'} />
+        <Stat label="Email Open Rate" value={hasEmail ? fmtPct(profile.emailOpenRate) : '\u2014'} accent={'#ff8b00'} mono />
+        <Stat label="Rounds (30d)" value={hasTeeSheet ? (profile.roundsPlayed ?? '\u2014') : '\u2014'} accent={'#12b76a'} mono />
+        <Stat label="Dining Spend (30d)" value={hasFb ? fmt$(profile.diningSpend) : '\u2014'} accent={'#f59e0b'} />
       </div>
 
       {/* Member Habits & Activity Snapshot */}
@@ -487,24 +507,35 @@ export default function MemberProfilePage() {
 
         {/* Risk signals */}
         <Section title="Risk Signals" sourceSystems={['Analytics', 'Tee Sheet', 'POS', 'Email']}>
-          {riskSignals.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              {riskSignals.map((signal, i) => (
-                <div key={i} className="p-2 rounded-lg border border-red-500/20 bg-red-500/[0.05]">
-                  <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
-                    {signal.label || signal.detail || signal}
-                  </div>
-                  {signal.source && (
-                    <div className="text-xs text-gray-400 mt-0.5">
-                      Source: {signal.source} {signal.confidence ? `\u00B7 Confidence: ${signal.confidence}` : ''}
+          {(() => {
+            const gatedSignals = riskSignals.filter(signal => {
+              if (!guidedMode) return true;
+              const src = (signal.source || '').toLowerCase();
+              const lbl = ((signal.label || signal.detail || '') + '').toLowerCase();
+              if ((src.includes('tee') || src.includes('golf') || lbl.includes('round') || lbl.includes('golf') || lbl.includes('handicap')) && !hasTeeSheet) return false;
+              if ((src === 'pos' || lbl.includes('dining') || lbl.includes('f&b') || lbl.includes('food') || lbl.includes('spend')) && !hasFb) return false;
+              if ((src.includes('email') || lbl.includes('email') || lbl.includes('newsletter') || lbl.includes('open rate')) && !hasEmail) return false;
+              return true;
+            });
+            return gatedSignals.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {gatedSignals.map((signal, i) => (
+                  <div key={i} className="p-2 rounded-lg border border-red-500/20 bg-red-500/[0.05]">
+                    <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                      {signal.label || signal.detail || signal}
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-success-500 text-sm">No active risk signals</div>
-          )}
+                    {signal.source && (
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        Source: {signal.source} {signal.confidence ? `\u00B7 Confidence: ${signal.confidence}` : ''}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-success-500 text-sm">No active risk signals</div>
+            );
+          })()}
         </Section>
       </div>
 
@@ -612,12 +643,12 @@ export default function MemberProfilePage() {
         </div>
         <div>
           <div className="text-xs text-gray-400 uppercase">Last Seen</div>
-          <div className="text-sm mt-0.5">{contact.lastSeenLocation || '\u2014'}</div>
+          <div className="text-sm mt-0.5">{hasTeeSheet ? (contact.lastSeenLocation || '\u2014') : '\u2014'}</div>
         </div>
       </Section>
 
-      {/* Invoices */}
-      <Section title="Invoice History" collapsible defaultCollapsed summary={`${invoiceItems.length} invoices`} sourceSystems={['POS', 'Member CRM']}>
+      {/* Invoices — needs POS/fb gate for spend data */}
+      {hasFb && <Section title="Invoice History" collapsible defaultCollapsed summary={`${invoiceItems.length} invoices`} sourceSystems={['POS', 'Member CRM']}>
         {invoiceItems.length > 0 ? (
           <>
             {invoices.summary && (
@@ -677,13 +708,22 @@ export default function MemberProfilePage() {
         ) : (
           <div className="text-gray-400 text-sm">No invoice history available</div>
         )}
-      </Section>
+      </Section>}
 
-      {/* Activity timeline */}
+      {/* Activity timeline — gate entries per source */}
       <Section title="Activity Timeline" collapsible defaultCollapsed summary={`${(profile.activity || []).length} entries`} sourceSystems={['Tee Sheet', 'POS', 'Email', 'Events']}>
-        {activity.length > 0 ? (
+        {(() => {
+          const gatedActivity = guidedMode ? activity.filter(event => {
+            const t = ((event.event || event.description || event.domain || '') + '').toLowerCase();
+            if ((t.includes('golf') || t.includes('round') || t.includes('tee')) && !hasTeeSheet) return false;
+            if ((t.includes('dining') || t.includes('f&b') || t.includes('grill') || t.includes('lounge')) && !hasFb) return false;
+            if ((t.includes('email') || t.includes('newsletter')) && !hasEmail) return false;
+            if ((t.includes('event') || t.includes('social')) && !hasEvents) return false;
+            return true;
+          }) : activity;
+          return gatedActivity.length > 0 ? (
           <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
-            {activity.map((event, i) => (
+            {gatedActivity.map((event, i) => (
               <div key={i} className="flex gap-4 items-start p-2 rounded-lg border-b border-gray-200">
                 <span className="shrink-0 w-20 text-xs text-gray-400 font-mono pt-0.5">
                   {fmtDate(event.date)}
@@ -697,7 +737,8 @@ export default function MemberProfilePage() {
           </div>
         ) : (
           <div className="text-gray-400 text-sm">No recent activity</div>
-        )}
+        );
+        })()}
       </Section>
 
       {/* Staff notes */}

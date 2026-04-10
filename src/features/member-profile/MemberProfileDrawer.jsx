@@ -192,25 +192,46 @@ function MemberJourneyTimeline({ profile }) {
   const journeyEvents = useMemo(() => {
     const events = [];
 
-    // Add activity items
+    // Add activity items (gated per source in guided mode)
+    const _guidedMode = getDataMode() === 'guided';
+    const _hasTeeSheet = !_guidedMode || shouldUseStatic('tee-sheet');
+    const _hasFb = !_guidedMode || shouldUseStatic('fb');
+    const _hasEmail = !_guidedMode || shouldUseStatic('email');
+    const _hasEvents = !_guidedMode || shouldUseStatic('events');
+
     (profile.activity ?? []).forEach(a => {
+      const domain = a.type?.includes('Golf') || a.type?.includes('Round') ? 'Golf'
+        : a.type?.includes('Dining') || a.type?.includes('F&B') ? 'Dining'
+        : a.type?.includes('Event') ? 'Events'
+        : a.type?.includes('Email') ? 'Email'
+        : 'Activity';
+      // Skip entries whose source isn't imported yet
+      if (_guidedMode) {
+        if (domain === 'Golf' && !_hasTeeSheet) return;
+        if (domain === 'Dining' && !_hasFb) return;
+        if (domain === 'Email' && !_hasEmail) return;
+        if (domain === 'Events' && !_hasEvents) return;
+      }
       events.push({
         date: a.timestamp ?? a.date ?? '',
-        domain: a.type?.includes('Golf') || a.type?.includes('Round') ? 'Golf'
-          : a.type?.includes('Dining') || a.type?.includes('F&B') ? 'Dining'
-          : a.type?.includes('Event') ? 'Events'
-          : a.type?.includes('Email') ? 'Email'
-          : 'Activity',
+        domain,
         label: a.detail ?? a.type ?? '',
         type: 'activity',
       });
     });
 
-    // Add risk signal events
+    // Add risk signal events (gated per source)
     (profile.riskSignals ?? []).forEach(s => {
+      const domain = s.source ?? 'Risk';
+      if (_guidedMode) {
+        const d = domain.toLowerCase();
+        if ((d.includes('tee') || d.includes('golf')) && !_hasTeeSheet) return;
+        if ((d === 'pos' || d.includes('dining')) && !_hasFb) return;
+        if (d.includes('email') && !_hasEmail) return;
+      }
       events.push({
         date: s.timestamp ?? '',
-        domain: s.source ?? 'Risk',
+        domain,
         label: s.label ?? s.description ?? '',
         type: 'risk',
       });
@@ -235,6 +256,8 @@ function MemberJourneyTimeline({ profile }) {
         if (!guidedMode) return true;
         if (evt.domain === 'Golf' && !guidedTeeSheet) return false;
         if (evt.domain === 'Dining' && !guidedFb) return false;
+        if (evt.domain === 'Email' && !shouldUseStatic('email')) return false;
+        if (evt.domain === 'Events' && !shouldUseStatic('events')) return false;
         return true;
       });
       events.push(...demoEvents);
@@ -320,11 +343,14 @@ function HealthDimensionGrid({ profile }) {
   const hasTeeSheet = shouldUseStatic('tee-sheet');
   const hasFb = shouldUseStatic('fb');
 
+  const hasEmail = !guided || shouldUseStatic('email');
+  const hasEvents = !guided || shouldUseStatic('events');
+
   const dimensions = [
     (!guided || hasTeeSheet) && { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#ff8b00' },
     (!guided || hasFb) && { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#12b76a' },
-    { label: 'Email Engagement', weight: '25%', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: '#3B82F6' },
-    { label: 'Event Attendance', weight: '20%', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
+    hasEmail && { label: 'Email Engagement', weight: '25%', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: '#3B82F6' },
+    hasEvents && { label: 'Event Attendance', weight: '20%', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
   ].filter(Boolean);
 
   return (
@@ -402,7 +428,7 @@ const ARCHETYPE_DESCRIPTIONS = {
   'Snowbird': 'Seasonal engagement pattern — highly active during their primary season, absent during off-season. Engagement drops are expected and should not trigger standard decay alerts during known off-season periods. Welcome-back calls at season start are critical.',
 };
 
-function getTalkingPoints(profile) {
+function getTalkingPoints(profile, { hasTeeSheet = true, hasFb = true, hasEmail = true } = {}) {
   const points = [];
   const archetype = profile.archetype || '';
   const score = profile.healthScore ?? 50;
@@ -413,19 +439,19 @@ function getTalkingPoints(profile) {
     points.push('Acknowledge the specific service issue and apologize directly');
     points.push('Share what the club has done to prevent recurrence');
   }
-  if (riskText.includes('pace') || riskText.includes('slow')) {
+  if (hasTeeSheet && (riskText.includes('pace') || riskText.includes('slow'))) {
     points.push('Acknowledge pace-of-play frustration \u2014 mention ranger deployment improvements');
     points.push('Offer preferred tee time slot hold to avoid peak congestion');
   }
-  if (riskText.includes('dining') || riskText.includes('f&b') || riskText.includes('grill')) {
+  if (hasFb && (riskText.includes('dining') || riskText.includes('f&b') || riskText.includes('grill'))) {
     points.push('Invite to an upcoming Chef\'s Table or wine dinner event');
     points.push('Mention new menu additions or seasonal specials');
   }
-  if (riskText.includes('golf') || riskText.includes('round') || riskText.includes('tee')) {
+  if (hasTeeSheet && (riskText.includes('golf') || riskText.includes('round') || riskText.includes('tee'))) {
     points.push('Ask about any scheduling changes or course condition concerns');
     if (archetype === 'Weekend Warrior') points.push('Offer a preferred Saturday morning tee time hold');
   }
-  if (riskText.includes('email') || riskText.includes('newsletter') || riskText.includes('open rate')) {
+  if (hasEmail && (riskText.includes('email') || riskText.includes('newsletter') || riskText.includes('open rate'))) {
     points.push('Ask if they\'re receiving communications \u2014 offer preferred channel switch');
   }
   if (points.length === 0) {
@@ -570,7 +596,7 @@ function DrawerSnapshotSection({ profile }) {
 
   // In guided mode, hide categories whose data source isn't connected yet.
   const guidedMode = getDataMode() === 'guided';
-  const guidedGateMap = { golf: 'tee-sheet', dining: 'fb' };
+  const guidedGateMap = { golf: 'tee-sheet', dining: 'fb', email: 'email', events: 'events', spa: 'spa', courts: 'courts' };
   const visibleCats = guidedMode
     ? SNAPSHOT_CATS.filter(c => !guidedGateMap[c.key] || shouldUseStatic(guidedGateMap[c.key]))
     : SNAPSHOT_CATS;
@@ -658,11 +684,17 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
   const initials = (profile.name || '?').split(' ').map((part) => part[0]).join('').slice(0, 2);
   const isDrawerLayout = layout === 'drawer';
 
+  const guidedMode = getDataMode() === 'guided';
+  const hasTeeSheet = !guidedMode || shouldUseStatic('tee-sheet');
+  const hasFb = !guidedMode || shouldUseStatic('fb');
+  const hasEmail = !guidedMode || shouldUseStatic('email');
+  const hasEvents = !guidedMode || shouldUseStatic('events');
+
   const topMetrics = useMemo(() => [
     { label: 'Annual dues', value: Number.isFinite(profile.duesAnnual) ? `$${Math.round(profile.duesAnnual).toLocaleString()}` : '\u2014' },
-    { label: 'Annual value', value: Number.isFinite(profile.memberValueAnnual) ? `$${Math.round(profile.memberValueAnnual).toLocaleString()}` : '\u2014' },
-    { label: 'Last seen', value: profile.lastSeenLocation ?? '\u2014' },
-  ], [profile.duesAnnual, profile.memberValueAnnual, profile.lastSeenLocation]);
+    { label: 'Annual value', value: (hasTeeSheet && hasFb) ? (Number.isFinite(profile.memberValueAnnual) ? `$${Math.round(profile.memberValueAnnual).toLocaleString()}` : '\u2014') : '\u2014' },
+    { label: 'Last seen', value: hasTeeSheet ? (profile.lastSeenLocation ?? '\u2014') : '\u2014' },
+  ], [profile.duesAnnual, profile.memberValueAnnual, profile.lastSeenLocation, hasTeeSheet, hasFb]);
 
   const handleAddNote = () => {
     if (!noteText.trim()) return;
@@ -682,8 +714,17 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
   const contextReason = useMemo(() => {
     if (!profile.riskSignals?.length) return null;
     const topSignal = profile.riskSignals[0];
-    return topSignal?.label || null;
-  }, [profile.riskSignals]);
+    if (!topSignal?.label) return null;
+    // Gate: hide risk signal if its source integration isn't connected
+    if (guidedMode) {
+      const src = (topSignal.source || '').toLowerCase();
+      const lbl = (topSignal.label || '').toLowerCase();
+      if ((src.includes('tee') || src.includes('golf') || lbl.includes('round') || lbl.includes('golf')) && !hasTeeSheet) return null;
+      if ((src === 'pos' || lbl.includes('dining') || lbl.includes('f&b') || lbl.includes('food') || lbl.includes('spend')) && !hasFb) return null;
+      if ((src.includes('email') || lbl.includes('email') || lbl.includes('newsletter') || lbl.includes('open rate')) && !hasEmail) return null;
+    }
+    return topSignal.label;
+  }, [profile.riskSignals, guidedMode, hasTeeSheet, hasFb, hasEmail]);
 
   return (
     <div className="flex flex-col gap-4" style={{ gap: '10px' }}>
@@ -833,11 +874,21 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                   <div className={`font-semibold text-sm ${f.memberId ? 'text-brand-500' : 'text-[#1a1a2e]'}`} style={{ fontSize: '12px', lineHeight: 1.4 }}>{f.name}</div>
                   <div className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>{f.relation}</div>
                 </div>
-                {f.notes && (
-                  <div className="text-xs text-gray-500 max-w-[50%] text-right" style={{ fontSize: '10px', lineHeight: 1.4 }}>
-                    {f.notes}
-                  </div>
-                )}
+                {f.notes && (() => {
+                  // Gate household member notes that reference ungated data sources
+                  if (guidedMode) {
+                    const noteLower = (f.notes || '').toLowerCase();
+                    const isDining = noteLower.includes('wine') || noteLower.includes('dinner') || noteLower.includes('grill') || noteLower.includes('dining') || noteLower.includes('chef');
+                    const isGolf = noteLower.includes('golf') || noteLower.includes('tee') || noteLower.includes('clinic') || noteLower.includes('round');
+                    if (isDining && !hasFb) return null;
+                    if (isGolf && !hasTeeSheet) return null;
+                  }
+                  return (
+                    <div className="text-xs text-gray-500 max-w-[50%] text-right" style={{ fontSize: '10px', lineHeight: 1.4 }}>
+                      {f.notes}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
           </div>
@@ -863,7 +914,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       {/* Recommended Talking Points */}
       <Section title="Talking Points" description="Personalized for this call">
         <div className="flex flex-col gap-1.5" style={{ fontSize: '12px', lineHeight: 1.4 }}>
-          {getTalkingPoints(profile).map((point, i) => (
+          {getTalkingPoints(profile, { hasTeeSheet, hasFb, hasEmail }).map((point, i) => (
             <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]" style={{ fontSize: '11px', lineHeight: 1.4, padding: '6px 10px', marginBottom: '2px' }}>
               <span className="text-brand-500 font-bold text-sm shrink-0" style={{ fontSize: '12px', lineHeight: 1.4 }}>{i + 1}.</span>
               <span className="text-sm text-gray-500 leading-normal" style={{ fontSize: '10px', lineHeight: 1.4 }}>{point}</span>
@@ -903,7 +954,14 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <Section title="Recent activity" description="Last 30 days" data-section="recent-activity"
         collapsible defaultCollapsed summary={`${(profile.activity ?? []).length} entries`}
         sourceSystems={['Tee Sheet', 'POS', 'Email', 'Events']}>
-        <ActivityTimeline activity={profile.activity} />
+        <ActivityTimeline activity={guidedMode ? (profile.activity ?? []).filter(a => {
+          const t = (a.type || a.domain || '').toLowerCase();
+          if ((t.includes('golf') || t.includes('round') || t.includes('tee')) && !hasTeeSheet) return false;
+          if ((t.includes('dining') || t.includes('f&b') || t.includes('grill') || t.includes('lounge')) && !hasFb) return false;
+          if ((t.includes('email') || t.includes('newsletter')) && !hasEmail) return false;
+          if ((t.includes('event') || t.includes('social')) && !hasEvents) return false;
+          return true;
+        }) : profile.activity} />
       </Section>
 
       <Section
@@ -920,11 +978,12 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <Section title="Risk signals" sourceSystems={['Analytics', 'Tee Sheet', 'POS', 'Email']}>
         <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {(profile.riskSignals ?? []).filter(signal => {
-            if (getDataMode() !== 'guided') return true;
+            if (!guidedMode) return true;
             const src = (signal.source || '').toLowerCase();
             const lbl = (signal.label || '').toLowerCase();
-            if ((src.includes('tee') || src.includes('golf') || lbl.includes('round') || lbl.includes('golf') || lbl.includes('handicap')) && !shouldUseStatic('tee-sheet')) return false;
-            if ((src === 'pos' || lbl.includes('dining') || lbl.includes('f&b') || lbl.includes('food') || lbl.includes('spend')) && !shouldUseStatic('fb')) return false;
+            if ((src.includes('tee') || src.includes('golf') || lbl.includes('round') || lbl.includes('golf') || lbl.includes('handicap')) && !hasTeeSheet) return false;
+            if ((src === 'pos' || lbl.includes('dining') || lbl.includes('f&b') || lbl.includes('food') || lbl.includes('spend')) && !hasFb) return false;
+            if ((src.includes('email') || lbl.includes('email') || lbl.includes('newsletter') || lbl.includes('open rate')) && !hasEmail) return false;
             return true;
           }).map((signal) => (
             <RiskSignalRow key={signal.id} signal={signal} profile={profile} />
