@@ -11,6 +11,7 @@ import { getComplaintCorrelation } from '@/services/staffingService';
 import { getMemberSaves } from '@/services/boardReportService';
 import { isAuthenticatedClub } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
+import { isGateOpen } from '@/services/demoGate';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useNavigation } from '@/context/NavigationContext';
@@ -157,7 +158,16 @@ export default function HealthOverview() {
   if (atRisk.length === 0 && watchList.length === 0) {
     const summary = getMemberSummary();
     if (summary.total > 0) {
-      return <DataEmptyState icon="✅" title="No members at risk" description={`${summary.total} members imported. Health scores require golf and dining data in addition to the member roster. Import tee sheet and POS data to see risk levels.`} dataType="engagement data" />;
+      {
+        const hasTee = isGateOpen('tee-sheet');
+        const hasFb = isGateOpen('fb');
+        const hasEmail = isGateOpen('email');
+        const nextSource = !hasTee ? 'tee sheet' : !hasFb ? 'POS' : !hasEmail ? 'email' : null;
+        const desc = nextSource
+          ? `${summary.total} members imported${hasTee ? ' + tee sheet' : ''}${hasFb ? ' + POS' : ''}${hasEmail ? ' + email' : ''}. Connect your ${nextSource} to unlock deeper risk scoring.`
+          : `${summary.total} members imported with all engagement sources connected. No members currently at risk.`;
+        return <DataEmptyState icon="✅" title="No members at risk" description={desc} dataType="engagement data" />;
+      }
     }
     return <DataEmptyState icon="👥" title="No members imported yet" description="Import your member roster to start tracking member health and engagement." dataType="members" />;
   }

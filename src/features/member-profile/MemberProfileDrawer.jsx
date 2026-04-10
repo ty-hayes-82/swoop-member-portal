@@ -6,6 +6,7 @@ import { getOutreachHistory, trackAction } from '@/services/activityService';
 
 import { getMemberChurnPrediction } from '@/services/memberService';
 import { getMemberSaves } from '@/services/boardReportService';
+import { isGateOpen } from '@/services/demoGate';
 import MemberDecayChain from './MemberDecayChain.jsx';
 
 const formatDate = (value) => {
@@ -288,13 +289,12 @@ function MemberJourneyTimeline({ profile }) {
   );
 }
 
-// Health score dimensions — uses real data from health_scores table when available,
-// falls back to deterministic approximations based on archetype patterns
+// Health score dimensions — only shows scores for connected data sources.
+// Ungated dimensions render as "Not connected" with reduced opacity.
 function HealthDimensionGrid({ profile }) {
   const score = profile.healthScore ?? 50;
   const arch = profile.archetype || '';
 
-  // Archetype-based dimension weights for deterministic fallback (no Math.random)
   const archetypeWeights = {
     'Die-Hard Golfer': { golf: 1.3, dining: 0.6, email: 0.5, events: 0.4 },
     'Social Butterfly': { golf: 0.4, dining: 1.2, email: 1.0, events: 1.3 },
@@ -307,27 +307,40 @@ function HealthDimensionGrid({ profile }) {
   };
   const w = archetypeWeights[arch] || { golf: 0.9, dining: 0.8, email: 0.7, events: 0.6 };
 
-  // Use real dimensions from profile if available (populated by health_scores API), else approximate.
   const dimensions = [
-    { label: 'Golf Engagement', weight: '30%', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#ff8b00' },
-    { label: 'Dining Frequency', weight: '25%', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#12b76a' },
-    { label: 'Email Engagement', weight: '25%', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: '#3B82F6' },
-    { label: 'Event Attendance', weight: '20%', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
+    { label: 'Golf Engagement', weight: '30%', gate: 'tee-sheet', source: 'tee sheet', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#ff8b00' },
+    { label: 'Dining Frequency', weight: '25%', gate: 'fb', source: 'POS', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#12b76a' },
+    { label: 'Email Engagement', weight: '25%', gate: 'email', source: 'email', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: '#3B82F6' },
+    { label: 'Event Attendance', weight: '20%', gate: 'events', source: 'events', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
   ];
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      {dimensions.map(d => (
-        <div key={d.label} className="px-2.5 py-2 rounded-lg border border-gray-200 bg-gray-50">
-          <div className="flex justify-between mb-1">
-            <span className="text-[11px] text-gray-400">{d.label} ({d.weight})</span>
-            <span className="text-[11px] font-bold font-mono" style={{ color: d.value >= 60 ? '#12b76a' : d.value >= 35 ? '#f59e0b' : '#ef4444' }}>{d.value}</span>
+      {dimensions.map(d => {
+        const connected = isGateOpen(d.gate);
+        if (!connected) {
+          return (
+            <div key={d.label} className="px-2.5 py-2 rounded-lg border border-dashed border-gray-200 bg-gray-50" style={{ opacity: 0.5 }}>
+              <div className="flex justify-between mb-1">
+                <span className="text-[11px] text-gray-400">{d.label} ({d.weight})</span>
+              </div>
+              <div className="text-[10px] text-gray-400">Not connected</div>
+              <div className="text-[9px] text-gray-300 mt-0.5">Connect {d.source} to unlock</div>
+            </div>
+          );
+        }
+        return (
+          <div key={d.label} className="px-2.5 py-2 rounded-lg border border-gray-200 bg-gray-50">
+            <div className="flex justify-between mb-1">
+              <span className="text-[11px] text-gray-400">{d.label} ({d.weight})</span>
+              <span className="text-[11px] font-bold font-mono" style={{ color: d.value >= 60 ? '#12b76a' : d.value >= 35 ? '#f59e0b' : '#ef4444' }}>{d.value}</span>
+            </div>
+            <div className="h-1 rounded-sm bg-gray-100">
+              <div className="h-full rounded-sm" style={{ background: d.value >= 60 ? '#12b76a' : d.value >= 35 ? '#f59e0b' : '#ef4444', width: `${d.value}%` }} />
+            </div>
           </div>
-          <div className="h-1 rounded-sm bg-gray-100">
-            <div className="h-full rounded-sm" style={{ background: d.value >= 60 ? '#12b76a' : d.value >= 35 ? '#f59e0b' : '#ef4444', width: `${d.value}%` }} />
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

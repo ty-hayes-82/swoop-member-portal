@@ -27,6 +27,7 @@ import {
   getBottleneckSummary,
   getSlowRoundContext,
 } from '@/services/revenueService';
+import { isGateOpen } from '@/services/demoGate';
 
 const COLORS = {
   pace: '#ef4444',
@@ -95,7 +96,13 @@ export default function RevenuePage() {
           <DataEmptyState
             icon="💰"
             title="Revenue leakage needs data"
-            description="Import your tee sheet, POS, and scheduling data to see how operational failures connect to F&B revenue loss."
+            description={
+              isGateOpen('fb') && !isGateOpen('tee-sheet')
+                ? 'Connect your tee sheet to unlock pace-to-dining attribution — the #1 hidden revenue leak at most clubs.'
+                : isGateOpen('tee-sheet') && !isGateOpen('fb')
+                ? 'Connect your POS system to see how pace of play and staffing gaps translate to F&B revenue loss.'
+                : 'Import your tee sheet, POS, and scheduling data to see how operational failures connect to F&B revenue loss.'
+            }
             dataType="operations data"
           />
         </div>

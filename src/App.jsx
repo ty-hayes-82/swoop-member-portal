@@ -14,6 +14,7 @@ import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
 import DemoWizard from '@/components/ui/DemoWizard';
 import { MobileConversionBar } from '@/components/layout';
 import ActionsDrawer from '@/components/layout/ActionsDrawer';
+import DataImportBanner from '@/components/ui/DataImportBanner';
 import SwoopLayout from '@/components/layout/SwoopLayout';
 import { getClubId as getClientClubId } from '@/services/apiClient';
 import { getDataMode } from '@/services/demoGate';
@@ -160,6 +161,7 @@ function AppShell() {
       }
       mobileBar={isMobile ? <MobileConversionBar /> : null}
     >
+      <DataImportBanner />
       <Suspense fallback={null}>
         <PageComponent key={`${currentRoute}-${demoRenderKey}`} />
       </Suspense>

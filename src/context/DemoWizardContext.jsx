@@ -42,7 +42,7 @@ export function DemoWizardProvider({ children }) {
         method: 'POST',
         body: JSON.stringify({ category: fileDef.gateId }),
       });
-      window.dispatchEvent(new CustomEvent('swoop:data-imported'));
+      window.dispatchEvent(new CustomEvent('swoop:data-imported', { detail: { category: fileDef.gateId } }));
     } catch (err) {
       console.error('[DemoWizard] guided-copy failed:', err);
     } finally {
@@ -96,7 +96,7 @@ export function DemoWizardProvider({ children }) {
           body: JSON.stringify({ category }),
         });
       }
-      window.dispatchEvent(new CustomEvent('swoop:data-imported'));
+      window.dispatchEvent(new CustomEvent('swoop:data-imported', { detail: { category: 'agents' } }));
     } catch (err) {
       console.error('[DemoWizard] guided-copy importAll failed:', err);
     } finally {

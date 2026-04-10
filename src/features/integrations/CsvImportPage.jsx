@@ -876,7 +876,7 @@ export default function CsvImportPage() {
         setResult(data);
         // Re-initialize all services so insights appear immediately
         if (data.success > 0) {
-          window.dispatchEvent(new CustomEvent('swoop:data-imported'));
+          window.dispatchEvent(new CustomEvent('swoop:data-imported', { detail: { category: importType } }));
         }
       }
     } catch (err) {

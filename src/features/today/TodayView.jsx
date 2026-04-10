@@ -19,7 +19,7 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { getDataMode } from '@/services/demoGate';
+import { getDataMode, isGateOpen } from '@/services/demoGate';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist, { LOW_DATA_THRESHOLD } from './OnboardingChecklist';
@@ -168,6 +168,7 @@ export default function TodayView() {
 
   const weatherAlerts = getWeatherAlerts();
   const [dismissedAlerts, setDismissedAlerts] = useState([]);
+  const [core3Dismissed, setCore3Dismissed] = useState(() => !!localStorage.getItem('swoop_core3_celebrated'));
 
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -329,6 +330,22 @@ export default function TodayView() {
             </div>
           </div>
         </div>
+
+        {/* Core-3 celebration banner — shows once when members + tee-sheet + F&B are all imported */}
+        {!core3Dismissed && isGateOpen('members') && isGateOpen('tee-sheet') && isGateOpen('fb') && (
+          <div className="fade-in-up rounded-xl p-4" style={{ background: 'white', border: '2px solid transparent', borderImage: 'linear-gradient(135deg, #e8a732, #12b76a, #3B82F6) 1' }}>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm text-gray-700 m-0">
+                <strong>Full intelligence unlocked</strong> — 3 core systems connected. You now see cross-domain insights no single vendor can produce.
+              </p>
+              <button
+                type="button"
+                onClick={() => { localStorage.setItem('swoop_core3_celebrated', 'true'); setCore3Dismissed(true); }}
+                className="text-xs text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer shrink-0"
+              >Dismiss</button>
+            </div>
+          </div>
+        )}
 
         {/* Section 1.5: Morning Briefing Synthesis (Pillar 1: SEE IT) */}
         <MorningBriefingSentence />
