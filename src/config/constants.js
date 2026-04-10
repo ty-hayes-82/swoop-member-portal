@@ -1,3 +1,5 @@
+import { getDataMode } from '@/services/demoGate';
+
 export const DEMO_CLUB_NAME = 'Pinetree Country Club';
 export const DEMO_CLUB_LOCATION = 'Kennesaw, GA';
 export const DEMO_DATE = '2026-01-17';
@@ -12,16 +14,14 @@ export function getClubName() {
     if (stored) return stored;
     const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
     if (user.clubName) return user.clubName;
-    const clubId = localStorage.getItem('swoop_club_id');
-    if (!clubId || clubId === 'demo' || clubId.startsWith('demo_')) return DEMO_CLUB_NAME;
+    if (getDataMode() !== 'live') return DEMO_CLUB_NAME;
     return 'Your Club';
   } catch { return DEMO_CLUB_NAME; }
 }
 
 export function isRealClub() {
   try {
-    const clubId = localStorage.getItem('swoop_club_id');
-    if (!clubId || clubId === 'demo' || clubId.startsWith('demo_')) return false;
+    if (getDataMode() !== 'live') return false;
     // Seeded/test clubs are not "real" — check for production flag
     const isProduction = localStorage.getItem('swoop_production') === 'true';
     return isProduction;
@@ -35,10 +35,7 @@ export const CLUB_NAME = DEMO_CLUB_NAME;
 // Unlike isRealClub(), this does NOT require the swoop_production flag.
 // Used by services to decide: show empty states (real club) vs demo data (demo mode).
 export function isAuthenticatedClub() {
-  try {
-    const clubId = localStorage.getItem('swoop_club_id');
-    return !!clubId && clubId !== 'demo' && !clubId.startsWith('demo_');
-  } catch { return false; }
+  return getDataMode() === 'live';
 }
 
 // Whether static demo data should be used

@@ -6,10 +6,46 @@
  * Accepts pre-parsed CSV rows (frontend handles file parsing)
  * and imports them into the appropriate table with validation.
  */
+import crypto from 'crypto';
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from './lib/withAuth.js';
 import { logError, logInfo, logWarn } from './lib/logger.js';
 import { cors } from './lib/cors.js';
+import { VENDOR_COLUMN_ALIASES } from '../src/services/csvImportService.js';
+
+// Flatten VENDOR_COLUMN_ALIASES into a single set of canonical Swoop fields
+// that are known to be legitimate CSV-origin columns. Combined with per-import
+// requiredFields/optionalFields below, this gives us a closed-vocabulary
+// allowlist so unknown/injected columns get rejected before hitting SQL.
+const VENDOR_KNOWN_FIELDS = (() => {
+  const s = new Set();
+  for (const vendor of Object.values(VENDOR_COLUMN_ALIASES || {})) {
+    for (const swoopField of Object.values(vendor || {})) {
+      if (swoopField && swoopField !== '_skip') s.add(swoopField);
+    }
+  }
+  return s;
+})();
+
+// § 1.3 rate limit: max 5 imports per club per hour.
+// Module-scope Map is fine for single-region serverless; each cold start
+// resets which is acceptable hot-path abuse protection. TODO(multi-region):
+// move to Postgres/Redis if we ever run in more than one Vercel region.
+const IMPORT_RATE_WINDOW_MS = 60 * 60 * 1000;
+const IMPORT_RATE_MAX = 5;
+const importRateBuckets = new Map(); // clubId -> number[] (timestamps)
+function checkImportRateLimit(clubId) {
+  const now = Date.now();
+  const cutoff = now - IMPORT_RATE_WINDOW_MS;
+  const bucket = (importRateBuckets.get(clubId) || []).filter(t => t > cutoff);
+  if (bucket.length >= IMPORT_RATE_MAX) {
+    const retryAfterMs = (bucket[0] + IMPORT_RATE_WINDOW_MS) - now;
+    return { limited: true, retryAfter: Math.ceil(retryAfterMs / 1000) };
+  }
+  bucket.push(now);
+  importRateBuckets.set(clubId, bucket);
+  return { limited: false, remaining: IMPORT_RATE_MAX - bucket.length };
+}
 
 const IMPORT_TYPES = {
   // Phase 1: Club Setup + Members
@@ -286,6 +322,42 @@ function validateRow(row, config, rowIndex) {
   return errors;
 }
 
+/**
+ * § 1.3 server-side schema validation.
+ * Returns a rejection reason string, or null if the row is clean.
+ * Rejects unknown columns, bad dates, and rows carrying a foreign clubId.
+ */
+function validateSchemaRow(rawRow, resolvedRow, config, sessionClubId) {
+  const known = new Set([
+    ...config.requiredFields,
+    ...(config.optionalFields || []),
+    ...Object.keys(config.columnMap || {}),
+    ...Object.values(config.columnMap || {}),
+  ]);
+  for (const key of Object.keys(resolvedRow)) {
+    if (!key || key === '_skip') continue;
+    if (known.has(key)) continue;
+    if (VENDOR_KNOWN_FIELDS.has(key)) continue;
+    return `unknown column "${key}"`;
+  }
+  // Bad dates: any field whose name contains "date"/"time"/"birthday"
+  for (const [key, val] of Object.entries(resolvedRow)) {
+    if (val === null || val === undefined || val === '') continue;
+    if (!/date|time|birthday/i.test(key)) continue;
+    // Skip pure numeric minute/hour counts like duration_min, response_time_min
+    if (/_min$|_minutes$|_hours$/i.test(key)) continue;
+    const s = String(val).trim();
+    if (!s) continue;
+    if (isNaN(Date.parse(s))) return `invalid date in "${key}": ${s}`;
+  }
+  // Foreign clubId: reject if row carries a clubId/club_id that isn't ours.
+  const foreign = rawRow?.clubId ?? rawRow?.club_id ?? resolvedRow?.club_id;
+  if (foreign && String(foreign) !== String(sessionClubId)) {
+    return `foreign club_id "${foreign}"`;
+  }
+  return null;
+}
+
 export default withAuth(async function handler(req, res) {
   if (cors(req, res)) return;
 
@@ -307,6 +379,42 @@ export default withAuth(async function handler(req, res) {
   const config = IMPORT_TYPES[importType];
   if (!config) {
     return res.status(400).json({ error: `Unknown import type: ${importType}. Valid types: ${Object.keys(IMPORT_TYPES).join(', ')}` });
+  }
+
+  // § 1.3 rate limit — max 5 imports per club per hour
+  const rl = checkImportRateLimit(clubId);
+  if (rl.limited) {
+    logWarn('/api/import-csv', 'rate limit exceeded', { clubId, retryAfter: rl.retryAfter });
+    res.setHeader('Retry-After', String(rl.retryAfter));
+    return res.status(429).json({
+      error: `Import rate limit exceeded (${IMPORT_RATE_MAX}/hour per club)`,
+      retryAfter: rl.retryAfter,
+    });
+  }
+
+  // § 1.3 file hash — sha256 of the canonical JSON payload so each unique
+  // upload is fingerprinted in the audit log even though the client sends
+  // pre-parsed rows rather than raw bytes.
+  const fileHash = crypto
+    .createHash('sha256')
+    .update(JSON.stringify({ importType, rows }))
+    .digest('hex');
+
+  // § 1.3 server-side schema validation pass — reject unknown columns, bad
+  // dates, and foreign-clubId rows before touching the DB. This runs across
+  // the raw payload so we can return a { accepted, rejected } preview count
+  // alongside the usual import result.
+  const schemaRejected = [];
+  const cleanRows = [];
+  for (let i = 0; i < rows.length; i++) {
+    const raw = rows[i] || {};
+    const resolved = resolveAliases(raw, importType);
+    const reason = validateSchemaRow(raw, resolved, config, clubId);
+    if (reason) {
+      schemaRejected.push({ row: i + 1, reason });
+    } else {
+      cleanRows.push(raw);
+    }
   }
 
   // Create import tracking record (skip if csv_imports table doesn't exist)
@@ -334,7 +442,7 @@ export default withAuth(async function handler(req, res) {
   if (importType === 'tee_times') {
     try { await sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS member_id TEXT`; } catch {}
     // Auto-create course records referenced by tee times to avoid FK failures
-    const courseIds = new Set(rows.map(r => r.course || r.course_id || r.golf_course).filter(Boolean));
+    const courseIds = new Set(cleanRows.map(r => r.course || r.course_id || r.golf_course).filter(Boolean));
     for (const cid of courseIds) {
       try {
         await sql`INSERT INTO courses (course_id, club_id, name, holes, par, tee_interval_min, first_tee, last_tee)
@@ -378,7 +486,7 @@ export default withAuth(async function handler(req, res) {
 
   // Pre-import: auto-create referenced courses for tee_times to avoid FK violations
   if (importType === 'tee_times') {
-    const courseIds = new Set(rows.map(r => r.course).filter(Boolean));
+    const courseIds = new Set(cleanRows.map(r => r.course).filter(Boolean));
     for (const courseId of courseIds) {
       try {
         await sql`
@@ -390,8 +498,8 @@ export default withAuth(async function handler(req, res) {
     }
   }
 
-  for (let i = 0; i < rows.length; i++) {
-    const row = resolveAliases(rows[i], importType);
+  for (let i = 0; i < cleanRows.length; i++) {
+    const row = resolveAliases(cleanRows[i], importType);
     const rowErrors = validateRow(row, config, i);
 
     if (rowErrors.length > 0) {
@@ -560,17 +668,54 @@ export default withAuth(async function handler(req, res) {
     }).catch(e => logWarn('/api/import-csv', 'health score recompute trigger failed', { err: e.message }));
   }
 
+  // § 1.3 audit log — reuse existing activity_log table. Every accepted
+  // import writes a row with importer, club, sha256 file hash, and counts.
+  if (successCount > 0) {
+    try {
+      await sql`
+        INSERT INTO activity_log (action_type, action_subtype, actor, reference_id, reference_type, description, meta, club_id)
+        VALUES (
+          'csv_import',
+          ${importType},
+          ${uploadedBy},
+          ${importId},
+          'csv_import',
+          ${`CSV import: ${successCount} accepted, ${errorCount + schemaRejected.length} rejected`},
+          ${JSON.stringify({
+            file_hash: fileHash,
+            rows_accepted: successCount,
+            rows_rejected: errorCount + schemaRejected.length,
+            schema_rejected: schemaRejected.length,
+            row_errors: errorCount,
+            import_type: importType,
+          })},
+          ${clubId}
+        )
+      `;
+    } catch (e) {
+      logWarn('/api/import-csv', 'audit log insert failed', { err: e.message });
+    }
+  }
+
+  const totalRejected = errorCount + schemaRejected.length;
   return res.status(200).json({
     importId,
     importType,
     totalRows: rows.length,
+    accepted: successCount,
+    rejected: [
+      ...schemaRejected,
+      ...allErrors.map(e => ({ row: e.row, reason: `${e.field}: ${e.message}` })),
+    ].slice(0, 50),
+    // Legacy fields kept for existing UI consumers
     success: successCount,
-    errors: errorCount,
+    errors: totalRejected,
     errorDetails: allErrors.slice(0, 20),
-    status: errorCount === rows.length ? 'failed' : errorCount > 0 ? 'partial' : 'completed',
+    fileHash,
+    status: totalRejected === rows.length ? 'failed' : totalRejected > 0 ? 'partial' : 'completed',
   });
   } catch (e) {
     logError('/api/import-csv', e, { phase: 'unhandled' });
     return res.status(500).json({ error: e.message || 'Internal import error' });
   }
-}, { roles: ['gm', 'assistant_gm', 'swoop_admin'] });
+}, { roles: ['gm', 'admin', 'swoop_admin'] });

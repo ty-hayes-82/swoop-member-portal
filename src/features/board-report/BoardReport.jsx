@@ -7,6 +7,7 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import MemberLink from '@/components/MemberLink';
 import { getKPIs, getMemberSaves, getOperationalSaves } from '@/services/boardReportService';
+import { getRevenueScenario } from '@/services/revenueService';
 import { getHealthDistribution, getLiveDashboard } from '@/services/memberService';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
 import { isRealClub, isAuthenticatedClub, getClubName } from '@/config/constants';
@@ -805,11 +806,16 @@ export default function BoardReport() {
                   });
                 }
 
-                // Priority 3: Revenue recovery opportunity
+                // Priority 3: Revenue recovery opportunity — pulls from revenueService
+                // so the dollar figure reflects actual leakage, not a hardcoded demo value.
+                const scenario = getRevenueScenario(0.2);
+                const recoveryDetail = scenario.recoveredPace
+                  ? `Projected $${scenario.recoveredPace.toLocaleString()}/mo recovery at 20% slow-round reduction. Review on Revenue page.`
+                  : 'Projected revenue recovery at 20% slow-round reduction. Review on Revenue page.';
                 priorities.push({
                   rank: priorities.length + 1,
                   title: 'Deploy ranger to bottleneck holes on weekends',
-                  detail: 'Projected $1,150/mo recovery at 20% slow-round reduction. Review on Revenue page.',
+                  detail: recoveryDetail,
                   owner: 'GM',
                   color: '#12b76a',
                 });

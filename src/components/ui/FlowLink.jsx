@@ -55,7 +55,7 @@ export default function FlowLink({ flowNum, persona, desc }) {
         type="button"
         onClick={handleDismiss}
         className="text-[11px] text-gray-500 bg-transparent border-none cursor-pointer px-1 py-0.5 opacity-50 dark:text-gray-400"
-        title="Dismiss guide prompt"
+        aria-label="Dismiss guide prompt"
       >
         \u00D7
       </button>

@@ -11,7 +11,7 @@ const SERVICE_SAVE_STEPS = [
   {
     title: 'GM personal alert with member profile',
     description: 'GM receives a push alert with member profile, complaint text, lifetime value, and suggested response script.',
-    preview: 'GM alert: "James Whitfield — member since 2019, $18K/yr dues. Complaint about slow lunch on Jan 16 — unresolved 4 days. Recommend personal call today."',
+    preview: 'GM alert: "James Whitfield — member since 2019, $18K/yr dues. Complaint about slow lunch on Jan 16 — unresolved 4 days. Recommend personal call today."', // lint-no-hardcoded-dollars: allow — playbook catalog teaser copy
     timeline: 'Hour 2–4',
     actionType: 'front-desk-flag',
   },
@@ -62,14 +62,14 @@ const DECAY_STEPS = [
 
 const DECAY_BEFORE = [
   { label: 'Declining members (current)', value: '30 members' },
-  { label: 'At-risk dues',                value: '$540K/yr' },
+  { label: 'At-risk dues',                value: '$540K/yr' }, // lint-no-hardcoded-dollars: allow — playbook catalog teaser copy
   { label: 'Projected conversions back',  value: '0%' },
 ];
 
 const DECAY_AFTER = [
   { label: 'Declining members (targeted)', value: '30 members' },
   { label: 'Expected recovery rate',       value: '17% (5 members)' },
-  { label: 'Protected annual dues',        value: '$90–110K' },
+  { label: 'Protected annual dues',        value: '$90–110K' }, // lint-no-hardcoded-dollars: allow — playbook catalog teaser copy
 ];
 
 // memberContext passed to Service Save to show archetype of triggered member
@@ -86,7 +86,7 @@ export default function MemberPlaybooks() {
       <PlaybookPanel
         id="service-save"
         title="Service Save Protocol"
-        scenario="The pattern we see with members like James Whitfield: an engaged member — in James's case, a 6-year member in good standing — files a complaint that goes unresolved, leading to resignation within days. One saved resignation protects $18K–$22K in dues plus $3K–$5K in ancillary revenue."
+        scenario="The pattern we see with members like James Whitfield: an engaged member — in James's case, a 6-year member in good standing — files a complaint that goes unresolved, leading to resignation within days. One saved resignation protects $18K–$22K in dues plus $3K–$5K in ancillary revenue." // lint-no-hardcoded-dollars: allow — playbook catalog teaser copy
         steps={SERVICE_SAVE_STEPS}
         beforeMetrics={SERVICE_SAVE_BEFORE}
         afterMetrics={SERVICE_SAVE_AFTER}

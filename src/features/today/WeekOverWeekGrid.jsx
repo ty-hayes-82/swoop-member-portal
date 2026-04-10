@@ -4,11 +4,11 @@ import { getLiveDashboard } from '@/services/memberService';
 
 // Static fallback metrics — used when live data isn't available
 const STATIC_METRICS = [
-  { label: 'Revenue', current: '$12,400', prior: '$11,200', delta: '+10.7%', positive: true, context: 'Driven by weekend dining surge and pro shop upsells.', link: 'revenue' },
+  { label: 'Revenue', current: '$12,400', prior: '$11,200', delta: '+10.7%', positive: true, context: 'Driven by weekend dining surge and pro shop upsells.', link: 'revenue' }, // lint-no-hardcoded-dollars: allow — STATIC_METRICS fallback when live dashboard absent
   { label: 'Rounds Played', current: '284', prior: '268', delta: '+6.0%', positive: true, context: 'Weather held — 3 more playable days than prior week.' },
   { label: 'Complaints Filed', current: '5', prior: '2', delta: '+150%', positive: false, context: '3 of 5 related to Friday understaffing — already addressed.', link: 'revenue' },
   { label: 'At-Risk Members', current: '26', prior: '31', delta: '-16.1%', positive: true, context: '5 members recovered via GM calls and comp offers.', link: 'member-health' },
-  { label: 'F&B Revenue', current: '$8,900', prior: '$7,800', delta: '+14.1%', positive: true, context: 'Post-round dining campaign showing early results.' },
+  { label: 'F&B Revenue', current: '$8,900', prior: '$7,800', delta: '+14.1%', positive: true, context: 'Post-round dining campaign showing early results.' }, // lint-no-hardcoded-dollars: allow — STATIC_METRICS fallback when live dashboard absent
   { label: 'Avg Response Time', current: '4.2 hrs', prior: '5.8 hrs', delta: '-27.6%', positive: true, context: 'Service Recovery agent now auto-escalating within 2 hrs.' },
 ];
 

@@ -5,6 +5,8 @@
 import { useState, useEffect } from 'react';
 import { getGoogleStatus, getGoogleAuthUrl, disconnectGoogle, clearGoogleStatusCache } from '@/services/googleService';
 import SourceBadge from '@/components/ui/SourceBadge';
+import { useCurrentClub } from '@/hooks/useCurrentClub';
+import { getDataMode } from '@/services/demoGate';
 
 // Role → feature access map. "scope" drives the Role & Club Permissions card.
 // Must stay in sync with the navigation/router feature gates.
@@ -87,9 +89,9 @@ const EMAIL_SEND_MODES = [
 ];
 
 export default function ProfilePage() {
+  const clubId = useCurrentClub() || '';
   const [user, setUser] = useState({ name: '', email: '', role: '' });
   const [clubName, setClubName] = useState('');
-  const [clubId, setClubId] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [formName, setFormName] = useState('');
@@ -114,7 +116,6 @@ export default function ProfilePage() {
       setFormName(stored.name || '');
       setFormEmail(stored.email || '');
       setClubName(localStorage.getItem('swoop_club_name') || stored.clubName || '');
-      setClubId(localStorage.getItem('swoop_club_id') || '');
       setDemoEmail(localStorage.getItem('swoop_demo_email') || '');
       setDemoPhone(localStorage.getItem('swoop_demo_phone') || '');
       setEmailSendMode(localStorage.getItem('swoop_email_send_mode') || 'local');
@@ -170,7 +171,7 @@ export default function ProfilePage() {
     setSaving(false);
   };
 
-  const isDemo = clubId === 'demo';
+  const isDemo = getDataMode() !== 'live';
   const initials = (formName || 'U')
     .split(' ')
     .map((n) => n[0])

@@ -8,9 +8,11 @@
     "build": "node scripts/prebuild-safe-clean.mjs && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit -p jsconfig.json",
     "lint-theme": "node scripts/lint-theme.mjs",
     "lint-clubid": "node scripts/lint-clubid.mjs",
-    "lint": "npm run lint-theme && npm run lint-clubid",
+    "lint-dollars": "node scripts/lint-no-hardcoded-dollars.mjs",
+    "lint": "npm run lint-theme && npm run lint-clubid && npm run lint-dollars",
     "db:migrate": "node scripts/migrate.mjs",
     "test:e2e": "npx playwright test",
     "test:insights": "npx playwright test --config=playwright.insights.config.js",
@@ -22,6 +24,7 @@
     "vision:full": "npm run vision:capture && npm run vision:critique"
   },
   "dependencies": {
+    "@sentry/react": "^10.48.0",
     "@vercel/postgres": "^0.10.0",
     "clsx": "^2.1.1",
     "leaflet": "^1.9.4",

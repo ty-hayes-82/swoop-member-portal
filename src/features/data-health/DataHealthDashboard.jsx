@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { useNavigation } from '@/context/NavigationContext';
 import { apiFetch } from '@/services/apiClient';
 import { getLeakageData } from '@/services/revenueService';
+import { useCurrentClub } from '@/hooks/useCurrentClub';
 
 const DOMAIN_INFO = {
   CRM: { icon: '👥', label: 'CRM / Members', desc: 'Member profiles, dues, tenure, household data', vendor: 'Jonas Club, Clubessential' },
@@ -22,17 +23,16 @@ export default function DataHealthDashboard() {
   const { navigate } = useNavigation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const clubId = useCurrentClub();
 
   useEffect(() => {
-    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
     if (!clubId) { setLoading(false); return; }
     apiFetch(`/api/feature-availability?clubId=${clubId}`)
       .then(d => { if (d) setData(d); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [clubId]);
 
-  const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
   const isAuthenticated = !!clubId && clubId !== 'demo';
   const DEMO_CONNECTED = { CRM: true, EMAIL: true };
   const domains = data?.domains || Object.keys(DOMAIN_INFO).map(code => (isAuthenticated ? {
@@ -52,18 +52,16 @@ export default function DataHealthDashboard() {
   const features = data?.features || [];
   const nextDomain = data?.nextDomainToConnect;
 
-  // Dollar figures come from revenueService.getLeakageData(); PACE_LOSS wires through exactly,
-  // STAFFING_LOSS / TOTAL fall back to canonical demo literals ($3,400 / $9,580) on divergence.
+  // Dollar figures come from revenueService.getLeakageData(). When gates are closed
+  // leakage is null and the domain cards simply omit the dollar line.
   const leakage = getLeakageData();
-  const paceDollars = leakage?.PACE_LOSS
-    ? `$${leakage.PACE_LOSS.toLocaleString()}/mo pace-to-dining attribution`
-    : '$5,760/mo pace-to-dining attribution';
+  const fmt = (n) => `$${Math.round(n).toLocaleString()}`;
   const DOMAIN_PILLAR_IMPACT = {
     CRM: { features: ['Today Morning Briefing', 'Member Health Scores', 'First Domino visualization'], dollar: 'Required for all member-level intelligence' },
-    TEE_SHEET: { features: ['Today briefing rounds count', 'Hole 12 bottleneck drill-down', 'At-risk on tee sheet detection'], dollar: paceDollars },
-    POS: { features: ['F&B revenue decomposition', 'Dining conversion correlation', 'Post-round dining stats'], dollar: '$9,580/mo full F&B leakage decomposition' },
+    TEE_SHEET: { features: ['Today briefing rounds count', 'Hole 12 bottleneck drill-down', 'At-risk on tee sheet detection'], dollar: leakage?.PACE_LOSS ? `${fmt(leakage.PACE_LOSS)}/mo pace-to-dining attribution` : 'Pace-to-dining attribution' },
+    POS: { features: ['F&B revenue decomposition', 'Dining conversion correlation', 'Post-round dining stats'], dollar: leakage?.TOTAL ? `${fmt(leakage.TOTAL)}/mo full F&B leakage decomposition` : 'Full F&B leakage decomposition' },
     EMAIL: { features: ['First Domino email signal', 'Engagement decay watch list', 'Cohort heatmap'], dollar: 'Earliest decay signal — typically the first domino to fall' },
-    LABOR: { features: ['Tomorrow staffing risk', 'Pace-to-Revenue connection card', 'Understaffed days correlation'], dollar: '$3,400/mo staffing-driven F&B loss' },
+    LABOR: { features: ['Tomorrow staffing risk', 'Pace-to-Revenue connection card', 'Understaffed days correlation'], dollar: leakage?.STAFFING_LOSS ? `${fmt(leakage.STAFFING_LOSS)}/mo staffing-driven F&B loss` : 'Staffing-driven F&B loss' },
   };
   const blockedDomains = domains.filter(d => !d.connected && !d.is_connected);
   const hasBlocking = blockedDomains.length > 0;

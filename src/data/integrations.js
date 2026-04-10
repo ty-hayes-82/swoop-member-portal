@@ -1,3 +1,15 @@
+// Static catalog of supported vendor systems.
+//
+// Freshness-audit gate (Wave 2, Task #11, 2026-04-09):
+//   The hardcoded `lastSync: 'Nm ago'` strings below are NEVER rendered for
+//   real authenticated clubs. The sole live consumer is
+//   `src/services/integrationsService.js::getConnectedSystems()`, which
+//   always replaces `lastSync` with either the live API value
+//   (`_d.systems[].lastSync`) or `null` before returning — the static string
+//   is scrubbed on every code path. (Wave 5, Task #21: deleted 5 dead
+//   importer files that previously read this seed but had zero callers.)
+//   => The "Nm ago" strings are effectively demo-only placeholders and do
+//      not leak to real-club UI. Do not rely on them as real freshness data.
 export const SYSTEMS = [
   { id: 'tee-sheet',      name: 'ForeTees Tee Sheet',            category: 'tee-sheet', tier: 1, logo: 'FT', status: 'connected',    lastSync: '2m ago',  endpoints: ['teeTimes', 'pacing', 'playerRoster'] },
   { id: 'pos',            name: 'Lightspeed POS',                category: 'pos',       tier: 1, logo: 'LS', status: 'connected',    lastSync: '4m ago',  endpoints: ['checks', 'lineItems', 'tenders'] },

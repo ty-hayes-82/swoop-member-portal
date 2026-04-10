@@ -183,6 +183,10 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, ac
           {/* Notify on action */}
           <div className="flex items-center gap-2">
             <button
+              type="button"
+              role="switch"
+              aria-checked={localConfig.notifyOnAction}
+              aria-label="Notify me when this agent proposes an action"
               onClick={() => handleConfigChange('notifyOnAction', !localConfig.notifyOnAction)}
               className={`relative w-9 h-5 rounded-full transition-colors cursor-pointer ${
                 localConfig.notifyOnAction ? 'bg-brand-500' : 'bg-gray-300 dark:bg-gray-600'
@@ -201,7 +205,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, ac
             <textarea
               value={localConfig.customInstructions}
               onChange={e => handleConfigChange('customInstructions', e.target.value)}
-              placeholder="e.g., Focus on members with dues over $10K. Always recommend a phone call before email for high-value members. Never suggest comp offers for members with outstanding balances."
+              placeholder="e.g., Focus on members with dues over $10K. Always recommend a phone call before email for high-value members. Never suggest comp offers for members with outstanding balances." // lint-no-hardcoded-dollars: allow — placeholder example text in textarea
               rows={2}
               className="w-full px-2 py-1.5 rounded-lg border border-gray-200 bg-white text-[11px] dark:bg-gray-900 dark:border-gray-700 dark:text-white/90 resize-none"
             />

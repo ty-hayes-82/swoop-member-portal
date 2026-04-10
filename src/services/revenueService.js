@@ -6,6 +6,41 @@ import { shouldUseStatic } from './demoGate';
 import { getPaceFBImpact, getBottleneckHoles, getSlowRoundRate } from './operationsService';
 import { getUnderstaffedDays } from './staffingService';
 
+/**
+ * @typedef {Object} LeakageData
+ * @property {number} PACE_LOSS                Dollars per month lost to slow pace
+ * @property {number} STAFFING_LOSS            Dollars per month lost to understaffing
+ * @property {number} WEATHER_LOSS             Dollars per month lost to weather no-shows
+ * @property {number} TOTAL                    Sum of the three buckets
+ * @property {string[]} sources                Source system labels
+ */
+
+/**
+ * @typedef {Object} RevenueScenario
+ * @property {number} recoveredPace
+ * @property {number} recoveredStaffing
+ * @property {number} totalRecovery
+ */
+
+/**
+ * @typedef {Object} BottleneckSummary
+ * @property {number} hole
+ * @property {string} course
+ * @property {number} avgDelay                 Minutes
+ * @property {number} roundsAffected
+ * @property {number} fastConversionPct        0-100
+ * @property {number} slowConversionPct        0-100
+ * @property {number} dollarPerSlowRound
+ */
+
+/**
+ * @typedef {Object} SlowRoundContext
+ * @property {number} totalRounds
+ * @property {number} slowRounds
+ * @property {number} overallRate              0-1
+ * @property {number} weekendRate              0-1
+ */
+
 // Static weather no-show estimate for demo. In production, derive from
 // weather_events × cancelled bookings × avg dining check.
 const WEATHER_NO_SHOW_LOSS_MONTHLY = 420;
@@ -15,6 +50,8 @@ const WEATHER_NO_SHOW_LOSS_MONTHLY = 420;
  * Returns null when no relevant gates are open.
  *
  * Shape: { PACE_LOSS, STAFFING_LOSS, WEATHER_LOSS, TOTAL, sources: [...] }
+ *
+ * @returns {LeakageData|null}
  */
 export function getLeakageData() {
   if (!shouldUseStatic('fb') && !shouldUseStatic('complaints') && !shouldUseStatic('pace')) {
@@ -53,6 +90,8 @@ export function getLeakageData() {
  * delta computes lower (~$8). We use the full-impact figure for demo
  * since it represents end-to-end business impact, with a fallback to
  * the computed conversion gap for real-data clubs.
+ *
+ * @returns {number}
  */
 export function getDollarPerSlowRound() {
   const paceFB = getPaceFBImpact();
@@ -75,7 +114,7 @@ export function getDollarPerSlowRound() {
 /**
  * getRevenueScenario — models recovery from a slow-round reduction.
  * @param {number} reductionPct — fraction (0-1) of slow rounds eliminated.
- * @returns { recoveredPace, recoveredStaffing, totalRecovery }
+ * @returns {RevenueScenario}
  */
 export function getRevenueScenario(reductionPct = 0) {
   const leakage = getLeakageData();
@@ -97,6 +136,7 @@ export function getRevenueScenario(reductionPct = 0) {
 
 /**
  * getBottleneckSummary — primary bottleneck hole + drill-down data
+ * @returns {BottleneckSummary|null}
  */
 export function getBottleneckSummary() {
   const holes = getBottleneckHoles();
@@ -120,6 +160,7 @@ export function getBottleneckSummary() {
 
 /**
  * getSlowRoundContext — overall slow-round stats for scenario modeling
+ * @returns {SlowRoundContext}
  */
 export function getSlowRoundContext() {
   const stats = getSlowRoundRate();

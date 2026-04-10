@@ -19,9 +19,10 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { shouldUseStatic } from '@/services/demoGate';
+import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
+import OnboardingChecklist, { LOW_DATA_THRESHOLD } from './OnboardingChecklist';
 import { getTodayTeeSheet } from '@/services/operationsService';
 import { getMemberSummary } from '@/services/memberService';
 import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
@@ -91,7 +92,7 @@ function GmGreetingAlert({ onDismiss }) {
                   <span className="text-xs font-bold uppercase tracking-wider text-white px-2 py-0.5 rounded-full" style={{ background: alert.isAtRisk ? '#ef4444' : '#f59e0b' }}>
                     {alert.isAtRisk ? 'AT-RISK CHECK-IN' : 'VIP CHECK-IN'}
                   </span>
-                  <span className="text-xs text-gray-400">Just now</span>
+                  <span className="text-xs text-gray-400">&mdash;</span>
                 </div>
                 <div className="text-sm font-bold text-gray-800 mb-0.5">
                   {shouldUseStatic('members') ? (
@@ -188,6 +189,17 @@ export default function TodayView() {
 
   if (isLoading) {
     return <SkeletonDashboard />;
+  }
+
+  // Fresh live club — show onboarding checklist instead of the normal dashboard
+  // so a brand-new GM doesn't see another club's numbers on first login.
+  // Demo and guided modes are the dashboard — never gate them behind this.
+  if (getDataMode() === 'live' && (getMemberSummary().total || 0) < LOW_DATA_THRESHOLD) {
+    return (
+      <PageTransition>
+        <OnboardingChecklist />
+      </PageTransition>
+    );
   }
 
   // Real authenticated club with no operational data — show welcome state
@@ -373,7 +385,7 @@ export default function TodayView() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               {[
                 { icon: '🍽️', label: 'Dining Covers Today', value: '126', color: '#ea580c' },
-                { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#039855' },
+                { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#039855' }, // lint-no-hardcoded-dollars: allow — F&B demo stat inside shouldUseStatic gate
                 { icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' },
               ].map(s => (
                 <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>

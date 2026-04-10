@@ -59,6 +59,9 @@ jobs:
       - name: Run clubId lint
         run: npm run lint-clubid
 
+      - name: Run hardcoded-dollars lint
+        run: npm run lint-dollars
+
   unit:
     name: Unit tests (vitest)
     runs-on: ubuntu-latest

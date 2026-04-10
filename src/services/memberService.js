@@ -14,6 +14,122 @@ import {
 import { decayingMembers as staticDecayingMembers, emailHeatmap as staticEmailHeatmap } from '@/data/email';
 import { feedbackRecords } from '@/data/staffing';
 
+/**
+ * @typedef {Object} AtRiskMember
+ * @property {string} memberId
+ * @property {string} name
+ * @property {number} score                   0-100 health score
+ * @property {string} archetype
+ * @property {string} topRisk                 Resolved risk signal (never generic)
+ * @property {string} trend                   'declining' | 'stable' | 'improving' | ...
+ * @property {number|null} duesAnnual         Normalized annual dues ($)
+ */
+
+/**
+ * @typedef {Object} ArchetypeRow
+ * @property {string} archetype
+ * @property {number} count
+ * @property {number} golf                    0-100
+ * @property {number} dining                  0-100
+ * @property {number} events                  0-100
+ * @property {number} email                   0-100
+ * @property {number} trend                   -100..100 delta
+ */
+
+/**
+ * @typedef {Object} HealthDistributionRow
+ * @property {string} level                   'Healthy' | 'Watch' | 'At Risk' | 'Critical' | ...
+ * @property {number} min                     Minimum score for bucket
+ * @property {number} count
+ * @property {number} percentage              0-1
+ * @property {string} color                   Hex color
+ * @property {number} delta                   Period-over-period count delta
+ */
+
+/**
+ * @typedef {Object} DecayingMemberRow
+ * @property {string} memberId
+ * @property {string} name
+ * @property {string} archetype
+ * @property {number} nov                     Open rate 0-1
+ * @property {number} dec                     Open rate 0-1
+ * @property {number} jan                     Open rate 0-1
+ * @property {number} trend                   Percent change -100..100
+ */
+
+/**
+ * @typedef {Object} EmailHeatmapRow
+ * @property {string} campaign
+ * @property {string} archetype
+ * @property {number} openRate
+ * @property {number} clickRate
+ */
+
+/**
+ * @typedef {Object} MemberSummary
+ * @property {number} total
+ * @property {number} totalMembers
+ * @property {number} healthy
+ * @property {number} watch
+ * @property {number} atRisk
+ * @property {number} critical
+ * @property {number} riskCount
+ * @property {number} avgHealthScore             Raw number (0 when unknown). Consumers format for display.
+ * @property {number} potentialDuesAtRisk        Raw number (0 when unknown). Consumers format for display.
+ */
+
+/**
+ * @typedef {Object} RiskSignal
+ * @property {string} id
+ * @property {string} label
+ * @property {string} source
+ * @property {string} confidence
+ */
+
+/**
+ * @typedef {Object} MemberProfile
+ * @property {string} memberId
+ * @property {string} name
+ * @property {string} [tier]
+ * @property {string} [archetype]
+ * @property {number|string} healthScore       string '—' when unknown
+ * @property {number|string} duesAnnual        string '—' when unknown
+ * @property {number|string} memberValueAnnual string '—' when unknown
+ * @property {number[]} trend                  5-point sparkline, each 0-100
+ * @property {{phone:string,email:string,preferredChannel:string}} [contact]
+ * @property {RiskSignal[]} [riskSignals]
+ * @property {Array<Object>} [activity]
+ * @property {Array<Object>} [staffNotes]
+ * @property {Object} [preferences]
+ * @property {Array<Object>} [family]
+ */
+
+/**
+ * @typedef {Object} ResignationScenario
+ * @property {string} memberId
+ * @property {string} name
+ * @property {string} archetype
+ * @property {string} resignDate               YYYY-MM-DD
+ * @property {string} pattern
+ * @property {number} dues
+ * @property {Array<{date:string,event:string,domain:string}>} timeline
+ */
+
+/**
+ * @typedef {Object} RosterMember
+ * @property {string} memberId
+ * @property {string} name
+ * @property {number} score
+ * @property {string} archetype
+ * @property {number} duesAnnual
+ * @property {number} [memberValueAnnual]
+ * @property {string} [tier]
+ * @property {string} [joinDate]
+ * @property {string} [trend]
+ * @property {string} [topRisk]
+ * @property {string|null} [lastSeenLocation]
+ */
+
 const toNumber = (value, fallback = 0) => {
   const num = Number(value);
   return Number.isFinite(num) ? num : fallback;
@@ -327,12 +443,21 @@ export const _init = async () => {
         ...apiData,
         healthDistribution: apiData.healthDistribution || _d.healthDistribution,
         memberProfiles: apiData.memberProfiles || _d.memberProfiles,
+        // Merge (not replace) memberSummary so partial API payloads like
+        // { memberSummary: { total: 50 } } don't wipe healthy/watch/atRisk/etc.
+        memberSummary: { ..._d.memberSummary, ...(apiData.memberSummary || {}) },
       };
-      // Ensure memberSummary.totalMembers is populated from apiData.total or roster length
+      // Patch memberSummary.total + .totalMembers from apiData (both fields, since
+      // some consumers read .total and some read .totalMembers — the previous code
+      // only patched .totalMembers, leaving .total at the static seed value).
+      const apiTotal = apiData.total || (Array.isArray(apiData.memberRoster) ? apiData.memberRoster.length : 0);
       if (_d.memberSummary) {
-        _d.memberSummary.totalMembers = _d.memberSummary.totalMembers || apiData.total || (Array.isArray(apiData.memberRoster) ? apiData.memberRoster.length : 0);
+        if (apiTotal) {
+          _d.memberSummary.total = apiTotal;
+          _d.memberSummary.totalMembers = apiTotal;
+        }
       } else {
-        _d.memberSummary = { total: apiData.total || 0, totalMembers: apiData.total || (Array.isArray(apiData.memberRoster) ? apiData.memberRoster.length : 0) };
+        _d.memberSummary = { ..._d.memberSummary, total: apiTotal, totalMembers: apiTotal };
       }
     }
   } catch { /* keep static fallback */ }
@@ -387,6 +512,7 @@ const _shouldReturnEmpty = () => !shouldUseStatic('members') && !_hasRealMembers
 
 export const hasRealMemberData = () => _hasRealMembers;
 
+/** @returns {HealthDistributionRow[]} */
 export const getHealthDistribution = () => {
   if (_shouldReturnEmpty()) return [];
   if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
@@ -413,6 +539,7 @@ export const getHealthDistribution = () => {
   const totalMembers = archetypes.reduce((sum, item) => sum + item.count, 0);
   return normalizeHealthDistribution(_d?.healthDistribution, totalMembers);
 };
+/** @returns {AtRiskMember[]} */
 export const getAtRiskMembers       = () => {
   if (_shouldReturnEmpty()) return [];
   const raw = normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
@@ -428,19 +555,23 @@ export const getAtRiskMembers       = () => {
   }
   return raw;
 };
+/** @returns {ArchetypeRow[]} */
 export const getArchetypeProfiles   = () => {
   if (_shouldReturnEmpty()) return [];
   if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
   return normalizeArchetypes(_d?.memberArchetypes);
 };
+/** @returns {Record<string, MemberProfile>} */
 export const getAllMemberProfiles   = () => {
   if (_shouldReturnEmpty()) return {};
   return _d?.memberProfiles ?? {};
 };
+/** @returns {ResignationScenario[]} */
 export const getResignationScenarios= () => {
   if (_shouldReturnEmpty()) return [];
   return normalizeResignationScenarios(_d?.resignationScenarios);
 };
+/** @returns {EmailHeatmapRow[]} */
 export const getEmailHeatmap        = () => {
   if (_shouldReturnEmpty()) return [];
   const raw = Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
@@ -451,11 +582,13 @@ export const getEmailHeatmap        = () => {
     clickRate: toNumber(e.clickRate, 0),
   }));
 };
+/** @returns {DecayingMemberRow[]} */
 export const getDecayingMembers     = () => {
   if (_shouldReturnEmpty()) return [];
   return normalizeDecayingMembers(_d?.decayingMembers);
 };
 
+/** @returns {MemberSummary} */
 export const getMemberSummary = () => {
   if (_shouldReturnEmpty()) {
     return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
@@ -476,11 +609,12 @@ export const getMemberSummary = () => {
     atRisk: Math.max(0, Math.round(toNumber(summary.atRisk, 0))),
     critical: Math.max(0, Math.round(toNumber(summary.critical, 0))),
     riskCount: Math.max(0, Math.round(toNumber(summary.riskCount, 0))),
-    avgHealthScore: formatMaybeNumber(summary.avgHealthScore, 0),
-    potentialDuesAtRisk: formatMaybeNumber(summary.potentialDuesAtRisk, 0),
+    avgHealthScore: toNumber(summary.avgHealthScore, 0),
+    potentialDuesAtRisk: toNumber(summary.potentialDuesAtRisk, 0),
   };
 };
 
+/** @returns {AtRiskMember[]} */
 export const getWatchMembers = () => {
   if (_shouldReturnEmpty()) return [];
   if (getDataMode() === 'guided' && !hasEngagementGates()) return [];
@@ -498,6 +632,7 @@ export const getWatchMembers = () => {
 
 
 // Member roster from API (for authenticated clubs with no engagement data)
+/** @returns {RosterMember[]} */
 export const getMemberRoster = () => {
   const roster = _d?.memberRoster ?? [];
   return roster.map(m => ({
@@ -522,7 +657,7 @@ export const getVolatileMembers = () => {
 // Fetch churn prediction for a member
 export const getMemberChurnPrediction = async (memberId) => {
   try {
-    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    const clubId = getClientClubId();
     if (!clubId || !memberId) return null;
     const res = await fetch(`/api/predict-churn?clubId=${clubId}&memberId=${memberId}`);
     if (res.ok) return await res.json();
@@ -603,6 +738,7 @@ function _generateRoster() {
 }
 
 /** Lazily generate and cache the full member roster. Both pages use this. */
+/** @returns {RosterMember[]} */
 export function getFullRoster() {
   if (_rosterCache.length > 0) return _rosterCache;
   const apiRoster = getMemberRoster();
@@ -610,6 +746,10 @@ export function getFullRoster() {
   return _rosterCache;
 }
 
+/**
+ * @param {string} memberId
+ * @returns {MemberProfile|null}
+ */
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
   if (_d?.memberProfiles?.[memberId]) {

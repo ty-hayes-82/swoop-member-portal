@@ -13,9 +13,11 @@ import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
 import { Card } from '@/components/tailadmin';
 import { apiFetch } from '@/services/apiClient';
 import Badge from '@/components/tailadmin/Badge';
-import { getConnectedSystems } from '@/services/integrationsService';
+import { getConnectedSystems, useIntegrationsData } from '@/services/integrationsService';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { getHealthRollup } from '@/services/apiHealthService';
+import { useCurrentClub } from '@/hooks/useCurrentClub';
+import { getDataMode } from '@/services/demoGate';
 
 // Shared with DataHealthDashboard — keep in sync with DOMAIN_PILLAR_IMPACT there.
 const DOMAIN_VALUE_PCTS = { CRM: 40, TEE_SHEET: 25, POS: 20, EMAIL: 10, LABOR: 5 };
@@ -30,13 +32,13 @@ const DOMAIN_UNLOCK_IMPACT = {
     label: 'Tee Sheet',
     sourceSystem: 'Tee Sheet',
     features: ['Today briefing rounds count', 'Hole 12 bottleneck drill-down', 'At-risk on tee sheet detection'],
-    dollar: '$5,760/mo pace-to-dining attribution',
+    dollar: '$5,760/mo pace-to-dining attribution', // lint-no-hardcoded-dollars: allow — domain unlock teaser shown when source is disconnected
   },
   POS: {
     label: 'POS / F&B',
     sourceSystem: 'POS',
     features: ['F&B revenue decomposition', 'Dining conversion correlation', 'Post-round dining stats'],
-    dollar: '$9,580/mo full F&B leakage decomposition',
+    dollar: '$9,580/mo full F&B leakage decomposition', // lint-no-hardcoded-dollars: allow — domain unlock teaser shown when source is disconnected
   },
   EMAIL: {
     label: 'Email & Events',
@@ -48,7 +50,7 @@ const DOMAIN_UNLOCK_IMPACT = {
     label: 'Scheduling & Labor',
     sourceSystem: 'Scheduling',
     features: ['Tomorrow staffing risk', 'Pace-to-Revenue connection card', 'Understaffed days correlation'],
-    dollar: '$3,400/mo staffing-driven F&B loss',
+    dollar: '$3,400/mo staffing-driven F&B loss', // lint-no-hardcoded-dollars: allow — domain unlock teaser shown when source is disconnected
   },
 };
 
@@ -64,7 +66,7 @@ const ALL_ADMIN_TABS = [
 export default function AdminHub() {
   const { navigate } = useNavigationContext();
   const [liveSourceCount, setLiveSourceCount] = useState(0);
-  const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+  const clubId = useCurrentClub();
 
   useEffect(() => {
     if (!clubId) return;
@@ -138,7 +140,7 @@ function DataHubTab({ clubId }) {
       return disconnected[0];
     };
 
-    if (!clubId || clubId === 'demo') {
+    if (getDataMode() !== 'live') {
       setNextUnlock(pickHighestValue(DEMO_CONNECTED));
       return;
     }
@@ -282,11 +284,41 @@ function DataHubTab({ clubId }) {
         )}
       </Card>
 
-      {/* Connected Sources */}
+      {/* Connected Sources — pilot migration to useServiceCache (SHIP_PLAN §2.3) */}
+      <ConnectedSourcesCard />
+
+      {/* CSV Upload link */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 rounded-xl p-4 bg-brand-50 border border-brand-200 dark:bg-brand-500/5 dark:border-brand-500/20">
+        <div>
+          <div className="font-bold text-sm text-gray-800 dark:text-white/90">Manual Data Upload</div>
+          <div className="text-xs text-gray-500">Upload CSV files for members, rounds, transactions, or complaints when API access isn&rsquo;t available.</div>
+        </div>
+        <button onClick={() => navigate('csv-import')} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0 self-start sm:self-auto">Open Upload Tool</button>
+      </div>
+    </div>
+  );
+}
+
+function ConnectedSourcesCard() {
+  const { data: systems, isLoading } = useIntegrationsData();
+  const sources = (systems || getConnectedSystems()).slice(0, 12);
+
+  return (
+    <>
       <Card>
         <h3 className="text-base font-bold mb-3 m-0 text-gray-800 dark:text-white/90">Connected Sources</h3>
+        {isLoading && !systems ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" aria-busy="true">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="px-3.5 py-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800 animate-pulse h-[82px]"
+              />
+            ))}
+          </div>
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {getConnectedSystems().slice(0, 12).map(source => (
+          {sources.map(source => (
             <div key={source.id} className={`px-3.5 py-3 rounded-lg border ${
               source.status === 'connected'
                 ? 'border-success-300 bg-success-50 dark:border-success-500/30 dark:bg-success-500/5'
@@ -302,17 +334,9 @@ function DataHubTab({ clubId }) {
             </div>
           ))}
         </div>
+        )}
       </Card>
-
-      {/* CSV Upload link */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 rounded-xl p-4 bg-brand-50 border border-brand-200 dark:bg-brand-500/5 dark:border-brand-500/20">
-        <div>
-          <div className="font-bold text-sm text-gray-800 dark:text-white/90">Manual Data Upload</div>
-          <div className="text-xs text-gray-500">Upload CSV files for members, rounds, transactions, or complaints when API access isn't available.</div>
-        </div>
-        <button onClick={() => navigate('csv-import')} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0 self-start sm:self-auto">Open Upload Tool</button>
-      </div>
-    </div>
+    </>
   );
 }
 

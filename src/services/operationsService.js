@@ -9,6 +9,69 @@ import { paceDistribution, slowRoundStats, bottleneckHoles, paceFBImpact } from 
 import { waitlistEntries } from '@/data/pipeline';
 import { todayTeeSheet, teeSheetSummary } from '@/data/teeSheet';
 
+/**
+ * @typedef {Object} DailyRevenueRow
+ * @property {string} date                     YYYY-MM-DD
+ * @property {number} golf
+ * @property {number} fb
+ * @property {string} [weather]
+ * @property {boolean} [isUnderstaffed]
+ */
+
+/**
+ * @typedef {Object} MonthlyRevenueSummary
+ * @property {number} total
+ * @property {number} golfTotal
+ * @property {number} fbTotal
+ * @property {number} dailyAvg
+ * @property {number} weekendAvg
+ * @property {number} weekdayAvg
+ */
+
+/**
+ * @typedef {Object} SlowRoundStats
+ * @property {number} totalRounds
+ * @property {number} slowRounds
+ * @property {number} overallRate              0-1
+ * @property {number} weekendRate              0-1
+ * @property {number} weekdayRate              0-1
+ * @property {number} threshold                Minutes
+ */
+
+/**
+ * @typedef {Object} BottleneckHole
+ * @property {number} hole
+ * @property {string} course
+ * @property {number} avgDelay                 Minutes
+ * @property {number} roundsAffected
+ */
+
+/**
+ * @typedef {Object} PaceFBImpact
+ * @property {number} fastConversionRate       0-1
+ * @property {number} slowConversionRate       0-1
+ * @property {number} avgCheckFast             Dollars
+ * @property {number} avgCheckSlow             Dollars
+ * @property {number} slowRoundsPerMonth
+ * @property {number} revenueLostPerMonth      Dollars/month
+ */
+
+/**
+ * @typedef {Object} TeeSheetRow
+ * @property {string} time
+ * @property {string} [memberId]
+ * @property {string} [memberName]
+ * @property {number} [players]
+ * @property {string} [course]
+ */
+
+/**
+ * @typedef {Object} TeeSheetSummary
+ * @property {number} totalRounds
+ * @property {number} weatherTemp
+ * @property {string} weatherCondition
+ */
+
 let _d = null; // hydrated by _init()
 const DEFAULT_PACE_DISTRIBUTION = [
   { bucket: '< 3:45', minutes: 225, count: 142, isSlow: false },
@@ -58,18 +121,21 @@ export const _init = async () => {
   } catch { /* keep static fallback */ }
 };
 
+/** @returns {DailyRevenueRow[]} */
 export const getRevenueByDay = () => {
   if (_d) return _d.revenueByDay;
   if (!shouldUseStatic('fb')) return [];
   return dailyRevenue;
 };
 
+/** @returns {MonthlyRevenueSummary} */
 export const getMonthlyRevenueSummary = () => {
   if (_d) return _d.monthlySummary;
   return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
 };
 
 const EMPTY_SLOW_ROUND = { totalRounds: 0, slowRounds: 0, overallRate: 0, weekendRate: 0, weekdayRate: 0, threshold: 270 };
+/** @returns {SlowRoundStats} */
 export const getSlowRoundRate = () => {
   if (_d?.slowRoundStats) { /* use API data */ }
   else if (!shouldUseStatic('pace')) return EMPTY_SLOW_ROUND;
@@ -86,6 +152,7 @@ export const getSlowRoundRate = () => {
   };
 };
 
+/** @returns {BottleneckHole[]} */
 export const getBottleneckHoles = () => {
   if (_d?.bottleneckHoles) { /* use API data */ }
   else if (!shouldUseStatic('pace')) return [];
@@ -103,6 +170,7 @@ export const getBottleneckHoles = () => {
 };
 
 const EMPTY_PACE_FB = { fastConversionRate: 0, slowConversionRate: 0, avgCheckFast: 0, avgCheckSlow: 0, slowRoundsPerMonth: 0, revenueLostPerMonth: 0 };
+/** @returns {PaceFBImpact} */
 export const getPaceFBImpact = () => {
   if (_d?.paceFBImpact) { /* use API data */ }
   else if (!shouldUseStatic('pace')) return EMPTY_PACE_FB;
@@ -119,12 +187,14 @@ export const getPaceFBImpact = () => {
 
 // ── Tee Sheet ─────────────────────────────────────────────────
 
+/** @returns {TeeSheetRow[]} */
 export const getTodayTeeSheet = () => {
   if (_d?.todayTeeSheet) return _d.todayTeeSheet;
   if (!shouldUseStatic('tee-sheet')) return [];
   return todayTeeSheet;
 };
 
+/** @returns {TeeSheetSummary} */
 export const getTeeSheetSummary = () => {
   if (_d?.teeSheetSummary) return _d.teeSheetSummary;
   if (!shouldUseStatic('tee-sheet')) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };

@@ -7,6 +7,41 @@ import { weatherDaily as weatherData } from '../data/weather';
 import { shouldUseStatic, isGuidedMode, isSourceLoaded } from './demoGate';
 import { apiFetch } from './apiClient';
 
+/**
+ * @typedef {Object} HourlyForecastRow
+ * @property {string} time                     ISO timestamp
+ * @property {number} temp
+ * @property {number} wind
+ * @property {number} gusts
+ * @property {number} precipProb               0-100
+ * @property {string} conditions
+ * @property {string} conditionsText
+ */
+
+/**
+ * @typedef {Object} DailyForecastRow
+ * @property {string} date                     YYYY-MM-DD
+ * @property {number} [high]                   Canonical shape — both API and static fallback emit `high`/`low`.
+ * @property {number} [low]
+ * @property {number} wind
+ * @property {number} [gusts]
+ * @property {number} [precipProb]             0-100
+ * @property {string} [conditions]
+ * @property {string} [conditionsText]
+ * @property {string} [condition]              Static fallback field (see src/data/weather.js)
+ * @property {number} [humidity]
+ * @property {boolean} [rain]                  Static fallback field
+ * @property {string} [description]            Static fallback field
+ */
+
+/**
+ * @typedef {Object} WeatherAlert
+ * @property {string} type
+ * @property {'MINOR'|'MODERATE'|'SEVERE'|'EXTREME'|string} severity
+ * @property {string} headline
+ * @property {string} description
+ */
+
 let _current = null;
 let _forecast = null;
 
@@ -170,6 +205,7 @@ export const _init = async () => {
 
 // ─── Hourly Forecast ──────────────────────────────────────
 
+/** @returns {HourlyForecastRow[]} */
 export function getHourlyForecast() {
   if (isWeatherGated()) return [];
   if (_forecast?.hourly?.length) return _forecast.hourly;
@@ -179,6 +215,10 @@ export function getHourlyForecast() {
 
 // ─── Daily Forecast (up to 5 days) ───────────────────────
 
+/**
+ * @param {number} [numDays]
+ * @returns {DailyForecastRow[]}
+ */
 export function getDailyForecast(numDays = 5) {
   if (isWeatherGated()) return [];
   if (_forecast?.daily?.length) return _forecast.daily.slice(0, numDays);
@@ -187,7 +227,7 @@ export function getDailyForecast(numDays = 5) {
   const startIdx = weatherData.findIndex(d => d.date === '2026-01-17');
   if (startIdx >= 0) {
     return weatherData.slice(startIdx, startIdx + numDays).map(d => ({
-      date: d.date, tempHigh: d.tempHigh, tempLow: d.tempHigh - 15,
+      date: d.date, high: d.tempHigh, low: d.tempHigh - 15,
       condition: d.condition, wind: d.wind, rain: d.rain || false,
       description: d.condition === 'sunny' ? 'Clear skies' : d.condition === 'rainy' ? 'Rain expected' : d.condition === 'windy' ? 'Wind advisory' : 'Partly cloudy',
     }));
@@ -197,6 +237,7 @@ export function getDailyForecast(numDays = 5) {
 
 // ─── Tomorrow's Forecast ──────────────────────────────────
 
+/** @returns {DailyForecastRow|null} */
 export function getTomorrowForecast() {
   const daily = getDailyForecast(2);
   return daily.length > 1 ? daily[1] : daily[0] || null;
@@ -204,6 +245,7 @@ export function getTomorrowForecast() {
 
 // ─── Weather Alerts ───────────────────────────────────────
 
+/** @returns {WeatherAlert[]} */
 export function getWeatherAlerts() {
   if (isWeatherGated()) return [];
   if (_forecast?.alerts?.length) return _forecast.alerts;
@@ -218,14 +260,17 @@ export function getWeatherAlerts() {
 
 // ─── Forecast metadata ───────────────────────────────────
 
+/** @returns {string} */
 export function getWeatherSource() {
   return _forecast?.source || 'static';
 }
 
+/** @returns {boolean} */
 export function isWeatherStale() {
   return _forecast?.stale || false;
 }
 
+/** @returns {string|null} */
 export function getWeatherLocation() {
   if (_forecast?.location) return _forecast.location;
   try {

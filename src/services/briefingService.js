@@ -8,6 +8,87 @@ import { getStaffingSummary, getComplaintCorrelation } from './staffingService';
 import { getCancellationSummary, getWaitlistSummary }  from './waitlistService';
 import { cancellationProbabilities } from '../data/pipeline';
 
+/**
+ * @typedef {Object} AtRiskTeetime
+ * @property {string} memberId
+ * @property {string} name
+ * @property {string} time                     Display time "9:20 AM"
+ * @property {number} [score]                  0-100 (DEMO_BRIEFING uses `health`)
+ * @property {number} [health]                 DEMO_BRIEFING fallback field (score equivalent)
+ * @property {string} [archetype]
+ * @property {string} [topRisk]
+ */
+
+/**
+ * @typedef {Object} TopCancellationRiskMember
+ * @property {string} memberId
+ * @property {string} memberName
+ * @property {number} probability              0-100 (integer %)
+ * @property {number} predictedDaysUntilCancellation
+ * @property {string} recommendedAction
+ * @property {'high'|'medium'|'low'} urgency
+ */
+
+/**
+ * @typedef {Object} CancellationRiskBlock
+ * @property {number} highRiskBookings
+ * @property {number} totalRevAtRisk
+ * @property {string} driverSummary
+ * @property {string} suggestedAction
+ * @property {number} estimatedRevenueSaved
+ * @property {TopCancellationRiskMember[]} topAtRiskMembers
+ * @property {{title:string,subtitle:string,items:TopCancellationRiskMember[]}} [briefingCard]
+ */
+
+/**
+ * @typedef {Object} KeyMetrics
+ * @property {number} atRiskMembers
+ * @property {number} openComplaints
+ * @property {number} [monthlyRevenue]
+ * @property {number} [revenueVsPlan]
+ * @property {number} [understaffedDays]
+ */
+
+/**
+ * @typedef {Object} YesterdayRecap
+ * @property {string} date
+ * @property {number} revenue
+ * @property {number} revenueVsPlan
+ * @property {number} revenueVsLastWeek
+ * @property {number} rounds
+ * @property {number} roundsVsLastWeek
+ * @property {string[]} incidents
+ * @property {string} weather
+ * @property {boolean} isUnderstaffed
+ */
+
+/**
+ * @typedef {Object} TodayRisks
+ * @property {string} weather
+ * @property {number} tempHigh
+ * @property {number} wind
+ * @property {string} forecast
+ * @property {AtRiskTeetime[]} atRiskTeetimes
+ * @property {Array<Object>} staffingGaps
+ * @property {boolean} fullyStaffed
+ * @property {CancellationRiskBlock} [cancellationRisk]
+ * @property {Object} [demandForecast]
+ */
+
+/**
+ * @typedef {Object} DailyBriefing
+ * @property {string} [currentDate]
+ * @property {{roundsToday:number,utilization:number}} [teeSheet]
+ * @property {YesterdayRecap|null} yesterdayRecap
+ * @property {TodayRisks} todayRisks
+ * @property {Array<{playbookId:string,title:string,status:string,urgency:string,reason:string}>} [pendingActions]
+ * @property {KeyMetrics} keyMetrics
+ * @property {Object} comparisons
+ * @property {TopCancellationRiskMember[]} topCancellationRiskMembers
+ * @property {Array<Object>} [quickWins]
+ * @property {Object} [waitlistIntel]
+ */
+
 let _d = null;
 
 export const _init = async () => {
@@ -82,6 +163,10 @@ export const DEMO_BRIEFING = {
   topCancellationRiskMembers: [],
 };
 
+/**
+ * @param {string} [date]
+ * @returns {DailyBriefing}
+ */
 export const getDailyBriefing = (date = '2026-01-17') => {
   if (_d) return _d;
   if (!shouldUseStatic('tee-sheet')) return EMPTY_BRIEFING;

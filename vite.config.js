@@ -24,10 +24,7 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (
-              id.includes('/react/') ||
-              id.includes('/react-dom/')
-            ) {
+            if (id.includes('/react/') || id.includes('/react-dom/')) {
               return 'vendor-react';
             }
             if (id.includes('/recharts/') || id.includes('/d3-')) {
@@ -38,20 +35,10 @@ export default defineConfig({
             }
             return undefined;
           }
-
-          if (id.includes('/src/landing/')) {
-            return 'landing';
-          }
-
-          // Split feature pages into separate chunks for lazy loading
-          if (id.includes('/src/features/board-report/')) return 'page-board-report';
-          if (id.includes('/src/features/admin/')) return 'page-admin';
-          if (id.includes('/src/features/playbooks/')) return 'page-playbooks';
-          if (id.includes('/src/features/integrations/')) return 'page-integrations';
-          if (id.includes('/src/features/member-profile/')) return 'page-members';
-          if (id.includes('/src/features/member-health/')) return 'page-members';
-          if (id.includes('/src/mobile/')) return 'mobile';
-
+          // Everything under src/ is auto-split by Vite via React.lazy boundaries
+          // in App.jsx and main.jsx. Directory-based buckets previously forced
+          // page-members + mobile + page-admin + page-board-report into the
+          // initial preload graph and caused a mobile <-> page-members circular.
           return undefined;
         },
       },

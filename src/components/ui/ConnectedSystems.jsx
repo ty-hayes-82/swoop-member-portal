@@ -1,11 +1,13 @@
 // ConnectedSystems.jsx — integration status panel for Daily Briefing + Demo Mode
 
+// lastSync intentionally '—' — no service exposes per-system sync freshness yet.
+// See docs/operations/freshness-audit-2026-04-09.md (needs service support).
 const SYSTEMS = [
-  { name: 'Tee Sheet', role: 'Tee Sheet \u00B7 Golf Operations', icon: '\u26F3', colorCls: 'text-blue-light-500', lastSync: '4 min ago', records: '2,524 bookings' },
-  { name: 'POS', role: 'Food & Beverage \u00B7 Payments', icon: '\uD83C\uDF7D', colorCls: 'text-orange-500', lastSync: '2 min ago', records: '3,851 checks' },
-  { name: 'Member CRM', role: 'Member CRM \u00B7 Email', icon: '\u2605', colorCls: 'text-gray-600 dark:text-gray-400', lastSync: '8 min ago', records: '300 members' },
-  { name: 'Scheduling', role: 'Staff Scheduling', icon: '\uD83D\uDCC5', colorCls: 'text-blue-light-600', lastSync: '12 min ago', records: '701 shifts' },
-  { name: 'Analytics', role: 'Membership Management', icon: '\u25C9', colorCls: 'text-gray-600 dark:text-gray-400', lastSync: '6 min ago', records: '300 accounts' },
+  { name: 'Tee Sheet', role: 'Tee Sheet \u00B7 Golf Operations', icon: '\u26F3', colorCls: 'text-blue-light-500', lastSync: '\u2014', records: '2,524 bookings' },
+  { name: 'POS', role: 'Food & Beverage \u00B7 Payments', icon: '\uD83C\uDF7D', colorCls: 'text-orange-500', lastSync: '\u2014', records: '3,851 checks' },
+  { name: 'Member CRM', role: 'Member CRM \u00B7 Email', icon: '\u2605', colorCls: 'text-gray-600 dark:text-gray-400', lastSync: '\u2014', records: '300 members' },
+  { name: 'Scheduling', role: 'Staff Scheduling', icon: '\uD83D\uDCC5', colorCls: 'text-blue-light-600', lastSync: '\u2014', records: '701 shifts' },
+  { name: 'Analytics', role: 'Membership Management', icon: '\u25C9', colorCls: 'text-gray-600 dark:text-gray-400', lastSync: '\u2014', records: '300 accounts' },
 ];
 
 export default function ConnectedSystems({ compact = false }) {

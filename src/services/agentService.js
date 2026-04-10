@@ -1,6 +1,48 @@
 import { apiFetch } from './apiClient';
 import { shouldUseStatic } from './demoGate';
+import { logError } from '@/utils/logError';
 import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents';
+
+/**
+ * @typedef {Object} Agent
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {'active'|'learning'|'idle'|string} status
+ * @property {string} lastAction                ISO timestamp
+ * @property {number} accuracy                  0-100
+ * @property {string} accentColor
+ */
+
+/**
+ * @typedef {Object} AgentAction
+ * @property {string} id
+ * @property {string} [actionType]
+ * @property {string} [status]                  'pending' | 'approved' | 'dismissed'
+ * @property {string} [timestamp]
+ * @property {string} [description]
+ * @property {string} [impactMetric]
+ * @property {Array<{system:string}>} [signals]
+ * @property {string} [approvedAt]
+ * @property {string|null} [approvalAction]
+ * @property {string} [dismissedAt]
+ * @property {string} [dismissalReason]
+ */
+
+/**
+ * @typedef {Object} ThoughtLogEntry
+ * @property {string} [timestamp]
+ * @property {string} [message]
+ */
+
+/**
+ * @typedef {Object} AgentSummary
+ * @property {number} active
+ * @property {number} total
+ * @property {number} pending
+ * @property {number} approved
+ * @property {number} dismissed
+ */
 
 // Filter out decommissioned action types (waitlist removed from MVP)
 const MVP_EXCLUDED_ACTIONS = new Set(['WAITLIST_PRIORITY', 'WAITLIST_BACKFILL']);
@@ -27,12 +69,17 @@ const byNewest = (a, b) => {
   return tb - ta;
 };
 
+/** @returns {Agent[]} */
 export function getAgents() {
   if (_d?.agents) return _d.agents;
   if (!shouldUseStatic('agents')) return [];
   return agentDefinitions;
 }
 
+/**
+ * @param {string} id
+ * @returns {Agent|null}
+ */
 export function getAgentById(id) {
   const agents = getAgents();
   return agents.find((agent) => agent.id === id) ?? null;
@@ -60,6 +107,7 @@ function actionMatchesGates(action) {
   return true;
 }
 
+/** @returns {AgentAction[]} */
 export function getAllActions() {
   if (_d?.actions) return [...actionStore].sort(byNewest);
   // Actions reference members — require both agents AND members gates
@@ -67,10 +115,16 @@ export function getAllActions() {
   return [...actionStore].filter(actionMatchesGates).sort(byNewest);
 }
 
+/** @returns {AgentAction[]} */
 export function getPendingActions() {
   return getAllActions().filter((action) => action.status === 'pending');
 }
 
+/**
+ * @param {string} id
+ * @param {Object} [meta]
+ * @returns {AgentAction|null}
+ */
 export function approveAction(id, meta = {}) {
   actionStore = actionStore.map((action) =>
     action.id === id
@@ -87,10 +141,15 @@ export function approveAction(id, meta = {}) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ actionId: id, operation: 'approve', meta }),
-  }).catch((err) => { console.error('Failed to persist action approval:', err); });
+  }).catch((err) => { logError(err, { service: 'agentService', op: 'approveAction', actionId: id }); });
   return actionStore.find((action) => action.id === id) ?? null;
 }
 
+/**
+ * @param {string} id
+ * @param {Object} [meta]
+ * @returns {AgentAction|null}
+ */
 export function dismissAction(id, meta = {}) {
   actionStore = actionStore.map((action) =>
     action.id === id
@@ -107,14 +166,19 @@ export function dismissAction(id, meta = {}) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ actionId: id, operation: 'dismiss', meta }),
-  }).catch((err) => { console.error('Failed to persist action dismissal:', err); });
+  }).catch((err) => { logError(err, { service: 'agentService', op: 'dismissAction', actionId: id }); });
   return actionStore.find((action) => action.id === id) ?? null;
 }
 
+/**
+ * @param {string} agentId
+ * @returns {ThoughtLogEntry[]}
+ */
 export function getThoughtLog(agentId) {
   return agentThoughtLogs[agentId] ?? [];
 }
 
+/** @returns {AgentSummary} */
 export function getAgentSummary() {
   const agents = getAgents();
   const actions = getAllActions();
@@ -127,6 +191,7 @@ export function getAgentSummary() {
   };
 }
 
+/** @returns {AgentAction|null} */
 export function getTopPendingAction() {
   return getPendingActions()[0] ?? null;
 }

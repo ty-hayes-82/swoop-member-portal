@@ -82,7 +82,7 @@ function SwipeableActionCard({ action, onApprove, onDismiss, showHint }) {
           <button
             onClick={handleApprove}
             style={{
-              flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
+              flex: 1, padding: '13px', minHeight: '44px', borderRadius: '10px', border: 'none',
               background: '#12b76a', color: '#fff', fontSize: '13px', fontWeight: 700,
               cursor: 'pointer',
             }}
@@ -90,7 +90,7 @@ function SwipeableActionCard({ action, onApprove, onDismiss, showHint }) {
           <button
             onClick={handleDismiss}
             style={{
-              flex: 1, padding: '10px', borderRadius: '10px',
+              flex: 1, padding: '13px', minHeight: '44px', borderRadius: '10px',
               border: '1px solid #E5E7EB', background: '#fff',
               color: '#6B7280', fontSize: '13px', fontWeight: 600,
               cursor: 'pointer',
@@ -130,6 +130,7 @@ function CompletedCard({ action, expanded, onToggle }) {
         }}>{action.description}</span>
         <button
           onClick={(e) => { e.stopPropagation(); onToggle(); }}
+          aria-label={expanded ? 'Collapse action details' : 'Expand action details'}
           style={{
             width: '44px', height: '44px', display: 'flex',
             alignItems: 'center', justifyContent: 'center',
@@ -299,7 +300,14 @@ function BatchCard({ memberName, actions, onApproveAll, onDismissAll }) {
         </span>
         <button
           onClick={() => setExpanded(!expanded)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#9CA3AF', padding: '4px 8px' }}
+          aria-label={expanded ? 'Collapse batched actions' : 'Expand batched actions'}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '12px', color: '#9CA3AF',
+            minWidth: '44px', minHeight: '44px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '-10px -8px',
+          }}
         >{expanded ? '▲' : '▼'}</button>
       </div>
       {expanded && (
@@ -313,11 +321,11 @@ function BatchCard({ memberName, actions, onApproveAll, onDismissAll }) {
       )}
       <div style={{ display: 'flex', gap: '8px' }}>
         <button onClick={onApproveAll} style={{
-          flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
+          flex: 1, padding: '13px', minHeight: '44px', borderRadius: '10px', border: 'none',
           background: '#12b76a', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
         }}>Approve All</button>
         <button onClick={onDismissAll} style={{
-          flex: 1, padding: '10px', borderRadius: '10px',
+          flex: 1, padding: '13px', minHeight: '44px', borderRadius: '10px',
           border: '1px solid #E5E7EB', background: '#fff',
           color: '#6B7280', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
         }}>Dismiss All</button>
@@ -377,14 +385,14 @@ export default function ActionInboxScreen() {
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <div style={{ display: 'flex', gap: '8px', background: '#F3F4F6', borderRadius: '12px', padding: '3px' }}>
         <button onClick={() => setFilter('pending')} style={{
-          flex: 1, padding: '8px', borderRadius: '10px', border: 'none', fontSize: '13px', fontWeight: 600,
+          flex: 1, padding: '12px 8px', minHeight: '44px', borderRadius: '10px', border: 'none', fontSize: '13px', fontWeight: 600,
           background: filter === 'pending' ? '#fff' : 'transparent',
           color: filter === 'pending' ? '#0F0F0F' : '#6B7280',
           boxShadow: filter === 'pending' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
           cursor: 'pointer',
         }}>Pending ({pendingCount})</button>
         <button onClick={() => setFilter('done')} style={{
-          flex: 1, padding: '8px', borderRadius: '10px', border: 'none', fontSize: '13px', fontWeight: 600,
+          flex: 1, padding: '12px 8px', minHeight: '44px', borderRadius: '10px', border: 'none', fontSize: '13px', fontWeight: 600,
           background: filter === 'done' ? '#fff' : 'transparent',
           color: filter === 'done' ? '#0F0F0F' : '#6B7280',
           boxShadow: filter === 'done' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',

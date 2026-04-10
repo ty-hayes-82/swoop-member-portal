@@ -38,7 +38,7 @@ const STORIES = [
     accentColor: '#F59E0B',
     bgFrom: 'rgba(245,158,11,0.12)',
     bgTo: 'rgba(245,158,11,0.04)',
-    teaser: 'Email dropped → Golf dropped → Dining dropped. $32K/yr saved.',
+    teaser: 'Email dropped → Golf dropped → Dining dropped. $32K/yr saved.', // lint-no-hardcoded-dollars: allow — demo story teaser copy
     cta: 'View First Domino →',
   },
   {
@@ -52,7 +52,7 @@ const STORIES = [
     accentColor: '#60A5FA',
     bgFrom: 'rgba(96,165,250,0.12)',
     bgTo: 'rgba(96,165,250,0.04)',
-    teaser: '$9,580/mo F&B leakage decomposed. $31/slow round. Board approved.',
+    teaser: '$9,580/mo F&B leakage decomposed. $31/slow round. Board approved.', // lint-no-hardcoded-dollars: allow — demo story teaser copy
     cta: 'Open Revenue page →',
   },
 ];

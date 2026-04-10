@@ -10,7 +10,7 @@ import {
   updateWaitlistConfig as updateTSOConfig,
 } from '@/services/teeSheetOpsService';
 import { useToast } from '@/components/ui/Toast.jsx';
-import { apiFetch } from '@/services/apiClient';
+import { apiFetch, getClubId as getClientClubId } from '@/services/apiClient';
 import { trackAction, checkRecentOutreach } from '@/services/activityService';
 import { createGmailDraft } from '@/services/googleService';
 
@@ -351,7 +351,7 @@ export function AppProvider({ children }) {
       description: `Approved: ${actionItem?.description || id}`,
     });
 
-    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    const clubId = getClientClubId();
     if (!clubId) return;
 
     const execType = meta.executionType || 'staff_task';

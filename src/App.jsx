@@ -15,6 +15,8 @@ import DemoWizard from '@/components/ui/DemoWizard';
 import { MobileConversionBar } from '@/components/layout';
 import ActionsDrawer from '@/components/layout/ActionsDrawer';
 import SwoopLayout from '@/components/layout/SwoopLayout';
+import { getClubId as getClientClubId } from '@/services/apiClient';
+import { getDataMode } from '@/services/demoGate';
 
 // V3: Active features only — deleted features removed in Phase 5 cleanup
 // Lazy-load all pages except Today (initial view) for code-splitting
@@ -24,7 +26,7 @@ const MembersView = lazy(() => import('@/features/members/MembersView'));
 const BoardReport = lazy(() => import("@/features/board-report/BoardReport.jsx"));
 const AdminHub = lazy(() => import('@/features/admin/AdminHub'));
 const MemberProfilePage = lazy(() => import('@/features/member-profile/MemberProfilePage.jsx'));
-import MemberProfileDrawer from '@/features/member-profile/MemberProfileDrawer.jsx';
+const MemberProfileDrawer = lazy(() => import('@/features/member-profile/MemberProfileDrawer.jsx'));
 const IntegrationsPage = lazy(() => import('@/features/integrations/IntegrationsPage'));
 const CsvImportPage = lazy(() => import('@/features/integrations/CsvImportPage'));
 const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
@@ -91,9 +93,11 @@ function AppShell() {
   // Demo session cleanup: delete demo club data from DB on sign-out or page close
   useEffect(() => {
     const cleanupDemo = () => {
+      // Specific check (not getDataMode): only DB-backed ephemeral demo clubs
+      // (clubId prefix demo_*) need server-side cleanup on unload.
       try {
         const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
-        const clubId = localStorage.getItem('swoop_club_id');
+        const clubId = getClientClubId();
         if (user?.isDemoSession && clubId?.startsWith('demo_')) {
           // Use sendBeacon for reliability during page unload
           navigator.sendBeacon(`/api/club?clubId=${clubId}&cleanup=true`, '');
@@ -105,10 +109,11 @@ function AppShell() {
   }, []);
 
   const handleSignOut = () => {
+    // Specific check (not getDataMode): only DB-backed ephemeral demo clubs
+    // (clubId prefix demo_*) need server-side cleanup; static 'demo' id does not.
     try {
       const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
-      const clubId = localStorage.getItem('swoop_club_id');
-      // Clean up demo data from DB
+      const clubId = getClientClubId();
       if (user?.isDemoSession && clubId?.startsWith('demo_')) {
         fetch(`/api/club?clubId=${clubId}`, { method: 'DELETE', headers: { 'X-Demo-Club': clubId } }).catch(() => {});
       }
@@ -130,8 +135,8 @@ function AppShell() {
       {(() => {
         try {
           const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
-          const clubId = localStorage.getItem('swoop_club_id');
-          const isDemoSession = user?.isDemoSession || clubId === 'demo';
+          const clubId = getClientClubId();
+          const isDemoSession = getDataMode() !== 'live';
           return (
             <span>
               {user.name ? ` · ${user.name}` : ''}
@@ -168,7 +173,9 @@ function PortalApplication() {
       <NavigationProvider>
         <MemberProfileProvider>
           <AppShell />
-          <MemberProfileDrawer />
+          <Suspense fallback={null}>
+            <MemberProfileDrawer />
+          </Suspense>
           <DemoWizard />
         </MemberProfileProvider>
       </NavigationProvider>

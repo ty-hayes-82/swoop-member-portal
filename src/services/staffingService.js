@@ -5,6 +5,54 @@ import { shouldUseStatic } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { understaffedDays, feedbackRecords, feedbackSummary, shiftCoverage } from '@/data/staffing';
 
+/**
+ * @typedef {Object} UnderstaffedDay
+ * @property {string} date                     YYYY-MM-DD
+ * @property {string} outlet
+ * @property {number} revenueLoss              Dollars
+ * @property {number} scheduledStaff
+ * @property {number} requiredStaff
+ * @property {number} ticketTimeIncrease       0-1 fraction
+ * @property {number} complaintMultiplier
+ */
+
+/**
+ * @typedef {Object} ShiftCoverageRow
+ * @property {string} date
+ * @property {string} department
+ * @property {number} scheduled
+ * @property {number} required
+ * @property {number} gap
+ */
+
+/**
+ * @typedef {Object} FeedbackSummaryRow
+ * @property {string} category
+ * @property {number} count
+ * @property {number} avgSentiment             -1..1
+ * @property {number} unresolvedCount
+ */
+
+/**
+ * @typedef {Object} FeedbackRecord
+ * @property {string} date
+ * @property {number} sentiment                -1..1
+ * @property {string} status                   'resolved' | 'acknowledged' | 'open' | ...
+ * @property {string} category
+ * @property {string} memberId
+ * @property {string} memberName
+ * @property {boolean} isUnderstaffed
+ * @property {boolean} isUnderstaffedDay
+ */
+
+/**
+ * @typedef {Object} StaffingSummary
+ * @property {number} understaffedDaysCount
+ * @property {number} totalRevenueLoss
+ * @property {number} annualizedLoss
+ * @property {number} unresolvedComplaints
+ */
+
 let _d = null;
 const FALLBACK_UNDERSTAFFED_DAYS = [
   {
@@ -108,6 +156,7 @@ const sanitizeFeedbackRecords = (source) => {
   }));
 };
 
+/** @returns {UnderstaffedDay[]} */
 export const getUnderstaffedDays = () => {
   const real = _d?.understaffedDays;
   if (Array.isArray(real) && real.length) return sanitizeUnderstaffedDays(real);
@@ -115,12 +164,14 @@ export const getUnderstaffedDays = () => {
   if (!shouldUseStatic('complaints') || !shouldUseStatic('members')) return [];
   return sanitizeUnderstaffedDays(understaffedDays);
 };
+/** @returns {ShiftCoverageRow[]} */
 export const getShiftCoverage = () => {
   const real = _d?.shiftCoverage;
   if (Array.isArray(real) && real.length) return sanitizeShiftCoverage(real);
   if (!shouldUseStatic('complaints')) return [];
   return sanitizeShiftCoverage(shiftCoverage);
 };
+/** @returns {FeedbackSummaryRow[]} */
 export const getFeedbackSummary = () => {
   const real = _d?.feedbackSummary;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackSummary(real);
@@ -128,6 +179,7 @@ export const getFeedbackSummary = () => {
   if (!shouldUseStatic('complaints') || !shouldUseStatic('members')) return [];
   return sanitizeFeedbackSummary(feedbackSummary);
 };
+/** @returns {FeedbackRecord[]} */
 export const getComplaintCorrelation = () => {
   const real = _d?.feedbackRecords;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackRecords(real);
@@ -136,6 +188,7 @@ export const getComplaintCorrelation = () => {
   return sanitizeFeedbackRecords(feedbackRecords);
 };
 
+/** @returns {StaffingSummary} */
 export const getStaffingSummary = () => {
   if (_d?.staffingSummary) {
     const days = getUnderstaffedDays();

@@ -155,7 +155,7 @@ export default function IntegrationsPage() {
   const weatherDollars = leakage?.WEATHER_LOSS || 420;
   const totalLeakage = leakage?.TOTAL || 9580;
   const memberCrmCombo = COMBOS.find((c) => c.id === 'member-crm-pos');
-  const memberCrmKpi = memberCrmCombo?.kpi?.value || '$128K';
+  const memberCrmKpi = memberCrmCombo?.kpi?.value || '$128K'; // lint-no-hardcoded-dollars: allow — COMBOS KPI fallback (data lives in src/data/integrations.js)
 
   const unlockCards = useMemo(() => ([
     {

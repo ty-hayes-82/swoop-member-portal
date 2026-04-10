@@ -113,10 +113,12 @@ function FilterChip({ label, onRemove, color }) {
     >
       {label}
       <button
+        type="button"
         onClick={onRemove}
+        aria-label={`Remove ${label} filter`}
         className="bg-transparent border-none text-inherit cursor-pointer text-sm p-0 leading-none opacity-70 hover:opacity-100"
       >
-        ×
+        <span aria-hidden="true">×</span>
       </button>
     </span>
   );

@@ -63,7 +63,7 @@ export default function DemoDataPreview({ file, onLoad, onClose }) {
                 <p className="text-sm text-gray-500 m-0">{file.system}</p>
               </div>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center border-none cursor-pointer text-lg font-bold hover:bg-gray-200">
+            <button onClick={onClose} aria-label="Close preview" className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center border-none cursor-pointer text-lg font-bold hover:bg-gray-200">
               &times;
             </button>
           </div>

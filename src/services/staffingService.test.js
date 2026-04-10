@@ -1,4 +1,17 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Wave 2 (SHIP_PLAN §2.1) — mock apiClient for _init() tests.
+const apiFetchMock = vi.fn();
+vi.mock('./apiClient', () => ({
+  apiFetch: (...args) => apiFetchMock(...args),
+  getClubId: () => null,
+}));
+
+async function freshStaffing() {
+  vi.resetModules();
+  return import('./staffingService');
+}
+
 import {
   getUnderstaffedDays,
   getShiftCoverage,
@@ -82,5 +95,49 @@ describe('staffingService', () => {
       // gap is non-negative and equals max(0, required - scheduled) unless overridden
       expect(shift.gap).toBeGreaterThanOrEqual(0);
     });
+  });
+});
+
+describe('staffingService — _init + mock contract', () => {
+  beforeEach(() => { apiFetchMock.mockReset(); });
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  it('_init() fetches /api/staffing and hydrates getUnderstaffedDays()', async () => {
+    apiFetchMock.mockResolvedValueOnce({
+      understaffedDays: [
+        { date: '2026-02-01', outlet: 'Grill Room', revenueLoss: 2100, scheduledStaff: 3, requiredStaff: 6 },
+      ],
+      staffingSummary: { understaffedDaysCount: 1, totalRevenueLoss: 2100, annualizedLoss: 25200, unresolvedComplaints: 4 },
+    });
+
+    const svc = await freshStaffing();
+    await svc._init();
+
+    expect(apiFetchMock).toHaveBeenCalledWith('/api/staffing');
+    const days = svc.getUnderstaffedDays();
+    expect(days).toHaveLength(1);
+    expect(days[0]).toMatchObject({ date: '2026-02-01', revenueLoss: 2100 });
+
+    const summary = svc.getStaffingSummary();
+    expect(summary.understaffedDaysCount).toBe(1);
+    expect(summary.totalRevenueLoss).toBe(2100);
+    expect(summary.unresolvedComplaints).toBe(4);
+  });
+
+  it('getUnderstaffedDays() pre-_init returns static demo data', async () => {
+    const svc = await freshStaffing();
+    const days = svc.getUnderstaffedDays();
+    expect(days.length).toBeGreaterThan(0);
+    expect(apiFetchMock).not.toHaveBeenCalled();
+  });
+
+  it('_init() swallows apiFetch rejection and leaves the service usable', async () => {
+    apiFetchMock.mockRejectedValueOnce(new Error('network boom'));
+    const svc = await freshStaffing();
+    await expect(svc._init()).resolves.toBeUndefined();
+
+    // Static fallback still usable.
+    expect(svc.getUnderstaffedDays().length).toBeGreaterThan(0);
+    expect(svc.getStaffingSummary().totalRevenueLoss).toBeGreaterThan(0);
   });
 });

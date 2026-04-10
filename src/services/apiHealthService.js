@@ -31,6 +31,54 @@
  * without credentials), so we use raw fetch and never send a Bearer token.
  */
 
+/**
+ * @typedef {Object} HealthIntegrationWeather
+ * @property {'ok'|'stale'|'unknown'} status
+ * @property {string|null} lastSync            ISO
+ * @property {number|null} ageMin
+ */
+
+/**
+ * @typedef {Object} HealthIntegrationAudit
+ * @property {'ok'|'stale'|'unknown'} status
+ * @property {number|null} rows
+ * @property {string|null} oldestRow           ISO
+ */
+
+/**
+ * @typedef {Object} HealthSnapshot
+ * @property {'ok'|'degraded'} status
+ * @property {string} timestamp                ISO
+ * @property {string} version
+ * @property {'ok'|'fail'} db
+ * @property {number|null} dbLatencyMs
+ * @property {number} uptimeSec
+ * @property {string} node
+ * @property {number} responseTimeMs
+ * @property {{weather?:HealthIntegrationWeather,audit?:HealthIntegrationAudit}} integrations
+ */
+
+/**
+ * @typedef {Object} HealthRollupIntegration
+ * @property {string} name
+ * @property {string} key
+ * @property {string} status
+ * @property {string|null} [lastSync]
+ * @property {number|null} [ageMin]
+ * @property {number|null} [rows]
+ * @property {string|null} [oldestRow]
+ * @property {string} badge
+ * @property {string} hint
+ */
+
+/**
+ * @typedef {Object} HealthRollup
+ * @property {'ok'|'degraded'|'unknown'} overall
+ * @property {{status:string,latencyMs:number|null}} db
+ * @property {HealthRollupIntegration[]} integrations
+ * @property {string|null} fetchedAt
+ */
+
 const HEALTH_PATH = '/api/health';
 
 // Module-level cache so multiple components rendering on the same page
@@ -42,6 +90,9 @@ const CACHE_TTL_MS = 30_000;
 /**
  * Fetch the current health snapshot. Returns null on network failure
  * (the endpoint is allowed to be unreachable; we never throw).
+ *
+ * @param {{forceRefresh?:boolean}} [options]
+ * @returns {Promise<HealthSnapshot|null>}
  */
 export async function getHealthSnapshot({ forceRefresh = false } = {}) {
   const now = Date.now();
@@ -78,6 +129,8 @@ export async function getHealthSnapshot({ forceRefresh = false } = {}) {
  *
  * `badge` is a one-letter sigil suitable for compact UI rendering.
  * `hint` is a short human-readable line explaining the current state.
+ *
+ * @returns {Promise<HealthRollup>}
  */
 export async function getHealthRollup() {
   const snap = await getHealthSnapshot();

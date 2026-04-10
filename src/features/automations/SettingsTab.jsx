@@ -242,14 +242,15 @@ export default function SettingsTab() {
                   className="text-xs font-semibold text-gray-700 dark:text-gray-300 bg-transparent border-none outline-none flex-1"
                 />
                 <button
+                  type="button"
+                  aria-label="Remove example"
                   onClick={() => {
                     const next = settings.examples.filter((_, j) => j !== i);
                     update('examples', next);
                   }}
                   className="text-xs text-gray-400 hover:text-red-500 cursor-pointer bg-transparent border-none p-1"
-                  title="Remove example"
                 >
-                  &times;
+                  <span aria-hidden="true">&times;</span>
                 </button>
               </div>
               <textarea
@@ -282,6 +283,10 @@ export default function SettingsTab() {
         </p>
         <div className="flex items-center gap-3 mb-3">
           <button
+            type="button"
+            role="switch"
+            aria-checked={settings.autoApproveEnabled}
+            aria-label="Toggle auto-approve"
             onClick={() => update('autoApproveEnabled', !settings.autoApproveEnabled)}
             className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${
               settings.autoApproveEnabled ? 'bg-brand-500' : 'bg-gray-300 dark:bg-gray-600'

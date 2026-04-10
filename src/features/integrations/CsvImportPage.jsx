@@ -15,6 +15,71 @@ import {
   autoMapColumns,
   getImportTypeConfig,
 } from '@/config/jonasMapping';
+import { getFullRoster } from '@/services/memberService';
+import { useAuth } from '@/context/AuthContext';
+
+// § 1.3 trust boundary — CSV import is a privileged operation that mutates
+// tenant data. Only GMs, club admins, and swoop_admin should ever see the UI.
+const IMPORT_ALLOWED_ROLES = new Set(['gm', 'admin', 'swoop_admin']);
+
+// Client-side dry-run diff. Returns { totalRows, toCreate, toUpdate, rejected: [{row, reason}] }
+function buildImportPreview({ parsedRows, mapping, importType, csvHeaders }) {
+  const config = getImportTypeConfig(importType);
+  const reverseMap = {};
+  for (const [csvH, swoopF] of Object.entries(mapping)) {
+    if (swoopF) reverseMap[swoopF] = csvH;
+  }
+  const requiredFields = (config?.fields || []).filter(f => f.required).map(f => f.swoop);
+  const dateFields = (config?.fields || [])
+    .filter(f => /date|birthday|tee_time/i.test(f.swoop))
+    .map(f => f.swoop);
+  const unknownColumns = csvHeaders.filter(h => !mapping[h]);
+
+  // Only members diff against roster; other types treat all as "create"
+  const roster = importType === 'members' ? getFullRoster() : [];
+  const rosterByExt = new Map();
+  const rosterByEmail = new Map();
+  for (const m of roster) {
+    if (m.external_id) rosterByExt.set(String(m.external_id).toLowerCase(), m);
+    if (m.email) rosterByEmail.set(String(m.email).toLowerCase(), m);
+  }
+
+  let toCreate = 0;
+  let toUpdate = 0;
+  const rejected = [];
+  parsedRows.forEach((row, idx) => {
+    const mapped = {};
+    for (const [swoopField, csvHeader] of Object.entries(reverseMap)) {
+      mapped[swoopField] = row[csvHeader] ?? '';
+    }
+    const missing = requiredFields.filter(f => !mapped[f] || String(mapped[f]).trim() === '');
+    if (missing.length) {
+      rejected.push({ row: idx + 2, reason: `missing required: ${missing.join(', ')}` });
+      return;
+    }
+    const badDates = dateFields.filter(f => mapped[f] && isNaN(Date.parse(mapped[f])));
+    if (badDates.length) {
+      rejected.push({ row: idx + 2, reason: `invalid date: ${badDates.join(', ')}` });
+      return;
+    }
+    if (importType === 'members') {
+      const ext = mapped.external_id && String(mapped.external_id).toLowerCase();
+      const email = mapped.email && String(mapped.email).toLowerCase();
+      const match = (ext && rosterByExt.get(ext)) || (email && rosterByEmail.get(email));
+      if (match) toUpdate++; else toCreate++;
+    } else {
+      toCreate++;
+    }
+  });
+
+  return {
+    totalRows: parsedRows.length,
+    toCreate,
+    toUpdate,
+    rejected,
+    unknownColumns,
+  };
+}
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -499,28 +564,88 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
 
 // ── Step 3: Import ───────────────────────────────────────────────────────────
 
-function StepImport({ importType, mapping, parsedRows, result, error, uploading, onImport, onReset }) {
+function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error, uploading, onImport, onReset }) {
   const config = getImportTypeConfig(importType);
+  const preview = useMemo(
+    () => buildImportPreview({ parsedRows, mapping, importType, csvHeaders }),
+    [parsedRows, mapping, importType, csvHeaders],
+  );
+  const [reviewed, setReviewed] = useState(false);
 
   return (
     <div>
       {!result && !error && !uploading && (
-        <div className="text-center py-8">
-          <div className="text-4xl mb-3">🚀</div>
-          <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">Ready to Import</h2>
-          <p className="text-sm text-gray-500 mb-1">
-            <strong>{parsedRows.length.toLocaleString()}</strong> rows of <strong>{config?.label}</strong> data
+        <div className="py-4">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-1 text-center">Dry-Run Preview</h2>
+          <p className="text-xs text-gray-400 mb-4 text-center">
+            Nothing has been sent to the server yet. Review the changes below before importing.
           </p>
-          <p className="text-xs text-gray-400 mb-6">
-            {Object.values(mapping).filter(Boolean).length} columns mapped to Swoop fields
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+            <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 text-center">
+              <div className="text-xl font-bold text-gray-800 dark:text-white/90">{preview.totalRows.toLocaleString()}</div>
+              <div className="text-[10px] text-gray-400">Total rows</div>
+            </div>
+            <div className="p-3 rounded-lg bg-success-50 dark:bg-success-500/10 text-center">
+              <div className="text-xl font-bold text-success-600 dark:text-success-400">{preview.toCreate.toLocaleString()}</div>
+              <div className="text-[10px] text-gray-400">To create</div>
+            </div>
+            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-center">
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{preview.toUpdate.toLocaleString()}</div>
+              <div className="text-[10px] text-gray-400">To update</div>
+            </div>
+            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-center">
+              <div className="text-xl font-bold text-red-600 dark:text-red-400">{preview.rejected.length.toLocaleString()}</div>
+              <div className="text-[10px] text-gray-400">Rejected</div>
+            </div>
+          </div>
+
+          {preview.unknownColumns.length > 0 && (
+            <div className="mb-3 p-2 rounded-lg bg-yellow-50 border border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/30 text-xs text-yellow-700 dark:text-yellow-400">
+              <strong>{preview.unknownColumns.length}</strong> unmapped column{preview.unknownColumns.length > 1 ? 's' : ''} (will be ignored): {preview.unknownColumns.slice(0, 6).join(', ')}{preview.unknownColumns.length > 6 ? '…' : ''}
+            </div>
+          )}
+
+          {preview.rejected.length > 0 && (
+            <div className="mb-3 rounded-lg border border-red-200 dark:border-red-500/30 max-h-40 overflow-y-auto">
+              <div className="px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-xs font-semibold text-red-700 dark:text-red-400 sticky top-0">
+                Rejected rows
+              </div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 divide-y divide-gray-100 dark:divide-gray-800">
+                {preview.rejected.slice(0, 25).map((r, i) => (
+                  <div key={i} className="px-3 py-1">Row {r.row}: <span className="text-red-500">{r.reason}</span></div>
+                ))}
+                {preview.rejected.length > 25 && (
+                  <div className="px-3 py-1 text-gray-400">…and {preview.rejected.length - 25} more</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs text-gray-400 mb-4 text-center">
+            {config?.label} &middot; {Object.values(mapping).filter(Boolean).length} columns mapped
           </p>
-          <button
-            onClick={onImport}
-            className="px-8 py-3 rounded-lg font-bold text-sm text-white cursor-pointer"
-            style={{ background: '#ff8b00' }}
-          >
-            Start Import
-          </button>
+
+          <div className="flex gap-3">
+            {!reviewed ? (
+              <button
+                onClick={() => setReviewed(true)}
+                className="flex-1 py-3 rounded-lg font-bold text-sm text-white cursor-pointer"
+                style={{ background: '#ff8b00' }}
+              >
+                Review &amp; Continue
+              </button>
+            ) : (
+              <button
+                onClick={onImport}
+                disabled={preview.toCreate + preview.toUpdate === 0}
+                className="flex-1 py-3 rounded-lg font-bold text-sm text-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: '#ff8b00' }}
+              >
+                Start Import ({(preview.toCreate + preview.toUpdate).toLocaleString()} rows)
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -625,7 +750,22 @@ function StepImport({ importType, mapping, parsedRows, result, error, uploading,
 // ── Main wizard ──────────────────────────────────────────────────────────────
 
 export default function CsvImportPage() {
+  const { user } = useAuth();
   const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+
+  // § 1.3 client-side role gate — keep non-privileged users out of the wizard
+  // entirely so they can't see vendor templates or trigger a 403 by accident.
+  // Server-side withAuth({ roles }) is the actual enforcement.
+  if (!user || !IMPORT_ALLOWED_ROLES.has(user.role)) {
+    return (
+      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+        <h1 className="text-xl font-bold text-gray-800 dark:text-white/90 mb-2">Import Data</h1>
+        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-300">
+          CSV import is restricted to General Managers and club admins. Contact your GM if you need a dataset loaded.
+        </div>
+      </div>
+    );
+  }
 
   // Wizard state
   const [step, setStep] = useState(0);
@@ -812,6 +952,7 @@ export default function CsvImportPage() {
           importType={importType}
           mapping={mapping}
           parsedRows={parsedRows}
+          csvHeaders={csvHeaders}
           result={result}
           error={error}
           uploading={uploading}

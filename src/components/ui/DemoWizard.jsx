@@ -47,6 +47,7 @@ export default function DemoWizard() {
           </div>
           <button
             onClick={() => setWizardOpen(false)}
+            aria-label="Minimize demo wizard"
             className="w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center border-none cursor-pointer text-xs font-bold hover:bg-white/30"
           >
             —

@@ -115,7 +115,7 @@ export default function EmailTab() {
         title={`${decaying.length} members in the pre-departure window \u2014 activate intervention now`}
         description="These members are showing the same email decay pattern that preceded 9 of 11 resignations this year. Personal outreach within 2 weeks has a 67% save rate."
         playbookName="Declining Member Intervention"
-        impact="$24K/mo"
+        impact="$24K/mo" // lint-no-hardcoded-dollars: allow — playbook impact teaser
         memberCount={decaying.length}
         buttonLabel="Activate Engagement Decay Intervention"
         buttonColor="#dc2626"

@@ -8,7 +8,6 @@ export default function CockpitScreen() {
   const { pendingAgentCount, inbox } = useApp();
   const { navigateTab, openMember } = useMobileNav();
   const [loaded, setLoaded] = useState(false);
-  const [lastUpdated] = useState(() => new Date());
 
   const summary = getMemberSummary();
   const agentSummary = getAgentSummary();
@@ -38,13 +37,9 @@ export default function CockpitScreen() {
 
   const complaints = atRisk.filter(m => m.topRisk?.toLowerCase().includes('complaint') || m.topRisk?.toLowerCase().includes('unresolved')).length;
 
-  // Format last updated
-  const updatedText = useMemo(() => {
-    const diff = Math.floor((Date.now() - lastUpdated.getTime()) / 60000);
-    if (diff < 1) return 'Updated just now';
-    if (diff < 60) return `Updated ${diff} min ago`;
-    return `Updated ${Math.floor(diff / 60)}h ago`;
-  }, [lastUpdated]);
+  // No service exposes a real "last refreshed" timestamp for the mobile cockpit yet.
+  // See docs/operations/freshness-audit-2026-04-09.md.
+  const updatedText = 'Updated —';
 
   if (!loaded) {
     return (

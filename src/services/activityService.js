@@ -4,6 +4,7 @@
  * The DB table serves as the universal action log for future integrations.
  */
 import { apiFetch } from './apiClient';
+import { logError } from '@/utils/logError';
 
 function getActorName() {
   try {
@@ -39,7 +40,7 @@ export function trackAction({
       description: description ?? null,
       meta: meta ?? {},
     }),
-  }).catch((err) => { console.error('Failed to log activity:', err); });
+  }).catch((err) => { logError(err, { service: 'activityService', op: 'trackAction', actionType }); });
 
   // Also log outreach events to localStorage for member profile display
   if (memberId && ['call', 'email', 'sms', 'comp', 'outreach'].includes(actionType)) {

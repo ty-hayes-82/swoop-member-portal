@@ -29,7 +29,7 @@ export default function SettingsScreen() {
               <button
                 onClick={handleNotifyMe}
                 style={{
-                  padding: '6px 12px', borderRadius: '8px', border: '1px solid #F3922D',
+                  padding: '10px 14px', minHeight: '44px', borderRadius: '8px', border: '1px solid #F3922D',
                   background: '#fff', color: '#F3922D', fontSize: '12px', fontWeight: 600,
                   cursor: 'pointer',
                 }}
@@ -39,7 +39,7 @@ export default function SettingsScreen() {
         />
         <SettingsRow icon="🖥️" label="Open Desktop Version" sub="Full analytics, board reports, AI agents" action={
           <button onClick={() => { window.location.hash = '#/today'; }} style={{
-            padding: '6px 12px', borderRadius: '8px', border: '1px solid #E5E7EB',
+            padding: '10px 14px', minHeight: '44px', borderRadius: '8px', border: '1px solid #E5E7EB',
             background: '#fff', color: '#374151', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
           }}>Open</button>
         } />

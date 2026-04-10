@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useNavigationContext } from "@/context/NavigationContext";
 import { NAV_ITEMS } from "@/config/navigation";
+import { useCurrentClub } from "@/hooks/useCurrentClub";
 
 const SwoopHeader = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -19,13 +20,12 @@ const SwoopHeader = () => {
 
   const currentNav = NAV_ITEMS.find((item) => item.key === currentRoute) || NAV_ITEMS[0];
 
-  // Get user info from localStorage
+  // Get user info from auth context; fall back to 'demo' when unauthenticated.
+  const clubId = useCurrentClub() || "demo";
   let userName = "Club Manager";
-  let clubId = "demo";
   try {
     const user = JSON.parse(localStorage.getItem("swoop_auth_user") || "{}");
     if (user.name) userName = user.name;
-    clubId = localStorage.getItem("swoop_club_id") || "demo";
   } catch {
     // ignore
   }

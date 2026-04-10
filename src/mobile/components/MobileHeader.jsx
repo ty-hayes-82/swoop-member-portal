@@ -20,9 +20,12 @@ export default function MobileHeader() {
       </div>
       <button
         onClick={() => navigateTab('inbox')}
+        aria-label="Open action inbox"
         style={{
           position: 'relative', background: 'none', border: 'none',
           cursor: 'pointer', padding: '8px', borderRadius: '50%',
+          minWidth: '44px', minHeight: '44px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
           WebkitTapHighlightColor: 'transparent',
         }}
       >
