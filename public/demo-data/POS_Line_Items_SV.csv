@@ -7408,3 +7408,101 @@ li_007406,chk_01916,Tuna Tartare,food,22,1,22,0,0,2026-02-03T14:07:00.000Z
 li_007407,chk_01916,Garden Salad,food,12,1,12,0,0,2026-02-03T14:10:00.000Z
 li_007408,chk_01916,Wings Basket,food,16,1,16,0,0,2026-02-03T14:13:00.000Z
 li_007409,chk_01916,Grilled Salmon,food,32,1,32,0,0,2026-02-03T14:16:00.000Z
+li_007410,chk_01920,Club Sandwich,food,18,1,18,0,0,2025-11-05T12:10:00.000Z
+li_007411,chk_01920,Arnold Palmer,beverage,6,1,6,0,0,2025-11-05T12:10:00.000Z
+li_007412,chk_01920,Grilled Salmon,food,32,1,32,0,0,2025-11-05T12:13:00.000Z
+li_007413,chk_01920,Lobster Bisque,food,16,1,16,0,0,2025-11-05T12:16:00.000Z
+li_007414,chk_01920,Filet Mignon,food,52,1,52,0,0,2025-11-05T12:19:00.000Z
+li_007415,chk_01920,Cabernet Glass,beverage,16,1,16,0,0,2025-11-05T12:22:00.000Z
+li_007416,chk_01920,Cappuccino,beverage,6,1,6,0,0,2025-11-05T12:25:00.000Z
+li_007417,chk_01920,Sparkling Water,beverage,4,2,8,0,0,2025-11-05T12:10:00.000Z
+li_007430,chk_01921,Club Sandwich,food,18,1,18,0,0,2025-11-12T12:13:00.000Z
+li_007431,chk_01921,Arnold Palmer,beverage,6,1,6,0,0,2025-11-12T12:13:00.000Z
+li_007432,chk_01921,Grilled Chicken,food,19,1,19,0,0,2025-11-12T12:16:00.000Z
+li_007433,chk_01921,Filet Mignon,food,52,1,52,0,0,2025-11-12T12:19:00.000Z
+li_007434,chk_01921,Cabernet Glass,beverage,16,2,32,0,0,2025-11-12T12:22:00.000Z
+li_007435,chk_01921,Lobster Bisque,food,16,1,16,0,0,2025-11-12T12:25:00.000Z
+li_007436,chk_01921,Sparkling Water,beverage,4,2,8,0,0,2025-11-12T12:13:00.000Z
+li_007437,chk_01921,Wedge Salad,food,14,1,14,0,0,2025-11-12T12:16:00.000Z
+li_007450,chk_01922,Club Sandwich,food,18,1,18,0,0,2025-11-19T12:08:00.000Z
+li_007451,chk_01922,Sparkling Water,beverage,4,1,4,0,0,2025-11-19T12:08:00.000Z
+li_007452,chk_01922,Grilled Salmon,food,32,1,32,0,0,2025-11-19T12:11:00.000Z
+li_007453,chk_01922,Cabernet Glass,beverage,16,1,16,0,0,2025-11-19T12:14:00.000Z
+li_007454,chk_01922,Lobster Bisque,food,16,1,16,0,0,2025-11-19T12:17:00.000Z
+li_007455,chk_01922,Filet Mignon,food,52,1,52,0,0,2025-11-19T12:20:00.000Z
+li_007456,chk_01922,Cappuccino,beverage,6,1,6,0,0,2025-11-19T12:23:00.000Z
+li_007470,chk_01923,Club Sandwich,food,18,1,18,0,0,2025-11-26T12:18:00.000Z
+li_007471,chk_01923,Arnold Palmer,beverage,6,1,6,0,0,2025-11-26T12:18:00.000Z
+li_007472,chk_01923,Filet Mignon,food,52,1,52,0,0,2025-11-26T12:21:00.000Z
+li_007473,chk_01923,Grilled Chicken,food,19,1,19,0,0,2025-11-26T12:24:00.000Z
+li_007474,chk_01923,Cabernet Glass,beverage,16,2,32,0,0,2025-11-26T12:27:00.000Z
+li_007475,chk_01923,Sparkling Water,beverage,4,2,8,0,0,2025-11-26T12:18:00.000Z
+li_007490,chk_01924,Club Sandwich,food,18,1,18,0,0,2025-12-03T12:09:00.000Z
+li_007491,chk_01924,Sparkling Water,beverage,4,1,4,0,0,2025-12-03T12:09:00.000Z
+li_007492,chk_01924,Filet Mignon,food,52,1,52,0,0,2025-12-03T12:12:00.000Z
+li_007493,chk_01924,Grilled Salmon,food,32,1,32,0,0,2025-12-03T12:15:00.000Z
+li_007494,chk_01924,Cabernet Glass,beverage,16,2,32,0,0,2025-12-03T12:18:00.000Z
+li_007495,chk_01924,Arnold Palmer,beverage,6,1,6,0,0,2025-12-03T12:21:00.000Z
+li_007510,chk_01925,Club Sandwich,food,18,1,18,0,0,2025-12-10T12:16:00.000Z
+li_007511,chk_01925,Arnold Palmer,beverage,6,1,6,0,0,2025-12-10T12:16:00.000Z
+li_007512,chk_01925,Grilled Chicken,food,19,1,19,0,0,2025-12-10T12:19:00.000Z
+li_007513,chk_01925,Filet Mignon,food,52,1,52,0,0,2025-12-10T12:22:00.000Z
+li_007514,chk_01925,Cabernet Glass,beverage,16,1,16,0,0,2025-12-10T12:25:00.000Z
+li_007515,chk_01925,Sparkling Water,beverage,4,2,8,0,0,2025-12-10T12:16:00.000Z
+li_007530,chk_01926,Club Sandwich,food,18,1,18,0,0,2025-12-17T12:11:00.000Z
+li_007531,chk_01926,Sparkling Water,beverage,4,1,4,0,0,2025-12-17T12:11:00.000Z
+li_007532,chk_01926,Grilled Salmon,food,32,1,32,0,0,2025-12-17T12:14:00.000Z
+li_007533,chk_01926,Filet Mignon,food,52,1,52,0,0,2025-12-17T12:17:00.000Z
+li_007534,chk_01926,Cabernet Glass,beverage,16,1,16,0,0,2025-12-17T12:20:00.000Z
+li_007535,chk_01926,Arnold Palmer,beverage,6,1,6,0,0,2025-12-17T12:23:00.000Z
+li_007550,chk_01927,Club Sandwich,food,18,1,18,0,0,2026-01-07T12:08:00.000Z
+li_007551,chk_01927,Sparkling Water,beverage,4,1,4,0,0,2026-01-07T12:08:00.000Z
+li_007552,chk_01927,Grilled Chicken,food,19,1,19,0,0,2026-01-07T12:11:00.000Z
+li_007553,chk_01927,Filet Mignon,food,52,1,52,0,0,2026-01-07T12:14:00.000Z
+li_007554,chk_01927,Cabernet Glass,beverage,16,1,16,0,0,2026-01-07T12:17:00.000Z
+li_007555,chk_01927,Arnold Palmer,beverage,6,1,6,0,0,2026-01-07T12:20:00.000Z
+li_007570,chk_01930,Grilled Salmon,food,32,1,32,0,0,2025-11-04T18:42:00.000Z
+li_007571,chk_01930,Chardonnay Glass,beverage,14,2,28,0,0,2025-11-04T18:42:00.000Z
+li_007572,chk_01930,Garden Salad,food,12,1,12,0,0,2025-11-04T18:45:00.000Z
+li_007573,chk_01930,Grilled Chicken,food,19,1,19,0,0,2025-11-04T18:48:00.000Z
+li_007574,chk_01930,Sparkling Water,beverage,4,2,8,0,0,2025-11-04T18:42:00.000Z
+li_007575,chk_01930,Cappuccino,beverage,6,1,6,0,0,2025-11-04T18:57:00.000Z
+li_007576,chk_01930,Cheesecake,food,14,1,14,0,0,2025-11-04T19:00:00.000Z
+li_007577,chk_01930,Lobster Bisque,food,16,1,16,0,0,2025-11-04T18:45:00.000Z
+li_007578,chk_01930,Hot Dog,food,9,1,9,0,0,2025-11-04T18:48:00.000Z
+li_007580,chk_01931,Grilled Chicken,food,19,1,19,0,0,2025-11-11T18:27:00.000Z
+li_007581,chk_01931,Chardonnay Glass,beverage,14,2,28,0,0,2025-11-11T18:27:00.000Z
+li_007582,chk_01931,Garden Salad,food,12,1,12,0,0,2025-11-11T18:30:00.000Z
+li_007583,chk_01931,Tuna Tartare,food,22,1,22,0,0,2025-11-11T18:33:00.000Z
+li_007584,chk_01931,Sparkling Water,beverage,4,2,8,0,0,2025-11-11T18:27:00.000Z
+li_007585,chk_01931,Cappuccino,beverage,6,1,6,0,0,2025-11-11T18:42:00.000Z
+li_007586,chk_01931,Lobster Bisque,food,16,1,16,0,0,2025-11-11T18:30:00.000Z
+li_007587,chk_01931,Brownie Sundae,food,12,1,12,0,0,2025-11-11T18:42:00.000Z
+li_007588,chk_01931,Wedge Salad,food,14,1,14,0,0,2025-11-11T18:33:00.000Z
+li_007590,chk_01932,Lobster Tail,food,48,1,48,0,0,2025-11-18T18:57:00.000Z
+li_007591,chk_01932,Cabernet Glass,beverage,16,2,32,0,0,2025-11-18T18:57:00.000Z
+li_007592,chk_01932,Charcuterie Board,food,24,1,24,0,0,2025-11-18T19:00:00.000Z
+li_007593,chk_01932,Garden Salad,food,12,1,12,0,0,2025-11-18T19:03:00.000Z
+li_007594,chk_01932,Sparkling Water,beverage,4,2,8,0,0,2025-11-18T18:57:00.000Z
+li_007595,chk_01932,Grilled Salmon,food,32,1,32,0,0,2025-11-18T19:06:00.000Z
+li_007596,chk_01932,Cheesecake,food,14,1,14,0,0,2025-11-18T19:15:00.000Z
+li_007600,chk_01933,Grilled Chicken,food,19,1,19,0,0,2025-11-25T18:42:00.000Z
+li_007601,chk_01933,Chardonnay Glass,beverage,14,2,28,0,0,2025-11-25T18:42:00.000Z
+li_007602,chk_01933,Tuna Tartare,food,22,1,22,0,0,2025-11-25T18:45:00.000Z
+li_007603,chk_01933,Garden Salad,food,12,1,12,0,0,2025-11-25T18:48:00.000Z
+li_007604,chk_01933,Sparkling Water,beverage,4,2,8,0,0,2025-11-25T18:42:00.000Z
+li_007605,chk_01933,Filet Mignon,food,52,1,52,0,0,2025-11-25T18:51:00.000Z
+li_007606,chk_01933,Cappuccino,beverage,6,1,6,0,0,2025-11-25T19:00:00.000Z
+li_007607,chk_01933,Brownie Sundae,food,12,1,12,0,0,2025-11-25T19:00:00.000Z
+li_007610,chk_01934,Garden Salad,food,12,1,12,0,0,2025-12-09T18:28:00.000Z
+li_007611,chk_01934,Sparkling Water,beverage,4,1,4,0,0,2025-12-09T18:28:00.000Z
+li_007612,chk_01934,Grilled Chicken,food,19,1,19,0,0,2025-12-09T18:31:00.000Z
+li_007613,chk_01934,Iced Tea,beverage,5,1,5,0,0,2025-12-09T18:34:00.000Z
+li_007620,chk_01935,Cappuccino,beverage,6,1,6,0,0,2026-01-14T10:10:00.000Z
+li_007621,chk_01935,Sparkling Water,beverage,4,1,4,0,0,2026-01-14T10:10:00.000Z
+li_007622,chk_01935,Biscotti,food,8,1,8,0,0,2026-01-14T10:13:00.000Z
+li_007630,chk_01940,Club Sandwich,food,18,1,18,0,0,2026-01-16T12:08:00.000Z
+li_007631,chk_01940,Arnold Palmer,beverage,6,1,6,0,0,2026-01-16T12:08:00.000Z
+li_007632,chk_01940,Garden Salad,food,12,1,12,0,0,2026-01-16T12:11:00.000Z
+li_007633,chk_01940,Iced Tea,beverage,5,1,5,0,0,2026-01-16T12:14:00.000Z
+li_007634,chk_01940,Sparkling Water,beverage,4,1,4,0,0,2026-01-16T12:08:00.000Z
