@@ -930,11 +930,18 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
       <Section title="Preferences & insights" sourceSystems={['Member CRM']}>
         <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
-          {profile.preferences?.favoriteSpots && (
-            <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
-              <strong>Favorite spots:</strong> {profile.preferences.favoriteSpots.join(', ')}
-            </div>
-          )}
+          {profile.preferences?.favoriteSpots && (() => {
+            const _diningRe = /grill room|restaurant|bar|dining/i;
+            const _guided = getDataMode() === 'guided';
+            const _hasFb = !_guided || shouldUseStatic('fb');
+            const _spots = profile.preferences.favoriteSpots.filter(s => _hasFb || !_diningRe.test(s));
+            if (_spots.length === 0) return null;
+            return (
+              <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
+                <strong>Favorite spots:</strong> {_spots.join(', ')}
+              </div>
+            );
+          })()}
           {profile.preferences?.teeWindows && (getDataMode() !== 'guided' || shouldUseStatic('tee-sheet')) && (
             <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
               <strong>Tee time window:</strong> {profile.preferences.teeWindows}

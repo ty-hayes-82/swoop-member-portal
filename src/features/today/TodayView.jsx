@@ -388,7 +388,7 @@ export default function TodayView() {
               {[
                 { icon: '🍽️', label: 'Dining Covers Today', value: '126', color: '#ea580c' },
                 { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#039855' }, // lint-no-hardcoded-dollars: allow — F&B demo stat inside shouldUseStatic gate
-                { icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' },
+                ...(shouldUseStatic('tee-sheet') ? [{ icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' }] : []),
               ].map(s => (
                 <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                   <span className="text-lg">{s.icon}</span>

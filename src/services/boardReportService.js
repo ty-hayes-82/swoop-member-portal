@@ -75,7 +75,19 @@ export const getKPIs = () => {
 };
 
 // Board report details — member saves need members, operational saves need complaints
-export const getMemberSaves = () => shouldUseStatic('members') ? staticMemberSaves : [];
+// V20: filter saves by domain — dining/F&B saves require fb gate, complaint saves require complaints gate
+const DINING_RE = /dining|grill room|f&b|food|beverage|chef|restaurant|kitchen|menu/i;
+const COMPLAINT_RE = /complaint|dispute|unresolved|service request/i;
+export const getMemberSaves = () => {
+  if (!shouldUseStatic('members')) return [];
+  if (getDataMode() !== 'guided') return staticMemberSaves;
+  return staticMemberSaves.filter(s => {
+    const text = `${s.trigger || ''} ${s.action || ''} ${s.outcome || ''}`;
+    if (DINING_RE.test(text) && !shouldUseStatic('fb')) return false;
+    if (COMPLAINT_RE.test(text) && !shouldUseStatic('complaints')) return false;
+    return true;
+  });
+};
 export const getOperationalSaves = () => (shouldUseStatic('members') && shouldUseStatic('complaints')) ? staticOperationalSaves : [];
 export const getMonthlyTrends = () => shouldUseStatic('members') ? staticMonthlyTrends : [];
 export const getDuesAtRiskNote = () => shouldUseStatic('members') ? staticDuesAtRiskNote : null;

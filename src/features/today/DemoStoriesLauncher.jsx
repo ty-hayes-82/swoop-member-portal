@@ -9,7 +9,7 @@
 
 import { useNavigation } from '@/context/NavigationContext';
 import { useMemberProfile } from '@/context/MemberProfileContext';
-import { shouldUseStatic } from '@/services/demoGate';
+import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 import { getAtRiskMembers } from '@/services/memberService';
 
 const STORIES = [
@@ -26,6 +26,7 @@ const STORIES = [
     bgTo: 'rgba(52,211,153,0.04)',
     teaser: '"220 rounds. 82°F clear. 3 at-risk on the sheet. 2 servers short."',
     cta: 'See briefing ↑',
+    requiredGates: ['tee-sheet'],
   },
   {
     id: 'catch',
@@ -40,6 +41,7 @@ const STORIES = [
     bgTo: 'rgba(245,158,11,0.04)',
     teaser: 'Email dropped → Golf dropped → Dining dropped. $32K/yr saved.', // lint-no-hardcoded-dollars: allow — demo story teaser copy
     cta: 'View First Domino →',
+    requiredGates: ['email', 'tee-sheet', 'fb'],
   },
   {
     id: 'revenue',
@@ -54,6 +56,7 @@ const STORIES = [
     bgTo: 'rgba(96,165,250,0.04)',
     teaser: '$9,580/mo F&B leakage decomposed. $31/slow round. Board approved.', // lint-no-hardcoded-dollars: allow — demo story teaser copy
     cta: 'Open Revenue page →',
+    requiredGates: ['fb', 'pace'],
   },
 ];
 
@@ -98,7 +101,10 @@ export default function DemoStoriesLauncher() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {STORIES.map((story) => (
+        {STORIES.filter(story => {
+          if (getDataMode() !== 'guided') return true;
+          return (story.requiredGates || []).every(g => shouldUseStatic(g));
+        }).map((story) => (
           <button
             key={story.id}
             type="button"

@@ -41,9 +41,39 @@ export const _init = async () => {
   }
 };
 
+// Keyword patterns for domain-specific gate filtering
+const FB_PATTERN = /dining|F&B|Grill Room|POS|food|beverage/i;
+const COMPLAINT_PATTERN = /complaint/i;
+
+/**
+ * Filter domain-specific signals/bullets from a cockpit item based on gate state.
+ * Mutates nothing — returns a new item with filtered arrays.
+ */
+function gateFilterItem(item) {
+  const hasFb = shouldUseStatic('fb');
+  const hasComplaints = shouldUseStatic('complaints');
+  if (hasFb && hasComplaints) return item;
+
+  const filterText = (text) => {
+    if (!hasFb && FB_PATTERN.test(text)) return false;
+    if (!hasComplaints && COMPLAINT_PATTERN.test(text)) return false;
+    return true;
+  };
+
+  return {
+    ...item,
+    evidenceSignals: item.evidenceSignals?.filter(s => filterText(s.detail) && filterText(s.source)) ?? [],
+    bullets: item.bullets?.filter(filterText) ?? [],
+    stakes: filterText(item.stakes) ? item.stakes : item.stakes?.replace(FB_PATTERN, '').replace(/\s*\+\s*$/, '').replace(/^\s*\+\s*/, '').trim() || item.stakes,
+  };
+}
+
 // Priority items reference members — require both agents AND members gates
 /** @returns {CockpitPriorityItem[]} */
-export const getPriorityItems = () => _d?.priorities ?? (shouldUseStatic('agents') && shouldUseStatic('members') ? cockpitItems : []);
+export const getPriorityItems = () => {
+  const raw = _d?.priorities ?? (shouldUseStatic('agents') && shouldUseStatic('members') ? cockpitItems : []);
+  return raw.map(gateFilterItem);
+};
 /** @returns {SinceLastLoginItem[]} */
 export const getSinceLastLogin = () => _d?.sinceLastLogin ?? (shouldUseStatic('agents') && shouldUseStatic('members') ? staticSinceLastLogin : []);
 export const sourceSystems = ['CRM', 'POS', 'Weather', 'Tee Sheet', 'Complaints'];

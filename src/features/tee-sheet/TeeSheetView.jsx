@@ -9,7 +9,7 @@ import PageTransition from '@/components/ui/PageTransition';
 import { getTodayTeeSheet, getTeeSheetSummary } from '@/services/operationsService';
 import { useApp } from '@/context/AppContext';
 import { apiFetch } from '@/services/apiClient';
-import { shouldUseStatic } from '@/services/demoGate';
+import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 
 const healthColor = (score) => {
   if (score >= 70) return '#12b76a';
@@ -174,12 +174,14 @@ function CartPrepCard({ teeTime, onSendCartText, onSendDiningNudge }) {
         >
           <span>💬</span> Send Cart Prep Text
         </button>
-        <button
-          onClick={() => onSendDiningNudge(teeTime)}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-amber-200 bg-amber-50 text-amber-700 inline-flex items-center gap-1"
-        >
-          <span>🍽</span> Post-Round Dining Nudge
-        </button>
+        {(getDataMode() !== 'guided' || shouldUseStatic('fb')) && (
+          <button
+            onClick={() => onSendDiningNudge(teeTime)}
+            className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-amber-200 bg-amber-50 text-amber-700 inline-flex items-center gap-1"
+          >
+            <span>🍽</span> Post-Round Dining Nudge
+          </button>
+        )}
       </div>
     </div>
   );

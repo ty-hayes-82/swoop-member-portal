@@ -556,18 +556,24 @@ export default function MemberProfilePage() {
                 <div className="text-sm text-[#1a1a2e] mt-0.5">{preferences.dining}</div>
               </div>
             )}
-            {preferences.favoriteSpots && preferences.favoriteSpots.length > 0 && (
-              <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wide">Favorite Spots</div>
-                <div className="flex gap-1.5 flex-wrap mt-1">
-                  {(Array.isArray(preferences.favoriteSpots) ? preferences.favoriteSpots : [preferences.favoriteSpots]).map((spot, i) => (
-                    <span key={i} className="px-2.5 py-0.5 rounded-full text-xs bg-brand-500/10 border border-brand-500/20 text-gray-500">
-                      {spot}
-                    </span>
-                  ))}
+            {preferences.favoriteSpots && preferences.favoriteSpots.length > 0 && (() => {
+              const DINING_SPOT_RE = /grill room|restaurant|bar|dining/i;
+              const spots = (Array.isArray(preferences.favoriteSpots) ? preferences.favoriteSpots : [preferences.favoriteSpots])
+                .filter(spot => !guidedMode || hasFb || !DINING_SPOT_RE.test(spot));
+              if (spots.length === 0) return null;
+              return (
+                <div>
+                  <div className="text-xs text-gray-400 uppercase tracking-wide">Favorite Spots</div>
+                  <div className="flex gap-1.5 flex-wrap mt-1">
+                    {spots.map((spot, i) => (
+                      <span key={i} className="px-2.5 py-0.5 rounded-full text-xs bg-brand-500/10 border border-brand-500/20 text-gray-500">
+                        {spot}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
             {preferences.notes && (
               <div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">Member Notes</div>

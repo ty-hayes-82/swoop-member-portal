@@ -19,6 +19,19 @@ const TRENDS = ['up','down','stable','stable','up','stable','down','stable'];
 const LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
 const MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-Resident','Corporate','Full Golf','Social','Full Golf'];
 
+// Filter risk signal text — hide labels referencing closed-gate data (reuses MemberAlerts logic)
+function filterRiskSignalForRoster(text) {
+  if (!text) return text;
+  if (getDataMode() !== 'guided') return text;
+  const hasTeeSheet = shouldUseStatic('tee-sheet');
+  const hasFb = shouldUseStatic('fb');
+  const hasComplaints = shouldUseStatic('complaints');
+  if (!hasTeeSheet && /round|golf visit|tee time|course/i.test(text)) return 'No current risks';
+  if (!hasFb && /F&B|dining|food|beverage|spending.*minimum/i.test(text)) return 'No current risks';
+  if (!hasComplaints && /complaint|service request/i.test(text)) return 'No current risks';
+  return text;
+}
+
 function generateRoster() {
   if (!shouldUseStatic('members')) return [];
   const roster = [];
@@ -27,7 +40,9 @@ function generateRoster() {
   // Include real profiles first
   const profiles = getAllMemberProfiles();
   Object.values(profiles).forEach(p => {
-    roster.push({ memberId: p.memberId, name: p.name, score: p.healthScore, archetype: p.archetype, duesAnnual: p.duesAnnual, memberValueAnnual: p.memberValueAnnual, tier: p.tier, joinDate: p.joinDate, trend: p.trend, topRisk: p.riskSignals?.[0]?.label || 'No current risks', lastSeenLocation: p.lastSeenLocation });
+    const rawRisk = p.riskSignals?.[0]?.label || 'No current risks';
+    const filteredRisk = filterRiskSignalForRoster(rawRisk);
+    roster.push({ memberId: p.memberId, name: p.name, score: p.healthScore, archetype: p.archetype, duesAnnual: p.duesAnnual, memberValueAnnual: p.memberValueAnnual, tier: p.tier, joinDate: p.joinDate, trend: p.trend, topRisk: filteredRisk, lastSeenLocation: p.lastSeenLocation });
   });
   // Include at-risk and watch members
   (atRisk || []).forEach(m => {
@@ -201,7 +216,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                     Last Seen
                   </div>
                   <div className="text-sm text-[#1a1a2e]">
-                    {member.lastSeenLocation || 'Unknown'}
+                    {(getDataMode() === 'guided' && !shouldUseStatic('tee-sheet')) ? '—' : (member.lastSeenLocation || 'Unknown')}
                   </div>
                 </div>
                 <div>

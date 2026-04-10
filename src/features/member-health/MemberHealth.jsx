@@ -12,6 +12,7 @@ import { SkeletonMemberList } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import FlowLink from '@/components/ui/FlowLink';
 import CohortTab from './tabs/CohortTab';
+import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 
 const TABS = [
   { key: 'health',       label: 'Health Overview' },
@@ -48,7 +49,16 @@ export default function MemberHealth() {
           <StoryHeadline
             variant="urgent"
             headline="5 members showed disengagement signals 6-8 weeks before leaving — here's what to watch for."
-            context="Email open rates dropped first, then golf frequency, then dining. GPS data shows 3 members consistently leaving after 9 holes — an early signal invisible to the tee sheet. No single system sees the full picture. Swoop connected all three — 30 more members are showing early-stage decay right now."
+            context={(() => {
+              const _g = getDataMode() === 'guided';
+              const parts = [];
+              if (!_g || shouldUseStatic('email')) parts.push('Email open rates dropped first');
+              if (!_g || shouldUseStatic('tee-sheet')) parts.push('then golf frequency');
+              if (!_g || shouldUseStatic('fb')) parts.push('then dining');
+              const lead = parts.length > 0 ? parts.join(', ') + '.' : '';
+              const gps = (!_g || shouldUseStatic('tee-sheet')) ? ' GPS data shows 3 members consistently leaving after 9 holes — an early signal invisible to the tee sheet.' : '';
+              return `${lead}${gps} No single system sees the full picture. Swoop connected all three — 30 more members are showing early-stage decay right now.`;
+            })()}
           />
           <button
             type="button"

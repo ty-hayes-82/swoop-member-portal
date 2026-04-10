@@ -3,6 +3,7 @@ import MemberLink from '@/components/MemberLink.jsx';
 import { getResignationScenarios } from '@/services/memberService';
 import { useNavigation } from '@/context/NavigationContext';
 import { SourceBadgeRow } from '@/components/ui/SourceBadge.jsx';
+import { shouldUseStatic, getDataMode } from '@/services/demoGate';
 
 // Map domain labels to source-system names so the timeline carries source-attribution badges.
 const DOMAIN_TO_SYSTEM = {
@@ -99,7 +100,15 @@ export default function ResignationTimeline() {
                   })()}
                 </div>
                 <div className="flex flex-col gap-2">
-                  {scenario.timeline.map((point, index) => (
+                  {scenario.timeline.filter(point => {
+                    if (getDataMode() !== 'guided') return true;
+                    const d = point.domain;
+                    if (d === 'Golf' && !shouldUseStatic('tee-sheet')) return false;
+                    if ((d === 'F&B' || d === 'Dining') && !shouldUseStatic('fb')) return false;
+                    if (d === 'Email' && !shouldUseStatic('email')) return false;
+                    if (d === 'Feedback' && !shouldUseStatic('complaints')) return false;
+                    return true;
+                  }).map((point, index) => (
                     <div key={index} className="flex gap-4 items-start">
                       <span className="shrink-0 w-[70px] text-xs text-gray-400 font-mono pt-0.5">
                         {point.date}
