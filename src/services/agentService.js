@@ -43,18 +43,29 @@ import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents'
  * @property {number} dismissed
  */
 
+import { getDataMode } from './demoGate';
+
 // Filter out decommissioned action types (waitlist removed from MVP)
 const MVP_EXCLUDED_ACTIONS = new Set(['WAITLIST_PRIORITY', 'WAITLIST_BACKFILL']);
-let actionStore = agentActions
-  .filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType))
-  .map((action) => ({ ...action }));
+let actionStore = getDataMode() === 'guided'
+  ? []
+  : agentActions
+      .filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType))
+      .map((action) => ({ ...action }));
 
-let _d = null;
+let _d = getDataMode() === 'guided' ? {} : null;
 
 // ── Guided data loader integration (Phase 1 — additive only) ──
 import { registerService } from './guidedDataLoader';
-export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
+export function _mergeData(partial) {
+  _d = { ...(_d || {}), ...partial };
+  if (Array.isArray(partial.actions)) {
+    actionStore = partial.actions
+      .filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType))
+      .map((action) => ({ ...action }));
+  }
+}
+export function _resetData() { _d = getDataMode() === 'guided' ? {} : null; actionStore = getDataMode() === 'guided' ? [] : agentActions.filter((a) => !MVP_EXCLUDED_ACTIONS.has(a.actionType)).map((a) => ({ ...a })); }
 registerService('agentService', { mergeData: _mergeData, resetData: _resetData });
 
 export const _init = async () => {
@@ -76,7 +87,7 @@ const byNewest = (a, b) => {
 
 /** @returns {Agent[]} */
 export function getAgents() {
-  return _d?.agents ?? agentDefinitions;
+  return _d?.agents ?? (getDataMode() === 'guided' ? [] : agentDefinitions);
 }
 
 /**
@@ -153,7 +164,8 @@ export function dismissAction(id, meta = {}) {
  * @returns {ThoughtLogEntry[]}
  */
 export function getThoughtLog(agentId) {
-  return agentThoughtLogs[agentId] ?? [];
+  const logs = _d?.thoughtLogs ?? (getDataMode() === 'guided' ? {} : agentThoughtLogs);
+  return logs[agentId] ?? [];
 }
 
 /** @returns {AgentSummary} */
@@ -175,5 +187,5 @@ export function getTopPendingAction() {
 }
 
 export function __resetAgentActions() {
-  actionStore = agentActions.map((action) => ({ ...action }));
+  actionStore = getDataMode() === 'guided' ? [] : agentActions.map((action) => ({ ...action }));
 }

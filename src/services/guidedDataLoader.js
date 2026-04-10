@@ -92,7 +92,7 @@ const GATE_DATA_MAP = {
       merges: {
         todayTeeSheet,
         teeSheetSummary,
-        revenueByDay: dailyRevenue,
+        revenueByDay: dailyRevenue.map(r => ({ ...r, fb: 0 })),
       },
     },
     {

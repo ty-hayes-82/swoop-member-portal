@@ -83,7 +83,7 @@ export const getKPIs = () => {
 const DINING_RE = /dining|grill room|f&b|food|beverage|chef|restaurant|kitchen|menu/i;
 const COMPLAINT_RE = /complaint|dispute|unresolved|service request/i;
 export const getMemberSaves = () => {
-  const saves = _d?.memberSaves ?? staticMemberSaves;
+  const saves = _d?.memberSaves ?? (getDataMode() === 'guided' ? [] : staticMemberSaves);
   if (saves.length === 0) return [];
   // Behavioral filter: in guided mode, filter saves by domain keyword
   if (getDataMode() === 'guided') {
@@ -96,9 +96,9 @@ export const getMemberSaves = () => {
   }
   return saves;
 };
-export const getOperationalSaves = () => _d?.operationalSaves ?? staticOperationalSaves;
-export const getMonthlyTrends = () => _d?.monthlyTrends ?? staticMonthlyTrends;
-export const getDuesAtRiskNote = () => _d?.duesAtRiskNote ?? staticDuesAtRiskNote;
+export const getOperationalSaves = () => _d?.operationalSaves ?? (getDataMode() === 'guided' ? [] : staticOperationalSaves);
+export const getMonthlyTrends = () => _d?.monthlyTrends ?? (getDataMode() === 'guided' ? [] : staticMonthlyTrends);
+export const getDuesAtRiskNote = () => _d?.duesAtRiskNote ?? (getDataMode() === 'guided' ? '' : staticDuesAtRiskNote);
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

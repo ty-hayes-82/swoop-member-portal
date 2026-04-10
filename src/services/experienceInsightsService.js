@@ -1,7 +1,7 @@
 // experienceInsightsService.js — correlation calculations from existing data
 // _init() hydrates from Postgres; arrays/objects are mutated in-place so imports stay current.
 import { apiFetch, getClubId } from './apiClient';
-// shouldUseStatic removed — data-driven getters use _d
+import { getDataMode } from './demoGate';
 import { memberArchetypes } from '@/data/members';
 
 // Touchpoint correlations with retention — derived from cross-domain analysis
@@ -114,7 +114,8 @@ export const complaintLoyaltyStats = {
 
 // Archetype spend patterns for spend potential analysis
 export const getArchetypeSpendPatterns = () => {
-  return memberArchetypes.map(a => ({
+  const archetypes = _d?.memberArchetypes ?? (getDataMode() === 'guided' ? [] : memberArchetypes);
+  return archetypes.map(a => ({
     archetype: a.archetype,
     count: a.count,
     engagement: { golf: a.golf, dining: a.dining, events: a.events, email: a.email },
@@ -329,12 +330,12 @@ export const archetypeSpendGaps = [
 ];
 
 // ─── Live data hydration ────────────────────────────────────────────────────
-let _d = null;
+let _d = getDataMode() === 'guided' ? {} : null;
 
 // ── Guided data loader integration (Phase 1 — additive only) ──
 import { registerService } from './guidedDataLoader';
 export function _mergeData(partial) { _d = { ...(_d || {}), ...partial }; }
-export function _resetData() { _d = null; }
+export function _resetData() { _d = getDataMode() === 'guided' ? {} : null; }
 registerService('experienceInsightsService', { mergeData: _mergeData, resetData: _resetData });
 
 export const _init = async () => {
@@ -406,25 +407,25 @@ export const _init = async () => {
 
 /** touchpointCorrelations — returns from _d or falls back to static array */
 export function getTouchpointCorrelations() {
-  return _d?.touchpointCorrelations ?? touchpointCorrelations;
+  return _d?.touchpointCorrelations ?? (getDataMode() === 'guided' ? [] : touchpointCorrelations);
 }
 
 /** correlationInsights — returns from _d or falls back to static array */
 export function getCorrelationInsights() {
-  return _d?.correlationInsights ?? correlationInsights;
+  return _d?.correlationInsights ?? (getDataMode() === 'guided' ? [] : correlationInsights);
 }
 
 /** eventROI — returns from _d or falls back to static array */
 export function getEventROI() {
-  return _d?.eventROI ?? eventROI;
+  return _d?.eventROI ?? (getDataMode() === 'guided' ? [] : eventROI);
 }
 
 /** complaintLoyaltyStats — returns from _d or falls back to static object */
 export function getComplaintLoyaltyStats() {
-  return _d?.complaintLoyaltyStats ?? complaintLoyaltyStats;
+  return _d?.complaintLoyaltyStats ?? (getDataMode() === 'guided' ? {} : complaintLoyaltyStats);
 }
 
 /** archetypeSpendGaps — returns from _d or falls back to static array */
 export function getArchetypeSpendGaps() {
-  return _d?.archetypeSpendGaps ?? archetypeSpendGaps;
+  return _d?.archetypeSpendGaps ?? (getDataMode() === 'guided' ? [] : archetypeSpendGaps);
 }
