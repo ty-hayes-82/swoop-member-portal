@@ -7,28 +7,6 @@ const VARIANT_CONFIG = {
   warning: { bgCls: 'bg-warning-500', icon: '\u26A0' },
 };
 
-// 2026-04-09 wave 14 web button audit P0 fix: belt-and-suspenders against
-// the showToast({ type, message }) calling pattern that bypassed the
-// (message, variant) signature. Some legacy callers passed an object as
-// the first arg, which Toast then tried to render directly inside a
-// <span>, throwing "Objects are not valid as a React child" and crashing
-// the entire ToastContainer. Now we coerce any non-string `message` to a
-// safe string representation. The buggy callers have ALSO been fixed to
-// pass strings — this guard exists so a future regression can't crash
-// the demo.
-function coerceMessage(value) {
-  if (value == null) return '';
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  // Object form: prefer .message, then .text, then JSON for debug visibility
-  if (typeof value === 'object') {
-    if (typeof value.message === 'string') return value.message;
-    if (typeof value.text === 'string') return value.text;
-    try { return JSON.stringify(value); } catch { return '[Toast: invalid message]'; }
-  }
-  return String(value);
-}
-
 export function Toast({ message, variant = 'success', duration = 4000, onClose }) {
   const [isVisible, setIsVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
@@ -47,7 +25,6 @@ export function Toast({ message, variant = 'success', duration = 4000, onClose }
   if (!isVisible) return null;
 
   const config = VARIANT_CONFIG[variant] || VARIANT_CONFIG.success;
-  const safeMessage = coerceMessage(message);
 
   return (
     <div
@@ -59,7 +36,7 @@ export function Toast({ message, variant = 'success', duration = 4000, onClose }
       }}
     >
       <span className="text-lg font-bold">{config.icon}</span>
-      <span>{safeMessage}</span>
+      <span>{String(message ?? '')}</span>
     </div>
   );
 }
@@ -67,21 +44,20 @@ export function Toast({ message, variant = 'success', duration = 4000, onClose }
 export function useToast() {
   const [toasts, setToasts] = useState([]);
 
-  // 2026-04-09 wave 14 fix: also accept the object-form signature
-  // showToast({ type: 'success', message: '...' }) so legacy callers don't
-  // crash. The (message, variant) form is still preferred and documented.
+  // Accepts both showToast(message, variant) and showToast({ message, type })
+  // so legacy object-form callers don't crash the toast container.
   const showToast = (messageOrOptions, variant = 'success', duration = 4000) => {
     const id = Date.now() + Math.random();
-    let resolvedMessage = messageOrOptions;
-    let resolvedVariant = variant;
-    let resolvedDuration = duration;
     if (messageOrOptions && typeof messageOrOptions === 'object' && !Array.isArray(messageOrOptions)) {
-      // Caller used the object form
-      resolvedMessage = messageOrOptions.message ?? messageOrOptions.text ?? '';
-      resolvedVariant = messageOrOptions.type ?? messageOrOptions.variant ?? variant;
-      resolvedDuration = messageOrOptions.duration ?? duration;
+      setToasts((prev) => [...prev, {
+        id,
+        message: messageOrOptions.message ?? messageOrOptions.text ?? '',
+        variant: messageOrOptions.type ?? messageOrOptions.variant ?? variant,
+        duration: messageOrOptions.duration ?? duration,
+      }]);
+      return;
     }
-    setToasts((prev) => [...prev, { id, message: resolvedMessage, variant: resolvedVariant, duration: resolvedDuration }]);
+    setToasts((prev) => [...prev, { id, message: messageOrOptions, variant, duration }]);
   };
 
   const removeToast = (id) => {

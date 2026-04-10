@@ -57,7 +57,6 @@ export default function ServiceView() {
             <button
               key={key}
               role="tab"
-              aria-label={label}
               aria-selected={activeTab === key}
               onClick={() => setActiveTab(key)}
               className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap ${

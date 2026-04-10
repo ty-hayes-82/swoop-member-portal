@@ -248,7 +248,6 @@ export default function LoginPage({ onLogin }) {
             <div className="text-center mt-3">
               <button
                 onClick={() => setShowForgotPassword(true)}
-                aria-label="Forgot password"
                 className="text-sm text-brand-500 hover:text-brand-600 font-medium bg-transparent border-none cursor-pointer"
               >
                 Forgot password?

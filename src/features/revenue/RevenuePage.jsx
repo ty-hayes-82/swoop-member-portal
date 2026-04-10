@@ -69,10 +69,6 @@ export default function RevenuePage() {
     });
     setRangerDeployed(true);
     if (showToast) {
-      // 2026-04-09 wave 14 web button audit P0 fix: was passing an object
-      // literal as the first arg. Toast expects (message: string, variant: string).
-      // The object form caused "Objects are not valid as a React child" and
-      // crashed the toast container.
       showToast(`Ranger deployment approved for Hole ${hole}. Logged to action history.`, 'success');
     }
   };
