@@ -183,7 +183,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   const complaints = getComplaintCorrelation().filter(c => c.status !== 'resolved');
   const cancelSummary  = getCancellationSummary();
   const waitlistSummary = getWaitlistSummary();
-  const topCancellationRiskMembers = [...cancellationProbabilities]
+  const topCancellationRiskMembers = !shouldUseStatic('pipeline') ? [] : [...cancellationProbabilities]
     .sort((a, b) => b.cancelProbability - a.cancelProbability)
     .slice(0, 3)
     .map((risk) => {
@@ -225,8 +225,8 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       rounds:         82,
       roundsVsLastWeek: +8,
       incidents: [
-        'Grill Room understaffed — 2 service speed complaints',
-        'James Whitfield filed a slow-service complaint — left unhappy, no follow-up',
+        ...(shouldUseStatic('fb') ? ['Grill Room understaffed — 2 service speed complaints'] : []),
+        ...(shouldUseStatic('complaints') ? ['James Whitfield filed a slow-service complaint — left unhappy, no follow-up'] : []),
       ],
       weather:        yesterday.weather,
       isUnderstaffed: yesterday.isUnderstaffed,
@@ -241,7 +241,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         { memberId: 'mbr_089', name: 'Anne Jordan',     archetype: 'Weekend Warrior',  time: '7:08 AM', score: 28,
           topRisk: 'Declining — golf visits dropped Oct→Nov→Dec' },
         { memberId: 'mbr_271', name: 'Robert Callahan', archetype: 'Declining',        time: '9:00 AM', score: 22,
-          topRisk: 'Hitting F&B minimum only — obligation spending pattern' },
+          topRisk: shouldUseStatic('fb') ? 'Hitting F&B minimum only — obligation spending pattern' : 'Declining engagement pattern' },
       ],
       staffingGaps: [], fullyStaffed: true,
       cancellationRisk: {
@@ -272,7 +272,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       { playbookId: 'slow-saturday',      title: 'Slow Saturday Recovery',       status: 'available',   urgency: 'medium',
         reason: '28% slow round rate — weekend pace deteriorating' },
       { playbookId: 'engagement-decay',   title: 'Engagement Decay Intervention',status: 'available',   urgency: 'medium',
-        reason: '5 members showing accelerated email decay' },
+        reason: shouldUseStatic('email') ? '5 members showing accelerated email decay' : 'Multiple members showing declining engagement signals' },
     ],
     keyMetrics: {
       monthlyRevenue: getMonthlyRevenueSummary().total,
@@ -293,7 +293,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         action: 'View waitlist queue',
         link: 'waitlist-demand',
       },
-      {
+      ...(shouldUseStatic('fb') ? [{
         id: 'wind-fb-prep',
         icon: '💨',
         title: 'Shift F&B prep for afternoon wind-driven indoor spike',
@@ -303,7 +303,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         detail: 'Afternoon wind advisory (gusts to 30-40 mph) historically reduces golf bookings by 15% but increases Grill Room lunch covers by 20-30% as members stay indoors. Add 2 servers, prep 15 extra grilled items.',
         action: 'View F&B operations',
         link: 'fb-performance',
-      },
+      }] : []),
       {
         id: 'at-risk-touchpoints',
         icon: '👋',
@@ -329,7 +329,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     ],
   };
   } catch {
-    return DEMO_BRIEFING;
+    return EMPTY_BRIEFING;
   }
 };
 
