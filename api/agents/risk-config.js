@@ -74,6 +74,18 @@ export async function evaluateRiskTrigger(memberId, clubId) {
   const delta = previousScore !== null ? previousScore - currentScore : 0;
 
   // 3. Evaluate criteria
+  // Special path: new member with low initial score and no baseline history
+  if (previousScore === null && currentScore < 50 && dues >= 8000) {
+    return {
+      shouldTrigger: true,
+      reason: 'New member with low initial health score — no baseline available.',
+      currentScore,
+      previousScore,
+      delta,
+      dues,
+    };
+  }
+
   const reasons = [];
   if (currentScore >= 50) reasons.push(`health_score ${currentScore} >= 50`);
   if (dues < 8000) reasons.push(`annual_dues ${dues} < 8000`);

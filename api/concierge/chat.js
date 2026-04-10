@@ -13,6 +13,80 @@ import { getOrCreateSession, updateSessionSummary } from '../agents/concierge-se
 import { buildConciergePrompt } from '../../src/config/conciergePrompt.js';
 import { getAnthropicClient, MANAGED_AGENT_ID, MANAGED_ENV_ID } from '../agents/managed-config.js';
 
+// ---------------------------------------------------------------------------
+// Concierge tool definitions (same as SMS tools in twilio/inbound.js)
+// ---------------------------------------------------------------------------
+const CONCIERGE_TOOLS = [
+  {
+    name: 'get_club_calendar',
+    description: 'Get upcoming club events and activities',
+    input_schema: { type: 'object', properties: { days_ahead: { type: 'integer', default: 7 } } }
+  },
+  {
+    name: 'book_tee_time',
+    description: 'Book a tee time for the member',
+    input_schema: { type: 'object', properties: { date: { type: 'string' }, time: { type: 'string' }, course: { type: 'string' }, players: { type: 'integer' } }, required: ['date', 'time'] }
+  },
+  {
+    name: 'make_dining_reservation',
+    description: 'Make a dining reservation',
+    input_schema: { type: 'object', properties: { date: { type: 'string' }, time: { type: 'string' }, outlet: { type: 'string' }, party_size: { type: 'integer' }, preferences: { type: 'string' } }, required: ['date', 'outlet'] }
+  },
+  {
+    name: 'get_my_schedule',
+    description: 'Get the member upcoming tee times, reservations, and events',
+    input_schema: { type: 'object', properties: {} }
+  },
+];
+
+/**
+ * Execute a concierge tool call (mirrors executeSmsTool from twilio/inbound.js).
+ */
+async function executeConciergeTool(toolName, input, profile) {
+  switch (toolName) {
+    case 'get_club_calendar': {
+      return {
+        events: [
+          { date: '2026-04-10', time: '6:00 PM', title: 'Wine Dinner — Spring Pairing Menu', location: 'Main Dining Room', capacity: '48 seats, 12 remaining' },
+          { date: '2026-04-12', time: '8:00 AM', title: 'Saturday Morning Shotgun — Member-Guest', location: 'North Course', capacity: '72 players, 8 spots left' },
+          { date: '2026-04-13', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment' },
+          { date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', capacity: '20 teams max, 6 remaining' },
+          { date: '2026-04-18', time: '7:00 AM', title: 'Club Championship Qualifier — Round 1', location: 'South Course', capacity: 'Registration open' },
+        ],
+      };
+    }
+    case 'book_tee_time': {
+      const course = input.course || 'North Course';
+      const players = input.players || 4;
+      return {
+        confirmation: `Tee time booked: ${input.date} at ${input.time} on the ${course} for ${players} players.`,
+        confirmation_number: `TT-${Date.now().toString(36).toUpperCase()}`,
+        member_name: profile.name,
+      };
+    }
+    case 'make_dining_reservation': {
+      const party = input.party_size || 2;
+      const time = input.time || '7:00 PM';
+      return {
+        confirmation: `Dining reservation confirmed: ${input.date} at ${time} at ${input.outlet} for ${party} guests.`,
+        confirmation_number: `DR-${Date.now().toString(36).toUpperCase()}`,
+        preferences_noted: input.preferences || 'None specified',
+        member_name: profile.name,
+      };
+    }
+    case 'get_my_schedule': {
+      return {
+        upcoming: [
+          { type: 'tee_time', date: '2026-04-12', time: '7:00 AM', course: 'North Course', players: 4 },
+          { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing' },
+        ],
+      };
+    }
+    default:
+      return { error: `Unknown tool: ${toolName}` };
+  }
+}
+
 const SIMULATION_MODE = !MANAGED_AGENT_ID || !MANAGED_ENV_ID;
 
 async function loadMemberProfile(clubId, memberId) {
@@ -107,14 +181,38 @@ async function chatHandler(req, res) {
   // Live mode: call Claude API
   try {
     const client = getAnthropicClient();
-    const result = await client.messages.create({
+    const messages = [{ role: 'user', content: message }];
+    let result = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       system: systemPrompt + conversationContext,
-      messages: [{ role: 'user', content: message }],
+      messages,
+      tools: CONCIERGE_TOOLS,
     });
 
-    const responseText = result.content?.[0]?.text ?? '';
+    // Tool-use loop: execute tools and feed results back until Claude responds with text
+    while (result.stop_reason === 'tool_use') {
+      const toolUse = result.content.find(c => c.type === 'tool_use');
+      if (!toolUse) break;
+
+      const toolResult = await executeConciergeTool(toolUse.name, toolUse.input, profile);
+
+      messages.push({ role: 'assistant', content: result.content });
+      messages.push({
+        role: 'user',
+        content: [{ type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(toolResult) }],
+      });
+
+      result = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: systemPrompt + conversationContext,
+        messages,
+        tools: CONCIERGE_TOOLS,
+      });
+    }
+
+    const responseText = result.content?.find(c => c.type === 'text')?.text ?? '';
 
     // Update conversation summary (truncate to last exchange)
     const summary = `Member asked: "${message.slice(0, 200)}". Agent responded: "${responseText.slice(0, 200)}"`;

@@ -172,6 +172,49 @@ export async function pullMonthlyRevenueAttribution(clubId, month) {
 }
 
 /**
+ * Pull period-over-period complaint comparison for the report month.
+ * Compares current month vs previous month complaint counts.
+ */
+export async function pullComplaintComparison(clubId, month) {
+  const monthStart = `${month}-01`;
+  // Use SQL date math relative to the provided month
+  const [currentResult, previousResult] = await Promise.all([
+    sql`
+      SELECT COUNT(*)::int AS count
+      FROM feedback
+      WHERE club_id = ${clubId}
+        AND submitted_at >= ${monthStart}::date
+        AND submitted_at < (${monthStart}::date + INTERVAL '1 month')
+    `,
+    sql`
+      SELECT COUNT(*)::int AS count
+      FROM feedback
+      WHERE club_id = ${clubId}
+        AND submitted_at >= (${monthStart}::date - INTERVAL '1 month')
+        AND submitted_at < ${monthStart}::date
+    `,
+  ]);
+
+  const currentCount = Number(currentResult.rows[0]?.count ?? 0);
+  const previousCount = Number(previousResult.rows[0]?.count ?? 0);
+  const delta = currentCount - previousCount;
+  const deltaPercent = previousCount > 0
+    ? Math.round((delta / previousCount) * 100)
+    : null;
+
+  return {
+    month,
+    current_month_complaints: currentCount,
+    previous_month_complaints: previousCount,
+    delta,
+    delta_percent: deltaPercent,
+    summary: deltaPercent !== null
+      ? `Complaints ${delta <= 0 ? 'reduced' : 'increased'} ${Math.abs(deltaPercent)}% month-over-month (${previousCount} → ${currentCount}).`
+      : `${currentCount} complaints this month (no prior month data for comparison).`,
+  };
+}
+
+/**
  * Save draft board report for GM review.
  */
 export async function saveDraftBoardReport(clubId, month, report) {
@@ -211,7 +254,7 @@ export async function saveDraftBoardReport(clubId, month, report) {
  * Build a draft board report from data pulls.
  * Every number traces to the source data.
  */
-function buildDraftReport(interventions, staffing, revenue, month) {
+function buildDraftReport(interventions, staffing, revenue, month, complaints = null) {
   const headline = [];
   const sections = [];
   const attributionChain = [];
@@ -268,6 +311,17 @@ function buildDraftReport(interventions, staffing, revenue, month) {
     });
   }
 
+  // Complaint trend section
+  if (complaints) {
+    sections.push({
+      title: 'Member Feedback Trend',
+      body: complaints.summary,
+    });
+    if (complaints.delta_percent !== null && complaints.delta < 0) {
+      headline.push(`complaints reduced ${Math.abs(complaints.delta_percent)}% month-over-month`);
+    }
+  }
+
   // Forward look
   sections.push({
     title: 'Looking Ahead',
@@ -315,10 +369,11 @@ async function boardReportHandler(req, res) {
 
   try {
     // 1. Pull all data in parallel
-    const [interventions, staffing, revenue] = await Promise.all([
+    const [interventions, staffing, revenue, complaints] = await Promise.all([
       pullMonthlyInterventionSummary(clubId, month),
       pullMonthlyStaffingOutcomes(clubId, month),
       pullMonthlyRevenueAttribution(clubId, month),
+      pullComplaintComparison(clubId, month),
     ]);
 
     // 2. Managed session or simulation
@@ -333,6 +388,7 @@ async function boardReportHandler(req, res) {
           interventions,
           staffing,
           revenue,
+          complaints,
           timestamp: new Date().toISOString(),
         }),
       });
@@ -346,7 +402,7 @@ async function boardReportHandler(req, res) {
 
     // Simulation mode
     const sessionId = `sim_br_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const report = buildDraftReport(interventions, staffing, revenue, month);
+    const report = buildDraftReport(interventions, staffing, revenue, month, complaints);
 
     // Save draft
     const { report_id } = await saveDraftBoardReport(clubId, month, report);
@@ -382,6 +438,8 @@ async function boardReportHandler(req, res) {
         interventions: interventions.total_interventions,
         staffing_recs: staffing.total_recommendations,
         approved_actions: revenue.total_approved_actions,
+        complaints: complaints ? complaints.current_month_complaints : null,
+        complaint_delta_percent: complaints ? complaints.delta_percent : null,
       },
     });
   } catch (err) {

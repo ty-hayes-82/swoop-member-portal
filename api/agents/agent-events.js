@@ -10,6 +10,7 @@
  *   member_re_engaged    → Member Risk agent (positive signal)
  *   complaint_filed_by_concierge → Service Recovery agent
  *   booking_cancelled    → Staffing-Demand + Game Plan
+ *   fb_intelligence_update → Staffing-Demand (confidence calibration from F&B analysis)
  */
 import { sql } from '@vercel/postgres';
 import { sendSessionEvent } from './managed-config.js';
@@ -98,6 +99,28 @@ async function handleComplaintFiledByConcierge(clubId, event) {
   return { delivered: true, target_agent: 'service-recovery', session_id: session.agent_session_id };
 }
 
+async function handleFbIntelligenceUpdate(clubId, event) {
+  const session = await findActiveSession(clubId, 'staffing-demand');
+  if (!session) return { delivered: false, reason: 'no_active_staffing_session' };
+
+  if (!session.agent_session_id?.startsWith('sim_')) {
+    await sendSessionEvent(session.agent_session_id, {
+      type: 'user.message',
+      content: JSON.stringify({
+        event_type: 'fb_intelligence_update',
+        date: event.date,
+        actual_covers: event.actual_covers,
+        forecast_accuracy: event.forecast_accuracy,
+        post_round_conversion_rate: event.post_round_conversion_rate,
+        non_diner_count: event.non_diner_count,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  }
+
+  return { delivered: true, target_agent: 'staffing-demand', session_id: session.agent_session_id };
+}
+
 async function handleBookingCancelled(clubId, event) {
   const results = [];
 
@@ -147,6 +170,7 @@ const EVENT_HANDLERS = {
   member_re_engaged: handleMemberReEngaged,
   complaint_filed_by_concierge: handleComplaintFiledByConcierge,
   booking_cancelled: handleBookingCancelled,
+  fb_intelligence_update: handleFbIntelligenceUpdate,
 };
 
 /**

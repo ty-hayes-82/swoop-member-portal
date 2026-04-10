@@ -98,15 +98,15 @@ describe('Trigger Accuracy', () => {
     expect(result.reason).toContain('health_score 55 >= 50');
   });
 
-  it('1c. no prior score (new member) does NOT trigger, reason explains why', async () => {
+  it('1c. new member with low score and high dues DOES trigger', async () => {
     queueSqlResults(
       { rows: [{ health_score: 30, annual_dues: 20000 }] },
       { rows: [] }, // no history
     );
     const result = await evaluateRiskTrigger('mbr_new', 'club_test');
-    expect(result.shouldTrigger).toBe(false);
+    expect(result.shouldTrigger).toBe(true);
     expect(result.delta).toBe(0);
-    expect(result.reason).toContain('no prior score history');
+    expect(result.reason).toContain('New member with low initial health score');
   });
 
   it('1d. member not found returns shouldTrigger=false', async () => {

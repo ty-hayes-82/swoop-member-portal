@@ -12,6 +12,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent, MANAGED_AGENT_ID, MANAGED_ENV_ID } from './managed-config.js';
+import { routeEvent } from './agent-events.js';
 
 const SIMULATION_MODE = !MANAGED_AGENT_ID || !MANAGED_ENV_ID;
 
@@ -162,6 +163,38 @@ export async function pullCoverVsReservationDelta(clubId, date) {
   };
 }
 
+/**
+ * Identify high-value members who played but did NOT dine on a given date.
+ * Joins bookings (players) against pos_checks to find the conversion gap
+ * at the individual member level.
+ */
+export async function pullNonDiningMembers(clubId, date) {
+  const result = await sql`
+    SELECT DISTINCT m.member_id::text AS member_id,
+      m.first_name || ' ' || m.last_name AS name,
+      m.annual_dues
+    FROM bookings b
+    JOIN booking_players bp ON bp.booking_id = b.booking_id
+    JOIN members m ON m.member_id = bp.member_id AND m.club_id = b.club_id
+    LEFT JOIN pos_checks pc ON pc.member_id = m.member_id
+      AND pc.club_id = m.club_id
+      AND pc.opened_at::date = b.booking_date
+    WHERE b.booking_date = ${date}
+      AND b.club_id = ${clubId}
+      AND b.status = 'confirmed'
+      AND pc.check_id IS NULL
+      AND m.annual_dues >= 10000
+    ORDER BY m.annual_dues DESC
+    LIMIT 25
+  `;
+
+  return result.rows.map(r => ({
+    member_id: r.member_id,
+    name: r.name,
+    annual_dues: Number(r.annual_dues ?? 0),
+  }));
+}
+
 // ---------------------------------------------------------------------------
 // Simulation logic
 // ---------------------------------------------------------------------------
@@ -169,7 +202,7 @@ export async function pullCoverVsReservationDelta(clubId, date) {
 /**
  * Build root cause analysis from correlated data pulls.
  */
-function buildRootCauseAnalysis(fbPerf, menuMix, coverDelta, weather, staffing, teeSheet) {
+function buildRootCauseAnalysis(fbPerf, menuMix, coverDelta, weather, staffing, teeSheet, nonDiners = []) {
   const insights = [];
   const causes = [];
 
@@ -225,6 +258,7 @@ function buildRootCauseAnalysis(fbPerf, menuMix, coverDelta, weather, staffing, 
     conversion_gap: Math.max(0, conversionGap),
     revenue_opportunity: revenueOpportunity,
     detected: conversionGap > 5,
+    non_diners: nonDiners
   });
 
   // Cover vs reservation delta
@@ -287,7 +321,7 @@ async function fbTriggerHandler(req, res) {
 
   try {
     // 1. Pull all data in parallel
-    const [fbPerf, menuMix, coverDelta, weatherResult, staffingResult, teeSheetResult] = await Promise.all([
+    const [fbPerf, menuMix, coverDelta, weatherResult, staffingResult, teeSheetResult, nonDiners] = await Promise.all([
       pullDailyFbPerformance(clubId, target_date),
       pullMenuMixAnalysis(clubId, target_date),
       pullCoverVsReservationDelta(clubId, target_date),
@@ -337,6 +371,7 @@ async function fbTriggerHandler(req, res) {
         morning_rounds: Number(r.rows[0]?.morning_rounds ?? 0),
         afternoon_rounds: Number(r.rows[0]?.afternoon_rounds ?? 0),
       })),
+      pullNonDiningMembers(clubId, target_date),
     ]);
 
     // 2. Managed session or simulation
@@ -354,6 +389,7 @@ async function fbTriggerHandler(req, res) {
           weather: weatherResult,
           staffing: staffingResult,
           tee_sheet: teeSheetResult,
+          non_dining_members: nonDiners,
           timestamp: new Date().toISOString(),
         }),
       });
@@ -367,7 +403,7 @@ async function fbTriggerHandler(req, res) {
 
     // Simulation mode
     const sessionId = `sim_fb_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const analysis = buildRootCauseAnalysis(fbPerf, menuMix, coverDelta, weatherResult, staffingResult, teeSheetResult);
+    const analysis = buildRootCauseAnalysis(fbPerf, menuMix, coverDelta, weatherResult, staffingResult, teeSheetResult, nonDiners);
     const actions = buildFbActions(analysis.insights);
 
     // Save actions
@@ -405,6 +441,19 @@ async function fbTriggerHandler(req, res) {
         : null,
       post_round_conversion_rate: conversion ? conversion.conversion_rate : null,
     };
+
+    // Emit cross-agent event so staffing-demand can update confidence calibration
+    try {
+      await routeEvent(clubId, 'fb_intelligence_update', {
+        date: target_date,
+        actual_covers: fbPerf.total_covers,
+        forecast_accuracy: staffingFeed.forecast_accuracy,
+        post_round_conversion_rate: staffingFeed.post_round_conversion_rate,
+        non_diner_count: nonDiners.length,
+      });
+    } catch (evtErr) {
+      console.error('fb_intelligence_update event error:', evtErr.message);
+    }
 
     return res.status(200).json({
       triggered: true,
