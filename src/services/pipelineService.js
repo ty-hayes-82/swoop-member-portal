@@ -197,7 +197,18 @@ const getStaticWaitlistEntries = () => normalizeWaitlistEntries(memberWaitlistEn
 
 const getSanitizedLeads = () => {
   const source = Array.isArray(_d?.warmLeads) && _d.warmLeads.length ? _d.warmLeads : warmLeads;
-  return dedupeLeads(source);
+  const leads = dedupeLeads(source);
+  // In guided mode, suppress fields that depend on gates not yet opened
+  const hasTeeSheet = shouldUseStatic('tee-sheet');
+  const hasFb = shouldUseStatic('fb');
+  if (!hasTeeSheet || !hasFb) {
+    return leads.map((lead) => ({
+      ...lead,
+      rounds: hasTeeSheet ? lead.rounds : 0,
+      dining: hasFb ? lead.dining : 0,
+    }));
+  }
+  return leads;
 };
 
 const getPipelineSnapshot = () => {

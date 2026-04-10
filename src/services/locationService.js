@@ -61,15 +61,21 @@ const normalizeStaff = (source) => {
 
 export const getLiveMemberLocations = (payload = null) => {
   if (!shouldUseStatic('weather') && !_d && !payload) return [];
+  // Location intelligence requires member roster — gate on 'members' in guided mode
+  if (!shouldUseStatic('members')) return [];
   return normalizeMembers(payload?.members ?? _d?.members ?? payload?.locationMembers);
 };
 export const getStaffLocations = (payload = null) => {
   if (!shouldUseStatic('weather') && !_d && !payload) return [];
+  // Staff locations are meaningful only when member data is available
+  if (!shouldUseStatic('members')) return [];
   return normalizeStaff(payload?.staff ?? _d?.staff ?? payload?.staffOnDuty);
 };
 
 export const getServiceRecoveryAlerts = (payload = null) => {
   if (!shouldUseStatic('weather') && !_d && !payload) return [];
+  // Alerts reference member context — gate on 'members' in guided mode
+  if (!shouldUseStatic('members')) return [];
   const source = payload?.alerts ?? _d?.alerts ?? payload?.alertsFeed;
   const list = Array.isArray(source) && source.length ? source : defaultAlerts;
   return list.map((alert, index) => ({

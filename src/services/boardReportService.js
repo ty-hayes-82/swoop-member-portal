@@ -6,6 +6,7 @@ import {
   memberSaves as staticMemberSaves,
   operationalSaves as staticOperationalSaves,
   monthlyTrends as staticMonthlyTrends,
+  duesAtRiskNote as staticDuesAtRiskNote,
 } from '@/data/boardReport';
 
 let _liveKpis = null;
@@ -77,6 +78,7 @@ export const getKPIs = () => {
 export const getMemberSaves = () => shouldUseStatic('members') ? staticMemberSaves : [];
 export const getOperationalSaves = () => (shouldUseStatic('members') && shouldUseStatic('complaints')) ? staticOperationalSaves : [];
 export const getMonthlyTrends = () => shouldUseStatic('members') ? staticMonthlyTrends : [];
+export const getDuesAtRiskNote = () => shouldUseStatic('members') ? staticDuesAtRiskNote : null;
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;

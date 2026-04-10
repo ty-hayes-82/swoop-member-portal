@@ -6,7 +6,10 @@ export const kpis = [
   { label: 'Members Retained', value: 14, prefix: '', suffix: '', color: 'green' },
   { label: 'Operational Efficiency', value: 4.2, prefix: '', suffix: ' hrs', color: 'green' },
   { label: 'Board Confidence Score', value: 94, prefix: '', suffix: '%', color: 'green' },
+  { label: 'Monthly Revenue', value: 375200, prefix: '$', suffix: '', color: 'green' },
 ];
+
+export const duesAtRiskNote = 'Represents 6 specific saves identified this month. Total portfolio at risk: $868K (see Member Health).';
 
 export const memberSaves = [
   {

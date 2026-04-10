@@ -11,7 +11,7 @@ export const dailyRevenue = [
   { date: '2026-01-07', day: 'Wed', golf: 5800, fb: 2100, weather: 'sunny',    isUnderstaffed: false },
   { date: '2026-01-08', day: 'Thu', golf: 7200, fb: 2600, weather: 'sunny',    isUnderstaffed: false },
   { date: '2026-01-09', day: 'Fri', golf: 8400, fb: 2900, weather: 'sunny',    isUnderstaffed: true  },
-  { date: '2026-01-10', day: 'Sat', golf: 13100, fb: 4600, weather: 'windy',   isUnderstaffed: false },
+  { date: '2026-01-10', day: 'Sat', golf: 13100, fb: 4600, weather: 'rainy',   isUnderstaffed: false },
   { date: '2026-01-11', day: 'Sun', golf: 13400, fb: 4800, weather: 'sunny',   isUnderstaffed: false },
   { date: '2026-01-12', day: 'Mon', golf: 5900, fb: 2100, weather: 'sunny',    isUnderstaffed: false },
   { date: '2026-01-13', day: 'Tue', golf: 5400, fb: 1900, weather: 'cloudy',   isUnderstaffed: false },

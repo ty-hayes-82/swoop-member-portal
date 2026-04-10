@@ -6,7 +6,7 @@ import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import MemberLink from '@/components/MemberLink';
-import { getKPIs, getMemberSaves, getOperationalSaves } from '@/services/boardReportService';
+import { getKPIs, getMemberSaves, getOperationalSaves, getDuesAtRiskNote } from '@/services/boardReportService';
 import { getRevenueScenario } from '@/services/revenueService';
 import { getHealthDistribution, getLiveDashboard } from '@/services/memberService';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
@@ -128,6 +128,7 @@ export default function BoardReport() {
 
   const totalDues = memberSaves.reduce((sum, m) => sum + (m.duesAtRisk || 0), 0);
   const totalOpsRevenue = operationalSaves.reduce((sum, o) => sum + (o.revenueProtected || 0), 0);
+  const duesAtRiskNote = getDuesAtRiskNote();
 
   // Complaint resolution stats — use service layer (returns [] for real clubs with no data)
   const feedbackRecords = getComplaintCorrelation();
@@ -589,6 +590,11 @@ export default function BoardReport() {
               <div className="text-xs text-gray-500 mt-1">health score points per save</div>
             </div>
           </div>
+          {duesAtRiskNote && (
+            <div className="text-xs text-gray-500 italic bg-gray-50 dark:bg-white/[0.03] rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-800">
+              {duesAtRiskNote}
+            </div>
+          )}
 
           {memberSaves.map((m) => (
             <Panel key={m.name || m.memberName}>
