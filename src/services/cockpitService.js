@@ -70,11 +70,11 @@ function gateFilterItem(item) {
 
 /** @returns {CockpitPriorityItem[]} */
 export const getPriorityItems = () => {
-  const raw = _d?.priorities ?? cockpitItems;
+  const raw = _d?.priorities ?? (isGateOpen('agents') ? cockpitItems : []);
   return raw.map(gateFilterItem);
 };
 /** @returns {SinceLastLoginItem[]} */
-export const getSinceLastLogin = () => _d?.sinceLastLogin ?? staticSinceLastLogin;
+export const getSinceLastLogin = () => _d?.sinceLastLogin ?? (isGateOpen('agents') ? staticSinceLastLogin : []);
 export const sourceSystems = ['CRM', 'POS', 'Weather', 'Tee Sheet', 'Complaints'];
 
 // ─── React hook (useServiceCache migration — SHIP_PLAN §2.3) ────────────

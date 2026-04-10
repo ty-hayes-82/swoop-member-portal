@@ -2,7 +2,6 @@
 // Connects pace-of-play, staffing, and weather data to dollar-quantified
 // revenue leakage. Powers the Revenue page and the Today RevenueSummaryCard.
 
-// isGateOpen removed — data-driven: underlying services handle availability
 import { getPaceFBImpact, getBottleneckHoles, getSlowRoundRate } from './operationsService';
 import { getUnderstaffedDays } from './staffingService';
 

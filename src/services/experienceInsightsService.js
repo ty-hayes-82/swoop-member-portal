@@ -395,8 +395,6 @@ export const _init = async () => {
 };
 
 // ─── Data-driven getters ──────────────────────────────────────────────────
-// In guided mode, data is pushed via _mergeData; getters return from _d.
-// In demo/live mode, _d is hydrated by _init() from the API.
 
 /** touchpointCorrelations — returns from _d or falls back to static array */
 export function getTouchpointCorrelations() {

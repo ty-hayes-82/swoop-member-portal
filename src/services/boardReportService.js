@@ -1,4 +1,5 @@
 import { apiFetch, getClubId } from './apiClient';
+import { isGateOpen } from './demoGate';
 import { getMemberSummary as _getMemberSummary } from '@/services/memberService';
 import {
   kpis as staticKpis,
@@ -70,10 +71,10 @@ export const getKPIs = () => {
   return EMPTY_KPIS;
 };
 
-export const getMemberSaves = () => _d?.memberSaves ?? staticMemberSaves;
-export const getOperationalSaves = () => _d?.operationalSaves ?? staticOperationalSaves;
-export const getMonthlyTrends = () => _d?.monthlyTrends ?? staticMonthlyTrends;
-export const getDuesAtRiskNote = () => _d?.duesAtRiskNote ?? staticDuesAtRiskNote;
+export const getMemberSaves = () => _d?.memberSaves ?? (isGateOpen('pipeline') ? staticMemberSaves : []);
+export const getOperationalSaves = () => _d?.operationalSaves ?? (isGateOpen('pipeline') ? staticOperationalSaves : []);
+export const getMonthlyTrends = () => _d?.monthlyTrends ?? (isGateOpen('pipeline') ? staticMonthlyTrends : []);
+export const getDuesAtRiskNote = () => _d?.duesAtRiskNote ?? (isGateOpen('pipeline') ? staticDuesAtRiskNote : '');
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 
 export const getLiveBenchmarks = () => _liveBenchmarks;
