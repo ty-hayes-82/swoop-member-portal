@@ -229,7 +229,15 @@ export default async function handler(req, res) {
 
   // Build system prompt with SMS instruction
   const basePrompt = buildConciergePrompt(profile, clubName);
-  const smsInstruction = '\n\nYou are responding via SMS text message. Keep responses concise — 2-3 sentences max (under 400 characters). No formatting, no markdown, no asterisks, no bullet points. Be warm and conversational like texting a friend who works at the club. Use their first name.';
+  const smsInstruction = `\n\nCRITICAL SMS RULES:
+- You are responding via SMS text message. Your response will be sent directly as a text.
+- Keep responses concise — 2-3 sentences max (under 400 characters).
+- No formatting, no markdown, no asterisks, no bullet points, no XML, no code blocks.
+- Do NOT output function calls, tool calls, or any XML tags. Just plain text.
+- Do NOT say "let me check" or "let me look up" — just answer with what you know about the club.
+- Be warm and conversational like texting a friend who works at the club.
+- Use their first name.
+- Answer based on what you know about the member and club from your context. Do not attempt to call external tools.`;
 
   // Get session summary for context
   let conversationContext = '';
@@ -264,8 +272,10 @@ export default async function handler(req, res) {
     responseText = `Hi ${profile.first_name}! I'm having a brief technical issue. Text me again in a moment and I'll be right with you.`;
   }
 
-  // Strip any markdown that slipped through
+  // Strip any markdown, XML, or tool calls that slipped through
   responseText = responseText
+    .replace(/<function_calls>[\s\S]*$/m, '') // remove any tool call XML from end
+    .replace(/<[^>]+>/g, '')                  // remove ALL XML/HTML tags
     .replace(/\*\*/g, '')
     .replace(/##\s*/g, '')
     .replace(/^\s*[-*]\s+/gm, '')
