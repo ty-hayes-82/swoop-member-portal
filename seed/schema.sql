@@ -653,7 +653,8 @@ CREATE TABLE IF NOT EXISTS agent_actions (
   dismissal_reason    TEXT,
   timestamp           TIMESTAMPTZ DEFAULT NOW(),
   approved_at         TIMESTAMPTZ,
-  dismissed_at        TIMESTAMPTZ
+  dismissed_at        TIMESTAMPTZ,
+  agent_version       TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_agent_actions_status ON agent_actions(status);
@@ -1156,6 +1157,7 @@ CREATE TABLE IF NOT EXISTS agent_activity (
   confidence          REAL,
   auto_executed       BOOLEAN DEFAULT FALSE,
   reasoning           TEXT,
+  phase               TEXT,
   created_at          TIMESTAMPTZ DEFAULT NOW()
 );
 

@@ -1,5 +1,5 @@
 // api/mcp.js — MCP server for Managed Agent POC
-// Exposes 8 tools over JSON-RPC (HTTP transport) for the Service Save Orchestrator.
+// Exposes 10 tools over JSON-RPC (HTTP transport) for the Service Save Orchestrator.
 // Auth: x-mcp-token header validated against MCP_AUTH_TOKEN env var.
 
 import { sql } from '@vercel/postgres';
@@ -122,6 +122,43 @@ const TOOL_DEFINITIONS = [
         is_member_save: { type: 'boolean' },
       },
       required: ['club_id', 'member_id', 'intervention_type', 'health_score_before', 'outcome'],
+    },
+  },
+  {
+    name: 'get_member_list',
+    description: 'Get a filtered list of members by criteria such as health tier, archetype, score range, dues, or inactivity.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string' },
+        health_tier: { type: 'string', enum: ['healthy', 'watch', 'at-risk', 'critical'] },
+        archetype: { type: 'string' },
+        min_health_score: { type: 'integer' },
+        max_health_score: { type: 'integer' },
+        min_dues: { type: 'integer' },
+        inactive_days: { type: 'integer', description: 'Members with no activity in N days' },
+        limit: { type: 'integer', default: 20 },
+      },
+      required: ['club_id'],
+    },
+  },
+  {
+    name: 'record_agent_activity',
+    description: 'Record an agent activity entry for reasoning chain logging and audit trail.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        club_id: { type: 'string' },
+        agent_id: { type: 'string' },
+        action_type: { type: 'string' },
+        description: { type: 'string' },
+        member_id: { type: 'string' },
+        confidence: { type: 'number' },
+        auto_executed: { type: 'boolean', default: false },
+        reasoning: { type: 'string' },
+        phase: { type: 'string' },
+      },
+      required: ['club_id', 'agent_id', 'action_type', 'description'],
     },
   },
   {
@@ -404,6 +441,79 @@ async function recordInterventionOutcome({ club_id, member_id, action_id, interv
   };
 }
 
+async function getMemberList({ club_id, health_tier, archetype, min_health_score, max_health_score, min_dues, inactive_days, limit }) {
+  const conditions = [`club_id = $1`];
+  const values = [club_id];
+  let idx = 2;
+
+  if (health_tier) {
+    conditions.push(`health_tier = $${idx}`);
+    values.push(health_tier);
+    idx++;
+  }
+  if (archetype) {
+    conditions.push(`archetype = $${idx}`);
+    values.push(archetype);
+    idx++;
+  }
+  if (min_health_score != null) {
+    conditions.push(`health_score >= $${idx}`);
+    values.push(min_health_score);
+    idx++;
+  }
+  if (max_health_score != null) {
+    conditions.push(`health_score <= $${idx}`);
+    values.push(max_health_score);
+    idx++;
+  }
+  if (min_dues != null) {
+    conditions.push(`annual_dues >= $${idx}`);
+    values.push(min_dues);
+    idx++;
+  }
+  if (inactive_days != null) {
+    conditions.push(`last_activity < NOW() - INTERVAL '1 day' * $${idx}`);
+    values.push(inactive_days);
+    idx++;
+  }
+
+  const whereClause = conditions.join(' AND ');
+  const queryLimit = limit || 20;
+  values.push(queryLimit);
+
+  const result = await sql.query(
+    `SELECT member_id::text AS member_id, first_name || ' ' || last_name AS name,
+       health_score, health_tier, archetype, annual_dues, last_activity
+     FROM members
+     WHERE ${whereClause}
+     ORDER BY health_score ASC NULLS LAST
+     LIMIT $${idx}`,
+    values,
+  );
+
+  return {
+    members: result.rows.map(r => ({
+      member_id: r.member_id,
+      name: r.name?.trim(),
+      health_score: r.health_score != null ? Number(r.health_score) : null,
+      health_tier: r.health_tier,
+      archetype: r.archetype,
+      annual_dues: r.annual_dues != null ? Number(r.annual_dues) : null,
+      last_activity: r.last_activity,
+    })),
+    count: result.rows.length,
+  };
+}
+
+async function recordAgentActivity({ club_id, agent_id, action_type, description, member_id, confidence, auto_executed, reasoning, phase }) {
+  const result = await sql`
+    INSERT INTO agent_activity (club_id, agent_id, action_type, description, member_id, confidence, auto_executed, reasoning, phase)
+    VALUES (${club_id}, ${agent_id}, ${action_type}, ${description}, ${member_id || null}, ${confidence || null}, ${auto_executed || false}, ${reasoning || null}, ${phase || null})
+    RETURNING activity_id
+  `;
+  return { activity_id: result.rows[0].activity_id };
+}
+
 async function draftMemberMessage({ member_id, context, tone, channel }) {
   // Fetch member context for the prompt
   const memberResult = await sql`
@@ -465,6 +575,8 @@ const TOOL_HANDLERS = {
   get_action_status: getActionStatus,
   record_intervention_outcome: recordInterventionOutcome,
   draft_member_message: draftMemberMessage,
+  get_member_list: getMemberList,
+  record_agent_activity: recordAgentActivity,
 };
 
 // ---------------------------------------------------------------------------
