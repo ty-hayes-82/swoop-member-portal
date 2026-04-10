@@ -33,5 +33,7 @@ export const paceFBImpact = {
   avgCheckFast: 34.20,
   avgCheckSlow: 28.50,
   slowRoundsPerMonth: 668,
-  revenueLostPerMonth: 5760,
+  // Bottom-up: fast conversion 0.41 × $34.20 = $14.02, slow 0.22 × $28.50 = $6.27,
+  // delta = $7.75/round × 668 slow rounds = $5,177/mo
+  revenueLostPerMonth: 5177,
 };

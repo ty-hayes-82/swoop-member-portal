@@ -41,9 +41,12 @@ import { getUnderstaffedDays } from './staffingService';
  */
 
 
-// Static weather no-show estimate for demo. In production, derive from
-// weather_events × cancelled bookings × avg dining check.
-const WEATHER_NO_SHOW_LOSS_MONTHLY = 420;
+// Weather no-show F&B loss — derived from dailyRevenue rainy days vs same-weekday avg:
+//   Sat Jan 10: avg Sat F&B $5,250 − actual $4,600 = $650
+//   Mon Jan 26: avg Mon F&B $2,150 − actual $2,000 = $150
+//   Tue Jan 27: avg Tue F&B $1,850 − actual $3,600 = $0 (rain drove more dining)
+//   Total: $650 + $150 = $800/mo
+const WEATHER_NO_SHOW_LOSS_MONTHLY = 800;
 
 /**
  * getLeakageData — returns the F&B revenue leakage decomposition.
@@ -81,8 +84,8 @@ export function getLeakageData() {
  * Computed from pace-FB conversion gap × average check.
  *
  * Computed from revenueLostPerMonth / slowRoundsPerMonth.
- * With the dining-conversion gap data ($5,760/mo / 668 slow rounds),
- * this yields ~$9/round. Fallback uses conversion-rate delta × avg check.
+ * With the dining-conversion gap data ($5,177/mo / 668 slow rounds),
+ * this yields ~$8/round. Fallback uses conversion-rate delta × avg check.
  *
  * @returns {number}
  */

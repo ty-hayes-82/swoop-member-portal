@@ -2,6 +2,7 @@
 // Uses live API data from memberService (not static demo data)
 import { useState } from 'react';
 import { getAtRiskMembers, getWatchMembers } from '@/services/memberService';
+import { getDailyBriefing } from '@/services/briefingService';
 import { getComplaintCorrelation } from '@/services/staffingService';
 import MemberLink from '@/components/MemberLink';
 import { useNavigation } from '@/context/NavigationContext';
@@ -118,6 +119,13 @@ const ARCHETYPE_COLORS = {
   'Snowbird': '#6B7280',
 };
 
+function getTeeTimeForMember(memberId) {
+  const briefing = getDailyBriefing();
+  const atRiskTeetimes = briefing?.todayRisks?.atRiskTeetimes;
+  if (!Array.isArray(atRiskTeetimes)) return null;
+  return atRiskTeetimes.find(t => t.memberId === memberId) || null;
+}
+
 export default function MemberAlerts() {
   const { navigate } = useNavigation();
   const members = buildPriorityList();
@@ -196,6 +204,7 @@ export default function MemberAlerts() {
             : m.score < 50 ? '#f59e0b'
             : '#6B7280';
           const arcColor = ARCHETYPE_COLORS[m.archetype] || '#9CA3AF';
+          const teeTime = getTeeTimeForMember(m.memberId);
 
           return (
             <div
@@ -230,6 +239,14 @@ export default function MemberAlerts() {
                       title={`$${m.duesAnnual.toLocaleString()}/yr ${m.score < 50 ? 'at risk' : 'in dues'}`}
                     >
                       ${Math.round(m.duesAnnual / 1000)}K{m.score < 50 ? ' at risk' : '/yr'}
+                    </span>
+                  )}
+                  {teeTime && (
+                    <span
+                      className="text-[10px] font-bold py-0.5 px-2 rounded-[10px] uppercase tracking-wide"
+                      style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
+                    >
+                      Tees off at {teeTime.time}
                     </span>
                   )}
                 </div>

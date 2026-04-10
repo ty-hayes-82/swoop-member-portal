@@ -103,7 +103,8 @@ const DEFAULT_PACE_FB_IMPACT = {
   avgCheckFast: 34.2,
   avgCheckSlow: 28.5,
   slowRoundsPerMonth: 668,
-  revenueLostPerMonth: 5760,
+  // Bottom-up: (0.41 × $34.20 - 0.22 × $28.50) × 668 = $5,177/mo
+  revenueLostPerMonth: 5177,
 };
 
 const toNumber = (value, fallback = 0) => {

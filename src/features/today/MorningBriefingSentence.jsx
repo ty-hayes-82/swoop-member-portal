@@ -117,7 +117,26 @@ export default function MorningBriefingSentence() {
   const { navigate } = useNavigation();
   const { segments, sources } = useMemo(buildSegments, []);
 
-  if (segments.length === 0) return null;
+  // Members-only segment: when members loaded but no tee-sheet data yet
+  if (segments.length === 0) {
+    const summary = getMemberSummary();
+    const riskCount = (summary.atRisk || 0) + (summary.critical || 0);
+    const duesAtRisk = summary.potentialDuesAtRisk || 0;
+    if ((summary.total || summary.totalMembers || 0) > 0 && riskCount > 0) {
+      const duesText = duesAtRisk > 0 ? `$${Math.round(duesAtRisk / 1000)}K` : '';
+      const membersText = `${riskCount} member${riskCount === 1 ? '' : 's'} need attention`;
+      const duesClause = duesText ? ` \u2014 ${duesText} in annual dues at risk` : '';
+      return (
+        <div id="today-briefing" data-story="briefing" className="fade-in-up">
+          <StoryHeadline
+            variant="insight"
+            headline={<>{membersText}{duesClause}. Import your tee sheet to see who\u2019s here today.</>}
+          />
+        </div>
+      );
+    }
+    return null;
+  }
 
   const hasAtRisk = segments.some(s => s.key === 'at-risk');
   const handleScrollToAlerts = () => {

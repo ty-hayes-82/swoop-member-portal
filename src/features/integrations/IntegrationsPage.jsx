@@ -147,13 +147,13 @@ export default function IntegrationsPage() {
   // Pillar 3 (Prove It) — quantify each missing integration in dollars.
   // Dollar values flow from revenueService.getLeakageData() (pace + staffing + weather)
   // with COMBOS (src/data/integrations.js) providing member-CRM KPI fallback.
-  // Canonical fallbacks match DataHealthDashboard: PACE $5,760 / STAFFING $3,400 /
-  // WEATHER $420 / TOTAL $9,580 if the demo gates are closed.
+  // Canonical fallbacks match seed data: PACE $5,177 / STAFFING $3,400 /
+  // WEATHER $800 / TOTAL $9,377 if the demo gates are closed.
   const leakage = getLeakageData();
-  const paceDollars = leakage?.PACE_LOSS || 5760;
+  const paceDollars = leakage?.PACE_LOSS || 5177;
   const staffingDollars = leakage?.STAFFING_LOSS || 3400;
-  const weatherDollars = leakage?.WEATHER_LOSS || 420;
-  const totalLeakage = leakage?.TOTAL || 9580;
+  const weatherDollars = leakage?.WEATHER_LOSS || 800;
+  const totalLeakage = leakage?.TOTAL || 9377;
   const memberCrmCombo = COMBOS.find((c) => c.id === 'member-crm-pos');
   const memberCrmKpi = memberCrmCombo?.kpi?.value || '$128K'; // lint-no-hardcoded-dollars: allow — COMBOS KPI fallback (data lives in src/data/integrations.js)
 

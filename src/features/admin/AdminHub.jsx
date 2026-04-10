@@ -38,7 +38,7 @@ const DOMAIN_UNLOCK_IMPACT = {
     label: 'POS / F&B',
     sourceSystem: 'POS',
     features: ['F&B revenue decomposition', 'Dining conversion correlation', 'Post-round dining stats'],
-    dollar: '$9,580/mo full F&B leakage decomposition', // lint-no-hardcoded-dollars: allow — domain unlock teaser shown when source is disconnected
+    dollar: '$9,377/mo full F&B leakage decomposition', // lint-no-hardcoded-dollars: allow — domain unlock teaser shown when source is disconnected
   },
   EMAIL: {
     label: 'Email & Events',

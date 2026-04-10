@@ -362,7 +362,14 @@ export default function TodayView() {
           {[
             { icon: courseCondition?.icon || '🌤️', bg: '#ecfdf5', label: 'Course Condition', value: courseCondition?.label || '—', color: courseCondition?.color || '#9ca3af', source: 'Weather API' },
             roundsToday > 0 ? { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: String(roundsToday), color: '#6366f1', source: 'Tee Sheet' } : null,
-            { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732', source: 'Member CRM' },
+            (() => {
+              const teeSheet = getTodayTeeSheet();
+              const atRiskOnSheet = teeSheet.filter(t => (t.healthScore ?? 100) < 50).length;
+              if (teeSheet.length > 0 && atRiskOnSheet > 0) {
+                return { icon: '🚨', bg: '#fef2f2', label: 'At-Risk on Sheet', value: String(atRiskOnSheet), color: '#ef4444', source: 'Tee Sheet + CRM' };
+              }
+              return { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732', source: 'Member CRM' };
+            })(),
             { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: cockpitLoading && !cockpitData ? '...' : String(priorities.length), color: '#8b5cf6', source: 'Analytics' },
           ].filter(Boolean).map((stat) => (
             <div

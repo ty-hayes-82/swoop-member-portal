@@ -1,8 +1,8 @@
 // RevenuePage — Pillar 3 (PROVE IT) revenue leakage decomposition
 //
-// The storyboard moment: "$9,580 per month in F&B revenue lost to operational
-// failures he didn't know existed. $5,760 from pace of play. $3,400 from
-// understaffed Fridays. $420 from weather no-shows. Three root causes. Three
+// The storyboard moment: "$9,377 per month in F&B revenue lost to operational
+// failures he didn't know existed. $5,177 from pace of play. $3,400 from
+// understaffed Fridays. $800 from weather no-shows. Three root causes. Three
 // different source systems. One number the GM has never seen before."
 //
 // This page is the proof of Layer 3: cross-domain revenue attribution that

@@ -2,7 +2,7 @@
 // Listens for swoop:data-imported, shows category-specific insight for 8s
 
 import { useState, useEffect, useCallback } from 'react';
-import { getMemberSummary, getAtRiskMembers, getDecayingMembers } from '@/services/memberService';
+import { getMemberSummary, getAtRiskMembers, getDecayingMembers, getWatchMembers } from '@/services/memberService';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getStaffingSummary, getComplaintCorrelation } from '@/services/staffingService';
 import { getMonthlyRevenueSummary } from '@/services/operationsService';
@@ -42,16 +42,30 @@ function buildMessage(category) {
     case 'complaints': {
       const complaints = getComplaintCorrelation();
       const open = complaints.filter(c => c.status !== 'resolved');
-      const oldest = open.reduce((max, c) => {
-        const d = c.daysOpen ?? c.ageDays ?? 0;
-        return d > max ? d : max;
-      }, 0);
-      return `${open.length} open complaints found. Oldest: ${oldest || 14} days. 2 linked to at-risk members.`;
+      const atRisk = getAtRiskMembers();
+      const atRiskIds = new Set(atRisk.map(m => m.memberId));
+      const linked = open.filter(c => atRiskIds.has(c.memberId));
+      // Find the highest-priority complaint member (longest open + at-risk)
+      const topComplaint = [...open].sort((a, b) => (b.daysOpen ?? b.ageDays ?? 0) - (a.daysOpen ?? a.ageDays ?? 0))
+        .find(c => atRiskIds.has(c.memberId)) || open[0];
+      const topMember = atRisk.find(m => m.memberId === topComplaint?.memberId);
+      const name = topMember?.name || topComplaint?.memberName || 'James Whitfield';
+      const days = topComplaint?.daysOpen ?? topComplaint?.ageDays ?? 14;
+      const dues = topMember?.duesAnnual ? `${Math.round(topMember.duesAnnual / 1000)}K` : '18K';
+      const category = topComplaint?.category ? ` ${topComplaint.category}` : '';
+      return `${name}'s${category} complaint is ${days} days old \u2014 $${dues} dues at risk. ${open.length} open complaints, ${linked.length} linked to at-risk members.`;
     }
     case 'email': {
       const decaying = getDecayingMembers();
       const count = decaying?.length || 8;
-      return `Email engagement mapped \u2014 ${count} members showing decay pattern. Email drops predict resignation 6\u20138 weeks early.`;
+      // Find top decaying member and cross-reference dues from at-risk/watch lists
+      const topDecay = decaying?.length ? [...decaying].sort((a, b) => (a.trend ?? 0) - (b.trend ?? 0))[0] : null;
+      const allMembers = [...(getAtRiskMembers() || []), ...(getWatchMembers() || [])];
+      const matchedMember = topDecay ? allMembers.find(m => m.memberId === topDecay.memberId) : null;
+      const name = topDecay?.name || 'Kevin Hurst';
+      const trend = topDecay ? Math.abs(topDecay.trend) : 91;
+      const dues = matchedMember?.duesAnnual ? `$${Math.round(matchedMember.duesAnnual / 1000)}K` : '$18K';
+      return `${name}\u2019s email opens dropped ${trend}% in 6 weeks \u2014 ${dues} dues. ${count} members match the pattern that preceded Kevin Hurst\u2019s resignation.`;
     }
     case 'weather': // staffing gate alias
     case 'staffing': {

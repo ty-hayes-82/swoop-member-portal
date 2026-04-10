@@ -233,7 +233,7 @@ const SwoopSidebar = () => {
                   style={{ borderLeftWidth: '3px', borderLeftColor: '#60A5FA' }}
                 >
                   <div className="text-[11px] font-bold text-white leading-tight">03 · Revenue Leakage</div>
-                  <div className="text-[9px] text-gray-400">$9,580/mo · ~3 min</div>
+                  <div className="text-[9px] text-gray-400">$9,377/mo · ~3 min</div>
                 </button>
               </div>
             </div>

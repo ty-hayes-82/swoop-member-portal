@@ -6,7 +6,7 @@ import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import MemberLink from '@/components/MemberLink';
-import { getKPIs, getMemberSaves, getOperationalSaves, getDuesAtRiskNote } from '@/services/boardReportService';
+import { getKPIs, getMemberSaves, getOperationalSaves, getDuesAtRiskNote, getMonthlyTrends } from '@/services/boardReportService';
 import { getRevenueScenario } from '@/services/revenueService';
 import { getHealthDistribution, getLiveDashboard } from '@/services/memberService';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
@@ -145,6 +145,15 @@ export default function BoardReport() {
         return sum + (Number.isFinite(days) ? days : 0);
       }, 0) / resolvedWithDates.length).toFixed(1)
     : null;
+
+  // Compute response-time improvement % from monthlyTrends (first → last)
+  const trends = getMonthlyTrends();
+  const responseTimeImprovement = (() => {
+    if (!trends || trends.length < 2) return 0;
+    const first = trends[0].responseTime;
+    const last = trends[trends.length - 1].responseTime;
+    return first > 0 ? Math.round(((first - last) / first) * 100) : 0;
+  })();
 
   const isEmpty = kpis.every(k => k.value === 0) && memberSaves.length === 0;
 
@@ -301,7 +310,7 @@ export default function BoardReport() {
             </p>
             <p className="text-gray-600 leading-relaxed">
               Staffing alignment and proactive scheduling adjustments prevented service gaps on high-demand days. The
-              operational response improvements continue to compound, with response times improving 48% since launch.
+              operational response improvements continue to compound, with response times improving {responseTimeImprovement}% since launch.
             </p>
           </Panel>
 

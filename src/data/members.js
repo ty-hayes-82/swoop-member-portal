@@ -218,6 +218,7 @@ export const memberProfiles = {
       { id: 'waitlist', label: 'Missed 3 Saturday waitlists in a row', timestamp: '2026-01-12T07:45:00Z', source: 'Demand Optimizer', confidence: '78%' },
     ],
     activity: [
+      { id: 'anne0', timestamp: 'Nov 10 · 6:15 PM', type: 'Events', detail: 'Couples wine dinner with Marcus — table of 6, stayed 2.5 hrs' },
       { id: 'anne1', timestamp: 'Jan 12 · 10:10 AM', type: 'Waitlist', detail: 'Declined Saturday slot due to late notification' },
       { id: 'anne2', timestamp: 'Jan 07 · 8:40 AM', type: 'Golf', detail: '9 holes · walked off after 7 due to pace' },
       { id: 'anne3', timestamp: 'Dec 28 · 12:05 PM', type: 'Dining', detail: 'Canceled lounge reservation last minute' },
@@ -273,6 +274,7 @@ export const memberProfiles = {
       { id: 'spend', label: 'Only minimum F&B spend since Nov', timestamp: '2026-01-15T12:00:00Z', source: 'POS', confidence: '82%' },
     ],
     activity: [
+      { id: 'rob0', timestamp: 'Jan 08 · 3:22 PM', type: 'Feedback', detail: 'Complaint: "Asked for private dining room for client lunch — told none available despite empty rooms"' },
       { id: 'rob1', timestamp: 'Jan 09 · 12:48 PM', type: 'Dining', detail: 'Minimum spend lunch · no guests' },
       { id: 'rob2', timestamp: 'Dec 21 · 5:12 PM', type: 'Email', detail: 'Ignored “Let us host your client dinner” invite' },
       { id: 'rob3', timestamp: 'Nov 30 · 2:05 PM', type: 'Golf', detail: 'Last recorded round' },
@@ -328,6 +330,7 @@ export const memberProfiles = {
       { id: 'events', label: 'Declined last 3 social invitations', timestamp: '2026-01-12T09:10:00Z', source: 'Events', confidence: '69%' },
     ],
     activity: [
+      { id: 'chen0', timestamp: 'Dec 18 · 9:04 AM', type: 'Email', detail: 'Opened holiday gala invite — clicked RSVP but abandoned before confirming' },
       { id: 'chen1', timestamp: 'Jan 13 · 6:42 PM', type: 'Dining', detail: 'Canceled wine dinner RSVP (schedule conflict)' },
       { id: 'chen2', timestamp: 'Jan 09 · 8:05 PM', type: 'Lounge', detail: 'Stopped by lounge for 30 min · no spend' },
       { id: 'chen3', timestamp: 'Jan 05 · 1:20 PM', type: 'Dining', detail: 'Grab-and-go salad · $18' },
@@ -383,6 +386,7 @@ export const memberProfiles = {
       { id: 'complaint', label: 'Mentioned slow-driver issue twice without follow-up', timestamp: '2026-01-06T06:55:00Z', source: 'CRM', confidence: '64%' },
     ],
     activity: [
+      { id: 'mills0', timestamp: 'Dec 14 · 7:50 AM', type: 'Dining', detail: 'Post-practice flat white + breakfast sandwich — $22 · asked about marshal schedule' },
       { id: 'mills1', timestamp: 'Jan 14 · 6:48 AM', type: 'Practice', detail: 'Driving range session — no clubhouse spend' },
       { id: 'mills2', timestamp: 'Jan 11 · 2:15 PM', type: 'Golf', detail: '18 holes · +45 mins pace · left club immediately' },
       { id: 'mills3', timestamp: 'Jan 05 · 7:35 AM', type: 'Complaint', detail: 'Flagged slow marshal response on holes 9–10' },
@@ -404,6 +408,118 @@ export const memberProfiles = {
     ],
     auditTrail: [
       { id: 'recommend', status: 'Flagged by Operations', owner: 'Operations Intelligence', timestamp: '2026-01-14T07:05:00Z' },
+    ],
+  },
+  mbr_t03: {
+    memberId: 'mbr_t03',
+    name: 'Kevin Hurst',
+    tier: 'Full Golf',
+    joinDate: '2022-03-15',
+    archetype: 'Declining',
+    healthScore: 18,
+    trend: [72, 68, 60, 48, 34, 22, 18],
+    duesAnnual: 18000,
+    memberValueAnnual: 22000,
+    preferredChannel: 'Email',
+    lastSeenLocation: 'Grill Room',
+    family: [],
+    preferences: {
+      favoriteSpots: ['North course', 'Grill Room bar'],
+      teeWindows: 'Any morning',
+      dining: 'Grill Room solo, quick service',
+      notes: 'Regular in the Saturday foursome. Responds to email only.',
+    },
+    contact: {
+      phone: '(770) 555-0147',
+      email: 'kevin.hurst@example.com',
+      preferredChannel: 'Email',
+      lastOutreach: '2025-12-04T10:12:00Z',
+    },
+    riskSignals: [
+      { id: 'email', label: 'Email open rate crashed from 80% to 0% in 8 weeks', timestamp: '2025-12-20T08:00:00Z', source: 'Email', confidence: '91%' },
+      { id: 'rounds', label: 'Zero rounds since November — was playing 10/month', timestamp: '2025-12-31T08:00:00Z', source: 'Tee Sheet', confidence: '88%' },
+      { id: 'resign', label: 'Resignation submitted Jan 8 — no outreach attempted', timestamp: '2026-01-08T10:00:00Z', source: 'CRM', confidence: '100%' },
+    ],
+    activity: [
+      { id: 'kh1', timestamp: 'Oct 12 · 7:30 AM', type: 'Golf', detail: '18 holes w/ regular foursome — 4:02 round, normal pace' },
+      { id: 'kh2', timestamp: 'Nov 8 · 8:15 AM', type: 'Golf', detail: '9 holes only — left after front nine, said "not feeling it"' },
+      { id: 'kh3', timestamp: 'Nov 22 · 6:45 PM', type: 'Dining', detail: 'Solo dinner at Grill Room — $38 check, no conversation with staff' },
+      { id: 'kh4', timestamp: 'Dec 4 · 10:12 AM', type: 'Email', detail: 'Last email opened — "Holiday Tournament" invite. No click.' },
+      { id: 'kh5', timestamp: 'Jan 8', type: 'CRM', detail: 'Resignation submitted via email. No exit interview requested.' },
+    ],
+    drafts: {
+      callScript: [
+        'This is a post-mortem — Kevin already resigned Jan 8.',
+        'Ask what one thing could have changed his mind.',
+        'Document answer for pattern recognition on future Declining members.',
+      ],
+      emailSubject: 'We noticed too late, Kevin',
+      emailBody: `Kevin — I owe you a call I should have made in November. We saw the signs and didn't act. If you'd be open to a 10-minute conversation about what we could have done differently, I'd genuinely appreciate it.
+
+— Alice`,
+      smsDraft: 'Kevin, it\'s Alice from Pinetree. I know we\'re past the point — but I\'d value 10 minutes of your time to hear what we missed.',
+    },
+    staffNotes: [
+      { id: 'note_hurst_1', author: 'Pro Shop', department: 'Golf', text: 'Regular in the Saturday foursome with Bill Evans. Competitive handicap.', timestamp: '2025-10-15T09:00:00Z' },
+    ],
+    auditTrail: [
+      { id: 'recommend', status: 'Resignation received — no prior outreach', owner: 'Member Pulse', timestamp: '2026-01-08T10:05:00Z' },
+    ],
+  },
+  mbr_117: {
+    memberId: 'mbr_117',
+    name: 'Linda Leonard',
+    tier: 'Social',
+    joinDate: '2025-06-10',
+    archetype: 'Ghost',
+    healthScore: 12,
+    trend: [64, 58, 42, 28, 18, 14, 12],
+    duesAnnual: 18000,
+    memberValueAnnual: 24000,
+    preferredChannel: 'Call',
+    lastSeenLocation: 'Event lawn',
+    family: [],
+    preferences: {
+      favoriteSpots: ['Wine cellar dining room', 'Event lawn'],
+      teeWindows: 'N/A — social member',
+      dining: 'Wine dinners, always table with Diane Prescott. Enjoys the social atmosphere.',
+      notes: 'Joined after her husband passed away. Friends encouraged her to join for the social calendar. Needs personal, warm outreach — not transactional.',
+    },
+    contact: {
+      phone: '(480) 555-0162',
+      email: 'linda.leonard@example.com',
+      preferredChannel: 'Call',
+      lastOutreach: null,
+    },
+    riskSignals: [
+      { id: 'visits', label: 'Zero visits since October — 3 months dark', timestamp: '2025-12-31T08:00:00Z', source: 'Access Log', confidence: '94%' },
+      { id: 'email', label: 'Stopped opening emails entirely in November', timestamp: '2025-11-20T08:00:00Z', source: 'Email', confidence: '86%' },
+      { id: 'social', label: 'Bridge partner Diane Prescott asked staff if Linda was okay — no follow-up logged', timestamp: '2025-12-08T14:00:00Z', source: 'CRM', confidence: '79%' },
+    ],
+    activity: [
+      { id: 'll1', timestamp: 'Aug 14 · 6:30 PM', type: 'Events', detail: 'Wine dinner #1 — sat with Diane Prescott\'s table. Stayed until close. Staff noted she was "glowing."' },
+      { id: 'll2', timestamp: 'Aug 28 · 6:45 PM', type: 'Events', detail: 'Wine dinner #2 — brought a guest (neighbor). $180 check, bought a case of the featured Pinot.' },
+      { id: 'll3', timestamp: 'Sep 12 · 7:00 PM', type: 'Events', detail: 'Wine dinner #3 — arrived early, helped arrange flowers. Last recorded visit.' },
+      { id: 'll4', timestamp: 'Dec 8 · 2:15 PM', type: 'CRM', detail: 'Diane Prescott asked front desk: "Is Linda okay? She hasn\'t been to bridge in weeks." No follow-up logged.' },
+      { id: 'll5', timestamp: 'Jan 15', type: 'CRM', detail: 'Resignation submitted by mail. No exit interview. No outreach ever attempted.' },
+    ],
+    drafts: {
+      callScript: [
+        'This is personal — Linda joined after losing her husband. Lead with empathy, not retention.',
+        'Ask how she\'s doing. Mention Diane misses her at bridge.',
+        'If she\'s open to it, offer to have Diane call her directly — peer connection matters more than club programming.',
+      ],
+      emailSubject: 'We miss you, Linda — so does Diane',
+      emailBody: `Linda — I hope you're doing well. Diane Prescott mentioned she misses seeing you at bridge night and I realized we never reached out to check in. That's on us. If you'd ever like to come back for a wine dinner — no pressure, no paperwork — I'd love to hold a seat for you at Diane's table. You brought something special to those evenings.
+
+— Alice`,
+      smsDraft: 'Linda, it\'s Alice from Pinetree. Just checking in — Diane mentioned she\'d love to see you at bridge. No agenda, just wanted you to know you\'re missed.',
+    },
+    staffNotes: [
+      { id: 'note_leonard_1', author: 'Events Director', department: 'Events', text: 'Joined June 2025 after husband passed. Friends (Diane Prescott\'s circle) encouraged her. Attended 3 wine dinners in first 6 weeks — very engaged. Then went silent.', timestamp: '2025-09-20T16:00:00Z' },
+    ],
+    auditTrail: [
+      { id: 'recommend', status: 'Resignation received — zero outreach in member history', owner: 'Member Pulse', timestamp: '2026-01-15T10:00:00Z' },
     ],
   },
 };
