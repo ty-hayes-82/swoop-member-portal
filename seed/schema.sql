@@ -1065,7 +1065,8 @@ CREATE TABLE IF NOT EXISTS playbook_runs (
   completed_at        TIMESTAMPTZ,
   health_score_at_start REAL,
   health_score_at_end REAL,
-  outcome             TEXT
+  outcome             TEXT,
+  agent_session_id    TEXT                                  -- Anthropic Managed Agent session ID for wake events
 );
 
 CREATE INDEX IF NOT EXISTS idx_playbook_runs_club ON playbook_runs(club_id, status);

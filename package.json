@@ -24,6 +24,7 @@
     "vision:full": "npm run vision:capture && npm run vision:critique"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.87.0",
     "@sentry/react": "^10.48.0",
     "@vercel/postgres": "^0.10.0",
     "clsx": "^2.1.1",
