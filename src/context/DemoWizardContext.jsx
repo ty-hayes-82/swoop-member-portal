@@ -4,8 +4,9 @@
  */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { isGuidedMode, isFileLoaded, loadFile, unloadFile, loadAllFiles, resetGuidedMode, getLoadedFiles, getLoadedGates, SOURCES_CHANGED_EVENT } from '@/services/demoGate';
-import { DEMO_FILES, ALL_FILE_IDS, ALL_SOURCE_IDS } from '@/config/demoSources';
+import { DEMO_FILES, ALL_FILE_IDS, ALL_SOURCE_IDS, FILE_GROUPS } from '@/config/demoSources';
 import { refreshWeatherForLocation } from '@/services/weatherService';
+import { apiFetch } from '@/services/apiClient';
 
 const DemoWizardCtx = createContext(null);
 
@@ -15,6 +16,7 @@ export function DemoWizardProvider({ children }) {
   const [loadedGates, setLoadedGates] = useState(() => new Set(getLoadedGates()));
   const [wizardOpen, setWizardOpen] = useState(guided);
   const [renderKey, setRenderKey] = useState(0);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     const handler = () => {
@@ -28,7 +30,24 @@ export function DemoWizardProvider({ children }) {
 
   const importFile = useCallback(async (fileId) => {
     const fileDef = DEMO_FILES.find(f => f.id === fileId);
-    if (fileDef) loadFile(fileId, fileDef.gateId);
+    if (!fileDef) return;
+
+    // Track file in UI via demoGate (sessionStorage)
+    loadFile(fileId, fileDef.gateId);
+
+    // Call real API to copy seed data for this category
+    setImporting(true);
+    try {
+      await apiFetch('/api/guided-copy', {
+        method: 'POST',
+        body: JSON.stringify({ category: fileDef.gateId }),
+      });
+      window.dispatchEvent(new CustomEvent('swoop:data-imported'));
+    } catch (err) {
+      console.error('[DemoWizard] guided-copy failed:', err);
+    } finally {
+      setImporting(false);
+    }
 
     // When club profile is imported, extract city/state and connect weather
     if (fileId === 'JCM_Club_Profile') {
@@ -47,7 +66,6 @@ export function DemoWizardProvider({ children }) {
               localStorage.setItem('swoop_club_city', values[cityIdx]);
               if (stateIdx >= 0) localStorage.setItem('swoop_club_state', values[stateIdx]);
               if (nameIdx >= 0) localStorage.setItem('swoop_club_name', values[nameIdx]);
-              // Fetch real weather for this location, then trigger re-render
               refreshWeatherForLocation().then(() => {
                 setRenderKey(k => k + 1);
               });
@@ -64,8 +82,26 @@ export function DemoWizardProvider({ children }) {
     if (fileDef) unloadFile(fileId, fileDef.gateId, siblingIds);
   }, []);
 
-  const importAll = useCallback(() => {
+  const importAll = useCallback(async () => {
+    // Track all files in UI via demoGate
     loadAllFiles(ALL_FILE_IDS, ALL_SOURCE_IDS);
+
+    // Copy seed data category-by-category (order matters for FK dependencies)
+    const categoryOrder = ['pipeline', 'members', 'tee-sheet', 'fb', 'complaints', 'email', 'weather', 'pace', 'agents'];
+    setImporting(true);
+    try {
+      for (const category of categoryOrder) {
+        await apiFetch('/api/guided-copy', {
+          method: 'POST',
+          body: JSON.stringify({ category }),
+        });
+      }
+      window.dispatchEvent(new CustomEvent('swoop:data-imported'));
+    } catch (err) {
+      console.error('[DemoWizard] guided-copy importAll failed:', err);
+    } finally {
+      setImporting(false);
+    }
   }, []);
 
   const startOver = useCallback(() => {
@@ -95,6 +131,7 @@ export function DemoWizardProvider({ children }) {
       importFile,
       removeFile,
       importAll,
+      importing,
       startOver,
       wizardOpen,
       setWizardOpen,

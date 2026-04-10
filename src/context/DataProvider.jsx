@@ -5,7 +5,6 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
 import { getDataMode, SOURCES_CHANGED_EVENT } from '@/services/demoGate';
-import { rebuildAllData } from '@/services/guidedDataLoader';
 import { _init as initOps }      from '@/services/operationsService';
 import { _init as initMembers }  from '@/services/memberService';
 import { _init as initStaffing } from '@/services/staffingService';
@@ -49,22 +48,20 @@ export function DataProvider({ children }) {
       return;
     }
 
-    // Demo/guided modes use static data — skip API calls entirely
+    // Demo mode uses static data — skip API calls entirely
     // API calls return 401 for demo tokens and would corrupt static _d
     // Exception: weather can load via Google Weather API if city is stored
     const mode = getDataMode();
-    if (mode === 'demo' || mode === 'guided') {
+    if (mode === 'demo') {
       if (localStorage.getItem('swoop_club_city')) {
         initWeather().catch(() => {});
-      }
-      // In guided mode, rebuild data from whatever gates are already open
-      // (handles page refresh with existing sessionStorage state)
-      if (mode === 'guided') {
-        rebuildAllData();
       }
       setReady(true);
       return;
     }
+
+    // Guided mode: call _init() like live mode — APIs return real DB data
+    // Fresh demo club starts empty; swoop:data-imported bumps refreshKey to re-init
 
     // 10-second timeout — Neon cold-starts can take 3-5s
     const timeout = new Promise(resolve =>
@@ -96,13 +93,10 @@ export function DataProvider({ children }) {
     return () => window.removeEventListener('swoop:data-imported', handler);
   }, []);
 
-  // In guided mode, rebuild service data when gates change (file import/unload)
+  // In guided mode, bump refreshKey when gates change so services re-init with fresh DB data
   useEffect(() => {
     if (getDataMode() !== 'guided') return;
-    const handler = () => {
-      rebuildAllData();
-      setRefreshKey(k => k + 1);
-    };
+    const handler = () => setRefreshKey(k => k + 1);
     window.addEventListener(SOURCES_CHANGED_EVENT, handler);
     return () => window.removeEventListener(SOURCES_CHANGED_EVENT, handler);
   }, []);

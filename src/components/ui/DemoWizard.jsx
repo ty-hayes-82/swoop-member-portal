@@ -5,7 +5,6 @@
 import { useState } from 'react';
 import { useDemoWizard } from '@/context/DemoWizardContext';
 import { DEMO_FILES, FILE_GROUPS } from '@/config/demoSources';
-import { loadFile } from '@/services/demoGate';
 import DemoDataPreview from './DemoDataPreview';
 
 export default function DemoWizard() {
@@ -15,7 +14,7 @@ export default function DemoWizard() {
 
   if (!ctx?.isGuided) return null;
 
-  const { loadedFiles, fileCount, totalFiles, importFile, importAll, wizardOpen, setWizardOpen } = ctx;
+  const { loadedFiles, fileCount, totalFiles, importFile, importAll, importing, wizardOpen, setWizardOpen } = ctx;
   const allLoaded = fileCount === totalFiles;
 
   if (!wizardOpen) {
@@ -57,8 +56,9 @@ export default function DemoWizard() {
         {/* Progress */}
         <div className="px-4 py-2.5 border-b border-gray-200 dark:border-gray-800 shrink-0">
           <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">
-              {allLoaded ? 'All files imported' : `${fileCount} of ${totalFiles} files imported`}
+            <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+              {importing && <span className="inline-block w-3 h-3 rounded-full border-2 border-gray-300 border-t-brand-500 animate-spin" />}
+              {importing ? 'Importing data...' : allLoaded ? 'All files imported' : `${fileCount} of ${totalFiles} files imported`}
             </span>
             <div className="flex gap-2">
               {fileCount > 0 && (
@@ -72,7 +72,8 @@ export default function DemoWizard() {
               {!allLoaded && (
                 <button
                   onClick={importAll}
-                  className="text-[10px] font-bold text-brand-500 bg-transparent border-none cursor-pointer hover:text-brand-600 focus-visible:ring-2 focus-visible:ring-brand-500"
+                  disabled={importing}
+                  className={`text-[10px] font-bold bg-transparent border-none focus-visible:ring-2 focus-visible:ring-brand-500 ${importing ? 'text-gray-400 cursor-not-allowed' : 'text-brand-500 cursor-pointer hover:text-brand-600'}`}
                 >
                   Import All
                 </button>
@@ -108,7 +109,8 @@ export default function DemoWizard() {
                   return (
                     <button
                       key={file.id}
-                      onClick={() => isLoaded ? null : setPreviewFile(file)}
+                      disabled={importing}
+                      onClick={() => (isLoaded || importing) ? null : setPreviewFile(file)}
                       className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 mb-0.5 border-none cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-brand-500 ${
                         isLoaded
                           ? 'bg-success-50 dark:bg-success-500/10'
@@ -146,10 +148,10 @@ export default function DemoWizard() {
               </span>
             </div>
             <button
+              disabled={importing}
               onClick={() => {
-                if (!ctx.isGateOpen('agents')) {
-                  // Use demoGate's loadFile directly — writes to sessionStorage + dispatches event
-                  loadFile('_agents', 'agents');
+                if (!ctx.isGateOpen('agents') && !importing) {
+                  importFile('JCM_Club_Profile_Agents');
                 }
               }}
               className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 mb-0.5 border-none cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-brand-500 ${
