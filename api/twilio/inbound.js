@@ -229,7 +229,7 @@ export default async function handler(req, res) {
 
   // Build system prompt with SMS instruction
   const basePrompt = buildConciergePrompt(profile, clubName);
-  const smsInstruction = '\n\nYou are responding via SMS text message. Keep responses under 300 characters (about 2 sentences). No formatting, no markdown, no asterisks, no bullet points. Be warm and conversational like texting a friend who works at the club.';
+  const smsInstruction = '\n\nYou are responding via SMS text message. Keep responses concise — 2-3 sentences max (under 400 characters). No formatting, no markdown, no asterisks, no bullet points. Be warm and conversational like texting a friend who works at the club. Use their first name.';
 
   // Get session summary for context
   let conversationContext = '';
@@ -254,7 +254,7 @@ export default async function handler(req, res) {
     const client = getAnthropicClient();
     const result = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 200,
+      max_tokens: 300,
       system: systemPrompt,
       messages,
     });
@@ -284,34 +284,9 @@ export default async function handler(req, res) {
 
   console.log('[twilio-inbound] responding to', From, ':', responseText.slice(0, 80));
 
-  // Send reply via Twilio API (works better than TwiML on trial accounts)
-  try {
-    const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
-    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-    const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-    const twilioFrom = process.env.TWILIO_PHONE_NUMBER;
-
-    const sendBody = new URLSearchParams({
-      To: From,
-      Body: responseText,
-    });
-    if (messagingSid) sendBody.set('MessagingServiceSid', messagingSid);
-    else if (twilioFrom) sendBody.set('From', twilioFrom);
-    else sendBody.set('From', To); // echo back the number they texted
-
-    await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Basic ' + Buffer.from(`${twilioAccountSid}:${twilioAuthToken}`).toString('base64'),
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: sendBody.toString(),
-    });
-  } catch (sendErr) {
-    console.error('[twilio-inbound] send error:', sendErr.message);
-  }
-
-  // Return empty TwiML so Twilio doesn't also send a default reply
+  // Reply via TwiML (clean, no trial prefix on upgraded account)
   res.setHeader('Content-Type', 'text/xml');
-  return res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+  return res.status(200).send(
+    `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapeXml(responseText)}</Message></Response>`
+  );
 }
