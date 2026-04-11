@@ -268,6 +268,7 @@ function GMIntelFeed({ events, loading }) {
 export default function SplitScreenDemo() {
   const [agentEvents, setAgentEvents] = useState([]);
   const [agentLoading, setAgentLoading] = useState(false);
+  const [mobileTab, setMobileTab] = useState('chat'); // 'chat' | 'feed'
 
   async function handleMessageSent(memberMessage, conciergeResponse) {
     setAgentLoading(true);
@@ -304,14 +305,34 @@ export default function SplitScreenDemo() {
   }
 
   return (
-    <div className="flex h-screen" style={{ height: '100dvh' }}>
-      {/* LEFT: Concierge Chat (60%) */}
-      <div className="w-[60%] border-r border-gray-300">
+    <div className="flex flex-col md:flex-row h-screen" style={{ height: '100dvh' }}>
+      {/* Mobile tab toggle */}
+      <div className="md:hidden flex-shrink-0 flex border-b border-gray-300 bg-white">
+        <button
+          onClick={() => setMobileTab('chat')}
+          className={`flex-1 py-3 text-sm font-semibold text-center transition-colors ${
+            mobileTab === 'chat' ? 'text-emerald-600 border-b-2 border-emerald-600 bg-white' : 'text-gray-500 bg-gray-50'
+          }`}
+        >
+          Member Chat
+        </button>
+        <button
+          onClick={() => setMobileTab('feed')}
+          className={`flex-1 py-3 text-sm font-semibold text-center transition-colors ${
+            mobileTab === 'feed' ? 'text-purple-600 border-b-2 border-purple-600 bg-gray-950' : 'text-gray-500 bg-gray-50'
+          }`}
+        >
+          GM Feed {agentEvents.length > 0 && <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs rounded-full bg-purple-600 text-white">{agentEvents.length}</span>}
+        </button>
+      </div>
+
+      {/* LEFT: Concierge Chat (60% desktop, full on mobile) */}
+      <div className={`md:w-[60%] md:border-r border-gray-300 flex-1 min-h-0 ${mobileTab !== 'chat' ? 'hidden md:block' : ''}`}>
         <ConciergePanel onMessageSent={handleMessageSent} />
       </div>
 
-      {/* RIGHT: GM Intelligence Feed (40%) */}
-      <div className="w-[40%]">
+      {/* RIGHT: GM Intelligence Feed (40% desktop, full on mobile) */}
+      <div className={`md:w-[40%] flex-1 min-h-0 ${mobileTab !== 'feed' ? 'hidden md:block' : ''}`}>
         <GMIntelFeed events={agentEvents} loading={agentLoading} />
       </div>
     </div>

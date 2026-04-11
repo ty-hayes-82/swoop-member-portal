@@ -18,6 +18,10 @@ const ArchetypeCompare = lazy(() => import('@/features/demo/ArchetypeCompare'));
 const ROISlide = lazy(() => import('@/features/demo/ROISlide'));
 const SplitScreenDemo = lazy(() => import('@/features/demo/SplitScreenDemo'));
 const SaveTimeline = lazy(() => import('@/features/demo/SaveTimeline'));
+const PilotResults = lazy(() => import('@/features/demo/PilotResults'));
+const LOITracker = lazy(() => import('@/features/demo/LOITracker'));
+const ArchitectureMoat = lazy(() => import('@/features/demo/ArchitectureMoat'));
+const MobileShowcase = lazy(() => import('@/features/demo/MobileShowcase'));
 import { DataProvider } from '@/context/DataProvider';
 import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
 import DemoWizard from '@/components/ui/DemoWizard';
@@ -207,6 +211,42 @@ function RouterViews() {
   const isDemoROI = hash === '#/demo/roi';
   const isDemoSplitScreen = hash === '#/demo/split-screen';
   const isDemoSaveTimeline = hash === '#/demo/save-timeline';
+  const isDemoPilotResults = hash === '#/demo/pilot-results';
+  const isDemoLOITracker = hash === '#/demo/loi-tracker';
+  const isDemoArchitecture = hash === '#/demo/architecture';
+  const isDemoMobileShowcase = hash === '#/demo/mobile-showcase';
+
+  if (isDemoPilotResults) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <PilotResults />
+      </Suspense>
+    );
+  }
+
+  if (isDemoLOITracker) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <LOITracker />
+      </Suspense>
+    );
+  }
+
+  if (isDemoArchitecture) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <ArchitectureMoat />
+      </Suspense>
+    );
+  }
+
+  if (isDemoMobileShowcase) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <MobileShowcase />
+      </Suspense>
+    );
+  }
 
   if (isDemoSplitScreen) {
     return (
