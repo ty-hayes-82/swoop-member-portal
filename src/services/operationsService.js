@@ -159,7 +159,7 @@ export const getSlowRoundRate = () => {
       threshold: sanitizePositive(source?.threshold, DEFAULT_SLOW_ROUND_STATS.threshold),
     };
   }
-  if (!isGateOpen('pace')) return EMPTY_SLOW_ROUND;
+  if (!isGateOpen('pace') && !isGateOpen('tee-sheet')) return EMPTY_SLOW_ROUND;
   const source = (slowRoundStats ?? DEFAULT_SLOW_ROUND_STATS);
   const totalRounds = Math.round(sanitizePositive(source?.totalRounds, DEFAULT_SLOW_ROUND_STATS.totalRounds));
   const slowRounds = Math.round(sanitizePositive(source?.slowRounds, DEFAULT_SLOW_ROUND_STATS.slowRounds));
@@ -188,7 +188,7 @@ export const getBottleneckHoles = () => {
       };
     });
   }
-  if (!isGateOpen('pace')) return [];
+  if (!isGateOpen('pace') && !isGateOpen('tee-sheet')) return [];
   const source = (bottleneckHoles ?? DEFAULT_BOTTLENECK_HOLES);
   if (!Array.isArray(source) || source.length === 0) return DEFAULT_BOTTLENECK_HOLES;
   return source.map((item, index) => {
@@ -216,7 +216,7 @@ export const getPaceFBImpact = () => {
       revenueLostPerMonth: Math.round(sanitizePositive(source?.revenueLostPerMonth, DEFAULT_PACE_FB_IMPACT.revenueLostPerMonth)),
     };
   }
-  if (!isGateOpen('pace')) return EMPTY_PACE_FB;
+  if (!isGateOpen('pace') && !isGateOpen('tee-sheet')) return EMPTY_PACE_FB;
   const source = (paceFBImpact ?? DEFAULT_PACE_FB_IMPACT);
   return {
     fastConversionRate: sanitizeRate(source?.fastConversionRate, DEFAULT_PACE_FB_IMPACT.fastConversionRate),

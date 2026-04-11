@@ -4,7 +4,7 @@ export default function IntegrationHealthStrip({
   connected, total, combosActive, totalCombos,
   nextRecommended = [], onClickConnected, onClickCombos,
 }) {
-  const pct = Math.round((connected / total) * 100);
+  const pct = total > 0 ? Math.round((connected / total) * 100) : 0;
   const remaining = total - connected;
 
   return (

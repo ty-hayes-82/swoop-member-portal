@@ -32,16 +32,16 @@ export default function ComplaintsTab() {
 
   const feedbackRecords = getComplaintCorrelation();
 
-  if (feedbackRecords.length === 0) {
-    return <DataEmptyState icon="📝" title="No complaint data yet" description="Import service requests to track complaints, resolution rates, and service patterns." dataType="service requests" />;
-  }
-
   // Accept category filter from Quality tab drill-down
   useEffect(() => {
     if (!routeIntent) return;
     if (routeIntent.category) setCategoryFilter(routeIntent.category);
     clearRouteIntent();
   }, [routeIntent, clearRouteIntent]);
+
+  if (feedbackRecords.length === 0) {
+    return <DataEmptyState icon="📝" title="No complaint data yet" description="Import service requests to track complaints, resolution rates, and service patterns." dataType="service requests" />;
+  }
 
   let filteredComplaints = feedbackRecords;
   if (statusFilter) filteredComplaints = filteredComplaints.filter(f => f.status === statusFilter);

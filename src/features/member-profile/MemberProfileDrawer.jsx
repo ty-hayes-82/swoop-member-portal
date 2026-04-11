@@ -18,6 +18,8 @@ const formatDate = (value) => {
 
 const formatDateTime = (value) => {
   if (!value) return '\u2014';
+  // If already human-readable (contains · or matches "Mon DD" pattern), return as-is
+  if (typeof value === 'string' && (value.includes('\u00B7') || value.includes('\u00b7') || /^[A-Z][a-z]{2}\s\d/.test(value))) return value;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '\u2014';
   return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
@@ -493,7 +495,8 @@ function SpendTrendSparkline({ profile }) {
       });
       const baseSpend = profile.duesAnnual ? profile.duesAnnual / 12 : 1500;
       const activityMultiplier = Math.max(0.2, Math.min(2, monthActivities.length / 3));
-      months.push(Math.round(baseSpend * activityMultiplier * (0.8 + Math.random() * 0.4)));
+      const seed = ((i + 1) * 7 + (profile.duesAnnual || 15000) % 100) / 100;
+      months.push(Math.round(baseSpend * activityMultiplier * (0.8 + (seed % 1) * 0.4)));
     }
     return months;
   }, [profile]);

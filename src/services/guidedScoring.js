@@ -113,6 +113,7 @@ export function computeScore(dims, openGates) {
 
   // Re-normalize weights so they sum to 1
   const totalWeight = available.reduce((s, d) => s + d.weight, 0);
+  if (totalWeight === 0) return 0;
   return Math.round(available.reduce((s, d) => s + (d.score * d.weight / totalWeight), 0));
 }
 

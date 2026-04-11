@@ -160,11 +160,13 @@ export default function RevenuePage() {
             </div>
             <div className="text-[11px] text-gray-500 mt-1">${(leakage.TOTAL * 12).toLocaleString()}/yr</div>
             {/* "vs last month" delta is mocked until revenueService exposes a historical series. */}
-            <div className="mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-error-500/[0.08] text-error-500 border border-error-500/15"
-                 title="Month-over-month change in total operational leakage. Higher = worse.">
-              <span>↑</span>
-              <span>+$840 vs last month</span>
+            {leakage.MOM_DELTA != null && (
+            <div className={`mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border ${leakage.MOM_DELTA > 0 ? 'bg-error-500/[0.08] text-error-500 border-error-500/15' : 'bg-success-500/[0.08] text-success-600 border-success-500/15'}`}
+                 title={`Dec leakage was $${leakage.PRIOR_MONTH_TOTAL.toLocaleString()}/mo — Jan ${leakage.MOM_DELTA > 0 ? 'jumped' : 'dropped'} $${Math.abs(leakage.MOM_DELTA).toLocaleString()} as holiday staff left and pace slowed.`}>
+              <span>{leakage.MOM_DELTA > 0 ? '↑' : '↓'}</span>
+              <span>{leakage.MOM_DELTA > 0 ? '+' : '-'}${Math.abs(leakage.MOM_DELTA).toLocaleString()} vs last month</span>
             </div>
+            )}
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
             <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Pace of Play</div>

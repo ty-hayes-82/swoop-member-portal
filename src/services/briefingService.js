@@ -219,6 +219,8 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   const summary = getTeeSheetSummary();
   return {
     currentDate: date,
+    fb: isGateOpen('fb') ? { covers: 126, avgCheck: 34, postRoundRate: 68 } : null,
+    email: isGateOpen('email') ? { openRate: 42, clickRate: 12, decayCount: 9 } : null,
     teeSheet: { roundsToday: summary.totalRounds || DEMO_BRIEFING.teeSheet.roundsToday, utilization: 0.87 },
     yesterdayRecap: {
       date:           yesterday.date,

@@ -34,7 +34,7 @@ function getAuthHeaders() {
     const user = JSON.parse(localStorage.getItem('swoop_auth_user') || 'null');
     if (user?.clubId?.startsWith('demo_')) return { 'X-Demo-Club': user.clubId };
   } catch {}
-  return { 'X-Demo-Club': 'club_001' };
+  return { 'X-Demo-Club': 'seed_pinetree' };
 }
 
 function timestamp() {

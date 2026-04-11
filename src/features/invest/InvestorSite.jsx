@@ -61,10 +61,10 @@ const DEMO_LINKS = [
   { label: 'Save Timeline', href: '#/demo/save-timeline', desc: 'Full member-save lifecycle visualization' },
   { label: 'Board Report', href: '#/demo/board-report', desc: 'Auto-generated board retention report' },
   { label: 'Archetype Compare', href: '#/demo/archetype-compare', desc: 'Behavioral archetype clustering' },
-  { label: 'Pilot Results', href: '#/demo/roi', desc: 'ROI and pilot club metrics' },
+  { label: 'Pilot Results', href: '#/demo/pilot-results', desc: 'ROI and pilot club metrics' },
   { label: 'Architecture', href: '#/demo/architecture', desc: 'System architecture deep-dive' },
-  { label: 'Technical Deep-Dive', href: '#/demo/technical', desc: 'Agent coordination and MCP tools' },
-  { label: 'ROI Slide', href: '#/demo/roi-slide', desc: 'Single-slide investment summary' },
+  { label: 'Technical Deep-Dive', href: '#/demo/technical-deep-dive', desc: 'Agent coordination and MCP tools' },
+  { label: 'ROI Slide', href: '#/demo/roi', desc: 'Single-slide investment summary' },
 ];
 
 const SUGGESTED_MESSAGES = [

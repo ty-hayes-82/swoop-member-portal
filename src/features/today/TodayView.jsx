@@ -414,9 +414,9 @@ export default function TodayView() {
           <div className="fade-in-up fade-delay-1 flex flex-col gap-2">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               {[
-                { icon: '🍽️', label: 'Dining Covers Today', value: '126', color: '#ea580c' },
-                { icon: '💵', label: 'Avg Check Size', value: '$34', color: '#039855' }, // lint-no-hardcoded-dollars: allow — F&B demo stat
-                ...(roundsToday > 0 ? [{ icon: '⛳', label: 'Post-Round Dining', value: '68%', color: '#2563eb' }] : []),
+                { icon: '🍽️', label: 'Dining Covers Today', value: String(briefing.fb.covers), color: '#ea580c' },
+                { icon: '💵', label: 'Avg Check Size', value: `$${briefing.fb.avgCheck}`, color: '#039855' },
+                ...(roundsToday > 0 ? [{ icon: '⛳', label: 'Post-Round Dining', value: `${briefing.fb.postRoundRate}%`, color: '#2563eb' }] : []),
               ].map(s => (
                 <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                   <span className="text-lg">{s.icon}</span>
@@ -450,9 +450,9 @@ export default function TodayView() {
           <div className="fade-in-up fade-delay-1 flex flex-col gap-2">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               {[
-                { icon: '📧', label: 'Email Open Rate', value: '42%', color: '#7c3aed' },
-                { icon: '🖱️', label: 'Click-Through Rate', value: '12%', color: '#0891b2' },
-                { icon: '📉', label: 'Engagement Decay', value: '8 members', color: '#dc2626' },
+                { icon: '📧', label: 'Email Open Rate', value: `${briefing.email.openRate}%`, color: '#7c3aed' },
+                { icon: '🖱️', label: 'Click-Through Rate', value: `${briefing.email.clickRate}%`, color: '#0891b2' },
+                { icon: '📉', label: 'Engagement Decay', value: `${briefing.email.decayCount} members`, color: '#dc2626' },
               ].map(s => (
                 <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                   <span className="text-lg">{s.icon}</span>

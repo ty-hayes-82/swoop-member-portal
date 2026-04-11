@@ -122,6 +122,7 @@ export default function BoardReport() {
   }, [routeIntent, clearRouteIntent]);
 
   const kpis = getKPIs();
+  const avgDetectionHrs = kpis.find(k => k.label?.includes('Resolution'))?.value || 4.2;
   const memberSaves = getMemberSaves();
   const operationalSaves = getOperationalSaves();
   const dist = getHealthDistribution();
@@ -300,7 +301,7 @@ export default function BoardReport() {
             <p className="text-gray-600 leading-relaxed mb-4">
               This month, {getClubName()} delivered consistent service quality with an <strong>{resolutionRate}% complaint resolution rate</strong>{avgResolutionDays ? <> and
               an average resolution time of <strong>{avgResolutionDays} days</strong></> : ''}. The operations team responded to alerts with an
-              average <strong>4.2-hour detection-to-action time</strong>, catching {operationalSaves.length} service disruptions before
+              average <strong>{avgDetectionHrs}-hour detection-to-action time</strong>, catching {operationalSaves.length} service disruptions before
               they impacted members.
             </p>
             <p className="text-gray-600 leading-relaxed mb-4">
@@ -366,7 +367,7 @@ export default function BoardReport() {
                 <div className="text-[11px] text-[#BCC3CF]">Staffing Alignment Rate</div>
               </div>
               <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
-                <div className="text-[28px] font-bold text-success-500">4.2 hrs</div>
+                <div className="text-[28px] font-bold text-success-500">{avgDetectionHrs} hrs</div>
                 <div className="text-[11px] text-[#BCC3CF]">Avg Detection to Action</div>
               </div>
             </div>
@@ -671,7 +672,7 @@ export default function BoardReport() {
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
               <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Avg Detection-to-Action</div>
-              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">4.2 hrs</div>
+              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{avgDetectionHrs} hrs</div>
               <div className="text-xs text-gray-500 mt-1">vs industry standard 6+ weeks</div>
             </div>
           </div>
@@ -779,7 +780,7 @@ export default function BoardReport() {
               </div>
               <div className="p-4 bg-success-50 border border-success-500/20 rounded-lg dark:bg-success-500/5">
                 <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">With Swoop</div>
-                <div className="text-2xl font-bold text-success-500 font-mono mt-1">4.2 hrs</div>
+                <div className="text-2xl font-bold text-success-500 font-mono mt-1">{avgDetectionHrs} hrs</div>
                 <div className="text-xs text-gray-500 mt-1">average detection-to-action time</div>
               </div>
             </div>
