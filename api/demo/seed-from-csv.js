@@ -167,12 +167,15 @@ async function batchInsert(client, table, columns, rowsData) {
     }
     const colNames = columns.map(c => `"${c}"`).join(', ');
     try {
+      await client.query(`SAVEPOINT sp_batch`);
       await client.query(
         `INSERT INTO ${table} (${colNames}) VALUES ${valueClauses.join(', ')} ON CONFLICT DO NOTHING`,
         params
       );
+      await client.query(`RELEASE SAVEPOINT sp_batch`);
       inserted += batch.length;
     } catch (e) {
+      await client.query(`ROLLBACK TO SAVEPOINT sp_batch`);
       // Fall back to row-by-row on batch failure — log the batch error
       const batchErr = `${table} batch fail: ${e.message}`;
       if (!batchInsert._errors) batchInsert._errors = [];
@@ -180,12 +183,16 @@ async function batchInsert(client, table, columns, rowsData) {
       for (const row of batch) {
         const placeholders = row.map((_, idx) => `$${idx + 1}`);
         try {
+          await client.query(`SAVEPOINT sp_row`);
           await client.query(
             `INSERT INTO ${table} (${colNames}) VALUES (${placeholders.join(', ')}) ON CONFLICT DO NOTHING`,
             row
           );
+          await client.query(`RELEASE SAVEPOINT sp_row`);
           inserted++;
-        } catch { /* skip row */ }
+        } catch {
+          await client.query(`ROLLBACK TO SAVEPOINT sp_row`);
+        }
       }
     }
   }
@@ -212,16 +219,25 @@ const TRUNCATE_TABLES = [
 
 async function cleanSlate(client) {
   // Delete seed_pinetree AND old club_001 data (member IDs overlap: mbr_001..mbr_100)
+  // Use SAVEPOINT so one failed DELETE doesn't abort the whole transaction
   const clubsToClean = [CLUB_ID, 'club_001'];
   for (const clubId of clubsToClean) {
     for (const table of TRUNCATE_TABLES) {
       try {
+        await client.query(`SAVEPOINT sp_clean`);
         await client.query(`DELETE FROM ${table} WHERE club_id = $1`, [clubId]);
+        await client.query(`RELEASE SAVEPOINT sp_clean`);
       } catch {
-        // Table may not exist or not have club_id — skip
+        await client.query(`ROLLBACK TO SAVEPOINT sp_clean`);
       }
     }
-    try { await client.query(`DELETE FROM club WHERE club_id = $1`, [clubId]); } catch { /* */ }
+    try {
+      await client.query(`SAVEPOINT sp_clean`);
+      await client.query(`DELETE FROM club WHERE club_id = $1`, [clubId]);
+      await client.query(`RELEASE SAVEPOINT sp_clean`);
+    } catch {
+      await client.query(`ROLLBACK TO SAVEPOINT sp_clean`);
+    }
   }
 }
 
@@ -694,9 +710,12 @@ export default async function handler(req, res) {
         continue;
       }
       try {
+        await client.query(`SAVEPOINT sp_csv`);
         const count = await fn(client, rows);
+        await client.query(`RELEASE SAVEPOINT sp_csv`);
         tables[label] = count;
       } catch (e) {
+        try { await client.query(`ROLLBACK TO SAVEPOINT sp_csv`); } catch { /* */ }
         errors.push(`${csv} (${label}): ${e.message}`);
         tables[label] = 0;
       }
