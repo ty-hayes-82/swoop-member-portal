@@ -157,6 +157,6 @@ export default async function handler(req, res) {
     res.redirect(302, `/#/google-auth?token=${sessionToken}&user=${userData}`);
   } catch (e) {
     console.error('[google/signin-callback] Error:', e.message, e.stack);
-    res.redirect(302, `/#/login?error=${encodeURIComponent(e.message)}`);
+    res.redirect(302, `/#/login?error=${encodeURIComponent('Google sign-in failed. Please try again.')}`);
   }
 }

@@ -65,9 +65,9 @@ export default async function handler(req, res) {
       VALUES (${user.user_id}, ${user.club_id}, ${resetToken}, ${expiresAt})
     `;
 
-    // Build reset URL
-    const baseUrl = req.headers.origin
-      || req.headers.referer?.replace(/\/[^/]*$/, '')
+    // Build reset URL from trusted env var — never trust request headers for security-sensitive URLs
+    const baseUrl = process.env.APP_BASE_URL
+      || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null
       || 'https://swoop-member-portal-production-readiness.vercel.app';
     const resetUrl = `${baseUrl}/#/reset-password?token=${resetToken}`;
 
