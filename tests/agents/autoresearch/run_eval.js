@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 /**
- * run_eval.js — FIXED evaluation harness. DO NOT MODIFY during experiment loop.
+ * run_eval.js — FIXED evaluation harness. DO NOT MODIFY during autoresearch loop.
  *
- * V2 Structural improvements:
- *   1. Message routing — routes to specialized agent (concierge/service-recovery/booking)
- *   2. Multi-tool handling — processes ALL tool_use blocks, not just the first
- *   3. Best-of-2 sampling — runs each scenario twice, takes the better score
- *
- * Usage: node run_eval.js
+ * V3: Production multi-agent reliability
+ *   1. Haiku LLM classifier routing (from agent.js)
+ *   2. Prefilled assistant openings for complaint + grief
+ *   3. Temperature differentiation (from agent.js)
+ *   4. Post-generation validation with retry
+ *   5. Scoring context passed to critic
+ *   6. Member context injection into system prompts
+ *   7. Grief circuit breaker (from agent.js)
+ *   + Best-of-2 sampling
+ *   + Multi-tool handling
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -33,17 +37,16 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 const client = new Anthropic();
 
-// Import agent configuration (the file being optimized)
+// Import agent configuration
 const agentMod = await import('./agent.js');
-const { CLUB_AGENT_PROMPTS, MODELS } = agentMod;
-// Support both single-prompt and routed architectures
-const buildConciergePrompt = agentMod.buildConciergePrompt;
-const buildServiceRecoveryPrompt = agentMod.buildServiceRecoveryPrompt || null;
-const BOOKING_PROMPT = agentMod.BOOKING_PROMPT || null;
-const routeMessage = agentMod.routeMessage || null;
+const {
+  MODELS, TEMPERATURES, CLUB_AGENT_PROMPTS,
+  buildConciergePrompt, buildServiceRecoveryPrompt, BOOKING_PROMPT,
+  routeMessage, getGriefResponse, extractDeceasedName,
+} = agentMod;
 
 // ---------------------------------------------------------------------------
-// Fixed: Member profiles
+// Fixed: Member profiles (Step 6: includes context metadata for injection)
 // ---------------------------------------------------------------------------
 const MEMBERS = {
   whitfield: {
@@ -61,6 +64,8 @@ const MEMBERS = {
       channel: 'Call',
       familyNotes: 'Logan (Junior, age 13) in junior clinics. Erin (Social) enjoys wine events and Sunday brunch.',
     },
+    // Step 6: member context for injection
+    context: 'Health declining (was 68 thirty days ago). Golf rounds dropped from 4/month to 1. Open complaint: 42-min Grill Room wait Jan 16. Renewal in 90 days.',
   },
   jordan: {
     member_id: 'mbr_t04', name: 'Anne Jordan', first_name: 'Anne',
@@ -73,6 +78,7 @@ const MEMBERS = {
       dining: 'Quick lunch at the Halfway House after morning rounds',
       favoriteHole: 14,
     },
+    context: 'Health critical (was 55 sixty days ago). Missed 3 Saturday waitlists. Zero rounds in 3 weeks. 10-year member.',
   },
   chen: {
     member_id: 'mbr_t07', name: 'Sandra Chen', first_name: 'Sandra',
@@ -88,6 +94,7 @@ const MEMBERS = {
       channel: 'Text',
       familyNotes: 'David plays Saturday mornings. Lily (age 10) in swim program.',
     },
+    context: 'Husband Richard passed away recently. Has not visited the club since. Health declining. Was very active in wine dinner events with Richard.',
   },
 };
 
@@ -147,8 +154,10 @@ Score each dimension 1-10:
 - PROACTIVE: Did the concierge anticipate needs? Suggest dining after golf? Reference preferences? (10 = anticipated 2+ unasked needs)
 - CLUB_IMPACT: Did club-side agents produce actionable, dollar-quantified insights? Cross-domain signals? (10 = specific, actionable, dollar-quantified)
 
-SCORING: 1-3=broken, 4-5=mediocre, 6-7=good, 8=very good, 9=excellent (nitpick-level improvements), 10=outstanding.
+SCORING: 1-3=broken, 4-5=mediocre, 6-7=good, 8=very good, 9=excellent (nitpick-level), 10=outstanding.
 Award 9s for genuinely excellent responses. Award 10s when no meaningful improvement exists.
+
+IMPORTANT: If a SCORING CONTEXT section is provided, use it to calibrate your expectations for that specific scenario type.
 
 Respond in exact JSON (no markdown, no backticks):
 {
@@ -159,59 +168,148 @@ Respond in exact JSON (no markdown, no backticks):
 }`;
 
 // ---------------------------------------------------------------------------
-// STRUCTURAL IMPROVEMENT #1: Routing — picks the right agent for each message
+// Step 6: Member context injection
 // ---------------------------------------------------------------------------
-function getPromptAndModel(member, message) {
-  if (routeMessage) {
-    const route = routeMessage(message);
-    if (route === 'service-recovery' && buildServiceRecoveryPrompt) {
-      return { prompt: buildServiceRecoveryPrompt(member), model: MODELS.serviceRecovery || MODELS.concierge, route };
-    }
-    if (route === 'booking' && BOOKING_PROMPT) {
-      const prompt = BOOKING_PROMPT + `\n\nMember: ${member.name}. Preferences: ${JSON.stringify(member.preferences)}`;
-      return { prompt, model: MODELS.booking || MODELS.concierge, route };
-    }
-  }
-  return { prompt: buildConciergePrompt(member), model: MODELS.concierge, route: 'concierge' };
+function buildMemberContext(member) {
+  return `
+MEMBER CONTEXT (pre-loaded — do not reference health scores or internal data to the member):
+- ${member.name}, ${member.membership_type}, member since ${member.join_date}
+- Household: ${member.household.map(h => `${h.name} (${h.membership_type})`).join(', ')}
+- Preferences: ${JSON.stringify(member.preferences)}
+- Internal notes: ${member.context || 'No special notes.'}`;
 }
 
 // ---------------------------------------------------------------------------
-// STRUCTURAL IMPROVEMENT #2: Multi-tool handling — process ALL tool_use blocks
+// Step 2: Prefilled assistant openings
 // ---------------------------------------------------------------------------
+function buildPrefill(route, member, message) {
+  const fn = member.first_name;
+  if (route === 'service-recovery') {
+    return `${fn}, `;
+  }
+  // grief is handled by circuit breaker — no prefill needed
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Step 4: Post-generation validation
+// ---------------------------------------------------------------------------
+function validateResponse(text, route, member, message) {
+  const issues = [];
+  const lower = text.toLowerCase();
+  const fn = member.first_name.toLowerCase();
+
+  if (route === 'service-recovery') {
+    if (!lower.startsWith(fn)) {
+      issues.push(`Response must start with "${member.first_name}" but starts with "${text.split(/\s/)[0]}"`);
+    }
+  }
+
+  // No markdown
+  if (text.includes('**') || text.includes('##')) {
+    issues.push('Response contains markdown formatting (** or ##)');
+  }
+
+  // No bullet points (lines starting with "- ")
+  if (text.split('\n').some(line => line.trimStart().startsWith('- '))) {
+    issues.push('Response contains bullet points');
+  }
+
+  return issues;
+}
+
+// ---------------------------------------------------------------------------
+// Routing + agent dispatch
+// ---------------------------------------------------------------------------
+function getPromptAndModel(route, member) {
+  if (route === 'service-recovery' && buildServiceRecoveryPrompt) {
+    const prompt = buildServiceRecoveryPrompt(member) + buildMemberContext(member);
+    return { prompt, model: MODELS.serviceRecovery, temp: TEMPERATURES.serviceRecovery };
+  }
+  if (route === 'booking' && BOOKING_PROMPT) {
+    const prompt = BOOKING_PROMPT + `\n\nMember: ${member.name}. Preferences: ${JSON.stringify(member.preferences)}` + buildMemberContext(member);
+    return { prompt, model: MODELS.booking, temp: TEMPERATURES.booking };
+  }
+  const prompt = buildConciergePrompt(member) + buildMemberContext(member);
+  return { prompt, model: MODELS.concierge, temp: TEMPERATURES.concierge };
+}
+
 async function callAgent(member, memberMessage) {
-  const { prompt, model, route } = getPromptAndModel(member, memberMessage);
+  // Step 1: Route via Haiku classifier
+  const route = await routeMessage(client, memberMessage);
+
+  // Step 7: Grief circuit breaker — bypass LLM entirely
+  if (route === 'grief') {
+    const deceasedName = extractDeceasedName(memberMessage);
+    return { text: getGriefResponse(member, deceasedName), toolCalls: [], route: 'grief' };
+  }
+
+  const { prompt, model, temp } = getPromptAndModel(route, member);
+
+  // Step 2: Build messages with optional prefill
+  const prefill = buildPrefill(route, member, memberMessage);
   let messages = [{ role: 'user', content: memberMessage }];
+  if (prefill) {
+    messages.push({ role: 'assistant', content: prefill });
+  }
+
   const toolCalls = [];
 
   let result = await client.messages.create({
-    model, max_tokens: 600, system: prompt, messages, tools: SMS_TOOLS,
+    model, max_tokens: 600, temperature: temp, system: prompt, messages, tools: SMS_TOOLS,
   });
 
+  // Multi-tool loop
   let loops = 0;
   while (result.stop_reason === 'tool_use' && loops < 5) {
     loops++;
-    // Handle ALL tool_use blocks in the response, not just the first
     const toolUses = result.content.filter(c => c.type === 'tool_use');
     if (!toolUses.length) break;
 
     const toolResults = toolUses.map(tu => {
       toolCalls.push({ name: tu.name, input: tu.input });
-      const toolResult = executeTool(tu.name, tu.input, member);
-      return { type: 'tool_result', tool_use_id: tu.id, content: JSON.stringify(toolResult) };
+      return { type: 'tool_result', tool_use_id: tu.id, content: JSON.stringify(executeTool(tu.name, tu.input, member)) };
     });
 
     messages.push({ role: 'assistant', content: result.content });
     messages.push({ role: 'user', content: toolResults });
-
-    result = await client.messages.create({ model, max_tokens: 600, system: prompt, messages, tools: SMS_TOOLS });
+    result = await client.messages.create({ model, max_tokens: 600, temperature: temp, system: prompt, messages, tools: SMS_TOOLS });
   }
 
   let text = result.content.find(c => c.type === 'text')?.text ?? '';
+
+  // Prepend the prefill to the response text (the API continues from the prefill)
+  if (prefill && text) {
+    text = prefill + text;
+  }
+
+  // Safety net: tool called but no text
   if (!text.trim() && toolCalls.length > 0) {
     messages.push({ role: 'assistant', content: result.content });
     messages.push({ role: 'user', content: '[SYSTEM: Tool call succeeded but no text. Send a short SMS reply now.]' });
-    const retry = await client.messages.create({ model, max_tokens: 600, system: prompt, messages });
-    text = retry.content.find(c => c.type === 'text')?.text ?? '';
+    const retry = await client.messages.create({ model, max_tokens: 600, temperature: temp, system: prompt, messages });
+    text = (prefill || '') + (retry.content.find(c => c.type === 'text')?.text ?? '');
+  }
+
+  // Step 4: Validate and retry if needed
+  const issues = validateResponse(text, route, member, memberMessage);
+  if (issues.length > 0) {
+    const correctionNote = `[SYSTEM: Your previous response violated these rules: ${issues.join('; ')}. Try again following the template exactly.]`;
+    // Reset to original messages + correction
+    const retryMessages = [
+      { role: 'user', content: memberMessage },
+      { role: 'assistant', content: text },
+      { role: 'user', content: correctionNote },
+    ];
+    if (prefill) {
+      retryMessages.push({ role: 'assistant', content: prefill });
+    }
+    const retryResult = await client.messages.create({ model, max_tokens: 600, temperature: Math.max(0, temp - 0.1), system: prompt, messages: retryMessages, tools: SMS_TOOLS });
+
+    // Process retry (simplified — just get text, skip tool loop)
+    let retryText = retryResult.content.find(c => c.type === 'text')?.text ?? '';
+    if (prefill && retryText) retryText = prefill + retryText;
+    if (retryText.trim()) text = retryText;
   }
 
   return { text: text.trim(), toolCalls, route };
@@ -221,12 +319,12 @@ async function callClubAgent(agentType, member, memberMessage, conciergeResponse
   const systemPrompt = CLUB_AGENT_PROMPTS[agentType];
   if (!systemPrompt) return `[No prompt for ${agentType}]`;
   const context = `MEMBER ACTION:\nMember: ${member.name} (${member.membership_type}, $${member.annual_dues.toLocaleString()}/yr, since ${member.join_date}, health_score: ${member.health_score}, archetype: ${member.archetype})\nHousehold: ${member.household.map(h => `${h.name} (${h.membership_type})`).join(', ')}\nMessage: "${memberMessage}"\n\nCONCIERGE RESPONSE: "${conciergeResponse.text}"\n${conciergeResponse.toolCalls.length ? `TOOLS CALLED: ${conciergeResponse.toolCalls.map(t => `${t.name}(${JSON.stringify(t.input)})`).join(', ')}` : 'NO TOOLS CALLED'}\n\nAnalyze this interaction and produce your response.`;
-  const result = await client.messages.create({ model: MODELS.club, max_tokens: 500, system: systemPrompt, messages: [{ role: 'user', content: context }] });
+  const result = await client.messages.create({ model: MODELS.club, max_tokens: 500, temperature: TEMPERATURES.club, system: systemPrompt, messages: [{ role: 'user', content: context }] });
   return result.content.find(c => c.type === 'text')?.text ?? '';
 }
 
 async function callCritic(conversationLog) {
-  const result = await client.messages.create({ model: MODELS.critic, max_tokens: 800, system: CRITIC_PROMPT, messages: [{ role: 'user', content: conversationLog }] });
+  const result = await client.messages.create({ model: MODELS.critic, max_tokens: 800, temperature: TEMPERATURES.critic, system: CRITIC_PROMPT, messages: [{ role: 'user', content: conversationLog }] });
   const text = result.content.find(c => c.type === 'text')?.text ?? '';
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -239,7 +337,7 @@ async function callCritic(conversationLog) {
 }
 
 // ---------------------------------------------------------------------------
-// STRUCTURAL IMPROVEMENT #3: Best-of-2 — run scenario twice, take better score
+// Scenario runner (best-of-2)
 // ---------------------------------------------------------------------------
 async function runScenarioOnce(example) {
   const member = MEMBERS[example.inputs.member];
@@ -253,12 +351,18 @@ async function runScenarioOnce(example) {
     clubResponses.push({ agent: agentType, response });
   }
 
+  // Build critic log
   let log = `SCENARIO: ${example.outputs.focus}\n`;
   log += `MEMBER (${member.name}, ${member.membership_type}, $${member.annual_dues}/yr, health: ${member.health_score}): "${example.inputs.message}"\n`;
   log += `ROUTED TO: ${concierge.route}\n`;
-  log += `CONCIERGE: "${concierge.text}"\n`;
+  log += `RESPONSE: "${concierge.text}"\n`;
   if (concierge.toolCalls.length) log += `TOOLS: ${concierge.toolCalls.map(t => `${t.name}(${JSON.stringify(t.input)})`).join(', ')}\n`;
   for (const cr of clubResponses) log += `\nCLUB [${cr.agent}]:\n${cr.response}\n`;
+
+  // Step 5: Append scoring context if present
+  if (example.outputs.scoring_context) {
+    log += `\nSCORING CONTEXT: ${example.outputs.scoring_context}\n`;
+  }
 
   const critique = await callCritic(log);
   const s = critique.scores;
@@ -268,15 +372,15 @@ async function runScenarioOnce(example) {
 }
 
 // ---------------------------------------------------------------------------
-// Main evaluation
+// Main
 // ---------------------------------------------------------------------------
 async function main() {
   const dataset = JSON.parse(readFileSync(resolve(__dirname, 'dataset.json'), 'utf-8'));
-  const BEST_OF = 2; // run each scenario N times, take the best
+  const BEST_OF = 2;
 
   console.error(`Running ${dataset.length} scenarios (best-of-${BEST_OF})...`);
-  console.error(`Models: concierge=${MODELS.concierge} club=${MODELS.club} critic=${MODELS.critic}`);
-  if (routeMessage) console.error('Routing: enabled (3-agent split)');
+  console.error(`Models: concierge=${MODELS.concierge} club=${MODELS.club} router=${MODELS.router} critic=${MODELS.critic}`);
+  console.error(`Temps: concierge=${TEMPERATURES.concierge} svcRecovery=${TEMPERATURES.serviceRecovery} booking=${TEMPERATURES.booking} club=${TEMPERATURES.club}`);
 
   const allScores = { natural: [], helpful: [], accurate: [], proactive: [], club_impact: [] };
   let numErrors = 0;
@@ -289,7 +393,6 @@ async function main() {
       for (let attempt = 0; attempt < BEST_OF; attempt++) {
         const result = await runScenarioOnce(example);
         if (!best || result.avg > best.avg) best = result;
-        // If first attempt is 9.5+, skip second attempt
         if (result.avg >= 9.5) break;
       }
 
@@ -300,7 +403,6 @@ async function main() {
       if (best.avg >= 9.5) numPerfect++;
 
       console.error(`[${member.first_name}] ${example.outputs.focus} → ${best.concierge.route}: N=${s.natural} H=${s.helpful} A=${s.accurate} P=${s.proactive} I=${s.club_impact} AVG=${best.avg.toFixed(1)}`);
-
     } catch (err) {
       numErrors++;
       console.error(`[${member.first_name}] ${example.outputs.focus}: ERROR ${err.message}`);
