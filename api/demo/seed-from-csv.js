@@ -109,6 +109,8 @@ const FIELD_ALIASES = {
   'payment id': 'payment_id', 'settlement time': 'processed_at',
   'course code': 'course_code', 'course name': 'course_name', 'interval (min)': 'interval_min',
   'sales area id': 'sales_area_id', 'sales area description': 'description',
+  'type code': 'type_code',
+  'line item id': 'line_item_id', 'due date': 'due_date', 'net amount': 'net_amount',
   'invoice #': 'invoice_id', 'statement date': 'statement_date',
   'billing code type': 'billing_code_type', 'aging bucket': 'aging_bucket',
   'last payment': 'last_payment', 'payment amount': 'payment_amount',
@@ -543,8 +545,8 @@ async function insertInvoices(client, rows) {
     const row = resolveAliases(rawRow, 'invoices');
     return [
       pfx(row.invoice_id), CLUB_ID, row.member_id ? pfx(row.member_id) : null,
-      row.statement_date || null, row.due_date || null,
-      row.net_amount ? Number(row.net_amount) : null,
+      row.statement_date || null, row.due_date || row.statement_date || '2025-01-31',
+      row.net_amount ? Number(row.net_amount) : 0,
       row.billing_code_type || null, row.description || null,
       row.aging_bucket || null, row.last_payment || null,
       row.payment_amount ? Number(row.payment_amount) : null,
