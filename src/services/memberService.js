@@ -508,6 +508,8 @@ export const hasRealMemberData = () => _hasRealMembers;
 /** @returns {HealthDistributionRow[]} */
 export const getHealthDistribution = () => {
   if (_shouldReturnEmpty()) return [];
+  // In guided mode, only show health data from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return [];
   // Compute distribution from the full roster so both pages agree
   const roster = getFullRoster();
   if (roster.length > 0) {
@@ -542,6 +544,8 @@ export const getAtRiskMembers       = () => {
 /** @returns {ArchetypeRow[]} */
 export const getArchetypeProfiles   = () => {
   if (_shouldReturnEmpty()) return [];
+  // In guided mode, only show archetype data from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return [];
   const rows = normalizeArchetypes(_d?.memberArchetypes);
   const fbClosed = !isGateOpen('fb');
   const emailClosed = !isGateOpen('email');
@@ -563,6 +567,8 @@ export const getAllMemberProfiles   = () => {
 /** @returns {ResignationScenario[]} */
 export const getResignationScenarios= () => {
   if (_shouldReturnEmpty()) return [];
+  // In guided mode, only show resignation data from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return [];
   return normalizeResignationScenarios(_d?.resignationScenarios);
 };
 /** @returns {EmailHeatmapRow[]} */
@@ -587,6 +593,10 @@ export const getDecayingMembers     = () => {
 /** @returns {MemberSummary} */
 export const getMemberSummary = () => {
   if (_shouldReturnEmpty()) {
+    return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
+  }
+  // In guided mode, only show summary from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) {
     return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
   }
   const summary = _d?.memberSummary ?? {};
@@ -663,6 +673,7 @@ const _MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-
 const _LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
 
 function _generateRoster() {
+  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('members')) return [];
   const roster = [];
   const atRisk = getAtRiskMembers();
@@ -735,6 +746,8 @@ export function getFullRoster() {
  */
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
+  // In guided mode, only show profiles from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return null;
   if (_d?.memberProfiles?.[memberId]) {
     const profile = normalizeMemberProfile(_d.memberProfiles[memberId]);
     return profile;

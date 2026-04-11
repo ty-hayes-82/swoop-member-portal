@@ -90,9 +90,11 @@ import { cancellationProbabilities as staticCancellationProbabilities } from '..
  */
 
 let _d = null;
-
+let _apiLoaded = false;
+const _isGuidedMode = () => getDataMode() === 'guided';
 
 export const _init = async () => {
+  _apiLoaded = true;
   try {
     const data = await apiFetch('/api/briefing');
     if (data) _d = data;
@@ -170,6 +172,8 @@ export const DEMO_BRIEFING = {
  */
 export const getDailyBriefing = (date = '2026-01-17') => {
   if (_d) return _d;
+  // In guided mode, only show briefing from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return EMPTY_BRIEFING;
   if (!isGateOpen('tee-sheet')) return EMPTY_BRIEFING;
 
   // Demo mode: try to build from service data, fall back to static
