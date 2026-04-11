@@ -30,7 +30,7 @@ async function getTodayVisitors(clubId) {
         m.membership_type, m.preferred_channel,
         m.health_score, m.health_tier, m.archetype,
         b.booking_id, b.tee_time, b.check_in_time,
-        c.course_name
+        c.name AS course_name
       FROM bookings b
       JOIN booking_players bp ON bp.booking_id = b.booking_id
       JOIN members m ON m.member_id = bp.member_id AND m.club_id = ${clubId}

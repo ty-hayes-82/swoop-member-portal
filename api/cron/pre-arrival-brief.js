@@ -68,7 +68,7 @@ async function getTomorrowBookings(clubId) {
       SELECT
         b.booking_id, b.booking_date, b.tee_time, b.transportation,
         b.has_caddie, b.round_type, b.player_count,
-        c.course_id, c.course_name,
+        c.course_id, c.name AS course_name,
         bp.member_id,
         m.first_name, m.last_name, m.email, m.phone,
         m.membership_type, m.archetype, m.preferred_channel,
@@ -127,7 +127,7 @@ async function getOpenComplaints(clubId, memberIds) {
   if (!memberIds.length) return new Map();
   try {
     const result = await sql`
-      SELECT member_id, complaint_id, category, description, priority, reported_at
+      SELECT member_id, id AS complaint_id, category, description, priority, created_at AS reported_at
       FROM complaints
       WHERE club_id = ${clubId}
         AND member_id = ANY(${memberIds})

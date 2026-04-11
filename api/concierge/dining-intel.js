@@ -71,19 +71,8 @@ async function handler(req, res) {
     const preferredBeverage = beverageMatch ? beverageMatch[0] : null;
 
     // 3. Check table/booth availability for the date and time
-    //    Query existing dining reservations to find conflicts
-    let bookedTables = [];
-    try {
-      const reservationsResult = await sql`
-        SELECT table_assignment, party_size, reservation_time
-        FROM dining_reservations
-        WHERE club_id = ${clubId}
-          AND reservation_date = ${date}
-          AND reservation_time = ${requestedTime}
-          AND status != 'cancelled'
-      `;
-      bookedTables = reservationsResult.rows.map(r => r.table_assignment);
-    } catch {}
+    //    No dining_reservations table — use empty list (all tables available)
+    const bookedTables = [];
 
     // Determine booth/table assignment
     let assignedSeat;
@@ -97,21 +86,9 @@ async function handler(req, res) {
       assignedSeat = requestedParty >= 6 ? 'Private Dining Alcove' : 'Window Table';
     }
 
-    // 4. Load chef's specials for the date
+    // 4. Chef's specials based on day of week (no chef_specials table)
     let chefSpecial = null;
-    try {
-      const specialsResult = await sql`
-        SELECT dish_name, description, pairing_suggestion
-        FROM chef_specials
-        WHERE club_id = ${clubId}
-          AND available_date = ${date}
-        LIMIT 1
-      `;
-      if (specialsResult.rows.length) chefSpecial = specialsResult.rows[0];
-    } catch {}
-
-    // Fallback chef special based on day of week
-    if (!chefSpecial) {
+    {
       const dayOfWeek = new Date(date).getDay();
       const specials = {
         0: { dish_name: 'Sunday Prime Rib', description: 'Slow-roasted 14oz prime rib with Yorkshire pudding', pairing_suggestion: '2021 Napa Cabernet Sauvignon' },

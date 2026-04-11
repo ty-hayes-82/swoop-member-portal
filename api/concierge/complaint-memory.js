@@ -52,7 +52,7 @@ function generateFollowUp(complaint, recentActivityInArea) {
   }
 
   // Unresolved
-  const aging = computeAging(complaint.reported_at);
+  const aging = computeAging(complaint.created_at);
   if (aging.hours_open > 48) {
     return `URGENT: Complaint open ${aging.days_open} days — escalate immediately. Acknowledge the delay and offer a concrete make-good.`;
   }
@@ -77,11 +77,11 @@ async function handler(req, res) {
     let complaints = [];
     try {
       const result = await sql`
-        SELECT complaint_id, category, description, status, priority,
-               reported_at, resolved_at, resolved_by, resolution_notes
+        SELECT id, category, description, status, priority,
+               created_at, resolved_at, resolved_by, resolution_notes
         FROM complaints
         WHERE club_id = ${clubId} AND member_id = ${memberId}
-        ORDER BY reported_at DESC
+        ORDER BY created_at DESC
         LIMIT 50
       `;
       complaints = result.rows;
@@ -105,7 +105,7 @@ async function handler(req, res) {
       let recentActivity = null;
 
       if (c.status === 'resolved' || c.status === 'closed') {
-        const resolvedDate = c.resolved_at || c.reported_at;
+        const resolvedDate = c.resolved_at || c.created_at;
         try {
           if (c.category === 'food_and_beverage') {
             const visits = await sql`
@@ -137,16 +137,16 @@ async function handler(req, res) {
       }
 
       const aging = (c.status !== 'resolved' && c.status !== 'closed')
-        ? computeAging(c.reported_at)
+        ? computeAging(c.created_at)
         : null;
 
       enriched.push({
-        id: c.complaint_id,
+        id: c.id,
         category: c.category,
         description: c.description,
         status: c.status,
         priority: c.priority,
-        filed_date: c.reported_at,
+        filed_date: c.created_at,
         resolved_at: c.resolved_at || null,
         resolution: c.resolution_notes || null,
         aging: aging,

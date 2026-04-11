@@ -24,14 +24,15 @@ async function handler(req, res) {
     // 1. Find open slots near preferred_time on the requested date
     //    We look for bookings on that date and find gaps in the tee sheet.
     const bookingsResult = await sql`
-      SELECT b.booking_id, b.tee_time, b.course_name, b.players_count,
+      SELECT b.booking_id, b.tee_time, c.name AS course_name,
              array_agg(bp.member_id::text) AS player_ids
-      FROM tee_sheet_bookings b
+      FROM bookings b
+      JOIN courses c ON c.course_id = b.course_id
       LEFT JOIN booking_players bp ON bp.booking_id = b.booking_id
       WHERE b.club_id = ${clubId}
         AND b.booking_date = ${date}
         AND b.status != 'cancelled'
-      GROUP BY b.booking_id, b.tee_time, b.course_name, b.players_count
+      GROUP BY b.booking_id, b.tee_time, c.name
       ORDER BY b.tee_time
     `;
 
@@ -39,7 +40,7 @@ async function handler(req, res) {
     let weather = { conditions: 'clear', high_temp: 75, low_temp: 60 };
     try {
       const weatherResult = await sql`
-        SELECT conditions, high_temp, low_temp, wind_speed
+        SELECT conditions, high_temp, low_temp, wind_mph
         FROM weather_forecasts
         WHERE club_id = ${clubId} AND forecast_date = ${date}
         LIMIT 1
@@ -54,7 +55,7 @@ async function handler(req, res) {
         SELECT DISTINCT bp2.member_id::text AS partner_id,
                m.first_name, m.last_name
         FROM booking_players bp1
-        JOIN tee_sheet_bookings b ON b.booking_id = bp1.booking_id
+        JOIN bookings b ON b.booking_id = bp1.booking_id
         JOIN booking_players bp2 ON bp2.booking_id = b.booking_id AND bp2.member_id != bp1.member_id
         JOIN members m ON m.member_id = bp2.member_id AND m.club_id = ${clubId}
         WHERE bp1.member_id = ${member_id} AND b.club_id = ${clubId}
@@ -116,7 +117,7 @@ async function handler(req, res) {
               weather: {
                 conditions: weather.conditions,
                 high_temp: weather.high_temp,
-                wind_speed: weather.wind_speed || null,
+                wind_mph: weather.wind_mph || null,
               },
               partners_nearby: nearbyPartners,
             });

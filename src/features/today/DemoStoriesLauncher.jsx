@@ -101,56 +101,76 @@ export default function DemoStoriesLauncher() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {STORIES.filter(story => {
-          if (getDataMode() !== 'guided') return true;
-          return (story.requiredGates || []).every(g => isGateOpen(g));
-        }).map((story) => (
+        {STORIES.map((story) => {
+          const isGuided = getDataMode() === 'guided';
+          const missingGates = isGuided
+            ? (story.requiredGates || []).filter(g => !isGateOpen(g))
+            : [];
+          const isLocked = isGuided && missingGates.length > 0;
+          const gateLabels = { 'tee-sheet': 'Tee Sheet', 'fb': 'F&B / POS', 'email': 'Email', 'pace': 'Pace of Play', 'members': 'Members' };
+          const unlockLabel = missingGates.map(g => gateLabels[g] || g).join(' + ');
+
+          return (
           <button
             key={story.id}
             type="button"
-            onClick={() => handleStartStory(story.id)}
-            className="text-left bg-white border border-gray-200 rounded-2xl p-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 dark:bg-white/[0.03] dark:border-gray-800 group"
+            onClick={() => !isLocked && handleStartStory(story.id)}
+            disabled={isLocked}
+            className={`text-left bg-white border border-gray-200 rounded-2xl p-4 transition-all duration-200 dark:bg-white/[0.03] dark:border-gray-800 group ${
+              isLocked
+                ? 'opacity-50 grayscale cursor-not-allowed'
+                : 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
+            }`}
             style={{
               borderLeftWidth: '4px',
-              borderLeftColor: story.accentColor,
-              background: `linear-gradient(135deg, ${story.bgFrom} 0%, ${story.bgTo} 100%)`,
+              borderLeftColor: isLocked ? '#9ca3af' : story.accentColor,
+              background: isLocked
+                ? 'linear-gradient(135deg, rgba(156,163,175,0.08) 0%, rgba(156,163,175,0.03) 100%)'
+                : `linear-gradient(135deg, ${story.bgFrom} 0%, ${story.bgTo} 100%)`,
             }}
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
                 <span
                   className="text-[10px] font-mono font-bold px-2 py-0.5 rounded text-white"
-                  style={{ background: story.accentColor }}
+                  style={{ background: isLocked ? '#9ca3af' : story.accentColor }}
                 >
-                  {story.number}
+                  {isLocked ? '🔒' : story.number}
                 </span>
                 <span className="text-[10px] font-mono font-bold text-gray-500">{story.runtime}</span>
               </div>
               <span
                 className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded"
-                style={{ background: story.accentColor + '20', color: story.accentColor }}
+                style={{ background: (isLocked ? '#9ca3af' : story.accentColor) + '20', color: isLocked ? '#9ca3af' : story.accentColor }}
               >
                 {story.pillar}
               </span>
             </div>
 
-            <div className="text-sm font-bold text-gray-800 dark:text-white/90 leading-tight mb-0.5">
+            <div className={`text-sm font-bold leading-tight mb-0.5 ${isLocked ? 'text-gray-400' : 'text-gray-800 dark:text-white/90'}`}>
               {story.title}
             </div>
             <div className="text-[11px] text-gray-500 mb-2">{story.subtitle}</div>
 
-            <div className="text-[11px] text-gray-700 dark:text-gray-300 italic leading-snug mb-3">
+            <div className={`text-[11px] italic leading-snug mb-3 ${isLocked ? 'text-gray-400' : 'text-gray-700 dark:text-gray-300'}`}>
               {story.teaser}
             </div>
 
-            <div
-              className="text-[11px] font-bold flex items-center gap-1 transition-transform group-hover:translate-x-0.5"
-              style={{ color: story.accentColor }}
-            >
-              {story.cta}
-            </div>
+            {isLocked ? (
+              <div className="text-[10px] font-bold text-gray-400 flex items-center gap-1">
+                Import {unlockLabel} to unlock
+              </div>
+            ) : (
+              <div
+                className="text-[11px] font-bold flex items-center gap-1 transition-transform group-hover:translate-x-0.5"
+                style={{ color: story.accentColor }}
+              >
+                {story.cta}
+              </div>
+            )}
           </button>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

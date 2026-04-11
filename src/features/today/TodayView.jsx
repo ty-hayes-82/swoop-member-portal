@@ -20,7 +20,7 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { getDataMode, isGateOpen } from '@/services/demoGate';
+import { getDataMode, isGateOpen, getLoadedGates } from '@/services/demoGate';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist, { LOW_DATA_THRESHOLD } from './OnboardingChecklist';
@@ -195,6 +195,35 @@ export default function TodayView() {
     return <SkeletonDashboard />;
   }
 
+  // Guided mode with zero imports — show welcome card instead of empty dashes
+  if (getDataMode() === 'guided' && getLoadedGates().length === 0) {
+    return (
+      <PageTransition>
+        <div className="flex flex-col gap-6 w-full">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90 m-0">{getGreeting()}</h1>
+            <p className="text-sm text-gray-500 mt-1 mb-0">{formatDate()}</p>
+          </div>
+          <div className="rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/50 p-8 text-center">
+            <div className="text-4xl mb-3">🏌️</div>
+            <h2 className="text-lg font-bold text-gray-800 m-0 mb-2">Welcome to Swoop</h2>
+            <p className="text-sm text-gray-600 max-w-md mx-auto mb-4">
+              Import your first data file to see your club come alive. Each file you connect unlocks new insights, alerts, and revenue intelligence.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate('admin', { tab: 'import' })}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-500 text-white text-sm font-bold rounded-lg border-none cursor-pointer hover:bg-brand-600 transition-colors"
+            >
+              Open Import Panel →
+            </button>
+          </div>
+          <DemoStoriesLauncher />
+        </div>
+      </PageTransition>
+    );
+  }
+
   // Fresh live club — show onboarding checklist instead of the normal dashboard
   // so a brand-new GM doesn't see another club's numbers on first login.
   // Demo and guided modes are the dashboard — never gate them behind this.
@@ -351,12 +380,63 @@ export default function TodayView() {
         {/* Section 1.5: Morning Briefing Synthesis (Pillar 1: SEE IT) */}
         <MorningBriefingSentence />
 
-        {/* Section 1.6: Demo Story Flows — 3 storyboard moments, one click to start.
-            Hidden in guided demo mode until at least one data source has been imported,
-            so the launcher's teaser copy ("220 rounds...") doesn't bleed demo content
-            into a clean guided session. The cards are storyboard marketing — only show
-            them when the underlying data exists to back them up. */}
+        {/* Section 1.6: Demo Story Flows — 3 storyboard moments, one click to start. */}
         <DemoStoriesLauncher />
+
+        {/* Concierge quick-try card — shown in guided mode after member import */}
+        {getDataMode() === 'guided' && isGateOpen('members') && (
+          <div
+            className="fade-in-up rounded-2xl p-5 flex items-center gap-4"
+            style={{
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.06) 100%)',
+              border: '1px solid rgba(99,102,241,0.2)',
+            }}
+          >
+            <div className="text-3xl flex-shrink-0">💬</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-bold text-gray-800 mb-0.5">Try the Member Concierge</div>
+              <div className="text-xs text-gray-600 leading-relaxed">
+                Text James Whitfield a message and watch AI respond with personalized context from his member profile.
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('concierge')}
+              className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-500 text-white text-xs font-bold rounded-lg border-none cursor-pointer hover:bg-indigo-600 transition-colors"
+            >
+              Open Concierge →
+            </button>
+          </div>
+        )}
+
+        {/* Split-screen demo link — shown in guided/demo mode */}
+        {(getDataMode() === 'guided' || getDataMode() === 'demo') && (
+          <div
+            className="fade-in-up rounded-2xl p-5 flex items-center gap-4"
+            style={{
+              background: 'linear-gradient(135deg, rgba(232,167,50,0.08) 0%, rgba(232,167,50,0.04) 100%)',
+              border: '1px solid rgba(232,167,50,0.2)',
+            }}
+          >
+            <div className="text-3xl flex-shrink-0">🪟</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-bold text-gray-800 mb-0.5">See Both Sides of the Glass</div>
+              <div className="text-xs text-gray-600 leading-relaxed">
+                Watch the member experience and GM dashboard side by side — the killer demo that shows how Swoop connects every touchpoint.
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => { window.location.hash = '#/demo/split-screen'; }}
+              className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg border-none cursor-pointer transition-colors"
+              style={{ background: '#e8a732', color: 'white' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#d4982d'}
+              onMouseLeave={e => e.currentTarget.style.background = '#e8a732'}
+            >
+              Launch Split Screen →
+            </button>
+          </div>
+        )}
 
         {/* Section 2: Quick Stats Row */}
         <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>

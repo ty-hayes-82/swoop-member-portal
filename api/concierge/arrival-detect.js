@@ -77,12 +77,10 @@ export default withAuth(
       const memberRes = await sql`
         SELECT
           m.member_id, m.first_name, m.last_name, m.membership_type,
-          m.archetype, m.membership_status, m.household_id,
-          m.preferred_dining_spot, m.tee_time_preference, m.dining_preference,
-          m.member_notes, m.family_members, m.account_balance,
-          h.primary_member_id, h.member_count AS household_size
+          m.membership_status, m.household_id, m.health_score,
+          s.preferences_cache
         FROM members m
-        LEFT JOIN households h ON m.household_id = h.household_id
+        LEFT JOIN member_concierge_sessions s ON s.member_id = m.member_id AND s.club_id = m.club_id
         WHERE m.member_id = ${member_id} AND m.club_id = ${clubId}
       `;
 
@@ -90,7 +88,11 @@ export default withAuth(
         return res.status(404).json({ error: 'Member not found' });
       }
 
-      const member = memberRes.rows[0];
+      const memberRow = memberRes.rows[0];
+      const prefsCache = memberRow.preferences_cache
+        ? (typeof memberRow.preferences_cache === 'string' ? JSON.parse(memberRow.preferences_cache) : memberRow.preferences_cache)
+        : {};
+      const member = { ...memberRow, ...prefsCache };
 
       // --- Load open complaints ---
       let openComplaints = [];
@@ -108,22 +110,8 @@ export default withAuth(
         // feedback table may not exist
       }
 
-      // --- Load health score ---
-      let healthScore = null;
-      try {
-        const engRes = await sql`
-          SELECT engagement_score
-          FROM member_engagement_weekly
-          WHERE member_id = ${member_id}
-          ORDER BY week_start DESC
-          LIMIT 1
-        `;
-        if (engRes.rows.length) {
-          healthScore = Number(engRes.rows[0].engagement_score);
-        }
-      } catch {
-        // table may not exist
-      }
+      // --- Health score from members table ---
+      const healthScore = member.health_score != null ? Number(member.health_score) : null;
 
       // --- Load household members ---
       let householdMembers = [];
@@ -143,12 +131,12 @@ export default withAuth(
       }
 
       // --- Build staff prep brief ---
-      const cartPref = member.tee_time_preference || 'standard cart';
+      const cartPref = prefsCache.tee_time_preference || 'standard cart';
       const cartPrep = `Stage ${cartPref} — ${member.first_name} ${member.last_name} (${member.membership_type})`;
 
-      const diningHold = member.preferred_dining_spot
-        ? `Preferred spot: ${member.preferred_dining_spot}. ${member.dining_preference || ''}`
-        : member.dining_preference || 'No dining preference on file';
+      const diningHold = prefsCache.preferred_dining_spot
+        ? `Preferred spot: ${prefsCache.preferred_dining_spot}. ${prefsCache.dining_preference || ''}`
+        : prefsCache.dining_preference || 'No dining preference on file';
 
       const isAtRisk = healthScore != null && healthScore < 50;
       const hasOpenComplaint = openComplaints.length > 0;
@@ -163,15 +151,12 @@ export default withAuth(
       if (isAtRisk) {
         talkingPoints.push(`Health score ${healthScore} — at-risk. Personal touch matters.`);
       }
-      if (member.member_notes) {
-        talkingPoints.push(`Notes: ${member.member_notes}`);
+      if (prefsCache.member_notes) {
+        talkingPoints.push(`Notes: ${prefsCache.member_notes}`);
       }
       if (householdMembers.length) {
         const names = householdMembers.map((h) => h.first_name).join(', ');
         talkingPoints.push(`Household: ${names}`);
-      }
-      if (member.family_members) {
-        talkingPoints.push(`Family: ${member.family_members}`);
       }
 
       const staffBrief = {

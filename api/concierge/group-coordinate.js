@@ -44,9 +44,10 @@ async function handler(req, res) {
     const memberConflicts = new Map();
     try {
       const bookingsResult = await sql`
-        SELECT bp.member_id::text, b.tee_time, b.course_name, b.booking_date
+        SELECT bp.member_id::text, b.tee_time, c.name AS course_name, b.booking_date
         FROM booking_players bp
-        JOIN tee_sheet_bookings b ON b.booking_id = bp.booking_id
+        JOIN bookings b ON b.booking_id = bp.booking_id
+        JOIN courses c ON c.course_id = b.course_id
         WHERE b.club_id = ${clubId}
           AND b.booking_date = ${date}
           AND b.status != 'cancelled'
@@ -62,22 +63,20 @@ async function handler(req, res) {
       }
     } catch {}
 
-    // 3. Check dining reservations for conflicts
+    // 3. Check POS checks for dining conflicts
     try {
       const diningResult = await sql`
-        SELECT member_id::text, reservation_time, outlet_name
-        FROM dining_reservations
-        WHERE club_id = ${clubId}
-          AND reservation_date = ${date}
-          AND status != 'cancelled'
-          AND member_id = ANY(${allMembers})
+        SELECT pc.member_id::text, pc.check_date
+        FROM pos_checks pc
+        WHERE pc.member_id = ANY(${allMembers})
+          AND pc.check_date = ${date}
       `;
       for (const r of diningResult.rows) {
         if (!memberConflicts.has(r.member_id)) memberConflicts.set(r.member_id, []);
         memberConflicts.get(r.member_id).push({
           type: 'dining',
-          time: r.reservation_time,
-          detail: `Dining reservation at ${r.reservation_time} at ${r.outlet_name}`,
+          time: null,
+          detail: `Has a dining check on ${r.check_date}`,
         });
       }
     } catch {}
@@ -85,19 +84,19 @@ async function handler(req, res) {
     // 4. Check event RSVPs for conflicts
     try {
       const eventsResult = await sql`
-        SELECT er.member_id::text, ce.event_date, ce.event_time, ce.title
-        FROM event_rsvps er
-        JOIN club_events ce ON ce.event_id = er.event_id
-        WHERE ce.club_id = ${clubId}
-          AND ce.event_date = ${date}
+        SELECT er.member_id::text, ed.event_date, ed.title
+        FROM event_registrations er
+        JOIN event_definitions ed ON ed.event_id = er.event_id
+        WHERE ed.club_id = ${clubId}
+          AND ed.event_date = ${date}
           AND er.member_id = ANY(${allMembers})
       `;
       for (const r of eventsResult.rows) {
         if (!memberConflicts.has(r.member_id)) memberConflicts.set(r.member_id, []);
         memberConflicts.get(r.member_id).push({
           type: 'event',
-          time: r.event_time,
-          detail: `RSVP'd to "${r.title}" at ${r.event_time}`,
+          time: null,
+          detail: `Registered for "${r.title}" on ${r.event_date}`,
         });
       }
     } catch {}

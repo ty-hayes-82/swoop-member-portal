@@ -43,11 +43,10 @@ async function calculateEngagementReel(clubId, memberId) {
     const rounds = await sql`
       SELECT COUNT(*) AS cnt
       FROM booking_players bp
-      JOIN tee_sheet_bookings b ON b.booking_id = bp.booking_id
+      JOIN bookings b ON b.booking_id = bp.booking_id
       WHERE bp.member_id = ${memberId}
         AND b.club_id = ${clubId}
         AND b.booking_date >= CURRENT_DATE - INTERVAL '12 months'
-        AND b.status != 'cancelled'
     `;
     reel.rounds_played = parseInt(rounds.rows[0]?.cnt || 0, 10);
   } catch {}
@@ -56,37 +55,35 @@ async function calculateEngagementReel(clubId, memberId) {
   try {
     const events = await sql`
       SELECT COUNT(*) AS cnt
-      FROM event_rsvps er
-      JOIN club_events ce ON ce.event_id = er.event_id
+      FROM event_registrations er
+      JOIN event_definitions ed ON ed.event_id = er.event_id
       WHERE er.member_id = ${memberId}
-        AND ce.club_id = ${clubId}
-        AND ce.event_date >= CURRENT_DATE - INTERVAL '12 months'
+        AND ed.club_id = ${clubId}
+        AND ed.event_date >= CURRENT_DATE - INTERVAL '12 months'
     `;
     reel.events_attended = parseInt(events.rows[0]?.cnt || 0, 10);
   } catch {}
 
-  // Guests hosted (guest rounds where this member was the host)
+  // Guests hosted — count bookings where this member is a player and there are guest players
   try {
     const guests = await sql`
-      SELECT COALESCE(SUM(b.guest_count), 0) AS cnt
-      FROM tee_sheet_bookings b
-      WHERE b.booked_by_member_id = ${memberId}
+      SELECT COUNT(DISTINCT b.booking_id) AS cnt
+      FROM booking_players bp
+      JOIN bookings b ON b.booking_id = bp.booking_id
+      WHERE bp.member_id = ${memberId}
         AND b.club_id = ${clubId}
         AND b.booking_date >= CURRENT_DATE - INTERVAL '12 months'
-        AND b.guest_count > 0
     `;
     reel.guests_hosted = parseInt(guests.rows[0]?.cnt || 0, 10);
   } catch {}
 
-  // Dining visits
+  // Dining visits (from POS checks)
   try {
     const dining = await sql`
       SELECT COUNT(*) AS cnt
-      FROM dining_reservations
+      FROM pos_checks
       WHERE member_id = ${memberId}
-        AND club_id = ${clubId}
-        AND reservation_date >= CURRENT_DATE - INTERVAL '12 months'
-        AND status != 'cancelled'
+        AND check_date >= CURRENT_DATE - INTERVAL '12 months'
     `;
     reel.dining_visits = parseInt(dining.rows[0]?.cnt || 0, 10);
   } catch {}
@@ -96,7 +93,7 @@ async function calculateEngagementReel(clubId, memberId) {
     const lastVisit = await sql`
       SELECT MAX(b.booking_date) AS last_date
       FROM booking_players bp
-      JOIN tee_sheet_bookings b ON b.booking_id = bp.booking_id
+      JOIN bookings b ON b.booking_id = bp.booking_id
       WHERE bp.member_id = ${memberId} AND b.club_id = ${clubId}
     `;
     reel.last_visit = lastVisit.rows[0]?.last_date || null;
@@ -111,7 +108,7 @@ async function findOpenIssues(clubId, memberId) {
   // Open complaints
   try {
     const complaints = await sql`
-      SELECT complaint_id, category, description, created_at, status
+      SELECT id, category, description, created_at, status
       FROM complaints
       WHERE club_id = ${clubId}
         AND member_id = ${memberId}
@@ -121,7 +118,7 @@ async function findOpenIssues(clubId, memberId) {
     for (const c of complaints.rows) {
       issues.push({
         type: 'open_complaint',
-        id: c.complaint_id,
+        id: c.id,
         category: c.category,
         description: (c.description || '').slice(0, 100),
         filed: c.created_at,

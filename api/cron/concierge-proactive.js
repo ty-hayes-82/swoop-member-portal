@@ -91,7 +91,7 @@ async function findWeatherOpportunities(clubId) {
         AND h.health_score BETWEEN 30 AND 70
         AND m.member_id NOT IN (
           SELECT bp.member_id FROM booking_players bp
-          JOIN tee_sheet_bookings b ON b.booking_id = bp.booking_id
+          JOIN bookings b ON b.booking_id = bp.booking_id
           WHERE b.club_id = ${clubId} AND b.booking_date = CURRENT_DATE + 1
         )
       ORDER BY h.health_score ASC
@@ -112,7 +112,7 @@ async function checkThrottle(clubId, memberId) {
     const result = await sql`
       SELECT 1 FROM member_proactive_log
       WHERE club_id = ${clubId} AND member_id = ${memberId}
-        AND sent_at > NOW() - INTERVAL '${THROTTLE_DAYS} days'
+        AND sent_at > NOW() - INTERVAL '7 days'
       LIMIT 1
     `;
     return result.rows.length > 0;
