@@ -1328,6 +1328,49 @@ CREATE TABLE IF NOT EXISTS member_requests (
 
 CREATE INDEX IF NOT EXISTS idx_member_requests_club ON member_requests(club_id, status);
 
+-- ---------------------------------------------------------------------------
+-- 3.16 PROACTIVE CONCIERGE (Agent Phase 8 — Proactive Outreach)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS member_proactive_log (
+  id                  SERIAL PRIMARY KEY,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT NOT NULL,
+  outreach_type       TEXT NOT NULL,              -- weather_opportunity | inactivity_nudge | event_suggestion | birthday
+  channel             TEXT NOT NULL DEFAULT 'in_app',  -- in_app | email | sms | push
+  message_preview     TEXT,
+  sent_at             TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_proactive_log_club ON member_proactive_log(club_id, member_id);
+CREATE INDEX IF NOT EXISTS idx_proactive_log_type ON member_proactive_log(outreach_type);
+CREATE INDEX IF NOT EXISTS idx_proactive_log_sent ON member_proactive_log(sent_at DESC);
+
+CREATE TABLE IF NOT EXISTS weather_forecasts (
+  id                  SERIAL PRIMARY KEY,
+  club_id             TEXT NOT NULL,
+  forecast_date       DATE NOT NULL,
+  conditions          TEXT NOT NULL,              -- clear | partly_cloudy | cloudy | rainy | stormy
+  high_temp           INTEGER NOT NULL,
+  low_temp            INTEGER NOT NULL,
+  wind_mph            INTEGER NOT NULL DEFAULT 0,
+  precip_prob         REAL NOT NULL DEFAULT 0,    -- 0.0–1.0
+  UNIQUE(club_id, forecast_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_weather_forecasts_club_date ON weather_forecasts(club_id, forecast_date);
+
+-- Seed: 7-day Scottsdale forecast (April 11–17, 2026)
+INSERT INTO weather_forecasts (club_id, forecast_date, conditions, high_temp, low_temp, wind_mph, precip_prob) VALUES
+  ('club_pinetree', '2026-04-11', 'clear',         92, 68, 5,  0.00),
+  ('club_pinetree', '2026-04-12', 'clear',         94, 70, 4,  0.00),
+  ('club_pinetree', '2026-04-13', 'partly_cloudy', 90, 67, 8,  0.10),
+  ('club_pinetree', '2026-04-14', 'clear',         91, 69, 6,  0.00),
+  ('club_pinetree', '2026-04-15', 'rainy',         78, 62, 15, 0.75),
+  ('club_pinetree', '2026-04-16', 'partly_cloudy', 85, 65, 10, 0.15),
+  ('club_pinetree', '2026-04-17', 'clear',         93, 70, 5,  0.00)
+ON CONFLICT (club_id, forecast_date) DO NOTHING;
+
 -- =============================================================================
 -- End of schema
 -- =============================================================================

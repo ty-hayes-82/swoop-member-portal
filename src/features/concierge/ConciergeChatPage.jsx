@@ -43,8 +43,10 @@ export default function ConciergeChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Prevent body scroll and handle mobile viewport
+  // Prevent body scroll only when concierge is the top-level route (not embedded)
   useEffect(() => {
+    const isTopLevel = window.location.hash === '#/concierge';
+    if (!isTopLevel) return;
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';

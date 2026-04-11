@@ -428,8 +428,14 @@ function generateSimulatedResponse(profile, message) {
     return `Absolutely, ${name}! I know you love ${favDining}. I have a table for 2 this evening at 7:30 PM — confirmation #${confNum}. Would you like me to let them know about any special requests?`;
   }
 
-  // Events — show real upcoming events
+  // Events — show upcoming events (filter to weekend if asked)
   if (lower.includes('event') || lower.includes('rsvp') || lower.includes('tournament') || lower.includes('happening') || lower.includes('weekend') || lower.includes('wine')) {
+    if (lower.includes('weekend')) {
+      return `Great timing, ${name}! Here's what's happening this weekend:\n\n` +
+        `• Saturday Shotgun — Member-Guest (Apr 12, 8 AM — only 8 spots left)\n` +
+        `• Junior Golf Clinic (Apr 13, 10 AM — open enrollment)\n\n` +
+        `Want me to RSVP you for either of these?`;
+    }
     return `Great timing, ${name}! Here's what's coming up:\n\n` +
       `• Saturday Shotgun — Member-Guest (Apr 12, 8 AM — only 8 spots left)\n` +
       `• Junior Golf Clinic (Apr 13, 10 AM — open enrollment)\n` +
