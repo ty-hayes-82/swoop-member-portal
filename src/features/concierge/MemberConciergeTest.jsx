@@ -2,11 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { isGuidedMode, getLoadedGates } from '../../services/demoGate';
 
 /* ── Member data ────────────────────────────────────────────────── */
-const TEST_CLUB = 'seed_pinetree';
+const TEST_CLUB = 'test_concierge';
 
 const MEMBERS = [
   {
-    id: 'mbr_t01',
+    id: 'mbr_t01_test_concierge',
     name: 'James Whitfield',
     initials: 'JW',
     archetype: 'Balanced Active',
@@ -22,7 +22,7 @@ const MEMBERS = [
     ],
   },
   {
-    id: 'mbr_t04',
+    id: 'mbr_t04_test_concierge',
     name: 'Anne Jordan',
     initials: 'AJ',
     archetype: 'Weekend Warrior',
@@ -38,7 +38,7 @@ const MEMBERS = [
     ],
   },
   {
-    id: 'mbr_t05',
+    id: 'mbr_t05_test_concierge',
     name: 'Robert Callahan',
     initials: 'RC',
     archetype: 'Declining',
@@ -54,7 +54,7 @@ const MEMBERS = [
     ],
   },
   {
-    id: 'mbr_146',
+    id: 'mbr_146_test_concierge',
     name: 'Margaret Chen',
     initials: 'MC',
     archetype: 'Social Butterfly',
@@ -70,7 +70,7 @@ const MEMBERS = [
     ],
   },
   {
-    id: 'mbr_t07',
+    id: 'mbr_t07_test_concierge',
     name: 'Linda Leonard',
     initials: 'LL',
     archetype: 'Ghost',
