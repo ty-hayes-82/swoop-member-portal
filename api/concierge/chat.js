@@ -233,9 +233,9 @@ async function loadMemberProfile(clubId, memberId) {
     WHERE member_id = ${memberId} AND club_id = ${clubId}
   `;
   if (result.rows.length === 0) {
-    // Fallback: static Whitfield profile for demo/conference testing
-    if (memberId === 'mbr_t01') {
-      return {
+    // Fallback: static profiles for demo/conference testing
+    const fallbacks = {
+      mbr_t01: {
         member_id: 'mbr_t01', name: 'James Whitfield', first_name: 'James',
         email: 'james.whitfield@example.com', membership_type: 'Full Golf',
         join_date: '2019-04-12', status: 'active',
@@ -249,9 +249,25 @@ async function loadMemberProfile(clubId, memberId) {
           favoriteSpots: 'North Course back nine, Grill Room booth 12',
           channel: 'Call',
         },
-      };
-    }
-    return null;
+      },
+      mbr_t07: {
+        member_id: 'mbr_t07', name: 'Linda Leonard', first_name: 'Linda',
+        email: 'linda.leonard@example.com', membership_type: 'Full Golf',
+        join_date: '2019-05-20', status: 'at-risk',
+        archetype: 'Ghost',
+        health_score: 12,
+        last_visit: '2025-09-12',
+        household: [],
+        preferences: {
+          teeWindows: 'N/A — social member',
+          dining: 'Wine dinners, always table with Diane Prescott. Enjoys the social atmosphere.',
+          favoriteSpots: 'Wine cellar dining room, Event lawn',
+          channel: 'Call',
+          notes: 'Joined after her husband Richard passed away. Friends encouraged her to join for the social calendar. Bridge partner is Diane Prescott. Zero visits since October — 6 months dark. Needs personal, warm outreach — not transactional.',
+        },
+      },
+    };
+    return fallbacks[memberId] || null;
   }
 
   const m = result.rows[0];
