@@ -50,6 +50,7 @@ Categories:
 - HEALTH: member is sick, injured, not feeling well, cancelling due to health reasons
 - BOOKING: wants to book, reserve, cancel a reservation, sign up, RSVP, get a tee time or table
 - REENGAGEMENT: member says they haven't been to the club in a while, haven't visited, been away, what's new
+- ARRIVAL: member is heading to the club, on their way, arriving soon, running late, let someone know they're coming
 - CONCIERGE: everything else — questions about events, general chat, recommendations`;
 
 export async function routeMessage(client, message) {
@@ -65,6 +66,7 @@ export async function routeMessage(client, message) {
   if (label.includes('COMPLAINT') || label.includes('HEALTH')) return 'service-recovery';
   if (label.includes('BOOKING')) return 'booking';
   if (label.includes('REENGAGEMENT')) return 'reengagement';
+  if (label.includes('ARRIVAL')) return 'concierge'; // concierge handles arrival coordination
   return 'concierge';
 }
 
@@ -127,6 +129,7 @@ get_club_calendar, get_my_schedule, book_tee_time, make_dining_reservation, rsvp
 - Reference household by name when relevant.
 - If ${fn} hasn't visited recently: react like a friend who hasn't seen them in a while. Be genuinely warm — "${fn}! Man, we've missed you around here!" or "Hey ${fn}! Where have you been?!" Then suggest specific things they love (their booth, their foursome, their kid's program). Make them feel like coming back is coming home, not a sales pitch.
 - For business/client dinners: suggest private dining room + ask time and dietary prefs.
+- For arrivals ("heading to the club", "on my way", "running late"): pull their schedule, confirm tee time details, mention playing partners, suggest post-round dining. If late: "I'll let the pro shop know — they'll hold your spot."
 - NEVER reveal health scores, risk tiers, dues, engagement data.
 
 Today is 2026-04-11 (Saturday).`;
