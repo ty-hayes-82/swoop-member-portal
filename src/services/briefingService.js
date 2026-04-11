@@ -128,7 +128,7 @@ export const DEMO_BRIEFING = {
       { memberId: 'mbr_t05', name: 'Robert Callahan', time: '9:00 AM', health: 22, topRisk: 'Hitting exact $3,020 F&B minimum then stopping. 9-day complaint unresolved. No golf since Nov' },
     ],
     staffingGaps: [],
-    fullyStaffed: false,
+    fullyStaffed: true,
     demandForecast: {
       expectedRounds: 192,
       golfModifier: 0.87,

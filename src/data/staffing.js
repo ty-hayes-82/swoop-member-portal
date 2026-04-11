@@ -28,7 +28,7 @@ export const feedbackRecords = [
   { id: 'fb_002', memberId: 'mbr_142', memberName: 'Patricia Nguyen', date: '2026-01-09', category: 'Service Speed',
     sentiment: -0.64, status: 'resolved', isUnderstaffedDay: true,
     resolved_date: '2026-01-10', resolved_by: 'F&B Director' },
-  { id: 'fb_003', memberId: 'mbr_088', memberName: 'Michael Torres', date: '2026-01-09', category: 'Service Speed',
+  { id: 'fb_003', memberId: 'mbr_088', memberName: 'Megan Torres', date: '2026-01-09', category: 'Service Speed',
     sentiment: -0.72, status: 'resolved', isUnderstaffedDay: true,
     resolved_date: '2026-01-11', resolved_by: 'F&B Director' },
   { id: 'fb_004', memberId: 'mbr_211', memberName: 'Irene Coleman', date: '2026-01-16', category: 'Food Quality',

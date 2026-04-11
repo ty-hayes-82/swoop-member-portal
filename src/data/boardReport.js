@@ -24,7 +24,7 @@ export const memberSaves = [
     duesAtRisk: 18500,
   },
   {
-    memberId: 'mbr_146',
+    memberId: 'mbr_t06',
     name: 'Sandra Chen',
     healthBefore: 41,
     healthAfter: 68,
@@ -35,12 +35,12 @@ export const memberSaves = [
   },
   {
     memberId: 'mbr_099',
-    name: 'Robert & Linda Chen',
+    name: 'Helen Porter',
     healthBefore: 28,
     healthAfter: 62,
-    trigger: 'Family membership — kids program schedule conflict led to 3 missed events',
-    action: 'Membership director meeting + custom schedule accommodation',
-    outcome: 'Family re-enrolled in junior program, added pool membership',
+    trigger: 'Seasonal absence pattern — Snowbird member gone Nov through Mar',
+    action: 'Proactive spring return outreach when weather warmed up, personal call from GM welcomed her back',
+    outcome: 'Returned for full spring/summer season, renewed membership',
     duesAtRisk: 31000,
   },
   {
@@ -65,7 +65,7 @@ export const memberSaves = [
   },
   {
     memberId: 'mbr_088',
-    name: 'Michael Torres',
+    name: 'Megan Torres',
     healthBefore: 31,
     healthAfter: 65,
     trigger: 'Guest policy confusion led to embarrassing denial at gate',

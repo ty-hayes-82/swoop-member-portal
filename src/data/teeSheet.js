@@ -160,5 +160,5 @@ export const teeSheetSummary = {
   weatherCondition: 'sunny',
   weatherTemp: 82,
   weatherWind: 8,
-  weatherForecast: 'Clear skies, high 82°F. Light winds 8 mph.',
+  weatherForecast: 'Clear skies, high 82°F. Light winds 8 mph — afternoon gusts to 30-40 mph possible.',
 };
