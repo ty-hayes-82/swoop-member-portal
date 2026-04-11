@@ -37,7 +37,6 @@ async function copyClub(client) {
       member_count = s.member_count,
       course_count = s.course_count,
       outlet_count = s.outlet_count,
-      brand_voice = s.brand_voice,
       timezone = s.timezone,
       latitude = s.latitude,
       longitude = s.longitude,
