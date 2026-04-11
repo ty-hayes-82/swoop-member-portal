@@ -23,6 +23,7 @@ const LOITracker = lazy(() => import('@/features/demo/LOITracker'));
 const ArchitectureMoat = lazy(() => import('@/features/demo/ArchitectureMoat'));
 const TechnicalDeepDive = lazy(() => import('@/features/demo/TechnicalDeepDive'));
 const MobileShowcase = lazy(() => import('@/features/demo/MobileShowcase'));
+const AgentsLanding = lazy(() => import('@/features/demo/AgentsLanding'));
 import { DataProvider } from '@/context/DataProvider';
 import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
 import DemoWizard from '@/components/ui/DemoWizard';
@@ -217,6 +218,7 @@ function RouterViews() {
   const isDemoArchitecture = hash === '#/demo/architecture';
   const isDemoTechnicalDeepDive = hash === '#/demo/technical-deep-dive';
   const isDemoMobileShowcase = hash === '#/demo/mobile-showcase';
+  const isDemoAgentsLanding = hash === '#/demo/agents-landing';
 
   if (isDemoPilotResults) {
     return (
@@ -254,6 +256,14 @@ function RouterViews() {
     return (
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
         <MobileShowcase />
+      </Suspense>
+    );
+  }
+
+  if (isDemoAgentsLanding) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <AgentsLanding />
       </Suspense>
     );
   }
