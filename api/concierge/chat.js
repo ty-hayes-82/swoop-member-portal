@@ -574,8 +574,8 @@ async function loadMemberProfile(clubId, memberId) {
           notes: 'Declining member. Hitting exact $3,020 F&B minimum then stopping — dining to fulfill obligation only. 9-day complaint unresolved about billing. No golf since November. Health score 22. $18K dues.',
         },
       },
-      mbr_146: {
-        member_id: 'mbr_146', name: 'Sandra Chen', first_name: 'Sandra',
+      mbr_t06: {
+        member_id: 'mbr_t06', name: 'Sandra Chen', first_name: 'Sandra',
         email: 'sandra.c@email.com', membership_type: 'Social',
         join_date: '2020-09-15', status: 'active',
         household: [],

@@ -54,7 +54,7 @@ const MEMBERS = [
     ],
   },
   {
-    id: 'mbr_146',
+    id: 'mbr_t06',
     name: 'Margaret Chen',
     initials: 'MC',
     archetype: 'Social Butterfly',

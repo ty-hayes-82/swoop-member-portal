@@ -57,7 +57,7 @@ export default async function handler(req, res) {
         ('conf_001', 'mbr_038', 'James Whitfield', 'bkg_sat_0920', 'Sat 9:20 AM', 0.42, 'pending', NULL, NULL, NOW()),
         ('conf_002', 'mbr_059', 'Anne Jordan', 'bkg_sat_0700', 'Sat 7:00 AM', 0.28, 'contacted', 'sms', NULL, NOW()),
         ('conf_003', 'mbr_072', 'Robert Callahan', 'bkg_sat_1040', 'Sat 10:40 AM', 0.35, 'pending', NULL, NULL, NOW()),
-        ('conf_004', 'mbr_146', 'David Chen', 'bkg_sat_0800', 'Sat 8:00 AM', 0.15, 'confirmed', NULL, NULL, NOW())
+        ('conf_004', 'mbr_t06', 'David Chen', 'bkg_sat_0800', 'Sat 8:00 AM', 0.15, 'confirmed', NULL, NULL, NOW())
       ON CONFLICT (confirmation_id) DO NOTHING`;
 
     // Seed slot_reassignments

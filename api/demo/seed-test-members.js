@@ -86,7 +86,7 @@ async function insertMembers(client) {
        'FG', '2016-03-15', 'active',   'hh_t04', 'Weekend Warrior', 14000, 0, 28, 'sms', 'seed'),
       ('mbr_t05', 1005, $1, 'Robert',  'Callahan',  'robert.c@email.com',          '(480) 555-0105',
        'CORP', '2021-06-01', 'active',  NULL,     'Declining',       18000, 0, 22, 'email', 'seed'),
-      ('mbr_146', 1146, $1, 'Sandra',  'Chen',      'sandra.c@email.com',          '(480) 555-0146',
+      ('mbr_t06', 1006, $1, 'Sandra',  'Chen',      'sandra.c@email.com',          '(480) 555-0146',
        'SPT', '2020-09-15', 'active',   NULL,     'Social Butterfly', 9000, 0, 36, 'sms', 'seed'),
       ('mbr_t07', 1007, $1, 'Linda',   'Leonard',   'linda.l@email.com',           '(480) 555-0107',
        'FG', '2019-05-20', 'resigned', 'hh_t07', 'Ghost',           18000, 0, 12, 'phone', 'seed')
@@ -217,7 +217,7 @@ async function insertConciergeSessions(client) {
       channel: 'Email',
       notes: 'Declining member. Hitting exact $3,020 F&B minimum then stopping — dining to fulfill obligation only. 9-day complaint unresolved about billing. No golf since November. Health score 22. $18K dues.',
     },
-    mbr_146: {
+    mbr_t06: {
       teeWindows: 'N/A — social member, does not golf',
       dining: 'Grill Room for casual lunches, Main Dining for events. Used to spend $142/visit, now $18. Loves wine tastings and social events.',
       favoriteSpots: 'Grill Room, Event lawn, Wine cellar',

@@ -195,7 +195,7 @@ export default function MemberProfilePage() {
   }, [memberRouteId]);
 
   // Seed profile IDs — use static data to avoid DB mismatch
-  const SEED_IDS = new Set(['mbr_t01', 'mbr_t04', 'mbr_t05', 'mbr_146', 'mbr_312']);
+  const SEED_IDS = new Set(['mbr_t01', 'mbr_t04', 'mbr_t05', 'mbr_t06', 'mbr_312']);
 
   useEffect(() => {
     if (!memberId) return;

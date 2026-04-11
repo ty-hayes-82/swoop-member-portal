@@ -152,7 +152,7 @@ export const agentActions = [
     status: 'pending',
     impactMetric: '$2.1K F&B revenue protected',
     priority: 'medium',
-    memberId: 'mbr_146',
+    memberId: 'mbr_t06',
     signals: [
       { system: 'Weather API', signal: 'Wind gusts 15+ mph', timestamp: 'Noon forecast' },
       { system: 'Tee Sheet', signal: '28 tee times at risk', timestamp: 'Today' },
@@ -189,7 +189,7 @@ export const agentActions = [
     // Must match pipeline.js David Chen potentialDues.
     impactMetric: '$42K new-member opportunity',
     priority: 'low',
-    memberId: 'mbr_146',
+    memberId: 'mbr_t06',
     auditTrail: [
       { id: 'rec', status: 'Recommended', owner: 'Member Pulse', timestamp: '2026-01-17T06:21:00Z' },
       { id: 'apr', status: 'Approved — Assign to Lisa Park', owner: 'Sarah Mitchell (GM)', timestamp: '2026-01-17T08:12:00Z' },
@@ -519,7 +519,7 @@ export const agentActions = [
     status: 'pending',
     impactMetric: '$480/mo F&B revenue at risk',
     priority: 'medium',
-    memberId: 'mbr_146',
+    memberId: 'mbr_t06',
     memberName: 'Sandra Chen',
     suggestedOwner: 'F&B Director · Maya Chen',
     recommendedChannel: 'SMS',
@@ -612,7 +612,7 @@ export const agentActions = [
     actionType: 'personal_outreach',
     priority: 'high',
     source: 'AI Recommendation (Claude)',
-    memberId: 'mbr_146',
+    memberId: 'mbr_t06',
     memberName: 'Sandra Chen',
     description: 'Wine dinner invitation for Sandra and daughter Avery — 30% spend decline over 90 days and no email opens in 3 weeks. Booth 6 reserved, her favorite Willamette Valley pinot on the pairing menu.',
     talkingPoints: [

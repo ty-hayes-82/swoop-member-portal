@@ -113,7 +113,7 @@ export function MemberProfileProvider({ children }) {
   }, [activeMemberId]);
 
   // Known seed profile IDs — static data is authoritative for these
-  const SEED_IDS = new Set(['mbr_t01', 'mbr_t04', 'mbr_t05', 'mbr_146', 'mbr_312']);
+  const SEED_IDS = new Set(['mbr_t01', 'mbr_t04', 'mbr_t05', 'mbr_t06', 'mbr_312']);
 
   const profile = useMemo(() => {
     if (!activeMemberId) return null;

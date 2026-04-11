@@ -74,7 +74,7 @@ export default async function handler(req, res) {
       ('mbr_t04', ${CLUB_ID}, 504, 'Anne', 'Jordan', 'anne.j@email.com', '(480) 555-0104', '1972-09-18', 'F', 'FG', 'active', '2016-03-15', NULL, 'hh_t04', 14000, 28, 'Weekend Warrior'),
       ('mbr_t04b', ${CLUB_ID}, 505, 'Marcus', 'Jordan', 'marcus.j@email.com', '(480) 555-0140', '1970-11-05', 'M', 'FG', 'active', '2016-03-15', NULL, 'hh_t04', 14000, 72, 'Die-Hard Golfer'),
       ('mbr_t05', ${CLUB_ID}, 506, 'Robert', 'Callahan', 'robert.c@email.com', '(480) 555-0105', '1965-02-28', 'M', 'CORP', 'active', '2021-06-01', NULL, NULL, 18000, 22, 'Declining'),
-      ('mbr_146', ${CLUB_ID}, 507, 'Sandra', 'Chen', 'sandra.c@email.com', '(480) 555-0146', '1984-12-10', 'F', 'SOC', 'active', '2020-09-15', NULL, NULL, 9000, 36, 'Social Butterfly'),
+      ('mbr_t06', ${CLUB_ID}, 507, 'Sandra', 'Chen', 'sandra.c@email.com', '(480) 555-0146', '1984-12-10', 'F', 'SOC', 'active', '2020-09-15', NULL, NULL, 9000, 36, 'Social Butterfly'),
       ('mbr_t07', ${CLUB_ID}, 508, 'Linda', 'Leonard', 'linda.l@email.com', '(480) 555-0107', '1974-08-22', 'F', 'FG', 'resigned', '2019-05-20', '2026-01-15', 'hh_t07', 18000, 12, 'Ghost')
       ON CONFLICT (member_id, club_id) DO UPDATE SET health_score = EXCLUDED.health_score, archetype = EXCLUDED.archetype
       RETURNING member_id`;
@@ -122,7 +122,7 @@ export default async function handler(req, res) {
       ('csess_t01', ${CLUB_ID}, 'mbr_t01', NOW(), ${{ teeWindows: 'Thu/Fri 7:00-8:30 AM, Saturday 7:00 AM with regular foursome', dining: 'Grill Room booth 12, Arnold Palmer + Club Sandwich, slow mornings with coffee refills', favoriteSpots: 'North Course back nine, Grill Room booth 12', channel: 'Call' }}::jsonb, NULL),
       ('csess_t04', ${CLUB_ID}, 'mbr_t04', NOW(), ${{ teeWindows: 'Saturday morning 7-8 AM, always with Marcus', dining: 'Terrace for lunch after golf, likes the chicken Caesar', favoriteSpots: 'North Course, Terrace patio', channel: 'SMS' }}::jsonb, NULL),
       ('csess_t05', ${CLUB_ID}, 'mbr_t05', NOW(), ${{ teeWindows: 'Weekday mornings when available', dining: 'Main Dining Room, quiet corner table. Steak and red wine.', favoriteSpots: 'South Course, Main Dining Room', channel: 'Email' }}::jsonb, NULL),
-      ('csess_146', ${CLUB_ID}, 'mbr_146', NOW(), ${{ teeWindows: 'N/A — social member', dining: 'Grill Room casual lunches, Main Dining for events. Wine tastings.', favoriteSpots: 'Grill Room, Event lawn, Wine cellar', channel: 'SMS' }}::jsonb, NULL),
+      ('csess_t06', ${CLUB_ID}, 'mbr_t06', NOW(), ${{ teeWindows: 'N/A — social member', dining: 'Grill Room casual lunches, Main Dining for events. Wine tastings.', favoriteSpots: 'Grill Room, Event lawn, Wine cellar', channel: 'SMS' }}::jsonb, NULL),
       ('csess_t07', ${CLUB_ID}, 'mbr_t07', NOW(), ${{ teeWindows: 'N/A — social member', dining: 'Wine dinners, always table with Diane Prescott', favoriteSpots: 'Wine cellar dining room, Event lawn', channel: 'Call', notes: 'Joined after husband Richard passed. Bridge partner Diane Prescott. Zero visits since October.' }}::jsonb, NULL)
       ON CONFLICT (session_id) DO UPDATE SET preferences_cache = EXCLUDED.preferences_cache`;
     results.sessions = 5;
@@ -143,8 +143,8 @@ export default async function handler(req, res) {
       ('chk_t01_002', ${CLUB_ID}, 'outlet_grill', 'mbr_t01', '2026-01-17', 28.00, 2.24, 5.60, 35.84, 'member_charge'),
       ('chk_t01_003', ${CLUB_ID}, 'outlet_grill', 'mbr_t01', '2025-12-20', 42.00, 3.36, 8.40, 53.76, 'member_charge'),
       ('chk_t05_001', ${CLUB_ID}, 'outlet_main', 'mbr_t05', '2026-01-05', 3020.00, 0, 0, 3020.00, 'member_charge'),
-      ('chk_146_001', ${CLUB_ID}, 'outlet_grill', 'mbr_146', '2026-01-08', 18.00, 1.44, 3.60, 23.04, 'member_charge'),
-      ('chk_146_002', ${CLUB_ID}, 'outlet_grill', 'mbr_146', '2025-11-15', 142.00, 11.36, 28.40, 181.76, 'member_charge')
+      ('chk_t06_001', ${CLUB_ID}, 'outlet_grill', 'mbr_t06', '2026-01-08', 18.00, 1.44, 3.60, 23.04, 'member_charge'),
+      ('chk_t06_002', ${CLUB_ID}, 'outlet_grill', 'mbr_t06', '2025-11-15', 142.00, 11.36, 28.40, 181.76, 'member_charge')
       ON CONFLICT DO NOTHING`;
     results.pos_checks = 6;
 
