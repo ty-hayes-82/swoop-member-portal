@@ -10,15 +10,15 @@
  *
  * Idempotency: rejects if an active service-recovery run already exists for this member.
  * Rate limit: 1-hour cooldown per member.
- * Simulation mode: when MANAGED_AGENT_ID or MANAGED_ENV_ID are unset.
+ * Simulation mode: when ANTHROPIC_API_KEY env var is unset.
  *
  * Cron auth: if x-cron-key header matches CRON_SECRET, bypasses withAuth.
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
-import { createManagedSession, sendSessionEvent, MANAGED_AGENT_ID, MANAGED_ENV_ID } from './managed-config.js';
+import { createManagedSession, sendSessionEvent } from './managed-config.js';
 
-const SIMULATION_MODE = !MANAGED_AGENT_ID || !MANAGED_ENV_ID;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 const PLAYBOOK_ID = 'service-recovery';
 
 const SERVICE_RECOVERY_STEPS = [

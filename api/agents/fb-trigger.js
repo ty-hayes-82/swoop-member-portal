@@ -6,15 +6,15 @@
  * forecast, surfaces root causes, detects post-round conversion gaps,
  * and feeds accuracy data to the staffing-demand agent.
  *
- * Simulation mode: when MANAGED_AGENT_ID or MANAGED_ENV_ID are unset,
+ * Simulation mode: when ANTHROPIC_API_KEY env var is unset,
  * runs deterministic analysis without calling the LLM.
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
-import { createManagedSession, sendSessionEvent, MANAGED_AGENT_ID, MANAGED_ENV_ID } from './managed-config.js';
+import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { routeEvent } from './agent-events.js';
 
-const SIMULATION_MODE = !MANAGED_AGENT_ID || !MANAGED_ENV_ID;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
 // ---------------------------------------------------------------------------
 // Data pull functions (reused by MCP tool handlers in api/mcp.js)
