@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { formatDate, formatDateTime } from '../../utils/dateFormat';
 import {
   ResponsiveContainer,
   LineChart,
@@ -19,19 +20,7 @@ const formatCurrency = (value) => {
   return currencyFormatter.format(amount);
 };
 
-const formatDate = (value) => {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
 
-const formatDateTime = (value) => {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-};
 
 const severityStyles = {
   critical: 'border-red-500/40 bg-red-50 text-red-900',

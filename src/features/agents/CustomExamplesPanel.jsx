@@ -57,8 +57,6 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
   const isEditing = editingIndex !== null;
   const atLimit = examples.length >= MAX_EXAMPLES;
 
-  // ---- Persist examples array to DB via PATCH ----------------------------
-
   const persistExamples = useCallback(async (updatedExamples) => {
     setSaving(true);
     setError(null);
@@ -82,8 +80,6 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
     }
   }, [agentId, onConfigUpdated]);
 
-  // ---- Add / Update ------------------------------------------------------
-
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
     if (!form.input.trim() || !form.ideal_response.trim()) return;
@@ -101,8 +97,6 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
     setEditingIndex(null);
   }, [form, isEditing, editingIndex, examples, atLimit, persistExamples]);
 
-  // ---- Edit --------------------------------------------------------------
-
   const startEdit = useCallback((index) => {
     setForm({ ...examples[index] });
     setEditingIndex(index);
@@ -114,8 +108,6 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
     setEditingIndex(null);
   }, []);
 
-  // ---- Delete ------------------------------------------------------------
-
   const confirmDelete = useCallback((index) => {
     setDeleteConfirm(index);
   }, []);
@@ -126,8 +118,6 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
     setDeleteConfirm(null);
     if (editingIndex === index) cancelEdit();
   }, [examples, editingIndex, persistExamples, cancelEdit]);
-
-  // ---- Render ------------------------------------------------------------
 
   return (
     <div className="space-y-6">

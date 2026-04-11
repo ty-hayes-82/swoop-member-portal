@@ -1,5 +1,3 @@
-// ArrivalBriefs — Upcoming member arrival briefs for the Today operational dashboard
-// Self-contained component, importable into TodayView.jsx
 import { useState, useEffect, useCallback } from 'react';
 
 const ROLES = [

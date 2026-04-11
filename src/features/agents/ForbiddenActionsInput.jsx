@@ -13,10 +13,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { apiFetch } from '@/services/apiClient';
 
-// ---------------------------------------------------------------------------
-// Autocomplete suggestions
-// ---------------------------------------------------------------------------
-
 const SUGGESTIONS = [
   'offer_refund',
   'cancel_membership',
@@ -25,10 +21,6 @@ const SUGGESTIONS = [
   'modify_dues',
   'delete_member',
 ];
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 
 export default function ForbiddenActionsInput({
   agentId,

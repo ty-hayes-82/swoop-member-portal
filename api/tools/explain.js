@@ -42,7 +42,6 @@ export default withAuth(async function handler(req, res) {
   }
 
   try {
-    // ── 1. Fetch the action ────────────────────────────────────────
     const actionResult = await sql`
       SELECT * FROM agent_actions
       WHERE club_id = ${clubId} AND id = ${actionId}
@@ -55,7 +54,6 @@ export default withAuth(async function handler(req, res) {
     const memberId = action.member_id;
     const causalChain = [];
 
-    // ── 2. Member health score ─────────────────────────────────────
     let memberHealth = null;
     try {
       const hsResult = await sql`
@@ -76,7 +74,6 @@ export default withAuth(async function handler(req, res) {
       }
     } catch { /* table may not exist yet */ }
 
-    // ── 3. Member activity (golf, dining, events) ──────────────────
     let activityRows = [];
     try {
       const actResult = await sql`
@@ -111,7 +108,6 @@ export default withAuth(async function handler(req, res) {
       }
     } catch { /* table may not exist yet */ }
 
-    // ── 4. Complaints ──────────────────────────────────────────────
     let complaints = [];
     try {
       const compResult = await sql`
@@ -141,7 +137,6 @@ export default withAuth(async function handler(req, res) {
       }
     } catch { /* table may not exist yet */ }
 
-    // ── 5. Membership details ──────────────────────────────────────
     let member = null;
     try {
       const memResult = await sql`
@@ -165,7 +160,6 @@ export default withAuth(async function handler(req, res) {
       }
     } catch { /* table may not exist yet */ }
 
-    // ── 6. Historical outcomes (similar interventions) ─────────────
     let similarInterventions = { total: 0, success_rate: 0 };
     try {
       const outResult = await sql`
@@ -184,12 +178,10 @@ export default withAuth(async function handler(req, res) {
       };
     } catch { /* table may not exist yet */ }
 
-    // ── 7. Value at risk ───────────────────────────────────────────
     const annualDues = parseFloat(member?.annual_dues) || 0;
     const churnRisk = parseFloat(memberHealth?.churn_risk) || 0.5;
     const valueAtRisk = Math.round(annualDues * churnRisk);
 
-    // ── 8. Confidence score ────────────────────────────────────────
     // Heuristic: more data signals = higher confidence
     let confidence = 0.3; // base
     if (memberHealth) confidence += 0.2;
@@ -199,7 +191,6 @@ export default withAuth(async function handler(req, res) {
     if (similarInterventions.total >= 5) confidence += 0.1;
     confidence = Math.min(confidence, 1.0);
 
-    // ── Build response ─────────────────────────────────────────────
     const explanation = {
       action_summary: action.headline || action.summary || `Action ${actionId}`,
       causal_chain: causalChain,

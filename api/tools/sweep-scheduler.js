@@ -40,7 +40,6 @@ function estimateNextRun(cronExpression) {
   }
 }
 
-// ── action: schedule (POST) ────────────────────────────────────────
 async function handleSchedule(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST required for schedule action' });
 
@@ -90,7 +89,6 @@ async function handleSchedule(req, res) {
   });
 }
 
-// ── action: history (GET) ──────────────────────────────────────────
 async function handleHistory(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET required for history action' });
 
@@ -124,7 +122,6 @@ async function handleHistory(req, res) {
   return res.status(200).json({ history: result.rows });
 }
 
-// ── action: configure (PUT) ────────────────────────────────────────
 async function handleConfigure(req, res) {
   if (req.method !== 'PUT') return res.status(405).json({ error: 'PUT required for configure action' });
 
@@ -166,7 +163,6 @@ async function handleConfigure(req, res) {
   });
 }
 
-// ── Router ─────────────────────────────────────────────────────────
 export default withAuth(async function handler(req, res) {
   const action = req.query.action;
 

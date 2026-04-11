@@ -1,13 +1,15 @@
-Running 10 scenarios (best-of-2)...
+Running 12 scenarios (best-of-2)...
 Models: concierge=claude-opus-4-20250514 club=claude-opus-4-20250514 router=claude-haiku-4-5-20251001 critic=claude-opus-4-20250514
 Temps: concierge=0.6 svcRecovery=0.3 booking=0.1 club=0.2
 [James] Regular booking + cross-sell → booking: N=9 H=10 A=10 P=10 I=9 AVG=9.6
-[James] High-value complaint handling → service-recovery: N=7 H=9 A=10 P=8 I=10 AVG=8.8
-[James] Corporate entertaining upsell → concierge: N=9 H=9 A=9 P=9 I=10 AVG=9.2
-[James] At-risk re-engagement → concierge: N=7 H=9 A=10 P=9 I=9 AVG=8.8
+[James] High-value complaint handling → service-recovery: N=9 H=10 A=10 P=9 I=10 AVG=9.6
+[James] Corporate entertaining upsell → concierge: N=2 H=3 A=5 P=4 I=9 AVG=4.6
+[James] At-risk re-engagement → reengagement: N=9 H=9 A=10 P=9 I=10 AVG=9.4
 [Anne] Preferred slot booking + cross-sell → booking: N=9 H=10 A=10 P=10 I=10 AVG=9.8
-[Anne] Pace frustration as complaint → service-recovery: N=9 H=9 A=10 P=9 I=10 AVG=9.4
+[Anne] Pace frustration as complaint → service-recovery: N=9 H=9 A=10 P=9 I=9 AVG=9.2
 [Anne] Health-sensitive cancellation → service-recovery: N=10 H=9 A=10 P=10 I=10 AVG=9.8
-[Sandra] Family event discovery → concierge: N=9 H=7 A=9 P=8 I=9 AVG=8.4
+[Sandra] Family event discovery → concierge: N=9 H=9 A=10 P=9 I=9 AVG=9.2
 [Sandra] Couple event RSVP + preferences → booking: N=9 H=10 A=10 P=9 I=10 AVG=9.6
 [Sandra] Grief + sensitive re-engagement → grief: N=9 H=10 A=10 P=9 I=10 AVG=9.6
+[James] Pre-arrival anticipation — member asks what to expect → concierge: N=9 H=9 A=10 P=9 I=10 AVG=9.4
+[Anne] Arrival coordination — late arrival notification → concierge: N=9 H=8 A=9 P=9 I=9 AVG=8.8

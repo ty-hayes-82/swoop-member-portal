@@ -9,22 +9,7 @@ import { getMemberSaves } from '@/services/boardReportService';
 import { isGateOpen } from '@/services/demoGate';
 import MemberDecayChain from './MemberDecayChain.jsx';
 import AgentUpsell from '@/components/ui/AgentUpsell.jsx';
-
-const formatDate = (value) => {
-  if (!value) return '\u2014';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '\u2014';
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
-
-const formatDateTime = (value) => {
-  if (!value) return '\u2014';
-  // If already human-readable (contains · or matches "Mon DD" pattern), return as-is
-  if (typeof value === 'string' && (value.includes('\u00B7') || value.includes('\u00b7') || /^[A-Z][a-z]{2}\s\d/.test(value))) return value;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '\u2014';
-  return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-};
+import { formatDate, formatDateTime } from '../../utils/dateFormat';
 
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);

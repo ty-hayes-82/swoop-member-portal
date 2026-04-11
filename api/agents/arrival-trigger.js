@@ -16,6 +16,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
+import { logError } from '../lib/logger.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
@@ -230,7 +231,7 @@ async function arrivalHandler(req, res) {
       briefs: stored,
     });
   } catch (err) {
-    console.error('/api/agents/arrival-trigger error:', err);
+    logError('/api/agents/arrival-trigger', err);
     return res.status(500).json({ error: err.message });
   }
 }

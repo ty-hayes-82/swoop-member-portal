@@ -10,6 +10,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId, getWriteClubId } from '../lib/withAuth.js';
+import { logError } from '../lib/logger.js';
 
 export default withAuth(async function handler(req, res) {
   const action = req.query.action;
@@ -30,7 +31,7 @@ export default withAuth(async function handler(req, res) {
         return res.status(400).json({ error: `Unknown action: ${action}. Use record_outcome, calibrate_model, or benchmark.` });
     }
   } catch (e) {
-    console.error(`/api/tools/data-flywheel?action=${action} error:`, e);
+    logError(`/api/tools/data-flywheel?action=${action}`, e);
     return res.status(500).json({ error: e.message });
   }
 });

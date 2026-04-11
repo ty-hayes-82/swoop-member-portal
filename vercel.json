@@ -15,7 +15,8 @@
     { "path": "/api/cron/post-visit-followup", "schedule": "0 20 * * *" },
     { "path": "/api/cron/staff-briefings", "schedule": "0 6 * * *" },
     { "path": "/api/cron/concierge-engagement", "schedule": "0 7 * * *" },
-    { "path": "/api/cron/renewal-intelligence", "schedule": "0 8 1 * *" }
+    { "path": "/api/cron/renewal-intelligence", "schedule": "0 8 1 * *" },
+    { "path": "/api/cron/arrival-scan", "schedule": "*/15 * * * *" }
   ],
   "headers": [
     {

@@ -8,7 +8,7 @@
  * Idempotent: skips members who already have a brief for that tee time.
  */
 import { sql } from '@vercel/postgres';
-import { logWarn, logInfo } from '../lib/logger.js';
+import { logError, logWarn, logInfo } from '../lib/logger.js';
 
 const MAX_BRIEFS_PER_RUN = 50;
 
@@ -31,7 +31,6 @@ export default async function handler(req, res) {
   logInfo('/api/cron/arrival-scan', 'cron tick start');
 
   try {
-    // Ensure staff_briefs table exists
     await sql`
       CREATE TABLE IF NOT EXISTS staff_briefs (
         brief_id      TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
@@ -51,13 +50,11 @@ export default async function handler(req, res) {
     const windowStart = new Date(now.getTime() + 80 * 60 * 1000);
     const windowEnd = new Date(now.getTime() + 100 * 60 * 1000);
 
-    // Format as HH:MM to match bookings.tee_time format
     const startTime = `${String(windowStart.getHours()).padStart(2, '0')}:${String(windowStart.getMinutes()).padStart(2, '0')}`;
     const endTime = `${String(windowEnd.getHours()).padStart(2, '0')}:${String(windowEnd.getMinutes()).padStart(2, '0')}`;
 
     logInfo('/api/cron/arrival-scan', `scanning tee times ${startTime} - ${endTime} on ${today}`);
 
-    // Find upcoming tee times with their member players
     const { rows: upcoming } = await sql`
       SELECT DISTINCT bp.member_id, b.tee_time, b.club_id,
              c.name AS course_name
@@ -82,7 +79,6 @@ export default async function handler(req, res) {
 
     for (const row of upcoming) {
       try {
-        // Check idempotency: does a brief already exist for this member + tee_time today?
         const { rows: existing } = await sql`
           SELECT brief_id FROM staff_briefs
           WHERE member_id = ${row.member_id}
@@ -98,7 +94,6 @@ export default async function handler(req, res) {
           continue;
         }
 
-        // Call arrival-trigger endpoint
         const baseUrl = process.env.VERCEL_URL
           ? `https://${process.env.VERCEL_URL}`
           : 'http://localhost:3000';
@@ -163,7 +158,7 @@ export default async function handler(req, res) {
       results,
     });
   } catch (err) {
-    console.error('Arrival scan cron error:', err);
+    logError('/api/cron/arrival-scan', err);
     return res.status(500).json({ error: err.message });
   }
 }

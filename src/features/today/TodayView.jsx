@@ -13,6 +13,7 @@ import TomorrowForecast from './TomorrowForecast';
 import WeekForecast from './WeekForecast';
 import MorningBriefingSentence from './MorningBriefingSentence';
 import DemoStoriesLauncher from './DemoStoriesLauncher';
+import { getFirstName } from '../../utils/nameUtils';
 import RecentActivityFeed from './RecentActivityFeed';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { AnimatedNumber } from '@/components/ui/PageTransition';
@@ -139,7 +140,7 @@ function GmGreetingAlert({ onDismiss }) {
 function getGreeting() {
   const hour = new Date().getHours();
   const stored = localStorage.getItem('swoop_auth_user');
-  const firstName = stored ? (JSON.parse(stored).name || '').split(' ')[0] : '';
+  const firstName = stored ? getFirstName(JSON.parse(stored).name || '') : '';
   const nameStr = firstName ? `, ${firstName}` : '';
   if (hour < 12) return `Good morning${nameStr} — here's what needs your attention today`;
   return `Afternoon check-in${nameStr} — here's where things stand`;

@@ -1,14 +1,5 @@
 /**
  * System prompt for the Personal Concierge agent (relationship layer).
- *
- * This agent runs on Opus and owns the RELATIONSHIP with each member.
- * It knows who the member is, what they like, and proactively suggests
- * things they didn't ask for. It does NOT handle complaints (Service
- * Recovery agent) and does NOT make bookings (Booking agent). It
- * suggests what to book and hands off.
- *
- * Tools available: lookup_member, get_member_preferences,
- * send_message, list_upcoming_events, get_weather_forecast
  */
 
 /**

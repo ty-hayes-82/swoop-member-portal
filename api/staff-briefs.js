@@ -12,6 +12,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId } from './lib/withAuth.js';
+import { logError } from './lib/logger.js';
 
 async function staffBriefsHandler(req, res) {
   if (req.method !== 'GET') {
@@ -88,7 +89,7 @@ async function staffBriefsHandler(req, res) {
       briefs,
     });
   } catch (err) {
-    console.error('/api/staff-briefs error:', err);
+    logError('/api/staff-briefs', err);
     return res.status(500).json({ error: err.message });
   }
 }

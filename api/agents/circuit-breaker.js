@@ -8,6 +8,7 @@
  */
 import { sql } from '@vercel/postgres';
 import Anthropic from '@anthropic-ai/sdk';
+import { logError } from '../lib/logger.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -62,8 +63,9 @@ export async function detectGrief(message) {
       deceasedName: parsed.deceasedName || null,
       confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0,
     };
-  } catch {
+  } catch (err) {
     // On classifier failure, default to not-grief (safe fallback)
+    logError('circuit-breaker/detectGrief', err);
     return { isGrief: false, deceasedName: null, confidence: 0 };
   }
 }
@@ -88,7 +90,6 @@ export function getCircuitBreakerResponse(member, scenarioType, config, extra = 
   const behavioral = config?.behavioral_config || {};
   const overrides = behavioral.scenario_overrides || {};
 
-  // Check for club-specific override first
   let template = overrides[scenarioType] || DEFAULT_SCENARIO_RESPONSES[scenarioType];
   if (!template) {
     template = DEFAULT_SCENARIO_RESPONSES.grief; // ultimate fallback
