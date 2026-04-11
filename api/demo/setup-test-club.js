@@ -27,23 +27,28 @@ async function copyClub(client) {
     ON CONFLICT (club_id) DO NOTHING
   `, [TARGET_CLUB, CLUB_NAME]);
 
-  // Copy profile fields from seed club
-  await client.query(`
-    UPDATE club SET
-      city = s.city,
-      state = s.state,
-      zip = s.zip,
-      founded_year = s.founded_year,
-      member_count = s.member_count,
-      course_count = s.course_count,
-      outlet_count = s.outlet_count,
-      timezone = s.timezone,
-      latitude = s.latitude,
-      longitude = s.longitude,
-      updated_at = NOW()
-    FROM club s
-    WHERE club.club_id = $1 AND s.club_id = $2
-  `, [TARGET_CLUB, SEED_CLUB]);
+  // Copy profile fields from seed club (only columns guaranteed in prod DB)
+  // Use dynamic column detection to avoid "column does not exist" errors
+  const { rows: colRows } = await client.query(`
+    SELECT column_name FROM information_schema.columns
+    WHERE table_name = 'club' AND table_schema = 'public'
+  `);
+  const existingCols = new Set(colRows.map(r => r.column_name));
+
+  const copyableCols = [
+    'city', 'state', 'zip', 'founded_year', 'member_count',
+    'course_count', 'outlet_count', 'brand_voice', 'timezone',
+    'latitude', 'longitude',
+  ].filter(c => existingCols.has(c));
+
+  if (copyableCols.length > 0) {
+    const setClause = copyableCols.map(c => `${c} = s.${c}`).join(', ');
+    await client.query(`
+      UPDATE club SET ${setClause}, updated_at = NOW()
+      FROM club s
+      WHERE club.club_id = $1 AND s.club_id = $2
+    `, [TARGET_CLUB, SEED_CLUB]);
+  }
 
   const w = await client.query(`
     INSERT INTO weather_daily (
