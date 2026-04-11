@@ -10,6 +10,7 @@ const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 // same reason: it ships alongside MobileApp but shouldn't inflate desktop.
 const ConferenceShell = lazy(() => import('@/mobile/conference/ConferenceShell'));
 const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatPage'));
+const MemberConciergeTest = lazy(() => import('@/features/concierge/MemberConciergeTest'));
 const InvestorSite = lazy(() => import('@/features/invest/InvestorSite'));
 const LandingPage = lazy(() => import('@/landing/LandingPage.jsx'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
@@ -222,6 +223,7 @@ function RouterViews() {
   const isDemoTechnicalDeepDive = hash === '#/demo/technical-deep-dive';
   const isDemoMobileShowcase = hash === '#/demo/mobile-showcase';
   const isDemoAgentsLanding = hash === '#/demo/agents-landing';
+  const isDemoMemberChat = hash === '#/demo/member-chat' || hash === '#/concierge/test';
 
   if (isDemoPilotResults) {
     return (
@@ -323,6 +325,14 @@ function RouterViews() {
     return (
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
         <ROISlide />
+      </Suspense>
+    );
+  }
+
+  if (isDemoMemberChat) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Member Chat...</div>}>
+        <MemberConciergeTest />
       </Suspense>
     );
   }
