@@ -13,7 +13,8 @@
     { "path": "/api/cron/member-onboarding", "schedule": "0 9 * * *" },
     { "path": "/api/cron/pre-arrival-brief", "schedule": "0 17 * * *" },
     { "path": "/api/cron/post-visit-followup", "schedule": "0 20 * * *" },
-    { "path": "/api/cron/staff-briefings", "schedule": "0 6 * * *" }
+    { "path": "/api/cron/staff-briefings", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/concierge-engagement", "schedule": "0 7 * * *" }
   ],
   "headers": [
     {
