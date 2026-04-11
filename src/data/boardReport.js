@@ -24,8 +24,8 @@ export const memberSaves = [
     duesAtRisk: 18500,
   },
   {
-    memberId: 'mbr_214',
-    name: 'Catherine Morales',
+    memberId: 'mbr_146',
+    name: 'Sandra Chen',
     healthBefore: 41,
     healthAfter: 68,
     trigger: 'Dining frequency dropped 60% after cold-food complaint',
@@ -44,8 +44,8 @@ export const memberSaves = [
     duesAtRisk: 31000,
   },
   {
-    memberId: 'mbr_218',
-    name: 'David Harrington',
+    memberId: 'mbr_t05',
+    name: 'Robert Callahan',
     healthBefore: 38,
     healthAfter: 74,
     trigger: 'Pro shop billing dispute escalated twice without resolution',
@@ -54,8 +54,8 @@ export const memberSaves = [
     duesAtRisk: 16800,
   },
   {
-    memberId: 'mbr_104',
-    name: 'Patricia Nguyen',
+    memberId: 'mbr_312',
+    name: 'Robert Mills',
     healthBefore: 45,
     healthAfter: 77,
     trigger: 'Tee time availability frustration — 4 preferred slots missed in 2 weeks',

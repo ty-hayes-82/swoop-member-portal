@@ -111,7 +111,7 @@ export const agentActions = [
     confidence: 0.88,
     signals: [
       { system: 'Tee Sheet', signal: 'Cancellation 7:00 AM Sat', timestamp: '6:03 AM' },
-      { system: 'Member CRM', signal: 'Health score 54', timestamp: 'Today' },
+      { system: 'Member CRM', signal: 'Health score 28', timestamp: 'Today' },
       { system: 'Analytics', signal: 'Waitlist position #3', timestamp: 'Now' },
     ],
     auditTrail: [
@@ -121,8 +121,8 @@ export const agentActions = [
   {
     id: 'agx_003',
     timestamp: '2026-01-17T06:09:00Z',
-    agentId: 'labor-optimizer',
-    source: 'Labor Optimizer',
+    agentId: 'service-recovery',
+    source: 'Service Recovery',
     actionType: 'DRAFT_MESSAGE',
     description: 'Draft apology + recovery note for unresolved Grill Room service issue.',
     status: 'pending',
@@ -139,7 +139,7 @@ export const agentActions = [
       { system: 'Scheduling', signal: 'Understaffed shift', timestamp: 'Jan 16' },
     ],
     auditTrail: [
-      { id: 'rec', status: 'Queued for drafting', owner: 'Labor Optimizer', timestamp: '2026-01-17T06:09:00Z' },
+      { id: 'rec', status: 'Queued for drafting', owner: 'Service Recovery', timestamp: '2026-01-17T06:09:00Z' },
     ],
   },
   {
@@ -181,8 +181,8 @@ export const agentActions = [
   {
     id: 'agx_006',
     timestamp: '2026-01-17T06:21:00Z',
-    agentId: 'labor-optimizer',
-    source: 'Labor Optimizer',
+    agentId: 'member-pulse',
+    source: 'Member Pulse',
     actionType: 'DRAFT_MESSAGE',
     description: 'Prepare sponsor outreach script for David Chen membership conversation.',
     status: 'approved',
@@ -191,7 +191,7 @@ export const agentActions = [
     priority: 'low',
     memberId: 'mbr_146',
     auditTrail: [
-      { id: 'rec', status: 'Recommended', owner: 'Labor Optimizer', timestamp: '2026-01-17T06:21:00Z' },
+      { id: 'rec', status: 'Recommended', owner: 'Member Pulse', timestamp: '2026-01-17T06:21:00Z' },
       { id: 'apr', status: 'Approved — Assign to Lisa Park', owner: 'Sarah Mitchell (GM)', timestamp: '2026-01-17T08:12:00Z' },
     ],
   },
@@ -220,7 +220,7 @@ export const agentActions = [
     description: 'Assign same-day owner for Robert Callahan complaint aged 9 days.',
     status: 'pending',
     // Must match pipeline.js Robert Callahan memberValueAnnual tier.
-    impactMetric: '$24K renewal risk mitigation',
+    impactMetric: '$18K renewal risk mitigation',
     priority: 'high',
     memberId: 'mbr_t05',
     dueBy: '2026-01-17T12:00:00Z',
@@ -229,7 +229,7 @@ export const agentActions = [
     confidence: 0.9,
     signals: [
       { system: 'Complaint Log', signal: 'Unresolved 9 days', timestamp: 'Jan 8' },
-      { system: 'Member CRM', signal: 'Health score 47', timestamp: 'Today' },
+      { system: 'Member CRM', signal: 'Health score 22', timestamp: 'Today' },
       { system: 'Email', signal: 'Zero follow-up sent', timestamp: 'Since Jan 8' },
     ],
     auditTrail: [
@@ -319,19 +319,19 @@ export const agentActions = [
     agentId: 'member-pulse',
     source: 'Member Pulse — Follow-Up',
     actionType: 'FOLLOW_UP',
-    description: '30-day check-in: James Whitfield — health score recovered 34 → 71 after GM personal call. Re-engaged with 3 rounds and 2 dining visits.',
+    description: '30-day check-in: James Whitfield — health score recovered 42 → 58 after GM personal call. Re-engaged with 3 rounds and 2 dining visits.',
     status: 'pending',
     impactMetric: '$18K dues protected — intervention successful',
     priority: 'low',
     memberId: 'mbr_t01',
     memberName: 'James Whitfield',
     signals: [
-      { system: 'Member CRM', signal: 'Health score: 34 → 71', timestamp: '30 days post-action' },
+      { system: 'Member CRM', signal: 'Health score: 42 → 58', timestamp: '30 days post-action' },
       { system: 'Tee Sheet', signal: '3 rounds booked since intervention', timestamp: 'Last 30 days' },
       { system: 'POS', signal: '2 dining visits ($142 total)', timestamp: 'Last 30 days' },
     ],
     auditTrail: [
-      { id: 'rec', status: 'Original action approved', owner: 'Sarah Mitchell (GM)', timestamp: '2025-12-18T09:30:00Z' },
+      { id: 'rec', status: 'Original action approved', owner: 'Sarah Mitchell (GM)', timestamp: '2026-01-17T09:30:00Z' },
       { id: 'fup', status: '30-day follow-up — Intervention successful', owner: 'Member Pulse', timestamp: '2026-01-17T10:00:00Z' },
     ],
   },

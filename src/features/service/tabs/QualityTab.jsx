@@ -265,14 +265,15 @@ export default function QualityTab() {
             outlets[outlet].totalComplaints++;
             if (r.status !== 'resolved') outlets[outlet].complaints++;
           });
-          // Add other outlets for completeness
-          const allOutlets = [
-            { name: 'Grill Room', ...outlets['Grill Room'] || { understaffedDays: 0, complaints: 0, totalComplaints: 0 }, risk: 'high' },
-            { name: 'The Terrace', understaffedDays: 0, complaints: 0, totalComplaints: 1, risk: 'low' },
-            { name: 'Turn Stand (Hole 9)', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
-            { name: 'Banquet/Events', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
-            { name: 'Pool Bar', understaffedDays: 0, complaints: 0, totalComplaints: 0, risk: 'low' },
-          ];
+          // Build outlet list from actual data only — no fabricated outlet names
+          const allOutlets = Object.entries(outlets)
+            .map(([name, data]) => {
+              const risk = data.complaints > 2 || data.understaffedDays > 2 ? 'high'
+                : data.complaints > 0 || data.understaffedDays > 0 ? 'medium' : 'low';
+              return { name, ...data, risk };
+            })
+            .sort((a, b) => (b.complaints + b.understaffedDays) - (a.complaints + a.understaffedDays));
+          if (allOutlets.length === 0) return <div className="text-sm text-gray-400">No outlet-level complaint data available.</div>;
           const riskColors = { high: '#ef4444', medium: '#ca8a04', low: '#12b76a' };
           return (
             <div className="flex flex-col gap-2">

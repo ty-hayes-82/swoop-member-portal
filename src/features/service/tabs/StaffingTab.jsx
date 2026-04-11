@@ -44,7 +44,7 @@ export default function StaffingTab() {
             </div>
             <div className="text-lg font-bold text-[#1a1a2e] mb-2">
               {briefing?.todayRisks?.demandForecast?.recommendation
-                || 'Saturday: Grill Room needs 4 servers — only 2 scheduled'}
+                || 'No staffing recommendations available — import scheduling data to enable demand forecasting.'}
             </div>
             <div className="text-sm text-gray-500 leading-relaxed mb-4">
               {briefing?.todayRisks?.demandForecast
@@ -71,7 +71,7 @@ export default function StaffingTab() {
         <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4 mb-6">
           <MetricCard label="Understaffed Days (Jan)" value={String(understaffedDays.length)} sublabel="Grill Room lunch service" />
           <MetricCard label="Complaint Spike" value={`${avgComplaintMultiplier}x higher`} sublabel={`${totalComplaints} complaints on those days`} />
-          <MetricCard label="Ticket Time Impact" value="+20%" sublabel="Average increase when short-staffed" />
+          <MetricCard label="Ticket Time Impact" value={understaffedDays.length > 0 ? `+${Math.round(understaffedDays.reduce((s, d) => s + (d.ticketTimeIncrease || 0), 0) / understaffedDays.length * 100)}%` : '—'} sublabel={understaffedDays.length > 0 ? 'Average increase when short-staffed' : 'Import POS data to measure impact'} />
         </div>
       </div>
 
@@ -142,7 +142,7 @@ export default function StaffingTab() {
       {/* Understaffed Days Detail */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
-          Understaffed Days — January 2026
+          Understaffed Days — {understaffedDays.length > 0 ? new Date(understaffedDays[0].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Current Period'}
         </h3>
         <div className="flex flex-col gap-2">
           {understaffedDays.map((day, idx) => {

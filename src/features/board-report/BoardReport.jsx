@@ -248,10 +248,10 @@ export default function BoardReport() {
         </summary>
         <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2.5">
           {[
-            { label: 'Service Quality', weight: '30%', value: '87%', benchmark: 'Complaint resolution + consistency', color: 'text-success-500' },
-            { label: 'Member Health', weight: '25%', value: '14 retained', benchmark: 'Health scores + interventions', color: 'text-blue-500' },
-            { label: 'Operational Response', weight: '25%', value: '4.2 hrs avg', benchmark: 'Detection to action time', color: 'text-amber-500' },
-            { label: 'Financial Performance', weight: '20%', value: 'On budget', benchmark: 'Dues + F&B vs plan', color: 'text-violet-500' },
+            { label: 'Service Quality', weight: '30%', value: `${resolutionRate}%`, benchmark: 'Complaint resolution + consistency', color: 'text-success-500' },
+            { label: 'Member Health', weight: '25%', value: `${memberSaves.length} retained`, benchmark: 'Health scores + interventions', color: 'text-blue-500' },
+            { label: 'Operational Response', weight: '25%', value: `${avgDetectionHrs} hrs avg`, benchmark: 'Detection to action time', color: 'text-amber-500' },
+            { label: 'Financial Performance', weight: '20%', value: totalDues > 0 ? `$${totalDues.toLocaleString()} protected` : 'No data', benchmark: 'Dues + F&B vs plan', color: 'text-violet-500' },
           ].map(m => (
             <div key={m.label} className="p-2.5 rounded-lg bg-gray-100 border border-gray-200">
               <div className={`text-[10px] font-bold uppercase tracking-wide ${m.color}`}>{m.label} ({m.weight})</div>
@@ -292,7 +292,7 @@ export default function BoardReport() {
             <strong className="text-blue-600">{operationalSaves.length} disruptions</strong>, protecting{' '}
             <strong className="text-blue-600 font-mono">${totalOpsRevenue.toLocaleString()}</strong> in operational revenue.
             Service consistency held at <strong>{resolutionRate}%</strong> complaint resolution
-            with an average <strong>4.2-hour</strong> detection-to-action time —
+            with an average <strong>{avgDetectionHrs}-hour</strong> detection-to-action time —
             compared to the industry standard of 6+ weeks.
             Health distribution: <strong>{dist.find(d => d.level === 'Healthy')?.count || 0} healthy</strong>,
             {' '}{dist.find(d => d.level === 'At Risk')?.count || 0} at-risk.

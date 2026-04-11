@@ -27,7 +27,8 @@ describe('briefingService', () => {
     // Must have yesterday recap
     expect(briefing.yesterdayRecap).toBeTruthy();
     expect(Number.isFinite(briefing.yesterdayRecap.revenue)).toBe(true);
-    expect(Number.isFinite(briefing.yesterdayRecap.rounds)).toBe(true);
+    // rounds is null until computed from real tee sheet data
+    expect(briefing.yesterdayRecap.rounds === null || Number.isFinite(briefing.yesterdayRecap.rounds)).toBe(true);
 
     // Must have today risks
     expect(briefing.todayRisks).toBeTruthy();

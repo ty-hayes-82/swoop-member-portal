@@ -523,10 +523,11 @@ export const getHealthDistribution = () => {
     });
     const total = roster.length || 1;
     return [
-      { level: 'Healthy',  min: 70, count: counts.Healthy,      percentage: counts.Healthy / total,      color: '#12b76a', delta: -4 },
-      { level: 'Watch',    min: 50, count: counts.Watch,         percentage: counts.Watch / total,         color: '#f59e0b', delta: 5  },
-      { level: 'At Risk',  min: 30, count: counts['At Risk'],    percentage: counts['At Risk'] / total,    color: '#ea580c', delta: 6  },
-      { level: 'Critical', min: 0,  count: counts.Critical,      percentage: counts.Critical / total,      color: '#ef4444', delta: 3  },
+      // TODO: compute from prior-period health snapshot when available
+      { level: 'Healthy',  min: 70, count: counts.Healthy,      percentage: counts.Healthy / total,      color: '#12b76a', delta: null },
+      { level: 'Watch',    min: 50, count: counts.Watch,         percentage: counts.Watch / total,         color: '#f59e0b', delta: null },
+      { level: 'At Risk',  min: 30, count: counts['At Risk'],    percentage: counts['At Risk'] / total,    color: '#ea580c', delta: null },
+      { level: 'Critical', min: 0,  count: counts.Critical,      percentage: counts.Critical / total,      color: '#ef4444', delta: null },
     ];
   }
   const archetypes = normalizeArchetypes(_d?.memberArchetypes);

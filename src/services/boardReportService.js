@@ -45,12 +45,16 @@ const EMPTY_KPIS = [
 
 export const getKPIs = () => {
   if (_liveKpis) {
-    return staticKpis.map(kpi => {
-      if (kpi.label === 'Members Retained' && _liveKpis.membersSaved > 0) {
-        return { ...kpi, value: _liveKpis.membersSaved };
-      }
-      return kpi;
-    });
+    if (_liveKpis.membersSaved > 0) {
+      return staticKpis.map(kpi => {
+        if (kpi.label === 'Members Retained') {
+          return { ...kpi, value: _liveKpis.membersSaved };
+        }
+        return kpi;
+      });
+    }
+    // Live mode with zero saves — show empty state, not fake demo KPIs
+    return EMPTY_KPIS;
   }
   // Data-driven: if _d has KPIs, use them
   if (_d?.kpis) return _d.kpis;

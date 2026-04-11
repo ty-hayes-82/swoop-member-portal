@@ -119,6 +119,11 @@ export function approveAction(id, meta = {}) {
         }
       : action
   );
+  // Keep _d.actions in sync so getAllActions() reflects the mutation
+  if (_d?.actions) {
+    const idx = _d.actions.findIndex(a => a.id === id);
+    if (idx >= 0) _d.actions[idx] = { ..._d.actions[idx], status: 'approved', approvedAt: new Date().toISOString(), approvalAction: meta.approvalAction ?? _d.actions[idx].approvalAction ?? null };
+  }
   // Fire-and-forget POST to persist
   apiFetch('/api/agents', {
     method: 'POST',
@@ -145,6 +150,11 @@ export function dismissAction(id, meta = {}) {
         }
       : action
   );
+  // Keep _d.actions in sync so getAllActions() reflects the mutation
+  if (_d?.actions) {
+    const idx = _d.actions.findIndex(a => a.id === id);
+    if (idx >= 0) _d.actions[idx] = { ..._d.actions[idx], status: 'dismissed', dismissedAt: new Date().toISOString(), dismissalReason: meta.reason ?? _d.actions[idx].dismissalReason ?? '' };
+  }
   // Fire-and-forget POST to persist
   apiFetch('/api/agents', {
     method: 'POST',

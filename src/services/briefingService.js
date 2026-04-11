@@ -221,17 +221,24 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   
   const teeSheet = getTodayTeeSheet();
   const summary = getTeeSheetSummary();
+
+  // Pre-compute at-risk members on today's sheet for dynamic quickWin stats
+  const atRiskTeetimeIds = new Set(['mbr_t01', 'mbr_t04', 'mbr_t05']);
+  const atRiskOnSheet = atRisk.filter(m => atRiskTeetimeIds.has(m.memberId));
+  const atRiskDues = atRiskOnSheet.reduce((sum, m) => sum + (m.duesAnnual || 0), 0);
+  const potentialRevenue = Math.round(312 * (waitlistSummary?.highPriority || 0) * 0.67);
+
   return {
     currentDate: date,
-    fb: isGateOpen('fb') ? { covers: 126, avgCheck: 34, postRoundRate: 68 } : null,
-    email: isGateOpen('email') ? { openRate: 42, clickRate: 12, decayCount: 9 } : null,
+    fb: null,    // TODO: compute from POS data when available
+    email: null, // TODO: compute from email engagement data when available
     teeSheet: { roundsToday: summary.totalRounds || DEMO_BRIEFING.teeSheet.roundsToday, utilization: 0.87 },
     yesterdayRecap: {
       date:           yesterday.date,
       revenue:        yesterdayTotal,
       revenueVsPlan:  -0.12,
       revenueVsLastWeek: parseFloat(revenueVsLastWeek),
-      rounds:         82,
+      rounds:         null, // TODO: compute from real tee sheet data
       roundsVsLastWeek: +8,
       incidents: [
         ...(isGateOpen('fb') ? ['Grill Room understaffed — 2 service speed complaints'] : []),
@@ -257,7 +264,9 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         highRiskBookings:     cancelSummary.highRisk,
         totalRevAtRisk:       cancelSummary.totalRevAtRisk,
         driverSummary:        'Wind advisory + 2 low-engagement members',
-        suggestedAction:      'Send confirmation nudges to Kevin Hurst (82%), Anne Jordan (71%), James Whitfield (68%)',
+        suggestedAction:      topCancellationRiskMembers.length
+          ? `Send confirmation nudges to ${topCancellationRiskMembers.map(m => `${m.memberName} (${m.probability}%)`).join(', ')}`
+          : 'No high-risk members identified',
         estimatedRevenueSaved: Math.round(cancelSummary.totalRevAtRisk * 0.34),
         briefingCard: {
           title: 'Tee Sheet Cancellation Risk',
@@ -285,7 +294,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     ],
     keyMetrics: {
       monthlyRevenue: getMonthlyRevenueSummary().total,
-      revenueVsPlan:  +4.2,
+      revenueVsPlan:  null, // TODO: compute from plan data when available
       atRiskMembers:  atRisk.length,
       openComplaints: complaints.length,
       understaffedDays: staffing.understaffedDaysCount,
@@ -295,7 +304,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         id: 'waitlist-retention-calls',
         icon: '📞',
         title: `Call ${waitlistSummary.highPriority} retention-priority waitlist members now`,
-        impact: '$2,100 potential revenue',
+        impact: `$${potentialRevenue.toLocaleString()} potential revenue`,
         effort: '15 min',
         conversionRate: 67,
         detail: `${waitlistSummary.highPriority} at-risk members are waiting for tee times. Historical fill rate for retention-priority calls: 67%. Estimated revenue: $312/slot × ${waitlistSummary.highPriority} × 67% = $2,100.`,
@@ -317,7 +326,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
         id: 'at-risk-touchpoints',
         icon: '👋',
         title: '3 at-risk members playing today — greet personally',
-        impact: '$60K dues at stake',
+        impact: `$${Math.round(atRiskDues / 1000)}K dues at stake`,
         effort: '15 min',
         conversionRate: null,
         detail: 'James Whitfield (8:00 AM), Anne Jordan (7:08 AM), and Robert Callahan (9:00 AM) are all at-risk members with tee times today. Personal GM greeting + brief conversation can prevent further disengagement.',
