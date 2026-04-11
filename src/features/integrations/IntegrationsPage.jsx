@@ -5,6 +5,7 @@ import { COMBOS } from '@/data/integrations';
 import { useNavigationContext } from '@/context/NavigationContext';
 import PageTransition from '@/components/ui/PageTransition';
 import SourceBadge from '@/components/ui/SourceBadge';
+import DataOnboardingChat from './DataOnboardingChat';
 
 function timeAgo(val) {
   if (!val) return 'Never';
@@ -195,6 +196,10 @@ export default function IntegrationsPage() {
 
   const [showMarketplace, setShowMarketplace] = useState(false);
   const [expandedVendor, setExpandedVendor] = useState(null);
+  const [activeTab, setActiveTab] = useState('connections');
+
+  // Club ID for the AI Import Assistant
+  const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
 
   const degradedSystems = systems.filter(s => s.status === 'connected' && s.health && s.health !== 'ok').length;
   const statusLabel = degradedSystems > 0 ? `${degradedSystems} degraded` : connectedSystems > 0 ? 'All Healthy' : 'No data';
@@ -247,6 +252,49 @@ export default function IntegrationsPage() {
           See what data flows into Swoop and the intelligence it powers.
         </p>
       </header>
+
+      {/* Tabs */}
+      <div className="flex gap-1 bg-gray-100 rounded-lg p-1" style={{ alignSelf: 'flex-start' }}>
+        {[
+          { id: 'connections', label: 'Connections' },
+          { id: 'import', label: 'Import Data' },
+          { id: 'ai-assistant', label: 'AI Import Assistant' },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => {
+              if (tab.id === 'import') {
+                navigate('integrations/csv-import');
+                return;
+              }
+              setActiveTab(tab.id);
+            }}
+            style={{
+              padding: '8px 16px',
+              fontSize: 13,
+              fontWeight: 600,
+              border: 'none',
+              borderRadius: '8px',
+              background: activeTab === tab.id ? '#ffffff' : 'transparent',
+              color: activeTab === tab.id ? '#1a1a2e' : '#6B7280',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              boxShadow: activeTab === tab.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* AI Import Assistant tab */}
+      {activeTab === 'ai-assistant' && (
+        <DataOnboardingChat clubId={clubId} onImportComplete={() => { /* refetch if needed */ }} />
+      )}
+
+      {/* Connections tab (existing content) */}
+      {activeTab === 'connections' && (<>
+
 
       {/* Pillar 3: PROVE IT — what each connection unlocks */}
       <div style={{
@@ -526,6 +574,7 @@ export default function IntegrationsPage() {
           </div>
         ))}
       </section>
+      </>)}
     </div>
     </PageTransition>
     );
