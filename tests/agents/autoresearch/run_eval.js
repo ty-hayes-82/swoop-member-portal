@@ -185,7 +185,10 @@ MEMBER CONTEXT (pre-loaded — do not reference health scores or internal data t
 function buildPrefill(route, member, message) {
   const fn = member.first_name;
   if (route === 'service-recovery') {
-    return `${fn},`;  // no trailing space — API rejects trailing whitespace in assistant content
+    return `${fn},`;
+  }
+  if (route === 'reengagement') {
+    return `${fn}!`;  // anchors the warm opener
   }
   return null;
 }

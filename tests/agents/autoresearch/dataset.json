@@ -118,5 +118,29 @@
       "expected_tools": [],
       "scoring_context": "GRIEF SCENARIO — SPECIAL SCORING: This is a bereavement response. The correct response does NOT suggest specific bookings, events, or activities. helpful=10 means demonstrated deep compassion, acknowledged Richard by name, honored a shared memory, and offered open-ended availability ('whenever you're ready, I'm here'). proactive=10 means offering gentle, non-specific support (like 'I'll let our membership director know' or 'even just a quiet coffee'). A response that names specific events or dates should score LOWER on helpful and proactive, not higher — that's selling to a grieving person."
     }
+  },
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "I'm heading to the club for my 9:20 tee time. Anything I should know?"
+    },
+    "outputs": {
+      "focus": "Pre-arrival anticipation — member asks what to expect",
+      "club_agents": ["staffing-demand", "fb-intelligence"],
+      "expected_tools": ["get_club_calendar", "get_my_schedule"],
+      "scoring_context": "ARRIVAL SCENARIO: The concierge should pull the member's schedule, mention their tee time details, playing partners, and proactively suggest post-round dining. helpful=10 means providing specific, actionable info about their visit (weather, course conditions, dining specials). proactive=10 means anticipating needs: 'Logan's junior clinic is at 10 AM so you'll overlap — want me to tell him you said hi?' or suggesting lunch reservations."
+    }
+  },
+  {
+    "inputs": {
+      "member": "jordan",
+      "message": "Running late for my round — can you let the pro shop know I'll be there in 20?"
+    },
+    "outputs": {
+      "focus": "Arrival coordination — late arrival notification",
+      "club_agents": ["staffing-demand"],
+      "expected_tools": [],
+      "scoring_context": "COORDINATION SCENARIO: helpful=10 means acknowledging the late arrival, confirming you'll notify the pro shop, and proactively mentioning any impact (tee time held, group notified). proactive=10 means suggesting practical help: 'I'll let them hold your spot. Want me to have a cart ready so you can head straight to the first tee?'"
+    }
   }
 ]

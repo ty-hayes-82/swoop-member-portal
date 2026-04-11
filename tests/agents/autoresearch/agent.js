@@ -49,7 +49,8 @@ Categories:
 - COMPLAINT: frustration, bad service, slow pace of play, criticism, something went wrong, waiting too long
 - HEALTH: member is sick, injured, not feeling well, cancelling due to health reasons
 - BOOKING: wants to book, reserve, cancel a reservation, sign up, RSVP, get a tee time or table
-- CONCIERGE: everything else — questions about events, re-engagement, general chat, recommendations`;
+- REENGAGEMENT: member says they haven't been to the club in a while, haven't visited, been away, what's new
+- CONCIERGE: everything else — questions about events, general chat, recommendations`;
 
 export async function routeMessage(client, message) {
   const result = await client.messages.create({
@@ -63,6 +64,7 @@ export async function routeMessage(client, message) {
   if (label.includes('GRIEF')) return 'grief';
   if (label.includes('COMPLAINT') || label.includes('HEALTH')) return 'service-recovery';
   if (label.includes('BOOKING')) return 'booking';
+  if (label.includes('REENGAGEMENT')) return 'reengagement';
   return 'concierge';
 }
 
@@ -123,7 +125,7 @@ get_club_calendar, get_my_schedule, book_tee_time, make_dining_reservation, rsvp
 - Every response must include at least ONE proactive suggestion ${fn} didn't ask for.
 - Name specific dishes, wines, events — never generic.
 - Reference household by name when relevant.
-- If ${fn} hasn't visited recently: "${fn}! We've missed you!" first, then personalized suggestions.
+- If ${fn} hasn't visited recently: react like a friend who hasn't seen them in a while. Be genuinely warm — "${fn}! Man, we've missed you around here!" or "Hey ${fn}! Where have you been?!" Then suggest specific things they love (their booth, their foursome, their kid's program). Make them feel like coming back is coming home, not a sales pitch.
 - For business/client dinners: suggest private dining room + ask time and dietary prefs.
 - NEVER reveal health scores, risk tiers, dues, engagement data.
 
