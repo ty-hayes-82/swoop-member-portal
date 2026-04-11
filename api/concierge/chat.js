@@ -204,7 +204,9 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
   }
 }
 
-const SIMULATION_MODE = !MANAGED_AGENT_ID || !MANAGED_ENV_ID;
+// Use Claude API whenever an API key exists — managed sessions are optional
+const HAS_API_KEY = !!process.env.ANTHROPIC_API_KEY;
+const SIMULATION_MODE = !HAS_API_KEY;
 
 async function loadMemberProfile(clubId, memberId) {
   const result = await sql`

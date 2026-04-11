@@ -92,7 +92,7 @@ async function handler(req, res) {
 
   // Generate message via Claude (or simulation fallback)
   let message;
-  const SIMULATION_MODE = !MANAGED_AGENT_ID;
+  const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
   if (SIMULATION_MODE) {
     // Simulation: generate a template-based message
