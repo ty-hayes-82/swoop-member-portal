@@ -15,6 +15,22 @@ import { getAnthropicClient, MANAGED_AGENT_ID, MANAGED_ENV_ID } from '../agents/
 import { routeEvent } from '../agents/agent-events.js';
 
 // ---------------------------------------------------------------------------
+// Gate requirements per tool — tool is only offered when ALL listed gates are open.
+// Tools with no entry (or empty array) are always available.
+// ---------------------------------------------------------------------------
+const TOOL_GATES = {
+  book_tee_time:           ['members', 'tee-sheet'],
+  cancel_tee_time:         ['members', 'tee-sheet'],
+  make_dining_reservation: ['members', 'fb'],
+  get_club_calendar:       ['pipeline'],
+  get_my_schedule:         ['members'],
+  rsvp_event:              ['members', 'email'],
+  file_complaint:          ['members'],
+  get_member_profile:      ['members'],
+  send_request_to_club:    ['members'],
+};
+
+// ---------------------------------------------------------------------------
 // Concierge tool definitions (same as SMS tools in twilio/inbound.js)
 // ---------------------------------------------------------------------------
 const CONCIERGE_TOOLS = [
@@ -311,6 +327,21 @@ async function chatHandler(req, res) {
   // Build system prompt
   const systemPrompt = buildConciergePrompt(profile, clubName);
 
+  // ── Filter tools by data gates ──────────────────────────────────────
+  // In guided-demo mode the client sends X-Demo-Gates listing which data
+  // domains have been imported (e.g. "members,tee-sheet,fb").  When the
+  // header is absent (live / full-demo) all tools are available.
+  const gatesHeader = req.headers['x-demo-gates'];
+  let availableTools = CONCIERGE_TOOLS;
+  if (gatesHeader) {
+    const openGates = new Set(gatesHeader.split(',').map(g => g.trim()).filter(Boolean));
+    availableTools = CONCIERGE_TOOLS.filter(tool => {
+      const required = TOOL_GATES[tool.name];
+      if (!required || required.length === 0) return true;
+      return required.every(g => openGates.has(g));
+    });
+  }
+
   // Build conversation context
   const conversationContext = session.conversation_summary
     ? `\n\nPrevious conversation context: ${session.conversation_summary}`
@@ -336,7 +367,7 @@ async function chatHandler(req, res) {
       max_tokens: 1024,
       system: systemPrompt + conversationContext,
       messages,
-      tools: CONCIERGE_TOOLS,
+      tools: availableTools,
     });
 
     // Tool-use loop: execute tools and feed results back until Claude responds with text
@@ -357,7 +388,7 @@ async function chatHandler(req, res) {
         max_tokens: 1024,
         system: systemPrompt + conversationContext,
         messages,
-        tools: CONCIERGE_TOOLS,
+        tools: availableTools,
       });
     }
 
