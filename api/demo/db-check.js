@@ -27,10 +27,17 @@ export default async function handler(req, res) {
       }
     }
 
-    // Check for seed_pinetree members specifically
+    // Check club IDs in use
+    let clubIds = [];
+    try {
+      const c = await sql`SELECT club_id, COUNT(*) as cnt FROM members GROUP BY club_id ORDER BY cnt DESC LIMIT 10`;
+      clubIds = c.rows;
+    } catch { clubIds = ['query_failed']; }
+
+    // Sample members from largest club
     let sampleMembers = [];
     try {
-      const m = await sql`SELECT member_id, first_name, last_name, club_id, health_score FROM members WHERE club_id = 'seed_pinetree' LIMIT 10`;
+      const m = await sql`SELECT member_id, first_name, last_name, club_id, health_score, membership_type FROM members ORDER BY club_id, member_id LIMIT 10`;
       sampleMembers = m.rows;
     } catch { sampleMembers = ['query_failed']; }
 
@@ -38,7 +45,8 @@ export default async function handler(req, res) {
       total_tables: tables.rows.length,
       table_names: tables.rows.map(r => r.table_name),
       row_counts: counts,
-      seed_pinetree_members: sampleMembers,
+      club_ids: clubIds,
+      sample_members: sampleMembers,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
