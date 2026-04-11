@@ -395,7 +395,7 @@ function generateSimulatedResponse(profile, message) {
   }
 
   // Complaints — MUST check before dining (so "lunch took 45 minutes" is complaint, not reservation)
-  const complaintSignals = ['slow', 'wait', 'terrible', 'awful', 'disappoint', 'complaint', 'cold', 'ignored', 'upset', 'rude', 'wrong', 'horrible', 'unacceptable', 'minutes', 'apologize', 'apologized', 'took', 'no one', 'never', 'worst', 'poor', 'forgot'];
+  const complaintSignals = ['slow', 'wait', 'terrible', 'awful', 'disappoint', 'complaint', 'cold', 'ignored', 'upset', 'rude', 'wrong', 'horrible', 'unacceptable', 'minutes', 'apologize', 'apologized', 'took', 'no one', 'never', 'worst', 'poor', 'forgot', 'downhill', 'worse', 'used to be', 'not what it was', 'frustrat'];
   if (complaintSignals.some(w => lower.includes(w))) {
     const complaintId = `FB-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     return `${name}, that's really frustrating — and I'm sorry. That's not the experience you deserve here. I've logged this as complaint #${complaintId} and routed it to our F&B director, Sarah Collins. She'll reach out to you personally within 24 hours. Is there anything I can do for you right now to make things better?`;
@@ -443,8 +443,13 @@ function generateSimulatedResponse(profile, message) {
       `Want me to RSVP you for any of these?`;
   }
 
+  // Privacy guard — MUST check before schedule (so "my health score" doesn't trigger schedule)
+  if (lower.includes('health') || lower.includes('score') || lower.includes('risk') || lower.includes('data') || lower.includes('analytics') || lower.includes('tier')) {
+    return `I'd be happy to connect you with membership services for account details, ${name}. Is there something specific I can help with — a booking, reservation, or event RSVP?`;
+  }
+
   // Schedule — show personalized upcoming items
-  if (lower.includes('schedule') || lower.includes('upcoming') || lower.includes('my')) {
+  if (lower.includes('schedule') || lower.includes('upcoming') || (lower.includes('my') && (lower.includes('booking') || lower.includes('reservation') || lower.includes('tee') || lower.includes('event')))) {
     return `Here's what I have for you, ${name}:\n\n` +
       `• Tee Time: Apr 12, 7:00 AM — North Course (foursome)\n` +
       `• Wine Dinner: Apr 10, 7:30 PM — Main Dining Room (party of 2)\n\n` +
@@ -457,11 +462,6 @@ function generateSimulatedResponse(profile, message) {
       const names = household.map(h => h.name?.split(' ')[0]).join(' and ');
       return `Of course, ${name}! I can help with ${names}'s schedule too. What would you like me to set up for them?`;
     }
-  }
-
-  // Privacy guard — never reveal scores, risk, or internal data
-  if (lower.includes('health') || lower.includes('score') || lower.includes('risk') || lower.includes('data')) {
-    return `I'd be happy to connect you with membership services for account details, ${name}. Is there something specific I can help with — a booking, reservation, or event RSVP?`;
   }
 
   // Default — warm, capability-focused
