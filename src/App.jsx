@@ -10,6 +10,7 @@ const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 // same reason: it ships alongside MobileApp but shouldn't inflate desktop.
 const ConferenceShell = lazy(() => import('@/mobile/conference/ConferenceShell'));
 const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatPage'));
+const InvestorSite = lazy(() => import('@/features/invest/InvestorSite'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
 const GamePlanDemo = lazy(() => import('@/features/demo/GamePlanDemo'));
 const BoardReportDemo = lazy(() => import('@/features/demo/BoardReportDemo'));
@@ -339,6 +340,15 @@ export default function App() {
     return (
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Concierge...</div>}>
         <ConciergeChatPage />
+      </Suspense>
+    );
+  }
+
+  // Investor site — accessible without auth
+  if (currentHash === '#/invest') {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading...</div>}>
+        <InvestorSite />
       </Suspense>
     );
   }
