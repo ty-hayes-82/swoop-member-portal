@@ -8,6 +8,7 @@ import MemberLink from '@/components/MemberLink';
 import { useNavigation } from '@/context/NavigationContext';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { trackAction } from '@/services/activityService';
+import AgentUpsell from '@/components/ui/AgentUpsell';
 
 const ACTION_OWNERS = {
   'Ghost': 'GM',
@@ -276,6 +277,12 @@ export default function MemberAlerts() {
           );
         })}
       </div>
+
+      <AgentUpsell
+        agentName="Member Risk Agent"
+        benefit="Would have flagged James Whitfield 6 weeks before resignation."
+        className="mt-3"
+      />
 
       <button
         onClick={() => navigate('members')}
