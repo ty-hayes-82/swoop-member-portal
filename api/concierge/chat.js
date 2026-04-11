@@ -546,6 +546,47 @@ async function loadMemberProfile(clubId, memberId) {
           notes: 'Joined after her husband Richard passed away. Friends encouraged her to join for the social calendar. Bridge partner is Diane Prescott. Zero visits since October — 6 months dark. Needs personal, warm outreach — not transactional.',
         },
       },
+      mbr_t04: {
+        member_id: 'mbr_t04', name: 'Anne Jordan', first_name: 'Anne',
+        email: 'anne.j@email.com', membership_type: 'Full Golf',
+        join_date: '2016-03-15', status: 'active',
+        household: [
+          { member_id: 'mbr_t04b', name: 'Marcus Jordan', membership_type: 'Full Golf' },
+        ],
+        preferences: {
+          teeWindows: 'Saturday morning 7-8 AM, always with Marcus',
+          dining: 'Terrace for lunch after golf, likes the chicken Caesar',
+          favoriteSpots: 'North Course, Terrace patio',
+          channel: 'SMS',
+          notes: '10-year member, Weekend Warrior. Missed 3 Saturday waitlists recently — walked off Jan 7 after slow pace. Zero rounds since. Health score 28.',
+        },
+      },
+      mbr_t05: {
+        member_id: 'mbr_t05', name: 'Robert Callahan', first_name: 'Robert',
+        email: 'robert.c@email.com', membership_type: 'Corporate',
+        join_date: '2021-06-01', status: 'active',
+        household: [],
+        preferences: {
+          teeWindows: 'Weekday mornings when available',
+          dining: 'Main Dining Room, prefers quiet corner table. Orders steak and red wine.',
+          favoriteSpots: 'South Course, Main Dining Room',
+          channel: 'Email',
+          notes: 'Declining member. Hitting exact $3,020 F&B minimum then stopping — dining to fulfill obligation only. 9-day complaint unresolved about billing. No golf since November. Health score 22. $18K dues.',
+        },
+      },
+      mbr_146: {
+        member_id: 'mbr_146', name: 'Sandra Chen', first_name: 'Sandra',
+        email: 'sandra.c@email.com', membership_type: 'Social',
+        join_date: '2020-09-15', status: 'active',
+        household: [],
+        preferences: {
+          teeWindows: 'N/A — social member, does not golf',
+          dining: 'Grill Room for casual lunches, Main Dining for events. Used to spend $142/visit, now $18. Loves wine tastings and social events.',
+          favoriteSpots: 'Grill Room, Event lawn, Wine cellar',
+          channel: 'SMS',
+          notes: 'Social Butterfly archetype. Dining cliff from $142 to $18 per visit — 87% drop. Declined 3 consecutive event invites. Health score 36. $9K dues.',
+        },
+      },
     };
     return fallbacks[memberId] || null;
   }
