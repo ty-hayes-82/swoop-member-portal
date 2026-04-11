@@ -48,6 +48,7 @@ const IntegrationsPage = lazy(() => import('@/features/integrations/Integrations
 const CsvImportPage = lazy(() => import('@/features/integrations/CsvImportPage'));
 const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
 const AutomationsHub = lazy(() => import('@/features/automations/AutomationsHub'));
+const AgentActivityPage = lazy(() => import('@/features/agents/AgentActivityPage'));
 const TeeSheetView = lazy(() => import('@/features/tee-sheet/TeeSheetView'));
 const RevenuePage = lazy(() => import('@/features/revenue/RevenuePage'));
 const ProfilePage = lazy(() => import('@/features/profile/ProfilePage'));
@@ -70,6 +71,7 @@ const ROUTES = {
   'csv-import': CsvImportPage,
   'playbooks': PlaybooksPage,
   'automations': AutomationsHub,
+  'agent-activity': AgentActivityPage,
   'profile': ProfilePage,
 };
 

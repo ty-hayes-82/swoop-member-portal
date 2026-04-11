@@ -10,7 +10,7 @@ const VALID_ROUTES = new Set([
   // V3 hidden but still routable for backward compat
   'revenue', 'insights', 'actions',
   // Accessible via direct navigation (not in nav)
-  'member-profile', 'integrations', 'profile', 'automations',
+  'member-profile', 'integrations', 'profile', 'automations', 'agent-activity',
   // Legacy routes (redirect via ROUTE_REDIRECTS below)
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
   'member-health', 'revenue-leakage', 'outreach-playbooks', 'staffing-service', 'growth-pipeline',
