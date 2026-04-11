@@ -150,7 +150,7 @@ const SwoopSidebar = () => {
                   <button
                     onClick={() => navigate(item.key)}
                     aria-label={item.label}
-                    className={`menu-item group cursor-pointer ${
+                    className={`menu-item group cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-1 focus-visible:ring-offset-black ${
                       isActive(item.key)
                         ? "bg-brand-500/15 text-brand-400"
                         : "text-gray-300 hover:bg-white/5 hover:text-white"

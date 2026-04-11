@@ -1,12 +1,39 @@
 // ActionsDrawer — Quick-access slide-in panel for pending actions
 // Full inbox + playbooks + agents are in #/automations
+import { useEffect, useRef, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useNavigationContext } from '@/context/NavigationContext';
 
 export default function ActionsDrawer({ isOpen, onClose }) {
+  const drawerRef = useRef(null);
   const { inbox, approveAction, dismissAction } = useApp();
   const { navigate } = useNavigationContext();
   const pending = inbox.filter(i => i.status === 'pending').slice(0, 5);
+
+  // Auto-focus first focusable element when drawer opens
+  useEffect(() => {
+    if (isOpen && drawerRef.current) {
+      const focusable = drawerRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length > 0) focusable[0].focus();
+    }
+  }, [isOpen]);
+
+  // Trap focus inside drawer
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Escape') { onClose(); return; }
+    if (e.key !== 'Tab') return;
+    const focusable = drawerRef.current?.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (!focusable || focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }, [onClose]);
 
   return (
     <>
@@ -15,6 +42,8 @@ export default function ActionsDrawer({ isOpen, onClose }) {
       )}
 
       <div
+        ref={drawerRef}
+        onKeyDown={handleKeyDown}
         className={`fixed top-0 right-0 h-screen bg-white border-l border-gray-200 flex flex-col overflow-hidden z-[210] transition-transform duration-250 dark:bg-white/[0.03] dark:border-gray-800 ${isOpen ? 'translate-x-0 shadow-theme-xl' : 'translate-x-full'}`}
         style={{ width: Math.min(420, typeof window !== 'undefined' ? window.innerWidth - 60 : 420) }}
         role="dialog"
@@ -29,7 +58,7 @@ export default function ActionsDrawer({ isOpen, onClose }) {
               {pending.length > 0 ? `${pending.length} action${pending.length > 1 ? 's' : ''} need review` : 'All caught up'}
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full border border-gray-200 bg-gray-100 text-gray-500 text-base cursor-pointer flex items-center justify-center dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+          <button onClick={onClose} aria-label="Close drawer" className="w-8 h-8 rounded-full border border-gray-200 bg-gray-100 text-gray-500 text-base cursor-pointer flex items-center justify-center dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
             &times;
           </button>
         </div>

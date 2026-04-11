@@ -332,7 +332,11 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
 
       {/* Drop zone */}
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Upload CSV or XLSX file"
         onClick={() => fileInputRef.current?.click()}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
@@ -348,6 +352,7 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
           ref={fileInputRef}
           type="file"
           accept=".csv,.xlsx,.xls"
+          aria-label="Upload file"
           onChange={e => validateAndSetFile(e.target.files?.[0])}
           className="hidden"
         />

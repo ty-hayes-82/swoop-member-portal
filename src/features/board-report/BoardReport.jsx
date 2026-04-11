@@ -32,6 +32,7 @@ const colors = {
 };
 
 function formatCurrency(val) {
+  if (!Number.isFinite(val)) return '$0';
   return '$' + val.toLocaleString();
 }
 

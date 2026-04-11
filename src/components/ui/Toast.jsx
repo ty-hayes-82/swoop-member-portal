@@ -28,6 +28,8 @@ export function Toast({ message, variant = 'success', duration = 4000, onClose }
 
   return (
     <div
+      role="alert"
+      aria-live="assertive"
       className={`fixed right-6 z-[9999] ${config.bgCls} text-white px-6 py-3.5 rounded-xl shadow-theme-xl border border-white/15 flex items-center gap-2.5 text-sm font-medium transition-all duration-300`}
       style={{
         bottom: isExiting ? '-100px' : '24px',

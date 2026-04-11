@@ -9,6 +9,9 @@ const LayoutContent = ({ children, footer, actionsDrawer, mobileBar }) => {
 
   return (
     <div className="h-screen lg:flex w-full overflow-hidden">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-brand-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-semibold">
+        Skip to content
+      </a>
       <SwoopSidebar />
       <Backdrop />
       <div
@@ -17,7 +20,7 @@ const LayoutContent = ({ children, footer, actionsDrawer, mobileBar }) => {
         }`}
       >
         <SwoopHeader />
-        <main className="flex-1 overflow-y-auto p-4 w-full md:p-6 pb-20 md:pb-24">
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 w-full md:p-6 pb-20 md:pb-24">
           <Suspense
             fallback={
               <div className="flex items-center justify-center min-h-[200px] text-gray-400">

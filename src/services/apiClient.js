@@ -46,11 +46,25 @@ export async function apiFetch(url, options = {}) {
   const authHeaders = getAuthHeaders();
   const headers = { ...authHeaders, ...(options.headers || {}) };
 
-  const res = await fetch(url, { ...options, headers });
+  // Timeout: abort after 15 seconds to prevent hanging on slow/dead servers
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  let res;
+  try {
+    res = await fetch(url, { ...options, headers, signal: controller.signal });
+  } catch (err) {
+    clearTimeout(timeout);
+    // Network offline, DNS failure, or timeout — return null like a failed request
+    logError(new Error(`[apiFetch] Network error on ${url}: ${err.name}`), { level: 'warning', service: 'apiClient' });
+    return null;
+  }
+  clearTimeout(timeout);
 
   if (res.status === 401) {
-    // Session expired — clear auth and let static data take over
-    logError(new Error(`[apiFetch] 401 on ${url} — session may be expired`), { level: 'warning', service: 'apiClient' });
+    // Session expired — notify the app so it can show re-login prompt
+    logError(new Error(`[apiFetch] 401 on ${url} — session expired`), { level: 'warning', service: 'apiClient' });
+    window.dispatchEvent(new CustomEvent('swoop:session-expired'));
     return null;
   }
 
