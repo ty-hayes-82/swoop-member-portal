@@ -5,3 +5,5 @@ a1b14d3	8.760000	8.900000	8.400000	9.200000	7.700000	9.600000	keep	exp2: strengt
 a085898	8.520000	8.300000	7.900000	9.000000	7.800000	9.600000	discard	exp3: business template G + proactive requirement (regressed grief/pace)
 0a9e8a5	9.370000	8.714000	9.428000	9.571000	9.428000	9.714000	keep	V3: 7 reliability practices (3 errors from prefill whitespace)
 514b3a9	9.300000	8.700000	9.200000	9.800000	9.100000	9.700000	keep	V3+fix: Haiku routing + prefill + temps + validation + grief circuit breaker + scoring context
+exp12	9.000000	8.833000	8.666000	9.416000	8.500000	9.583000	keep	exp12: reengagement prefill + arrival scenarios (12 scenarios)
+exp13	9.050000	8.500000	8.833000	9.500000	8.833000	9.583000	keep	exp13: fix arrival routing to concierge + arrival prompt guidance (corporate stochastic crash)
