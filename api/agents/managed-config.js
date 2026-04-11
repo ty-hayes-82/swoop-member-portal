@@ -30,14 +30,23 @@ export function getAnthropicClient() {
 // ---------------------------------------------------------------------------
 
 export const AGENT_IDS = {
-  'chief-of-staff':        process.env.COS_AGENT_ID        || MANAGED_AGENT_ID,
-  'member-risk-lifecycle':  process.env.RISK_AGENT_ID       || MANAGED_AGENT_ID,
-  'service-recovery':      process.env.SR_AGENT_ID          || MANAGED_AGENT_ID,
-  'tomorrows-game-plan':   process.env.GAMEPLAN_AGENT_ID    || MANAGED_AGENT_ID,
-  'staffing-demand':       process.env.STAFFING_AGENT_ID    || MANAGED_AGENT_ID,
-  'fb-intelligence':       process.env.FB_AGENT_ID          || MANAGED_AGENT_ID,
-  'board-report-compiler': process.env.BOARD_AGENT_ID       || MANAGED_AGENT_ID,
-  'member-concierge':      process.env.CONCIERGE_AGENT_ID   || MANAGED_AGENT_ID,
+  // Opus — orchestration + emotional intelligence
+  'chief-of-staff':          process.env.COS_AGENT_ID          || MANAGED_AGENT_ID,
+  'personal-concierge':      process.env.CONCIERGE_AGENT_ID    || MANAGED_AGENT_ID,
+  'member-service-recovery': process.env.MSR_AGENT_ID          || MANAGED_AGENT_ID,
+  // Haiku — transactional, high-volume
+  'booking-agent':           process.env.BOOKING_AGENT_ID      || MANAGED_AGENT_ID,
+  'staffing-demand':         process.env.STAFFING_AGENT_ID     || MANAGED_AGENT_ID,
+  // Sonnet — analytical
+  'member-risk-lifecycle':   process.env.RISK_AGENT_ID         || MANAGED_AGENT_ID,
+  'service-recovery':        process.env.SR_AGENT_ID           || MANAGED_AGENT_ID,
+  'tomorrows-game-plan':     process.env.GAMEPLAN_AGENT_ID     || MANAGED_AGENT_ID,
+  'fb-intelligence':         process.env.FB_AGENT_ID           || MANAGED_AGENT_ID,
+  'board-report-compiler':   process.env.BOARD_AGENT_ID        || MANAGED_AGENT_ID,
+  'revenue-analyst':         process.env.REVENUE_AGENT_ID      || MANAGED_AGENT_ID,
+  'growth-pipeline':         process.env.GROWTH_AGENT_ID       || MANAGED_AGENT_ID,
+  // Legacy alias
+  'member-concierge':        process.env.CONCIERGE_AGENT_ID    || MANAGED_AGENT_ID,
 };
 
 // ---------------------------------------------------------------------------
