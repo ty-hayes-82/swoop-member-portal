@@ -1,0 +1,136 @@
+[
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "Book my usual Saturday tee time"
+    },
+    "outputs": {
+      "focus": "Regular booking + cross-sell",
+      "club_agents": ["staffing-demand", "member-risk"],
+      "expected_tools": ["book_tee_time"],
+      "must_contain": ["Saturday", "4/11", "booth", "Arnold Palmer"],
+      "must_not_contain": ["Sunday", "health_score", "at-risk"]
+    }
+  },
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "The Grill Room service was terrible yesterday. We waited 40 minutes and nobody checked on us."
+    },
+    "outputs": {
+      "focus": "High-value complaint handling",
+      "club_agents": ["service-recovery", "member-risk"],
+      "expected_tools": ["file_complaint"],
+      "must_contain": ["James", "40 minutes"],
+      "must_not_contain": ["Perfect", "health_score"],
+      "first_word_must_be_empathy": true
+    }
+  },
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "I need to host a dinner for 4 clients from Meridian Partners next Wednesday. What do you recommend?"
+    },
+    "outputs": {
+      "focus": "Corporate entertaining upsell",
+      "club_agents": ["fb-intelligence"],
+      "expected_tools": [],
+      "must_contain": ["private dining", "Wednesday", "wine"],
+      "must_not_contain": ["health_score"],
+      "should_ask_before_booking": true
+    }
+  },
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "I haven't been to the club in weeks. What's new?"
+    },
+    "outputs": {
+      "focus": "At-risk re-engagement",
+      "club_agents": ["member-risk"],
+      "expected_tools": ["get_club_calendar"],
+      "must_contain": ["James", "missed"],
+      "must_not_contain": ["health_score", "at-risk", "engagement"]
+    }
+  },
+  {
+    "inputs": {
+      "member": "jordan",
+      "message": "Can I get a 7 AM slot next Saturday?"
+    },
+    "outputs": {
+      "focus": "Preferred slot booking + cross-sell",
+      "club_agents": ["staffing-demand", "member-risk"],
+      "expected_tools": ["book_tee_time"],
+      "must_contain": ["Saturday", "7"],
+      "must_not_contain": ["health_score"]
+    }
+  },
+  {
+    "inputs": {
+      "member": "jordan",
+      "message": "Why is the course always so slow on Saturday mornings? It's really frustrating."
+    },
+    "outputs": {
+      "focus": "Pace frustration as complaint",
+      "club_agents": ["game-plan", "service-recovery"],
+      "expected_tools": ["file_complaint"],
+      "must_contain": ["Anne"],
+      "must_not_contain": ["Perfect"],
+      "first_word_must_be_empathy": true
+    }
+  },
+  {
+    "inputs": {
+      "member": "jordan",
+      "message": "Cancel my tee time tomorrow, not feeling great"
+    },
+    "outputs": {
+      "focus": "Health-sensitive cancellation",
+      "club_agents": ["member-risk"],
+      "expected_tools": ["cancel_tee_time"],
+      "must_contain": ["Anne", "feeling better"],
+      "must_not_contain": ["health_score"]
+    }
+  },
+  {
+    "inputs": {
+      "member": "chen",
+      "message": "What events are coming up? Lily would love something fun this weekend."
+    },
+    "outputs": {
+      "focus": "Family event discovery",
+      "club_agents": ["member-risk"],
+      "expected_tools": ["get_club_calendar"],
+      "must_contain": ["Lily", "Sandra"],
+      "must_not_contain": ["health_score"]
+    }
+  },
+  {
+    "inputs": {
+      "member": "chen",
+      "message": "Sign me and David up for the wine dinner Monday. Can we get a window table?"
+    },
+    "outputs": {
+      "focus": "Couple event RSVP + preferences",
+      "club_agents": ["fb-intelligence", "member-risk"],
+      "expected_tools": ["rsvp_event"],
+      "must_contain": ["wine dinner", "window"],
+      "must_not_contain": ["health_score"]
+    }
+  },
+  {
+    "inputs": {
+      "member": "chen",
+      "message": "We haven't been in since Richard passed. He loved those wine dinners. I think I'm ready to come back."
+    },
+    "outputs": {
+      "focus": "Grief + sensitive re-engagement",
+      "club_agents": ["member-risk"],
+      "expected_tools": [],
+      "must_contain": ["Richard"],
+      "must_not_contain": ["book", "reserve", "sign up", "health_score"],
+      "grief_scenario": true
+    }
+  }
+]
