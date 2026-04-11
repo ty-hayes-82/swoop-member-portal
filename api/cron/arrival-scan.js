@@ -94,8 +94,12 @@ export default async function handler(req, res) {
           continue;
         }
 
-        const baseUrl = process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}`
+        const rawUrl = process.env.VERCEL_URL || process.env.APP_URL;
+        if (!rawUrl && process.env.NODE_ENV === 'production') {
+          throw new Error('Neither VERCEL_URL nor APP_URL is set in production');
+        }
+        const baseUrl = rawUrl
+          ? (rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`)
           : 'http://localhost:3000';
 
         const triggerRes = await fetch(`${baseUrl}/api/agents/arrival-trigger`, {
@@ -111,6 +115,23 @@ export default async function handler(req, res) {
             club_id: row.club_id,
           }),
         });
+
+        const contentType = triggerRes.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          const body = await triggerRes.text();
+          logWarn('/api/cron/arrival-scan', `non-JSON response for ${row.member_id}`, {
+            status: triggerRes.status,
+            contentType,
+            body: body.slice(0, 200),
+          });
+          results.push({
+            member_id: row.member_id,
+            tee_time: row.tee_time,
+            status: 'error',
+            error: `Non-JSON response (${contentType})`,
+          });
+          continue;
+        }
 
         const triggerData = await triggerRes.json();
 

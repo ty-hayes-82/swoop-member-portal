@@ -7,6 +7,7 @@
  *
  * @module api/agents/config-templates
  */
+import { DEFAULT_TEMPERATURES } from './assemble.js';
 
 // ---------------------------------------------------------------------------
 // Model constants
@@ -51,21 +52,6 @@ function _swoopRecommendedAgent(agentId) {
   const isOpus   = OPUS_AGENTS.includes(agentId);
   const isHaiku  = HAIKU_AGENTS.includes(agentId);
 
-  const temperatures = {
-    'chief-of-staff': 0.4,
-    'personal-concierge': 0.6,
-    'member-service-recovery': 0.6,
-    'booking-agent': 0.1,
-    'staffing-demand': 0.2,
-    'member-risk-lifecycle': 0.3,
-    'service-recovery': 0.4,
-    'tomorrows-game-plan': 0.3,
-    'fb-intelligence': 0.3,
-    'board-report-compiler': 0.3,
-    'revenue-analyst': 0.3,
-    'growth-pipeline': 0.3,
-  };
-
   return {
     agent_id: agentId,
     tone: 'warm',
@@ -85,7 +71,7 @@ function _swoopRecommendedAgent(agentId) {
     },
     prompt_overrides: {
       model: isOpus ? OPUS : isHaiku ? HAIKU : SONNET,
-      temperature: temperatures[agentId] ?? 0.3,
+      temperature: DEFAULT_TEMPERATURES[agentId] ?? 0.3,
       max_tokens: 4096,
       validation_rules: ['empathy_first', 'no_markdown'],
       prefill: null,

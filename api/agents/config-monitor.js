@@ -11,6 +11,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId } from '../lib/withAuth.js';
 import { SWOOP_RECOMMENDED } from './config-templates.js';
+import { logError } from '../lib/logger.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -168,7 +169,8 @@ async function handler(req, res) {
         clubs,
       });
     } catch (err) {
-      return res.status(500).json({ error: 'Failed to fetch config health', detail: err.message });
+      logError('config-monitor/all', err);
+      return res.status(500).json({ error: 'Internal error' });
     }
   }
 
@@ -179,7 +181,8 @@ async function handler(req, res) {
     const health = await getClubHealth(clubId);
     return res.status(200).json(health);
   } catch (err) {
-    return res.status(500).json({ error: 'Failed to fetch config health', detail: err.message });
+    logError('config-monitor', err);
+    return res.status(500).json({ error: 'Internal error' });
   }
 }
 

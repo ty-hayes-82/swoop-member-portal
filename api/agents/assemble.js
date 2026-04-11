@@ -36,7 +36,7 @@ const DEFAULT_MODELS = {
 };
 
 /** Default temperature per agent. */
-const DEFAULT_TEMPERATURES = {
+export const DEFAULT_TEMPERATURES = {
   'chief-of-staff':          0.4,
   'personal-concierge':      0.6,
   'member-service-recovery':  0.6,

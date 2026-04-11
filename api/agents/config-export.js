@@ -11,6 +11,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId, getWriteClubId } from '../lib/withAuth.js';
 import { clearConfigCache } from './assemble.js';
+import { logError } from '../lib/logger.js';
 
 // ---------------------------------------------------------------------------
 // Validation constants (must match agent-config.js)
@@ -74,7 +75,8 @@ async function handler(req, res) {
       res.setHeader('Content-Disposition', `attachment; filename="agent-configs-${clubId}-${Date.now()}.json"`);
       return res.status(200).json(exportData);
     } catch (err) {
-      return res.status(500).json({ error: 'Failed to export configs', detail: err.message });
+      logError('config-export/GET', err);
+      return res.status(500).json({ error: 'Internal error' });
     }
   }
 
@@ -169,7 +171,8 @@ async function handler(req, res) {
         configs: imported,
       });
     } catch (err) {
-      return res.status(500).json({ error: 'Failed to import configs', detail: err.message });
+      logError('config-export/POST', err);
+      return res.status(500).json({ error: 'Internal error' });
     }
   }
 

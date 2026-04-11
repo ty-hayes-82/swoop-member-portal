@@ -123,7 +123,6 @@ export default function ToolPermissionsPanel({
       } else if (approval.has(tool.name)) {
         map[tool.name] = 'requires_approval';
       } else {
-        // High-risk tools default to requires_approval when no config exists
         map[tool.name] = tool.riskLevel === 'high' ? 'requires_approval' : 'auto_execute';
       }
     }
