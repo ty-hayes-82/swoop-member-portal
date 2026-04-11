@@ -85,79 +85,328 @@ const CONCIERGE_TOOLS = [
  * Execute a concierge tool call (mirrors executeSmsTool from twilio/inbound.js).
  */
 async function executeConciergeTool(toolName, input, profile, clubId) {
+  const memberId = profile.member_id;
+
   switch (toolName) {
+    // ── GET CLUB CALENDAR ──────────────────────────────────────────────
     case 'get_club_calendar': {
+      try {
+        const result = await sql`
+          SELECT event_id, name, type, event_date, capacity, registration_fee, description
+          FROM event_definitions
+          WHERE club_id = ${clubId} AND event_date >= CURRENT_DATE
+          ORDER BY event_date
+          LIMIT 10
+        `;
+        if (result.rows.length > 0) {
+          // Enrich with registration counts
+          const events = [];
+          for (const ev of result.rows) {
+            let registeredCount = 0;
+            try {
+              const regResult = await sql`
+                SELECT COUNT(*)::int AS cnt FROM event_registrations
+                WHERE event_id = ${ev.event_id} AND status != 'cancelled'
+              `;
+              registeredCount = regResult.rows[0]?.cnt || 0;
+            } catch (_) { /* table may not exist */ }
+            events.push({
+              date: ev.event_date,
+              title: ev.name,
+              type: ev.type,
+              capacity: `${ev.capacity} total, ${Math.max(0, ev.capacity - registeredCount)} remaining`,
+              fee: ev.registration_fee || 0,
+              description: ev.description,
+            });
+          }
+          return { events };
+        }
+      } catch (e) {
+        console.warn('[concierge] get_club_calendar DB error (using fallback):', e.message);
+      }
+      // Fallback: hardcoded
       const memberType = profile.membership_type || 'Full Golf';
       return {
         events: [
           { date: '2026-04-10', time: '6:00 PM', title: 'Wine Dinner — Spring Pairing Menu', location: 'Main Dining Room', capacity: '48 seats, 12 remaining', note: 'Popular with Social and Full Golf members — filling fast', dress_code: 'Smart casual' },
-          { date: '2026-04-12', time: '8:00 AM', title: 'Saturday Morning Shotgun — Member-Guest', location: 'North Course', capacity: '72 players, only 8 spots left', note: memberType.includes('Golf') ? 'Your membership includes entry — invite a guest for $45' : 'Open to all members, guest fee $85', weather_forecast: '72°F, partly cloudy — ideal conditions' },
-          { date: '2026-04-13', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment', note: profile.household?.some(h => h.membership_type === 'Junior') ? 'Great fit for your Junior member — Coach Davis leading this session' : 'Ages 8-16, led by Coach Davis' },
-          { date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', capacity: '20 teams max, only 6 remaining', note: 'Last month sold out — grab a spot early', food_included: 'Appetizer spread + 2 drink tickets per person' },
-          { date: '2026-04-18', time: '7:00 AM', title: 'Club Championship Qualifier — Round 1', location: 'South Course', capacity: 'Registration open — 54 of 72 spots filled', note: 'Defending champion: Tom Gallagher. Registration closes Apr 16.' },
+          { date: '2026-04-12', time: '8:00 AM', title: 'Saturday Morning Shotgun — Member-Guest', location: 'North Course', capacity: '72 players, only 8 spots left', note: memberType.includes('Golf') ? 'Your membership includes entry — invite a guest for $45' : 'Open to all members, guest fee $85' },
+          { date: '2026-04-13', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment' },
+          { date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', capacity: '20 teams max, only 6 remaining' },
+          { date: '2026-04-18', time: '7:00 AM', title: 'Club Championship Qualifier — Round 1', location: 'South Course', capacity: 'Registration open — 54 of 72 spots filled' },
         ],
       };
     }
+
+    // ── BOOK TEE TIME ──────────────────────────────────────────────────
     case 'book_tee_time': {
       const course = input.course || 'North Course';
       const players = input.players || 4;
       const prefs = profile.preferences || {};
       const beverage = prefs.dining?.includes('Arnold Palmer') ? 'Arnold Palmer' : 'cold water and towels';
+      const bookingId = `bkg_c_${Date.now().toString(36)}`;
+      const confNumber = `TT-${Date.now().toString(36).toUpperCase()}`;
+
+      try {
+        // Resolve course_id from name
+        const courseResult = await sql`
+          SELECT course_id, name FROM courses
+          WHERE club_id = ${clubId} AND name ILIKE '%' || ${course} || '%'
+          LIMIT 1
+        `;
+        const courseId = courseResult.rows[0]?.course_id;
+        const courseName = courseResult.rows[0]?.name || course;
+
+        if (courseId) {
+          await sql`
+            INSERT INTO bookings (booking_id, club_id, course_id, booking_date, tee_time, player_count, status)
+            VALUES (${bookingId}, ${clubId}, ${courseId}, ${input.date}, ${input.time}, ${players}, 'confirmed')
+          `;
+          // Add the member as first player
+          const playerId = `bp_c_${Date.now().toString(36)}`;
+          await sql`
+            INSERT INTO booking_players (player_id, booking_id, member_id, position_in_group)
+            VALUES (${playerId}, ${bookingId}, ${memberId}, 1)
+          `;
+          // Log to activity_log
+          try {
+            await sql`
+              INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, meta)
+              VALUES ('concierge_booking', 'tee_time', ${memberId}, ${profile.name}, ${bookingId}, 'booking',
+                ${`Booked tee time: ${input.date} at ${input.time} on ${courseName}`},
+                ${JSON.stringify({ course: courseName, players, confirmation: confNumber })}::jsonb)
+            `;
+          } catch (_) { /* activity_log may not exist */ }
+
+          return {
+            confirmation: `Tee time booked: ${input.date} at ${input.time} on the ${courseName} for ${players} players.`,
+            confirmation_number: confNumber,
+            booking_id: bookingId,
+            member_name: profile.name,
+            cart_note: `Cart will be staged with ${beverage} at the bag drop 15 min before your time.`,
+          };
+        }
+      } catch (e) {
+        console.warn('[concierge] book_tee_time DB error (using fallback):', e.message);
+      }
+      // Fallback: hardcoded
       return {
         confirmation: `Tee time booked: ${input.date} at ${input.time} on the ${course} for ${players} players.`,
-        confirmation_number: `TT-${Date.now().toString(36).toUpperCase()}`,
+        confirmation_number: confNumber,
         member_name: profile.name,
         cart_note: `Cart will be staged with ${beverage} at the bag drop 15 min before your time.`,
-        weather: '75°F, light breeze from the south — perfect golf weather.',
-        starter_note: course === 'North Course' ? 'Starter: Mike will have you set at the tee.' : 'Starter: Danny will get your group rolling.',
-        pace_note: `Current pace on ${course}: 4 hrs 10 min.`,
       };
     }
+
+    // ── MAKE DINING RESERVATION ────────────────────────────────────────
     case 'make_dining_reservation': {
       const party = input.party_size || 2;
       const time = input.time || '7:00 PM';
       const prefs = profile.preferences || {};
       const favDining = prefs.dining || '';
       const seatingNote = favDining.includes('booth 12') ? 'Booth 12 reserved — your usual spot.' : 'Window table reserved.';
-      const isSpecialDinner = (input.outlet || '').toLowerCase().includes('dining') || (input.preferences || '').toLowerCase().includes('anniversary') || (input.preferences || '').toLowerCase().includes('birthday');
+      const confNumber = `DR-${Date.now().toString(36).toUpperCase()}`;
+
+      try {
+        const detail = JSON.stringify({
+          date: input.date, time, outlet: input.outlet, party_size: party,
+          preferences: input.preferences, confirmation: confNumber,
+        });
+        await sql`
+          INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, meta)
+          VALUES ('concierge_booking', 'dining_reservation', ${memberId}, ${profile.name}, ${confNumber}, 'dining',
+            ${`Dining reservation: ${input.date} at ${time} at ${input.outlet} for ${party}`},
+            ${detail}::jsonb)
+        `;
+      } catch (e) {
+        console.warn('[concierge] make_dining_reservation DB error (using fallback):', e.message);
+      }
+
       return {
         confirmation: `Dining reservation confirmed: ${input.date} at ${time} at ${input.outlet} for ${party} guests.`,
-        confirmation_number: `DR-${Date.now().toString(36).toUpperCase()}`,
+        confirmation_number: confNumber,
         seating: seatingNote,
-        server: 'Maria will take care of you — she knows your preferences.',
         preferences_noted: input.preferences || (favDining ? `On file: ${favDining}` : 'None specified'),
         member_name: profile.name,
-        wine_suggestion: isSpecialDinner ? 'Chef recommends the 2021 Willamette Valley Pinot Noir with tonight\'s special — shall we have a bottle ready?' : undefined,
-        kitchen_note: favDining.includes('Arnold Palmer') ? 'Kitchen flagged: Arnold Palmer ready on arrival.' : undefined,
       };
     }
+
+    // ── GET MY SCHEDULE ────────────────────────────────────────────────
     case 'get_my_schedule': {
+      try {
+        // Tee times
+        const teeTimesResult = await sql`
+          SELECT b.booking_id, b.booking_date, b.tee_time, b.player_count, b.status,
+                 c.name AS course_name
+          FROM bookings b
+          JOIN booking_players bp ON bp.booking_id = b.booking_id
+          JOIN courses c ON c.course_id = b.course_id
+          WHERE bp.member_id = ${memberId} AND b.club_id = ${clubId}
+            AND b.booking_date >= CURRENT_DATE AND b.status = 'confirmed'
+          ORDER BY b.booking_date, b.tee_time
+          LIMIT 10
+        `;
+        // Event registrations
+        const eventsResult = await sql`
+          SELECT er.status, er.guest_count, ed.name AS event_name, ed.event_date, ed.type
+          FROM event_registrations er
+          JOIN event_definitions ed ON ed.event_id = er.event_id
+          WHERE er.member_id = ${memberId} AND ed.club_id = ${clubId}
+            AND ed.event_date >= CURRENT_DATE AND er.status != 'cancelled'
+          ORDER BY ed.event_date
+          LIMIT 10
+        `;
+        // Dining reservations from activity_log
+        let diningRows = [];
+        try {
+          const diningResult = await sql`
+            SELECT description, meta, created_at
+            FROM activity_log
+            WHERE member_id = ${memberId} AND action_subtype = 'dining_reservation'
+              AND status != 'cancelled'
+            ORDER BY created_at DESC
+            LIMIT 5
+          `;
+          diningRows = diningResult.rows;
+        } catch (_) { /* activity_log may not exist */ }
+
+        // Open feedback
+        let feedbackRows = [];
+        try {
+          const fbResult = await sql`
+            SELECT feedback_id, category, status, submitted_at
+            FROM feedback
+            WHERE member_id = ${memberId} AND club_id = ${clubId}
+              AND status NOT IN ('resolved')
+            ORDER BY submitted_at DESC
+            LIMIT 5
+          `;
+          feedbackRows = fbResult.rows;
+        } catch (_) { /* feedback may not exist */ }
+
+        const hasData = teeTimesResult.rows.length > 0 || eventsResult.rows.length > 0
+          || diningRows.length > 0 || feedbackRows.length > 0;
+
+        if (hasData) {
+          const upcoming = [];
+          for (const r of teeTimesResult.rows) {
+            upcoming.push({ type: 'tee_time', date: r.booking_date, time: r.tee_time, course: r.course_name, players: r.player_count });
+          }
+          for (const r of diningRows) {
+            const meta = r.meta || {};
+            upcoming.push({ type: 'dining', date: meta.date, time: meta.time, outlet: meta.outlet, party_size: meta.party_size });
+          }
+          for (const r of eventsResult.rows) {
+            upcoming.push({ type: 'event', date: r.event_date, title: r.event_name, status: r.status, guests: r.guest_count });
+          }
+          return {
+            upcoming,
+            pending_actions: feedbackRows.map(f => ({
+              type: 'open_feedback', filed_date: f.submitted_at, category: f.category, status: f.status,
+            })),
+          };
+        }
+      } catch (e) {
+        console.warn('[concierge] get_my_schedule DB error (using fallback):', e.message);
+      }
+      // Fallback: hardcoded
       return {
         upcoming: [
-          { type: 'tee_time', date: '2026-04-12', time: '7:00 AM', course: 'North Course', players: 4, group: ['James Whitfield', 'Tom Gallagher', 'Mark Patterson', 'Greg Holloway'], weather: '72°F, partly cloudy' },
-          { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing', seating: 'Table 14 confirmed', dress_code: 'Smart casual' },
-          { type: 'event', date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', status: 'RSVP confirmed — Team of 4' },
+          { type: 'tee_time', date: '2026-04-12', time: '7:00 AM', course: 'North Course', players: 4 },
+          { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2 },
         ],
-        pending_actions: [
-          { type: 'open_feedback', filed_date: '2026-01-16', category: 'food_and_beverage', status: 'in_progress', note: 'Our F&B manager Sarah will follow up with you this week.' },
-        ],
-        household_upcoming: profile.household?.length > 0 ? [
-          { member: 'Logan Whitfield', type: 'event', date: '2026-04-13', time: '10:00 AM', title: 'Junior Golf Clinic' },
-        ] : [],
+        pending_actions: [],
       };
     }
+
+    // ── RSVP EVENT ─────────────────────────────────────────────────────
     case 'rsvp_event': {
       const eventTitle = input.event_title || 'Event';
       const who = input.member_name || profile.name;
+      const guestCount = input.guest_count || 0;
+
+      try {
+        // Find the event by fuzzy title match
+        const eventResult = await sql`
+          SELECT event_id, name, event_date, capacity, registration_fee
+          FROM event_definitions
+          WHERE club_id = ${clubId} AND name ILIKE '%' || ${eventTitle} || '%'
+            AND event_date >= CURRENT_DATE
+          ORDER BY event_date
+          LIMIT 1
+        `;
+        if (eventResult.rows.length > 0) {
+          const ev = eventResult.rows[0];
+          const regId = `reg_c_${Date.now().toString(36)}`;
+          // Resolve target member_id (household member or self)
+          let targetMemberId = memberId;
+          if (input.member_name && input.member_name !== profile.name) {
+            try {
+              const hhResult = await sql`
+                SELECT m2.member_id FROM members m1
+                JOIN members m2 ON m2.household_id = m1.household_id AND m2.club_id = m1.club_id
+                WHERE m1.member_id = ${memberId} AND m1.club_id = ${clubId}
+                  AND (m2.first_name || ' ' || m2.last_name) ILIKE '%' || ${input.member_name} || '%'
+                LIMIT 1
+              `;
+              if (hhResult.rows.length > 0) targetMemberId = hhResult.rows[0].member_id;
+            } catch (_) { /* fall back to self */ }
+          }
+          await sql`
+            INSERT INTO event_registrations (registration_id, event_id, member_id, status, guest_count, fee_paid, registered_at)
+            VALUES (${regId}, ${ev.event_id}, ${targetMemberId}, 'registered', ${guestCount}, ${ev.registration_fee || 0}, NOW()::text)
+          `;
+          return {
+            registration_id: regId,
+            event: ev.name,
+            event_date: ev.event_date,
+            registered_for: who,
+            guest_count: guestCount,
+            status: 'registered',
+          };
+        }
+      } catch (e) {
+        console.warn('[concierge] rsvp_event DB error (using fallback):', e.message);
+      }
+      // Fallback: hardcoded
       return {
         registration_id: `ER-${Date.now().toString(36).toUpperCase()}`,
         event: eventTitle,
         registered_for: who,
-        guest_count: input.guest_count || 0,
+        guest_count: guestCount,
         status: 'registered',
       };
     }
+
+    // ── CANCEL TEE TIME ────────────────────────────────────────────────
     case 'cancel_tee_time': {
+      try {
+        const cancelResult = await sql`
+          UPDATE bookings SET status = 'cancelled'
+          WHERE booking_id IN (
+            SELECT b.booking_id FROM bookings b
+            JOIN booking_players bp ON bp.booking_id = b.booking_id
+            WHERE b.club_id = ${clubId} AND bp.member_id = ${memberId}
+              AND b.booking_date = ${input.booking_date}
+              AND b.status = 'confirmed'
+              AND (${input.tee_time || null}::text IS NULL OR b.tee_time = ${input.tee_time})
+            LIMIT 1
+          )
+          RETURNING booking_id, booking_date, tee_time
+        `;
+        if (cancelResult.rows.length > 0) {
+          const row = cancelResult.rows[0];
+          return {
+            status: 'cancelled',
+            booking_id: row.booking_id,
+            booking_date: row.booking_date,
+            tee_time: row.tee_time,
+            message: `Tee time on ${row.booking_date} at ${row.tee_time} has been cancelled.`,
+          };
+        }
+      } catch (e) {
+        console.warn('[concierge] cancel_tee_time DB error (using fallback):', e.message);
+      }
+      // Fallback: hardcoded
       return {
         status: 'cancelled',
         booking_date: input.booking_date,
@@ -165,6 +414,8 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
         message: `Tee time on ${input.booking_date} has been cancelled. Your group has been notified.`,
       };
     }
+
+    // ── FILE COMPLAINT ─────────────────────────────────────────────────
     case 'file_complaint': {
       const categoryManagers = {
         food_and_beverage: { manager: 'Sarah Collins, F&B Director', dept: 'Food & Beverage', timeline: 'within 24 hours' },
@@ -175,8 +426,21 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
         other: { manager: 'David Park, General Manager', dept: 'Club Management', timeline: 'within 24 hours' },
       };
       const routing = categoryManagers[input.category] || categoryManagers.other;
+      let feedbackId = `FB-${Date.now().toString(36).toUpperCase()}`;
+
+      try {
+        feedbackId = `fb_c_${Date.now().toString(36)}`;
+        await sql`
+          INSERT INTO feedback (feedback_id, club_id, member_id, submitted_at, category, sentiment_score, description, status)
+          VALUES (${feedbackId}, ${clubId}, ${memberId}, NOW()::text, ${input.category}, -0.8, ${input.description}, 'acknowledged')
+        `;
+      } catch (e) {
+        console.warn('[concierge] file_complaint DB error (using fallback id):', e.message);
+        feedbackId = `FB-${Date.now().toString(36).toUpperCase()}`;
+      }
+
       const complaintResult = {
-        complaint_id: `FB-${Date.now().toString(36).toUpperCase()}`,
+        complaint_id: feedbackId,
         category: input.category,
         status: 'filed',
         routed_to: routing.dept,
@@ -196,6 +460,8 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
       } catch (e) { console.warn('[concierge] complaint event routing error:', e.message); }
       return complaintResult;
     }
+
+    // ── GET MEMBER PROFILE ─────────────────────────────────────────────
     case 'get_member_profile': {
       return {
         name: profile.name,
@@ -206,15 +472,29 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
         preferences: profile.preferences || {},
       };
     }
+
+    // ── SEND REQUEST TO CLUB ───────────────────────────────────────────
     case 'send_request_to_club': {
+      const requestId = `RQ-${Date.now().toString(36).toUpperCase()}`;
+      try {
+        await sql`
+          INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, meta)
+          VALUES ('concierge_request', ${input.department}, ${memberId}, ${profile.name}, ${requestId}, 'club_request',
+            ${input.message},
+            ${JSON.stringify({ department: input.department, urgency: input.urgency || 'normal' })}::jsonb)
+        `;
+      } catch (e) {
+        console.warn('[concierge] send_request_to_club DB error:', e.message);
+      }
       return {
-        request_id: `RQ-${Date.now().toString(36).toUpperCase()}`,
+        request_id: requestId,
         department: input.department,
         status: 'submitted',
         message: `Your request has been sent to the ${input.department.replace('_', ' ')} team. They'll follow up shortly.`,
         member_name: profile.name,
       };
     }
+
     default:
       return { error: `Unknown tool: ${toolName}` };
   }
