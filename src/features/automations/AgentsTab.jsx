@@ -4,7 +4,7 @@
  */
 import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
-import { getAgents, getAllActions, getAgentSummary } from '@/services/agentService';
+import { getAgents, getAllActions, getAgentSummary, getCoordinationGraph } from '@/services/agentService';
 
 const STATUS_STYLES = {
   active: { bg: 'bg-success-50 dark:bg-success-500/10', text: 'text-success-600 dark:text-success-400', label: 'Active' },
@@ -239,6 +239,32 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, ac
   );
 }
 
+function CoordinationPanel({ agents }) {
+  const edges = useMemo(() => getCoordinationGraph(), []);
+  const agentMap = useMemo(() => Object.fromEntries(agents.map(a => [a.id, a.name])), [agents]);
+
+  if (edges.length === 0) return null;
+
+  return (
+    <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-4">
+      <div className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Agent Coordination Graph</div>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 m-0">
+        Agents share member context in real time. Each link shows agents coordinating on the same member.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {edges.slice(0, 8).map(e => (
+          <div key={`${e.agentA}-${e.agentB}`} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20">
+            <span className="text-[11px] font-semibold text-brand-700 dark:text-brand-300">{agentMap[e.agentA] || e.agentA}</span>
+            <svg className="w-3 h-3 text-brand-400" viewBox="0 0 20 20" fill="currentColor"><path d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" /></svg>
+            <span className="text-[11px] font-semibold text-brand-700 dark:text-brand-300">{agentMap[e.agentB] || e.agentB}</span>
+            <span className="text-[10px] text-brand-500 dark:text-brand-400 ml-1">{e.sharedMembers.length} shared</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AgentsTab() {
   const { agentStatuses, toggleAgent, saveAgentConfig, getAgentConfig } = useApp();
   const agents = useMemo(() => getAgents(), []);
@@ -262,6 +288,9 @@ export default function AgentsTab() {
           <span className="text-xs text-gray-500 dark:text-gray-400">Approved This Period</span>
         </div>
       </div>
+
+      {/* Cross-agent coordination */}
+      <CoordinationPanel agents={agents} />
 
       {/* Agent cards grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

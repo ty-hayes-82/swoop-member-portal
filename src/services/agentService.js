@@ -181,6 +181,47 @@ export function getTopPendingAction() {
   return getPendingActions()[0] ?? null;
 }
 
+/**
+ * Returns actions from OTHER agents that touch the same member as the given action.
+ * This proves multi-agent coordination — agents share context on the same member.
+ * @param {string} actionId
+ * @returns {{ actionId: string, agentId: string, source: string, description: string }[]}
+ */
+export function getRelatedActions(actionId) {
+  const all = getAllActions();
+  const target = all.find(a => a.id === actionId);
+  if (!target?.memberId) return [];
+  return all
+    .filter(a => a.id !== actionId && a.memberId === target.memberId && a.agentId !== target.agentId)
+    .map(a => ({ actionId: a.id, agentId: a.agentId, source: a.source, description: a.description }));
+}
+
+/**
+ * Returns the coordination graph — which agents are actively working together on shared members.
+ * @returns {{ agentA: string, agentB: string, sharedMembers: string[] }[]}
+ */
+export function getCoordinationGraph() {
+  const all = getAllActions();
+  const byMember = {};
+  for (const a of all) {
+    if (!a.memberId) continue;
+    if (!byMember[a.memberId]) byMember[a.memberId] = new Set();
+    byMember[a.memberId].add(a.agentId);
+  }
+  const edges = {};
+  for (const [memberId, agentSet] of Object.entries(byMember)) {
+    const agents = [...agentSet].sort();
+    for (let i = 0; i < agents.length; i++) {
+      for (let j = i + 1; j < agents.length; j++) {
+        const key = `${agents[i]}|${agents[j]}`;
+        if (!edges[key]) edges[key] = { agentA: agents[i], agentB: agents[j], sharedMembers: [] };
+        edges[key].sharedMembers.push(memberId);
+      }
+    }
+  }
+  return Object.values(edges);
+}
+
 export function __resetAgentActions() {
   actionStore = null;
 }

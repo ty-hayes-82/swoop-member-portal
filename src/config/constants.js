@@ -44,6 +44,73 @@ export function useStaticData() {
   return false;
 }
 
+/**
+ * Club profile presets — proves the system scales across club sizes and types.
+ * Each profile defines structural parameters that drive data generation and thresholds.
+ * The demo uses 'mid-private' (Pinetree). Investors can see how the same engine
+ * adapts to a 1200-member resort or a 150-member boutique club.
+ */
+export const CLUB_PROFILES = {
+  'boutique-private': {
+    label: 'Boutique Private (150 members)',
+    memberCount: 150,
+    avgDues: 24000,
+    archetypeWeights: { 'Die-Hard Golfer': 0.25, 'Social Butterfly': 0.10, 'Balanced Active': 0.20, 'Weekend Warrior': 0.15, 'Declining': 0.08, 'New Member': 0.10, 'Ghost': 0.05, 'Snowbird': 0.07 },
+    renewalRate: 0.94,
+    avgHealthScore: 72,
+    holes: 18,
+    fbVenues: 1,
+    staffCount: 25,
+  },
+  'mid-private': {
+    label: 'Mid-Size Private (390 members)',
+    memberCount: 390,
+    avgDues: 16400,
+    archetypeWeights: { 'Die-Hard Golfer': 0.20, 'Social Butterfly': 0.15, 'Balanced Active': 0.18, 'Weekend Warrior': 0.15, 'Declining': 0.08, 'New Member': 0.10, 'Ghost': 0.05, 'Snowbird': 0.09 },
+    renewalRate: 0.91,
+    avgHealthScore: 68,
+    holes: 18,
+    fbVenues: 2,
+    staffCount: 45,
+  },
+  'large-resort': {
+    label: 'Large Resort Club (1200 members)',
+    memberCount: 1200,
+    avgDues: 12000,
+    archetypeWeights: { 'Die-Hard Golfer': 0.15, 'Social Butterfly': 0.18, 'Balanced Active': 0.15, 'Weekend Warrior': 0.18, 'Declining': 0.10, 'New Member': 0.08, 'Ghost': 0.08, 'Snowbird': 0.08 },
+    renewalRate: 0.87,
+    avgHealthScore: 64,
+    holes: 36,
+    fbVenues: 4,
+    staffCount: 120,
+  },
+  'city-club': {
+    label: 'City/Athletic Club (600 members)',
+    memberCount: 600,
+    avgDues: 8500,
+    archetypeWeights: { 'Die-Hard Golfer': 0.05, 'Social Butterfly': 0.30, 'Balanced Active': 0.20, 'Weekend Warrior': 0.10, 'Declining': 0.10, 'New Member': 0.12, 'Ghost': 0.08, 'Snowbird': 0.05 },
+    renewalRate: 0.85,
+    avgHealthScore: 62,
+    holes: 0,
+    fbVenues: 3,
+    staffCount: 60,
+  },
+};
+
+export const DEFAULT_CLUB_PROFILE = 'mid-private';
+
+/**
+ * Returns the active club profile. In demo mode, defaults to mid-private (Pinetree).
+ * In live mode, would be loaded from club settings.
+ */
+export function getClubProfile() {
+  try {
+    const stored = localStorage.getItem('swoop_club_profile');
+    if (stored && CLUB_PROFILES[stored]) return { id: stored, ...CLUB_PROFILES[stored] };
+  } catch { /* fall through */ }
+  return { id: DEFAULT_CLUB_PROFILE, ...CLUB_PROFILES[DEFAULT_CLUB_PROFILE] };
+}
+
 export const SLOW_ROUND_THRESHOLD_MIN = 270;
 export const POST_ROUND_WINDOW_MIN = 90;
 export const HEALTH_THRESHOLDS = {

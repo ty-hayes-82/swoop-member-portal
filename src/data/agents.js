@@ -9,6 +9,8 @@ export const agentDefinitions = [
     lastAction: '2026-01-17T06:04:00Z',
     accuracy: 91,
     accentColor: theme.colors.agentCyan,
+    sourceSystems: ['Member CRM', 'Tee Sheet', 'POS', 'Email', 'Complaint Log'],
+    coordinatesWith: ['service-recovery', 'demand-optimizer', 'engagement-autopilot'],
   },
   {
     id: 'demand-optimizer',
@@ -18,6 +20,8 @@ export const agentDefinitions = [
     lastAction: '2026-01-17T06:11:00Z',
     accuracy: 88,
     accentColor: theme.colors.agentApproved,
+    sourceSystems: ['Tee Sheet', 'Weather API', 'Waitlist', 'Member CRM'],
+    coordinatesWith: ['member-pulse', 'labor-optimizer', 'revenue-analyst'],
   },
   {
     id: 'service-recovery',
@@ -27,6 +31,8 @@ export const agentDefinitions = [
     lastAction: '2026-01-17T08:43:00Z',
     accuracy: 84,
     accentColor: theme.colors.warning,
+    sourceSystems: ['Complaint Log', 'POS', 'Scheduling', 'Member CRM'],
+    coordinatesWith: ['member-pulse', 'labor-optimizer', 'revenue-analyst'],
   },
   {
     id: 'revenue-analyst',
@@ -36,6 +42,8 @@ export const agentDefinitions = [
     lastAction: '2026-01-17T07:55:00Z',
     accuracy: 93,
     accentColor: theme.colors.navPipeline,
+    sourceSystems: ['POS', 'Tee Sheet', 'Analytics', 'Member CRM'],
+    coordinatesWith: ['demand-optimizer', 'member-pulse', 'engagement-autopilot'],
   },
   {
     id: 'engagement-autopilot',
@@ -45,6 +53,8 @@ export const agentDefinitions = [
     lastAction: '2026-01-16T18:12:00Z',
     accuracy: 86,
     accentColor: theme.colors.navMembers,
+    sourceSystems: ['Email', 'Tee Sheet', 'Events', 'Member CRM'],
+    coordinatesWith: ['member-pulse', 'revenue-analyst'],
   },
   {
     id: 'labor-optimizer',
@@ -54,6 +64,8 @@ export const agentDefinitions = [
     lastAction: '2026-01-17T06:21:00Z',
     accuracy: 90,
     accentColor: theme.colors.navBriefing,
+    sourceSystems: ['Scheduling', 'Weather API', 'POS', 'Tee Sheet'],
+    coordinatesWith: ['demand-optimizer', 'service-recovery'],
   },
 ];
 
@@ -693,36 +705,47 @@ export const agentActions = [
 ];
 
 export const agentThoughtLogs = {
-  'retention-sentinel': [
-    { timestamp: '06:00:03', text: 'Loading 300-member health vectors and complaint status deltas.' },
+  'member-pulse': [
+    { timestamp: '06:00:03', text: 'Loading 390-member health vectors and complaint status deltas.' },
     { timestamp: '06:00:09', text: 'Detected score decay >15 points in 90-day window for 5 members.' },
+    { timestamp: '06:00:12', text: 'Cross-referencing Service Recovery complaint queue — 2 members overlap with active escalations.' },
     { timestamp: '06:00:15', text: 'Correlated unresolved complaint + upcoming tee time for James Whitfield.' },
+    { timestamp: '06:00:16', text: 'Received signal from Demand Optimizer: Anne Jordan waitlist frustration aligns with declining health score.' },
     { timestamp: '06:00:18', text: 'Recommended personal outreach before Saturday round start.' },
   ],
   'demand-optimizer': [
     { timestamp: '06:03:40', text: 'Evaluating cancellations, weather impact, and waitlist urgency tiers.' },
+    { timestamp: '06:03:45', text: 'Queried Member Pulse for at-risk member overlay — 3 waitlisted members flagged declining.' },
     { timestamp: '06:03:51', text: 'Prime slot released: 7:00 AM Saturday. 8 members eligible.' },
-    { timestamp: '06:03:57', text: 'Anne Jordan ranked first by resignation risk and retention value uplift.' },
+    { timestamp: '06:03:54', text: 'Labor Optimizer confirms adequate staffing for projected demand shift.' },
+    { timestamp: '06:03:57', text: 'Anne Jordan ranked first by resignation risk (from Member Pulse) and retention value uplift.' },
     { timestamp: '06:04:00', text: 'Proposed priority routing action for GM approval.' },
   ],
   'service-recovery': [
     { timestamp: '08:42:10', text: 'Scanning complaint queue for SLA breaches and unresolved sentiment risk.' },
+    { timestamp: '08:42:20', text: 'Member Pulse flagged James Whitfield and Robert Callahan — cross-referencing with open complaints.' },
     { timestamp: '08:42:34', text: 'Robert Callahan complaint open 9 days with no owner assignment.' },
+    { timestamp: '08:42:41', text: 'Revenue Analyst reports Robert\'s F&B spend at minimum threshold — corroborates disengagement signal.' },
     { timestamp: '08:42:49', text: 'Escalation path selected: F&B manager + GM visibility.' },
     { timestamp: '08:43:00', text: 'Generated same-day ownership + callback deadline action.' },
   ],
   'revenue-analyst': [
     { timestamp: '07:54:03', text: 'Comparing projected demand against last 8 equivalent weather days.' },
+    { timestamp: '07:54:10', text: 'Demand Optimizer shared wind-shift forecast — adjusting F&B revenue projections for indoor pivot.' },
+    { timestamp: '07:54:15', text: 'Member Pulse at-risk list ingested — excluding at-risk members from promotional targeting.' },
     { timestamp: '07:54:20', text: 'Identified underfilled twilight block with healthy conversion history.' },
     { timestamp: '07:54:31', text: 'Forecasted positive margin under dynamic pricing adjustment.' },
   ],
-  'engagement-coach': [
+  'engagement-autopilot': [
     { timestamp: '18:10:22', text: 'Reviewing participation decay and archetype baseline engagement curves.' },
+    { timestamp: '18:10:45', text: 'Member Pulse shared 12 watch-tier members — filtering for re-engagement eligibility.' },
     { timestamp: '18:11:06', text: 'Selected low-friction invite strategy for weekend-only members.' },
+    { timestamp: '18:11:30', text: 'Coordinating with Revenue Analyst on post-round dining offers for re-engaging members.' },
   ],
-  'draft-communicator': [
-    { timestamp: '06:20:09', text: 'Building draft variants from approved tone, context, and urgency.' },
-    { timestamp: '06:20:44', text: 'Generated concise GM note for service recovery outreach.' },
-    { timestamp: '06:21:00', text: 'Prepared sponsor call script with clear ask and close.' },
+  'labor-optimizer': [
+    { timestamp: '06:20:09', text: 'Demand Optimizer forecasts wind-driven indoor pivot — recalculating Grill Room staffing.' },
+    { timestamp: '06:20:22', text: 'Service Recovery has 2 active complaints in Grill Room — increasing service quality buffer.' },
+    { timestamp: '06:20:44', text: 'Recommending +1 lunch server to protect F&B margin and complaint SLA.' },
+    { timestamp: '06:21:00', text: 'Prepared staffing adjustment with cost-benefit analysis for GM approval.' },
   ],
 };
