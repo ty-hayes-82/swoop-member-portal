@@ -92,9 +92,9 @@ export const todayTeeSheet = [
   {
     time: '9:16 AM', course: 'North', memberId: 'mbr_t06', name: 'Sandra Chen',
     archetype: 'Social Butterfly', healthScore: 36, tier: 'House', duesAnnual: 9000,
-    group: ['Sandra Chen', 'Avery Chen'],
+    group: ['Sandra Chen', 'David Chen'],
     cancelRisk: 0.38,
-    cartPrep: { beverage: 'Iced coffee', snack: 'Fruit & cheese', note: 'At-risk — dining spend down 58%. Playing with daughter Avery. Suggest family event invite.' },
+    cartPrep: { beverage: 'Iced coffee', snack: 'Fruit & cheese', note: 'At-risk — dining spend down 58%. Playing with husband David. Suggest family event invite.' },
   },
   // 10:00 AM block
   {

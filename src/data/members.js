@@ -312,7 +312,8 @@ export const memberProfiles = {
     preferredChannel: 'SMS',
     lastSeenLocation: 'Grill Room',
     family: [
-      { name: 'Avery Chen', relation: 'Daughter', notes: 'Volleyball team — summer camps' },
+      { name: 'David Chen', relation: 'Spouse', notes: 'Full Golf member' },
+      { name: 'Lily Chen', relation: 'Daughter', notes: 'Age 10, Junior member — swim program' },
     ],
     preferences: {
       favoriteSpots: ['Grill Room', 'Event lawn'],
@@ -342,7 +343,7 @@ export const memberProfiles = {
         'Offer to reserve her favorite booth and pre-select pescatarian options.',
       ],
       emailSubject: 'Save you a booth for Friday’s wine dinner?',
-      emailBody: `Sandra — we missed you at the last dinner and wanted to hold booth 6 for you this Friday. Chef added two pescatarian pairings just for you. Should I confirm 7:15 PM for you and Avery?
+      emailBody: `Sandra — we missed you at the last dinner and wanted to hold booth 6 for you this Friday. Chef added two pescatarian pairings just for you. Should I confirm 7:15 PM for you and David?
 
 — Nina`,
       smsDraft: 'Sandra! Booth 6 is yours Friday if you want it. New Riesling flight just landed 🍷',

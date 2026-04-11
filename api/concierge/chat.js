@@ -543,7 +543,7 @@ async function loadMemberProfile(clubId, memberId) {
           dining: 'Wine dinners, always table with Diane Prescott. Enjoys the social atmosphere.',
           favoriteSpots: 'Wine cellar dining room, Event lawn',
           channel: 'Call',
-          notes: 'Joined after her husband Richard passed away. Friends encouraged her to join for the social calendar. Bridge partner is Diane Prescott. Zero visits since October — 6 months dark. Needs personal, warm outreach — not transactional.',
+          notes: 'Joined after her husband Richard passed away. Friends encouraged her to join for the social calendar. Bridge partner is Diane Prescott. Zero visits since October — 3+ months dark. Needs personal, warm outreach — not transactional.',
         },
       },
       mbr_t04: {
@@ -578,7 +578,10 @@ async function loadMemberProfile(clubId, memberId) {
         member_id: 'mbr_t06', name: 'Sandra Chen', first_name: 'Sandra',
         email: 'sandra.c@email.com', membership_type: 'Social',
         join_date: '2020-09-15', status: 'active',
-        household: [],
+        household: [
+          { member_id: 'mbr_t06b', name: 'David Chen', membership_type: 'Full Golf' },
+          { member_id: 'mbr_t06c', name: 'Lily Chen', membership_type: 'Junior' },
+        ],
         preferences: {
           teeWindows: 'N/A — social member, does not golf',
           dining: 'Grill Room for casual lunches, Main Dining for events. Used to spend $142/visit, now $18. Loves wine tastings and social events.',

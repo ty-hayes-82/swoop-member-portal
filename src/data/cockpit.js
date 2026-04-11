@@ -101,7 +101,7 @@ export const cockpitItems = [
       'Anne Jordan (health: 28) \u2014 declining: golf visits dropped Oct\u2192Nov\u2192Dec, plays at 7:08am.',
       'Robert Callahan (health: 22) \u2014 obligation-only F&B spending pattern, plays at 9:00am.',
     ],
-    stakes: '$48,000 combined annual dues at risk',
+    stakes: '$50,000 combined annual dues at risk',
     memberName: null,
     memberId: null,
     context: 'Three members flagged as at-risk by health scoring are on the tee sheet today.',
