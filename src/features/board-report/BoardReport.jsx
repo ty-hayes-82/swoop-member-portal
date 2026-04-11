@@ -12,6 +12,7 @@ import { getHealthDistribution, getLiveDashboard } from '@/services/memberServic
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
 import { isRealClub, isAuthenticatedClub, getClubName } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
+import AgentUpsell from '@/components/ui/AgentUpsell';
 
 const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned'];
 
@@ -181,6 +182,11 @@ export default function BoardReport() {
             </div>
           </div>
           <DataEmptyState icon="📊" title="Board report needs data" description="Import member, golf, and F&B data to generate your executive board report with KPIs, member saves, and operational insights." dataType="club data" />
+          <AgentUpsell
+            agentName="Board Report Compiler"
+            benefit="Auto-generates this monthly with full attribution."
+            className="mt-4"
+          />
         </div>
       </PageTransition>
     );
@@ -863,6 +869,11 @@ export default function BoardReport() {
         </div>
       </div>
 
+      <AgentUpsell
+        agentName="Board Report Compiler"
+        benefit="Auto-generates this monthly with full attribution."
+        className="mt-4"
+      />
       </div>
     </PageTransition>
   );

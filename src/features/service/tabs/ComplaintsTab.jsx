@@ -8,6 +8,7 @@ import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import MemberLink from '@/components/MemberLink';
 import ActionPanel from '@/components/ui/ActionPanel';
 import { trackAction } from '@/services/activityService';
+import AgentUpsell from '@/components/ui/AgentUpsell';
 
 const STATUS_STYLES = {
   resolved: { bg: `${'#12b76a'}12`, color: '#12b76a', label: 'Resolved' },
@@ -321,6 +322,11 @@ export default function ComplaintsTab() {
           </div>
         );
       })()}
+
+      <AgentUpsell
+        agentName="Service Recovery Agent"
+        benefit="Resolves complaints in 4.2 hrs avg — before members disengage."
+      />
 
       {/* Understaffed Day Correlation */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">

@@ -28,6 +28,7 @@ import {
   getSlowRoundContext,
 } from '@/services/revenueService';
 import { isGateOpen } from '@/services/demoGate';
+import AgentUpsell from '@/components/ui/AgentUpsell';
 
 const COLORS = {
   pace: '#ef4444',
@@ -323,6 +324,12 @@ export default function RevenuePage() {
             </div>
           </Panel>
         )}
+
+        <AgentUpsell
+          agentName="Staffing-Demand Agent"
+          benefit="Auto-adjusts coverage to recover"
+          metric={`$${leakage.STAFFING_LOSS.toLocaleString()}/mo.`}
+        />
 
         {/* Scenario Slider */}
         <ScenarioSlider

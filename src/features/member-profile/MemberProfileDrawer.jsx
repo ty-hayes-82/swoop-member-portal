@@ -8,6 +8,7 @@ import { getMemberChurnPrediction } from '@/services/memberService';
 import { getMemberSaves } from '@/services/boardReportService';
 import { isGateOpen } from '@/services/demoGate';
 import MemberDecayChain from './MemberDecayChain.jsx';
+import AgentUpsell from '@/components/ui/AgentUpsell.jsx';
 
 const formatDate = (value) => {
   if (!value) return '\u2014';
@@ -958,6 +959,13 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           </div>
         </div>
       </Section>
+
+      {(profile.healthScore ?? 100) < 50 && (
+        <AgentUpsell
+          agentName="Re-Engagement Agent"
+          benefit="With AI Agents enabled, this member would already have a personalized 30-day re-engagement plan."
+        />
+      )}
 
       <div className={isDrawerLayout ? 'sticky bottom-0 bg-white pt-4 pb-2 shadow-[0_-12px_32px_rgba(15,23,42,0.08)] z-[5]' : ''} style={{ paddingTop: '8px', paddingBottom: '6px' }}>
         <Section title="Quick actions">
