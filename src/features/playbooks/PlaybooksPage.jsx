@@ -3,6 +3,7 @@ import PageTransition from '@/components/ui/PageTransition';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
 import { useCurrentClub } from '@/hooks/useCurrentClub';
+import { getDataMode } from '@/services/demoGate';
 
 // ────────────────────────────────────────────────
 // Playbook data
@@ -664,7 +665,8 @@ function DetailSlideOver({ playbook, onClose }) {
 // ────────────────────────────────────────────────
 
 export default function PlaybooksPage({ embedded = false }) {
-  const visiblePlaybooks = useMemo(() => PLAYBOOKS, []);
+  // In guided mode, only show playbooks when real agent data has been loaded (not static seed)
+  const visiblePlaybooks = useMemo(() => getDataMode() === 'guided' ? [] : PLAYBOOKS, []);
   const [selectedId, setSelectedId] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('All');
 

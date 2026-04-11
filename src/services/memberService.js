@@ -497,10 +497,11 @@ export const getLiveDashboard = () => _live;
 let _apiLoaded = false;
 let _hasRealMembers = false;
 
-import { isGateOpen } from './demoGate';
+import { isGateOpen, getDataMode } from './demoGate';
 const _shouldReturnEmpty = () => {
   return !isGateOpen('members') && !_hasRealMembers;
 };
+const _isGuidedMode = () => getDataMode() === 'guided';
 
 export const hasRealMemberData = () => _hasRealMembers;
 
@@ -533,6 +534,8 @@ export const getHealthDistribution = () => {
 /** @returns {AtRiskMember[]} */
 export const getAtRiskMembers       = () => {
   if (_shouldReturnEmpty()) return [];
+  // In guided mode, only show at-risk members from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return [];
   const raw = normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
   return raw;
 };
@@ -608,6 +611,8 @@ export const getMemberSummary = () => {
 /** @returns {AtRiskMember[]} */
 export const getWatchMembers = () => {
   if (_shouldReturnEmpty()) return [];
+  // In guided mode, only show watch members from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return [];
   const apiWatch = _d?.watchMembers ?? [];
   return Array.isArray(apiWatch) ? apiWatch.map((m) => ({ ...m, trend: 'watch', riskLevel: 'Watch' })) : [];
 };
