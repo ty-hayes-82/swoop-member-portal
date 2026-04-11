@@ -51,6 +51,11 @@ function ActionCard({ action, onApprove, onDismiss }) {
           <SourceBadge system={action.source} size="xs" />
         )}
         {action.actionType && <span className="text-[10px] uppercase tracking-wide text-gray-400">{action.actionType.replace(/_/g, ' ').toLowerCase()}</span>}
+        {action.contributing_agents && (
+          <span className="text-[10px] text-purple-500 font-medium">
+            Flagged by: {Array.isArray(action.contributing_agents) ? action.contributing_agents.join(' + ') : action.contributing_agents}
+          </span>
+        )}
       </div>
 
       {/* Signal sources — Pillar 1: SEE IT */}

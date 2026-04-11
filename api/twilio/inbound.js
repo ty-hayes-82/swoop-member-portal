@@ -12,6 +12,7 @@ import { logWarn, logInfo } from '../lib/logger.js';
 import { buildConciergePrompt } from '../../src/config/conciergePrompt.js';
 import { getOrCreateSession, updateSessionSummary } from '../agents/concierge-session.js';
 import { getAnthropicClient } from '../agents/managed-config.js';
+import { routeEvent } from '../agents/agent-events.js';
 
 // ---------------------------------------------------------------------------
 // SMS tool definitions (Anthropic tool_use format)
@@ -67,7 +68,7 @@ const SMS_TOOLS = [
 /**
  * Execute an SMS tool call and return seed data.
  */
-async function executeSmsTool(toolName, input, member) {
+async function executeSmsTool(toolName, input, member, clubId) {
   switch (toolName) {
     case 'get_club_calendar': {
       return {
@@ -127,12 +128,22 @@ async function executeSmsTool(toolName, input, member) {
       };
     }
     case 'file_complaint': {
-      return {
+      const complaintResult = {
         complaint_id: `FB-${Date.now().toString(36).toUpperCase()}`,
         category: input.category,
         status: 'filed',
         message: 'Your feedback has been filed and routed to the appropriate manager.',
       };
+      try {
+        await routeEvent(clubId, 'complaint_filed_by_concierge', {
+          member_id: member.member_id,
+          member_name: member.name || `${member.first_name} ${member.last_name}`.trim(),
+          category: input.category,
+          description: input.description,
+          complaint_id: complaintResult.complaint_id,
+        });
+      } catch (e) { console.warn('[sms] complaint event routing error:', e.message); }
+      return complaintResult;
     }
     case 'get_member_profile': {
       return {
@@ -415,7 +426,7 @@ export default async function handler(req, res) {
       if (!toolUse) break;
 
       console.log('[twilio-inbound] tool call:', toolUse.name, JSON.stringify(toolUse.input));
-      const toolResult = await executeSmsTool(toolUse.name, toolUse.input, member);
+      const toolResult = await executeSmsTool(toolUse.name, toolUse.input, member, clubId);
 
       messages.push({ role: 'assistant', content: result.content });
       messages.push({

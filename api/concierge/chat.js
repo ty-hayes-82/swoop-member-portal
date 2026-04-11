@@ -12,6 +12,7 @@ import { withAuth, getReadClubId } from '../lib/withAuth.js';
 import { getOrCreateSession, updateSessionSummary } from '../agents/concierge-session.js';
 import { buildConciergePrompt } from '../../src/config/conciergePrompt.js';
 import { getAnthropicClient, MANAGED_AGENT_ID, MANAGED_ENV_ID } from '../agents/managed-config.js';
+import { routeEvent } from '../agents/agent-events.js';
 
 // ---------------------------------------------------------------------------
 // Concierge tool definitions (same as SMS tools in twilio/inbound.js)
@@ -67,7 +68,7 @@ const CONCIERGE_TOOLS = [
 /**
  * Execute a concierge tool call (mirrors executeSmsTool from twilio/inbound.js).
  */
-async function executeConciergeTool(toolName, input, profile) {
+async function executeConciergeTool(toolName, input, profile, clubId) {
   switch (toolName) {
     case 'get_club_calendar': {
       return {
@@ -127,12 +128,23 @@ async function executeConciergeTool(toolName, input, profile) {
       };
     }
     case 'file_complaint': {
-      return {
+      const complaintResult = {
         complaint_id: `FB-${Date.now().toString(36).toUpperCase()}`,
         category: input.category,
         status: 'filed',
         message: 'Your feedback has been filed and routed to the appropriate manager.',
       };
+      // Fire complaint event to wake Service Recovery + Member Risk agents
+      try {
+        await routeEvent(clubId, 'complaint_filed_by_concierge', {
+          member_id: profile.member_id,
+          member_name: profile.name,
+          category: input.category,
+          description: input.description,
+          complaint_id: complaintResult.complaint_id,
+        });
+      } catch (e) { console.warn('[concierge] complaint event routing error:', e.message); }
+      return complaintResult;
     }
     case 'get_member_profile': {
       return {
@@ -296,7 +308,7 @@ async function chatHandler(req, res) {
       const toolUse = result.content.find(c => c.type === 'tool_use');
       if (!toolUse) break;
 
-      const toolResult = await executeConciergeTool(toolUse.name, toolUse.input, profile);
+      const toolResult = await executeConciergeTool(toolUse.name, toolUse.input, profile, clubId);
 
       messages.push({ role: 'assistant', content: result.content });
       messages.push({

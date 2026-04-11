@@ -342,6 +342,16 @@ async function gameplanHandler(req, res) {
       `;
     }
 
+    // Trigger Chief of Staff to coordinate across all pending agent actions
+    try {
+      const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
+      fetch(`${baseUrl}/api/agents/cos-trigger`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-cron-key': process.env.CRON_SECRET || '' },
+        body: JSON.stringify({ club_id: clubId, trigger: 'post_game_plan' }),
+      }).catch(e => console.warn('[gameplan] CoS trigger error:', e.message));
+    } catch {}
+
     return res.status(200).json({
       triggered: true,
       session_id: sessionId,
