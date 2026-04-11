@@ -43,8 +43,9 @@ async function copyClub(client) {
 
   if (copyableCols.length > 0) {
     const setClause = copyableCols.map(c => `${c} = s.${c}`).join(', ');
+    const updatedAtClause = existingCols.has('updated_at') ? ', updated_at = NOW()' : '';
     await client.query(`
-      UPDATE club SET ${setClause}, updated_at = NOW()
+      UPDATE club SET ${setClause}${updatedAtClause}
       FROM club s
       WHERE club.club_id = $1 AND s.club_id = $2
     `, [TARGET_CLUB, SEED_CLUB]);
