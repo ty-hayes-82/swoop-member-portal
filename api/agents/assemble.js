@@ -372,3 +372,49 @@ export async function assembleAgentCall(clubId, agentId, memberContext, userMess
     config: loadedConfig,
   };
 }
+
+/**
+ * Execute an assembled agent call, validate the response, and retry if needed.
+ * This is the full pipeline: assemble -> call API -> validate -> retry if needed.
+ *
+ * @param {object} client         — Anthropic SDK client instance.
+ * @param {string} clubId         — Club UUID.
+ * @param {string} agentId        — Agent slug (e.g. 'personal-concierge').
+ * @param {object} memberContext   — { first_name, last_name, club_name, ... }
+ * @param {string} userMessage     — The end-user or system message to send.
+ * @param {object} [opts]          — Optional overrides (passed through to assembleAgentCall).
+ * @returns {Promise<{ text: string, result: object, payload: object }>}
+ */
+export async function executeAgentCall(client, clubId, agentId, memberContext, userMessage, opts = {}) {
+  const payload = await assembleAgentCall(clubId, agentId, memberContext, userMessage, opts);
+
+  // Make the API call
+  const result = await client.messages.create({
+    model: payload.model,
+    temperature: payload.temperature,
+    max_tokens: payload.max_tokens,
+    system: payload.system,
+    messages: payload.messages,
+    tools: payload.tools,
+  });
+
+  let text = result.content.find(c => c.type === 'text')?.text || '';
+
+  // Load validation rules from config
+  const rules = payload.config?.prompt_overrides?.validation_rules || [];
+  const enabledRules = rules.filter(r => r.enabled !== false);
+
+  if (enabledRules.length > 0) {
+    const { validateAndRetry } = await import('./validate.js');
+    const ruleNames = enabledRules.map(r => r.name);
+    const maxRetries = Math.max(...enabledRules.map(r => r.max_retries || 1));
+    const context = {
+      memberFirstName: memberContext?.first_name || memberContext?.name?.split(' ')[0],
+      forbiddenWords: payload.config?.behavioral_config?.forbidden_actions || [],
+    };
+    const { finalText } = await validateAndRetry(client, payload, text, ruleNames, context, maxRetries);
+    text = finalText;
+  }
+
+  return { text, result, payload };
+}

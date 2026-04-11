@@ -50,6 +50,13 @@ const TEMP_ZONES = {
   'growth-pipeline':         [0.2, 0.4],
 };
 
+const QA_SCENARIOS = [
+  'Greeting — new member', 'Greeting — returning member', 'Complaint — slow service',
+  'Complaint — billing error', 'Booking — tee time', 'Booking — dining reservation',
+  'Dietary restriction ask', 'Corporate event inquiry', 'Membership cancellation threat',
+  'General knowledge question',
+];
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -65,6 +72,8 @@ export default function EngineeringPanel({ agentId, role }) {
   const [validationRules, setValidationRules] = useState({});
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
+  const [qaRunning, setQaRunning] = useState(false);
+  const [qaResults, setQaResults] = useState(null);
 
   // Load current config on mount
   useEffect(() => {
@@ -147,6 +156,29 @@ export default function EngineeringPanel({ agentId, role }) {
       setTimeout(() => setSaveStatus(null), 3000);
     }
   }, [agentId, model, temperature, maxTokens, prefill, validationRules]);
+
+  const runQaSuite = useCallback(async () => {
+    setQaRunning(true);
+    setQaResults(null);
+    try {
+      const clubId = getClubId();
+      const res = await apiFetch('/api/agents/run-qa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clubId, agentId, model, temperature }),
+      });
+      setQaResults(res);
+    } catch {
+      // Endpoint not deployed yet — show placeholder results
+      setQaResults({
+        placeholder: true,
+        overall: null,
+        scenarios: QA_SCENARIOS.map(s => ({ scenario: s, score: null, status: 'pending' })),
+      });
+    } finally {
+      setQaRunning(false);
+    }
+  }, [agentId, model, temperature]);
 
   const recommendedZone = TEMP_ZONES[agentId] || [0.2, 0.4];
   const defaultModel = MODEL_DEFAULTS[agentId] || MODELS[1].id;
