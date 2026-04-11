@@ -89,7 +89,7 @@ export default function ComplaintsTab() {
           </div>
           <div className="bg-white border border-purple-200 rounded-xl p-3">
             <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Adverse weather</div>
-            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{weatherPct || '—'}%</div>
+            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{weatherPct > 0 ? `${weatherPct}%` : '—'}</div>
             <div className="text-[11px] text-gray-500">of complaints during adverse conditions</div>
           </div>
           <div className="bg-white border border-purple-200 rounded-xl p-3">

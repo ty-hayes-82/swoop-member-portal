@@ -73,7 +73,7 @@ function parseHash() {
   if (raw.startsWith('members/')) {
     const [, subpath] = raw.split('/');
     // Known sub-views route to members page with mode intent
-    const MEMBER_MODES = { 'at-risk': 'at-risk', 'first-90-days': 'cohorts', 'all-members': 'search', 'all': 'search' };
+    const MEMBER_MODES = { 'at-risk': 'at-risk', 'first-90-days': 'cohorts', 'all-members': 'search', 'all': 'search', 'email-decay': 'email-decay' };
     if (MEMBER_MODES[subpath]) {
       return { route: 'members', memberId: null, mode: MEMBER_MODES[subpath] };
     }
