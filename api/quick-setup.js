@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const { club_id, club_name, city, state } = req.body || {};
+  const { club_id, club_name, city, state, create_new } = req.body || {};
 
   if (!club_name || club_name.trim().length < 2) {
     return res.status(400).json({ error: 'club_name is required (min 2 characters)' });
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     let clubId = club_id;
     let isUpdate = false;
 
-    if (authHeader?.startsWith('Bearer ')) {
+    if (authHeader?.startsWith('Bearer ') && !create_new) {
       const token = authHeader.slice(7);
       const session = await sql`
         SELECT s.user_id, s.club_id FROM sessions s

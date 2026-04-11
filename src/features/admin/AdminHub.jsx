@@ -526,9 +526,40 @@ function ClubManagementTab({ currentClubId }) {
             View all clubs in the database, switch between them, or clean up test data.
           </p>
         </div>
-        <button onClick={fetchClubs} className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 font-semibold text-xs cursor-pointer hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">
-          Refresh
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              const name = prompt('Club name:');
+              if (!name) return;
+              const city = prompt('City:');
+              if (!city) return;
+              const state = prompt('State (2-letter code):');
+              if (!state) return;
+              const token = localStorage.getItem('swoop_auth_token');
+              fetch('/api/quick-setup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                body: JSON.stringify({ club_name: name, city, state, create_new: true }),
+              })
+                .then(r => r.json())
+                .then(data => {
+                  if (data.clubId) {
+                    setSuccess(`Created "${name}" (${data.clubId}). Switch to it below.`);
+                    fetchClubs();
+                  } else {
+                    setError(data.error || 'Failed to create club');
+                  }
+                })
+                .catch(() => setError('Connection error'));
+            }}
+            className="px-3 py-1.5 rounded-lg bg-brand-500 text-white font-semibold text-xs cursor-pointer hover:bg-brand-600"
+          >
+            + New Club
+          </button>
+          <button onClick={fetchClubs} className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 font-semibold text-xs cursor-pointer hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">
+            Refresh
+          </button>
+        </div>
       </div>
 
       {error && (
