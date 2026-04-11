@@ -384,14 +384,37 @@ async function chatHandler(req, res) {
 function generateSimulatedResponse(profile, message) {
   const name = profile.first_name || profile.name || 'there';
   const prefs = profile.preferences || {};
+  const household = profile.household || [];
   const lower = message.toLowerCase();
+
+  // Cancel membership — MUST check first (highest severity)
+  if ((lower.includes('cancel') && lower.includes('membership')) || lower.includes('resign') || lower.includes('quit the club')) {
+    return `${name}, I'm sorry to hear you're considering that. Before anything, I'd love to connect you with our membership director who can talk through any concerns. Would you like me to set up a call? We truly value having you as part of the Pinetree family.`;
+  }
+
+  // Complaints — MUST check before dining (so "lunch took 45 minutes" is complaint, not reservation)
+  const complaintSignals = ['slow', 'wait', 'terrible', 'awful', 'disappoint', 'complaint', 'cold', 'ignored', 'upset', 'rude', 'wrong', 'horrible', 'unacceptable', 'minutes', 'apologize', 'apologized', 'took', 'no one', 'never', 'worst', 'poor', 'forgot'];
+  if (complaintSignals.some(w => lower.includes(w))) {
+    const complaintId = `FB-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    return `${name}, that's really frustrating — and I'm sorry. That's not the experience you deserve here. I've logged this as complaint #${complaintId} and routed it to our F&B director, Sarah Collins. She'll reach out to you personally within 24 hours. Is there anything I can do for you right now to make things better?`;
+  }
+
+  // Household + event combo — detect "get Erin on the wine dinner" and ACT
+  const householdNames = household.map(h => (h.name || '').toLowerCase().split(' ')[0]).filter(Boolean);
+  const matchedHousehold = householdNames.find(n => lower.includes(n));
+  if (matchedHousehold && (lower.includes('wine') || lower.includes('dinner') || lower.includes('event') || lower.includes('rsvp') || lower.includes('sign up') || lower.includes('list') || lower.includes('clinic'))) {
+    const memberName = household.find(h => (h.name || '').toLowerCase().startsWith(matchedHousehold))?.name || matchedHousehold;
+    const confNum = `ER-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    const eventName = lower.includes('wine') ? 'Wine Dinner — Spring Pairing Menu' : lower.includes('clinic') ? 'Junior Golf Clinic' : lower.includes('trivia') ? 'Trivia Night' : 'the event';
+    return `Done, ${name}! I've RSVP'd ${memberName} for the ${eventName}. Confirmation #${confNum}. Would you like me to add anyone else to the reservation?`;
+  }
 
   // Tee time / booking — reference known preferences
   if (lower.includes('tee time') || lower.includes('book') || lower.includes('golf') || lower.includes('usual')) {
     const teeWindow = prefs.teeWindows || 'Saturday morning';
     const confNum = `TT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     if (lower.includes('usual') || lower.includes('saturday') || lower.includes('regular')) {
-      return `Done, ${name}! I've got you down for your usual — ${teeWindow}. Confirmation #${confNum}. Want me to reserve your booth at the Grill Room for after your round?`;
+      return `Done, ${name}! I've got you down for your usual — ${teeWindow}. Confirmation #${confNum}. Want me to reserve booth 12 at the Grill Room for noon? Your Arnold Palmer will be waiting.`;
     }
     return `Of course, ${name}! I know you usually like ${teeWindow}. Want me to book that, or are you looking for a different time? I can check availability right away.`;
   }
@@ -403,16 +426,11 @@ function generateSimulatedResponse(profile, message) {
     return `Absolutely, ${name}! I know you love ${favDining}. I have a table for 2 this evening at 7:30 PM — confirmation #${confNum}. Would you like me to let them know about any special requests?`;
   }
 
-  // Complaints — empathetic, action-oriented
-  if (lower.includes('slow') || lower.includes('wait') || lower.includes('terrible') || lower.includes('awful') || lower.includes('disappoint') || lower.includes('complaint') || lower.includes('cold') || lower.includes('ignored') || lower.includes('upset') || lower.includes('rude') || lower.includes('wrong')) {
-    return `${name}, I'm really sorry to hear that. That's not the experience you deserve, and I want to make sure we fix this. I've logged your feedback and flagged it for the team — someone will follow up with you personally within 24 hours. In the meantime, is there anything I can do right now to make things right?`;
-  }
-
   // Events — show real upcoming events
   if (lower.includes('event') || lower.includes('rsvp') || lower.includes('tournament') || lower.includes('happening') || lower.includes('weekend') || lower.includes('wine')) {
     return `Great timing, ${name}! Here's what's coming up:\n\n` +
-      `• Wine Dinner — Spring Pairing Menu (Apr 10, 6 PM, Main Dining Room — 12 seats left)\n` +
-      `• Saturday Shotgun — Member-Guest (Apr 12, 8 AM — 8 spots left)\n` +
+      `• Saturday Shotgun — Member-Guest (Apr 12, 8 AM — only 8 spots left)\n` +
+      `• Junior Golf Clinic (Apr 13, 10 AM — open enrollment)\n` +
       `• Trivia Night (Apr 15, 5:30 PM, Grill Room — 6 teams open)\n\n` +
       `Want me to RSVP you for any of these?`;
   }
@@ -425,9 +443,8 @@ function generateSimulatedResponse(profile, message) {
       `Everything look good, or would you like to make any changes?`;
   }
 
-  // Household — reference family members
-  if (lower.includes('erin') || lower.includes('logan') || lower.includes('wife') || lower.includes('son') || lower.includes('family') || lower.includes('household')) {
-    const household = profile.household || [];
+  // Household — general family reference
+  if (matchedHousehold || lower.includes('wife') || lower.includes('son') || lower.includes('family') || lower.includes('household')) {
     if (household.length > 0) {
       const names = household.map(h => h.name?.split(' ')[0]).join(' and ');
       return `Of course, ${name}! I can help with ${names}'s schedule too. What would you like me to set up for them?`;
@@ -437,11 +454,6 @@ function generateSimulatedResponse(profile, message) {
   // Privacy guard — never reveal scores, risk, or internal data
   if (lower.includes('health') || lower.includes('score') || lower.includes('risk') || lower.includes('data')) {
     return `I'd be happy to connect you with membership services for account details, ${name}. Is there something specific I can help with — a booking, reservation, or event RSVP?`;
-  }
-
-  // Cancel membership — empathetic, de-escalation
-  if (lower.includes('cancel') && lower.includes('membership')) {
-    return `${name}, I'm sorry to hear you're considering that. Before anything, I'd love to connect you with our membership director who can talk through any concerns. Would you like me to set up a call? We truly value having you as part of the Pinetree family.`;
   }
 
   // Default — warm, capability-focused

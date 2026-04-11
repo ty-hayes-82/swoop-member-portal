@@ -19,12 +19,15 @@ const MEMBER_CONTEXT = {
 
 function classifyMessage(message) {
   const lower = message.toLowerCase();
-  const complaintWords = ['slow', 'wait', 'ignored', 'terrible', 'awful', 'bad', 'disappointed', 'upset', 'rude', 'cold', 'wrong', 'complaint', 'unacceptable', 'never', 'worst', 'horrible', 'poor', 'forgot'];
-  const bookingWords = ['book', 'reserve', 'tee time', 'reservation', 'dinner', 'lunch', 'table', 'party', 'event'];
+  const complaintWords = ['slow', 'wait', 'ignored', 'terrible', 'awful', 'bad', 'disappointed', 'upset', 'rude', 'cold', 'wrong', 'complaint', 'unacceptable', 'never', 'worst', 'horrible', 'poor', 'forgot', 'minutes', 'apologize', 'apologized', 'took', 'no one'];
+  const cancellationWords = ['cancel membership', 'resign', 'quit the club', 'leaving the club', 'not renewing'];
+  const bookingWords = ['book', 'reserve', 'tee time', 'reservation', 'table', 'party'];
 
   const isComplaint = complaintWords.some(w => lower.includes(w));
+  const isCancellation = cancellationWords.some(w => lower.includes(w));
   const isBooking = bookingWords.some(w => lower.includes(w));
 
+  if (isCancellation) return 'complaint'; // Cancellation intent triggers same agents as complaint (service-recovery + member-risk)
   if (isComplaint) return 'complaint';
   if (isBooking) return 'booking';
   return 'general';
