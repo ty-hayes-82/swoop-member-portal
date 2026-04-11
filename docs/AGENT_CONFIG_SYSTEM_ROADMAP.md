@@ -1,6 +1,9 @@
 # Swoop Golf — Agent Configuration System
 ## Development Roadmap
 
+> **Repo:** swoop-member-portal | **Branch:** autoresearch/apr11 | **Updated:** 2026-04-11  
+> **Type:** Living document — update when roadmap evolves
+
 **Document:** AGENT_CONFIG_SYSTEM_ROADMAP.md
 **Created:** April 11, 2026
 **Status:** Draft

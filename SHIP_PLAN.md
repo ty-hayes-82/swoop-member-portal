@@ -1,5 +1,8 @@
 # Swoop — Ship Plan
 
+> **Repo:** swoop-member-portal | **Branch:** autoresearch/apr11 | **Updated:** 2026-04-11  
+> **Type:** Point-in-time snapshot — do not edit, create new version instead
+
 Branch: `product-readiness` · Last reviewed: 2026-04-09
 
 The goal of this document: get the **first paying club** live without

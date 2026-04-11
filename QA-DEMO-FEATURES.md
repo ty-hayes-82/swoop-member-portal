@@ -1,5 +1,8 @@
 # QA Script — Full Feature Regression + New Inline Actions
 
+> **Repo:** swoop-member-portal | **Branch:** autoresearch/apr11 | **Updated:** 2026-04-11  
+> **Type:** Point-in-time snapshot — do not edit, create new version instead
+
 **Environment:** https://swoop-member-portal-dev.vercel.app (or localhost:5173)
 **Login:** Click "Enter Demo Mode (Pinetree CC)" on the login page, then click "Start Demo"
 **Browser:** Chrome recommended (Gmail compose URLs open in new tab)

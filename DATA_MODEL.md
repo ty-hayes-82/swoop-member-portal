@@ -1,5 +1,8 @@
 # Swoop Golf — Complete Data Model
 
+> **Repo:** swoop-member-portal | **Branch:** autoresearch/apr11 | **Updated:** 2026-04-11  
+> **Type:** Living document — update when data model changes
+
 **Pinetree Country Club** | Demo Environment | January 2026
 **Database:** Neon PostgreSQL (via Vercel Postgres)
 **Tables:** 49 | **Domains:** 8
