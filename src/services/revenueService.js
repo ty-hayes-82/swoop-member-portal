@@ -125,7 +125,7 @@ export function getDollarPerSlowRound() {
   if (paceFB.revenueLostPerMonth && paceFB.slowRoundsPerMonth) {
     const computed = paceFB.revenueLostPerMonth / paceFB.slowRoundsPerMonth;
     if (Number.isFinite(computed) && computed > 0) {
-      return Math.round(computed * 100) / 100;
+      return Math.round(computed);
     }
   }
 
