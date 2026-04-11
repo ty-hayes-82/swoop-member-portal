@@ -7,9 +7,9 @@ import { useState, useRef, useEffect } from 'react';
 const ARCHETYPES = {
   left: {
     member_id: 'mbr_t01',
-    name: 'Robert Mills',
-    archetype: 'Die-Hard Golfer',
-    avatar: 'RM',
+    name: 'James Whitfield',
+    archetype: 'Balanced Active',
+    avatar: 'JW',
     color: '#2563eb',
     bgGradient: 'from-blue-50 to-blue-100',
     borderColor: '#3b82f6',

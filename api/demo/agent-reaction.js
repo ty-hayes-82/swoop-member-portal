@@ -116,9 +116,8 @@ export default async function handler(req, res) {
   const config = AGENT_PROMPTS[category];
 
   try {
-    const events = [];
-
-    for (const agentKey of config.agents) {
+    // Run all agents in parallel for faster GM-side response
+    const events = await Promise.all(config.agents.map(async (agentKey) => {
       const promptFn = config.prompts[agentKey];
       const prompt = promptFn(member_message, concierge_response || '');
 
@@ -131,7 +130,7 @@ export default async function handler(req, res) {
         result = { title: AGENT_LABELS[agentKey], detail: 'Agent activated — processing...' };
       }
 
-      events.push({
+      return {
         agent: agentKey,
         agentLabel: AGENT_LABELS[agentKey],
         title: result.title || AGENT_LABELS[agentKey],
@@ -139,8 +138,8 @@ export default async function handler(req, res) {
         action: result.action || result.adjustment || result.escalation || null,
         severity: result.severity || result.risk_level || null,
         projected_change: result.projected_change || null,
-      });
-    }
+      };
+    }));
 
     return res.status(200).json({
       category,

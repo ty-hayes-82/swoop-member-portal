@@ -52,6 +52,16 @@ const CONCIERGE_TOOLS = [
     description: 'File a complaint or feedback on behalf of the member',
     input_schema: { type: 'object', properties: { category: { type: 'string', enum: ['food_and_beverage', 'golf_operations', 'facilities', 'staff', 'billing', 'other'] }, description: { type: 'string', description: 'What happened — the member complaint in their own words' } }, required: ['category', 'description'] }
   },
+  {
+    name: 'get_member_profile',
+    description: 'Get the member profile including preferences, household, and membership details',
+    input_schema: { type: 'object', properties: {} }
+  },
+  {
+    name: 'send_request_to_club',
+    description: 'Send a special request or message to the club staff on behalf of the member',
+    input_schema: { type: 'object', properties: { department: { type: 'string', enum: ['golf_ops', 'dining', 'events', 'membership', 'facilities', 'general'] }, message: { type: 'string', description: 'The request or message to send' }, urgency: { type: 'string', enum: ['normal', 'high'], default: 'normal' } }, required: ['department', 'message'] }
+  },
 ];
 
 /**
@@ -122,6 +132,25 @@ async function executeConciergeTool(toolName, input, profile) {
         category: input.category,
         status: 'filed',
         message: 'Your feedback has been filed and routed to the appropriate manager.',
+      };
+    }
+    case 'get_member_profile': {
+      return {
+        name: profile.name,
+        membership_type: profile.membership_type || 'Full Golf',
+        member_since: profile.join_date,
+        status: profile.status || 'active',
+        household: profile.household || [],
+        preferences: profile.preferences || {},
+      };
+    }
+    case 'send_request_to_club': {
+      return {
+        request_id: `RQ-${Date.now().toString(36).toUpperCase()}`,
+        department: input.department,
+        status: 'submitted',
+        message: `Your request has been sent to the ${input.department.replace('_', ' ')} team. They'll follow up shortly.`,
+        member_name: profile.name,
       };
     }
     default:
@@ -308,25 +337,69 @@ async function chatHandler(req, res) {
 
 function generateSimulatedResponse(profile, message) {
   const name = profile.first_name || profile.name || 'there';
+  const prefs = profile.preferences || {};
   const lower = message.toLowerCase();
 
-  if (lower.includes('tee time') || lower.includes('book') || lower.includes('golf')) {
-    return `Hi ${name}! I'd love to help you book a tee time. What date and time works best for you? I can check availability right away.`;
-  }
-  if (lower.includes('dinner') || lower.includes('reserv') || lower.includes('dining') || lower.includes('restaurant')) {
-    return `Of course, ${name}! I can make a dining reservation for you. Which restaurant and when were you thinking?`;
-  }
-  if (lower.includes('event') || lower.includes('rsvp') || lower.includes('tournament')) {
-    return `Great question, ${name}! Let me check the upcoming events calendar for you. Would you like to see what's coming up this week?`;
-  }
-  if (lower.includes('schedule') || lower.includes('upcoming')) {
-    return `Here's what I have on your schedule, ${name}. Let me pull up your upcoming bookings and events.`;
-  }
-  if (lower.includes('health') || lower.includes('score') || lower.includes('risk')) {
-    return `I don't have that information, ${name}. I'd be happy to connect you with membership services if you have questions about your account.`;
+  // Tee time / booking — reference known preferences
+  if (lower.includes('tee time') || lower.includes('book') || lower.includes('golf') || lower.includes('usual')) {
+    const teeWindow = prefs.teeWindows || 'Saturday morning';
+    const confNum = `TT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    if (lower.includes('usual') || lower.includes('saturday') || lower.includes('regular')) {
+      return `Done, ${name}! I've got you down for your usual — ${teeWindow}. Confirmation #${confNum}. Want me to reserve your booth at the Grill Room for after your round?`;
+    }
+    return `Of course, ${name}! I know you usually like ${teeWindow}. Want me to book that, or are you looking for a different time? I can check availability right away.`;
   }
 
-  return `Hi ${name}! How can I help you today? I can book tee times, make dining reservations, RSVP to events, or answer questions about the club.`;
+  // Dining — reference favorite spots
+  if (lower.includes('dinner') || lower.includes('reserv') || lower.includes('dining') || lower.includes('restaurant') || lower.includes('lunch') || lower.includes('grill')) {
+    const favDining = prefs.dining || 'the Grill Room';
+    const confNum = `DR-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    return `Absolutely, ${name}! I know you love ${favDining}. I have a table for 2 this evening at 7:30 PM — confirmation #${confNum}. Would you like me to let them know about any special requests?`;
+  }
+
+  // Complaints — empathetic, action-oriented
+  if (lower.includes('slow') || lower.includes('wait') || lower.includes('terrible') || lower.includes('awful') || lower.includes('disappoint') || lower.includes('complaint') || lower.includes('cold') || lower.includes('ignored') || lower.includes('upset') || lower.includes('rude') || lower.includes('wrong')) {
+    return `${name}, I'm really sorry to hear that. That's not the experience you deserve, and I want to make sure we fix this. I've logged your feedback and flagged it for the team — someone will follow up with you personally within 24 hours. In the meantime, is there anything I can do right now to make things right?`;
+  }
+
+  // Events — show real upcoming events
+  if (lower.includes('event') || lower.includes('rsvp') || lower.includes('tournament') || lower.includes('happening') || lower.includes('weekend') || lower.includes('wine')) {
+    return `Great timing, ${name}! Here's what's coming up:\n\n` +
+      `• Wine Dinner — Spring Pairing Menu (Apr 10, 6 PM, Main Dining Room — 12 seats left)\n` +
+      `• Saturday Shotgun — Member-Guest (Apr 12, 8 AM — 8 spots left)\n` +
+      `• Trivia Night (Apr 15, 5:30 PM, Grill Room — 6 teams open)\n\n` +
+      `Want me to RSVP you for any of these?`;
+  }
+
+  // Schedule — show personalized upcoming items
+  if (lower.includes('schedule') || lower.includes('upcoming') || lower.includes('my')) {
+    return `Here's what I have for you, ${name}:\n\n` +
+      `• Tee Time: Apr 12, 7:00 AM — North Course (foursome)\n` +
+      `• Wine Dinner: Apr 10, 7:30 PM — Main Dining Room (party of 2)\n\n` +
+      `Everything look good, or would you like to make any changes?`;
+  }
+
+  // Household — reference family members
+  if (lower.includes('erin') || lower.includes('logan') || lower.includes('wife') || lower.includes('son') || lower.includes('family') || lower.includes('household')) {
+    const household = profile.household || [];
+    if (household.length > 0) {
+      const names = household.map(h => h.name?.split(' ')[0]).join(' and ');
+      return `Of course, ${name}! I can help with ${names}'s schedule too. What would you like me to set up for them?`;
+    }
+  }
+
+  // Privacy guard — never reveal scores, risk, or internal data
+  if (lower.includes('health') || lower.includes('score') || lower.includes('risk') || lower.includes('data')) {
+    return `I'd be happy to connect you with membership services for account details, ${name}. Is there something specific I can help with — a booking, reservation, or event RSVP?`;
+  }
+
+  // Cancel membership — empathetic, de-escalation
+  if (lower.includes('cancel') && lower.includes('membership')) {
+    return `${name}, I'm sorry to hear you're considering that. Before anything, I'd love to connect you with our membership director who can talk through any concerns. Would you like me to set up a call? We truly value having you as part of the Pinetree family.`;
+  }
+
+  // Default — warm, capability-focused
+  return `Hi ${name}! Great to hear from you. I can book tee times, make dining reservations, RSVP to events, check your schedule, or help with anything club-related. What would you like to do?`;
 }
 
 export default withAuth(chatHandler, { allowDemo: true });

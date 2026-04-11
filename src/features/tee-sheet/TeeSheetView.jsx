@@ -331,7 +331,7 @@ export default function TeeSheetView() {
           <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
               <div className="text-sm font-bold text-gray-800">Today's Tee Sheet</div>
-              <div className="text-xs text-gray-400">Friday, January 17, 2026 - {teeData.length} groups</div>
+              <div className="text-xs text-gray-400">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} - {teeData.length} groups</div>
               {/* Source badges for the underlying columns — Pillar 1: SEE IT */}
               <div className="flex gap-1 mt-1.5 flex-wrap">
                 <SourceBadge system="Tee Sheet" size="xs" />

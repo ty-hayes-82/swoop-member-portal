@@ -17,7 +17,7 @@ const STATUS_STYLES = {
 };
 
 const STATUS_FILTERS = [
-  { key: null, label: 'All' },
+  { key: null, label: 'Open' },
   { key: 'acknowledged', label: 'Acknowledged' },
   { key: 'in_progress', label: 'In Progress' },
   { key: 'escalated', label: 'Escalated' },

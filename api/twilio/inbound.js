@@ -52,6 +52,16 @@ const SMS_TOOLS = [
     description: 'File a complaint or feedback on behalf of the member',
     input_schema: { type: 'object', properties: { category: { type: 'string', enum: ['food_and_beverage', 'golf_operations', 'facilities', 'staff', 'billing', 'other'] }, description: { type: 'string', description: 'What happened — the member complaint in their own words' } }, required: ['category', 'description'] }
   },
+  {
+    name: 'get_member_profile',
+    description: 'Get the member profile including preferences, household, and membership details',
+    input_schema: { type: 'object', properties: {} }
+  },
+  {
+    name: 'send_request_to_club',
+    description: 'Send a special request or message to the club staff on behalf of the member',
+    input_schema: { type: 'object', properties: { department: { type: 'string', enum: ['golf_ops', 'dining', 'events', 'membership', 'facilities', 'general'] }, message: { type: 'string', description: 'The request or message to send' }, urgency: { type: 'string', enum: ['normal', 'high'], default: 'normal' } }, required: ['department', 'message'] }
+  },
 ];
 
 /**
@@ -122,6 +132,23 @@ async function executeSmsTool(toolName, input, member) {
         category: input.category,
         status: 'filed',
         message: 'Your feedback has been filed and routed to the appropriate manager.',
+      };
+    }
+    case 'get_member_profile': {
+      return {
+        name: member.name || `${member.first_name} ${member.last_name}`.trim(),
+        membership_type: member.membership_type || 'Full Golf',
+        member_since: member.join_date,
+        household: member.household || [],
+        preferences: member.preferences || {},
+      };
+    }
+    case 'send_request_to_club': {
+      return {
+        request_id: `RQ-${Date.now().toString(36).toUpperCase()}`,
+        department: input.department,
+        status: 'submitted',
+        message: `Request sent to ${input.department.replace('_', ' ')} team. They'll follow up shortly.`,
       };
     }
     default:
