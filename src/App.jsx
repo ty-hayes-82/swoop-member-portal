@@ -21,6 +21,7 @@ const SaveTimeline = lazy(() => import('@/features/demo/SaveTimeline'));
 const PilotResults = lazy(() => import('@/features/demo/PilotResults'));
 const LOITracker = lazy(() => import('@/features/demo/LOITracker'));
 const ArchitectureMoat = lazy(() => import('@/features/demo/ArchitectureMoat'));
+const TechnicalDeepDive = lazy(() => import('@/features/demo/TechnicalDeepDive'));
 const MobileShowcase = lazy(() => import('@/features/demo/MobileShowcase'));
 import { DataProvider } from '@/context/DataProvider';
 import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
@@ -214,6 +215,7 @@ function RouterViews() {
   const isDemoPilotResults = hash === '#/demo/pilot-results';
   const isDemoLOITracker = hash === '#/demo/loi-tracker';
   const isDemoArchitecture = hash === '#/demo/architecture';
+  const isDemoTechnicalDeepDive = hash === '#/demo/technical-deep-dive';
   const isDemoMobileShowcase = hash === '#/demo/mobile-showcase';
 
   if (isDemoPilotResults) {
@@ -236,6 +238,14 @@ function RouterViews() {
     return (
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
         <ArchitectureMoat />
+      </Suspense>
+    );
+  }
+
+  if (isDemoTechnicalDeepDive) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <TechnicalDeepDive />
       </Suspense>
     );
   }
