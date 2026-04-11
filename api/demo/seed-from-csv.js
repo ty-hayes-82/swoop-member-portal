@@ -18,13 +18,15 @@ const CLUB_ID = 'seed_pinetree';
 // Vercel serverless: public/ is at the project root
 // In Vercel, process.cwd() is /var/task — files in public/ are deployed to /var/task/public/
 // Try multiple paths — Vercel serverless doesn't always have public/ at cwd
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const DEMO_DIR_CANDIDATES = [
   path.join(process.cwd(), 'public', 'demo-data'),
-  path.join(process.cwd(), '..', 'public', 'demo-data'),
   path.join(__dirname, '..', '..', 'public', 'demo-data'),
   '/var/task/public/demo-data',
 ];
-const DEMO_DIR = DEMO_DIR_CANDIDATES.find(d => fs.existsSync(d)) || DEMO_DIR_CANDIDATES[0];
+const DEMO_DIR = DEMO_DIR_CANDIDATES.find(d => { try { return fs.existsSync(d); } catch { return false; } }) || DEMO_DIR_CANDIDATES[0];
 
 // ─── CSV parser ──────────────────────────────────────────────────────────────
 
