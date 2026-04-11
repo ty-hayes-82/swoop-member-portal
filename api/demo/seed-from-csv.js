@@ -672,12 +672,16 @@ export default async function handler(req, res) {
 
     for (const { csv, label, fn } of INSERT_ORDER) {
       if (allowedLabels && !allowedLabels.includes(label)) continue;
-      const filePath = path.join(DEMO_DIR, csv);
-      if (!fs.existsSync(filePath)) {
-        errors.push(`${csv}: file not found`);
-        continue;
-      }
-      const text = fs.readFileSync(filePath, 'utf-8');
+      // Fetch CSV via HTTP (Vercel serverless can't read public/ via filesystem)
+      const baseUrl = req.headers['x-forwarded-proto'] && req.headers['x-forwarded-host']
+        ? `${req.headers['x-forwarded-proto']}://${req.headers['x-forwarded-host']}`
+        : `https://${req.headers.host}`;
+      let text;
+      try {
+        const csvResp = await fetch(`${baseUrl}/demo-data/${csv}`);
+        if (!csvResp.ok) { errors.push(`${csv}: HTTP ${csvResp.status}`); continue; }
+        text = await csvResp.text();
+      } catch (e) { errors.push(`${csv}: fetch failed - ${e.message}`); continue; }
       const rows = parseCSV(text);
       if (!rows.length) {
         tables[label] = 0;
