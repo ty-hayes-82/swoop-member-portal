@@ -1371,6 +1371,20 @@ INSERT INTO weather_forecasts (club_id, forecast_date, conditions, high_temp, lo
   ('club_pinetree', '2026-04-17', 'clear',         93, 70, 5,  0.00)
 ON CONFLICT (club_id, forecast_date) DO NOTHING;
 
+-- ---------------------------------------------------------------------------
+-- 3.17 AGENT REGISTRY (Managed Agent registration via /v1/agents API)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS agent_registry (
+  agent_name          TEXT NOT NULL,
+  agent_id            TEXT NOT NULL,
+  club_id             TEXT NOT NULL,
+  registered_at       TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (agent_name, club_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_registry_club ON agent_registry(club_id);
+
 -- =============================================================================
 -- End of schema
 -- =============================================================================
