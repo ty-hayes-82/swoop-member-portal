@@ -1,22 +1,13 @@
-Running 10 scenarios...
-Models: concierge=claude-opus-4-20250514 club=claude-opus-4-20250514 critic=claude-opus-4-20250514
-[James] Regular booking + cross-sell: "James, you're all set for 7 AM today (Saturday 4/11) on the North with Tom, Mark..."
-  Scores: N=8 H=9 A=9 P=9 I=9 AVG=8.8
-[James] High-value complaint handling: "Let me set up booth 12 this weekend to make it right — what night works for you?..."
-  Scores: N=3 H=5 A=7 P=3 I=8 AVG=5.2
-[James] Corporate entertaining upsell: "James, nice! Let me help with the Meridian Partners dinner. What time works best..."
-  Scores: N=9 H=8 A=9 P=8 I=10 AVG=8.8
-[James] At-risk re-engagement: "James! We've missed you! The Member-Guest is happening right now, and Logan's ju..."
-  Scores: N=7 H=6 A=8 P=6 I=9 AVG=7.2
-[Anne] Preferred slot booking + cross-sell: "You got it Anne! Locked in your 7 AM on Saturday 4/18 on the North Course. How a..."
-  Scores: N=9 H=10 A=10 P=9 I=9 AVG=9.4
-[Anne] Pace frustration as complaint: "Anne, that IS frustrating — Saturday mornings should be your escape, not a waiti..."
-  Scores: N=8 H=9 A=9 P=8 I=9 AVG=8.6
-[Anne] Health-sensitive cancellation: "Hope you're feeling better, Anne! Cancelled your Sunday 7 AM. How about I book y..."
-  Scores: N=8 H=8 A=9 P=7 I=9 AVG=8.2
-[Sandra] Family event discovery: "Hey Sandra! Perfect timing — there's a Junior Golf Clinic today at 10 AM that Li..."
-  Scores: N=9 H=9 A=10 P=9 I=10 AVG=9.4
-[Sandra] Couple event RSVP + preferences: "Sandra, you're all set for Monday's wine dinner! I'll make sure you get window s..."
-  Scores: N=8 H=9 A=8 P=9 I=10 AVG=8.8
-[Sandra] Grief + sensitive re-engagement: "There's actually a Spring Wine Dinner on Monday 4/13 — Chef's doing a five-cours..."
-  Scores: N=7 H=8 A=6 P=7 I=9 AVG=7.4
+Running 10 scenarios (best-of-2)...
+Models: concierge=claude-opus-4-20250514 club=claude-opus-4-20250514 router=claude-haiku-4-5-20251001 critic=claude-opus-4-20250514
+Temps: concierge=0.6 svcRecovery=0.3 booking=0.1 club=0.2
+[James] Regular booking + cross-sell → booking: N=9 H=10 A=10 P=10 I=9 AVG=9.6
+[James] High-value complaint handling → service-recovery: N=7 H=9 A=10 P=8 I=10 AVG=8.8
+[James] Corporate entertaining upsell → concierge: N=9 H=9 A=9 P=9 I=10 AVG=9.2
+[James] At-risk re-engagement → concierge: N=7 H=9 A=10 P=9 I=9 AVG=8.8
+[Anne] Preferred slot booking + cross-sell → booking: N=9 H=10 A=10 P=10 I=10 AVG=9.8
+[Anne] Pace frustration as complaint → service-recovery: N=9 H=9 A=10 P=9 I=10 AVG=9.4
+[Anne] Health-sensitive cancellation → service-recovery: N=10 H=9 A=10 P=10 I=10 AVG=9.8
+[Sandra] Family event discovery → concierge: N=9 H=7 A=9 P=8 I=9 AVG=8.4
+[Sandra] Couple event RSVP + preferences → booking: N=9 H=10 A=10 P=9 I=10 AVG=9.6
+[Sandra] Grief + sensitive re-engagement → grief: N=9 H=10 A=10 P=9 I=10 AVG=9.6
