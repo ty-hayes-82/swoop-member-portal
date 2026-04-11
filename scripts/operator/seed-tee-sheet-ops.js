@@ -54,17 +54,17 @@ export default async function handler(req, res) {
     // Seed booking_confirmations
     await sql`INSERT INTO booking_confirmations (confirmation_id, member_id, member_name, booking_id, tee_time, cancel_probability, outreach_status, outreach_channel, staff_notes, created_at)
       VALUES
-        ('conf_001', 'mbr_038', 'James Whitfield', 'bkg_sat_0920', 'Sat 9:20 AM', 0.42, 'pending', NULL, NULL, NOW()),
-        ('conf_002', 'mbr_059', 'Anne Jordan', 'bkg_sat_0700', 'Sat 7:00 AM', 0.28, 'contacted', 'sms', NULL, NOW()),
-        ('conf_003', 'mbr_072', 'Robert Callahan', 'bkg_sat_1040', 'Sat 10:40 AM', 0.35, 'pending', NULL, NULL, NOW()),
+        ('conf_001', 'mbr_t01', 'James Whitfield', 'bkg_sat_0920', 'Sat 9:20 AM', 0.42, 'pending', NULL, NULL, NOW()),
+        ('conf_002', 'mbr_t04', 'Anne Jordan', 'bkg_sat_0700', 'Sat 7:00 AM', 0.28, 'contacted', 'sms', NULL, NOW()),
+        ('conf_003', 'mbr_t05', 'Robert Callahan', 'bkg_sat_1040', 'Sat 10:40 AM', 0.35, 'pending', NULL, NULL, NOW()),
         ('conf_004', 'mbr_t06', 'David Chen', 'bkg_sat_0800', 'Sat 8:00 AM', 0.15, 'confirmed', NULL, NULL, NOW())
       ON CONFLICT (confirmation_id) DO NOTHING`;
 
     // Seed slot_reassignments
     await sql`INSERT INTO slot_reassignments (reassignment_id, source_booking_id, source_slot, source_member_id, source_member_name, recommended_fill_member_id, recommended_fill_member_name, status, revenue_recovered, health_before, health_after)
       VALUES
-        ('rea_001', 'bkg_sat_0700', 'Sat 7:00 AM', 'mbr_059', 'Anne Jordan', 'mbr_012', 'George Whitaker', 'pending', 312, 54, 62),
-        ('rea_002', 'bkg_sat_1400', 'Sat 2:00 PM (cancelled)', 'mbr_xxx', 'Cancelled Member', 'mbr_059', 'Anne Jordan', 'pending', 312, 71, 74)
+        ('rea_001', 'bkg_sat_0700', 'Sat 7:00 AM', 'mbr_t04', 'Anne Jordan', 'mbr_012', 'George Whitaker', 'pending', 312, 28, 42),
+        ('rea_002', 'bkg_sat_1400', 'Sat 2:00 PM (cancelled)', 'mbr_xxx', 'Cancelled Member', 'mbr_t04', 'Anne Jordan', 'pending', 312, 71, 74)
       ON CONFLICT (reassignment_id) DO NOTHING`;
 
     // Seed waitlist_config
