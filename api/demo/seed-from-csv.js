@@ -633,6 +633,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
+  // Accept ?phase=1|2|3 to split the import into chunks (Vercel timeout workaround)
+  // phase=1: truncate + members/courses/households/outlets/types
+  // phase=2: bookings, POS, complaints
+  // phase=3: email, events, staff, sessions
+  // phase=all (default): everything at once
+  const phase = req.body?.phase || req.query?.phase || 'all';
+
   const startTime = Date.now();
   const tables = {};
   const errors = [];
@@ -641,11 +648,21 @@ export default async function handler(req, res) {
   try {
     await client.query('BEGIN');
 
-    // Step 1: Clean slate
-    await cleanSlate(client);
+    // Step 1: Clean slate (only on phase 1 or all)
+    if (phase === '1' || phase === 'all') {
+      await cleanSlate(client);
+    }
 
     // Step 2: Insert each CSV in FK-safe order
+    const phaseFilter = {
+      '1': ['membership_types', 'courses', 'dining_outlets', 'households', 'members'],
+      '2': ['bookings', 'booking_players', 'pos_checks', 'pos_line_items', 'pos_payments', 'close_outs', 'feedback', 'service_requests', 'invoices'],
+      '3': ['event_definitions', 'event_registrations', 'email_campaigns', 'email_events', 'staff', 'staff_shifts'],
+    };
+    const allowedLabels = phase === 'all' ? null : (phaseFilter[phase] || null);
+
     for (const { csv, label, fn } of INSERT_ORDER) {
+      if (allowedLabels && !allowedLabels.includes(label)) continue;
       const filePath = path.join(DEMO_DIR, csv);
       if (!fs.existsSync(filePath)) {
         errors.push(`${csv}: file not found`);
@@ -666,12 +683,14 @@ export default async function handler(req, res) {
       }
     }
 
-    // Step 3: Create concierge sessions for key test members
-    try {
-      const sessionCount = await insertConciergeSessions(client);
-      tables['member_concierge_sessions'] = sessionCount;
-    } catch (e) {
-      errors.push(`concierge_sessions: ${e.message}`);
+    // Step 3: Create concierge sessions for key test members (phase 3 or all)
+    if (phase === '3' || phase === 'all') {
+      try {
+        const sessionCount = await insertConciergeSessions(client);
+        tables['member_concierge_sessions'] = sessionCount;
+      } catch (e) {
+        errors.push(`concierge_sessions: ${e.message}`);
+      }
     }
 
     await client.query('COMMIT');
