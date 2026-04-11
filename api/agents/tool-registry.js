@@ -817,6 +817,43 @@ const TOOLS = {
       required: ['club_id'],
     },
   },
+
+  // --- Arrival anticipation tools ---
+  get_booking_detail: {
+    name: 'get_booking_detail',
+    displayName: 'Get Booking Detail',
+    description: 'Get today\'s booking for a member — date, time, course, playing partners, walking/riding, cart type.',
+    category: 'read',
+    riskLevel: 'low',
+    input_schema: {
+      type: 'object',
+      properties: {
+        member_id: { type: 'string', description: 'Member UUID' },
+        date:      { type: 'string', format: 'date', description: 'Booking date (ISO date)' },
+      },
+      required: ['member_id', 'date'],
+    },
+  },
+
+  push_staff_brief: {
+    name: 'push_staff_brief',
+    displayName: 'Push Staff Brief',
+    description: 'Send a formatted brief to staff mobile app by role.',
+    category: 'communicate',
+    riskLevel: 'medium',
+    input_schema: {
+      type: 'object',
+      properties: {
+        club_id:    { type: 'string', description: 'Club identifier' },
+        member_id:  { type: 'string', description: 'Member UUID the brief is about' },
+        role:       { type: 'string', enum: ['pro_shop', 'grill_room', 'beverage_cart'], description: 'Target staff role' },
+        brief_text: { type: 'string', description: 'Formatted brief text (under 100 words)' },
+        priority:   { type: 'string', enum: ['normal', 'high'], description: 'Brief priority level' },
+        tee_time:   { type: 'string', description: 'Tee time (ISO datetime or HH:MM)' },
+      },
+      required: ['club_id', 'member_id', 'role', 'brief_text', 'tee_time'],
+    },
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -910,6 +947,13 @@ export const AGENT_TOOLS = {
     TOOLS.get_referral_programs,
     TOOLS.get_prospect_activity,
     TOOLS.create_action,
+  ],
+
+  'arrival-anticipation': [
+    TOOLS.get_member_preferences,
+    TOOLS.get_member_history,
+    TOOLS.get_booking_detail,
+    TOOLS.push_staff_brief,
   ],
 
   'chief-of-staff': [],  // Uses callable_agents, not direct tools

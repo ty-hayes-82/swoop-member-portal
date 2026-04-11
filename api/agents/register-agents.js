@@ -28,6 +28,7 @@ import CHIEF_OF_STAFF_PROMPT from '../../src/config/chiefOfStaffPrompt.js';
 import BOOKING_AGENT_PROMPT from '../../src/config/bookingAgentPrompt.js';
 import REVENUE_ANALYST_PROMPT from '../../src/config/revenueAnalystPrompt.js';
 import GROWTH_PIPELINE_PROMPT from '../../src/config/growthPipelinePrompt.js';
+import ARRIVAL_ANTICIPATION_PROMPT from '../../src/config/arrivalAnticipationPrompt.js';
 import { buildPersonalConciergePrompt } from '../../src/config/personalConciergePrompt.js';
 import { buildMemberServiceRecoveryPrompt } from '../../src/config/memberServiceRecoveryPrompt.js';
 
@@ -145,6 +146,15 @@ const DOMAIN_AGENTS = [
     system_prompt: GROWTH_PIPELINE_PROMPT,
     tools: [
       { type: 'mcp', name: 'swoop-growth-data', description: 'Access guest passes, trial memberships, referral programs, and prospect activity' },
+    ],
+  },
+  {
+    name: 'arrival-anticipation',
+    description: 'Pre-arrival staff briefing engine — assembles cross-domain briefs for Pro Shop, Grill Room, and Beverage Cart 90 minutes before member tee times.',
+    model: SONNET,
+    system_prompt: ARRIVAL_ANTICIPATION_PROMPT,
+    tools: [
+      { type: 'mcp', name: 'swoop-arrival-tools', description: 'Get booking details, member preferences, visit history, and push staff briefs' },
     ],
   },
 ];

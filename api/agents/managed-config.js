@@ -45,6 +45,7 @@ export const AGENT_IDS = {
   'board-report-compiler':   process.env.BOARD_AGENT_ID        || MANAGED_AGENT_ID,
   'revenue-analyst':         process.env.REVENUE_AGENT_ID      || MANAGED_AGENT_ID,
   'growth-pipeline':         process.env.GROWTH_AGENT_ID       || MANAGED_AGENT_ID,
+  'arrival-anticipation':    process.env.ARRIVAL_AGENT_ID      || MANAGED_AGENT_ID,
   // Legacy alias
   'member-concierge':        process.env.CONCIERGE_AGENT_ID    || MANAGED_AGENT_ID,
 };
