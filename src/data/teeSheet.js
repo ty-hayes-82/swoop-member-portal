@@ -1,4 +1,4 @@
-// Static tee sheet for demo day: Friday January 17, 2026
+// Static tee sheet for demo day: Saturday January 17, 2026
 // Pinetree Country Club — 2 courses (North, South), 8-min intervals
 
 export const todayTeeSheet = [
@@ -90,7 +90,7 @@ export const todayTeeSheet = [
     cartPrep: { beverage: 'Water', snack: 'Apple slices', note: 'Regular group. Evelyn is Watch list — be attentive.' },
   },
   {
-    time: '9:16 AM', course: 'North', memberId: 'mbr_146', name: 'Sandra Chen',
+    time: '9:16 AM', course: 'North', memberId: 'mbr_t06', name: 'Sandra Chen',
     archetype: 'Social Butterfly', healthScore: 36, tier: 'House', duesAnnual: 9000,
     group: ['Sandra Chen', 'Avery Chen'],
     cancelRisk: 0.38,
@@ -157,7 +157,8 @@ export const teeSheetSummary = {
   atRiskOnCourse: todayTeeSheet.filter(t => t.healthScore < 50).length,
   vipCount: todayTeeSheet.filter(t => t.duesAnnual >= 18000).length,
   // Weather must match briefingService / cockpit / weather.js — contradictory weather across adjacent screens breaks the demo.
-  weatherCondition: 'wind advisory',
-  weatherTemp: 68,
-  weatherWind: 32,
+  weatherCondition: 'sunny',
+  weatherTemp: 82,
+  weatherWind: 8,
+  weatherForecast: 'Clear skies, high 82°F. Light winds 8 mph.',
 };

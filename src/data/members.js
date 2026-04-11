@@ -58,7 +58,7 @@ export const atRiskMembers = [
   { memberId: 'mbr_t01', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 16 — 42-min Grill Room wait, felt ignored. $18K dues at risk', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:3},{month:'Dec',rounds:2},{month:'Jan',rounds:1}] },
   { memberId: 'mbr_t04', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace — zero rounds since. 10-year member, $14K dues at risk', archetype: 'Weekend Warrior', duesAnnual: 14000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
   { memberId: 'mbr_t05', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact $3,020 F&B minimum then stopping. 9-day complaint unresolved. No golf since Nov', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:1}] },
-  { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining spend dropped 87% ($18 last visit vs $142 avg). Declined 3 consecutive event invites. $9K annual dues — last 2 renewals were late.', archetype: 'Social Butterfly', duesAnnual: 9000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:1},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_t06', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining spend dropped 87% ($18 last visit vs $142 avg). Declined 3 consecutive event invites. $9K annual dues — last 2 renewals were late.', archetype: 'Social Butterfly', duesAnnual: 9000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:1},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
   { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Two slow-play complaints filed and ignored. Skipping dining entirely. 12-year member, $18K dues', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
 ];
 
@@ -299,8 +299,8 @@ export const memberProfiles = {
       { id: 'recommend', status: 'Escalated by Service Recovery', owner: 'Service Recovery', timestamp: '2026-01-17T08:43:00Z' },
     ],
   },
-  mbr_146: {
-    memberId: 'mbr_146',
+  mbr_t06: {
+    memberId: 'mbr_t06',
     name: 'Sandra Chen',
     tier: 'House',
     joinDate: '2021-05-22',

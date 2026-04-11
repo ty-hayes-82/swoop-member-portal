@@ -9,7 +9,7 @@ simulation_month: "2026-01"
 club_id: "club_001"
 
 # ─── Member population ────────────────────────────────────────────────────────
-member_count: 100
+member_count: 394
 
 archetype_weights:
   Die-Hard Golfer:   18   # 18%
