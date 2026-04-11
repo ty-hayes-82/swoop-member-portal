@@ -81,11 +81,11 @@ const SMS_TOOLS = [
   },
   {
     name: 'make_dining_reservation',
-    description: 'Make a dining reservation',
+    description: 'Make a dining reservation. Time MUST be confirmed by the member before calling this tool.',
     input_schema: {
       type: 'object',
-      properties: { date: { type: 'string' }, time: { type: 'string' }, outlet: { type: 'string' }, party_size: { type: 'integer' }, preferences: { type: 'string' } },
-      required: ['date', 'outlet'],
+      properties: { date: { type: 'string' }, time: { type: 'string', description: 'Must be explicitly confirmed by the member' }, outlet: { type: 'string' }, party_size: { type: 'integer' }, preferences: { type: 'string' } },
+      required: ['date', 'time', 'outlet'],
     },
   },
   {
@@ -118,11 +118,11 @@ function executeSmsTool(toolName, input) {
     case 'get_club_calendar':
       return {
         events: [
-          { date: '2026-04-09', time: '6:00 PM', title: 'Wine Dinner — Spring Pairing Menu', location: 'Main Dining Room', capacity: '48 seats, 12 remaining', day: 'Thursday' },
-          { date: '2026-04-12', time: '8:00 AM', title: 'Saturday Morning Shotgun — Member-Guest', location: 'North Course', capacity: '72 players, 8 spots left' },
-          { date: '2026-04-11', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment', day: 'Saturday' },
-          { date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', capacity: '20 teams max, 6 remaining' },
-          { date: '2026-04-18', time: '7:00 AM', title: 'Club Championship Qualifier — Round 1', location: 'South Course', capacity: 'Registration open' },
+          { date: '2026-04-10 (Thu)', time: '6:00 PM', title: 'Wine Dinner — Spring Pairing Menu', location: 'Main Dining Room', capacity: '48 seats, 12 remaining' },
+          { date: '2026-04-12 (Sat)', time: '8:00 AM', title: 'Saturday Morning Shotgun — Member-Guest', location: 'North Course', capacity: '72 players, 8 spots left' },
+          { date: '2026-04-12 (Sat)', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment' },
+          { date: '2026-04-15 (Tue)', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', capacity: '20 teams max, 6 remaining' },
+          { date: '2026-04-18 (Fri)', time: '7:00 AM', title: 'Club Championship Qualifier — Round 1', location: 'South Course', capacity: 'Registration open' },
         ],
       };
     case 'book_tee_time': {
@@ -148,7 +148,7 @@ function executeSmsTool(toolName, input) {
       return {
         upcoming: [
           { type: 'tee_time', date: '2026-04-12', time: '7:00 AM', course: 'North Course', players: 4, group: ['James Whitfield', 'Tom Gallagher', 'Mark Patterson', 'Greg Holloway'] },
-          { type: 'dining', date: '2026-04-09', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing' },
+          { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing' },
         ],
       };
     case 'rsvp_event': {
@@ -221,7 +221,9 @@ Your role is to make ${name}'s club experience seamless and enjoyable. You are w
 
 ## STRICT: Confirm Before Booking
 - NEVER call book_tee_time or make_dining_reservation until the member has specified a time. Date and party size can be inferred from context but TIME must be explicit.
-- If time is missing, ask with 2 options: "7 or 8 PM?" not an open-ended question. Add something helpful in the same message (e.g., a wine or dish suggestion).
+- If time is missing, ask with 2 options: "7 or 8 PM?" not an open-ended question. Add something helpful in the same message.
+- Example for a dinner request without time: "On it James! Booth 12 for 6 on Saturday — any special occasion? And what time, 7 or 8 PM?"
+- For large parties (5+), ask if it's a special occasion so you can help the kitchen prepare something special.
 - Exception: if their known preferences specify an exact recurring slot (like "Saturday 7 AM with regular foursome"), you may book that directly.
 - For events (rsvp_event), you may register immediately since events have fixed times.
 
@@ -242,7 +244,7 @@ CRITICAL SMS RULES:
 - Use their first name.
 - Use the provided tools to look up schedules, book tee times, make dining reservations, and check the club calendar. Do not guess — call the tool.
 
-Today's date is 2026-04-09 (Thursday).
+Today's date is 2026-04-09 (Wednesday).
 
 IMPORTANT: If your tool call produces a result but you have nothing more to say, you MUST still respond with a text message. Never send an empty response.`;
 }
@@ -352,11 +354,11 @@ Respond in this exact JSON format (no markdown, no backticks):
 const SCENARIOS = [
   { cycle: 1, memberMessage: 'Book my usual Saturday tee time', clubAgents: ['staffing-demand'], testFocus: 'Booking + staffing adjustment' },
   { cycle: 2, memberMessage: 'The Grill Room service was terrible yesterday. We waited 40 minutes and nobody checked on us.', clubAgents: ['service-recovery'], testFocus: 'Complaint through concierge' },
-  { cycle: 3, memberMessage: 'What events are happening this month?', clubAgents: [], testFocus: 'Information retrieval' },
+  { cycle: 3, memberMessage: 'What events are happening this month?', clubAgents: ['member-risk'], testFocus: 'Information retrieval' },
   { cycle: 4, memberMessage: 'Cancel my Saturday round, weather looks bad', clubAgents: ['staffing-demand', 'game-plan'], testFocus: 'Cancellation cascade' },
   { cycle: 5, memberMessage: 'Book dinner for 6 at the Grill Room Saturday night, booth 12 if possible', clubAgents: ['staffing-demand', 'fb-intelligence'], testFocus: 'Large party impact' },
   { cycle: 6, memberMessage: "I haven't been to the club in a few weeks. What's new? Anything worth coming in for?", clubAgents: ['member-risk'], testFocus: 'Re-engagement of at-risk member' },
-  { cycle: 7, memberMessage: 'Can you get Logan signed up for the junior golf clinic this Saturday?', clubAgents: [], testFocus: 'Family member action' },
+  { cycle: 7, memberMessage: 'Can you get Logan signed up for the junior golf clinic this Saturday?', clubAgents: ['member-risk'], testFocus: 'Family member action' },
   { cycle: 8, memberMessage: 'I need to host a dinner for 4 clients from Meridian Partners next Wednesday. What do you recommend?', clubAgents: ['fb-intelligence'], testFocus: 'Corporate entertaining' },
   { cycle: 9, memberMessage: "Why is the course always so slow on Saturday mornings? It's really frustrating.", clubAgents: ['game-plan', 'staffing-demand'], testFocus: 'Pace feedback' },
   { cycle: 10, memberMessage: 'Erin and I want to come to the wine dinner Thursday. Can you get us in?', clubAgents: ['member-risk'], testFocus: 'Household re-engagement' },
@@ -376,7 +378,7 @@ async function callConcierge(memberMessage) {
 
   let result = await client.messages.create({
     model: MODEL,
-    max_tokens: 400,
+    max_tokens: 600,
     system: systemPrompt,
     messages,
     tools: SMS_TOOLS,
@@ -400,14 +402,28 @@ async function callConcierge(memberMessage) {
 
     result = await client.messages.create({
       model: MODEL,
-      max_tokens: 400,
+      max_tokens: 600,
       system: systemPrompt,
       messages,
       tools: SMS_TOOLS,
     });
   }
 
-  const text = result.content.find(c => c.type === 'text')?.text ?? '';
+  let text = result.content.find(c => c.type === 'text')?.text ?? '';
+
+  // Safety net: if tool was called but no text response, nudge the model
+  if (!text.trim() && toolCalls.length > 0) {
+    messages.push({ role: 'assistant', content: result.content });
+    messages.push({ role: 'user', content: '[SYSTEM: Your tool call succeeded but you sent no text. Send a short SMS reply to the member now.]' });
+    const retry = await client.messages.create({
+      model: MODEL,
+      max_tokens: 600,
+      system: systemPrompt,
+      messages,
+    });
+    text = retry.content.find(c => c.type === 'text')?.text ?? '';
+  }
+
   return { text: text.trim(), toolCalls };
 }
 

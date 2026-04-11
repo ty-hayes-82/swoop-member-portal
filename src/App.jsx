@@ -12,6 +12,11 @@ const ConferenceShell = lazy(() => import('@/mobile/conference/ConferenceShell')
 const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatPage'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
 const GamePlanDemo = lazy(() => import('@/features/demo/GamePlanDemo'));
+const BoardReportDemo = lazy(() => import('@/features/demo/BoardReportDemo'));
+const ArchetypeCompare = lazy(() => import('@/features/demo/ArchetypeCompare'));
+const ROISlide = lazy(() => import('@/features/demo/ROISlide'));
+const SplitScreenDemo = lazy(() => import('@/features/demo/SplitScreenDemo'));
+const SaveTimeline = lazy(() => import('@/features/demo/SaveTimeline'));
 import { DataProvider } from '@/context/DataProvider';
 import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
 import DemoWizard from '@/components/ui/DemoWizard';
@@ -196,6 +201,27 @@ function RouterViews() {
   const isConciergeRoute = hash === '#/concierge' || hash.startsWith('#/concierge?');
   const isDemoWeatherCascade = hash === '#/demo/weather-cascade';
   const isDemoGameplan = hash === '#/demo/gameplan';
+  const isDemoBoardReport = hash === '#/demo/board-report';
+  const isDemoArchetype = hash === '#/demo/archetype-compare';
+  const isDemoROI = hash === '#/demo/roi';
+  const isDemoSplitScreen = hash === '#/demo/split-screen';
+  const isDemoSaveTimeline = hash === '#/demo/save-timeline';
+
+  if (isDemoSplitScreen) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <SplitScreenDemo />
+      </Suspense>
+    );
+  }
+
+  if (isDemoSaveTimeline) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <SaveTimeline />
+      </Suspense>
+    );
+  }
 
   if (isDemoWeatherCascade) {
     return (
@@ -209,6 +235,30 @@ function RouterViews() {
     return (
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
         <GamePlanDemo />
+      </Suspense>
+    );
+  }
+
+  if (isDemoBoardReport) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <BoardReportDemo />
+      </Suspense>
+    );
+  }
+
+  if (isDemoArchetype) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <ArchetypeCompare />
+      </Suspense>
+    );
+  }
+
+  if (isDemoROI) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <ROISlide />
       </Suspense>
     );
   }
@@ -290,6 +340,19 @@ export default function App() {
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Concierge...</div>}>
         <ConciergeChatPage />
       </Suspense>
+    );
+  }
+
+  // Demo routes — accessible without auth for conference demos
+  if (currentHash.startsWith('#/demo/')) {
+    return (
+      <BrowserRouter>
+        <DataProvider>
+          <AppProvider>
+            <RouterViews />
+          </AppProvider>
+        </DataProvider>
+      </BrowserRouter>
     );
   }
 
