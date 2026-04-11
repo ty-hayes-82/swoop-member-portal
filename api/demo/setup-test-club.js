@@ -433,7 +433,7 @@ async function computeHealthScores(client) {
         LEAST(100, COALESCE(COUNT(DISTINCT bp.booking_id), 0) * 4) AS golf_score
       FROM members m
       LEFT JOIN booking_players bp ON bp.member_id = m.member_id
-      LEFT JOIN bookings b ON bp.booking_id = b.booking_id AND b.booking_date >= NOW() - INTERVAL '180 days'
+      LEFT JOIN bookings b ON bp.booking_id = b.booking_id AND b.booking_date::date >= (NOW() - INTERVAL '180 days')::date
       WHERE m.club_id = $1
       GROUP BY m.member_id
     ),
