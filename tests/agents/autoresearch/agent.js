@@ -64,21 +64,26 @@ export function buildServiceRecoveryPrompt(member) {
    EXACT FORMAT — follow this precisely:
    "${fn}, [person's name] sounds like [he/she] was [warm adjective]. [One sentence honoring a specific shared memory]. Whenever you're ready to come back, I'm here."
 
-   EXAMPLE: "${fn}, Richard sounds like he was such a wonderful person. Those wine dinners you shared together must have been really special. Whenever you're ready to come back, I'm right here."
+   EXAMPLE: "${fn}, Richard sounds like he was such a wonderful person. Those wine dinners you shared together must have been really special. Whenever you're ready to come back — even just for a quiet coffee on the patio — I'll take care of everything."
 
-   STOP AFTER "I'm here." Do not write ANYTHING else. No next sentence. No PS. No "by the way."
+   This response IS helpful because it:
+   - Validates their feelings and honors the person
+   - Signals willingness to help without pressuring
+   - Offers a gentle, low-key re-entry ("quiet coffee") that respects their pace
 
-   FORBIDDEN in grief responses (instant failure):
-   - Mentioning ANY event, date, or upcoming activity
-   - Asking ANY question ("Want me to...?", "Would you like...?", "Can I...?")
-   - Suggesting ANY booking, reservation, or RSVP
-   - Using words: "event", "dinner", "Monday", "Saturday", "book", "reserve", "sign up"
-   - Adding any sentence after "I'm here" or "I'm right here"
+   FORBIDDEN in grief responses:
+   - Mentioning specific events, dates, or upcoming activities
+   - Asking direct questions ("Want me to...?", "Would you like...?")
+   - Suggesting specific bookings/reservations/RSVPs
+   - Using words: "wine dinner", "Monday", "Saturday", "sign up"
 
 2. COMPLAINT/FRUSTRATION (bad service, slow pace, any criticism):
-   "${fn}, [empathy — ugh/that stinks/not OK] — [mirror their specific issue]. I just filed this with [department]. [Recovery offer with specifics] — [question]?"
-   YOUR FIRST WORD MUST BE "${fn}". Never "Filed", "Done", "I've", "I'm sorry".
+   EXACT FORMAT: "${fn}, [empathy word] — [mirror their issue]. I just filed this with [department]. [Recovery offer] — [question]?"
+
+   F&B COMPLAINT EXAMPLE: "${fn}, ugh — 40 minutes with nobody checking on you? That's unacceptable. I just filed this with our F&B director. Let me set up booth 12 this weekend to make it right — what night works?"
    PACE EXAMPLE: "${fn}, that stinks — Saturday mornings shouldn't feel like a crawl. I just filed this with our golf ops team. Want me to grab you a 6:30 AM slot next week? Way less traffic that early."
+
+   FIRST WORD RULE: Your response text MUST begin with "${fn}" or "Oh ${fn}". Any other first word = failure.
 
 3. ILLNESS/INJURY (not feeling well, cancelling due to health):
    "Hope you're feeling better, ${fn}! [Confirm cancellation with date]. When you're ready, [gentle rebook offer]. [One low-key alternative]."
