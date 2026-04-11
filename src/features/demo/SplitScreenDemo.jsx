@@ -2,13 +2,19 @@
  * SplitScreenDemo — "Both Sides of the Glass"
  * Route: #/demo/split-screen
  *
- * LEFT (60%): Concierge chat as James Whitfield
- * RIGHT (40%): GM Intelligence Feed showing agent activations
+ * LEFT (55%): Concierge chat as James Whitfield
+ * RIGHT (45%): GM Intelligence Feed showing agent activations
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 const MEMBER_ID = 'mbr_t01';
-const SUGGESTED_MESSAGE = "Lunch was really slow today. We waited forever and nobody checked on us.";
+
+const SUGGESTED_MESSAGES = [
+  "Lunch was really slow today. We waited forever and nobody checked on us.",
+  "Book my usual Saturday tee time",
+  "What events this weekend?",
+  "Can you get Erin on the wine dinner list?",
+];
 
 function timestamp() {
   return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -19,7 +25,14 @@ function agentTimestamp() {
 }
 
 /* ---------- Agent Event Card ---------- */
-function AgentEventCard({ event, isNew }) {
+function AgentEventCard({ event, index }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   const borderColor = {
     'service-recovery': 'border-red-400 bg-red-950/60',
     'staffing-demand': 'border-blue-400 bg-blue-950/60',
@@ -37,7 +50,11 @@ function AgentEventCard({ event, isNew }) {
   }[event.agent] || '\u{1F916}';
 
   return (
-    <div className={`rounded-xl border-l-4 ${borderColor} p-4 transition-all duration-500 ${isNew ? 'animate-pulse' : ''}`}>
+    <div
+      className={`rounded-xl border-l-4 ${borderColor} p-4 transition-all duration-500 ease-out ${
+        visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+      }`}
+    >
       <div className="flex items-start gap-3">
         <div className="text-2xl flex-shrink-0">{avatarIcon}</div>
         <div className="flex-1 min-w-0">
@@ -61,13 +78,21 @@ function AgentEventCard({ event, isNew }) {
 }
 
 /* ---------- Concierge Chat Panel (Left) ---------- */
-function ConciergePanel({ onMessageSent }) {
+function ConciergePanel({ onMessageSent, resetKey }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showSuggestion, setShowSuggestion] = useState(true);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Reset state when resetKey changes
+  useEffect(() => {
+    setMessages([]);
+    setInput('');
+    setLoading(false);
+    setShowSuggestions(true);
+  }, [resetKey]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,7 +100,7 @@ function ConciergePanel({ onMessageSent }) {
 
   async function send(text) {
     if (!text.trim() || loading) return;
-    setShowSuggestion(false);
+    setShowSuggestions(false);
     const userMsg = { role: 'user', text: text.trim(), time: timestamp() };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
@@ -84,7 +109,7 @@ function ConciergePanel({ onMessageSent }) {
     try {
       const res = await fetch('/api/concierge/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Demo-Club': 'club_001' },
+        headers: { 'Content-Type': 'application/json', 'X-Demo-Club': 'seed_pinetree' },
         body: JSON.stringify({ member_id: MEMBER_ID, message: text.trim() }),
       });
       const data = await res.json();
@@ -126,13 +151,18 @@ function ConciergePanel({ onMessageSent }) {
             <p className="text-gray-500 text-sm text-center">
               Welcome to Pinetree Country Club. How can I help you today?
             </p>
-            {showSuggestion && (
-              <button
-                onClick={() => send(SUGGESTED_MESSAGE)}
-                className="text-left text-sm bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors max-w-sm"
-              >
-                {SUGGESTED_MESSAGE}
-              </button>
+            {showSuggestions && (
+              <div className="flex flex-col gap-2 w-full max-w-sm">
+                {SUGGESTED_MESSAGES.map((msg, i) => (
+                  <button
+                    key={i}
+                    onClick={() => send(msg)}
+                    className="text-left text-sm bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                  >
+                    {msg}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -168,6 +198,21 @@ function ConciergePanel({ onMessageSent }) {
         )}
         <div ref={bottomRef} />
       </div>
+
+      {/* Suggestion chips when conversation is active */}
+      {messages.length > 0 && !loading && (
+        <div className="flex-shrink-0 px-3 pb-1 flex gap-2 overflow-x-auto">
+          {SUGGESTED_MESSAGES.slice(1).map((msg, i) => (
+            <button
+              key={i}
+              onClick={() => send(msg)}
+              className="whitespace-nowrap text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full px-3 py-1.5 transition-colors flex-shrink-0"
+            >
+              {msg}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Input bar */}
       <form
@@ -236,7 +281,7 @@ function GMIntelFeed({ events, loading }) {
         )}
 
         {events.map((event, i) => (
-          <AgentEventCard key={i} event={event} isNew={i === events.length - 1} />
+          <AgentEventCard key={`${event.agent}-${event.time}-${i}`} event={event} index={i} />
         ))}
 
         {loading && (
@@ -252,13 +297,16 @@ function GMIntelFeed({ events, loading }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Member context strip */}
-      <div className="flex-shrink-0 border-t border-gray-800 px-4 py-2 flex items-center gap-4 text-[10px] text-gray-500">
-        <span>James Whitfield</span>
-        <span>$18K/yr</span>
-        <span>6-year member</span>
-        <span>Balanced Active</span>
-        <span className="text-amber-400 font-semibold">Health: 42</span>
+      {/* Member context strip — prominent */}
+      <div className="flex-shrink-0 border-t border-amber-700/50 bg-amber-950/40 px-4 py-3">
+        <div className="text-[10px] text-amber-400/70 uppercase tracking-widest font-bold mb-1.5">Active Member</div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-sm font-semibold text-white">James Whitfield</span>
+          <span className="text-sm font-bold text-emerald-400">$18K/yr</span>
+          <span className="text-xs text-gray-300">6-year member</span>
+          <span className="text-xs text-gray-400">Balanced Active</span>
+          <span className="text-sm font-bold text-amber-400 bg-amber-900/50 rounded px-2 py-0.5">Health: 42</span>
+        </div>
       </div>
     </div>
   );
@@ -269,6 +317,13 @@ export default function SplitScreenDemo() {
   const [agentEvents, setAgentEvents] = useState([]);
   const [agentLoading, setAgentLoading] = useState(false);
   const [mobileTab, setMobileTab] = useState('chat'); // 'chat' | 'feed'
+  const [resetKey, setResetKey] = useState(0);
+
+  const handleReset = useCallback(() => {
+    setAgentEvents([]);
+    setAgentLoading(false);
+    setResetKey(k => k + 1);
+  }, []);
 
   async function handleMessageSent(memberMessage, conciergeResponse) {
     setAgentLoading(true);
@@ -285,9 +340,9 @@ export default function SplitScreenDemo() {
       const data = await res.json();
 
       if (data.events && Array.isArray(data.events)) {
-        // Stagger events for dramatic effect
+        // Stagger events: 300ms initial, 800ms between each
         for (let i = 0; i < data.events.length; i++) {
-          await new Promise(r => setTimeout(r, i === 0 ? 300 : 1200));
+          await new Promise(r => setTimeout(r, i === 0 ? 300 : 800));
           setAgentEvents(prev => [...prev, { ...data.events[i], time: agentTimestamp() }]);
         }
       }
@@ -304,36 +359,45 @@ export default function SplitScreenDemo() {
     }
   }
 
+  const mobileToggleLabel = mobileTab === 'chat' ? 'Switch to GM View' : 'Switch to Member View';
+
   return (
-    <div className="flex flex-col md:flex-row h-screen" style={{ height: '100dvh' }}>
-      {/* Mobile tab toggle */}
-      <div className="md:hidden flex-shrink-0 flex border-b border-gray-300 bg-white">
+    <div className="flex flex-col h-screen" style={{ height: '100dvh' }}>
+      {/* Top header bar */}
+      <div className="flex-shrink-0 bg-gray-900 text-white px-4 py-3 flex items-center justify-between gap-3 border-b border-gray-700">
+        <div className="min-w-0">
+          <div className="text-sm font-bold tracking-wide uppercase">SWOOP DEMO — Both Sides of the Glass</div>
+          <div className="text-[11px] text-gray-400 hidden sm:block">
+            Left: what the member sees. Right: what the GM sees. Same moment.
+          </div>
+        </div>
         <button
-          onClick={() => setMobileTab('chat')}
-          className={`flex-1 py-3 text-sm font-semibold text-center transition-colors ${
-            mobileTab === 'chat' ? 'text-emerald-600 border-b-2 border-emerald-600 bg-white' : 'text-gray-500 bg-gray-50'
-          }`}
+          onClick={handleReset}
+          className="flex-shrink-0 text-xs font-semibold bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg px-3 py-1.5 transition-colors"
         >
-          Member Chat
-        </button>
-        <button
-          onClick={() => setMobileTab('feed')}
-          className={`flex-1 py-3 text-sm font-semibold text-center transition-colors ${
-            mobileTab === 'feed' ? 'text-purple-600 border-b-2 border-purple-600 bg-gray-950' : 'text-gray-500 bg-gray-50'
-          }`}
-        >
-          GM Feed {agentEvents.length > 0 && <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs rounded-full bg-purple-600 text-white">{agentEvents.length}</span>}
+          Clear &amp; Reset
         </button>
       </div>
 
-      {/* LEFT: Concierge Chat (60% desktop, full on mobile) */}
-      <div className={`md:w-[60%] md:border-r border-gray-300 flex-1 min-h-0 ${mobileTab !== 'chat' ? 'hidden md:block' : ''}`}>
-        <ConciergePanel onMessageSent={handleMessageSent} />
-      </div>
+      {/* Content area */}
+      <div className="flex-1 flex flex-col md:flex-row min-h-0 relative">
+        {/* LEFT: Concierge Chat (55% desktop, full on mobile) */}
+        <div className={`md:w-[55%] md:border-r border-gray-300 flex-1 min-h-0 ${mobileTab !== 'chat' ? 'hidden md:flex md:flex-col' : 'flex flex-col'}`}>
+          <ConciergePanel onMessageSent={handleMessageSent} resetKey={resetKey} />
+        </div>
 
-      {/* RIGHT: GM Intelligence Feed (40% desktop, full on mobile) */}
-      <div className={`md:w-[40%] flex-1 min-h-0 ${mobileTab !== 'feed' ? 'hidden md:block' : ''}`}>
-        <GMIntelFeed events={agentEvents} loading={agentLoading} />
+        {/* RIGHT: GM Intelligence Feed (45% desktop, full on mobile) */}
+        <div className={`md:w-[45%] flex-1 min-h-0 ${mobileTab !== 'feed' ? 'hidden md:flex md:flex-col' : 'flex flex-col'}`}>
+          <GMIntelFeed events={agentEvents} loading={agentLoading} />
+        </div>
+
+        {/* Mobile floating toggle */}
+        <button
+          onClick={() => setMobileTab(t => t === 'chat' ? 'feed' : 'chat')}
+          className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white text-sm font-semibold px-5 py-3 rounded-full shadow-lg border border-gray-600 active:scale-95 transition-transform"
+        >
+          {mobileToggleLabel}
+        </button>
       </div>
     </div>
   );
