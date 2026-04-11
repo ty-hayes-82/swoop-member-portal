@@ -173,7 +173,10 @@ async function batchInsert(client, table, columns, rowsData) {
       );
       inserted += batch.length;
     } catch (e) {
-      // Fall back to row-by-row on batch failure
+      // Fall back to row-by-row on batch failure — log the batch error
+      const batchErr = `${table} batch fail: ${e.message}`;
+      if (!batchInsert._errors) batchInsert._errors = [];
+      batchInsert._errors.push(batchErr);
       for (const row of batch) {
         const placeholders = row.map((_, idx) => `$${idx + 1}`);
         try {
@@ -208,19 +211,18 @@ const TRUNCATE_TABLES = [
 ];
 
 async function cleanSlate(client) {
-  for (const table of TRUNCATE_TABLES) {
-    try {
-      await client.query(`DELETE FROM ${table} WHERE club_id = $1`, [CLUB_ID]);
-    } catch {
-      // Table may not exist or not have club_id — try unconditional for join tables
+  // Delete seed_pinetree AND old club_001 data (member IDs overlap: mbr_001..mbr_100)
+  const clubsToClean = [CLUB_ID, 'club_001'];
+  for (const clubId of clubsToClean) {
+    for (const table of TRUNCATE_TABLES) {
       try {
-        // booking_players, pos_line_items, pos_payments don't have club_id
-        // They get cleaned via cascade or we skip
-      } catch { /* ignore */ }
+        await client.query(`DELETE FROM ${table} WHERE club_id = $1`, [clubId]);
+      } catch {
+        // Table may not exist or not have club_id — skip
+      }
     }
+    try { await client.query(`DELETE FROM club WHERE club_id = $1`, [clubId]); } catch { /* */ }
   }
-  // Also delete club record
-  try { await client.query(`DELETE FROM club WHERE club_id = $1`, [CLUB_ID]); } catch { /* */ }
 }
 
 // ─── Insert functions (one per CSV type) ─────────────────────────────────────
@@ -298,7 +300,7 @@ async function insertMembers(client, rows) {
   const columns = [
     'member_id', 'member_number', 'club_id', 'external_id', 'first_name', 'last_name',
     'email', 'phone', 'membership_type', 'annual_dues', 'join_date', 'household_id',
-    'date_of_birth', 'gender', 'account_balance', 'membership_status', 'resigned_on',
+    'birthday', 'current_balance', 'membership_status', 'date_resigned',
     'health_tier', 'archetype', 'data_source',
   ];
   const data = rows.map((rawRow, idx) => {
@@ -313,7 +315,7 @@ async function insertMembers(client, rows) {
       row.membership_type ? pfx(row.membership_type) : null,
       row.annual_dues ? Number(row.annual_dues) : null,
       row.join_date || null, row.household_id ? pfx(row.household_id) : null,
-      row.birthday || row.date_of_birth || null, row.sex || row.gender || null,
+      row.birthday || row.date_of_birth || null,
       row.current_balance ? Number(row.current_balance) : null,
       statusVal, row.date_resigned || null, defaultTier, 'unknown', 'seed',
     ];
@@ -656,6 +658,7 @@ export default async function handler(req, res) {
   const client = await db.connect();
   try {
     await client.query('BEGIN');
+    batchInsert._errors = [];
 
     // Step 1: Clean slate (only on phase 1 or all)
     if (phase === '1' || phase === 'all') {
@@ -721,6 +724,7 @@ export default async function handler(req, res) {
       elapsed_seconds: Number(elapsed),
       tables,
       errors: errors.length > 0 ? errors : undefined,
+      batch_errors: batchInsert._errors || undefined,
       debug: { demo_dir: DEMO_DIR, dir_exists: fs.existsSync(DEMO_DIR), cwd: process.cwd(), phase },
     });
   } catch (e) {
