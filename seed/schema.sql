@@ -80,12 +80,12 @@ CREATE TABLE IF NOT EXISTS members (
     last_name               TEXT NOT NULL,
     email                   TEXT,
     phone                   TEXT,
-    date_of_birth           TEXT,
+    date_of_birth           DATE,
     gender                  TEXT,
     membership_type         TEXT NOT NULL REFERENCES membership_types(type_code),
     membership_status       TEXT NOT NULL DEFAULT 'active',  -- active | loa | resigned
-    join_date               TEXT NOT NULL,
-    resigned_on             TEXT,               -- NULL unless resigned
+    join_date               DATE NOT NULL,
+    resigned_on             DATE,               -- NULL unless resigned
     household_id            TEXT REFERENCES households(household_id),
     archetype               TEXT NOT NULL,
     annual_dues             REAL NOT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     booking_id          TEXT PRIMARY KEY,       -- bkg_0001 …
     club_id             TEXT NOT NULL REFERENCES club(club_id),
     course_id           TEXT NOT NULL REFERENCES courses(course_id),
-    booking_date        TEXT NOT NULL,          -- ISO date
+    booking_date        DATE NOT NULL,          -- ISO date
     tee_time            TEXT NOT NULL,          -- HH:MM
     player_count        INTEGER NOT NULL DEFAULT 1,
     has_guest           INTEGER NOT NULL DEFAULT 0,
@@ -192,8 +192,8 @@ CREATE TABLE IF NOT EXISTS pos_checks (
     check_id                TEXT PRIMARY KEY,   -- chk_00001 …
     outlet_id               TEXT NOT NULL REFERENCES dining_outlets(outlet_id),
     member_id               TEXT REFERENCES members(member_id),
-    opened_at               TEXT NOT NULL,
-    closed_at               TEXT,
+    opened_at               TIMESTAMPTZ NOT NULL,
+    closed_at               TIMESTAMPTZ,
     first_item_fired_at     TEXT,
     last_item_fulfilled_at  TEXT,
     subtotal                REAL NOT NULL DEFAULT 0,
@@ -252,7 +252,7 @@ CREATE TABLE IF NOT EXISTS event_definitions (
     club_id             TEXT NOT NULL REFERENCES club(club_id),
     name                TEXT NOT NULL,
     type                TEXT NOT NULL,          -- golf_tournament | dining | league | social
-    event_date          TEXT NOT NULL,
+    event_date          DATE NOT NULL,
     capacity            INTEGER NOT NULL,
     registration_fee    REAL NOT NULL DEFAULT 0,
     description         TEXT
@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS email_campaigns (
     club_id             TEXT NOT NULL REFERENCES club(club_id),
     subject             TEXT NOT NULL,
     type                TEXT NOT NULL,          -- newsletter | operational | event_promo | fb_promo
-    send_date           TEXT NOT NULL,
+    send_date           DATE NOT NULL,
     recipient_count     INTEGER NOT NULL DEFAULT 0,
     html_content_url    TEXT
 );
@@ -309,12 +309,12 @@ CREATE TABLE IF NOT EXISTS feedback (
     feedback_id         TEXT PRIMARY KEY,       -- fb_001 …
     member_id           TEXT REFERENCES members(member_id),
     club_id             TEXT NOT NULL REFERENCES club(club_id),
-    submitted_at        TEXT NOT NULL,
+    submitted_at        TIMESTAMPTZ NOT NULL,
     category            TEXT NOT NULL,          -- Service Speed | Food Quality | Course Condition | Facility | Staff | Pace of Play | General
     sentiment_score     REAL NOT NULL,          -- -1.0 to +1.0
     description         TEXT,
     status              TEXT NOT NULL DEFAULT 'acknowledged',  -- acknowledged | in_progress | resolved | escalated
-    resolved_at         TEXT,
+    resolved_at         TIMESTAMPTZ,
     is_understaffed_day INTEGER NOT NULL DEFAULT 0
 );
 
@@ -328,9 +328,9 @@ CREATE TABLE IF NOT EXISTS service_requests (
     member_id           TEXT REFERENCES members(member_id),
     booking_id          TEXT REFERENCES bookings(booking_id),
     request_type        TEXT NOT NULL,          -- beverage_cart | pace_complaint | course_condition | equipment | facility_maintenance
-    requested_at        TEXT NOT NULL,
+    requested_at        TIMESTAMPTZ NOT NULL,
     response_time_min   INTEGER,
-    resolved_at         TEXT,
+    resolved_at         TIMESTAMPTZ,
     resolution_notes    TEXT,
     is_understaffed_day INTEGER NOT NULL DEFAULT 0
 );
@@ -374,7 +374,7 @@ CREATE INDEX IF NOT EXISTS idx_shifts_understaffed      ON staff_shifts(is_under
 CREATE TABLE IF NOT EXISTS close_outs (
     closeout_id         TEXT PRIMARY KEY,       -- co_001 …
     club_id             TEXT NOT NULL REFERENCES club(club_id),
-    date                TEXT NOT NULL UNIQUE,
+    date                DATE NOT NULL,
     golf_revenue        REAL NOT NULL DEFAULT 0,
     fb_revenue          REAL NOT NULL DEFAULT 0,
     total_revenue       REAL NOT NULL DEFAULT 0,
