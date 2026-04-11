@@ -8,7 +8,7 @@
 import { sql } from '@vercel/postgres';
 import crypto from 'crypto';
 
-const SESSION_TTL_HOURS = 24;
+const SESSION_TTL_HOURS = 24 * 7; // 7 days for Google OAuth (refresh token handles re-auth)
 
 function generateToken() {
   return crypto.randomBytes(32).toString('hex');

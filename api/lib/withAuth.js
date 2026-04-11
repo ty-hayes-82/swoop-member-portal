@@ -51,6 +51,12 @@ export async function verifySession(req) {
     `;
     if (result.rows.length === 0) return { status: 'expired' };
     const row = result.rows[0];
+
+    // Sliding session: extend expiry by 24h on every valid request.
+    // This keeps active users logged in indefinitely without storing long TTLs.
+    // Fire-and-forget — don't block the request on this update.
+    sql`UPDATE sessions SET expires_at = NOW() + INTERVAL '24 hours' WHERE token = ${token}`.catch(() => {});
+
     return {
       status: 'ok',
       session: {

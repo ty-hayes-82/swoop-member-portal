@@ -13,7 +13,7 @@ import { rateLimit } from './lib/rateLimit.js';
 import { cors } from './lib/cors.js';
 import { logError, logInfo, logWarn, redactEmail } from './lib/logger.js';
 
-const SESSION_TTL_HOURS = 24;
+const SESSION_TTL_HOURS = 24 * 7; // 7 days — sliding extension in withAuth keeps active users logged in
 
 function generateToken() {
   return crypto.randomBytes(32).toString('hex');
