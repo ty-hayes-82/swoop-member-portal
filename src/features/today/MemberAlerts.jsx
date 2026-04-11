@@ -163,7 +163,7 @@ export default function MemberAlerts() {
             <div className="alerts-empty-title">All Members in Good Standing</div>
             <div className="alerts-empty-desc">No at-risk members detected. Import member data and engagement sources to activate priority alerts.</div>
           </div>
-          <button className="alerts-cta" onClick={() => navigate('settings')}>📥 Import Member Data</button>
+          <button className="alerts-cta" onClick={() => navigate('integrations/csv-import', { category: 'members' })}>📥 Import Member Data</button>
         </div>
       </div>
     );

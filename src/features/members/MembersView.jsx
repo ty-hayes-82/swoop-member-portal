@@ -78,8 +78,11 @@ export default function MembersView() {
   // Accept navigation intent for mode, segment, and archetype filters
   useEffect(() => {
     if (!routeIntent) return;
-    if (routeIntent.mode && MODES.some(m => m.key === routeIntent.mode)) {
-      setMode(routeIntent.mode);
+    const MODE_ALIASES = { 'all-members': 'search', 'email': 'email-decay' };
+    const rawMode = routeIntent.mode || routeIntent.tab;
+    const intentMode = MODE_ALIASES[rawMode] || rawMode;
+    if (intentMode && MODES.some(m => m.key === intentMode)) {
+      setMode(intentMode);
     }
     if (routeIntent.segment) setSegment(routeIntent.segment);
     if (routeIntent.archetype) setArchetype(routeIntent.archetype);

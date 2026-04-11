@@ -52,7 +52,7 @@ export default function ComplaintsTab() {
   const understaffedComplaints = feedbackRecords.filter(f => f.isUnderstaffedDay).length;
   const paceFB = getPaceFBImpact();
   const { fastConversionRate, slowConversionRate } = paceFB;
-  const conversionDrop = ((fastConversionRate - slowConversionRate) / fastConversionRate * 100).toFixed(0);
+  const conversionDrop = fastConversionRate > 0 ? ((fastConversionRate - slowConversionRate) / fastConversionRate * 100).toFixed(0) : '0';
 
   const understaffedDays = getUnderstaffedDays();
   const understaffedPct = feedbackRecords.length > 0

@@ -471,7 +471,7 @@ export default function TodayView() {
               in member disengagement.{' '}
               <button
                 type="button"
-                onClick={() => navigate('members', { tab: 'email' })}
+                onClick={() => navigate('members', { mode: 'email-decay' })}
                 className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 View decay watch list →
