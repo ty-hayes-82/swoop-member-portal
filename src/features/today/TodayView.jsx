@@ -398,6 +398,7 @@ export default function TodayView() {
               <div className="text-xs text-gray-600 leading-relaxed">
                 Text James Whitfield a message and watch AI respond with personalized context from his member profile.
               </div>
+              <div className="text-[11px] text-indigo-500/70 italic mt-1">"Book my usual Saturday 7 AM" → "Done! Booth 12 at noon? Your Arnold Palmer will be waiting."</div>
             </div>
             <button
               type="button"
@@ -409,8 +410,8 @@ export default function TodayView() {
           </div>
         )}
 
-        {/* Split-screen demo link — shown in guided/demo mode */}
-        {(getDataMode() === 'guided' || getDataMode() === 'demo') && (
+        {/* Split-screen demo link — shown after at least one import (not on empty state) */}
+        {(getDataMode() === 'guided' || getDataMode() === 'demo') && isGateOpen('members') && (
           <div
             className="fade-in-up rounded-2xl p-5 flex items-center gap-4"
             style={{
