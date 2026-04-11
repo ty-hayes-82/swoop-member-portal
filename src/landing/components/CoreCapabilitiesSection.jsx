@@ -36,7 +36,7 @@ export default function CoreCapabilitiesSection() {
   }, [prefersReducedMotion]);
 
   return (
-    <section style={{ marginBottom: theme.spacing.xxl }}>
+    <section id="platform" style={{ marginBottom: theme.spacing.xxl }}>
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
         Five core capabilities. One operating view.
       </h2>

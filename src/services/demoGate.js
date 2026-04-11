@@ -90,6 +90,9 @@ export function isFileLoaded(fileId) {
   return getLoadedFileSet().has(fileId);
 }
 
+// Gates that are always co-activated — importing either one opens both.
+const LINKED_GATES = { pipeline: 'agents', agents: 'pipeline' };
+
 /**
  * Import a file. Opens the corresponding gate.
  */
@@ -98,6 +101,8 @@ export function loadFile(fileId, gateId) {
   const gates = getLoadedGateSet();
   files.add(fileId);
   if (gateId) gates.add(gateId);
+  // Co-activate linked gates (pipeline <-> agents share the same CSV)
+  if (gateId && LINKED_GATES[gateId]) gates.add(LINKED_GATES[gateId]);
   persistFiles(files, gates);
   // Invalidate guided scoring cache so scores recalculate with new data.
   // Static import below; the guidedScoring <-> demoGate cycle is safe because
@@ -116,7 +121,11 @@ export function unloadFile(fileId, gateId, allFilesForGate = []) {
   // Only close the gate if no other files for this gate are loaded
   if (gateId) {
     const otherFilesLoaded = allFilesForGate.some(f => f !== fileId && files.has(f));
-    if (!otherFilesLoaded) gates.delete(gateId);
+    if (!otherFilesLoaded) {
+      gates.delete(gateId);
+      // Also close linked gate (pipeline <-> agents)
+      if (LINKED_GATES[gateId]) gates.delete(LINKED_GATES[gateId]);
+    }
   }
   persistFiles(files, gates);
   window.dispatchEvent(new CustomEvent(SOURCES_CHANGED_EVENT, { detail: { fileId, gateId, action: 'unload' } }));

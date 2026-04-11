@@ -2,7 +2,7 @@
 // Phase 2 swap: DataProvider calls _init() before render. All exports stay synchronous.
 
 import { apiFetch } from './apiClient';
-import { isGateOpen } from './demoGate';
+import { isGateOpen, getDataMode } from './demoGate';
 import { isAuthenticatedClub } from '@/config/constants';
 import { dailyRevenue } from '@/data/revenue';
 import { paceDistribution, slowRoundStats, bottleneckHoles, paceFBImpact } from '@/data/pace';
@@ -73,6 +73,8 @@ import { todayTeeSheet, teeSheetSummary } from '@/data/teeSheet';
  */
 
 let _d = null; // hydrated by _init()
+let _apiLoaded = false;
+const _isGuidedMode = () => getDataMode() === 'guided';
 
 const DEFAULT_PACE_DISTRIBUTION = [
   { bucket: '< 3:45', minutes: 225, count: 142, isSlow: false },
@@ -117,6 +119,7 @@ const sanitizePositive = (value, fallback = 0) => Math.max(0, toNumber(value, fa
 const toBucket = (value, fallback) => (typeof value === 'string' && value.trim() ? value.trim() : fallback);
 
 export const _init = async () => {
+  _apiLoaded = true;
   try {
     const data = await apiFetch('/api/operations');
     if (data) _d = data;
@@ -126,6 +129,7 @@ export const _init = async () => {
 /** @returns {DailyRevenueRow[]} */
 export const getRevenueByDay = () => {
   if (_d?.revenueByDay) return _d.revenueByDay;
+  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('fb')) return [];
   return dailyRevenue;
 };
@@ -133,6 +137,7 @@ export const getRevenueByDay = () => {
 /** @returns {MonthlyRevenueSummary} */
 export const getMonthlyRevenueSummary = () => {
   if (_d?.monthlySummary) return _d.monthlySummary;
+  if (_isGuidedMode() && !_apiLoaded) return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
   const fbOpen = isGateOpen('fb');
   const teeOpen = isGateOpen('tee-sheet');
   if (!fbOpen && !teeOpen) return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
@@ -159,7 +164,8 @@ export const getSlowRoundRate = () => {
       threshold: sanitizePositive(source?.threshold, DEFAULT_SLOW_ROUND_STATS.threshold),
     };
   }
-  if (!isGateOpen('pace')) return EMPTY_SLOW_ROUND;
+  if (_isGuidedMode() && !_apiLoaded) return EMPTY_SLOW_ROUND;
+  if (!isGateOpen('pace') && !isGateOpen('tee-sheet')) return EMPTY_SLOW_ROUND;
   const source = (slowRoundStats ?? DEFAULT_SLOW_ROUND_STATS);
   const totalRounds = Math.round(sanitizePositive(source?.totalRounds, DEFAULT_SLOW_ROUND_STATS.totalRounds));
   const slowRounds = Math.round(sanitizePositive(source?.slowRounds, DEFAULT_SLOW_ROUND_STATS.slowRounds));
@@ -188,7 +194,8 @@ export const getBottleneckHoles = () => {
       };
     });
   }
-  if (!isGateOpen('pace')) return [];
+  if (_isGuidedMode() && !_apiLoaded) return [];
+  if (!isGateOpen('pace') && !isGateOpen('tee-sheet')) return [];
   const source = (bottleneckHoles ?? DEFAULT_BOTTLENECK_HOLES);
   if (!Array.isArray(source) || source.length === 0) return DEFAULT_BOTTLENECK_HOLES;
   return source.map((item, index) => {
@@ -216,7 +223,8 @@ export const getPaceFBImpact = () => {
       revenueLostPerMonth: Math.round(sanitizePositive(source?.revenueLostPerMonth, DEFAULT_PACE_FB_IMPACT.revenueLostPerMonth)),
     };
   }
-  if (!isGateOpen('pace')) return EMPTY_PACE_FB;
+  if (_isGuidedMode() && !_apiLoaded) return EMPTY_PACE_FB;
+  if (!isGateOpen('pace') && !isGateOpen('tee-sheet')) return EMPTY_PACE_FB;
   const source = (paceFBImpact ?? DEFAULT_PACE_FB_IMPACT);
   return {
     fastConversionRate: sanitizeRate(source?.fastConversionRate, DEFAULT_PACE_FB_IMPACT.fastConversionRate),
@@ -233,6 +241,7 @@ export const getPaceFBImpact = () => {
 /** @returns {TeeSheetRow[]} */
 export const getTodayTeeSheet = () => {
   if (_d?.todayTeeSheet) return _d.todayTeeSheet;
+  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('tee-sheet')) return [];
   return todayTeeSheet;
 };
@@ -240,6 +249,7 @@ export const getTodayTeeSheet = () => {
 /** @returns {TeeSheetSummary} */
 export const getTeeSheetSummary = () => {
   if (_d?.teeSheetSummary) return _d.teeSheetSummary;
+  if (_isGuidedMode() && !_apiLoaded) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
   if (!isGateOpen('tee-sheet')) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
   return teeSheetSummary;
 };

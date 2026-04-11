@@ -10,10 +10,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 const MEMBER_ID = 'mbr_t01';
 
 const SUGGESTED_MESSAGES = [
-  "Lunch was really slow today. We waited forever and nobody checked on us.",
-  "Book my usual Saturday tee time",
-  "What events this weekend?",
-  "Can you get Erin on the wine dinner list?",
+  "My lunch took 45 minutes and no one apologized",
+  "Book my usual Saturday 7 AM with the guys",
+  "Get Erin on the wine dinner list",
+  "What's happening at the club this weekend?",
 ];
 
 function timestamp() {
@@ -243,6 +243,28 @@ function ConciergePanel({ onMessageSent, resetKey }) {
   );
 }
 
+/* ---------- "$18K AT RISK" Flash Badge ---------- */
+function AtRiskBadge() {
+  const [flash, setFlash] = useState(true);
+
+  useEffect(() => {
+    const id = setInterval(() => setFlash(f => !f), 800);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-xs font-black uppercase tracking-wide rounded-md px-2.5 py-1 transition-all duration-300 ${
+        flash
+          ? 'bg-red-600 text-white shadow-lg shadow-red-600/50 scale-105'
+          : 'bg-red-700/80 text-red-100 shadow-md shadow-red-700/30 scale-100'
+      }`}
+    >
+      $18K/yr AT RISK
+    </span>
+  );
+}
+
 /* ---------- GM Intelligence Feed (Right) ---------- */
 function GMIntelFeed({ events, loading }) {
   const bottomRef = useRef(null);
@@ -250,6 +272,9 @@ function GMIntelFeed({ events, loading }) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [events, loading]);
+
+  const hasComplaint = events.some(e => e.agent === 'service-recovery' || e.agent === 'member-risk');
+  const agentCount = new Set(events.map(e => e.agent)).size;
 
   return (
     <div className="flex flex-col h-full bg-gray-950 text-white">
@@ -262,11 +287,26 @@ function GMIntelFeed({ events, loading }) {
           <div className="font-semibold text-sm text-gray-100">GM Intelligence Feed</div>
           <div className="text-[10px] text-gray-500 uppercase tracking-wider">Real-time Agent Activations</div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] text-emerald-400">Live</span>
+        <div className="flex items-center gap-2">
+          {agentCount > 0 && (
+            <span className="text-[10px] font-bold text-blue-300 bg-blue-900/60 rounded-full px-2.5 py-1">
+              {agentCount} agent{agentCount !== 1 ? 's' : ''} responding
+            </span>
+          )}
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] text-emerald-400">Live</span>
+          </div>
         </div>
       </div>
+
+      {/* At-risk flash banner */}
+      {hasComplaint && (
+        <div className="flex-shrink-0 bg-red-950/60 border-b border-red-800/50 px-4 py-2.5 flex items-center justify-center gap-3">
+          <AtRiskBadge />
+          <span className="text-xs text-red-300">Service complaint detected — retention risk elevated</span>
+        </div>
+      )}
 
       {/* Events */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">

@@ -134,7 +134,7 @@ export default function StaffingTab() {
             <strong className="text-gray-800 dark:text-white/90">The Layer 3 connection:</strong>{' '}
             Slow rounds skip the dining room. The tee sheet knows the pace.
             The POS knows the dining. Neither knows the other exists. Swoop sees both —
-            and {leakage ? `that's $${leakage.PACE_LOSS.toLocaleString()}/mo of the $${leakage.TOTAL.toLocaleString()} total leakage` : 'that\'s why $5,760/mo is slipping through the cracks'}. // lint-no-hardcoded-dollars: allow — fallback when leakage data null
+            and {leakage ? `that's $${leakage.PACE_LOSS.toLocaleString()}/mo of the $${leakage.TOTAL.toLocaleString()} total leakage` : 'that\'s why thousands per month are slipping through the cracks'}.
           </div>
         </div>
       )}

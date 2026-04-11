@@ -90,9 +90,11 @@ import { cancellationProbabilities as staticCancellationProbabilities } from '..
  */
 
 let _d = null;
-
+let _apiLoaded = false;
+const _isGuidedMode = () => getDataMode() === 'guided';
 
 export const _init = async () => {
+  _apiLoaded = true;
   try {
     const data = await apiFetch('/api/briefing');
     if (data) _d = data;
@@ -170,6 +172,8 @@ export const DEMO_BRIEFING = {
  */
 export const getDailyBriefing = (date = '2026-01-17') => {
   if (_d) return _d;
+  // In guided mode, only show briefing from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return EMPTY_BRIEFING;
   if (!isGateOpen('tee-sheet')) return EMPTY_BRIEFING;
 
   // Demo mode: try to build from service data, fall back to static
@@ -219,6 +223,8 @@ export const getDailyBriefing = (date = '2026-01-17') => {
   const summary = getTeeSheetSummary();
   return {
     currentDate: date,
+    fb: isGateOpen('fb') ? { covers: 126, avgCheck: 34, postRoundRate: 68 } : null,
+    email: isGateOpen('email') ? { openRate: 42, clickRate: 12, decayCount: 9 } : null,
     teeSheet: { roundsToday: summary.totalRounds || DEMO_BRIEFING.teeSheet.roundsToday, utilization: 0.87 },
     yesterdayRecap: {
       date:           yesterday.date,

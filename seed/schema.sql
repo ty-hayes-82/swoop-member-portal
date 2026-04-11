@@ -80,12 +80,12 @@ CREATE TABLE IF NOT EXISTS members (
     last_name               TEXT NOT NULL,
     email                   TEXT,
     phone                   TEXT,
-    date_of_birth           TEXT,
+    date_of_birth           DATE,
     gender                  TEXT,
     membership_type         TEXT NOT NULL REFERENCES membership_types(type_code),
     membership_status       TEXT NOT NULL DEFAULT 'active',  -- active | loa | resigned
-    join_date               TEXT NOT NULL,
-    resigned_on             TEXT,               -- NULL unless resigned
+    join_date               DATE NOT NULL,
+    resigned_on             DATE,               -- NULL unless resigned
     household_id            TEXT REFERENCES households(household_id),
     archetype               TEXT NOT NULL,
     annual_dues             REAL NOT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     booking_id          TEXT PRIMARY KEY,       -- bkg_0001 …
     club_id             TEXT NOT NULL REFERENCES club(club_id),
     course_id           TEXT NOT NULL REFERENCES courses(course_id),
-    booking_date        TEXT NOT NULL,          -- ISO date
+    booking_date        DATE NOT NULL,          -- ISO date
     tee_time            TEXT NOT NULL,          -- HH:MM
     player_count        INTEGER NOT NULL DEFAULT 1,
     has_guest           INTEGER NOT NULL DEFAULT 0,
@@ -192,8 +192,8 @@ CREATE TABLE IF NOT EXISTS pos_checks (
     check_id                TEXT PRIMARY KEY,   -- chk_00001 …
     outlet_id               TEXT NOT NULL REFERENCES dining_outlets(outlet_id),
     member_id               TEXT REFERENCES members(member_id),
-    opened_at               TEXT NOT NULL,
-    closed_at               TEXT,
+    opened_at               TIMESTAMPTZ NOT NULL,
+    closed_at               TIMESTAMPTZ,
     first_item_fired_at     TEXT,
     last_item_fulfilled_at  TEXT,
     subtotal                REAL NOT NULL DEFAULT 0,
@@ -252,7 +252,7 @@ CREATE TABLE IF NOT EXISTS event_definitions (
     club_id             TEXT NOT NULL REFERENCES club(club_id),
     name                TEXT NOT NULL,
     type                TEXT NOT NULL,          -- golf_tournament | dining | league | social
-    event_date          TEXT NOT NULL,
+    event_date          DATE NOT NULL,
     capacity            INTEGER NOT NULL,
     registration_fee    REAL NOT NULL DEFAULT 0,
     description         TEXT
@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS email_campaigns (
     club_id             TEXT NOT NULL REFERENCES club(club_id),
     subject             TEXT NOT NULL,
     type                TEXT NOT NULL,          -- newsletter | operational | event_promo | fb_promo
-    send_date           TEXT NOT NULL,
+    send_date           DATE NOT NULL,
     recipient_count     INTEGER NOT NULL DEFAULT 0,
     html_content_url    TEXT
 );
@@ -309,12 +309,12 @@ CREATE TABLE IF NOT EXISTS feedback (
     feedback_id         TEXT PRIMARY KEY,       -- fb_001 …
     member_id           TEXT REFERENCES members(member_id),
     club_id             TEXT NOT NULL REFERENCES club(club_id),
-    submitted_at        TEXT NOT NULL,
+    submitted_at        TIMESTAMPTZ NOT NULL,
     category            TEXT NOT NULL,          -- Service Speed | Food Quality | Course Condition | Facility | Staff | Pace of Play | General
     sentiment_score     REAL NOT NULL,          -- -1.0 to +1.0
     description         TEXT,
     status              TEXT NOT NULL DEFAULT 'acknowledged',  -- acknowledged | in_progress | resolved | escalated
-    resolved_at         TEXT,
+    resolved_at         TIMESTAMPTZ,
     is_understaffed_day INTEGER NOT NULL DEFAULT 0
 );
 
@@ -328,9 +328,9 @@ CREATE TABLE IF NOT EXISTS service_requests (
     member_id           TEXT REFERENCES members(member_id),
     booking_id          TEXT REFERENCES bookings(booking_id),
     request_type        TEXT NOT NULL,          -- beverage_cart | pace_complaint | course_condition | equipment | facility_maintenance
-    requested_at        TEXT NOT NULL,
+    requested_at        TIMESTAMPTZ NOT NULL,
     response_time_min   INTEGER,
-    resolved_at         TEXT,
+    resolved_at         TIMESTAMPTZ,
     resolution_notes    TEXT,
     is_understaffed_day INTEGER NOT NULL DEFAULT 0
 );
@@ -374,7 +374,7 @@ CREATE INDEX IF NOT EXISTS idx_shifts_understaffed      ON staff_shifts(is_under
 CREATE TABLE IF NOT EXISTS close_outs (
     closeout_id         TEXT PRIMARY KEY,       -- co_001 …
     club_id             TEXT NOT NULL REFERENCES club(club_id),
-    date                TEXT NOT NULL UNIQUE,
+    date                DATE NOT NULL,
     golf_revenue        REAL NOT NULL DEFAULT 0,
     fb_revenue          REAL NOT NULL DEFAULT 0,
     total_revenue       REAL NOT NULL DEFAULT 0,
@@ -1067,7 +1067,8 @@ CREATE TABLE IF NOT EXISTS playbook_runs (
   health_score_at_start REAL,
   health_score_at_end REAL,
   outcome             TEXT,
-  agent_session_id    TEXT                                  -- Anthropic Managed Agent session ID for wake events
+  agent_session_id    TEXT,                                  -- Anthropic Managed Agent session ID for wake events
+  session_thread_id   TEXT                                   -- Thread within coordinator session for sub-agent routing
 );
 
 CREATE INDEX IF NOT EXISTS idx_playbook_runs_club ON playbook_runs(club_id, status);
@@ -1327,6 +1328,63 @@ CREATE TABLE IF NOT EXISTS member_requests (
 );
 
 CREATE INDEX IF NOT EXISTS idx_member_requests_club ON member_requests(club_id, status);
+
+-- ---------------------------------------------------------------------------
+-- 3.16 PROACTIVE CONCIERGE (Agent Phase 8 — Proactive Outreach)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS member_proactive_log (
+  id                  SERIAL PRIMARY KEY,
+  club_id             TEXT NOT NULL,
+  member_id           TEXT NOT NULL,
+  outreach_type       TEXT NOT NULL,              -- weather_opportunity | inactivity_nudge | event_suggestion | birthday
+  channel             TEXT NOT NULL DEFAULT 'in_app',  -- in_app | email | sms | push
+  message_preview     TEXT,
+  sent_at             TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_proactive_log_club ON member_proactive_log(club_id, member_id);
+CREATE INDEX IF NOT EXISTS idx_proactive_log_type ON member_proactive_log(outreach_type);
+CREATE INDEX IF NOT EXISTS idx_proactive_log_sent ON member_proactive_log(sent_at DESC);
+
+CREATE TABLE IF NOT EXISTS weather_forecasts (
+  id                  SERIAL PRIMARY KEY,
+  club_id             TEXT NOT NULL,
+  forecast_date       DATE NOT NULL,
+  conditions          TEXT NOT NULL,              -- clear | partly_cloudy | cloudy | rainy | stormy
+  high_temp           INTEGER NOT NULL,
+  low_temp            INTEGER NOT NULL,
+  wind_mph            INTEGER NOT NULL DEFAULT 0,
+  precip_prob         REAL NOT NULL DEFAULT 0,    -- 0.0–1.0
+  UNIQUE(club_id, forecast_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_weather_forecasts_club_date ON weather_forecasts(club_id, forecast_date);
+
+-- Seed: 7-day Scottsdale forecast (April 11–17, 2026)
+INSERT INTO weather_forecasts (club_id, forecast_date, conditions, high_temp, low_temp, wind_mph, precip_prob) VALUES
+  ('club_pinetree', '2026-04-11', 'clear',         92, 68, 5,  0.00),
+  ('club_pinetree', '2026-04-12', 'clear',         94, 70, 4,  0.00),
+  ('club_pinetree', '2026-04-13', 'partly_cloudy', 90, 67, 8,  0.10),
+  ('club_pinetree', '2026-04-14', 'clear',         91, 69, 6,  0.00),
+  ('club_pinetree', '2026-04-15', 'rainy',         78, 62, 15, 0.75),
+  ('club_pinetree', '2026-04-16', 'partly_cloudy', 85, 65, 10, 0.15),
+  ('club_pinetree', '2026-04-17', 'clear',         93, 70, 5,  0.00)
+ON CONFLICT (club_id, forecast_date) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- 3.17 AGENT REGISTRY (Managed Agent registration via /v1/agents API)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS agent_registry (
+  agent_name          TEXT NOT NULL,
+  agent_id            TEXT NOT NULL,
+  club_id             TEXT NOT NULL,
+  registered_at       TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (agent_name, club_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_registry_club ON agent_registry(club_id);
 
 -- =============================================================================
 -- End of schema

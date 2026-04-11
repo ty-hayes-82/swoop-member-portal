@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { isGateOpen } from './demoGate';
+import { isGateOpen, getDataMode } from './demoGate';
 import { cockpitItems, sinceLastLogin as staticSinceLastLogin } from '@/data/cockpit';
 import { useServiceCache } from '@/hooks/useServiceCache';
 
@@ -31,8 +31,11 @@ import { useServiceCache } from '@/hooks/useServiceCache';
  */
 
 let _d = null;
+let _apiLoaded = false;
+const _isGuidedMode = () => getDataMode() === 'guided';
 
 export const _init = async () => {
+  _apiLoaded = true;
   try {
     const data = await apiFetch('/api/cockpit');
     if (data) _d = data;
@@ -70,11 +73,17 @@ function gateFilterItem(item) {
 
 /** @returns {CockpitPriorityItem[]} */
 export const getPriorityItems = () => {
+  // In guided mode, only show priority items from live API data, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return [];
   const raw = _d?.priorities ?? (isGateOpen('agents') ? cockpitItems : []);
   return raw.map(gateFilterItem);
 };
 /** @returns {SinceLastLoginItem[]} */
-export const getSinceLastLogin = () => _d?.sinceLastLogin ?? (isGateOpen('agents') ? staticSinceLastLogin : []);
+export const getSinceLastLogin = () => {
+  // In guided mode, only show login data from live API, not static seed
+  if (_isGuidedMode() && !_apiLoaded) return [];
+  return _d?.sinceLastLogin ?? (isGateOpen('agents') ? staticSinceLastLogin : []);
+};
 export const sourceSystems = ['CRM', 'POS', 'Weather', 'Tee Sheet', 'Complaints'];
 
 // ─── React hook (useServiceCache migration — SHIP_PLAN §2.3) ────────────

@@ -1,8 +1,8 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
-import { createManagedSession, sendSessionEvent, MANAGED_AGENT_ID, MANAGED_ENV_ID } from './managed-config.js';
+import { createManagedSession, sendSessionEvent } from './managed-config.js';
 
-const SIMULATION_MODE = !MANAGED_AGENT_ID || !MANAGED_ENV_ID;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
 export default withAuth(async function handler(req, res) {
   if (req.method !== 'POST') {

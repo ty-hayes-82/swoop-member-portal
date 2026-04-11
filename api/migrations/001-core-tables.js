@@ -332,7 +332,9 @@ export default async function handler(req, res) {
       completed_at TIMESTAMPTZ,
       health_score_at_start REAL,
       health_score_at_end REAL,
-      outcome TEXT
+      outcome TEXT,
+      agent_session_id TEXT,
+      session_thread_id TEXT
     )
   `);
 

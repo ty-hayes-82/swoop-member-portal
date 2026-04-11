@@ -9,6 +9,8 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
+import { assembleAgentCall } from './agents/assemble.js';
+import { logError } from './lib/logger.js';
 
 const AGENTS = {
   demand_optimizer: {
@@ -181,10 +183,23 @@ export default withAuth(async function handler(req, res) {
       pendingDetails: pendingApproval.slice(0, 10),
     });
   } catch (e) {
+    logError('agent-autonomous:POST', e, { clubId });
     res.status(500).json({ error: e.message });
   }
 }, { allowDemo: true });
 
+/**
+ * Generate proposals for a given agent.
+ *
+ * SQL-driven agents (member_pulse, service_recovery, demand_optimizer) query
+ * the database directly. LLM-powered agents use assembleAgentCall() to build
+ * a Claude API payload for richer reasoning.
+ *
+ * @param {string} clubId
+ * @param {string} agentId
+ * @param {object} def — Agent definition from the AGENTS map.
+ * @returns {Promise<Array<object>>}
+ */
 async function generateAgentProposals(clubId, agentId, def) {
   const proposals = [];
 

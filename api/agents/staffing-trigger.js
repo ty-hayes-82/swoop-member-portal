@@ -11,14 +11,14 @@
  *   4. Save recommendations to staffing_recommendations table
  *   5. Create actions for high-impact gaps
  *
- * Simulation mode: when MANAGED_AGENT_ID or MANAGED_ENV_ID are unset,
+ * Simulation mode: when ANTHROPIC_API_KEY env var is unset,
  * runs deterministic analysis without calling the LLM.
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
-import { createManagedSession, sendSessionEvent, MANAGED_AGENT_ID, MANAGED_ENV_ID } from './managed-config.js';
+import { createManagedSession, sendSessionEvent } from './managed-config.js';
 
-const SIMULATION_MODE = !MANAGED_AGENT_ID || !MANAGED_ENV_ID;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
 // ---------------------------------------------------------------------------
 // Data pull functions

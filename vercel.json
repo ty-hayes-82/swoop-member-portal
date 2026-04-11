@@ -7,7 +7,16 @@
     { "path": "/api/cron/purge-cross-club-audit", "schedule": "0 4 * * *" },
     { "path": "/api/cron/playbook-timers", "schedule": "0 8 * * *" },
     { "path": "/api/cron/health-monitor", "schedule": "0 10 * * *" },
-    { "path": "/api/cron/daily-gameplan", "schedule": "0 5 * * *" }
+    { "path": "/api/cron/daily-gameplan", "schedule": "0 5 * * *" },
+    { "path": "/api/cron/staffing-monitor", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/concierge-proactive", "schedule": "0 7 * * *" },
+    { "path": "/api/cron/member-onboarding", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/pre-arrival-brief", "schedule": "0 17 * * *" },
+    { "path": "/api/cron/post-visit-followup", "schedule": "0 20 * * *" },
+    { "path": "/api/cron/staff-briefings", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/concierge-engagement", "schedule": "0 7 * * *" },
+    { "path": "/api/cron/renewal-intelligence", "schedule": "0 8 1 * *" },
+    { "path": "/api/cron/arrival-scan", "schedule": "*/15 * * * *" }
   ],
   "headers": [
     {

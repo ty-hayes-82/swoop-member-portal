@@ -3,6 +3,10 @@
   overflow-x: hidden;
 }
 
+.landing-page section[id] {
+  scroll-margin-top: 64px;
+}
+
 .landing-page,
 .landing-page * {
   box-sizing: border-box;
@@ -128,6 +132,10 @@
 }
 
 @media (max-width: 768px) {
+  .landing-nav-links button:not(:last-child) {
+    display: none;
+  }
+
   .landing-grid-3 {
     grid-template-columns: 1fr;
   }

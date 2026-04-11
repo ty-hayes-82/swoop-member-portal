@@ -27,6 +27,7 @@ vi.mock('../../api/agents/managed-config.js', () => ({
   getAnthropicClient: () => ({}),
   createManagedSession: vi.fn().mockResolvedValue({ id: 'sim_test_session' }),
   sendSessionEvent: vi.fn().mockResolvedValue({}),
+  sendThreadMessage: vi.fn().mockResolvedValue({}),
 }));
 
 vi.mock('../../api/lib/withAuth.js', () => ({

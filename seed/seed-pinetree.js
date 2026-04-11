@@ -337,7 +337,7 @@ function resolveAliases(row, importType) {
   const resolved = {};
   for (const [key, value] of Object.entries(row)) {
     const lower = key.trim().toLowerCase();
-    const mapped = overrides[lower] || FIELD_ALIASES[lower] || key;
+    const mapped = overrides[lower] || FIELD_ALIASES[lower] || lower;
     if (mapped !== '_skip') {
       resolved[mapped] = value;
     }

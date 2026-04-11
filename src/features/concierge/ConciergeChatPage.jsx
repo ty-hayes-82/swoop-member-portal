@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
+import { isGuidedMode, getLoadedGates } from '../../services/demoGate';
 
 const STORAGE_KEY = 'swoop_concierge_chat';
 const MEMBER_ID = 'mbr_t01';
 
 const QUICK_MESSAGES = [
+  "My lunch took 45 minutes and no one apologized",
+  "Book my usual Saturday 7 AM with the guys",
+  "Get Erin on the wine dinner list",
   "What's happening at the club this weekend?",
-  'Book my usual Saturday tee time',
-  'Reserve booth 12 for lunch Saturday',
 ];
 
 function getAuthHeaders() {
@@ -42,8 +44,10 @@ export default function ConciergeChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Prevent body scroll and handle mobile viewport
+  // Prevent body scroll only when concierge is the top-level route (not embedded)
   useEffect(() => {
+    const isTopLevel = window.location.hash === '#/concierge';
+    if (!isTopLevel) return;
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
@@ -66,7 +70,11 @@ export default function ConciergeChatPage() {
     try {
       const res = await fetch('/api/concierge/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+          ...(isGuidedMode() ? { 'X-Demo-Gates': getLoadedGates().join(',') } : {}),
+        },
         body: JSON.stringify({ member_id: MEMBER_ID, message: text.trim() }),
       });
       const data = await res.json();
@@ -173,6 +181,21 @@ export default function ConciergeChatPage() {
         <div ref={bottomRef} />
       </div>
 
+      {/* Suggestion chips when conversation is active */}
+      {messages.length > 0 && !loading && (
+        <div className="flex-shrink-0 px-3 pb-1 flex gap-2 overflow-x-auto">
+          {QUICK_MESSAGES.filter(msg => !messages.some(m => m.text === msg)).slice(0, 3).map((msg, i) => (
+            <button
+              key={i}
+              onClick={() => send(msg)}
+              className="whitespace-nowrap text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full px-3 py-1.5 transition-colors flex-shrink-0"
+            >
+              {msg}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Input bar */}
       <form
         onSubmit={handleSubmit}
@@ -198,6 +221,11 @@ export default function ConciergeChatPage() {
           </svg>
         </button>
       </form>
+
+      {/* Powered by badge */}
+      <div className="flex-shrink-0 bg-white text-center py-1.5">
+        <span className="text-[10px] text-gray-400 tracking-wide">Powered by <span className="font-semibold text-gray-500">Swoop AI</span></span>
+      </div>
     </div>
   );
 }

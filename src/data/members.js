@@ -56,10 +56,10 @@ export const atRiskMembers = [
   { memberId: 'mbr_t03', name: 'Kevin Hurst', score: 18, trend: 'declining', topRisk: 'Zero activity since December; email decay since November', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:10},{month:'Nov',rounds:6},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
   { memberId: 'mbr_t07', name: 'Linda Leonard', score: 12, trend: 'declining', topRisk: 'Last visit October; dues-only member', archetype: 'Ghost', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:0},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
   { memberId: 'mbr_t01', name: 'James Whitfield', score: 42, trend: 'declining', topRisk: 'Unresolved complaint Jan 16 — 42-min Grill Room wait, felt ignored. $18K dues at risk', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:3},{month:'Dec',rounds:2},{month:'Jan',rounds:1}] },
-  { memberId: 'mbr_t04', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace — zero rounds since. 10-year member', archetype: 'Weekend Warrior', duesAnnual: 12000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_t04', name: 'Anne Jordan', score: 28, trend: 'declining', topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace — zero rounds since. 10-year member, $14K dues at risk', archetype: 'Weekend Warrior', duesAnnual: 14000, roundsTrend: [{month:'Oct',rounds:4},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
   { memberId: 'mbr_t05', name: 'Robert Callahan', score: 22, trend: 'declining', topRisk: 'Hitting exact $3,020 F&B minimum then stopping. 9-day complaint unresolved. No golf since Nov', archetype: 'Declining', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:1}] },
   { memberId: 'mbr_146', name: 'Sandra Chen', score: 36, trend: 'declining', topRisk: 'Dining spend dropped 87% ($18 last visit vs $142 avg). Declined 3 consecutive event invites. $9K annual dues — last 2 renewals were late.', archetype: 'Social Butterfly', duesAnnual: 9000, roundsTrend: [{month:'Oct',rounds:1},{month:'Nov',rounds:1},{month:'Dec',rounds:0},{month:'Jan',rounds:0}] },
-  { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Two slow-play complaints filed and ignored. Skipping dining entirely. 12-year member, $15K dues', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
+  { memberId: 'mbr_312', name: 'Robert Mills', score: 33, trend: 'declining', topRisk: 'Two slow-play complaints filed and ignored. Skipping dining entirely. 12-year member, $18K dues', archetype: 'Balanced Active', duesAnnual: 18000, roundsTrend: [{month:'Oct',rounds:3},{month:'Nov',rounds:2},{month:'Dec',rounds:1},{month:'Jan',rounds:0}] },
 ];
 
 export const resignationScenarios = [
@@ -103,7 +103,7 @@ export const resignationScenarios = [
     memberId: 'mbr_t04', name: 'Anne Jordan', archetype: 'Weekend Warrior', resignDate: '2026-01-27',
     pattern: 'Slow weekday-then-weekend withdrawal', keySignal: 'Rounds: Oct 4 → Nov 2 → Dec 1',
     missedIntervention: 'Oct round drop from 4 to 2/mo should have triggered priority Saturday slot offer',
-    lifetimeValue: 48000, dues: 12000,
+    lifetimeValue: 48000, dues: 14000,
     timeline: [
       { date: 'Oct 2025', event: '4 rounds played (Sat/Sun only)', domain: 'Golf' },
       { date: 'Nov 2025', event: 'Down to 2 rounds; skips 3 weekend events', domain: 'Golf' },
@@ -191,11 +191,11 @@ export const memberProfiles = {
     memberId: 'mbr_t04',
     name: 'Anne Jordan',
     tier: 'Full Golf',
-    joinDate: '2016-08-01',
+    joinDate: '2016-03-15',
     archetype: 'Weekend Warrior',
     healthScore: 28,
     trend: [66, 62, 58, 52, 48, 35, 28],
-    duesAnnual: 12000,
+    duesAnnual: 14000,
     memberValueAnnual: 17800,
     preferredChannel: 'SMS',
     lastSeenLocation: 'Practice putting green',
@@ -470,8 +470,8 @@ export const memberProfiles = {
   mbr_t07: {
     memberId: 'mbr_t07',
     name: 'Linda Leonard',
-    tier: 'Social',
-    joinDate: '2025-06-10',
+    tier: 'Full Golf',
+    joinDate: '2019-05-20',
     archetype: 'Ghost',
     healthScore: 12,
     trend: [64, 58, 42, 28, 18, 14, 12],

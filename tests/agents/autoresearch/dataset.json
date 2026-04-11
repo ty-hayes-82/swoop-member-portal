@@ -1,0 +1,146 @@
+[
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "Book my usual Saturday tee time"
+    },
+    "outputs": {
+      "focus": "Regular booking + cross-sell",
+      "club_agents": ["staffing-demand", "member-risk"],
+      "expected_tools": ["book_tee_time"],
+      "scoring_context": "BOOKING SCENARIO: proactive=10 means suggesting dining or another activity after confirming the booking, referencing specific preferences (booth 12, Arnold Palmer). helpful=10 means the booking was completed AND a cross-sell was offered."
+    }
+  },
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "The Grill Room service was terrible yesterday. We waited 40 minutes and nobody checked on us."
+    },
+    "outputs": {
+      "focus": "High-value complaint handling",
+      "club_agents": ["service-recovery", "member-risk"],
+      "expected_tools": ["file_complaint"],
+      "scoring_context": "COMPLAINT SCENARIO: natural=10 means the response starts with the member's name + empathy, NOT with 'Filed' or 'Done'. helpful=10 means the complaint was filed AND a concrete recovery was offered (specific booth, specific date). proactive=10 means suggesting a recovery experience the member didn't ask for."
+    }
+  },
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "I need to host a dinner for 4 clients from Meridian Partners next Wednesday. What do you recommend?"
+    },
+    "outputs": {
+      "focus": "Corporate entertaining upsell",
+      "club_agents": ["fb-intelligence"],
+      "expected_tools": [],
+      "scoring_context": "BUSINESS DINNER SCENARIO: proactive=10 means suggesting private dining room, cocktails, wine pairings, or other upsells without being asked. helpful=10 means asking about time and dietary preferences while simultaneously offering high-value suggestions. The concierge should be enthusiastic about impressing the member's clients."
+    }
+  },
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "I haven't been to the club in weeks. What's new?"
+    },
+    "outputs": {
+      "focus": "At-risk re-engagement",
+      "club_agents": ["member-risk"],
+      "expected_tools": ["get_club_calendar"],
+      "scoring_context": "RE-ENGAGEMENT SCENARIO: natural=10 means starting with warm acknowledgment ('We've missed you!'). proactive=10 means suggesting 2+ personalized activities referencing the member's known preferences and family. helpful=10 means actually pulling the calendar and making specific, actionable suggestions."
+    }
+  },
+  {
+    "inputs": {
+      "member": "jordan",
+      "message": "Can I get a 7 AM slot next Saturday?"
+    },
+    "outputs": {
+      "focus": "Preferred slot booking + cross-sell",
+      "club_agents": ["staffing-demand", "member-risk"],
+      "expected_tools": ["book_tee_time"],
+      "scoring_context": "BOOKING SCENARIO: Same as standard booking. proactive=10 means suggesting post-round dining or activity. helpful=10 means confirming the booking with date AND cross-selling."
+    }
+  },
+  {
+    "inputs": {
+      "member": "jordan",
+      "message": "Why is the course always so slow on Saturday mornings? It's really frustrating."
+    },
+    "outputs": {
+      "focus": "Pace frustration as complaint",
+      "club_agents": ["game-plan", "service-recovery"],
+      "expected_tools": ["file_complaint"],
+      "scoring_context": "COMPLAINT SCENARIO: This IS a complaint even though it's about pace, not service. natural=10 means empathy-first response starting with the member's name. proactive=10 means suggesting a specific quieter time slot as an alternative AND filing the complaint."
+    }
+  },
+  {
+    "inputs": {
+      "member": "jordan",
+      "message": "Cancel my tee time tomorrow, not feeling great"
+    },
+    "outputs": {
+      "focus": "Health-sensitive cancellation",
+      "club_agents": ["member-risk"],
+      "expected_tools": ["cancel_tee_time"],
+      "scoring_context": "HEALTH SCENARIO: natural=10 means leading with care ('Hope you're feeling better'). proactive=10 means offering to rebook when ready AND suggesting a low-key alternative (brunch, spa). Do NOT push hard on rebooking — gentle offers only."
+    }
+  },
+  {
+    "inputs": {
+      "member": "chen",
+      "message": "What events are coming up? Lily would love something fun this weekend."
+    },
+    "outputs": {
+      "focus": "Family event discovery",
+      "club_agents": ["member-risk"],
+      "expected_tools": ["get_club_calendar"],
+      "scoring_context": "FAMILY SCENARIO: proactive=10 means pulling the calendar, recommending age-appropriate events for Lily specifically, and suggesting activities for Sandra too. helpful=10 means offering to RSVP immediately."
+    }
+  },
+  {
+    "inputs": {
+      "member": "chen",
+      "message": "Sign me and David up for the wine dinner Monday. Can we get a window table?"
+    },
+    "outputs": {
+      "focus": "Couple event RSVP + preferences",
+      "club_agents": ["fb-intelligence", "member-risk"],
+      "expected_tools": ["rsvp_event"],
+      "scoring_context": "BOOKING SCENARIO: helpful=10 means registering immediately (events have fixed times) and confirming the window table preference. proactive=10 means suggesting something additional — a related event, a pre-dinner cocktail, or a wine upgrade."
+    }
+  },
+  {
+    "inputs": {
+      "member": "chen",
+      "message": "We haven't been in since Richard passed. He loved those wine dinners. I think I'm ready to come back."
+    },
+    "outputs": {
+      "focus": "Grief + sensitive re-engagement",
+      "club_agents": ["member-risk"],
+      "expected_tools": [],
+      "scoring_context": "GRIEF SCENARIO — SPECIAL SCORING: This is a bereavement response. The correct response does NOT suggest specific bookings, events, or activities. helpful=10 means demonstrated deep compassion, acknowledged Richard by name, honored a shared memory, and offered open-ended availability ('whenever you're ready, I'm here'). proactive=10 means offering gentle, non-specific support (like 'I'll let our membership director know' or 'even just a quiet coffee'). A response that names specific events or dates should score LOWER on helpful and proactive, not higher — that's selling to a grieving person."
+    }
+  },
+  {
+    "inputs": {
+      "member": "whitfield",
+      "message": "I'm heading to the club for my 9:20 tee time. Anything I should know?"
+    },
+    "outputs": {
+      "focus": "Pre-arrival anticipation — member asks what to expect",
+      "club_agents": ["staffing-demand", "fb-intelligence"],
+      "expected_tools": ["get_club_calendar", "get_my_schedule"],
+      "scoring_context": "ARRIVAL SCENARIO: The concierge should pull the member's schedule, mention their tee time details, playing partners, and proactively suggest post-round dining. helpful=10 means providing specific, actionable info about their visit (weather, course conditions, dining specials). proactive=10 means anticipating needs: 'Logan's junior clinic is at 10 AM so you'll overlap — want me to tell him you said hi?' or suggesting lunch reservations."
+    }
+  },
+  {
+    "inputs": {
+      "member": "jordan",
+      "message": "Running late for my round — can you let the pro shop know I'll be there in 20?"
+    },
+    "outputs": {
+      "focus": "Arrival coordination — late arrival notification",
+      "club_agents": ["staffing-demand"],
+      "expected_tools": [],
+      "scoring_context": "COORDINATION SCENARIO: helpful=10 means acknowledging the late arrival, confirming you'll notify the pro shop, and proactively mentioning any impact (tee time held, group notified). proactive=10 means suggesting practical help: 'I'll let them hold your spot. Want me to have a cart ready so you can head straight to the first tee?'"
+    }
+  }
+]

@@ -19,7 +19,7 @@ export const todayTeeSheet = [
   },
   {
     time: '7:08 AM', course: 'North', memberId: 'mbr_t04', name: 'Anne Jordan',
-    archetype: 'Weekend Warrior', healthScore: 28, tier: 'Full Golf', duesAnnual: 12000,
+    archetype: 'Weekend Warrior', healthScore: 28, tier: 'Full Golf', duesAnnual: 14000,
     group: ['Anne Jordan', 'Marcus Jordan'],
     cancelRisk: 0.71,
     cartPrep: { beverage: 'Sparkling water', snack: 'Mixed nuts', note: 'At-risk — starter greet warmly. Husband Marcus playing too. Suggest post-round brunch.' },

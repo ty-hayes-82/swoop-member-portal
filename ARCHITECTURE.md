@@ -1,5 +1,8 @@
 # Swoop Golf Five Lenses Platform — Architecture Reference
 
+> **Repo:** swoop-member-portal | **Branch:** autoresearch/apr11 | **Updated:** 2026-04-11  
+> **Type:** Living document — update when architecture changes
+
 **Stack:** React 18 + Vite 5 · Recharts · Deployed via Vercel  
 **Repo:** `github.com/ty-hayes-82/swoop-member-portal` · Branch: `dev`  
 **Phase:** 1 (static demo data) — Phase 2 API endpoints are the next sprint

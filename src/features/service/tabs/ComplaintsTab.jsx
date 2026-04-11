@@ -8,6 +8,7 @@ import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import MemberLink from '@/components/MemberLink';
 import ActionPanel from '@/components/ui/ActionPanel';
 import { trackAction } from '@/services/activityService';
+import AgentUpsell from '@/components/ui/AgentUpsell';
 
 const STATUS_STYLES = {
   resolved: { bg: `${'#12b76a'}12`, color: '#12b76a', label: 'Resolved' },
@@ -17,7 +18,7 @@ const STATUS_STYLES = {
 };
 
 const STATUS_FILTERS = [
-  { key: null, label: 'All' },
+  { key: null, label: 'Open' },
   { key: 'acknowledged', label: 'Acknowledged' },
   { key: 'in_progress', label: 'In Progress' },
   { key: 'escalated', label: 'Escalated' },
@@ -32,16 +33,16 @@ export default function ComplaintsTab() {
 
   const feedbackRecords = getComplaintCorrelation();
 
-  if (feedbackRecords.length === 0) {
-    return <DataEmptyState icon="📝" title="No complaint data yet" description="Import service requests to track complaints, resolution rates, and service patterns." dataType="service requests" />;
-  }
-
   // Accept category filter from Quality tab drill-down
   useEffect(() => {
     if (!routeIntent) return;
     if (routeIntent.category) setCategoryFilter(routeIntent.category);
     clearRouteIntent();
   }, [routeIntent, clearRouteIntent]);
+
+  if (feedbackRecords.length === 0) {
+    return <DataEmptyState icon="📝" title="No complaint data yet" description="Import service requests to track complaints, resolution rates, and service patterns." dataType="service requests" />;
+  }
 
   let filteredComplaints = feedbackRecords;
   if (statusFilter) filteredComplaints = filteredComplaints.filter(f => f.status === statusFilter);
@@ -89,7 +90,7 @@ export default function ComplaintsTab() {
           </div>
           <div className="bg-white border border-purple-200 rounded-xl p-3">
             <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Adverse weather</div>
-            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{weatherPct || '—'}%</div>
+            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{weatherPct > 0 ? `${weatherPct}%` : '—'}</div>
             <div className="text-[11px] text-gray-500">of complaints during adverse conditions</div>
           </div>
           <div className="bg-white border border-purple-200 rounded-xl p-3">
@@ -321,6 +322,11 @@ export default function ComplaintsTab() {
           </div>
         );
       })()}
+
+      <AgentUpsell
+        agentName="Service Recovery Agent"
+        benefit="Resolves complaints in 4.2 hrs avg — before members disengage."
+      />
 
       {/* Understaffed Day Correlation */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">

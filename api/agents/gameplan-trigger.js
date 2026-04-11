@@ -11,14 +11,14 @@
  *   4. Save the plan to daily_game_plans
  *   5. Create actions for each plan item
  *
- * Simulation mode: when MANAGED_AGENT_ID or MANAGED_ENV_ID are unset,
+ * Simulation mode: when ANTHROPIC_API_KEY env var is unset,
  * runs a deterministic data-pull + save without calling the LLM.
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
-import { createManagedSession, sendSessionEvent, MANAGED_AGENT_ID, MANAGED_ENV_ID } from './managed-config.js';
+import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 
-const SIMULATION_MODE = !MANAGED_AGENT_ID || !MANAGED_ENV_ID;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
 /**
  * Pull tee sheet summary for a given date and club.
@@ -287,32 +287,32 @@ async function gameplanHandler(req, res) {
       pullGamePlanHistory(clubId),
     ]);
 
-    // 3. Create session or simulate
+    // 3. Create thread within coordinator session or simulate
     let sessionId = null;
+    let threadId = null;
 
     if (!SIMULATION_MODE) {
-      const session = await createManagedSession();
-      sessionId = session.id;
+      const coordinator = await createCoordinatorSession();
+      sessionId = coordinator.id;
 
-      await sendSessionEvent(sessionId, {
-        type: 'user.message',
-        content: JSON.stringify({
-          trigger: 'daily_game_plan',
-          club_id: clubId,
-          plan_date,
-          tee_sheet: teeSheet,
-          weather,
-          staffing,
-          fb_reservations: fbRes,
-          open_complaints: complaints,
-          history,
-          timestamp: new Date().toISOString(),
-        }),
+      const thread = await createAgentThread(sessionId, 'tomorrows-game-plan', {
+        trigger: 'daily_game_plan',
+        club_id: clubId,
+        plan_date,
+        tee_sheet: teeSheet,
+        weather,
+        staffing,
+        fb_reservations: fbRes,
+        open_complaints: complaints,
+        history,
+        timestamp: new Date().toISOString(),
       });
+      threadId = thread.session_thread_id;
 
       return res.status(200).json({
         triggered: true,
         session_id: sessionId,
+        session_thread_id: threadId,
         simulation: false,
         data_pulls: { tee_sheet: true, weather: true, staffing: true, fb: true, complaints: true },
       });
@@ -341,6 +341,16 @@ async function gameplanHandler(req, res) {
         )
       `;
     }
+
+    // Trigger Chief of Staff to coordinate across all pending agent actions
+    try {
+      const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
+      fetch(`${baseUrl}/api/agents/cos-trigger`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-cron-key': process.env.CRON_SECRET || '' },
+        body: JSON.stringify({ club_id: clubId, trigger: 'post_game_plan' }),
+      }).catch(e => console.warn('[gameplan] CoS trigger error:', e.message));
+    } catch {}
 
     return res.status(200).json({
       triggered: true,

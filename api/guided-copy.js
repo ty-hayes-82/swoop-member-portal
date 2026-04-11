@@ -7,7 +7,7 @@
  * authenticated user's club. Uses INSERT...SELECT with ON CONFLICT DO NOTHING
  * for idempotent re-imports. Each category runs inside a transaction.
  */
-import { sql } from '@vercel/postgres';
+import { sql, db } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from './lib/withAuth.js';
 import { cors } from './lib/cors.js';
 import { logError, logInfo } from './lib/logger.js';
@@ -450,9 +450,7 @@ export default withAuth(async function handler(req, res) {
   const start = Date.now();
 
   // Use a raw client for transaction support
-  const { Pool } = await import('pg');
-  const pool = new Pool({ connectionString: process.env.POSTGRES_URL });
-  const client = await pool.connect();
+  const client = await db.connect();
 
   try {
     await client.query('BEGIN');
@@ -496,6 +494,5 @@ export default withAuth(async function handler(req, res) {
     return res.status(500).json({ error: `Failed to copy ${category} data: ${e.message}` });
   } finally {
     client.release();
-    pool.end().catch(() => {});
   }
 }, { roles: ['gm', 'admin', 'swoop_admin'] });

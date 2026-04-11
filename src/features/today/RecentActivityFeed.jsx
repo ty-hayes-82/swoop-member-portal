@@ -37,7 +37,6 @@ function sourceBadgeFor(item) {
 
 export default function RecentActivityFeed() {
   const [activities, setActivities] = useState([]);
-  const [prevIds, setPrevIds] = useState(new Set());
   const [newIds, setNewIds] = useState(new Set());
   const intervalRef = useRef(null);
 
@@ -51,7 +50,6 @@ export default function RecentActivityFeed() {
         const fresh = new Set();
         items.forEach(a => { if (!oldIds.has(a.id)) fresh.add(a.id); });
         if (fresh.size > 0) setNewIds(fresh);
-        setPrevIds(new Set(items.map(a => a.id)));
         return items;
       });
     } catch {

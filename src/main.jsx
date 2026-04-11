@@ -19,7 +19,8 @@ const LandingPage = lazy(() => import('./landing/LandingPage.jsx'));
 const App = lazy(() => import('./App.jsx'));
 
 const normalizedPath = window.location.pathname.replace(/\/+$/, '') || '/';
-const isLandingRoute = normalizedPath === '/landing';
+const hash = window.location.hash;
+const isLandingRoute = normalizedPath === '/landing' || hash === '#/landing';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

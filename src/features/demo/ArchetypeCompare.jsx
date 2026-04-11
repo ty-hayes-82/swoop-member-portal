@@ -3,13 +3,14 @@
  * Route: #/demo/archetype-compare
  */
 import { useState, useRef, useEffect } from 'react';
+import { getFirstName } from '../../utils/nameUtils';
 
 const ARCHETYPES = {
   left: {
     member_id: 'mbr_t01',
-    name: 'Robert Mills',
-    archetype: 'Die-Hard Golfer',
-    avatar: 'RM',
+    name: 'James Whitfield',
+    archetype: 'Balanced Active',
+    avatar: 'JW',
     color: '#2563eb',
     bgGradient: 'from-blue-50 to-blue-100',
     borderColor: '#3b82f6',
@@ -34,7 +35,7 @@ function getAuthHeaders() {
     const user = JSON.parse(localStorage.getItem('swoop_auth_user') || 'null');
     if (user?.clubId?.startsWith('demo_')) return { 'X-Demo-Club': user.clubId };
   } catch {}
-  return { 'X-Demo-Club': 'club_001' };
+  return { 'X-Demo-Club': 'seed_pinetree' };
 }
 
 function timestamp() {
@@ -102,7 +103,7 @@ function ChatPanel({ config, side }) {
         {isEmpty && (
           <div className="flex flex-col items-center justify-center h-full gap-3 px-4">
             <p className="text-gray-400 text-sm text-center">
-              Ask {config.name.split(' ')[0]} anything
+              Ask {getFirstName(config.name)} anything
             </p>
             <button
               onClick={() => send(config.seedMessage)}
@@ -159,7 +160,7 @@ function ChatPanel({ config, side }) {
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder={`Message ${config.name.split(' ')[0]}...`}
+          placeholder={`Message ${getFirstName(config.name)}...`}
           disabled={loading}
           className="flex-1 rounded-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:bg-gray-50"
           style={{ '--tw-ring-color': config.color }}

@@ -1,8 +1,8 @@
 import { sql } from '@vercel/postgres';
 import { withAuth } from '../lib/withAuth.js';
-import { sendSessionEvent, MANAGED_AGENT_ID, MANAGED_ENV_ID } from './managed-config.js';
+import { sendSessionEvent } from './managed-config.js';
 
-const SIMULATION_MODE = !MANAGED_AGENT_ID || !MANAGED_ENV_ID;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
 const VALID_EVENT_TYPES = ['action_approved', 'action_dismissed', 'complaint_resolved', 'member_resigned'];
 

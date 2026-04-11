@@ -2,20 +2,31 @@
 // Narrative and chart helpers stay pure functions — they work on whatever data source is active.
 
 import { apiFetch } from './apiClient';
-import { isGateOpen } from './demoGate';
+import { isGateOpen, getDataMode } from './demoGate';
 import { trends as staticTrends, MONTHS as STATIC_MONTHS, outletTrends as staticOutletTrends } from '@/data/trends.js';
 
 let _d = null; // { trends, outletTrends, months }
+let _apiLoaded = false;
+const _isGuidedMode = () => getDataMode() === 'guided';
 
 export const _init = async () => {
+  _apiLoaded = true;
   try {
     const data = await apiFetch('/api/trends');
     if (data) _d = data;
   } catch { /* keep static fallback */ }
 };
 
-const _trends = () => _d?.trends ?? (isGateOpen('pipeline') ? staticTrends : {});
-const _months = () => _d?.months ?? (isGateOpen('pipeline') ? STATIC_MONTHS : []);
+const _trends = () => {
+  if (_d?.trends) return _d.trends;
+  if (_isGuidedMode() && !_apiLoaded) return {};
+  return isGateOpen('pipeline') ? staticTrends : {};
+};
+const _months = () => {
+  if (_d?.months) return _d.months;
+  if (_isGuidedMode() && !_apiLoaded) return [];
+  return isGateOpen('pipeline') ? STATIC_MONTHS : [];
+};
 
 export function getTrendChartData(metricKey) {
   const series = _trends()[metricKey];

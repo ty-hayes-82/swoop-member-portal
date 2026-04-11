@@ -4,7 +4,7 @@ const trustSignals = [
   '28 System Integrations',
   'Live in Under 2 Weeks',
   'No Rip-and-Replace',
-  'SOC 2 on Roadmap',
+  'Data Encrypted at Rest & in Transit',
 ];
 
 export default function TrustStrip() {

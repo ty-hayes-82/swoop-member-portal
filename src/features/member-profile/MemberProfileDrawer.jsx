@@ -8,20 +8,8 @@ import { getMemberChurnPrediction } from '@/services/memberService';
 import { getMemberSaves } from '@/services/boardReportService';
 import { isGateOpen } from '@/services/demoGate';
 import MemberDecayChain from './MemberDecayChain.jsx';
-
-const formatDate = (value) => {
-  if (!value) return '\u2014';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '\u2014';
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
-
-const formatDateTime = (value) => {
-  if (!value) return '\u2014';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '\u2014';
-  return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-};
+import AgentUpsell from '@/components/ui/AgentUpsell.jsx';
+import { formatDate, formatDateTime } from '../../utils/dateFormat';
 
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -493,7 +481,8 @@ function SpendTrendSparkline({ profile }) {
       });
       const baseSpend = profile.duesAnnual ? profile.duesAnnual / 12 : 1500;
       const activityMultiplier = Math.max(0.2, Math.min(2, monthActivities.length / 3));
-      months.push(Math.round(baseSpend * activityMultiplier * (0.8 + Math.random() * 0.4)));
+      const seed = ((i + 1) * 7 + (profile.duesAnnual || 15000) % 100) / 100;
+      months.push(Math.round(baseSpend * activityMultiplier * (0.8 + (seed % 1) * 0.4)));
     }
     return months;
   }, [profile]);
@@ -955,6 +944,13 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           </div>
         </div>
       </Section>
+
+      {(profile.healthScore ?? 100) < 50 && (
+        <AgentUpsell
+          agentName="Re-Engagement Agent"
+          benefit="With AI Agents enabled, this member would already have a personalized 30-day re-engagement plan."
+        />
+      )}
 
       <div className={isDrawerLayout ? 'sticky bottom-0 bg-white pt-4 pb-2 shadow-[0_-12px_32px_rgba(15,23,42,0.08)] z-[5]' : ''} style={{ paddingTop: '8px', paddingBottom: '6px' }}>
         <Section title="Quick actions">

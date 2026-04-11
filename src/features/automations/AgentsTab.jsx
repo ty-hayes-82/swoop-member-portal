@@ -5,6 +5,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getAgents, getAllActions, getAgentSummary, getCoordinationGraph } from '@/services/agentService';
+import AgentConfigDrawer from '@/features/agents/AgentConfigDrawer';
 
 const STATUS_STYLES = {
   active: { bg: 'bg-success-50 dark:bg-success-500/10', text: 'text-success-600 dark:text-success-400', label: 'Active' },
@@ -22,7 +23,7 @@ const TONE_OPTIONS = [
   { value: 'energetic-enthusiastic', label: 'Energetic & Enthusiastic' },
 ];
 
-function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, actions }) {
+function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, onOpenConfig, actions }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const statusKey = agentStatus || agent.status || 'idle';
@@ -97,8 +98,18 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, ac
           </div>
         )}
 
-        {/* Action bar: Settings + Recent Actions */}
+        {/* Action bar: Configure + Settings + Recent Actions */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => onOpenConfig?.(agent)}
+            className="flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-transparent border-none p-0 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 text-brand-500 hover:text-brand-600"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9v1a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+            Configure
+          </button>
+          <span className="text-gray-300 dark:text-gray-600">|</span>
           <button
             onClick={() => { setShowSettings(!showSettings); if (showActions) setShowActions(false); }}
             className={`flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-transparent border-none p-0 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${
@@ -108,7 +119,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, ac
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9v1a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
             </svg>
-            Settings
+            Quick Settings
           </button>
           {agentActions.length > 0 && (
             <button
@@ -271,6 +282,11 @@ export default function AgentsTab() {
   const actions = useMemo(() => getAllActions(), []);
   const summary = useMemo(() => getAgentSummary(), []);
 
+  // Config drawer state
+  const [drawerAgent, setDrawerAgent] = useState(null);
+  const openConfigDrawer = useCallback((agent) => setDrawerAgent(agent), []);
+  const closeConfigDrawer = useCallback(() => setDrawerAgent(null), []);
+
   return (
     <div className="flex flex-col gap-6">
       {/* Summary strip */}
@@ -302,6 +318,7 @@ export default function AgentsTab() {
             agentConfig={getAgentConfig?.(agent.id)}
             onToggle={toggleAgent}
             onSaveConfig={saveAgentConfig}
+            onOpenConfig={openConfigDrawer}
             actions={actions}
           />
         ))}
@@ -316,6 +333,14 @@ export default function AgentsTab() {
           </div>
         </div>
       )}
+
+      {/* Sprint 2: Full config drawer */}
+      <AgentConfigDrawer
+        agentId={drawerAgent?.id}
+        agentName={drawerAgent?.name}
+        open={!!drawerAgent}
+        onClose={closeConfigDrawer}
+      />
     </div>
   );
 }

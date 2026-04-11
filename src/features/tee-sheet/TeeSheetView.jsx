@@ -10,6 +10,7 @@ import { getTodayTeeSheet, getTeeSheetSummary } from '@/services/operationsServi
 import { useApp } from '@/context/AppContext';
 import { apiFetch } from '@/services/apiClient';
 import { isGateOpen } from '@/services/demoGate';
+import { getFirstName } from '../../utils/nameUtils';
 
 const healthColor = (score) => {
   if (score >= 70) return '#12b76a';
@@ -133,7 +134,7 @@ function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
 function CartPrepCard({ teeTime, onSendCartText, onSendDiningNudge }) {
   const color = healthColor(teeTime.healthScore);
   const isAtRisk = teeTime.healthScore < 50;
-  const firstName = teeTime.name.split(' ')[0];
+  const firstName = getFirstName(teeTime.name);
   return (
     <div className={`rounded-xl border p-4 ${isAtRisk ? 'bg-red-50/30 border-red-200' : 'bg-white border-gray-200'}`}>
       <div className="flex items-center justify-between mb-2">
@@ -194,7 +195,7 @@ export default function TeeSheetView() {
   const vipTimes = teeData.filter(t => t.duesAnnual >= 18000 && t.healthScore >= 50);
 
   const handleSendCartText = async (teeTime) => {
-    const firstName = teeTime.name.split(' ')[0];
+    const firstName = getFirstName(teeTime.name);
     const items = [teeTime.cartPrep.beverage, teeTime.cartPrep.snack].filter(Boolean).join(', ');
     showToast('Generating cart prep text...', 'info');
     try {
@@ -218,7 +219,7 @@ export default function TeeSheetView() {
   };
 
   const handleSendRecovery = async (teeTime, type) => {
-    const firstName = teeTime.name.split(' ')[0];
+    const firstName = getFirstName(teeTime.name);
     const hasComplaint = teeTime.cartPrep.note?.toLowerCase().includes('complaint');
     const recoveryContext = hasComplaint
       ? `Proactive service recovery message. This member had a recent complaint that is being resolved. Acknowledge the issue, explain what the club has changed, and invite them back with a specific offer. Be genuine and personal — not corporate.`
@@ -260,7 +261,7 @@ export default function TeeSheetView() {
   };
 
   const handleSendDiningNudge = async (teeTime) => {
-    const firstName = teeTime.name.split(' ')[0];
+    const firstName = getFirstName(teeTime.name);
     showToast('Generating dining offer...', 'info');
     try {
       const draft = await apiFetch('/api/generate-draft', {
@@ -331,7 +332,7 @@ export default function TeeSheetView() {
           <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
               <div className="text-sm font-bold text-gray-800">Today's Tee Sheet</div>
-              <div className="text-xs text-gray-400">Friday, January 17, 2026 - {teeData.length} groups</div>
+              <div className="text-xs text-gray-400">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} - {teeData.length} groups</div>
               {/* Source badges for the underlying columns — Pillar 1: SEE IT */}
               <div className="flex gap-1 mt-1.5 flex-wrap">
                 <SourceBadge system="Tee Sheet" size="xs" />

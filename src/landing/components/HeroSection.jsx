@@ -11,6 +11,9 @@ const ctaBase = {
   border: '2px solid transparent',
 };
 
+const TEAL = '#14B8A6';
+const TEAL_HOVER = '#0D9488';
+
 export default function HeroSection() {
   const goToDemoForm = () => {
     document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -18,34 +21,41 @@ export default function HeroSection() {
 
   return (
     <section className="landing-section-padded" style={{ padding: '88px 0 80px' }}>
-      <div style={{ maxWidth: 780 }}>
+      <div style={{ maxWidth: 820 }}>
         <p style={{
           color: theme.colors.accent,
           fontSize: theme.fontSize.sm,
           fontWeight: 700,
-          letterSpacing: '0.08em',
+          letterSpacing: '0.12em',
           textTransform: 'uppercase',
           marginBottom: theme.spacing.md,
         }}>
-          Swoop Golf
+          The Operating System for Private Clubs
         </p>
         <h1 style={{
           fontFamily: theme.fonts.serif,
-          fontSize: 'clamp(42px, 6vw, 68px)',
-          lineHeight: 1.05,
+          fontSize: 'clamp(38px, 5.5vw, 60px)',
+          lineHeight: 1.1,
           marginBottom: theme.spacing.lg,
-          maxWidth: 760,
+          maxWidth: 800,
         }}>
-          Know a member is leaving before they do.
+          Your members get{' '}
+          <em style={{ color: theme.colors.accent, fontStyle: 'italic' }}>a concierge.</em>
+          <br />
+          Your GM gets{' '}
+          <em style={{ color: TEAL, fontStyle: 'italic' }}>a command center.</em>
         </h1>
         <p style={{
           color: theme.colors.textSecondary,
-          fontSize: 'clamp(18px, 2vw, 24px)',
+          fontSize: 'clamp(17px, 2vw, 22px)',
+          lineHeight: 1.55,
           maxWidth: 760,
           marginBottom: theme.spacing.xl,
         }}>
-          The AI-powered GM platform that fills tee times with the right members
-          {' '}— and proves the revenue impact of every decision.
+          AI agents that work both sides of the club relationship. Members book,
+          ask, and engage through a personal concierge. The GM sees the full
+          picture, acts on coordinated intelligence, and proves the impact to
+          the board.
         </p>
         <div className="landing-hero-ctas">
           <button
@@ -53,40 +63,43 @@ export default function HeroSection() {
             className="landing-hero-cta"
             style={{
               ...ctaBase,
-              background: theme.colors.ctaGreen,
-              color: theme.colors.ctaGreenText,
+              background: theme.colors.accent,
+              color: '#FFFFFF',
             }}
             onClick={goToDemoForm}
             onMouseEnter={(event) => {
               event.currentTarget.style.background = theme.colors.ctaGreenHover;
             }}
             onMouseLeave={(event) => {
-              event.currentTarget.style.background = theme.colors.ctaGreen;
+              event.currentTarget.style.background = theme.colors.accent;
             }}
           >
-            Book a Demo
+            Book a 30-Minute Demo
           </button>
-          <button
-            type="button"
+          <a
+            href="#/demo/split-screen"
             className="landing-hero-cta"
             style={{
               ...ctaBase,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textDecoration: 'none',
               background: 'transparent',
-              color: theme.colors.ctaGreen,
-              borderColor: theme.colors.ctaGreen,
+              color: TEAL,
+              borderColor: TEAL,
             }}
-            onClick={goToDemoForm}
             onMouseEnter={(event) => {
-              event.currentTarget.style.background = theme.colors.ctaGreen;
-              event.currentTarget.style.color = theme.colors.ctaGreenText;
+              event.currentTarget.style.background = TEAL;
+              event.currentTarget.style.color = '#FFFFFF';
             }}
             onMouseLeave={(event) => {
               event.currentTarget.style.background = 'transparent';
-              event.currentTarget.style.color = theme.colors.ctaGreen;
+              event.currentTarget.style.color = TEAL;
             }}
           >
-            See How It Works
-          </button>
+            See a Day in Action
+          </a>
         </div>
       </div>
     </section>

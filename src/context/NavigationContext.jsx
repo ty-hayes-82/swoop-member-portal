@@ -10,7 +10,7 @@ const VALID_ROUTES = new Set([
   // V3 hidden but still routable for backward compat
   'revenue', 'insights', 'actions',
   // Accessible via direct navigation (not in nav)
-  'member-profile', 'integrations', 'profile', 'automations',
+  'member-profile', 'integrations', 'profile', 'automations', 'agent-activity',
   // Legacy routes (redirect via ROUTE_REDIRECTS below)
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
   'member-health', 'revenue-leakage', 'outreach-playbooks', 'staffing-service', 'growth-pipeline',
@@ -73,7 +73,7 @@ function parseHash() {
   if (raw.startsWith('members/')) {
     const [, subpath] = raw.split('/');
     // Known sub-views route to members page with mode intent
-    const MEMBER_MODES = { 'at-risk': 'at-risk', 'first-90-days': 'cohorts', 'all-members': 'search', 'all': 'search' };
+    const MEMBER_MODES = { 'at-risk': 'at-risk', 'first-90-days': 'cohorts', 'all-members': 'search', 'all': 'search', 'email-decay': 'email-decay' };
     if (MEMBER_MODES[subpath]) {
       return { route: 'members', memberId: null, mode: MEMBER_MODES[subpath] };
     }

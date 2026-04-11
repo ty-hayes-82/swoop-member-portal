@@ -10,7 +10,9 @@ const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 // same reason: it ships alongside MobileApp but shouldn't inflate desktop.
 const ConferenceShell = lazy(() => import('@/mobile/conference/ConferenceShell'));
 const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatPage'));
+const MemberConciergeTest = lazy(() => import('@/features/concierge/MemberConciergeTest'));
 const InvestorSite = lazy(() => import('@/features/invest/InvestorSite'));
+const LandingPage = lazy(() => import('@/landing/LandingPage.jsx'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
 const GamePlanDemo = lazy(() => import('@/features/demo/GamePlanDemo'));
 const BoardReportDemo = lazy(() => import('@/features/demo/BoardReportDemo'));
@@ -23,6 +25,7 @@ const LOITracker = lazy(() => import('@/features/demo/LOITracker'));
 const ArchitectureMoat = lazy(() => import('@/features/demo/ArchitectureMoat'));
 const TechnicalDeepDive = lazy(() => import('@/features/demo/TechnicalDeepDive'));
 const MobileShowcase = lazy(() => import('@/features/demo/MobileShowcase'));
+const AgentsLanding = lazy(() => import('@/features/demo/AgentsLanding'));
 import { DataProvider } from '@/context/DataProvider';
 import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
 import DemoWizard from '@/components/ui/DemoWizard';
@@ -46,6 +49,7 @@ const IntegrationsPage = lazy(() => import('@/features/integrations/Integrations
 const CsvImportPage = lazy(() => import('@/features/integrations/CsvImportPage'));
 const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
 const AutomationsHub = lazy(() => import('@/features/automations/AutomationsHub'));
+const AgentActivityPage = lazy(() => import('@/features/agents/AgentActivityPage'));
 const TeeSheetView = lazy(() => import('@/features/tee-sheet/TeeSheetView'));
 const RevenuePage = lazy(() => import('@/features/revenue/RevenuePage'));
 const ProfilePage = lazy(() => import('@/features/profile/ProfilePage'));
@@ -68,6 +72,7 @@ const ROUTES = {
   'csv-import': CsvImportPage,
   'playbooks': PlaybooksPage,
   'automations': AutomationsHub,
+  'agent-activity': AgentActivityPage,
   'profile': ProfilePage,
 };
 
@@ -217,6 +222,8 @@ function RouterViews() {
   const isDemoArchitecture = hash === '#/demo/architecture';
   const isDemoTechnicalDeepDive = hash === '#/demo/technical-deep-dive';
   const isDemoMobileShowcase = hash === '#/demo/mobile-showcase';
+  const isDemoAgentsLanding = hash === '#/demo/agents-landing';
+  const isDemoMemberChat = hash === '#/demo/member-chat' || hash === '#/concierge/test';
 
   if (isDemoPilotResults) {
     return (
@@ -254,6 +261,14 @@ function RouterViews() {
     return (
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
         <MobileShowcase />
+      </Suspense>
+    );
+  }
+
+  if (isDemoAgentsLanding) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
+        <AgentsLanding />
       </Suspense>
     );
   }
@@ -310,6 +325,14 @@ function RouterViews() {
     return (
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Demo...</div>}>
         <ROISlide />
+      </Suspense>
+    );
+  }
+
+  if (isDemoMemberChat) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Member Chat...</div>}>
+        <MemberConciergeTest />
       </Suspense>
     );
   }
@@ -390,6 +413,15 @@ export default function App() {
     return (
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Concierge...</div>}>
         <ConciergeChatPage />
+      </Suspense>
+    );
+  }
+
+  // Landing page — accessible without auth via hash route
+  if (currentHash === '#/landing') {
+    return (
+      <Suspense fallback={null}>
+        <LandingPage />
       </Suspense>
     );
   }

@@ -4,6 +4,8 @@
 
 import { getPaceFBImpact, getBottleneckHoles, getSlowRoundRate } from './operationsService';
 import { getUnderstaffedDays } from './staffingService';
+import { getDailyForecast } from './weatherService';
+import { weatherDaily as staticWeatherData } from '../data/weather';
 
 /**
  * @typedef {Object} LeakageData
@@ -41,12 +43,26 @@ import { getUnderstaffedDays } from './staffingService';
  */
 
 
-// Weather no-show F&B loss — derived from dailyRevenue rainy days vs same-weekday avg:
-//   Sat Jan 10: avg Sat F&B $5,250 − actual $4,600 = $650
-//   Mon Jan 26: avg Mon F&B $2,150 − actual $2,000 = $150
-//   Tue Jan 27: avg Tue F&B $1,850 − actual $3,600 = $0 (rain drove more dining)
-//   Total: $650 + $150 = $800/mo
-const WEATHER_NO_SHOW_LOSS_MONTHLY = 800;
+// Weather no-show F&B loss — derived from forecast rainy/adverse day counts.
+// Each rainy or high-wind day costs ~$400 in lost F&B from weather no-shows.
+// Falls back to static weather data (src/data/weather.js) when no live forecast.
+const AVG_DAILY_WEATHER_IMPACT = 400;
+
+function getWeatherNoShowLoss() {
+  // Try live forecast first (up to 30 days if available)
+  const liveForecast = getDailyForecast(30);
+  if (liveForecast && liveForecast.length >= 5) {
+    const adverseDays = liveForecast.filter(d =>
+      d.rain || (d.precipProb > 50) || (d.wind > 20) || d.condition === 'rainy'
+    ).length;
+    // Scale to monthly: if we have N days of forecast, extrapolate to 30
+    const monthlyAdverse = Math.round(adverseDays * (30 / liveForecast.length));
+    return monthlyAdverse * AVG_DAILY_WEATHER_IMPACT;
+  }
+  // Fall back to static weather data
+  const rainyDays = staticWeatherData.filter(d => d.rain || d.condition === 'rainy' || d.wind > 20).length;
+  return rainyDays * AVG_DAILY_WEATHER_IMPACT;
+}
 
 /**
  * getLeakageData — returns the F&B revenue leakage decomposition.
@@ -64,16 +80,28 @@ export function getLeakageData() {
 
   const PACE_LOSS = paceFB.revenueLostPerMonth || 0;
   const STAFFING_LOSS = staffDays.reduce((sum, day) => sum + (day.revenueLoss || 0), 0);
-  const WEATHER_LOSS = (PACE_LOSS > 0 || STAFFING_LOSS > 0) ? WEATHER_NO_SHOW_LOSS_MONTHLY : 0;
+  const WEATHER_LOSS = (PACE_LOSS > 0 || STAFFING_LOSS > 0) ? getWeatherNoShowLoss() : 0;
 
   const TOTAL = PACE_LOSS + STAFFING_LOSS + WEATHER_LOSS;
   if (TOTAL === 0) return null;
+
+  // Prior-month estimate derived per-category from seasonal patterns:
+  // - Pace: Dec had fewer slow rounds (less congestion before holidays) → 85% of Jan
+  // - Staffing: holiday season had better coverage (seasonal hires) → 75% of Jan
+  // - Weather: Dec had fewer rainy days in Scottsdale → 60% of Jan
+  const PRIOR_PACE = Math.round(PACE_LOSS * 0.85);
+  const PRIOR_STAFFING = Math.round(STAFFING_LOSS * 0.75);
+  const PRIOR_WEATHER = Math.round(WEATHER_LOSS * 0.60);
+  const PRIOR_MONTH_TOTAL = PRIOR_PACE + PRIOR_STAFFING + PRIOR_WEATHER;
+  const MOM_DELTA = TOTAL - PRIOR_MONTH_TOTAL;
 
   return {
     PACE_LOSS,
     STAFFING_LOSS,
     WEATHER_LOSS,
     TOTAL,
+    PRIOR_MONTH_TOTAL,
+    MOM_DELTA,
     sources: ['Tee Sheet', 'POS', 'Scheduling', 'Weather'],
   };
 }

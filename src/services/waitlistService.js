@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { isGateOpen } from './demoGate';
+import { isGateOpen, getDataMode } from './demoGate';
 import {
   memberWaitlistEntries,
   cancellationProbabilities,
@@ -8,8 +8,11 @@ import {
 import { normalizeWaitlistEntry, summarizeWaitlistEntries } from './waitlistMetrics';
 
 let _d = null;
+let _apiLoaded = false;
+const _isGuidedMode = () => getDataMode() === 'guided';
 
 export const _init = async () => {
+  _apiLoaded = true;
   try {
     const data = await apiFetch('/api/waitlist');
     if (data) _d = data;
@@ -28,6 +31,7 @@ export const getWaitlistQueue = () => {
       return a.healthScore - b.healthScore;
     });
   }
+  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('pipeline')) return [];
   const normalized = Array.isArray(memberWaitlistEntries) ? memberWaitlistEntries.map((entry) => normalizeWaitlistEntry(entry)) : [];
   return normalized.sort((a, b) => {
@@ -40,18 +44,21 @@ export const getWaitlistQueue = () => {
 
 export const getWaitlistSummary = () => {
   if (_d?.queue) return summarizeWaitlistEntries(_d.queue);
+  if (_isGuidedMode() && !_apiLoaded) return { total: 0, highPriority: 0, normalPriority: 0, avgHealthScore: 0 };
   if (!isGateOpen('pipeline')) return { total: 0, highPriority: 0, normalPriority: 0, avgHealthScore: 0 };
   return summarizeWaitlistEntries(memberWaitlistEntries);
 };
 
 export const getCancellationPredictions = () => {
   if (_d?.cancellationPredictions) return [..._d.cancellationPredictions].sort((a, b) => b.cancelProbability - a.cancelProbability);
+  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('pipeline')) return [];
   return [...cancellationProbabilities].sort((a, b) => b.cancelProbability - a.cancelProbability);
 };
 
 export const getCancellationSummary = () => {
   if (_d?.cancellationSummary) return _d.cancellationSummary;
+  if (_isGuidedMode() && !_apiLoaded) return { total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: '' };
   if (!isGateOpen('pipeline')) return { total: 0, highRisk: 0, totalRevAtRisk: 0, topDriver: '' };
   const preds = cancellationProbabilities;
   const highRisk = preds.filter((p) => p.cancelProbability >= 0.6);
@@ -65,6 +72,7 @@ export const getCancellationSummary = () => {
 
 export const getDemandHeatmap = () => {
   if (_d?.demandHeatmap) return _d.demandHeatmap;
+  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('pipeline')) return [];
   return demandHeatmap;
 };

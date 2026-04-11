@@ -45,7 +45,7 @@ export default function FaqSection() {
                 <span style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.lg }}>{isOpen ? '−' : '+'}</span>
               </button>
               <div style={{
-                maxHeight: isOpen ? 220 : 0,
+                maxHeight: isOpen ? 400 : 0,
                 overflow: 'hidden',
                 transition: 'max-height 220ms ease',
               }}>

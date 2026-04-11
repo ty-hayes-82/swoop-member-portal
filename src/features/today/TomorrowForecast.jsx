@@ -3,8 +3,29 @@ import { useState, useEffect } from 'react';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getTomorrowForecast } from '@/services/weatherService';
 import { getUnderstaffedDays } from '@/services/staffingService';
+import { getDataMode } from '@/services/demoGate';
 
 function getOutlets() {
+  try {
+    const { getShiftCoverage } = require('@/services/staffingService');
+    const shifts = getShiftCoverage();
+    if (shifts && shifts.length > 0) {
+      const outletMap = {};
+      shifts.forEach(s => {
+        if (!outletMap[s.outlet]) outletMap[s.outlet] = { required: 0, scheduled: 0 };
+        outletMap[s.outlet].required += s.requiredStaff || 1;
+        outletMap[s.outlet].scheduled += s.scheduledStaff || 0;
+      });
+      return Object.entries(outletMap).slice(0, 4).map(([name, data]) => ({
+        name,
+        requiredStaff: data.required,
+        scheduledStaff: data.scheduled,
+        status: data.scheduled >= data.required ? 'full' : 'gap',
+      }));
+    }
+  } catch {}
+  // In guided mode, don't show hardcoded staffing data before imports
+  if (getDataMode() === 'guided') return [];
   return [
     { name: 'Grill Room', requiredStaff: 4, scheduledStaff: 2, status: 'gap' },
     { name: 'Terrace', requiredStaff: 3, scheduledStaff: 3, status: 'full' },

@@ -6,6 +6,7 @@ import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
 import { apiFetch } from '@/services/apiClient';
 import { getGoogleStatus, createCalendarEvent } from '@/services/googleService';
+import { getFirstName } from '../../utils/nameUtils';
 
 const STAFF = ['F&B Director', 'Head Golf Professional', 'Membership Director', 'Grill Room Manager', 'Club Manager'];
 
@@ -76,7 +77,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
     getGoogleStatus().then(s => setGoogleConnected(s?.connected || false)).catch(() => {});
   }, []);
 
-  const firstName = memberName?.split(' ')[0] ?? 'the member';
+  const firstName = getFirstName(memberName) || 'the member';
   const defaultNote = `Dear ${firstName},\n\nI wanted to reach out personally to apologize for your recent experience at the Grill Room. Your satisfaction is our top priority and I'm sorry we fell short.\n\nI'd love to have you as my guest for lunch this week \u2014 please let me know what works for your schedule.\n\nWarm regards,\n[GM Name]\nYour Club`;
 
   // Fetch AI-generated draft when note mode opens
