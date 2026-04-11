@@ -9,9 +9,19 @@ export default function ProblemSection() {
       padding: 'clamp(32px, 6vw, 56px) clamp(18px, 4vw, 28px)',
       marginBottom: theme.spacing.xxl,
     }}>
-      <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.lg }}>
+      <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.sm }}>
         Most clubs are flying blind.
       </h2>
+      <p style={{
+        color: theme.colors.textSecondary,
+        fontSize: theme.fontSize.lg,
+        maxWidth: 640,
+        marginBottom: theme.spacing.lg,
+        lineHeight: 1.5,
+      }}>
+        Your tee sheet, CRM, and POS each hold a fragment. Nobody connects
+        the dots until a member is already gone.
+      </p>
       <div className="landing-problem-grid">
         {problemCards.map((card) => (
           <article

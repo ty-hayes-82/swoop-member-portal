@@ -38,6 +38,7 @@ function PricingCard({ tier }) {
       </ul>
       <button
         type="button"
+        onClick={() => document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
         style={{
           width: '100%',
           borderRadius: theme.radius.md,
@@ -59,7 +60,7 @@ function PricingCard({ tier }) {
 
 export default function PricingSection() {
   return (
-    <section style={{ marginBottom: theme.spacing.xxl }}>
+    <section id="pricing" style={{ marginBottom: theme.spacing.xxl }}>
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.sm }}>
         Simple pricing. No long-term contracts.
       </h2>

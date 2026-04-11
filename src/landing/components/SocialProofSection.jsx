@@ -76,10 +76,10 @@ export default function SocialProofSection() {
       {/* Metric Proof Cards */}
       <div style={{ marginBottom: theme.spacing.xxl }}>
         <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.sm, textAlign: 'center' }}>
-          What Swoop detects in the demo scenario
+          Intelligence in action: live demo results
         </h2>
         <p style={{ color: theme.colors.textMuted, marginBottom: theme.spacing.xl, textAlign: 'center', maxWidth: 700, margin: '0 auto ' + theme.spacing.xl }}>
-          These metrics are from the Pinetree CC demo environment (300 members, Jan 2026). Real founding partner case studies will be published as clubs onboard.
+          Metrics from the Pinetree CC demo environment (300 members, real system data). Founding partner case studies publishing Q2 2026.
         </p>
         <div className="landing-grid-2" style={{ gap: theme.spacing.lg }}>
           {metricCards.map((card) => (

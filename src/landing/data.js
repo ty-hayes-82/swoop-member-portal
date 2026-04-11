@@ -159,7 +159,7 @@ export const comparisonFeatures = [
   {
     feature: 'Closed-loop engagement',
     swoop: true,
-    waitlistTools: true,
+    waitlistTools: 'partial',
     crm: 'partial',
     sheets: false,
   },
@@ -199,14 +199,14 @@ export const agents = [
 ];
 
 export const integrationCategories = [
-  { label: 'Tee Sheet & Booking', systems: 4, description: 'Leading tee sheet platforms' },
-  { label: 'Member CRM', systems: 3, description: 'Club management systems' },
-  { label: 'POS & F&B', systems: 5, description: 'Point-of-sale platforms' },
-  { label: 'Communications', systems: 4, description: 'Email & SMS providers' },
-  { label: 'Staffing & Payroll', systems: 3, description: 'Payroll & scheduling platforms' },
-  { label: 'Finance & BI', systems: 4, description: 'Accounting & analytics tools' },
-  { label: 'Web & Lead Capture', systems: 2, description: 'Marketing & CRM platforms' },
-  { label: 'Access & Activity', systems: 3, description: 'Access control systems' },
+  { label: 'Tee Sheet & Booking', systems: 4, description: 'Leading tee sheet platforms', vendors: ['ForeUP', 'Lightspeed Golf', 'Club Prophet', 'Tee-On'] },
+  { label: 'Member CRM', systems: 3, description: 'Club management systems', vendors: ['Northstar', 'Jonas Club', 'Clubessential'] },
+  { label: 'POS & F&B', systems: 5, description: 'Point-of-sale platforms', vendors: ['Toast', 'Square', 'Lightspeed', 'POSitouch', 'Jonas F&B'] },
+  { label: 'Communications', systems: 4, description: 'Email & SMS providers', vendors: ['Mailchimp', 'Constant Contact', 'Twilio', 'SendGrid'] },
+  { label: 'Staffing & Payroll', systems: 3, description: 'Payroll & scheduling platforms', vendors: ['ADP', '7shifts', 'Paychex'] },
+  { label: 'Finance & BI', systems: 4, description: 'Accounting & analytics tools', vendors: ['QuickBooks', 'Sage Intacct', 'Club Benchmarking', 'PivotTable'] },
+  { label: 'Web & Lead Capture', systems: 2, description: 'Marketing & CRM platforms', vendors: ['HubSpot', 'Memberplanet'] },
+  { label: 'Access & Activity', systems: 3, description: 'Access control systems', vendors: ['Brivo', 'Keri Systems', 'GateKeeper'] },
 ];
 
 export const foundingPartnerBenefits = [

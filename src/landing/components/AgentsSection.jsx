@@ -12,7 +12,7 @@ const iconLabel = {
 
 export default function AgentsSection() {
   return (
-    <section style={{ marginBottom: theme.spacing.xxl }}>
+    <section id="agents" style={{ marginBottom: theme.spacing.xxl }}>
       <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
         Your GM platform now has a staff.
       </h2>

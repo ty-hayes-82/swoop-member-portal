@@ -92,15 +92,15 @@ export default function DemoCtaSection() {
       >
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Name</span>
-          <input type="text" name="name" autoComplete="name" style={inputStyle} />
+          <input type="text" name="name" autoComplete="name" required style={inputStyle} />
         </label>
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Club</span>
-          <input type="text" name="club" autoComplete="organization" style={inputStyle} />
+          <input type="text" name="club" autoComplete="organization" required style={inputStyle} />
         </label>
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Email</span>
-          <input type="email" name="email" autoComplete="email" style={inputStyle} />
+          <input type="email" name="email" autoComplete="email" required style={inputStyle} />
         </label>
         <label>
           <span style={{ display: 'block', marginBottom: 6 }}>Phone</span>

@@ -110,7 +110,7 @@ export default function RoiCalculatorSection() {
             <p style={{ fontFamily: theme.fonts.mono, fontSize: '32px', fontWeight: 700, color: theme.colors.urgent }}>${annualLoss.toLocaleString()}</p>
           </div>
           <div style={{ paddingTop: theme.spacing.md, borderTop: `1px solid rgba(255, 255, 255, 0.1)` }}>
-            <p style={{ fontSize: theme.fontSize.sm, color: `${theme.colors.bgCard}80` }}>Swoop projected saves (65% retention)</p>
+            <p style={{ fontSize: theme.fontSize.sm, color: `${theme.colors.bgCard}80` }}>Swoop projected saves (65% early-intervention retention rate)</p>
             <p style={{ fontFamily: theme.fonts.mono, fontSize: '32px', fontWeight: 700, color: theme.colors.ctaGreen }}>{swoopSaves} members</p>
           </div>
           <div>
