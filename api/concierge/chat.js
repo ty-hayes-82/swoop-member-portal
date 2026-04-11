@@ -214,12 +214,22 @@ async function chatHandler(req, res) {
     return res.status(404).json({ error: `Member ${member_id} not found` });
   }
 
-  // Get or create concierge session
-  const session = await getOrCreateSession(clubId, member_id);
+  // Get or create concierge session (may fail if table doesn't exist yet)
+  let session = { conversation_summary: null };
+  try {
+    session = await getOrCreateSession(clubId, member_id);
+  } catch (e) {
+    console.warn('[concierge/chat] session error (continuing):', e.message);
+  }
 
-  // Get club name
-  const clubResult = await sql`SELECT name FROM club WHERE club_id = ${clubId}`;
-  const clubName = clubResult.rows[0]?.name || 'the club';
+  // Get club name (fallback for demo)
+  let clubName = 'Pinetree Country Club';
+  try {
+    const clubResult = await sql`SELECT name FROM club WHERE club_id = ${clubId}`;
+    clubName = clubResult.rows[0]?.name || clubName;
+  } catch (e) {
+    console.warn('[concierge/chat] club lookup error (using fallback):', e.message);
+  }
 
   // Build system prompt
   const systemPrompt = buildConciergePrompt(profile, clubName);
@@ -277,8 +287,12 @@ async function chatHandler(req, res) {
     const responseText = result.content?.find(c => c.type === 'text')?.text ?? '';
 
     // Update conversation summary (truncate to last exchange)
-    const summary = `Member asked: "${message.slice(0, 200)}". Agent responded: "${responseText.slice(0, 200)}"`;
-    await updateSessionSummary(clubId, member_id, summary);
+    try {
+      const summary = `Member asked: "${message.slice(0, 200)}". Agent responded: "${responseText.slice(0, 200)}"`;
+      await updateSessionSummary(clubId, member_id, summary);
+    } catch (e) {
+      console.warn('[concierge/chat] summary update error (continuing):', e.message);
+    }
 
     return res.status(200).json({
       session_id: session.session_id,
