@@ -43,14 +43,13 @@ function scrollTo(id) {
 
 /* ── agent data ──────────────────────────────────────────── */
 const AGENTS = [
-  { name: 'Member Risk', icon: '\u{1F6E1}\uFE0F', desc: 'Predicts churn 6-8 weeks before a resignation letter.', link: '#/demo/save-timeline' },
-  { name: 'Service Recovery', icon: '\u{1F527}', desc: 'Detects service failures and orchestrates recovery automatically.', link: '#/demo/split-screen' },
-  { name: 'Game Plan', icon: '\u{1F4CB}', desc: 'Builds 30-day personalized re-engagement plans.', link: '#/demo/gameplan' },
-  { name: 'Weather Cascade', icon: '\u26C8\uFE0F', desc: 'Adjusts tee sheets, F&B prep, and comms when weather shifts.', link: '#/demo/weather-cascade' },
-  { name: 'Board Report', icon: '\u{1F4CA}', desc: 'Generates board-ready retention reports with traced ROI.', link: '#/demo/board-report' },
-  { name: 'Concierge', icon: '\u{1F4AC}', desc: 'Per-member AI that handles reservations and outreach.', link: '#/concierge' },
-  { name: 'Revenue Intel', icon: '\u{1F4B0}', desc: 'Surfaces F&B leakage and upsell opportunities per member.', link: '#/demo/roi' },
-  { name: 'Archetype Engine', icon: '\u{1F9EC}', desc: 'Clusters members into behavioral archetypes.', link: '#/demo/archetype-compare' },
+  { name: "Tomorrow's Game Plan", icon: '\u{1F4CB}', desc: "Pulls tomorrow's tee sheet, weather, staffing, and at-risk members into one prioritized morning briefing.", link: '#/demo/gameplan' },
+  { name: 'Member Risk Lifecycle', icon: '\u{1F6E1}\uFE0F', desc: 'Detects declining engagement across golf, dining, and events. Diagnoses cause, proposes intervention, follows up at Day 7/14/30.', link: '#/demo/save-timeline' },
+  { name: 'Service Recovery', icon: '\u{1F527}', desc: 'Owns the full resolution lifecycle when a high-value member files a complaint. Routes, alerts, escalates, measures.', link: '#/demo/split-screen' },
+  { name: 'Staffing-Demand', icon: '\u{1F4CA}', desc: "Monitors the gap between scheduled staff and forecasted demand. Connects understaffing to dollar risk per outlet.", link: '#/demo/weather-cascade' },
+  { name: 'F&B Intelligence', icon: '\u{1F37D}\uFE0F', desc: 'Finds the root cause of margin compression -- food cost, labor, demand, or menu mix -- and proposes conversion strategies.', link: '#/demo/roi' },
+  { name: 'Board Report Compiler', icon: '\u{1F4C8}', desc: 'Produces a draft narrative board report with attribution: which actions protected which dollars over the past 30 days.', link: '#/demo/board-report' },
+  { name: 'Chief of Staff', icon: '\u2B50', desc: 'The meta-agent. Deduplicates across all agents, resolves conflicts, and ranks 3-5 coordinated recommendations by impact.', link: '#/demo/agents-landing' },
 ];
 
 const DEMO_LINKS = [
@@ -65,6 +64,7 @@ const DEMO_LINKS = [
   { label: 'Architecture', href: '#/demo/architecture', desc: 'System architecture deep-dive' },
   { label: 'Technical Deep-Dive', href: '#/demo/technical-deep-dive', desc: 'Agent coordination and MCP tools' },
   { label: 'ROI Slide', href: '#/demo/roi', desc: 'Single-slide investment summary' },
+  { label: 'Agent Fleet', href: '#/demo/agents-landing', desc: '7 autonomous agents — the full AI team' },
 ];
 
 const SUGGESTED_MESSAGES = [
@@ -121,7 +121,7 @@ export default function InvestorSite() {
           </Reveal>
           <Reveal delay={150}>
             <p className="mx-auto mt-8 max-w-2xl text-lg text-gray-400 md:text-xl">
-              <span className="font-semibold text-emerald-400">8 autonomous agents.</span>{' '}
+              <span className="font-semibold text-emerald-400">7 autonomous agents.</span>{' '}
               <span className="font-semibold text-white">$9,377/mo</span> in recoverable revenue per club.{' '}
               <span className="font-semibold text-white">$71/month</span> to run.
             </p>
@@ -244,7 +244,7 @@ export default function InvestorSite() {
               {
                 step: '02',
                 title: 'Agents activate',
-                desc: '8 AI agents analyze every member across 5 data domains. Risks flagged, plans built.',
+                desc: '7 AI agents analyze every member across 5 data domains. Risks flagged, plans built.',
                 icon: '\u{1F916}',
               },
               {
@@ -299,7 +299,7 @@ export default function InvestorSite() {
         <div className="mx-auto max-w-6xl">
           <Reveal>
             <p className="mb-3 text-center text-sm font-semibold uppercase tracking-widest text-emerald-400">The Agents</p>
-            <h2 className="text-center text-3xl font-bold text-white md:text-4xl">8 AI agents working 24/7</h2>
+            <h2 className="text-center text-3xl font-bold text-white md:text-4xl">7 AI agents working 24/7</h2>
           </Reveal>
           {/* horizontal scroll on mobile, grid on desktop */}
           <div className="mt-12 flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0">

@@ -71,41 +71,66 @@ const SMS_TOOLS = [
 async function executeSmsTool(toolName, input, member, clubId) {
   switch (toolName) {
     case 'get_club_calendar': {
+      const memberName = member.name || `${member.first_name} ${member.last_name}`.trim();
+      const memberType = member.membership_type || 'Full Golf';
       return {
         events: [
-          { date: '2026-04-10', time: '6:00 PM', title: 'Wine Dinner — Spring Pairing Menu', location: 'Main Dining Room', capacity: '48 seats, 12 remaining' },
-          { date: '2026-04-12', time: '8:00 AM', title: 'Saturday Morning Shotgun — Member-Guest', location: 'North Course', capacity: '72 players, 8 spots left' },
-          { date: '2026-04-13', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment' },
-          { date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', capacity: '20 teams max, 6 remaining' },
-          { date: '2026-04-18', time: '7:00 AM', title: 'Club Championship Qualifier — Round 1', location: 'South Course', capacity: 'Registration open' },
+          { date: '2026-04-10', time: '6:00 PM', title: 'Wine Dinner — Spring Pairing Menu', location: 'Main Dining Room', capacity: '48 seats, 12 remaining', note: 'Popular with Social and Full Golf members — filling fast', dress_code: 'Smart casual' },
+          { date: '2026-04-12', time: '8:00 AM', title: 'Saturday Morning Shotgun — Member-Guest', location: 'North Course', capacity: '72 players, only 8 spots left', note: (memberType || '').includes('Golf') || (memberType || '').includes('FG') ? 'Your membership includes entry — invite a guest for $45' : 'Open to all members, guest fee $85', weather_forecast: '72°F, partly cloudy — ideal conditions' },
+          { date: '2026-04-13', time: '10:00 AM', title: 'Junior Golf Clinic', location: 'Practice Range', capacity: 'Open enrollment', note: 'Ages 8-16, led by Coach Davis' },
+          { date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', capacity: '20 teams max, only 6 remaining', note: 'Last month sold out — grab a spot early', food_included: 'Appetizer spread + 2 drink tickets per person' },
+          { date: '2026-04-18', time: '7:00 AM', title: 'Club Championship Qualifier — Round 1', location: 'South Course', capacity: 'Registration open — 54 of 72 spots filled', note: 'Defending champion: Tom Gallagher. Registration closes Apr 16.' },
         ],
       };
     }
     case 'book_tee_time': {
       const course = input.course || 'North Course';
       const players = input.players || 4;
+      const memberName = member.name || `${member.first_name} ${member.last_name}`.trim();
+      const prefs = member.preferences || {};
+      const beverage = (typeof prefs.dining === 'string' && prefs.dining.includes('Arnold Palmer')) ? 'Arnold Palmer' : 'cold water and towels';
       return {
         confirmation: `Tee time booked: ${input.date} at ${input.time} on the ${course} for ${players} players.`,
         confirmation_number: `TT-${Date.now().toString(36).toUpperCase()}`,
-        member_name: member.first_name + ' ' + member.last_name,
+        member_name: memberName,
+        cart_note: `Cart will be staged with ${beverage} at the bag drop 15 min before your time.`,
+        weather: '75°F, light breeze from the south — perfect golf weather.',
+        starter_note: course === 'North Course' ? 'Starter: Mike will have you set at the tee.' : 'Starter: Danny will get your group rolling.',
+        pace_note: `Current pace on ${course}: 4 hrs 10 min.`,
       };
     }
     case 'make_dining_reservation': {
       const party = input.party_size || 2;
       const time = input.time || '7:00 PM';
+      const memberName = member.name || `${member.first_name} ${member.last_name}`.trim();
+      const prefs = member.preferences || {};
+      const favDining = (typeof prefs.dining === 'string') ? prefs.dining : '';
+      const seatingNote = favDining.includes('booth 12') ? 'Booth 12 reserved — your usual spot.' : 'Window table reserved.';
+      const isSpecialDinner = (input.outlet || '').toLowerCase().includes('dining') || (input.preferences || '').toLowerCase().includes('anniversary') || (input.preferences || '').toLowerCase().includes('birthday');
       return {
         confirmation: `Dining reservation confirmed: ${input.date} at ${time} at ${input.outlet} for ${party} guests.`,
         confirmation_number: `DR-${Date.now().toString(36).toUpperCase()}`,
-        preferences_noted: input.preferences || 'Booth 12 (preferred)',
-        member_name: member.first_name + ' ' + member.last_name,
+        seating: seatingNote,
+        server: 'Maria will take care of you — she knows your preferences.',
+        preferences_noted: input.preferences || (favDining ? `On file: ${favDining}` : 'Booth 12 (preferred)'),
+        member_name: memberName,
+        wine_suggestion: isSpecialDinner ? 'Chef recommends the 2021 Willamette Valley Pinot Noir with tonight\'s special — shall we have a bottle ready?' : undefined,
+        kitchen_note: favDining.includes('Arnold Palmer') ? 'Kitchen flagged: Arnold Palmer ready on arrival.' : undefined,
       };
     }
     case 'get_my_schedule': {
       return {
         upcoming: [
-          { type: 'tee_time', date: '2026-04-12', time: '7:00 AM', course: 'North Course', players: 4, group: ['James Whitfield', 'Tom Gallagher', 'Mark Patterson', 'Greg Holloway'] },
-          { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing' },
+          { type: 'tee_time', date: '2026-04-12', time: '7:00 AM', course: 'North Course', players: 4, group: ['James Whitfield', 'Tom Gallagher', 'Mark Patterson', 'Greg Holloway'], weather: '72°F, partly cloudy' },
+          { type: 'dining', date: '2026-04-10', time: '7:30 PM', outlet: 'Main Dining Room', party_size: 2, notes: 'Wine Dinner — Spring Pairing', seating: 'Table 14 confirmed', dress_code: 'Smart casual' },
+          { type: 'event', date: '2026-04-15', time: '5:30 PM', title: 'Trivia Night', location: 'Grill Room', status: 'RSVP confirmed — Team of 4' },
         ],
+        pending_actions: [
+          { type: 'open_feedback', filed_date: '2026-01-16', category: 'food_and_beverage', status: 'in_progress', note: 'Our F&B manager Sarah will follow up with you this week.' },
+        ],
+        household_upcoming: member.household_id ? [
+          { member: 'Logan Whitfield', type: 'event', date: '2026-04-13', time: '10:00 AM', title: 'Junior Golf Clinic' },
+        ] : [],
       };
     }
     case 'rsvp_event': {
@@ -128,16 +153,30 @@ async function executeSmsTool(toolName, input, member, clubId) {
       };
     }
     case 'file_complaint': {
+      const memberName = member.name || `${member.first_name} ${member.last_name}`.trim();
+      const firstName = member.first_name || memberName.split(' ')[0];
+      const categoryManagers = {
+        food_and_beverage: { manager: 'Sarah Collins, F&B Director', dept: 'Food & Beverage', timeline: 'within 24 hours' },
+        golf_operations: { manager: 'Chris Delaney, Head Golf Professional', dept: 'Golf Operations', timeline: 'within 24 hours' },
+        facilities: { manager: 'Robert Kim, Facilities Director', dept: 'Facilities', timeline: 'within 48 hours' },
+        staff: { manager: 'Jennifer Hayes, HR Director', dept: 'Human Resources', timeline: 'within 24 hours' },
+        billing: { manager: 'Anne Torres, Membership Accounting', dept: 'Billing & Accounts', timeline: 'within 2 business days' },
+        other: { manager: 'David Park, General Manager', dept: 'Club Management', timeline: 'within 24 hours' },
+      };
+      const routing = categoryManagers[input.category] || categoryManagers.other;
       const complaintResult = {
         complaint_id: `FB-${Date.now().toString(36).toUpperCase()}`,
         category: input.category,
         status: 'filed',
-        message: 'Your feedback has been filed and routed to the appropriate manager.',
+        routed_to: routing.dept,
+        assigned_manager: routing.manager,
+        expected_response: `You will hear back from ${routing.manager.split(',')[0]} ${routing.timeline}.`,
+        message: `We take this seriously, ${firstName}. Your feedback has been filed and escalated directly to ${routing.manager}. They will reach out to you ${routing.timeline} to discuss and resolve this. Your reference number is below — you can text it anytime for a status update.`,
       };
       try {
         await routeEvent(clubId, 'complaint_filed_by_concierge', {
           member_id: member.member_id,
-          member_name: member.name || `${member.first_name} ${member.last_name}`.trim(),
+          member_name: memberName,
           category: input.category,
           description: input.description,
           complaint_id: complaintResult.complaint_id,
