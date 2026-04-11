@@ -664,9 +664,12 @@ export default async function handler(req, res) {
 
     // Step 2: Insert each CSV in FK-safe order
     const phaseFilter = {
-      '1': ['membership_types', 'courses', 'dining_outlets', 'households', 'members'],
-      '2': ['bookings', 'booking_players', 'pos_checks', 'pos_line_items', 'pos_payments', 'close_outs', 'feedback', 'service_requests', 'invoices'],
-      '3': ['event_definitions', 'event_registrations', 'email_campaigns', 'email_events', 'staff', 'staff_shifts'],
+      '1': ['club', 'membership_types', 'courses', 'dining_outlets', 'households', 'members'],
+      '2': ['bookings', 'booking_players'],
+      '3': ['pos_checks', 'close_outs'],
+      '4': ['pos_line_items', 'pos_payments'],
+      '5': ['email_campaigns', 'email_events'],
+      '6': ['event_definitions', 'event_registrations', 'feedback', 'service_requests', 'member_invoices', 'staff', 'staff_shifts'],
     };
     const allowedLabels = phase === 'all' ? null : (phaseFilter[phase] || null);
 
@@ -697,7 +700,7 @@ export default async function handler(req, res) {
     }
 
     // Step 3: Create concierge sessions for key test members (phase 3 or all)
-    if (phase === '3' || phase === 'all') {
+    if (phase === '6' || phase === 'all') {
       try {
         const sessionCount = await insertConciergeSessions(client);
         tables['member_concierge_sessions'] = sessionCount;
