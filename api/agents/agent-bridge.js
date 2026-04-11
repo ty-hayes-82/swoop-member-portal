@@ -9,6 +9,9 @@
  *   2. Checks staffing impact (large party, busy date) → notifies Staffing-Demand agent
  *   3. Checks for open complaints → flags for Game Plan agent
  *   4. Logs to agent_activity with phase='agent-bridge'
+ *
+ * Events are routed through the coordinator session via routeEvent(),
+ * which handles thread targeting and logs agent.thread_message_sent events.
  */
 import { sql } from '@vercel/postgres';
 import { routeEvent } from './agent-events.js';

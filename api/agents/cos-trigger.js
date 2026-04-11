@@ -19,7 +19,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
-import { createManagedSession, sendSessionEvent } from './managed-config.js';
+import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
@@ -287,7 +287,30 @@ async function cosTriggerHandler(req, res) {
 
     // 3. Managed agent or simulation
     if (!SIMULATION_MODE) {
-      const session = await createManagedSession();
+      // Create coordinator session with callable_agents (sub-agent delegation)
+      const session = await createCoordinatorSession();
+
+      // Group actions by agent to create per-agent threads
+      const actionsByAgent = {};
+      for (const action of actions) {
+        if (!actionsByAgent[action.agent_id]) actionsByAgent[action.agent_id] = [];
+        actionsByAgent[action.agent_id].push(action);
+      }
+
+      const threads = [];
+      for (const [agentId, agentActions] of Object.entries(actionsByAgent)) {
+        const thread = await createAgentThread(session.id, agentId, {
+          trigger: 'cos_review',
+          club_id: clubId,
+          agent_id: agentId,
+          actions: agentActions,
+          confidence: confidenceScores.agents?.find(a => a.agent_id === agentId) || null,
+          timestamp: new Date().toISOString(),
+        });
+        threads.push({ agent_id: agentId, thread_id: thread.session_thread_id });
+      }
+
+      // Send coordination directive to the main session (not a thread)
       await sendSessionEvent(session.id, {
         type: 'user.message',
         content: JSON.stringify({
@@ -295,12 +318,15 @@ async function cosTriggerHandler(req, res) {
           club_id: clubId,
           pending_actions: actions,
           confidence_scores: confidenceScores,
+          agent_threads: threads,
           timestamp: new Date().toISOString(),
         }),
       });
+
       return res.status(200).json({
         triggered: true,
         session_id: session.id,
+        agent_threads: threads,
         simulation: false,
         input_actions: inputCount,
       });

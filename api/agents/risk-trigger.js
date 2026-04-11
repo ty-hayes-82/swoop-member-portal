@@ -15,7 +15,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
-import { createManagedSession, sendSessionEvent } from './managed-config.js';
+import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 import { evaluateRiskTrigger } from './risk-config.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
@@ -82,44 +82,45 @@ async function riskHandler(req, res) {
       }
     }
 
-    // 4. Create session (live or simulation)
+    // 4. Create thread within coordinator session (live or simulation)
     let sessionId = null;
+    let threadId = null;
 
     if (!SIMULATION_MODE) {
-      const session = await createManagedSession();
-      sessionId = session.id;
+      // Create (or reuse) a coordinator session, then spawn a thread for this agent
+      const coordinator = await createCoordinatorSession();
+      sessionId = coordinator.id;
 
-      await sendSessionEvent(sessionId, {
-        type: 'user.message',
-        content: JSON.stringify({
-          trigger: 'health_score_crossing',
-          club_id: clubId,
-          member_id,
-          current_score: evaluation.currentScore,
-          previous_score: evaluation.previousScore,
-          delta: evaluation.delta,
-          annual_dues: evaluation.dues,
-          timestamp: new Date().toISOString(),
-        }),
+      const thread = await createAgentThread(sessionId, 'member-risk-lifecycle', {
+        trigger: 'health_score_crossing',
+        club_id: clubId,
+        member_id,
+        current_score: evaluation.currentScore,
+        previous_score: evaluation.previousScore,
+        delta: evaluation.delta,
+        annual_dues: evaluation.dues,
+        timestamp: new Date().toISOString(),
       });
+      threadId = thread.session_thread_id;
     } else {
       sessionId = `sim_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      console.log(`[risk-trigger] Simulation mode — session_id=${sessionId}`);
+      threadId = `sim_thread_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      console.log(`[risk-trigger] Simulation mode — session_id=${sessionId}, thread_id=${threadId}`);
     }
 
-    // 5. Insert playbook run
+    // 5. Insert playbook run (with thread reference for event routing)
     const runId = `run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     await sql`
       INSERT INTO playbook_runs (
         run_id, club_id, playbook_id, member_id,
         triggered_by, trigger_reason, status,
-        agent_session_id, started_at
+        agent_session_id, session_thread_id, started_at
       ) VALUES (
         ${runId}, ${clubId}, ${PLAYBOOK_ID}, ${member_id},
         'risk-trigger',
         ${`health_score=${evaluation.currentScore} (was ${evaluation.previousScore}), delta=${evaluation.delta}, dues=${evaluation.dues}`},
         'active',
-        ${sessionId}, NOW()
+        ${sessionId}, ${threadId}, NOW()
       )
     `;
 
@@ -134,6 +135,7 @@ async function riskHandler(req, res) {
     return res.status(200).json({
       triggered: true,
       session_id: sessionId,
+      session_thread_id: threadId,
       run_id: runId,
       simulation: SIMULATION_MODE,
       ...evaluation,

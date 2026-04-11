@@ -138,8 +138,9 @@ export async function createCoordinatorSession(envId = MANAGED_ENV_ID) {
   const response = await client.beta.sessions.create({
     agent: AGENT_IDS['chief-of-staff'],
     environment_id: envId,
+    agent_toolset_version: 'agent_toolset_20260401',
+    callable_agents: callableAgents,
     metadata: {
-      agent_toolset_version: 'agent_toolset_20260401',
       coordinator: 'chief-of-staff',
     },
   });
