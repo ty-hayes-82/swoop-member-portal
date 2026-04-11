@@ -442,7 +442,7 @@ async function computeHealthScores(client) {
         m.member_id,
         LEAST(100, COALESCE(COUNT(DISTINCT pc.check_id), 0) * 5) AS dining_score
       FROM members m
-      LEFT JOIN pos_checks pc ON pc.member_id = m.member_id AND pc.opened_at >= NOW() - INTERVAL '180 days'
+      LEFT JOIN pos_checks pc ON pc.member_id = m.member_id AND pc.opened_at::timestamptz >= NOW() - INTERVAL '180 days'
       WHERE m.club_id = $1
       GROUP BY m.member_id
     ),
@@ -451,7 +451,7 @@ async function computeHealthScores(client) {
         m.member_id,
         LEAST(100, COALESCE(COUNT(DISTINCT ee.event_id), 0) * 8) AS email_score
       FROM members m
-      LEFT JOIN email_events ee ON ee.member_id = m.member_id AND ee.event_type IN ('open', 'click') AND ee.occurred_at >= NOW() - INTERVAL '180 days'
+      LEFT JOIN email_events ee ON ee.member_id = m.member_id AND ee.event_type IN ('open', 'click') AND ee.occurred_at::timestamptz >= NOW() - INTERVAL '180 days'
       WHERE m.club_id = $1
       GROUP BY m.member_id
     ),
@@ -460,7 +460,7 @@ async function computeHealthScores(client) {
         m.member_id,
         LEAST(100, COALESCE(COUNT(DISTINCT er.registration_id), 0) * 15) AS event_score
       FROM members m
-      LEFT JOIN event_registrations er ON er.member_id = m.member_id AND er.status IN ('confirmed', 'attended') AND er.registered_at >= NOW() - INTERVAL '180 days'
+      LEFT JOIN event_registrations er ON er.member_id = m.member_id AND er.status IN ('confirmed', 'attended') AND er.registered_at::timestamptz >= NOW() - INTERVAL '180 days'
       WHERE m.club_id = $1
       GROUP BY m.member_id
     ),
