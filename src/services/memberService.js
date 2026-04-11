@@ -567,8 +567,8 @@ export const getResignationScenarios= () => {
 };
 /** @returns {EmailHeatmapRow[]} */
 export const getEmailHeatmap        = () => {
-  // Email data merges via the email gate — don't gate on _shouldReturnEmpty
-  // which checks memberSummary.total (members gate). Read directly from _d.
+  // In guided mode, only show email data when email gate is open
+  if (_isGuidedMode() && !isGateOpen('email')) return [];
   const raw = Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
   return raw.map(e => ({
     campaign: e.campaign ?? e.subject ?? 'Unknown',
@@ -579,8 +579,8 @@ export const getEmailHeatmap        = () => {
 };
 /** @returns {DecayingMemberRow[]} */
 export const getDecayingMembers     = () => {
-  // Email data merges via the email gate — don't gate on _shouldReturnEmpty
-  // which checks memberSummary.total (members gate). Read directly from _d.
+  // In guided mode, only show email data when email gate is open
+  if (_isGuidedMode() && !isGateOpen('email')) return [];
   return normalizeDecayingMembers(_d?.decayingMembers);
 };
 
