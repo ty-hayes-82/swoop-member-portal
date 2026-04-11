@@ -513,6 +513,20 @@ export default async function handler(req, res) {
   try {
     await client.query('BEGIN');
 
+    // 0. Ensure member_concierge_sessions table exists (needed for chat persistence)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS member_concierge_sessions (
+        session_id          TEXT PRIMARY KEY,
+        club_id             TEXT NOT NULL,
+        member_id           TEXT NOT NULL,
+        last_active         TIMESTAMPTZ DEFAULT NOW(),
+        preferences_cache   JSONB,
+        conversation_summary TEXT,
+        created_at          TIMESTAMPTZ DEFAULT NOW(),
+        UNIQUE(club_id, member_id)
+      )
+    `);
+
     // 1. Club profile + weather
     const clubCopied = await copyClub(client);
 
