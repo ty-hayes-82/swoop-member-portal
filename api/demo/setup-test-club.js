@@ -7,7 +7,7 @@
  * After copying, triggers health score computation so the concierge has
  * fully scored member data to query.
  */
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 import { logError, logInfo } from '../lib/logger.js';
 
 const SEED_CLUB = 'seed_pinetree';
@@ -506,9 +506,7 @@ export default async function handler(req, res) {
 
   const start = Date.now();
 
-  const { Pool } = await import('pg');
-  const pool = new Pool({ connectionString: process.env.POSTGRES_URL });
-  const client = await pool.connect();
+  const client = await db.connect();
 
   try {
     await client.query('BEGIN');
@@ -597,6 +595,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: `Failed to setup test club: ${e.message}` });
   } finally {
     client.release();
-    pool.end().catch(() => {});
   }
 }
