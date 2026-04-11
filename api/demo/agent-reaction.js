@@ -17,19 +17,38 @@ const MEMBER_CONTEXT = {
   recentActivity: 'Golf rounds dropping (4 -> 3 -> 2 -> 1/month), complaint filed about slow lunch',
 };
 
-function classifyMessage(message) {
+/**
+ * Classify member message intent using Claude (with keyword fallback).
+ * AI classification catches nuance that keywords miss:
+ * "This place has gone downhill" → complaint
+ * "Can you check if there's space Saturday?" → booking
+ */
+async function classifyMessage(message) {
+  // Try AI classification first
+  try {
+    const raw = await generateText(
+      `Classify this country club member message into exactly one category. Reply with ONLY the category name, nothing else.
+
+Categories:
+- complaint: The member is expressing dissatisfaction, frustration, reporting a problem, or threatening to leave
+- booking: The member wants to book, reserve, or schedule something (tee time, dining, event)
+- general: Anything else (questions, greetings, information requests)
+
+Member message: "${message}"
+
+Category:`
+    );
+    const category = raw.trim().toLowerCase().replace(/[^a-z]/g, '');
+    if (['complaint', 'booking', 'general'].includes(category)) return category;
+  } catch {}
+
+  // Keyword fallback when AI is unavailable
   const lower = message.toLowerCase();
-  const complaintWords = ['slow', 'wait', 'ignored', 'terrible', 'awful', 'bad', 'disappointed', 'upset', 'rude', 'cold', 'wrong', 'complaint', 'unacceptable', 'never', 'worst', 'horrible', 'poor', 'forgot', 'minutes', 'apologize', 'apologized', 'took', 'no one'];
-  const cancellationWords = ['cancel membership', 'resign', 'quit the club', 'leaving the club', 'not renewing'];
-  const bookingWords = ['book', 'reserve', 'tee time', 'reservation', 'table', 'party'];
+  const complaintSignals = ['slow', 'wait', 'ignored', 'terrible', 'awful', 'bad', 'disappoint', 'upset', 'rude', 'cold', 'wrong', 'complaint', 'unacceptable', 'worst', 'horrible', 'poor', 'forgot', 'minutes', 'apologize', 'took', 'no one', 'downhill', 'cancel membership', 'resign', 'quit', 'leaving'];
+  const bookingSignals = ['book', 'reserve', 'tee time', 'reservation', 'table', 'party'];
 
-  const isComplaint = complaintWords.some(w => lower.includes(w));
-  const isCancellation = cancellationWords.some(w => lower.includes(w));
-  const isBooking = bookingWords.some(w => lower.includes(w));
-
-  if (isCancellation) return 'complaint'; // Cancellation intent triggers same agents as complaint (service-recovery + member-risk)
-  if (isComplaint) return 'complaint';
-  if (isBooking) return 'booking';
+  if (complaintSignals.some(w => lower.includes(w))) return 'complaint';
+  if (bookingSignals.some(w => lower.includes(w))) return 'booking';
   return 'general';
 }
 
@@ -115,7 +134,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'member_message is required' });
   }
 
-  const category = classifyMessage(member_message);
+  const category = await classifyMessage(member_message);
   const config = AGENT_PROMPTS[category];
 
   try {
