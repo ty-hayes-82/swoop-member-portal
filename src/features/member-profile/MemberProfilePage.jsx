@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StoryHeadline } from '@/components/ui';
+import { StoryHeadline, useToast } from '@/components/ui';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import { useNavigationContext } from '@/context/NavigationContext';
@@ -182,6 +182,43 @@ export default function MemberProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const { openProfile } = useMemberProfile();
+  const { showToast, ToastContainer } = useToast();
+  const [draftLoading, setDraftLoading] = useState(null); // tracks which action is loading
+
+  const handleQuickAction = async (label) => {
+    if (label === 'Schedule call') {
+      showToast('Call scheduling will be available when a phone system is connected. Configure in Admin > Action Channels.', 'info');
+      return;
+    }
+    if (label === 'Offer comp') {
+      showToast('Comp offers will be available in the next release. Configure in Admin > Action Channels.', 'info');
+      return;
+    }
+    const draftType = label === 'Send email' ? 'email' : 'sms';
+    if (!memberId) return;
+    setDraftLoading(label);
+    showToast(`Generating ${draftType} draft...`, 'info');
+    try {
+      const res = await fetch('/api/generate-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId, draftType }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Draft generation failed');
+      if (draftType === 'email' && data.subject) {
+        const mailto = `mailto:${encodeURIComponent(data.memberEmail)}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(data.body)}`;
+        window.open(mailto, '_blank');
+        showToast(`Email draft created for ${data.memberName}`, 'info');
+      } else {
+        showToast(`${draftType === 'sms' ? 'SMS' : 'Email'} draft: "${data.body.slice(0, 80)}${data.body.length > 80 ? '...' : ''}"`, 'info');
+      }
+    } catch (e) {
+      showToast(`Draft failed: ${e.message}`, 'error');
+    } finally {
+      setDraftLoading(null);
+    }
+  };
 
   // Get member ID from NavigationContext (primary) or URL hash (fallback)
   useEffect(() => {
@@ -365,6 +402,7 @@ export default function MemberProfilePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <ToastContainer />
       {/* Why am I looking at this member? — context banner */}
       {contextReason && (
         <div className="px-3.5 py-2.5 rounded-lg bg-red-500/[0.04] border border-red-500/[0.13] border-l-[3px] border-l-red-500 text-sm text-[#1a1a2e]">
@@ -588,12 +626,13 @@ export default function MemberProfilePage() {
         ].map(action => (
           <button
             key={action.label}
-            onClick={() => {}}
+            onClick={() => handleQuickAction(action.label)}
+            disabled={draftLoading === action.label}
             className="px-2.5 py-2.5 rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5"
-            style={{ border: `1px solid ${action.color}25`, background: `${action.color}06`, color: action.color }}
+            style={{ border: `1px solid ${action.color}25`, background: `${action.color}06`, color: action.color, opacity: draftLoading === action.label ? 0.6 : 1 }}
           >
             <span className="text-sm">{action.icon}</span>
-            {action.label}
+            {draftLoading === action.label ? 'Generating...' : action.label}
           </button>
         ))}
       </div>

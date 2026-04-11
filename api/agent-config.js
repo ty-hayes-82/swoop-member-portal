@@ -86,7 +86,8 @@ async function handler(req, res) {
       _configCache.set(cacheKey, config);
       return res.status(200).json(config);
     } catch (err) {
-      return res.status(500).json({ error: 'Failed to fetch agent config', detail: err.message });
+      console.error('/api/agent-config GET error:', err);
+      return res.status(500).json({ error: 'Failed to fetch agent config' });
     }
   }
 
@@ -155,7 +156,8 @@ async function handler(req, res) {
 
       return res.status(200).json(result.rows[0]);
     } catch (err) {
-      return res.status(500).json({ error: 'Failed to update agent config', detail: err.message });
+      console.error('/api/agent-config PATCH error:', err);
+      return res.status(500).json({ error: 'Failed to update agent config' });
     }
   }
 

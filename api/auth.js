@@ -103,7 +103,7 @@ export default async function handler(req, res) {
       });
     } catch (e) {
       logError('/api/auth', e, { phase: 'login', emailDomain: redactEmail(email) });
-      return res.status(500).json({ error: e.message });
+      return res.status(500).json({ error: 'Internal error' });
     }
   }
 
@@ -132,7 +132,7 @@ export default async function handler(req, res) {
       });
     } catch (e) {
       logError('/api/auth', e, { phase: 'session-validate' });
-      return res.status(500).json({ error: e.message });
+      return res.status(500).json({ error: 'Internal error' });
     }
   }
 

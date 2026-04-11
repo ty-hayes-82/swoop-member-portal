@@ -11,6 +11,7 @@
 import { sql } from '@vercel/postgres';
 import crypto from 'crypto';
 import { logError, logInfo } from './lib/logger.js';
+import { rateLimit } from './lib/rateLimit.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -60,6 +61,12 @@ export default async function handler(req, res) {
       `;
       logInfo('quick-setup', `Updated club ${clubId}: ${name}, ${cleanCity}, ${cleanState}`);
     } else {
+      // Rate limit unauthenticated club creation: max 5 per IP per hour
+      const { limited, retryAfter } = rateLimit(req, { maxAttempts: 5, windowMs: 60 * 60 * 1000 });
+      if (limited) {
+        return res.status(429).json({ error: 'Too many club creations — try again later', retryAfter });
+      }
+
       // Create new club
       clubId = `club_${crypto.randomBytes(6).toString('hex')}`;
 

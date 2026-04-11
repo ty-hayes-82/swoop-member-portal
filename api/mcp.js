@@ -3,6 +3,7 @@
 // Auth: x-mcp-token header validated against MCP_AUTH_TOKEN env var.
 
 import { sql } from '@vercel/postgres';
+import crypto from 'crypto';
 import { getAnthropicClient } from './agents/managed-config.js';
 import { notifyClubAgents } from './agents/agent-bridge.js';
 
@@ -12,8 +13,12 @@ import { notifyClubAgents } from './agents/agent-bridge.js';
 
 function validateToken(req) {
   const token = req.headers['x-mcp-token'];
-  if (!token || token !== process.env.MCP_AUTH_TOKEN) return false;
-  return true;
+  const expected = process.env.MCP_AUTH_TOKEN;
+  if (!expected || !token) return false;
+  const a = Buffer.from(String(token));
+  const b = Buffer.from(String(expected));
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }
 
 // ---------------------------------------------------------------------------

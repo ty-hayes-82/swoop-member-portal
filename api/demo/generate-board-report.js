@@ -36,6 +36,11 @@ Paragraph 2: Financial impact — revenue growth, efficiency gains, forward outl
 Do NOT use markdown. Plain text paragraphs only.`;
 
 export default async function handler(req, res) {
+  // Block in production — demo endpoints are dev/staging only
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEMO_ENDPOINTS) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

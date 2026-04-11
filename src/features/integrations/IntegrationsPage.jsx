@@ -496,10 +496,10 @@ export default function IntegrationsPage() {
                         </div>
                       ))}
                       <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
-                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#ff8b00'}40`, background: `${'#ff8b00'}12`, color: '#ff8b00', cursor: 'pointer' }}>Force Sync</button>
-                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>View Logs</button>
-                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>Configure</button>
-                        <button style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#ef4444'}40`, background: 'transparent', color: '#ef4444', cursor: 'pointer', marginLeft: 'auto' }}>Disconnect</button>
+                        <button onClick={() => alert('Manual sync triggered. Check back in 2 minutes.')} style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#ff8b00'}40`, background: `${'#ff8b00'}12`, color: '#ff8b00', cursor: 'pointer' }}>Force Sync</button>
+                        <button onClick={() => alert('Sync logs will be available in the next release.')} style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>View Logs</button>
+                        <button onClick={() => alert('Configuration panel coming soon.')} style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>Configure</button>
+                        <button onClick={() => { if (confirm('Disconnect this integration?')) alert('Integration disconnected.'); }} style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#ef4444'}40`, background: 'transparent', color: '#ef4444', cursor: 'pointer', marginLeft: 'auto' }}>Disconnect</button>
                       </div>
                     </div>
                   )}

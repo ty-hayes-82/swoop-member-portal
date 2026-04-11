@@ -182,7 +182,7 @@ function AppShell() {
       mobileBar={isMobile ? <MobileConversionBar /> : null}
     >
       <DataImportBanner />
-      <Suspense fallback={null}>
+      <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
         <PageComponent key={`${currentRoute}-${demoRenderKey}`} />
       </Suspense>
     </SwoopLayout>
@@ -195,7 +195,7 @@ function PortalApplication() {
       <NavigationProvider>
         <MemberProfileProvider>
           <AppShell />
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
             <MemberProfileDrawer />
           </Suspense>
           <DemoWizard />
@@ -421,7 +421,7 @@ export default function App() {
   // Landing page — accessible without auth via hash route
   if (currentHash === '#/landing') {
     return (
-      <Suspense fallback={null}>
+      <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
         <LandingPage />
       </Suspense>
     );
@@ -452,7 +452,7 @@ export default function App() {
   // Password reset page — accessible without auth
   if (currentHash.startsWith('#/reset-password')) {
     return (
-      <Suspense fallback={null}>
+      <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
         <ResetPasswordPage />
       </Suspense>
     );

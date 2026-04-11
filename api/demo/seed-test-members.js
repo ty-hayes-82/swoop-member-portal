@@ -255,6 +255,11 @@ async function insertConciergeSessions(client) {
 // ---------------------------------------------------------------------------
 
 export default async function handler(req, res) {
+  // Block in production — demo endpoints are dev/staging only
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEMO_ENDPOINTS) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');

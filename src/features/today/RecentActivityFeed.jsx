@@ -59,7 +59,11 @@ export default function RecentActivityFeed() {
 
   useEffect(() => {
     fetchActivities();
-    intervalRef.current = setInterval(fetchActivities, 3000);
+    intervalRef.current = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchActivities();
+      }
+    }, 3000);
     return () => clearInterval(intervalRef.current);
   }, []);
 

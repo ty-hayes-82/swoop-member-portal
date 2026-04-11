@@ -6,9 +6,21 @@
  *
  * Total time: ~10-15 seconds for ~36K rows.
  */
+import { rateLimit } from '../lib/rateLimit.js';
+
 export default async function handler(req, res) {
+  // Block in production — demo endpoints are dev/staging only
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEMO_ENDPOINTS) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
+  }
+
+  const { limited, retryAfter } = rateLimit(req, { maxAttempts: 3, windowMs: 60 * 60 * 1000 });
+  if (limited) {
+    return res.status(429).json({ error: 'Rate limit exceeded', retryAfter });
   }
 
   const baseUrl = req.headers['x-forwarded-proto'] && req.headers['x-forwarded-host']

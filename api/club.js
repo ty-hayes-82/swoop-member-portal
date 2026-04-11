@@ -134,7 +134,8 @@ export default withAuth(async function handler(req, res) {
       `;
       return res.status(200).json({ clubs: result.rows });
     } catch (e) {
-      return res.status(500).json({ error: e.message });
+      console.error('/api/club GET error:', e);
+      return res.status(500).json({ error: 'Internal error' });
     }
   }
 
@@ -169,7 +170,8 @@ export default withAuth(async function handler(req, res) {
       `;
       return res.status(200).json({ success: true });
     } catch (e) {
-      return res.status(500).json({ error: e.message });
+      console.error('/api/club PUT error:', e);
+      return res.status(500).json({ error: 'Internal error' });
     }
   }
 
@@ -261,7 +263,8 @@ export default withAuth(async function handler(req, res) {
         details: deletedCounts,
       });
     } catch (e) {
-      return res.status(500).json({ error: e.message });
+      console.error('/api/club DELETE error:', e);
+      return res.status(500).json({ error: 'Internal error' });
     }
   }
 

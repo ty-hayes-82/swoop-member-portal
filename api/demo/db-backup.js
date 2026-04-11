@@ -8,6 +8,7 @@
  * Restore truncates seed_pinetree data and re-inserts from the backup JSON.
  */
 import { db } from '@vercel/postgres';
+import { rateLimit } from '../lib/rateLimit.js';
 
 const CLUB_ID = 'seed_pinetree';
 
@@ -41,6 +42,16 @@ const BACKUP_TABLES = [
 const DELETE_ORDER = [...BACKUP_TABLES].reverse();
 
 export default async function handler(req, res) {
+  // Block in production — demo endpoints are dev/staging only
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEMO_ENDPOINTS) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
+  const { limited, retryAfter } = rateLimit(req, { maxAttempts: 3, windowMs: 60 * 60 * 1000 });
+  if (limited) {
+    return res.status(429).json({ error: 'Rate limit exceeded', retryAfter });
+  }
+
   const action = req.query?.action || (req.method === 'GET' ? 'backup' : 'restore');
 
   if (action === 'list') {

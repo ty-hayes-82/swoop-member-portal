@@ -106,9 +106,10 @@ export default withAuth(async function handler(req, res) {
       const body = renderTemplate(template.body, templateVars);
 
       // Send via SendGrid if API key is configured
-      // In demo mode, override recipient with demo user's email
+      // Only allow demo override in non-production / demo sessions
+      const isDemo = req.auth?.isDemo || process.env.NODE_ENV !== 'production';
       const demoOverrideEmail = req.body.demoOverrideEmail;
-      const toEmail = demoOverrideEmail || memberEmail || (await getMemberEmail(memberId || action.member_id));
+      const toEmail = (isDemo ? (demoOverrideEmail || memberEmail) : memberEmail) || (await getMemberEmail(memberId || action.member_id));
       let emailSent = false;
       if (process.env.SENDGRID_API_KEY && toEmail) {
         try {
@@ -145,9 +146,10 @@ export default withAuth(async function handler(req, res) {
 
     } else if (executionType === 'sms') {
       // Send via Twilio
-      // In demo mode, override recipient with demo user's phone
+      // Only allow demo override in non-production / demo sessions
+      const isDemoSms = req.auth?.isDemo || process.env.NODE_ENV !== 'production';
       const demoOverridePhone = req.body.demoOverridePhone;
-      const toPhone = demoOverridePhone || memberPhone || (await getMemberPhone(memberId || action.member_id));
+      const toPhone = (isDemoSms ? (demoOverridePhone || memberPhone) : memberPhone) || (await getMemberPhone(memberId || action.member_id));
       let smsSent = false;
       const twilioSid = process.env.TWILIO_ACCOUNT_SID;
       const twilioAuth = process.env.TWILIO_API_KEY_SECRET || process.env.TWILIO_AUTH_TOKEN;
@@ -252,7 +254,8 @@ export default withAuth(async function handler(req, res) {
 
     res.status(200).json(results);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('/api/execute-action error:', e);
+    res.status(500).json({ error: 'Internal error' });
   }
 }, { allowDemo: true });
 

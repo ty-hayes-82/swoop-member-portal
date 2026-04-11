@@ -92,6 +92,6 @@ export default withAuth(async function handler(req, res) {
     res.status(200).json({ agents, actions });
   } catch (err) {
     console.error('/api/agents error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal error' });
   }
 }, { allowDemo: true });

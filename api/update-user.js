@@ -29,6 +29,11 @@ export default withAuth(async function handler(req, res) {
     }
     if (!user) return res.status(404).json({ error: 'No user found for this club' });
 
+    // Authorization: only gm/admin/swoop_admin can update other users
+    if (!['gm', 'admin', 'swoop_admin'].includes(req.auth.role) && req.auth.userId !== user.user_id) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
     // Update fields — every UPDATE is double-scoped (user_id AND club_id)
     const updates = [];
     if (newEmail) {
@@ -53,6 +58,7 @@ export default withAuth(async function handler(req, res) {
       email: newEmail || user.email,
     });
   } catch (e) {
-    return res.status(500).json({ error: e.message });
+    console.error('/api/update-user error:', e);
+    return res.status(500).json({ error: 'Internal error' });
   }
 });

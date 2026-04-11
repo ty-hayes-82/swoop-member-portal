@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, useState } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState, useCallback, useMemo } from 'react';
 import { getAgents, getAllActions, getPendingActions, approveAction as approveAgentServiceAction, dismissAction as dismissAgentServiceAction } from '@/services/agentService';
 import {
   getConfirmations as getTSOConfirmations,
@@ -258,11 +258,11 @@ export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState, loadPersistedState);
   const { showToast, ToastContainer } = useToast();
 
-  const activePlaybooks = Object.entries(state.playbooks).filter(([, value]) => value.active);
-  const totalRevenueImpact = {
+  const activePlaybooks = useMemo(() => Object.entries(state.playbooks).filter(([, value]) => value.active), [state.playbooks]);
+  const totalRevenueImpact = useMemo(() => ({
     monthly: activePlaybooks.reduce((sum, [id]) => sum + (PLAYBOOK_DEFS[id]?.monthly ?? 0), 0),
     annual: activePlaybooks.reduce((sum, [id]) => sum + (PLAYBOOK_DEFS[id]?.annual ?? 0), 0),
-  };
+  }), [activePlaybooks]);
 
   // Lazy-load agent inbox — poll until gates are ready (handles post-reload timing).
   // Always reconcile state on first run (even when the result is empty) so that an
@@ -335,7 +335,7 @@ export function AppProvider({ children }) {
     } catch {}
   }, [state.inbox, state.agentStatuses, state.agentConfigs]);
 
-  async function approveAction(id, meta = {}) {
+  const approveAction = useCallback(async function approveAction(id, meta = {}) {
     approveAgentServiceAction(id, meta);
     dispatch({ type: 'APPROVE_ACTION', id, meta });
 
@@ -508,9 +508,9 @@ export function AppProvider({ children }) {
     }).catch(() => {
       showToast('Failed to send action — please retry', 'error');
     });
-  }
+  }, [state.inbox, dispatch, showToast]);
 
-  function dismissAction(id, meta = {}) {
+  const dismissAction = useCallback(function dismissAction(id, meta = {}) {
     dismissAgentServiceAction(id, meta);
     dispatch({ type: 'DISMISS_ACTION', id, meta });
 
@@ -525,7 +525,7 @@ export function AppProvider({ children }) {
       referenceType: 'action',
       description: `Dismissed: ${actionItem?.description || id}`,
     });
-  }
+  }, [state.inbox, dispatch]);
 
   return (
     <AppContext.Provider
