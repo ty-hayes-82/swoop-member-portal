@@ -13,6 +13,7 @@ const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatP
 const MemberConciergeTest = lazy(() => import('@/features/concierge/MemberConciergeTest'));
 const InvestorSite = lazy(() => import('@/features/invest/InvestorSite'));
 const LandingPage = lazy(() => import('@/landing/LandingPage.jsx'));
+const QuickClubSetup = lazy(() => import('@/features/login/QuickClubSetup'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
 const GamePlanDemo = lazy(() => import('@/features/demo/GamePlanDemo'));
 const BoardReportDemo = lazy(() => import('@/features/demo/BoardReportDemo'));
@@ -459,6 +460,28 @@ export default function App() {
 
   if (!authed) {
     return <LoginPage onLogin={() => setAuthed(true)} />;
+  }
+
+  // Quick setup for Google OAuth users who haven't named their club yet.
+  // Google callback auto-creates a placeholder club like "John's Club" —
+  // this screen replaces it with real club name + city + state.
+  const needsQuickSetup = (() => {
+    try {
+      const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+      const clubName = user.clubName || localStorage.getItem('swoop_club_name') || '';
+      return clubName.endsWith("'s Club") || clubName === '' || clubName === 'My Club';
+    } catch { return false; }
+  })();
+
+  if (needsQuickSetup) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading...</div>}>
+        <QuickClubSetup
+          existingClubId={(() => { try { return JSON.parse(localStorage.getItem('swoop_auth_user') || '{}').clubId; } catch { return null; } })()}
+          onComplete={() => { setAuthed(true); window.location.hash = '#/today'; window.location.reload(); }}
+        />
+      </Suspense>
+    );
   }
 
   return (
