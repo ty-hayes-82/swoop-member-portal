@@ -17,7 +17,7 @@ export function routeMessage(message) {
   if (/passed|died|lost\s+(him|her|my)|passing|funeral|memorial/.test(lower)) return 'service-recovery';
   if (/terrible|awful|horrible|unacceptable|frustrating|frustrated|waited\s+\d|slow\s+(on|play|pace)|complaint|rude|ignored|worst|not\s+ok/i.test(lower)) return 'service-recovery';
   if (/not feeling|feeling sick|injured|surgery|recovery/.test(lower)) return 'service-recovery';
-  if (/\b(book|reserve|cancel|sign\s*(me|us)\s*up|rsvp|get\s*(me|us)\s*a?\s*(slot|table|spot|time))\b/.test(lower)) return 'booking';
+  if (/\b(book|reserve|cancel|sign\s*(me|us)\s*up|rsvp|get\s*(me|us|i)\s*a?\s*(slot|table|spot|time)|can i get a)\b/.test(lower)) return 'booking';
   return 'concierge';
 }
 
@@ -60,16 +60,25 @@ export function buildServiceRecoveryPrompt(member) {
 
 ## TEMPLATES (use the matching one — first match wins)
 
-1. GRIEF/LOSS (mentions death, "passed", loss):
-   "${fn}, [person's name] sounds like [warm statement]. [Honor a specific shared memory at the club]. Whenever you're ready to come back, I'm here."
-   ABSOLUTELY NO bookings, events, dates, or suggestions. Nothing after "I'm here." This overrides everything.
-   BAD: "Richard was wonderful. We have a wine dinner Monday!" — NEVER do this.
-   BAD: "Those wine dinners were special. There's one coming up..." — STILL selling.
-   BAD: "Whenever you're ready. Want me to check events?" — DON'T ask.
+1. GRIEF/LOSS (mentions death, "passed", loss, someone who died):
+   EXACT FORMAT — follow this precisely:
+   "${fn}, [person's name] sounds like [he/she] was [warm adjective]. [One sentence honoring a specific shared memory]. Whenever you're ready to come back, I'm here."
+
+   EXAMPLE: "${fn}, Richard sounds like he was such a wonderful person. Those wine dinners you shared together must have been really special. Whenever you're ready to come back, I'm right here."
+
+   STOP AFTER "I'm here." Do not write ANYTHING else. No next sentence. No PS. No "by the way."
+
+   FORBIDDEN in grief responses (instant failure):
+   - Mentioning ANY event, date, or upcoming activity
+   - Asking ANY question ("Want me to...?", "Would you like...?", "Can I...?")
+   - Suggesting ANY booking, reservation, or RSVP
+   - Using words: "event", "dinner", "Monday", "Saturday", "book", "reserve", "sign up"
+   - Adding any sentence after "I'm here" or "I'm right here"
 
 2. COMPLAINT/FRUSTRATION (bad service, slow pace, any criticism):
    "${fn}, [empathy — ugh/that stinks/not OK] — [mirror their specific issue]. I just filed this with [department]. [Recovery offer with specifics] — [question]?"
    YOUR FIRST WORD MUST BE "${fn}". Never "Filed", "Done", "I've", "I'm sorry".
+   PACE EXAMPLE: "${fn}, that stinks — Saturday mornings shouldn't feel like a crawl. I just filed this with our golf ops team. Want me to grab you a 6:30 AM slot next week? Way less traffic that early."
 
 3. ILLNESS/INJURY (not feeling well, cancelling due to health):
    "Hope you're feeling better, ${fn}! [Confirm cancellation with date]. When you're ready, [gentle rebook offer]. [One low-key alternative]."
