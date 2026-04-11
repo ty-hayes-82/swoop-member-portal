@@ -182,17 +182,36 @@ async function _resolveBasePrompt(agentId, memberContext) {
 /**
  * Format custom few-shot examples into a prompt block.
  *
- * @param {Array<{ user: string, assistant: string }>} examples
+ * Supports both legacy { user, assistant } format and the Sprint 4
+ * { scenario, input, ideal_response } format used by the CustomExamplesPanel.
+ *
+ * @param {Array<object>} examples
+ * @param {string} [scenarioFilter] — Optional: only include examples matching this scenario type.
  * @returns {string}
  */
-function _formatExamplesBlock(examples) {
+function _formatExamplesBlock(examples, scenarioFilter) {
   if (!examples?.length) return '';
 
-  const formatted = examples
-    .map((ex, i) => `Example ${i + 1}:\nUser: ${ex.user}\nAssistant: ${ex.assistant}`)
+  let filtered = examples;
+  if (scenarioFilter) {
+    filtered = examples.filter(ex => ex.scenario === scenarioFilter);
+    // Fall back to all examples if no matches for the filter
+    if (filtered.length === 0) filtered = examples;
+  }
+
+  const formatted = filtered
+    .map((ex, i) => {
+      // Sprint 4 format: { scenario, input, ideal_response }
+      if (ex.input && ex.ideal_response) {
+        const scenarioLine = ex.scenario ? `Scenario: ${ex.scenario}\n` : '';
+        return `${scenarioLine}Member says: "${ex.input}"\nYou respond: "${ex.ideal_response}"`;
+      }
+      // Legacy format: { user, assistant }
+      return `Example ${i + 1}:\nUser: ${ex.user}\nAssistant: ${ex.assistant}`;
+    })
     .join('\n\n');
 
-  return `\n\n<examples>\n${formatted}\n</examples>`;
+  return `\n\n--- Club-Specific Examples ---\n${formatted}`;
 }
 
 /**
@@ -217,6 +236,17 @@ function _formatForbiddenActionsBlock(actions) {
 
   const list = actions.map(a => `- ${a}`).join('\n');
   return `\n\n<CRITICAL_INSTRUCTION>\nYou MUST NEVER do any of the following:\n${list}\n</CRITICAL_INSTRUCTION>`;
+}
+
+/**
+ * Format max comp amount into a guardrail block.
+ *
+ * @param {number|null|undefined} amount
+ * @returns {string}
+ */
+function _formatMaxCompAmountBlock(amount) {
+  if (amount == null) return '';
+  return `\n\n<comp_guardrail>\nDo not offer complimentary items valued above $${amount} without GM approval.\n</comp_guardrail>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -285,6 +315,7 @@ function _interpolatePrefill(prefill, memberContext) {
  * @param {string} userMessage    — The end-user or system message to send.
  * @param {object} [opts]         — Optional overrides.
  * @param {Array<object>} [opts.tools] — Full tool set for the agent (caller provides).
+ * @param {string} [opts.scenarioFilter] — Only inject custom examples matching this scenario type.
  * @returns {Promise<object>} Assembled payload: { model, temperature, max_tokens, system, messages, tools, config }.
  */
 export async function assembleAgentCall(clubId, agentId, memberContext, userMessage, opts = {}) {
@@ -302,14 +333,17 @@ export async function assembleAgentCall(clubId, agentId, memberContext, userMess
   const toneBlock = getToneBlock(tone);
   assembledPrompt += `\n\n<communication_tone>\n${toneBlock}\n</communication_tone>`;
 
-  // 4. Inject custom examples
-  assembledPrompt += _formatExamplesBlock(behavioral.custom_examples);
+  // 4. Inject custom examples (optionally filtered by scenario type)
+  assembledPrompt += _formatExamplesBlock(behavioral.custom_examples, opts.scenarioFilter);
 
   // 5. Inject brand voice
   assembledPrompt += _formatBrandVoiceBlock(behavioral.brand_voice_notes);
 
   // 6. Inject forbidden actions
   assembledPrompt += _formatForbiddenActionsBlock(behavioral.forbidden_actions);
+
+  // 6b. Inject max comp amount guardrail
+  assembledPrompt += _formatMaxCompAmountBlock(behavioral.max_comp_amount);
 
   // 7. Filter tools
   const filteredTools = _filterTools(opts.tools || [], toolPerms);
