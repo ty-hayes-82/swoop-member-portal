@@ -11,6 +11,7 @@ import { useApp } from '@/context/AppContext';
 import { apiFetch } from '@/services/apiClient';
 import { isGateOpen } from '@/services/demoGate';
 import { getFirstName } from '../../utils/nameUtils';
+import { CourseUtilizationCards } from '@/components/insights/DeepInsightWidgets';
 
 const healthColor = (score) => {
   if (score >= 70) return '#12b76a';
@@ -313,6 +314,9 @@ export default function TeeSheetView() {
         />
 
         <EvidenceStrip systems={['Tee Sheet', 'Member CRM', 'Weather', 'POS']} />
+
+        {/* Course utilization powered by imported courses + bookings */}
+        <CourseUtilizationCards />
 
         {/* At-Risk & VIP Alerts */}
         {atRiskTimes.length > 0 && (

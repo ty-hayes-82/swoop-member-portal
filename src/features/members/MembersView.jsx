@@ -10,6 +10,7 @@ import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import StatCard from '@/components/ui/StatCard';
 import { isGateOpen } from '@/services/demoGate';
 import DataEmptyState from '@/components/ui/DataEmptyState';
+import { TierRevenueMix } from '@/components/insights/DeepInsightWidgets';
 
 // Member Health tabs
 import HealthOverview from '@/features/member-health/tabs/HealthOverview';
@@ -146,6 +147,9 @@ export default function MembersView() {
         />
 
         <EvidenceStrip systems={['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email']} />
+
+        {/* Tier-revenue mix powered by imported members + membership_types */}
+        <TierRevenueMix />
 
         {/* Roster summary stats */}
         {(summary.avgTenure > 0 || summary.avgDues > 0 || summary.renewalRate > 0) && (

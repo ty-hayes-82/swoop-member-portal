@@ -18,6 +18,7 @@ import PageTransition, { AnimatedNumber } from '@/components/ui/PageTransition';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import ScenarioSlider from '@/components/ui/ScenarioSlider';
+import { ARAgingPanel, SettlementMixDonut } from '@/components/insights/DeepInsightWidgets';
 import { useNavigation } from '@/context/NavigationContext';
 import { useApp } from '@/context/AppContext';
 import { trackAction } from '@/services/activityService';
@@ -146,6 +147,12 @@ export default function RevenuePage() {
           >
             Generate Board Report →
           </button>
+        </div>
+
+        {/* Deep insights powered by imported CSV data */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16 }}>
+          <SettlementMixDonut />
+          <ARAgingPanel />
         </div>
 
         {/* Story headline */}
