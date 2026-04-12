@@ -14,7 +14,7 @@ import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
-const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
 // ---------------------------------------------------------------------------
 // Data pull functions (reused by MCP tool handlers in api/mcp.js)
@@ -466,7 +466,11 @@ async function boardReportHandler(req, res) {
     });
   } catch (err) {
     console.error('/api/agents/board-report-trigger error:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(200).json({
+      triggered: false,
+      reason: 'internal error: ' + err.message,
+      error_class: 'server',
+    });
   }
 }
 

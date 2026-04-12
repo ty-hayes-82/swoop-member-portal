@@ -78,6 +78,7 @@ test.describe('B-lite Agents — GM persona deep test', () => {
   let pendingActionIds = [];
 
   test.beforeAll(async ({ browser }) => {
+    test.setTimeout(180000); // 3 min for restore + compute-health-scores
     session = loadSession();
     if (!session) {
       throw new Error(
@@ -87,6 +88,21 @@ test.describe('B-lite Agents — GM persona deep test', () => {
     }
     console.log(`[agent-test] restoring "${SAVEPOINT_NAME}" for club ${session.clubId}`);
     restoreSavepoint(SAVEPOINT_NAME, session.clubId);
+
+    // Compute health scores against the restored data so agents have real
+    // signals to fire on. Without this, every member is health_tier=Watch
+    // with null score and no trigger fires. Uses global fetch (Node 18+).
+    try {
+      const r = await fetch(`${APP_URL}/api/compute-health-scores?clubId=${session.clubId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.token}` },
+        body: JSON.stringify({ clubId: session.clubId }),
+      });
+      const j = await r.json().catch(() => ({}));
+      console.log(`[agent-test] compute-health-scores: ${r.status} computed=${j.computed} alerts=${j.alerts}`);
+    } catch (e) {
+      console.log(`[agent-test] compute-health-scores failed: ${e.message}`);
+    }
 
     const ctx = await browser.newContext();
     await ctx.addInitScript(({ token, user, clubId, clubName }) => {
@@ -162,9 +178,18 @@ test.describe('B-lite Agents — GM persona deep test', () => {
       return;
     }
 
-    // Pick the first member (any member works for a trigger test)
-    aRiskMemberId = roster[0].memberId;
-    console.log(`[agent-test] using member ${aRiskMemberId} for triggers`);
+    // Pick the most-at-risk member with non-trivial dues so risk-trigger
+    // actually fires. Falls back to the first roster row if no scores.
+    const sorted = [...roster].sort((a, b) => {
+      const sa = (a.score ?? a.healthScore ?? 100);
+      const sb = (b.score ?? b.healthScore ?? 100);
+      if (sa !== sb) return sa - sb;
+      return (b.annualDues ?? 0) - (a.annualDues ?? 0);
+    });
+    aRiskMemberId = sorted[0]?.memberId || roster[0].memberId;
+    const pickedScore = sorted[0]?.score ?? sorted[0]?.healthScore;
+    const pickedDues = sorted[0]?.annualDues;
+    console.log(`[agent-test] picked at-risk member ${aRiskMemberId} (score=${pickedScore}, dues=${pickedDues})`);
     expect.soft(aRiskMemberId, 'picked a real member id').toBeTruthy();
   });
 

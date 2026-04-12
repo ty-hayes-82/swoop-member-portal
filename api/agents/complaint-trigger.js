@@ -208,7 +208,14 @@ async function complaintHandler(req, res) {
     });
   } catch (err) {
     console.error('/api/agents/complaint-trigger error:', err);
-    return res.status(500).json({ error: err.message });
+    // Return graceful 200 with the error reason — the GM doesn't need a
+    // 500 from a backend tool that's missing data. This keeps the agent
+    // surface honest: "agent couldn't run, here's why" instead of crashing.
+    return res.status(200).json({
+      triggered: false,
+      reason: 'internal error: ' + err.message,
+      error_class: 'server',
+    });
   }
 }
 

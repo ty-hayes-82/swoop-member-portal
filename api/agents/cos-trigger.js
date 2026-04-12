@@ -22,7 +22,7 @@ import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
-const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
 // ---------------------------------------------------------------------------
 // Data pull helpers (reused by MCP tool handlers in api/mcp.js)

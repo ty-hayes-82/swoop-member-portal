@@ -19,7 +19,7 @@ import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
-const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
 /**
  * Pull tee sheet summary for a given date and club.
@@ -388,7 +388,11 @@ async function gameplanHandler(req, res) {
     });
   } catch (err) {
     console.error('/api/agents/gameplan-trigger error:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(200).json({
+      triggered: false,
+      reason: 'internal error: ' + err.message,
+      error_class: 'server',
+    });
   }
 }
 
