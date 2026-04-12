@@ -25,6 +25,7 @@ import { getDataMode, isGateOpen, getLoadedGates } from '@/services/demoGate';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist from './OnboardingChecklist';
+import StageInsightsPanel from './StageInsightsPanel';
 import { getTodayTeeSheet } from '@/services/operationsService';
 import { getMemberSummary } from '@/services/memberService';
 import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
@@ -527,6 +528,9 @@ export default function TodayView() {
             </div>
           ))}
         </div>
+
+        {/* Stage Insights — one card per imported dataset, headline insight */}
+        <StageInsightsPanel />
 
         {/* Section 2.5: Live Activity Feed */}
         <RecentActivityFeed />

@@ -5,6 +5,7 @@
 import { useNavigation } from '@/context/NavigationContext';
 import { getMemberSummary } from '@/services/memberService';
 import { getConnectedSystems } from '@/services/integrationsService';
+import StageInsightsPanel from './StageInsightsPanel';
 import Panel from '@/components/ui/Panel';
 import Btn from '@/components/ui/Btn';
 
@@ -116,6 +117,10 @@ export default function OnboardingChecklist() {
           ))}
         </div>
       </Panel>
+
+      {/* Live insights from anything already imported — also shows the
+          locked roadmap so the GM sees what each next file unlocks. */}
+      <StageInsightsPanel />
     </div>
   );
 }

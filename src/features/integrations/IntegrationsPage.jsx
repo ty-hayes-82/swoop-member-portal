@@ -6,6 +6,7 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import PageTransition from '@/components/ui/PageTransition';
 import SourceBadge from '@/components/ui/SourceBadge';
 import DataOnboardingChat from './DataOnboardingChat';
+import ImportedDataCatalog from './ImportedDataCatalog';
 
 function timeAgo(val) {
   if (!val) return 'Never';
@@ -257,6 +258,7 @@ export default function IntegrationsPage() {
       <div className="flex gap-1 bg-gray-100 rounded-lg p-1" style={{ alignSelf: 'flex-start' }}>
         {[
           { id: 'connections', label: 'Connections' },
+          { id: 'imported-data', label: 'Imported Data' },
           { id: 'import', label: 'Import Data' },
           { id: 'ai-assistant', label: 'AI Import Assistant' },
         ].map((tab) => (
@@ -286,6 +288,9 @@ export default function IntegrationsPage() {
           </button>
         ))}
       </div>
+
+      {/* Imported Data tab — baseline catalog of every CSV that has landed */}
+      {activeTab === 'imported-data' && <ImportedDataCatalog />}
 
       {/* AI Import Assistant tab */}
       {activeTab === 'ai-assistant' && (
