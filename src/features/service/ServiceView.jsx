@@ -6,6 +6,8 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
+import DataEmptyState from '@/components/ui/DataEmptyState';
+import { isGateOpen } from '@/services/demoGate';
 import QualityTab from './tabs/QualityTab';
 import StaffingTab from './tabs/StaffingTab';
 import ComplaintsTab from './tabs/ComplaintsTab';
@@ -37,6 +39,20 @@ export default function ServiceView() {
 
   if (isLoading) {
     return <SkeletonGrid cards={6} columns={3} cardHeight={160} />;
+  }
+
+  // Service page requires complaint data to be meaningful
+  if (!isGateOpen('complaints')) {
+    return (
+      <PageTransition>
+        <DataEmptyState
+          icon="📋"
+          title="No service data yet"
+          description="Import service requests and complaint data to see service consistency scores, staffing gaps, and complaint patterns."
+          dataType="service requests"
+        />
+      </PageTransition>
+    );
   }
 
   return (

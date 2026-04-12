@@ -233,7 +233,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     fb: null,    // TODO: compute from POS data when available
     email: null, // TODO: compute from email engagement data when available
     teeSheet: { roundsToday: summary.totalRounds || DEMO_BRIEFING.teeSheet.roundsToday, utilization: 0.87 },
-    yesterdayRecap: {
+    yesterdayRecap: yesterday ? {
       date:           yesterday.date,
       revenue:        yesterdayTotal,
       revenueVsPlan:  -0.12,
@@ -246,7 +246,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       ],
       weather:        yesterday.weather,
       isUnderstaffed: yesterday.isUnderstaffed,
-    },
+    } : null,
     todayRisks: {
       // Must match the canonical DEMO_BRIEFING block above and the cockpit / teeSheet narrative.
       weather:    'clear', tempHigh: 82, wind: 8,
