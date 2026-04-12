@@ -30,6 +30,32 @@ const RISK_LIFECYCLE_STEPS = [
   { step_number: 5, step_key: 'day_30_outcome',         title: 'Day 30 outcome measurement',       description: 'Measure final health score delta and record intervention outcome.' },
 ];
 
+// Insert a representative pending action so the Today view / Inbox can
+// render this agent's recommendation. Deterministic action_id keyed by
+// Real Anthropic call for the Member Pulse agent. Uses claude-haiku via
+// the shared realAgentCall helper, which writes to agent_actions with a
+// deterministic live_* action_id.
+async function insertRealRiskAction(memberId, clubId, evaluation) {
+  const { realAgentCall } = await import('./real-agent-call.js');
+  const { rows } = await sql`
+    SELECT first_name, last_name, archetype, health_tier
+    FROM members WHERE member_id = ${memberId} AND club_id = ${clubId}
+  `;
+  const m = rows[0] || {};
+  return realAgentCall({
+    clubId,
+    agentId: 'member-pulse',
+    actionType: 'risk_intervention',
+    memberId,
+    systemPrompt: `You are the Member Pulse agent for a private golf and country club. A member's engagement health score signals risk. Recommend ONE concrete outreach action the GM should take in the next 7 days. Reference real numbers (current score, prior score if present, dues, archetype). Be specific about who contacts the member, the channel, and the talking point.`,
+    contextData: {
+      member: { name: `${m.first_name || ''} ${m.last_name || ''}`.trim(), archetype: m.archetype, health_tier: m.health_tier },
+      score: { current: evaluation.currentScore, previous: evaluation.previousScore, delta: evaluation.delta },
+      annual_dues: evaluation.dues,
+    },
+  });
+}
+
 async function riskHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -53,6 +79,17 @@ async function riskHandler(req, res) {
   try {
     // 1. Evaluate trigger criteria via risk-config
     const evaluation = await evaluateRiskTrigger(member_id, clubId);
+
+    // Write the agent_action FIRST. The playbook_runs/playbook_steps inserts
+    // below have a history of schema drift; the agent_action is what the GM
+    // actually sees in the Today view, so make it the most reliable insert.
+    // Eligibility-rejected members in simulation mode still get an action
+    // so the GM workflow can be tested with score-only signals.
+    const shouldWriteAction = evaluation.shouldTrigger
+      || (SIMULATION_MODE && evaluation.currentScore != null && evaluation.currentScore < 70);
+    if (shouldWriteAction) {
+      await insertRealRiskAction(member_id, clubId, evaluation);
+    }
 
     if (!evaluation.shouldTrigger) {
       return res.status(200).json({ triggered: false, ...evaluation });
@@ -121,11 +158,11 @@ async function riskHandler(req, res) {
     const runId = `run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     await sql`
       INSERT INTO playbook_runs (
-        run_id, club_id, playbook_id, member_id,
+        run_id, club_id, playbook_id, playbook_name, member_id,
         triggered_by, trigger_reason, status,
         agent_session_id, session_thread_id, started_at
       ) VALUES (
-        ${runId}, ${clubId}, ${PLAYBOOK_ID}, ${member_id},
+        ${runId}, ${clubId}, ${PLAYBOOK_ID}, 'Member Risk Lifecycle', ${member_id},
         'risk-trigger',
         ${`health_score=${evaluation.currentScore} (was ${evaluation.previousScore}), delta=${evaluation.delta}, dues=${evaluation.dues}`},
         'active',
@@ -140,6 +177,11 @@ async function riskHandler(req, res) {
         VALUES (${runId}, ${clubId}, ${step.step_number}, ${step.step_key}, ${step.title}, ${step.description}, 'pending')
       `;
     }
+
+    // 7. Surface as a pending action so the Today view / Inbox / drawer
+    // can render the agent's recommendation. /api/agents reads from
+    // agent_actions, not playbook_runs — both paths need the row.
+    await insertRealRiskAction(member_id, clubId, evaluation);
 
     return res.status(200).json({
       triggered: true,

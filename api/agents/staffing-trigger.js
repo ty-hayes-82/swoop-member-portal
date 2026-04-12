@@ -18,6 +18,7 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
+import { realAgentCall } from './real-agent-call.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
@@ -120,7 +121,8 @@ export async function pullHistoricalOutcomes(clubId, lookbackDays = 30) {
   const result = await sql`
     SELECT rec_id, target_date, outlet, time_window,
       current_staff, recommended_staff, demand_forecast,
-      revenue_at_risk, confidence, rationale, status, actual_outcome, created_at
+      revenue_at_risk, confidence, rationale,
+      NULL::text AS status, NULL::text AS actual_outcome, created_at
     FROM staffing_recommendations
     WHERE club_id = ${clubId}
       AND created_at > NOW() - INTERVAL '1 day' * ${lookbackDays}
@@ -258,6 +260,32 @@ async function staffingHandler(req, res) {
   const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['staffing-trigger']);
   if (!gate.ok) {
     return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
+  }
+
+  if (SIMULATION_MODE) {
+    try {
+      const { rows: shiftRows } = await sql`
+        SELECT outlet_id AS outlet,
+          CASE WHEN EXTRACT(HOUR FROM start_time::time) < 11 THEN 'morning'
+               WHEN EXTRACT(HOUR FROM start_time::time) < 16 THEN 'lunch'
+               ELSE 'dinner' END AS shift,
+          COUNT(*)::int AS staff_count
+        FROM staff_shifts
+        WHERE club_id = ${clubId} AND shift_date = ${target_date}
+        GROUP BY outlet_id, shift
+        ORDER BY outlet, shift
+      `;
+      await realAgentCall({
+        clubId,
+        agentId: 'staffing-demand',
+        actionType: 'staffing_alert',
+        scope: target_date,
+        systemPrompt: `You are the Staffing & Demand agent for a private golf and country club. Review tomorrow's scheduled shifts by outlet and recommend ONE concrete labor adjustment the Operations Manager should make. Reference real numbers (staff count by outlet/shift). Be specific about which outlet, which shift, and how many staff to add or shift.`,
+        contextData: { target_date, scheduled_shifts: shiftRows, total_shifts: shiftRows.length },
+      });
+    } catch (err) {
+      console.warn('[staffing-trigger] real agent call failed:', err.message);
+    }
   }
 
   try {

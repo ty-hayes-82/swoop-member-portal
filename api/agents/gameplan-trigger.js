@@ -18,6 +18,7 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
+import { realAgentCall } from './real-agent-call.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
@@ -126,7 +127,7 @@ export async function pullFbReservations(clubId, date) {
   const result = await sql`
     SELECT outlet, meal_period, SUM(covers) AS total_covers, COUNT(*) AS reservation_count
     FROM fb_reservations
-    WHERE date = ${date} AND club_id = ${clubId}
+    WHERE reservation_date = ${date} AND club_id = ${clubId}
     GROUP BY outlet, meal_period
     ORDER BY outlet, meal_period
   `;
@@ -274,6 +275,36 @@ async function gameplanHandler(req, res) {
   const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['gameplan-trigger']);
   if (!gate.ok) {
     return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
+  }
+
+  if (SIMULATION_MODE) {
+    try {
+      const [teeRes, fbRes] = await Promise.all([
+        sql`
+          SELECT COUNT(*)::int AS rounds_count,
+            COUNT(*) FILTER (WHERE m.health_tier IN ('at-risk','critical'))::int AS at_risk_count
+          FROM bookings b
+          LEFT JOIN members m ON m.member_id = b.member_id AND m.club_id = b.club_id
+          WHERE b.club_id = ${clubId} AND b.booking_date = ${plan_date}
+        `,
+        sql`
+          SELECT outlet, meal_period, SUM(covers)::int AS covers
+          FROM fb_reservations
+          WHERE club_id = ${clubId} AND reservation_date = ${plan_date}
+          GROUP BY outlet, meal_period
+        `,
+      ]);
+      await realAgentCall({
+        clubId,
+        agentId: 'tomorrows-game-plan',
+        actionType: 'daily_gameplan',
+        scope: plan_date,
+        systemPrompt: `You are the Tomorrow's Game Plan agent for a private golf and country club. Synthesize the tee sheet and F&B reservations for tomorrow into ONE concrete operational priority the GM should brief department heads on first thing. Reference real numbers (rounds count, at-risk members on the sheet, F&B covers). No generic advice.`,
+        contextData: { plan_date, tee_sheet: teeRes.rows[0] || {}, fb_reservations: fbRes.rows },
+      });
+    } catch (err) {
+      console.warn('[gameplan-trigger] real agent call failed:', err.message);
+    }
   }
 
   try {

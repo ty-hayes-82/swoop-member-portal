@@ -179,7 +179,7 @@ async function computeEventScore(memberId, clubId) {
   }
 }
 
-export default withAuth(async function handler(req, res) {
+async function computeHealthScoresHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
   }
@@ -360,4 +360,13 @@ export default withAuth(async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}, { roles: ['gm', 'assistant_gm', 'swoop_admin'] });
+}
+
+export default function handler(req, res) {
+  const cronKey = req.headers['x-cron-key'];
+  if (cronKey && process.env.CRON_SECRET && cronKey === process.env.CRON_SECRET) {
+    req.auth = req.auth || { clubId: req.body?.club_id || req.body?.clubId, userId: 'cron', role: 'system' };
+    return computeHealthScoresHandler(req, res);
+  }
+  return withAuth(computeHealthScoresHandler, { roles: ['gm', 'assistant_gm', 'swoop_admin'] })(req, res);
+}

@@ -2,10 +2,11 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
+import { realAgentCall } from './real-agent-call.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
-export default withAuth(async function handler(req, res) {
+async function serviceSaveHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -85,6 +86,29 @@ export default withAuth(async function handler(req, res) {
     // 5. Triggered — create session and playbook run
     let sessionId = null;
 
+    if (SIMULATION_MODE) {
+      try {
+        const { rows: nameRows } = await sql`
+          SELECT first_name, last_name, health_tier FROM members
+          WHERE member_id = ${member_id} AND club_id = ${clubId}
+        `;
+        const m = nameRows[0] || {};
+        await realAgentCall({
+          clubId,
+          agentId: 'member-service-recovery',
+          actionType: 'service_save',
+          memberId: member_id,
+          systemPrompt: `You are the Member Service Recovery agent for a private golf and country club. A high-dues member with a low health score has filed a complaint. Recommend ONE concrete service-save action the GM can execute in the next 24 hours. Reference real numbers (dues, health score, complaint priority). Be specific about owner, deadline, and dollar impact.`,
+          contextData: {
+            member: { name: `${m.first_name || ''} ${m.last_name || ''}`.trim(), annual_dues: annualDues, health_score: healthScore, health_tier: m.health_tier },
+            complaint: { complaint_id, category: category || null, priority },
+          },
+        });
+      } catch (err) {
+        console.warn('[service-save-trigger] real agent call failed:', err.message);
+      }
+    }
+
     if (!SIMULATION_MODE) {
       // Live mode: create Managed Agent session via Anthropic API
       const session = await createManagedSession();
@@ -115,11 +139,11 @@ export default withAuth(async function handler(req, res) {
     const runId = `run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     await sql`
       INSERT INTO playbook_runs (
-        run_id, club_id, playbook_id, member_id,
+        run_id, club_id, playbook_id, playbook_name, member_id,
         triggered_by, trigger_reason, status,
         agent_session_id, started_at
       ) VALUES (
-        ${runId}, ${clubId}, 'service-save', ${member_id},
+        ${runId}, ${clubId}, 'service-save', 'Service Save', ${member_id},
         'service-save-trigger', ${`complaint ${complaint_id} — health_score=${healthScore}, dues=${annualDues}`},
         'active',
         ${sessionId}, NOW()
@@ -155,4 +179,13 @@ export default withAuth(async function handler(req, res) {
       error_class: 'server',
     });
   }
-}, { roles: ['gm', 'admin'] });
+}
+
+export default function handler(req, res) {
+  const cronKey = req.headers['x-cron-key'];
+  if (cronKey && process.env.CRON_SECRET && cronKey === process.env.CRON_SECRET) {
+    req.auth = req.auth || { clubId: req.body?.club_id || 'unknown', role: 'system' };
+    return serviceSaveHandler(req, res);
+  }
+  return withAuth(serviceSaveHandler, { roles: ['gm', 'admin'] })(req, res);
+}

@@ -35,7 +35,7 @@ const TS = Date.now();
 //
 // Stage order: members → tee → dining → agents (future: complaints, staff...)
 const STAGE = (process.env.STAGE || '').toLowerCase();
-const STAGE_ORDER = ['members', 'tee', 'dining', 'agents'];
+const STAGE_ORDER = ['members', 'tee', 'dining', 'complaints', 'agents'];
 const STAGE_INDEX = STAGE ? STAGE_ORDER.indexOf(STAGE) : -1;
 const RESTORE_FROM = STAGE_INDEX > 0 ? `stage-${STAGE_ORDER[STAGE_INDEX - 1]}` : null;
 
@@ -785,6 +785,96 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     if (activeClubId) {
       captureSavepoint('stage-dining', activeClubId);
       console.log(`[stage-snapshot] stage-dining saved for ${activeClubId}`);
+    }
+  });
+
+  // ── Stage 4: Complaints (Service quality) ──────────────────────────────
+  // Imports member complaints on top of members + tee-sheet + dining.
+  // Unlocks: Service Quality KPIs, Service Recovery agent eligibility,
+  // complaint surfacing in TodaysRisks + member drawer timeline.
+  test('12 — Real complaints CSV imports into Neon', async () => {
+    test.skip(!shouldRun('complaints'), `STAGE=${STAGE} skips complaints stage`);
+    test.setTimeout(180000);
+
+    await page.goto(`${APP_URL}/#/csv-import`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1500);
+
+    const moreDataBtn = page.locator('button:has-text("Import More Data")');
+    if (await moreDataBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await moreDataBtn.click();
+      await page.waitForTimeout(1000);
+    }
+
+    // Jonas → Complaints
+    const jonasBtn = page.locator('button:has-text("Jonas Club Software")').first();
+    if (await jonasBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await jonasBtn.click();
+      await page.waitForTimeout(300);
+    }
+    await page.locator('button:has-text("JCM_Communications")').first().click();
+    await page.waitForTimeout(300);
+    await page.locator('button:has-text("Next: Upload File")').click();
+    await page.waitForTimeout(1000);
+
+    const csvPath = path.resolve(__dirname, '../fixtures/small/JCM_Communications_RG.csv');
+    await page.locator('input[type="file"]').setInputFiles(csvPath);
+    await page.waitForTimeout(2000);
+    await shot('24-complaints-uploaded.png');
+
+    const mapBtn = page.locator('button:has-text("Next: Map Columns"), button:has-text("Map Columns")').first();
+    if (await mapBtn.isVisible({ timeout: 5000 }).catch(() => false)) await mapBtn.click();
+    await page.waitForTimeout(1500);
+
+    const importRowsBtn = page.locator('button:has-text("Import"):not(:has-text("Start"))').last();
+    if (await importRowsBtn.isVisible({ timeout: 5000 }).catch(() => false)) await importRowsBtn.click();
+    await page.waitForTimeout(1500);
+
+    const startBtn = page.locator('button:has-text("Start Import")');
+    await expect.soft(startBtn, 'Start Import visible for complaints').toBeVisible({ timeout: 12000 });
+
+    const importPromise = page.waitForResponse(
+      r => r.url().includes('/api/import-csv') && r.request().method() === 'POST',
+      { timeout: 60000 }
+    );
+    await startBtn.click();
+    const importRes = await importPromise;
+    expect.soft(importRes.status(), 'complaints import should return 200').toBe(200);
+    const importBody = await importRes.json();
+    expect.soft(importBody.success, 'some complaints should import').toBeGreaterThan(0);
+    await page.waitForTimeout(2000);
+    await shot('25-complaints-import-complete.png');
+  });
+
+  test('13 — Service page renders real complaints (no hardcoded fallbacks)', async () => {
+    test.skip(!shouldRun('complaints'), `STAGE=${STAGE} skips complaints stage`);
+
+    await page.goto(`${APP_URL}/#/service`);
+    await page.waitForFunction(
+      () => /complaint|service|feedback|quality|resolution/i.test(document.body.innerText)
+        && !/^\s*Loading\.\.\.\s*$/m.test(document.body.innerText),
+      null,
+      { timeout: 20000 },
+    ).catch(() => {});
+    await page.waitForTimeout(1500);
+    await shot('26-service-page.png');
+
+    const bodyText = (await page.locator('body').textContent()) || '';
+
+    expect.soft(bodyText, 'club name should appear').toContain(PERSONA.clubName);
+
+    // Stage 1's static fallback for service quality was 87% — that came
+    // from src/data/boardReport.js. Should not appear for a real club.
+    const leakedQuality87 = /87\s*%.*service\s*quality|service\s*quality[^0-9]*87\s*%/i.test(bodyText);
+    expect.soft(leakedQuality87, 'static 87% Service Quality must not appear').toBe(false);
+  });
+
+  test('13c — Snapshot stage-complaints for fast downstream iteration', async () => {
+    test.skip(!shouldRun('complaints'), `STAGE=${STAGE} skips complaints snapshot`);
+    const activeClubId = clubId || await page.evaluate(() => localStorage.getItem('swoop_club_id'));
+    if (activeClubId) {
+      captureSavepoint('stage-complaints', activeClubId);
+      console.log(`[stage-snapshot] stage-complaints saved for ${activeClubId}`);
     }
   });
 });

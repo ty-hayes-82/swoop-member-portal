@@ -13,6 +13,7 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
+import { realAgentCall } from './real-agent-call.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
@@ -98,7 +99,8 @@ export async function pullMonthlyStaffingOutcomes(clubId, month) {
   const result = await sql`
     SELECT rec_id, target_date, outlet, time_window,
       current_staff, recommended_staff, demand_forecast,
-      revenue_at_risk, confidence, rationale, status, actual_outcome
+      revenue_at_risk, confidence, rationale,
+      NULL::text AS status, NULL::text AS actual_outcome
     FROM staffing_recommendations
     WHERE club_id = ${clubId}
       AND target_date >= ${startDate}
@@ -235,6 +237,21 @@ export async function pullComplaintComparison(clubId, month) {
  * Save draft board report for GM review.
  */
 export async function saveDraftBoardReport(clubId, month, report) {
+  await sql`
+    CREATE TABLE IF NOT EXISTS board_reports (
+      report_id text PRIMARY KEY,
+      club_id text NOT NULL,
+      report_month text NOT NULL,
+      status text DEFAULT 'draft',
+      content jsonb,
+      members_saved int DEFAULT 0,
+      dues_protected numeric DEFAULT 0,
+      staffing_recs int DEFAULT 0,
+      approval_rate numeric DEFAULT 0,
+      created_at timestamptz DEFAULT NOW(),
+      UNIQUE (club_id, report_month)
+    )
+  `;
   const result = await sql`
     INSERT INTO board_reports (
       report_id, club_id, report_month, status, content,
@@ -399,6 +416,21 @@ async function boardReportHandler(req, res) {
     ]);
 
     // 2. Managed session or simulation
+    if (SIMULATION_MODE) {
+      try {
+        await realAgentCall({
+          clubId,
+          agentId: 'board-report-compiler',
+          actionType: 'board_report',
+          scope: month,
+          systemPrompt: `You are the Board Report Compiler agent for a private golf and country club. Synthesize this month's interventions, staffing outcomes, revenue attribution, and complaint comparison into ONE concrete bullet the GM should put on page 1 of the board deck. Reference real numbers (member saves, dues protected, complaint deltas). Lead with the most board-relevant signal.`,
+          contextData: { month, interventions, staffing, revenue, complaints },
+        });
+      } catch (err) {
+        console.warn('[board-report-trigger] real agent call failed:', err.message);
+      }
+    }
+
     if (!SIMULATION_MODE) {
       const session = await createManagedSession();
       await sendSessionEvent(session.id, {

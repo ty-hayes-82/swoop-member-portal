@@ -21,6 +21,7 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
+import { readRecentEvents } from './agent-events.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
@@ -273,7 +274,61 @@ async function cosTriggerHandler(req, res) {
 
   try {
     // 1. Pull all pending actions
-    const { actions, count: inputCount } = await pullAllPendingActions(clubId);
+    const { actions: rawActions, count: rawCount } = await pullAllPendingActions(clubId);
+
+    // 1b. Phase A dedup — group last-24h event_bus rows by member_id and
+    // collapse multi-agent situations targeting the same member into a
+    // single coalesced action card. The persisted event_bus is the source
+    // of truth: when Service Recovery, Member Pulse, and Arrival all
+    // touched member X today, the GM should see one card with three
+    // contributing agents, not three separate cards. Pure SQL — no LLM.
+    const recentEvents = await readRecentEvents(clubId, { sinceHours: 24, limit: 500 });
+    const eventsByMember = new Map();
+    for (const e of recentEvents) {
+      if (!e.member_id) continue;
+      if (!eventsByMember.has(e.member_id)) eventsByMember.set(e.member_id, []);
+      eventsByMember.get(e.member_id).push(e);
+    }
+
+    const actionsByMember = new Map();
+    const orphanActions = [];
+    for (const a of rawActions) {
+      if (!a.member_id) { orphanActions.push(a); continue; }
+      if (!actionsByMember.has(a.member_id)) actionsByMember.set(a.member_id, []);
+      actionsByMember.get(a.member_id).push(a);
+    }
+
+    const dedupedActions = [...orphanActions];
+    for (const [memberId, memberActions] of actionsByMember) {
+      if (memberActions.length === 1) {
+        // Single agent — pass through as-is, but enrich with event_bus
+        // contributing-agent context if other agents touched this member.
+        const memberEvents = eventsByMember.get(memberId) || [];
+        const contributingAgents = [...new Set(
+          memberEvents.map(e => e.source_agent).filter(a => a && a !== memberActions[0].agent_id)
+        )];
+        dedupedActions.push({
+          ...memberActions[0],
+          contributing_agents: contributingAgents.length > 0 ? contributingAgents : memberActions[0].contributing_agents,
+        });
+        continue;
+      }
+      // Multi-agent on same member — keep the highest priority action and
+      // attribute the rest as contributing.
+      const priOrder = { high: 0, medium: 1, low: 2 };
+      memberActions.sort((a, b) => (priOrder[a.priority] ?? 3) - (priOrder[b.priority] ?? 3));
+      const winner = memberActions[0];
+      const contributingAgents = [...new Set(memberActions.slice(1).map(a => a.agent_id))];
+      dedupedActions.push({
+        ...winner,
+        contributing_agents: contributingAgents,
+        deduped_from: memberActions.slice(1).map(a => a.action_id),
+      });
+    }
+
+    const actions = dedupedActions;
+    const inputCount = actions.length;
+    console.log(`[cos-trigger] dedup: ${rawCount} raw actions → ${inputCount} after coalescing on member_id`);
 
     // 2. Pull confidence scores
     const confidenceScores = await pullAgentConfidenceScores(clubId);
@@ -292,6 +347,22 @@ async function cosTriggerHandler(req, res) {
     }
 
     // 3. Managed agent or simulation
+    if (SIMULATION_MODE) {
+      try {
+        const { realAgentCall } = await import('./real-agent-call.js');
+        await realAgentCall({
+          clubId,
+          agentId: 'chief-of-staff',
+          actionType: 'cos_synthesis',
+          systemPrompt: `You are the Chief of Staff agent for a private golf and country club. Multiple agents have raised pending actions. Your job is to recommend ONE concrete cross-domain action the GM should take first today, citing which agents converged on the underlying signal. Be specific and reference real numbers from the input.`,
+          contextData: { actions, unique_agents: uniqueAgents, pending_count: inputCount },
+          contributingAgents: uniqueAgents,
+        });
+      } catch (err) {
+        console.warn('[cos-trigger] real agent call failed:', err.message);
+      }
+    }
+
     if (!SIMULATION_MODE) {
       // Create coordinator session with callable_agents (sub-agent delegation)
       const session = await createCoordinatorSession();

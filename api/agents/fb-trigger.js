@@ -14,6 +14,7 @@ import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { routeEvent } from './agent-events.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
+import { realAgentCall } from './real-agent-call.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
@@ -121,23 +122,26 @@ export async function pullMenuMixAnalysis(clubId, date) {
  * Pull cover vs reservation delta: no-show rate, walk-in rate.
  */
 export async function pullCoverVsReservationDelta(clubId, date) {
-  const [resvResult, actualResult] = await Promise.all([
-    sql`
-      SELECT outlet, meal_period,
-        SUM(covers) AS reserved_covers,
-        COUNT(*) AS reservation_count
-      FROM fb_reservations
-      WHERE date = ${date} AND club_id = ${clubId}
-      GROUP BY outlet, meal_period
-    `,
-    sql`
+  const resvResult = await sql`
+    SELECT outlet, meal_period,
+      SUM(covers) AS reserved_covers,
+      COUNT(*) AS reservation_count
+    FROM fb_reservations
+    WHERE reservation_date = ${date} AND club_id = ${clubId}
+    GROUP BY outlet, meal_period
+  `;
+  let actualResult = { rows: [] };
+  try {
+    actualResult = await sql`
       SELECT outlet, meal_period,
         SUM(covers) AS actual_covers
       FROM fb_daily_performance
       WHERE date = ${date} AND club_id = ${clubId}
       GROUP BY outlet, meal_period
-    `,
-  ]);
+    `;
+  } catch (e) {
+    if (!/does not exist/i.test(e.message)) throw e;
+  }
 
   const reserved = resvResult.rows.map(r => ({
     outlet: r.outlet,
@@ -345,6 +349,28 @@ async function fbTriggerHandler(req, res) {
     return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
+  if (SIMULATION_MODE) {
+    try {
+      const { rows: resRows } = await sql`
+        SELECT outlet, meal_period, SUM(covers)::int AS covers, COUNT(*)::int AS reservations
+        FROM fb_reservations
+        WHERE club_id = ${clubId} AND reservation_date = ${target_date}
+        GROUP BY outlet, meal_period
+        ORDER BY covers DESC
+      `;
+      await realAgentCall({
+        clubId,
+        agentId: 'fb-intelligence',
+        actionType: 'fb_pivot',
+        scope: target_date,
+        systemPrompt: `You are the F&B Intelligence agent for a private golf and country club. Review today's reservation outlook and recommend ONE concrete pivot the F&B Director can act on within 4 hours. Reference real numbers from the input data — covers, outlet, meal period. Be specific (which outlet, which meal period, what dollar impact).`,
+        contextData: { target_date, reservations_by_outlet: resRows },
+      });
+    } catch (err) {
+      console.warn('[fb-trigger] real agent call failed:', err.message);
+    }
+  }
+
   try {
     // 1. Pull all data in parallel
     const [fbPerf, menuMix, coverDelta, weatherResult, staffingResult, teeSheetResult, nonDiners] = await Promise.all([
@@ -369,17 +395,25 @@ async function fbTriggerHandler(req, res) {
         };
       }),
       sql`
-        SELECT outlet, shift, staff_count,
-          staff_count - CEIL(projected_covers / 10.0) AS gap,
-          projected_covers
-        FROM staff_shifts ss
+        SELECT ss.outlet_id AS outlet, ss.shift, ss.staff_count,
+          ss.staff_count - CEIL(COALESCE(d.projected_covers, 0) / 10.0) AS gap,
+          COALESCE(d.projected_covers, 0) AS projected_covers
+        FROM (
+          SELECT outlet_id, shift_date,
+            CASE WHEN EXTRACT(HOUR FROM start_time::time) < 11 THEN 'morning'
+                 WHEN EXTRACT(HOUR FROM start_time::time) < 16 THEN 'lunch'
+                 ELSE 'dinner' END AS shift,
+            COUNT(*)::int AS staff_count
+          FROM staff_shifts
+          WHERE shift_date = ${target_date} AND club_id = ${clubId}
+          GROUP BY outlet_id, shift_date, shift
+        ) ss
         LEFT JOIN (
           SELECT outlet, meal_period, SUM(covers) AS projected_covers
           FROM fb_reservations
-          WHERE date = ${target_date} AND club_id = ${clubId}
+          WHERE reservation_date = ${target_date} AND club_id = ${clubId}
           GROUP BY outlet, meal_period
-        ) d ON ss.outlet = d.outlet AND ss.shift = d.meal_period
-        WHERE ss.date = ${target_date} AND ss.club_id = ${clubId}
+        ) d ON ss.outlet_id = d.outlet AND ss.shift = d.meal_period
       `.then(r => r.rows.map(row => ({
         outlet: row.outlet,
         shift: row.shift,

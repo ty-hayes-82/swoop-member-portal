@@ -289,18 +289,100 @@ const EVENT_HANDLERS = {
  * @param {object} event - event payload
  * @returns {Promise<object>} delivery result
  */
+/**
+ * Persist a publish event to the durable event_bus table BEFORE dispatch.
+ * Append-only audit + replay source for downstream agents (CoS dedup,
+ * flywheel calibration, sweep context). Failures here log and continue —
+ * we never block the in-memory delivery on a persistence error.
+ */
+async function persistEvent(clubId, eventType, event) {
+  try {
+    const memberId = event?.member_id || event?.memberId || null;
+    const sourceAgent = event?.source_agent || event?.sourceAgent || null;
+    const threadId = event?.session_thread_id || event?.thread_id || null;
+    await sql`
+      INSERT INTO event_bus (club_id, event_type, source_agent, member_id, payload, thread_id)
+      VALUES (${clubId}, ${eventType}, ${sourceAgent}, ${memberId}, ${JSON.stringify(event || {})}::jsonb, ${threadId})
+    `;
+  } catch (err) {
+    console.warn(`[agent-events] persistEvent(${eventType}) failed:`, err.message);
+  }
+}
+
 export async function routeEvent(clubId, eventType, event) {
+  // Persist FIRST so the audit row exists even if delivery fails. Phase A
+  // of the agent framework plan: durability for the in-memory bus.
+  await persistEvent(clubId, eventType, event);
+
   const handler = EVENT_HANDLERS[eventType];
   if (!handler) {
     console.warn(`[agent-events] Unknown event type: ${eventType}`);
-    return { error: `Unknown event type: ${eventType}`, delivered: false };
+    return { error: `Unknown event type: ${eventType}`, delivered: false, persisted: true };
   }
   try {
     const result = await handler(clubId, event);
-    return result;
+    return { ...result, persisted: true };
   } catch (err) {
     console.error(`[agent-events] Event handler failed for ${eventType}:`, err.message);
-    return { delivered: false, error: err.message, event_type: eventType };
+    return { delivered: false, error: err.message, event_type: eventType, persisted: true };
+  }
+}
+
+/**
+ * Read recent events from the bus for a club. Used by sweep / cos-dedup /
+ * flywheel aggregator. Returns rows in reverse-chronological order.
+ */
+export async function readRecentEvents(clubId, { sinceHours = 24, eventType = null, memberId = null, limit = 200 } = {}) {
+  try {
+    if (eventType && memberId) {
+      const r = await sql`
+        SELECT event_id, event_type, source_agent, member_id, payload, thread_id, created_at
+        FROM event_bus
+        WHERE club_id = ${clubId}
+          AND created_at >= NOW() - (${sinceHours} || ' hours')::interval
+          AND event_type = ${eventType}
+          AND member_id = ${memberId}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
+      return r.rows;
+    }
+    if (eventType) {
+      const r = await sql`
+        SELECT event_id, event_type, source_agent, member_id, payload, thread_id, created_at
+        FROM event_bus
+        WHERE club_id = ${clubId}
+          AND created_at >= NOW() - (${sinceHours} || ' hours')::interval
+          AND event_type = ${eventType}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
+      return r.rows;
+    }
+    if (memberId) {
+      const r = await sql`
+        SELECT event_id, event_type, source_agent, member_id, payload, thread_id, created_at
+        FROM event_bus
+        WHERE club_id = ${clubId}
+          AND created_at >= NOW() - (${sinceHours} || ' hours')::interval
+          AND member_id = ${memberId}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
+      return r.rows;
+    }
+    const r = await sql`
+      SELECT event_id, event_type, source_agent, member_id, payload, thread_id, created_at
+      FROM event_bus
+      WHERE club_id = ${clubId}
+        AND created_at >= NOW() - (${sinceHours} || ' hours')::interval
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `;
+    return r.rows;
+  } catch (err) {
+    console.warn('[agent-events] readRecentEvents failed:', err.message);
+    return [];
   }
 }
 

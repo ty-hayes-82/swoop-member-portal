@@ -273,6 +273,20 @@ The `b-lite-agents.spec.js` spec is invariant — it runs the same set of trigge
 
 **Loop discipline:** never start the next phase's data import until the current phase's agent test is producing useful output for every agent whose dependencies are satisfied.
 
+**Next round of agent improvement — simulation mode must persist actions.**
+
+Today every trigger handler has `SIMULATION_MODE = !ANTHROPIC_API_KEY || !MANAGED_ENV_ID || !MANAGED_AGENT_ID`. In simulation mode they return a shaped response (`triggered: true, simulation: true, ...`) but **do NOT insert a row into `agent_actions`**. That's why every agent test cycle so far has logged `[agents] 6 agents, 0 actions` even after firing 9 triggers against a real at-risk member.
+
+The fix that should land in the next agent round:
+
+Each trigger handler in simulation mode should write a representative pending row into `agent_actions` so the rest of the GM workflow can be exercised end-to-end without needing real Anthropic Managed Agent credentials. Specifically:
+
+- `INSERT INTO agent_actions (action_id, club_id, agent_id, action_type, priority, source, description, impact_metric, member_id, status, timestamp)` with realistic values derived from the same evaluation the trigger already runs (`evaluation.priority`, the member's name, the dues amount, the headline reason).
+- Use a deterministic `action_id` like `sim_<agent_id>_<member_id>_<YYYYMMDD>` so re-firing the same trigger doesn't create duplicates (rely on the `ON CONFLICT (action_id) DO NOTHING` upsert).
+- Mark the row with a clear `source: 'simulation'` so the Today view UI can choose to badge or hide simulation rows in production while keeping them visible in dev/test.
+
+**Acceptance criterion** for the next agent round: after the b-lite-agents test fires its 9 triggers against a real at-risk member, `/api/agents` returns at least 4 pending actions (Member Pulse, Service Recovery, Service Save, Arrival — the four agents whose member-scoped triggers have a real signal in stage-dining). The Today view shows those rows as actionable cards. Approving one moves it to `status='approved'` and decrements the pending count.
+
 ### Stage 3.5 — AI Agent deep test (GM-as-user)
 
 **Preconditions:** `stage-dining` save point green (members + tee sheet + dining all loaded). Restore it before running this stage so there's no variation in the data the agents see.
@@ -355,6 +369,57 @@ node scripts/db-savepoint.mjs create members-tee-dining-complaints <clubId>
 ```
 node scripts/db-savepoint.mjs create full-staged-cycle <clubId>
 ```
+
+### Insight-diff rule — every import isolates its own contribution
+
+After each import file lands, the **set of new insights / recommendations / metrics that appear in the UI must be directly attributable to the data just imported**. Importing `JCM_Dependents_F9.csv` should not produce a new tee-sheet insight; importing `7shifts_Staff_Shifts.csv` should not produce new F&B revenue numbers.
+
+The verification pattern:
+
+1. Take a snapshot of the current UI surface BEFORE the import:
+   - Pending agent actions in `agent_actions`
+   - Insight cards rendered on Today, Members, Service, Revenue, Board Report
+   - Health scores per member
+   - Computed totals (revenue, dues at risk, etc.)
+2. Run the import.
+3. Take a second snapshot.
+4. Diff the two. The diff should ONLY contain rows / cards / numbers that are derivable from columns in the new CSV.
+5. Anything in the diff that ISN'T traceable back to the new file is a leak — flag and fix before moving on.
+
+The b-lite-journey spec gets a new helper for this — `assertNewInsightsRelatedTo(csvName, before, after)` — that walks the diff and fails if a leaked insight is found.
+
+### Remaining import files (Stages 5–N)
+
+The Jonas exports directory (`docs/jonas-exports/`) has ~21 CSVs. Done so far: members, tee_times (TTM_Tee_Sheet_SV), transactions (POS_Sales_Detail_SV), complaints (JCM_Communications_RG). The remaining ~17 still need their own staged import + agent-improvement loop:
+
+| Stage | CSV | Import type | Unlocks |
+|---|---|---|---|
+| 5 | TTM_Tee_Sheet_Players_SV | booking_players | Per-player attribution on bookings |
+| 6 | TTM_Course_Setup_F9 | courses | Course-specific configuration |
+| 7 | POS_Line_Items_SV | line_items | Item-level POS data, F&B menu mix |
+| 8 | POS_Payments_SV | payments | Settlement breakdowns |
+| 9 | POS_Daily_Close_SV | daily_close | Day-of-business reconciliation |
+| 10 | POS_Sales_Areas_F9 | sales_areas | Outlet definitions |
+| 11 | 7shifts_Staff_Shifts | shifts | Staffing schedules |
+| 12 | ADP_Staff_Roster | staff | Staff identities |
+| 13 | JAM_Event_List_SV | events | Member-facing events |
+| 14 | JAM_Registrations_SV | event_registrations | Event participation |
+| 15 | CHO_Campaigns_SV | email_campaigns | Email campaign roster |
+| 16 | CHO_Email_Events_SV | email_events | Open / click data |
+| 17 | JCM_Aged_Receivables_SV | invoices | Member balance state |
+| 18 | JCM_Dependents_F9 | dependents | Household structure |
+| 19 | JCM_Membership_Types_F9 | membership_types | Tier definitions |
+| 20 | JCM_Service_Requests_RG | service_requests | Service ticket data |
+| 21 | JCM_Club_Profile | club_profile | Club-level metadata |
+
+Each stage follows the same loop:
+- Generate a small fixture if not already in `tests/fixtures/small/`
+- Import via the wizard
+- Snapshot the tenant
+- Run b-lite-agents test against the new save point
+- Verify insight-diff: only new things attributable to the new file
+- Fix anything that leaks
+- Move to next stage
 
 ### Stage 6+ — Everything else
 

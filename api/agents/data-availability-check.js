@@ -114,7 +114,9 @@ async function domainHasRows(clubId, domain) {
       }
       case DOMAINS.LABOR: {
         const r = await sql`SELECT 1 FROM staff WHERE club_id = ${clubId} LIMIT 1`;
-        return r.rows.length > 0;
+        if (r.rows.length > 0) return true;
+        const s = await sql`SELECT 1 FROM staff_shifts WHERE club_id = ${clubId} LIMIT 1`;
+        return s.rows.length > 0;
       }
       default:
         return false;

@@ -58,6 +58,10 @@ const IMPORT_TYPES = {
     requiredFields: ['club_name'],
     optionalFields: ['city', 'state', 'zip', 'founded_year', 'member_count', 'course_count', 'outlet_count'],
     table: 'club',
+    columnMap: { club_name: 'name' },
+    // The club table PK is club_id, not the first required field. Override
+    // so the generic upsert path uses the right ON CONFLICT target.
+    pkColumn: 'club_id',
   },
   membership_types: {
     requiredFields: ['type_code', 'description'],
@@ -362,7 +366,7 @@ function validateSchemaRow(rawRow, resolvedRow, config, sessionClubId) {
   return null;
 }
 
-export default withAuth(async function handler(req, res) {
+async function importCsvHandler(req, res) {
   if (cors(req, res)) return;
 
   if (req.method !== 'POST') {
@@ -529,6 +533,75 @@ export default withAuth(async function handler(req, res) {
         }
       }
 
+      // booking_players references bookings.booking_id, which is tenant-prefixed
+      // by the tee_times import path. Apply the same prefix here so the FK join
+      // chain (booking_players → bookings) actually resolves for this tenant.
+      if (importType === 'booking_players' && row.reservation_id) {
+        if (!row.reservation_id.startsWith(clubId)) {
+          row.reservation_id = `${clubId}_${row.reservation_id}`;
+        }
+      }
+
+      // courses.course_id is a global PK so a raw `crs_001` from one tenant's
+      // CSV collides with every other tenant's. Mirror the tee_times prefix
+      // so each tenant owns its own course rows.
+      if (importType === 'courses' && row.course_code) {
+        if (!row.course_code.startsWith(clubId)) {
+          row.course_code = `${clubId}_${row.course_code}`;
+        }
+      }
+
+      // pos_checks.check_id is a global PK with the same cross-tenant collision
+      // problem. Prefix it so each tenant owns its own checks. line_items and
+      // payments reference check_id and need the same prefix applied below.
+      if (importType === 'pos_checks' && row.check_id) {
+        if (!row.check_id.startsWith(clubId)) {
+          row.check_id = `${clubId}_${row.check_id}`;
+        }
+      }
+      if ((importType === 'line_items' || importType === 'payments') && row.check_id) {
+        if (!row.check_id.startsWith(clubId)) {
+          row.check_id = `${clubId}_${row.check_id}`;
+        }
+      }
+
+      // Same global-PK collision: staff_shifts.shift_id, staff.staff_id (or
+      // employee_id), event_definitions.event_id, event_registrations.registration_id,
+      // email_campaigns.campaign_id, email_events.event_id (note: collides with
+      // event_definitions namespace too — keep it scoped),
+      // member_invoices.invoice_id, membership_types.type_code, service_requests.request_id.
+      // Apply tenant prefix to each per importType.
+      const PREFIXED_PK = {
+        shifts: 'shift_id',
+        staff: 'employee_id',
+        events: 'event_id',
+        event_registrations: 'registration_id',
+        email_campaigns: 'campaign_id',
+        email_events: 'event_id',
+        invoices: 'invoice_id',
+        membership_types: 'type_code',
+        service_requests: 'request_id',
+      };
+      const pkField = PREFIXED_PK[importType];
+      if (pkField && row[pkField]) {
+        if (!row[pkField].startsWith(clubId)) {
+          row[pkField] = `${clubId}_${row[pkField]}`;
+        }
+      }
+      // Cross-table FK references that need the same prefix:
+      // - email_events.campaign_id → email_campaigns.campaign_id
+      // - event_registrations.event_id → event_definitions.event_id
+      // - shifts.employee_id → staff.employee_id
+      if (importType === 'email_events' && row.campaign_id && !row.campaign_id.startsWith(clubId)) {
+        row.campaign_id = `${clubId}_${row.campaign_id}`;
+      }
+      if (importType === 'event_registrations' && row.event_id && !row.event_id.startsWith(clubId)) {
+        row.event_id = `${clubId}_${row.event_id}`;
+      }
+      if (importType === 'shifts' && row.employee_id && !row.employee_id.startsWith(clubId)) {
+        row.employee_id = `${clubId}_${row.employee_id}`;
+      }
+
       if (importType === 'members') {
         const memberId = row.external_id || `mbr_${Date.now()}_${i}`;
         const uniqueMemberId = `${clubId}_${memberId}`;
@@ -648,7 +721,9 @@ export default withAuth(async function handler(req, res) {
         const colNames = columns.map(c => `"${c}"`).join(', ');
         let upsertSuffix = '';
         if (!config.insertOnly) {
-          const pkCol = config.requiredFields[0];
+          // Allow per-config pkColumn override (e.g. club_profile uses club_id
+          // while requiredFields[0] is club_name).
+          const pkCol = config.pkColumn || config.requiredFields[0];
           const dbPkCol = columnMap[pkCol] || pkCol;
           const updateCols = columns.filter(c => c !== dbPkCol && c !== 'club_id').map(c => `"${c}" = EXCLUDED."${c}"`).join(', ');
           upsertSuffix = updateCols ? ` ON CONFLICT ("${dbPkCol}") DO UPDATE SET ${updateCols}` : ' ON CONFLICT DO NOTHING';
@@ -727,6 +802,45 @@ export default withAuth(async function handler(req, res) {
     }).catch(e => logWarn('/api/import-csv', 'health score recompute trigger failed', { err: e.message }));
   }
 
+  // Post-import: fire AI agent triggers (fire-and-forget) so agent_actions
+  // populates within seconds of upload. Each trigger self-gates via
+  // data-availability-check, so firing them all is safe — agents whose
+  // data isn't ready will return triggered:false.
+  // The cron-key bypass lets us call them server-to-server without auth.
+  if (successCount > 0 && process.env.CRON_SECRET) {
+    const host = req.headers.host || 'swoop-member-portal.vercel.app';
+    const proto = host.includes('localhost') ? 'http' : 'https';
+    const today = new Date().toISOString().slice(0, 10);
+    const month = today.slice(0, 7);
+    const cronHeaders = { 'Content-Type': 'application/json', 'x-cron-key': process.env.CRON_SECRET };
+    // Pick a high-value at-risk member for member-scoped triggers
+    let memberId = null;
+    try {
+      const m = await sql`
+        SELECT member_id FROM members
+        WHERE club_id = ${clubId} AND annual_dues >= 12000
+        ORDER BY COALESCE(health_score, 100) ASC LIMIT 1
+      `;
+      memberId = m.rows[0]?.member_id || null;
+    } catch { /* no members yet */ }
+
+    const fires = [
+      // Daily/club-scoped — always safe
+      { url: '/api/agents/gameplan-trigger', body: { club_id: clubId, plan_date: today } },
+      { url: '/api/agents/fb-trigger', body: { club_id: clubId, target_date: today } },
+      { url: '/api/agents/staffing-trigger', body: { club_id: clubId, target_date: today, trigger_type: 'daily' } },
+      { url: '/api/agents/board-report-trigger', body: { club_id: clubId, month } },
+    ];
+    if (memberId) {
+      fires.push({ url: '/api/agents/risk-trigger', body: { club_id: clubId, member_id: memberId } });
+      fires.push({ url: '/api/agents/arrival-trigger', body: { club_id: clubId, member_id: memberId, tee_time: today + 'T08:00:00' } });
+    }
+    for (const f of fires) {
+      fetch(`${proto}://${host}${f.url}`, { method: 'POST', headers: cronHeaders, body: JSON.stringify(f.body) })
+        .catch(e => logWarn('/api/import-csv', `agent trigger failed: ${f.url}`, { err: e.message }));
+    }
+  }
+
   // § 1.3 audit log — reuse existing activity_log table. Every accepted
   // import writes a row with importer, club, sha256 file hash, and counts.
   if (successCount > 0) {
@@ -777,4 +891,13 @@ export default withAuth(async function handler(req, res) {
     logError('/api/import-csv', e, { phase: 'unhandled' });
     return res.status(500).json({ error: e.message || 'Internal import error' });
   }
-}, { roles: ['gm', 'admin', 'swoop_admin'] });
+}
+
+export default function handler(req, res) {
+  const cronKey = req.headers['x-cron-key'];
+  if (cronKey && process.env.CRON_SECRET && cronKey === process.env.CRON_SECRET) {
+    req.auth = req.auth || { clubId: req.body?.club_id || req.body?.clubId, userId: 'cron', role: 'system' };
+    return importCsvHandler(req, res);
+  }
+  return withAuth(importCsvHandler, { roles: ['gm', 'admin', 'swoop_admin'] })(req, res);
+}

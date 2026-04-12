@@ -27,10 +27,14 @@ const SHOT_DIR = path.resolve(REPO, 'tmp', 'agent-screenshots');
 const FINDINGS_PATH = path.join(homedir(), 'qa-outputs', `agent-deep-test-${new Date().toISOString().slice(0, 10)}.md`);
 mkdirSync(path.dirname(FINDINGS_PATH), { recursive: true });
 
-const SAVEPOINT_NAME = 'stage-dining';
+// Pick which save point to test against. Defaults to stage-dining; later
+// phases set SAVEPOINT=stage-complaints / stage-staff / etc. so the same
+// agent test runs against richer tenant state.
+const SAVEPOINT_NAME = process.env.SAVEPOINT || 'stage-dining';
+const SAVEPOINT_FILE = SAVEPOINT_NAME.replace(/[^a-z0-9_]/gi, '_');
 
 function loadSession() {
-  const p = path.join(homedir(), '.swoop-savepoints', 'stage_dining.json');
+  const p = path.join(homedir(), '.swoop-savepoints', `${SAVEPOINT_FILE}.json`);
   if (!existsSync(p)) return null;
   return JSON.parse(readFileSync(p, 'utf8'));
 }

@@ -18,6 +18,7 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
+import { realAgentCall } from './real-agent-call.js';
 
 // Fall into simulation mode when the Managed Agent platform isn't
 // configured — MANAGED_ENV_ID empty rejects the API call anyway, so the
@@ -105,6 +106,38 @@ async function complaintHandler(req, res) {
     return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
+  // Real Anthropic call — Managed Agent platform isn't configured locally,
+  // so we use the messages API directly with structured tool-use output.
+  // The handler still proceeds to evaluate trigger criteria + write playbook
+  // rows below; this just gives the GM a real-LLM action card to approve.
+  if (SIMULATION_MODE) {
+    try {
+      const { rows: memberRows } = await sql`
+        SELECT first_name, last_name, annual_dues, health_score, health_tier
+        FROM members WHERE member_id = ${member_id} AND club_id = ${clubId}
+      `;
+      const m = memberRows[0] || {};
+      await realAgentCall({
+        clubId,
+        agentId: 'service-recovery',
+        actionType: 'complaint_resolution',
+        memberId: member_id,
+        systemPrompt: `You are the Service Recovery agent for a private golf and country club. A member has filed a complaint. Your job is to recommend ONE concrete recovery action the GM can take in the next 24 hours. Reference real numbers from the input data (dues, health score, complaint priority). Keep recommendations specific and actionable — no generic platitudes.`,
+        contextData: {
+          member: {
+            name: `${m.first_name || ''} ${m.last_name || ''}`.trim(),
+            annual_dues: m.annual_dues,
+            health_score: m.health_score,
+            health_tier: m.health_tier,
+          },
+          complaint: { priority, category: category || null, complaint_id: complaint_id || null },
+        },
+      });
+    } catch (err) {
+      console.warn('[complaint-trigger] real agent call failed:', err.message);
+    }
+  }
+
   try {
     // 1. Evaluate trigger criteria
     const evaluation = await evaluateComplaintTrigger(member_id, clubId, priority);
@@ -176,11 +209,11 @@ async function complaintHandler(req, res) {
     const runId = `run_sr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     await sql`
       INSERT INTO playbook_runs (
-        run_id, club_id, playbook_id, member_id,
+        run_id, club_id, playbook_id, playbook_name, member_id,
         triggered_by, trigger_reason, status,
         agent_session_id, session_thread_id, started_at
       ) VALUES (
-        ${runId}, ${clubId}, ${PLAYBOOK_ID}, ${member_id},
+        ${runId}, ${clubId}, ${PLAYBOOK_ID}, 'Service Recovery', ${member_id},
         'complaint-trigger',
         ${`complaint priority=${priority}, dues=${evaluation.dues}, health_score=${evaluation.healthScore}${evaluation.repeatComplainant ? ', REPEAT COMPLAINANT' : ''}`},
         'active',

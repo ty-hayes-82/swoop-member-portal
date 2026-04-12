@@ -18,6 +18,7 @@ import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { logError } from '../lib/logger.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
+import { realAgentCall } from './real-agent-call.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
@@ -36,6 +37,29 @@ async function arrivalHandler(req, res) {
   const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['arrival-trigger']);
   if (!gate.ok) {
     return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
+  }
+
+  if (SIMULATION_MODE) {
+    try {
+      const { rows: memRows } = await sql`
+        SELECT first_name, last_name, annual_dues, archetype, membership_type
+        FROM members WHERE member_id = ${member_id} AND club_id = ${clubId}
+      `;
+      const m = memRows[0] || {};
+      await realAgentCall({
+        clubId,
+        agentId: 'arrival-anticipation',
+        actionType: 'arrival_brief',
+        memberId: member_id,
+        systemPrompt: `You are the Arrival Anticipation agent for a private golf and country club. A high-value member has a tee time today. Recommend ONE concrete pre-arrival preparation step the staff should take in the next 30 minutes. Reference the member's archetype, dues tier, and tee time. Be specific (which staff role, what to prepare).`,
+        contextData: {
+          member: { name: `${m.first_name || ''} ${m.last_name || ''}`.trim(), annual_dues: m.annual_dues, archetype: m.archetype, membership_type: m.membership_type },
+          tee_time, course: course || null,
+        },
+      });
+    } catch (err) {
+      console.warn('[arrival-trigger] real agent call failed:', err.message);
+    }
   }
 
   try {
