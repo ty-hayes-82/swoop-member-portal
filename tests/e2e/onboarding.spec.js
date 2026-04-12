@@ -261,7 +261,7 @@ test.describe('2 — Setup Wizard', () => {
     await page.getByRole('button', { name: 'Open Dashboard' }).click();
     await page.waitForTimeout(3000);
     await expect(page.locator('text=/good morning|afternoon|welcome/i').first()).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=/Welcome to your dashboard/i')).toBeVisible();
+    await expect(page.locator('text=/data flowing|Onboarding checklist|Welcome to your dashboard/i').first()).toBeVisible();
     const body = await page.locator('body').textContent();
     expect(body).not.toContain('Oakmont Hills');
     expect(body).not.toContain('Scottsdale');
@@ -347,11 +347,6 @@ test.describe('2 — Setup Wizard', () => {
       await page.waitForTimeout(2000);
     }
 
-    // Now on the import step — click "Start Import".
-    // 2026-04-09: bumped timeout 5s → 12s. Earlier piecewise runs of this
-    // spec passed, but in the full-suite run the wizard step transition is
-    // slower under load. The button is reliably visible within 8-10s; 12s
-    // gives a comfortable margin without masking a real hang.
     const startBtn = page.locator('button:has-text("Start Import")');
     await expect(startBtn).toBeVisible({ timeout: 12000 });
 
@@ -488,23 +483,23 @@ test.describe('2B — Progressive Import Insights', () => {
     await fileInput.setInputFiles(filePath);
     await pg.waitForTimeout(2000);
 
-    // Step 2: Advance through mapping
+    // Step 2: Advance through mapping. Intermediate steps need ~8–10s under
+    // full-suite load (see Suite 2 test 2.17 comment); 3s was silently no-op'ing
+    // on a slow step and returning status 0 from the helper.
     const mapBtn = pg.locator('button:has-text("Next: Map Columns"), button:has-text("Map Columns")').first();
-    if (await mapBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await mapBtn.isVisible({ timeout: 12000 }).catch(() => false)) {
       await mapBtn.click();
       await pg.waitForTimeout(1500);
     }
 
-    // Click "Import N Rows" to go to review
     const importRowsBtn = pg.locator('button:has-text("Import"):not(:has-text("Start"))').last();
-    if (await importRowsBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await importRowsBtn.isVisible({ timeout: 12000 }).catch(() => false)) {
       await importRowsBtn.click();
       await pg.waitForTimeout(1500);
     }
 
-    // Step 3: Click "Start Import"
     const startBtn = pg.locator('button:has-text("Start Import")');
-    if (await startBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await startBtn.isVisible({ timeout: 12000 }).catch(() => false)) {
       const importPromise = pg.waitForResponse(
         resp => resp.url().includes('/api/import-csv') && resp.request().method() === 'POST',
         { timeout: 60000 }

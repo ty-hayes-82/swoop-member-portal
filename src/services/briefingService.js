@@ -232,7 +232,11 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     currentDate: date,
     fb: null,    // TODO: compute from POS data when available
     email: null, // TODO: compute from email engagement data when available
-    teeSheet: { roundsToday: summary.totalRounds || DEMO_BRIEFING.teeSheet.roundsToday, utilization: 0.87 },
+    // teeSheet values come from real API data when available. Never merge the
+    // DEMO_BRIEFING fallback for authenticated clubs — that's a static leak.
+    teeSheet: summary.totalRounds > 0
+      ? { roundsToday: summary.totalRounds, utilization: Number.isFinite(summary.teeSheetUtilization) ? summary.teeSheetUtilization : 0 }
+      : null,
     yesterdayRecap: yesterday ? {
       date:           yesterday.date,
       revenue:        yesterdayTotal,

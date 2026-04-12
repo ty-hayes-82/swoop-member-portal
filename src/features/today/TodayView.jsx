@@ -24,7 +24,7 @@ import { isAuthenticatedClub } from '@/config/constants';
 import { getDataMode, isGateOpen, getLoadedGates } from '@/services/demoGate';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
-import OnboardingChecklist, { LOW_DATA_THRESHOLD } from './OnboardingChecklist';
+import OnboardingChecklist from './OnboardingChecklist';
 import { getTodayTeeSheet } from '@/services/operationsService';
 import { getMemberSummary } from '@/services/memberService';
 import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
@@ -226,10 +226,10 @@ export default function TodayView() {
     );
   }
 
-  // Fresh live club — show onboarding checklist instead of the normal dashboard
-  // so a brand-new GM doesn't see another club's numbers on first login.
-  // Demo and guided modes are the dashboard — never gate them behind this.
-  if (getDataMode() === 'live' && (getMemberSummary().total || 0) < LOW_DATA_THRESHOLD) {
+  // Fresh live club with zero members — show the onboarding checklist.
+  // Once any member exists, live widgets take over even if the checklist
+  // would still mark the members step as incomplete (<10 threshold).
+  if (getDataMode() === 'live' && (getMemberSummary().total || 0) === 0) {
     return (
       <PageTransition>
         <OnboardingChecklist />
@@ -375,6 +375,45 @@ export default function TodayView() {
                 onClick={() => { localStorage.setItem('swoop_core3_celebrated', 'true'); setCore3Dismissed(true); }}
                 className="text-xs text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer shrink-0"
               >Dismiss</button>
+            </div>
+          </div>
+        )}
+
+        {/* Section 1.4: What you can see now — hero insight summary for authenticated live clubs */}
+        {isAuthenticatedClub() && memberSummary.total > 0 && (
+          <div className="rounded-xl border border-brand-200 bg-brand-50/30 p-4 dark:border-brand-500/30 dark:bg-brand-500/5">
+            <div className="text-[10px] font-semibold text-brand-600 uppercase tracking-wide mb-2 dark:text-brand-400">
+              What you can see now
+            </div>
+            <div className="flex items-baseline gap-6 flex-wrap">
+              <div>
+                <div className="text-2xl font-bold text-gray-800 dark:text-white/90">{memberSummary.total.toLocaleString()}</div>
+                <div className="text-xs text-gray-500">members imported</div>
+              </div>
+              {(memberSummary.atRisk + memberSummary.critical) > 0 && (
+                <div>
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {(memberSummary.atRisk + memberSummary.critical).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-gray-500">need attention this week</div>
+                </div>
+              )}
+              {memberSummary.watch > 0 && (
+                <div>
+                  <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                    {memberSummary.watch.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-gray-500">on the watch list</div>
+                </div>
+              )}
+              {memberSummary.healthy > 0 && (
+                <div>
+                  <div className="text-2xl font-bold text-success-600 dark:text-success-400">
+                    {memberSummary.healthy.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-gray-500">healthy</div>
+                </div>
+              )}
             </div>
           </div>
         )}

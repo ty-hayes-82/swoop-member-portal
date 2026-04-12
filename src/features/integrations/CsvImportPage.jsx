@@ -31,7 +31,7 @@ function buildImportPreview({ parsedRows, mapping, importType, csvHeaders }) {
   }
   const requiredFields = (config?.fields || []).filter(f => f.required).map(f => f.swoop);
   const dateFields = (config?.fields || [])
-    .filter(f => /date|birthday|tee_time/i.test(f.swoop))
+    .filter(f => /date|birthday/i.test(f.swoop))
     .map(f => f.swoop);
   const unknownColumns = csvHeaders.filter(h => !mapping[h]);
 
@@ -428,6 +428,12 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
 
   return (
     <div>
+      {mappedCount === 0 && (
+        <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-300">
+          <strong>Auto-detection didn't match any columns.</strong> This usually means the file is from a different vendor or a different data type than selected. Map fields manually below, or go back and double-check your vendor and data-type selection.
+        </div>
+      )}
+
       {/* Status summary */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-1">
@@ -436,14 +442,15 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
             {mappedCount} of {csvHeaders.length} columns mapped
           </span>
         </div>
-        {requiredMissing.length > 0 && (
-          <div className="text-xs text-red-500 font-medium">
-            {requiredMissing.length} required field{requiredMissing.length > 1 ? 's' : ''} unmapped
-          </div>
-        )}
-        {requiredMissing.length === 0 && (
-          <div className="text-xs text-success-500 font-medium">All required fields mapped</div>
-        )}
+        <div role="status" aria-live="polite" className="text-xs font-medium">
+          {requiredMissing.length > 0 ? (
+            <span className="text-red-500">
+              {requiredMissing.length} required field{requiredMissing.length > 1 ? 's' : ''} unmapped
+            </span>
+          ) : (
+            <span className="text-success-500">All required fields mapped</span>
+          )}
+        </div>
       </div>
 
       {/* Mapping table */}
@@ -575,7 +582,6 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
     () => buildImportPreview({ parsedRows, mapping, importType, csvHeaders }),
     [parsedRows, mapping, importType, csvHeaders],
   );
-  const [reviewed, setReviewed] = useState(false);
 
   return (
     <div>
@@ -631,34 +637,44 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
             {config?.label} &middot; {Object.values(mapping).filter(Boolean).length} columns mapped
           </p>
 
-          <div className="flex gap-3">
-            {!reviewed ? (
+          {preview.toCreate + preview.toUpdate === 0 ? (
+            <div>
+              <div className="mb-3 p-3 rounded-lg bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30">
+                <div className="text-sm font-bold text-red-700 dark:text-red-400 mb-1">
+                  Nothing to import
+                </div>
+                <div className="text-xs text-red-600 dark:text-red-400">
+                  {preview.rejected.length > 0
+                    ? `All ${preview.rejected.length.toLocaleString()} rows were rejected. Fix the issues listed above in your source file and re-upload.`
+                    : 'No valid rows were found in this file. Check that you selected the right file and data type.'}
+                </div>
+              </div>
               <button
-                onClick={() => setReviewed(true)}
-                className="flex-1 py-3 rounded-lg font-bold text-sm text-white cursor-pointer"
-                style={{ background: '#ff8b00' }}
+                onClick={onReset}
+                className="w-full py-3 rounded-lg border border-gray-300 font-semibold text-sm text-gray-700 cursor-pointer hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
               >
-                Review &amp; Continue
+                Start Over
               </button>
-            ) : (
-              <button
-                onClick={onImport}
-                disabled={preview.toCreate + preview.toUpdate === 0}
-                className="flex-1 py-3 rounded-lg font-bold text-sm text-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: '#ff8b00' }}
-              >
-                Start Import ({(preview.toCreate + preview.toUpdate).toLocaleString()} rows)
-              </button>
-            )}
-          </div>
+            </div>
+          ) : (
+            <button
+              onClick={onImport}
+              className="w-full py-3 rounded-lg font-bold text-sm text-white cursor-pointer"
+              style={{ background: '#ff8b00' }}
+            >
+              Start Import ({(preview.toCreate + preview.toUpdate).toLocaleString()} rows)
+            </button>
+          )}
         </div>
       )}
 
       {uploading && (
-        <div className="text-center py-12">
+        <div className="text-center py-12" role="status" aria-live="polite">
           <div className="inline-block w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mb-4" />
-          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Importing {parsedRows.length.toLocaleString()} rows...</p>
-          <p className="text-xs text-gray-400 mt-1">This may take a moment for large files</p>
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Importing {parsedRows.length.toLocaleString()} rows…
+          </p>
+          <p className="text-xs text-gray-400 mt-1">Please keep this tab open until it finishes.</p>
         </div>
       )}
 
@@ -794,6 +810,14 @@ export default function CsvImportPage() {
     if (!file) return;
     setParseError(null);
 
+    // Guard against pathological file sizes — parseCSV reads the whole file
+    // into memory and would freeze the tab on a multi-hundred-MB drop.
+    const MAX_BYTES = 50 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      setParseError(`File is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum is 50 MB — split the file and try again.`);
+      return;
+    }
+
     try {
       const ext = file.name.split('.').pop()?.toLowerCase();
       let headers = [];
@@ -801,9 +825,9 @@ export default function CsvImportPage() {
 
       if (ext === 'csv') {
         const text = await file.text();
-        const result = parseCSV(text);
-        headers = result.headers;
-        rows = result.rows;
+        const parsed = parseCSV(text);
+        headers = parsed.headers;
+        rows = parsed.rows;
       } else if (ext === 'xlsx' || ext === 'xls') {
         const XLSX = await import('xlsx');
         const data = await file.arrayBuffer();
@@ -885,7 +909,7 @@ export default function CsvImportPage() {
         }
       }
     } catch (err) {
-      setError(`Upload error: ${err.message}`);
+      setError(`Import failed: ${err.message}`);
     }
     setUploading(false);
   }, [clubId, importType, mapping, parsedRows]);

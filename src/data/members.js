@@ -30,9 +30,12 @@ export const memberSummary = {
   avgHealthScore: 68,
   // 75 at-risk + critical members × $11,573 avg dues = $868K (7 visible below sum to $111K; 68 others in full roster)
   potentialDuesAtRisk: 868000,
-  avgTenure: 6.2,
-  avgDues: 16400,
-  renewalRate: 0.91,
+  // avgTenure / avgDues / renewalRate are computed server-side in /api/members
+  // from real member rows. Never hardcode them here — the UI's conditional
+  // render (MembersView.jsx:151) hides the stat cards when the value is 0.
+  avgTenure: 0,
+  avgDues: 0,
+  renewalRate: 0,
 };
 
 // Watch tier members — early-stage decay signals, not yet At Risk

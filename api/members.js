@@ -105,12 +105,40 @@ export default withAuth(async function handler(req, res) {
           riskLevel: r.score < 30 ? 'Critical' : 'At Risk', trend: 'declining', topRisk: r.topRisk,
         }));
 
+        // Derive the three summary stats from real member data. These fields
+        // previously fell back to hardcoded values in src/data/members.js — a
+        // data-integrity leak. Now computed only from the imported rows.
+        let tenureSum = 0, tenureCount = 0;
+        let duesSum = 0, duesCount = 0;
+        const now = Date.now();
+        for (const r of rosterResult.rows) {
+          if (r.join_date) {
+            const years = (now - new Date(r.join_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+            if (Number.isFinite(years) && years >= 0) { tenureSum += years; tenureCount++; }
+          }
+          const dues = toNumber(r.annual_dues, 0);
+          if (dues > 0) { duesSum += dues; duesCount++; }
+        }
+        const avgTenure = tenureCount > 0 ? Math.round((tenureSum / tenureCount) * 10) / 10 : 0;
+        const avgDues = duesCount > 0 ? Math.round(duesSum / duesCount) : 0;
+
+        // Retention / renewal rate requires historical year-over-year data. A
+        // one-shot roster import can only approximate via date_resigned on the
+        // imported rows. Leave as 0 (UI hides it) unless we have a real signal.
+        const resignedCount = rosterResult.rows.filter(r => r.status === 'resigned').length;
+        const renewalRate = total > 0 && resignedCount > 0
+          ? Math.max(0, 1 - (resignedCount / total))
+          : 0;
+
         summaryData = {
           total, healthy: tierCounts.Healthy || 0,
           atRisk: tierCounts['At Risk'] || 0, critical: tierCounts.Critical || 0,
           riskCount: (tierCounts['At Risk'] || 0) + (tierCounts.Critical || 0),
           avgHealthScore: scoreCount > 0 ? Math.round(scoreSum / scoreCount * 10) / 10 : 0,
           potentialDuesAtRisk: rosterResult.rows.filter(r => (r.health_tier === 'At Risk' || r.health_tier === 'Critical') || (r.health_score != null && toNumber(r.health_score) < 50)).reduce((s, r) => s + toNumber(r.annual_dues), 0),
+          avgTenure,
+          avgDues,
+          renewalRate,
         };
       }
 

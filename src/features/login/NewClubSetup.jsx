@@ -4,7 +4,7 @@
  *
  * Uses TailAdmin-style layout: centered form with max-w-md mx-auto
  */
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 
 const TEMPLATES = [
   { file: 'swoop-template-members-only.xlsx', label: 'Members Only', desc: '20 members — test health scores and at-risk detection', sheets: '1 sheet', color: '#3b82f6' },
@@ -37,12 +37,6 @@ export default function NewClubSetup({ onComplete, onBack }) {
   // Created club data
   const [clubId, setClubId] = useState(null);
   const [userId, setUserId] = useState(null);
-
-  // Step 2 state
-  const [uploadResults, setUploadResults] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadedFileName, setUploadedFileName] = useState(null);
-  const fileInputRef = useRef(null);
 
   // ─── Step 0: Validate Club Info & advance ───
   const handleClubInfoNext = () => {
@@ -92,52 +86,6 @@ export default function NewClubSetup({ onComplete, onBack }) {
     setLoading(false);
   };
 
-  // ─── Step 2: Upload Data ───
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const ext = file.name.split('.').pop()?.toLowerCase();
-    if (ext !== 'xlsx' && ext !== 'xls') {
-      setError(`Invalid file type ".${ext}" — please upload an .xlsx file. Download a template above to get the correct format.`);
-      return;
-    }
-    setUploading(true);
-    setError(null);
-    setUploadedFileName(file.name);
-    try {
-      const XLSX = await import('xlsx');
-      const data = await file.arrayBuffer();
-      const wb = XLSX.read(data, { type: 'array' });
-      const results = { members: 0, rounds: 0, transactions: 0, complaints: 0 };
-      for (const sheetName of wb.SheetNames) {
-        const ws = wb.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(ws);
-        if (rows.length === 0) continue;
-        const cols = Object.keys(rows[0]).map(c => c.toLowerCase());
-        let importType = null;
-        if (sheetName.toLowerCase().includes('member') || cols.includes('first_name')) importType = 'members';
-        else if (sheetName.toLowerCase().includes('round') || cols.includes('round_date')) importType = 'rounds';
-        else if (sheetName.toLowerCase().includes('transaction') || cols.includes('total_amount')) importType = 'transactions';
-        else if (sheetName.toLowerCase().includes('complaint') || cols.includes('category') && cols.includes('description')) importType = 'complaints';
-        if (!importType) continue;
-        const res = await fetch('/api/import-csv', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clubId, importType, rows, uploadedBy: userId || 'setup-wizard' }),
-        });
-        const result = await res.json();
-        results[importType] = result.success || rows.length;
-      }
-      setUploadResults(results);
-      if (results.members > 0) {
-        try { await fetch(`/api/compute-health-scores?clubId=${clubId}`, { method: 'POST' }); } catch { /* non-critical */ }
-      }
-    } catch (err) {
-      setError(`Upload error: ${err.message}`);
-    }
-    setUploading(false);
-  };
-
   // ─── Step 3: Go to Dashboard ───
   const handleFinish = () => {
     const user = {
@@ -148,6 +96,9 @@ export default function NewClubSetup({ onComplete, onBack }) {
     localStorage.setItem('swoop_auth_user', JSON.stringify(user));
     localStorage.setItem('swoop_club_id', clubId);
     localStorage.setItem('swoop_club_name', clubName.trim());
+    // Notify AuthProvider so useCurrentClub / useAuth pick up the new session
+    // without a page reload — otherwise the header falls back to "demo".
+    window.dispatchEvent(new Event('swoop:auth-changed'));
     onComplete?.(user);
   };
 
@@ -243,10 +194,10 @@ export default function NewClubSetup({ onComplete, onBack }) {
         {step === 2 && (
           <div className="space-y-4">
             <div className="px-4 py-3 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/30 dark:text-blue-400">
-              Club created! Upload your data or skip for now.
+              Club created! Download a template to prepare your data, then run the Import Wizard.
             </div>
             <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-              Download a template, fill in your data, and upload it. Start with Members Only to test quickly.
+              The Import Wizard auto-maps Jonas columns, validates every row, and shows a dry-run preview before anything hits your database.
             </p>
 
             {/* Template downloads */}
@@ -268,56 +219,18 @@ export default function NewClubSetup({ onComplete, onBack }) {
               ))}
             </div>
 
-            {/* Upload area */}
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className={`p-6 rounded-lg border-2 border-dashed text-center cursor-pointer transition-colors ${
-                uploadedFileName
-                  ? 'border-success-500/40 bg-success-50/30 dark:bg-success-500/5'
-                  : 'border-gray-300 bg-gray-50 hover:border-gray-400 dark:border-gray-700 dark:bg-gray-800'
-              }`}
-            >
-              <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className="hidden" />
-              {uploading ? (
-                <div className="text-sm text-brand-500 font-semibold">Uploading and processing...</div>
-              ) : uploadedFileName ? (
-                <>
-                  <div className="text-2xl mb-2">✅</div>
-                  <div className="text-sm font-semibold text-success-600">{uploadedFileName}</div>
-                  <div className="text-xs text-gray-400 mt-1">Click to upload a different file</div>
-                </>
-              ) : (
-                <>
-                  <div className="text-2xl mb-2">📄</div>
-                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">Click to upload XLSX file</div>
-                  <div className="text-xs text-gray-400 mt-1">Multi-sheet files auto-detected</div>
-                </>
-              )}
-            </div>
-
-            {/* Upload results */}
-            {uploadResults && (
-              <div className="px-4 py-3 rounded-lg bg-success-50 border border-success-200 dark:bg-success-500/10 dark:border-success-500/30">
-                <div className="text-sm font-bold text-success-600 dark:text-success-400 mb-1">Upload Complete</div>
-                <div className="flex gap-3 flex-wrap text-xs text-gray-700 dark:text-gray-300">
-                  {uploadResults.members > 0 && <span>{uploadResults.members} members</span>}
-                  {uploadResults.rounds > 0 && <span>{uploadResults.rounds} rounds</span>}
-                  {uploadResults.transactions > 0 && <span>{uploadResults.transactions} transactions</span>}
-                  {uploadResults.complaints > 0 && <span>{uploadResults.complaints} complaints</span>}
-                </div>
-              </div>
-            )}
-
-            <div className="pt-1">
+            <div className="flex flex-col gap-2 pt-1">
+              <a
+                href="#/csv-import"
+                className="w-full text-center py-3 rounded-lg text-sm font-bold no-underline bg-brand-500 text-white hover:bg-brand-600 transition"
+              >
+                Open Import Wizard
+              </a>
               <button
                 onClick={() => setStep(3)}
-                className={`w-full py-3 rounded-lg text-sm font-bold transition ${
-                  uploadResults
-                    ? 'bg-brand-500 text-white hover:bg-brand-600'
-                    : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700'
-                }`}
+                className="w-full py-3 rounded-lg text-sm font-bold bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700"
               >
-                {uploadResults ? 'Continue' : 'Skip for Now'}
+                Skip for Now
               </button>
             </div>
           </div>
@@ -330,25 +243,9 @@ export default function NewClubSetup({ onComplete, onBack }) {
             <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
               {clubName} is ready!
             </h2>
-
-            {uploadResults ? (
-              <div className="text-left p-4 rounded-lg bg-gray-50 border border-gray-200 dark:bg-white/[0.03] dark:border-gray-700">
-                <div className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">What you can see now:</div>
-                <div className="space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
-                  {uploadResults.members > 0 && <div>✅ Health scores & at-risk members</div>}
-                  {uploadResults.rounds > 0 && <div>✅ Golf engagement & pace analysis</div>}
-                  {uploadResults.transactions > 0 && <div>✅ Revenue signals & spend patterns</div>}
-                  {uploadResults.complaints > 0 && <div>✅ Complaint tracking & follow-through</div>}
-                  {!uploadResults.transactions && <div className="text-gray-400">📎 Upload F&B data later to unlock revenue insights</div>}
-                  {!uploadResults.complaints && <div className="text-gray-400">📎 Upload complaints later to track service follow-through</div>}
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                No data uploaded yet. You can upload data from Admin &gt; CSV Import anytime.
-              </p>
-            )}
-
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No data uploaded yet. You can upload data from Admin &gt; CSV Import anytime.
+            </p>
             <button onClick={handleFinish} className="w-full py-3.5 rounded-lg bg-brand-500 text-white text-base font-bold hover:bg-brand-600 transition">
               Open Dashboard
             </button>

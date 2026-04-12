@@ -44,34 +44,32 @@ const EMPTY_KPIS = [
 ];
 
 export const getKPIs = () => {
-  if (_liveKpis) {
-    if (_liveKpis.membersSaved > 0) {
-      return staticKpis.map(kpi => {
-        if (kpi.label === 'Members Retained') {
-          return { ...kpi, value: _liveKpis.membersSaved };
-        }
-        return kpi;
-      });
-    }
-    // Live mode with zero saves — show empty state, not fake demo KPIs
-    return EMPTY_KPIS;
+  // Guided/demo mode uses the hand-authored static KPIs for storytelling.
+  // Every other mode computes from real member data or shows empty state —
+  // never spreads staticKpis (which contains hardcoded 87% / $375K fallbacks).
+  if (_isGuidedMode() || getDataMode() === 'demo') {
+    return _d?.kpis || staticKpis;
   }
-  // Data-driven: if _d has KPIs, use them
+
+  // Data-driven: if _d has KPIs from a live endpoint, use them directly.
   if (_d?.kpis) return _d.kpis;
-  // Build KPIs from member health data (works for guided, demo, and real clubs)
+
+  // Derive from member health data — honest live numbers.
   const summary = _getMemberSummary();
   if (summary.totalMembers > 0 || summary.total > 0) {
     const total = summary.totalMembers || summary.total;
     const healthy = summary.healthy || 0;
     const retentionPct = total > 0 ? Math.round((healthy / total) * 100) : 0;
+    const liveRetained = _liveKpis?.membersSaved > 0 ? _liveKpis.membersSaved : healthy;
     return [
-      { label: 'Members Retained', value: healthy, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total members tracked` },
+      { label: 'Members Retained', value: liveRetained, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total members tracked` },
       { label: 'Dues at Risk', value: Math.round((summary.potentialDuesAtRisk || 0) / 1000), unit: '$K', prefix: '$', suffix: 'K', color: 'warning', description: 'Annual dues from at-risk + critical members' },
       { label: 'Retention Rate', value: retentionPct, unit: '%', prefix: '', suffix: '%', color: retentionPct >= 80 ? 'success' : 'warning', description: 'Healthy members as % of total' },
       { label: 'At Risk', value: (summary.atRisk || 0) + (summary.critical || 0), unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
     ];
   }
-  // No data available
+
+  // Brand-new authenticated club with no data yet — show "Awaiting data".
   return EMPTY_KPIS;
 };
 

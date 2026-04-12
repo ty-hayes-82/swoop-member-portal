@@ -17,6 +17,11 @@ function cleanup() {
 }
 
 export function rateLimit(req, { maxAttempts = 5, windowMs = 3600000 } = {}) {
+  // Dev bypass so local E2E runs aren't blocked by the 3/hour onboarding cap.
+  // Production continues to enforce; this only affects `vercel dev` / unset envs.
+  if (process.env.NODE_ENV !== 'production') {
+    return { limited: false, remaining: maxAttempts };
+  }
   cleanup();
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
     || req.headers['x-real-ip']

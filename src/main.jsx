@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import ErrorBoundary from './components/ErrorBoundary';
+import { AuthProvider } from './context/AuthContext';
 import './styles/tailwind.css';
 
 // Initialize Sentry only when a DSN is configured. Dev builds without a DSN
@@ -25,9 +26,11 @@ const isLandingRoute = normalizedPath === '/landing' || hash === '#/landing';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <Suspense fallback={null}>
-        {isLandingRoute ? <LandingPage /> : <App />}
-      </Suspense>
+      <AuthProvider>
+        <Suspense fallback={null}>
+          {isLandingRoute ? <LandingPage /> : <App />}
+        </Suspense>
+      </AuthProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );

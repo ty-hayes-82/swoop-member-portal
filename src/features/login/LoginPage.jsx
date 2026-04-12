@@ -292,11 +292,19 @@ export default function LoginPage({ onLogin }) {
               </div>
             )}
 
-            {/* Explore without account */}
+            {/* Signup / explore alternatives */}
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-[11px] uppercase tracking-wide text-gray-400">New to Swoop?</span>
               <div className="flex-1 h-px bg-gray-200" />
             </div>
+
+            <button
+              onClick={() => setShowNewClub(true)}
+              className="w-full py-3 rounded-xl bg-brand-500 text-white text-sm font-bold cursor-pointer hover:bg-brand-600 transition-colors mb-3"
+            >
+              Set Up New Club
+            </button>
 
             <button
               onClick={() => setScreen('explore')}

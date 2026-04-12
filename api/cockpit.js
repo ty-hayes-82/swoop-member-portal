@@ -35,7 +35,7 @@ export default withAuth(async function handler(req, res) {
         JOIN members m ON m.member_id = bp.member_id
         LEFT JOIN member_engagement_weekly w ON w.member_id = m.member_id
           AND w.week_number = (SELECT MAX(week_number) FROM member_engagement_weekly)
-        WHERE b.booking_date = TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD')
+        WHERE b.booking_date = CURRENT_DATE
           AND w.engagement_score < 50
           AND b.status = 'confirmed'
           AND m.club_id = ${clubId}
@@ -44,8 +44,8 @@ export default withAuth(async function handler(req, res) {
       `,
       // Since-last-login
       sql`
-        SELECT login_at AS last_login_at FROM user_sessions
-        ORDER BY login_at DESC LIMIT 1
+        SELECT last_login_at FROM user_sessions
+        ORDER BY last_login_at DESC LIMIT 1
       `,
     ]);
 
@@ -151,7 +151,7 @@ export default withAuth(async function handler(req, res) {
       try {
         const wxFallback = await sql`
           SELECT condition, temp_high, wind_mph FROM weather_daily
-          WHERE date = TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD')
+          WHERE date = CURRENT_DATE
             OR date = (SELECT MAX(date) FROM weather_daily)
           ORDER BY date DESC LIMIT 1
         `;

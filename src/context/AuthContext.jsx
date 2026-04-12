@@ -20,28 +20,45 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Validate existing session on mount
+  // Validate existing session on mount, and re-read on swoop:auth-changed so
+  // the new-club wizard (which stores the post-signup user in localStorage
+  // directly, without going through login()) flows through to the header and
+  // anywhere else that consumes useCurrentClub / useAuth.
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    fetch('/api/auth', {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then(res => {
-      if (res.ok) return res.json();
-      throw new Error('Session expired');
-    }).then(data => {
-      setUser(data.user);
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-      if (data.user.clubId) localStorage.setItem('swoop_club_id', data.user.clubId);
-      if (data.user.clubName) localStorage.setItem('swoop_club_name', data.user.clubName);
-    }).catch(() => {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
-      setUser(null);
-    }).finally(() => setLoading(false));
+    let cancelled = false;
+    const rehydrate = () => {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        if (!cancelled) { setUser(null); setLoading(false); }
+        return;
+      }
+      // Fast path: if localStorage has a stored user, reflect it immediately
+      // so the header updates without waiting for /api/auth to round-trip.
+      try {
+        const stored = localStorage.getItem(USER_KEY);
+        if (stored && !cancelled) setUser(JSON.parse(stored));
+      } catch { /* ignore */ }
+
+      fetch('/api/auth', {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(res => {
+        if (res.ok) return res.json();
+        throw new Error('Session expired');
+      }).then(data => {
+        if (cancelled) return;
+        setUser(data.user);
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+        if (data.user.clubId) localStorage.setItem('swoop_club_id', data.user.clubId);
+        if (data.user.clubName) localStorage.setItem('swoop_club_name', data.user.clubName);
+      }).catch(() => {
+        if (cancelled) return;
+        // Keep the locally-stored user if the auth endpoint is unavailable
+        // (e.g. vercel dev cold-start) — only clear on explicit 401/expired.
+      }).finally(() => { if (!cancelled) setLoading(false); });
+    };
+    rehydrate();
+    window.addEventListener('swoop:auth-changed', rehydrate);
+    return () => { cancelled = true; window.removeEventListener('swoop:auth-changed', rehydrate); };
   }, []);
 
   const login = useCallback(async (email, password) => {

@@ -14,6 +14,15 @@ dist.locked-*
 .env*.local
 .env.vercel
 .vercel
+# Local-only dev overrides — never commit. Excluding api/* dirs from prod would
+# break Google OAuth, cron jobs, concierge, and onboarding-agent (see Agent D
+# audit). This file only exists to let `vercel dev` boot under the 128-function
+# cap locally.
+.vercelignore
+
+# Local QA artifacts
+tmp/
+tmp_*.mjs
 
 # Debug / capture artifacts (local-only)
 debug*.png
