@@ -249,8 +249,8 @@ export const getTodayTeeSheet = () => {
 /** @returns {TeeSheetSummary} */
 export const getTeeSheetSummary = () => {
   if (_d?.teeSheetSummary) return _d.teeSheetSummary;
-  if (_isGuidedMode() && !_apiLoaded) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
   if (!isGateOpen('tee-sheet')) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
+  // Gate is open — return static data even in guided mode (demo with tee-sheet imported)
   return teeSheetSummary;
 };
 

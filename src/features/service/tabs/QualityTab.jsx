@@ -16,7 +16,8 @@ export default function QualityTab() {
   const slowRoundStats = getSlowRoundRate();
 
   const hasPaceData = slowRoundStats && slowRoundStats.totalRounds > 0;
-  if (feedbackRecords.length === 0 && feedbackSummary.length === 0 && understaffedDays.length === 0 && !hasPaceData) {
+  // Service Quality needs complaints or staffing data — pace data alone isn't enough
+  if (feedbackRecords.length === 0 && feedbackSummary.length === 0 && understaffedDays.length === 0) {
     return <DataEmptyState icon="✅" title="No service quality data yet" description="Import service requests and staffing data to see service consistency scores, complaint patterns, and quality correlations." dataType="service requests + staffing" />;
   }
 
