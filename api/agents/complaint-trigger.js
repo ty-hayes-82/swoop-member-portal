@@ -17,8 +17,13 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
+import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
-const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
+// Fall into simulation mode when the Managed Agent platform isn't
+// configured — MANAGED_ENV_ID empty rejects the API call anyway, so the
+// honest path is to use the deterministic simulation output instead of
+// surfacing a 500 to the GM.
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 const PLAYBOOK_ID = 'service-recovery';
 
 const SERVICE_RECOVERY_STEPS = [
@@ -93,6 +98,11 @@ async function complaintHandler(req, res) {
   }
   if (!priority) {
     return res.status(400).json({ error: 'priority is required' });
+  }
+
+  const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['complaint-trigger']);
+  if (!gate.ok) {
+    return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
   try {

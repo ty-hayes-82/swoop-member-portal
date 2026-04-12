@@ -60,13 +60,14 @@ export async function evaluateRiskTrigger(memberId, clubId) {
   const currentScore = memberRows[0].health_score ?? 100;
   const dues = memberRows[0].annual_dues ?? 0;
 
-  // 2. Historical score from ~30 days ago
+  // 2. Historical score from ~30 days ago. The column is `computed_at` in
+  // the deployed schema, not `recorded_at`.
   const { rows: historyRows } = await sql`
     SELECT score
     FROM health_scores
     WHERE member_id = ${memberId} AND club_id = ${clubId}
-      AND recorded_at <= NOW() - INTERVAL '25 days'
-    ORDER BY recorded_at DESC
+      AND computed_at <= NOW() - INTERVAL '25 days'
+    ORDER BY computed_at DESC
     LIMIT 1
   `;
 

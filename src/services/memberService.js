@@ -454,6 +454,17 @@ export const _init = async () => {
           // Merge (not replace) memberSummary so partial API payloads like
           // { memberSummary: { total: 50 } } don't wipe healthy/watch/atRisk/etc.
           memberSummary: { ..._d.memberSummary, ...(apiData.memberSummary || {}) },
+          // For live authenticated clubs, explicitly overwrite static
+          // fallback arrays that would otherwise leak demo members (e.g.
+          // James Whitfield from src/data/members.js). If the API returned
+          // nothing for these fields, force an empty array — honest empty
+          // state beats a fake roster of someone else's members.
+          atRiskMembers: apiData.atRiskMembers || [],
+          watchMembers: apiData.watchMembers || [],
+          memberRoster: apiData.memberRoster || _d.memberRoster || [],
+          memberArchetypes: apiData.memberArchetypes || [],
+          resignationScenarios: apiData.resignationScenarios || [],
+          decayingMembers: apiData.decayingMembers || [],
         };
         // Patch memberSummary.total + .totalMembers from apiData (both fields, since
         // some consumers read .total and some read .totalMembers — the previous code

@@ -110,6 +110,28 @@ export function clearAgentIdCache() {
 // ---------------------------------------------------------------------------
 
 /**
+ * Thrown when the Managed Agent platform isn't configured for this
+ * environment. Trigger handlers catch this and return a graceful
+ * `triggered: false` response so the GM sees "agent platform not
+ * configured" instead of a 500 crash from the Anthropic API.
+ */
+export class ManagedAgentNotConfiguredError extends Error {
+  constructor(msg) {
+    super(msg);
+    this.name = 'ManagedAgentNotConfiguredError';
+  }
+}
+
+function assertManagedAgentConfigured(agentId, envId) {
+  if (!agentId) {
+    throw new ManagedAgentNotConfiguredError('MANAGED_AGENT_ID is not set — agent platform unavailable');
+  }
+  if (!envId) {
+    throw new ManagedAgentNotConfiguredError('MANAGED_ENV_ID is not set — agent platform unavailable');
+  }
+}
+
+/**
  * Create a new Managed Agent session (basic, no callable_agents).
  * Uses the proper beta SDK method: client.beta.sessions.create()
  *
@@ -118,6 +140,7 @@ export function clearAgentIdCache() {
  * @returns {Promise<object>} the session object from the API
  */
 export async function createManagedSession(agentId = MANAGED_AGENT_ID, envId = MANAGED_ENV_ID) {
+  assertManagedAgentConfigured(agentId, envId);
   const client = getAnthropicClient();
   const response = await client.beta.sessions.create({
     agent: agentId,
@@ -136,6 +159,7 @@ export async function createManagedSession(agentId = MANAGED_AGENT_ID, envId = M
  * @returns {Promise<object>} the session object (includes session.id)
  */
 export async function createCoordinatorSession(envId = MANAGED_ENV_ID) {
+  assertManagedAgentConfigured(AGENT_IDS['chief-of-staff'], envId);
   const client = getAnthropicClient();
   const callableAgents = Object.entries(AGENT_IDS)
     .filter(([key]) => key !== 'chief-of-staff')
@@ -145,10 +169,13 @@ export async function createCoordinatorSession(envId = MANAGED_ENV_ID) {
       description: `Delegate work to the ${key} agent`,
     }));
 
+  // Note: `agent_toolset_version` was removed from the beta API contract —
+  // the previous value "agent_toolset_20260401" now produces
+  // "Extra inputs are not permitted" 400s. Passing only the supported
+  // fields now.
   const response = await client.beta.sessions.create({
     agent: AGENT_IDS['chief-of-staff'],
     environment_id: envId,
-    agent_toolset_version: 'agent_toolset_20260401',
     callable_agents: callableAgents,
     metadata: {
       coordinator: 'chief-of-staff',

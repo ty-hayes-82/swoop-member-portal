@@ -17,8 +17,9 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { logError } from '../lib/logger.js';
+import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
-const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
+const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
 async function arrivalHandler(req, res) {
   if (req.method !== 'POST') {
@@ -30,6 +31,11 @@ async function arrivalHandler(req, res) {
 
   if (!member_id || !tee_time) {
     return res.status(400).json({ error: 'member_id and tee_time are required' });
+  }
+
+  const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['arrival-trigger']);
+  if (!gate.ok) {
+    return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
   try {
@@ -131,16 +137,21 @@ async function arrivalHandler(req, res) {
       ORDER BY b.tee_time
     `;
 
-    // 7. Load pace data (avg duration from last 3 completed rounds)
+    // 7. Load pace data (avg duration from last 3 completed rounds). Must
+    // be a subquery — you can't ORDER BY + LIMIT the outer rows of an
+    // aggregate-only SELECT in Postgres.
     const { rows: paceData } = await sql`
-      SELECT AVG(b.duration_minutes) AS avg_duration,
+      SELECT AVG(duration_minutes) AS avg_duration,
              COUNT(*) AS round_count
-      FROM bookings b
-      JOIN booking_players bp ON b.booking_id = bp.booking_id
-      WHERE bp.member_id = ${member_id} AND b.club_id = ${clubId}
-        AND b.duration_minutes IS NOT NULL
-      ORDER BY b.booking_date DESC
-      LIMIT 3
+      FROM (
+        SELECT b.duration_minutes
+        FROM bookings b
+        JOIN booking_players bp ON b.booking_id = bp.booking_id
+        WHERE bp.member_id = ${member_id} AND b.club_id = ${clubId}
+          AND b.duration_minutes IS NOT NULL
+        ORDER BY b.booking_date DESC
+        LIMIT 3
+      ) t
     `;
 
     // 8. Assemble context payload

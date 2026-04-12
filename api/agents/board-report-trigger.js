@@ -12,6 +12,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
+import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
@@ -19,23 +20,41 @@ const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 // Data pull functions (reused by MCP tool handlers in api/mcp.js)
 // ---------------------------------------------------------------------------
 
+// The comment on prior `endDate = \`${month}-31\`` lines was wrong — Postgres
+// does NOT silently coerce "2026-04-31". Compute the real last day of the
+// month in JS. 30-day months and February are the bugs we're fixing here.
+function monthRange(month) {
+  const [y, m] = month.split('-').map(Number);
+  const lastDay = new Date(y, m, 0).getDate();
+  return { startDate: `${month}-01`, endDate: `${month}-${String(lastDay).padStart(2, '0')}` };
+}
+
 /**
  * Pull monthly intervention summary: all interventions and outcomes.
  */
 export async function pullMonthlyInterventionSummary(clubId, month) {
-  const startDate = `${month}-01`;
-  const endDate = `${month}-31`; // SQL handles overflow gracefully
+  const { startDate, endDate } = monthRange(month); // SQL handles overflow gracefully
 
+  // Schema mapping: deployed `interventions` table uses `intervention_type`
+  // (not `playbook_type`), `initiated_at` (not `started_at`),
+  // `outcome_measured_at` (not `completed_at`), and has no `agent_id` /
+  // `status` columns. Map them at SELECT time so the rest of the function
+  // doesn't have to know about the drift.
   const result = await sql`
-    SELECT i.intervention_id, i.member_id, i.playbook_type, i.status, i.outcome,
-      i.started_at, i.completed_at, i.agent_id,
+    SELECT i.intervention_id, i.member_id,
+      i.intervention_type AS playbook_type,
+      i.outcome,
+      i.initiated_at AS started_at,
+      i.outcome_measured_at AS completed_at,
+      i.is_member_save,
+      i.dues_protected,
       m.first_name, m.last_name, m.annual_dues, m.health_score
     FROM interventions i
     JOIN members m ON i.member_id = m.member_id AND i.club_id = m.club_id
     WHERE i.club_id = ${clubId}
-      AND i.started_at >= ${startDate}
-      AND i.started_at <= ${endDate}
-    ORDER BY i.started_at DESC
+      AND i.initiated_at >= ${startDate}
+      AND i.initiated_at <= ${endDate}
+    ORDER BY i.initiated_at DESC
   `;
 
   const interventions = result.rows.map(r => ({
@@ -45,11 +64,11 @@ export async function pullMonthlyInterventionSummary(clubId, month) {
     annual_dues: Number(r.annual_dues ?? 0),
     health_score: r.health_score != null ? Number(r.health_score) : null,
     playbook_type: r.playbook_type,
-    status: r.status,
+    status: r.is_member_save ? 'saved' : 'in_progress',
     outcome: r.outcome,
     started_at: r.started_at,
     completed_at: r.completed_at,
-    agent_id: r.agent_id,
+    agent_id: null, // not tracked in current schema
   }));
 
   const saved = interventions.filter(i => i.outcome === 'saved' || i.status === 'saved');
@@ -74,8 +93,7 @@ export async function pullMonthlyInterventionSummary(clubId, month) {
  * Pull monthly staffing outcomes: recommendations and actual results.
  */
 export async function pullMonthlyStaffingOutcomes(clubId, month) {
-  const startDate = `${month}-01`;
-  const endDate = `${month}-31`;
+  const { startDate, endDate } = monthRange(month);
 
   const result = await sql`
     SELECT rec_id, target_date, outlet, time_window,
@@ -120,8 +138,7 @@ export async function pullMonthlyStaffingOutcomes(clubId, month) {
  * Pull monthly revenue attribution: revenue impact traced to agent actions.
  */
 export async function pullMonthlyRevenueAttribution(clubId, month) {
-  const startDate = `${month}-01`;
-  const endDate = `${month}-31`;
+  const { startDate, endDate } = monthRange(month);
 
   const result = await sql`
     SELECT aa.action_id, aa.agent_id, aa.action_type, aa.description,
@@ -365,6 +382,11 @@ async function boardReportHandler(req, res) {
 
   if (!month) {
     return res.status(400).json({ error: 'month is required (YYYY-MM)' });
+  }
+
+  const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['board-report-trigger']);
+  if (!gate.ok) {
+    return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
   try {

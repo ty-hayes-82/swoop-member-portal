@@ -17,6 +17,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
+import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
@@ -90,11 +91,23 @@ export async function pullWeather(clubId, date) {
  * Pull staffing schedule for a given date and club.
  */
 export async function pullStaffing(clubId, date) {
+  // Schema mapping (matches the same fix in staffing-trigger.js):
+  // outlet_id (not outlet), shift_date (not date), shift derived from
+  // start_time, staff_count via COUNT(*).
   const result = await sql`
-    SELECT ss.outlet, ss.shift, ss.staff_count, ss.date
-    FROM staff_shifts ss
-    WHERE ss.date = ${date} AND ss.club_id = ${clubId}
-    ORDER BY ss.outlet, ss.shift
+    SELECT
+      outlet_id AS outlet,
+      CASE
+        WHEN EXTRACT(HOUR FROM start_time::time) < 11 THEN 'morning'
+        WHEN EXTRACT(HOUR FROM start_time::time) < 16 THEN 'lunch'
+        ELSE 'dinner'
+      END AS shift,
+      COUNT(*) AS staff_count,
+      shift_date AS date
+    FROM staff_shifts
+    WHERE shift_date = ${date} AND club_id = ${clubId}
+    GROUP BY outlet_id, shift, shift_date
+    ORDER BY outlet, shift
   `;
   return {
     shifts: result.rows.map(r => ({
@@ -256,6 +269,11 @@ async function gameplanHandler(req, res) {
 
   if (!plan_date) {
     return res.status(400).json({ error: 'plan_date is required (YYYY-MM-DD)' });
+  }
+
+  const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['gameplan-trigger']);
+  if (!gate.ok) {
+    return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
   try {

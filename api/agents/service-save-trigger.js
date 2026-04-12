@@ -1,6 +1,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
+import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
@@ -14,6 +15,11 @@ export default withAuth(async function handler(req, res) {
 
   if (!complaint_id || !member_id) {
     return res.status(400).json({ error: 'complaint_id and member_id are required' });
+  }
+
+  const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['service-save-trigger']);
+  if (!gate.ok) {
+    return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
   try {

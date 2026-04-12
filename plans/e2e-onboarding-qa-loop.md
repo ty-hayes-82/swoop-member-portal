@@ -260,6 +260,19 @@ node scripts/db-savepoint.mjs create members-and-tee-sheet <clubId>
 node scripts/db-savepoint.mjs create members-tee-dining <clubId>
 ```
 
+### Agent test cadence — after EVERY phase
+
+The agent deep-test does NOT only run after Stage 3 (Dining). It runs after **every** core data phase: Members, Tee Sheet, Dining, Complaints, Staff/Shifts, Email, Events, etc. Each phase unlocks new data → more agents become eligible → more meaningful recommendations → more chances to find product gaps. The pattern is:
+
+```
+phase N: import → snapshot → b-lite-agents test → fix findings → re-run → green
+phase N+1: import → snapshot → b-lite-agents test → fix findings → re-run → green
+```
+
+The `b-lite-agents.spec.js` spec is invariant — it runs the same set of trigger checks against whatever save point the GM is on. As more data arrives, more agents return `triggered: true` instead of `triggered: false, reason: 'data not available'`. The data-availability gate (api/agents/data-availability-check.js) is what makes this safe: agents can't crash trying to call tools whose data isn't there yet.
+
+**Loop discipline:** never start the next phase's data import until the current phase's agent test is producing useful output for every agent whose dependencies are satisfied.
+
 ### Stage 3.5 — AI Agent deep test (GM-as-user)
 
 **Preconditions:** `stage-dining` save point green (members + tee sheet + dining all loaded). Restore it before running this stage so there's no variation in the data the agents see.

@@ -17,6 +17,7 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 import { evaluateRiskTrigger } from './risk-config.js';
+import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 const PLAYBOOK_ID = 'member-risk-lifecycle';
@@ -39,6 +40,14 @@ async function riskHandler(req, res) {
 
   if (!member_id) {
     return res.status(400).json({ error: 'member_id is required' });
+  }
+
+  // Data-availability gate — agents can't call tools whose required data
+  // hasn't been imported. If the gate fails, return an honest "not yet"
+  // instead of attempting SQL that will crash.
+  const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['risk-trigger']);
+  if (!gate.ok) {
+    return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
   try {

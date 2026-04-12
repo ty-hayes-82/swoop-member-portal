@@ -20,6 +20,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
+import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
@@ -264,6 +265,11 @@ async function cosTriggerHandler(req, res) {
 
   const clubId = getWriteClubId(req);
   const today = new Date().toISOString().split('T')[0];
+
+  const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['cos-trigger']);
+  if (!gate.ok) {
+    return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
+  }
 
   try {
     // 1. Pull all pending actions

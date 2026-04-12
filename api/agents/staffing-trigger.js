@@ -17,6 +17,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
+import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
@@ -26,26 +27,35 @@ const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
 /**
  * Pull staffing vs demand gap analysis for a given date and club.
+ *
+ * Real schema mapping:
+ * - staff_shifts.outlet_id (not `outlet`)
+ * - staff_shifts.shift_date (not `date`)
+ * - "shift" derived from start_time (morning/lunch/dinner buckets)
+ * - "staff_count" derived from COUNT(*) per outlet_id + time bucket
+ * - fb_reservations table does not exist — fall back to an empty demand
+ *   array and lean on the rounds-based demand path below.
  */
 export async function pullStaffingVsDemand(clubId, date) {
-  // Get scheduled staff by outlet/shift
+  // Scheduled staff headcount per outlet_id + shift bucket
   const staffResult = await sql`
-    SELECT ss.outlet, ss.shift, ss.staff_count
-    FROM staff_shifts ss
-    WHERE ss.date = ${date} AND ss.club_id = ${clubId}
-    ORDER BY ss.outlet, ss.shift
+    SELECT
+      outlet_id AS outlet,
+      CASE
+        WHEN EXTRACT(HOUR FROM start_time::time) < 11 THEN 'morning'
+        WHEN EXTRACT(HOUR FROM start_time::time) < 16 THEN 'lunch'
+        ELSE 'dinner'
+      END AS shift,
+      COUNT(*) AS staff_count
+    FROM staff_shifts
+    WHERE shift_date = ${date} AND club_id = ${clubId}
+    GROUP BY outlet_id, shift
+    ORDER BY outlet, shift
   `;
 
-  // Get F&B reservations as demand proxy
-  const demandResult = await sql`
-    SELECT outlet, meal_period,
-      SUM(covers) AS projected_covers,
-      COUNT(*) AS reservation_count
-    FROM fb_reservations
-    WHERE date = ${date} AND club_id = ${clubId}
-    GROUP BY outlet, meal_period
-    ORDER BY outlet, meal_period
-  `;
+  // F&B reservations table doesn't exist in deployed schema. Fall back to
+  // empty demand — the rounds-based path below still runs.
+  const demandResult = { rows: [] };
 
   // Get tee sheet for round-based demand
   const roundsResult = await sql`
@@ -243,6 +253,11 @@ async function staffingHandler(req, res) {
 
   if (!target_date) {
     return res.status(400).json({ error: 'target_date is required (YYYY-MM-DD)' });
+  }
+
+  const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['staffing-trigger']);
+  if (!gate.ok) {
+    return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
   try {

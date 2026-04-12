@@ -13,6 +13,7 @@ import { sql } from '@vercel/postgres';
 import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { routeEvent } from './agent-events.js';
+import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
 
@@ -24,17 +25,26 @@ const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY;
  * Pull daily F&B performance: revenue, covers, margin by outlet and meal period.
  */
 export async function pullDailyFbPerformance(clubId, date) {
-  const result = await sql`
-    SELECT outlet, meal_period,
-      SUM(revenue) AS revenue,
-      SUM(covers) AS covers,
-      AVG(margin_pct) AS margin_pct,
-      SUM(cost_of_goods) AS cogs
-    FROM fb_daily_performance
-    WHERE date = ${date} AND club_id = ${clubId}
-    GROUP BY outlet, meal_period
-    ORDER BY outlet, meal_period
-  `;
+  // fb_daily_performance is a pre-aggregated table that doesn't exist in
+  // the deployed schema. Future: derive it from `transactions` rows. For
+  // now, degrade gracefully and the agent surfaces "no F&B performance
+  // data yet" via the empty totals path.
+  let result = { rows: [] };
+  try {
+    result = await sql`
+      SELECT outlet, meal_period,
+        SUM(revenue) AS revenue,
+        SUM(covers) AS covers,
+        AVG(margin_pct) AS margin_pct,
+        SUM(cost_of_goods) AS cogs
+      FROM fb_daily_performance
+      WHERE date = ${date} AND club_id = ${clubId}
+      GROUP BY outlet, meal_period
+      ORDER BY outlet, meal_period
+    `;
+  } catch (e) {
+    if (!/does not exist|column .* does not exist/i.test(e.message)) throw e;
+  }
 
   const rows = result.rows.map(r => ({
     outlet: r.outlet,
@@ -62,16 +72,27 @@ export async function pullDailyFbPerformance(clubId, date) {
 
 /**
  * Pull menu mix analysis: item-level sales and margin contribution.
+ * Degrades gracefully if the `fb_menu_mix` table doesn't exist in the
+ * deployed schema (older environments or fresh clubs without pre-computed
+ * menu analytics). Real menu mix should be derivable from pos_line_items
+ * once that schema is wired — tracked as follow-up.
  */
 export async function pullMenuMixAnalysis(clubId, date) {
-  const result = await sql`
-    SELECT item_name, category, quantity_sold, revenue, margin_pct,
-      revenue * margin_pct / 100.0 AS margin_contribution
-    FROM fb_menu_mix
-    WHERE date = ${date} AND club_id = ${clubId}
-    ORDER BY revenue DESC
-    LIMIT 20
-  `;
+  let result = { rows: [] };
+  try {
+    result = await sql`
+      SELECT item_name, category, quantity_sold, revenue, margin_pct,
+        revenue * margin_pct / 100.0 AS margin_contribution
+      FROM fb_menu_mix
+      WHERE date = ${date} AND club_id = ${clubId}
+      ORDER BY revenue DESC
+      LIMIT 20
+    `;
+  } catch (e) {
+    if (!/does not exist|column .* does not exist/i.test(e.message)) throw e;
+    // Table/column missing — return empty menu mix so the caller can
+    // proceed. The fb-trigger's other data sources still run.
+  }
 
   const items = result.rows.map(r => ({
     item_name: r.item_name,
@@ -317,6 +338,11 @@ async function fbTriggerHandler(req, res) {
 
   if (!target_date) {
     return res.status(400).json({ error: 'target_date is required (YYYY-MM-DD)' });
+  }
+
+  const gate = await checkDataAvailable(clubId, TRIGGER_REQUIREMENTS['fb-trigger']);
+  if (!gate.ok) {
+    return res.status(200).json({ triggered: false, reason: gate.reason, missing: gate.missing });
   }
 
   try {
