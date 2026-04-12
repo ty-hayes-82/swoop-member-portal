@@ -40,6 +40,7 @@ const STORIES = [
     bgFrom: 'rgba(245,158,11,0.12)',
     bgTo: 'rgba(245,158,11,0.04)',
     teaser: 'Kevin Hurst: email dropped → golf dropped → dining dropped. $18K/yr — resigned Jan 8.', // lint-no-hardcoded-dollars: allow — demo story teaser copy
+    lockedTeaser: 'Email dropped → golf dropped → dining dropped. A quiet resignation caught too late.',
     cta: 'View First Domino →',
     requiredGates: ['email', 'tee-sheet', 'fb'],
   },
@@ -153,7 +154,7 @@ export default function DemoStoriesLauncher() {
             <div className="text-[11px] text-gray-500 mb-2">{story.subtitle}</div>
 
             <div className={`text-[11px] italic leading-snug mb-3 ${isLocked ? 'text-gray-400' : 'text-gray-700 dark:text-gray-300'}`}>
-              {story.teaser}
+              {!isGateOpen('members') && story.lockedTeaser ? story.lockedTeaser : story.teaser}
             </div>
 
             {isLocked ? (
