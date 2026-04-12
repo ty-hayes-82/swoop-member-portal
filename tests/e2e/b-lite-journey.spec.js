@@ -300,4 +300,102 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     // No hard assertion on agent data — the prompt says "If agents are not yet
     // wired to live data, document this as a gap, not a bug."
   });
+
+  // ── Stage 2: Tee Sheet ──────────────────────────────────────────────────
+  // Imports tee-sheet bookings on top of the already-imported members. If
+  // this test block fails mid-iteration, you can restore from a
+  // `members-seeded` save point via scripts/db-savepoint.mjs instead of
+  // re-running signup + members import.
+  test('6 — Real tee-sheet CSV imports into Neon', async () => {
+    test.setTimeout(480000); // 8 min — 4,415 sequential Neon INSERTs take ~4-6 min
+    // Navigate back to CSV import for a second pass. The previous run may
+    // have landed on a "result" screen; reset via direct URL.
+    await page.goto(`${APP_URL}/#/csv-import`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1500);
+
+    // If we landed on a completed-import view, click Import More Data.
+    const moreDataBtn = page.locator('button:has-text("Import More Data")');
+    if (await moreDataBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await moreDataBtn.click();
+      await page.waitForTimeout(1000);
+    }
+
+    await shot('15-tee-sheet-import-start.png');
+
+    // Jonas vendor → Tee Times type
+    const jonasBtn = page.locator('button:has-text("Jonas Club Software")').first();
+    if (await jonasBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await jonasBtn.click();
+      await page.waitForTimeout(300);
+    }
+    await page.locator('button:has-text("TTM_Tee_Sheet")').first().click();
+    await page.waitForTimeout(300);
+    await page.locator('button:has-text("Next: Upload File")').click();
+    await page.waitForTimeout(1000);
+
+    // Upload real Jonas tee-sheet CSV
+    const csvPath = path.resolve(__dirname, '../../docs/jonas-exports/TTM_Tee_Sheet_SV.csv');
+    await page.locator('input[type="file"]').setInputFiles(csvPath);
+    await page.waitForTimeout(2000);
+    await shot('16-tee-sheet-uploaded.png');
+
+    // Advance through mapping → dry-run → Start Import
+    const mapBtn = page.locator('button:has-text("Next: Map Columns"), button:has-text("Map Columns")').first();
+    if (await mapBtn.isVisible({ timeout: 5000 }).catch(() => false)) await mapBtn.click();
+    await page.waitForTimeout(1500);
+
+    const importRowsBtn = page.locator('button:has-text("Import"):not(:has-text("Start"))').last();
+    if (await importRowsBtn.isVisible({ timeout: 5000 }).catch(() => false)) await importRowsBtn.click();
+    await page.waitForTimeout(1500);
+
+    const startBtn = page.locator('button:has-text("Start Import")');
+    await expect.soft(startBtn, 'Start Import should be visible for tee sheet').toBeVisible({ timeout: 12000 });
+
+    const importPromise = page.waitForResponse(
+      r => r.url().includes('/api/import-csv') && r.request().method() === 'POST',
+      { timeout: 420000 } // 7 min
+    );
+    await startBtn.click();
+    const importRes = await importPromise;
+    expect.soft(importRes.status(), 'tee-sheet import should return 200').toBe(200);
+    const importBody = await importRes.json();
+    expect.soft(importBody.success, 'some tee-sheet rows should import').toBeGreaterThan(0);
+    await page.waitForTimeout(2000);
+    await shot('17-tee-sheet-import-complete.png');
+  });
+
+  test('7 — Tee Sheet page renders real bookings (no hardcoded fallbacks)', async () => {
+    await page.goto(`${APP_URL}/#/tee-sheet`);
+    await page.waitForFunction(
+      () => {
+        const t = document.body.innerText;
+        return /tee time|booking|tee sheet|course/i.test(t)
+          && !/^\s*Loading\.\.\.\s*$/m.test(t);
+      },
+      null,
+      { timeout: 20000 },
+    ).catch(() => {});
+    await page.waitForTimeout(1500);
+    await shot('18-tee-sheet-page.png');
+
+    const bodyText = (await page.locator('body').textContent()) || '';
+
+    // Tenant sanity
+    expect.soft(bodyText, 'club name should still appear').toContain(PERSONA.clubName);
+
+    // Known hardcoded leak candidates from briefingService.js DEMO_BRIEFING
+    // and src/data/*.js — none of these should appear for a real club.
+    // `0.87 utilization` was the teeSheet hardcode in briefingService:235.
+    const leaked87Util = /87\s*%.*utiliz|utilization[^0-9]*87\s*%/i.test(bodyText);
+    expect.soft(leaked87Util, 'static 87% utilization must not appear').toBe(false);
+
+    // DEMO_BRIEFING.teeSheet.roundsToday was 312 — don't want to see this
+    // unless imported data coincidentally produces it (unlikely).
+    // Soft check only: log the finding, don't fail, because 312 is a common
+    // number that could legitimately appear.
+    if (/\b312\s*rounds?\b/i.test(bodyText)) {
+      console.log('[finding] "312 rounds" appears — verify this is computed, not DEMO_BRIEFING fallback');
+    }
+  });
 });

@@ -126,8 +126,8 @@ export default withAuth(async function handler(req, res) {
       computed++;
     }
 
-    res.status(200).json({ clubId, computed, message: `Churn predictions computed for ${computed} members` });
+    return res.status(200).json({ clubId, computed, message: `Churn predictions computed for ${computed} members` });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e.message });
   }
 }, { allowDemo: true });

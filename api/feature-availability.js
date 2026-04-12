@@ -83,7 +83,7 @@ export default withAuth(async function handler(req, res) {
       const domainWeights = { CRM: 40, TEE_SHEET: 25, POS: 20, EMAIL: 10, LABOR: 5 };
       const valueScore = DOMAINS.reduce((sum, d) => sum + (connected.has(d) ? domainWeights[d] : 0), 0);
 
-      res.status(200).json({
+      return res.status(200).json({
         clubId,
         domains: DOMAINS.map(d => ({
           code: d,
@@ -99,7 +99,7 @@ export default withAuth(async function handler(req, res) {
         nextDomainToConnect: getNextRecommendedDomain(connected, features),
       });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      return res.status(500).json({ error: e.message });
     }
   }
 

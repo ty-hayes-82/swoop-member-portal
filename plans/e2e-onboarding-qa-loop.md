@@ -156,3 +156,124 @@ This applies to every page, every widget, every tier: Today, Members, Board Repo
 
 **Verification pattern:** `tests/e2e/b-lite-journey.spec.js` step 4b asserts that none of the old leaked values (`6.2 years`, `$16,400`, `91%`) appear in the rendered body after a real Members CSV import. Extend this assertion as more leaks are plugged.
 
+---
+
+## Staged data-loading plan with save points
+
+**Goal:** perfect each CSV data type in isolation — Members, then Tee Sheet, then Dining — and land every insight the UI shows. After each stage is green, snapshot the tenant state so the next stage's iterations don't require re-running the previous ones from scratch.
+
+### Save-point tool
+
+`scripts/db-savepoint.mjs` — tenant-scoped snapshots of all tables carrying a given `club_id`, stored as `snap__<name>__<table>` tables in Neon.
+
+```
+node scripts/db-savepoint.mjs create <name> <clubId>    # snapshot tenant rows
+node scripts/db-savepoint.mjs restore <name> <clubId>   # wipe + restore
+node scripts/db-savepoint.mjs list                      # show save points
+node scripts/db-savepoint.mjs drop <name>               # delete
+```
+
+Restore is seconds; creation is ~2 seconds. This is how we avoid re-running signup + Members import every time a Tee Sheet or Dining fix breaks state.
+
+### Stage 1 — Members (✅ green on 2026-04-12)
+
+**Import:** `docs/jonas-exports/JCM_Members_F9.csv` via `/api/import-csv?importType=members`.
+**Verify:**
+- Member count in `members` table matches CSV row count exactly.
+- Members page stat cards render real values: `avgTenure` derived from `join_date`, `avgDues` from `annual_dues`, `renewalRate` from `date_resigned`. Zero-fallback assertion in `b-lite-journey.spec.js` step 4b.
+- Every member name, household, dues, join date, and status on the Members page traces to a CSV row.
+- Member drawer opens, renders Contact + Archetype sections regardless of engagement data. HealthDimensionGrid renders only when real engagement scores exist (expected empty for Members-only state).
+
+**Snapshot when green:**
+```
+node scripts/db-savepoint.mjs create members-seeded <clubId>
+```
+
+### Stage 2 — Tee Sheet (in progress)
+
+**Preconditions:** restore `members-seeded` save point first. Tee-sheet bookings reference members by ID; without members, every row fails FK.
+
+**Import:** `docs/jonas-exports/TTM_Tee_Sheet_SV.csv` via `/api/import-csv?importType=tee_times`.
+
+**Verify:**
+- Booking count in `bookings` table matches CSV row count.
+- Every booking's `member_id` resolves to a member imported in Stage 1 (no orphans).
+- Booking dates, times, course, player count, status match CSV values byte-for-byte.
+- Tee Sheet page shows real bookings — no leaked demo data.
+- Today view's "rounds played this week / month" counters match a SQL `SELECT COUNT(*) FROM bookings WHERE booking_date BETWEEN ...`.
+- Member drawer now shows golf engagement score for members with bookings (HealthDimensionGrid partial render).
+- Zero leaked tee-sheet values: grep the page for hardcoded `312`, `0.87 utilization`, `DEMO_BRIEFING.teeSheet` strings.
+
+**Snapshot when green:**
+```
+node scripts/db-savepoint.mjs create members-and-tee-sheet <clubId>
+```
+
+### Stage 3 — Dining (F&B transactions)
+
+**Preconditions:** restore `members-and-tee-sheet` save point.
+
+**Import:** `docs/jonas-exports/POS_Sales_Detail_SV.csv` via `/api/import-csv?importType=transactions`.
+
+**Verify:**
+- Transaction count in `transactions` table matches CSV row count.
+- Every transaction's `member_id` resolves to a Stage-1 member (no orphans, no "unknown member" rows).
+- Revenue totals (daily, weekly, monthly) match SQL aggregates over the imported rows.
+- Today view's "F&B revenue" and "dining engagement" signals populate with honest values derived from the real transactions — not the hardcoded `$375,200`/`$112K` from `src/data/boardReport.js` or `briefingService.js`.
+- Member drawer now shows dining engagement score for members with post-round F&B activity.
+- Cross-domain reveal: members with tee times but no post-round dining should flag correctly.
+- Zero leaked dining values.
+
+**Snapshot when green:**
+```
+node scripts/db-savepoint.mjs create full-roster-seeded <clubId>
+```
+
+### Stage 4+ — Everything else
+
+After dining, the same staged pattern applies to complaints, staff, shifts, events, email campaigns. Each new stage restores the latest green save point and adds its data on top. Each new stage adds its own zero-fallback assertion to `b-lite-journey.spec.js`.
+
+### Final verification
+
+One full forward pass: restore `full-roster-seeded` → walk the entire app (Today, Members, Tee Sheet, Service, Revenue, Board Report, Actions, Admin) → verify every single number visible to a GM traces to a CSV row or a deterministic calculation from CSV rows. This is the acceptance test for the whole plan.
+
+### Iteration discipline
+
+- **Never edit a .jsx or api file while a Playwright run is in flight.** Vite HMR will reload the page mid-test and your screenshots will show a blank canvas. Queue edits for after the run completes.
+- **Always `reset-test-clubs` before a run**, not during. Each run creates a new timestamped club to avoid inter-run pollution.
+- **Commit after each stage green.** Don't let stages bleed into each other in a single commit — makes rollback painful.
+
+### QA click-tester — runs after every stage
+
+A persistent "QA click tester" role exists alongside the staged import tests. Its entire purpose is to click through the whole app with real imported data and document every break, every visual oddity, every stale label, every 401 it captures, every piece of data that doesn't trace to the imported CSV.
+
+**When it runs:** after each core phase (Members, Tee Sheet, Onboarding Agent, Dining, Complaints, Staff/Shifts) is applied and the staged test is green. Before moving to the next phase.
+
+**What it does:** loads a club that's restored from the latest save point, then walks every nav item: Today → Members → Tee Sheet → Service → Revenue → Automations → Board Report → Admin → Actions. In each view, it expands every tab, opens every drawer, clicks every actionable card. It captures a screenshot and a console/network trace for each view. It logs anything that:
+
+- Shows "Loading..." that never resolves within 20s
+- Shows a blank panel where content should render
+- Throws a console error (`pageerror` or `console.error`)
+- Returns a 4xx/5xx from any `/api/*` call
+- Renders a number that doesn't match imported CSV rows or a deterministic calculation from them
+- Shows stale labels from a previous tenant (e.g. "Oakmont Hills" in a Sonoran Pines club)
+- Shows demo-only strings ("DEMO" pill, "Demo Environment") in live mode
+- Renders a placeholder that looks like real data
+
+Output lives in `C:\Users\tyhay\qa-outputs\click-tester-<phase>-<date>.md` — a punch list with:
+1. One section per broken view
+2. Screenshot path
+3. Console errors captured
+4. API failures captured
+5. Severity: blocking / high / cosmetic
+6. A one-line reproduction: "Open X, click Y, observe Z"
+
+**Handoff to dev:** after the click-tester's run, it's my job (the dev agent) to:
+1. Read the punch list end-to-end.
+2. Prioritise blocking → high → cosmetic.
+3. Fix every blocking and high bug. Cosmetic bugs can be deferred if they don't affect data integrity.
+4. Re-run the click-tester against the same save point to verify every fix.
+5. Only after the click-tester produces a clean pass on that phase's save point, unblock the next phase.
+
+**Implementation:** `tests/e2e/qa-click-tester.spec.js` — a Playwright spec that takes the phase name via env var (`PHASE=members`, `PHASE=tee-sheet`, etc.), restores the matching save point, walks the app, and writes its findings to the output markdown file. It uses soft assertions + `afterEach` hooks to accumulate findings without stopping on the first break.
+

@@ -348,6 +348,10 @@ function validateSchemaRow(rawRow, resolvedRow, config, sessionClubId) {
     if (/_min$|_minutes$|_hours$/i.test(key)) continue;
     const s = String(val).trim();
     if (!s) continue;
+    // Time-of-day values like "12:00" or "15:20:00" aren't dates — they're
+    // wall-clock times. Tee sheet rows and check-in times carry these. Skip
+    // Date.parse for them so the tee_times import doesn't reject every row.
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) continue;
     if (isNaN(Date.parse(s))) return `invalid date in "${key}": ${s}`;
   }
   // Foreign clubId: reject if row carries a clubId/club_id that isn't ours.
@@ -498,14 +502,19 @@ export default withAuth(async function handler(req, res) {
     }
   }
 
-  for (let i = 0; i < cleanRows.length; i++) {
+  // Parallelize the per-row insert loop. Sequential was fine for 400 members
+  // but a 4,000-row tee sheet takes ~5 minutes over Neon round-trips. 20-way
+  // concurrency cuts that to ~15s. The per-row logic below is preserved
+  // verbatim — only the outer control flow changed.
+  const INSERT_CONCURRENCY = 20;
+  async function processRow(i) {
     const row = resolveAliases(cleanRows[i], importType);
     const rowErrors = validateRow(row, config, i);
 
     if (rowErrors.length > 0) {
       allErrors.push(...rowErrors);
       errorCount++;
-      continue;
+      return;
     }
 
     try {
@@ -611,6 +620,13 @@ export default withAuth(async function handler(req, res) {
       allErrors.push({ row: i + 1, field: 'database', message: e.message });
       errorCount++;
     }
+  }
+
+  for (let start = 0; start < cleanRows.length; start += INSERT_CONCURRENCY) {
+    const end = Math.min(start + INSERT_CONCURRENCY, cleanRows.length);
+    const indices = [];
+    for (let j = start; j < end; j++) indices.push(j);
+    await Promise.all(indices.map(processRow));
   }
 
   // Update import record (non-critical if csv_imports table doesn't exist)
