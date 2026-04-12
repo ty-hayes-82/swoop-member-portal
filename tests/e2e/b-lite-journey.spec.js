@@ -144,7 +144,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     await shot('06-upload-step.png');
 
     // Upload the real Jonas members CSV
-    const csvPath = path.resolve(__dirname, '../../docs/jonas-exports/JCM_Members_F9.csv');
+    const csvPath = path.resolve(__dirname, '../fixtures/small/JCM_Members_F9.csv');
     await page.locator('input[type="file"]').setInputFiles(csvPath);
     await page.waitForTimeout(2000);
     await shot('07-file-uploaded.png');
@@ -335,7 +335,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     await page.waitForTimeout(1000);
 
     // Upload real Jonas tee-sheet CSV
-    const csvPath = path.resolve(__dirname, '../../docs/jonas-exports/TTM_Tee_Sheet_SV.csv');
+    const csvPath = path.resolve(__dirname, '../fixtures/small/TTM_Tee_Sheet_SV.csv');
     await page.locator('input[type="file"]').setInputFiles(csvPath);
     await page.waitForTimeout(2000);
     await shot('16-tee-sheet-uploaded.png');
@@ -471,7 +471,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     // when a user drops a CSV. The onboarding agent needs: filename, headers,
     // sample_rows, row_count. We construct these from a known real CSV.
     const fs = await import('fs');
-    const csvPath = path.resolve(__dirname, '../../docs/jonas-exports/JCM_Members_F9.csv');
+    const csvPath = path.resolve(__dirname, '../fixtures/small/JCM_Members_F9.csv');
     const raw = fs.readFileSync(csvPath, 'utf8').split(/\r?\n/).filter(Boolean);
     const headers = raw[0].replace(/^\uFEFF/, '').split(',').map(h => h.trim());
     const sampleRows = raw.slice(1, 6).map(line => {

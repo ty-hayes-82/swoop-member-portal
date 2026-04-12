@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-04-12T18:16:54.736Z",
+  "targetMemberCount": 100,
+  "actualMemberCount": 100,
+  "counts": {
+    "members": 100,
+    "tee_sheet_players": 1993,
+    "tee_sheet_bookings": 1993,
+    "pos_sales_detail": 686,
+    "communications": 8
+  },
+  "activityRange": {
+    "topBookings": 26,
+    "bottomBookings": 17
+  }
+}

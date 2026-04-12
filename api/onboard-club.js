@@ -166,9 +166,33 @@ export default async function handler(req, res) {
         VALUES (${token}, ${userId}, ${clubId}, 'gm', ${expiresAt.toISOString()})
       `;
 
+      // Seed agent roster for the new club by copying the canonical
+      // `club_001` template. Without this, /api/agents returns 0 rows
+      // for the new club and no orchestration agent ever surfaces a
+      // recommendation after the first import. Non-critical — if it
+      // fails we still return success; the club just won't have agents
+      // until a manual backfill runs.
+      try {
+        // agent_id is varchar(50) — suffix with the last 12 chars of the
+        // clubId UUID (e.g. member-pulse_bc57e216bce8 = 25 chars) to stay
+        // within the column width while keeping rows tenant-scoped. 12 hex
+        // chars = 48 bits, collision probability across realistic tenant
+        // counts is negligible.
+        const suffix = String(clubId).replace(/-/g, '').slice(-12);
+        const { rowCount: agentsCopied } = await sql`
+          INSERT INTO agent_definitions (agent_id, club_id, name, description, status, model, avatar, source_systems, last_run)
+          SELECT agent_id || '_' || ${suffix}, ${clubId}, name, description, status, model, avatar, source_systems, last_run
+          FROM agent_definitions WHERE club_id = 'club_001'
+          ON CONFLICT (agent_id) DO NOTHING
+        `;
+        logInfo('/api/onboard-club', 'agent roster seeded', { clubId, agentsCopied });
+      } catch (seedErr) {
+        logError('/api/onboard-club', seedErr, { phase: 'seed-agent-roster', clubId });
+      }
+
       logInfo('/api/onboard-club', 'club created', { clubId, userId, clubName, adminEmailDomain: redactEmail(adminEmail) });
 
-      res.status(201).json({
+      return res.status(201).json({
         clubId,
         userId,
         token,
@@ -183,7 +207,7 @@ export default async function handler(req, res) {
         return res.status(409).json({ error: 'An account with this email already exists. Please use a different email or sign in.' });
       }
       logError('/api/onboard-club', e, { phase: 'create-club', clubName });
-      res.status(500).json({ error: 'Something went wrong creating your club. Please try again.' });
+      return res.status(500).json({ error: 'Something went wrong creating your club. Please try again.' });
     }
   }
 
