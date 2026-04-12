@@ -412,7 +412,7 @@ export default function TeeSheetView() {
                           {t.healthScore}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 hidden md:table-cell text-xs text-gray-500 max-w-[200px] truncate">
+                      <td className="px-4 py-2.5 hidden md:table-cell text-xs text-gray-500 max-w-[200px] truncate" title={t.group.join(', ')}>
                         {t.group.join(', ')}
                       </td>
                       <td className="px-4 py-2.5 text-center hidden lg:table-cell">

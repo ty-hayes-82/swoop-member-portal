@@ -358,7 +358,7 @@ export default function TodayView() {
                 flexShrink: 0,
               }}
             >
-              <span className="pulse-dot" /> Live Dashboard
+              <span className="pulse-dot" /> {isAuthenticatedClub() ? 'Live Dashboard' : 'Demo Dashboard'}
             </div>
           </div>
         </div>

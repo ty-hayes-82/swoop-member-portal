@@ -21,29 +21,38 @@ export const understaffedDays = [
   },
 ];
 
+// Dates computed relative to "today" so complaints always show a realistic spread
+// (1-30 days old) regardless of when the demo is viewed.
+const _today = new Date();
+const _daysAgo = (n) => { const d = new Date(_today); d.setDate(d.getDate() - n); return d.toISOString().split('T')[0]; };
+
 export const feedbackRecords = [
-  { id: 'fb_001', memberId: 'mbr_t01', memberName: 'James Whitfield', date: '2026-01-16', category: 'Service Speed',
+  // Fresh: 2 open within 1-3 days
+  { id: 'fb_001', memberId: 'mbr_t01', memberName: 'James Whitfield', date: _daysAgo(2), category: 'Service Speed',
     sentiment: -0.80, status: 'acknowledged', isUnderstaffedDay: true,
     resolved_date: null, resolved_by: null },
-  { id: 'fb_002', memberId: 'mbr_142', memberName: 'Patricia Nguyen', date: '2026-01-09', category: 'Service Speed',
-    sentiment: -0.64, status: 'resolved', isUnderstaffedDay: true,
-    resolved_date: '2026-01-10', resolved_by: 'F&B Director' },
-  { id: 'fb_003', memberId: 'mbr_088', memberName: 'Megan Torres', date: '2026-01-09', category: 'Service Speed',
-    sentiment: -0.72, status: 'resolved', isUnderstaffedDay: true,
-    resolved_date: '2026-01-11', resolved_by: 'F&B Director' },
-  { id: 'fb_004', memberId: 'mbr_211', memberName: 'Irene Coleman', date: '2026-01-16', category: 'Food Quality',
-    sentiment: -0.48, status: 'resolved', isUnderstaffedDay: true,
-    resolved_date: '2026-01-17', resolved_by: 'Executive Chef' },
-  { id: 'fb_005', memberId: 'mbr_055', memberName: 'Carol Simmons', date: '2026-01-16', category: 'Service Speed',
+  { id: 'fb_004', memberId: 'mbr_211', memberName: 'Irene Coleman', date: _daysAgo(1), category: 'Food Quality',
+    sentiment: -0.48, status: 'in_progress', isUnderstaffedDay: true,
+    resolved_date: null, resolved_by: null },
+  // Recent: 2 open within 4-7 days
+  { id: 'fb_005', memberId: 'mbr_055', memberName: 'Carol Simmons', date: _daysAgo(5), category: 'Service Speed',
     sentiment: -0.66, status: 'in_progress', isUnderstaffedDay: true,
     resolved_date: null, resolved_by: null },
-  { id: 'fb_006', memberId: 'mbr_177', memberName: 'Sandra Park', date: '2026-01-17', category: 'Course Condition',
-    sentiment: -0.32, status: 'resolved', isUnderstaffedDay: false,
-    resolved_date: '2026-01-18', resolved_by: 'Head Superintendent' },
-  { id: 'fb_007', memberId: 'mbr_099', memberName: 'Robert Chen', date: '2026-01-22', category: 'Pace of Play',
-    sentiment: -0.55, status: 'in_progress', isUnderstaffedDay: false,
+  { id: 'fb_007', memberId: 'mbr_099', memberName: 'Robert Chen', date: _daysAgo(6), category: 'Pace of Play',
+    sentiment: -0.55, status: 'acknowledged', isUnderstaffedDay: false,
     resolved_date: null, resolved_by: null },
-  { id: 'fb_008', memberId: 'mbr_134', memberName: 'Catherine Mercer', date: '2026-01-28', category: 'Service Speed',
+  // Resolved within last 10 days
+  { id: 'fb_002', memberId: 'mbr_142', memberName: 'Patricia Nguyen', date: _daysAgo(9), category: 'Service Speed',
+    sentiment: -0.64, status: 'resolved', isUnderstaffedDay: true,
+    resolved_date: _daysAgo(7), resolved_by: 'F&B Director' },
+  { id: 'fb_003', memberId: 'mbr_088', memberName: 'Megan Torres', date: _daysAgo(10), category: 'Service Speed',
+    sentiment: -0.72, status: 'resolved', isUnderstaffedDay: true,
+    resolved_date: _daysAgo(8), resolved_by: 'F&B Director' },
+  { id: 'fb_006', memberId: 'mbr_177', memberName: 'Sandra Park', date: _daysAgo(13), category: 'Course Condition',
+    sentiment: -0.32, status: 'resolved', isUnderstaffedDay: false,
+    resolved_date: _daysAgo(12), resolved_by: 'Head Superintendent' },
+  // Older lingering escalation
+  { id: 'fb_008', memberId: 'mbr_134', memberName: 'Catherine Mercer', date: _daysAgo(22), category: 'Service Speed',
     sentiment: -0.70, status: 'escalated', isUnderstaffedDay: true,
     resolved_date: null, resolved_by: null },
 ];

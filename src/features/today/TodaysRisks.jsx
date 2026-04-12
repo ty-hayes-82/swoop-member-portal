@@ -132,9 +132,11 @@ export default function TodaysRisks() {
                       className={`flex flex-col sm:flex-row sm:items-center justify-between py-2.5 px-3.5 rounded-lg cursor-pointer transition-shadow duration-150 hover:shadow-md gap-1.5 sm:gap-0 ${isOld ? 'bg-red-500/[0.024] border border-red-500/[0.15]' : 'border border-gray-200'} ${isCritical ? 'animate-[pulse-border_2s_infinite]' : ''}`}
                     >
                       <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0 flex-wrap">
+                        <span onClick={(e) => e.stopPropagation()}>
                         <MemberLink memberId={c.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 dark:text-white/90 whitespace-nowrap">
                             {c.memberName}
                           </MemberLink>
+                        </span>
                         <span className="text-xs text-gray-500">{c.category}</span>
                         {c.isUnderstaffedDay && (
                           <span className="text-[9px] font-bold text-error-500 bg-error-500/[0.07] px-1.5 py-px rounded-full">Understaffed</span>

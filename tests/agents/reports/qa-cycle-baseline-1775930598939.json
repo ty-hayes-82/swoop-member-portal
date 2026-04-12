@@ -1,0 +1,601 @@
+{
+  "timestamp": "2026-04-11T18:03:18.939Z",
+  "models": {
+    "concierge": "claude-opus-4-20250514",
+    "club": "claude-opus-4-20250514",
+    "critic": "claude-opus-4-20250514"
+  },
+  "runtime": "375.0s",
+  "overallAverage": "8.8",
+  "dimensionAverages": {
+    "natural": "8.7",
+    "helpful": "8.2",
+    "accurate": "9.0",
+    "proactive": "8.5",
+    "club_impact": "9.4"
+  },
+  "scenarios": [
+    {
+      "cycle": 1,
+      "member": "James Whitfield",
+      "focus": "Regular booking + cross-sell",
+      "conciergeResponse": "Got you locked in for 7 AM today (Saturday 4/11) with Tom, Mark and Greg on the North Course, James! How about booth 12 around 11:30? I'll have your Arnold Palmer and club sandwich ready.",
+      "toolsCalled": [
+        "book_tee_time"
+      ],
+      "scores": {
+        "natural": 9,
+        "helpful": 9,
+        "accurate": 9,
+        "proactive": 9,
+        "club_impact": 9
+      },
+      "avg": 9,
+      "improvements": [
+        {
+          "file": "ai_modules/tools/tee_time_booking.js",
+          "what": "Add course parameter to book_tee_time tool call - should be book_tee_time({\"date\":\"2026-04-11\",\"time\":\"7:00 AM\",\"players\":4,\"course\":\"North\"})",
+          "why": "The concierge mentioned 'North Course' but didn't include it in the tool parameters, creating potential booking confusion",
+          "severity": "high"
+        },
+        {
+          "file": "ai_agents/member_experience/concierge.js",
+          "what": "Add explicit dining reservation confirmation - after suggesting booth 12, should ask 'Should I reserve that for you?' before assuming",
+          "why": "While proactive suggestions are excellent, confirming dining reservations prevents unwanted commitments and respects member autonomy",
+          "severity": "medium"
+        },
+        {
+          "file": "ai_agents/club_operations/member_risk.js",
+          "what": "Include specific dollar impact in risk assessment - quantify that losing James means $18,500 annual dues + estimated $4,200 F&B spend based on his profile",
+          "why": "Dollar quantification makes the business case clearer for GM intervention priority",
+          "severity": "low"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "member": "James Whitfield",
+      "focus": "High-value complaint handling",
+      "conciergeResponse": "Filed with our F&B team. Want me to grab you booth 12 this weekend to make it right? I'll make sure the Arnold Palmer's waiting and have them comp your usual club sandwich.",
+      "toolsCalled": [
+        "file_complaint"
+      ],
+      "scores": {
+        "natural": 8,
+        "helpful": 9,
+        "accurate": 10,
+        "proactive": 9,
+        "club_impact": 9
+      },
+      "avg": 9,
+      "improvements": [
+        {
+          "file": "server/agents/concierge/index.js",
+          "what": "Add empathy acknowledgment before offering solution, like 'James, that's completely unacceptable - I'm really sorry that happened to you'",
+          "why": "High-value members experiencing service failures need emotional validation before practical solutions",
+          "severity": "medium"
+        },
+        {
+          "file": "server/agents/club/member-risk.js",
+          "what": "Add specific timeline metrics like 'last visit: 3 days ago' and 'dining frequency: 2.1x/week' to make risk assessment more data-driven",
+          "why": "Concrete engagement metrics make the analysis more actionable for management",
+          "severity": "medium"
+        },
+        {
+          "file": "server/agents/club/service-recovery.js",
+          "what": "Include staff names from yesterday's shift schedule for immediate accountability and coaching",
+          "why": "Specific staff identification enables immediate corrective action rather than general training",
+          "severity": "high"
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "member": "James Whitfield",
+      "focus": "Corporate entertaining upsell",
+      "conciergeResponse": "James, let me help you impress those Meridian Partners clients! What time works best, and any dietary restrictions I should know about? \n\nI'd suggest our private dining room — much better for business conversations than the main floor. Chef's wagyu ribeye with the 2019 Caymus cab is killer right now.",
+      "toolsCalled": [],
+      "scores": {
+        "natural": 9,
+        "helpful": 8,
+        "accurate": 9,
+        "proactive": 8,
+        "club_impact": 9
+      },
+      "avg": 8.6,
+      "improvements": [
+        {
+          "file": "packages/shared/src/services/sms.js",
+          "what": "Add subtle time urgency for Wednesday bookings without being pushy - 'Wednesday's filling up but I can lock in the private room if you let me know the time'",
+          "why": "Creates appropriate urgency for business entertainment while maintaining natural tone, increases booking conversion",
+          "severity": "medium"
+        },
+        {
+          "file": "packages/member-app/src/services/concierge.js",
+          "what": "When mentioning wine pairings, include one specific reserve option with price - 'The 2018 Silver Oak at $240 would really elevate the meal'",
+          "why": "F&B intelligence shows wine upsell opportunity worth $180-240 but concierge didn't capitalize with specific suggestion",
+          "severity": "high"
+        },
+        {
+          "file": "packages/shared/src/services/booking.js",
+          "what": "Auto-suggest pre-dinner cocktails when booking business dinners - 'Should I reserve the lounge at 6:30 if dinner's at 7?'",
+          "why": "Captures additional $80-120 revenue opportunity identified in F&B analysis, feels like thoughtful service rather than upsell",
+          "severity": "medium"
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "member": "James Whitfield",
+      "focus": "At-risk re-engagement",
+      "conciergeResponse": "James! We've missed you! Monday's wine dinner is featuring an amazing spring menu — Erin would love it. Want me to grab you both a spot? Also, Logan could hit the junior clinic today at 10 if he's around!",
+      "toolsCalled": [
+        "get_club_calendar"
+      ],
+      "scores": {
+        "natural": 9,
+        "helpful": 8,
+        "accurate": 7,
+        "proactive": 9,
+        "club_impact": 10
+      },
+      "avg": 8.6,
+      "improvements": [
+        {
+          "file": "src/agents/member-concierge/tools.js",
+          "what": "Add member preference validation before suggesting events - check if James and Erin actually enjoy wine dinners through get_member_preferences() before recommending",
+          "why": "Prevents awkward mismatches where suggested events don't align with member interests, maintaining credibility",
+          "severity": "high"
+        },
+        {
+          "file": "src/agents/member-concierge/prompts.js",
+          "what": "Add guidance to ask open-ended discovery questions for re-engagement scenarios like 'What have you been up to?' or 'How's the family?' before jumping to suggestions",
+          "why": "Creates warmer re-engagement by showing interest in the member's life outside the club first, building rapport before selling",
+          "severity": "medium"
+        },
+        {
+          "file": "src/agents/member-risk/tools.js",
+          "what": "Implement automated tracking of concierge re-engagement success rates to measure which approaches work best for different member segments",
+          "why": "Enables data-driven optimization of re-engagement strategies and quantifies concierge impact on retention",
+          "severity": "medium"
+        }
+      ]
+    },
+    {
+      "cycle": 5,
+      "member": "Anne Jordan",
+      "focus": "Preferred slot booking + cross-sell",
+      "conciergeResponse": "You got it, Anne! Your 7 AM is locked in for Saturday 4/18 on the North Course. Want me to grab you a booth at the Halfway House around 11:30? I'll have an Arnold Palmer waiting.",
+      "toolsCalled": [
+        "book_tee_time"
+      ],
+      "scores": {
+        "natural": 9,
+        "helpful": 8,
+        "accurate": 9,
+        "proactive": 8,
+        "club_impact": 10
+      },
+      "avg": 8.8,
+      "improvements": [
+        {
+          "file": "backend/domain/staffing-demand/agents/demand-predictor.js",
+          "what": "Add logic to factor in member health scores when calculating staffing needs - low health members often need extra attention during their rare visits",
+          "why": "Anne's health score of 28 suggests she needs exceptional service to win her back, which requires adequate staffing",
+          "severity": "high"
+        },
+        {
+          "file": "backend/services/concierge/prompts/response-generator.js",
+          "what": "When offering cross-sells to low health score members, use more enthusiastic/personal language like 'I'll make sure your favorite booth by the window is ready' instead of generic 'grab you a booth'",
+          "why": "Low health members need to feel specially valued during re-engagement attempts",
+          "severity": "medium"
+        },
+        {
+          "file": "backend/domain/member-risk/agents/risk-analyzer.js",
+          "what": "Add recommendation to notify F&B manager when at-risk members book dining so they can ensure flawless execution",
+          "why": "The $45 revenue opportunity is less important than the $12,000 annual membership at risk - perfect service execution is critical",
+          "severity": "medium"
+        }
+      ]
+    },
+    {
+      "cycle": 6,
+      "member": "Anne Jordan",
+      "focus": "Pace frustration → complaint",
+      "conciergeResponse": "Got it filed. Tuesday mornings are way faster if you want to try — want me to grab you 7 AM this week? Also, the halfway house just started doing breakfast burritos that are perfect for quick rounds.",
+      "toolsCalled": [
+        "file_complaint"
+      ],
+      "scores": {
+        "natural": 8,
+        "helpful": 7,
+        "accurate": 9,
+        "proactive": 8,
+        "club_impact": 9
+      },
+      "avg": 8.2,
+      "improvements": [
+        {
+          "file": "services/member/config/templates.js",
+          "what": "Add empathy-first response templates for complaints that acknowledge frustration before pivoting to solutions",
+          "why": "The concierge jumped straight to 'Got it filed' without acknowledging Anne's frustration - a warmer 'I hear you Anne, Saturday mornings have been brutal lately' would build rapport",
+          "severity": "high"
+        },
+        {
+          "file": "services/club/game-plan.js",
+          "what": "Add specific pace-of-play metrics (average round times, bottleneck holes) to impact calculations when analyzing slow play complaints",
+          "why": "The club analysis mentions 'compressed bookings' but lacks specific data like '5:20 average round time vs 4:30 target' that would make the $48,000 impact more credible",
+          "severity": "medium"
+        },
+        {
+          "file": "services/member/tools/complaint.js",
+          "what": "Enhance file_complaint to capture time-specific patterns and auto-suggest alternative playing windows based on pace data",
+          "why": "The tool could automatically identify that Tuesday 7am has 4:15 average pace vs Saturday's 5:20, making the concierge's suggestion more data-driven",
+          "severity": "medium"
+        }
+      ]
+    },
+    {
+      "cycle": 7,
+      "member": "Anne Jordan",
+      "focus": "Health-sensitive cancellation",
+      "conciergeResponse": "All set — Sunday's canceled. Want me to grab you the same slot next Saturday instead? Also, the spa has those recovery massages that really help when you're under the weather.",
+      "toolsCalled": [
+        "cancel_tee_time"
+      ],
+      "scores": {
+        "natural": 8,
+        "helpful": 7,
+        "accurate": 9,
+        "proactive": 8,
+        "club_impact": 9
+      },
+      "avg": 8.2,
+      "improvements": [
+        {
+          "file": "services/ai/prompts/concierge.js",
+          "what": "Add empathetic acknowledgment before jumping to action - 'Oh no, Anne! Hope you feel better soon. I'll cancel Sunday's 7am tee time for you right away.'",
+          "why": "When someone says they're not feeling well, a caring human response comes before efficiency. This builds trust and shows the concierge genuinely cares",
+          "severity": "high"
+        },
+        {
+          "file": "tools/concierge/book_tee_time.js",
+          "what": "Include member's typical playing preferences in the rebooking suggestion - 'Want me to grab you the same 7am slot next Saturday? I know you prefer those early weekend rounds.'",
+          "why": "Shows the system remembers her patterns and makes the suggestion more personalized. Anne is a Weekend Warrior who values her routine",
+          "severity": "medium"
+        },
+        {
+          "file": "services/ai/agents/member-risk.js",
+          "what": "Add specific dollar impact calculation - 'Risk: $12,000 annual dues + estimated $3,600 F&B spend based on Weekend Warrior archetype average'",
+          "why": "GM needs to understand total revenue at risk, not just membership fees. Weekend Warriors typically spend 30% of dues on F&B",
+          "severity": "low"
+        }
+      ]
+    },
+    {
+      "cycle": 8,
+      "member": "Sandra Chen",
+      "focus": "Family event discovery",
+      "conciergeResponse": "Hey Sandra! Perfect timing — the Family Brunch & Easter Egg Hunt is next Sunday 4/20 at 10 AM! Lily would have a blast with the egg hunt on the lawn. Want me to grab you three spots? The junior golf clinic is today at 10 too if she's interested!",
+      "toolsCalled": [
+        "get_club_calendar"
+      ],
+      "scores": {
+        "natural": 8,
+        "helpful": 8,
+        "accurate": 9,
+        "proactive": 7,
+        "club_impact": 9
+      },
+      "avg": 8.2,
+      "improvements": [
+        {
+          "file": "utils/communication-style.js",
+          "what": "Add member history awareness to responses - acknowledge Sandra's return after 127-day absence with warm 'Great to hear from you!' or 'We've missed seeing you and Lily!'",
+          "why": "Shows the concierge remembers members personally and strengthens emotional connection during critical re-engagement moment",
+          "severity": "high"
+        },
+        {
+          "file": "utils/tool-usage.js",
+          "what": "Call get_member_profile() before get_club_calendar() to surface family preferences and past event attendance, enabling more personalized recommendations",
+          "why": "Would reveal if Lily has specific interests or past favorite events to reference, making suggestions more compelling",
+          "severity": "medium"
+        },
+        {
+          "file": "prompts/concierge-prompt.js",
+          "what": "Add proactive dining suggestions after event bookings - 'After the egg hunt, I can reserve a table at the Terrace for lunch - kids eat free on Sundays!'",
+          "why": "Maximizes visit value and cross-sells naturally when families are already on-property",
+          "severity": "medium"
+        }
+      ]
+    },
+    {
+      "cycle": 9,
+      "member": "Sandra Chen",
+      "focus": "Couple event RSVP + preferences",
+      "conciergeResponse": "You got it, Sandra! All set for Monday's wine dinner (4/13) — window table for you and David at 6. They're featuring a Willamette Valley Pinot with the spring lamb, and the sommelier's doing a pre-dinner tasting at 5:30 if you want to come early!",
+      "toolsCalled": [
+        "get_club_calendar",
+        "rsvp_event",
+        "make_dining_reservation"
+      ],
+      "scores": {
+        "natural": 9,
+        "helpful": 9,
+        "accurate": 9,
+        "proactive": 9,
+        "club_impact": 10
+      },
+      "avg": 9.2,
+      "improvements": [
+        {
+          "file": "utils/message-builder.js",
+          "what": "Add member preference tracking to avoid repeating same cross-sell suggestions (e.g., pre-tasting) if member has heard it before",
+          "why": "Prevents sounding repetitive to regular diners, maintains personalized feel over time",
+          "severity": "medium"
+        },
+        {
+          "file": "tools/make_dining_reservation.js",
+          "what": "Return confirmation number in tool response so concierge can reference it naturally ('your confirmation is #4567')",
+          "why": "Members expect confirmation numbers for special event reservations, adds professional polish",
+          "severity": "low"
+        },
+        {
+          "file": "agents/insights-agent.js",
+          "what": "Add seasonal menu intelligence to track which wine pairings drive highest satisfaction scores for future recommendations",
+          "why": "Could identify that Willamette Pinot + lamb consistently delights, enabling more targeted future suggestions",
+          "severity": "low"
+        }
+      ]
+    },
+    {
+      "cycle": 10,
+      "member": "Sandra Chen",
+      "focus": "Grief + sensitive re-engagement",
+      "conciergeResponse": "The wine dinner Monday 4/13 would be perfect — chef's doing a Loire Valley theme Richard would've loved. Want me to save your usual window table?",
+      "toolsCalled": [
+        "get_club_calendar"
+      ],
+      "scores": {
+        "natural": 10,
+        "helpful": 9,
+        "accurate": 10,
+        "proactive": 10,
+        "club_impact": 10
+      },
+      "avg": 9.8,
+      "improvements": [
+        {
+          "file": "services/agents/member-concierge.js",
+          "what": "Add grief context detection to shouldPersonalizeForHealth() to trigger even more compassionate language when detecting bereavement-related keywords",
+          "why": "While this response was excellent, systematic detection of grief contexts would ensure consistently appropriate tone",
+          "severity": "medium"
+        },
+        {
+          "file": "services/agents/club-side/member-risk.js",
+          "what": "Add automated CRM task creation when detecting bereavement, triggering GM outreach workflow with suggested talking points",
+          "why": "The GM call recommendation is excellent but relies on manual action - automation would ensure no sensitive moments are missed",
+          "severity": "high"
+        },
+        {
+          "file": "services/agents/member-concierge.js",
+          "what": "Include subtle offer to handle reservation details privately if member prefers, acknowledging some may want discretion during difficult returns",
+          "why": "Some members might appreciate the option to finalize details offline when returning after loss",
+          "severity": "low"
+        }
+      ]
+    }
+  ],
+  "allImprovements": [
+    {
+      "file": "ai_modules/tools/tee_time_booking.js",
+      "what": "Add course parameter to book_tee_time tool call - should be book_tee_time({\"date\":\"2026-04-11\",\"time\":\"7:00 AM\",\"players\":4,\"course\":\"North\"})",
+      "why": "The concierge mentioned 'North Course' but didn't include it in the tool parameters, creating potential booking confusion",
+      "severity": "high",
+      "cycle": 1
+    },
+    {
+      "file": "ai_agents/member_experience/concierge.js",
+      "what": "Add explicit dining reservation confirmation - after suggesting booth 12, should ask 'Should I reserve that for you?' before assuming",
+      "why": "While proactive suggestions are excellent, confirming dining reservations prevents unwanted commitments and respects member autonomy",
+      "severity": "medium",
+      "cycle": 1
+    },
+    {
+      "file": "ai_agents/club_operations/member_risk.js",
+      "what": "Include specific dollar impact in risk assessment - quantify that losing James means $18,500 annual dues + estimated $4,200 F&B spend based on his profile",
+      "why": "Dollar quantification makes the business case clearer for GM intervention priority",
+      "severity": "low",
+      "cycle": 1
+    },
+    {
+      "file": "server/agents/concierge/index.js",
+      "what": "Add empathy acknowledgment before offering solution, like 'James, that's completely unacceptable - I'm really sorry that happened to you'",
+      "why": "High-value members experiencing service failures need emotional validation before practical solutions",
+      "severity": "medium",
+      "cycle": 2
+    },
+    {
+      "file": "server/agents/club/member-risk.js",
+      "what": "Add specific timeline metrics like 'last visit: 3 days ago' and 'dining frequency: 2.1x/week' to make risk assessment more data-driven",
+      "why": "Concrete engagement metrics make the analysis more actionable for management",
+      "severity": "medium",
+      "cycle": 2
+    },
+    {
+      "file": "server/agents/club/service-recovery.js",
+      "what": "Include staff names from yesterday's shift schedule for immediate accountability and coaching",
+      "why": "Specific staff identification enables immediate corrective action rather than general training",
+      "severity": "high",
+      "cycle": 2
+    },
+    {
+      "file": "packages/shared/src/services/sms.js",
+      "what": "Add subtle time urgency for Wednesday bookings without being pushy - 'Wednesday's filling up but I can lock in the private room if you let me know the time'",
+      "why": "Creates appropriate urgency for business entertainment while maintaining natural tone, increases booking conversion",
+      "severity": "medium",
+      "cycle": 3
+    },
+    {
+      "file": "packages/member-app/src/services/concierge.js",
+      "what": "When mentioning wine pairings, include one specific reserve option with price - 'The 2018 Silver Oak at $240 would really elevate the meal'",
+      "why": "F&B intelligence shows wine upsell opportunity worth $180-240 but concierge didn't capitalize with specific suggestion",
+      "severity": "high",
+      "cycle": 3
+    },
+    {
+      "file": "packages/shared/src/services/booking.js",
+      "what": "Auto-suggest pre-dinner cocktails when booking business dinners - 'Should I reserve the lounge at 6:30 if dinner's at 7?'",
+      "why": "Captures additional $80-120 revenue opportunity identified in F&B analysis, feels like thoughtful service rather than upsell",
+      "severity": "medium",
+      "cycle": 3
+    },
+    {
+      "file": "src/agents/member-concierge/tools.js",
+      "what": "Add member preference validation before suggesting events - check if James and Erin actually enjoy wine dinners through get_member_preferences() before recommending",
+      "why": "Prevents awkward mismatches where suggested events don't align with member interests, maintaining credibility",
+      "severity": "high",
+      "cycle": 4
+    },
+    {
+      "file": "src/agents/member-concierge/prompts.js",
+      "what": "Add guidance to ask open-ended discovery questions for re-engagement scenarios like 'What have you been up to?' or 'How's the family?' before jumping to suggestions",
+      "why": "Creates warmer re-engagement by showing interest in the member's life outside the club first, building rapport before selling",
+      "severity": "medium",
+      "cycle": 4
+    },
+    {
+      "file": "src/agents/member-risk/tools.js",
+      "what": "Implement automated tracking of concierge re-engagement success rates to measure which approaches work best for different member segments",
+      "why": "Enables data-driven optimization of re-engagement strategies and quantifies concierge impact on retention",
+      "severity": "medium",
+      "cycle": 4
+    },
+    {
+      "file": "backend/domain/staffing-demand/agents/demand-predictor.js",
+      "what": "Add logic to factor in member health scores when calculating staffing needs - low health members often need extra attention during their rare visits",
+      "why": "Anne's health score of 28 suggests she needs exceptional service to win her back, which requires adequate staffing",
+      "severity": "high",
+      "cycle": 5
+    },
+    {
+      "file": "backend/services/concierge/prompts/response-generator.js",
+      "what": "When offering cross-sells to low health score members, use more enthusiastic/personal language like 'I'll make sure your favorite booth by the window is ready' instead of generic 'grab you a booth'",
+      "why": "Low health members need to feel specially valued during re-engagement attempts",
+      "severity": "medium",
+      "cycle": 5
+    },
+    {
+      "file": "backend/domain/member-risk/agents/risk-analyzer.js",
+      "what": "Add recommendation to notify F&B manager when at-risk members book dining so they can ensure flawless execution",
+      "why": "The $45 revenue opportunity is less important than the $12,000 annual membership at risk - perfect service execution is critical",
+      "severity": "medium",
+      "cycle": 5
+    },
+    {
+      "file": "services/member/config/templates.js",
+      "what": "Add empathy-first response templates for complaints that acknowledge frustration before pivoting to solutions",
+      "why": "The concierge jumped straight to 'Got it filed' without acknowledging Anne's frustration - a warmer 'I hear you Anne, Saturday mornings have been brutal lately' would build rapport",
+      "severity": "high",
+      "cycle": 6
+    },
+    {
+      "file": "services/club/game-plan.js",
+      "what": "Add specific pace-of-play metrics (average round times, bottleneck holes) to impact calculations when analyzing slow play complaints",
+      "why": "The club analysis mentions 'compressed bookings' but lacks specific data like '5:20 average round time vs 4:30 target' that would make the $48,000 impact more credible",
+      "severity": "medium",
+      "cycle": 6
+    },
+    {
+      "file": "services/member/tools/complaint.js",
+      "what": "Enhance file_complaint to capture time-specific patterns and auto-suggest alternative playing windows based on pace data",
+      "why": "The tool could automatically identify that Tuesday 7am has 4:15 average pace vs Saturday's 5:20, making the concierge's suggestion more data-driven",
+      "severity": "medium",
+      "cycle": 6
+    },
+    {
+      "file": "services/ai/prompts/concierge.js",
+      "what": "Add empathetic acknowledgment before jumping to action - 'Oh no, Anne! Hope you feel better soon. I'll cancel Sunday's 7am tee time for you right away.'",
+      "why": "When someone says they're not feeling well, a caring human response comes before efficiency. This builds trust and shows the concierge genuinely cares",
+      "severity": "high",
+      "cycle": 7
+    },
+    {
+      "file": "tools/concierge/book_tee_time.js",
+      "what": "Include member's typical playing preferences in the rebooking suggestion - 'Want me to grab you the same 7am slot next Saturday? I know you prefer those early weekend rounds.'",
+      "why": "Shows the system remembers her patterns and makes the suggestion more personalized. Anne is a Weekend Warrior who values her routine",
+      "severity": "medium",
+      "cycle": 7
+    },
+    {
+      "file": "services/ai/agents/member-risk.js",
+      "what": "Add specific dollar impact calculation - 'Risk: $12,000 annual dues + estimated $3,600 F&B spend based on Weekend Warrior archetype average'",
+      "why": "GM needs to understand total revenue at risk, not just membership fees. Weekend Warriors typically spend 30% of dues on F&B",
+      "severity": "low",
+      "cycle": 7
+    },
+    {
+      "file": "utils/communication-style.js",
+      "what": "Add member history awareness to responses - acknowledge Sandra's return after 127-day absence with warm 'Great to hear from you!' or 'We've missed seeing you and Lily!'",
+      "why": "Shows the concierge remembers members personally and strengthens emotional connection during critical re-engagement moment",
+      "severity": "high",
+      "cycle": 8
+    },
+    {
+      "file": "utils/tool-usage.js",
+      "what": "Call get_member_profile() before get_club_calendar() to surface family preferences and past event attendance, enabling more personalized recommendations",
+      "why": "Would reveal if Lily has specific interests or past favorite events to reference, making suggestions more compelling",
+      "severity": "medium",
+      "cycle": 8
+    },
+    {
+      "file": "prompts/concierge-prompt.js",
+      "what": "Add proactive dining suggestions after event bookings - 'After the egg hunt, I can reserve a table at the Terrace for lunch - kids eat free on Sundays!'",
+      "why": "Maximizes visit value and cross-sells naturally when families are already on-property",
+      "severity": "medium",
+      "cycle": 8
+    },
+    {
+      "file": "utils/message-builder.js",
+      "what": "Add member preference tracking to avoid repeating same cross-sell suggestions (e.g., pre-tasting) if member has heard it before",
+      "why": "Prevents sounding repetitive to regular diners, maintains personalized feel over time",
+      "severity": "medium",
+      "cycle": 9
+    },
+    {
+      "file": "tools/make_dining_reservation.js",
+      "what": "Return confirmation number in tool response so concierge can reference it naturally ('your confirmation is #4567')",
+      "why": "Members expect confirmation numbers for special event reservations, adds professional polish",
+      "severity": "low",
+      "cycle": 9
+    },
+    {
+      "file": "agents/insights-agent.js",
+      "what": "Add seasonal menu intelligence to track which wine pairings drive highest satisfaction scores for future recommendations",
+      "why": "Could identify that Willamette Pinot + lamb consistently delights, enabling more targeted future suggestions",
+      "severity": "low",
+      "cycle": 9
+    },
+    {
+      "file": "services/agents/member-concierge.js",
+      "what": "Add grief context detection to shouldPersonalizeForHealth() to trigger even more compassionate language when detecting bereavement-related keywords",
+      "why": "While this response was excellent, systematic detection of grief contexts would ensure consistently appropriate tone",
+      "severity": "medium",
+      "cycle": 10
+    },
+    {
+      "file": "services/agents/club-side/member-risk.js",
+      "what": "Add automated CRM task creation when detecting bereavement, triggering GM outreach workflow with suggested talking points",
+      "why": "The GM call recommendation is excellent but relies on manual action - automation would ensure no sensitive moments are missed",
+      "severity": "high",
+      "cycle": 10
+    },
+    {
+      "file": "services/agents/member-concierge.js",
+      "what": "Include subtle offer to handle reservation details privately if member prefers, acknowledging some may want discretion during difficult returns",
+      "why": "Some members might appreciate the option to finalize details offline when returning after loss",
+      "severity": "low",
+      "cycle": 10
+    }
+  ]
+}

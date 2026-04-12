@@ -8,7 +8,7 @@
 // This page is the proof of Layer 3: cross-domain revenue attribution that
 // no single vendor (Jonas, ForeTees, Northstar) can produce.
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Panel } from '@/components/ui';
 import StoryHeadline from '@/components/ui/StoryHeadline';
@@ -83,7 +83,10 @@ export default function RevenuePage() {
     );
   }
 
-  const leakage = getLeakageData();
+  // Memoize leakage snapshots so navigating away and back shows identical
+  // dollar amounts (bug #26 — services pull timestamped weather/staffing data
+  // that can drift between calls).
+  const leakage = useMemo(() => getLeakageData(), []);
   if (!leakage || leakage.TOTAL === 0) {
     return (
       <PageTransition>
@@ -111,9 +114,9 @@ export default function RevenuePage() {
     );
   }
 
-  const bottleneck = getBottleneckSummary();
-  const slowContext = getSlowRoundContext();
-  const dollarPerSlowRound = getDollarPerSlowRound();
+  const bottleneck = useMemo(() => getBottleneckSummary(), []);
+  const slowContext = useMemo(() => getSlowRoundContext(), []);
+  const dollarPerSlowRound = useMemo(() => getDollarPerSlowRound(), []);
 
   // Build chart data
   const chartData = [

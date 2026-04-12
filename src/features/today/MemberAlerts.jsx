@@ -10,6 +10,15 @@ import SourceBadge from '@/components/ui/SourceBadge';
 import { trackAction } from '@/services/activityService';
 import AgentUpsell from '@/components/ui/AgentUpsell';
 
+// Mirrors TeeSheetView.healthLabel so the same member reads consistently
+// across Today and Tee Sheet (bug #32).
+const healthTierLabel = (score) => {
+  if (score >= 70) return 'Healthy';
+  if (score >= 50) return 'Watch';
+  if (score >= 30) return 'At Risk';
+  return 'Critical';
+};
+
 const ACTION_OWNERS = {
   'Ghost': 'GM',
   'Declining': 'Membership Director',
@@ -226,7 +235,7 @@ export default function MemberAlerts() {
                     className="text-[10px] font-bold py-0.5 px-2 rounded-[10px]"
                     style={{ background: `${scoreColor}15`, color: scoreColor }}
                   >
-                    {m.score}
+                    {m.score} · {healthTierLabel(m.score)}
                   </span>
                   <span
                     className="text-[10px] font-semibold py-0.5 px-2 rounded-[10px]"

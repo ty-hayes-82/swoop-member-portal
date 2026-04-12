@@ -172,15 +172,9 @@ export default function BoardReport() {
     return (
       <PageTransition>
         <div className="p-6 w-full">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Board Report — Service, Members & Operations</h1>
-              <p className="text-sm text-gray-500 mt-1">Monthly executive summary — service quality, member health, and operational response</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => window.print()} className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none focus-visible:ring-2 focus-visible:ring-brand-500">Export as PDF</button>
-              <button onClick={() => window.print()} className="rounded-lg border border-brand-500 bg-transparent text-brand-500 px-5 py-2 text-sm font-semibold cursor-pointer">Print</button>
-            </div>
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">Board Report — Service, Members & Operations</h1>
+            <p className="text-sm text-gray-500 mt-1">Monthly executive summary — service quality, member health, and operational response</p>
           </div>
           <DataEmptyState icon="📊" title="Board report needs data" description="Import member, golf, and F&B data to generate your executive board report with KPIs, member saves, and operational insights." dataType="club data" />
           <AgentUpsell

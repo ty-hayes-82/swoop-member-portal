@@ -3,6 +3,26 @@ import { useSidebar } from "@/context/SidebarContext";
 import { useNavigationContext } from "@/context/NavigationContext";
 import { NAV_ITEMS } from "@/config/navigation";
 import { useCurrentClub } from "@/hooks/useCurrentClub";
+import { memberProfiles } from "@/data/members";
+
+// Client-side fallback: used when /api/search returns empty (e.g. demo mode).
+function localMemberSearch(q) {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return [];
+  return Object.values(memberProfiles)
+    .filter((m) => {
+      const name = (m.name || '').toLowerCase();
+      const email = (m.contact?.email || '').toLowerCase();
+      return name.includes(needle) || email.includes(needle);
+    })
+    .slice(0, 8)
+    .map((m) => ({
+      id: m.memberId,
+      name: m.name,
+      email: m.contact?.email || '',
+      archetype: m.archetype || '',
+    }));
+}
 
 const SwoopHeader = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -133,12 +153,15 @@ const SwoopHeader = () => {
         })
           .then((r) => (r.ok ? r.json() : { results: [] }))
           .then((data) => {
-            setSearchResults(data.results || []);
+            const apiResults = data.results || [];
+            const results = apiResults.length > 0 ? apiResults : localMemberSearch(q);
+            setSearchResults(results);
             setShowSearchResults(true);
           })
           .catch(() => {
-            setSearchResults([]);
-            setShowSearchResults(false);
+            const results = localMemberSearch(q);
+            setSearchResults(results);
+            setShowSearchResults(results.length > 0);
           });
       }, 300);
     },
@@ -321,7 +344,7 @@ const SwoopHeader = () => {
                   {(clubId === "demo" || clubId?.startsWith("demo_")) ? "Demo Environment" : ((() => { try { return localStorage.getItem("swoop_club_name") || JSON.parse(localStorage.getItem("swoop_auth_user") || "{}").clubName || "Connected Club"; } catch { return "Connected Club"; } })())}
                 </p>
               </div>
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 text-brand-600 font-semibold text-sm">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 text-brand-600 font-semibold text-sm flex-shrink-0 leading-none">
                 {userName
                   .split(" ")
                   .map((n) => n[0])
