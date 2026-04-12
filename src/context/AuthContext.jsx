@@ -92,6 +92,25 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) {
+    // Fallback: read user from localStorage when AuthProvider is not in the tree.
+    // This keeps CsvImportPage and other consumers from crashing.
+    try {
+      const stored = localStorage.getItem('swoop_auth_user');
+      const user = stored ? JSON.parse(stored) : null;
+      return {
+        user,
+        loading: false,
+        error: null,
+        isAuthenticated: !!user,
+        isGM: user?.role === 'gm',
+        clubId: user?.clubId || null,
+        login: async () => false,
+        logout: async () => {},
+      };
+    } catch {
+      return { user: null, loading: false, error: null, isAuthenticated: false, isGM: false, clubId: null, login: async () => false, logout: async () => {} };
+    }
+  }
   return ctx;
 };

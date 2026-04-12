@@ -63,30 +63,41 @@ export default async function handler(req, res) {
 
   // ─── AUTHED: GET per-club weather data lookups ───────────────────────
   if (req.method === 'GET') {
-    // Per-club weather lookups require authentication. Previously public
-    // (B19): anyone could poll forecasts/historical data for any club by
-    // guessing IDs. verifySession is the shared helper from ./lib/withAuth.js;
-    // we can't wrap the whole handler with withAuth() because the ?city=
-    // branch above must stay open.
-    const authResult = await verifySession(req);
-    if (authResult.status === 'error') {
-      logError('/api/weather', authResult.error, { phase: 'session-lookup' });
-      return res.status(500).json({ error: 'Authentication service error' });
-    }
-    if (authResult.status !== 'ok') {
-      logWarn('/api/weather', 'unauthenticated per-club weather lookup', {
-        ip: req.headers['x-forwarded-for'] || null,
-        requestedClubId: req.query.clubId, // lint-clubid-allow: diagnostic log only, not used for data access
-      });
-      return res.status(401).json({ error: 'Authentication required for per-club weather lookups' });
-    }
-    const session = authResult.session;
+    // Demo mode: allow unauthenticated access when X-Demo-Club header or demoClubId param is present
+    const demoClubId = req.headers['x-demo-club'] || req.query?.demoClubId;
+    let clubId;
+    let session;
 
-    // CRITICAL: clubId comes from the verified session, NEVER from req.query,
-    // except for swoop_admin — who is intentionally allowed to target any
-    // club for cross-club observability.
-    const requestedClubId = req.query.clubId; // lint-clubid-allow: swoop_admin per-club lookup, role-gated below
-    const clubId = (session.role === 'swoop_admin' && requestedClubId) ? requestedClubId : session.clubId;
+    if (demoClubId && !req.headers.authorization) {
+      // Demo session — use the demo club ID directly
+      clubId = demoClubId;
+      session = { clubId: demoClubId, userId: 'demo', role: 'demo' };
+    } else {
+      // Per-club weather lookups require authentication. Previously public
+      // (B19): anyone could poll forecasts/historical data for any club by
+      // guessing IDs. verifySession is the shared helper from ./lib/withAuth.js;
+      // we can't wrap the whole handler with withAuth() because the ?city=
+      // branch above must stay open.
+      const authResult = await verifySession(req);
+      if (authResult.status === 'error') {
+        logError('/api/weather', authResult.error, { phase: 'session-lookup' });
+        return res.status(500).json({ error: 'Authentication service error' });
+      }
+      if (authResult.status !== 'ok') {
+        logWarn('/api/weather', 'unauthenticated per-club weather lookup', {
+          ip: req.headers['x-forwarded-for'] || null,
+          requestedClubId: req.query.clubId, // lint-clubid-allow: diagnostic log only, not used for data access
+        });
+        return res.status(401).json({ error: 'Authentication required for per-club weather lookups' });
+      }
+      session = authResult.session;
+
+      // CRITICAL: clubId comes from the verified session, NEVER from req.query,
+      // except for swoop_admin — who is intentionally allowed to target any
+      // club for cross-club observability.
+      const requestedClubId = req.query.clubId; // lint-clubid-allow: swoop_admin per-club lookup, role-gated below
+      clubId = (session.role === 'swoop_admin' && requestedClubId) ? requestedClubId : session.clubId;
+    }
 
     if (!clubId) return res.status(400).json({ error: 'clubId required' });
     const { type, date, hours, days } = req.query;

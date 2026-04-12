@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '@/context/AppContext';
 import { NavigationProvider, useNavigationContext } from '@/context/NavigationContext';
 import { MemberProfileProvider, useMemberProfile } from '@/context/MemberProfileContext';
+import { RouteErrorBoundary } from '@/components/ErrorBoundary';
 
 // Mobile app — lazy loaded, zero bundle impact on desktop
 const MobileApp = lazy(() => import('@/mobile/MobileApp'));
@@ -182,9 +183,11 @@ function AppShell() {
       mobileBar={isMobile ? <MobileConversionBar /> : null}
     >
       <DataImportBanner />
-      <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
-        <PageComponent key={`${currentRoute}-${demoRenderKey}`} />
-      </Suspense>
+      <RouteErrorBoundary>
+        <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
+          <PageComponent key={`${currentRoute}-${demoRenderKey}`} />
+        </Suspense>
+      </RouteErrorBoundary>
     </SwoopLayout>
   );
 }

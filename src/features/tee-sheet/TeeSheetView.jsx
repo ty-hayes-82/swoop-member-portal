@@ -211,10 +211,12 @@ export default function TeeSheetView() {
       const body = encodeURIComponent(draft?.body || `Hi ${firstName}! Your cart is ready for your ${teeTime.time} tee time: ${items}. See you on the first tee!`);
       const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
       window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+      showToast(`Cart prep text sent to ${firstName}`, 'success');
     } catch {
       const body = encodeURIComponent(`Hi ${firstName}! Your cart is ready for your ${teeTime.time} tee time: ${items}. See you on the first tee!`);
       const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
       window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+      showToast(`Cart prep text sent to ${firstName}`, 'success');
     }
   };
 
@@ -242,6 +244,7 @@ export default function TeeSheetView() {
         const body = encodeURIComponent(draft?.body || `Hi ${firstName}, I wanted to personally reach out and make sure everything is to your satisfaction at the club. Would love to connect.`);
         const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
         window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+        showToast(`Check-in text drafted for ${firstName}`, 'success');
       } else {
         const to = encodeURIComponent(localStorage.getItem('swoop_demo_email') || draft?.memberEmail || '');
         const subject = encodeURIComponent(draft?.subject || `A personal note from your club`);
@@ -251,11 +254,13 @@ export default function TeeSheetView() {
         } else {
           window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_self');
         }
+        showToast(`Recovery email drafted for ${firstName}`, 'success');
       }
     } catch {
       if (type === 'sms') {
         const body = encodeURIComponent(`Hi ${firstName}, I wanted to personally reach out about your recent experience. We've made changes and I'd love to show you. Can we connect?`);
         window.open(`sms:?&body=${body}`, '_self');
+        showToast(`Check-in text drafted for ${firstName}`, 'success');
       }
     }
   };
@@ -276,10 +281,12 @@ export default function TeeSheetView() {
       const body = encodeURIComponent(draft?.body || `Great round today, ${firstName}! Chef has a special lunch menu — your usual table is open at the Grill Room. Want me to hold it?`);
       const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
       window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+      showToast(`Dining nudge sent to ${firstName}`, 'success');
     } catch {
       const body = encodeURIComponent(`Great round today, ${firstName}! Chef has a special lunch menu — your usual table is open at the Grill Room. Want me to hold it?`);
       const demoPhone = localStorage.getItem('swoop_demo_phone') || '';
       window.open(`sms:${demoPhone}?&body=${body}`, '_self');
+      showToast(`Dining nudge sent to ${firstName}`, 'success');
     }
   };
 

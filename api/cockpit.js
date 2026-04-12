@@ -44,8 +44,8 @@ export default withAuth(async function handler(req, res) {
       `,
       // Since-last-login
       sql`
-        SELECT last_login_at FROM user_sessions
-        ORDER BY last_login_at DESC LIMIT 1
+        SELECT login_at AS last_login_at FROM user_sessions
+        ORDER BY login_at DESC LIMIT 1
       `,
     ]);
 

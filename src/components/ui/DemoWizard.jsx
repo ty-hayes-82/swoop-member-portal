@@ -2,7 +2,7 @@
  * DemoWizard — Floating panel showing individual CSV files to import one at a time.
  * Files are grouped by system/category for readability.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDemoWizard } from '@/context/DemoWizardContext';
 import { DEMO_FILES, FILE_GROUPS } from '@/config/demoSources';
 import DemoDataPreview from './DemoDataPreview';
@@ -16,6 +16,19 @@ export default function DemoWizard() {
 
   const { loadedFiles, fileCount, totalFiles, importFile, importAll, importing, wizardOpen, setWizardOpen } = ctx;
   const allLoaded = fileCount === totalFiles;
+
+  // Close panel on Escape key
+  useEffect(() => {
+    if (!wizardOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setWizardOpen(false);
+        setPreviewFile(null);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [wizardOpen, setWizardOpen]);
 
   if (!wizardOpen) {
     return (

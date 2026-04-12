@@ -12,6 +12,7 @@ const SwoopHeader = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [showCommandHint, setShowCommandHint] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -43,21 +44,30 @@ const SwoopHeader = () => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
         inputRef.current?.focus();
+        setShowCommandHint(true);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Close user menu on outside click
+  // Close user menu on outside click or Escape
   useEffect(() => {
+    if (!userMenuOpen) return;
     const handleClickOutside = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setUserMenuOpen(false);
       }
     };
-    if (userMenuOpen) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const handleEscape = (e) => {
+      if (e.key === "Escape") setUserMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [userMenuOpen]);
 
   // Close notification dropdown on outside click or Escape
@@ -109,6 +119,7 @@ const SwoopHeader = () => {
     (e) => {
       const q = e.target.value;
       setSearchQuery(q);
+      if (q) setShowCommandHint(false);
       if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
       if (!q || q.trim().length < 2) {
         setSearchResults([]);
@@ -137,7 +148,9 @@ const SwoopHeader = () => {
   const handleSearchKeyDown = (e) => {
     if (e.key === "Escape") {
       setShowSearchResults(false);
+      setShowCommandHint(false);
       setSearchQuery('');
+      inputRef.current?.blur();
     }
     if (e.key === "Enter" && searchResults.length > 0) {
       e.preventDefault();
@@ -193,8 +206,8 @@ const SwoopHeader = () => {
                   value={searchQuery}
                   onChange={handleSearchChange}
                   onKeyDown={handleSearchKeyDown}
-                  onFocus={() => searchResults.length > 0 && setShowSearchResults(true)}
-                  onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+                  onFocus={() => { if (searchResults.length > 0) setShowSearchResults(true); }}
+                  onBlur={() => setTimeout(() => { setShowSearchResults(false); setShowCommandHint(false); }, 200)}
                   className="h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 lg:w-[430px]"
                 />
                 <button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
@@ -222,6 +235,29 @@ const SwoopHeader = () => {
                         </button>
                       ))
                     )}
+                  </div>
+                )}
+                {showCommandHint && !showSearchResults && !searchQuery && (
+                  <div className="absolute left-0 top-12 w-full rounded-xl border border-gray-200 bg-white shadow-theme-lg z-50 dark:border-gray-800 dark:bg-gray-900">
+                    <div className="p-3 text-xs text-gray-400 font-semibold uppercase tracking-wide border-b border-gray-100 dark:border-gray-800">Quick Actions</div>
+                    {[
+                      { label: 'Search members', hint: 'Type a name to search...', icon: '👤' },
+                      { label: 'Go to Today', hint: 'View daily briefing', icon: '📋', action: () => { navigate('today'); setShowCommandHint(false); inputRef.current?.blur(); } },
+                      { label: 'Go to Members', hint: 'View member health', icon: '👥', action: () => { navigate('members'); setShowCommandHint(false); inputRef.current?.blur(); } },
+                      { label: 'Go to Automations', hint: 'Agent inbox & playbooks', icon: '⚡', action: () => { navigate('automations'); setShowCommandHint(false); inputRef.current?.blur(); } },
+                    ].map((cmd, i) => (
+                      <button
+                        key={i}
+                        onMouseDown={(e) => { e.preventDefault(); cmd.action?.(); }}
+                        className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-b-0 cursor-pointer bg-transparent border-x-0 border-t-0 flex items-center gap-3"
+                      >
+                        <span className="text-base">{cmd.icon}</span>
+                        <div>
+                          <div className="text-sm font-semibold text-gray-800 dark:text-white/90">{cmd.label}</div>
+                          <div className="text-xs text-gray-400">{cmd.hint}</div>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>

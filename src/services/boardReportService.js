@@ -78,22 +78,19 @@ export const getKPIs = () => {
 const _isGuidedMode = () => getDataMode() === 'guided';
 export const getMemberSaves = () => {
   if (_d?.memberSaves) return _d.memberSaves;
-  if (_isGuidedMode()) return [];
+  // In guided mode, show static data when the pipeline gate is open
   return isGateOpen('pipeline') ? staticMemberSaves : [];
 };
 export const getOperationalSaves = () => {
   if (_d?.operationalSaves) return _d.operationalSaves;
-  if (_isGuidedMode()) return [];
   return isGateOpen('pipeline') ? staticOperationalSaves : [];
 };
 export const getMonthlyTrends = () => {
   if (_d?.monthlyTrends) return _d.monthlyTrends;
-  if (_isGuidedMode()) return [];
   return isGateOpen('pipeline') ? staticMonthlyTrends : [];
 };
 export const getDuesAtRiskNote = () => {
   if (_d?.duesAtRiskNote) return _d.duesAtRiskNote;
-  if (_isGuidedMode()) return '';
   return isGateOpen('pipeline') ? staticDuesAtRiskNote : '';
 };
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];

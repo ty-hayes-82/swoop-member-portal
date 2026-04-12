@@ -210,8 +210,12 @@ export default function MemberAlerts() {
           return (
             <div
               key={m.memberId}
-              className="py-3 px-4 bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer transition-all duration-150 hover:shadow-md hover:-translate-y-px"
-              style={{ borderLeft: `3px solid ${scoreColor}` }}
+              className={`py-3 px-4 border rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-px ${
+                bulkApproved
+                  ? 'bg-success-50 dark:bg-success-500/5 border-success-200 dark:border-success-800 opacity-60'
+                  : 'bg-white dark:bg-white/[0.03] border-gray-200 dark:border-gray-800'
+              }`}
+              style={{ borderLeft: `3px solid ${bulkApproved ? '#12b76a' : scoreColor}` }}
             >
               <div className="flex justify-between items-center mb-1.5">
                 <div className="flex items-center gap-2">
@@ -267,11 +271,15 @@ export default function MemberAlerts() {
               </div>
               <div className="text-xs font-semibold flex items-center gap-2">
                 {m.owner && (
-                  <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight shrink-0">
+                  <span className={`text-[9px] font-bold py-0.5 px-1.5 rounded uppercase tracking-tight shrink-0 ${
+                    bulkApproved ? 'bg-success-500/[0.06] text-success-500' : 'bg-brand-500/[0.06] text-brand-500'
+                  }`}>
                     {m.owner}
                   </span>
                 )}
-                <span className="text-brand-500">{m.action}</span>
+                <span className={bulkApproved ? 'text-success-500 line-through' : 'text-brand-500'}>
+                  {bulkApproved && '✓ '}{m.action}
+                </span>
               </div>
             </div>
           );

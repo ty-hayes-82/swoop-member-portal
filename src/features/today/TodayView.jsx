@@ -154,6 +154,7 @@ function formatDate() {
 
 export default function TodayView() {
   const { navigate } = useNavigation();
+  const { pendingAgentCount } = useApp();
   // Migrated to useServiceCache (SHIP_PLAN §2.3) — fall back to legacy getter
   const { data: cockpitData, isLoading: cockpitLoading } = useCockpitData();
   const priorities = cockpitData?.priorities ?? getPriorityItems();
@@ -453,7 +454,7 @@ export default function TodayView() {
               }
               return { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732', source: 'Member CRM' };
             })(),
-            { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: cockpitLoading && !cockpitData ? '...' : String(priorities.length), color: '#8b5cf6', source: 'Analytics' },
+            { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: cockpitLoading && !cockpitData ? '...' : String(pendingAgentCount || priorities.length), color: '#8b5cf6', source: 'Analytics' },
           ].filter(Boolean).map((stat) => (
             <div
               key={stat.label}

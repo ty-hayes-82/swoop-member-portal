@@ -438,26 +438,35 @@ export const _init = async () => {
         (Array.isArray(apiData.memberRoster) && apiData.memberRoster.length > 0) ||
         (apiData.memberProfiles && Object.keys(apiData.memberProfiles).length > 0);
       if (hasMemberData) _hasRealMembers = true;
-      _d = {
-        ..._d,
-        ...apiData,
-        healthDistribution: apiData.healthDistribution || _d.healthDistribution,
-        memberProfiles: apiData.memberProfiles || _d.memberProfiles,
-        // Merge (not replace) memberSummary so partial API payloads like
-        // { memberSummary: { total: 50 } } don't wipe healthy/watch/atRisk/etc.
-        memberSummary: { ..._d.memberSummary, ...(apiData.memberSummary || {}) },
-      };
-      // Patch memberSummary.total + .totalMembers from apiData (both fields, since
-      // some consumers read .total and some read .totalMembers — the previous code
-      // only patched .totalMembers, leaving .total at the static seed value).
-      const apiTotal = apiData.total || (Array.isArray(apiData.memberRoster) ? apiData.memberRoster.length : 0);
-      if (_d.memberSummary) {
-        if (apiTotal) {
-          _d.memberSummary.total = apiTotal;
-          _d.memberSummary.totalMembers = apiTotal;
-        }
+
+      // In guided mode, if the API returned no real members, keep static data intact.
+      // The guided demo import opens gates which tell services to use static data,
+      // but _init() was overwriting _d with empty API responses, wiping the static data.
+      if (_isGuidedMode() && !hasMemberData) {
+        // Reset _d to static defaults so gate-based logic can serve demo data
+        _d = getInitialData();
       } else {
-        _d.memberSummary = { ..._d.memberSummary, total: apiTotal, totalMembers: apiTotal };
+        _d = {
+          ..._d,
+          ...apiData,
+          healthDistribution: apiData.healthDistribution || _d.healthDistribution,
+          memberProfiles: apiData.memberProfiles || _d.memberProfiles,
+          // Merge (not replace) memberSummary so partial API payloads like
+          // { memberSummary: { total: 50 } } don't wipe healthy/watch/atRisk/etc.
+          memberSummary: { ..._d.memberSummary, ...(apiData.memberSummary || {}) },
+        };
+        // Patch memberSummary.total + .totalMembers from apiData (both fields, since
+        // some consumers read .total and some read .totalMembers — the previous code
+        // only patched .totalMembers, leaving .total at the static seed value).
+        const apiTotal = apiData.total || (Array.isArray(apiData.memberRoster) ? apiData.memberRoster.length : 0);
+        if (_d.memberSummary) {
+          if (apiTotal) {
+            _d.memberSummary.total = apiTotal;
+            _d.memberSummary.totalMembers = apiTotal;
+          }
+        } else {
+          _d.memberSummary = { ..._d.memberSummary, total: apiTotal, totalMembers: apiTotal };
+        }
       }
     }
   } catch { /* keep static fallback */ }

@@ -495,4 +495,4 @@ export default withAuth(async function handler(req, res) {
   } finally {
     client.release();
   }
-}, { roles: ['gm', 'admin', 'swoop_admin'] });
+}, { roles: ['gm', 'admin', 'swoop_admin'], allowDemo: true });

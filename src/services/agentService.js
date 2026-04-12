@@ -1,6 +1,6 @@
 import { apiFetch } from './apiClient';
 import { logError } from '@/utils/logError';
-import { getDataMode } from './demoGate';
+import { getDataMode, isGateOpen } from './demoGate';
 import { agentDefinitions, agentActions, agentThoughtLogs } from '@/data/agents';
 
 /**
@@ -78,7 +78,11 @@ const byNewest = (a, b) => {
 
 /** @returns {Agent[]} */
 export function getAgents() {
-  return _d?.agents ?? (getDataMode() === 'demo' ? agentDefinitions : []);
+  if (_d?.agents) return _d.agents;
+  const mode = getDataMode();
+  // In demo mode, always show agents. In guided mode, show when agents gate is open.
+  if (mode === 'demo' || (mode === 'guided' && isGateOpen('agents'))) return agentDefinitions;
+  return [];
 }
 
 /**
@@ -93,8 +97,11 @@ export function getAgentById(id) {
 /** @returns {AgentAction[]} */
 export function getAllActions() {
   if (_d?.actions) return [..._d.actions].sort(byNewest);
-  if (getDataMode() !== 'demo') return [];
-  return [...getActionStore()].sort(byNewest);
+  const mode = getDataMode();
+  if (mode === 'demo' || (mode === 'guided' && isGateOpen('agents'))) {
+    return [...getActionStore()].sort(byNewest);
+  }
+  return [];
 }
 
 /** @returns {AgentAction[]} */
@@ -169,8 +176,12 @@ export function dismissAction(id, meta = {}) {
  * @returns {ThoughtLogEntry[]}
  */
 export function getThoughtLog(agentId) {
-  const logs = _d?.thoughtLogs ?? (getDataMode() === 'demo' ? agentThoughtLogs : {});
-  return logs[agentId] ?? [];
+  if (_d?.thoughtLogs) return _d.thoughtLogs[agentId] ?? [];
+  const mode = getDataMode();
+  if (mode === 'demo' || (mode === 'guided' && isGateOpen('agents'))) {
+    return agentThoughtLogs[agentId] ?? [];
+  }
+  return [];
 }
 
 /** @returns {AgentSummary} */

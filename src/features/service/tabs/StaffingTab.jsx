@@ -47,14 +47,19 @@ export default function StaffingTab() {
                 || 'No staffing recommendations available — import scheduling data to enable demand forecasting.'}
             </div>
             <div className="text-sm text-gray-500 leading-relaxed mb-4">
-              {briefing?.todayRisks?.demandForecast
-                ? <>Based on {briefing.todayRisks.demandForecast.expectedRounds} expected rounds
-                  ({briefing?.teeSheet?.roundsToday || 0} booked × {briefing.todayRisks.demandForecast.golfModifier} weather factor)
-                  {briefing.todayRisks.demandForecast.weatherSummary !== 'No weather disruptions — standard demand expected'
-                    && <> — {briefing.todayRisks.demandForecast.weatherSummary}</>}.
-                  On similar days with 2 servers, complaints increased {avgComplaintMultiplier}x.</>
-                : <>Based on {briefing?.teeSheet?.roundsToday || 0} booked rounds + weather forecast + 1 private dining event.
-                  On similar days with 2 servers, complaints increased {avgComplaintMultiplier}x and ticket times rose 20%.</>}
+              {(() => {
+                const bookedRounds = briefing?.teeSheet?.roundsToday || 0;
+                const df = briefing?.todayRisks?.demandForecast;
+                if (df) {
+                  return <>Based on {df.expectedRounds || bookedRounds} expected rounds
+                    ({bookedRounds} booked × {df.golfModifier} weather factor)
+                    {df.weatherSummary !== 'No weather disruptions — standard demand expected'
+                      && <> — {df.weatherSummary}</>}.
+                    On similar days with 2 servers, complaints increased {avgComplaintMultiplier}x.</>;
+                }
+                return <>Based on {bookedRounds} booked rounds + weather forecast + 1 private dining event.
+                  On similar days with 2 servers, complaints increased {avgComplaintMultiplier}x and ticket times rose 20%.</>;
+              })()}
             </div>
             <div className="inline-flex items-center gap-1.5 py-2 px-4 rounded-lg bg-brand-500 text-white text-sm font-semibold cursor-pointer">
               Add server to Saturday schedule

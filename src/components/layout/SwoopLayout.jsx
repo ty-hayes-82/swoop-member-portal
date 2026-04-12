@@ -15,12 +15,12 @@ const LayoutContent = ({ children, footer, actionsDrawer, mobileBar }) => {
       <SwoopSidebar />
       <Backdrop />
       <div
-        className={`flex flex-col h-screen transition-all duration-300 ease-in-out w-full ${
+        className={`flex flex-col h-screen transition-all duration-300 ease-in-out w-full min-w-0 ${
           isExpanded || isHovered ? "lg:pl-[290px]" : "lg:pl-[90px]"
         }`}
       >
         <SwoopHeader />
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 w-full md:p-6 pb-20 md:pb-24">
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 w-full md:p-6 pb-20 md:pb-24 min-w-0">
           <Suspense
             fallback={
               <div className="flex items-center justify-center min-h-[200px] text-gray-400">
