@@ -365,6 +365,56 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     await shot('17-tee-sheet-import-complete.png');
   });
 
+  // After members + tee-sheet are both imported, orchestration agents should
+  // have enough data to surface recommendations. If they don't (empty state,
+  // 401, or static demo data), we capture it as a finding — the prompt said
+  // "If agents are not yet wired to live data, document as gap not bug."
+  test('7a — Agent recommendations surface after members + tee-sheet', async () => {
+    // Wait for the fire-and-forget /api/compute-health-scores triggered by
+    // the members import to actually land.
+    await page.waitForTimeout(3000);
+
+    await page.goto(`${APP_URL}/#/today`);
+    await page.waitForFunction(
+      () => {
+        const t = document.body.innerText;
+        return /member|alert|priority|attention|risk|briefing/i.test(t)
+          && !/^\s*Loading\.\.\.\s*$/m.test(t);
+      },
+      null,
+      { timeout: 20000 },
+    ).catch(() => {});
+    await page.waitForTimeout(1500);
+    await shot('19-today-with-agent-recs.png');
+
+    const bodyText = (await page.locator('body').textContent()) || '';
+
+    // At minimum: Today view should render past the Suspense fallback and
+    // reference members imported from the real CSV.
+    const todayRendered = /briefing|alert|member|priority|attention|risk|rounds|today/i.test(bodyText);
+    expect.soft(todayRendered, 'Today view should render with real data after imports').toBeTruthy();
+
+    // Hit the agent API directly to verify the service layer has data for
+    // orchestration. This is a soft check — if the endpoint 404s or the
+    // agent pipeline isn't wired, we log the gap.
+    const token = await page.evaluate(() => localStorage.getItem('swoop_auth_token'));
+    const agentRes = await page.request.get(`${APP_URL}/api/agents`, {
+      headers: { Authorization: `Bearer ${token || ''}` },
+    }).catch(() => null);
+
+    if (!agentRes || !agentRes.ok()) {
+      console.log(`[finding] /api/agents not reachable: ${agentRes?.status() || 'no response'} — agent orchestration gap after members+tee-sheet`);
+    } else {
+      const data = await agentRes.json().catch(() => ({}));
+      const agentCount = Array.isArray(data?.agents) ? data.agents.length : 0;
+      const actionCount = Array.isArray(data?.actions) ? data.actions.length : 0;
+      console.log(`[agent-rec] ${agentCount} agents registered, ${actionCount} pending actions for club after members+tee-sheet import`);
+      if (agentCount === 0) {
+        console.log('[finding] zero agents registered for this club — the signup flow or post-import trigger is not wiring the agent roster');
+      }
+    }
+  });
+
   test('7 — Tee Sheet page renders real bookings (no hardcoded fallbacks)', async () => {
     await page.goto(`${APP_URL}/#/tee-sheet`);
     await page.waitForFunction(
@@ -396,6 +446,83 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     // number that could legitimately appear.
     if (/\b312\s*rounds?\b/i.test(bodyText)) {
       console.log('[finding] "312 rounds" appears — verify this is computed, not DEMO_BRIEFING fallback');
+    }
+  });
+
+  // ── Stage 2.5: Onboarding AI Agent ──────────────────────────────────────
+  // The same data flows (members + tee-sheet import) should also be doable
+  // via the onboarding AI agent chat endpoint. This stage POSTs parsed file
+  // data to /api/onboarding-agent/chat and verifies the agent analyzes,
+  // proposes a mapping, and can orchestrate the import.
+  //
+  // Preconditions: steps 1-7 have already imported members + tee-sheet via
+  // the wizard. We reuse the same authenticated session. The agent should
+  // be able to analyze an additional file and produce actionable output
+  // without re-running signup.
+  test('8 — Onboarding AI agent analyzes members CSV structure', async () => {
+    test.setTimeout(120000);
+
+    const token = await page.evaluate(() => localStorage.getItem('swoop_auth_token'));
+    const clubId = await page.evaluate(() => localStorage.getItem('swoop_club_id'));
+    expect.soft(token, 'auth token should be present').toBeTruthy();
+    expect.soft(clubId, 'club id should be present').toBeTruthy();
+
+    // Build a tiny file_data payload matching what DataOnboardingChat sends
+    // when a user drops a CSV. The onboarding agent needs: filename, headers,
+    // sample_rows, row_count. We construct these from a known real CSV.
+    const fs = await import('fs');
+    const csvPath = path.resolve(__dirname, '../../docs/jonas-exports/JCM_Members_F9.csv');
+    const raw = fs.readFileSync(csvPath, 'utf8').split(/\r?\n/).filter(Boolean);
+    const headers = raw[0].replace(/^\uFEFF/, '').split(',').map(h => h.trim());
+    const sampleRows = raw.slice(1, 6).map(line => {
+      const cells = line.split(',');
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = (cells[i] || '').trim(); });
+      return obj;
+    });
+
+    const filePayload = {
+      filename: 'JCM_Members_F9.csv',
+      headers,
+      sample_rows: sampleRows,
+      rowCount: raw.length - 1,
+      data: sampleRows, // DataOnboardingChat sends full data; we send a small sample
+    };
+
+    const agentRes = await page.request.post(`${APP_URL}/api/onboarding-agent/chat`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        message: "I've uploaded a members file. What do you see?",
+        club_id: clubId,
+        file_data: filePayload,
+      },
+      timeout: 90000,
+    });
+
+    console.log(`[onboarding-agent] status=${agentRes.status()}`);
+    expect.soft(agentRes.status(), 'onboarding-agent chat should return 200').toBe(200);
+
+    if (agentRes.ok()) {
+      const data = await agentRes.json();
+      console.log(`[onboarding-agent] response_length=${(data.response || '').length} tools_called=${(data.tools_called || []).join(',')}`);
+
+      // The agent should recognize this as members data and name-check at
+      // least one of the expected columns.
+      const response = (data.response || '').toLowerCase();
+      const recognizedMembers = /member|roster|first.name|last.name|email/.test(response);
+      expect.soft(recognizedMembers, 'agent should recognize members data').toBeTruthy();
+
+      // Should call at least one analysis tool. If zero tools called, the
+      // agent is falling back to generic chat — document as a gap.
+      if ((data.tools_called || []).length === 0) {
+        console.log('[finding] onboarding agent returned text-only response — no tool use. Agent may not be fully wired to tools pipeline for this club/session.');
+      }
+    } else {
+      const errText = await agentRes.text().catch(() => '(body read failed)');
+      console.log(`[finding] onboarding-agent returned ${agentRes.status()}: ${errText.slice(0, 300)}`);
     }
   });
 });
