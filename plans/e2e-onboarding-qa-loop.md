@@ -209,29 +209,143 @@ node scripts/db-savepoint.mjs create members-seeded <clubId>
 node scripts/db-savepoint.mjs create members-and-tee-sheet <clubId>
 ```
 
-### Stage 3 — Dining (F&B transactions)
+### Stage 2.5 — Onboarding AI agent (✅ green on 2026-04-12)
 
-**Preconditions:** restore `members-and-tee-sheet` save point.
-
-**Import:** `docs/jonas-exports/POS_Sales_Detail_SV.csv` via `/api/import-csv?importType=transactions`.
+**Import path:** `POST /api/onboarding-agent/chat` with `{message, club_id, file_data}`. The agent analyzes the file and uses its tool pipeline (`analyze_file_structure`, `detect_data_type`, `detect_vendor`, `propose_column_mapping`, `get_schema_info`, `preview_import`, `execute_import`) to orchestrate the same imports a human would do through the wizard.
 
 **Verify:**
-- Transaction count in `transactions` table matches CSV row count.
-- Every transaction's `member_id` resolves to a Stage-1 member (no orphans, no "unknown member" rows).
-- Revenue totals (daily, weekly, monthly) match SQL aggregates over the imported rows.
-- Today view's "F&B revenue" and "dining engagement" signals populate with honest values derived from the real transactions — not the hardcoded `$375,200`/`$112K` from `src/data/boardReport.js` or `briefingService.js`.
-- Member drawer now shows dining engagement score for members with post-round F&B activity.
-- Cross-domain reveal: members with tee times but no post-round dining should flag correctly.
-- Zero leaked dining values.
+- `/api/onboarding-agent/chat` returns 200 with a real Claude response (not simulation).
+- Response calls at least 4 tools — if it's text-only, the tool pipeline is broken.
+- Response recognises members data when given a members CSV (name, email, join_date columns).
+- Later (when we extend): driving the agent through a multi-turn "upload → confirm → verify" flow should land rows in the DB via `execute_import`.
+
+**Follow-up:** current b-lite step 8 only exercises the analysis phase. Extend to fully drive the import via agent tool calls (not just UI wizard).
+
+### Stage 3 — Dining (F&B transactions)
+
+**Preconditions:** restore `members-and-tee-sheet` save point (or re-run prior stages). Dining data only makes sense with members + tee sheet loaded because the most interesting signal is "members who played but didn't dine afterward."
+
+**Import:** `tests/fixtures/small/POS_Sales_Detail_SV.csv` (686 rows linked to the Stage-1 members) via `/api/import-csv?importType=transactions`. Full-size `docs/jonas-exports/POS_Sales_Detail_SV.csv` (1,916 rows) for the occasional sanity run.
+
+**Column mapping** (from `src/config/jonasMapping.js` `transactions`): `transaction_date`, `total_amount`, `member_id`, `outlet_name`, `category`, `item_count`, `tax`, `gratuity`, `comp`, `discount`, `void`, `settlement_method`, `open_time`, `close_time`, `is_post_round`. Auto-maps from Jonas aliases like `Chk#`, `Sales Area`, `Member #`, `Net Amount`, `Open Time`, `Close Time`, etc.
+
+**Verify (in order):**
+
+1. **Row count integrity.** Client-side preview reports N rows from CSV. After import, `SELECT COUNT(*) FROM transactions WHERE club_id = $1` equals N (minus any rejected rows — expect zero rejects because our small fixture is pre-validated).
+
+2. **Join to members.** Every transaction's `member_id` resolves to a Stage-1 member row. No orphans: `SELECT COUNT(*) FROM transactions t LEFT JOIN members m ON m.external_id = REPLACE(t.member_id, $clubId || '_', '') WHERE m.member_id IS NULL AND t.club_id = $1` equals 0.
+
+3. **Revenue totals are honest.** The Revenue page and Board Report "Monthly Revenue" KPI must match `SELECT SUM(total_amount) FROM transactions WHERE club_id = $1 AND transaction_date BETWEEN ...`. No `$375,200` hardcoded fallback. No `briefingService.DEMO_BRIEFING.keyMetrics.monthlyRevenue` leak.
+
+4. **Today view's F&B signals populate.** With transactions imported, `TodayView` should now render:
+   - A dining engagement hint under the member alerts section if members have post-round dining activity.
+   - Revenue-adjacent numbers derived from today's and yesterday's real transactions.
+   - Nothing hardcoded from `briefingService.js:117` (DEMO_BRIEFING.keyMetrics). Assert no `$375,200`, no `87%` revenue-vs-plan banners.
+
+5. **Member drawer dining dimension.** `MemberProfileDrawer.HealthDimensionGrid` should now render the Dining Frequency tile with a real score for any member with F&B rows. For members without F&B, the tile stays "Not connected" — honest empty state.
+
+6. **Cross-domain reveal.** After members + tee-sheet + dining are all loaded, the product should be able to surface: "N members played golf this month but didn't eat in the clubhouse." A real differentiator vs dashboards that can't join domains. Add a `b-lite-journey.spec.js` step that navigates to wherever this surfaces (likely Today view or a new cross-domain card) and verifies the number matches a SQL `SELECT COUNT(*) FROM (bookings b LEFT JOIN transactions t ON ... WHERE t.id IS NULL) ...` equivalent.
+
+7. **Zero leaked dining values.** Regex-assert that none of these appear in the rendered body for the real club:
+   - `$375,200` / `$375.2K` / `$375200` (all the forms of the DEMO_BRIEFING revenue number)
+   - `87%` near the word "utilization" or "margin"
+   - `$16,400` average spend (carryover sanity check from Stage 1's assertion)
+
+**Known leaks to hunt** (from Agent C's earlier audit):
+- `src/data/boardReport.js:9` — `Monthly Revenue: 375200` hardcoded KPI. Covered by the `getKPIs()` routing fix from Stage 1, but verify the path holds for live clubs with transactions imported.
+- `src/services/briefingService.js:117` — `DEMO_BRIEFING.keyMetrics.monthlyRevenue: 375200`. Stage 1 patched `teeSheet.utilization`; this commit should patch `keyMetrics.monthlyRevenue` too: return null / honest computation for authenticated clubs.
 
 **Snapshot when green:**
 ```
-node scripts/db-savepoint.mjs create full-roster-seeded <clubId>
+node scripts/db-savepoint.mjs create members-tee-dining <clubId>
 ```
 
-### Stage 4+ — Everything else
+### Stage 3.5 — AI Agent deep test (GM-as-user)
 
-After dining, the same staged pattern applies to complaints, staff, shifts, events, email campaigns. Each new stage restores the latest green save point and adds its data on top. Each new stage adds its own zero-fallback assertion to `b-lite-journey.spec.js`.
+**Preconditions:** `stage-dining` save point green (members + tee sheet + dining all loaded). Restore it before running this stage so there's no variation in the data the agents see.
+
+**What this stage verifies:** the six orchestration agents (`Member Pulse`, `Demand Optimizer`, `Service Recovery`, `Revenue Analyst`, `Engagement Autopilot`, `Labor Optimizer`) — and their trigger endpoints — can actually:
+
+1. Produce specific, actionable recommendations from the imported data.
+2. Show up as pending actions in the UI (Today view, Inbox, Member drawer).
+3. Explain WHY each recommendation was made, referencing a real member row, booking row, transaction row, or complaint row.
+4. Accept approval / dismissal and persist the outcome.
+5. Hand off to other agents where the platform claims orchestration happens (e.g., Service Recovery resolving a complaint feeds Member Pulse's risk score).
+6. Be used by a GM through either direct UI interaction OR the Chief of Staff / concierge chat.
+
+**Persona for the test:** a real club GM who just completed onboarding and now opens the app expecting agents to tell them what matters today. No prior knowledge of the internal agent names or triggers. If a GM can't get value in 5 minutes, the agents fail this stage.
+
+**Test shape:** a new spec — `tests/e2e/b-lite-agents.spec.js` — that:
+
+- Restores the `stage-dining` save point and injects the saved session (same pattern as `b-lite-journey.spec.js` with `STAGE=dining`).
+- For each trigger endpoint in `api/agents/*-trigger.js`, POSTs a valid payload and verifies:
+  - 200 response (or a documented `triggered: false` with a real reason)
+  - A new row in `agent_actions` with `status = 'pending'`
+  - The `member_id` / `booking_id` / `transaction_id` in the action references a row that was actually imported in stages 1–3 (no orphans, no demo leaks)
+- Walks the UI as a GM: navigates to Today, Members, Actions, Concierge Chat (if present). For each visible recommendation, captures:
+  - The headline the GM sees
+  - The "why" (evidence the agent cites)
+  - The suggested action + owner
+  - Any numeric claim the agent makes (must match a SQL aggregate over imported data)
+- Approves at least one pending action through the UI. Verifies the action moves to `approved`, the agent's action count updates, and the underlying member/booking/transaction is flagged appropriately.
+- Tries the concierge chat with GM-realistic questions: "What should I worry about today?", "Which members are at risk?", "Where are we losing revenue?". Logs the concierge's responses. Assesses whether they reference real imported rows or fall back to generic / DEMO strings.
+- Fires triggers in combination (e.g., complaint-trigger THEN risk-trigger on the same member) and verifies Member Pulse's score response shifts to reflect the Service Recovery outcome — genuine cross-agent orchestration.
+
+**Findings capture:** every run writes to `C:\Users\tyhay\qa-outputs\agent-deep-test-<date>.md`. Each finding gets: agent name, endpoint, expected GM value, actual behavior, severity (blocking / weakens product / cosmetic), and the one-line fix class (agent prompt / trigger eligibility / UI surface / data join).
+
+**Iteration loop:** after the first run produces the findings file, the dev agent (me) reads it end-to-end, fixes every blocking and "weakens product" finding, and re-runs the spec against the same save point until it produces a clean pass. Cosmetic findings may be deferred. The criterion for moving to Stage 4 is: a GM running through the clean pass would say "yes, this is useful" for each of the 6 agents.
+
+### Stage 4 — Complaints (Service quality)
+
+**Preconditions:** restore `members-tee-dining` save point.
+
+**Import:** `tests/fixtures/small/JCM_Communications_RG.csv` (8 rows for the small set — complaints are rare even in the full 33-row file). Via `/api/import-csv?importType=complaints`.
+
+**Column mapping** (from `jonasMapping.js` `complaints`): `category`, `description`, `member_id`, `status`, `priority`, `reported_at`, `resolved_at`. Auto-maps from Jonas aliases like `Type`, `Subject`, `Member #`, `Complete`, `Happometer Score`, `Date`, `Resolution Date`.
+
+**Verify:**
+- Complaint count matches CSV. No rejected rows.
+- Every complaint's `member_id` resolves to a Stage-1 member.
+- Service page `ComplaintsTab` renders the real rows with correct status (open/resolved), category, and member names.
+- Today view's `TodaysRisks` section now shows open complaints tied to real members. No hardcoded `4 open complaints` from DEMO_BRIEFING.
+- Board Report `Service Quality Score` is either computed from complaints resolution rate OR shows "Awaiting data" — not the hardcoded 87%.
+- Member drawer for a complaint-linked member shows the complaint in the member's timeline.
+
+**Snapshot when green:**
+```
+node scripts/db-savepoint.mjs create members-tee-dining-complaints <clubId>
+```
+
+### Stage 5 — Agent orchestration (trigger agents against loaded data)
+
+**Preconditions:** restore `members-tee-dining-complaints`. By now the tenant has members with real golf + dining + complaint data — enough context for every agent to actually produce recommendations.
+
+**What this stage verifies:** the 6 registered agents (`Member Pulse`, `Demand Optimizer`, `Service Recovery`, `Revenue Analyst`, `Engagement Autopilot`, `Labor Optimizer`) can be triggered and will each write at least one row into `agent_actions` with status `pending`, referencing real imported members.
+
+**Trigger endpoints** (from `api/agents/*-trigger.js`):
+- `POST /api/agents/risk-trigger` with `{memberId}` — Member Pulse fires on at-risk member
+- `POST /api/agents/fb-trigger` — F&B trigger based on post-round dining gaps
+- `POST /api/agents/complaint-trigger` — Service Recovery for unresolved complaints
+- `POST /api/agents/cos-trigger` — Chief of Staff / Revenue Analyst orchestration
+- `POST /api/agents/gameplan-trigger` — daily gameplan
+- `POST /api/agents/staffing-trigger` — Labor Optimizer
+- `POST /api/agents/arrival-trigger` — member arrival
+
+**Verify:**
+1. For each trigger endpoint, POST with real club session + a real member id. Expect 200 + `{triggered: true, ...}` OR a documented "not triggered" reason (e.g., "member not at risk — criteria not met").
+2. After firing all triggers, `SELECT COUNT(*) FROM agent_actions WHERE club_id = $1 AND status = 'pending'` should be > 0.
+3. `/api/agents` should now return those pending actions in its `actions` array.
+4. `MemberAlerts` on the Today view should render at least one agent-surfaced recommendation with a real member's name, a real "because..." explanation, and an approve button.
+5. Approving a pending action should move it to `status = 'approved'` and update the agent's action count.
+
+**Snapshot when green:**
+```
+node scripts/db-savepoint.mjs create full-staged-cycle <clubId>
+```
+
+### Stage 6+ — Everything else
+
+After dining + complaints + agents, the remaining data types follow the same pattern: staff, shifts, events, email campaigns. Each new stage restores the latest green save point and adds its data on top. Each new stage adds its own zero-fallback assertion to `b-lite-journey.spec.js`.
 
 ### Final verification
 

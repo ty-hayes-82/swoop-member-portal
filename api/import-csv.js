@@ -488,14 +488,17 @@ export default withAuth(async function handler(req, res) {
     }
   }
 
-  // Pre-import: auto-create referenced courses for tee_times to avoid FK violations
+  // Pre-import: auto-create referenced courses for tee_times to avoid FK
+  // violations. Course IDs are tenant-scoped (clubId_rawCourseId) because
+  // raw codes like "course_main" collide across every tenant's import.
   if (importType === 'tee_times') {
     const courseIds = new Set(cleanRows.map(r => r.course).filter(Boolean));
-    for (const courseId of courseIds) {
+    for (const rawCourseId of courseIds) {
+      const uniqueCourseId = `${clubId}_${rawCourseId}`;
       try {
         await sql`
           INSERT INTO courses (course_id, club_id, course_name, holes, par)
-          VALUES (${courseId}, ${clubId}, ${courseId}, 18, 72)
+          VALUES (${uniqueCourseId}, ${clubId}, ${rawCourseId}, 18, 72)
           ON CONFLICT (course_id) DO NOTHING
         `;
       } catch { /* courses table may not exist or have different schema — non-critical */ }
@@ -562,6 +565,46 @@ export default withAuth(async function handler(req, res) {
         await sql`
           INSERT INTO complaints (club_id, member_id, category, description, status, priority, reported_at, data_source)
           VALUES (${clubId}, ${row.member_id || null}, ${row.category}, ${row.description}, ${row.status || 'open'}, ${row.priority || 'medium'}, ${row.reported_at || new Date().toISOString()}, 'csv_import')
+        `;
+      } else if (importType === 'tee_times') {
+        // bookings.booking_id is the PK but isn't composite with club_id, so
+        // a raw `bkg_0001` from the CSV collides with every other tenant's
+        // bkg_0001. Prefix with clubId to keep rows tenant-scoped. Same
+        // pattern we use for members.member_id. booking_players that
+        // reference booking_id will need to apply the same transform when
+        // we wire them up.
+        const uniqueBookingId = `${clubId}_${row.reservation_id}`;
+        // course_id also collides across tenants if left raw. Use the
+        // pre-import auto-insert path which creates a clubId-scoped course.
+        const uniqueCourseId = `${clubId}_${row.course}`;
+        // has_guest / has_caddie are INTEGER columns (0/1), not booleans.
+        // Coerce raw "0"/"1"/""/"true"/"false" to 0/1.
+        const toInt01 = (v) => (v === 1 || v === '1' || v === 'true' || v === true) ? 1 : 0;
+        await sql`
+          INSERT INTO bookings (booking_id, club_id, course_id, booking_date, tee_time, player_count, has_guest, transportation, has_caddie, status, check_in_time, round_start, round_end, duration_minutes, member_id)
+          VALUES (
+            ${uniqueBookingId}, ${clubId}, ${uniqueCourseId},
+            ${row.date || null}, ${row.tee_time || null},
+            ${row.players ? Number(row.players) : 1},
+            ${toInt01(row.guest_flag)},
+            ${row.transportation || null},
+            ${toInt01(row.caddie)},
+            ${row.status || 'confirmed'},
+            ${row.check_in_time || null}, ${row.round_start || null}, ${row.round_end || null},
+            ${row.duration_min ? Number(row.duration_min) : null},
+            ${row.member_id || null}
+          )
+          ON CONFLICT (booking_id) DO UPDATE SET
+            course_id = EXCLUDED.course_id,
+            booking_date = EXCLUDED.booking_date,
+            tee_time = EXCLUDED.tee_time,
+            player_count = EXCLUDED.player_count,
+            status = EXCLUDED.status,
+            check_in_time = EXCLUDED.check_in_time,
+            round_start = EXCLUDED.round_start,
+            round_end = EXCLUDED.round_end,
+            duration_minutes = EXCLUDED.duration_minutes,
+            member_id = EXCLUDED.member_id
         `;
       } else {
         // Generic insert for all other import types

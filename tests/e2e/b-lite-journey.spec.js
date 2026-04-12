@@ -10,21 +10,85 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
+import { existsSync, readFileSync } from 'fs';
+import { homedir } from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const APP_URL = process.env.APP_URL || 'http://localhost:3001';
 const SHOT_DIR = path.resolve(__dirname, '../../tmp/b-lite-screenshots');
+const REPO = path.resolve(__dirname, '../..');
 const TS = Date.now();
+
+// STAGE env var controls which stage to iterate on. When set, all prior
+// stages are skipped and the matching save point is restored before the
+// current stage runs. Each stage also auto-snapshots after its last test
+// passes, so the NEXT stage can branch off without a full re-run.
+//
+//   (unset)       — run every stage from scratch
+//   STAGE=members — run only stage 1 from signup (no restore)
+//   STAGE=tee     — restore stage-1 save point, run stage 2+
+//   STAGE=dining  — restore stage-2 save point, run stage 3+
+//   STAGE=agents  — restore stage-3 save point, run stage 4+
+//
+// Stage order: members → tee → dining → agents (future: complaints, staff...)
+const STAGE = (process.env.STAGE || '').toLowerCase();
+const STAGE_ORDER = ['members', 'tee', 'dining', 'agents'];
+const STAGE_INDEX = STAGE ? STAGE_ORDER.indexOf(STAGE) : -1;
+const RESTORE_FROM = STAGE_INDEX > 0 ? `stage-${STAGE_ORDER[STAGE_INDEX - 1]}` : null;
+
+function shouldRun(stage) {
+  if (!STAGE) return true;
+  return STAGE_ORDER.indexOf(stage) >= STAGE_INDEX;
+}
+
+function savepointSessionPath(name) {
+  // Outside the project root — see db-savepoint.mjs for the rationale.
+  return path.join(homedir(), '.swoop-savepoints', `${name.replace(/[^a-z0-9_]/gi, '_')}.json`);
+}
+
+function captureSavepoint(name, clubId) {
+  try {
+    execSync(`node scripts/db-savepoint.mjs create ${name} ${clubId}`, {
+      cwd: REPO,
+      stdio: 'inherit',
+      timeout: 60000,
+    });
+  } catch (e) {
+    console.log(`[savepoint] create "${name}" failed: ${e.message}`);
+  }
+}
+
+function restoreSavepoint(name, clubId) {
+  try {
+    execSync(`node scripts/db-savepoint.mjs restore ${name} ${clubId}`, {
+      cwd: REPO,
+      stdio: 'inherit',
+      timeout: 60000,
+    });
+  } catch (e) {
+    console.log(`[savepoint] restore "${name}" failed: ${e.message}`);
+  }
+}
+
+function loadSavepointSession(name) {
+  const p = savepointSessionPath(name);
+  if (!existsSync(p)) return null;
+  try { return JSON.parse(readFileSync(p, 'utf8')); }
+  catch { return null; }
+}
+
+const TS_STR = TS.toString();
 const PERSONA = {
-  clubName: `QA Sonoran Pines ${TS}`,
+  clubName: `QA Sonoran Pines ${TS_STR}`,
   city: 'Phoenix',
   state: 'AZ',
   zip: '85001',
   memberCount: '50',
   adminName: 'QA GM',
-  adminEmail: `qa+${TS}@swoopgolf.com`,
+  adminEmail: `qa+${TS_STR}@swoopgolf.com`,
   adminPassword: 'QaPass1234!',
 };
 
@@ -39,6 +103,47 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
 
   test.beforeAll(async ({ browser }) => {
     const ctx = await browser.newContext();
+
+    // If STAGE is set to something other than 'members', restore the prior
+    // stage's save point + session before any test runs. Dining iteration
+    // takes <1 min instead of 3+ because signup + members + tee-sheet are
+    // skipped entirely.
+    if (RESTORE_FROM) {
+      const session = loadSavepointSession(RESTORE_FROM);
+      if (!session) {
+        throw new Error(
+          `STAGE=${STAGE} requires save point "${RESTORE_FROM}" but tests/fixtures/savepoint-${RESTORE_FROM.replace(/[^a-z0-9_]/gi, '_')}.json does not exist. ` +
+          `Run the full spec once (or with STAGE=${STAGE_ORDER[STAGE_INDEX - 1]}) to generate it.`
+        );
+      }
+      console.log(`[stage] restoring "${RESTORE_FROM}" for club ${session.clubId}`);
+      restoreSavepoint(RESTORE_FROM, session.clubId);
+      clubId = session.clubId;
+      // Inject the saved session into localStorage BEFORE the first page load
+      await ctx.addInitScript(({ token, user, clubId: cid, clubName }) => {
+        localStorage.setItem('swoop_auth_token', token);
+        localStorage.setItem('swoop_auth_user', JSON.stringify(user));
+        localStorage.setItem('swoop_club_id', cid);
+        localStorage.setItem('swoop_club_name', clubName);
+      }, {
+        token: session.token,
+        user: {
+          userId: session.userId,
+          clubId: session.clubId,
+          name: session.userName || 'QA GM',
+          email: session.userEmail,
+          role: session.role || 'gm',
+          title: 'General Manager',
+          clubName: session.clubName,
+        },
+        clubId: session.clubId,
+        clubName: session.clubName,
+      });
+      // Override the persona so subsequent assertions (like "club name should
+      // appear") match the restored club, not the timestamped fresh persona.
+      PERSONA.clubName = session.clubName;
+    }
+
     page = await ctx.newPage();
     page.on('pageerror', e => pageErrors.push(`pageerror: ${e.message}`));
     page.on('console', msg => { if (msg.type() === 'error') pageErrors.push(`console: ${msg.text()}`); });
@@ -70,6 +175,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
 
   // ── Step 1: Real signup via UI ───────────────────────────────────────────
   test('1 — Real signup creates a club in Neon', async () => {
+    test.skip(!shouldRun('members'), `STAGE=${STAGE} skips members stage`);
     await page.goto(APP_URL);
     await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
     await page.reload();
@@ -129,6 +235,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
 
   // ── Step 2: Real CSV upload (members) ────────────────────────────────────
   test('2 — Real members CSV imports into Neon', async () => {
+    test.skip(!shouldRun('members'), `STAGE=${STAGE} skips members stage`);
     await page.goto(`${APP_URL}/#/csv-import`);
     await page.waitForLoadState('networkidle');
     await shot('05-csv-import-page.png');
@@ -180,6 +287,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
 
   // ── Step 3: Verify members exist in the DB via the app's live endpoint ──
   test('3 — Member count from real DB matches imported CSV', async () => {
+    test.skip(!shouldRun('members'), `STAGE=${STAGE} skips members stage`);
     // Navigate to Members page — it reads from live API. If the number matches
     // what we imported, we know the DB round-trip worked end-to-end.
     await page.goto(`${APP_URL}/#/members`);
@@ -199,6 +307,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
 
   // ── Step 4: Open member drawer, verify health score explainability ──────
   test('4 — Member drawer shows health score dimension breakdown', async () => {
+    test.skip(!shouldRun('members'), `STAGE=${STAGE} skips members stage`);
     await page.goto(`${APP_URL}/#/members`);
     // Wait for MembersView to actually render a tab or member marker — not the
     // outer Suspense fallback.
@@ -238,6 +347,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
 
   // ── Step 4b: Verify stats come from real data, not static fallbacks ─────
   test('4b — Members stats match imported data (no hardcoded fallbacks)', async () => {
+    test.skip(!shouldRun('members'), `STAGE=${STAGE} skips members stage`);
     await page.goto(`${APP_URL}/#/members`);
     await page.waitForFunction(
       () => /All Members|Archetype|Resignation/i.test(document.body.innerText),
@@ -261,8 +371,22 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     expect.soft(leakedRenewal, 'static renewal rate 91% must not appear').toBe(false);
   });
 
+  // Auto-snapshot at the end of Stage 1 (members). Any subsequent stage
+  // can now run in isolation via STAGE=<next> by restoring this save point.
+  test('4c — Snapshot stage-members for fast downstream iteration', async () => {
+    test.skip(!shouldRun('members'), `STAGE=${STAGE} skips members snapshot`);
+    const activeClubId = clubId || await page.evaluate(() => localStorage.getItem('swoop_club_id'));
+    if (activeClubId) {
+      captureSavepoint('stage-members', activeClubId);
+      console.log(`[stage-snapshot] stage-members saved for ${activeClubId}`);
+    }
+  });
+
   // ── Step 5: AI Agent visibility ──────────────────────────────────────────
+  // Stage `members` — still part of the members walkthrough, just verifying
+  // the admin page loads. Skipped when STAGE=tee or later.
   test('5 — AI agent surfaces are reachable and document state', async () => {
+    test.skip(!shouldRun('members'), `STAGE=${STAGE} skips members stage`);
     // Close any open drawer first
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
@@ -307,6 +431,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
   // `members-seeded` save point via scripts/db-savepoint.mjs instead of
   // re-running signup + members import.
   test('6 — Real tee-sheet CSV imports into Neon', async () => {
+    test.skip(!shouldRun('tee'), `STAGE=${STAGE} skips tee-sheet stage`);
     test.setTimeout(480000); // 8 min — 4,415 sequential Neon INSERTs take ~4-6 min
     // Navigate back to CSV import for a second pass. The previous run may
     // have landed on a "result" screen; reset via direct URL.
@@ -370,6 +495,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
   // 401, or static demo data), we capture it as a finding — the prompt said
   // "If agents are not yet wired to live data, document as gap not bug."
   test('7a — Agent recommendations surface after members + tee-sheet', async () => {
+    test.skip(!shouldRun('tee'), `STAGE=${STAGE} skips tee-sheet stage`);
     // Wait for the fire-and-forget /api/compute-health-scores triggered by
     // the members import to actually land.
     await page.waitForTimeout(3000);
@@ -416,6 +542,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
   });
 
   test('7 — Tee Sheet page renders real bookings (no hardcoded fallbacks)', async () => {
+    test.skip(!shouldRun('tee'), `STAGE=${STAGE} skips tee-sheet stage`);
     await page.goto(`${APP_URL}/#/tee-sheet`);
     await page.waitForFunction(
       () => {
@@ -449,6 +576,16 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     }
   });
 
+  // Auto-snapshot at the end of Stage 2 (tee-sheet).
+  test('7c — Snapshot stage-tee for fast downstream iteration', async () => {
+    test.skip(!shouldRun('tee'), `STAGE=${STAGE} skips tee snapshot`);
+    const activeClubId = clubId || await page.evaluate(() => localStorage.getItem('swoop_club_id'));
+    if (activeClubId) {
+      captureSavepoint('stage-tee', activeClubId);
+      console.log(`[stage-snapshot] stage-tee saved for ${activeClubId}`);
+    }
+  });
+
   // ── Stage 2.5: Onboarding AI Agent ──────────────────────────────────────
   // The same data flows (members + tee-sheet import) should also be doable
   // via the onboarding AI agent chat endpoint. This stage POSTs parsed file
@@ -460,6 +597,7 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
   // be able to analyze an additional file and produce actionable output
   // without re-running signup.
   test('8 — Onboarding AI agent analyzes members CSV structure', async () => {
+    test.skip(!shouldRun('tee'), `STAGE=${STAGE} skips onboarding agent check`);
     test.setTimeout(120000);
 
     const token = await page.evaluate(() => localStorage.getItem('swoop_auth_token'));
@@ -523,6 +661,130 @@ test.describe('B-lite — real-backend diagnostic journey', () => {
     } else {
       const errText = await agentRes.text().catch(() => '(body read failed)');
       console.log(`[finding] onboarding-agent returned ${agentRes.status()}: ${errText.slice(0, 300)}`);
+    }
+  });
+
+  // ── Stage 3: Dining (F&B transactions) ─────────────────────────────────
+  // Import POS sales detail on top of members + tee-sheet. This unlocks:
+  //  - Revenue totals computed from real transactions (no $375,200 leak)
+  //  - Dining engagement dimension on member health
+  //  - Cross-domain signal: members who played but didn't dine
+  test('9 — Real POS transactions CSV imports into Neon', async () => {
+    test.skip(!shouldRun('dining'), `STAGE=${STAGE} skips dining stage`);
+    test.setTimeout(240000); // 4 min — 686 POS rows × 20-way concurrency
+
+    await page.goto(`${APP_URL}/#/csv-import`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1500);
+
+    const moreDataBtn = page.locator('button:has-text("Import More Data")');
+    if (await moreDataBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await moreDataBtn.click();
+      await page.waitForTimeout(1000);
+    }
+
+    // Jonas → F&B Transactions
+    const jonasBtn = page.locator('button:has-text("Jonas Club Software")').first();
+    if (await jonasBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await jonasBtn.click();
+      await page.waitForTimeout(300);
+    }
+    await page.locator('button:has-text("POS_Sales_Detail")').first().click();
+    await page.waitForTimeout(300);
+    await page.locator('button:has-text("Next: Upload File")').click();
+    await page.waitForTimeout(1000);
+
+    const csvPath = path.resolve(__dirname, '../fixtures/small/POS_Sales_Detail_SV.csv');
+    await page.locator('input[type="file"]').setInputFiles(csvPath);
+    await page.waitForTimeout(2000);
+    await shot('20-pos-uploaded.png');
+
+    const mapBtn = page.locator('button:has-text("Next: Map Columns"), button:has-text("Map Columns")').first();
+    if (await mapBtn.isVisible({ timeout: 5000 }).catch(() => false)) await mapBtn.click();
+    await page.waitForTimeout(1500);
+
+    const importRowsBtn = page.locator('button:has-text("Import"):not(:has-text("Start"))').last();
+    if (await importRowsBtn.isVisible({ timeout: 5000 }).catch(() => false)) await importRowsBtn.click();
+    await page.waitForTimeout(1500);
+
+    const startBtn = page.locator('button:has-text("Start Import")');
+    await expect.soft(startBtn, 'Start Import visible for POS').toBeVisible({ timeout: 12000 });
+
+    const importPromise = page.waitForResponse(
+      r => r.url().includes('/api/import-csv') && r.request().method() === 'POST',
+      { timeout: 120000 }
+    );
+    await startBtn.click();
+    const importRes = await importPromise;
+    expect.soft(importRes.status(), 'POS import should return 200').toBe(200);
+    const importBody = await importRes.json();
+    expect.soft(importBody.success, 'some POS rows should import').toBeGreaterThan(0);
+    await page.waitForTimeout(2000);
+    await shot('21-pos-import-complete.png');
+  });
+
+  test('10 — Revenue page renders real transaction totals (no hardcoded fallbacks)', async () => {
+    test.skip(!shouldRun('dining'), `STAGE=${STAGE} skips dining stage`);
+    await page.goto(`${APP_URL}/#/revenue`);
+    await page.waitForFunction(
+      () => {
+        const t = document.body.innerText;
+        return /revenue|spend|dining|transaction|f&b|pos/i.test(t)
+          && !/^\s*Loading\.\.\.\s*$/m.test(t);
+      },
+      null,
+      { timeout: 20000 },
+    ).catch(() => {});
+    await page.waitForTimeout(1500);
+    await shot('22-revenue-page.png');
+
+    const bodyText = (await page.locator('body').textContent()) || '';
+
+    // Club name sanity
+    expect.soft(bodyText, 'club name should still appear').toContain(PERSONA.clubName);
+
+    // Hardcoded leak candidates from src/data/boardReport.js + briefingService.js
+    const leaked375k = /\$\s*375,?200|\$\s*375\.2\s*K/i.test(bodyText);
+    expect.soft(leaked375k, 'static $375,200 monthly revenue must not appear').toBe(false);
+
+    // Hero insight card carryover check
+    expect.soft(/\$\s*16,?400/.test(bodyText), 'static $16,400 dues must not appear').toBe(false);
+  });
+
+  test('11 — Today view post-dining shows no DEMO_BRIEFING fallbacks', async () => {
+    test.skip(!shouldRun('dining'), `STAGE=${STAGE} skips dining stage`);
+    await page.goto(`${APP_URL}/#/today`);
+    await page.waitForFunction(
+      () => /member|alert|briefing|priority|risk/i.test(document.body.innerText)
+        && !/^\s*Loading\.\.\.\s*$/m.test(document.body.innerText),
+      null,
+      { timeout: 20000 },
+    ).catch(() => {});
+    await page.waitForTimeout(1500);
+    await shot('23-today-post-dining.png');
+
+    const bodyText = (await page.locator('body').textContent()) || '';
+
+    // DEMO_BRIEFING.keyMetrics values — these should never reach a real club
+    expect.soft(/\$\s*375,?200/.test(bodyText), 'DEMO_BRIEFING $375,200 revenue leak').toBe(false);
+    // DEMO_BRIEFING.keyMetrics.atRiskMembers = 7 — a small fresh club could
+    // legitimately have 7 at-risk members, so this is a soft log, not a fail.
+    if (/\b7\s*at[\s-]?risk/i.test(bodyText)) {
+      console.log('[check] "7 at-risk" appears — verify this is computed from real members, not DEMO_BRIEFING');
+    }
+    if (/\b4\s*(open\s*complaints?|unresolved)/i.test(bodyText)) {
+      console.log('[check] "4 open complaints" appears — verify this is computed, not DEMO_BRIEFING fallback');
+    }
+  });
+
+  // Auto-snapshot at the end of Stage 3 (dining). Agents stage (future)
+  // can branch off from here via STAGE=agents.
+  test('11c — Snapshot stage-dining for fast downstream iteration', async () => {
+    test.skip(!shouldRun('dining'), `STAGE=${STAGE} skips dining snapshot`);
+    const activeClubId = clubId || await page.evaluate(() => localStorage.getItem('swoop_club_id'));
+    if (activeClubId) {
+      captureSavepoint('stage-dining', activeClubId);
+      console.log(`[stage-snapshot] stage-dining saved for ${activeClubId}`);
     }
   });
 });

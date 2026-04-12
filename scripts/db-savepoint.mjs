@@ -142,8 +142,54 @@ async function cmdDrop(name) {
   });
 }
 
+// Persist the active session (token + user) alongside the save point so a
+// dining-only rerun can inject it into localStorage and skip signup.
+//
+// IMPORTANT: session JSON lives OUTSIDE the project root (in the user home
+// dir). If it lived under tests/fixtures/, Vite's dev-server file watcher
+// would broadcast an HMR reload when we wrote it, destroying the Playwright
+// page context mid-test. That happened in run 27.
+async function cmdCreateWithSession(name, clubId) {
+  const { writeFileSync, mkdirSync } = await import('fs');
+  const { homedir } = await import('os');
+  const { join } = await import('path');
+  await cmdCreate(name, clubId);
+  await withPool(async (pool) => {
+    // Pull the most recent active session for this club from the `sessions` table
+    const { rows } = await pool.query(
+      `SELECT s.token, s.user_id, s.role, u.email, u.name, c.name AS club_name
+       FROM sessions s
+       LEFT JOIN users u ON u.user_id = s.user_id
+       LEFT JOIN club c ON c.club_id = s.club_id
+       WHERE s.club_id = $1 AND s.expires_at > NOW()
+       ORDER BY s.expires_at DESC
+       LIMIT 1`,
+      [clubId],
+    );
+    if (rows.length === 0) {
+      console.log('  ! no active session — dining-only rerun will need to re-sign-in');
+      return;
+    }
+    const s = rows[0];
+    const savepointDir = join(homedir(), '.swoop-savepoints');
+    mkdirSync(savepointDir, { recursive: true });
+    const sessionFile = join(savepointDir, `${name.replace(/[^a-z0-9_]/gi, '_')}.json`);
+    writeFileSync(sessionFile, JSON.stringify({
+      savepoint: name,
+      clubId,
+      token: s.token,
+      userId: s.user_id,
+      userName: s.name,
+      userEmail: s.email,
+      clubName: s.club_name,
+      role: s.role || 'gm',
+    }, null, 2));
+    console.log(`  wrote ${sessionFile}`);
+  });
+}
+
 const [, , cmd, ...args] = process.argv;
-const handlers = { create: cmdCreate, restore: cmdRestore, list: cmdList, drop: cmdDrop };
+const handlers = { create: cmdCreateWithSession, restore: cmdRestore, list: cmdList, drop: cmdDrop };
 const handler = handlers[cmd];
 if (!handler) {
   console.error(`Usage: node scripts/db-savepoint.mjs <create|restore|list|drop> [args...]`);
