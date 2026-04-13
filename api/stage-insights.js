@@ -376,8 +376,11 @@ async function clubProfileInsight(clubId) {
   if (!r.rows.length) return null;
   const row = r.rows[0];
   if (!row.name) return null;
+  const city = row.city && row.city !== 'Unknown' ? row.city : null;
+  const state = row.state && row.state !== 'US' ? row.state : null;
+  const location = city ? `${city}${state ? `, ${state}` : ''}` : null;
   return {
-    headline: `${row.name}${row.city ? ` — ${row.city}, ${row.state}` : ''}`,
+    headline: `${row.name}${location ? ` — ${location}` : ''}`,
     metric: row.founded_year ? `Founded ${row.founded_year}` : null,
     bullets: ['Powers club header on every view'],
   };

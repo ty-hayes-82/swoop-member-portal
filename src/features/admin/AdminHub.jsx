@@ -458,6 +458,92 @@ function UserRolesTab() {
   );
 }
 
+function ClubSettingsEditor({ club, onSaved }) {
+  const [name, setName] = useState(club.name || '');
+  const [city, setCity] = useState(club.city && club.city !== 'Unknown' ? club.city : '');
+  const [state, setState] = useState(club.state && club.state !== 'US' ? club.state : '');
+  const [zip, setZip] = useState(club.zip || '');
+  const [foundedYear, setFoundedYear] = useState(club.founded_year || '');
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState(null);
+
+  const handleSave = async () => {
+    if (!name.trim()) { setErr('Club name is required'); return; }
+    setSaving(true);
+    setErr(null);
+    try {
+      const res = await fetch('/api/club', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('swoop_auth_token')}`,
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          city: city.trim() || null,
+          state: state.trim() || null,
+          zip: zip.trim() || null,
+          founded_year: foundedYear ? parseInt(foundedYear) : null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setErr(data.error || 'Save failed'); setSaving(false); return; }
+      // Update localStorage so the header picks it up without a reload
+      localStorage.setItem('swoop_club_name', name.trim());
+      const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+      user.clubName = name.trim();
+      localStorage.setItem('swoop_auth_user', JSON.stringify(user));
+      window.dispatchEvent(new Event('swoop:auth-changed'));
+      onSaved();
+    } catch (e) { setErr(e.message); }
+    setSaving(false);
+  };
+
+  const inputCls = 'h-9 w-full rounded-lg border px-3 py-2 text-sm bg-white text-gray-800 border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 dark:bg-gray-800 dark:text-white/90 dark:border-gray-700';
+
+  return (
+    <Card>
+      <div className="flex flex-col gap-3">
+        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 m-0">Club Settings</h3>
+        {err && <p className="text-xs text-error-600 dark:text-error-400">{err}</p>}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">Club Name</label>
+            <input value={name} onChange={e => setName(e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">Founded Year</label>
+            <input type="number" value={foundedYear} onChange={e => setFoundedYear(e.target.value)} placeholder="e.g. 1965" className={inputCls} />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">City</label>
+            <input value={city} onChange={e => setCity(e.target.value)} placeholder="Scottsdale" className={inputCls} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">State</label>
+              <input value={state} onChange={e => setState(e.target.value)} maxLength={2} placeholder="AZ" className={inputCls} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">ZIP</label>
+              <input value={zip} onChange={e => setZip(e.target.value)} placeholder="85255" className={inputCls} />
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-4 py-1.5 rounded-lg bg-brand-500 text-white text-xs font-bold hover:bg-brand-600 transition disabled:opacity-60"
+          >
+            {saving ? 'Saving…' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function ClubManagementTab({ currentClubId }) {
   const [clubs, setClubs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -563,8 +649,15 @@ function ClubManagementTab({ currentClubId }) {
     setDeleting(null);
   };
 
+  const currentClub = clubs.find(c => c.club_id === currentClubId);
+
   return (
     <div className="flex flex-col gap-4">
+      {/* Club Settings — always shown for the active club */}
+      {currentClub && (
+        <ClubSettingsEditor key={currentClub.club_id} club={currentClub} onSaved={fetchClubs} />
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-white/90">Club Management</h2>

@@ -148,7 +148,7 @@ export default withAuth(async function handler(req, res) {
     if (req.auth?.isDemo) {
       return res.status(403).json({ error: 'Demo sessions cannot update club metadata' });
     }
-    const { name, city, state, zip } = req.body;
+    const { name, city, state, zip, founded_year } = req.body;
     // swoop_admin may update any club by passing clubId in body or query;
     // everyone else is locked to their session club. getWriteClubId honors
     // both query and body when allowAdminOverride is set (B27), and falls
@@ -159,15 +159,24 @@ export default withAuth(async function handler(req, res) {
     });
     if (!clubId) return res.status(400).json({ error: 'clubId required' });
 
+    const foundedYearInt = founded_year ? parseInt(founded_year) : null;
+
     try {
-      await sql`
-        UPDATE club SET
-          name = COALESCE(${name || null}, name),
-          city = COALESCE(${city || null}, city),
-          state = COALESCE(${state || null}, state),
-          zip = COALESCE(${zip || null}, zip)
-        WHERE club_id = ${clubId}
-      `;
+      // Use raw query so we can update only the supplied fields and support
+      // explicit null (clearing a value) alongside COALESCE for omitted fields.
+      const updates = [];
+      const params = [];
+      if (name !== undefined)         { params.push(name || null);         updates.push(`name = $${params.length}`); }
+      if (city !== undefined)         { params.push(city || null);         updates.push(`city = $${params.length}`); }
+      if (state !== undefined)        { params.push(state || null);        updates.push(`state = $${params.length}`); }
+      if (zip !== undefined)          { params.push(zip || null);          updates.push(`zip = $${params.length}`); }
+      if (founded_year !== undefined) { params.push(foundedYearInt);       updates.push(`founded_year = $${params.length}`); }
+      if (!updates.length) return res.status(400).json({ error: 'No fields to update' });
+      params.push(clubId);
+      await sql.query(
+        `UPDATE club SET ${updates.join(', ')} WHERE club_id = $${params.length}`,
+        params
+      );
       return res.status(200).json({ success: true });
     } catch (e) {
       console.error('/api/club PUT error:', e);
