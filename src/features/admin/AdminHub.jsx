@@ -478,7 +478,9 @@ function WeatherStatusBadge({ city, clubId }) {
         setDetail(data.error || 'Weather unavailable');
       } else {
         setStatus('connected');
-        setDetail(`${Math.round(data.current?.temp ?? 0)}°F · ${data.current?.conditionsText || data.current?.conditions || '—'}`);
+        const temp = data.current?.temp ?? data.daily?.[0]?.high;
+        const cond = data.current?.conditionsText || data.daily?.[0]?.conditionsText || '';
+        setDetail(temp != null ? `${Math.round(temp)}°F${cond ? ` · ${cond}` : ''}` : cond || 'Live data available');
       }
     } catch (e) {
       setStatus('error');

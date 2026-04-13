@@ -111,7 +111,7 @@ async function cacheForecast(clubId, data, ttlMinutes = 60) {
 const GOOGLE_BASE = 'https://weather.googleapis.com';
 
 async function googleCurrentConditions(lat, lon) {
-  const key = process.env.GOOGLE_WEATHER_API_KEY;
+  const key = (process.env.GOOGLE_WEATHER_API_KEY || '').replace(/\\n|\n/g, '').trim();
   if (!key) throw new Error('GOOGLE_WEATHER_API_KEY not configured');
 
   const params = new URLSearchParams({
@@ -146,7 +146,7 @@ async function googleCurrentConditions(lat, lon) {
 }
 
 async function googleForecast(lat, lon, { hours, days } = {}) {
-  const key = process.env.GOOGLE_WEATHER_API_KEY;
+  const key = (process.env.GOOGLE_WEATHER_API_KEY || '').replace(/\\n|\n/g, '').trim();
   if (!key) throw new Error('GOOGLE_WEATHER_API_KEY not configured');
 
   let gotData = false;
