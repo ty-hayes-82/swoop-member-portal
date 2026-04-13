@@ -172,11 +172,28 @@ export default withAuth(async function handler(req, res) {
       if (zip !== undefined)          { params.push(zip || null);          updates.push(`zip = $${params.length}`); }
       if (founded_year !== undefined) { params.push(foundedYearInt);       updates.push(`founded_year = $${params.length}`); }
       if (!updates.length) return res.status(400).json({ error: 'No fields to update' });
+
+      // If city or state changed, also clear lat/lon so weather.js re-geocodes
+      // and wipe the weather cache so the next forecast fetch is fresh.
+      const locationChanged = city !== undefined || state !== undefined;
+      if (locationChanged) {
+        updates.push(`latitude = NULL`);
+        updates.push(`longitude = NULL`);
+      }
+
       params.push(clubId);
       await sql.query(
         `UPDATE club SET ${updates.join(', ')} WHERE club_id = $${params.length}`,
         params
       );
+
+      // Clear stale weather cache so next forecast call re-fetches with new location
+      if (locationChanged) {
+        try {
+          await sql`DELETE FROM weather_hourly_cache WHERE club_id = ${clubId}`;
+        } catch { /* non-critical */ }
+      }
+
       return res.status(200).json({ success: true });
     } catch (e) {
       console.error('/api/club PUT error:', e);

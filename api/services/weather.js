@@ -13,12 +13,27 @@ import { sql } from '@vercel/postgres';
 
 async function getClubCoordinates(clubId) {
   const { rows } = await sql`
-    SELECT latitude, longitude FROM club WHERE club_id = ${clubId}
+    SELECT latitude, longitude, city, state FROM club WHERE club_id = ${clubId}
   `;
-  if (!rows.length || !rows[0].latitude || !rows[0].longitude) {
-    throw new Error(`No coordinates found for club ${clubId}`);
+  if (!rows.length) throw new Error(`Club not found: ${clubId}`);
+  const row = rows[0];
+
+  // Return stored lat/lon if present
+  if (row.latitude && row.longitude) {
+    return { lat: row.latitude, lon: row.longitude };
   }
-  return { lat: rows[0].latitude, lon: rows[0].longitude };
+
+  // Fall back: geocode from city/state and persist the result
+  const city = row.city && row.city !== 'Unknown' ? row.city : null;
+  const state = row.state && row.state !== 'US' ? row.state : null;
+  if (!city) throw new Error(`No coordinates found for club ${clubId}`);
+
+  const { lat, lon } = await geocodeCity(city, state);
+
+  // Persist so subsequent calls don't need to geocode again
+  await sql`UPDATE club SET latitude = ${lat}, longitude = ${lon} WHERE club_id = ${clubId}`;
+
+  return { lat, lon };
 }
 
 function normalizeConditionCode(code) {
