@@ -581,6 +581,18 @@ async function importCsvHandler(req, res) {
         invoices: 'invoice_id',
         membership_types: 'type_code',
         service_requests: 'request_id',
+        // Added by hardening loop: these were upserting cross-tenant rows
+        // and leaving the importing tenant with no data.
+        daily_close: 'closeout_id',
+        sales_areas: 'sales_area_id',
+        households: 'household_id',
+        // POS detail: payment_id and line_item_id are global PKs. Without
+        // tenant prefix, parallel permutation runs overwrite each other's
+        // check_id FK, breaking the pos_payments→pos_checks JOIN.
+        payments: 'payment_id',
+        line_items: 'line_item_id',
+        // booking_players.player_id has the same global-PK problem.
+        booking_players: 'player_id',
       };
       const pkField = PREFIXED_PK[importType];
       if (pkField && row[pkField]) {

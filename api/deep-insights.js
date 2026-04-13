@@ -353,9 +353,14 @@ async function memberEngagementKind(clubId, opts) {
     { kind: 'opens',       label: 'Email Opens',     count: Number(opens.rows[0]?.n || 0),      last: opens.rows[0]?.last },
     { kind: 'complaints',  label: 'Complaints',      count: Number(complaints.rows[0]?.n || 0), last: complaints.rows[0]?.last },
   ];
-  const anyData = dimensions.some(d => d.count > 0);
+  // Verify the member actually exists for this tenant before flipping to
+  // available. An empty timeline (all dimensions zero) is still a valid
+  // render — it tells the GM "we're tracking this member, nothing yet."
+  const memberExists = await sql`
+    SELECT 1 FROM members WHERE club_id = ${clubId} AND member_id = ${memberId} LIMIT 1
+  `.catch(() => ({ rows: [] }));
   return {
-    available: anyData,
+    available: memberExists.rows.length > 0,
     memberId,
     dimensions,
     openComplaints: Number(complaints.rows[0]?.open || 0),
