@@ -320,7 +320,9 @@ test.describe('2 — Setup Wizard', () => {
   test('2.16 — Upload members CSV and verify column mapping', async () => {
     test.skip(!clubCreated, 'Club creation was rate-limited');
     const membersFile = path.join(TEMPLATE_DIR, 'JCM_Members_F9.csv');
-    const fileInput = page.locator('input[type="file"]');
+    // The wizard file input is distinct from the MultiFileDropZone at the
+    // top of the page — scope by data-testid so both inputs can coexist.
+    const fileInput = page.locator('[data-testid="wizard-file-input"]');
     await expect(fileInput).toBeAttached({ timeout: 5000 });
     await fileInput.setInputFiles(membersFile);
     await page.waitForTimeout(2000);
@@ -477,9 +479,10 @@ test.describe('2B — Progressive Import Insights', () => {
     await pg.locator('button:has-text("Next: Upload File")').click();
     await pg.waitForTimeout(1000);
 
-    // Step 1: Upload file
+    // Step 1: Upload file — scope to the wizard input so we don't hit the
+    // MultiFileDropZone input at the top of the page.
     const filePath = path.join(TEMPLATE_DIR, csvFileName);
-    const fileInput = pg.locator('input[type="file"]');
+    const fileInput = pg.locator('[data-testid="wizard-file-input"]');
     await fileInput.setInputFiles(filePath);
     await pg.waitForTimeout(2000);
 

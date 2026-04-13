@@ -11,6 +11,8 @@ const VALID_ROUTES = new Set([
   'revenue', 'insights', 'actions',
   // Accessible via direct navigation (not in nav)
   'member-profile', 'integrations', 'profile', 'automations', 'agent-activity',
+  // App-shell routes handled outside ROUTES map (see src/App.jsx)
+  'new-club',
   // Legacy routes (redirect via ROUTE_REDIRECTS below)
   'daily-briefing', 'operations', 'waitlist-demand', 'fb-performance',
   'member-health', 'revenue-leakage', 'outreach-playbooks', 'staffing-service', 'growth-pipeline',

@@ -151,6 +151,7 @@ function MultiFileDropZone({ onFilesClassified }) {
           accept=".csv,.xlsx,.xls"
           onChange={(e) => ingest(e.target.files)}
           className="hidden"
+          data-testid="bulk-csv-input"
         />
         <div className="text-3xl mb-2">📁</div>
         <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -541,6 +542,7 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
           aria-label="Upload file"
           onChange={e => validateAndSetFile(e.target.files?.[0])}
           className="hidden"
+          data-testid="wizard-file-input"
         />
         {file ? (
           <>
