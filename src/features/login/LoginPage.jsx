@@ -5,6 +5,7 @@
  */
 import { useState } from 'react';
 import NewClubSetup from './NewClubSetup';
+import { loadStaticDemo } from '@/services/demoSession';
 
 export default function LoginPage({ onLogin }) {
   const [screen, setScreen] = useState('signin'); // 'signin' | 'explore'
@@ -82,40 +83,19 @@ export default function LoginPage({ onLogin }) {
   const [demoPhone, setDemoPhone] = useState('');
 
   const startDemo = (guided = false) => {
-    const demoClubId = `demo_${Date.now()}`;
-    const demoUser = {
-      userId: 'demo', clubId: demoClubId, name: 'Demo User',
-      email: demoEmail || 'demo@swoopgolf.com',
-      phone: demoPhone || '',
-      role: 'gm', title: 'General Manager',
-      isDemoSession: true,
-    };
-    localStorage.setItem('swoop_auth_user', JSON.stringify(demoUser));
-    localStorage.setItem('swoop_auth_token', 'demo');
-    localStorage.setItem('swoop_club_id', demoClubId);
-    localStorage.setItem('swoop_club_name', 'Pinetree Country Club');
-    if (demoEmail) localStorage.setItem('swoop_demo_email', demoEmail);
-    if (demoPhone) localStorage.setItem('swoop_demo_phone', demoPhone);
+    // Canonical static demo loader. Guided mode is a variant that clears
+    // the preloaded inbox so the walkthrough starts from an empty state.
+    const demoUser = loadStaticDemo({ email: demoEmail, phone: demoPhone });
     if (guided) {
       sessionStorage.setItem('swoop_demo_guided', 'true');
-      sessionStorage.removeItem('swoop_demo_sources');
-      sessionStorage.removeItem('swoop_demo_files');
-      sessionStorage.removeItem('swoop_demo_gates');
       localStorage.setItem('swoop_was_guided', 'true');
-      // Clear any stale persisted inbox from a prior 'demo' mode AppContext mount
-      // on this same page load. Without this, the in-memory inbox keeps the
-      // 15 demo actions that were preloaded before the user chose Guided Demo.
       localStorage.removeItem('swoop_agent_inbox');
-    } else {
-      sessionStorage.removeItem('swoop_demo_guided');
-      localStorage.removeItem('swoop_was_guided');
+      try {
+        window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed', {
+          detail: { action: 'mode-change', guided: true },
+        }));
+      } catch { /* best-effort */ }
     }
-    // Notify AppContext (and any other listeners) that the data mode just
-    // changed so they can re-evaluate the inbox / agents under the new gates.
-    // For guided mode this CLEARS the inbox; for full demo it's a no-op refresh.
-    try {
-      window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed', { detail: { action: 'mode-change', guided } }));
-    } catch {}
     onLogin?.(demoUser);
   };
 

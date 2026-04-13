@@ -15,6 +15,7 @@ const MemberConciergeTest = lazy(() => import('@/features/concierge/MemberConcie
 const InvestorSite = lazy(() => import('@/features/invest/InvestorSite'));
 const LandingPage = lazy(() => import('@/landing/LandingPage.jsx'));
 const QuickClubSetup = lazy(() => import('@/features/login/QuickClubSetup'));
+const NewClubSetup = lazy(() => import('@/features/login/NewClubSetup'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
 const GamePlanDemo = lazy(() => import('@/features/demo/GamePlanDemo'));
 const BoardReportDemo = lazy(() => import('@/features/demo/BoardReportDemo'));
@@ -463,6 +464,20 @@ export default function App() {
 
   if (!authed) {
     return <LoginPage onLogin={() => setAuthed(true)} />;
+  }
+
+  // "Create New Club" from the user menu routes here. Re-authenticated users
+  // land in the full NewClubSetup wizard so they can spin up a fresh club
+  // without signing out first.
+  if (currentHash === '#/new-club' || currentHash.startsWith('#/new-club?')) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading...</div>}>
+        <NewClubSetup
+          onComplete={() => { window.location.hash = '#/today'; window.location.reload(); }}
+          onBack={() => { window.location.hash = '#/today'; }}
+        />
+      </Suspense>
+    );
   }
 
   // Quick setup for Google OAuth users who haven't named their club yet.
