@@ -18,6 +18,7 @@ import SourceBadge from '@/components/ui/SourceBadge';
 import { getHealthRollup, useApiHealthData } from '@/services/apiHealthService';
 import { useCurrentClub } from '@/hooks/useCurrentClub';
 import { getDataMode } from '@/services/demoGate';
+import { refreshWeatherForLocation } from '@/services/weatherService';
 
 // Shared with DataHealthDashboard — keep in sync with DOMAIN_PILLAR_IMPACT there.
 const DOMAIN_VALUE_PCTS = { CRM: 40, TEE_SHEET: 25, POS: 20, EMAIL: 10, LABOR: 5 };
@@ -488,11 +489,19 @@ function ClubSettingsEditor({ club, onSaved }) {
       });
       const data = await res.json();
       if (!res.ok) { setErr(data.error || 'Save failed'); setSaving(false); return; }
-      // Update localStorage so the header picks it up without a reload
+      // Update localStorage so the header and weather service pick it up immediately
       localStorage.setItem('swoop_club_name', name.trim());
       const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
       user.clubName = name.trim();
       localStorage.setItem('swoop_auth_user', JSON.stringify(user));
+      if (city.trim()) {
+        localStorage.setItem('swoop_club_city', city.trim());
+        localStorage.setItem('swoop_club_state', state.trim() || '');
+        refreshWeatherForLocation().catch(() => {});
+      } else {
+        localStorage.removeItem('swoop_club_city');
+        localStorage.removeItem('swoop_club_state');
+      }
       window.dispatchEvent(new Event('swoop:auth-changed'));
       onSaved();
     } catch (e) { setErr(e.message); }
