@@ -26,7 +26,7 @@ async function serviceSaveHandler(req, res) {
   try {
     // 1. Query member health_score and annual_dues
     const memberResult = await sql`
-      SELECT health_score, annual_dues
+      SELECT health_score, annual_dues, first_name, last_name, health_tier
       FROM members
       WHERE member_id = ${member_id} AND club_id = ${clubId}
     `;
@@ -38,6 +38,33 @@ async function serviceSaveHandler(req, res) {
     const member = memberResult.rows[0];
     const healthScore = member.health_score ?? 100;
     const annualDues = member.annual_dues ?? 0;
+
+    // SIM-mode demo write — fire the agent regardless of strict criteria so
+    // the GM can see a real Anthropic recommendation against any complaint
+    // they file. The strict eligibility check still gates the playbook flow
+    // below; only the agent_actions surface is unconditional.
+    if (SIMULATION_MODE) {
+      try {
+        await realAgentCall({
+          clubId,
+          agentId: 'member-service-recovery',
+          actionType: 'service_save',
+          memberId: member_id,
+          systemPrompt: `You are the Member Service Recovery agent for a private golf and country club. A member has filed a complaint. Recommend ONE concrete service-save action the GM can execute in the next 24 hours. Reference real numbers (dues, health score, complaint priority).`,
+          contextData: {
+            member: {
+              name: `${member.first_name || ''} ${member.last_name || ''}`.trim(),
+              annual_dues: annualDues,
+              health_score: healthScore,
+              health_tier: member.health_tier,
+            },
+            complaint: { complaint_id, category: category || null, priority },
+          },
+        });
+      } catch (err) {
+        console.warn('[service-save-trigger] real agent call failed:', err.message);
+      }
+    }
 
     // 2. Evaluate trigger criteria
     const triggered = healthScore <= 50 && annualDues >= 12000 && priority !== 'low';
@@ -85,29 +112,6 @@ async function serviceSaveHandler(req, res) {
 
     // 5. Triggered — create session and playbook run
     let sessionId = null;
-
-    if (SIMULATION_MODE) {
-      try {
-        const { rows: nameRows } = await sql`
-          SELECT first_name, last_name, health_tier FROM members
-          WHERE member_id = ${member_id} AND club_id = ${clubId}
-        `;
-        const m = nameRows[0] || {};
-        await realAgentCall({
-          clubId,
-          agentId: 'member-service-recovery',
-          actionType: 'service_save',
-          memberId: member_id,
-          systemPrompt: `You are the Member Service Recovery agent for a private golf and country club. A high-dues member with a low health score has filed a complaint. Recommend ONE concrete service-save action the GM can execute in the next 24 hours. Reference real numbers (dues, health score, complaint priority). Be specific about owner, deadline, and dollar impact.`,
-          contextData: {
-            member: { name: `${m.first_name || ''} ${m.last_name || ''}`.trim(), annual_dues: annualDues, health_score: healthScore, health_tier: m.health_tier },
-            complaint: { complaint_id, category: category || null, priority },
-          },
-        });
-      } catch (err) {
-        console.warn('[service-save-trigger] real agent call failed:', err.message);
-      }
-    }
 
     if (!SIMULATION_MODE) {
       // Live mode: create Managed Agent session via Anthropic API

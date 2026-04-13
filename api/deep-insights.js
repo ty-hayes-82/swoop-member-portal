@@ -211,6 +211,158 @@ async function tierRevenueKind(clubId) {
 }
 
 // ---------------------------------------------------------------------------
+// households — household-size distribution + family-targeting list
+// ---------------------------------------------------------------------------
+
+async function householdsKind(clubId) {
+  const r = await sql`
+    SELECT member_count, COUNT(*)::int AS households
+    FROM households WHERE club_id = ${clubId}
+    GROUP BY member_count ORDER BY member_count
+  `;
+  if (!r.rows.length) {
+    return { available: false, reason: 'No households imported yet' };
+  }
+  const total = await sql`SELECT COUNT(*)::int AS n FROM households WHERE club_id = ${clubId}`;
+  const families = await sql`
+    SELECT household_id, primary_member_id, member_count, address
+    FROM households
+    WHERE club_id = ${clubId} AND member_count >= 4
+    ORDER BY member_count DESC NULLS LAST
+    LIMIT 10
+  `;
+  const distribution = r.rows.map(x => ({
+    size: Number(x.member_count) || 1,
+    households: Number(x.households),
+  }));
+  const totalCount = Number(total.rows[0]?.n || 0);
+  const avgSize = distribution.reduce((s, d) => s + d.size * d.households, 0) /
+    Math.max(1, totalCount);
+  return {
+    available: true,
+    totalHouseholds: totalCount,
+    avgSize: Math.round(avgSize * 10) / 10,
+    distribution,
+    families: families.rows.map(f => ({
+      householdId: f.household_id,
+      primaryMemberId: f.primary_member_id,
+      memberCount: Number(f.member_count),
+      address: f.address,
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// service-tickets — open tickets + categories + top requesters
+// ---------------------------------------------------------------------------
+
+async function serviceTicketsKind(clubId) {
+  const r = await sql`
+    SELECT request_type, COUNT(*)::int AS total,
+      COUNT(*) FILTER (WHERE resolved_at IS NULL)::int AS open
+    FROM service_requests
+    WHERE member_id IN (SELECT member_id FROM members WHERE club_id = ${clubId})
+    GROUP BY request_type
+    ORDER BY open DESC, total DESC
+  `;
+  if (!r.rows.length) {
+    return { available: false, reason: 'No service requests imported yet' };
+  }
+  const totals = r.rows.reduce(
+    (acc, x) => ({
+      total: acc.total + Number(x.total),
+      open: acc.open + Number(x.open),
+    }),
+    { total: 0, open: 0 },
+  );
+  const topRequesters = await sql`
+    SELECT m.first_name, m.last_name,
+      COUNT(*)::int AS tickets
+    FROM service_requests sr
+    JOIN members m ON m.member_id = sr.member_id
+    WHERE m.club_id = ${clubId}
+    GROUP BY m.first_name, m.last_name
+    ORDER BY tickets DESC LIMIT 5
+  `;
+  // Avg response time on resolved tickets (response_time_min column)
+  const avg = await sql`
+    SELECT AVG(response_time_min)::numeric(8,1) AS avg_min
+    FROM service_requests
+    WHERE response_time_min IS NOT NULL
+      AND member_id IN (SELECT member_id FROM members WHERE club_id = ${clubId})
+  `;
+  return {
+    available: true,
+    total: totals.total,
+    open: totals.open,
+    avgResponseMin: avg.rows[0]?.avg_min ? Number(avg.rows[0].avg_min) : null,
+    categories: r.rows.map(x => ({
+      type: x.request_type || 'unknown',
+      total: Number(x.total),
+      open: Number(x.open),
+    })),
+    topRequesters: topRequesters.rows.map(t => ({
+      name: `${t.first_name} ${t.last_name}`.trim(),
+      tickets: Number(t.tickets),
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// member-engagement — per-member events / opens / complaints (timeline)
+// memberId comes via ?memberId= query param
+// ---------------------------------------------------------------------------
+
+async function memberEngagementKind(clubId, opts) {
+  const memberId = opts?.memberId;
+  if (!memberId) {
+    return { available: false, reason: 'memberId query param required' };
+  }
+  const [opens, rsvps, complaints, rounds] = await Promise.all([
+    sql`
+      SELECT COUNT(*)::int AS n,
+        MAX(occurred_at) AS last
+      FROM email_events
+      WHERE club_id = ${clubId} AND member_id = ${memberId} AND event_type = 'open'
+    `.catch(() => ({ rows: [{ n: 0, last: null }] })),
+    sql`
+      SELECT COUNT(*)::int AS n,
+        MAX(registered_at) AS last
+      FROM event_registrations
+      WHERE club_id = ${clubId} AND member_id = ${memberId}
+    `.catch(() => ({ rows: [{ n: 0, last: null }] })),
+    sql`
+      SELECT COUNT(*)::int AS n,
+        COUNT(*) FILTER (WHERE status != 'resolved')::int AS open,
+        MAX(reported_at) AS last
+      FROM complaints
+      WHERE club_id = ${clubId} AND member_id = ${memberId}
+    `.catch(() => ({ rows: [{ n: 0, open: 0, last: null }] })),
+    sql`
+      SELECT COUNT(*)::int AS n,
+        MAX(b.booking_date) AS last
+      FROM booking_players bp
+      JOIN bookings b ON b.booking_id = bp.booking_id
+      WHERE b.club_id = ${clubId} AND bp.member_id = ${memberId}
+        AND b.booking_date >= CURRENT_DATE - INTERVAL '90 days'
+    `.catch(() => ({ rows: [{ n: 0, last: null }] })),
+  ]);
+  const dimensions = [
+    { kind: 'rounds',     label: 'Rounds (90d)',   count: Number(rounds.rows[0]?.n || 0),     last: rounds.rows[0]?.last },
+    { kind: 'rsvps',       label: 'Event RSVPs',     count: Number(rsvps.rows[0]?.n || 0),      last: rsvps.rows[0]?.last },
+    { kind: 'opens',       label: 'Email Opens',     count: Number(opens.rows[0]?.n || 0),      last: opens.rows[0]?.last },
+    { kind: 'complaints',  label: 'Complaints',      count: Number(complaints.rows[0]?.n || 0), last: complaints.rows[0]?.last },
+  ];
+  const anyData = dimensions.some(d => d.count > 0);
+  return {
+    available: anyData,
+    memberId,
+    dimensions,
+    openComplaints: Number(complaints.rows[0]?.open || 0),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Router
 // ---------------------------------------------------------------------------
 
@@ -219,6 +371,9 @@ const KINDS = {
   'ar-aging': arAgingKind,
   courses: coursesKind,
   'tier-revenue': tierRevenueKind,
+  households: householdsKind,
+  'service-tickets': serviceTicketsKind,
+  'member-engagement': memberEngagementKind,
 };
 
 async function deepInsightsHandler(req, res) {
@@ -231,7 +386,9 @@ async function deepInsightsHandler(req, res) {
     });
   }
   try {
-    const data = await KINDS[kind](clubId);
+    // Pass the full query as opts so kinds that need extra params (e.g.
+    // member-engagement → memberId) can read them.
+    const data = await KINDS[kind](clubId, req.query || {});
     return res.status(200).json(data);
   } catch (err) {
     return res.status(500).json({ error: err.message });

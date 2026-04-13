@@ -8,6 +8,7 @@ import PageTransition from '@/components/ui/PageTransition';
 import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { isGateOpen } from '@/services/demoGate';
+import { ServiceTicketsPanel } from '@/components/insights/DeepInsightWidgets';
 import QualityTab from './tabs/QualityTab';
 import StaffingTab from './tabs/StaffingTab';
 import ComplaintsTab from './tabs/ComplaintsTab';
@@ -65,6 +66,9 @@ export default function ServiceView() {
         />
 
         <EvidenceStrip systems={['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather']} />
+
+        {/* Service tickets surface from imported service_requests */}
+        <ServiceTicketsPanel />
 
         {/* Tab switcher */}
         <div role="tablist" aria-label="Service tabs" className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">

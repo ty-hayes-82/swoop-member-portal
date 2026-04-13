@@ -8,6 +8,7 @@ import { getMemberChurnPrediction } from '@/services/memberService';
 import { getMemberSaves } from '@/services/boardReportService';
 import { isGateOpen } from '@/services/demoGate';
 import MemberDecayChain from './MemberDecayChain.jsx';
+import { MemberEngagementTimeline } from '@/components/insights/DeepInsightWidgets';
 import AgentUpsell from '@/components/ui/AgentUpsell.jsx';
 import { formatDate, formatDateTime } from '../../utils/dateFormat';
 
@@ -249,6 +250,10 @@ function MemberJourneyTimeline({ profile }) {
     <div className="flex flex-col">
       {/* Decay Chain — "First Domino" visualization (shared component) */}
       <MemberDecayChain member={profile} variant="drawer" />
+      {/* Cross-domain engagement signals from imported CSV data */}
+      <div className="mb-3">
+        <MemberEngagementTimeline memberId={profile?.memberId} />
+      </div>
     <div className="flex flex-col relative pl-5">
       {/* Vertical timeline line */}
       <div className="absolute left-2 top-1 bottom-1 w-0.5 bg-gray-200" />

@@ -244,6 +244,173 @@ export function CourseUtilizationCards() {
 // Tier revenue mix
 // ---------------------------------------------------------------------------
 
+export function HouseholdComposition() {
+  const { data, loading } = useDeepInsight('households');
+  if (loading || !data?.available) return null;
+  const max = Math.max(1, ...data.distribution.map(d => d.households));
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14,
+      padding: 18, display: 'flex', flexDirection: 'column', gap: 14,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Household Composition
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e', marginTop: 4 }}>
+            {data.totalHouseholds.toLocaleString()}
+          </div>
+          <div style={{ fontSize: 12, color: '#6B7280' }}>households · avg {data.avgSize}/household</div>
+        </div>
+        {data.families.length > 0 && (
+          <div style={{
+            background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8',
+            borderRadius: 10, padding: '8px 12px', fontSize: 12, fontWeight: 600,
+          }}>
+            {data.families.length} families with 4+
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {data.distribution.map(d => (
+          <div key={d.size} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
+            <span style={{ width: 50, color: '#6B7280', fontWeight: 600 }}>
+              {d.size === 1 ? '1 mem' : `${d.size} mems`}
+            </span>
+            <div style={{ flex: 1, background: '#f3f4f6', borderRadius: 4, height: 12, overflow: 'hidden' }}>
+              <div style={{ width: `${(d.households / max) * 100}%`, height: '100%', background: '#3b82f6' }} />
+            </div>
+            <span style={{ width: 60, textAlign: 'right', color: '#1a1a2e', fontWeight: 600 }}>
+              {d.households}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ServiceTicketsPanel() {
+  const { data, loading } = useDeepInsight('service-tickets');
+  if (loading || !data?.available) return null;
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14,
+      padding: 18, display: 'flex', flexDirection: 'column', gap: 14,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Service Requests
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e', marginTop: 4 }}>
+            {data.total.toLocaleString()}
+          </div>
+          <div style={{ fontSize: 12, color: '#6B7280' }}>
+            {data.open} open · {data.avgResponseMin ? `${Math.round(data.avgResponseMin)}min avg response` : 'response time tbd'}
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+          By Category
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {data.categories.slice(0, 6).map((c, i) => (
+            <div key={c.type} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
+              <span style={{ flex: 1, color: '#1a1a2e', fontWeight: 600 }}>{c.type}</span>
+              <span style={{ color: '#6B7280' }}>{c.total} total</span>
+              {c.open > 0 && (
+                <span style={{
+                  background: '#fef2f2', color: '#b91c1c', borderRadius: 4,
+                  padding: '2px 6px', fontWeight: 600,
+                }}>
+                  {c.open} open
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      {data.topRequesters?.length > 0 && (
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+            Top Requesters
+          </div>
+          {data.topRequesters.map(t => (
+            <div key={t.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '2px 0' }}>
+              <span style={{ color: '#1a1a2e' }}>{t.name}</span>
+              <span style={{ color: '#1d4ed8', fontWeight: 600 }}>{t.tickets} tickets</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function MemberEngagementTimeline({ memberId }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!memberId) return;
+    let cancelled = false;
+    setLoading(true);
+    apiFetch(`/api/deep-insights?kind=member-engagement&memberId=${encodeURIComponent(memberId)}`)
+      .then(d => { if (!cancelled) setData(d); })
+      .catch(() => { if (!cancelled) setData({ available: false }); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [memberId]);
+
+  if (!memberId || loading || !data?.available) return null;
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14,
+      padding: 18, display: 'flex', flexDirection: 'column', gap: 12,
+    }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          Engagement Timeline
+        </div>
+        <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>
+          Cross-domain signals from imported data
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+        {data.dimensions.map((d, i) => (
+          <div key={d.kind} style={{
+            background: d.count > 0 ? '#eff6ff' : '#f9fafb',
+            border: '1px solid ' + (d.count > 0 ? '#bfdbfe' : '#e5e7eb'),
+            borderRadius: 8, padding: 10,
+          }}>
+            <div style={{ fontSize: 10, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+              {d.label}
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: d.count > 0 ? '#1d4ed8' : '#9ca3af', marginTop: 2 }}>
+              {d.count}
+            </div>
+            {d.last && (
+              <div style={{ fontSize: 10, color: '#6B7280', marginTop: 2 }}>
+                last: {String(d.last).slice(0, 10)}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      {data.openComplaints > 0 && (
+        <div style={{
+          fontSize: 12, color: '#b91c1c', background: '#fef2f2',
+          border: '1px solid #fecaca', borderRadius: 8, padding: '8px 12px',
+        }}>
+          ⚠ {data.openComplaints} unresolved complaint{data.openComplaints === 1 ? '' : 's'} on file
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function TierRevenueMix() {
   const { data, loading } = useDeepInsight('tier-revenue');
   if (loading || !data?.available) return null;
