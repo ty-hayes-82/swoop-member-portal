@@ -86,16 +86,81 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { clubName, city, state, zip, memberCount, courseCount, outletCount, adminEmail, adminName, adminPassword } = req.body;
+    const { clubName, city, state, zip, memberCount, courseCount, outletCount, adminEmail, adminName, adminPassword, linkToExistingUser } = req.body;
 
-    if (!clubName || !adminEmail || !adminName || !adminPassword) {
-      return res.status(400).json({ error: 'Please provide your club name, admin name, email, and password.' });
+    if (!clubName || !adminEmail || !adminPassword) {
+      return res.status(400).json({ error: 'Please provide your club name, email, and password.' });
+    }
+    if (!linkToExistingUser && !adminName) {
+      return res.status(400).json({ error: 'Please provide your name.' });
     }
 
     if (adminPassword.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
+    // ── Link-to-existing-user path ──
+    // Authenticates the existing account, creates the new club, then updates
+    // the user's club_id to point at the new club and issues a fresh session.
+    if (linkToExistingUser) {
+      const existing = await sql`
+        SELECT user_id, name, password_hash, password_salt, club_id
+        FROM users WHERE email = ${adminEmail.toLowerCase()} LIMIT 1
+      `;
+      if (existing.rowCount === 0) {
+        return res.status(404).json({ error: 'No account found with that email. Please create a new account.' });
+      }
+      const u = existing.rows[0];
+      const hash = hashPassword(adminPassword, u.password_salt);
+      if (hash !== u.password_hash) {
+        return res.status(401).json({ error: 'Incorrect password. Please try again.' });
+      }
+      // Create the new club
+      const clubId = crypto.randomUUID();
+      try {
+        await sql`
+          INSERT INTO club (club_id, name, city, state, zip, member_count, course_count, outlet_count)
+          VALUES (${clubId}, ${clubName}, ${city || null}, ${state || null}, ${zip || null}, ${memberCount || null}, ${courseCount || 1}, ${outletCount || 3})
+        `;
+        // Move the user to the new club
+        await sql`UPDATE users SET club_id = ${clubId} WHERE user_id = ${u.user_id}`;
+        // Initialize onboarding steps
+        for (const step of ONBOARDING_STEPS) {
+          await sql`
+            INSERT INTO onboarding_progress (club_id, step_key, completed, completed_at)
+            VALUES (${clubId}, ${step.key}, ${step.key === 'club_created'}, ${step.key === 'club_created' ? new Date().toISOString() : null})
+            ON CONFLICT DO NOTHING
+          `;
+        }
+        // Seed agent roster
+        try {
+          const suffix = String(clubId).replace(/-/g, '').slice(-12);
+          await sql`
+            INSERT INTO agent_definitions (agent_id, club_id, name, description, status, model, avatar, source_systems, last_run)
+            SELECT agent_id || '_' || ${suffix}, ${clubId}, name, description, status, model, avatar, source_systems, last_run
+            FROM agent_definitions WHERE club_id = 'club_001'
+            ON CONFLICT (agent_id) DO NOTHING
+          `;
+        } catch {}
+        // Issue fresh session
+        const token = crypto.randomBytes(32).toString('hex');
+        await sql`
+          INSERT INTO sessions (token, user_id, club_id, role, expires_at)
+          VALUES (${token}, ${u.user_id}, ${clubId}, 'gm', ${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()})
+        `;
+        logInfo('/api/onboard-club', 'club linked to existing user', { clubId, userId: u.user_id, clubName });
+        return res.status(201).json({
+          clubId, userId: u.user_id, token,
+          user: { userId: u.user_id, clubId, name: u.name, email: adminEmail.toLowerCase(), role: 'gm', title: 'General Manager', clubName },
+          message: `Club "${clubName}" created and linked to your account.`,
+        });
+      } catch (e) {
+        logError('/api/onboard-club', e, { phase: 'link-existing-user', clubName });
+        return res.status(500).json({ error: 'Something went wrong creating your club. Please try again.' });
+      }
+    }
+
+    // ── New account path ──
     const clubId = crypto.randomUUID();
     const userId = crypto.randomUUID();
     const salt = crypto.randomBytes(16).toString('hex');

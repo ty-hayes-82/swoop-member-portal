@@ -286,7 +286,7 @@ export default function LoginPage({ onLogin }) {
     );
   }
 
-  // ── Screen 2: Explore (Demo / Guided / New Club) ──
+  // ── Screen 2: Explore (Demo / New Club) ──
   return (
     <div className="min-h-screen flex font-sans">
       {brandPanel}
@@ -299,54 +299,49 @@ export default function LoginPage({ onLogin }) {
               <img src="/favicon.svg" alt="Swoop Golf" className="w-12 h-12" />
             </div>
             <div className="text-[28px] font-extrabold text-gray-900">
-              Explore Swoop
+              Get Started
             </div>
             <div className="text-sm text-gray-500 mt-1">
-              Try a demo or set up your club
+              Set up your club or explore with sample data
             </div>
           </div>
 
-          {/* Demo contact info */}
-          <div className="flex flex-col gap-3 mb-6">
-            <div className="text-[13px] font-semibold text-gray-700">
-              Enter your contact info to receive test emails and SMS:
-            </div>
-            <label htmlFor="demo-email" className="sr-only">Demo email</label>
-            <input
-              id="demo-email"
-              type="email"
-              value={demoEmail}
-              onChange={e => setDemoEmail(e.target.value)}
-              placeholder="Your email (for test emails)"
-              className="w-full h-11 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-            />
-            <label htmlFor="demo-phone" className="sr-only">Demo phone</label>
-            <input
-              id="demo-phone"
-              type="tel"
-              value={demoPhone}
-              onChange={e => setDemoPhone(e.target.value)}
-              placeholder="Your phone +1XXXXXXXXXX (for test SMS)"
-              className="w-full h-11 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-            />
+          {/* Primary CTA — Set Up Your Club */}
+          <button
+            onClick={() => setShowNewClub(true)}
+            className="w-full py-4 rounded-xl bg-brand-500 text-white text-sm font-bold cursor-pointer hover:bg-brand-600 transition-colors mb-3"
+          >
+            Set Up My Club
+            <span className="block text-xs font-normal text-white/70 mt-0.5">Connect your data and go live</span>
+          </button>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-400 font-medium">or explore with sample data</span>
+            <div className="flex-1 h-px bg-gray-200" />
           </div>
 
-          {/* Demo options */}
+          {/* Demo contact info — collapsed into demo button */}
           <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="demo-email" className="sr-only">Demo email</label>
+              <input
+                id="demo-email"
+                type="email"
+                value={demoEmail}
+                onChange={e => setDemoEmail(e.target.value)}
+                placeholder="Your email (optional — for test emails)"
+                className="w-full h-10 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              />
+            </div>
+
             <button
               onClick={() => startDemo()}
               className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors"
             >
-              Full Demo (Pinetree CC)
-              <span className="block text-xs font-normal text-gray-400 mt-0.5">All sample data pre-loaded</span>
-            </button>
-
-            <button
-              onClick={() => setShowNewClub(true)}
-              className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors"
-            >
-              Set Up New Club
-              <span className="block text-xs font-normal text-gray-400 mt-0.5">Import your own member data</span>
+              Explore Demo (Pinetree CC)
+              <span className="block text-xs font-normal text-gray-400 mt-0.5">Sample data pre-loaded — no signup needed</span>
             </button>
 
             {/* Conference Demo — phone-optimized scene navigator on the mobile shell. Tap-to-enter, no login. */}

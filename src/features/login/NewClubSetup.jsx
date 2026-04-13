@@ -21,6 +21,8 @@ export default function NewClubSetup({ onComplete, onBack }) {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // When the user's email already exists, switch to sign-in mode
+  const [existingAccountMode, setExistingAccountMode] = useState(false);
 
   // Step 0 state — club info
   const [clubName, setClubName] = useState('');
@@ -34,6 +36,15 @@ export default function NewClubSetup({ onComplete, onBack }) {
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
 
+  // Pre-fill from current session if user is already signed in
+  const _prefillFromSession = () => {
+    try {
+      const u = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+      if (u.name && !adminName) setAdminName(u.name);
+      if (u.email && !adminEmail) setAdminEmail(u.email);
+    } catch {}
+  };
+
   // Created club data
   const [clubId, setClubId] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -42,12 +53,13 @@ export default function NewClubSetup({ onComplete, onBack }) {
   const handleClubInfoNext = () => {
     if (!clubName.trim()) { setError('Club name is required'); return; }
     setError(null);
+    _prefillFromSession();
     setStep(1);
   };
 
-  // ─── Step 1: Create Club with Admin Account ───
+  // ─── Step 1: Submit (create new account OR link existing) ───
   const handleCreateClub = async () => {
-    if (!adminName.trim()) { setError('Your name is required'); return; }
+    if (!existingAccountMode && !adminName.trim()) { setError('Your name is required'); return; }
     if (!adminEmail.trim()) { setError('Email is required'); return; }
     if (!adminPassword || adminPassword.length < 8) { setError('Password must be at least 8 characters'); return; }
     setError(null);
@@ -67,10 +79,23 @@ export default function NewClubSetup({ onComplete, onBack }) {
           adminEmail: adminEmail.trim(),
           adminName: adminName.trim(),
           adminPassword,
+          linkToExistingUser: existingAccountMode,
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Failed to create club'); setLoading(false); return; }
+      if (!res.ok) {
+        // Email already exists — offer to link via existing account instead
+        if (res.status === 409) {
+          setExistingAccountMode(true);
+          setAdminPassword('');
+          setError(null);
+          setLoading(false);
+          return;
+        }
+        setError(data.error || 'Failed to create club');
+        setLoading(false);
+        return;
+      }
       setClubId(data.clubId);
       setUserId(data.userId);
       if (data.token) {
@@ -166,27 +191,61 @@ export default function NewClubSetup({ onComplete, onBack }) {
         {/* ─── Step 1: Admin Account ─── */}
         {step === 1 && (
           <div className="space-y-4">
-            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Create your admin account</p>
-            <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Your Name *</label>
-              <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Sarah Mitchell" className={inputClasses} />
-            </div>
+            {existingAccountMode ? (
+              <div className="px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-300">
+                <p className="font-semibold mb-0.5">You already have a Swoop account</p>
+                <p className="text-xs font-normal">Sign in with your existing password to link <strong>{clubName}</strong> to your account. Your previous club data won't be affected.</p>
+              </div>
+            ) : (
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Create your admin account</p>
+            )}
+
+            {!existingAccountMode && (
+              <div>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Your Name *</label>
+                <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Sarah Mitchell" className={inputClasses} />
+              </div>
+            )}
+
             <div>
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Email *</label>
-              <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="sarah@pinevalleycc.com" className={inputClasses} />
+              <input
+                type="email"
+                value={adminEmail}
+                onChange={e => { setAdminEmail(e.target.value); if (existingAccountMode) setExistingAccountMode(false); }}
+                placeholder="sarah@pinevalleycc.com"
+                className={inputClasses}
+              />
             </div>
             <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Password *</label>
-              <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Min 8 characters" className={inputClasses} />
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">
+                {existingAccountMode ? 'Your Password *' : 'Password *'}
+              </label>
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={e => setAdminPassword(e.target.value)}
+                placeholder={existingAccountMode ? 'Enter your Swoop password' : 'Min 8 characters'}
+                className={inputClasses}
+                autoFocus={existingAccountMode}
+              />
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => { setError(null); setStep(0); }} className="px-5 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">
+              <button onClick={() => { setError(null); setExistingAccountMode(false); setStep(0); }} className="px-5 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">
                 Back
               </button>
               <button onClick={handleCreateClub} disabled={loading} className={`flex-1 py-3 rounded-lg text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 transition ${loading ? 'opacity-70 cursor-wait' : ''}`}>
-                {loading ? 'Setting up...' : 'Next'}
+                {loading ? 'Setting up...' : existingAccountMode ? 'Sign In & Create Club' : 'Next'}
               </button>
             </div>
+            {existingAccountMode && (
+              <p className="text-xs text-center text-gray-400">
+                Wrong email?{' '}
+                <button className="text-brand-500 underline bg-transparent border-none cursor-pointer p-0 text-xs" onClick={() => { setExistingAccountMode(false); setAdminPassword(''); }}>
+                  Use a different email
+                </button>
+              </p>
+            )}
           </div>
         )}
 
