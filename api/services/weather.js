@@ -212,7 +212,7 @@ async function googleForecast(lat, lon, { hours, days } = {}) {
     }
   }
 
-  // Weather alerts (piggyback on current conditions)
+  // Current conditions + alerts — one call for both
   try {
     const aParams = new URLSearchParams({
       key, 'location.latitude': lat, 'location.longitude': lon,
@@ -228,8 +228,26 @@ async function googleForecast(lat, lon, { hours, days } = {}) {
         description: a.description?.text,
         expires: a.expires,
       }));
+      // Capture current conditions here so callers don't need a second API call
+      if (ad.temperature?.degrees != null) {
+        result.current = {
+          temp: ad.temperature.degrees,
+          feelsLike: ad.feelsLikeTemperature?.degrees,
+          humidity: ad.relativeHumidity,
+          wind: ad.wind?.speed?.value,
+          gusts: ad.wind?.gust?.value || 0,
+          windDirection: ad.wind?.direction?.degrees,
+          uvIndex: ad.uvIndex,
+          cloudCover: ad.cloudCover,
+          conditions: normalizeConditionCode(ad.weatherCondition?.type),
+          conditionsText: ad.weatherCondition?.description?.text || ad.weatherCondition?.type,
+          precipProbability: ad.precipitation?.probability?.percent ?? 0,
+          dewPoint: ad.dewPoint?.degrees || 0,
+          thunderstormProbability: ad.precipitation?.thunderstormProbability?.percent ?? 0,
+        };
+      }
     }
-  } catch { /* alerts are best-effort */ }
+  } catch { /* alerts/current are best-effort */ }
 
   // If no hourly or daily data returned, treat as failure so fallback kicks in
   if (!result.hourly.length && !result.daily.length) {
@@ -362,7 +380,9 @@ export async function getForecast(clubId, { hours = 24, days = 5 } = {}) {
   // Google Weather
   try {
     const googleData = await googleForecast(lat, lon, { hours, days });
-    const current = await googleCurrentConditions(lat, lon).catch(() => null);
+    // googleForecast now bundles current conditions from the alerts call;
+    // only make a separate currentConditions call if it didn't come through.
+    const current = googleData.current ?? await googleCurrentConditions(lat, lon).catch(() => null);
     googleData.daily = googleData.daily.slice(0, days);
 
     const result = { current, ...googleData, source: 'google', stale: false };
@@ -387,7 +407,9 @@ export async function getForecastByCity(city, state, { hours = 24, days = 5 } = 
   const { lat, lon } = await geocodeCity(city, state);
 
   const googleData = await googleForecast(lat, lon, { hours, days });
-  const current = await googleCurrentConditions(lat, lon).catch(() => null);
+  // Use current conditions bundled in googleForecast (from the alerts call);
+  // only fall back to a separate call if not present.
+  const current = googleData.current ?? await googleCurrentConditions(lat, lon).catch(() => null);
   googleData.daily = googleData.daily.slice(0, days);
 
   return { current, ...googleData, source: 'google', stale: false, location: city };
