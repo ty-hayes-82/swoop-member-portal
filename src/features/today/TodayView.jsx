@@ -205,6 +205,7 @@ export default function TodayView() {
     return (
       <PageTransition>
         <OnboardingChecklist />
+        <WeekForecast />
       </PageTransition>
     );
   }
