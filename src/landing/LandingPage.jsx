@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { theme } from '@/config/theme';
 import HeroSection from '@/landing/components/HeroSection';
+import TrustStrip from '@/landing/components/TrustStrip';
 import ProblemSection from '@/landing/components/ProblemSection';
-import InlineCta from '@/landing/components/InlineCta';
 import CoreCapabilitiesSection from '@/landing/components/CoreCapabilitiesSection';
 import ComparisonSection from '@/landing/components/ComparisonSection';
 import AgentsSection from '@/landing/components/AgentsSection';
@@ -10,36 +10,17 @@ import IntegrationsSection from '@/landing/components/IntegrationsSection';
 import PricingSection from '@/landing/components/PricingSection';
 import RoiCalculatorSection from '@/landing/components/RoiCalculatorSection';
 import SocialProofSection from '@/landing/components/SocialProofSection';
+import TestimonialsSection from '@/landing/components/TestimonialsSection';
+import PhotoBand from '@/landing/components/PhotoBand';
 import FaqSection from '@/landing/components/FaqSection';
 import DemoCtaSection from '@/landing/components/DemoCtaSection';
+import { Button } from '@/landing/ui';
 import '@/landing/landing.css';
-
-const pageWrap = {
-  background: theme.colors.bg,
-  color: theme.colors.textPrimary,
-  fontFamily: theme.fonts.sans,
-};
-
-const container = {
-  width: '100%',
-  maxWidth: 1180,
-  margin: '0 auto',
-  padding: '0 clamp(16px, 4vw, 32px)',
-  boxSizing: 'border-box',
-};
-
-const fullWidth = {
-  width: '100%',
-  margin: '0 auto',
-  padding: '0 clamp(16px, 4vw, 32px)',
-  boxSizing: 'border-box',
-};
 
 const NAV_LINKS = [
   { label: 'Platform', target: 'platform' },
   { label: 'Agents', target: 'agents' },
   { label: 'Pricing', target: 'pricing' },
-  { label: 'Demo', target: 'demo-form' },
 ];
 
 function scrollToSection(id) {
@@ -63,129 +44,148 @@ function LandingNav() {
         position: 'sticky',
         top: 0,
         zIndex: 200,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '14px clamp(16px, 4vw, 32px)',
-        background: scrolled ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.6)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: scrolled ? '1px solid #e4e4e7' : '1px solid transparent',
-        transition: 'background 200ms, border-color 200ms',
-        maxWidth: 1180,
-        margin: '0 auto',
-        width: '100%',
-        boxSizing: 'border-box',
+        background: scrolled ? 'rgba(250,247,242,0.85)' : 'rgba(250,247,242,0)',
+        backdropFilter: scrolled ? 'blur(14px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(14px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(17,17,17,0.08)' : '1px solid transparent',
+        transition: 'background 220ms, border-color 220ms',
       }}
     >
-      {/* Logo */}
-      <span
+      <div
+        className="landing-container"
         style={{
-          fontWeight: 800,
-          fontSize: '1.4rem',
-          color: '#0F0F0F',
-          letterSpacing: '-0.02em',
-          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '18px clamp(20px, 4vw, 40px)',
         }}
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       >
-        swoop.
-      </span>
-
-      {/* Nav links */}
-      <div className="landing-nav-links" style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-        {NAV_LINKS.map(({ label, target }) => (
-          <button
-            key={target}
-            onClick={() => scrollToSection(target)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              color: '#3F3F46',
-              padding: 0,
-              fontFamily: 'inherit',
-            }}
-          >
-            {label}
-          </button>
-        ))}
-
-        {/* Book a Demo CTA */}
-        <button
-          onClick={() => scrollToSection('demo-form')}
+        <span
           style={{
-            background: '#F3922D',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 8,
-            padding: '8px 20px',
-            fontWeight: 600,
-            fontSize: '0.9rem',
+            fontWeight: 800,
+            fontSize: 22,
+            color: theme.neutrals.ink,
+            letterSpacing: '-0.03em',
             cursor: 'pointer',
-            fontFamily: 'inherit',
-            whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'baseline',
+            gap: 2,
           }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
-          Book a Demo
-        </button>
+          swoop<span style={{ color: theme.colors.accent }}>.</span>
+        </span>
+
+        <div className="landing-nav-links" style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
+          {NAV_LINKS.map(({ label, target }) => (
+            <button
+              key={target}
+              onClick={() => scrollToSection(target)}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 14,
+                fontWeight: 600,
+                color: theme.colors.textSecondary,
+                padding: 0,
+                fontFamily: 'inherit',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+          <Button size="md" onClick={() => scrollToSection('demo-form')}>
+            Book a Demo
+          </Button>
+        </div>
       </div>
     </nav>
   );
 }
 
+function LandingFooter() {
+  return (
+    <footer
+      style={{
+        borderTop: '1px solid rgba(17,17,17,0.08)',
+        background: theme.neutrals.paper,
+        padding: '48px 0 40px',
+      }}
+    >
+      <div
+        className="landing-container"
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 24,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontWeight: 800,
+              fontSize: 20,
+              color: theme.neutrals.ink,
+              letterSpacing: '-0.03em',
+              marginBottom: 6,
+            }}
+          >
+            swoop<span style={{ color: theme.colors.accent }}>.</span>
+          </div>
+          <p style={{ color: theme.colors.textMuted, fontSize: 13, margin: 0 }}>
+            Integrated Intelligence for Private Clubs
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center', fontSize: 13 }}>
+          <a
+            href="#/invest"
+            style={{ color: theme.colors.accent, fontWeight: 700, textDecoration: 'none' }}
+          >
+            Investor Information
+          </a>
+          <span style={{ color: theme.colors.textMuted }}>
+            © {new Date().getFullYear()} Swoop Golf
+          </span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 export default function LandingPage() {
   return (
-    <div className="landing-page" style={pageWrap}>
+    <div
+      className="landing-page"
+      style={{
+        color: theme.neutrals.ink,
+        fontFamily: theme.fonts.sans,
+      }}
+    >
       <LandingNav />
-      <main style={container}>
+      <main>
         <HeroSection />
+        <TrustStrip />
         <ProblemSection />
-        <InlineCta />
         <CoreCapabilitiesSection />
-        <InlineCta />
         <ComparisonSection />
         <AgentsSection />
+        <PhotoBand
+          photoKey="fairwayGreen"
+          kicker="One operating view"
+          headline="Every signal. Every system. One clubhouse of intelligence."
+        />
         <IntegrationsSection />
         <PricingSection />
         <RoiCalculatorSection />
         <SocialProofSection />
+        <TestimonialsSection />
         <FaqSection />
+        <DemoCtaSection />
       </main>
-      <div style={fullWidth}>
-        <div style={{ ...container, maxWidth: 1300 }}>
-          <DemoCtaSection />
-        </div>
-      </div>
-      {/* Footer with investor link */}
-      <footer style={{
-        borderTop: '1px solid #e4e4e7',
-        padding: '32px clamp(16px, 4vw, 32px)',
-        textAlign: 'center',
-        color: '#6B7280',
-        fontSize: '0.85rem',
-        maxWidth: 1180,
-        margin: '0 auto',
-        width: '100%',
-        boxSizing: 'border-box',
-      }}>
-        <div style={{ marginBottom: 8 }}>
-          Swoop Golf &middot; Integrated Intelligence for Private Clubs
-        </div>
-        <a
-          href="#/invest"
-          style={{
-            color: '#F3922D',
-            fontWeight: 600,
-            textDecoration: 'none',
-            fontSize: '0.85rem',
-          }}
-        >
-          Investor Information
-        </a>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }

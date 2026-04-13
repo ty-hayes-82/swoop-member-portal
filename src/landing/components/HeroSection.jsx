@@ -1,18 +1,7 @@
 import { theme } from '@/config/theme';
-
-const ctaBase = {
-  height: 48,
-  borderRadius: 8,
-  fontFamily: theme.fonts.sans,
-  fontWeight: 700,
-  fontSize: '16px',
-  padding: '0 22px',
-  transition: 'all 150ms ease',
-  border: '2px solid transparent',
-};
-
-const TEAL = '#14B8A6';
-const TEAL_HOVER = '#0D9488';
+import { Button, Eyebrow, LandingImage } from '@/landing/ui';
+import HeroArt from '@/landing/assets/HeroArt';
+import { photoUrl, photoSrcSet, photoAlt } from '@/landing/assets/photos';
 
 export default function HeroSection() {
   const goToDemoForm = () => {
@@ -20,86 +9,70 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="landing-section-padded" style={{ padding: '88px 0 80px' }}>
-      <div style={{ maxWidth: 820 }}>
-        <p style={{
-          color: theme.colors.accent,
-          fontSize: theme.fontSize.sm,
-          fontWeight: 700,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          marginBottom: theme.spacing.md,
-        }}>
-          The Operating System for Private Clubs
-        </p>
-        <h1 style={{
-          fontFamily: theme.fonts.serif,
-          fontSize: 'clamp(38px, 5.5vw, 60px)',
-          lineHeight: 1.1,
-          marginBottom: theme.spacing.lg,
-          maxWidth: 800,
-        }}>
-          Your members get{' '}
-          <em style={{ color: theme.colors.accent, fontStyle: 'italic' }}>a concierge.</em>
-          <br />
-          Your GM gets{' '}
-          <em style={{ color: TEAL, fontStyle: 'italic' }}>a command center.</em>
-        </h1>
-        <p style={{
-          color: theme.colors.textSecondary,
-          fontSize: 'clamp(17px, 2vw, 22px)',
-          lineHeight: 1.55,
-          maxWidth: 760,
-          marginBottom: theme.spacing.xl,
-        }}>
-          AI agents that work both sides of the club relationship. Members book,
-          ask, and engage through a personal concierge. The GM sees the full
-          picture, acts on coordinated intelligence, and proves the impact to
-          the board.
-        </p>
-        <div className="landing-hero-ctas">
-          <button
-            type="button"
-            className="landing-hero-cta"
-            style={{
-              ...ctaBase,
-              background: theme.colors.accent,
-              color: '#FFFFFF',
-            }}
-            onClick={goToDemoForm}
-            onMouseEnter={(event) => {
-              event.currentTarget.style.background = theme.colors.ctaGreenHover;
-            }}
-            onMouseLeave={(event) => {
-              event.currentTarget.style.background = theme.colors.accent;
-            }}
-          >
-            Book a 30-Minute Demo
-          </button>
-          <a
-            href="#/demo/split-screen"
-            className="landing-hero-cta"
-            style={{
-              ...ctaBase,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textDecoration: 'none',
-              background: 'transparent',
-              color: TEAL,
-              borderColor: TEAL,
-            }}
-            onMouseEnter={(event) => {
-              event.currentTarget.style.background = TEAL;
-              event.currentTarget.style.color = '#FFFFFF';
-            }}
-            onMouseLeave={(event) => {
-              event.currentTarget.style.background = 'transparent';
-              event.currentTarget.style.color = TEAL;
-            }}
-          >
-            See a Day in Action
-          </a>
+    <section className="landing-section" style={{ paddingTop: 'clamp(48px, 6vw, 96px)' }}>
+      <div className="landing-container">
+        <div className="landing-hero-grid">
+          <div>
+            <Eyebrow>The Operating System for Private Clubs</Eyebrow>
+            <h1 className="landing-headline">
+              Your members get{' '}
+              <span style={{ color: theme.colors.accent, fontStyle: 'italic', fontWeight: 600 }}>a concierge.</span>
+              <br />
+              Your GM gets{' '}
+              <span style={{ color: theme.neutrals.ink, fontStyle: 'italic', fontWeight: 600, backgroundImage: `linear-gradient(transparent 62%, rgba(243,146,45,0.25) 62%)` }}>
+                a command center.
+              </span>
+            </h1>
+            <p className="landing-subhead">
+              Spot at-risk members <strong style={{ color: theme.neutrals.ink, fontWeight: 700 }}>6 days</strong> before
+              they resign. Recover <strong style={{ color: theme.neutrals.ink, fontWeight: 700 }}>$74K+</strong> in
+              dues a year. Without replacing your tee sheet, CRM, or POS.
+            </p>
+            <div className="landing-hero-ctas">
+              <Button size="lg" onClick={goToDemoForm}>
+                Book a 30-Minute Demo
+              </Button>
+              <Button as="a" href="#/demo/split-screen" variant="ghost" size="lg">
+                See a Day in Action
+              </Button>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 24,
+                marginTop: 40,
+                flexWrap: 'wrap',
+                color: theme.colors.textMuted,
+                fontSize: 13,
+                fontWeight: 500,
+              }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
+                Live in under 2 weeks
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
+                No rip-and-replace
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
+                28 integrations
+              </span>
+            </div>
+          </div>
+          <div className="landing-hero-media">
+            <LandingImage
+              src={photoUrl('heroCourse', 1200)}
+              srcSet={photoSrcSet('heroCourse')}
+              sizes="(max-width: 960px) 90vw, 40vw"
+              alt={photoAlt('heroCourse')}
+              eager
+              radius={0}
+              fallback={<HeroArt />}
+            />
+          </div>
         </div>
       </div>
     </section>

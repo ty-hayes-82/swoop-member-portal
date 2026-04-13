@@ -153,12 +153,31 @@ export const theme = {
   },
   fontSize: {
     xs: '12px', sm: '14px', md: '16px',
-    lg: '20px', xl: '26px', xxl: '38px', hero: '52px',
+    lg: '20px', xl: '26px', xxl: '38px', hero: '52px', display: '64px',
   },
   shadow: {
     sm:  '0 1px 3px rgba(0,0,0,0.06)',
     md:  '0 4px 12px rgba(0,0,0,0.08)',
     lg:  '0 8px 24px rgba(0,0,0,0.10)',
+    card:'0 12px 32px rgba(17,17,17,0.08)',
+    cardHover:'0 20px 44px rgba(17,17,17,0.12)',
     glow: (color) => `0 0 16px ${color}22`,
+  },
+  neutrals: {
+    paper: PAPER,
+    cream: '#FAF7F2',
+    sand:  '#F2ECE1',
+    mist:  '#ECE7DD',
+    ink:   '#111111',
+  },
+  landing: {
+    sectionPaddingY: 'clamp(80px, 10vw, 140px)',
+    sectionPaddingYSm: 'clamp(48px, 7vw, 88px)',
+    containerMax: 1200,
+    containerNarrow: 820,
+    containerWide: 1320,
+    gutter: 'clamp(20px, 4vw, 40px)',
+    radius: 20,
+    quoteSerif: "'Plus Jakarta Sans', Georgia, serif",
   },
 };

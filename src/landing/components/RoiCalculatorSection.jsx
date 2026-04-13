@@ -1,5 +1,41 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme';
+import { SectionShell, Stat } from '@/landing/ui';
+import { RoiIllustration } from '@/landing/assets/Illustrations';
+
+function Slider({ label, value, onChange, min, max, step = 1, displayValue }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          fontSize: 13,
+          fontWeight: 600,
+          color: theme.colors.textSecondary,
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em',
+          marginBottom: 10,
+        }}
+      >
+        <span>{label}</span>
+        <span style={{ fontFamily: theme.fonts.mono, color: theme.colors.accent, fontSize: 16, fontWeight: 700, textTransform: 'none', letterSpacing: 0 }}>
+          {displayValue}
+        </span>
+      </label>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(+e.target.value)}
+        style={{ width: '100%', accentColor: theme.colors.accent, cursor: 'pointer' }}
+      />
+    </div>
+  );
+}
 
 export default function RoiCalculatorSection() {
   const [members, setMembers] = useState(300);
@@ -10,133 +46,123 @@ export default function RoiCalculatorSection() {
   const annualLoss = atRisk * dues;
   const swoopSaves = Math.round(atRisk * 0.65);
   const recovered = swoopSaves * dues;
-  const swoopProCost = 5988; // $499/mo × 12
+  const swoopProCost = 5988;
   const netGain = recovered - swoopProCost;
   const roiMultiple = recovered > 0 ? Math.round(recovered / swoopProCost) : 0;
 
+  const fmt = (n) => `$${n.toLocaleString()}`;
+
   return (
-    <section
-      className="landing-section-padded"
-      style={{
-        margin: `${theme.spacing.xxl} 0`,
-        borderRadius: theme.radius.xl,
-        background: theme.colors.bgSidebar,
-        color: theme.colors.bgCard,
-        padding: '54px 28px',
-      }}
+    <SectionShell
+      band="paper"
+      eyebrow="ROI Calculator"
+      title="What is member turnover costing your club?"
+      subtitle="Adjust the sliders to see your club's exposure — and what Swoop recovers."
     >
-      <h2 style={{ fontSize: 'clamp(30px, 4vw, 46px)', marginBottom: theme.spacing.md, textAlign: 'center' }}>
-        What is member turnover costing your club?
-      </h2>
-      <p
+      <div
         style={{
-          color: `${theme.colors.bgCard}D9`,
-          marginBottom: theme.spacing.xl,
-          maxWidth: 780,
-          fontSize: theme.fontSize.lg,
-          textAlign: 'center',
-          marginLeft: 'auto',
-          marginRight: 'auto',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)',
+          gap: 40,
+          alignItems: 'stretch',
         }}
+        className="landing-roi-grid"
       >
-        Adjust the sliders to see your club&apos;s exposure — and what Swoop recovers.
-      </p>
-
-      <div className="landing-grid-2" style={{ gap: theme.spacing.xl, alignItems: 'start' }}>
-        {/* Inputs */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-          <div>
-            <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: theme.fontSize.sm, marginBottom: theme.spacing.sm, color: `${theme.colors.bgCard}B3` }}>
-              <span>Total Members</span>
-              <span style={{ fontFamily: theme.fonts.mono, color: theme.colors.ctaGreen }}>{members}</span>
-            </label>
-            <input
-              type="range"
-              min={100}
-              max={800}
-              value={members}
-              onChange={(e) => setMembers(+e.target.value)}
-              style={{ width: '100%', accentColor: theme.colors.ctaGreen }}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: theme.fontSize.sm, marginBottom: theme.spacing.sm, color: `${theme.colors.bgCard}B3` }}>
-              <span>Avg Annual Dues</span>
-              <span style={{ fontFamily: theme.fonts.mono, color: theme.colors.ctaGreen }}>${dues.toLocaleString()}</span>
-            </label>
-            <input
-              type="range"
-              min={2000}
-              max={25000}
-              step={500}
-              value={dues}
-              onChange={(e) => setDues(+e.target.value)}
-              style={{ width: '100%', accentColor: theme.colors.ctaGreen }}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: theme.fontSize.sm, marginBottom: theme.spacing.sm, color: `${theme.colors.bgCard}B3` }}>
-              <span>Annual Turnover Rate</span>
-              <span style={{ fontFamily: theme.fonts.mono, color: theme.colors.ctaGreen }}>{churn}%</span>
-            </label>
-            <input
-              type="range"
-              min={1}
-              max={15}
-              value={churn}
-              onChange={(e) => setChurn(+e.target.value)}
-              style={{ width: '100%', accentColor: theme.colors.ctaGreen }}
-            />
-          </div>
-        </div>
-
-        {/* Results */}
         <div
           style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: theme.radius.lg,
-            padding: theme.spacing.xl,
+            background: '#FAF7F2',
+            borderRadius: 20,
+            padding: 'clamp(24px, 4vw, 36px)',
             display: 'flex',
             flexDirection: 'column',
-            gap: theme.spacing.md,
+            gap: 24,
+            border: '1px solid rgba(17,17,17,0.08)',
+          }}
+        >
+          <div style={{ marginBottom: 8 }}>
+            <RoiIllustration />
+          </div>
+          <Slider label="Total Members" value={members} onChange={setMembers} min={100} max={800} displayValue={members} />
+          <Slider label="Avg Annual Dues" value={dues} onChange={setDues} min={2000} max={25000} step={500} displayValue={fmt(dues)} />
+          <Slider label="Annual Turnover Rate" value={churn} onChange={setChurn} min={1} max={15} displayValue={`${churn}%`} />
+        </div>
+
+        <div
+          style={{
+            background: theme.neutrals.ink,
+            color: '#FFFFFF',
+            borderRadius: 20,
+            padding: 'clamp(28px, 4vw, 40px)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 20,
           }}
         >
           <div>
-            <p style={{ fontSize: theme.fontSize.sm, color: `${theme.colors.bgCard}80` }}>Members at risk annually</p>
-            <p style={{ fontFamily: theme.fonts.mono, fontSize: '32px', fontWeight: 700, color: theme.colors.urgent }}>{atRisk}</p>
+            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', margin: '0 0 6px' }}>
+              Exposure
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+              <div>
+                <p style={{ fontSize: 36, fontWeight: 800, fontFamily: theme.fonts.mono, color: '#ef4444', margin: '0 0 2px', lineHeight: 1 }}>
+                  {atRisk}
+                </p>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: 0 }}>Members at risk</p>
+              </div>
+              <div>
+                <p style={{ fontSize: 36, fontWeight: 800, fontFamily: theme.fonts.mono, color: '#ef4444', margin: '0 0 2px', lineHeight: 1 }}>
+                  {fmt(annualLoss)}
+                </p>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: 0 }}>Annual revenue at risk</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <p style={{ fontSize: theme.fontSize.sm, color: `${theme.colors.bgCard}80` }}>Annual revenue at risk</p>
-            <p style={{ fontFamily: theme.fonts.mono, fontSize: '32px', fontWeight: 700, color: theme.colors.urgent }}>${annualLoss.toLocaleString()}</p>
-          </div>
-          <div style={{ paddingTop: theme.spacing.md, borderTop: `1px solid rgba(255, 255, 255, 0.1)` }}>
-            <p style={{ fontSize: theme.fontSize.sm, color: `${theme.colors.bgCard}80` }}>Swoop projected saves (65% early-intervention retention rate)</p>
-            <p style={{ fontFamily: theme.fonts.mono, fontSize: '32px', fontWeight: 700, color: theme.colors.ctaGreen }}>{swoopSaves} members</p>
-          </div>
-          <div>
-            <p style={{ fontSize: theme.fontSize.sm, color: `${theme.colors.bgCard}80` }}>Revenue recovered with Swoop</p>
-            <p style={{ fontFamily: theme.fonts.mono, fontSize: '40px', fontWeight: 700, color: theme.colors.ctaGreen }}>${recovered.toLocaleString()}</p>
-          </div>
+
           <div
             style={{
-              paddingTop: theme.spacing.md,
-              marginTop: theme.spacing.sm,
-              borderTop: `1px solid ${theme.colors.ctaGreen}40`,
-              background: `${theme.colors.ctaGreen}10`,
-              borderRadius: theme.radius.md,
-              padding: theme.spacing.md,
-              marginLeft: -theme.spacing.md,
-              marginRight: -theme.spacing.md,
+              height: 1,
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)',
+            }}
+          />
+
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: theme.colors.accent, margin: '0 0 6px' }}>
+              With Swoop
+            </p>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: '0 0 12px' }}>
+              65% early-intervention retention rate
+            </p>
+            <p style={{ fontSize: 52, fontWeight: 800, fontFamily: theme.fonts.mono, color: theme.colors.accent, margin: 0, lineHeight: 1, letterSpacing: '-0.02em' }}>
+              {fmt(recovered)}
+            </p>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: '6px 0 0' }}>
+              Revenue recovered ({swoopSaves} members saved)
+            </p>
+          </div>
+
+          <div
+            style={{
+              background: 'rgba(243,146,45,0.1)',
+              border: '1px solid rgba(243,146,45,0.3)',
+              borderRadius: 14,
+              padding: 20,
+              marginTop: 'auto',
             }}
           >
-            <p style={{ fontSize: theme.fontSize.sm, color: `${theme.colors.bgCard}80` }}>Swoop Pro annual cost</p>
-            <p style={{ fontFamily: theme.fonts.mono, fontSize: '20px', fontWeight: 700, color: `${theme.colors.bgCard}CC` }}>-${swoopProCost.toLocaleString()}</p>
-            <p style={{ fontSize: theme.fontSize.sm, color: `${theme.colors.bgCard}80`, marginTop: theme.spacing.sm }}>Net revenue gain</p>
-            <p style={{ fontFamily: theme.fonts.mono, fontSize: '40px', fontWeight: 700, color: theme.colors.ctaGreen }}>${netGain.toLocaleString()}</p>
-            <p style={{ color: `${theme.colors.ctaGreen}CC`, fontSize: theme.fontSize.sm, marginTop: theme.spacing.xs, fontWeight: 600 }}>{roiMultiple}× return on investment</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>Swoop Pro annual cost</span>
+              <span style={{ fontFamily: theme.fonts.mono, fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>-{fmt(swoopProCost)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>Net revenue gain</span>
+              <span style={{ fontFamily: theme.fonts.mono, fontSize: 22, color: theme.colors.accent, fontWeight: 800 }}>{fmt(netGain)}</span>
+            </div>
+            <p style={{ fontSize: 13, color: theme.colors.accent, fontWeight: 700, margin: '8px 0 0' }}>
+              {roiMultiple}× return on investment
+            </p>
           </div>
         </div>
       </div>
-    </section>
+    </SectionShell>
   );
 }

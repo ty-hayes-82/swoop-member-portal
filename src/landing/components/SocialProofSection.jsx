@@ -1,26 +1,6 @@
 import { theme } from '@/config/theme';
 import { foundingPartnerBenefits } from '@/landing/data';
-
-const integrationCategories = [
-  'Tee Sheet Platforms',
-  'Club Management Systems',
-  'POS & F&B',
-  'CRM & Email',
-  'Payroll & Scheduling',
-  'Finance & BI',
-  'Access Control',
-  'Web & Leads',
-];
-
-const pillStyle = {
-  display: 'inline-block',
-  padding: '6px 14px',
-  borderRadius: 999,
-  background: theme.colors.bgCard,
-  border: `1px solid ${theme.colors.border}`,
-  fontSize: theme.fontSize.sm,
-  fontWeight: 500,
-};
+import { SectionShell, Card, Button, IconBadge, Stat } from '@/landing/ui';
 
 const metricCards = [
   {
@@ -49,113 +29,141 @@ const metricCards = [
   },
 ];
 
+const benefitIcons = ['Handshake', 'Compass', 'Lock'];
+
 export default function SocialProofSection() {
   return (
-    <section style={{ marginBottom: theme.spacing.xxl }}>
-      {/* Integration Trust Strip */}
-      <div style={{
-        background: '#F3F4F6',
-        borderRadius: theme.radius.lg,
-        padding: '24px',
-        marginBottom: theme.spacing.xl,
-        textAlign: 'center',
-      }}>
-        <p style={{ fontWeight: 600, marginBottom: theme.spacing.md, color: theme.colors.textPrimary }}>
-          Connects to the systems you already use
-        </p>
-        <ul className="landing-trust-strip" style={{ listStyle: 'none', padding: 0, margin: 0, marginBottom: theme.spacing.md }}>
-          {integrationCategories.map((category) => (
-            <li key={category} className="landing-trust-chip" style={pillStyle}>{category}</li>
-          ))}
-        </ul>
-        <p style={{ color: theme.colors.textMuted, fontSize: theme.fontSize.sm, margin: 0 }}>
-          28 integrations · Live in under 2 weeks · No rip-and-replace
-        </p>
-      </div>
-
-      {/* Metric Proof Cards */}
-      <div style={{ marginBottom: theme.spacing.xxl }}>
-        <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.sm, textAlign: 'center' }}>
-          Intelligence in action: live demo results
-        </h2>
-        <p style={{ color: theme.colors.textMuted, marginBottom: theme.spacing.xl, textAlign: 'center', maxWidth: 700, margin: '0 auto ' + theme.spacing.xl }}>
-          Metrics from the Pinetree CC demo environment (300 members, real system data). Founding partner case studies publishing Q2 2026.
-        </p>
-        <div className="landing-grid-2" style={{ gap: theme.spacing.lg }}>
-          {metricCards.map((card) => (
-            <article
-              key={card.title}
+    <SectionShell
+      band="cream"
+      eyebrow="Proof"
+      title="Intelligence in action: live demo results"
+      subtitle="Metrics from the Pinetree CC demo environment (300 members, real system data). Founding partner case studies publishing Q2 2026."
+    >
+      <div
+        className="landing-metric-grid"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+          gap: 20,
+          marginBottom: 80,
+        }}
+      >
+        {metricCards.map((card) => (
+          <Card key={card.title} interactive>
+            <p
               style={{
-                border: `1px solid ${theme.colors.border}`,
-                borderLeft: `4px solid ${theme.colors.ctaGreen}`,
-                borderRadius: theme.radius.lg,
-                padding: '24px',
-                background: theme.colors.bgCard,
+                fontSize: 11,
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                color: theme.colors.textMuted,
+                margin: 0,
+                letterSpacing: '0.1em',
               }}
             >
-              <p style={{ fontSize: theme.fontSize.sm, textTransform: 'uppercase', fontWeight: 600, color: theme.colors.textMuted, marginBottom: theme.spacing.xs }}>
-                {card.title}
-              </p>
-              <p style={{ fontSize: '42px', fontWeight: 700, fontFamily: theme.fonts.mono, color: theme.colors.ctaGreen, marginBottom: theme.spacing.xs, lineHeight: 1 }}>
-                {card.metric}
-              </p>
-              <p style={{ fontSize: theme.fontSize.md, fontWeight: 600, marginBottom: theme.spacing.sm, color: theme.colors.textPrimary }}>
-                {card.subtitle}
-              </p>
-              <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
-                {card.description}
-              </p>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
-        Founding Partner Program
-      </h2>
-      <p style={{ color: theme.colors.textMuted, marginBottom: theme.spacing.lg }}>
-        We&apos;re onboarding our first 10 clubs with hands-on implementation, direct roadmap input,
-        and locked-in pricing. Be one of them.
-      </p>
-      <div className="landing-grid-3">
-        {foundingPartnerBenefits.map((benefit) => (
-          <article
-            key={benefit.title}
-            style={{
-              border: `1px solid ${theme.colors.border}`,
-              borderRadius: theme.radius.lg,
-              padding: '20px',
-              background: theme.colors.bgCard,
-            }}
-          >
-            <p style={{ fontSize: theme.fontSize.lg, marginBottom: theme.spacing.sm, fontWeight: 700 }}>
-              {benefit.title}
+              {card.title}
             </p>
-            <p style={{ color: theme.colors.textSecondary }}>{benefit.description}</p>
-          </article>
+            <p
+              style={{
+                fontSize: 52,
+                fontWeight: 800,
+                fontFamily: theme.fonts.mono,
+                color: theme.colors.accent,
+                margin: '4px 0 0',
+                lineHeight: 1,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {card.metric}
+            </p>
+            <p style={{ fontSize: 16, fontWeight: 700, color: theme.neutrals.ink, margin: '8px 0 0' }}>
+              {card.subtitle}
+            </p>
+            <p style={{ fontSize: 14, color: theme.colors.textSecondary, lineHeight: 1.55, margin: 0 }}>
+              {card.description}
+            </p>
+          </Card>
         ))}
       </div>
-      <div style={{ marginTop: theme.spacing.lg }}>
-        <a
-          href="#demo-form"
+
+      <div
+        style={{
+          background: theme.neutrals.paper,
+          border: `2px solid ${theme.colors.accent}`,
+          borderRadius: 24,
+          padding: 'clamp(32px, 5vw, 56px)',
+          position: 'relative',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <span
+            style={{
+              display: 'inline-block',
+              padding: '6px 16px',
+              borderRadius: 999,
+              background: theme.colors.accent,
+              color: '#FFFFFF',
+              fontSize: 11,
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: 16,
+            }}
+          >
+            Founding Partner Program
+          </span>
+          <h3
+            style={{
+              fontSize: 'clamp(26px, 3.5vw, 38px)',
+              fontWeight: 700,
+              color: theme.neutrals.ink,
+              margin: '0 0 12px',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Be one of our first ten clubs.
+          </h3>
+          <p style={{ color: theme.colors.textSecondary, fontSize: 17, maxWidth: 620, margin: '0 auto' }}>
+            Hands-on implementation, direct roadmap input, and locked-in pricing for life.
+          </p>
+        </div>
+        <div
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '12px 20px',
-            borderRadius: theme.radius.md,
-            background: theme.colors.ctaGreen,
-            color: theme.colors.ctaGreenText,
-            fontWeight: 700,
-            textDecoration: 'none',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: 24,
+            marginBottom: 32,
           }}
         >
-          Apply for Founding Partner
-        </a>
-        <p style={{ marginTop: theme.spacing.sm, color: theme.colors.textMuted, fontSize: theme.fontSize.sm }}>
-          Limited founding partner spots — early clubs get direct roadmap input
-        </p>
+          {foundingPartnerBenefits.map((benefit, idx) => (
+            <div key={benefit.title} style={{ textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                <IconBadge name={benefitIcons[idx] || 'Star'} tone="orange" />
+              </div>
+              <p style={{ fontSize: 17, fontWeight: 700, margin: '0 0 6px', color: theme.neutrals.ink }}>
+                {benefit.title}
+              </p>
+              <p style={{ color: theme.colors.textSecondary, fontSize: 14, lineHeight: 1.55, margin: 0 }}>
+                {benefit.description}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <Button
+            as="a"
+            href="#demo-form"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+          >
+            Apply for Founding Partner
+          </Button>
+          <p style={{ marginTop: 14, color: theme.colors.textMuted, fontSize: 13 }}>
+            Limited founding partner spots — early clubs get direct roadmap input
+          </p>
+        </div>
       </div>
-    </section>
+    </SectionShell>
   );
 }

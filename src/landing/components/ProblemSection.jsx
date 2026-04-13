@@ -1,71 +1,80 @@
 import { theme } from '@/config/theme';
 import { problemCards } from '@/landing/data';
+import { SectionShell, Card, IconBadge, Stat } from '@/landing/ui';
+
+const sourceIconMap = {
+  'CRM + POS + Email': 'Radio',
+  'Member CRM + Service Desk': 'Headphones',
+  'Tee Sheet + Weather + POS': 'CloudRain',
+};
 
 export default function ProblemSection() {
   return (
-    <section className="landing-section-padded" style={{
-      background: theme.colors.landingCream,
-      borderRadius: theme.radius.xl,
-      padding: 'clamp(32px, 6vw, 56px) clamp(18px, 4vw, 28px)',
-      marginBottom: theme.spacing.xxl,
-    }}>
-      <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.sm }}>
-        Most clubs are flying blind.
-      </h2>
-      <p style={{
-        color: theme.colors.textSecondary,
-        fontSize: theme.fontSize.lg,
-        maxWidth: 640,
-        marginBottom: theme.spacing.lg,
-        lineHeight: 1.5,
-      }}>
-        Your tee sheet, CRM, and POS each hold a fragment. Nobody connects
-        the dots until a member is already gone.
-      </p>
-      <div className="landing-problem-grid">
+    <SectionShell
+      band="sand"
+      title="Most clubs are flying blind."
+      subtitle="Your tee sheet, CRM, and POS each hold a fragment. Nobody connects the dots until a member is already gone."
+      align="center"
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: 24,
+        }}
+      >
         {problemCards.map((card) => (
-          <article
-            key={card.title}
-            style={{
-              background: theme.colors.bgCard,
-              border: `1px solid ${theme.colors.border}`,
-              borderRadius: theme.radius.lg,
-              padding: 'clamp(20px, 4vw, 26px)',
-              boxShadow: theme.shadow.sm,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
-              <span>📡 {card.source}</span>
-              <span>⏱ {card.freshness}</span>
+          <Card key={card.title} interactive>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <IconBadge name={sourceIconMap[card.source] || 'Radio'} tone="orange" />
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: theme.colors.accent,
+                  background: 'rgba(243,146,45,0.1)',
+                  padding: '6px 12px',
+                  borderRadius: 999,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                }}
+              >
+                {card.confidence}
+              </span>
             </div>
-            <h3 style={{ fontSize: theme.fontSize.lg, margin: 0 }}>{card.title}</h3>
-            <p style={{ fontSize: theme.fontSize.sm, color: theme.colors.textSecondary }}>{card.summary}</p>
+            <h3 style={{ fontSize: 22, fontWeight: 700, margin: '8px 0 4px', color: theme.neutrals.ink }}>{card.title}</h3>
+            <p style={{ fontSize: 15, lineHeight: 1.55, color: theme.colors.textSecondary, margin: 0 }}>
+              {card.summary}
+            </p>
             {card.highlights?.length > 0 && (
-              <ul style={{ margin: 0, paddingLeft: '18px', color: theme.colors.textPrimary, fontSize: theme.fontSize.sm, lineHeight: 1.5 }}>
+              <ul style={{ margin: '4px 0 0', paddingLeft: 18, color: theme.neutrals.ink, fontSize: 14, lineHeight: 1.6 }}>
                 {card.highlights.map((highlight) => (
-                  <li key={highlight} style={{ marginBottom: '4px' }}>{highlight}</li>
+                  <li key={highlight} style={{ marginBottom: 4 }}>{highlight}</li>
                 ))}
               </ul>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <div style={{ fontSize: theme.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: theme.colors.textMuted }}>
-                Why this surfaced
-                <div style={{ fontSize: theme.fontSize.sm, fontWeight: 600, color: theme.colors.textPrimary }}>{card.why}</div>
+            <div
+              style={{
+                marginTop: 'auto',
+                paddingTop: 16,
+                borderTop: '1px solid rgba(17,17,17,0.08)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+                gap: 12,
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.colors.textMuted, marginBottom: 4 }}>
+                  Why this surfaced
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: theme.neutrals.ink, maxWidth: 180 }}>{card.why}</div>
               </div>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: theme.colors.accent, background: `${theme.colors.accent}12`, padding: '4px 10px', borderRadius: '999px' }}>{card.confidence}</span>
+              {card.metric && <Stat value={card.metric.value} label={card.metric.label} />}
             </div>
-            {card.metric && (
-              <div style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md, padding: '10px 12px', display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
-                <span style={{ fontSize: '22px', fontFamily: theme.fonts.mono, fontWeight: 700 }}>{card.metric.value}</span>
-                <span style={{ fontSize: theme.fontSize.xs, color: theme.colors.textMuted }}>{card.metric.label}</span>
-              </div>
-            )}
-          </article>
+          </Card>
         ))}
       </div>
-    </section>
+    </SectionShell>
   );
 }

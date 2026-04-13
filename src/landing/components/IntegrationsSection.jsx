@@ -1,5 +1,7 @@
 import { theme } from '@/config/theme';
 import { integrationCategories } from '@/landing/data';
+import { SectionShell, Card, IconBadge } from '@/landing/ui';
+import { IntegrationsIllustration } from '@/landing/assets/Illustrations';
 
 const swoopUnique = [
   { title: 'Real-Time Location Intelligence', desc: 'GPS and behavioral data from the Swoop member app. On-property movement patterns that no POS, tee sheet, or CRM captures.' },
@@ -8,240 +10,146 @@ const swoopUnique = [
   { title: 'Closed-Loop Engagement Tracking', desc: 'From signal detection to GM action to member response to outcome measurement. Your existing tools stop at the data layer. Swoop closes the loop.' },
 ];
 
+const ACCENT = '#F3922D';
+
 export default function IntegrationsSection() {
   return (
-    <>
-      <section style={{ marginBottom: theme.spacing.xxl }}>
-        <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.md }}>
-          Your tools manage operations. Swoop connects them and tells you what they mean together.
-        </h2>
-        <p style={{
-          color: theme.colors.textSecondary,
-          fontSize: theme.fontSize.lg,
-          marginBottom: theme.spacing.xl,
-        }}>
-          These systems collect data. Swoop is the intelligence layer that connects them, adds location-aware behavioral signals, and turns cross-system patterns into actionable recommendations.
+    <SectionShell
+      band="dark"
+      eyebrow="Integrations"
+      title="Your tools manage operations. Swoop connects them."
+      subtitle="These systems collect data. Swoop is the intelligence layer that connects them, adds location-aware behavioral signals, and turns cross-system patterns into actionable recommendations."
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+          gap: 'clamp(32px, 5vw, 72px)',
+          alignItems: 'center',
+          marginBottom: 64,
+        }}
+        className="landing-integrations-hero"
+      >
+        <div style={{ maxWidth: 360, margin: '0 auto' }}>
+          <IntegrationsIllustration />
+        </div>
+        <div style={{ display: 'grid', gap: 20 }}>
+          {swoopUnique.map((item) => (
+            <div
+              key={item.title}
+              style={{
+                borderLeft: `3px solid ${ACCENT}`,
+                paddingLeft: 18,
+              }}
+            >
+              <p style={{ fontSize: 17, fontWeight: 700, margin: '0 0 6px', color: '#FFFFFF' }}>{item.title}</p>
+              <p style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(255,255,255,0.7)', margin: 0 }}>
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        style={{
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 20,
+          padding: 'clamp(24px, 4vw, 36px)',
+          marginBottom: 32,
+        }}
+      >
+        <p
+          style={{
+            fontSize: 12,
+            color: 'rgba(255,255,255,0.6)',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            fontWeight: 700,
+            margin: '0 0 24px',
+          }}
+        >
+          28 Integrations Across 10 Categories
         </p>
-
-        {/* What Swoop Adds (Unique Differentiators) */}
-        <div style={{
-          border: `2px solid ${theme.colors.ctaGreen}`,
-          borderRadius: theme.radius.lg,
-          background: theme.colors.bgCard,
-          padding: 'clamp(18px, 4vw, 28px)',
-          marginBottom: theme.spacing.xl,
-        }}>
-          <p style={{
-            fontSize: theme.fontSize.sm,
-            color: theme.colors.textMuted,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            marginBottom: theme.spacing.md,
-          }}>
-            What Swoop Adds That No Integration Can Provide
-          </p>
-          <div className="landing-grid-2" style={{ gap: 16 }}>
-            {swoopUnique.map((item) => (
-              <div key={item.title} style={{
-                borderLeft: `3px solid ${theme.colors.ctaGreen}`,
-                paddingLeft: '14px',
-              }}>
-                <p style={{ fontWeight: 600, marginBottom: 6 }}>{item.title}</p>
-                <p style={{
-                  color: theme.colors.textSecondary,
-                  fontSize: theme.fontSize.sm,
-                  lineHeight: 1.6,
-                }}>
-                  {item.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Visual: Data Flow */}
-        <div style={{
-          border: `1px solid ${theme.colors.border}`,
-          borderRadius: theme.radius.lg,
-          background: theme.colors.bgCard,
-          padding: 'clamp(18px, 4vw, 28px)',
-          marginBottom: theme.spacing.xl,
-        }}>
-          <p style={{
-            fontSize: theme.fontSize.lg,
-            fontWeight: 600,
-            textAlign: 'center',
-            marginBottom: theme.spacing.lg,
-          }}>
-            From disconnected systems to unified intelligence
-          </p>
-          <div className="landing-flow-grid" style={{ gap: 20 }}>
-            {/* Left: Systems */}
-            <div>
-              <p style={{
-                fontSize: theme.fontSize.xs,
-                color: theme.colors.textMuted,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                marginBottom: theme.spacing.sm,
-              }}>
-                Your Systems Collect
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 16,
+          }}
+        >
+          {integrationCategories.map((category) => (
+            <div
+              key={category.label}
+              style={{
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 12,
+                padding: 16,
+                background: 'rgba(255,255,255,0.02)',
+              }}
+            >
+              <p style={{ fontWeight: 700, margin: '0 0 4px', color: '#FFFFFF', fontSize: 15 }}>{category.label}</p>
+              <p style={{ color: ACCENT, fontFamily: theme.fonts.mono, fontSize: 13, margin: '0 0 6px' }}>
+                {category.systems} connected systems
               </p>
-              {['Tee times', 'POS transactions', 'CRM records', 'Payroll hours', 'Email opens'].map((item) => (
-                <div key={item} style={{
-                  border: `1px solid ${theme.colors.borderLight}`,
-                  borderRadius: theme.radius.sm,
-                  padding: '8px',
-                  marginBottom: 8,
-                  fontSize: theme.fontSize.sm,
-                }}>
-                  {item}
-                </div>
-              ))}
-            </div>
-
-            {/* Middle: Arrow + Swoop Layer */}
-            <div style={{ textAlign: 'center' }}>
-              <div style={{
-                background: theme.colors.bgSidebar,
-                color: theme.colors.textOnDark,
-                borderRadius: theme.radius.md,
-                padding: '16px',
-                marginBottom: theme.spacing.md,
-              }}>
-                <p style={{
-                  fontSize: theme.fontSize.xs,
-                  color: theme.colors.ctaGreen,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  marginBottom: 8,
-                }}>
-                  Swoop Intelligence Layer
-                </p>
-                <div style={{ fontSize: theme.fontSize.sm, lineHeight: 1.8 }}>
-                  <p>Location data</p>
-                  <p>Behavioral patterns</p>
-                  <p>Cross-system correlation</p>
-                  <p>AI prediction</p>
-                </div>
-              </div>
-              <div style={{ fontSize: '32px', color: theme.colors.ctaGreen }}>→</div>
-            </div>
-
-            {/* Right: What Swoop Delivers */}
-            <div>
-              <p style={{
-                fontSize: theme.fontSize.xs,
-                color: theme.colors.textMuted,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                marginBottom: theme.spacing.sm,
-              }}>
-                Swoop Delivers
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, margin: 0, lineHeight: 1.5 }}>
+                {category.vendors.join(' · ')}
               </p>
-              {[
-                { label: 'Member health intelligence', color: theme.colors.lensMemberIntelligence },
-                { label: 'Retention-prioritized waitlist', color: theme.colors.lensTeeSheetDemand },
-                { label: 'F&B demand prediction', color: theme.colors.lensFbOperations },
-                { label: 'Staffing gap alerts', color: theme.colors.lensStaffingLabor },
-                { label: 'Revenue attribution', color: theme.colors.lensRevenuePipeline },
-              ].map((item) => (
-                <div key={item.label} style={{
-                  borderLeft: `3px solid ${item.color}`,
-                  borderRadius: theme.radius.sm,
-                  padding: '8px 8px 8px 12px',
-                  marginBottom: 8,
-                  fontSize: theme.fontSize.sm,
-                  fontWeight: 500,
-                  background: theme.colors.bgCard,
-                }}>
-                  {item.label}
-                </div>
-              ))}
             </div>
-          </div>
+          ))}
         </div>
+      </div>
 
-        {/* 28 Integrations Grid */}
-        <div style={{
-          border: `1px solid ${theme.colors.border}`,
-          borderRadius: theme.radius.lg,
-          background: theme.colors.bgCard,
-          padding: 'clamp(18px, 4vw, 24px)',
-          marginBottom: theme.spacing.lg,
-        }}>
-          <p style={{
-            fontSize: theme.fontSize.sm,
-            color: theme.colors.textMuted,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            marginBottom: theme.spacing.md,
-          }}>
-            28 Integrations Across 10 Categories
-          </p>
-          <div className="landing-grid-auto" style={{ gap: 12 }}>
-            {integrationCategories.map((category) => (
-              <div key={category.label} style={{
-                border: `1px solid ${theme.colors.borderLight}`,
-                borderRadius: theme.radius.md,
-                padding: '12px',
-              }}>
-                <p style={{ fontWeight: 600 }}>{category.label}</p>
-                <p style={{
-                  color: theme.colors.textSecondary,
-                  fontFamily: theme.fonts.mono,
-                  fontSize: theme.fontSize.sm,
-                }}>
-                  {category.systems} connected systems
-                </p>
-                <p style={{
-                  color: theme.colors.textMuted,
-                  fontSize: theme.fontSize.sm,
-                  marginTop: 6,
-                }}>
-                  {category.vendors.join(', ')}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Rollout Timeline */}
-        <div style={{
-          border: `1px solid ${theme.colors.border}`,
-          borderRadius: theme.radius.lg,
-          background: theme.colors.bgDeep,
-          padding: 'clamp(18px, 4vw, 24px)',
-        }}>
-          <p style={{
-            fontSize: theme.fontSize.sm,
-            color: theme.colors.textMuted,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            marginBottom: theme.spacing.md,
-          }}>
+      <div
+        style={{
+          border: `1px solid rgba(243,146,45,0.4)`,
+          background: 'rgba(243,146,45,0.08)',
+          borderRadius: 20,
+          padding: 'clamp(24px, 4vw, 36px)',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+          gap: 32,
+          alignItems: 'center',
+        }}
+        className="landing-integrations-timeline"
+      >
+        <div>
+          <p
+            style={{
+              fontSize: 12,
+              color: ACCENT,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              fontWeight: 700,
+              margin: '0 0 12px',
+            }}
+          >
             Rollout Timeline
           </p>
-          <p style={{ fontSize: theme.fontSize.lg, marginBottom: theme.spacing.md }}>
-            Typical launch: <span className="font-mono">10 business days</span>.
+          <p style={{ fontSize: 28, fontWeight: 700, color: '#FFFFFF', margin: '0 0 12px', lineHeight: 1.2 }}>
+            Typical launch: <span style={{ fontFamily: theme.fonts.mono, color: ACCENT }}>10 business days</span>.
           </p>
-          <p style={{ color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>
-            Week 1: connector setup, data validation, and intelligence baselines. Week 2: workflows,
-            AI agent playbooks, and GM readiness.
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15, lineHeight: 1.6, margin: 0 }}>
+            Week 1: connector setup, data validation, and intelligence baselines. Week 2: workflows, AI agent playbooks, and GM readiness.
           </p>
-          <div style={{
-            borderRadius: theme.radius.sm,
-            background: theme.colors.bgCard,
-            padding: '12px',
-            border: `1px solid ${theme.colors.border}`,
-          }}>
-            <p style={{ fontFamily: theme.fonts.mono, fontWeight: 600 }}>No operational downtime.</p>
-            <p style={{ color: theme.colors.textSecondary, fontSize: theme.fontSize.sm }}>
-              Keep current systems active while Swoop comes online in parallel.
-            </p>
-          </div>
         </div>
-      </section>
-    </>
+        <div
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            borderRadius: 14,
+            padding: 22,
+            border: '1px solid rgba(255,255,255,0.12)',
+          }}
+        >
+          <p style={{ fontFamily: theme.fonts.mono, fontWeight: 700, color: '#FFFFFF', margin: '0 0 6px', fontSize: 15 }}>
+            No operational downtime.
+          </p>
+          <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, lineHeight: 1.55, margin: 0 }}>
+            Keep current systems active while Swoop comes online in parallel.
+          </p>
+        </div>
+      </div>
+    </SectionShell>
   );
 }

@@ -1,77 +1,106 @@
 import { theme } from '@/config/theme';
 import { pricingTiers } from '@/landing/data';
+import { SectionShell, Card, Button, Icon } from '@/landing/ui';
 
 function PricingCard({ tier }) {
   const isPopular = tier.badge === 'Most Popular';
+  const goToDemoForm = () =>
+    document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   return (
-    <article
+    <Card
+      featured={isPopular}
+      interactive={!isPopular}
       style={{
-        background: theme.colors.bgCard,
-        border: `1px solid ${isPopular ? theme.colors.ctaGreen : theme.colors.border}`,
-        borderRadius: theme.radius.lg,
-        padding: isPopular ? '26px 22px' : '22px',
-        boxShadow: isPopular ? theme.shadow.lg : theme.shadow.sm,
-        transform: isPopular ? 'translateY(-6px)' : 'none',
+        padding: isPopular ? 36 : 28,
+        ...(isPopular && {
+          transform: 'translateY(-12px)',
+          boxShadow: '0 30px 60px rgba(243,146,45,0.22), 0 10px 20px rgba(17,17,17,0.08)',
+          borderWidth: 2,
+        }),
       }}
     >
       {isPopular && (
-        <span style={{
-          display: 'inline-block',
-          marginBottom: theme.spacing.sm,
-          padding: '5px 10px',
-          borderRadius: theme.radius.sm,
-          background: `${theme.colors.ctaGreen}2B`,
-          color: theme.colors.ctaGreenText,
-          fontSize: theme.fontSize.sm,
-          fontWeight: 700,
-        }}>
+        <span
+          style={{
+            position: 'absolute',
+            top: -14,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            padding: '6px 16px',
+            borderRadius: 999,
+            background: theme.colors.accent,
+            color: '#FFFFFF',
+            fontSize: 11,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 6px 16px rgba(243,146,45,0.4)',
+          }}
+        >
           {tier.badge}
         </span>
       )}
-      <h3 style={{ fontSize: theme.fontSize.xl, marginBottom: 6 }}>{tier.name}</h3>
-      <p style={{ fontSize: theme.fontSize.xxl, margin: '0 0 10px', fontWeight: 700 }}>{tier.price}</p>
-      <p style={{ color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>{tier.description}</p>
-      <ul style={{ margin: `0 0 ${theme.spacing.lg}`, paddingLeft: 18, color: theme.colors.textSecondary }}>
+      <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: theme.neutrals.ink }}>{tier.name}</h3>
+      <p style={{ fontSize: 42, margin: '4px 0 0', fontWeight: 800, color: theme.neutrals.ink, letterSpacing: '-0.02em', lineHeight: 1 }}>
+        {tier.price}
+      </p>
+      <p style={{ color: theme.colors.textSecondary, fontSize: 15, lineHeight: 1.55, margin: '0 0 8px' }}>
+        {tier.description}
+      </p>
+      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'grid', gap: 10 }}>
         {tier.features.map((feature) => (
-          <li key={feature} style={{ marginBottom: 8 }}>{feature}</li>
+          <li
+            key={feature}
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 10,
+              fontSize: 14,
+              color: theme.neutrals.ink,
+              lineHeight: 1.5,
+            }}
+          >
+            <Icon name="Check" size={18} color={theme.colors.accent} strokeWidth={3} style={{ flexShrink: 0, marginTop: 2 }} />
+            {feature}
+          </li>
         ))}
       </ul>
-      <button
-        type="button"
-        onClick={() => document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-        style={{
-          width: '100%',
-          borderRadius: theme.radius.md,
-          border: `1px solid ${isPopular ? theme.colors.ctaGreen : theme.colors.border}`,
-          background: isPopular ? theme.colors.ctaGreen : theme.colors.bgCard,
-          color: isPopular ? theme.colors.ctaGreenText : theme.colors.textPrimary,
-          fontWeight: 700,
-          fontFamily: theme.fonts.sans,
-          fontSize: theme.fontSize.md,
-          padding: '12px 14px',
-          cursor: 'pointer',
-        }}
+      <Button
+        variant={isPopular ? 'primary' : 'light'}
+        size="md"
+        block
+        onClick={goToDemoForm}
       >
         {tier.cta}
-      </button>
-    </article>
+      </Button>
+    </Card>
   );
 }
 
 export default function PricingSection() {
   return (
-    <section id="pricing" style={{ marginBottom: theme.spacing.xxl }}>
-      <h2 style={{ fontSize: theme.fontSize.xxl, marginBottom: theme.spacing.sm }}>
-        Simple pricing. No long-term contracts.
-      </h2>
-      <p style={{ color: theme.colors.textSecondary, marginBottom: theme.spacing.xl, fontSize: theme.fontSize.lg }}>
-        Start free with your existing systems. Upgrade when you see the value.
-      </p>
-      <div className="landing-grid-3" style={{ alignItems: 'stretch' }}>
+    <SectionShell
+      id="pricing"
+      band="paper"
+      eyebrow="Pricing"
+      title="Simple pricing. No long-term contracts."
+      subtitle="Start free with your existing systems. Upgrade when you see the value."
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 28,
+          alignItems: 'stretch',
+          paddingTop: 24,
+        }}
+      >
         {pricingTiers.map((tier) => (
           <PricingCard key={tier.name} tier={tier} />
         ))}
       </div>
-    </section>
+    </SectionShell>
   );
 }
