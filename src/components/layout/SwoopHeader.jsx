@@ -5,6 +5,7 @@ import { NAV_ITEMS } from "@/config/navigation";
 import { useCurrentClub } from "@/hooks/useCurrentClub";
 import { memberProfiles } from "@/data/members";
 import { loadStaticDemo, hasRealClub } from "@/services/demoSession";
+import { useApp } from "@/context/AppContext";
 
 // Client-side fallback: used when /api/search returns empty (e.g. demo mode).
 function localMemberSearch(q) {
@@ -41,6 +42,7 @@ const SwoopHeader = () => {
   const notifRef = useRef(null);
 
   const currentNav = NAV_ITEMS.find((item) => item.key === currentRoute) || NAV_ITEMS[0];
+  const { pendingAgentCount } = useApp() || {};
 
   // Get user info from auth context; fall back to 'demo' when unauthenticated.
   const clubId = useCurrentClub() || "demo";
@@ -306,6 +308,24 @@ const SwoopHeader = () => {
               </span>
             )}
           </div>
+
+          {/* Action Inbox — quick approve from any page */}
+          {pendingAgentCount > 0 && (
+            <button
+              onClick={() => navigate("automations", { tab: "inbox" })}
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer transition-colors"
+              style={{ background: 'rgba(139,92,246,0.08)', borderColor: 'rgba(139,92,246,0.25)', color: '#8b5cf6' }}
+              title={`${pendingAgentCount} action${pendingAgentCount === 1 ? '' : 's'} awaiting approval`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+              <span className="hidden sm:inline">Inbox</span>
+              <span className="min-w-[18px] h-[18px] inline-flex items-center justify-center rounded-full bg-purple-500 text-white text-[10px] font-bold px-1">
+                {pendingAgentCount > 99 ? '99+' : pendingAgentCount}
+              </span>
+            </button>
+          )}
 
           {/* Notification bell */}
           <div className="relative" ref={notifRef}>

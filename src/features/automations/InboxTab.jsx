@@ -37,13 +37,29 @@ function ActionCard({ action, onApprove, onDismiss }) {
 
   return (
     <div className={`border border-gray-200 rounded-xl px-4 py-3.5 bg-white border-l-4 ${PRIORITY_COLORS[priority] || ''} dark:bg-gray-900 dark:border-gray-800`}>
-      <div className="flex items-start justify-between gap-3 mb-1.5">
-        <div className="text-sm font-semibold text-gray-800 dark:text-white/90 leading-snug">
-          {action.description}
+      {/* Hero: member name + dollar — the marketing-site framing */}
+      <div className="flex items-start justify-between gap-3 mb-1">
+        <div className="flex-1 min-w-0">
+          {action.memberName && (
+            <div className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wide">
+              {action.memberName}
+              {action.archetype ? ` · ${action.archetype}` : ''}
+            </div>
+          )}
+          <div className="text-sm font-semibold text-gray-800 dark:text-white/90 leading-snug">
+            {action.description}
+          </div>
         </div>
-        <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${badge.bg} ${badge.text}`}>
-          {priority}
-        </span>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {action.impactMetric && (
+            <span className="text-xs font-mono font-bold text-success-600 dark:text-success-400 bg-success-50 dark:bg-success-500/10 border border-success-500/20 px-2 py-0.5 rounded-md whitespace-nowrap">
+              {action.impactMetric}
+            </span>
+          )}
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${badge.bg} ${badge.text}`}>
+            {priority}
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex-wrap">
@@ -65,11 +81,13 @@ function ActionCard({ action, onApprove, onDismiss }) {
         </div>
       )}
 
-      {action.impactMetric && (
-        <div className="inline-flex items-center gap-1 mb-2.5 px-2 py-1 rounded-md bg-success-50 border border-success-500/20 dark:bg-success-500/10">
-          <span className="text-xs font-mono font-bold text-success-600 dark:text-success-400">
-            {action.impactMetric}
-          </span>
+      {/* Drafted message preview — if available */}
+      {(action.draftedMessage || action.suggestedScript || action.messageTemplate) && (
+        <div className="mb-2.5 p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+          <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1">Drafted message</div>
+          <p className="text-xs text-gray-700 dark:text-gray-300 m-0 leading-relaxed line-clamp-3">
+            {action.draftedMessage || action.suggestedScript || action.messageTemplate}
+          </p>
         </div>
       )}
 

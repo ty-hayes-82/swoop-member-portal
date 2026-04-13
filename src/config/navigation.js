@@ -17,6 +17,15 @@ export const navItems = [
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
   },
   {
+    key: 'revenue',
+    label: 'Revenue',
+    section: 'PRIMARY',
+    icon: '💰',
+    color: theme.colors.navFb,
+    subtitle: 'Revenue leakage decomposition, scenario modeling, and board-ready attribution.',
+    sourceSystems: ['Tee Sheet', 'POS', 'Scheduling', 'Weather'],
+  },
+  {
     key: 'members',
     label: 'Members',
     section: 'PRIMARY',
@@ -42,15 +51,6 @@ export const navItems = [
     color: theme.colors.navOperations,
     subtitle: 'Service quality, staffing intelligence, and complaint patterns.',
     sourceSystems: ['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather'],
-  },
-  {
-    key: 'revenue',
-    label: 'Revenue',
-    section: 'PRIMARY',
-    icon: '💰',
-    color: theme.colors.navFb,
-    subtitle: 'Revenue leakage decomposition, scenario modeling, and board-ready attribution.',
-    sourceSystems: ['Tee Sheet', 'POS', 'Scheduling', 'Weather'],
   },
   {
     key: 'automations',

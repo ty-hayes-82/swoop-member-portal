@@ -15,6 +15,7 @@ import MorningBriefingSentence from './MorningBriefingSentence';
 import DemoStoriesLauncher from './DemoStoriesLauncher';
 import { getFirstName } from '../../utils/nameUtils';
 import RecentActivityFeed from './RecentActivityFeed';
+import OvernightBrief from './OvernightBrief';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { AnimatedNumber } from '@/components/ui/PageTransition';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
@@ -336,6 +337,9 @@ export default function TodayView() {
           </div>
         </div>
 
+        {/* Overnight Brief — what agents surfaced while the GM was away */}
+        <OvernightBrief />
+
         {/* Core-3 celebration banner — shows once when members + tee-sheet + F&B are all imported */}
         {!core3Dismissed && isGateOpen('members') && isGateOpen('tee-sheet') && isGateOpen('fb') && (
           <div className="fade-in-up rounded-xl p-4" style={{ background: 'white', border: '2px solid transparent', borderImage: 'linear-gradient(135deg, #e8a732, #12b76a, #3B82F6) 1' }}>
@@ -369,6 +373,14 @@ export default function TodayView() {
                     {(memberSummary.atRisk + memberSummary.critical).toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500">need attention this week</div>
+                </div>
+              )}
+              {memberSummary.potentialDuesAtRisk > 0 && (
+                <div>
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    ${Math.round(memberSummary.potentialDuesAtRisk / 1000)}K
+                  </div>
+                  <div className="text-xs text-gray-500">dues at risk</div>
                 </div>
               )}
               {memberSummary.watch > 0 && (
