@@ -467,10 +467,26 @@ function ClubManagementTab({ currentClubId }) {
 
   const fetchClubs = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await apiFetch('/api/club');
-      if (data?.clubs) setClubs(data.clubs);
-      else if (data?.club_id) setClubs([data]); // single-club response for non-admin GMs
+      if (data?.clubs) {
+        setClubs(data.clubs);
+      } else if (data?.club_id) {
+        setClubs([data]);
+      } else if (currentClubId) {
+        // API returned null (session error, network, etc.) — build a minimal row
+        // from localStorage so the Reset Data / Delete buttons are still usable.
+        const user = JSON.parse(localStorage.getItem('swoop_auth_user') || '{}');
+        setClubs([{
+          club_id: currentClubId,
+          name: user.clubName || localStorage.getItem('swoop_club_name') || 'Your Club',
+          member_count: null,
+          last_activity: null,
+        }]);
+      } else {
+        setError('Could not load club data. Try refreshing.');
+      }
     } catch { setError('Failed to load clubs'); }
     setLoading(false);
   };
