@@ -470,6 +470,7 @@ function ClubManagementTab({ currentClubId }) {
     try {
       const data = await apiFetch('/api/club');
       if (data?.clubs) setClubs(data.clubs);
+      else if (data?.club_id) setClubs([data]); // single-club response for non-admin GMs
     } catch { setError('Failed to load clubs'); }
     setLoading(false);
   };
