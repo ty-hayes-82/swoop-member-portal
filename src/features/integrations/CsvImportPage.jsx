@@ -8,7 +8,7 @@
  *   Step 2: Map columns (auto-detected from Jonas aliases, manually adjustable)
  *   Step 3: Preview & import
  */
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   JONAS_IMPORT_TYPES,
   SUPPORTED_VENDORS,
@@ -18,6 +18,7 @@ import {
 import { getFullRoster } from '@/services/memberService';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/Toast';
+import AIImportAssistant from './AIImportAssistant';
 
 // § 1.3 trust boundary — CSV import is a privileged operation that mutates
 // tenant data. Only GMs, club admins, and swoop_admin should ever see the UI.
@@ -38,6 +39,71 @@ const IMPORT_DEP_ORDER = [
 
 function normalizeHeader(h) {
   return String(h || '').trim().toLowerCase().replace(/[\s_#\-()]/g, '');
+}
+
+// ── AI co-pilot helpers ──────────────────────────────────────────────────────
+
+function getAIAuthHeaders() {
+  try {
+    const token = localStorage.getItem('swoop_auth_token');
+    if (token && token !== 'demo') return { Authorization: `Bearer ${token}` };
+    const user = JSON.parse(localStorage.getItem('swoop_auth_user') || 'null');
+    if (user?.clubId?.startsWith('demo_')) return { 'X-Demo-Club': user.clubId };
+  } catch { /* ignore */ }
+  return { 'X-Demo-Club': 'club_001' };
+}
+
+async function parseHeadersOnly(file) {
+  try {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (ext !== 'csv') return { headers: [], rowCount: null };
+    const text = await file.slice(0, 8192).text();
+    const firstNL = text.indexOf('\n');
+    if (firstNL === -1) return { headers: [], rowCount: null };
+    const headers = text.slice(0, firstNL).replace(/\r$/, '')
+      .split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    return { headers, rowCount: Math.round(file.size / 50) };
+  } catch { return { headers: [], rowCount: null }; }
+}
+
+async function callAIForStep({ step, file, parsedHeaders, sampleRows, rowCount, mapping, previewCounts, importType, sessionId }) {
+  const authHeaders = getAIAuthHeaders();
+  let message;
+  let file_data;
+
+  if (step === 1) {
+    message = `The user uploaded "${file?.name || 'upload.csv'}" for a ${importType} import. File headers: ${parsedHeaders.join(', ')}. Estimated rows: ${rowCount ?? 'unknown'}. In 2–3 sentences: identify the data type, guess the vendor software (Jonas, ForeTees, Toast, Clubessential, etc.), note the row count, and flag any obvious data quality issues. Be concise — this appears below a file dropzone in the import wizard.`;
+    file_data = { filename: file?.name || 'upload.csv', headers: parsedHeaders, sampleRows: (sampleRows || []).slice(0, 5), rowCount };
+  } else if (step === 2) {
+    const mapped = Object.entries(mapping).filter(([, v]) => v).map(([c, f]) => `${c} → ${f}`).join(', ');
+    const unmappedCount = Object.values(mapping).filter(v => !v).length;
+    message = `Column auto-mapping for a ${importType} import is complete. Mapped fields: ${mapped || 'none'}. Unmapped columns: ${unmappedCount}. In 1–2 sentences: summarize the mapping confidence and flag any columns the GM should manually review. Don't repeat all mappings — just call out what's uncertain or worth double-checking.`;
+    file_data = { filename: file?.name || 'upload.csv', headers: parsedHeaders, sampleRows: (sampleRows || []).slice(0, 3), rowCount };
+  } else if (step === 3) {
+    const { toCreate = 0, toUpdate = 0, rejected = [] } = previewCounts || {};
+    const rejectedCount = Array.isArray(rejected) ? rejected.length : (rejected || 0);
+    const topReasons = Array.isArray(rejected)
+      ? [...new Set(rejected.slice(0, 5).map(r => r.reason))].join('; ')
+      : '';
+    message = `Write a single plain-English paragraph (no markdown, no bullet points) summarizing this import preview for a golf club GM: ${importType} import, ${toCreate} records to create, ${toUpdate} to update, ${rejectedCount} rejected${topReasons ? ` (reasons: ${topReasons})` : ''}. Mention what the rejected rows mean for data coverage if relevant. Keep it friendly and direct — 2–3 sentences max.`;
+  }
+
+  try {
+    const res = await fetch('/api/onboarding-agent/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({
+        message,
+        session_id: sessionId || undefined,
+        ...(file_data ? { file_data } : {}),
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { text: data.response || null, sessionId: data.session_id || null };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -764,7 +830,7 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
 
 // ── Step 3: Import ───────────────────────────────────────────────────────────
 
-function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error, uploading, onImport, onReset }) {
+function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error, uploading, onImport, onReset, aiPanel }) {
   const config = getImportTypeConfig(importType);
   const preview = useMemo(
     () => buildImportPreview({ parsedRows, mapping, importType, csvHeaders }),
@@ -779,6 +845,9 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
           <p className="text-xs text-gray-400 mb-4 text-center">
             Nothing has been sent to the server yet. Review the changes below before importing.
           </p>
+
+          {/* AI co-pilot narrative — appears above the count tiles */}
+          {aiPanel}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
             <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 text-center">
@@ -1076,6 +1145,72 @@ export default function CsvImportPage() {
   const [error, setError] = useState(null);
   const [parseError, setParseError] = useState(null);
 
+  // AI co-pilot state
+  const [aiInsight, setAiInsight] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSessionId, setAiSessionId] = useState(null);
+  const [aiDismissed, setAiDismissed] = useState(false); // per-wizard-run only
+  const dismissAI = useCallback(() => setAiDismissed(true), []);
+
+  // Clear AI insight on every step change; keep sessionId for cross-step continuity
+  useEffect(() => {
+    setAiInsight(null);
+    setAiLoading(false);
+  }, [step]);
+
+  // Step 1: analyze file as soon as it's dropped
+  useEffect(() => {
+    if (step !== 1 || !file || aiDismissed) return;
+    let cancelled = false;
+    setAiInsight(null);
+    setAiLoading(true);
+    parseHeadersOnly(file).then(({ headers, rowCount }) => {
+      if (cancelled) return Promise.resolve(null);
+      if (headers.length === 0) { setAiLoading(false); return Promise.resolve(null); }
+      return callAIForStep({ step: 1, file, parsedHeaders: headers, sampleRows: [], rowCount, mapping: {}, previewCounts: {}, importType, sessionId: aiSessionId });
+    }).then(result => {
+      if (cancelled || !result) { setAiLoading(false); return; }
+      setAiInsight(result.text);
+      if (result.sessionId) setAiSessionId(result.sessionId);
+      setAiLoading(false);
+    }).catch(() => { if (!cancelled) setAiLoading(false); });
+    return () => { cancelled = true; };
+  }, [step, file, importType, aiDismissed]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Step 2: summarize mapping confidence once after auto-mapping runs
+  useEffect(() => {
+    if (step !== 2 || csvHeaders.length === 0 || aiDismissed) return;
+    let cancelled = false;
+    setAiInsight(null);
+    setAiLoading(true);
+    callAIForStep({ step: 2, file, parsedHeaders: csvHeaders, sampleRows: parsedRows.slice(0, 5), rowCount: parsedRows.length, mapping, previewCounts: {}, importType, sessionId: aiSessionId })
+      .then(result => {
+        if (cancelled || !result) { setAiLoading(false); return; }
+        setAiInsight(result.text);
+        if (result.sessionId) setAiSessionId(result.sessionId);
+        setAiLoading(false);
+      }).catch(() => { if (!cancelled) setAiLoading(false); });
+    return () => { cancelled = true; };
+  }, [step, csvHeaders, aiDismissed]); // eslint-disable-line react-hooks/exhaustive-deps
+  // mapping excluded intentionally — fire once on step entry, not on every user tweak
+
+  // Step 3: plain-English narrative above the count tiles
+  useEffect(() => {
+    if (step !== 3 || parsedRows.length === 0 || aiDismissed) return;
+    const preview = buildImportPreview({ parsedRows, mapping, importType, csvHeaders });
+    let cancelled = false;
+    setAiInsight(null);
+    setAiLoading(true);
+    callAIForStep({ step: 3, file, parsedHeaders: csvHeaders, sampleRows: [], rowCount: parsedRows.length, mapping, previewCounts: { toCreate: preview.toCreate, toUpdate: preview.toUpdate, rejected: preview.rejected }, importType, sessionId: aiSessionId })
+      .then(result => {
+        if (cancelled || !result) { setAiLoading(false); return; }
+        setAiInsight(result.text);
+        if (result.sessionId) setAiSessionId(result.sessionId);
+        setAiLoading(false);
+      }).catch(() => { if (!cancelled) setAiLoading(false); });
+    return () => { cancelled = true; };
+  }, [step, parsedRows.length, aiDismissed]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Parse file when moving from step 1 → step 2
   const handleFileNext = useCallback(async () => {
     if (!file) return;
@@ -1200,6 +1335,10 @@ export default function CsvImportPage() {
     setResult(null);
     setError(null);
     setParseError(null);
+    // Clear AI state between wizard runs; aiDismissed intentionally kept for the page session
+    setAiInsight(null);
+    setAiLoading(false);
+    setAiSessionId(null);
   };
 
   const handleBulkImport = useCallback(async () => {
@@ -1219,8 +1358,17 @@ export default function CsvImportPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <div className="flex items-center gap-3 mb-1">
+      <div className="flex items-center justify-between gap-3 mb-1">
         <h1 className="text-xl font-bold text-gray-800 dark:text-white/90">Import Data</h1>
+        {step > 0 && (
+          <button
+            type="button"
+            onClick={() => setAiDismissed(d => !d)}
+            className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 border-none bg-transparent cursor-pointer shrink-0"
+          >
+            {aiDismissed ? '✦ Show AI tips' : 'Hide AI tips'}
+          </button>
+        )}
       </div>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
         Import CSV or XLSX files from your club software. We'll auto-detect columns and map them for you.
@@ -1287,19 +1435,35 @@ export default function CsvImportPage() {
               {parseError}
             </div>
           )}
+          <AIImportAssistant
+            step={1}
+            insight={aiInsight}
+            loading={aiLoading}
+            dismissed={aiDismissed}
+            onDismiss={dismissAI}
+          />
         </>
       )}
 
       {step === 2 && (
-        <StepMapColumns
-          importType={importType}
-          csvHeaders={csvHeaders}
-          mapping={mapping}
-          setMapping={setMapping}
-          previewRows={parsedRows}
-          onNext={() => setStep(3)}
-          onBack={() => setStep(1)}
-        />
+        <>
+          <StepMapColumns
+            importType={importType}
+            csvHeaders={csvHeaders}
+            mapping={mapping}
+            setMapping={setMapping}
+            previewRows={parsedRows}
+            onNext={() => setStep(3)}
+            onBack={() => setStep(1)}
+          />
+          <AIImportAssistant
+            step={2}
+            insight={aiInsight}
+            loading={aiLoading}
+            dismissed={aiDismissed}
+            onDismiss={dismissAI}
+          />
+        </>
       )}
 
       {step === 3 && (
@@ -1313,6 +1477,15 @@ export default function CsvImportPage() {
           uploading={uploading}
           onImport={handleImport}
           onReset={handleReset}
+          aiPanel={
+            <AIImportAssistant
+              step={3}
+              insight={aiInsight}
+              loading={aiLoading}
+              dismissed={aiDismissed}
+              onDismiss={dismissAI}
+            />
+          }
         />
       )}
       <ToastContainer />
