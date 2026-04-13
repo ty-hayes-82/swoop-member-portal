@@ -459,6 +459,59 @@ function UserRolesTab() {
   );
 }
 
+function WeatherStatusBadge({ city, clubId }) {
+  const [status, setStatus] = useState(null); // null | 'checking' | 'connected' | 'no-location' | 'error'
+  const [detail, setDetail] = useState('');
+
+  const check = async () => {
+    if (!city) { setStatus('no-location'); setDetail('No city set'); return; }
+    setStatus('checking');
+    setDetail('');
+    try {
+      const token = localStorage.getItem('swoop_auth_token');
+      const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}&days=1`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok || data.source === 'none' || data.stale) {
+        setStatus('error');
+        setDetail(data.error || 'Weather unavailable');
+      } else {
+        setStatus('connected');
+        setDetail(`${Math.round(data.current?.temp ?? 0)}°F · ${data.current?.conditionsText || data.current?.conditions || '—'}`);
+      }
+    } catch (e) {
+      setStatus('error');
+      setDetail(e.message || 'Connection failed');
+    }
+  };
+
+  const pill = {
+    null:         { dot: 'bg-gray-300',                   text: 'text-gray-400',  label: 'Weather' },
+    checking:     { dot: 'bg-yellow-400 animate-pulse',   text: 'text-yellow-600 dark:text-yellow-400', label: 'Checking…' },
+    connected:    { dot: 'bg-success-500',                text: 'text-success-600 dark:text-success-400', label: 'Weather connected' },
+    'no-location':{ dot: 'bg-gray-300',                   text: 'text-gray-400',  label: 'No location set' },
+    error:        { dot: 'bg-error-400',                  text: 'text-error-600 dark:text-error-400', label: 'Weather unavailable' },
+  }[status] ?? { dot: 'bg-gray-300', text: 'text-gray-400', label: 'Weather' };
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        <span className={`inline-block w-2 h-2 rounded-full ${pill.dot}`} />
+        <span className={`text-xs font-semibold ${pill.text}`}>{pill.label}</span>
+        {detail && <span className="text-xs text-gray-400">{detail}</span>}
+      </div>
+      <button
+        onClick={check}
+        disabled={status === 'checking'}
+        className="px-2.5 py-1 rounded-md border border-gray-200 bg-white text-gray-600 text-[11px] font-semibold hover:bg-gray-50 transition disabled:opacity-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+      >
+        {status === 'checking' ? '…' : 'Test'}
+      </button>
+    </div>
+  );
+}
+
 function ClubSettingsEditor({ club, onSaved }) {
   const [name, setName] = useState(club.name || '');
   const [city, setCity] = useState(club.city && club.city !== 'Unknown' ? club.city : '');
@@ -539,7 +592,8 @@ function ClubSettingsEditor({ club, onSaved }) {
             </div>
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <WeatherStatusBadge city={city} clubId={club.club_id} />
           <button
             onClick={handleSave}
             disabled={saving}
