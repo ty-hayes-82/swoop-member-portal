@@ -180,6 +180,82 @@ export default withAuth(async function handler(req, res) {
     req.method = 'DELETE'; // fall through to DELETE handler below
   }
 
+  // ─── POST with ?action=reset-data: wipe imported data, keep club + users + sessions ───
+  // Any authenticated GM can reset their own club's imported data.
+  if (req.method === 'POST' && req.query?.action === 'reset-data') {
+    if (req.auth?.isDemo) {
+      return res.status(403).json({ error: 'Demo sessions cannot reset data' });
+    }
+    const clubId = getWriteClubId(req, {
+      allowAdminOverride: true,
+      reason: 'GM reset imported data for own club',
+    });
+    if (!clubId) return res.status(400).json({ error: 'clubId required' });
+
+    // Tables to wipe — imported/computed data only. Preserves: club, users, sessions,
+    // agent_definitions, onboarding_progress (reset to club_created only).
+    const DATA_TABLES = [
+      'playbook_steps', 'playbook_runs', 'agent_activity', 'agent_actions',
+      'agent_configs', 'notification_preferences', 'notifications',
+      'csv_imports', 'data_syncs', 'data_source_status',
+      'feature_state_log', 'feature_dependency', 'pause_state', 'activity_log',
+      'correlation_insights', 'experience_correlations', 'correlations',
+      'churn_predictions', 'member_sentiment_ratings', 'health_scores',
+      'interventions', 'actions', 'member_interventions', 'operational_interventions',
+      'board_report_snapshots', 'complaint_weather_context',
+      'service_recovery_alerts', 'slot_reassignments', 'booking_confirmations',
+      'member_location_current', 'staff_location_current',
+      'waitlist_config', 'connected_systems', 'industry_benchmarks',
+      'event_roi_metrics', 'archetype_spend_gaps', 'demand_heatmap',
+      'cancellation_risk', 'member_waitlist', 'member_engagement_weekly',
+      'member_engagement_daily', 'visit_sessions', 'canonical_events',
+      'close_outs', 'staff_shifts', 'staff', 'email_events', 'email_campaigns',
+      'feedback', 'service_requests', 'complaints', 'transactions', 'rounds',
+      'member_invoices', 'event_registrations', 'event_definitions',
+      'pos_payments', 'pos_line_items', 'pos_checks', 'waitlist_entries',
+      'pace_hole_segments', 'pace_of_play', 'booking_players', 'bookings',
+      'members', 'households', 'membership_types', 'dining_outlets', 'courses',
+    ];
+
+    // Orphan cleanup first (same as full DELETE pass 2)
+    const orphanCleanup = [
+      `DELETE FROM email_events WHERE campaign_id IN (SELECT campaign_id FROM email_campaigns WHERE club_id = $1)`,
+      `DELETE FROM event_registrations WHERE event_id IN (SELECT event_id FROM event_definitions WHERE club_id = $1)`,
+      `DELETE FROM booking_players WHERE booking_id IN (SELECT booking_id FROM bookings WHERE club_id = $1)`,
+      `DELETE FROM pos_line_items WHERE check_id IN (SELECT check_id FROM pos_checks WHERE club_id = $1)`,
+      `DELETE FROM pos_payments WHERE check_id IN (SELECT check_id FROM pos_checks WHERE club_id = $1)`,
+      `DELETE FROM pace_hole_segments WHERE pace_id IN (SELECT pace_id FROM pace_of_play WHERE club_id = $1)`,
+    ];
+
+    try {
+      for (const q of orphanCleanup) {
+        try { await sql.query(q, [clubId]); } catch {}
+      }
+
+      let totalDeleted = 0;
+      for (const table of DATA_TABLES) {
+        try {
+          const result = await sql.query(`DELETE FROM ${table} WHERE club_id = $1`, [clubId]);
+          totalDeleted += result.rowCount || 0;
+        } catch {}
+      }
+
+      // Reset onboarding back to club_created only
+      await sql`
+        UPDATE onboarding_progress
+        SET completed = (step_key = 'club_created'),
+            completed_at = CASE WHEN step_key = 'club_created' THEN completed_at ELSE NULL END
+        WHERE club_id = ${clubId}
+      `;
+
+      console.info(`[/api/club reset-data] clubId=${clubId} deleted ${totalDeleted} rows`);
+      return res.status(200).json({ success: true, totalRowsDeleted: totalDeleted });
+    } catch (e) {
+      console.error('/api/club POST reset-data error:', e);
+      return res.status(500).json({ error: 'Internal error resetting data' });
+    }
+  }
+
   // ─── DELETE: cascade-delete all club data ───
   if (req.method === 'DELETE') {
     // swoop_admin may delete any club via ?clubId; demo cleanup flows use

@@ -486,6 +486,35 @@ function ClubManagementTab({ currentClubId }) {
     window.location.reload();
   };
 
+  const [resetting, setResetting] = useState(null);
+
+  const handleResetData = async (clubId, clubName) => {
+    if (!confirm(`Reset all imported data for "${clubName || clubId}"?\n\nThis will delete all members, rounds, transactions, complaints, and computed insights. Your club account and login will be preserved.\n\nThis cannot be undone.`)) return;
+    setResetting(clubId);
+    setError(null);
+    try {
+      const res = await fetch(`/api/club?action=reset-data`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('swoop_auth_token')}`,
+        },
+        body: JSON.stringify({ clubId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccess(`Reset complete — cleared ${data.totalRowsDeleted} rows. Reload the page to see the empty state.`);
+        fetchClubs();
+        window.dispatchEvent(new Event('swoop:data-imported')); // trigger DataProvider refresh
+      } else {
+        setError(data.error || 'Reset failed');
+      }
+    } catch (e) {
+      setError(e.message);
+    }
+    setResetting(null);
+  };
+
   const handleDelete = async (clubId) => {
     if (!confirm(`Delete ALL data for club "${clubId}"? This cannot be undone.`)) return;
     setDeleting(clubId);
@@ -615,12 +644,21 @@ function ClubManagementTab({ currentClubId }) {
                             Switch
                           </button>
                         )}
+                        {isActive && (
+                          <button
+                            onClick={() => handleResetData(club.club_id, club.name)}
+                            disabled={resetting === club.club_id}
+                            className="px-2.5 py-1 rounded-md border border-warning-300 bg-warning-50 text-warning-700 text-[11px] font-bold cursor-pointer hover:bg-warning-100 disabled:opacity-50 dark:bg-warning-500/5 dark:border-warning-500/30"
+                          >
+                            {resetting === club.club_id ? 'Resetting...' : 'Reset Data'}
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDelete(club.club_id)}
                           disabled={deleting === club.club_id}
                           className="px-2.5 py-1 rounded-md border border-error-300 bg-error-50 text-error-600 text-[11px] font-bold cursor-pointer hover:bg-error-100 disabled:opacity-50 dark:bg-error-500/5 dark:border-error-500/30"
                         >
-                          {deleting === club.club_id ? 'Deleting...' : 'Delete Data'}
+                          {deleting === club.club_id ? 'Deleting...' : 'Delete Club'}
                         </button>
                       </div>
                     </td>
