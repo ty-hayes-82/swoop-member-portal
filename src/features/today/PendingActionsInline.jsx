@@ -6,6 +6,18 @@ import { getAllActions } from '@/services/agentService';
 import MemberLink from '@/components/MemberLink';
 import ActionPanel from '@/components/ui/ActionPanel';
 import SourceBadge from '@/components/ui/SourceBadge';
+import { apiFetch } from '@/services/apiClient';
+
+// Fire-and-forget POST to /api/recommendation-feedback. The human-eval loop
+// reads this aggregate to judge whether individual agents are producing
+// recommendations GMs actually act on.
+function sendFeedback({ feedback, actionId, agentId, reason, snoozeHours, rating }) {
+  apiFetch('/api/recommendation-feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ feedback, actionId, agentId, reason, snoozeHours, rating }),
+  }).catch(() => { /* feedback is fire-and-forget */ });
+}
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const PRIORITY_COLORS = { high: '#ef4444', medium: '#f59e0b', low: '#9CA3AF' };
@@ -53,15 +65,35 @@ export default function PendingActionsInline({ topPriority = null }) {
   const inbox = contextInbox.length > 0 ? contextInbox : getAllActions();
   const { navigate } = useNavigationContext();
   const [expandedId, setExpandedId] = useState(null);
+  const [snoozedIds, setSnoozedIds] = useState(() => new Set());
+
+  // Wrapped action handlers that also POST feedback for the human-eval loop
+  const handleApprove = (id, meta) => {
+    approveAction(id, meta);
+    const action = inbox.find(a => a.id === id);
+    sendFeedback({ feedback: 'accept', actionId: id, agentId: action?.agentId });
+  };
+  const handleDismiss = (id, meta) => {
+    dismissAction(id, meta);
+    const action = inbox.find(a => a.id === id);
+    sendFeedback({ feedback: 'dismiss', actionId: id, agentId: action?.agentId, reason: meta?.reason });
+  };
+  const handleSnooze = (id, hours = 24) => {
+    const action = inbox.find(a => a.id === id);
+    setSnoozedIds(prev => { const next = new Set(prev); next.add(id); return next; });
+    sendFeedback({ feedback: 'snooze', actionId: id, agentId: action?.agentId, snoozeHours: hours });
+  };
 
   const topActions = useMemo(() => {
     const pending = inbox.filter(
-      (item) => item.status === 'pending' && item.id !== topPriority?.id
+      (item) => item.status === 'pending'
+        && item.id !== topPriority?.id
+        && !snoozedIds.has(item.id)
     );
     return [...pending]
       .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2))
       .slice(0, 3);
-  }, [inbox, topPriority?.id]);
+  }, [inbox, topPriority?.id, snoozedIds]);
 
   const hasHero = !!topPriority;
   const hasActions = pendingAgentCount > 0;
@@ -135,8 +167,8 @@ export default function PendingActionsInline({ topPriority = null }) {
                   { key: 'email', icon: '✉', label: 'Send Personal Email', type: 'email', description: topPriority.recommendation },
                   { key: 'call', icon: '📞', label: 'Schedule GM Call', type: 'call', description: `Call ${topPriority.memberName || 'member'}` },
                 ]}
-                onApprove={approveAction}
-                onDismiss={dismissAction}
+                onApprove={handleApprove}
+                onDismiss={handleDismiss}
                 onClose={() => setExpandedId(null)}
                 compact
               />
@@ -170,9 +202,19 @@ export default function PendingActionsInline({ topPriority = null }) {
                       <SourceBadge system={action.source} size="xs" />
                     )}
                   </div>
-                  <span className="text-[10px] font-semibold text-brand-500 py-0.5 px-2 rounded-[10px] bg-brand-500/[0.06]">
-                    {isExpanded ? 'Collapse' : 'Take action'}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleSnooze(action.id, 24); }}
+                      className="text-[10px] font-semibold text-gray-500 py-0.5 px-2 rounded-[10px] bg-gray-100 hover:bg-gray-200 border-none cursor-pointer dark:bg-white/[0.06] dark:text-gray-400"
+                      title="Snooze 24h"
+                    >
+                      Snooze 24h
+                    </button>
+                    <span className="text-[10px] font-semibold text-brand-500 py-0.5 px-2 rounded-[10px] bg-brand-500/[0.06]">
+                      {isExpanded ? 'Collapse' : 'Take action'}
+                    </span>
+                  </div>
                 </div>
                 <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-0.5 leading-snug">
                   {action.description}
@@ -192,8 +234,8 @@ export default function PendingActionsInline({ topPriority = null }) {
                     source: action.source,
                   }}
                   recommended={buildRecommended(action)}
-                  onApprove={approveAction}
-                  onDismiss={dismissAction}
+                  onApprove={handleApprove}
+                  onDismiss={handleDismiss}
                   onClose={() => setExpandedId(null)}
                   compact
                 />

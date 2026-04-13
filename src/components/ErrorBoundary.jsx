@@ -1,5 +1,38 @@
 import { Component, useState } from 'react';
 
+// Fire-and-forget client error telemetry. Single-flight: de-duplicates
+// identical error signatures within a session so one broken widget doesn't
+// flood the endpoint. Fails silently — telemetry is never allowed to
+// cascade into another error.
+const _reportedErrors = new Set();
+function reportClientError(error, errorInfo, level) {
+  try {
+    const stack = (error?.stack || String(error || '')).slice(0, 500);
+    const key = `${level}:${stack.slice(0, 200)}`;
+    if (_reportedErrors.has(key)) return;
+    _reportedErrors.add(key);
+    const payload = {
+      level,
+      message: String(error?.message || error || '').slice(0, 500),
+      stack,
+      componentStack: (errorInfo?.componentStack || '').slice(0, 1000),
+      url: typeof window !== 'undefined' ? window.location.href : '',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      timestamp: new Date().toISOString(),
+    };
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_auth_token') : null;
+    fetch('/api/client-errors', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {});
+  } catch { /* telemetry must never throw */ }
+}
+
 export default class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -33,6 +66,7 @@ export default class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('[Swoop ErrorBoundary]', error, errorInfo);
+    reportClientError(error, errorInfo, 'app');
   }
 
   handleReset = () => {
@@ -49,6 +83,13 @@ export default class ErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
+      // Inline fallback mode: widgets pass `fallback` to keep other cards
+      // on the page alive when one of them throws.
+      if (this.props.fallback) {
+        return typeof this.props.fallback === 'function'
+          ? this.props.fallback(this.state.error)
+          : this.props.fallback;
+      }
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 font-sans">
           <div className="max-w-md text-center p-8">
@@ -138,6 +179,7 @@ export class RouteErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('[Swoop RouteErrorBoundary]', error, errorInfo);
+    reportClientError(error, errorInfo, 'route');
   }
 
   render() {

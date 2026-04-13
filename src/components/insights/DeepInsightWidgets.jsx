@@ -2,15 +2,17 @@
  * Reusable deep-insight widgets that read from /api/deep-insights?kind=…
  * Each is a standalone, self-fetching React component that drops onto
  * any view. Empty/loading states are inline so they degrade silently
- * when no data is imported.
+ * when no data is imported. Each widget is wrapped in an ErrorBoundary
+ * via withCardBoundary() so a single broken query doesn't blank the page.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { apiFetch } from '@/services/apiClient';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 function useDeepInsight(kind) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
+  const fetchIt = useCallback(() => {
     let cancelled = false;
     apiFetch(`/api/deep-insights?kind=${encodeURIComponent(kind)}`)
       .then(d => { if (!cancelled) setData(d); })
@@ -18,7 +20,40 @@ function useDeepInsight(kind) {
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [kind]);
+  useEffect(() => {
+    const cleanup = fetchIt();
+    const onImported = () => { setLoading(true); fetchIt(); };
+    window.addEventListener('swoop:data-imported', onImported);
+    return () => {
+      cleanup?.();
+      window.removeEventListener('swoop:data-imported', onImported);
+    };
+  }, [fetchIt]);
   return { data, loading };
+}
+
+// HOC: wrap any widget in a card-level ErrorBoundary so a thrown render
+// in one widget doesn't take down the whole dashboard view.
+function withCardBoundary(Widget, label) {
+  const Wrapped = (props) => (
+    <ErrorBoundary fallback={<WidgetError label={label} />}>
+      <Widget {...props} />
+    </ErrorBoundary>
+  );
+  Wrapped.displayName = `Boundary(${label})`;
+  return Wrapped;
+}
+
+function WidgetError({ label }) {
+  return (
+    <div style={{
+      background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14,
+      padding: 18, fontSize: 12, color: '#9a3412',
+    }}>
+      <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
+      <div>Temporarily unavailable.</div>
+    </div>
+  );
 }
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -31,7 +66,7 @@ function fmtCurrency(n) {
 // Settlement mix donut (payments)
 // ---------------------------------------------------------------------------
 
-export function SettlementMixDonut() {
+function SettlementMixDonutInner() {
   const { data, loading } = useDeepInsight('payments');
   if (loading || !data?.available) return null;
   const { slices, grandTotal, arRisk } = data;
@@ -118,7 +153,7 @@ const BUCKET_COLOR = {
   paid:    '#9ca3af',
 };
 
-export function ARAgingPanel() {
+function ARAgingPanelInner() {
   const { data, loading } = useDeepInsight('ar-aging');
   if (loading || !data?.available) return null;
   const { buckets, openTotal, aged60Plus, topOpen } = data;
@@ -192,7 +227,7 @@ export function ARAgingPanel() {
 // Course utilization gauge
 // ---------------------------------------------------------------------------
 
-export function CourseUtilizationCards() {
+function CourseUtilizationCardsInner() {
   const { data, loading } = useDeepInsight('courses');
   if (loading || !data?.available) return null;
   return (
@@ -244,7 +279,7 @@ export function CourseUtilizationCards() {
 // Tier revenue mix
 // ---------------------------------------------------------------------------
 
-export function HouseholdComposition() {
+function HouseholdCompositionInner() {
   const { data, loading } = useDeepInsight('households');
   if (loading || !data?.available) return null;
   const max = Math.max(1, ...data.distribution.map(d => d.households));
@@ -291,7 +326,7 @@ export function HouseholdComposition() {
   );
 }
 
-export function ServiceTicketsPanel() {
+function ServiceTicketsPanelInner() {
   const { data, loading } = useDeepInsight('service-tickets');
   if (loading || !data?.available) return null;
   return (
@@ -350,7 +385,7 @@ export function ServiceTicketsPanel() {
   );
 }
 
-export function MemberEngagementTimeline({ memberId }) {
+function MemberEngagementTimelineInner({ memberId }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -411,7 +446,7 @@ export function MemberEngagementTimeline({ memberId }) {
   );
 }
 
-export function TierRevenueMix() {
+function TierRevenueMixInner() {
   const { data, loading } = useDeepInsight('tier-revenue');
   if (loading || !data?.available) return null;
   const { tiers, grandTotal } = data;
@@ -453,3 +488,13 @@ export function TierRevenueMix() {
     </div>
   );
 }
+
+// Wrapped exports — each widget is isolated behind its own ErrorBoundary
+// so a render-time throw in one widget never blanks a whole dashboard view.
+export const SettlementMixDonut       = withCardBoundary(SettlementMixDonutInner,       'F&B Settlement Mix');
+export const ARAgingPanel             = withCardBoundary(ARAgingPanelInner,             'Aged Receivables');
+export const CourseUtilizationCards   = withCardBoundary(CourseUtilizationCardsInner,   'Course Utilization');
+export const HouseholdComposition     = withCardBoundary(HouseholdCompositionInner,     'Household Composition');
+export const ServiceTicketsPanel      = withCardBoundary(ServiceTicketsPanelInner,      'Service Requests');
+export const MemberEngagementTimeline = withCardBoundary(MemberEngagementTimelineInner, 'Member Engagement');
+export const TierRevenueMix           = withCardBoundary(TierRevenueMixInner,           'Tier Revenue Mix');

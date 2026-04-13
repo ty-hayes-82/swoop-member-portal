@@ -17,10 +17,196 @@ import {
 } from '@/config/jonasMapping';
 import { getFullRoster } from '@/services/memberService';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/components/ui/Toast';
 
 // § 1.3 trust boundary — CSV import is a privileged operation that mutates
 // tenant data. Only GMs, club admins, and swoop_admin should ever see the UI.
 const IMPORT_ALLOWED_ROLES = new Set(['gm', 'admin', 'swoop_admin']);
+
+// ── Auto-classify ────────────────────────────────────────────────────────────
+// Dependency order — tenant-scoped tables reference each other, so importing
+// e.g. event_registrations before events leaves the FK chain broken. Members
+// is always first; everything else falls in here.
+const IMPORT_DEP_ORDER = [
+  'members', 'club_profile', 'households', 'membership_types',
+  'courses', 'tee_times', 'booking_players',
+  'transactions', 'sales_areas', 'pos_checks', 'line_items', 'payments', 'daily_close',
+  'staff', 'shifts',
+  'events', 'event_registrations', 'email_campaigns', 'email_events',
+  'invoices', 'complaints', 'service_requests',
+];
+
+function normalizeHeader(h) {
+  return String(h || '').trim().toLowerCase().replace(/[\s_#\-()]/g, '');
+}
+
+/**
+ * Classify a CSV by matching its header set against every JONAS_IMPORT_TYPES
+ * entry's aliases. Returns the best-scoring type with confidence in [0,1].
+ * A type's score is the fraction of its *required* fields that matched AT
+ * LEAST one alias in the file headers. Ties broken by total matched fields.
+ */
+function classifyHeaders(headers) {
+  const normalized = new Set(headers.map(normalizeHeader).filter(Boolean));
+  let best = null;
+  for (const importType of JONAS_IMPORT_TYPES) {
+    const required = importType.fields.filter(f => f.required);
+    if (required.length === 0) continue;
+    const requiredMatched = required.filter(f =>
+      f.aliases.some(a => normalized.has(normalizeHeader(a)))
+    ).length;
+    const totalMatched = importType.fields.filter(f =>
+      f.aliases.some(a => normalized.has(normalizeHeader(a)))
+    ).length;
+    const confidence = requiredMatched / required.length;
+    const score = confidence * 100 + totalMatched; // break ties on total overlap
+    if (!best || score > best.score) {
+      best = { importType: importType.key, label: importType.label, confidence, requiredMatched, required: required.length, totalMatched, score };
+    }
+  }
+  return best;
+}
+
+function MultiFileDropZone({ onFilesClassified }) {
+  const [files, setFiles] = useState([]); // [{ file, name, size, headers, classification }]
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef(null);
+
+  const ingest = useCallback(async (fileList) => {
+    const incoming = Array.from(fileList || []).filter(f =>
+      /\.(csv|xlsx|xls)$/i.test(f.name)
+    );
+    const classified = [];
+    for (const file of incoming) {
+      try {
+        let headers = [];
+        if (/\.csv$/i.test(file.name)) {
+          const text = await file.text();
+          const parsed = parseCSV(text);
+          headers = parsed.headers || [];
+        } else {
+          const XLSX = await import('xlsx');
+          const data = await file.arrayBuffer();
+          const wb = XLSX.read(data, { type: 'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws);
+          headers = rows.length ? Object.keys(rows[0]) : [];
+        }
+        classified.push({
+          file,
+          name: file.name,
+          size: file.size,
+          headers,
+          classification: classifyHeaders(headers),
+        });
+      } catch (err) {
+        classified.push({ file, name: file.name, size: file.size, headers: [], classification: null, error: err.message });
+      }
+    }
+    setFiles(prev => [...prev, ...classified]);
+    onFilesClassified?.(classified);
+  }, [onFilesClassified]);
+
+  const removeFile = (i) => setFiles(prev => prev.filter((_, j) => j !== i));
+  const overrideType = (i, importType) => setFiles(prev => prev.map((f, j) =>
+    j === i ? { ...f, classification: { ...(f.classification || {}), importType, label: JONAS_IMPORT_TYPES.find(t => t.key === importType)?.label || importType, confidence: 1, manualOverride: true } } : f
+  ));
+  const clearAll = () => setFiles([]);
+
+  return (
+    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] p-5 mb-4">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-0.5">Quick Upload</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Drop all your files at once — we'll auto-detect each one.
+          </p>
+        </div>
+        {files.length > 0 && (
+          <button
+            type="button"
+            onClick={clearAll}
+            className="text-xs text-gray-500 hover:text-gray-700 bg-transparent border-none cursor-pointer"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); ingest(e.dataTransfer.files); }}
+        onClick={() => inputRef.current?.click()}
+        className={`rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition-colors ${
+          dragOver
+            ? 'border-brand-500 bg-brand-500/[0.05]'
+            : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/[0.02]'
+        }`}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          accept=".csv,.xlsx,.xls"
+          onChange={(e) => ingest(e.target.files)}
+          className="hidden"
+        />
+        <div className="text-3xl mb-2">📁</div>
+        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          Drop CSV or XLSX files here, or click to browse
+        </div>
+        <div className="text-xs text-gray-400 mt-1">
+          Up to 22 datasets — members, tee sheet, POS, payroll, events, etc.
+        </div>
+      </div>
+
+      {files.length > 0 && (
+        <div className="mt-4 flex flex-col gap-2">
+          {files.map((f, i) => {
+            const c = f.classification;
+            const confBadge = !c ? { label: 'unknown', color: 'bg-red-500/10 text-red-600' }
+              : c.confidence >= 1 ? { label: 'high', color: 'bg-green-500/10 text-green-600' }
+              : c.confidence >= 0.5 ? { label: 'medium', color: 'bg-amber-500/10 text-amber-600' }
+              : { label: 'low', color: 'bg-red-500/10 text-red-600' };
+            return (
+              <div key={f.name + i} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-800">
+                <div className="text-lg">📄</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-gray-800 dark:text-white/90 truncate">{f.name}</div>
+                  <div className="text-xs text-gray-500">
+                    {(f.size / 1024).toFixed(1)} KB · {f.headers.length} columns · detected as{' '}
+                    <select
+                      value={c?.importType || ''}
+                      onChange={(e) => overrideType(i, e.target.value)}
+                      className="text-xs bg-transparent border border-gray-200 rounded px-1 py-0.5 dark:border-gray-700"
+                    >
+                      <option value="">— choose —</option>
+                      {JONAS_IMPORT_TYPES.map(t => (
+                        <option key={t.key} value={t.key}>{t.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${confBadge.color}`}>
+                  {confBadge.label}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeFile(i)}
+                  className="text-gray-400 hover:text-red-500 bg-transparent border-none cursor-pointer text-lg leading-none"
+                  title="Remove"
+                >
+                  ×
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Client-side dry-run diff. Returns { totalRows, toCreate, toUpdate, rejected: [{row, reason}] }
 function buildImportPreview({ parsedRows, mapping, importType, csvHeaders }) {
@@ -770,9 +956,92 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
 
 // ── Main wizard ──────────────────────────────────────────────────────────────
 
+async function batchImportFiles(files, clubId, user, showToast) {
+  // Sort by dependency order so members lands before tee_times, etc.
+  const ordered = [...files]
+    .filter(f => f.classification?.importType)
+    .sort((a, b) => {
+      const ai = IMPORT_DEP_ORDER.indexOf(a.classification.importType);
+      const bi = IMPORT_DEP_ORDER.indexOf(b.classification.importType);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
+
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_auth_token') : null;
+  const results = [];
+  let totalAccepted = 0;
+  let totalRejected = 0;
+
+  for (const f of ordered) {
+    try {
+      let headers = [], rows = [];
+      if (/\.csv$/i.test(f.name)) {
+        const text = await f.file.text();
+        const parsed = parseCSV(text);
+        headers = parsed.headers;
+        rows = parsed.rows;
+      } else {
+        const XLSX = await import('xlsx');
+        const data = await f.file.arrayBuffer();
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rawRows = XLSX.utils.sheet_to_json(ws);
+        rows = rawRows;
+        headers = rawRows.length ? Object.keys(rawRows[0]) : [];
+      }
+      const importType = f.classification.importType;
+      const mapping = autoMapColumns(headers, importType);
+      const reverseMap = {};
+      for (const [csvH, swoopF] of Object.entries(mapping)) {
+        if (swoopF) reverseMap[swoopF] = csvH;
+      }
+      const transformed = rows.map(r => {
+        const out = {};
+        for (const [swoopField, csvHeader] of Object.entries(reverseMap)) {
+          out[swoopField] = r[csvHeader] ?? '';
+        }
+        return out;
+      });
+      const res = await fetch('/api/import-csv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          clubId,
+          importType,
+          rows: transformed,
+          uploadedBy: user?.userId || 'bulk-import',
+        }),
+      });
+      const data = await res.json();
+      const accepted = data?.success ?? 0;
+      const rejected = (data?.rejected?.length ?? data?.errors ?? 0);
+      totalAccepted += accepted;
+      totalRejected += rejected;
+      results.push({ file: f.name, importType, accepted, rejected, ok: res.ok });
+    } catch (err) {
+      results.push({ file: f.name, importType: f.classification?.importType, error: err.message });
+    }
+  }
+
+  if (totalAccepted > 0) {
+    window.dispatchEvent(new CustomEvent('swoop:data-imported', { detail: { category: 'bulk' } }));
+  }
+  showToast(
+    `Imported ${totalAccepted} rows across ${results.length} files${totalRejected > 0 ? ` · ${totalRejected} rejected` : ''}`,
+    totalRejected > 0 ? 'warning' : 'success',
+  );
+  return results;
+}
+
 export default function CsvImportPage() {
   const { user } = useAuth();
   const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+  const { showToast, ToastContainer } = useToast();
+  const [bulkFiles, setBulkFiles] = useState([]);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const [bulkResults, setBulkResults] = useState(null);
 
   // § 1.3 client-side role gate — keep non-privileged users out of the wizard
   // entirely so they can't see vendor templates or trigger a 403 by accident.
@@ -906,13 +1175,19 @@ export default function CsvImportPage() {
         // Re-initialize all services so insights appear immediately
         if (data.success > 0) {
           window.dispatchEvent(new CustomEvent('swoop:data-imported', { detail: { category: importType } }));
+          const rejected = (data.rejected?.length ?? data.errors ?? 0);
+          const msg = rejected > 0
+            ? `Imported ${data.success} rows · ${rejected} rejected`
+            : `Imported ${data.success} rows. Insights are refreshing.`;
+          showToast(msg, rejected > 0 ? 'warning' : 'success');
         }
       }
     } catch (err) {
       setError(`Import failed: ${err.message}`);
+      showToast(`Import failed: ${err.message}`, 'error');
     }
     setUploading(false);
-  }, [clubId, importType, mapping, parsedRows]);
+  }, [clubId, importType, mapping, parsedRows, showToast]);
 
   const handleReset = () => {
     setStep(0);
@@ -925,6 +1200,21 @@ export default function CsvImportPage() {
     setParseError(null);
   };
 
+  const handleBulkImport = useCallback(async () => {
+    if (!clubId || bulkFiles.length === 0) return;
+    setBulkUploading(true);
+    setBulkResults(null);
+    try {
+      const results = await batchImportFiles(bulkFiles, clubId, user, showToast);
+      setBulkResults(results);
+    } catch (err) {
+      showToast(`Bulk import failed: ${err.message}`, 'error');
+    }
+    setBulkUploading(false);
+  }, [bulkFiles, clubId, user, showToast]);
+
+  const bulkReady = bulkFiles.length > 0 && bulkFiles.every(f => f.classification?.importType);
+
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div className="flex items-center gap-3 mb-1">
@@ -934,6 +1224,40 @@ export default function CsvImportPage() {
         Import CSV or XLSX files from your club software. We'll auto-detect columns and map them for you.
       </p>
 
+      <MultiFileDropZone onFilesClassified={setBulkFiles} />
+      {bulkFiles.length > 0 && (
+        <div className="mb-4 flex items-center justify-between">
+          <div className="text-xs text-gray-500">
+            {bulkFiles.length} file{bulkFiles.length === 1 ? '' : 's'} ready
+            {!bulkReady && ' — resolve unknown types before importing'}
+          </div>
+          <button
+            type="button"
+            onClick={handleBulkImport}
+            disabled={!bulkReady || bulkUploading}
+            className="py-2 px-4 text-sm font-bold text-white bg-brand-500 border-none rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {bulkUploading ? 'Importing...' : `Import all ${bulkFiles.length}`}
+          </button>
+        </div>
+      )}
+      {bulkResults && (
+        <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800">
+          <div className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">Batch import results</div>
+          <div className="flex flex-col gap-1">
+            {bulkResults.map((r, i) => (
+              <div key={i} className="text-xs text-gray-600 dark:text-gray-400">
+                {r.error ? '✗' : '✓'} {r.file}{r.importType ? ` → ${r.importType}` : ''}
+                {r.error ? ` (${r.error})` : ` — ${r.accepted || 0} accepted${r.rejected ? `, ${r.rejected} rejected` : ''}`}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="text-xs uppercase font-bold text-gray-400 mb-3 tracking-wide">
+        Or use the guided wizard
+      </div>
       <StepIndicator current={step} />
 
       {step === 0 && (
@@ -989,6 +1313,7 @@ export default function CsvImportPage() {
           onReset={handleReset}
         />
       )}
+      <ToastContainer />
     </div>
   );
 }

@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { apiFetch } from '@/services/apiClient';
+import { SkeletonLine, SkeletonGrid } from '@/components/ui/SkeletonLoader';
+import DataEmptyState from '@/components/ui/DataEmptyState';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 /**
  * Today panel — one card per imported dataset with its headline insight.
@@ -8,17 +11,59 @@ import { apiFetch } from '@/services/apiClient';
 export default function StageInsightsPanel() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     let cancelled = false;
+    setError(null);
     apiFetch('/api/stage-insights')
       .then(d => { if (!cancelled) setData(d); })
-      .catch(() => { /* keep panel hidden on error */ })
+      .catch(e => { if (!cancelled) setError(e); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
 
-  if (loading || !data?.insights?.length) return null;
+  useEffect(() => {
+    const cleanup = fetchData();
+    // Refetch whenever a CSV import finishes anywhere in the app.
+    const onImported = () => { setLoading(true); fetchData(); };
+    window.addEventListener('swoop:data-imported', onImported);
+    return () => {
+      cleanup?.();
+      window.removeEventListener('swoop:data-imported', onImported);
+    };
+  }, [fetchData]);
+
+  if (loading) {
+    return (
+      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: 24 }}>
+        <SkeletonLine width="260px" height={22} marginBottom={6} />
+        <SkeletonLine width="380px" height={14} marginBottom={18} />
+        <SkeletonGrid cards={4} columns={2} cardHeight={110} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <DataEmptyState
+        icon="\u26A0\uFE0F"
+        title="Couldn't load insights"
+        description="Refresh the page or check back in a moment."
+      />
+    );
+  }
+
+  if (!data?.insights?.length) {
+    return (
+      <DataEmptyState
+        icon="\uD83D\uDCCA"
+        title="No insights yet"
+        description="Import your first dataset to see your headline metrics."
+        dataType="a CSV"
+      />
+    );
+  }
   const { insights, unlockedCount, totalStages } = data;
   const unlocked = insights.filter(i => i.unlocked);
   const locked = insights.filter(i => !i.unlocked);
@@ -56,7 +101,9 @@ export default function StageInsightsPanel() {
         gap: 12,
       }}>
         {unlocked.map(insight => (
-          <InsightCard key={insight.stage} insight={insight} />
+          <ErrorBoundary key={insight.stage} fallback={<CardError label={insight.label} />}>
+            <InsightCard insight={insight} />
+          </ErrorBoundary>
         ))}
       </div>
 
@@ -78,6 +125,18 @@ export default function StageInsightsPanel() {
           </div>
         </details>
       )}
+    </div>
+  );
+}
+
+function CardError({ label }) {
+  return (
+    <div style={{
+      background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 12,
+      padding: 16, fontSize: 12, color: '#9a3412',
+    }}>
+      <div style={{ fontWeight: 700, marginBottom: 4 }}>{label || 'Widget'}</div>
+      <div>Temporarily unavailable. Other insights still loading.</div>
     </div>
   );
 }
