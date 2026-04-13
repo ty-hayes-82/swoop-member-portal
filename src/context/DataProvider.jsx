@@ -4,7 +4,7 @@
 // Components never change — they call the same synchronous service functions as always.
 
 import { useState, useEffect, createContext, useContext } from 'react';
-import { getDataMode, SOURCES_CHANGED_EVENT } from '@/services/demoGate';
+import { getDataMode } from '@/services/demoGate';
 import { _init as initOps }      from '@/services/operationsService';
 import { _init as initMembers }  from '@/services/memberService';
 import { _init as initStaffing } from '@/services/staffingService';
@@ -91,13 +91,6 @@ export function DataProvider({ children }) {
     };
     window.addEventListener('swoop:data-imported', handler);
     return () => window.removeEventListener('swoop:data-imported', handler);
-  }, []);
-
-  // Bump refreshKey when sources change so services re-init with fresh DB data
-  useEffect(() => {
-    const handler = () => setRefreshKey(k => k + 1);
-    window.addEventListener(SOURCES_CHANGED_EVENT, handler);
-    return () => window.removeEventListener(SOURCES_CHANGED_EVENT, handler);
   }, []);
 
   if (!ready) {

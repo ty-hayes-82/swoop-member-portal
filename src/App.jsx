@@ -30,8 +30,6 @@ const TechnicalDeepDive = lazy(() => import('@/features/demo/TechnicalDeepDive')
 const MobileShowcase = lazy(() => import('@/features/demo/MobileShowcase'));
 const AgentsLanding = lazy(() => import('@/features/demo/AgentsLanding'));
 import { DataProvider } from '@/context/DataProvider';
-import { DemoWizardProvider, useDemoWizard } from '@/context/DemoWizardContext';
-import DemoWizard from '@/components/ui/DemoWizard';
 import { MobileConversionBar } from '@/components/layout';
 import ActionsDrawer from '@/components/layout/ActionsDrawer';
 import DataImportBanner from '@/components/ui/DataImportBanner';
@@ -84,9 +82,6 @@ function AppShell() {
   const PageComponent = ROUTES[currentRoute] ?? TodayView;
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [actionsDrawerOpen, setActionsDrawerOpen] = useState(false);
-  const demoWizard = useDemoWizard();
-  const demoRenderKey = demoWizard?.renderKey ?? 0;
-
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', onResize);
@@ -98,19 +93,6 @@ function AppShell() {
     const handler = () => setActionsDrawerOpen(true);
     window.addEventListener('swoop:open-actions', handler);
     return () => window.removeEventListener('swoop:open-actions', handler);
-  }, []);
-
-  // Guided demo session expiry: if the tab was closed and reopened, log out
-  useEffect(() => {
-    if (localStorage.getItem('swoop_was_guided') === 'true' && sessionStorage.getItem('swoop_demo_guided') !== 'true') {
-      localStorage.removeItem('swoop_was_guided');
-      localStorage.removeItem('swoop_auth_user');
-      localStorage.removeItem('swoop_auth_token');
-      localStorage.removeItem('swoop_club_id');
-      localStorage.removeItem('swoop_club_name');
-      localStorage.removeItem('swoop_agent_inbox');
-      window.location.reload();
-    }
   }, []);
 
   // Demo session cleanup: delete demo club data from DB on sign-out or page close
@@ -147,7 +129,6 @@ function AppShell() {
     localStorage.removeItem('swoop_club_name');
     localStorage.removeItem('swoop_demo_email');
     localStorage.removeItem('swoop_demo_phone');
-    localStorage.removeItem('swoop_was_guided');
     sessionStorage.clear();
     window.location.reload();
   };
@@ -186,7 +167,7 @@ function AppShell() {
       <DataImportBanner />
       <RouteErrorBoundary>
         <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
-          <PageComponent key={`${currentRoute}-${demoRenderKey}`} />
+          <PageComponent key={currentRoute} />
         </Suspense>
       </RouteErrorBoundary>
     </SwoopLayout>
@@ -195,17 +176,14 @@ function AppShell() {
 
 function PortalApplication() {
   return (
-    <DemoWizardProvider>
-      <NavigationProvider>
-        <MemberProfileProvider>
-          <AppShell />
-          <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
-            <MemberProfileDrawer />
-          </Suspense>
-          <DemoWizard />
-        </MemberProfileProvider>
-      </NavigationProvider>
-    </DemoWizardProvider>
+    <NavigationProvider>
+      <MemberProfileProvider>
+        <AppShell />
+        <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
+          <MemberProfileDrawer />
+        </Suspense>
+      </MemberProfileProvider>
+    </NavigationProvider>
   );
 }
 

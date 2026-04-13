@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { isGuidedMode, getLoadedGates } from '../../services/demoGate';
 
 /* ── Member data ────────────────────────────────────────────────── */
 const TEST_CLUB = 'seed_pinetree';
@@ -171,10 +170,6 @@ export default function MemberConciergeTest() {
         'Content-Type': 'application/json',
         'X-Demo-Club': TEST_CLUB,
       };
-      if (isGuidedMode()) {
-        headers['X-Demo-Gates'] = getLoadedGates().join(',');
-      }
-
       const res = await fetch('/api/concierge/chat', {
         method: 'POST',
         headers,

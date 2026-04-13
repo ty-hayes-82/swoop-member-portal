@@ -74,8 +74,6 @@ import { todayTeeSheet, teeSheetSummary } from '@/data/teeSheet';
 
 let _d = null; // hydrated by _init()
 let _apiLoaded = false;
-const _isGuidedMode = () => getDataMode() === 'guided';
-
 const DEFAULT_PACE_DISTRIBUTION = [
   { bucket: '< 3:45', minutes: 225, count: 142, isSlow: false },
   { bucket: '3:45-4:00', minutes: 240, count: 318, isSlow: false },
@@ -129,7 +127,7 @@ export const _init = async () => {
 /** @returns {DailyRevenueRow[]} */
 export const getRevenueByDay = () => {
   if (_d?.revenueByDay) return _d.revenueByDay;
-  if (_isGuidedMode() && !_apiLoaded) return [];
+
   if (!isGateOpen('fb')) return [];
   return dailyRevenue;
 };
@@ -137,7 +135,7 @@ export const getRevenueByDay = () => {
 /** @returns {MonthlyRevenueSummary} */
 export const getMonthlyRevenueSummary = () => {
   if (_d?.monthlySummary) return _d.monthlySummary;
-  if (_isGuidedMode() && !_apiLoaded) return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
+
   const fbOpen = isGateOpen('fb');
   const teeOpen = isGateOpen('tee-sheet');
   if (!fbOpen && !teeOpen) return { total: 0, golfTotal: 0, fbTotal: 0, dailyAvg: 0, weekendAvg: 0, weekdayAvg: 0 };
@@ -164,7 +162,7 @@ export const getSlowRoundRate = () => {
       threshold: sanitizePositive(source?.threshold, DEFAULT_SLOW_ROUND_STATS.threshold),
     };
   }
-  if (_isGuidedMode() && !_apiLoaded) return EMPTY_SLOW_ROUND;
+
   if (!isGateOpen('pace') && !isGateOpen('tee-sheet')) return EMPTY_SLOW_ROUND;
   const source = (slowRoundStats ?? DEFAULT_SLOW_ROUND_STATS);
   const totalRounds = Math.round(sanitizePositive(source?.totalRounds, DEFAULT_SLOW_ROUND_STATS.totalRounds));
@@ -194,7 +192,7 @@ export const getBottleneckHoles = () => {
       };
     });
   }
-  if (_isGuidedMode() && !_apiLoaded) return [];
+
   if (!isGateOpen('pace') && !isGateOpen('tee-sheet')) return [];
   const source = (bottleneckHoles ?? DEFAULT_BOTTLENECK_HOLES);
   if (!Array.isArray(source) || source.length === 0) return DEFAULT_BOTTLENECK_HOLES;
@@ -223,7 +221,7 @@ export const getPaceFBImpact = () => {
       revenueLostPerMonth: Math.round(sanitizePositive(source?.revenueLostPerMonth, DEFAULT_PACE_FB_IMPACT.revenueLostPerMonth)),
     };
   }
-  if (_isGuidedMode() && !_apiLoaded) return EMPTY_PACE_FB;
+
   if (!isGateOpen('pace') && !isGateOpen('tee-sheet')) return EMPTY_PACE_FB;
   const source = (paceFBImpact ?? DEFAULT_PACE_FB_IMPACT);
   return {
@@ -241,7 +239,7 @@ export const getPaceFBImpact = () => {
 /** @returns {TeeSheetRow[]} */
 export const getTodayTeeSheet = () => {
   if (_d?.todayTeeSheet) return _d.todayTeeSheet;
-  if (_isGuidedMode() && !_apiLoaded) return [];
+
   if (!isGateOpen('tee-sheet')) return [];
   return todayTeeSheet;
 };
@@ -250,7 +248,7 @@ export const getTodayTeeSheet = () => {
 export const getTeeSheetSummary = () => {
   if (_d?.teeSheetSummary) return _d.teeSheetSummary;
   if (!isGateOpen('tee-sheet')) return { totalRounds: 0, weatherTemp: 0, weatherCondition: '' };
-  // Gate is open — return static data even in guided mode (demo with tee-sheet imported)
+
   return teeSheetSummary;
 };
 

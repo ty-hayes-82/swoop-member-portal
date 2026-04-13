@@ -21,7 +21,7 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
-import { getDataMode, isGateOpen, getLoadedGates } from '@/services/demoGate';
+import { getDataMode, isGateOpen } from '@/services/demoGate';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist from './OnboardingChecklist';
@@ -196,35 +196,6 @@ export default function TodayView() {
 
   if (isLoading) {
     return <SkeletonDashboard />;
-  }
-
-  // Guided mode with zero imports — show welcome card instead of empty dashes
-  if (getDataMode() === 'guided' && getLoadedGates().length === 0) {
-    return (
-      <PageTransition>
-        <div className="flex flex-col gap-6 w-full">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90 m-0">{getGreeting()}</h1>
-            <p className="text-sm text-gray-500 mt-1 mb-0">{formatDate()}</p>
-          </div>
-          <div className="rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/50 p-8 text-center">
-            <div className="text-4xl mb-3">🏌️</div>
-            <h2 className="text-lg font-bold text-gray-800 m-0 mb-2">Welcome to Swoop</h2>
-            <p className="text-sm text-gray-600 max-w-md mx-auto mb-4">
-              Import your first data file to see your club come alive. Each file you connect unlocks new insights, alerts, and revenue intelligence.
-            </p>
-            <button
-              type="button"
-              onClick={() => navigate('admin', { tab: 'import' })}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-500 text-white text-sm font-bold rounded-lg border-none cursor-pointer hover:bg-brand-600 transition-colors"
-            >
-              Open Import Panel →
-            </button>
-          </div>
-          <DemoStoriesLauncher />
-        </div>
-      </PageTransition>
-    );
   }
 
   // Fresh live club with zero members — show the onboarding checklist.
@@ -425,35 +396,8 @@ export default function TodayView() {
         {/* Section 1.6: Demo Story Flows — 3 storyboard moments, one click to start. */}
         <DemoStoriesLauncher />
 
-        {/* Concierge quick-try card — shown in guided mode after member import */}
-        {getDataMode() === 'guided' && isGateOpen('members') && (
-          <div
-            className="fade-in-up rounded-2xl p-5 flex items-center gap-4"
-            style={{
-              background: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.06) 100%)',
-              border: '1px solid rgba(99,102,241,0.2)',
-            }}
-          >
-            <div className="text-3xl flex-shrink-0">💬</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold text-gray-800 mb-0.5">Try the Member Concierge</div>
-              <div className="text-xs text-gray-600 leading-relaxed">
-                Text James Whitfield a message and watch AI respond with personalized context from his member profile.
-              </div>
-              <div className="text-[11px] text-indigo-500/70 italic mt-1">"Book my usual Saturday 7 AM" → "Done! Booth 12 at noon? Your Arnold Palmer will be waiting."</div>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate('concierge')}
-              className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-500 text-white text-xs font-bold rounded-lg border-none cursor-pointer hover:bg-indigo-600 transition-colors"
-            >
-              Open Concierge →
-            </button>
-          </div>
-        )}
-
-        {/* Split-screen demo link — shown after at least one import (not on empty state) */}
-        {(getDataMode() === 'guided' || getDataMode() === 'demo') && isGateOpen('members') && (
+        {/* Split-screen demo link */}
+        {getDataMode() === 'demo' && (
           <div
             className="fade-in-up rounded-2xl p-5 flex items-center gap-4"
             style={{

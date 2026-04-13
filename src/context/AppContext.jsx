@@ -33,13 +33,8 @@ function getDefaultInbox() {
   return getAllActions();
 }
 
-// Pre-populate inbox if gates are already set (e.g., after page reload in guided demo).
-// IMPORTANT: this runs at MODULE EVAL time, before any login. On a fresh page load
-// the user has not yet chosen a mode, so getDataMode() returns 'demo' by default
-// and getAllActions() returns the full demo inbox. That's fine for full-demo mode,
-// but means we MUST re-evaluate this once the user actually picks guided mode —
-// see the SOURCES_CHANGED_EVENT listener and lazy-load effect below, both of which
-// must be allowed to CLEAR the inbox (not just populate it).
+// Pre-populate inbox at module eval time. In demo mode this loads the full static
+// inbox; in live mode getAllActions() returns empty until the API call completes.
 const initialInbox = (() => {
   try { return getAllActions(); } catch { return []; }
 })();
@@ -215,11 +210,7 @@ const AppContext = createContext(null);
 
 function loadPersistedState(base) {
   try {
-    // In guided demo mode, don't load persisted inbox from a previous session
-    // — start fresh so only activated gates produce data
-    const isGuided = sessionStorage.getItem('swoop_demo_guided') === 'true';
-
-    const inbox = isGuided ? null : JSON.parse(localStorage.getItem('swoop_agent_inbox') || 'null');
+    const inbox = JSON.parse(localStorage.getItem('swoop_agent_inbox') || 'null');
     const agentStatuses = JSON.parse(localStorage.getItem('swoop_agent_statuses') || 'null');
     const agentConfigs = JSON.parse(localStorage.getItem('swoop_agent_configs') || 'null');
 
@@ -264,10 +255,8 @@ export function AppProvider({ children }) {
     annual: activePlaybooks.reduce((sum, [id]) => sum + (PLAYBOOK_DEFS[id]?.annual ?? 0), 0),
   }), [activePlaybooks]);
 
-  // Lazy-load agent inbox — poll until gates are ready (handles post-reload timing).
-  // Always reconcile state on first run (even when the result is empty) so that an
-  // AppProvider mounting in guided mode after login does NOT keep the demo-mode
-  // initialInbox that was computed at module-eval time.
+  // Lazy-load agent inbox — poll to catch post-reload timing. Always reconcile on
+  // first run so that live-mode AppProvider mounts with the correct empty inbox.
   useEffect(() => {
     let firstRun = true;
     const loadInbox = () => {
@@ -294,25 +283,6 @@ export function AppProvider({ children }) {
       }, 500);
       return () => clearInterval(interval);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Also reload inbox when demo gates change (e.g., after importGates + page reload,
-  // or when the user enters guided demo from a fresh page where AppContext was
-  // initialized in 'demo' mode and pre-loaded the full demo inbox).
-  // Always dispatch — even when the new inbox is empty — so transitions from
-  // demo → guided correctly CLEAR stale state instead of leaving it in place.
-  useEffect(() => {
-    const handler = () => {
-      const inbox = getDefaultInbox();
-      dispatch({ type: 'SET_INBOX', inbox });
-      const agents = getAgents();
-      dispatch({
-        type: 'SET_AGENT_STATUSES',
-        statuses: agents.length > 0 ? Object.fromEntries(agents.map(a => [a.id, a.status])) : {},
-      });
-    };
-    window.addEventListener('swoop:demo-sources-changed', handler);
-    return () => window.removeEventListener('swoop:demo-sources-changed', handler);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

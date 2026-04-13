@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { isGuidedMode, getLoadedGates } from '../../services/demoGate';
 
 const STORAGE_KEY = 'swoop_concierge_chat';
 const MEMBER_ID = 'mbr_t01';
@@ -73,7 +72,6 @@ export default function ConciergeChatPage() {
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeaders(),
-          ...(isGuidedMode() ? { 'X-Demo-Gates': getLoadedGates().join(',') } : {}),
         },
         body: JSON.stringify({ member_id: MEMBER_ID, message: text.trim() }),
       });

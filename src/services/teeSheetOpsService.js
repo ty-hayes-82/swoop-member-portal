@@ -16,7 +16,6 @@ import { revenuePerSlot } from '@/data/revenue';
 
 let _d = null;
 let _apiLoaded = false;
-const _isGuidedMode = () => getDataMode() === 'guided';
 
 export const _init = async () => {
   _apiLoaded = true;
@@ -62,7 +61,6 @@ function initSteeringData() {
 
 export function getConfirmations() {
   if (_d?.confirmations) return [..._d.confirmations].sort((a, b) => b.cancelProbability - a.cancelProbability);
-  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('tee-sheet')) return [];
   return [...getConfirmationStore()].sort((a, b) => b.cancelProbability - a.cancelProbability);
 }
@@ -110,7 +108,6 @@ export function getReassignments() {
       return (statusOrder[a.status] ?? 5) - (statusOrder[b.status] ?? 5);
     });
   }
-  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('tee-sheet')) return [];
   return [...getReassignmentStore()].sort((a, b) => {
     const statusOrder = { pending: 0, approved: 1, completed: 2, overridden: 3, skipped: 4 };
@@ -203,21 +200,18 @@ export function updateWaitlistConfig(updates) {
 
 export function getHistoricalPatterns() {
   if (_d?.historicalPatterns) return _d.historicalPatterns;
-  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('tee-sheet')) return [];
   return historicalPatterns;
 }
 
 export function getWeeklyQueuePressure() {
   if (_d?.weeklyQueuePressure) return _d.weeklyQueuePressure;
-  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('tee-sheet')) return [];
   return weeklyQueuePressure;
 }
 
 export function getDemandSteeringStats() {
   if (_d?.demandSteeringStats) return { ...(_d.demandSteeringStats) };
-  if (_isGuidedMode() && !_apiLoaded) return { redirectionsSent: 0, acceptanceRate: 0, revenueSaved: 0, avgResponseTime: 0 };
   if (!isGateOpen('tee-sheet')) return { redirectionsSent: 0, acceptanceRate: 0, revenueSaved: 0, avgResponseTime: 0 };
   return { ...initSteeringData() };
 }

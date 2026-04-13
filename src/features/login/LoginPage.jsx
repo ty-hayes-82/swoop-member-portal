@@ -1,7 +1,7 @@
 /**
  * Login Page — shown when user is not authenticated
  * Screen 1: Sign in (email/password + Google)
- * Screen 2: Demo / Guided Demo / New Club setup
+ * Screen 2: Demo / New Club setup
  */
 import { useState } from 'react';
 import NewClubSetup from './NewClubSetup';
@@ -82,20 +82,8 @@ export default function LoginPage({ onLogin }) {
   const [demoEmail, setDemoEmail] = useState('');
   const [demoPhone, setDemoPhone] = useState('');
 
-  const startDemo = (guided = false) => {
-    // Canonical static demo loader. Guided mode is a variant that clears
-    // the preloaded inbox so the walkthrough starts from an empty state.
+  const startDemo = () => {
     const demoUser = loadStaticDemo({ email: demoEmail, phone: demoPhone });
-    if (guided) {
-      sessionStorage.setItem('swoop_demo_guided', 'true');
-      localStorage.setItem('swoop_was_guided', 'true');
-      localStorage.removeItem('swoop_agent_inbox');
-      try {
-        window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed', {
-          detail: { action: 'mode-change', guided: true },
-        }));
-      } catch { /* best-effort */ }
-    }
     onLogin?.(demoUser);
   };
 
@@ -346,16 +334,7 @@ export default function LoginPage({ onLogin }) {
           {/* Demo options */}
           <div className="flex flex-col gap-3">
             <button
-              onClick={() => startDemo(true)}
-              aria-label="Guided Demo"
-              className="w-full py-3.5 rounded-xl border-none bg-brand-500 text-white text-sm font-bold cursor-pointer hover:bg-brand-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
-            >
-              Guided Demo
-              <span className="block text-xs font-normal text-white/70 mt-0.5">Load data one source at a time</span>
-            </button>
-
-            <button
-              onClick={() => startDemo(false)}
+              onClick={() => startDemo()}
               className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors"
             >
               Full Demo (Pinetree CC)
@@ -378,7 +357,7 @@ export default function LoginPage({ onLogin }) {
                 if (typeof window !== 'undefined') {
                   window.location.hash = '#/m/conference';
                 }
-                startDemo(false);
+                startDemo();
               }}
               className="w-full py-3 rounded-xl border border-purple-200 bg-purple-50 text-purple-700 text-sm font-semibold cursor-pointer hover:bg-purple-100 transition-colors"
               style={{ borderColor: '#c4b5fd', background: '#f5f3ff', color: '#6d28d9' }}

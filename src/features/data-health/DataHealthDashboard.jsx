@@ -8,7 +8,7 @@ import { useNavigation } from '@/context/NavigationContext';
 import { apiFetch } from '@/services/apiClient';
 import { getLeakageData } from '@/services/revenueService';
 import { useCurrentClub } from '@/hooks/useCurrentClub';
-import { isGateOpen, getDataMode } from '@/services/demoGate';
+import { getDataMode } from '@/services/demoGate';
 
 const DOMAIN_INFO = {
   CRM: { icon: '👥', label: 'CRM / Members', desc: 'Member profiles, dues, tenure, household data', vendor: 'Jonas Club, Clubessential' },
@@ -37,23 +37,15 @@ export default function DataHealthDashboard() {
   const isAuthenticated = !!clubId && clubId !== 'demo';
   const mode = getDataMode();
   // Map domain codes to their corresponding gate IDs
-  const DOMAIN_GATE_MAP = { CRM: 'members', TEE_SHEET: 'tee-sheet', POS: 'fb', EMAIL: 'email', LABOR: 'labor' };
   const DEMO_ROW_COUNTS = { CRM: 300, TEE_SHEET: 850, POS: 1200, EMAIL: 120, LABOR: 45 };
-  // In demo/guided mode, derive connection status from open gates
-  const isGateConnected = (code) => {
-    const gateId = DOMAIN_GATE_MAP[code];
-    return gateId ? isGateOpen(gateId) : false;
-  };
   const domains = data?.domains || Object.keys(DOMAIN_INFO).map(code => {
-    // For guided/demo modes, check gate status instead of assuming disconnected
-    if (mode === 'guided' || mode === 'demo') {
-      const connected = isGateConnected(code);
+    if (mode === 'demo') {
       return {
         code,
-        connected,
-        health_status: connected ? 'healthy' : 'disconnected',
-        row_count: connected ? (DEMO_ROW_COUNTS[code] || 0) : 0,
-        last_sync_at: connected ? new Date().toISOString() : null,
+        connected: true,
+        health_status: 'healthy',
+        row_count: DEMO_ROW_COUNTS[code] || 0,
+        last_sync_at: new Date().toISOString(),
       };
     }
     // Live mode with no API data — show disconnected

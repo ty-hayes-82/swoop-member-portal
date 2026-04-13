@@ -7,7 +7,6 @@ import { trends as staticTrends, MONTHS as STATIC_MONTHS, outletTrends as static
 
 let _d = null; // { trends, outletTrends, months }
 let _apiLoaded = false;
-const _isGuidedMode = () => getDataMode() === 'guided';
 
 export const _init = async () => {
   _apiLoaded = true;
@@ -19,12 +18,10 @@ export const _init = async () => {
 
 const _trends = () => {
   if (_d?.trends) return _d.trends;
-  if (_isGuidedMode() && !_apiLoaded) return {};
   return isGateOpen('pipeline') ? staticTrends : {};
 };
 const _months = () => {
   if (_d?.months) return _d.months;
-  if (_isGuidedMode() && !_apiLoaded) return [];
   return isGateOpen('pipeline') ? STATIC_MONTHS : [];
 };
 

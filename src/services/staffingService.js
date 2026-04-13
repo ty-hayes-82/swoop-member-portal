@@ -55,7 +55,6 @@ import { understaffedDays, feedbackRecords, feedbackSummary, shiftCoverage } fro
 
 let _d = null;
 let _apiLoaded = false;
-const _isGuidedMode = () => getDataMode() === 'guided';
 
 const FALLBACK_UNDERSTAFFED_DAYS = [
   {
@@ -171,7 +170,6 @@ const sanitizeFeedbackRecords = (source) => {
 export const getUnderstaffedDays = () => {
   const real = _d?.understaffedDays;
   if (Array.isArray(real) && real.length) return sanitizeUnderstaffedDays(real);
-  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('complaints') || !isGateOpen('members')) return [];
   return sanitizeUnderstaffedDays(understaffedDays);
 };
@@ -179,7 +177,6 @@ export const getUnderstaffedDays = () => {
 export const getShiftCoverage = () => {
   const real = _d?.shiftCoverage;
   if (Array.isArray(real) && real.length) return sanitizeShiftCoverage(real);
-  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('complaints')) return [];
   return sanitizeShiftCoverage(shiftCoverage);
 };
@@ -187,7 +184,6 @@ export const getShiftCoverage = () => {
 export const getFeedbackSummary = () => {
   const real = _d?.feedbackSummary;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackSummary(real);
-  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('complaints') || !isGateOpen('members')) return [];
   return sanitizeFeedbackSummary(feedbackSummary);
 };
@@ -195,7 +191,6 @@ export const getFeedbackSummary = () => {
 export const getComplaintCorrelation = () => {
   const real = _d?.feedbackRecords;
   if (Array.isArray(real) && real.length) return sanitizeFeedbackRecords(real);
-  if (_isGuidedMode() && !_apiLoaded) return [];
   if (!isGateOpen('complaints') || !isGateOpen('members')) return [];
   return sanitizeFeedbackRecords(feedbackRecords);
 };

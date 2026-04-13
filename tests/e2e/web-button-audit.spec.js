@@ -617,14 +617,19 @@ test.describe('Web Button Audit (Desktop Chrome)', () => {
       liveVis ? 'PASS' : 'PARTIAL', liveVis ? '' : 'P2');
 
     // ====================================================================
-    // FOOTER: Sign out
+    // FOOTER: Sign out (inside user-menu dropdown — open it first)
     // ====================================================================
+    const userMenuBtn = page.locator('button').filter({ hasText: /Demo Environment|Pinetree|GM|Admin/i }).first();
+    if (await userMenuBtn.count()) await userMenuBtn.click().catch(() => {});
+    await page.waitForTimeout(200);
     const signOut = page.getByRole('button', { name: /^Sign Out$/i }).first();
     if (await signOut.count()) {
       record('Footer', 'Sign Out button', 'Exists', 'present', 'PASS');
     } else {
       record('Footer', 'Sign Out button', 'Exists', 'not found', 'PARTIAL', 'P2');
     }
+    // Close the dropdown
+    await page.keyboard.press('Escape');
 
     // ====================================================================
     // DUMP THE LOG

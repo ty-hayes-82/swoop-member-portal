@@ -43,16 +43,6 @@ export function getConnectedSystems() {
       return live ? { ...s, status: live.status, lastSync: live.lastSync } : { ...s, status: 'available', lastSync: null };
     });
   }
-  // In guided mode, override status based on whether the gate is open
-  if (getDataMode() === 'guided') {
-    systems = systems.map(s => {
-      const gateId = CATEGORY_GATE[s.category];
-      if (gateId && !isGateOpen(gateId)) {
-        return { ...s, status: 'available', lastSync: null };
-      }
-      return s;
-    });
-  }
   return systems;
 }
 

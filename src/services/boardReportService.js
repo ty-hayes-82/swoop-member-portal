@@ -47,7 +47,7 @@ export const getKPIs = () => {
   // Guided/demo mode uses the hand-authored static KPIs for storytelling.
   // Every other mode computes from real member data or shows empty state —
   // never spreads staticKpis (which contains hardcoded 87% / $375K fallbacks).
-  if (_isGuidedMode() || getDataMode() === 'demo') {
+  if (getDataMode() === 'demo') {
     return _d?.kpis || staticKpis;
   }
 
@@ -73,23 +73,21 @@ export const getKPIs = () => {
   return EMPTY_KPIS;
 };
 
-const _isGuidedMode = () => getDataMode() === 'guided';
 export const getMemberSaves = () => {
   if (_d?.memberSaves) return _d.memberSaves;
-  // In guided mode, show static data when the pipeline gate is open
-  return isGateOpen('pipeline') ? staticMemberSaves : [];
+  return isGateOpen() ? staticMemberSaves : [];
 };
 export const getOperationalSaves = () => {
   if (_d?.operationalSaves) return _d.operationalSaves;
-  return isGateOpen('pipeline') ? staticOperationalSaves : [];
+  return isGateOpen() ? staticOperationalSaves : [];
 };
 export const getMonthlyTrends = () => {
   if (_d?.monthlyTrends) return _d.monthlyTrends;
-  return isGateOpen('pipeline') ? staticMonthlyTrends : [];
+  return isGateOpen() ? staticMonthlyTrends : [];
 };
 export const getDuesAtRiskNote = () => {
   if (_d?.duesAtRiskNote) return _d.duesAtRiskNote;
-  return isGateOpen('pipeline') ? staticDuesAtRiskNote : '';
+  return isGateOpen() ? staticDuesAtRiskNote : '';
 };
 export const sourceSystems = ['Member CRM', 'POS', 'Tee Sheet', 'Complaints'];
 

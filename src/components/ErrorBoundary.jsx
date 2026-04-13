@@ -70,11 +70,8 @@ export default class ErrorBoundary extends Component {
   }
 
   handleReset = () => {
-    // Clear demo wizard state so recovery doesn't re-open the Data Files panel (Bug #15)
     try {
-      sessionStorage.removeItem('swoop_demo_guided');
       sessionStorage.removeItem('swoop_demo_files');
-      sessionStorage.removeItem('swoop_demo_gates');
     } catch {}
     this.setState({ hasError: false, error: null, errorHash: null });
     // Navigate to Today as a safe page

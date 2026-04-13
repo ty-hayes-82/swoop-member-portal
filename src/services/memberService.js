@@ -162,10 +162,10 @@ const resolveOverrideSignal = (member) => {
       let signal = RISK_SIGNAL_OVERRIDES.get(key);
       // Filter signal parts based on open gates
       const parts = signal.split(' • ').filter(part => {
-        if (!isGateOpen('tee-sheet') && /round|golf/i.test(part)) return false;
-        if (!isGateOpen('fb') && /dining|F&B|spend/i.test(part)) return false;
-        if (!isGateOpen('complaints') && /complaint/i.test(part)) return false;
-        if (!isGateOpen('email') && /email|open/i.test(part)) return false;
+        if (!isGateOpen() && /round|golf/i.test(part)) return false;
+        if (!isGateOpen() && /dining|F&B|spend/i.test(part)) return false;
+        if (!isGateOpen() && /complaint/i.test(part)) return false;
+        if (!isGateOpen() && /email|open/i.test(part)) return false;
         return true;
       });
       return parts.length > 0 ? parts.join(' • ') : null;
@@ -439,13 +439,7 @@ export const _init = async () => {
         (apiData.memberProfiles && Object.keys(apiData.memberProfiles).length > 0);
       if (hasMemberData) _hasRealMembers = true;
 
-      // In guided mode, if the API returned no real members, keep static data intact.
-      // The guided demo import opens gates which tell services to use static data,
-      // but _init() was overwriting _d with empty API responses, wiping the static data.
-      if (_isGuidedMode() && !hasMemberData) {
-        // Reset _d to static defaults so gate-based logic can serve demo data
-        _d = getInitialData();
-      } else {
+      {
         _d = {
           ..._d,
           ...apiData,
@@ -519,17 +513,14 @@ let _hasRealMembers = false;
 
 import { isGateOpen, getDataMode } from './demoGate';
 const _shouldReturnEmpty = () => {
-  return !isGateOpen('members') && !_hasRealMembers;
+  return !isGateOpen() && !_hasRealMembers;
 };
-const _isGuidedMode = () => getDataMode() === 'guided';
 
 export const hasRealMemberData = () => _hasRealMembers;
 
 /** @returns {HealthDistributionRow[]} */
 export const getHealthDistribution = () => {
   if (_shouldReturnEmpty()) return [];
-  // In guided mode, only show health data from live API data, not static seed
-  if (_isGuidedMode() && !_apiLoaded) return [];
   // Compute distribution from the full roster so both pages agree
   const roster = getFullRoster();
   if (roster.length > 0) {
@@ -557,19 +548,15 @@ export const getHealthDistribution = () => {
 /** @returns {AtRiskMember[]} */
 export const getAtRiskMembers       = () => {
   if (_shouldReturnEmpty()) return [];
-  // In guided mode, only show at-risk members from live API data, not static seed
-  if (_isGuidedMode() && !_apiLoaded) return [];
   const raw = normalizeAtRiskMembers(_d?.atRiskMembers ?? _d?.membersAtRisk ?? [], _d?.memberProfiles ?? {});
   return raw;
 };
 /** @returns {ArchetypeRow[]} */
 export const getArchetypeProfiles   = () => {
   if (_shouldReturnEmpty()) return [];
-  // In guided mode, only show archetype data from live API data, not static seed
-  if (_isGuidedMode() && !_apiLoaded) return [];
   const rows = normalizeArchetypes(_d?.memberArchetypes);
-  const fbClosed = !isGateOpen('fb');
-  const emailClosed = !isGateOpen('email');
+  const fbClosed = !isGateOpen();
+  const emailClosed = !isGateOpen();
   if (fbClosed || emailClosed) {
     return rows.map(r => ({
       ...r,
@@ -588,14 +575,10 @@ export const getAllMemberProfiles   = () => {
 /** @returns {ResignationScenario[]} */
 export const getResignationScenarios= () => {
   if (_shouldReturnEmpty()) return [];
-  // In guided mode, only show resignation data from live API data, not static seed
-  if (_isGuidedMode() && !_apiLoaded) return [];
   return normalizeResignationScenarios(_d?.resignationScenarios);
 };
 /** @returns {EmailHeatmapRow[]} */
 export const getEmailHeatmap        = () => {
-  // In guided mode, only show email data when email gate is open
-  if (_isGuidedMode() && !isGateOpen('email')) return [];
   const raw = Array.isArray(_d?.emailHeatmap) ? _d.emailHeatmap : [];
   return raw.map(e => ({
     campaign: e.campaign ?? e.subject ?? 'Unknown',
@@ -606,18 +589,12 @@ export const getEmailHeatmap        = () => {
 };
 /** @returns {DecayingMemberRow[]} */
 export const getDecayingMembers     = () => {
-  // In guided mode, only show email data when email gate is open
-  if (_isGuidedMode() && !isGateOpen('email')) return [];
   return normalizeDecayingMembers(_d?.decayingMembers);
 };
 
 /** @returns {MemberSummary} */
 export const getMemberSummary = () => {
   if (_shouldReturnEmpty()) {
-    return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
-  }
-  // In guided mode, only show summary from live API data, not static seed
-  if (_isGuidedMode() && !_apiLoaded) {
     return { total: 0, healthy: 0, watch: 0, atRisk: 0, critical: 0, riskCount: 0, avgHealthScore: 0, potentialDuesAtRisk: 0, totalMembers: 0 };
   }
   const summary = _d?.memberSummary ?? {};
@@ -642,8 +619,6 @@ export const getMemberSummary = () => {
 /** @returns {AtRiskMember[]} */
 export const getWatchMembers = () => {
   if (_shouldReturnEmpty()) return [];
-  // In guided mode, only show watch members from live API data, not static seed
-  if (_isGuidedMode() && !_apiLoaded) return [];
   const apiWatch = _d?.watchMembers ?? [];
   return Array.isArray(apiWatch) ? apiWatch.map((m) => ({ ...m, trend: 'watch', riskLevel: 'Watch' })) : [];
 };
@@ -694,8 +669,7 @@ const _MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-
 const _LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
 
 function _generateRoster() {
-  if (_isGuidedMode() && !_apiLoaded) return [];
-  if (!isGateOpen('members')) return [];
+  if (!isGateOpen()) return [];
   const roster = [];
   const atRisk = getAtRiskMembers();
   const watch = getWatchMembers();
@@ -745,7 +719,7 @@ function _generateRoster() {
         joinDate: `${yr}-${mo}-01`,
         trend: level === 'Healthy' ? 'stable' : level === 'Watch' ? 'stable' : 'down',
         topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Minor engagement shift' : 'Engagement declining',
-        lastSeenLocation: isGateOpen('tee-sheet') ? _LOCATIONS[idx % _LOCATIONS.length] : null,
+        lastSeenLocation: isGateOpen() ? _LOCATIONS[idx % _LOCATIONS.length] : null,
       });
     }
   }
@@ -767,8 +741,6 @@ export function getFullRoster() {
  */
 export const getMemberProfile = (memberId) => {
   if (!memberId) return null;
-  // In guided mode, only show profiles from live API data, not static seed
-  if (_isGuidedMode() && !_apiLoaded) return null;
   if (_d?.memberProfiles?.[memberId]) {
     const profile = normalizeMemberProfile(_d.memberProfiles[memberId]);
     return profile;

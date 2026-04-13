@@ -32,8 +32,6 @@ import { useServiceCache } from '@/hooks/useServiceCache';
 
 let _d = null;
 let _apiLoaded = false;
-const _isGuidedMode = () => getDataMode() === 'guided';
-
 export const _init = async () => {
   _apiLoaded = true;
   try {
@@ -53,8 +51,8 @@ const COMPLAINT_PATTERN = /complaint/i;
  * Mutates nothing — returns a new item with filtered arrays.
  */
 function gateFilterItem(item) {
-  const hasFb = isGateOpen('fb');
-  const hasComplaints = isGateOpen('complaints');
+  const hasFb = isGateOpen();
+  const hasComplaints = isGateOpen();
   if (hasFb && hasComplaints) return item;
 
   const filterText = (text) => {
@@ -73,16 +71,12 @@ function gateFilterItem(item) {
 
 /** @returns {CockpitPriorityItem[]} */
 export const getPriorityItems = () => {
-  // In guided mode, only show priority items from live API data, not static seed
-  if (_isGuidedMode() && !_apiLoaded) return [];
-  const raw = _d?.priorities ?? (isGateOpen('agents') ? cockpitItems : []);
+  const raw = _d?.priorities ?? (isGateOpen() ? cockpitItems : []);
   return raw.map(gateFilterItem);
 };
 /** @returns {SinceLastLoginItem[]} */
 export const getSinceLastLogin = () => {
-  // In guided mode, only show login data from live API, not static seed
-  if (_isGuidedMode() && !_apiLoaded) return [];
-  return _d?.sinceLastLogin ?? (isGateOpen('agents') ? staticSinceLastLogin : []);
+  return _d?.sinceLastLogin ?? (isGateOpen() ? staticSinceLastLogin : []);
 };
 export const sourceSystems = ['CRM', 'POS', 'Weather', 'Tee Sheet', 'Complaints'];
 

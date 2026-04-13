@@ -28,20 +28,6 @@ export function loadStaticDemo({ email = '', phone = '' } = {}) {
   if (email) localStorage.setItem('swoop_demo_email', email);
   if (phone) localStorage.setItem('swoop_demo_phone', phone);
 
-  // Guided mode is NOT the default demo — reset any stale guided flags so
-  // entering the static demo always shows the prefilled experience.
-  sessionStorage.removeItem('swoop_demo_guided');
-  sessionStorage.removeItem('swoop_demo_sources');
-  sessionStorage.removeItem('swoop_demo_files');
-  sessionStorage.removeItem('swoop_demo_gates');
-  localStorage.removeItem('swoop_was_guided');
-
-  try {
-    window.dispatchEvent(new CustomEvent('swoop:demo-sources-changed', {
-      detail: { action: 'mode-change', guided: false },
-    }));
-  } catch { /* event dispatch is best-effort */ }
-
   return demoUser;
 }
 
