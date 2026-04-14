@@ -32,6 +32,7 @@ import { getMemberSummary } from '@/services/memberService';
 import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
 import { trackAction } from '@/services/activityService';
 import { getHealthRollup } from '@/services/apiHealthService';
+import { getMemberSaves } from '@/services/boardReportService';
 
 // GM Greeting Alert — simulates real-time member check-in notifications
 function buildCheckinAlerts() {
@@ -647,6 +648,55 @@ export default function TodayView() {
 
         {/* Section 5: Action Queue */}
         <PendingActionsInline topPriority={topPriority} />
+
+        {/* Section 5.5: Prove It — recent member saves */}
+        {(() => {
+          const saves = getMemberSaves().slice(0, 3);
+          if (!saves.length) return null;
+          return (
+            <div className="fade-in-up fade-delay-2 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-success-600 dark:text-success-400">
+                  ✓ Recent Member Saves
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('board-report')}
+                  className="text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline"
+                >
+                  Full report →
+                </button>
+              </div>
+              <div className="bg-white border border-success-500/20 rounded-xl divide-y divide-gray-100 dark:bg-white/[0.03] dark:border-success-500/20 dark:divide-gray-800">
+                {saves.map((s, i) => (
+                  <div key={s.memberId || i} className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-6 h-6 rounded-full bg-success-50 dark:bg-success-500/10 flex items-center justify-center text-[11px] font-bold text-success-600 dark:text-success-400 shrink-0">
+                      ✓
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-semibold text-gray-800 dark:text-white/90 truncate">
+                        {s.name}
+                      </div>
+                      <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                        {s.trigger || s.action}
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      {s.scoreBefore != null && s.scoreAfter != null && (
+                        <div className="text-[11px] font-mono font-bold text-success-600 dark:text-success-400">
+                          {s.scoreBefore}→{s.scoreAfter}
+                        </div>
+                      )}
+                      {s.duesAtRisk > 0 && (
+                        <div className="text-[10px] text-gray-400">${s.duesAtRisk.toLocaleString()} protected</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Section 6: Weather — Hourly + 5-Day Forecast */}
         <div className="flex flex-col gap-3 fade-in-up fade-delay-2">
