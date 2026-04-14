@@ -1051,6 +1051,32 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
             >
               Import More Data
             </button>
+            {result.status !== 'failed' && (() => {
+              const IMPORT_NAV = {
+                members: { route: 'members', label: 'View Members →' },
+                tee_times: { route: 'tee-sheet', label: 'View Tee Sheet →' },
+                booking_players: { route: 'tee-sheet', label: 'View Tee Sheet →' },
+                transactions: { route: 'revenue', label: 'View Revenue →' },
+                complaints: { route: 'service', label: 'View Service →' },
+                staff_roster: { route: 'service', label: 'View Service →' },
+                staff_shifts: { route: 'service', label: 'View Service →' },
+                email_campaigns: { route: 'members', label: 'View Members →' },
+                email_events: { route: 'members', label: 'View Members →' },
+                events: { route: 'today', label: 'View Today →' },
+                event_registrations: { route: 'today', label: 'View Today →' },
+                invoices: { route: 'members', label: 'View Members →' },
+              };
+              const nav = IMPORT_NAV[importType];
+              if (!nav) return null;
+              return (
+                <button
+                  onClick={() => { window.location.hash = `/${nav.route}`; }}
+                  className="flex-1 py-3 rounded-lg font-bold text-sm cursor-pointer border border-brand-500 text-brand-500 bg-transparent hover:bg-brand-50 transition-colors dark:hover:bg-brand-500/10"
+                >
+                  {nav.label}
+                </button>
+              );
+            })()}
           </div>
         </div>
       )}
