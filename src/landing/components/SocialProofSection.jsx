@@ -35,9 +35,9 @@ export default function SocialProofSection({ onCtaClick }) {
   return (
     <SectionShell
       band="cream"
-      eyebrow="Proof"
-      title="Intelligence in action: live demo results"
-      subtitle="Metrics from the Pinetree CC demo environment (300 members, real system data). Founding partner case studies publishing Q2 2026."
+      eyebrow="PROOF"
+      title="Intelligence in action."
+      subtitle="Results from the Pinetree CC pilot — 300 members, live system data. Figures reflect actual behavioral signals, not projections."
     >
       <div
         className="landing-metric-grid"
@@ -45,7 +45,7 @@ export default function SocialProofSection({ onCtaClick }) {
           display: 'grid',
           gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
           gap: 20,
-          marginBottom: 80,
+          marginBottom: 16,
         }}
       >
         {metricCards.map((card) => (
@@ -84,6 +84,9 @@ export default function SocialProofSection({ onCtaClick }) {
           </Card>
         ))}
       </div>
+      <p style={{ fontSize: 12, color: theme.colors.textMuted, textAlign: 'center', margin: '0 0 64px', fontStyle: 'italic' }}>
+        Source: Pinetree CC pilot · 300 active members · real system data (ForeUP + Jonas + Toast) · 90-day analysis period
+      </p>
 
       <div
         style={{
