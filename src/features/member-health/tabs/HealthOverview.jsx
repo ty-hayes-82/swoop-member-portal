@@ -151,6 +151,7 @@ export default function HealthOverview() {
   const volatileMembers = getVolatileMembers();
   const [expandedId, setExpandedId] = useState(null);
   const [showAll, setShowAll] = useState(false);
+  const [bulkConfirm, setBulkConfirm] = useState(false);
   const { showToast, addAction } = useApp();
   const { navigate } = useNavigation();
 
@@ -273,36 +274,52 @@ export default function HealthOverview() {
               Priority-sorted by health score, complaints, and engagement signals
             </div>
           </div>
-          {/* Bulk approve — Pillar 2: FIX IT */}
+          {/* Bulk approve — Pillar 2: FIX IT (two-step inline confirm, no window.confirm) */}
           {priorityMembers.length > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                const totalDues = priorityMembers.reduce((s, m) => s + (m.duesAnnual || 0), 0);
-                const proceed = window.confirm(
-                  `Approve recommended outreach for all ${priorityMembers.length} priority members?` +
-                  (totalDues > 0 ? `\n\nProtects $${totalDues.toLocaleString()}/yr in dues.` : '')
-                );
-                if (!proceed) return;
-                priorityMembers.forEach(m => {
-                  trackAction({
-                    actionType: 'approve',
-                    actionSubtype: 'bulk_outreach',
-                    memberId: m.memberId,
-                    memberName: m.name,
-                    referenceType: 'priority_member',
-                    referenceId: `bulk_${m.memberId}`,
-                    description: `Bulk approved: ${m.action}`,
+            <div className="flex items-center gap-2">
+              {bulkConfirm && (
+                <button
+                  type="button"
+                  onClick={() => setBulkConfirm(false)}
+                  className="px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer border border-gray-200 bg-transparent text-gray-500 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (!bulkConfirm) {
+                    setBulkConfirm(true);
+                    return;
+                  }
+                  setBulkConfirm(false);
+                  priorityMembers.forEach(m => {
+                    trackAction({
+                      actionType: 'approve',
+                      actionSubtype: 'bulk_outreach',
+                      memberId: m.memberId,
+                      memberName: m.name,
+                      referenceType: 'priority_member',
+                      referenceId: `bulk_${m.memberId}`,
+                      description: `Bulk approved: ${m.action}`,
+                    });
                   });
-                });
-                if (showToast) {
-                  showToast(`Approved outreach for ${priorityMembers.length} members.`, 'success');
-                }
-              }}
-              className="px-4 py-2 rounded-lg bg-success-500 text-white text-xs font-semibold cursor-pointer border-none whitespace-nowrap hover:bg-success-600 focus-visible:ring-2 focus-visible:ring-brand-500"
-            >
-              Approve all {priorityMembers.length} →
-            </button>
+                  if (showToast) {
+                    showToast(`Approved outreach for ${priorityMembers.length} members — added to Automations inbox.`, 'success');
+                  }
+                }}
+                className={`px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer border-none whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${
+                  bulkConfirm
+                    ? 'bg-success-600 text-white hover:bg-success-700'
+                    : 'bg-success-500 text-white hover:bg-success-600'
+                }`}
+              >
+                {bulkConfirm
+                  ? `Confirm — approve all ${priorityMembers.length} →`
+                  : `Approve all ${priorityMembers.length} →`}
+              </button>
+            </div>
           )}
         </div>
 
