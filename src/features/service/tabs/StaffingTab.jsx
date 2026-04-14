@@ -62,7 +62,7 @@ export default function StaffingTab() {
               })()}
             </div>
             <div className="inline-flex items-center gap-1.5 py-2 px-4 rounded-lg bg-brand-500 text-white text-sm font-semibold cursor-pointer">
-              Add server to Saturday schedule
+              Add server to {new Date(Date.now() + 86400000).toLocaleDateString('en-US', { weekday: 'long' })} schedule
             </div>
           </div>
         </div>

@@ -157,7 +157,11 @@ export default function ComplaintsTab() {
 
         {openComplaints.length === 0 ? (
           <div className="py-6 text-center text-gray-400 text-sm">
-            All complaints resolved.
+            {feedbackRecords.length === 0
+              ? 'No complaint records this month.'
+              : statusFilter === 'resolved'
+                ? 'No resolved complaints to show.'
+                : 'All complaints resolved — nothing open.'}
           </div>
         ) : (
           <div className="flex flex-col gap-2">
