@@ -11,6 +11,7 @@ import {
 
 let _liveKpis = null;
 let _liveBenchmarks = null;
+let _liveMemberSaves = null;
 
 let _d = null;
 
@@ -26,6 +27,21 @@ export const _init = async () => {
         membersSaved: data.boardReportSummary.membersSaved,
         duesProtected: data.boardReportSummary.duesProtected,
       };
+    }
+    // Map recentInterventions → memberSaves shape for BoardReport
+    if (data?.recentInterventions?.length > 0) {
+      _liveMemberSaves = data.recentInterventions
+        .filter(i => i.isSave || i.outcome === 'saved')
+        .map(i => ({
+          memberId: i.memberId,
+          name: i.memberName,
+          scoreBefore: i.scoreBefore,
+          scoreAfter: i.scoreAfter,
+          trigger: i.description,
+          action: i.type,
+          outcome: i.outcome === 'saved' ? 'Member retained after intervention' : i.outcome,
+          duesAtRisk: i.duesProtected || 0,
+        }));
     }
   } catch {}
 
@@ -75,6 +91,7 @@ export const getKPIs = () => {
 
 export const getMemberSaves = () => {
   if (_d?.memberSaves) return _d.memberSaves;
+  if (_liveMemberSaves?.length > 0) return _liveMemberSaves;
   return isGateOpen() ? staticMemberSaves : [];
 };
 export const getOperationalSaves = () => {
