@@ -1,5 +1,6 @@
 import { theme } from '@/config/theme';
 import LandingShell from '@/landing/LandingShell';
+import ProblemSection from '@/landing/components/ProblemSection';
 import CoreCapabilitiesSection from '@/landing/components/CoreCapabilitiesSection';
 import AgentsSection from '@/landing/components/AgentsSection';
 import PhotoBand from '@/landing/components/PhotoBand';
@@ -22,6 +23,7 @@ export default function PlatformPage() {
           </Button>
         </div>
       </SectionShell>
+      <ProblemSection />
       <CoreCapabilitiesSection />
       <AgentsSection />
       <PhotoBand

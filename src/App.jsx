@@ -395,6 +395,12 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
+  // Root URL — redirect to landing page
+  if (!currentHash || currentHash === '#' || currentHash === '#/') {
+    window.location.replace('#/landing');
+    return null;
+  }
+
   // Concierge chat — accessible without auth (demo/testing mode)
   if (currentHash === '#/concierge' || currentHash.startsWith('#/concierge?')) {
     return (
