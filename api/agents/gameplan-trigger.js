@@ -216,7 +216,7 @@ function buildSimulatedPlan(teeSheet, weather, staffing, fbRes, complaints, hist
     actions.push({
       headline: `Priority service for ${member.name} (at-risk, open complaint)`,
       rationale: `${member.name} has a health score of ${member.health_score} and is playing today. There are ${complaints.count} open complaints. Ensure service team is briefed.`,
-      impact: `$${member.annual_dues.toLocaleString()}/yr at risk`,
+      impact: member.annual_dues > 0 ? `$${Math.round(member.annual_dues).toLocaleString()}/yr at risk` : 'At-risk member',
       owner: 'Director of Golf',
       domains: ['tee_sheet', 'member_risk'],
     });

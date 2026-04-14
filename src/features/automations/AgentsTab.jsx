@@ -4,6 +4,7 @@
  */
 import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
+import { useNavigation } from '@/context/NavigationContext';
 import { getAgents, getAllActions, getAgentSummary, getCoordinationGraph } from '@/services/agentService';
 import AgentConfigDrawer from '@/features/agents/AgentConfigDrawer';
 
@@ -278,6 +279,7 @@ function CoordinationPanel({ agents }) {
 
 export default function AgentsTab() {
   const { agentStatuses, toggleAgent, saveAgentConfig, getAgentConfig } = useApp();
+  const { navigate } = useNavigation();
   const agents = useMemo(() => getAgents(), []);
   const actions = useMemo(() => getAllActions(), []);
   const summary = useMemo(() => getAgentSummary(), []);
@@ -329,7 +331,15 @@ export default function AgentsTab() {
           <div className="text-3xl mb-3">🤖</div>
           <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">No agents configured</div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            AI agents will appear here once your club data is connected.
+            Import your member roster and tee sheet data to activate agents. Start in{' '}
+            <button
+              type="button"
+              className="text-brand underline bg-transparent border-none cursor-pointer p-0 font-inherit text-sm"
+              onClick={() => navigate('admin', { tab: 'data-hub' })}
+            >
+              Import Data
+            </button>
+            .
           </div>
         </div>
       )}
