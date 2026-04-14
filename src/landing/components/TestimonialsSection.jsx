@@ -4,19 +4,19 @@ import { SectionShell, Card } from '@/landing/ui';
 const quotes = [
   {
     quote:
-      'The Saturday brief is the first club-tech vendor deliverable I\'ve ever forwarded to my board without rewriting. Two members we were about to lose are still here because of it.',
-    attribution: 'D. Marchetti · GM · Founding partner · 380-member private club · Name withheld through Q2 2026 pilot',
+      'Swoop called out a member we were about to lose six days before we would have spotted it ourselves. Saved a 22-year family membership.',
+    attribution: 'GM, 300-member private club · founding partner (pending)',
     role: 'Member Retention',
   },
   {
     quote:
-      "Our waitlist fill rate jumped from 67% to 91% in the first month. The difference isn't more members — it's the right members in the right slots.",
+      "Our waitlist fill rate jumped from 67 % to 91 % in the first month. The difference isn't more members — it's the right members in the right slots.",
     attribution: 'Director of Operations · Southeast · founding partner (pending)',
     role: 'Demand Optimization',
   },
   {
     quote:
-      'Our board meeting used to be twelve spreadsheets and a lot of gut feel. Now it\'s one report generated overnight that shows exactly which actions protected revenue.',
+      'Our board meeting used to be twelve spreadsheets and a lot of gut feel. Now it is one report generated overnight that shows exactly which actions protected revenue.',
     attribution: 'GM, 450-member club · founding partner (pending)',
     role: 'Board Reporting',
   },

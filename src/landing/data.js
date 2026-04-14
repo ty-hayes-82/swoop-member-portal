@@ -247,76 +247,79 @@ export const objections = [
 
 export const pricingTiers = [
   {
-    name: 'Signals',
+    name: 'Free — Health Scores',
     price: '$0/mo',
     description:
-      'Read-only alerts. Swoop reads your systems and surfaces member-risk, complaint, and demand signals daily.',
+      'Connect your existing systems. See member health scores and basic risk alerts powered by integration data alone.',
     features: [
-      'Daily member health scores',
-      'Risk + complaint + demand alerts',
-      'Up to 3 active integrations (28 in library)',
+      'Health score dashboard',
+      'Basic risk alerts',
+      'Up to 3 system integrations',
       'Email support',
     ],
-    cta: 'Start on Signals (free)',
+    cta: 'Start Free',
   },
   {
-    name: 'Signals + Actions',
+    name: 'Pro — Intelligence Dashboard',
     price: '$499/mo',
     badge: 'Most Popular',
     description:
-      'Everything in Signals, plus Swoop drafts the callback script, the comp offer, and the staffing shift in plain English — so your team acts instead of sorting spreadsheets.',
+      'Full platform access with cross-system intelligence. Optional member app integration for richer behavioral data.',
     features: [
-      'Everything in Signals',
+      'Complete platform access',
+      'Cross-system intelligence',
       'AI agent recommendations',
-      'Swoop drafts the callback + comp + shift',
-      'Retention-prioritized waitlist routing',
-      'Up to 10 active integrations (28 in library)',
+      'Up to 10 integrations',
       'Priority support',
     ],
-    cta: 'Book the 30-minute walkthrough',
+    cta: 'Start 14-Day Trial',
   },
   {
-    name: 'Signals + Actions + Member App',
+    name: 'Club — Full Platform',
     price: '$1,499/mo',
     description:
-      'Adds the Swoop member app — GPS + what members actually do on property, plus push notifications and attribution from signal to save.',
+      'Everything in Pro plus the Swoop member app, GPS behavioral data, push notifications, and closed-loop engagement.',
     features: [
-      'Everything in Signals + Actions',
-      'Automated playbooks + agent-driven actions',
+      'Everything in Pro',
       'Swoop member app included',
-      'GPS + on-property member behavior',
+      'GPS + real-time behavioral data',
       'Push notification channel',
-      'Save-attribution tracking',
+      'Closed-loop engagement tracking',
       'Dedicated success manager',
     ],
-    cta: 'Book the 30-minute walkthrough',
+    cta: 'Book a Demo',
   },
 ];
 
 export const faqItems = [
   {
-    question: 'We already have Jonas and ClubEssential. Does Swoop replace them?',
+    question: 'How long does setup take?',
     answer:
-      'No — Swoop reads Jonas and ClubEssential, it does not replace them. Your CRM keeps storing records; Swoop connects those records to your tee sheet and POS in real time so the GM sees a ranked member brief every morning, not just a complaint log after the fact.',
+      'Most clubs are live in under 2 weeks. We connect to your existing tee sheet, POS, and CRM — no rip-and-replace required.',
   },
   {
     question: 'Do I need to replace my current software?',
     answer:
-      'No. Swoop sits on top of your existing tee sheet, CRM, and POS and connects via API. We support 28 integrations across 10 categories. Keep what you have.',
+      'No. Swoop sits on top of your existing systems and connects via API. We support 28 integrations across 10 categories.',
   },
   {
-    question: 'How long does setup take?',
+    question: "What if I don't have a tee sheet system?",
     answer:
-      'Most clubs are live with their 4 core systems (Jonas or ClubEssential, ForeUP, Toast, member app) in under two weeks. Week 1: connect and validate the integrations. Week 2: your GM reads the first morning brief. Additional integrations from our library of 28 activate incrementally — no big-bang cutover.',
+      "You can still use Swoop's member intelligence, F&B, and staffing capabilities with manual data entry or CSV import. Tee sheet analytics activate when you connect a supported booking system.",
   },
   {
     question: "Is my members' data secure?",
     answer:
-      'Yes. Enterprise-grade encryption in transit and at rest. We never share member data with third parties. SOC 2 Type I in progress for 2026.',
+      'Yes. All data is encrypted in transit and at rest. We never share member data with third parties. SOC 2 compliance is on our roadmap.',
   },
   {
-    question: 'What does a founding-partner pilot actually look like?',
+    question: 'Can I try it before committing?',
     answer:
-      'Six months, white-glove onboarding on-site, weekly roadmap calls, locked-in pricing for life. At the end you get a board-deck template populated with every save, dollar, and action Swoop attributed during the pilot.',
+      'Absolutely. Our Free tier gives you health scores with no credit card required. Pro includes a 14-day trial.',
+  },
+  {
+    question: 'What makes Swoop different from standalone waitlist tools?',
+    answer:
+      'Standalone waitlist tools fill cancelled tee times — one function, one system. Swoop is a full intelligence platform that connects members, demand, service, labor, and revenue with AI agents, behavioral data, and closed-loop engagement. Waitlist software is a feature; Swoop is the operating layer.',
   },
 ];

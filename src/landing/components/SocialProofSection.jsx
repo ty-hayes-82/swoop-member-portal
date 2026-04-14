@@ -31,7 +31,7 @@ const metricCards = [
 
 const benefitIcons = ['Handshake', 'Compass', 'Lock'];
 
-export default function SocialProofSection({ onCtaClick }) {
+export default function SocialProofSection() {
   return (
     <SectionShell
       band="cream"
@@ -154,11 +154,7 @@ export default function SocialProofSection({ onCtaClick }) {
             href="#demo-form"
             onClick={(e) => {
               e.preventDefault();
-              if (onCtaClick) {
-                onCtaClick();
-              } else {
-                document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
+              document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
           >
             Apply for Founding Partner

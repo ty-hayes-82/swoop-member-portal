@@ -2,10 +2,10 @@ import { theme } from '@/config/theme';
 import { pricingTiers } from '@/landing/data';
 import { SectionShell, Card, Button, Icon } from '@/landing/ui';
 
-function PricingCard({ tier, onCtaClick }) {
+function PricingCard({ tier }) {
   const isPopular = tier.badge === 'Most Popular';
-  const goToDemoForm = onCtaClick ?? (() =>
-    document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  const goToDemoForm = () =>
+    document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   return (
     <Card
@@ -79,7 +79,7 @@ function PricingCard({ tier, onCtaClick }) {
   );
 }
 
-export default function PricingSection({ onCtaClick } = {}) {
+export default function PricingSection() {
   return (
     <SectionShell
       id="pricing"
@@ -98,7 +98,7 @@ export default function PricingSection({ onCtaClick } = {}) {
         }}
       >
         {pricingTiers.map((tier) => (
-          <PricingCard key={tier.name} tier={tier} onCtaClick={onCtaClick} />
+          <PricingCard key={tier.name} tier={tier} />
         ))}
       </div>
     </SectionShell>
