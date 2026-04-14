@@ -20,7 +20,7 @@ export default function RevenueSummaryCard() {
   const spendTotal = getArchetypeSpendGaps().reduce((s, a) => s + a.totalUntapped, 0);
   const spendMonthly = Math.round(spendTotal / 12);
   const memberSummary = getMemberSummary();
-  const duesAtRisk = memberSummary.potentialDuesAtRisk || 868000;
+  const duesAtRisk = memberSummary.potentialDuesAtRisk ?? 0;
   const duesMonthly = Math.round(duesAtRisk / 12);
   const totalOpportunity = leakage.TOTAL + spendMonthly + duesMonthly;
 

@@ -19,7 +19,7 @@ export default function CockpitScreen() {
   }, []);
 
   const atRiskCount = (summary.atRisk ?? 0) + (summary.critical ?? 0);
-  const duesAtRisk = summary.potentialDuesAtRisk || 868000;
+  const duesAtRisk = summary.potentialDuesAtRisk ?? 0;
 
   const topPriority = useMemo(() => {
     const critical = atRisk.filter(m => m.score < 30).sort((a, b) => a.score - b.score);
