@@ -260,7 +260,7 @@ export default function IntegrationsPage() {
           { id: 'connections', label: 'Connections' },
           { id: 'imported-data', label: 'Imported Data' },
           { id: 'import', label: 'Import Data' },
-          { id: 'ai-assistant', label: 'AI Import Assistant' },
+          { id: 'ai-assistant', label: 'AI Chat' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -292,9 +292,19 @@ export default function IntegrationsPage() {
       {/* Imported Data tab — baseline catalog of every CSV that has landed */}
       {activeTab === 'imported-data' && <ImportedDataCatalog />}
 
-      {/* AI Import Assistant tab */}
+      {/* AI Chat tab — conversational assistant, separate from the guided wizard */}
       {activeTab === 'ai-assistant' && (
-        <DataOnboardingChat clubId={clubId} onImportComplete={() => { /* refetch if needed */ }} />
+        <div className="flex flex-col gap-4">
+          <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-sm text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-300">
+            <strong>AI Chat</strong> — ask questions about your data, get format guidance, or troubleshoot a file.
+            For a step-by-step import with auto-mapping, use the <button
+              type="button"
+              onClick={() => navigate('integrations/csv-import')}
+              className="underline font-semibold bg-transparent border-none cursor-pointer text-blue-700 dark:text-blue-300 p-0"
+            >Import Data wizard</button>.
+          </div>
+          <DataOnboardingChat clubId={clubId} onImportComplete={() => { /* refetch if needed */ }} />
+        </div>
       )}
 
       {/* Connections tab (existing content) */}
