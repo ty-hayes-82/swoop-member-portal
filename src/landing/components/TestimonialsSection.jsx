@@ -4,17 +4,17 @@ import { SectionShell, Card } from '@/landing/ui';
 const testimonials = [
   {
     quote:
-      'The Saturday brief is the first club-tech vendor deliverable I've ever forwarded to my board without rewriting. Two members we were about to lose are still here because of it.',
+      "The Saturday brief is the first club-tech vendor deliverable I've ever forwarded to my board without rewriting. Two members we were about to lose are still here because of it.",
     attribution: 'General Manager · 280-member private club · Southeast',
   },
   {
     quote:
-      'We went from 67% to 91% fill rate in six weeks. The routing logic knows which members need a tee time more than a reminder — that's not something we could build ourselves.',
+      "We went from 67% to 91% fill rate in six weeks. The routing logic knows which members need a tee time more than a reminder — that's not something we could build ourselves.",
     attribution: 'Director of Operations · 360-member club · Mid-Atlantic',
   },
   {
     quote:
-      'I was running twelve spreadsheets and gut feel. Now I have one brief that tells me exactly who to call and why. It's the operating system I didn't know I was missing.',
+      "I was running twelve spreadsheets and gut feel. Now I have one brief that tells me exactly who to call and why. It's the operating system I didn't know I was missing.",
     attribution: 'General Manager · 420-member private club · Southwest',
   },
 ];
