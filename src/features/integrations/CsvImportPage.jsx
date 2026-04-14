@@ -75,29 +75,35 @@ async function callAIForStep({ step, file, parsedHeaders, sampleRows, rowCount, 
     message = `The user uploaded "${file?.name || 'upload.csv'}" for a ${importType} import. File headers: ${parsedHeaders.join(', ')}. Estimated rows: ${rowCount ?? 'unknown'}. In 2–3 sentences: identify the data type, guess the vendor software (Jonas, ForeTees, Toast, Clubessential, etc.), note the row count, and flag any obvious data quality issues. Be concise — this appears below a file dropzone in the import wizard.`;
     file_data = { filename: file?.name || 'upload.csv', headers: parsedHeaders, sampleRows: (sampleRows || []).slice(0, 5), rowCount };
   } else if (step === 2) {
-    const mapped = Object.entries(mapping).filter(([, v]) => v).map(([c, f]) => `${c} → ${f}`).join(', ');
-    const unmappedCount = Object.values(mapping).filter(v => !v).length;
-    // Ask for structured JSON so the UI can render interactive suggestion chips
-    message = `You are a data-mapping assistant for Swoop, a club management platform. Analyze the CSV column mapping and return ONLY a valid JSON object — no markdown, no prose outside the JSON.
+    const mappedEntries = Object.entries(mapping).filter(([, v]) => v);
+    const unmappedCols = Object.entries(mapping).filter(([, v]) => !v).map(([c]) => c);
+    const mapped = mappedEntries.map(([c, f]) => `${c} → ${f}`).join(', ');
+    // Chips-only: no summary prose. One chip per actionable issue found.
+    message = `You are a data-mapping assistant for Swoop golf club platform. Analyze the CSV mapping and return ONLY a valid JSON object — no markdown, no prose.
 
 Return format:
 {
-  "summary": "<2-3 sentence plain-English confidence summary>",
   "suggestions": [
-    { "type": "remap", "csvCol": "<exact CSV column>", "targetField": "<swoop field key>", "label": "<short action label>", "reason": "<1 sentence why>" },
-    { "type": "review", "csvCol": "<exact CSV column>", "targetField": null, "label": "<short review label>", "reason": "<1 sentence concern>" }
+    { "type": "remap",   "csvCol": "<exact CSV column name>", "targetField": "<swoop field key>", "label": "<≤6 word action>", "reason": "<1 sentence why>" },
+    { "type": "skip",    "csvCol": "<exact CSV column name>", "targetField": null, "label": "Skip <column>", "reason": "<1 sentence why safe to skip>" },
+    { "type": "warning", "csvCol": "<exact CSV column name>", "targetField": null, "label": "<≤8 word issue>", "reason": "<1 sentence data concern with sample evidence>" }
   ],
   "validation": { "ready": <N>, "warnings": <N>, "errors": <N> }
 }
 
+Rules — generate ONE chip per issue found, up to 6 total:
+- "remap": CSV column currently unmapped but clearly matches a Swoop field (e.g. "Member Number" → external_id)
+- "skip": unmapped column that is safe to ignore (e.g. mailing flags, internal codes)
+- "warning": suspicious sample data — wrong gender values, invalid emails, missing required fields, unexpected formats
+
 Import type: ${importType}
-Current mapping: ${mapped || 'none'}
-Unmapped columns: ${unmappedCount}
+Currently mapped: ${mapped || 'none yet'}
+Unmapped columns: ${unmappedCols.join(', ') || 'none'}
 All CSV headers: ${parsedHeaders.join(', ')}
-Sample rows (first 3): ${JSON.stringify((sampleRows || []).slice(0, 3))}
+Sample rows (first 5): ${JSON.stringify((sampleRows || []).slice(0, 5))}
 Total rows: ~${rowCount}
 
-Include 1–3 suggestions max. Only suggest remaps if a clearly better field is available. Only flag review items if there is a real data concern visible in the sample. Estimate ready/warnings/errors from sample quality.`;
+Be specific. If sample values show "F" for names that look male, say so. If an email column has invalid formats, say how many. Count validation errors from the sample — extrapolate to full row count.`;
     file_data = { filename: file?.name || 'upload.csv', headers: parsedHeaders, sampleRows: (sampleRows || []).slice(0, 3), rowCount };
   } else if (step === 3) {
     const { toCreate = 0, toUpdate = 0, rejected = [] } = previewCounts || {};
@@ -121,17 +127,18 @@ Include 1–3 suggestions max. Only suggest remaps if a clearly better field is 
     if (!res.ok) return null;
     const data = await res.json();
     const raw = data.response || null;
-    // Step 2 requests structured JSON — try to parse it for interactive chips
+    // Step 2: chips-only — parse JSON, no prose summary
     if (step === 2 && raw) {
       try {
         const parsed = JSON.parse(raw);
         return {
-          text: parsed.summary || raw,
+          text: null,   // intentionally suppressed — step 2 is chips-only
           suggestions: (parsed.suggestions || []).map((s, i) => ({ ...s, id: `sug-${i}` })),
           validation: parsed.validation || null,
           sessionId: data.session_id || null,
         };
-      } catch { /* fall through to plain text */ }
+      } catch { /* fall through — no chips shown on parse error */ }
+      return { text: null, suggestions: [], validation: null, sessionId: data.session_id || null };
     }
     return { text: raw, suggestions: [], validation: null, sessionId: data.session_id || null };
   } catch {
@@ -1217,6 +1224,8 @@ export default function CsvImportPage() {
   const handleAISuggestion = useCallback((suggestion) => {
     if (suggestion.type === 'remap' && suggestion.csvCol && suggestion.targetField) {
       setMapping(prev => ({ ...prev, [suggestion.csvCol]: suggestion.targetField }));
+    } else if (suggestion.type === 'skip' && suggestion.csvCol) {
+      setMapping(prev => ({ ...prev, [suggestion.csvCol]: '' }));
     }
     setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
   }, []);
