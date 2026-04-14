@@ -169,6 +169,45 @@ export default function MembersView() {
           </div>
         )}
 
+        {/* Health tier KPI strip — quick-read signal counts before tab selection */}
+        {hasEngagementData && (summary.critical > 0 || summary.atRisk > 0 || summary.watch > 0) && (
+          <div className="flex items-center gap-3 flex-wrap">
+            {summary.critical > 0 && (
+              <button
+                onClick={() => setMode('at-risk')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors cursor-pointer dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                {summary.critical} Critical
+              </button>
+            )}
+            {summary.atRisk > 0 && (
+              <button
+                onClick={() => setMode('at-risk')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                {summary.atRisk} At-Risk
+              </button>
+            )}
+            {summary.watch > 0 && (
+              <button
+                onClick={() => setMode('at-risk')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 transition-colors cursor-pointer dark:bg-yellow-500/10 dark:text-yellow-600 dark:border-yellow-500/30"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 shrink-0" />
+                {summary.watch} Watch
+              </button>
+            )}
+            {summary.healthy > 0 && (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                {summary.healthy} Healthy
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Mode switcher — disable engagement tabs when no activity data */}
         <div role="tablist" aria-label="Member views" className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
           {MODES.map(({ key, label }) => {

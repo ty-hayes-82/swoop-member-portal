@@ -142,10 +142,11 @@ function GmGreetingAlert({ onDismiss }) {
 function getGreeting() {
   const hour = new Date().getHours();
   const stored = localStorage.getItem('swoop_auth_user');
-  const firstName = stored ? getFirstName(JSON.parse(stored).name || '') : '';
+  const firstName = stored ? (() => { try { return getFirstName(JSON.parse(stored).name || ''); } catch { return ''; } })() : '';
   const nameStr = firstName ? `, ${firstName}` : '';
   if (hour < 12) return `Good morning${nameStr} — here's what needs your attention today`;
-  return `Afternoon check-in${nameStr} — here's where things stand`;
+  if (hour < 17) return `Afternoon check-in${nameStr} — here's where things stand`;
+  return `Good evening${nameStr} — end-of-day summary`;
 }
 
 function formatDate() {
@@ -579,7 +580,7 @@ export default function TodayView() {
             setDismissedAlerts(prev => [...prev, alert.headline]);
           };
           return (
-          <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border flex-wrap gap-2 ${
+          <div key={alert.headline || i} className={`flex items-center justify-between rounded-xl px-4 py-3 border flex-wrap gap-2 ${
             isSevere
               ? 'border-error-500/40 bg-error-50 dark:bg-error-500/10'
               : 'border-warning-500/40 bg-warning-50 dark:bg-warning-500/10'

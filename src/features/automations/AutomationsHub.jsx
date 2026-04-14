@@ -79,7 +79,7 @@ export default function AutomationsHub() {
         {activeTab === 'playbooks' && <PlaybooksPage embedded />}
         {activeTab === 'agents' && <AgentsTab />}
         {activeTab === 'activity' && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="flex items-center justify-center py-16 text-sm text-gray-400">Loading activity…</div>}>
             <AgentActivityPage />
           </Suspense>
         )}
