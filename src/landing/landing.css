@@ -452,7 +452,6 @@ body:has(.landing-page) {
 }
 
 @media (max-width: 768px) {
-  .landing-nav-links a,
   .landing-nav-links button:not(:last-child) {
     display: none;
   }

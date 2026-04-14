@@ -13,26 +13,27 @@ export default function HeroSection({ onDemoClick }) {
       <div className="landing-container">
         <div className="landing-hero-grid">
           <div>
-            <Eyebrow>Private club intelligence · built for GMs</Eyebrow>
+            <Eyebrow>The Operating System for Private Clubs</Eyebrow>
             <h1 className="landing-headline">
-              Your club runs on{' '}
-              <span style={{ color: theme.colors.accent, fontStyle: 'italic', fontWeight: 600 }}>four systems.</span>
+              Your members get{' '}
+              <span style={{ color: theme.colors.accent, fontStyle: 'italic', fontWeight: 600 }}>a concierge.</span>
               <br />
+              Your GM gets{' '}
               <span style={{ color: theme.neutrals.ink, fontStyle: 'italic', fontWeight: 600, backgroundImage: `linear-gradient(transparent 62%, rgba(243,146,45,0.25) 62%)` }}>
-                None of them talk to each other.
+                a command center.
               </span>
             </h1>
             <p className="landing-subhead">
-              Swoop connects your tee sheet, CRM, and POS to surface at-risk members and protect{' '}
-              <strong style={{ color: theme.neutrals.ink, fontWeight: 700 }}>$74K+</strong> in dues a year.
-              Live in two weeks. No rip-and-replace.
+              Spot at-risk members <strong style={{ color: theme.neutrals.ink, fontWeight: 700 }}>6 days</strong> before
+              they resign. Recover <strong style={{ color: theme.neutrals.ink, fontWeight: 700 }}>$74K+</strong> in
+              dues a year. Without replacing your tee sheet, CRM, or POS.
             </p>
             <div className="landing-hero-ctas">
               <Button size="lg" onClick={goToDemoForm}>
-                Book the 30-minute walkthrough
+                Book a 30-Minute Demo
               </Button>
-              <Button as="a" href="#/platform" variant="ghost" size="lg">
-                See it in action →
+              <Button as="a" href="#/demo/split-screen" variant="ghost" size="lg">
+                See a Day in Action
               </Button>
             </div>
             <div

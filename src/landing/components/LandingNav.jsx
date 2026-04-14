@@ -32,12 +32,11 @@ export default function LandingNav() {
         position: 'sticky',
         top: 0,
         zIndex: 200,
-        background: 'rgba(250,247,242,0.96)',
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
-        borderBottom: scrolled ? '1px solid rgba(17,17,17,0.10)' : '1px solid rgba(17,17,17,0.06)',
-        boxShadow: scrolled ? '0 2px 16px rgba(17,17,17,0.06)' : 'none',
-        transition: 'border-color 220ms, box-shadow 220ms',
+        background: scrolled ? 'rgba(250,247,242,0.85)' : 'rgba(250,247,242,0)',
+        backdropFilter: scrolled ? 'blur(14px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(14px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(17,17,17,0.08)' : '1px solid transparent',
+        transition: 'background 220ms, border-color 220ms',
       }}
     >
       <div
