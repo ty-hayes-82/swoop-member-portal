@@ -39,7 +39,7 @@ function AgentConsole() {
               fontWeight: 700,
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              color: theme.colors.brass || '#B5956A',
+              color: theme.colors.brass,
             }}
           >
             BRIEF · 06:14 · DELIVERED
@@ -95,7 +95,7 @@ function AgentConsole() {
                 fontSize: 12,
                 fontFamily: theme.fonts.mono,
                 fontWeight: 700,
-                color: row.positive ? theme.colors.brass || '#B5956A' : 'rgba(255,255,255,0.45)',
+                color: row.positive ? theme.colors.brass : 'rgba(255,255,255,0.45)',
                 flexShrink: 0,
               }}
             >
@@ -124,7 +124,7 @@ function AgentConsole() {
             width: 24,
             height: 24,
             borderRadius: '50%',
-            background: theme.colors.brass || '#B5956A',
+            background: theme.colors.brass,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -153,7 +153,7 @@ export default function HeroSection({ onDemoClick }) {
   return (
     <section
       style={{
-        background: theme.colors.heroGreen || '#1A2E20',
+        background: theme.colors.heroGreen,
         paddingTop: 'clamp(72px, 9vw, 120px)',
         paddingBottom: 'clamp(72px, 9vw, 120px)',
       }}
@@ -175,7 +175,7 @@ export default function HeroSection({ onDemoClick }) {
                 fontWeight: 700,
                 letterSpacing: '0.14em',
                 textTransform: 'uppercase',
-                color: theme.colors.brass || '#B5956A',
+                color: theme.colors.brass,
                 margin: '0 0 20px',
               }}
             >
@@ -184,7 +184,7 @@ export default function HeroSection({ onDemoClick }) {
 
             <h1
               style={{
-                fontFamily: theme.fonts.serif || "'Fraunces', Georgia, serif",
+                fontFamily: theme.fonts.serif,
                 fontSize: 'clamp(36px, 4.5vw, 58px)',
                 fontWeight: 800,
                 lineHeight: 1.1,

@@ -210,7 +210,7 @@ export default function HealthOverview() {
         <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
           <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Dues at Risk</div>
           <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
-            ${totalDuesAtRisk > 0 ? totalDuesAtRisk.toLocaleString() : (summaryForKpi.potentialDuesAtRisk || 0).toLocaleString()}
+            ${totalDuesAtRisk > 0 ? totalDuesAtRisk.toLocaleString() : (summaryForKpi.potentialDuesAtRisk ?? 0).toLocaleString()}
           </div>
           <div className="text-xs text-gray-500 mt-0.5">annual dues exposure</div>
           <div className="mt-2">

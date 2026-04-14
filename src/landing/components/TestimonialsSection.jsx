@@ -47,7 +47,7 @@ export default function TestimonialsSection() {
               width: 46,
               height: 46,
               borderRadius: '50%',
-              background: theme.colors.heroGreen || '#1A2E20',
+              background: theme.colors.heroGreen,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

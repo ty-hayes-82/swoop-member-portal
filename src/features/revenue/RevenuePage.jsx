@@ -172,7 +172,7 @@ export default function RevenuePage() {
             {/* "vs last month" delta is mocked until revenueService exposes a historical series. */}
             {leakage.MOM_DELTA != null && (
             <div className={`mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border ${leakage.MOM_DELTA > 0 ? 'bg-error-500/[0.08] text-error-500 border-error-500/15' : 'bg-success-500/[0.08] text-success-600 border-success-500/15'}`}
-                 title={`Dec leakage was $${leakage.PRIOR_MONTH_TOTAL.toLocaleString()}/mo — Jan ${leakage.MOM_DELTA > 0 ? 'jumped' : 'dropped'} $${Math.abs(leakage.MOM_DELTA).toLocaleString()} as holiday staff left and pace slowed.`}>
+                 title={leakage.PRIOR_MONTH_TOTAL != null ? `Dec leakage was $${leakage.PRIOR_MONTH_TOTAL.toLocaleString()}/mo — Jan ${leakage.MOM_DELTA > 0 ? 'jumped' : 'dropped'} $${Math.abs(leakage.MOM_DELTA).toLocaleString()} as holiday staff left and pace slowed.` : undefined}>
               <span>{leakage.MOM_DELTA > 0 ? '↑' : '↓'}</span>
               <span>{leakage.MOM_DELTA > 0 ? '+' : '-'}${Math.abs(leakage.MOM_DELTA).toLocaleString()} vs last month</span>
             </div>
