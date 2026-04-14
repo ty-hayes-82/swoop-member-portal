@@ -13,9 +13,9 @@ export default function ComparisonSection() {
   return (
     <SectionShell
       band="paper"
-      eyebrow="Compare"
-      title="Built to replace patchwork ops."
-      subtitle="Swoop is not another single-point tool. It is the operating layer across member demand, service quality, labor, and revenue."
+      eyebrow="THE COMPARISON"
+      title="One page replaces four logins."
+      subtitle="Waitlist tools fill slots. CRMs store records. Spreadsheets report the past. Swoop ranks today's members, today's demand, and today's moves."
     >
       <ComparisonTable features={comparisonFeatures} columns={columns} />
       <p

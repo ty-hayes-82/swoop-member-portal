@@ -1,13 +1,12 @@
 import LandingShell from '@/landing/LandingShell';
-import ProblemSection from '@/landing/components/ProblemSection';
-import SaveStorySection from '@/landing/components/SaveStorySection';
 import CoreCapabilitiesSection from '@/landing/components/CoreCapabilitiesSection';
+import HowItWorksSection from '@/landing/components/HowItWorksSection';
 import AgentsSection from '@/landing/components/AgentsSection';
-import MemberExperienceSection from '@/landing/components/MemberExperienceSection';
-import PhotoBand from '@/landing/components/PhotoBand';
+import SaveStorySection from '@/landing/components/SaveStorySection';
 import IntegrationsSection from '@/landing/components/IntegrationsSection';
 import ComparisonSection from '@/landing/components/ComparisonSection';
 import { SectionShell, Button } from '@/landing/ui';
+import { theme } from '@/config/theme';
 
 export default function PlatformPage() {
   return (
@@ -16,7 +15,7 @@ export default function PlatformPage() {
         band="cream"
         eyebrow="Platform"
         title="Every signal. One operating view."
-        subtitle="Five AI-powered lenses that connect your tee sheet, CRM, POS, staffing, and revenue into a single intelligence layer — delivered before 6:15 AM."
+        subtitle="Six AI-powered lenses that connect your tee sheet, CRM, POS, staffing, and revenue — surfaced before 6:15 AM."
       >
         <div style={{ textAlign: 'center', marginTop: 8 }}>
           <Button size="lg" onClick={() => { window.location.hash = '#/contact'; }}>
@@ -24,18 +23,25 @@ export default function PlatformPage() {
           </Button>
         </div>
       </SectionShell>
-      <ProblemSection />
-      <SaveStorySection />
       <CoreCapabilitiesSection />
+      <HowItWorksSection />
       <AgentsSection />
-      <MemberExperienceSection />
-      <PhotoBand
-        photoKey="fairwayGreen"
-        kicker="One operating view"
-        headline="Every signal. Every system. One clubhouse of intelligence."
-      />
+      <SaveStorySection />
       <IntegrationsSection />
       <ComparisonSection />
+      <SectionShell band="dark" size="sm">
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 12 }}>
+            Ready to see it live?
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, margin: '0 auto 24px', maxWidth: 460 }}>
+            30 minutes. Your real questions. We'll show you exactly what Swoop surfaces for a club like yours.
+          </p>
+          <Button size="lg" onClick={() => { window.location.hash = '#/contact'; }}>
+            Book the walkthrough →
+          </Button>
+        </div>
+      </SectionShell>
     </LandingShell>
   );
 }

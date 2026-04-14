@@ -81,6 +81,10 @@ export const theme = {
     chartPurple:  SLATE,
 
     landingCream: '#F7F5F2',
+    heroGreen:    '#1A2E20',
+    darkSection:  '#0E1A10',
+    brass:        '#B5956A',
+    brand:        '#F3922D',
 
     lensMemberIntelligence: BLACK,
     lensTeeSheetDemand:     ORANGE,
@@ -149,7 +153,7 @@ export const theme = {
   fonts: {
     sans:  "'Plus Jakarta Sans', system-ui, sans-serif",
     mono:  "'JetBrains Mono', monospace",
-    serif: "'Plus Jakarta Sans', system-ui, sans-serif",
+    serif: "'Fraunces', Georgia, serif",
   },
   fontSize: {
     xs: '12px', sm: '14px', md: '16px',

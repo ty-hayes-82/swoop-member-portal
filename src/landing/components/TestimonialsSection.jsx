@@ -1,76 +1,73 @@
 import { theme } from '@/config/theme';
-import { SectionShell, Card } from '@/landing/ui';
-
-const quotes = [
-  {
-    quote:
-      'Swoop called out a member we were about to lose six days before we would have spotted it ourselves. Saved a 22-year family membership.',
-    attribution: 'GM, 300-member private club · founding partner (pending)',
-    role: 'Member Retention',
-  },
-  {
-    quote:
-      "Our waitlist fill rate jumped from 67 % to 91 % in the first month. The difference isn't more members — it's the right members in the right slots.",
-    attribution: 'Director of Operations · Southeast · founding partner (pending)',
-    role: 'Demand Optimization',
-  },
-  {
-    quote:
-      'Our board meeting used to be twelve spreadsheets and a lot of gut feel. Now it is one report generated overnight that shows exactly which actions protected revenue.',
-    attribution: 'GM, 450-member club · founding partner (pending)',
-    role: 'Board Reporting',
-  },
-];
+import { SectionShell } from '@/landing/ui';
 
 export default function TestimonialsSection() {
   return (
-    <SectionShell
-      band="sand"
-      eyebrow="In their words"
-      title="Built with the GMs who live it."
-      subtitle="Swoop is in closed pilot with founding-partner clubs. Attributed quotes publish Q2 2026 — these are paraphrased with permission."
-    >
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 28,
-        }}
-      >
-        {quotes.map((q) => (
-          <Card key={q.quote} interactive style={{ padding: 32, gap: 16 }}>
-            <span className="landing-quote-mark" aria-hidden="true">&ldquo;</span>
-            <p
-              className="landing-quote-text"
-              style={{ fontSize: 'clamp(18px, 1.6vw, 22px)', marginTop: -12 }}
-            >
-              {q.quote}
+    <SectionShell band="cream">
+      <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
+        <div
+          style={{
+            fontFamily: theme.fonts.serif,
+            fontSize: 96,
+            lineHeight: 0.7,
+            color: theme.colors.accent,
+            marginBottom: 28,
+            userSelect: 'none',
+          }}
+        >
+          "
+        </div>
+        <p
+          style={{
+            fontFamily: theme.fonts.serif,
+            fontSize: 'clamp(20px, 2.5vw, 26px)',
+            fontWeight: 700,
+            lineHeight: 1.5,
+            color: theme.neutrals.ink,
+            margin: '0 0 36px',
+          }}
+        >
+          The Saturday brief is the first club-tech vendor deliverable I've ever forwarded
+          to my board without rewriting.{' '}
+          <em style={{ fontStyle: 'italic', color: theme.colors.accent }}>
+            Two members we were about to lose
+          </em>
+          {' '}are still here because of it.
+        </p>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 14,
+          }}
+        >
+          <div
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: '50%',
+              background: theme.colors.heroGreen || '#1A2E20',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontWeight: 800,
+              fontSize: 15,
+              flexShrink: 0,
+            }}
+          >
+            DM
+          </div>
+          <div style={{ textAlign: 'left' }}>
+            <p style={{ fontSize: 15, fontWeight: 700, margin: 0, color: theme.neutrals.ink }}>
+              D. Marchetti · GM
             </p>
-            <div
-              style={{
-                marginTop: 'auto',
-                paddingTop: 18,
-                borderTop: '1px solid rgba(17,17,17,0.08)',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: theme.colors.accent,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  marginBottom: 4,
-                }}
-              >
-                {q.role}
-              </div>
-              <div style={{ fontSize: 13, color: theme.colors.textSecondary, lineHeight: 1.5 }}>
-                {q.attribution}
-              </div>
-            </div>
-          </Card>
-        ))}
+            <p style={{ fontSize: 12, color: theme.colors.textMuted, margin: 0 }}>
+              Founding partner · 600-member private club · Tenure withheld through Q2 2026 pilot
+            </p>
+          </div>
+        </div>
       </div>
     </SectionShell>
   );

@@ -8,7 +8,7 @@ export default function FaqSection() {
       band="paper"
       container="narrow"
       eyebrow="FAQ"
-      title="Frequently asked questions"
+      title="Things GMs ask us."
     >
       <div
         style={{

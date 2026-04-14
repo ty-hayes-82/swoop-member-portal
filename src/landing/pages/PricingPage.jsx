@@ -1,6 +1,5 @@
 import { theme } from '@/config/theme';
 import LandingShell from '@/landing/LandingShell';
-import IndustryStatsSection from '@/landing/components/IndustryStatsSection';
 import RoiCalculatorSection from '@/landing/components/RoiCalculatorSection';
 import PricingSection from '@/landing/components/PricingSection';
 import { faqItems } from '@/landing/data';
@@ -9,7 +8,8 @@ import { SectionShell, FaqItem } from '@/landing/ui';
 const PRICING_FAQ_QUESTIONS = new Set([
   'Do I need to replace my current software?',
   'How long does setup take?',
-  'Can I try it before committing?',
+  "Is my members' data secure?",
+  'What does a founding-partner pilot actually look like?',
 ]);
 
 const pricingFaqItems = faqItems.filter((item) => PRICING_FAQ_QUESTIONS.has(item.question));
@@ -22,7 +22,7 @@ function PricingFaqSection() {
       band="cream"
       container="narrow"
       eyebrow="Pricing FAQ"
-      title="Common questions"
+      title="Things GMs ask us."
     >
       <div
         style={{
@@ -43,7 +43,6 @@ function PricingFaqSection() {
 export default function PricingPage() {
   return (
     <LandingShell>
-      <IndustryStatsSection />
       <RoiCalculatorSection />
       <PricingSection onCtaClick={toDemoPage} />
       <PricingFaqSection />

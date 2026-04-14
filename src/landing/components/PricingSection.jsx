@@ -79,26 +79,69 @@ function PricingCard({ tier }) {
   );
 }
 
-export default function PricingSection() {
+export default function PricingSection({ onCtaClick }) {
   return (
     <SectionShell
       id="pricing"
       band="paper"
-      eyebrow="Pricing"
-      title="Simple pricing. No long-term contracts."
-      subtitle="Start free with your existing systems. Upgrade when you see the value."
+      eyebrow="THE TERMS"
+      title="Start at zero. Upgrade when the math shows up."
+      subtitle="No long-term contract. Cancel at the end of any month."
     >
+      {/* Founding partners banner */}
+      <div
+        style={{
+          background: '#FAF7F2',
+          border: '1px solid rgba(17,17,17,0.10)',
+          borderRadius: 12,
+          padding: '16px 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 24,
+          marginBottom: 32,
+          flexWrap: 'wrap',
+        }}
+      >
+        <div>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: theme.colors.accent,
+              margin: '0 0 4px',
+            }}
+          >
+            Founding Partners · Nine Seats Left
+          </p>
+          <p style={{ fontSize: 13, color: theme.colors.textSecondary, margin: 0, maxWidth: 520 }}>
+            Swoop is in closed pilot today — the first ten founding-partner clubs get hands-on
+            onboarding, direct roadmap input, and locked-in pricing for life. Attributed case
+            studies publish Q2 2026.
+          </p>
+        </div>
+        <Button
+          size="sm"
+          onClick={onCtaClick ?? (() => document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))}
+          style={{ whiteSpace: 'nowrap' }}
+        >
+          Claim a founding seat
+        </Button>
+      </div>
+
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: 28,
           alignItems: 'stretch',
-          paddingTop: 24,
+          paddingTop: 8,
         }}
       >
         {pricingTiers.map((tier) => (
-          <PricingCard key={tier.name} tier={tier} />
+          <PricingCard key={tier.name} tier={tier} onCtaClick={onCtaClick} />
         ))}
       </div>
     </SectionShell>

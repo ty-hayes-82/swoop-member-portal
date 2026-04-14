@@ -452,8 +452,11 @@ body:has(.landing-page) {
 }
 
 @media (max-width: 768px) {
-  .landing-nav-links button:not(:last-child) {
-    display: none;
+  .landing-nav-desktop {
+    display: none !important;
+  }
+  .landing-nav-hamburger {
+    display: block !important;
   }
 
   .landing-grid-3 {

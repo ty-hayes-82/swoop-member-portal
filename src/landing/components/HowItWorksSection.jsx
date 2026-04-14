@@ -158,9 +158,9 @@ export default function HowItWorksSection() {
   return (
     <SectionShell
       band="paper"
-      eyebrow="How it works"
-      title="One screen. Every signal. Before the first tee time."
-      subtitle="Your tee sheet knows rounds. Your POS knows spend. Your CRM knows complaints. None of them know what James Whitfield's morning looks like. Swoop does — and it tells your GM before 6:15 AM."
+      eyebrow="FIX IT · THE MONDAY"
+      title="The daily brief, written overnight."
+      subtitle="Every morning, Swoop hands your GM a ranked list of members to call, slots to backfill, and service moves to make — with the math behind each recommendation."
     >
       <div
         style={{

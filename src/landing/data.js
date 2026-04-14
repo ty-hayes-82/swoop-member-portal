@@ -118,6 +118,21 @@ export const coreCapabilities = [
     why: '4 members saved this month via playbooks',
     metric: { value: '$251K', label: 'annualized impact' },
   },
+  {
+    icon: 'Send',
+    title: 'Engagement & Outreach',
+    color: '#6B7280',
+    summary: 'The right message to the right member at the right moment.',
+    bullets: [
+      'Drafts callback scripts, comp offers, and re-engagement notes.',
+      'Every outreach tracked back to the signal that triggered it.',
+    ],
+    source: 'Email + SMS + Member app',
+    freshness: 'Outreach queue updated nightly',
+    confidence: '87% confidence',
+    why: '18 members flagged for re-engagement this week',
+    metric: { value: '3.4x', label: 'response vs. blast' },
+  },
 ];
 
 export const comparisonFeatures = [
@@ -247,47 +262,47 @@ export const objections = [
 
 export const pricingTiers = [
   {
-    name: 'Free — Health Scores',
+    name: 'Signals',
     price: '$0/mo',
     description:
-      'Connect your existing systems. See member health scores and basic risk alerts powered by integration data alone.',
+      'Read-only alerts. Swoop reads your systems and surfaces member-risk, complaint, and demand signals daily.',
     features: [
-      'Health score dashboard',
-      'Basic risk alerts',
+      'Daily member health scores',
+      'Risk + complaint + demand alerts',
       'Up to 3 system integrations',
       'Email support',
     ],
-    cta: 'Start Free',
+    cta: 'Start on Signals (free)',
   },
   {
-    name: 'Pro — Intelligence Dashboard',
+    name: 'Signals + Actions',
     price: '$499/mo',
     badge: 'Most Popular',
     description:
-      'Full platform access with cross-system intelligence. Optional member app integration for richer behavioral data.',
+      'Everything in Signals, plus Swoop drafts the callback script, the comp offer, and the staffing shift in plain English — so your team acts instead of sorting spreadsheets.',
     features: [
-      'Complete platform access',
-      'Cross-system intelligence',
-      'AI agent recommendations',
+      'Everything in Signals',
+      'Intelligence drafts the response',
+      'Retention-prioritized waitlist routing',
       'Up to 10 integrations',
       'Priority support',
     ],
-    cta: 'Start 14-Day Trial',
+    cta: 'Book the 30-minute walkthrough',
   },
   {
-    name: 'Club — Full Platform',
+    name: 'Signals + Actions + Member App',
     price: '$1,499/mo',
     description:
-      'Everything in Pro plus the Swoop member app, GPS behavioral data, push notifications, and closed-loop engagement.',
+      'Adds the Swoop member app — GPS + what members actually do on property, plus push notifications and attribution from signal to save.',
     features: [
-      'Everything in Pro',
+      'Everything in Signals + Actions',
       'Swoop member app included',
-      'GPS + real-time behavioral data',
+      'GPS + on-property member behavior',
       'Push notification channel',
-      'Closed-loop engagement tracking',
+      'Save-attribution tracking',
       'Dedicated success manager',
     ],
-    cta: 'Book a Demo',
+    cta: 'Talk to us about Club',
   },
 ];
 
@@ -321,5 +336,10 @@ export const faqItems = [
     question: 'What makes Swoop different from standalone waitlist tools?',
     answer:
       'Standalone waitlist tools fill cancelled tee times — one function, one system. Swoop is a full intelligence platform that connects members, demand, service, labor, and revenue with AI agents, behavioral data, and closed-loop engagement. Waitlist software is a feature; Swoop is the operating layer.',
+  },
+  {
+    question: 'What does a founding-partner pilot actually look like?',
+    answer:
+      'Six months. Your data, your members, your systems. We connect your tee sheet, POS, and CRM in week one. Your GM gets a daily brief starting day two. At the end, you have a board deck with every save attributed, every dollar traced. Nine founding seats remain — first ten clubs get locked-in pricing for life.',
   },
 ];
