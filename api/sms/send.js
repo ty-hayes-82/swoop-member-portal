@@ -164,9 +164,8 @@ export async function sendMemberSms({ clubId, memberId, templateId, variables = 
   // 7. Render body
   const rendered = renderTemplate(template.body, { ...variables, first_name: member.first_name });
 
-  // 8. Prepend sender name if not already present
-  const senderName = config.sender_name || 'Your Club';
-  const finalBody = rendered.startsWith(senderName) ? rendered : `${senderName}: ${rendered}`;
+  // 8. Templates include {{club_name}} prefix already; no auto-prepend needed
+  const finalBody = rendered;
 
   // 9. Send (or simulate in dry-run mode)
   let twilioResult;
