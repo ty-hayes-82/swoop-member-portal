@@ -16,19 +16,14 @@ if (SENTRY_DSN) {
   });
 }
 
-const LandingPage = lazy(() => import('./landing/LandingPage.jsx'));
 const App = lazy(() => import('./App.jsx'));
-
-const normalizedPath = window.location.pathname.replace(/\/+$/, '') || '/';
-const hash = window.location.hash;
-const isLandingRoute = normalizedPath === '/landing' || hash === '#/landing';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <AuthProvider>
         <Suspense fallback={null}>
-          {isLandingRoute ? <LandingPage /> : <App />}
+          <App />
         </Suspense>
       </AuthProvider>
     </ErrorBoundary>
