@@ -151,10 +151,12 @@ export default withAuth(async function handler(req, res) {
 
       // Prove It
       recentInterventions: recentInterventions.rows.map(r => ({
+        interventionId: r.intervention_id,
+        memberId: r.member_id,
         type: r.intervention_type,
         description: r.description,
         date: r.initiated_at,
-        memberName: `${r.first_name} ${r.last_name}`,
+        memberName: `${r.first_name} ${r.last_name}`.trim(),
         scoreBefore: r.health_score_before,
         scoreAfter: r.health_score_after,
         outcome: r.outcome,

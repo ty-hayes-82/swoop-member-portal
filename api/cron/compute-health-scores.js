@@ -104,14 +104,19 @@ export default async function handler(req, res) {
           }
         }
 
-        // Archive snapshot for trending
+        // Archive daily snapshot for trending (one row per member per day)
         await sql`
           INSERT INTO health_scores (member_id, club_id, score, tier, recorded_at)
-          SELECT member_id, club_id, health_score, health_tier, NOW()
-          FROM members
-          WHERE club_id = ${clubId}
-            AND (status = 'active' OR membership_status = 'active' OR status IS NULL)
-          ON CONFLICT DO NOTHING
+          SELECT m.member_id, m.club_id, m.health_score, m.health_tier, NOW()
+          FROM members m
+          WHERE m.club_id = ${clubId}
+            AND (m.status = 'active' OR m.membership_status = 'active' OR m.status IS NULL)
+            AND NOT EXISTS (
+              SELECT 1 FROM health_scores hs
+              WHERE hs.member_id = m.member_id
+                AND hs.club_id = m.club_id
+                AND DATE(hs.recorded_at) = CURRENT_DATE
+            )
         `;
       } catch (clubErr) {
         logWarn('/api/cron/compute-health-scores', `club ${clubId} failed`, { message: clubErr.message });
