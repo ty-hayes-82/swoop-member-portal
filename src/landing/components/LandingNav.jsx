@@ -76,7 +76,8 @@ export default function LandingNav() {
             onClick={() => setMenuOpen(o => !o)}
             style={{
               display: 'none', background: 'none', border: 'none',
-              cursor: 'pointer', padding: 4, color: theme.neutrals.ink,
+              cursor: 'pointer', padding: 10, color: theme.neutrals.ink,
+              minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center',
             }}
           >
             {menuOpen ? (

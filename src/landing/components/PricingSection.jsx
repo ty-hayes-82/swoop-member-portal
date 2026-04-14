@@ -118,9 +118,8 @@ export default function PricingSection({ onCtaClick }) {
             Founding Partners · Nine Seats Left
           </p>
           <p style={{ fontSize: 13, color: theme.colors.textSecondary, margin: 0, maxWidth: 520 }}>
-            Swoop is in closed pilot today — the first ten founding-partner clubs get hands-on
-            onboarding, direct roadmap input, and locked-in pricing for life. Attributed case
-            studies publish Q2 2026.
+            A small founding cohort gets hands-on onboarding, direct roadmap influence, and
+            pricing locked for life. Attributed case studies publish Q2 2026. Nine seats remaining.
           </p>
         </div>
         <Button
@@ -144,6 +143,13 @@ export default function PricingSection({ onCtaClick }) {
         {pricingTiers.map((tier) => (
           <PricingCard key={tier.name} tier={tier} onCtaClick={onCtaClick} />
         ))}
+      </div>
+
+      {/* Reassurance strip */}
+      <div style={{ textAlign: 'center', marginTop: 40, paddingTop: 32, borderTop: '1px solid rgba(17,17,17,0.07)' }}>
+        <p style={{ fontSize: 14, color: theme.colors.textMuted, margin: 0 }}>
+          Most clubs are live in under 2 weeks · No IT team required · Month-to-month, cancel any time
+        </p>
       </div>
     </SectionShell>
   );

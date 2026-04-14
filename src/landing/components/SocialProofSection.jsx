@@ -120,10 +120,10 @@ export default function SocialProofSection({ onCtaClick }) {
               letterSpacing: '-0.02em',
             }}
           >
-            Be one of our first ten clubs.
+            Join the Founding Partner Program.
           </h3>
           <p style={{ color: theme.colors.textSecondary, fontSize: 17, maxWidth: 620, margin: '0 auto' }}>
-            Hands-on implementation, direct roadmap input, and locked-in pricing for life.
+            A small cohort of clubs gets hands-on onboarding, direct roadmap influence, and pricing locked for life. Nine seats remaining.
           </p>
         </div>
         <div

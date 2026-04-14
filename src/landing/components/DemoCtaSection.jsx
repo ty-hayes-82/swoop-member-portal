@@ -101,7 +101,7 @@ export default function DemoCtaSection() {
                 <Input tone="dark" name="club" label="Club" autoComplete="organization" required />
               </div>
               <Input tone="dark" name="email" type="email" label="Email" autoComplete="email" required />
-              <Input tone="dark" name="phone" type="tel" label="Phone" autoComplete="tel" />
+              <Input tone="dark" name="phone" type="tel" label="Phone (optional)" autoComplete="tel" />
               <Button
                 type="submit"
                 size="lg"

@@ -530,6 +530,42 @@ body:has(.landing-page) {
   }
 }
 
+/* ── Mobile tap-target & readability fixes ─────────────────────────── */
+@media (max-width: 768px) {
+  /* Ensure all buttons meet 44px minimum tap target */
+  .landing-page button,
+  .landing-page a[role="button"] {
+    min-height: 44px;
+  }
+
+  /* Hamburger button — enlarge hit area */
+  .landing-nav-hamburger {
+    padding: 10px !important;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Card body text minimum size on mobile */
+  .landing-page .landing-card p,
+  .landing-page [class*="card"] p {
+    font-size: 14px !important;
+  }
+
+  /* Proof columns stacked on mobile — remove right border */
+  .landing-page [style*="border-right"] {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* Dark band body copy contrast */
+  .landing-band-dark p {
+    color: rgba(255, 255, 255, 0.72) !important;
+  }
+}
+
 @media (max-width: 375px) {
   .landing-page section {
     margin-bottom: 56px !important;
