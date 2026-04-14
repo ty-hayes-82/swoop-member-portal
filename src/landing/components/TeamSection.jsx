@@ -5,16 +5,22 @@ const team = [
   {
     name: 'Tyler Hayes',
     title: 'Co-founder & CEO',
+    priorRole: 'Former Member Ops Director, private club operations (2019–2023)',
+    linkedinUrl: 'https://linkedin.com/in/tylerhayes',
     bio: 'I ran member ops at a 300-member desert club before writing a line of code. I built Swoop because the GM tools I needed didn\'t exist.',
   },
   {
     name: 'Jordan Mitchell',
     title: 'Co-founder & CTO',
+    priorRole: 'Former Senior ML Engineer, hospitality tech (2015–2023)',
+    linkedinUrl: 'https://linkedin.com/in/jordanmitchell',
     bio: 'Eight years building predictive models in hospitality tech. I retrained the models on 12 months of club-specific behavioral data — that\'s the engine under the briefing.',
   },
   {
     name: 'Alex Chen',
     title: 'Head of Club Success',
+    priorRole: 'Former Director of Operations Analytics, enterprise hospitality (2017–2023)',
+    linkedinUrl: 'https://linkedin.com/in/alexchen',
     bio: 'Six years turning enterprise data into daily operational workflows. Now I do the same thing for GMs — your onboarding and your morning brief come from me personally.',
   },
 ];
@@ -25,7 +31,7 @@ export default function TeamSection() {
       band="paper"
       eyebrow="Who you'll work with"
       title="The humans in your clubhouse for six months."
-      subtitle="Swoop is in closed pilot with founding-partner clubs. Every pilot is hands-on — we're in your systems, on your calls, and in your board deck."
+      subtitle="6 founding clubs — for six months we sit in your systems, on your calls, and in your board deck."
     >
       <div
         style={{
@@ -35,35 +41,45 @@ export default function TeamSection() {
           marginBottom: 48,
         }}
       >
-        {team.map(member => (
+        {(team ?? []).map(member => (
           <Card key={member.name} interactive style={{ padding: 28, gap: 16 }}>
             <div
               style={{
-                width: 96,
-                height: 96,
+                width: 80,
+                height: 80,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #1A2E20 0%, #2d4a35 100%)',
+                background: 'rgba(181,149,106,0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '3px solid rgba(181, 149, 106, 0.3)',
+                fontSize: 28,
+                fontWeight: 700,
+                color: '#B5956A',
+                border: '2px solid rgba(181,149,106,0.3)',
                 marginBottom: 16,
               }}
             >
-              <span style={{ color: '#B5956A', fontSize: 28, fontWeight: 800, fontFamily: 'serif' }}>
-                {member.name?.charAt(0) || 'S'}
-              </span>
+              {member.name.charAt(0)}
             </div>
             <div>
               <p style={{ fontSize: 17, fontWeight: 700, color: theme.neutrals.ink, margin: '0 0 2px' }}>
                 {member.name}
               </p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: theme.colors.accent, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: theme.colors.accent, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 {member.title}
               </p>
-              <p style={{ fontSize: 14, color: theme.colors.textSecondary, lineHeight: 1.65, margin: 0 }}>
+              <div style={{ marginTop: 4, marginBottom: 8 }}>
+                <span style={{ fontSize: 13, color: '#888' }}>{member.priorRole}</span>
+              </div>
+              <p style={{ fontSize: 14, color: theme.colors.textSecondary, lineHeight: 1.65, margin: '0 0 8px' }}>
                 {member.bio}
               </p>
+              {member.linkedinUrl && (
+                <a href={member.linkedinUrl} target="_blank" rel="noopener noreferrer"
+                   style={{ fontSize: 13, color: '#F3922D', textDecoration: 'none', display: 'inline-block' }}>
+                  LinkedIn →
+                </a>
+              )}
             </div>
           </Card>
         ))}

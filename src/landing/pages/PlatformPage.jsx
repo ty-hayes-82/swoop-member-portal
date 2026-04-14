@@ -10,6 +10,15 @@ import { theme } from '@/config/theme';
 
 const toDemoPage = () => { window.location.hash = '#/contact'; };
 
+const subNavItems = [
+  { label: 'Capabilities', anchor: 'platform' },
+  { label: 'How it works', anchor: 'howitworks' },
+  { label: 'Agents', anchor: 'agents' },
+  { label: 'Integrations', anchor: 'integrations' },
+  { label: 'Comparison', anchor: 'compare' },
+  { label: 'Pricing', anchor: 'pricing' },
+];
+
 export default function PlatformPage() {
   return (
     <LandingShell>
@@ -22,15 +31,34 @@ export default function PlatformPage() {
         >
           <div style={{ textAlign: 'center', marginTop: 8 }}>
             <Button size="lg" onClick={toDemoPage}>
-              Book the 30-minute walkthrough
+              See a live agent run on your tee sheet
             </Button>
           </div>
         </SectionShell>
       </div>
+
+      {/* Sticky pill sub-nav */}
+      <div style={{
+        position: 'sticky', top: 64, zIndex: 150,
+        display: 'flex', gap: 8, overflowX: 'auto',
+        padding: '10px 16px', background: 'rgba(250,247,242,0.96)',
+        borderBottom: '1px solid rgba(17,17,17,0.06)',
+      }}>
+        {subNavItems.map(({ label, anchor }) => (
+          <a key={anchor} href={`#${anchor}`} style={{
+            whiteSpace: 'nowrap', padding: '6px 14px',
+            borderRadius: 999, border: '1px solid rgba(17,17,17,0.12)',
+            fontSize: 13, textDecoration: 'none', color: '#1A2E20',
+          }}>{label}</a>
+        ))}
+      </div>
+
       <div id="platform">
         <CoreCapabilitiesSection />
       </div>
-      <HowItWorksSection />
+      <div id="howitworks">
+        <HowItWorksSection />
+      </div>
       <div id="agents">
         <AgentsSection />
       </div>
@@ -55,19 +83,26 @@ export default function PlatformPage() {
       <div id="compare">
         <ComparisonSection />
       </div>
-      <SectionShell band="dark" size="sm">
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 12 }}>
-            Ready to see it live?
+      <div id="pricing">
+        <SectionShell band="dark" size="sm">
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 12 }}>
+              Ready to see it live?
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, margin: '0 auto 24px', maxWidth: 460 }}>
+              30 minutes. Your real questions. We'll show you exactly what Swoop surfaces for a club like yours.
+            </p>
+            <Button size="lg" onClick={toDemoPage}>
+              Book the walkthrough →
+            </Button>
           </div>
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, margin: '0 auto 24px', maxWidth: 460 }}>
-            30 minutes. Your real questions. We'll show you exactly what Swoop surfaces for a club like yours.
-          </p>
-          <Button size="lg" onClick={toDemoPage}>
-            Book the walkthrough →
-          </Button>
-        </div>
-      </SectionShell>
+        </SectionShell>
+      </div>
+      <div style={{ textAlign: 'center', padding: '40px 24px', borderTop: '1px solid rgba(17,17,17,0.06)' }}>
+        <a href="#/pricing" style={{ fontSize: 17, fontWeight: 600, color: '#F3922D', textDecoration: 'none' }}>
+          Next: See pricing →
+        </a>
+      </div>
     </LandingShell>
   );
 }

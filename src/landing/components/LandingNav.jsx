@@ -14,9 +14,14 @@ export default function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
   const [activeHash, setActiveHash] = useState(window.location.hash);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrollPct, setScrollPct] = useState(0);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 10);
+      const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      setScrollPct(Math.min(pct, 1));
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -72,7 +77,8 @@ export default function LandingNav() {
           <button
             type="button"
             className="landing-nav-hamburger"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
             onClick={() => setMenuOpen(o => !o)}
             style={{
               display: 'none', background: 'none', border: 'none',
@@ -111,6 +117,7 @@ export default function LandingNav() {
           </div>
         )}
       </nav>
+      <div style={{ height: 2, background: '#F3922D', transform: `scaleX(${scrollPct})`, transformOrigin: 'left', transition: 'transform 0.1s', position: 'sticky', top: 0, zIndex: 199 }} />
     </>
   );
 }

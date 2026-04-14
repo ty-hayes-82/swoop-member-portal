@@ -130,12 +130,13 @@ function StatusSection({ clubId }) {
       </div>
 
       {/* Coverage stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         {[
           { label: 'Phone Coverage', value: `${coveragePct}%`, sub: `${stats.has_phone} of ${stats.total_members} members` },
           { label: 'Opted In', value: `${optInPct}%`, sub: `${stats.opted_in} of ${stats.has_phone}` },
           { label: 'Sent (30d)', value: stats.sent_30d.toLocaleString() },
           { label: 'Delivery Rate', value: stats.delivery_rate != null ? `${stats.delivery_rate}%` : '—' },
+          { label: 'Reply Rate', value: stats.reply_rate != null ? `${stats.reply_rate}%` : '—', sub: 'action keywords' },
         ].map(s => (
           <div key={s.label} className="rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
             <p className="text-xs text-gray-500 mb-1">{s.label}</p>
@@ -475,6 +476,7 @@ function LogSection({ clubId }) {
               <tr className="text-left text-gray-500 border-b border-gray-200 dark:border-gray-700">
                 <th className="py-2 pr-3 font-medium">Time</th>
                 <th className="py-2 pr-3 font-medium">Direction</th>
+                <th className="py-2 pr-3 font-medium">Name</th>
                 <th className="py-2 pr-3 font-medium">Template</th>
                 <th className="py-2 pr-3 font-medium">Status</th>
                 <th className="py-2 font-medium">Preview</th>
@@ -493,6 +495,7 @@ function LogSection({ clubId }) {
                       'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
                     }`}>{row.direction}</span>
                   </td>
+                  <td className="py-1.5 pr-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{row.member_name || '—'}</td>
                   <td className="py-1.5 pr-3 font-mono text-gray-500">{row.template_id || '—'}</td>
                   <td className={`py-1.5 pr-3 font-medium ${STATUS_COLORS[row.status] || 'text-gray-500'}`}>{row.status}</td>
                   <td className="py-1.5 text-gray-600 dark:text-gray-400 max-w-xs truncate">{row.body}</td>

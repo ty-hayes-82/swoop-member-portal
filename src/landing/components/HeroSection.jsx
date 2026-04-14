@@ -66,9 +66,9 @@ export default function HeroSection({ onDemoClick }) {
             maxWidth: 900,
           }}
         >
-          Your club runs on four systems.{' '}
+          Your club runs on Jonas, Lightspeed, ForeTees, and a spreadsheet.{' '}
           <em style={{ fontStyle: 'italic', color: theme.colors.accent }}>
-            None of them talk to each other.
+            Swoop turns them into one 6 AM brief.
           </em>
         </h1>
 
@@ -83,27 +83,27 @@ export default function HeroSection({ onDemoClick }) {
             textAlign: 'center',
           }}
         >
-          Every night, Swoop reads your tee sheet, CRM, and POS — and tells your team which members are pulling away. The average club protects $74K in annual dues. Live in two weeks. No IT project.
+          Most club software tells you what happened. Swoop tells you what to do about it — connecting your tee sheet, POS, member CRM, and scheduling into one morning briefing that turns operational noise into decisions.
         </p>
         <p
           style={{
-            fontSize: 13,
-            color: 'rgba(255,255,255,0.40)',
+            fontSize: 14,
+            color: 'rgba(255,255,255,0.65)',
             margin: '0 auto 40px',
             textAlign: 'center',
           }}
         >
-          $74K figure: Pinetree CC pilot · 300-member club · trailing 90 days.
+          Pinetree CC recovered $74K in dues in their first 90 days on Swoop.
         </p>
 
         {/* CTAs */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, flexWrap: 'wrap', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, flexWrap: 'wrap', marginBottom: 8 }}>
           <Button
             size="lg"
             onClick={goToDemoForm}
             style={{ background: theme.colors.accent, color: '#FFFFFF', border: 'none' }}
           >
-            Book the 30-minute walkthrough
+            See a sample brief
           </Button>
           <button
             onClick={seeHowItWorks}
@@ -113,12 +113,15 @@ export default function HeroSection({ onDemoClick }) {
               display: 'inline-flex', alignItems: 'center', gap: 6,
             }}
           >
-            Here's how it works <span style={{ fontSize: 16 }}>›</span>
+            Book 30-min demo <span style={{ fontSize: 16 }}>›</span>
           </button>
         </div>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 8, textAlign: 'center', marginBottom: 16 }}>
+          No credit card · No IT lift · Live in 2 weeks · 3 founding-partner slots left for Q2
+        </p>
 
         {/* Trust bullets */}
-        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 64 }}>
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 48 }}>
           {['Live in under 2 weeks', 'No rip-and-replace', '28 integrations'].map((item) => (
             <span
               key={item}

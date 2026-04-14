@@ -599,3 +599,24 @@ body:has(.landing-page) {
 @media (max-width: 768px) {
   .pricing-grid { grid-template-columns: 1fr !important; }
 }
+
+/* ── Typography hierarchy ─────────────────────────────────────────── */
+.landing h2 { font-size: clamp(2rem, 3.4vw, 3rem); line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance; }
+.landing h3 { font-size: 1.125rem; font-weight: 600; }
+
+@media (max-width: 640px) {
+  .landing section { padding-block: 3rem; }
+  .landing h2 { font-size: 1.75rem; line-height: 1.15; }
+  .landing h3 { font-size: 1rem; }
+  .landing .card { padding: 1.25rem; }
+  body.landing-body { padding-bottom: 68px; }
+  .hidden-mobile-section { display: none; }
+}
+
+/* ── Tap targets ──────────────────────────────────────────────────── */
+.landing-nav a, .landing-nav button { min-height: 44px; display: inline-flex; align-items: center; }
+.landing-footer a { min-height: 44px; display: inline-flex; align-items: center; padding: 0 8px; }
+
+/* ── Mobile sticky CTA ────────────────────────────────────────────── */
+@media (min-width: 768px) { .md-hidden-sticky { display: none !important; } }
+@media (max-width: 767px) { body { padding-bottom: 68px; } }

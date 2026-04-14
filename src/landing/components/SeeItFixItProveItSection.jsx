@@ -133,7 +133,7 @@ const blocks = [
   {
     eyebrow: 'FIX IT',
     headline: 'The right action. The right person. Before the problem compounds.',
-    copy: "A health score isn't useful if nobody acts on it. Swoop recommends specific interventions tied to specific members, assigns them to the right staff member, and tracks whether they were completed. One phone call from the GM. $32K in dues protected. That's not a dashboard. That's an operating system.",
+    copy: "A health score isn't useful if nobody acts on it. Right errors. Right people. Ranked by dollars at risk. Swoop recommends specific interventions tied to specific members, assigns them to the right staff member, and tracks whether they were completed. One phone call from the GM. $32K in dues protected. That's not a dashboard. That's an operating system.",
     visual: <ActionCard />,
   },
   {

@@ -19,7 +19,7 @@ function PricingHero() {
     <SectionShell band="dark" eyebrow="PRICING" title="The platform that pays for itself.">
       <div style={{ textAlign: 'center', marginTop: -8, marginBottom: 40 }}>
         <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.70)', maxWidth: 580, margin: '0 auto 28px', lineHeight: 1.65 }}>
-          Most clubs recover Swoop's annual cost within 60 days of their first early intervention. Start free. Upgrade when the ROI is obvious.
+          5 of 7 founding-partner clubs recovered Swoop's annual cost within 60 days of their first intervention (Jan–Apr 2026 cohort). Start free. Upgrade when the ROI shows up in your own numbers.
         </p>
         <Button size="lg" onClick={scrollToPlans} style={{ background: theme.colors.accent, color: '#FFFFFF', border: 'none' }}>
           See the plans →
@@ -38,13 +38,13 @@ function PricingHero() {
             }}
           >
             <p style={{ fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: 800, fontFamily: theme.fonts.mono, color: theme.colors.accent, margin: '0 0 8px', lineHeight: 1, letterSpacing: '-0.02em' }}>
-              {s.value}
+              {s.value === '$2.1B' ? <span style={{ whiteSpace: 'nowrap' }}>$2.1B</span> : s.value}
             </p>
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: '0 0 6px', lineHeight: 1.5 }}>
               {s.label}
             </p>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: 0, fontStyle: 'italic' }}>
-              ({s.source})
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: 0 }}>
+              Source: {s.source}
             </p>
           </div>
         ))}
@@ -82,7 +82,12 @@ function PricingFaqSection() {
         }}
       >
         {pricingFaqItems.map((item, idx) => (
-          <FaqItem key={item.question} question={item.question} answer={item.answer} defaultOpen={idx === 0} />
+          <FaqItem
+            key={item.question}
+            question={item.question}
+            answer={item.answer}
+            defaultOpen={idx === 0 || item.question === "Is my members' data secure?"}
+          />
         ))}
       </div>
     </SectionShell>

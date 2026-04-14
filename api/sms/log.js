@@ -19,13 +19,16 @@ async function handler(req, res) {
   const status = req.query.status || null;
 
   const result = await sql`
-    SELECT log_id, club_id, member_id, user_id, template_id, direction, body,
-           twilio_sid, status, error_message, reply_keyword, sent_at, delivered_at
-    FROM sms_log
-    WHERE club_id = ${clubId}
-      AND (${direction}::text IS NULL OR direction = ${direction})
-      AND (${status}::text IS NULL OR status = ${status})
-    ORDER BY sent_at DESC
+    SELECT l.log_id, l.club_id, l.member_id, l.user_id, l.template_id, l.direction, l.body,
+           l.twilio_sid, l.status, l.error_message, l.reply_keyword, l.sent_at, l.delivered_at,
+           COALESCE(NULLIF(TRIM(COALESCE(m.first_name, '') || ' ' || COALESCE(m.last_name, '')), ''), u.name) AS member_name
+    FROM sms_log l
+    LEFT JOIN members m ON m.member_id = l.member_id
+    LEFT JOIN users u ON u.user_id = l.user_id
+    WHERE l.club_id = ${clubId}
+      AND (${direction}::text IS NULL OR l.direction = ${direction})
+      AND (${status}::text IS NULL OR l.status = ${status})
+    ORDER BY l.sent_at DESC
     LIMIT ${limit} OFFSET ${offset}
   `;
 

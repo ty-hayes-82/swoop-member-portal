@@ -2,14 +2,21 @@ import { theme } from '@/config/theme';
 import { pricingTiers } from '@/landing/data';
 import { SectionShell, Card, Button, Icon } from '@/landing/ui';
 
+const pricingMobileStyles = `
+  @media (max-width: 768px) {
+    .pricing-grid { grid-template-columns: 1fr !important; }
+    .pricing-card-featured { order: -1; transform: none !important; }
+  }
+`;
+
 const TIER_CTA_LABELS = {
-  '$0/mo': 'Start Free — No Credit Card',
-  '$499/mo': 'Book the 30-Minute Walkthrough →',
-  '$1,499/mo': 'Request a Member App Pilot →',
+  '$0/mo': 'Start free — no card',
+  '$499/mo': 'Book demo — Standard',
+  '$1,499/mo': 'Talk to founders',
 };
 
 function PricingCard({ tier, onCtaClick }) {
-  const isPopular = tier.badge === 'Most Popular';
+  const isPopular = !!tier.badge;
   const isFree = tier.price === '$0/mo';
   const ctaLabel = TIER_CTA_LABELS[tier.price] ?? tier.cta;
   const handleCta = onCtaClick ?? (() =>
@@ -19,12 +26,15 @@ function PricingCard({ tier, onCtaClick }) {
     <Card
       featured={isPopular}
       interactive={!isPopular}
+      className={isPopular ? 'pricing-card-featured' : undefined}
       style={{
         padding: isPopular ? 36 : 28,
+        position: 'relative',
         ...(isPopular && {
-          transform: 'translateY(-12px)',
-          boxShadow: '0 30px 60px rgba(243,146,45,0.22), 0 10px 20px rgba(17,17,17,0.08)',
-          borderWidth: 2,
+          transform: 'translateY(-12px) scale(1.03)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 30px 60px rgba(243,146,45,0.22)',
+          border: '2px solid #F3922D',
+          zIndex: 1,
         }),
       }}
     >
@@ -49,6 +59,11 @@ function PricingCard({ tier, onCtaClick }) {
         >
           {tier.badge}
         </span>
+      )}
+      {isPopular && tier.badgeFootnote && (
+        <p style={{ fontSize: 11, color: theme.colors.textMuted, margin: '20px 0 -4px', textAlign: 'center', fontStyle: 'italic' }}>
+          {tier.badgeFootnote}
+        </p>
       )}
       <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: theme.neutrals.ink }}>{tier.name}</h3>
       <p style={{ fontSize: 42, margin: '4px 0 0', fontWeight: 800, color: theme.neutrals.ink, letterSpacing: '-0.02em', lineHeight: 1 }}>
@@ -75,12 +90,18 @@ function PricingCard({ tier, onCtaClick }) {
           </li>
         ))}
       </ul>
+      {tier.technical && (
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(0,0,0,0.08)', fontSize: 12, color: '#666' }}>
+          <strong style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Technical</strong>
+          <p style={{ margin: '6px 0 0' }}>{tier.technical}</p>
+        </div>
+      )}
       <Button
         variant={isPopular ? 'primary' : 'light'}
         size="md"
         block
         onClick={handleCta}
-        style={{ width: '100%', minHeight: 52 }}
+        style={{ width: '100%', minHeight: 52, marginTop: 20 }}
       >
         {ctaLabel}
       </Button>
@@ -97,6 +118,7 @@ export default function PricingSection({ onCtaClick }) {
       title="Start at zero. Upgrade when the math shows up."
       subtitle="No long-term contract. Cancel at the end of any month."
     >
+      <style>{pricingMobileStyles}</style>
       {/* Founding partners banner */}
       <div
         style={{
@@ -123,11 +145,11 @@ export default function PricingSection({ onCtaClick }) {
               margin: '0 0 4px',
             }}
           >
-            Founding Partners · Nine Seats Left
+            Founding Partners · 3 of 10 seats remaining
           </p>
           <p style={{ fontSize: 13, color: theme.colors.textSecondary, margin: 0, maxWidth: 520 }}>
             A small founding cohort gets hands-on onboarding, direct roadmap influence, and
-            pricing locked for life. Only 3 of 10 spots remaining.
+            pricing locked for life.
           </p>
         </div>
         <Button

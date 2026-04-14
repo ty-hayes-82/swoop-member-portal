@@ -11,6 +11,7 @@
  * Logs all follow-ups to member_proactive_log with type 'post_visit_followup'.
  */
 import { sql } from '@vercel/postgres';
+import { sendMemberSms } from '../sms/send.js';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 const THROTTLE_DAYS = 7;
@@ -36,7 +37,7 @@ async function getTodayVisitors(clubId) {
       JOIN members m ON m.member_id = bp.member_id AND m.club_id = ${clubId}
       JOIN courses c ON c.course_id = b.course_id
       WHERE b.club_id = ${clubId}
-        AND b.booking_date = CURRENT_DATE::text
+        AND b.booking_date = CURRENT_DATE
         AND b.status IN ('confirmed', 'completed', 'checked_in')
         AND bp.is_guest = 0
         AND bp.member_id IS NOT NULL
@@ -134,14 +135,21 @@ export default async function handler(req, res) {
     const memberIds = visitors.map(v => v.member_id);
     const healthMap = await getHealthScores(clubId, memberIds);
 
-    // 3. Filter to at-risk members (health < 50)
+    // 3. Fetch club name for SMS template variables
+    let clubName = 'Your Club';
+    try {
+      const { rows: [clubRow] } = await sql`SELECT name FROM club WHERE club_id = ${clubId}`;
+      if (clubRow?.name) clubName = clubRow.name;
+    } catch { /* use default */ }
+
+    // 4. Filter to at-risk members (health < 50)
     const atRiskVisitors = visitors.filter(v => {
       const healthRecord = healthMap.get(v.member_id);
       const score = healthRecord?.score ?? v.health_score;
       return score != null && score < AT_RISK_THRESHOLD;
     });
 
-    // 4. Check throttle and send follow-ups
+    // 5. Check throttle and send follow-ups for at-risk members
     const followups = [];
     const throttled = [];
 
@@ -176,6 +184,34 @@ export default async function handler(req, res) {
       });
     }
 
+    // 6. Send post-round dining bridge SMS to all today's visitors (throttled)
+    const diningSmsSent = [];
+    for (const visitor of visitors) {
+      // Skip if already messaged within 7 days (reuse existing throttle logic)
+      const isThrottled = await checkThrottle(clubId, visitor.member_id);
+      if (isThrottled) continue;
+
+      try {
+        const result = await sendMemberSms({
+          clubId,
+          memberId: visitor.member_id,
+          templateId: 'dining_nudge',
+          variables: {
+            club_name: clubName,
+            first_name: visitor.first_name,
+            table_info: 'the dining room',
+            special_text: '',
+          },
+          priority: 'normal',
+        });
+        if (result.sent) {
+          diningSmsSent.push({ member_id: visitor.member_id, sid: result.sid });
+        }
+      } catch (err) {
+        console.warn(`[post-visit-followup] dining SMS failed for ${visitor.member_id}:`, err.message);
+      }
+    }
+
     return res.status(200).json({
       triggered: true,
       club_id: clubId,
@@ -184,6 +220,7 @@ export default async function handler(req, res) {
       at_risk_found: atRiskVisitors.length,
       throttled_count: throttled.length,
       followups_sent: followups.length,
+      dining_sms_sent: diningSmsSent.length,
       followups,
       throttled,
       generated_at: new Date().toISOString(),

@@ -19,7 +19,12 @@ export default function FaqSection() {
         }}
       >
         {faqItems.map((item, idx) => (
-          <FaqItem key={item.question} question={item.question} answer={item.answer} defaultOpen={idx === 0} />
+          <FaqItem
+            key={item.question}
+            question={item.question}
+            answer={item.answer}
+            defaultOpen={idx === 0 || item.question === "Is my members' data secure?"}
+          />
         ))}
       </div>
     </SectionShell>

@@ -1,0 +1,348 @@
+{
+  "permutation": "tee-first",
+  "seed": "tee-first",
+  "clubId": "perm-tee-first-3k411yyp",
+  "totalFailures": 28,
+  "steps": [
+    {
+      "step": 0,
+      "stage": "members",
+      "failures": []
+    },
+    {
+      "step": 1,
+      "stage": "tee_times",
+      "failures": []
+    },
+    {
+      "step": 2,
+      "stage": "booking_players",
+      "failures": []
+    },
+    {
+      "step": 3,
+      "stage": "courses",
+      "failures": []
+    },
+    {
+      "step": 4,
+      "stage": "transactions",
+      "failures": []
+    },
+    {
+      "step": 5,
+      "stage": "complaints",
+      "failures": []
+    },
+    {
+      "step": 6,
+      "stage": "pos_checks",
+      "failures": []
+    },
+    {
+      "step": 7,
+      "stage": "line_items",
+      "failures": []
+    },
+    {
+      "step": 8,
+      "stage": "payments",
+      "failures": []
+    },
+    {
+      "step": 9,
+      "stage": "daily_close",
+      "failures": []
+    },
+    {
+      "step": 10,
+      "stage": "sales_areas",
+      "failures": []
+    },
+    {
+      "step": 11,
+      "stage": "shifts",
+      "failures": []
+    },
+    {
+      "step": 12,
+      "stage": "staff",
+      "failures": []
+    },
+    {
+      "step": 13,
+      "stage": "events",
+      "failures": []
+    },
+    {
+      "step": 14,
+      "stage": "event_registrations",
+      "failures": [
+        {
+          "type": "insight-under-unlock",
+          "step": "step-14-event_registrations",
+          "stage": "members",
+          "requires": [
+            "members"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-14-event_registrations",
+          "stage": "transactions",
+          "requires": [
+            "transactions"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-14-event_registrations",
+          "stage": "pos_line_items",
+          "requires": [
+            "pos_line_items",
+            "pos_checks"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-14-event_registrations",
+          "stage": "pos_payments",
+          "requires": [
+            "pos_payments",
+            "pos_checks"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-14-event_registrations",
+          "stage": "dining_outlets",
+          "requires": [
+            "dining_outlets"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-14-event_registrations",
+          "stage": "staff_shifts",
+          "requires": [
+            "staff_shifts"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-14-event_registrations",
+          "stage": "complaints",
+          "requires": [
+            "complaints"
+          ]
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-14-event_registrations",
+          "kind": "payments",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-14-event_registrations",
+          "kind": "ar-aging",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-14-event_registrations",
+          "kind": "courses",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-14-event_registrations",
+          "kind": "tier-revenue",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-14-event_registrations",
+          "kind": "households",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-14-event_registrations",
+          "kind": "service-tickets",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-under-unlock",
+          "step": "step-14-event_registrations",
+          "kind": "member-engagement",
+          "requires": [
+            "members"
+          ]
+        }
+      ]
+    },
+    {
+      "step": 15,
+      "stage": "email_campaigns",
+      "failures": [
+        {
+          "type": "insight-under-unlock",
+          "step": "step-15-email_campaigns",
+          "stage": "members",
+          "requires": [
+            "members"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-15-email_campaigns",
+          "stage": "transactions",
+          "requires": [
+            "transactions"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-15-email_campaigns",
+          "stage": "pos_line_items",
+          "requires": [
+            "pos_line_items",
+            "pos_checks"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-15-email_campaigns",
+          "stage": "pos_payments",
+          "requires": [
+            "pos_payments",
+            "pos_checks"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-15-email_campaigns",
+          "stage": "dining_outlets",
+          "requires": [
+            "dining_outlets"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-15-email_campaigns",
+          "stage": "staff_shifts",
+          "requires": [
+            "staff_shifts"
+          ]
+        },
+        {
+          "type": "insight-under-unlock",
+          "step": "step-15-email_campaigns",
+          "stage": "complaints",
+          "requires": [
+            "complaints"
+          ]
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-15-email_campaigns",
+          "kind": "payments",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-15-email_campaigns",
+          "kind": "ar-aging",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-15-email_campaigns",
+          "kind": "courses",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-15-email_campaigns",
+          "kind": "tier-revenue",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-15-email_campaigns",
+          "kind": "households",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-error",
+          "step": "step-15-email_campaigns",
+          "kind": "service-tickets",
+          "message": "HTTP 500"
+        },
+        {
+          "type": "deep-insight-under-unlock",
+          "step": "step-15-email_campaigns",
+          "kind": "member-engagement",
+          "requires": [
+            "members"
+          ]
+        }
+      ]
+    },
+    {
+      "step": 16,
+      "stage": "email_events",
+      "failures": []
+    },
+    {
+      "step": 17,
+      "stage": "invoices",
+      "failures": []
+    },
+    {
+      "step": 18,
+      "stage": "households",
+      "failures": []
+    },
+    {
+      "step": 19,
+      "stage": "membership_types",
+      "failures": []
+    },
+    {
+      "step": 20,
+      "stage": "service_requests",
+      "failures": []
+    },
+    {
+      "step": 21,
+      "stage": "club_profile",
+      "failures": []
+    }
+  ],
+  "order": [
+    "members",
+    "tee_times",
+    "booking_players",
+    "courses",
+    "transactions",
+    "complaints",
+    "pos_checks",
+    "line_items",
+    "payments",
+    "daily_close",
+    "sales_areas",
+    "shifts",
+    "staff",
+    "events",
+    "event_registrations",
+    "email_campaigns",
+    "email_events",
+    "invoices",
+    "households",
+    "membership_types",
+    "service_requests",
+    "club_profile"
+  ]
+}

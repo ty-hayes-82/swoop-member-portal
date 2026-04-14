@@ -8,6 +8,7 @@
 import { sql } from '@vercel/postgres';
 import { logWarn, logInfo } from '../lib/logger.js';
 import { evaluateRiskTrigger } from '../agents/risk-config.js';
+import { sendStaffSms } from '../sms/send.js';
 
 const MAX_CANDIDATES_PER_RUN = 25;
 
@@ -45,7 +46,7 @@ export default async function handler(req, res) {
           WHERE hs.member_id = m.member_id
             AND hs.club_id = m.club_id
             AND hs.score >= 50
-            AND hs.recorded_at >= NOW() - INTERVAL '7 days'
+            AND hs.computed_at >= NOW() - INTERVAL '7 days'
         )
         AND NOT EXISTS (
           SELECT 1 FROM playbook_runs pr
@@ -106,14 +107,79 @@ export default async function handler(req, res) {
       }
     }
 
+    // --- Service recovery escalation SMS ---
+    // Find critical members (health < 35) with complaints unresolved > 3 days
+    // and SMS staff who have complaint_escalation in their alert categories.
+    let escalationsSent = 0;
+    try {
+      const { rows: criticalMembers } = await sql`
+        SELECT DISTINCT m.member_id, m.club_id, m.first_name, m.last_name,
+               m.health_score, m.annual_dues,
+               c.complaint_id,
+               EXTRACT(DAY FROM NOW() - c.reported_at)::int AS days_open
+        FROM members m
+        JOIN complaints c ON c.member_id = m.member_id AND c.club_id = m.club_id
+        WHERE m.health_score < 35
+          AND c.status != 'resolved'
+          AND c.reported_at <= NOW() - INTERVAL '3 days'
+          AND m.annual_dues >= 5000
+        ORDER BY m.health_score ASC, m.annual_dues DESC
+        LIMIT 10
+      `;
+
+      for (const member of criticalMembers) {
+        try {
+          // Get club name
+          const { rows: [clubRow] } = await sql`SELECT name FROM club WHERE club_id = ${member.club_id}`;
+          const clubName = clubRow?.name || 'Your Club';
+
+          // Find staff with complaint_escalation category
+          const { rows: alertStaff } = await sql`
+            SELECT user_id FROM users
+            WHERE club_id = ${member.club_id}
+              AND sms_alerts_enabled = TRUE
+              AND 'complaint_escalation' = ANY(alert_categories)
+            LIMIT 5
+          `;
+
+          for (const staffUser of alertStaff) {
+            const result = await sendStaffSms({
+              clubId: member.club_id,
+              userId: staffUser.user_id,
+              templateId: 'staff_complaint',
+              variables: {
+                club_name: clubName,
+                member_name: `${member.first_name} ${member.last_name}`,
+                health_score: Math.round(member.health_score),
+                dues: Math.round(member.annual_dues / 1000) + 'K',
+                days: member.days_open,
+                action: 'Call before 10 AM',
+                link: '',
+              },
+              priority: 'urgent',
+            });
+            if (result.sent) escalationsSent++;
+          }
+        } catch (err) {
+          logWarn('/api/cron/health-monitor', `escalation SMS failed for ${member.member_id}`, { error: err.message });
+        }
+      }
+
+      logInfo('/api/cron/health-monitor', `service recovery escalations sent: ${escalationsSent}`);
+    } catch (err) {
+      logWarn('/api/cron/health-monitor', 'service recovery escalation block failed', { error: err.message });
+    }
+
     logInfo('/api/cron/health-monitor', 'cron tick complete', {
       candidatesChecked: candidates.length,
       triggered: results.filter(r => r.shouldTrigger).length,
+      escalationsSent,
     });
 
     return res.json({
       candidatesChecked: candidates.length,
       triggered: results.filter(r => r.shouldTrigger).length,
+      escalationsSent,
       results,
     });
   } catch (err) {

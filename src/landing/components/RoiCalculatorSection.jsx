@@ -149,6 +149,9 @@ export default function RoiCalculatorSection() {
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: '6px 0 0' }}>
               Revenue recovered ({swoopSaves} members saved)
             </p>
+            <p style={{ fontSize: 12, color: '#888', marginTop: 8, fontStyle: 'italic' }}>
+              Calculated from your inputs: avg dues × estimated lapse rate × 12. Not a projection — math you can verify.
+            </p>
           </div>
 
           <div

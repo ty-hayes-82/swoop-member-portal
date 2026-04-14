@@ -55,13 +55,18 @@ async function handler(req, res) {
     const statsRes = await sql`
       SELECT
         COUNT(*) FILTER (WHERE direction = 'outbound') AS sent_30d,
-        COUNT(*) FILTER (WHERE direction = 'outbound' AND status = 'delivered') AS delivered_30d
+        COUNT(*) FILTER (WHERE direction = 'outbound' AND status = 'delivered') AS delivered_30d,
+        COUNT(*) FILTER (WHERE direction = 'inbound' AND reply_keyword IS NOT NULL) AS action_replies
       FROM sms_log
       WHERE club_id = ${clubId} AND sent_at >= NOW() - INTERVAL '30 days'
     `;
-    const { sent_30d, delivered_30d } = statsRes.rows[0];
-    const delivery_rate = sent_30d > 0
-      ? Math.round((parseInt(delivered_30d, 10) / parseInt(sent_30d, 10)) * 1000) / 10
+    const { sent_30d, delivered_30d, action_replies } = statsRes.rows[0];
+    const sent30dInt = parseInt(sent_30d, 10);
+    const delivery_rate = sent30dInt > 0
+      ? Math.round((parseInt(delivered_30d, 10) / sent30dInt) * 1000) / 10
+      : null;
+    const reply_rate = sent30dInt > 0
+      ? Math.round((parseInt(action_replies, 10) / sent30dInt) * 1000) / 10
       : null;
 
     return res.json({
@@ -73,9 +78,10 @@ async function handler(req, res) {
           ? Math.round((parseInt(has_phone, 10) / parseInt(total_members, 10)) * 100)
           : 0,
         opted_in,
-        sent_30d: parseInt(sent_30d, 10),
+        sent_30d: sent30dInt,
         delivered_30d: parseInt(delivered_30d, 10),
         delivery_rate,
+        reply_rate,
       },
     });
   }

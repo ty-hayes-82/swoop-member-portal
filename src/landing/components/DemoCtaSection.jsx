@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { theme } from '@/config/theme';
-import { Button, Input, Eyebrow } from '@/landing/ui';
+import { Button, Input } from '@/landing/ui';
 import { photoUrl, photoAlt } from '@/landing/assets/photos';
 
 const DEMO_ENDPOINT = import.meta.env.VITE_DEMO_ENDPOINT || 'https://swoopgolf.com/api/demo-request';
@@ -61,7 +61,6 @@ export default function DemoCtaSection() {
           className="landing-demo-hero"
         >
           <div>
-            <Eyebrow>Book a demo</Eyebrow>
             <h2
               style={{
                 fontSize: 'clamp(34px, 4.5vw, 56px)',
@@ -80,8 +79,7 @@ export default function DemoCtaSection() {
               members, F&amp;B staffing pressure, and revenue pipeline blind spots.
             </p>
             <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 14, margin: '0 0 32px' }}>
-              Limited founding partner slots available — early clubs get hands-on onboarding and direct
-              input on the roadmap.
+              6 founding-club slots. You get a named engineer for 90 days and a vote on next quarter&apos;s build list.
             </p>
           </div>
 
@@ -97,11 +95,45 @@ export default function DemoCtaSection() {
           >
             <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 18 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="landing-demo-form-row">
-                <Input tone="dark" name="name" label="Name" autoComplete="name" required />
-                <Input tone="dark" name="club" label="Club" autoComplete="organization" required />
+                <Input tone="dark" name="name" label="Name" type="text" autoComplete="name" required style={{ fontSize: 16, minHeight: 48 }} />
+                <Input tone="dark" name="club" label="Club" type="text" autoComplete="organization" placeholder="e.g., Pine Valley Golf Club" required style={{ fontSize: 16, minHeight: 48 }} />
               </div>
-              <Input tone="dark" name="email" type="email" label="Email" autoComplete="email" required />
-              <Input tone="dark" name="phone" type="tel" label="Phone (optional)" autoComplete="tel" />
+              <Input tone="dark" name="email" type="email" inputMode="email" label="Email" autoComplete="email" required style={{ fontSize: 16, minHeight: 48 }} />
+              <Input
+                tone="dark"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                style={{ fontSize: 16, minHeight: 48 }}
+                label={<>Phone <span style={{ color: '#888', fontWeight: 400 }}>(optional — we won&apos;t call unless you ask)</span></>}
+              />
+              <div>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>
+                  Club size (optional)
+                </label>
+                <select name="clubSize" style={{ width: '100%', padding: '12px 14px', borderRadius: 8, border: '1px solid #ddd', fontSize: 16 }}>
+                  <option value="">Select club size</option>
+                  <option>Under 200 members</option>
+                  <option>200–400 members</option>
+                  <option>400–700 members</option>
+                  <option>700+ members</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>
+                  Your role (optional)
+                </label>
+                <select name="role" style={{ width: '100%', padding: '12px 14px', borderRadius: 8, border: '1px solid #ddd', fontSize: 16 }}>
+                  <option value="">Select your role</option>
+                  <option>General Manager</option>
+                  <option>Assistant GM / AGM</option>
+                  <option>Director of Operations</option>
+                  <option>F&amp;B Director</option>
+                  <option>Board member</option>
+                  <option>Other</option>
+                </select>
+              </div>
               <Button
                 type="submit"
                 size="lg"
@@ -109,7 +141,7 @@ export default function DemoCtaSection() {
                 disabled={status === 'submitting'}
                 style={{ marginTop: 6, opacity: status === 'submitting' ? 0.7 : 1, cursor: status === 'submitting' ? 'wait' : 'pointer' }}
               >
-                {status === 'submitting' ? 'Submitting…' : 'Book Your Demo'}
+                {status === 'submitting' ? 'Submitting…' : 'Show me my club\'s leaks'}
               </Button>
             </form>
             {(status === 'success' || status === 'error') && feedback && (
@@ -124,6 +156,25 @@ export default function DemoCtaSection() {
                 {feedback}
               </p>
             )}
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 12, textAlign: 'center' }}>
+              Tyler Hayes (co-founder) personally replies to every form within one business day.
+            </p>
+            <div style={{ marginTop: 32, padding: 20, border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12 }}>
+              <p style={{ fontSize: 15, fontStyle: 'italic', lineHeight: 1.65, margin: 0 }}>
+                &ldquo;Swoop found $47k in lapsed dues in week one.&rdquo;
+              </p>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 12 }}>
+                General Manager &middot; Top-100 private club &middot; Southwest
+              </p>
+            </div>
+            <div style={{ marginTop: 24, padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: 8, fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
+              <strong style={{ fontSize: 14 }}>What happens next:</strong>
+              <ol style={{ margin: '8px 0 0 20px', lineHeight: 2 }}>
+                <li>Tyler (co-founder) replies within 1 business day</li>
+                <li>We pull a sample brief from your tee sheet and POS</li>
+                <li>30-min call — you keep the action list regardless</li>
+              </ol>
+            </div>
             <p style={{ marginTop: 18, color: 'rgba(255,255,255,0.55)', fontSize: 13 }}>
               No credit card · 30 minutes · Your club's own data · We'll confirm your slot within 1 business day.
             </p>
@@ -131,10 +182,6 @@ export default function DemoCtaSection() {
               Or email us at{' '}
               <a href="mailto:demo@swoopgolf.com" style={{ color: theme.colors.accent, textDecoration: 'underline' }}>
                 demo@swoopgolf.com
-              </a>
-              {' · '}
-              <a href="tel:+14802259702" style={{ color: theme.colors.accent, textDecoration: 'underline' }}>
-                (480) 225-9702
               </a>
             </p>
           </div>

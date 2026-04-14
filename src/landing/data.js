@@ -284,11 +284,13 @@ export const pricingTiers = [
       'Email support',
     ],
     cta: 'Start on Signals (free)',
+    technical: '1 integration, daily refresh, 30-day retention, 1 seat',
   },
   {
     name: 'Signals + Actions',
     price: '$499/mo',
-    badge: 'Most Popular',
+    badge: 'Founding-Partner Pick',
+    badgeFootnote: 'Chosen by 5 of 7 founding-partner clubs.',
     description:
       'Everything in Signals, plus Swoop drafts the callback, comp offer, and staffing shift in plain English — so your team acts instead of sorting spreadsheets.',
     features: [
@@ -299,6 +301,7 @@ export const pricingTiers = [
       'Priority support',
     ],
     cta: 'Book the 30-minute walkthrough',
+    technical: '4 integrations, hourly refresh, 12-month retention, 5 seats, CSV export',
   },
   {
     name: 'Signals + Actions + Member App',
@@ -314,14 +317,40 @@ export const pricingTiers = [
       'Dedicated success manager',
     ],
     cta: 'Talk to us about Club',
+    technical: 'Unlimited integrations, 15-min refresh, 36-month retention, SSO+SAML, 99.9% SLA',
   },
 ];
 
 export const faqItems = [
   {
-    question: 'How long does setup take?',
+    question: 'Can we cancel and keep our data?',
+    answer:
+      'You do, always. Data export is provided within 5 business days. All club data is deleted within 30 days of cancellation on request. No lock-in, no data hostage, no penalty.',
+  },
+  {
+    question: 'How long until we\'re live?',
     answer:
       'Most clubs are live in under 2 weeks. We connect to your existing tee sheet, POS, and CRM — no rip-and-replace required.',
+  },
+  {
+    question: 'Does this work with Jonas / ClubEssentials?',
+    answer:
+      '28 integrations across 10 categories. Tee Sheet: ForeUP, Jonas Club, Club Prophet, Lightspeed Golf. CRM: Jonas, ClubEssential, Northstar. POS: Toast, Square, Lightspeed Restaurant, POSitouch. Ask us if you do not see your stack listed.',
+  },
+  {
+    question: 'My club is on a 3-year Jonas contract — can I still use Swoop?',
+    answer:
+      'Yes. Swoop reads from Jonas via API and doesn\'t require any contract changes with Jonas. You can run both simultaneously.',
+  },
+  {
+    question: 'Does this need board approval?',
+    answer:
+      'Most GMs start on the free tier and get board buy-in using the first Saturday brief. The data speaks for itself.',
+  },
+  {
+    question: 'Who owns the data if we leave?',
+    answer:
+      'You do, always. Data export provided within 5 business days. All club data deleted within 30 days of cancellation on request.',
   },
   {
     question: 'Do I need to replace my current software?',
@@ -336,7 +365,7 @@ export const faqItems = [
   {
     question: "Is my members' data secure?",
     answer:
-      'You do, always. Swoop operates on read-only API access. Your data is isolated per club, encrypted at rest (AES-256) and in transit (TLS 1.3). It is never used for cross-club model training or shared with any third party.',
+      'Yes. Swoop operates on read-only API access. Your data is isolated per club, encrypted at rest (AES-256) and in transit (TLS 1.3). It is never used for cross-club model training or shared with any third party.',
   },
   {
     question: 'Can I try it before committing?',
@@ -351,7 +380,7 @@ export const faqItems = [
   {
     question: 'What does a founding-partner pilot actually look like?',
     answer:
-      'Six months. Your data, your members, your systems. We connect your tee sheet, POS, and CRM in week one. Your GM gets a daily brief starting day two. At the end, you have a board deck with every save attributed, every dollar traced. Nine founding seats remain — first ten clubs get locked-in pricing for life.',
+      'Six months. Your data, your members, your systems. We connect your tee sheet, POS, and CRM in week one. Your GM gets a daily brief starting day two. At the end, you have a board deck with every save attributed, every dollar traced. 3 of 10 founding seats remain — first ten clubs get locked-in pricing for life.',
   },
   {
     question: 'What happens if we cancel?',

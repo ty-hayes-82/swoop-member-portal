@@ -82,9 +82,9 @@ export default function HomePage() {
     <LandingShell>
       <HeroSection onDemoClick={toDemoPage} />
       <SeeItFixItProveItSection />
-      <AgentRevealSection />
+      <div className="hidden-mobile-section"><AgentRevealSection /></div>
       <MorningBriefingSection />
-      <MemberExperienceSection />
+      <div className="hidden-mobile-section"><MemberExperienceSection /></div>
       <IntegrationsSection />
       <PricingSection onCtaClick={toDemoPage} />
       <HomeCtaStrip />

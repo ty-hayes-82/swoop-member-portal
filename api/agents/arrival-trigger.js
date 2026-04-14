@@ -19,6 +19,7 @@ import { createManagedSession, sendSessionEvent } from './managed-config.js';
 import { logError } from '../lib/logger.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 import { realAgentCall } from './real-agent-call.js';
+import { sendMemberSms, sendStaffSms } from '../sms/send.js';
 
 const SIMULATION_MODE = !process.env.ANTHROPIC_API_KEY || !process.env.MANAGED_ENV_ID || !process.env.MANAGED_AGENT_ID;
 
@@ -256,10 +257,70 @@ async function arrivalHandler(req, res) {
       stored.push(inserted);
     }
 
-    // 12. Return briefs
+    // 12. Send SMS notifications
+    let clubName = 'Your Club';
+    try {
+      const { rows: [clubRow] } = await sql`SELECT name FROM club WHERE club_id = ${clubId}`;
+      if (clubRow?.name) clubName = clubRow.name;
+    } catch { /* use default */ }
+
+    const memberFullName = `${member.first_name} ${member.last_name}`;
+
+    // 12a. Send tee time reminder to member (~90 min before arrival)
+    try {
+      await sendMemberSms({
+        clubId,
+        memberId: member_id,
+        templateId: 'tee_time_reminder',
+        variables: {
+          club_name: clubName,
+          first_name: member.first_name,
+          slot_time: tee_time,
+          course: context.course,
+          equipment: '',
+          weather_note: '',
+        },
+        priority: 'normal',
+      });
+    } catch (err) {
+      console.warn('[arrival-trigger] member tee time reminder SMS failed:', err.message);
+    }
+
+    // 12b. Send arrival brief to staff with arrival_anticipation alert category
+    try {
+      const { rows: alertStaff } = await sql`
+        SELECT user_id FROM users
+        WHERE club_id = ${clubId}
+          AND sms_alerts_enabled = TRUE
+          AND 'arrival_anticipation' = ANY(alert_categories)
+        LIMIT 5
+      `;
+      const briefSummary = (briefs.pro_shop || '').slice(0, 120);
+      for (const staffUser of alertStaff) {
+        await sendStaffSms({
+          clubId,
+          userId: staffUser.user_id,
+          templateId: 'staff_arrival_brief',
+          variables: {
+            club_name: clubName,
+            member_name: memberFullName,
+            time: tee_time,
+            brief: briefSummary,
+            link: '',
+          },
+          priority: 'normal',
+        }).catch(err =>
+          console.warn('[arrival-trigger] staff arrival SMS failed:', err.message)
+        );
+      }
+    } catch (err) {
+      console.warn('[arrival-trigger] staff arrival SMS lookup failed:', err.message);
+    }
+
+    // 13. Return briefs
     return res.status(200).json({
       member_id,
-      member_name: `${member.first_name} ${member.last_name}`,
+      member_name: memberFullName,
       tee_time,
       course: context.course,
       simulation: SIMULATION_MODE,

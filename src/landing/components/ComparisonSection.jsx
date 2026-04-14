@@ -14,7 +14,7 @@ const mobileComparisonStyles = `
 
 const columns = [
   { key: 'swoop', label: 'Swoop', highlight: true },
-  { key: 'waitlistTools', label: 'Waitlist Tools' },
+  { key: 'waitlistTools', label: 'Jonas + ClubEssentials + spreadsheets' },
   { key: 'crm', label: 'Your CRM' },
   { key: 'sheets', label: 'Spreadsheets' },
 ];
@@ -53,6 +53,9 @@ export default function ComparisonSection() {
         }}
       >
         ← swipe to compare every column →
+      </p>
+      <p style={{ fontSize: 11, color: '#888', marginTop: 12, fontStyle: 'italic' }}>
+        Comparison based on published feature matrices as of Apr 2026.
       </p>
 
       <div style={{ textAlign: 'center', marginTop: 40 }}>

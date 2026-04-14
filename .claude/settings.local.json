@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
       "WebFetch(domain:swoop-member-portal-dev.vercel.app)",
       "WebFetch(domain:swoop-member-portal.vercel.app)",
@@ -11,7 +12,14 @@
       "Bash(git checkout:*)",
       "Bash(git reset:*)",
       "Bash(git push:*)",
-      "Bash(grep -r \"^[[:space:]]*//[^/]\" src --include=\"*.jsx\" --include=\"*.js\")"
+      "Bash(grep -r \"^[[:space:]]*//[^/]\" src --include=\"*.jsx\" --include=\"*.js\")",
+      "Bash(npx vitest:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git commit:*)",
+      "Bash(npm run:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Skill(update-config)"
     ]
   }
 }

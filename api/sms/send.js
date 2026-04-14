@@ -12,6 +12,8 @@ const BASE_URL = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : (process.env.NEXT_PUBLIC_BASE_URL || 'https://swoop-member-portal-dev.vercel.app');
 
+const DRY_RUN = process.env.SMS_DRY_RUN === 'true';
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -166,20 +168,25 @@ export async function sendMemberSms({ clubId, memberId, templateId, variables = 
   const senderName = config.sender_name || 'Your Club';
   const finalBody = rendered.startsWith(senderName) ? rendered : `${senderName}: ${rendered}`;
 
-  // 9. Send
+  // 9. Send (or simulate in dry-run mode)
   let twilioResult;
   let errorMsg;
-  try {
-    twilioResult = await twilioSend({
-      to: phone,
-      body: finalBody,
-      from: config.twilio_phone_number || process.env.TWILIO_PHONE_NUMBER,
-      messagingServiceSid: config.messaging_service_sid || process.env.TWILIO_MESSAGING_SERVICE_SID,
-      statusCallback: `${BASE_URL}/api/twilio/status`,
-    });
-  } catch (e) {
-    errorMsg = e.message;
-    console.error('[sms/send] Twilio error:', e.message);
+  if (DRY_RUN) {
+    twilioResult = { sid: `SIM_${Date.now()}`, status: 'simulated' };
+    console.log(`[sms/send] DRY RUN — would send to ${phone}: ${finalBody}`);
+  } else {
+    try {
+      twilioResult = await twilioSend({
+        to: phone,
+        body: finalBody,
+        from: config.twilio_phone_number || process.env.TWILIO_PHONE_NUMBER,
+        messagingServiceSid: config.messaging_service_sid || process.env.TWILIO_MESSAGING_SERVICE_SID,
+        statusCallback: `${BASE_URL}/api/twilio/status`,
+      });
+    } catch (e) {
+      errorMsg = e.message;
+      console.error('[sms/send] Twilio error:', e.message);
+    }
   }
 
   // 10. Log
@@ -227,18 +234,23 @@ export async function sendStaffSms({ clubId, userId, templateId, variables = {},
 
   let twilioResult;
   let errorMsg;
-  try {
-    const config = await getClubSmsConfig(clubId);
-    twilioResult = await twilioSend({
-      to: phone,
-      body: rendered,
-      from: config?.twilio_phone_number || process.env.TWILIO_PHONE_NUMBER,
-      messagingServiceSid: config?.messaging_service_sid || process.env.TWILIO_MESSAGING_SERVICE_SID,
-      statusCallback: `${BASE_URL}/api/twilio/status`,
-    });
-  } catch (e) {
-    errorMsg = e.message;
-    console.error('[sms/send] staff Twilio error:', e.message);
+  if (DRY_RUN) {
+    twilioResult = { sid: `SIM_${Date.now()}`, status: 'simulated' };
+    console.log(`[sms/send] DRY RUN (staff) — would send to ${phone}: ${rendered}`);
+  } else {
+    try {
+      const config = await getClubSmsConfig(clubId);
+      twilioResult = await twilioSend({
+        to: phone,
+        body: rendered,
+        from: config?.twilio_phone_number || process.env.TWILIO_PHONE_NUMBER,
+        messagingServiceSid: config?.messaging_service_sid || process.env.TWILIO_MESSAGING_SERVICE_SID,
+        statusCallback: `${BASE_URL}/api/twilio/status`,
+      });
+    } catch (e) {
+      errorMsg = e.message;
+      console.error('[sms/send] staff Twilio error:', e.message);
+    }
   }
 
   await sql`

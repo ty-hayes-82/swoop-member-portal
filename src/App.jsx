@@ -19,6 +19,8 @@ const LandingPlatformPage = lazy(() => import('@/landing/pages/PlatformPage.jsx'
 const LandingPricingPage  = lazy(() => import('@/landing/pages/PricingPage.jsx'));
 const LandingAboutPage    = lazy(() => import('@/landing/pages/AboutPage.jsx'));
 const LandingContactPage  = lazy(() => import('@/landing/pages/ContactPage.jsx'));
+const LandingPrivacyPage  = lazy(() => import('@/landing/pages/PrivacyPage.jsx'));
+const LandingTermsPage    = lazy(() => import('@/landing/pages/TermsPage.jsx'));
 const QuickClubSetup = lazy(() => import('@/features/login/QuickClubSetup'));
 const NewClubSetup = lazy(() => import('@/features/login/NewClubSetup'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
@@ -412,6 +414,8 @@ export default function App() {
   if (currentHash === '#/pricing')  return <Suspense fallback={landingFallback}><LandingPricingPage /></Suspense>;
   if (currentHash === '#/about')    return <Suspense fallback={landingFallback}><LandingAboutPage /></Suspense>;
   if (currentHash === '#/contact')  return <Suspense fallback={landingFallback}><LandingContactPage /></Suspense>;
+  if (currentHash === '#/privacy')  return <Suspense fallback={landingFallback}><LandingPrivacyPage /></Suspense>;
+  if (currentHash === '#/terms')    return <Suspense fallback={landingFallback}><LandingTermsPage /></Suspense>;
 
   // Investor site — accessible without auth
   if (currentHash === '#/invest') {

@@ -15,9 +15,13 @@ export default function IntegrationsSection() {
     <SectionShell
       band="dark"
       eyebrow="Integrations"
-      title="Your tools manage operations. Swoop connects them."
+      title="Your tools store the data. Swoop decides what to do with it."
       subtitle="These systems collect data. Swoop is the intelligence layer that connects them, adds location-aware behavioral signals, and turns cross-system patterns into actionable recommendations."
     >
+      <style>{`
+        @media (max-width: 639px) { .integrations-ring { display: none; } .integrations-list { display: block !important; } }
+        @media (min-width: 640px) { .integrations-list { display: none; } }
+      `}</style>
       <div
         style={{
           display: 'grid',
@@ -29,7 +33,22 @@ export default function IntegrationsSection() {
         className="landing-integrations-hero"
       >
         <div style={{ maxWidth: 360, margin: '0 auto' }}>
-          <IntegrationsIllustration />
+          <div className="integrations-ring">
+            <IntegrationsIllustration />
+          </div>
+          <div className="integrations-list" style={{ display: 'none' }}>
+            {[
+              { category: 'Tee sheet', items: 'Jonas, ClubEssentials, Northstar, ClubReady, foreUP, Club Prophet' },
+              { category: 'POS', items: 'Lightspeed Golf, Square, Toast, Clover' },
+              { category: 'CRM', items: 'HubSpot, Salesforce, Mailchimp' },
+            ].map(g => (
+              <div key={g.category} style={{ marginBottom: 12 }}>
+                <div style={{ fontWeight: 600, fontSize: 13, color: '#888', marginBottom: 4 }}>{g.category.toUpperCase()}</div>
+                <div style={{ fontSize: 15, color: '#FFFFFF' }}>{g.items}</div>
+              </div>
+            ))}
+            <p style={{ fontSize: 12, color: '#888', marginTop: 16 }}>Preferred integration partner: Jonas Club Software (Feb 2026).</p>
+          </div>
         </div>
         <div style={{ display: 'grid', gap: 20 }}>
           {swoopUnique.map((item) => (
@@ -152,6 +171,16 @@ export default function IntegrationsSection() {
       <p style={{ fontSize: 14, color: theme.colors.textSecondary, textAlign: 'center', maxWidth: 560, margin: '24px auto 0', lineHeight: 1.6 }}>
         Swoop connects via read-only API — your existing systems keep running exactly as they do today. No write access is ever requested.
       </p>
+
+      <details style={{ marginTop: 32, border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '16px 20px' }}>
+        <summary style={{ fontWeight: 600, cursor: 'pointer', fontSize: 15, color: '#FFFFFF' }}>For IT and Ops teams</summary>
+        <div style={{ marginTop: 16, fontSize: 14, lineHeight: 1.7, color: 'rgba(255,255,255,0.75)' }}>
+          <p><strong style={{ color: '#FFFFFF' }}>Systems we connect to:</strong> Jonas, Club Essentials, Northstar, ClubReady, Lightspeed, foreUP, Club Prophet, Stripe, Toast, Square</p>
+          <p><strong style={{ color: '#FFFFFF' }}>How data moves:</strong> Read via API or nightly SFTP. Write-back only for tee-sheet notes, CRM tasks, GM-approved messages.</p>
+          <p><strong style={{ color: '#FFFFFF' }}>Security:</strong> AES-256 at rest, TLS 1.3, SSO, RBAC, 90-day audit log.</p>
+          <p><strong style={{ color: '#FFFFFF' }}>AI transparency:</strong> Anthropic Claude API, zero-retention agreement, PII never trains models, every action logged and reversible.</p>
+        </div>
+      </details>
     </SectionShell>
   );
 }

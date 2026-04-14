@@ -44,7 +44,7 @@ export default function IndustryStatsSection() {
                 letterSpacing: '-0.02em',
               }}
             >
-              {s.value}
+              {s.value === '$2.1B' ? <span style={{ whiteSpace: 'nowrap' }}>$2.1B</span> : s.value}
             </p>
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.5 }}>
               {s.label}

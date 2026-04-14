@@ -1,0 +1,142 @@
+{
+  "permutation": "pos-first",
+  "seed": "pos-first",
+  "clubId": "perm-pos-first-x3a2uzye",
+  "totalFailures": 0,
+  "steps": [
+    {
+      "step": 0,
+      "stage": "members",
+      "failures": []
+    },
+    {
+      "step": 1,
+      "stage": "transactions",
+      "failures": []
+    },
+    {
+      "step": 2,
+      "stage": "pos_checks",
+      "failures": []
+    },
+    {
+      "step": 3,
+      "stage": "line_items",
+      "failures": []
+    },
+    {
+      "step": 4,
+      "stage": "payments",
+      "failures": []
+    },
+    {
+      "step": 5,
+      "stage": "daily_close",
+      "failures": []
+    },
+    {
+      "step": 6,
+      "stage": "sales_areas",
+      "failures": []
+    },
+    {
+      "step": 7,
+      "stage": "tee_times",
+      "failures": []
+    },
+    {
+      "step": 8,
+      "stage": "complaints",
+      "failures": []
+    },
+    {
+      "step": 9,
+      "stage": "booking_players",
+      "failures": []
+    },
+    {
+      "step": 10,
+      "stage": "courses",
+      "failures": []
+    },
+    {
+      "step": 11,
+      "stage": "shifts",
+      "failures": []
+    },
+    {
+      "step": 12,
+      "stage": "staff",
+      "failures": []
+    },
+    {
+      "step": 13,
+      "stage": "events",
+      "failures": []
+    },
+    {
+      "step": 14,
+      "stage": "event_registrations",
+      "failures": []
+    },
+    {
+      "step": 15,
+      "stage": "email_campaigns",
+      "failures": []
+    },
+    {
+      "step": 16,
+      "stage": "email_events",
+      "failures": []
+    },
+    {
+      "step": 17,
+      "stage": "invoices",
+      "failures": []
+    },
+    {
+      "step": 18,
+      "stage": "households",
+      "failures": []
+    },
+    {
+      "step": 19,
+      "stage": "membership_types",
+      "failures": []
+    },
+    {
+      "step": 20,
+      "stage": "service_requests",
+      "failures": []
+    },
+    {
+      "step": 21,
+      "stage": "club_profile",
+      "failures": []
+    }
+  ],
+  "order": [
+    "members",
+    "transactions",
+    "pos_checks",
+    "line_items",
+    "payments",
+    "daily_close",
+    "sales_areas",
+    "tee_times",
+    "complaints",
+    "booking_players",
+    "courses",
+    "shifts",
+    "staff",
+    "events",
+    "event_registrations",
+    "email_campaigns",
+    "email_events",
+    "invoices",
+    "households",
+    "membership_types",
+    "service_requests",
+    "club_profile"
+  ]
+}

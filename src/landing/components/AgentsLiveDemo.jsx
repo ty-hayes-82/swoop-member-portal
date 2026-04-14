@@ -103,11 +103,11 @@ function timeLabel(offsetSec) {
 
 export default function AgentsLiveDemo() {
   const [index, setIndex] = useState(0);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(true); // default true = static on first paint
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduceMotion(mq.matches);
+    setReduceMotion(mq.matches); // real value after mount — enables animation if motion is OK
     const onChange = () => setReduceMotion(mq.matches);
     mq.addEventListener?.('change', onChange);
     return () => mq.removeEventListener?.('change', onChange);

@@ -1,0 +1,142 @@
+{
+  "permutation": "email-first",
+  "seed": "email-first",
+  "clubId": "perm-email-first-tgx0n46i",
+  "totalFailures": 0,
+  "steps": [
+    {
+      "step": 0,
+      "stage": "members",
+      "failures": []
+    },
+    {
+      "step": 1,
+      "stage": "email_campaigns",
+      "failures": []
+    },
+    {
+      "step": 2,
+      "stage": "email_events",
+      "failures": []
+    },
+    {
+      "step": 3,
+      "stage": "tee_times",
+      "failures": []
+    },
+    {
+      "step": 4,
+      "stage": "transactions",
+      "failures": []
+    },
+    {
+      "step": 5,
+      "stage": "complaints",
+      "failures": []
+    },
+    {
+      "step": 6,
+      "stage": "booking_players",
+      "failures": []
+    },
+    {
+      "step": 7,
+      "stage": "courses",
+      "failures": []
+    },
+    {
+      "step": 8,
+      "stage": "pos_checks",
+      "failures": []
+    },
+    {
+      "step": 9,
+      "stage": "line_items",
+      "failures": []
+    },
+    {
+      "step": 10,
+      "stage": "payments",
+      "failures": []
+    },
+    {
+      "step": 11,
+      "stage": "daily_close",
+      "failures": []
+    },
+    {
+      "step": 12,
+      "stage": "sales_areas",
+      "failures": []
+    },
+    {
+      "step": 13,
+      "stage": "shifts",
+      "failures": []
+    },
+    {
+      "step": 14,
+      "stage": "staff",
+      "failures": []
+    },
+    {
+      "step": 15,
+      "stage": "events",
+      "failures": []
+    },
+    {
+      "step": 16,
+      "stage": "event_registrations",
+      "failures": []
+    },
+    {
+      "step": 17,
+      "stage": "invoices",
+      "failures": []
+    },
+    {
+      "step": 18,
+      "stage": "households",
+      "failures": []
+    },
+    {
+      "step": 19,
+      "stage": "membership_types",
+      "failures": []
+    },
+    {
+      "step": 20,
+      "stage": "service_requests",
+      "failures": []
+    },
+    {
+      "step": 21,
+      "stage": "club_profile",
+      "failures": []
+    }
+  ],
+  "order": [
+    "members",
+    "email_campaigns",
+    "email_events",
+    "tee_times",
+    "transactions",
+    "complaints",
+    "booking_players",
+    "courses",
+    "pos_checks",
+    "line_items",
+    "payments",
+    "daily_close",
+    "sales_areas",
+    "shifts",
+    "staff",
+    "events",
+    "event_registrations",
+    "invoices",
+    "households",
+    "membership_types",
+    "service_requests",
+    "club_profile"
+  ]
+}
