@@ -122,6 +122,7 @@ Be specific. If sample values show "F" for names that look male, say so. If an e
         message,
         session_id: sessionId || undefined,
         ...(file_data ? { file_data } : {}),
+        ...(step === 2 ? { json_mode: true } : {}),
       }),
     });
     if (!res.ok) return null;

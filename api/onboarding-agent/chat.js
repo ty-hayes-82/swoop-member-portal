@@ -600,6 +600,7 @@ async function chatHandler(req, res) {
     return res.status(400).json({ error: 'message is required and must be a string' });
   }
 
+  const { json_mode } = req.body;
   const currentSessionId = session_id || generateSessionId();
 
   // Load club name
@@ -649,7 +650,14 @@ async function chatHandler(req, res) {
 
   // Simulation mode
   if (SIMULATION_MODE) {
-    const simResponse = generateSimulatedResponse(message, file_data);
+    const simResponse = json_mode
+      ? JSON.stringify({
+          suggestions: [
+            { type: 'warning', csvCol: null, targetField: null, label: 'Demo mode — mapping analysis simulated', reason: 'Connect a live club to see real AI mapping suggestions.' },
+          ],
+          validation: { ready: 0, warnings: 1, errors: 0 },
+        })
+      : generateSimulatedResponse(message, file_data);
     return res.status(200).json({
       response: simResponse,
       tools_called: [],
@@ -661,7 +669,30 @@ async function chatHandler(req, res) {
   // Live mode: call Claude API with tool-use loop
   try {
     const client = getAnthropicClient();
-    const systemPrompt = buildDataOnboardingPrompt(clubName, importHistory, dataGaps);
+    const baseSystemPrompt = buildDataOnboardingPrompt(clubName, importHistory, dataGaps);
+
+    // json_mode: structured output requests (e.g. step 2 column mapping analysis).
+    // Disable tools + enforce JSON output to prevent tool-call interference.
+    if (json_mode) {
+      const systemPrompt = baseSystemPrompt +
+        '\n\nCRITICAL: The user is requesting structured JSON output. Respond with ONLY a valid JSON object — no markdown fences, no prose, no explanation outside the JSON. Your entire response must be parseable by JSON.parse().';
+      const result = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        temperature: 0,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMessage }],
+        // No tools — tool calls break structured JSON output
+      });
+      const responseText = result.content?.find(c => c.type === 'text')?.text ?? '';
+      return res.status(200).json({
+        response: responseText,
+        tools_called: [],
+        session_id: currentSessionId,
+      });
+    }
+
+    const systemPrompt = baseSystemPrompt;
     const messages = [{ role: 'user', content: userMessage }];
     const toolsCalled = [];
 
