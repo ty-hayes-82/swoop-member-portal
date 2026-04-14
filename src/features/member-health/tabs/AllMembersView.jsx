@@ -173,7 +173,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
             {member.tier || '—'}
           </span>
         </td>
-        <td className="px-4 py-2 hidden lg:table-cell">
+        <td className="px-4 py-2 hidden md:table-cell">
           <span className="font-mono text-xs text-gray-500">
             {(member.duesAnnual || member.memberValueAnnual) ? `$${(member.duesAnnual || member.memberValueAnnual || 0).toLocaleString()}` : '—'}
           </span>
@@ -427,7 +427,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
     ? [
         { key: 'name', label: 'Member', hideClass: '' },
         { key: 'tier', label: 'Tier', hideClass: 'hidden sm:table-cell' },
-        { key: 'value', label: 'Annual Dues', hideClass: 'hidden lg:table-cell' },
+        { key: 'value', label: 'Annual Dues', hideClass: 'hidden md:table-cell' },
         { key: 'expand', label: '', sortable: false, hideClass: '' },
       ]
     : [
@@ -436,7 +436,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
         { key: 'level', label: 'Level', hideClass: '' },
         { key: 'archetype', label: 'Archetype', hideClass: 'hidden md:table-cell' },
         { key: 'tier', label: 'Tier', hideClass: 'hidden sm:table-cell' },
-        { key: 'value', label: 'Annual Value', hideClass: 'hidden lg:table-cell' },
+        { key: 'value', label: 'Annual Value', hideClass: 'hidden md:table-cell' },
         { key: 'expand', label: '', sortable: false, hideClass: '' },
       ];
 

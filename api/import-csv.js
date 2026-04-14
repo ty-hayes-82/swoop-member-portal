@@ -12,6 +12,7 @@ import { withAuth, getWriteClubId } from './lib/withAuth.js';
 import { logError, logInfo, logWarn } from './lib/logger.js';
 import { cors } from './lib/cors.js';
 import { VENDOR_COLUMN_ALIASES } from '../src/services/csvImportService.js';
+import { normalizePhone } from './lib/phone.js';
 
 // Flatten VENDOR_COLUMN_ALIASES into a single set of canonical Swoop fields
 // that are known to be legitimate CSV-origin columns. Combined with per-import
@@ -615,6 +616,7 @@ async function importCsvHandler(req, res) {
       }
 
       if (importType === 'members') {
+        if (row.phone) row.phone = normalizePhone(row.phone);
         const memberId = row.external_id || `mbr_${Date.now()}_${i}`;
         const uniqueMemberId = `${clubId}_${memberId}`;
         const statusVal = row.status || 'active';

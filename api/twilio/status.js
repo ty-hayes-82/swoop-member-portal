@@ -3,6 +3,7 @@
  * POST /api/twilio/status
  * Receives delivery status updates (application/x-www-form-urlencoded)
  */
+import { sql } from '@vercel/postgres';
 import { verifyTwilioSignature } from '../lib/twilioVerify.js';
 import { logWarn, logInfo } from '../lib/logger.js';
 
@@ -31,6 +32,16 @@ export default async function handler(req, res) {
     to: To,
     receivedAt: new Date().toISOString(),
   });
+
+  if (MessageSid && MessageStatus) {
+    await sql`
+      UPDATE sms_log
+      SET status = ${MessageStatus},
+          delivered_at = CASE WHEN ${MessageStatus} = 'delivered' THEN NOW() ELSE delivered_at END,
+          error_message = CASE WHEN ${ErrorMessage} IS NOT NULL THEN ${ErrorMessage || null} ELSE error_message END
+      WHERE twilio_sid = ${MessageSid}
+    `.catch(e => console.error('[twilio-status] sms_log update error:', e.message));
+  }
 
   res.status(200).json({ ok: true });
 }

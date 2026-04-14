@@ -13,6 +13,8 @@ import { buildConciergePrompt } from '../../src/config/conciergePrompt.js';
 import { getOrCreateSession, updateSessionSummary } from '../agents/concierge-session.js';
 import { getAnthropicClient } from '../agents/managed-config.js';
 import { routeEvent } from '../agents/agent-events.js';
+import { normalizePhone } from '../lib/phone.js';
+import { getClubSmsConfig } from '../sms/send.js';
 
 // ---------------------------------------------------------------------------
 // SMS tool definitions (Anthropic tool_use format)
@@ -212,16 +214,6 @@ const conversationCache = new Map();
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 const MAX_HISTORY = 10; // keep last N exchanges
 
-/**
- * Normalize any US phone string to E.164 (+1XXXXXXXXXX).
- */
-function normalizePhone(raw) {
-  if (!raw) return null;
-  const digits = raw.replace(/\D/g, '');
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
-  return raw.startsWith('+') ? raw : `+${digits}`;
-}
 
 /**
  * Look up a member by phone number. Returns {member_id, first_name, last_name, club_id} or null.
@@ -314,6 +306,45 @@ async function loadMemberProfile(clubId, memberId) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Keyword intercept helpers
+// ---------------------------------------------------------------------------
+
+const SMS_KEYWORDS = {
+  STOP: 'opt_out', UNSUBSCRIBE: 'opt_out', CANCEL: 'opt_out', QUIT: 'opt_out',
+  START: 'opt_in', YES: 'opt_in', SUBSCRIBE: 'opt_in',
+  HOLD: 'accept_hold', BOOK: 'accept_booking', EARLY: 'accept_early',
+  SIM: 'accept_simulator', CONFIRM: 'confirm_action', LATER: 'snooze',
+};
+
+async function logSmsInbound(member, body, twilioSid, keyword) {
+  await sql`
+    INSERT INTO sms_log (club_id, member_id, direction, body, twilio_sid, status, reply_keyword, sent_at)
+    VALUES (${member.club_id}, ${member.member_id}, 'inbound', ${body || ''}, ${twilioSid || null}, 'received', ${keyword || null}, NOW())
+  `.catch(e => console.error('[twilio-inbound] sms_log error:', e.message));
+}
+
+async function processActionReply(memberId, clubId, action) {
+  // Log the action reply — full intent fulfillment (HOLD → reservation, BOOK → tee time)
+  // is handled by the agents that own those workflows. For now we record the intent
+  // so the agent's next sweep can pick it up.
+  await sql`
+    INSERT INTO notifications (club_id, related_member_id, channel, type, title, body, priority)
+    VALUES (${clubId}, ${memberId}, 'sms_inbound', 'member_action_reply',
+            ${`Member action: ${action}`}, ${`Member ${memberId} replied ${action}`}, 'normal')
+  `.catch(e => console.error('[twilio-inbound] action reply log error:', e.message));
+}
+
+function respondTwiml(res, message) {
+  res.setHeader('Content-Type', 'text/xml');
+  if (message) {
+    return res.status(200).send(
+      `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapeXml(message)}</Message></Response>`
+    );
+  }
+  return res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+}
+
 /**
  * Escape XML special characters for TwiML.
  */
@@ -398,6 +429,44 @@ export default async function handler(req, res) {
     return res.status(200).send(
       `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapeXml(fallback)}</Message></Response>`
     );
+  }
+
+  // --- Keyword intercept (STOP/START/YES/HOLD/BOOK etc.) ---
+  // Must run before the AI concierge path. STOP must always be honored (TCPA).
+  const keyword = (Body || '').trim().toUpperCase().split(/\s+/)[0];
+  const kwAction = SMS_KEYWORDS[keyword];
+
+  if (kwAction === 'opt_out') {
+    await sql`
+      UPDATE member_comm_preferences
+      SET sms_opted_in = FALSE, opt_out_date = NOW(), updated_at = NOW()
+      WHERE member_id = ${member.member_id} AND club_id = ${member.club_id}
+    `.catch(e => console.error('[twilio-inbound] opt_out db error:', e.message));
+    await logSmsInbound(member, Body, MessageSid, 'opt_out');
+    const config = await getClubSmsConfig(member.club_id).catch(() => null);
+    const msg = config?.opt_out_message || 'You have been unsubscribed. Reply START to re-subscribe.';
+    return respondTwiml(res, msg);
+  }
+
+  if (kwAction === 'opt_in') {
+    await sql`
+      INSERT INTO member_comm_preferences (member_id, club_id, sms_opted_in, sms_consent_date, sms_consent_method)
+      VALUES (${member.member_id}, ${member.club_id}, TRUE, NOW(), 'text_reply')
+      ON CONFLICT (member_id, club_id) DO UPDATE SET
+        sms_opted_in = TRUE, sms_consent_date = NOW(), sms_consent_method = 'text_reply',
+        opt_out_date = NULL, updated_at = NOW()
+    `.catch(e => console.error('[twilio-inbound] opt_in db error:', e.message));
+    await logSmsInbound(member, Body, MessageSid, 'opt_in');
+    return respondTwiml(res, `Welcome, ${member.first_name}! You'll receive updates from your club. Reply STOP anytime to opt out.`);
+  }
+
+  if (kwAction) {
+    // Action keyword (HOLD, BOOK, EARLY, SIM, CONFIRM, LATER)
+    await processActionReply(member.member_id, member.club_id, kwAction);
+    await logSmsInbound(member, Body, MessageSid, kwAction);
+    // No TwiML reply here — the agent that sent the nudge handles the confirmation
+    res.setHeader('Content-Type', 'text/xml');
+    return res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
   }
 
   // Load full profile for prompt

@@ -10,6 +10,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigationContext } from '@/context/NavigationContext';
 import DataHealthDashboard from '@/features/data-health/DataHealthDashboard';
+import SmsMessagingPanel from '@/features/admin/SmsMessagingPanel';
 import { Card } from '@/components/tailadmin';
 import { apiFetch } from '@/services/apiClient';
 import Badge from '@/components/tailadmin/Badge';
@@ -62,6 +63,7 @@ const ALL_ADMIN_TABS = [
   { key: 'data-hub', label: 'Integrations', icon: '🔌' },
   { key: 'health', label: 'Data Health', icon: '🩺' },
   { key: 'clubs', label: 'Club Management', icon: '🏌️' },
+  { key: 'sms', label: 'SMS & Messaging', icon: '📱' },
 ];
 
 export default function AdminHub() {
@@ -118,6 +120,7 @@ export default function AdminHub() {
         {activeTab === 'data-hub' && <DataHubTab clubId={clubId} />}
         {activeTab === 'health' && <DataHealthDashboard />}
         {activeTab === 'clubs' && <ClubManagementTab currentClubId={clubId} />}
+        {activeTab === 'sms' && <SmsMessagingPanel clubId={clubId} />}
       </div>
       {/* V3: CSV Import, Notifications, User Roles removed — white-glove onboarding */}
     </div>

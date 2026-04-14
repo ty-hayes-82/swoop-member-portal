@@ -76,11 +76,12 @@ export default function RevenuePage() {
     }
   };
 
-  // Memoize leakage snapshots so navigating away and back shows identical
-  // dollar amounts (bug #26 — services pull timestamped weather/staffing data
-  // that can drift between calls). Must be above the early-return so React's
-  // hook ordering stays consistent across renders.
+  // Memoize all data snapshots above ALL early returns so hook ordering stays
+  // consistent across renders (Rules of Hooks — conditional hooks crash React).
   const leakage = useMemo(() => getLeakageData(), []);
+  const bottleneck = useMemo(() => getBottleneckSummary(), []);
+  const slowContext = useMemo(() => getSlowRoundContext(), []);
+  const dollarPerSlowRound = useMemo(() => getDollarPerSlowRound(), []);
 
   if (isLoading) {
     return (
@@ -116,10 +117,6 @@ export default function RevenuePage() {
       </PageTransition>
     );
   }
-
-  const bottleneck = useMemo(() => getBottleneckSummary(), []);
-  const slowContext = useMemo(() => getSlowRoundContext(), []);
-  const dollarPerSlowRound = useMemo(() => getDollarPerSlowRound(), []);
 
   // Build chart data
   const chartData = [
