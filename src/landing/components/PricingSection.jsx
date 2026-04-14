@@ -68,13 +68,8 @@ function PricingCard({ tier, onCtaClick }) {
           </li>
         ))}
       </ul>
-      {isFree && (
-        <Button variant="light" size="md" block onClick={handleCta} style={{ marginBottom: 8 }}>
-          Get started free
-        </Button>
-      )}
       <Button
-        variant={isPopular ? 'primary' : isFree ? 'ghost' : 'light'}
+        variant={isPopular ? 'primary' : 'light'}
         size="md"
         block
         onClick={handleCta}
