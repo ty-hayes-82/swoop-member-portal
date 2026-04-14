@@ -49,6 +49,11 @@ function ActionCard({ action, onApprove, onDismiss }) {
           <div className="text-sm font-semibold text-gray-800 dark:text-white/90 leading-snug">
             {action.description}
           </div>
+          {action.rationale && (
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+              {action.rationale}
+            </div>
+          )}
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           {action.impactMetric && (
