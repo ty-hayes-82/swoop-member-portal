@@ -226,9 +226,14 @@ export default withAuth(async function handler(req, res) {
       });
     }
 
-    // Since last login
+    // Since last login — computed from real priorities (no hardcoded numbers)
     const lastLogin = sessions.rows[0]?.last_login_at ?? null;
-    const sinceLastLogin = { newAlerts: 3, membersChanged: 2, revenueImpact: '$8,736', lastLoginAt: lastLogin };
+    const sinceLastLogin = {
+      newAlerts: priorities.length,
+      membersChanged: null,   // requires member-delta query — omit until implemented
+      revenueImpact: null,    // requires revenue-delta query — omit until implemented
+      lastLoginAt: lastLogin,
+    };
 
     res.status(200).json({ priorities, sinceLastLogin });
   } catch (err) {
