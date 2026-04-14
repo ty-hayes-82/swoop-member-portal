@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { getActionsForArchetype, outreachCategories } from '@/data/outreach';
 import { isGateOpen } from '@/services/demoGate';
 import { useApp } from '@/context/AppContext';
+import { useNavigation } from '@/context/NavigationContext';
 import { trackAction } from '@/services/activityService';
 import { apiFetch } from '@/services/apiClient';
 import { getGoogleStatus, createCalendarEvent } from '@/services/googleService';
@@ -12,6 +13,7 @@ const STAFF = ['F&B Director', 'Head Golf Professional', 'Membership Director', 
 
 export default function QuickActions({ memberName, memberId, context = '', archetype = '' }) {
   const { showToast, addAction } = useApp();
+  const { navigate } = useNavigation();
   const [mode, setMode]   = useState(null);
   const [note, setNote]   = useState('');
   const [time, setTime]   = useState('');
@@ -351,6 +353,16 @@ export default function QuickActions({ memberName, memberId, context = '', arche
           )}
         </div>
       )}
+
+      <div className="mt-3">
+        <button
+          type="button"
+          onClick={() => navigate('automations', { tab: 'playbooks' })}
+          className="text-[11px] text-gray-400 hover:text-brand-500 bg-transparent border-none cursor-pointer p-0 font-medium transition-colors"
+        >
+          ✦ Start a multi-step playbook for {getFirstName(memberName)} →
+        </button>
+      </div>
 
       {actionLog.length > 0 && (
         <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800">
