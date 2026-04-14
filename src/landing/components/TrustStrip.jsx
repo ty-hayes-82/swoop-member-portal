@@ -14,8 +14,8 @@ const stats = [
   },
   {
     icon: 'Plug',
-    value: '28 integrations',
-    sub: '10 categories · no rip-and-replace',
+    value: 'Reads Jonas, ClubEssential, ForeUP + 25 more',
+    sub: 'Read-only API access · 10 categories',
   },
   {
     icon: 'Zap',

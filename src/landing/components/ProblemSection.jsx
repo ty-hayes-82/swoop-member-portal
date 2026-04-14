@@ -75,6 +75,20 @@ export default function ProblemSection() {
           </Card>
         ))}
       </div>
+
+      <p style={{ fontSize: 11, color: '#888', textAlign: 'center', marginTop: 24, fontStyle: 'italic' }}>
+        Confidence scores reflect Swoop's signal-weighted detection accuracy across pilot data from our 300-member Pinetree CC deployment, Q4 2025.
+      </p>
+
+      <div style={{ textAlign: 'center', marginTop: 40 }}>
+        <p style={{ fontSize: 17, fontWeight: 600, color: theme.neutrals.ink, margin: '0 0 16px' }}>
+          Sound familiar?
+        </p>
+        <a href="#/contact" onClick={() => { window.location.hash = '#/contact'; }}
+          style={{ display: 'inline-block', background: '#F3922D', color: '#fff', fontWeight: 700, fontSize: 16, padding: '14px 32px', borderRadius: 8, textDecoration: 'none' }}>
+          Show me what Swoop would find in my club →
+        </a>
+      </div>
     </SectionShell>
   );
 }

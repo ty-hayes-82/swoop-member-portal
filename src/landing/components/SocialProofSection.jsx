@@ -19,12 +19,12 @@ const metricCards = [
     title: 'Revenue Per Slot',
     metric: '$312',
     subtitle: 'Average revenue per slot with intelligence',
-    description: 'Increased from $187 reactive average by backfilling cancellations with high-engagement, high-F&B members first.',
+    description: 'Increased from $187 reactive average by backfilling cancellations with high-engagement, high food-and-beverage spend members first.',
   },
   {
     title: 'Dues at Risk Visibility',
     metric: '$1.38M',
-    subtitle: 'Annual dues identified as at-risk in demo',
+    subtitle: 'at-risk dues — 23 flagged members, 300-member Pinetree CC, annualized at full dues rates.',
     description: '23 members flagged across health score decline, declining visits, unresolved complaints, and behavioral pattern changes.',
   },
 ];
@@ -37,7 +37,7 @@ export default function SocialProofSection({ onCtaClick }) {
       band="cream"
       eyebrow="PROOF"
       title="Intelligence in action."
-      subtitle="Results from the Pinetree CC pilot — 300 members, live system data. Figures reflect actual behavioral signals, not projections."
+      subtitle="Metrics from our Pinetree CC founding-partner pilot — 300 members, live ForeUP + Jonas + Toast integration, 90-day analysis window."
     >
       <div
         className="landing-metric-grid"
@@ -152,10 +152,13 @@ export default function SocialProofSection({ onCtaClick }) {
           ))}
         </div>
         <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#F3922D', margin: '0 0 12px' }}>
+            Only 3 of 10 founding-partner spots remaining.
+          </p>
           <Button
             onClick={onCtaClick ?? (() => { window.location.hash = '#/contact'; })}
           >
-            Apply for Founding Partner
+            Claim a Founding Partner Spot →
           </Button>
           <p style={{ marginTop: 14, color: theme.colors.textMuted, fontSize: 13 }}>
             Limited founding partner spots — early clubs get direct roadmap input

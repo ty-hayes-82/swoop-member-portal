@@ -595,3 +595,7 @@ body:has(.landing-page) {
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .pricing-grid { grid-template-columns: 1fr !important; }
+}

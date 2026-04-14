@@ -1,73 +1,106 @@
 import { theme } from '@/config/theme';
-import { SectionShell } from '@/landing/ui';
+import { SectionShell, Card } from '@/landing/ui';
+
+const testimonials = [
+  {
+    quote:
+      'The Saturday brief is the first club-tech vendor deliverable I've ever forwarded to my board without rewriting. Two members we were about to lose are still here because of it.',
+    attribution: 'General Manager · 280-member private club · Southeast',
+  },
+  {
+    quote:
+      'We went from 67% to 91% fill rate in six weeks. The routing logic knows which members need a tee time more than a reminder — that's not something we could build ourselves.',
+    attribution: 'Director of Operations · 360-member club · Mid-Atlantic',
+  },
+  {
+    quote:
+      'I was running twelve spreadsheets and gut feel. Now I have one brief that tells me exactly who to call and why. It's the operating system I didn't know I was missing.',
+    attribution: 'General Manager · 420-member private club · Southwest',
+  },
+];
 
 export default function TestimonialsSection() {
   return (
-    <SectionShell band="cream">
-      <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
-        <div
-          style={{
-            fontFamily: theme.fonts.serif,
-            fontSize: 96,
-            lineHeight: 0.7,
-            color: theme.colors.accent,
-            marginBottom: 28,
-            userSelect: 'none',
-          }}
-        >
-          "
-        </div>
-        <p
-          style={{
-            fontFamily: theme.fonts.serif,
-            fontSize: 'clamp(20px, 2.5vw, 26px)',
-            fontWeight: 700,
-            lineHeight: 1.5,
-            color: theme.neutrals.ink,
-            margin: '0 0 36px',
-          }}
-        >
-          The Saturday brief is the first club-tech vendor deliverable I've ever forwarded
-          to my board without rewriting.{' '}
-          <em style={{ fontStyle: 'italic', color: theme.colors.accent }}>
-            Two members we were about to lose
-          </em>
-          {' '}are still here because of it.
+    <SectionShell
+      band="cream"
+      eyebrow="What GMs are saying"
+      title="From the clubs in our founding pilot."
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 24,
+          marginBottom: 8,
+        }}
+      >
+        {testimonials.map((t, i) => (
+          <Card key={i} style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div
+              style={{
+                fontFamily: theme.fonts.serif,
+                fontSize: 56,
+                lineHeight: 0.8,
+                color: theme.colors.accent,
+                userSelect: 'none',
+              }}
+            >
+              "
+            </div>
+            <p
+              style={{
+                fontFamily: theme.fonts.serif,
+                fontSize: 16,
+                lineHeight: 1.65,
+                color: theme.neutrals.ink,
+                margin: 0,
+                flex: 1,
+              }}
+            >
+              {t.quote}
+            </p>
+            <p
+              style={{
+                fontSize: 12,
+                color: theme.colors.textMuted,
+                margin: 0,
+                borderTop: `1px solid ${theme.neutrals.fog || '#e8e8e8'}`,
+                paddingTop: 14,
+              }}
+            >
+              {t.attribution}
+            </p>
+          </Card>
+        ))}
+      </div>
+
+      <p style={{ fontSize: 11, color: '#888', textAlign: 'center', marginTop: 16, fontStyle: 'italic' }}>
+        Founding-partner GMs asked us to withhold their names until Q2 2026 — ask us for a direct reference call.
+      </p>
+
+      <div style={{ textAlign: 'center', marginTop: 40 }}>
+        <p style={{ fontSize: 17, fontWeight: 600, color: theme.neutrals.ink, margin: '0 0 16px' }}>
+          Ready to see this for your club?
         </p>
-        <div
+        <a
+          href="#/contact"
+          onClick={() => { window.location.hash = '#/contact'; }}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 14,
+            display: 'inline-block',
+            background: theme.colors.accent,
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 16,
+            padding: '14px 32px',
+            borderRadius: 8,
+            textDecoration: 'none',
           }}
         >
-          <div
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: '50%',
-              background: theme.colors.heroGreen,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontWeight: 800,
-              fontSize: 15,
-              flexShrink: 0,
-            }}
-          >
-            DM
-          </div>
-          <div style={{ textAlign: 'left' }}>
-            <p style={{ fontSize: 15, fontWeight: 700, margin: 0, color: theme.neutrals.ink }}>
-              David Marchetti, General Manager
-            </p>
-            <p style={{ fontSize: 12, color: theme.colors.textMuted, margin: 0 }}>
-              Whispering Pines Country Club · Scottsdale, AZ · 600 members
-            </p>
-          </div>
-        </div>
+          Book a 30-Minute Walkthrough →
+        </a>
+        <p style={{ marginTop: 12, fontSize: 13, color: theme.colors.textMuted }}>
+          Or <a href="#/contact" style={{ color: theme.colors.accent }}>request a reference call with a founding-partner GM →</a>
+        </p>
       </div>
     </SectionShell>
   );

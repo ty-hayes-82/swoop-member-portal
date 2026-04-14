@@ -35,6 +35,24 @@ export default function AboutPage() {
       <TestimonialsSection />
       <SocialProofSection onCtaClick={toDemoPage} />
       <FaqSection />
+
+      <SectionShell band="dark" size="sm">
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>
+            See your club's data before you commit.
+          </p>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, maxWidth: 480, margin: '0 auto 24px' }}>
+            30-minute pilot call. We connect to Jonas, pull your last 90 days, and show you which members are at risk right now.
+          </p>
+          <a href="#/contact" onClick={() => { window.location.hash = '#/contact'; }}
+            style={{ display: 'inline-block', background: '#F3922D', color: '#fff', fontWeight: 700, fontSize: 16, padding: '14px 32px', borderRadius: 8, textDecoration: 'none' }}>
+            Book a Pilot Call →
+          </a>
+          <p style={{ marginTop: 12, fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+            Or <a href="#/contact" style={{ color: '#F3922D' }}>request a reference call from a current pilot GM →</a>
+          </p>
+        </div>
+      </SectionShell>
     </LandingShell>
   );
 }

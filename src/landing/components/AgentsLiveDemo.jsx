@@ -129,6 +129,7 @@ export default function AgentsLiveDemo() {
   });
 
   return (
+    <>
     <div
       style={{
         background: theme.neutrals.ink,
@@ -461,5 +462,16 @@ export default function AgentsLiveDemo() {
         ))}
       </div>
     </div>
+
+    <div style={{ textAlign: 'center', marginTop: 40 }}>
+      <p style={{ fontSize: 17, color: theme.colors.textSecondary, margin: '0 0 16px' }}>
+        These six agents run 24/7 for every member. Want to see them working for your club?
+      </p>
+      <a href="#/contact" onClick={() => { window.location.hash = '#/contact'; }}
+        style={{ display: 'inline-block', background: '#F3922D', color: '#fff', fontWeight: 700, fontSize: 16, padding: '14px 32px', borderRadius: 8, textDecoration: 'none' }}>
+        Book the 30-Minute Walkthrough →
+      </a>
+    </div>
+    </>
   );
 }

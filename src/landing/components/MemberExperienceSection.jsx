@@ -97,17 +97,29 @@ export default function MemberExperienceSection() {
           </Card>
         ))}
       </div>
-      <p
-        style={{
-          textAlign: 'center',
-          marginTop: 40,
-          fontSize: 16,
-          color: theme.colors.textSecondary,
-          fontStyle: 'italic',
-        }}
-      >
-        James doesn't know Swoop exists. <strong style={{ color: theme.neutrals.ink, fontStyle: 'normal' }}>He just knows his club feels different.</strong>
-      </p>
+      <blockquote style={{
+        fontSize: 22,
+        fontWeight: 700,
+        color: theme.neutrals.ink,
+        textAlign: 'center',
+        fontStyle: 'italic',
+        maxWidth: 560,
+        margin: '40px auto 24px',
+        lineHeight: 1.4,
+        borderLeft: 'none',
+        padding: 0,
+      }}>
+        "James doesn't know Swoop exists. He just knows his club feels different."
+      </blockquote>
+      <div style={{ textAlign: 'center' }}>
+        <a
+          href="#/contact"
+          onClick={() => { window.location.hash = '#/contact'; }}
+          style={{ display: 'inline-block', background: '#F3922D', color: '#fff', fontWeight: 700, fontSize: 16, padding: '14px 32px', borderRadius: 8, textDecoration: 'none' }}
+        >
+          Give your members a club that knows them →
+        </a>
+      </div>
     </SectionShell>
   );
 }

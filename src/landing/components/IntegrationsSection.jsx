@@ -148,6 +148,10 @@ export default function IntegrationsSection() {
           </p>
         </div>
       </div>
+
+      <p style={{ fontSize: 14, color: theme.colors.textSecondary, textAlign: 'center', maxWidth: 560, margin: '24px auto 0', lineHeight: 1.6 }}>
+        Swoop connects via read-only API — your existing systems keep running exactly as they do today. No write access is ever requested.
+      </p>
     </SectionShell>
   );
 }

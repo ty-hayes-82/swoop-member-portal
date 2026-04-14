@@ -45,7 +45,8 @@ export const problemCards = [
 export const coreCapabilities = [
   {
     icon: 'Users',
-    title: 'Member Intelligence',
+    title: 'Know who\'s drifting before they resign.',
+    category: 'Member Intelligence',
     color: theme.colors.lensMemberIntelligence,
     summary: 'Know who is drifting before they resign.',
     bullets: [
@@ -53,6 +54,7 @@ export const coreCapabilities = [
       'Connects complaints, spend, rounds, and email engagement.',
     ],
     source: 'CRM + POS + Email',
+    dataSources: 'CRM + POS + EMAIL',
     freshness: 'Updated 14 min ago',
     confidence: '92% confidence',
     why: 'Engagement down 28% & unresolved complaint',
@@ -60,7 +62,8 @@ export const coreCapabilities = [
   },
   {
     icon: 'Calendar',
-    title: 'Tee Sheet & Demand',
+    title: 'Fill every slot with the right member.',
+    category: 'Tee Sheet & Demand',
     color: theme.colors.lensTeeSheetDemand,
     summary: 'Fill every slot with the member who needs it most.',
     bullets: [
@@ -68,6 +71,7 @@ export const coreCapabilities = [
       'Route openings to retention-priority members automatically.',
     ],
     source: 'Tee Sheet + Weather + Waitlist',
+    dataSources: 'TEE SHEET + WEATHER + WAITLIST',
     freshness: 'High-risk slots recalculated 9 min ago',
     confidence: '89% confidence',
     why: 'Wind advisory + low-engagement bookings',
@@ -75,7 +79,8 @@ export const coreCapabilities = [
   },
   {
     icon: 'Utensils',
-    title: 'F&B Operations',
+    title: 'Stop leaving covers on the table.',
+    category: 'F&B Operations',
     color: theme.colors.lensFbOperations,
     summary: 'Tie culinary prep to what golf & weather already know.',
     bullets: [
@@ -83,14 +88,17 @@ export const coreCapabilities = [
       'Flag pace-of-play issues before they crush the Grill Room.',
     ],
     source: 'POS + Tee Sheet + Weather',
+    dataSources: 'POS + TEE SHEET + WEATHER',
     freshness: 'Prep forecast updated 7 min ago',
     confidence: '86% confidence',
     why: 'Rounds running 4:45 · patio demand spiking',
+    description: 'When tee-sheet traffic is light and weather is pushing members indoors, Swoop tells the kitchen before the shift starts — so F&B is staffed and prepped for the covers that are actually coming.',
     metric: { value: '$5.7K', label: 'monthly F&B upside' },
   },
   {
     icon: 'UsersRound',
-    title: 'Staffing & Labor',
+    title: 'Staff for what\'s actually happening.',
+    category: 'Staffing & Labor',
     color: theme.colors.lensStaffingLabor,
     summary: 'Staff to predicted demand, not static templates.',
     bullets: [
@@ -98,14 +106,16 @@ export const coreCapabilities = [
       'Overtime + labor cost per dollar tracked in real time.',
     ],
     source: 'Scheduling + Tee Sheet',
+    dataSources: 'SCHEDULING + TEE SHEET',
     freshness: 'Coverage model recalculated hourly',
     confidence: '90% confidence',
     why: 'Saturday lunch forecast 95 covers vs. 6 staff scheduled',
-    metric: { value: '223x', label: 'ROI on alert' },
+    metric: { value: '$14,200', label: 'Dues protected · one alert · 14 min' },
   },
   {
     icon: 'DollarSign',
-    title: 'Revenue & Pipeline',
+    title: 'Prove the save to your board.',
+    category: 'Revenue & Pipeline',
     color: theme.colors.lensRevenuePipeline,
     summary: 'Show the board which actions protected revenue.',
     bullets: [
@@ -113,10 +123,11 @@ export const coreCapabilities = [
       'Pipeline insights tie guest play to future memberships.',
     ],
     source: 'Revenue + CRM + POS',
+    dataSources: 'REVENUE + CRM + POS',
     freshness: 'Board-ready report generated nightly',
     confidence: '94% confidence',
     why: '4 members saved this month via playbooks',
-    metric: { value: '$251K', label: 'annualized impact' },
+    metric: { value: '$251K', label: 'annualized impact', source: 'Pinetree CC pilot · 300-member club · trailing 90 days' },
   },
   {
     icon: 'Send',
@@ -279,7 +290,7 @@ export const pricingTiers = [
     price: '$499/mo',
     badge: 'Most Popular',
     description:
-      'Everything in Signals, plus Swoop drafts the callback script, the comp offer, and the staffing shift in plain English — so your team acts instead of sorting spreadsheets.',
+      'Everything in Signals, plus Swoop drafts the callback, comp offer, and staffing shift in plain English — so your team acts instead of sorting spreadsheets.',
     features: [
       'Everything in Signals',
       'Intelligence drafts the response',
@@ -325,7 +336,7 @@ export const faqItems = [
   {
     question: "Is my members' data secure?",
     answer:
-      'Yes. All data is encrypted in transit and at rest. We never share member data with third parties. SOC 2 compliance is on our roadmap.',
+      'You do, always. Swoop operates on read-only API access. Your data is isolated per club, encrypted at rest (AES-256) and in transit (TLS 1.3). It is never used for cross-club model training or shared with any third party.',
   },
   {
     question: 'Can I try it before committing?',
@@ -346,5 +357,30 @@ export const faqItems = [
     question: 'What happens if we cancel?',
     answer:
       'Month-to-month, cancel any time. Your data exports in one click — member records, action history, and board reports stay yours. No lock-in, no data hostage, no penalty.',
+  },
+  {
+    question: 'What does Swoop cost?',
+    answer:
+      'Founding-partner pricing starts at $499/month, locked for life. Standard plans run $499–$1,499/mo depending on club size and tier. No setup fees. No long-term contracts.',
+  },
+  {
+    question: 'Who owns our member data?',
+    answer:
+      'You do, always. Swoop operates on read-only API access. Your data is isolated per club, encrypted at rest (AES-256) and in transit (TLS 1.3). It is never used for cross-club model training or shared with any third party.',
+  },
+  {
+    question: 'What is the cancellation policy?',
+    answer:
+      'Month-to-month. Cancel any time in the first 90 days for a full refund. After that, 30 days written notice. Your data exports in one click and your member records stay yours.',
+  },
+  {
+    question: 'Can we talk to a reference club before deciding?',
+    answer:
+      'Yes. We will connect you with a founding-partner GM for a 20-minute peer call — no NDA, no sales involvement. Just one GM talking to another.',
+  },
+  {
+    question: 'What integrations are available on day one?',
+    answer:
+      '28 integrations across 10 categories. Tee Sheet: ForeUP, Jonas Club, Club Prophet, Lightspeed Golf. CRM: Jonas, ClubEssential, Northstar. POS: Toast, Square, Lightspeed Restaurant, POSitouch. Ask us if you do not see your stack listed.',
   },
 ];

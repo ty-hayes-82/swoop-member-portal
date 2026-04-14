@@ -13,21 +13,27 @@ const toDemoPage = () => { window.location.hash = '#/contact'; };
 export default function PlatformPage() {
   return (
     <LandingShell>
-      <SectionShell
-        band="cream"
-        eyebrow="Platform"
-        title="Every signal. One operating view."
-        subtitle="One dashboard shows which members are drifting, why, and what to do next — assembled from your existing systems overnight."
-      >
-        <div style={{ textAlign: 'center', marginTop: 8 }}>
-          <Button size="lg" onClick={toDemoPage}>
-            Book the 30-minute walkthrough
-          </Button>
-        </div>
-      </SectionShell>
-      <CoreCapabilitiesSection />
+      <div id="problem">
+        <SectionShell
+          band="cream"
+          eyebrow="Platform"
+          title="Every signal. One operating view."
+          subtitle="One dashboard shows which members are drifting, why, and what to do next — assembled from your existing systems overnight."
+        >
+          <div style={{ textAlign: 'center', marginTop: 8 }}>
+            <Button size="lg" onClick={toDemoPage}>
+              Book the 30-minute walkthrough
+            </Button>
+          </div>
+        </SectionShell>
+      </div>
+      <div id="platform">
+        <CoreCapabilitiesSection />
+      </div>
       <HowItWorksSection />
-      <AgentsSection />
+      <div id="agents">
+        <AgentsSection />
+      </div>
       <SaveStorySection />
       {/* Mid-page CTA */}
       <SectionShell band="sand" size="sm">
@@ -43,8 +49,12 @@ export default function PlatformPage() {
           </Button>
         </div>
       </SectionShell>
-      <IntegrationsSection />
-      <ComparisonSection />
+      <div id="integrations">
+        <IntegrationsSection />
+      </div>
+      <div id="compare">
+        <ComparisonSection />
+      </div>
       <SectionShell band="dark" size="sm">
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 12 }}>

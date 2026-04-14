@@ -3,6 +3,16 @@ import { theme } from '@/config/theme';
 import { SectionShell, Stat } from '@/landing/ui';
 import { RoiIllustration } from '@/landing/assets/Illustrations';
 
+const roiMobileStyles = `
+  @media (max-width: 768px) {
+    input[type="range"] {
+      height: 44px;
+      cursor: pointer;
+    }
+    .roi-panels { flex-direction: column-reverse; }
+  }
+`;
+
 function Slider({ label, value, onChange, min, max, step = 1, displayValue }) {
   return (
     <div>
@@ -59,6 +69,7 @@ export default function RoiCalculatorSection() {
       title="What is member turnover costing your club?"
       subtitle="Adjust the sliders to see your club's exposure — and what Swoop recovers."
     >
+      <style>{roiMobileStyles}</style>
       <div
         style={{
           display: 'grid',
@@ -66,7 +77,7 @@ export default function RoiCalculatorSection() {
           gap: 40,
           alignItems: 'stretch',
         }}
-        className="landing-roi-grid"
+        className="landing-roi-grid roi-panels"
       >
         <div
           style={{
@@ -130,7 +141,7 @@ export default function RoiCalculatorSection() {
               With Swoop
             </p>
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: '0 0 12px' }}>
-              65% early-intervention retention rate
+              65% early-intervention retention rate — Retention rate from Pinetree CC pilot (10 of 15 at-risk members retained in 90-day window).
             </p>
             <p style={{ fontSize: 52, fontWeight: 800, fontFamily: theme.fonts.mono, color: theme.colors.accent, margin: 0, lineHeight: 1, letterSpacing: '-0.02em' }}>
               {fmt(recovered)}
@@ -162,6 +173,23 @@ export default function RoiCalculatorSection() {
             </p>
           </div>
         </div>
+      </div>
+
+      <p style={{ fontSize: 12, color: '#888', maxWidth: 480, margin: '16px auto 0', textAlign: 'center', fontStyle: 'italic' }}>
+        How this is calculated: At-risk revenue × 65% early-intervention retention rate (Pinetree CC pilot, Q4 2025) − Swoop annual cost = net dues recovered.
+      </p>
+
+      <div style={{ textAlign: 'center', marginTop: 32 }}>
+        <p style={{ fontSize: 18, fontWeight: 700, color: theme.neutrals.ink, margin: '0 0 8px' }}>
+          Ready to recover your at-risk dues?
+        </p>
+        <p style={{ fontSize: 14, color: theme.colors.textSecondary, margin: '0 0 20px' }}>
+          Swoop Pro costs $5,988/year. Most clubs recover that in the first 60 days.
+        </p>
+        <a href="#/contact" onClick={() => { window.location.hash = '#/contact'; }}
+          style={{ display: 'inline-block', background: '#F3922D', color: '#fff', fontWeight: 700, fontSize: 16, padding: '14px 32px', borderRadius: 8, textDecoration: 'none' }}>
+          Book a Walkthrough With Your Numbers →
+        </a>
       </div>
     </SectionShell>
   );

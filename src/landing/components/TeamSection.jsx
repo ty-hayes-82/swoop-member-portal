@@ -3,22 +3,19 @@ import { SectionShell, Card } from '@/landing/ui';
 
 const team = [
   {
-    initials: 'TH',
     name: 'Tyler Hayes',
-    title: 'Founder & CEO',
-    bio: 'Former club-tech operator. Ran member experience at a 300-member desert club. Ten years building SaaS for private clubs.',
+    title: 'Co-founder & CEO',
+    bio: 'I ran member ops at a 300-member desert club before writing a line of code. I built Swoop because the GM tools I needed didn\'t exist.',
   },
   {
-    initials: 'JM',
     name: 'Jordan Mitchell',
-    title: 'CTO',
-    bio: 'Ex-Agilysys (hospitality tech, NASDAQ: AGYS). Eight years building behavioral prediction systems for clubs, resorts, and cruise lines.',
+    title: 'Co-founder & CTO',
+    bio: 'Eight years building predictive models in hospitality tech. I retrained the models on 12 months of club-specific behavioral data — that\'s the engine under the briefing.',
   },
   {
-    initials: 'AC',
     name: 'Alex Chen',
     title: 'Head of Club Success',
-    bio: 'Ex-Salesforce Industries. Six years turning operational data into daily workflows. Your onboarding lead for the pilot.',
+    bio: 'Six years turning enterprise data into daily operational workflows. Now I do the same thing for GMs — your onboarding and your morning brief come from me personally.',
   },
 ];
 
@@ -39,24 +36,23 @@ export default function TeamSection() {
         }}
       >
         {team.map(member => (
-          <Card key={member.initials} interactive style={{ padding: 28, gap: 16 }}>
+          <Card key={member.name} interactive style={{ padding: 28, gap: 16 }}>
             <div
               style={{
-                width: 52,
-                height: 52,
+                width: 96,
+                height: 96,
                 borderRadius: '50%',
-                background: `linear-gradient(135deg, ${theme.colors.accent}, #e07820)`,
-                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, #1A2E20 0%, #2d4a35 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 18,
-                fontWeight: 800,
-                letterSpacing: '-0.02em',
-                flexShrink: 0,
+                border: '3px solid rgba(181, 149, 106, 0.3)',
+                marginBottom: 16,
               }}
             >
-              {member.initials}
+              <span style={{ color: '#B5956A', fontSize: 28, fontWeight: 800, fontFamily: 'serif' }}>
+                {member.name?.charAt(0) || 'S'}
+              </span>
             </div>
             <div>
               <p style={{ fontSize: 17, fontWeight: 700, color: theme.neutrals.ink, margin: '0 0 2px' }}>

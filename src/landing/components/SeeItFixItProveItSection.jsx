@@ -114,6 +114,9 @@ function ProveStats() {
           CRM said <em>active</em>. POS: last tab 18 days ago. Tee sheet: no-show three Wednesdays.{' '}
           <strong style={{ color: theme.neutrals.ink }}>Not one system flagged her.</strong> Together they did. A comp dinner went out Tuesday. Karen renewed in November.
         </p>
+        <p style={{ fontSize: 11, color: '#888', fontStyle: 'italic', marginTop: 8 }}>
+          Composite example based on real Swoop deployments. Member name changed.
+        </p>
       </Card>
     </div>
   );
@@ -124,6 +127,7 @@ const blocks = [
     eyebrow: 'SEE IT',
     headline: 'One screen. Every signal. Before the first tee time.',
     copy: 'Your tee sheet knows rounds. Your POS knows spend. Your CRM knows complaints. None of them know that James Whitfield has an unresolved complaint, a tee time in 90 minutes, and his dining visits dropped 40% this month. Swoop connects them into a single morning briefing that shows you exactly who needs attention and why.',
+    memberDisclaimer: true,
     visual: <MorningBriefingPanel />,
   },
   {
@@ -186,6 +190,11 @@ export default function SeeItFixItProveItSection() {
                 <p style={{ color: theme.colors.textSecondary, fontSize: 16, lineHeight: 1.7, margin: 0 }}>
                   {block.copy}
                 </p>
+                {block.memberDisclaimer && (
+                  <p style={{ fontSize: 11, color: '#888', fontStyle: 'italic', marginTop: 8 }}>
+                    Composite example based on real Swoop deployments. Member name changed.
+                  </p>
+                )}
               </div>
               {/* Visual */}
               <div style={{ direction: 'ltr' }}>

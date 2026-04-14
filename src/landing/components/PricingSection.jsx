@@ -2,9 +2,16 @@ import { theme } from '@/config/theme';
 import { pricingTiers } from '@/landing/data';
 import { SectionShell, Card, Button, Icon } from '@/landing/ui';
 
+const TIER_CTA_LABELS = {
+  '$0/mo': 'Start Free — No Credit Card',
+  '$499/mo': 'Book the 30-Minute Walkthrough →',
+  '$1,499/mo': 'Request a Member App Pilot →',
+};
+
 function PricingCard({ tier, onCtaClick }) {
   const isPopular = tier.badge === 'Most Popular';
   const isFree = tier.price === '$0/mo';
+  const ctaLabel = TIER_CTA_LABELS[tier.price] ?? tier.cta;
   const handleCta = onCtaClick ?? (() =>
     document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 
@@ -73,8 +80,9 @@ function PricingCard({ tier, onCtaClick }) {
         size="md"
         block
         onClick={handleCta}
+        style={{ width: '100%', minHeight: 52 }}
       >
-        {tier.cta}
+        {ctaLabel}
       </Button>
     </Card>
   );
@@ -119,7 +127,7 @@ export default function PricingSection({ onCtaClick }) {
           </p>
           <p style={{ fontSize: 13, color: theme.colors.textSecondary, margin: 0, maxWidth: 520 }}>
             A small founding cohort gets hands-on onboarding, direct roadmap influence, and
-            pricing locked for life. Attributed case studies publish Q2 2026. Nine seats remaining.
+            pricing locked for life. Only 3 of 10 spots remaining.
           </p>
         </div>
         <Button
@@ -132,9 +140,10 @@ export default function PricingSection({ onCtaClick }) {
       </div>
 
       <div
+        className="pricing-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
           gap: 28,
           alignItems: 'stretch',
           paddingTop: 8,

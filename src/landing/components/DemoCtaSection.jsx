@@ -125,7 +125,7 @@ export default function DemoCtaSection() {
               </p>
             )}
             <p style={{ marginTop: 18, color: 'rgba(255,255,255,0.55)', fontSize: 13 }}>
-              No credit card required · 30-minute walkthrough · Cancel anytime
+              No credit card · 30 minutes · Your club's own data · We'll confirm your slot within 1 business day.
             </p>
             <p style={{ marginTop: 10, color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
               Or email us at{' '}

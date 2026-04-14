@@ -12,8 +12,7 @@ export default function IndustryStatsSection() {
     <SectionShell
       band="dark"
       eyebrow="Why now"
-      title="The window is open. For a little while longer."
-      subtitle="The private club industry spent a decade digitizing — tee sheets, POS, CRM — but no platform connected those systems into a single intelligence layer. In 2024, LLM infrastructure made that layer buildable in months, not years. Swoop is the first platform built natively on that infrastructure for this vertical."
+      title="The numbers behind the opportunity."
     >
       <div
         style={{

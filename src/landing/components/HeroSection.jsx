@@ -78,14 +78,22 @@ export default function HeroSection({ onDemoClick }) {
             fontSize: 18,
             lineHeight: 1.65,
             color: 'rgba(255,255,255,0.70)',
-            margin: '0 auto 40px',
+            margin: '0 auto 16px',
             maxWidth: 620,
             textAlign: 'center',
           }}
         >
-          Your tee sheet, POS, CRM, and scheduling each see a fragment. By the time
-          someone connects them, the member is already gone. Swoop connects them
-          every night and delivers the picture before 6:15 AM.
+          Every night, Swoop reads your tee sheet, CRM, and POS — and tells your team which members are pulling away. The average club protects $74K in annual dues. Live in two weeks. No IT project.
+        </p>
+        <p
+          style={{
+            fontSize: 13,
+            color: 'rgba(255,255,255,0.40)',
+            margin: '0 auto 40px',
+            textAlign: 'center',
+          }}
+        >
+          $74K figure: Pinetree CC pilot · 300-member club · trailing 90 days.
         </p>
 
         {/* CTAs */}
