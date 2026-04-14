@@ -3,10 +3,10 @@ import { Button, Eyebrow, LandingImage } from '@/landing/ui';
 import HeroArt from '@/landing/assets/HeroArt';
 import { photoUrl, photoSrcSet, photoAlt } from '@/landing/assets/photos';
 
-export default function HeroSection() {
-  const goToDemoForm = () => {
+export default function HeroSection({ onDemoClick }) {
+  const goToDemoForm = onDemoClick ?? (() => {
     document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  });
 
   return (
     <section className="landing-section" style={{ paddingTop: 'clamp(48px, 6vw, 96px)' }}>

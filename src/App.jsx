@@ -13,7 +13,11 @@ const ConferenceShell = lazy(() => import('@/mobile/conference/ConferenceShell')
 const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatPage'));
 const MemberConciergeTest = lazy(() => import('@/features/concierge/MemberConciergeTest'));
 const InvestorSite = lazy(() => import('@/features/invest/InvestorSite'));
-const LandingPage = lazy(() => import('@/landing/LandingPage.jsx'));
+const LandingHomePage     = lazy(() => import('@/landing/pages/HomePage.jsx'));
+const LandingPlatformPage = lazy(() => import('@/landing/pages/PlatformPage.jsx'));
+const LandingPricingPage  = lazy(() => import('@/landing/pages/PricingPage.jsx'));
+const LandingAboutPage    = lazy(() => import('@/landing/pages/AboutPage.jsx'));
+const LandingContactPage  = lazy(() => import('@/landing/pages/ContactPage.jsx'));
 const QuickClubSetup = lazy(() => import('@/features/login/QuickClubSetup'));
 const NewClubSetup = lazy(() => import('@/features/login/NewClubSetup'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
@@ -400,11 +404,39 @@ export default function App() {
     );
   }
 
-  // Landing page — accessible without auth via hash route
+  // Landing pages — accessible without auth via hash route
   if (currentHash === '#/landing') {
     return (
       <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
-        <LandingPage />
+        <LandingHomePage />
+      </Suspense>
+    );
+  }
+  if (currentHash === '#/platform') {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
+        <LandingPlatformPage />
+      </Suspense>
+    );
+  }
+  if (currentHash === '#/pricing') {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
+        <LandingPricingPage />
+      </Suspense>
+    );
+  }
+  if (currentHash === '#/about') {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
+        <LandingAboutPage />
+      </Suspense>
+    );
+  }
+  if (currentHash === '#/contact') {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center h-64 text-gray-400 text-sm">Loading...</div>}>
+        <LandingContactPage />
       </Suspense>
     );
   }
