@@ -222,6 +222,22 @@ export default function TodayView() {
             <p className="text-sm text-gray-500 mt-1 mb-0">{formatDate()}</p>
           </div>
           <DataEmptyState icon="📊" title="Welcome to your dashboard" description="Import your member roster, tee sheet, and POS data to see today's operational briefing. Start with members — each data source you connect unlocks more insights." dataType="club data" />
+          <div className="flex gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={() => navigate('admin', { tab: 'data-hub' })}
+              className="px-5 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors"
+            >
+              Go to Import Data →
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('admin')}
+              className="px-5 py-2.5 rounded-lg border border-gray-200 bg-transparent text-gray-600 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+            >
+              View Integrations
+            </button>
+          </div>
         </div>
       </PageTransition>
     );
