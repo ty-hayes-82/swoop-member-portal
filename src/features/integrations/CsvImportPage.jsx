@@ -77,7 +77,27 @@ async function callAIForStep({ step, file, parsedHeaders, sampleRows, rowCount, 
   } else if (step === 2) {
     const mapped = Object.entries(mapping).filter(([, v]) => v).map(([c, f]) => `${c} → ${f}`).join(', ');
     const unmappedCount = Object.values(mapping).filter(v => !v).length;
-    message = `Column auto-mapping for a ${importType} import is complete. Mapped fields: ${mapped || 'none'}. Unmapped columns: ${unmappedCount}. In 1–2 sentences: summarize the mapping confidence and flag any columns the GM should manually review. Don't repeat all mappings — just call out what's uncertain or worth double-checking.`;
+    // Ask for structured JSON so the UI can render interactive suggestion chips
+    message = `You are a data-mapping assistant for Swoop, a club management platform. Analyze the CSV column mapping and return ONLY a valid JSON object — no markdown, no prose outside the JSON.
+
+Return format:
+{
+  "summary": "<2-3 sentence plain-English confidence summary>",
+  "suggestions": [
+    { "type": "remap", "csvCol": "<exact CSV column>", "targetField": "<swoop field key>", "label": "<short action label>", "reason": "<1 sentence why>" },
+    { "type": "review", "csvCol": "<exact CSV column>", "targetField": null, "label": "<short review label>", "reason": "<1 sentence concern>" }
+  ],
+  "validation": { "ready": <N>, "warnings": <N>, "errors": <N> }
+}
+
+Import type: ${importType}
+Current mapping: ${mapped || 'none'}
+Unmapped columns: ${unmappedCount}
+All CSV headers: ${parsedHeaders.join(', ')}
+Sample rows (first 3): ${JSON.stringify((sampleRows || []).slice(0, 3))}
+Total rows: ~${rowCount}
+
+Include 1–3 suggestions max. Only suggest remaps if a clearly better field is available. Only flag review items if there is a real data concern visible in the sample. Estimate ready/warnings/errors from sample quality.`;
     file_data = { filename: file?.name || 'upload.csv', headers: parsedHeaders, sampleRows: (sampleRows || []).slice(0, 3), rowCount };
   } else if (step === 3) {
     const { toCreate = 0, toUpdate = 0, rejected = [] } = previewCounts || {};
@@ -100,7 +120,20 @@ async function callAIForStep({ step, file, parsedHeaders, sampleRows, rowCount, 
     });
     if (!res.ok) return null;
     const data = await res.json();
-    return { text: data.response || null, sessionId: data.session_id || null };
+    const raw = data.response || null;
+    // Step 2 requests structured JSON — try to parse it for interactive chips
+    if (step === 2 && raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        return {
+          text: parsed.summary || raw,
+          suggestions: (parsed.suggestions || []).map((s, i) => ({ ...s, id: `sug-${i}` })),
+          validation: parsed.validation || null,
+          sessionId: data.session_id || null,
+        };
+      } catch { /* fall through to plain text */ }
+    }
+    return { text: raw, suggestions: [], validation: null, sessionId: data.session_id || null };
   } catch {
     return null;
   }
@@ -1147,14 +1180,26 @@ export default function CsvImportPage() {
 
   // AI co-pilot state
   const [aiInsight, setAiInsight] = useState(null);
+  const [aiSuggestions, setAiSuggestions] = useState([]);
+  const [aiValidation, setAiValidation] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSessionId, setAiSessionId] = useState(null);
   const [aiDismissed, setAiDismissed] = useState(false); // per-wizard-run only
   const dismissAI = useCallback(() => setAiDismissed(true), []);
 
+  // Apply an AI mapping suggestion directly to the column mapping
+  const handleAISuggestion = useCallback((suggestion) => {
+    if (suggestion.type === 'remap' && suggestion.csvCol && suggestion.targetField) {
+      setMapping(prev => ({ ...prev, [suggestion.csvCol]: suggestion.targetField }));
+    }
+    setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
+  }, []);
+
   // Clear AI insight on every step change; keep sessionId for cross-step continuity
   useEffect(() => {
     setAiInsight(null);
+    setAiSuggestions([]);
+    setAiValidation(null);
     setAiLoading(false);
   }, [step]);
 
@@ -1177,22 +1222,25 @@ export default function CsvImportPage() {
     return () => { cancelled = true; };
   }, [step, file, importType, aiDismissed]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Step 2: summarize mapping confidence once after auto-mapping runs
+  // Step 2: structured mapping analysis — fires once on step entry (mapping excluded intentionally)
   useEffect(() => {
     if (step !== 2 || csvHeaders.length === 0 || aiDismissed) return;
     let cancelled = false;
     setAiInsight(null);
+    setAiSuggestions([]);
+    setAiValidation(null);
     setAiLoading(true);
     callAIForStep({ step: 2, file, parsedHeaders: csvHeaders, sampleRows: parsedRows.slice(0, 5), rowCount: parsedRows.length, mapping, previewCounts: {}, importType, sessionId: aiSessionId })
       .then(result => {
         if (cancelled || !result) { setAiLoading(false); return; }
         setAiInsight(result.text);
+        setAiSuggestions(result.suggestions || []);
+        setAiValidation(result.validation || null);
         if (result.sessionId) setAiSessionId(result.sessionId);
         setAiLoading(false);
       }).catch(() => { if (!cancelled) setAiLoading(false); });
     return () => { cancelled = true; };
   }, [step, csvHeaders, aiDismissed]); // eslint-disable-line react-hooks/exhaustive-deps
-  // mapping excluded intentionally — fire once on step entry, not on every user tweak
 
   // Step 3: plain-English narrative above the count tiles
   useEffect(() => {
@@ -1337,6 +1385,8 @@ export default function CsvImportPage() {
     setParseError(null);
     // Clear AI state between wizard runs; aiDismissed intentionally kept for the page session
     setAiInsight(null);
+    setAiSuggestions([]);
+    setAiValidation(null);
     setAiLoading(false);
     setAiSessionId(null);
   };
@@ -1462,6 +1512,9 @@ export default function CsvImportPage() {
             loading={aiLoading}
             dismissed={aiDismissed}
             onDismiss={dismissAI}
+            suggestions={aiSuggestions}
+            validation={aiValidation}
+            onApplySuggestion={handleAISuggestion}
           />
         </>
       )}

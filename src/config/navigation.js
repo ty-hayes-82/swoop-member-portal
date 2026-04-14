@@ -17,15 +17,6 @@ export const navItems = [
     sourceSystems: ['Tee Sheet', 'POS', 'Member CRM', 'Scheduling', 'Weather', 'Complaints'],
   },
   {
-    key: 'members',
-    label: 'Members',
-    section: 'PRIMARY',
-    icon: '👥',
-    color: theme.colors.navMembers,
-    subtitle: 'Member intelligence: who needs attention, why, and what to do.',
-    sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
-  },
-  {
     key: 'revenue',
     label: 'Revenue',
     section: 'PRIMARY',
@@ -33,6 +24,15 @@ export const navItems = [
     color: theme.colors.navFb,
     subtitle: 'Revenue leakage decomposition, scenario modeling, and board-ready attribution.',
     sourceSystems: ['Tee Sheet', 'POS', 'Scheduling', 'Weather'],
+  },
+  {
+    key: 'members',
+    label: 'Members',
+    section: 'PRIMARY',
+    icon: '👥',
+    color: theme.colors.navMembers,
+    subtitle: 'Member intelligence: who needs attention, why, and what to do.',
+    sourceSystems: ['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email'],
   },
   {
     key: 'tee-sheet',
