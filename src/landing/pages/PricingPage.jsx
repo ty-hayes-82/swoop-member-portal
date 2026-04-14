@@ -7,9 +7,9 @@ import { faqItems } from '@/landing/data';
 import { SectionShell, FaqItem } from '@/landing/ui';
 
 const PRICING_FAQ_QUESTIONS = new Set([
-  'We already have Jonas and ClubEssential. Does Swoop replace them?',
+  'Do I need to replace my current software?',
   'How long does setup take?',
-  'What does a founding-partner pilot actually look like?',
+  'Can I try it before committing?',
 ]);
 
 const pricingFaqItems = faqItems.filter((item) => PRICING_FAQ_QUESTIONS.has(item.question));
