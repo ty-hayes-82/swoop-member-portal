@@ -37,10 +37,10 @@ export default function LandingFooter() {
         </div>
         <div style={{ display: 'flex', gap: 24, alignItems: 'center', fontSize: 13 }}>
           <a
-            href="#/invest"
+            href="#/contact"
             style={{ color: theme.colors.accent, fontWeight: 700, textDecoration: 'none' }}
           >
-            Investor Information
+            Book a Demo
           </a>
           <span style={{ color: theme.colors.textMuted }}>
             © {new Date().getFullYear()} Swoop Golf

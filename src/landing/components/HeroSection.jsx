@@ -62,7 +62,7 @@ function AgentConsole() {
             letterSpacing: '-0.02em',
           }}
         >
-          $42.2K
+          $42.4K
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>
           protected across 8 actions, delivered 06:14

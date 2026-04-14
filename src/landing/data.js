@@ -121,7 +121,7 @@ export const coreCapabilities = [
   {
     icon: 'Send',
     title: 'Engagement & Outreach',
-    color: '#6B7280',
+    color: '#F3922D',
     summary: 'The right message to the right member at the right moment.',
     bullets: [
       'Drafts callback scripts, comp offers, and re-engagement notes.',

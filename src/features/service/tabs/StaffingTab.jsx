@@ -255,7 +255,7 @@ export default function StaffingTab() {
               {dailyForecast.map((day, i) => {
                 const gusts = day.gusts || day.wind || 0;
                 const precipProb = day.precipProb || 0;
-                const hasRisk = gusts > 15 || precipProb > 40 || (day.high || 72) < 45;
+                const hasRisk = gusts > 15 || precipProb > 40 || (day.high != null && day.high < 45);
                 const dateStr = day.date
                   ? new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
                   : `Day ${i + 1}`;
