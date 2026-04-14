@@ -869,9 +869,20 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
   );
 }
 
+// Recommended next-import type after completing a given import type.
+// Drives the "Import X next →" CTA on the success screen.
+const NEXT_IMPORT_SUGGESTION = {
+  members:           { type: 'tee_times',     label: 'Tee Sheet',    why: 'Unlock health scores and daily briefings' },
+  tee_times:         { type: 'transactions',  label: 'POS / F&B',    why: 'Complete the revenue picture' },
+  booking_players:   { type: 'transactions',  label: 'POS / F&B',    why: 'Complete the revenue picture' },
+  transactions:      { type: 'staff',         label: 'Staff Roster', why: 'Enable staffing-gap analysis' },
+  staff:             { type: 'complaints',    label: 'Complaints',   why: 'Surface service-recovery intelligence' },
+  email_campaigns:   { type: 'members',       label: 'Members',      why: 'Link email signals to member health' },
+};
+
 // ── Step 3: Import ───────────────────────────────────────────────────────────
 
-function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error, uploading, onImport, onReset, aiPanel }) {
+function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error, uploading, onImport, onReset, onImportNext, aiPanel }) {
   const config = getImportTypeConfig(importType);
   const preview = useMemo(
     () => buildImportPreview({ parsedRows, mapping, importType, csvHeaders }),
@@ -1048,6 +1059,28 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
               <ul className="text-xs text-blue-600 dark:text-blue-400 space-y-0.5">
                 {config.unlocks.map(u => <li key={u}>• {u}</li>)}
               </ul>
+            </div>
+          )}
+
+          {/* Next import suggestion — dependency-aware onboarding nudge */}
+          {result.status !== 'failed' && NEXT_IMPORT_SUGGESTION[importType] && onImportNext && (
+            <div className="mt-4 flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-brand-200 bg-brand-50/50 dark:bg-brand-500/5 dark:border-brand-500/20">
+              <div>
+                <div className="text-xs font-bold text-brand-600 dark:text-brand-400">
+                  Next: Import {NEXT_IMPORT_SUGGESTION[importType].label}
+                </div>
+                <div className="text-[11px] text-gray-500 mt-0.5">
+                  {NEXT_IMPORT_SUGGESTION[importType].why}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => onImportNext(NEXT_IMPORT_SUGGESTION[importType].type)}
+                className="shrink-0 px-4 py-2 rounded-lg text-xs font-bold text-white border-none cursor-pointer hover:opacity-90 transition-opacity"
+                style={{ background: '#ff8b00' }}
+              >
+                Import {NEXT_IMPORT_SUGGESTION[importType].label} →
+              </button>
             </div>
           )}
 
@@ -1427,6 +1460,12 @@ export default function CsvImportPage() {
     setAiSessionId(null);
   };
 
+  // Navigate directly to a specific import type after completing one
+  const handleImportNext = (nextType) => {
+    handleReset();
+    setImportType(nextType);
+  };
+
   const handleBulkImport = useCallback(async () => {
     if (!clubId || bulkFiles.length === 0) return;
     setBulkUploading(true);
@@ -1566,6 +1605,7 @@ export default function CsvImportPage() {
           uploading={uploading}
           onImport={handleImport}
           onReset={handleReset}
+          onImportNext={handleImportNext}
           aiPanel={
             <AIImportAssistant
               step={3}
