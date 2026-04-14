@@ -862,7 +862,7 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
         >
           {requiredMissing.length > 0
             ? `Map ${requiredMissing.length} required field${requiredMissing.length > 1 ? 's' : ''} to continue`
-            : `Import ${previewRows.length.toLocaleString()} Rows`}
+            : `Preview Import →`}
         </button>
       </div>
     </div>
@@ -882,7 +882,7 @@ const NEXT_IMPORT_SUGGESTION = {
 
 // ── Step 3: Import ───────────────────────────────────────────────────────────
 
-function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error, uploading, onImport, onReset, onImportNext, aiPanel }) {
+function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error, uploading, onImport, onReset, onImportNext, onBack, isDemo, aiPanel }) {
   const config = getImportTypeConfig(importType);
   const preview = useMemo(
     () => buildImportPreview({ parsedRows, mapping, importType, csvHeaders }),
@@ -942,6 +942,52 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
             </div>
           )}
 
+          {/* Sample records preview */}
+          {preview.toCreate + preview.toUpdate > 0 && parsedRows.length > 0 && (() => {
+            const reverseMap = {};
+            for (const [csvH, swoopF] of Object.entries(mapping)) {
+              if (swoopF) reverseMap[swoopF] = csvH;
+            }
+            const sampleFields = Object.keys(reverseMap).slice(0, 4);
+            const sampleRows = parsedRows.filter((_, i) => {
+              // pick rows that will be created (not rejected)
+              const idx = i + 2;
+              return !preview.rejected.some(r => r.row === idx);
+            }).slice(0, 5);
+            if (sampleRows.length === 0 || sampleFields.length === 0) return null;
+            return (
+              <div className="mb-4">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
+                  Sample records ({Math.min(5, sampleRows.length)} of {preview.toCreate + preview.toUpdate})
+                </div>
+                <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                  <table className="w-full text-[11px]">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-gray-800">
+                        {sampleFields.map(f => (
+                          <th key={f} className="px-2 py-1.5 text-left font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            {f.replace(/_/g, ' ')}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sampleRows.map((row, i) => (
+                        <tr key={i} className="border-t border-gray-100 dark:border-gray-800">
+                          {sampleFields.map(f => (
+                            <td key={f} className="px-2 py-1 text-gray-700 dark:text-gray-300 max-w-[140px] truncate whitespace-nowrap">
+                              {row[reverseMap[f]] || '—'}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
+
           <p className="text-xs text-gray-400 mb-4 text-center">
             {config?.label} &middot; {Object.values(mapping).filter(Boolean).length} columns mapped
           </p>
@@ -966,13 +1012,28 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
               </button>
             </div>
           ) : (
-            <button
-              onClick={onImport}
-              className="w-full py-3 rounded-lg font-bold text-sm text-white cursor-pointer"
-              style={{ background: '#ff8b00' }}
-            >
-              Start Import ({(preview.toCreate + preview.toUpdate).toLocaleString()} rows)
-            </button>
+            <>
+              {isDemo && (
+                <div className="mb-3 p-2.5 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/30 text-xs text-blue-700 dark:text-blue-400 text-center">
+                  Demo mode — data will not be written to the database.
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button
+                  onClick={onBack}
+                  className="flex-1 py-3 rounded-lg border border-gray-200 font-semibold text-sm text-gray-600 cursor-pointer hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={onImport}
+                  className="flex-[2] py-3 rounded-lg font-bold text-sm text-white cursor-pointer"
+                  style={{ background: '#ff8b00' }}
+                >
+                  {isDemo ? 'Simulate Import' : `Start Import (${(preview.toCreate + preview.toUpdate).toLocaleString()} rows)`}
+                </button>
+              </div>
+            </>
           )}
         </div>
       )}
@@ -1245,6 +1306,11 @@ export default function CsvImportPage() {
   const [error, setError] = useState(null);
   const [parseError, setParseError] = useState(null);
 
+  // Demo mode — skip real API calls, show static placeholders
+  const isDemo = (typeof localStorage !== 'undefined' &&
+    (localStorage.getItem('swoop_auth_token') === 'demo' ||
+     (user?.clubId || '').startsWith('demo_')));
+
   // AI co-pilot state
   const [aiInsight, setAiInsight] = useState(null);
   const [aiSuggestions, setAiSuggestions] = useState([]);
@@ -1274,7 +1340,7 @@ export default function CsvImportPage() {
 
   // Step 1: analyze file as soon as it's dropped
   useEffect(() => {
-    if (step !== 1 || !file || aiDismissed) return;
+    if (step !== 1 || !file || aiDismissed || isDemo) return;
     let cancelled = false;
     setAiInsight(null);
     setAiLoading(true);
@@ -1293,7 +1359,7 @@ export default function CsvImportPage() {
 
   // Step 2: structured mapping analysis — fires once on step entry (mapping excluded intentionally)
   useEffect(() => {
-    if (step !== 2 || csvHeaders.length === 0 || aiDismissed) return;
+    if (step !== 2 || csvHeaders.length === 0 || aiDismissed || isDemo) return;
     let cancelled = false;
     setAiInsight(null);
     setAiSuggestions([]);
@@ -1313,7 +1379,7 @@ export default function CsvImportPage() {
 
   // Step 3: plain-English narrative above the count tiles
   useEffect(() => {
-    if (step !== 3 || parsedRows.length === 0 || aiDismissed) return;
+    if (step !== 3 || parsedRows.length === 0 || aiDismissed || isDemo) return;
     const preview = buildImportPreview({ parsedRows, mapping, importType, csvHeaders });
     let cancelled = false;
     setAiInsight(null);
@@ -1387,6 +1453,14 @@ export default function CsvImportPage() {
     setUploading(true);
     setError(null);
     setResult(null);
+
+    // Demo mode — simulate success without hitting the server
+    if (isDemo) {
+      await new Promise(r => setTimeout(r, 800));
+      setResult({ status: 'completed', totalRows: parsedRows.length, success: parsedRows.length, errors: 0 });
+      setUploading(false);
+      return;
+    }
 
     try {
       // Build reverse map: swoopField → csvHeader
@@ -1606,6 +1680,8 @@ export default function CsvImportPage() {
           onImport={handleImport}
           onReset={handleReset}
           onImportNext={handleImportNext}
+          onBack={() => setStep(2)}
+          isDemo={isDemo}
           aiPanel={
             <AIImportAssistant
               step={3}
