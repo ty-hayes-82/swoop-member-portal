@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { label: 'Platform', href: '#/platform' },
   { label: 'Pricing',  href: '#/pricing' },
   { label: 'About',    href: '#/about' },
+  { label: 'Contact',  href: '#/contact' },
 ];
 
 export default function LandingNav() {

@@ -342,4 +342,9 @@ export const faqItems = [
     answer:
       'Six months. Your data, your members, your systems. We connect your tee sheet, POS, and CRM in week one. Your GM gets a daily brief starting day two. At the end, you have a board deck with every save attributed, every dollar traced. Nine founding seats remain — first ten clubs get locked-in pricing for life.',
   },
+  {
+    question: 'What happens if we cancel?',
+    answer:
+      'Month-to-month, cancel any time. Your data exports in one click — member records, action history, and board reports stay yours. No lock-in, no data hostage, no penalty.',
+  },
 ];

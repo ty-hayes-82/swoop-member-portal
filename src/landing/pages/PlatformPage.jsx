@@ -15,7 +15,7 @@ export default function PlatformPage() {
         band="cream"
         eyebrow="Platform"
         title="Every signal. One operating view."
-        subtitle="Six AI-powered lenses that connect your tee sheet, CRM, POS, staffing, and revenue — surfaced before 6:15 AM."
+        subtitle="One dashboard shows which members are drifting, why, and what to do next — assembled from your existing systems overnight."
       >
         <div style={{ textAlign: 'center', marginTop: 8 }}>
           <Button size="lg" onClick={() => { window.location.hash = '#/contact'; }}>

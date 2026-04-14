@@ -2,10 +2,11 @@ import { theme } from '@/config/theme';
 import { pricingTiers } from '@/landing/data';
 import { SectionShell, Card, Button, Icon } from '@/landing/ui';
 
-function PricingCard({ tier }) {
+function PricingCard({ tier, onCtaClick }) {
   const isPopular = tier.badge === 'Most Popular';
-  const goToDemoForm = () =>
-    document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const isFree = tier.price === '$0/mo';
+  const handleCta = onCtaClick ?? (() =>
+    document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 
   return (
     <Card
@@ -67,11 +68,16 @@ function PricingCard({ tier }) {
           </li>
         ))}
       </ul>
+      {isFree && (
+        <Button variant="light" size="md" block onClick={handleCta} style={{ marginBottom: 8 }}>
+          Get started free
+        </Button>
+      )}
       <Button
-        variant={isPopular ? 'primary' : 'light'}
+        variant={isPopular ? 'primary' : isFree ? 'ghost' : 'light'}
         size="md"
         block
-        onClick={goToDemoForm}
+        onClick={handleCta}
       >
         {tier.cta}
       </Button>

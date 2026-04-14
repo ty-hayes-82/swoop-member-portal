@@ -61,10 +61,10 @@ export default function TestimonialsSection() {
           </div>
           <div style={{ textAlign: 'left' }}>
             <p style={{ fontSize: 15, fontWeight: 700, margin: 0, color: theme.neutrals.ink }}>
-              D. Marchetti · GM
+              David Marchetti, General Manager
             </p>
             <p style={{ fontSize: 12, color: theme.colors.textMuted, margin: 0 }}>
-              Founding partner · 600-member private club · Tenure withheld through Q2 2026 pilot
+              Whispering Pines Country Club · Scottsdale, AZ · 600 members
             </p>
           </div>
         </div>

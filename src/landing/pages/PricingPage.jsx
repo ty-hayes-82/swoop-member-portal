@@ -10,6 +10,7 @@ const PRICING_FAQ_QUESTIONS = new Set([
   'How long does setup take?',
   "Is my members' data secure?",
   'What does a founding-partner pilot actually look like?',
+  'What happens if we cancel?',
 ]);
 
 const pricingFaqItems = faqItems.filter((item) => PRICING_FAQ_QUESTIONS.has(item.question));

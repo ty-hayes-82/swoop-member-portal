@@ -1,6 +1,7 @@
 import { theme } from '@/config/theme';
 
 const sizeStyles = {
+  sm: { height: 36, padding: '0 16px', fontSize: 14 },
   md: { height: 44, padding: '0 20px', fontSize: 15 },
   lg: { height: 52, padding: '0 26px', fontSize: 16 },
 };

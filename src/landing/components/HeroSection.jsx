@@ -1,290 +1,157 @@
 import { theme } from '@/config/theme';
 import { Button } from '@/landing/ui';
 
-const agentRows = [
-  { label: 'Member Pulse',         detail: 'Callback queued · Mark Henderson',      value: '$9.4K',  positive: true },
-  { label: 'Service Recovery',     detail: 'Mid-comp drafted · Golf Room',           value: '$11K',   positive: true },
-  { label: 'Demand Optimizer',     detail: 'Full-fare slots routed to 5 members',    value: '-$1.5K', positive: false },
-  { label: 'Labor Optimizer',      detail: '2 FOH shifts added · Get lunch',         value: '$3.2K',  positive: true },
-  { label: 'Engagement Autopilot', detail: '18 member outreach sequences',           value: '$42.4K', positive: true },
-  { label: 'Revenue Analyst',      detail: 'Board revenue report ready',             value: '$12K',   positive: true },
+const proofColumns = [
+  {
+    eyebrow: 'SEE IT',
+    headline: 'Know who\'s drifting — six days early.',
+    body: 'Swoop connects your tee sheet, POS, and CRM into a single member health score. At-risk members surface automatically.',
+  },
+  {
+    eyebrow: 'FIX IT',
+    headline: 'One-tap intervention before the problem compounds.',
+    body: 'Swoop drafts the callback script, the comp offer, and the staffing shift. Your team acts instead of sorting spreadsheets.',
+  },
+  {
+    eyebrow: 'PROVE IT',
+    headline: 'Board-ready attribution. Not a feeling.',
+    body: 'Every save is tracked. Every dollar is sourced. One click generates the report your board wants to see.',
+  },
 ];
-
-function AgentConsole() {
-  return (
-    <div
-      style={{
-        background: '#0D1A0E',
-        border: '1px solid rgba(255,255,255,0.10)',
-        borderRadius: 16,
-        overflow: 'hidden',
-        boxShadow: '0 32px 72px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
-      }}
-    >
-      {/* Header bar */}
-      <div
-        style={{
-          background: '#0a1309',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          padding: '10px 18px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: theme.colors.brass,
-            }}
-          >
-            BRIEF · 06:14 · DELIVERED
-          </span>
-        </div>
-        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em' }}>
-          tonight's brief
-        </span>
-      </div>
-
-      {/* Total */}
-      <div style={{ padding: '20px 20px 12px' }}>
-        <div
-          style={{
-            fontFamily: theme.fonts.mono,
-            fontSize: 42,
-            fontWeight: 800,
-            color: '#FFFFFF',
-            lineHeight: 1,
-            letterSpacing: '-0.02em',
-          }}
-        >
-          $42.4K
-        </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>
-          protected across 8 actions, delivered 06:14
-        </div>
-      </div>
-
-      {/* Agent rows */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '8px 0' }}>
-        {agentRows.map((row) => (
-          <div
-            key={row.label}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '7px 20px',
-              gap: 8,
-            }}
-          >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>
-                {row.label}
-              </span>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', marginLeft: 8 }}>
-                {row.detail}
-              </span>
-            </div>
-            <span
-              style={{
-                fontSize: 12,
-                fontFamily: theme.fonts.mono,
-                fontWeight: 700,
-                color: row.positive ? theme.colors.brass : 'rgba(255,255,255,0.45)',
-                flexShrink: 0,
-              }}
-            >
-              {row.value}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div
-        style={{
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          padding: '10px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.30)' }}>
-          sent to gm@pinetree.com — ready before the first tee time
-        </span>
-        {/* Monogram */}
-        <div
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: '50%',
-            background: theme.colors.brass,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 11,
-            fontWeight: 900,
-            color: '#0D1A0E',
-            letterSpacing: '-0.03em',
-          }}
-        >
-          S
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function HeroSection({ onDemoClick }) {
   const goToDemoForm = onDemoClick ?? (() => {
     document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  const seeTheBrief = () => {
-    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const seeHowItWorks = () => {
+    document.getElementById('see-it')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
     <section
       style={{
-        background: theme.colors.heroGreen,
+        background: theme.colors.heroGreen || '#1A2E20',
         paddingTop: 'clamp(72px, 9vw, 120px)',
         paddingBottom: 'clamp(72px, 9vw, 120px)',
       }}
     >
       <div className="landing-container">
+        {/* Eyebrow */}
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: theme.colors.brass || '#B5956A',
+            margin: '0 0 20px',
+            textAlign: 'center',
+          }}
+        >
+          Member Retention Software for Private Clubs
+        </p>
+
+        {/* Headline */}
+        <h1
+          style={{
+            fontFamily: theme.fonts.serif || "'Fraunces', Georgia, serif",
+            fontSize: 'clamp(36px, 5vw, 64px)',
+            fontWeight: 800,
+            lineHeight: 1.1,
+            letterSpacing: '-0.025em',
+            color: '#FFFFFF',
+            margin: '0 auto 24px',
+            textAlign: 'center',
+            maxWidth: 900,
+          }}
+        >
+          Your club runs on four systems.{' '}
+          <em style={{ fontStyle: 'italic', color: theme.colors.accent }}>
+            None of them talk to each other.
+          </em>
+        </h1>
+
+        {/* Subheadline */}
+        <p
+          style={{
+            fontSize: 18,
+            lineHeight: 1.65,
+            color: 'rgba(255,255,255,0.70)',
+            margin: '0 auto 40px',
+            maxWidth: 620,
+            textAlign: 'center',
+          }}
+        >
+          Your tee sheet, POS, CRM, and scheduling each see a fragment. By the time
+          someone connects them, the member is already gone. Swoop connects them
+          every night and delivers the picture before 6:15 AM.
+        </p>
+
+        {/* CTAs */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, flexWrap: 'wrap', marginBottom: 16 }}>
+          <Button
+            size="lg"
+            onClick={goToDemoForm}
+            style={{ background: theme.colors.accent, color: '#FFFFFF', border: 'none' }}
+          >
+            Book the 30-minute walkthrough
+          </Button>
+          <button
+            onClick={seeHowItWorks}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: 14, color: 'rgba(255,255,255,0.55)', padding: 0,
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            Here's how it works <span style={{ fontSize: 16 }}>›</span>
+          </button>
+        </div>
+
+        {/* Trust bullets */}
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 64 }}>
+          {['Live in under 2 weeks', 'No rip-and-replace', '28 integrations'].map((item) => (
+            <span
+              key={item}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13, color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}
+            >
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', flexShrink: 0 }} />
+              {item}
+            </span>
+          ))}
+        </div>
+
+        {/* Proof columns */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 440px), 1fr))',
-            gap: 'clamp(48px, 6vw, 80px)',
-            alignItems: 'center',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            borderRadius: 20,
+            overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.10)',
           }}
         >
-          {/* Left — copy */}
-          <div>
-            <p
+          {proofColumns.map((col, idx) => (
+            <div
+              key={col.eyebrow}
               style={{
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: theme.colors.brass,
-                margin: '0 0 20px',
+                background: 'rgba(255,255,255,0.05)',
+                borderRight: idx < proofColumns.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                padding: 'clamp(24px, 3vw, 36px)',
               }}
             >
-              Member Retention, Built for Private-Club GMs
-            </p>
-
-            <h1
-              style={{
-                fontFamily: theme.fonts.serif,
-                fontSize: 'clamp(36px, 4.5vw, 58px)',
-                fontWeight: 800,
-                lineHeight: 1.1,
-                letterSpacing: '-0.02em',
-                color: '#FFFFFF',
-                margin: '0 0 24px',
-              }}
-            >
-              See which members are about to resign —{' '}
-              <em
-                style={{
-                  fontStyle: 'italic',
-                  color: theme.colors.accent,
-                  display: 'block',
-                }}
-              >
-                six days before they tell you.
-              </em>
-            </h1>
-
-            <p
-              style={{
-                fontSize: 17,
-                lineHeight: 1.65,
-                color: 'rgba(255,255,255,0.70)',
-                margin: '0 0 36px',
-                maxWidth: 480,
-              }}
-            >
-              Swoop reads your tee sheet, CRM, and POS together, surfaces at-risk
-              members, fills the waitlist with the right replacements, and protects{' '}
-              <strong style={{ color: '#FFFFFF', fontWeight: 700 }}>$74K+</strong> in
-              dues a year. Live in fourteen days.
-            </p>
-
-            {/* CTAs */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', marginBottom: 32 }}>
-              <Button
-                size="lg"
-                onClick={goToDemoForm}
-                style={{
-                  background: theme.colors.accent,
-                  color: '#FFFFFF',
-                  border: 'none',
-                }}
-              >
-                Book the 30-minute walkthrough
-              </Button>
-              <button
-                onClick={seeTheBrief}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: 14,
-                  color: 'rgba(255,255,255,0.55)',
-                  padding: 0,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                }}
-              >
-                or see the daily brief{' '}
-                <span style={{ fontSize: 16 }}>›</span>
-              </button>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: theme.colors.brass || '#B5956A', margin: '0 0 12px' }}>
+                {col.eyebrow}
+              </p>
+              <h3 style={{ fontFamily: theme.fonts.serif, fontSize: 17, fontWeight: 700, color: '#FFFFFF', margin: '0 0 10px', lineHeight: 1.3 }}>
+                {col.headline}
+              </h3>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, margin: 0 }}>
+                {col.body}
+              </p>
             </div>
-
-            {/* Trust bullets */}
-            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-              {['Live in under 2 weeks', 'No rip-and-replace', '28 integrations'].map((item) => (
-                <span
-                  key={item}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 7,
-                    fontSize: 13,
-                    color: 'rgba(255,255,255,0.55)',
-                    fontWeight: 500,
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 7,
-                      height: 7,
-                      borderRadius: '50%',
-                      background: '#4ade80',
-                      flexShrink: 0,
-                    }}
-                  />
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Right — agent console */}
-          <div>
-            <AgentConsole />
-          </div>
+          ))}
         </div>
       </div>
     </section>
