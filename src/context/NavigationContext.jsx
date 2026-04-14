@@ -10,7 +10,7 @@ const VALID_ROUTES = new Set([
   // V3 hidden but still routable for backward compat
   'revenue', 'insights', 'actions',
   // Accessible via direct navigation (not in nav)
-  'member-profile', 'integrations', 'profile', 'automations', 'agent-activity',
+  'member-profile', 'integrations', 'profile', 'automations', 'agent-activity', 'sms-simulator',
   // App-shell routes handled outside ROUTES map (see src/App.jsx)
   'new-club',
   // Legacy routes (redirect via ROUTE_REDIRECTS below)

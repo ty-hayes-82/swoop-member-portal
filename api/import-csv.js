@@ -28,12 +28,12 @@ const VENDOR_KNOWN_FIELDS = (() => {
   return s;
 })();
 
-// § 1.3 rate limit: max 5 imports per club per hour.
+// § 1.3 rate limit: max imports per club per hour.
 // Module-scope Map is fine for single-region serverless; each cold start
 // resets which is acceptable hot-path abuse protection. TODO(multi-region):
 // move to Postgres/Redis if we ever run in more than one Vercel region.
 const IMPORT_RATE_WINDOW_MS = 60 * 60 * 1000;
-const IMPORT_RATE_MAX = 5;
+const IMPORT_RATE_MAX = process.env.IMPORT_RATE_MAX ? parseInt(process.env.IMPORT_RATE_MAX, 10) : 20;
 const importRateBuckets = new Map(); // clubId -> number[] (timestamps)
 function checkImportRateLimit(clubId) {
   const now = Date.now();
@@ -85,7 +85,7 @@ const IMPORT_TYPES = {
   },
   tee_times: {
     requiredFields: ['reservation_id', 'course', 'date', 'tee_time'],
-    optionalFields: ['member_id', 'players', 'guest_flag', 'transportation', 'caddie', 'status', 'check_in_time', 'round_start', 'round_end', 'duration_min'],
+    optionalFields: ['member_id', 'players', 'guest_flag', 'transportation', 'caddie', 'holes', 'status', 'check_in_time', 'round_start', 'round_end', 'duration_min'],
     table: 'bookings',
     columnMap: { reservation_id: 'booking_id', course: 'course_id', date: 'booking_date', players: 'player_count', guest_flag: 'has_guest', caddie: 'has_caddie', duration_min: 'duration_minutes' },
   },
@@ -216,7 +216,7 @@ const FIELD_ALIASES = {
   'phone #': 'phone', 'annual fee': 'annual_dues', 'annual dues': 'annual_dues',
   'date joined': 'join_date', 'membership type': 'membership_type', 'mem type': 'membership_type',
   'household id': 'household_id', 'handicap #': 'handicap', 'current balance': 'current_balance',
-  'date resigned': 'date_resigned', 'date of birth': 'birthday',
+  'date resigned': 'date_resigned', 'date of birth': 'birthday', 'mailings': 'communication_preference',
   // Booking Players
   'player id': 'player_id', 'reservation id': 'reservation_id',
   // Tee Times
@@ -229,6 +229,10 @@ const FIELD_ALIASES = {
   'net amount': 'total_amount', 'total due': 'total_amount', 'total amount': 'total_amount', 'chit total': 'total_amount',
   'sales area': 'outlet_name', 'outlet name': 'outlet_name', 'item count': 'item_count',
   'settlement method': 'settlement_method',
+  'first fire': 'first_fire', 'last fulfilled': 'last_fulfilled',
+  // Booking Players
+  'player id': 'player_id', 'reservation id': 'reservation_id',
+  'guest name': 'guest_name', 'guest flag': 'guest_flag',
   // Complaints
   'happometer score': 'priority', 'reported at': 'reported_at', 'created date': 'reported_at',
   'resolution date': 'resolved_at', 'resolved at': 'resolved_at',
@@ -259,7 +263,7 @@ const FIELD_ALIASES = {
   'act hrs': 'actual_hours', 'actual hours': 'actual_hours', 'hours worked': 'actual_hours',
   'shift date': 'date',
   // POS Checks / Line Items / Payments
-  'chk#': 'check_id',
+  'chk#': 'transaction_id',
   'item description': 'item_description', 'sales category': 'sales_category',
   'regular price': 'regular_price', 'fire time': 'fire_time',
   'payment id': 'payment_id', 'settlement time': 'processed_at',
@@ -289,6 +293,7 @@ const IMPORT_ALIAS_OVERRIDES = {
   event_registrations: { 'member #': 'member_id', 'event number': 'event_id' },
   complaints: { 'type': 'category', 'subject': 'description', 'date': 'reported_at', 'member #': 'member_id' },
   tee_times: { 'member #': 'member_id' },
+  booking_players: { 'member #': 'member_id' },
   transactions: { 'member #': 'member_id' },
   pos_checks: { 'member #': 'member_id', 'chk#': 'check_id' },
   line_items: { 'chk#': 'check_id', 'item description': 'item_description', 'sales category': 'sales_category', 'regular price': 'regular_price', 'qty': 'quantity', 'fire time': 'fire_time', 'comp': 'is_comp', 'void': 'is_void' },
@@ -303,7 +308,7 @@ function resolveAliases(row, importType) {
   const resolved = {};
   for (const [key, value] of Object.entries(row)) {
     const lower = key.trim().toLowerCase();
-    const mapped = overrides[lower] || FIELD_ALIASES[lower] || key;
+    const mapped = overrides[lower] || FIELD_ALIASES[lower] || lower;
     if (mapped !== '_skip') {
       resolved[mapped] = value;
     }

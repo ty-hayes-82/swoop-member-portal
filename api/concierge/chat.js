@@ -632,7 +632,7 @@ async function chatHandler(req, res) {
   }
 
   const clubId = getReadClubId(req);
-  const { member_id, message } = req.body;
+  const { member_id, message, debug } = req.body;
 
   if (!member_id) {
     return res.status(400).json({ error: 'member_id is required' });
@@ -710,12 +710,19 @@ async function chatHandler(req, res) {
       tools: availableTools,
     });
 
+    // Collect tool call trace for debug mode
+    const toolCallLog = [];
+
     // Tool-use loop: execute tools and feed results back until Claude responds with text
     while (result.stop_reason === 'tool_use') {
       const toolUse = result.content.find(c => c.type === 'tool_use');
       if (!toolUse) break;
 
       const toolResult = await executeConciergeTool(toolUse.name, toolUse.input, profile, clubId);
+
+      if (debug) {
+        toolCallLog.push({ name: toolUse.name, input: toolUse.input, result: toolResult, ts: new Date().toISOString() });
+      }
 
       messages.push({ role: 'assistant', content: result.content });
       messages.push({
@@ -747,6 +754,7 @@ async function chatHandler(req, res) {
       member_id,
       response: responseText,
       simulated: false,
+      ...(debug && { tool_calls: toolCallLog }),
     });
   } catch (err) {
     console.error('Concierge chat error:', err);

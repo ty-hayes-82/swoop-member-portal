@@ -50,6 +50,7 @@ const CsvImportPage = lazy(() => import('@/features/integrations/CsvImportPage')
 const PlaybooksPage = lazy(() => import('@/features/playbooks/PlaybooksPage'));
 const AutomationsHub = lazy(() => import('@/features/automations/AutomationsHub'));
 const AgentActivityPage = lazy(() => import('@/features/agents/AgentActivityPage'));
+const SMSChatSimulatorPage = lazy(() => import('@/features/agents/SMSChatSimulatorPage'));
 const TeeSheetView = lazy(() => import('@/features/tee-sheet/TeeSheetView'));
 const RevenuePage = lazy(() => import('@/features/revenue/RevenuePage'));
 const ProfilePage = lazy(() => import('@/features/profile/ProfilePage'));
@@ -73,6 +74,7 @@ const ROUTES = {
   'playbooks': PlaybooksPage,
   'automations': AutomationsHub,
   'agent-activity': AgentActivityPage,
+  'sms-simulator': SMSChatSimulatorPage,
   'profile': ProfilePage,
 };
 
