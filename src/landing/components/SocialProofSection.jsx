@@ -31,7 +31,7 @@ const metricCards = [
 
 const benefitIcons = ['Handshake', 'Compass', 'Lock'];
 
-export default function SocialProofSection() {
+export default function SocialProofSection({ onCtaClick }) {
   return (
     <SectionShell
       band="cream"
@@ -150,12 +150,7 @@ export default function SocialProofSection() {
         </div>
         <div style={{ textAlign: 'center' }}>
           <Button
-            as="a"
-            href="#demo-form"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }}
+            onClick={onCtaClick ?? (() => { window.location.hash = '#/contact'; })}
           >
             Apply for Founding Partner
           </Button>

@@ -103,7 +103,7 @@ function OneBriefPanel() {
   return (
     <div>
       <p style={{ color: theme.colors.textMuted, fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-        This morning's brief · $42.2K across 6 actions
+        This morning's brief · $42.4K across 6 actions
       </p>
       <div style={{ display: 'grid', gap: 10 }}>
         {briefRows.map(row => (

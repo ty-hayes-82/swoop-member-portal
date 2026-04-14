@@ -10,8 +10,6 @@ const swoopUnique = [
   { title: 'Closed-Loop Engagement Tracking', desc: 'From signal detection to GM action to member response to outcome measurement. Your existing tools stop at the data layer. Swoop closes the loop.' },
 ];
 
-const ACCENT = '#F3922D';
-
 export default function IntegrationsSection() {
   return (
     <SectionShell
@@ -38,7 +36,7 @@ export default function IntegrationsSection() {
             <div
               key={item.title}
               style={{
-                borderLeft: `3px solid ${ACCENT}`,
+                borderLeft: `3px solid ${theme.colors.accent}`,
                 paddingLeft: 18,
               }}
             >
@@ -90,7 +88,7 @@ export default function IntegrationsSection() {
               }}
             >
               <p style={{ fontWeight: 700, margin: '0 0 4px', color: '#FFFFFF', fontSize: 15 }}>{category.label}</p>
-              <p style={{ color: ACCENT, fontFamily: theme.fonts.mono, fontSize: 13, margin: '0 0 6px' }}>
+              <p style={{ color: theme.colors.accent, fontFamily: theme.fonts.mono, fontSize: 13, margin: '0 0 6px' }}>
                 {category.systems} connected systems
               </p>
               <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, margin: 0, lineHeight: 1.5 }}>
@@ -118,7 +116,7 @@ export default function IntegrationsSection() {
           <p
             style={{
               fontSize: 12,
-              color: ACCENT,
+              color: theme.colors.accent,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
               fontWeight: 700,
@@ -128,7 +126,7 @@ export default function IntegrationsSection() {
             Rollout Timeline
           </p>
           <p style={{ fontSize: 28, fontWeight: 700, color: '#FFFFFF', margin: '0 0 12px', lineHeight: 1.2 }}>
-            Typical launch: <span style={{ fontFamily: theme.fonts.mono, color: ACCENT }}>10 business days</span>.
+            Typical launch: <span style={{ fontFamily: theme.fonts.mono, color: theme.colors.accent }}>10 business days</span>.
           </p>
           <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15, lineHeight: 1.6, margin: 0 }}>
             Week 1: connector setup, data validation, and intelligence baselines. Week 2: workflows, AI agent playbooks, and GM readiness.
