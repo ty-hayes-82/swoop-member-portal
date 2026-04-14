@@ -1,7 +1,8 @@
-import { theme } from '@/config/theme';
 import LandingShell from '@/landing/LandingShell';
 import HeroSection from '@/landing/components/HeroSection';
 import TrustStrip from '@/landing/components/TrustStrip';
+import HowItWorksSection from '@/landing/components/HowItWorksSection';
+import { theme } from '@/config/theme';
 import { SectionShell, Button } from '@/landing/ui';
 
 const toDemoPage = () => { window.location.hash = '#/contact'; };
@@ -27,10 +28,10 @@ function HomeCtaStrip() {
               letterSpacing: '-0.02em',
             }}
           >
-            See how it works.
+            See what your club misses today.
           </h2>
           <p style={{ color: theme.colors.textSecondary, fontSize: 16, margin: 0 }}>
-            Explore the platform, see pricing, or book a 30-minute live walkthrough.
+            Explore the platform, see pricing, or book a 30-minute live walkthrough on your data.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -38,7 +39,7 @@ function HomeCtaStrip() {
             See the Platform
           </Button>
           <Button size="md" onClick={toDemoPage}>
-            Book a Demo
+            Book the Walkthrough
           </Button>
         </div>
       </div>
@@ -51,6 +52,7 @@ export default function HomePage() {
     <LandingShell>
       <HeroSection onDemoClick={toDemoPage} />
       <TrustStrip />
+      <HowItWorksSection />
       <HomeCtaStrip />
     </LandingShell>
   );

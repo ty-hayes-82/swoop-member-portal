@@ -13,27 +13,26 @@ export default function HeroSection({ onDemoClick }) {
       <div className="landing-container">
         <div className="landing-hero-grid">
           <div>
-            <Eyebrow>The Operating System for Private Clubs</Eyebrow>
+            <Eyebrow>Private club intelligence · built for GMs</Eyebrow>
             <h1 className="landing-headline">
-              Your members get{' '}
-              <span style={{ color: theme.colors.accent, fontStyle: 'italic', fontWeight: 600 }}>a concierge.</span>
+              Your club runs on{' '}
+              <span style={{ color: theme.colors.accent, fontStyle: 'italic', fontWeight: 600 }}>four systems.</span>
               <br />
-              Your GM gets{' '}
               <span style={{ color: theme.neutrals.ink, fontStyle: 'italic', fontWeight: 600, backgroundImage: `linear-gradient(transparent 62%, rgba(243,146,45,0.25) 62%)` }}>
-                a command center.
+                None of them talk to each other.
               </span>
             </h1>
             <p className="landing-subhead">
-              Spot at-risk members <strong style={{ color: theme.neutrals.ink, fontWeight: 700 }}>6 days</strong> before
-              they resign. Recover <strong style={{ color: theme.neutrals.ink, fontWeight: 700 }}>$74K+</strong> in
-              dues a year. Without replacing your tee sheet, CRM, or POS.
+              Swoop connects your tee sheet, CRM, and POS to surface at-risk members and protect{' '}
+              <strong style={{ color: theme.neutrals.ink, fontWeight: 700 }}>$74K+</strong> in dues a year.
+              Live in two weeks. No rip-and-replace.
             </p>
             <div className="landing-hero-ctas">
               <Button size="lg" onClick={goToDemoForm}>
-                Book a 30-Minute Demo
+                Book the 30-minute walkthrough
               </Button>
-              <Button as="a" href="#/demo/split-screen" variant="ghost" size="lg">
-                See a Day in Action
+              <Button as="a" href="#/platform" variant="ghost" size="lg">
+                See it in action →
               </Button>
             </div>
             <div

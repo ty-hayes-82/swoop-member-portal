@@ -1,8 +1,9 @@
-import { theme } from '@/config/theme';
 import LandingShell from '@/landing/LandingShell';
 import ProblemSection from '@/landing/components/ProblemSection';
+import SaveStorySection from '@/landing/components/SaveStorySection';
 import CoreCapabilitiesSection from '@/landing/components/CoreCapabilitiesSection';
 import AgentsSection from '@/landing/components/AgentsSection';
+import MemberExperienceSection from '@/landing/components/MemberExperienceSection';
 import PhotoBand from '@/landing/components/PhotoBand';
 import IntegrationsSection from '@/landing/components/IntegrationsSection';
 import ComparisonSection from '@/landing/components/ComparisonSection';
@@ -19,13 +20,15 @@ export default function PlatformPage() {
       >
         <div style={{ textAlign: 'center', marginTop: 8 }}>
           <Button size="lg" onClick={() => { window.location.hash = '#/contact'; }}>
-            Book a Demo
+            Book the 30-minute walkthrough
           </Button>
         </div>
       </SectionShell>
       <ProblemSection />
+      <SaveStorySection />
       <CoreCapabilitiesSection />
       <AgentsSection />
+      <MemberExperienceSection />
       <PhotoBand
         photoKey="fairwayGreen"
         kicker="One operating view"
