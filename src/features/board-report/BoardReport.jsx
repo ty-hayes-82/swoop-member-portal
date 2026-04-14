@@ -104,7 +104,7 @@ function KPIStrip({ kpis, onDrillDown }) {
 }
 
 export default function BoardReport() {
-  const { routeIntent, clearRouteIntent } = useNavigationContext();
+  const { routeIntent, clearRouteIntent, navigate } = useNavigationContext();
   const { openProfile } = useMemberProfile();
   const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -604,6 +604,20 @@ export default function BoardReport() {
           {duesAtRiskNote && (
             <div className="text-xs text-gray-500 italic bg-gray-50 dark:bg-white/[0.03] rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-800">
               {duesAtRiskNote}
+            </div>
+          )}
+
+          {memberSaves.length === 0 && (
+            <div className="py-8 text-center text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+              No member saves recorded yet. Approve actions in the{' '}
+              <button
+                type="button"
+                onClick={() => navigate('automations')}
+                className="text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0"
+              >
+                Automations inbox
+              </button>{' '}
+              to start tracking outcomes.
             </div>
           )}
 
