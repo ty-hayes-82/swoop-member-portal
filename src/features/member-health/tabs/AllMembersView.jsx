@@ -444,41 +444,36 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Health Distribution Cards - Clickable (hidden in roster-only mode) */}
-      {!rosterOnly && <div>
-        <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
-          Filter by Health Level (click to filter)
-        </div>
-        <div className="grid-responsive-4">
+      {/* Health Distribution — compact chip row */}
+      {!rosterOnly && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider shrink-0">Health:</span>
           {filteredHealthDist.map((d) => {
             const isActive = activeHealthLevel === d.level;
             return (
-              <div
+              <button
                 key={d.level}
+                type="button"
                 onClick={() => applyHealthFilter(d.level)}
-                className={`bg-white rounded-xl p-4 cursor-pointer transition-all duration-200 ${isActive ? 'shadow-theme-md scale-[1.02]' : 'shadow-theme-xs scale-100 hover:scale-[1.02] hover:shadow-theme-md'}`}
-                style={{ border: `2px solid ${isActive ? d.color : d.color + '40'}` }}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold cursor-pointer transition-all ${isActive ? 'ring-2 ring-offset-1' : 'hover:opacity-90'}`}
+                style={{
+                  borderColor: isActive ? d.color : d.color + '55',
+                  background: isActive ? d.color + '18' : d.color + '0d',
+                  color: d.color,
+                }}
               >
-                <div className="flex justify-between mb-2">
-                  <span className="text-xs text-gray-400 uppercase tracking-wide">
-                    {d.level}
-                  </span>
-                  <span className="text-xs" style={{ color: d.color }}>
-                    {(d.percentage * 100).toFixed(0)}%
-                  </span>
-                </div>
-                <div className="text-[28px] font-mono font-bold" style={{ color: d.color }}>
-                  {d.count}
-                </div>
-                <div className="text-xs text-gray-400">members</div>
-                <div className="h-1 bg-gray-200 rounded-sm mt-2">
-                  <div className="h-full rounded-sm" style={{ background: d.color, width: `${d.percentage * 100}%` }} />
-                </div>
-              </div>
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ background: d.color, opacity: d.count === 0 ? 0.35 : 1 }}
+                />
+                <span style={{ opacity: d.count === 0 ? 0.55 : 1 }}>{d.level}</span>
+                <span className="font-mono font-bold" style={{ opacity: d.count === 0 ? 0.55 : 1 }}>{d.count}</span>
+                <span className="text-[10px] opacity-70">{(d.percentage * 100).toFixed(0)}%</span>
+              </button>
             );
           })}
         </div>
-      </div>}
+      )}
 
       {/* Archetype Filter - Clickable (hidden in roster-only) */}
       {!rosterOnly && (
