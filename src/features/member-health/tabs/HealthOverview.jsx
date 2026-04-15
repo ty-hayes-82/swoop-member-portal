@@ -241,7 +241,7 @@ export default function HealthOverview() {
     <div className="flex flex-col gap-6">
 
       {/* Health Distribution KPI Cards */}
-      <div className="grid-responsive-4">
+      <div className="grid-responsive-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
         {dist.map((d) => {
           const delta = Number.isFinite(d?.delta) ? d.delta : 0;
           const descriptor = levelDescriptions[d.level] ?? 'are in this state';
