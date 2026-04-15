@@ -220,8 +220,8 @@ export default function TodayView() {
     const hasTeeSheet = isGateOpen('tee-sheet');
     const hasPOS = isGateOpen('fb');
     const steps = [
-      { id: 'members', label: 'Member Roster', done: hasMembersGate, preview: 'Who's going quiet and why — health scores, dues at risk, at-risk alerts' },
-      { id: 'tee-sheet', label: 'Tee Sheet', done: hasTeeSheet, preview: 'Today's bookings with health scores — know which at-risk members are on the course right now' },
+      { id: 'members', label: 'Member Roster', done: hasMembersGate, preview: "Who's going quiet and why — health scores, dues at risk, at-risk alerts" },
+      { id: 'tee-sheet', label: 'Tee Sheet', done: hasTeeSheet, preview: "Today's bookings with health scores — know which at-risk members are on the course right now" },
       { id: 'fb', label: 'POS / F&B', done: hasPOS, preview: 'F&B leakage from slow rounds and understaffing — quantified to the dollar' },
     ];
     const connectedCount = steps.filter(s => s.done).length;
