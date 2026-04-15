@@ -92,6 +92,9 @@ export default function RevenuePage() {
   }
 
   if (!leakage || leakage.TOTAL === 0) {
+    const hasPOS = isGateOpen('fb');
+    const hasTeeSheet = isGateOpen('tee-sheet');
+
     return (
       <PageTransition>
         <div className="p-6 w-full">
@@ -101,18 +104,61 @@ export default function RevenuePage() {
               Cross-domain revenue attribution across pace of play, staffing, and weather.
             </p>
           </div>
-          <DataEmptyState
-            icon="💰"
-            title="Revenue leakage needs data"
-            description={
-              isGateOpen('fb') && !isGateOpen('tee-sheet')
-                ? 'Connect your tee sheet to unlock pace-to-dining attribution — the #1 hidden revenue leak at most clubs.'
-                : isGateOpen('tee-sheet') && !isGateOpen('fb')
-                ? 'Connect your POS system to see how pace of play and staffing gaps translate to F&B revenue loss.'
-                : 'Import your tee sheet, POS, and scheduling data to see how operational failures connect to F&B revenue loss.'
-            }
-            dataType="operations data"
-          />
+
+          {hasPOS && !hasTeeSheet ? (
+            <div className="flex flex-col gap-4">
+              {/* POS data loaded — show what we have */}
+              <Panel className="border-l-4 border-l-green-500">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">✅</div>
+                  <div>
+                    <div className="font-semibold text-gray-800 dark:text-white/90 mb-1">POS Transactions Loaded</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Your point-of-sale data is connected. To compute F&amp;B revenue leakage, Swoop cross-references
+                      POS checks against tee sheet rounds — identifying which rounds skip dining and quantifying the revenue impact.
+                    </div>
+                  </div>
+                </div>
+              </Panel>
+
+              <Panel className="border-l-4 border-l-amber-400">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">📋</div>
+                  <div>
+                    <div className="font-semibold text-gray-800 dark:text-white/90 mb-1">Next: Connect Tee Sheet</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                      Import your tee sheet to unlock pace-to-dining attribution — the #1 hidden revenue leak at most clubs.
+                      Swoop will show you exactly which rounds are slow, which ones skip the grill, and how much that costs per month.
+                    </div>
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                      {[
+                        { label: 'Avg leakage found', value: '$8,400/mo', sub: 'across similar clubs' },
+                        { label: 'Top driver', value: 'Pace of Play', sub: '62% of leakage' },
+                        { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
+                      ].map(({ label, value, sub }) => (
+                        <div key={label} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</div>
+                          <div className="font-bold text-gray-800 dark:text-white/90">{value}</div>
+                          <div className="text-[10px] text-gray-400 mt-0.5">{sub}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Panel>
+            </div>
+          ) : (
+            <DataEmptyState
+              icon="💰"
+              title="Revenue leakage needs data"
+              description={
+                hasTeeSheet && !hasPOS
+                  ? 'Connect your POS system to see how pace of play and staffing gaps translate to F&B revenue loss.'
+                  : 'Import your tee sheet, POS, and scheduling data to see how operational failures connect to F&B revenue loss.'
+              }
+              dataType="operations data"
+            />
+          )}
         </div>
       </PageTransition>
     );

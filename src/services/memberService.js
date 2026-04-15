@@ -526,7 +526,8 @@ export const getHealthDistribution = () => {
   if (roster.length > 0) {
     const counts = { Healthy: 0, Watch: 0, 'At Risk': 0, Critical: 0 };
     roster.forEach(m => {
-      const s = m.score ?? 0;
+      if (m.score == null) return; // Skip uncomputed members — don't default to Critical
+      const s = m.score;
       if (s >= 70) counts.Healthy++;
       else if (s >= 50) counts.Watch++;
       else if (s >= 30) counts['At Risk']++;

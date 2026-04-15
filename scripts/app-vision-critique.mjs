@@ -47,7 +47,7 @@ const API_KEY     = process.env.GEMINI_API_KEY;
 const FLASH_MODEL = 'gemini-2.5-flash';   // per-agent critiques (75 calls) — Flash with thinking
 const RECS_MODEL  = 'gemini-2.5-flash';   // per-screenshot recommendations (15 calls)
 const PRO_MODEL   = 'gemini-2.5-pro';     // master report (1 call)
-const THINKING_CONFIG = { thinkingConfig: { thinkingBudget: 8000 } }; // ~8k tokens of reasoning per call
+const THINKING_CONFIG = { thinkingConfig: { thinkingBudget: 2000 } }; // 2k budget for fast iteration cycles
 const VIEWPORT    = { width: 1440, height: 900 };
 const FIXTURE_DIR = path.resolve(__dirname, '../tests/fixtures/small');
 const OUTPUT_BASE = path.resolve(__dirname, '../tests/e2e/reports');
@@ -465,8 +465,11 @@ One sentence: is the data on this page trustworthy for a GM to act on?
 ];
 
 // ─── Stages (cumulative) ──────────────────────────────────────────────────────
+//
+// QUICK_MODE=1 env var → uses STAGES_FOCUSED (9 screens) instead of all 14.
+// Use for fast improvement cycles. Full run only needed for baseline + final report.
 
-const STAGES = [
+const STAGES_FULL = [
   {
     id: 0,
     label: 'Stage 0 — Empty (no data)',
@@ -531,6 +534,66 @@ const STAGES = [
     ],
   },
 ];
+
+// Quick mode: only the 9 screens that had the worst or most important scores in cycle 1.
+// All imports are still run (needed for gate state), but fewer screenshots are taken.
+const STAGES_FOCUSED = [
+  {
+    id: 0,
+    label: 'Stage 0 — Empty',
+    imports: [],
+    dataState: 'No data imported. Empty states expected everywhere.',
+    screenshots: [
+      { slug: '0_revenue', hash: '/#/revenue', label: 'Revenue (empty)', waitMs: 2000 },
+      { slug: '0_today',   hash: '/#/today',   label: 'Today (empty)',   waitMs: 2000 },
+    ],
+  },
+  {
+    id: 1,
+    label: 'Stage 1 — Members',
+    imports: [{ type: 'members', file: 'JCM_Members_F9.csv', expectedRows: 100 }],
+    dataState: '100 members. No POS, no tee times, no complaints.',
+    screenshots: [
+      { slug: '1_today', hash: '/#/today', label: 'Today (members only)', waitMs: 3000 },
+    ],
+  },
+  {
+    id: 2,
+    label: 'Stage 2 — + POS',
+    imports: [{ type: 'transactions', file: 'POS_Sales_Detail_SV.csv', expectedRows: 686 }],
+    dataState: '100 members + 686 POS transactions. Revenue page cannot show cross-domain leakage yet (needs tee sheet), but SHOULD show a "POS data loaded" panel confirming the data connection and explaining what tee sheet import will unlock. The page should NOT be a blank empty state.',
+    screenshots: [
+      { slug: '2_revenue', hash: '/#/revenue', label: 'Revenue (POS only)', waitMs: 4000 },
+    ],
+  },
+  {
+    id: 3,
+    label: 'Stage 3 — + Tee Sheet',
+    imports: [
+      { type: 'tee_times',       file: 'TTM_Tee_Sheet_SV.csv',         expectedRows: 1993 },
+      { type: 'booking_players', file: 'TTM_Tee_Sheet_Players_SV.csv', expectedRows: 1993 },
+    ],
+    dataState: '100 members + 686 POS + 1,993 tee times. Tee sheet should show real bookings. Revenue should show full pace analysis.',
+    screenshots: [
+      { slug: '3_tee-sheet', hash: '/#/tee-sheet', label: 'Tee Sheet (populated)',  waitMs: 4000 },
+      { slug: '3_revenue',   hash: '/#/revenue',   label: 'Revenue (full leakage)', waitMs: 4000 },
+    ],
+  },
+  {
+    id: 4,
+    label: 'Stage 4 — Full Data',
+    imports: [{ type: 'complaints', file: 'JCM_Communications_RG.csv', expectedRows: 8 }],
+    dataState: 'Full data. Service page should populate. Board report shows real data (no demo banner). Automations inbox has AI-generated agent actions. SMS simulator shows AI-drafted outreach messages for at-risk members.',
+    screenshots: [
+      { slug: '4_service',       hash: '/#/service',       label: 'Service Quality',    waitMs: 4000 },
+      { slug: '4_board-report',  hash: '/#/board-report',  label: 'Board Report',       waitMs: 5000 },
+      { slug: '4_automations',   hash: '/#/automations',   label: 'Automations',        waitMs: 4000 },
+      { slug: '4_sms-simulator', hash: '/#/sms-simulator', label: 'SMS Chat Simulator', waitMs: 3000 },
+    ],
+  },
+];
+
+const STAGES = process.env.QUICK_MODE ? STAGES_FOCUSED : STAGES_FULL;
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 

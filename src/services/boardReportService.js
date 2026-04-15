@@ -76,11 +76,13 @@ export const getKPIs = () => {
     const total = summary.totalMembers || summary.total;
     const healthy = summary.healthy || 0;
     const atRisk = (summary.atRisk || 0) + (summary.critical || 0);
-    const hasHealthTiers = healthy > 0 || atRisk > 0 || (summary.watch || 0) > 0;
+    // 'Watch' is the DEFAULT tier assigned at import time before health scores are
+    // computed. Treat Watch-only as "not yet scored" — same as no tiers.
+    const hasRealHealthTiers = healthy > 0 || atRisk > 0 || (summary.critical || 0) > 0;
 
-    // When no health tiers exist (members imported but no behavioral data yet),
-    // show total members tracked rather than misleading "0 retained / 0% rate".
-    if (!hasHealthTiers) {
+    // When no real health tiers exist (members imported but no behavioral data yet,
+    // or everyone is still in default Watch tier), show honest "onboarded" KPIs.
+    if (!hasRealHealthTiers) {
       return [
         { label: 'Members Onboarded', value: total, unit: 'members', prefix: '', suffix: '', color: 'blue', description: 'Total active members in system' },
         { label: 'Dues at Risk', value: Math.round((summary.potentialDuesAtRisk || 0) / 1000), unit: '$K', prefix: '$', suffix: 'K', color: 'warning', description: 'Estimated at-risk dues (import tee + POS to refine)' },
