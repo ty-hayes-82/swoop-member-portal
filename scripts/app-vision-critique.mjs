@@ -524,10 +524,10 @@ const STAGES_FULL = [
     imports: [
       { type: 'complaints', file: 'JCM_Communications_RG.csv', expectedRows: 8 },
     ],
-    dataState: '100 members + 686 POS + 1,993 tee times + 1,993 booking players + 8 complaints/communications. Full data state. All pages should be populated. Board Report should have full data. Agent Inbox may have pending actions.',
+    dataState: '100 members + 686 POS + 1,993 tee times + 1,993 booking players + 8 complaints/communications. Full data state. All pages should be populated. Board Report should have full data. The Agent Inbox (Actions page) is in live mode — it will either show AI-generated pending actions OR a rich "agents scanning your data" first-run state with 4 insight category cards (at-risk members, tee sheet patterns, milestone opportunities, revenue recovery). Both states are valid for a fresh live club.',
     screenshots: [
       { slug: '4_board-report',  hash: '/#/board-report',  label: 'Board Report',       waitMs: 5000 },
-      { slug: '4_automations',   hash: '/#/automations',   label: 'Automations/Inbox',  waitMs: 4000 },
+      { slug: '4_automations',   hash: '/#/automations',   label: 'Automations/Inbox',  waitMs: 6000 },
       { slug: '4_sms-simulator', hash: '/#/sms-simulator', label: 'SMS Chat Simulator', waitMs: 3000 },
       { slug: '4_service',       hash: '/#/service',       label: 'Service Quality',    waitMs: 4000 },
       { slug: '4_members-full',  hash: '/#/members',       label: 'Members (full data)', waitMs: 4000 },
@@ -587,7 +587,7 @@ const STAGES_FOCUSED = [
     screenshots: [
       { slug: '4_service',       hash: '/#/service',       label: 'Service Quality',    waitMs: 4000 },
       { slug: '4_board-report',  hash: '/#/board-report',  label: 'Board Report',       waitMs: 5000 },
-      { slug: '4_automations',   hash: '/#/automations',   label: 'Automations',        waitMs: 4000 },
+      { slug: '4_automations',   hash: '/#/automations',   label: 'Automations',        waitMs: 6000 },
       { slug: '4_sms-simulator', hash: '/#/sms-simulator', label: 'SMS Chat Simulator', waitMs: 3000 },
     ],
   },

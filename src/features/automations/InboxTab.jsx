@@ -5,6 +5,7 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getAllActions } from '@/services/agentService';
+import { getDataMode, isGateOpen } from '@/services/demoGate';
 import SourceBadge, { SourceBadgeRow } from '@/components/ui/SourceBadge';
 
 // Extract a dollar value from impactMetric strings like "$32K dues protected"
@@ -239,15 +240,57 @@ export default function InboxTab() {
 
       {/* Pending actions */}
       {pending.length === 0 ? (
-        <div className="py-12 text-center">
-          <div className="text-3xl mb-3">✓</div>
-          <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">All caught up</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            {priorityFilter !== 'all'
-              ? `No ${priorityFilter} priority actions. Try "All" filter.`
-              : 'No pending actions right now. Your AI agents will surface recommendations here.'}
-          </div>
-        </div>
+        (() => {
+          // Live mode with data connected — agents are scanning, not "all caught up"
+          const isLiveWithData = getDataMode() === 'live' && isGateOpen('members') && priorityFilter === 'all';
+          if (isLiveWithData) {
+            return (
+              <div className="rounded-xl border border-brand-200 bg-brand-50/40 dark:bg-brand-500/5 dark:border-brand-500/20 p-5">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg className="w-4 h-4 text-brand-600 dark:text-brand-400 animate-spin" style={{ animationDuration: '3s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-brand-800 dark:text-brand-300">AI agents are scanning your data</div>
+                    <div className="text-xs text-brand-600/80 dark:text-brand-400/80 mt-0.5">
+                      Your agents are analyzing member activity, tee sheet patterns, and service records. Recommendations will appear here as they are generated.
+                    </div>
+                  </div>
+                </div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">What your agents are looking for</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {[
+                    { icon: '⚠️', label: 'At-risk members', detail: 'Members with declining visit frequency or low engagement scores' },
+                    { icon: '🏌️', label: 'Tee sheet patterns', detail: 'Members who haven\'t booked in 30+ days compared to their usual cadence' },
+                    { icon: '🎂', label: 'Milestone opportunities', detail: 'Birthdays, anniversaries, and first-year member check-ins' },
+                    { icon: '📊', label: 'Revenue recovery', detail: 'Understaffed periods and pace-of-play revenue leakage' },
+                  ].map(item => (
+                    <div key={item.label} className="flex items-start gap-2 bg-white/60 dark:bg-white/5 rounded-lg p-2.5 border border-brand-100 dark:border-brand-500/10">
+                      <span className="text-base shrink-0">{item.icon}</span>
+                      <div>
+                        <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">{item.label}</div>
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{item.detail}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div className="py-12 text-center">
+              <div className="text-3xl mb-3">✓</div>
+              <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">All caught up</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {priorityFilter !== 'all'
+                  ? `No ${priorityFilter} priority actions. Try "All" filter.`
+                  : 'No pending actions right now. Your AI agents will surface recommendations here.'}
+              </div>
+            </div>
+          );
+        })()
       ) : (
         <div className="grid gap-3">
           {pending.map(action => (
