@@ -284,6 +284,15 @@ import { useServiceCache } from '@/hooks/useServiceCache';
  */
 export function useWeatherData() {
   const fetcher = async () => {
+    // City/state takes priority — used when a club sets their location manually
+    try {
+      const city = localStorage.getItem('swoop_club_city');
+      if (city) {
+        const state = localStorage.getItem('swoop_club_state');
+        const cityData = await fetchWeatherByCity(city, state);
+        if (cityData?.daily?.length) return cityData;
+      }
+    } catch { /* fall through to clubId path */ }
     const cid = getClubId();
     if (!cid) return null;
     return apiFetch(`/api/weather?clubId=${cid}&type=forecast`);

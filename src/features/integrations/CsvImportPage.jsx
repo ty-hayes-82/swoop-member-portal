@@ -380,7 +380,8 @@ function buildImportPreview({ parsedRows, mapping, importType, csvHeaders }) {
 function parseCSV(text) {
   // Strip UTF-8 BOM if present
   if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-  // Handle quoted fields with commas inside
+  // Handle quoted fields with commas inside.
+  // Supports \n (Unix), \r\n (Windows), and \r (old Mac) line endings.
   const lines = [];
   let current = '';
   let inQuotes = false;
@@ -389,11 +390,11 @@ function parseCSV(text) {
     if (ch === '"') {
       if (inQuotes && text[i + 1] === '"') { current += '"'; i++; }
       else { inQuotes = !inQuotes; }
-    } else if (ch === '\n' && !inQuotes) {
+    } else if ((ch === '\n' || (ch === '\r' && text[i + 1] !== '\n')) && !inQuotes) {
       if (current.trim()) lines.push(current);
       current = '';
     } else if (ch === '\r' && !inQuotes) {
-      // skip
+      // \r in \r\n — skip (the \n will trigger line push)
     } else {
       current += ch;
     }
@@ -513,7 +514,7 @@ function StepSelectData({ vendor, setVendor, importType, setImportType, onNext }
               Follow the recommended order below. Each import unlocks more intelligence.
             </p>
           )}
-          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+          <div className="space-y-2">
             {jonasTypes.map((t, idx) => (
               <button
                 key={t.key}
@@ -755,7 +756,7 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
           <div className="px-3">→</div>
           <div>Swoop Field</div>
         </div>
-        <div className="max-h-[320px] overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
+        <div className="divide-y divide-gray-100 dark:divide-gray-800">
           {csvHeaders.map(header => {
             const swoopField = mapping[header];
             const fieldConfig = swoopFields.find(f => f.swoop === swoopField);
@@ -1573,40 +1574,46 @@ export default function CsvImportPage() {
         Import CSV or XLSX files from your club software. We'll auto-detect columns and map them for you.
       </p>
 
-      <MultiFileDropZone onFilesClassified={setBulkFiles} />
-      {bulkFiles.length > 0 && (
-        <div className="mb-4 flex items-center justify-between">
-          <div className="text-xs text-gray-500">
-            {bulkFiles.length} file{bulkFiles.length === 1 ? '' : 's'} ready
-            {!bulkReady && ' — resolve unknown types before importing'}
-          </div>
-          <button
-            type="button"
-            onClick={handleBulkImport}
-            disabled={!bulkReady || bulkUploading}
-            className="py-2 px-4 text-sm font-bold text-white bg-brand-500 border-none rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {bulkUploading ? 'Importing...' : `Import all ${bulkFiles.length}`}
-          </button>
-        </div>
-      )}
-      {bulkResults && (
-        <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800">
-          <div className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">Batch import results</div>
-          <div className="flex flex-col gap-1">
-            {bulkResults.map((r, i) => (
-              <div key={i} className="text-xs text-gray-600 dark:text-gray-400">
-                {r.error ? '✗' : '✓'} {r.file}{r.importType ? ` → ${r.importType}` : ''}
-                {r.error ? ` (${r.error})` : ` — ${r.accepted || 0} accepted${r.rejected ? `, ${r.rejected} rejected` : ''}`}
+      {/* Bulk drop zone — only shown before wizard starts */}
+      {step === 0 && (
+        <>
+          <MultiFileDropZone onFilesClassified={setBulkFiles} />
+          {bulkFiles.length > 0 && (
+            <div className="mb-4 flex items-center justify-between">
+              <div className="text-xs text-gray-500">
+                {bulkFiles.length} file{bulkFiles.length === 1 ? '' : 's'} ready
+                {!bulkReady && ' — resolve unknown types before importing'}
               </div>
-            ))}
+              <button
+                type="button"
+                onClick={handleBulkImport}
+                disabled={!bulkReady || bulkUploading}
+                className="py-2 px-4 text-sm font-bold text-white bg-brand-500 border-none rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {bulkUploading ? 'Importing...' : `Import all ${bulkFiles.length}`}
+              </button>
+            </div>
+          )}
+          {bulkResults && (
+            <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800">
+              <div className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">Batch import results</div>
+              <div className="flex flex-col gap-1">
+                {bulkResults.map((r, i) => (
+                  <div key={i} className="text-xs text-gray-600 dark:text-gray-400">
+                    {r.error ? '✗' : '✓'} {r.file}{r.importType ? ` → ${r.importType}` : ''}
+                    {r.error ? ` (${r.error})` : ` — ${r.accepted || 0} accepted${r.rejected ? `, ${r.rejected} rejected` : ''}`}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
+            <span className="text-xs uppercase font-semibold text-gray-400 tracking-wide whitespace-nowrap">or use the guided wizard</span>
+            <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
           </div>
-        </div>
+        </>
       )}
-
-      <div className="text-xs uppercase font-bold text-gray-400 mb-3 tracking-wide">
-        Or use the guided wizard
-      </div>
       <StepIndicator current={step} />
 
       {step === 0 && (
@@ -1645,27 +1652,31 @@ export default function CsvImportPage() {
       )}
 
       {step === 2 && (
-        <>
-          <StepMapColumns
-            importType={importType}
-            csvHeaders={csvHeaders}
-            mapping={mapping}
-            setMapping={setMapping}
-            previewRows={parsedRows}
-            onNext={() => setStep(3)}
-            onBack={() => setStep(1)}
-          />
-          <AIImportAssistant
-            step={2}
-            insight={aiInsight}
-            loading={aiLoading}
-            dismissed={aiDismissed}
-            onDismiss={dismissAI}
-            suggestions={aiSuggestions}
-            validation={aiValidation}
-            onApplySuggestion={handleAISuggestion}
-          />
-        </>
+        <div className="flex flex-col lg:flex-row gap-4 items-start">
+          <div className="flex-1 min-w-0">
+            <StepMapColumns
+              importType={importType}
+              csvHeaders={csvHeaders}
+              mapping={mapping}
+              setMapping={setMapping}
+              previewRows={parsedRows}
+              onNext={() => setStep(3)}
+              onBack={() => setStep(1)}
+            />
+          </div>
+          <div className="lg:w-72 shrink-0">
+            <AIImportAssistant
+              step={2}
+              insight={aiInsight}
+              loading={aiLoading}
+              dismissed={aiDismissed}
+              onDismiss={dismissAI}
+              suggestions={aiSuggestions}
+              validation={aiValidation}
+              onApplySuggestion={handleAISuggestion}
+            />
+          </div>
+        </div>
       )}
 
       {step === 3 && (

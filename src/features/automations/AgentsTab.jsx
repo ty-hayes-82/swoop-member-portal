@@ -1,6 +1,6 @@
 /**
  * AgentsTab — AI agent status cards with per-agent configuration
- * Each card: status, accuracy, pause/resume, expandable settings (threshold, tone override, custom instructions)
+ * Each card: status, accuracy, pause/resume, run-now, expandable settings
  */
 import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
@@ -24,9 +24,11 @@ const TONE_OPTIONS = [
   { value: 'energetic-enthusiastic', label: 'Energetic & Enthusiastic' },
 ];
 
-function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, onOpenConfig, actions }) {
+function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, onOpenConfig, onRunNow, actions }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [runResult, setRunResult] = useState(null);
   const statusKey = agentStatus || agent.status || 'idle';
   const style = STATUS_STYLES[statusKey] || STATUS_STYLES.idle;
   const isPaused = statusKey === 'paused';
@@ -50,6 +52,18 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
     onSaveConfig(agent.id, localConfig);
   };
 
+  const handleRunNow = useCallback(async () => {
+    setRunning(true);
+    setRunResult(null);
+    try {
+      await onRunNow?.(agent.id);
+      setRunResult({ ok: true, text: 'Agent run queued.' });
+    } catch (err) {
+      setRunResult({ ok: false, text: err.message || 'Run failed.' });
+    }
+    setRunning(false);
+  }, [agent.id, onRunNow]);
+
   return (
     <div className="border border-gray-200 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 overflow-hidden">
       <div className="p-4">
@@ -71,16 +85,33 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
               </div>
             </div>
           </div>
-          <button
-            onClick={() => onToggle(agent.id, statusKey)}
-            className={`px-3 py-1 rounded-lg text-[11px] font-semibold cursor-pointer border transition-colors ${
-              isPaused
-                ? 'bg-brand-500 text-white border-brand-500'
-                : 'bg-transparent text-gray-500 border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400'
-            }`}
-          >
-            {isPaused ? 'Resume' : 'Pause'}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleRunNow}
+              disabled={running}
+              title="Manually trigger this agent now (normally runs on schedule or webhook)"
+              className="px-3 py-1 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-300 text-brand-600 bg-brand-50 hover:bg-brand-100 dark:border-brand-500/40 dark:text-brand-400 dark:bg-brand-500/10 dark:hover:bg-brand-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            >
+              {running ? (
+                <span className="inline-block w-2.5 h-2.5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                </svg>
+              )}
+              Run Now
+            </button>
+            <button
+              onClick={() => onToggle(agent.id, statusKey)}
+              className={`px-3 py-1 rounded-lg text-[11px] font-semibold cursor-pointer border transition-colors ${
+                isPaused
+                  ? 'bg-brand-500 text-white border-brand-500'
+                  : 'bg-transparent text-gray-500 border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400'
+              }`}
+            >
+              {isPaused ? 'Resume' : 'Pause'}
+            </button>
+          </div>
         </div>
 
         {/* Description */}
@@ -141,6 +172,11 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
         {agent.lastAction && (
           <div className="text-[10px] text-gray-400 mt-2">
             Last active: {new Date(agent.lastAction).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+          </div>
+        )}
+        {runResult && (
+          <div className={`text-[11px] font-medium mt-1 ${runResult.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+            {runResult.text}
           </div>
         )}
       </div>
@@ -289,6 +325,24 @@ export default function AgentsTab() {
   const openConfigDrawer = useCallback((agent) => setDrawerAgent(agent), []);
   const closeConfigDrawer = useCallback(() => setDrawerAgent(null), []);
 
+  // Manual agent trigger — never auto-runs, only on explicit click
+  const runAgent = useCallback(async (agentId) => {
+    const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_auth_token') : null;
+    const res = await fetch('/api/agents', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && token !== 'demo' ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ operation: 'run', agentId, clubId }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || `HTTP ${res.status}`);
+    }
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       {/* Summary strip */}
@@ -321,6 +375,7 @@ export default function AgentsTab() {
             onToggle={toggleAgent}
             onSaveConfig={saveAgentConfig}
             onOpenConfig={openConfigDrawer}
+            onRunNow={runAgent}
             actions={actions}
           />
         ))}

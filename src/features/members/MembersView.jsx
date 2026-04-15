@@ -1,5 +1,5 @@
 // MembersView — consolidated view combining Member Risk, Tee Sheet, and Experience Insights
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { StoryHeadline } from '@/components/ui';
 // CollapsibleSection removed in V3 — At-Risk mode simplified
 import { useNavigationContext } from '@/context/NavigationContext';
@@ -75,6 +75,34 @@ export default function MembersView() {
   const [segment, setSegment] = useState('all');
   const [archetype, setArchetype] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [rescoring, setRescoring] = useState(false);
+  const [rescoreMsg, setRescoreMsg] = useState(null);
+
+  const handleRescore = useCallback(async () => {
+    setRescoring(true);
+    setRescoreMsg(null);
+    try {
+      const clubId = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_club_id') : null;
+      const token = typeof localStorage !== 'undefined' ? localStorage.getItem('swoop_auth_token') : null;
+      const res = await fetch(`/api/compute-health-scores${clubId ? `?clubId=${clubId}` : ''}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && token !== 'demo' ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setRescoreMsg({ type: 'success', text: `Scores updated for ${data.updated ?? 'all'} members.` });
+        window.dispatchEvent(new CustomEvent('swoop:data-imported', { detail: { category: 'scores' } }));
+      } else {
+        setRescoreMsg({ type: 'error', text: data.error || 'Score update failed.' });
+      }
+    } catch (err) {
+      setRescoreMsg({ type: 'error', text: `Score update failed: ${err.message}` });
+    }
+    setRescoring(false);
+  }, []);
 
   // Accept navigation intent for mode, segment, and archetype filters
   useEffect(() => {
@@ -140,11 +168,42 @@ export default function MembersView() {
     <PageTransition>
       <div className="flex flex-col gap-6">
 
-        <StoryHeadline
-          variant={headlineData.variant}
-          headline={headlineData.headline}
-          context={headlineData.context}
-        />
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <StoryHeadline
+              variant={headlineData.variant}
+              headline={headlineData.headline}
+              context={headlineData.context}
+            />
+          </div>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={handleRescore}
+              disabled={rescoring}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-brand-300 text-brand-600 bg-brand-50 hover:bg-brand-100 dark:bg-brand-500/10 dark:border-brand-500/40 dark:text-brand-400 dark:hover:bg-brand-500/20 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {rescoring ? (
+                <>
+                  <span className="inline-block w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+                  Scoring…
+                </>
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  </svg>
+                  Re-Score Members
+                </>
+              )}
+            </button>
+            {rescoreMsg && (
+              <span className={`text-[11px] font-medium ${rescoreMsg.type === 'success' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                {rescoreMsg.text}
+              </span>
+            )}
+          </div>
+        </div>
 
         <EvidenceStrip systems={['Member CRM', 'Analytics', 'Tee Sheet', 'POS', 'Email']} />
 

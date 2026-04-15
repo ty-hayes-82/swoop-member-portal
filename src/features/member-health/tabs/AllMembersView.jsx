@@ -154,14 +154,17 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
         {!rosterOnly && (
           <>
             <td className="px-3 sm:px-4 py-2">
-              <span className="font-mono font-bold" style={{ color: healthColor }}>
-                {hasScore ? member.score : '—'}
-              </span>
-            </td>
-            <td className="px-3 sm:px-4 py-2">
-              <span className="text-xs font-semibold" style={{ color: healthColor }}>
-                {healthLevel}
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-mono font-bold text-sm" style={{ color: healthColor }}>
+                  {hasScore ? member.score : '—'}
+                </span>
+                <span
+                  className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                  style={{ background: healthColor + '22', color: healthColor }}
+                >
+                  {healthLevel}
+                </span>
+              </div>
             </td>
             <td className="px-4 py-2 hidden md:table-cell">
               {member.archetype ? <ArchetypeBadge archetype={member.archetype} size="xs" /> : <span className="text-xs text-gray-400">—</span>}
@@ -188,7 +191,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
       </tr>
       {isExpanded && (
         <tr className="bg-gray-100">
-          <td colSpan={7} className="p-4">
+          <td colSpan={6} className="p-4">
             <div className="flex flex-col gap-4">
               {/* Member Details */}
               <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
@@ -432,8 +435,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
       ]
     : [
         { key: 'name', label: 'Member', hideClass: '' },
-        { key: 'score', label: 'Score', hideClass: '' },
-        { key: 'level', label: 'Level', hideClass: '' },
+        { key: 'score', label: 'Health', hideClass: '' },
         { key: 'archetype', label: 'Archetype', hideClass: 'hidden md:table-cell' },
         { key: 'tier', label: 'Tier', hideClass: 'hidden sm:table-cell' },
         { key: 'value', label: 'Annual Value', hideClass: 'hidden md:table-cell' },
@@ -655,7 +657,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
             <tbody>
               {sortedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-6 text-center text-gray-400">
+                  <td colSpan={6} className="p-6 text-center text-gray-400">
                     No members match the current filters
                   </td>
                 </tr>

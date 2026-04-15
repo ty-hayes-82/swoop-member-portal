@@ -29,8 +29,9 @@ export default function WeekForecast() {
   }, []);
 
   // Prefer hook data when available; fall back to legacy getters for backwards compat
-  const forecast = weatherData?.daily?.slice(0, 5) ?? getDailyForecast(5);
-  const hourly = weatherData?.hourly ?? getHourlyForecast();
+  // Use length check (not ??) so empty arrays also trigger the fallback
+  const forecast = (weatherData?.daily?.length ? weatherData.daily.slice(0, 5) : null) ?? getDailyForecast(5);
+  const hourly = (weatherData?.hourly?.length ? weatherData.hourly : null) ?? getHourlyForecast();
   const source = weatherData?.source ?? getWeatherSource();
   const location = weatherData?.location ?? getWeatherLocation();
 
