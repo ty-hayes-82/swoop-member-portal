@@ -49,6 +49,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
   // Created club data
   const [clubId, setClubId] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [generatedPassword, setGeneratedPassword] = useState(null);
 
   // ─── Step 0: Validate Club Info & advance ───
   const handleClubInfoNext = () => {
@@ -62,7 +63,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
   const handleCreateClub = async () => {
     if (!existingAccountMode && !adminName.trim()) { setError('Your name is required'); return; }
     if (!adminEmail.trim()) { setError('Email is required'); return; }
-    if (!adminPassword || adminPassword.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (existingAccountMode && !adminPassword) { setError('Password required to link existing account'); return; }
     setError(null);
     setLoading(true);
     try {
@@ -99,6 +100,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
       }
       setClubId(data.clubId);
       setUserId(data.userId);
+      if (data.generatedPassword) setGeneratedPassword(data.generatedPassword);
       if (data.token) {
         localStorage.setItem('swoop_auth_token', data.token);
         localStorage.setItem('swoop_club_id', data.clubId);
@@ -236,13 +238,14 @@ export default function NewClubSetup({ onComplete, onBack }) {
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">
-                {existingAccountMode ? 'Your Password *' : 'Password *'}
+                {existingAccountMode ? 'Your Password *' : 'Password'}
+                {!existingAccountMode && <span className="text-gray-400 font-normal ml-1">(optional — we'll generate one)</span>}
               </label>
               <input
                 type="password"
                 value={adminPassword}
                 onChange={e => setAdminPassword(e.target.value)}
-                placeholder={existingAccountMode ? 'Enter your Swoop password' : 'Min 8 characters'}
+                placeholder={existingAccountMode ? 'Enter your Swoop password' : 'Leave blank to auto-generate'}
                 className={inputClasses}
                 autoFocus={existingAccountMode}
               />
@@ -319,6 +322,13 @@ export default function NewClubSetup({ onComplete, onBack }) {
             <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
               {clubName} is ready!
             </h2>
+            {generatedPassword && (
+              <div className="text-left px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/30">
+                <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1">Save your auto-generated password</p>
+                <p className="font-mono text-sm font-bold text-amber-900 dark:text-amber-200 tracking-wide">{generatedPassword}</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">You'll need this to sign back in. You can change it in Admin settings.</p>
+              </div>
+            )}
             <p className="text-sm text-gray-500 dark:text-gray-400">
               No data uploaded yet. You can upload data from Admin &gt; CSV Import anytime.
             </p>

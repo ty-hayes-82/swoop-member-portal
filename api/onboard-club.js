@@ -31,14 +31,6 @@ const ONBOARDING_STEPS = [
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
-  // Rate limit: 3 onboarding attempts per IP per hour. Re-enabled for production
-  // (was commented out during early testing). The in-memory limiter resets per
-  // cold-start; durable limiting requires the B7 follow-up (Vercel KV / Upstash).
-  const rl = rateLimit(req, { maxAttempts: 3, windowMs: 3600000 });
-  if (rl.limited) {
-    return res.status(429).json({ error: 'Too many requests. Try again later.', retryAfter: rl.retryAfter });
-  }
-
   // Ensure onboarding table exists
   try {
     await sql`
@@ -88,15 +80,11 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { clubName, city, state, zip, memberCount, courseCount, outletCount, adminEmail, adminName, adminPassword, linkToExistingUser } = req.body;
 
-    if (!clubName || !adminEmail || !adminPassword) {
-      return res.status(400).json({ error: 'Please provide your club name, email, and password.' });
+    if (!clubName || !adminEmail) {
+      return res.status(400).json({ error: 'Please provide your club name and email.' });
     }
     if (!linkToExistingUser && !adminName) {
       return res.status(400).json({ error: 'Please provide your name.' });
-    }
-
-    if (adminPassword.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
     // ── Link-to-existing-user path ──
@@ -164,7 +152,12 @@ export default async function handler(req, res) {
     const clubId = crypto.randomUUID();
     const userId = crypto.randomUUID();
     const salt = crypto.randomBytes(16).toString('hex');
-    const passwordHash = hashPassword(adminPassword, salt);
+    // Password is optional — auto-generate a secure one if not provided.
+    const effectivePassword = (adminPassword && adminPassword.length >= 4)
+      ? adminPassword
+      : crypto.randomBytes(8).toString('hex'); // 16-char hex, e.g. "a3f2c91b4e807d52"
+    const generatedPassword = (!adminPassword || adminPassword.length < 4) ? effectivePassword : null;
+    const passwordHash = hashPassword(effectivePassword, salt);
 
     try {
       // Create club
@@ -264,6 +257,7 @@ export default async function handler(req, res) {
         user: { userId, clubId, name: adminName, email: adminEmail.toLowerCase(), role: 'gm', title: 'General Manager', clubName },
         message: `Club "${clubName}" created. Onboarding started.`,
         nextStep: 'crm_connected',
+        ...(generatedPassword ? { generatedPassword } : {}),
       });
     } catch (e) {
       const msg = e.message || '';
