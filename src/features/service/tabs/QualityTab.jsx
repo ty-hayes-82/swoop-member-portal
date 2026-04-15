@@ -3,13 +3,11 @@ import { useState } from 'react';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
 import { getSlowRoundRate } from '@/services/operationsService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
-import EvidenceStrip from '@/components/ui/EvidenceStrip';
 import { useNavigationContext } from '@/context/NavigationContext';
 
 export default function QualityTab() {
   const { navigate } = useNavigationContext();
   const [expandedOutlet, setExpandedOutlet] = useState(null);
-  const [hoveredBar, setHoveredBar] = useState(null);
   const feedbackRecords = getComplaintCorrelation();
   const feedbackSummary = getFeedbackSummary();
   const understaffedDays = getUnderstaffedDays();
@@ -52,27 +50,11 @@ export default function QualityTab() {
       ))
     : null;
 
-  // Complaints by day of week — use getDay() for platform-independent weekday extraction
-  const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const dayOfWeekMap = {};
-  feedbackRecords.forEach(r => {
-    if (!r.date || r.date === 'Unknown date') return;
-    const parsed = new Date(r.date.length === 10 ? r.date + 'T00:00:00' : r.date);
-    if (isNaN(parsed.getTime())) return;
-    const day = DOW[parsed.getDay()];
-    dayOfWeekMap[day] = (dayOfWeekMap[day] || 0) + 1;
-  });
-  const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const maxDayCount = Math.max(...weekdays.map(d => dayOfWeekMap[d] || 0), 1);
-  const hasAnyDayData = weekdays.some(d => dayOfWeekMap[d] > 0);
-
   // Complaints by category
   const maxCatCount = Math.max(...feedbackSummary.map(c => c.count), 1);
 
   return (
     <div className="flex flex-col gap-6">
-      <EvidenceStrip systems={['Complaints', 'Scheduling', 'POS', 'Tee Sheet', 'Weather']} compact />
-
       {/* Service Consistency Score */}
       <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-wrap">
         <div className="flex items-center gap-4">
@@ -168,61 +150,6 @@ export default function QualityTab() {
           </div>
         );
       })()}
-
-      {/* By Day of Week */}
-      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
-        <h3 className="text-base font-bold text-swoop-text mb-4">
-          Complaints by Day of Week
-        </h3>
-        {!hasAnyDayData && (
-          <div className="text-sm text-swoop-text-label italic mb-2">
-            Complaint dates not yet available — day-of-week breakdown will populate as complaints are resolved and timestamped.
-          </div>
-        )}
-        <div className="flex gap-2 items-end h-[120px] relative">
-          {weekdays.map(day => {
-            const count = dayOfWeekMap[day] || 0;
-            const heightPct = maxDayCount > 0 ? (count / maxDayCount) * 100 : 0;
-            const isWeekend = day === 'Sat' || day === 'Sun';
-            const isHovered = hoveredBar === day;
-            // Build tooltip detail
-            const dayComplaints = feedbackRecords.filter(r => {
-              if (!r.date || r.date === 'Unknown date') return false;
-              const p = new Date(r.date.length === 10 ? r.date + 'T00:00:00' : r.date);
-              return !isNaN(p.getTime()) && DOW[p.getDay()] === day;
-            });
-            const catBreakdown = {};
-            dayComplaints.forEach(c => { catBreakdown[c.category] = (catBreakdown[c.category] || 0) + 1; });
-            return (
-              <div
-                key={day}
-                className="flex-1 flex flex-col items-center gap-1 relative"
-                onMouseEnter={() => setHoveredBar(day)}
-                onMouseLeave={() => setHoveredBar(null)}
-              >
-                {isHovered && count > 0 && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 bg-[#1a1a2e] text-white py-1.5 px-2.5 rounded-md text-[11px] whitespace-nowrap z-10 mb-1 shadow-lg">
-                    <div className="font-bold mb-0.5">{day}: {count} complaint{count !== 1 ? 's' : ''}</div>
-                    <div className="text-white/70">{Object.entries(catBreakdown).map(([k, v]) => `${v} ${k}`).join(', ')}</div>
-                  </div>
-                )}
-                <span className="text-[11px] font-mono font-bold text-[#1a1a2e]">
-                  {count || ''}
-                </span>
-                <div
-                  className={`w-full max-w-[40px] rounded-t transition-all duration-300 ${isWeekend ? 'bg-error-500' : 'bg-success-500'}`}
-                  style={{
-                    height: `${Math.max(heightPct, 4)}%`,
-                    opacity: isHovered ? 1 : count > 0 ? 0.85 : 0.2,
-                    cursor: count > 0 ? 'pointer' : 'default',
-                  }}
-                />
-                <span className="text-[11px] text-swoop-text-label font-semibold">{day}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       {/* By Category */}
       <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
