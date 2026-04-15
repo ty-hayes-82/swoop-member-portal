@@ -32,6 +32,101 @@ import { trackAction } from '@/services/activityService';
 import { getHealthRollup } from '@/services/apiHealthService';
 import { getUnderstaffedDays } from '@/services/staffingService';
 
+// ─── Dark theme tokens ────────────────────────────────────────────────────────
+const D = {
+  bg:        'rgb(14,14,14)',
+  surface:   'rgba(255,255,255,0.03)',
+  border:    'rgba(255,255,255,0.08)',
+  borderSub: 'rgba(255,255,255,0.05)',
+  text:      '#ffffff',
+  textMuted: 'rgba(255,255,255,0.5)',
+  textDim:   'rgba(255,255,255,0.35)',
+  accent:    'rgb(243,146,45)',
+  accentBg:  'rgba(243,146,45,0.12)',
+  accentBdr: 'rgba(243,146,45,0.3)',
+  red:       'rgb(239,68,68)',
+  redBg:     'rgba(239,68,68,0.08)',
+  redBdr:    'rgba(239,68,68,0.18)',
+  green:     'rgb(34,197,94)',
+};
+
+// Collapsible section — dark chrome with title + count + peek + chevron
+function CollapsibleSection({ title, count, peek, accentColor, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const color = accentColor || D.accent;
+  return (
+    <div style={{ background: D.surface, border: `1px solid ${D.border}`, borderRadius: 14, overflow: 'hidden' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color, whiteSpace: 'nowrap' }}>{title}</span>
+          {count != null && (
+            <span style={{ fontSize: 10, fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: D.text, padding: '2px 8px', borderRadius: 999, flexShrink: 0 }}>
+              {count}
+            </span>
+          )}
+          {peek && (
+            <span style={{ fontSize: 11, color: D.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{peek}</span>
+          )}
+        </div>
+        <span style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', color: D.textMuted, flexShrink: 0, marginLeft: 8 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </span>
+      </button>
+      {open && (
+        <div style={{ borderTop: `1px solid ${D.border}` }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Dark action button
+function DarkBtn({ children, onClick, variant = 'primary' }) {
+  const isPrimary = variant === 'primary';
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        fontSize: 11, fontWeight: 600, cursor: 'pointer', borderRadius: 6, whiteSpace: 'nowrap',
+        padding: '5px 12px', transition: 'opacity 0.15s',
+        color: isPrimary ? D.accent : D.textMuted,
+        background: isPrimary ? D.accentBg : 'rgba(255,255,255,0.06)',
+        border: `1px solid ${isPrimary ? D.accentBdr : 'rgba(255,255,255,0.1)'}`,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// Dark detail row
+function DRow({ icon, title, sub, action, onAction, accentColor, children }) {
+  const bg = accentColor ? accentColor.replace('rgb', 'rgba').replace(')', ',0.07)') : D.surface;
+  const bdr = accentColor ? accentColor.replace('rgb', 'rgba').replace(')', ',0.18)') : D.borderSub;
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 8, background: bg, border: `1px solid ${bdr}` }}>
+      {icon && <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {title && <div style={{ fontSize: 12, color: D.text, fontWeight: 600, marginBottom: 2 }}>{title}</div>}
+        {sub && <div style={{ fontSize: 11, color: D.textMuted }}>{sub}</div>}
+        {children}
+      </div>
+      {action && <DarkBtn onClick={onAction}>{action}</DarkBtn>}
+    </div>
+  );
+}
+
 // GM Greeting Alert — simulates real-time member check-in notifications
 function buildCheckinAlerts() {
   const teeSheet = getTodayTeeSheet();
@@ -301,7 +396,7 @@ export default function TodayView() {
 
   return (
     <PageTransition>
-      <div className="flex flex-col w-full" style={{ gap: 12 }}>
+      <div className="flex flex-col w-full" style={{ gap: 12, background: D.bg, borderRadius: 16, padding: 16 }}>
 
         {/* Section 1: Compact Greeting Bar */}
         <div
@@ -397,7 +492,9 @@ export default function TodayView() {
         <MorningBriefingSentence />
 
         {/* Overnight Brief — what agents surfaced while the GM was away */}
-        <OvernightBrief />
+        <CollapsibleSection title="Overnight Brief" accentColor={D.accent} defaultOpen={true} peek="what surfaced while you were away">
+          <OvernightBrief />
+        </CollapsibleSection>
 
         {/* Core-3 celebration banner — shows once when members + tee-sheet + F&B are all imported */}
         {!core3Dismissed && isGateOpen('members') && isGateOpen('tee-sheet') && isGateOpen('fb') && (
@@ -466,22 +563,21 @@ export default function TodayView() {
               key={stat.label}
               className="today-stat-card"
               style={{
-                background: 'white',
-                border: '1px solid #e5e7eb',
+                background: 'rgba(255,255,255,0.05)',
+                border: `1px solid ${D.border}`,
                 borderRadius: 14,
                 padding: '16px 18px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 14,
                 cursor: 'default',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
               }}
             >
-              <div style={{ width: 42, height: 42, background: stat.bg, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+              <div style={{ width: 42, height: 42, background: 'rgba(255,255,255,0.08)', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                 {stat.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 2 }} title={stat.label === 'Pending Actions' ? 'Total actions awaiting your approval across all agents' : stat.label}>{stat.label}</div>
+                <div style={{ fontSize: 11, color: D.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 2 }} title={stat.label === 'Pending Actions' ? 'Total actions awaiting your approval across all agents' : stat.label}>{stat.label}</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, letterSpacing: -0.3 }}>
                   {/^\d+$/.test(stat.value) ? <AnimatedNumber value={parseInt(stat.value, 10)} duration={800} /> : stat.value}
                 </div>
@@ -499,49 +595,45 @@ export default function TodayView() {
         {(() => {
           const atRiskOnSheet = buildCheckinAlerts().filter(a => a.isAtRisk);
           if (!atRiskOnSheet.length) return null;
+          const peek = atRiskOnSheet.map(m => m.name.split(' ')[0]).join(', ');
           return (
-            <div
-              className="fade-in-up rounded-2xl border p-4"
-              style={{ borderColor: 'rgba(239,68,68,0.25)', background: 'rgba(254,242,242,0.5)' }}
-              data-section="member-alerts"
+            <CollapsibleSection
+              title="At-Risk on Today's Sheet"
+              count={atRiskOnSheet.length}
+              peek={peek}
+              accentColor={D.red}
+              defaultOpen={true}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-red-600 dark:text-red-400">
-                  ⚠ At-Risk on Today's Sheet — {atRiskOnSheet.length} flagged
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate('members')}
-                  className="text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline"
-                >
-                  View all →
-                </button>
-              </div>
-              <div className="flex flex-col gap-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {atRiskOnSheet.map(m => {
-                  const sc = m.healthScore < 30 ? '#ef4444' : m.healthScore < 50 ? '#f59e0b' : '#6b7280';
+                  const sc = m.healthScore < 30 ? D.red : m.healthScore < 50 ? '#f59e0b' : D.textMuted;
                   return (
-                    <div key={m.memberId} className="bg-white dark:bg-white/[0.03] rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <MemberLink memberId={m.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 dark:text-white/90 hover:text-brand-500 transition-colors">
+                    <div key={m.memberId} style={{ padding: '10px 16px', borderBottom: `1px solid ${D.borderSub}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <MemberLink memberId={m.memberId} mode="drawer" style={{ fontWeight: 600, fontSize: 13, color: D.text }}>
                             {m.name}
                           </MemberLink>
-                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded shrink-0" style={{ color: sc, background: sc + '15' }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, color: sc, background: sc + '20' }}>
                             {m.healthScore}
                           </span>
-                          <span className="text-[10px] text-gray-400">{m.archetype}</span>
+                          <span style={{ fontSize: 10, color: D.textDim }}>{m.archetype}</span>
                         </div>
-                        <span className="text-[11px] text-gray-400 shrink-0">{m.time} · {m.course}</span>
+                        <span style={{ fontSize: 11, color: D.textMuted, flexShrink: 0 }}>{m.time} · {m.course}</span>
                       </div>
-                      <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                      <div style={{ fontSize: 11, color: D.textMuted, lineHeight: 1.5 }}>
                         💬 {m.talkingPoints[0]}
                       </div>
                     </div>
                   );
                 })}
+                <div style={{ padding: '8px 16px' }}>
+                  <button type="button" onClick={() => navigate('members')} style={{ fontSize: 11, color: D.accent, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                    View all members →
+                  </button>
+                </div>
               </div>
-            </div>
+            </CollapsibleSection>
           );
         })()}
 
@@ -554,68 +646,59 @@ export default function TodayView() {
           const understaffed = getUnderstaffedDays();
           const totalLoss = understaffed.reduce((s, d) => s + (d.revenueLoss || 0), 0);
           if (!newMembers.length && !understaffed.length) return null;
+          const itemCount = (newMembers.length > 0 ? 1 : 0) + understaffed.length;
+          const peekParts = [];
+          if (newMembers.length > 0) peekParts.push(`${newMembers.length} new member${newMembers.length !== 1 ? 's' : ''}`);
+          if (understaffed.length > 0) peekParts.push(`${understaffed.length} staffing gap${understaffed.length !== 1 ? 's' : ''}`);
           return (
-            <div className="fade-in-up rounded-2xl border border-gray-200 bg-white dark:bg-white/[0.03] dark:border-gray-800 p-4 flex flex-col gap-3">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:text-brand-400">
-                Today's Priorities
+            <CollapsibleSection title="Today's Priorities" count={itemCount} peek={peekParts.join(' · ')} accentColor={D.accent} defaultOpen={true}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {/* 90-Day New Member Alert */}
+                {newMembers.length > 0 && (
+                  <div style={{ padding: '12px 16px', borderBottom: understaffed.length > 0 ? `1px solid ${D.borderSub}` : 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: '#f59e0b', marginBottom: 4 }}>
+                          New Member Watch — First 90 Days
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>
+                          {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in their first 90 days
+                          {needsAttention.length > 0 && (
+                            <span style={{ color: '#f59e0b' }}> — {needsAttention.length} need{needsAttention.length === 1 ? 's' : ''} attention</span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 11, color: D.textMuted, marginTop: 3 }}>
+                          Members who attend 2+ events in the first quarter renew at <strong style={{ color: D.green }}>94%</strong>. Members who don't renew at <strong style={{ color: D.red }}>61%</strong>.
+                        </div>
+                      </div>
+                      <DarkBtn onClick={() => navigate('members', { filter: 'new' })}>View →</DarkBtn>
+                    </div>
+                  </div>
+                )}
+                {/* Staffing Flag */}
+                {understaffed.length > 0 && (
+                  <div style={{ padding: '12px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: D.red, marginBottom: 4 }}>
+                          Staffing Alert
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>
+                          {understaffed.length} understaffed day{understaffed.length !== 1 ? 's' : ''} this period
+                          {totalLoss > 0 && (
+                            <span style={{ color: D.red }}> — ${totalLoss.toLocaleString()} revenue impact</span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 11, color: D.textMuted, marginTop: 3 }}>
+                          {understaffed[0]?.outlet} on {understaffed[0]?.date}: {understaffed[0]?.scheduledStaff} scheduled vs {understaffed[0]?.requiredStaff} required
+                        </div>
+                      </div>
+                      <DarkBtn onClick={() => navigate('service')}>View →</DarkBtn>
+                    </div>
+                  </div>
+                )}
               </div>
-              {/* 90-Day New Member Alert */}
-              {newMembers.length > 0 && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 dark:border-amber-500/20 dark:bg-amber-500/5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[10px] font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400 mb-1">
-                        New Member Watch — First 90 Days
-                      </div>
-                      <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
-                        {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in their first 90 days
-                        {needsAttention.length > 0 && (
-                          <span className="text-amber-600 dark:text-amber-400"> — {needsAttention.length} need{needsAttention.length === 1 ? 's' : ''} attention</span>
-                        )}
-                      </div>
-                      <div className="text-[11px] text-gray-500 mt-0.5">
-                        Members who attend 2+ events in the first quarter renew at <strong className="text-success-600">94%</strong>. Members who don't renew at <strong className="text-error-600">61%</strong>.
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => navigate('members', { filter: 'new' })}
-                      className="shrink-0 text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
-                    >
-                      View →
-                    </button>
-                  </div>
-                </div>
-              )}
-              {/* Staffing Flag */}
-              {understaffed.length > 0 && (
-                <div className="rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 dark:border-red-500/20 dark:bg-red-500/5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[10px] font-bold uppercase tracking-wide text-red-600 dark:text-red-400 mb-1">
-                        Staffing Alert
-                      </div>
-                      <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
-                        {understaffed.length} understaffed day{understaffed.length !== 1 ? 's' : ''} this period
-                        {totalLoss > 0 && (
-                          <span className="text-red-600 dark:text-red-400"> — ${totalLoss.toLocaleString()} revenue impact</span>
-                        )}
-                      </div>
-                      <div className="text-[11px] text-gray-500 mt-0.5">
-                        {understaffed[0]?.outlet} on {understaffed[0]?.date}: {understaffed[0]?.scheduledStaff} scheduled vs {understaffed[0]?.requiredStaff} required
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => navigate('service')}
-                      className="shrink-0 text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
-                    >
-                      View →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            </CollapsibleSection>
           );
         })()}
 
@@ -679,16 +762,24 @@ export default function TodayView() {
         <GmGreetingAlert />
 
         {/* Section 3: Priority Member Alerts */}
-        <MemberAlerts />
+        <CollapsibleSection title="Member Alerts" accentColor={D.red} defaultOpen={true} peek="health score changes, renewals, flags">
+          <MemberAlerts />
+        </CollapsibleSection>
 
         {/* Section 4: Staffing vs Demand + Open Complaints (moved up for visibility) */}
-        <TodaysRisks />
+        <CollapsibleSection title="Today's Risks" accentColor={D.accent} defaultOpen={true} peek="staffing gaps, complaints, pace issues">
+          <TodaysRisks />
+        </CollapsibleSection>
 
         {/* Section 5: Action Queue */}
-        <PendingActionsInline topPriority={topPriority} />
+        <CollapsibleSection title="Action Queue" accentColor="#8b5cf6" defaultOpen={true} peek="pending approvals and agent recommendations">
+          <PendingActionsInline topPriority={topPriority} />
+        </CollapsibleSection>
 
         {/* Section 7: Tomorrow's Forecast */}
-        <TomorrowForecast />
+        <CollapsibleSection title="Tomorrow's Forecast" accentColor={D.textMuted} defaultOpen={false} peek="weather, tee times, staffing">
+          <TomorrowForecast />
+        </CollapsibleSection>
 
       </div>
     </PageTransition>
