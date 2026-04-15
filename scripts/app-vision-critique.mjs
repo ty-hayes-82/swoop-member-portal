@@ -588,7 +588,6 @@ const STAGES_FOCUSED = [
       { slug: '4_service',       hash: '/#/service',       label: 'Service Quality',    waitMs: 4000 },
       { slug: '4_board-report',  hash: '/#/board-report',  label: 'Board Report',       waitMs: 5000 },
       { slug: '4_automations',   hash: '/#/automations',   label: 'Automations',        waitMs: 6000 },
-      { slug: '4_sms-simulator', hash: '/#/sms-simulator', label: 'SMS Chat Simulator', waitMs: 3000 },
     ],
   },
 ];

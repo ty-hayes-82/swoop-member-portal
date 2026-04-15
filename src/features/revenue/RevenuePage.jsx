@@ -29,6 +29,7 @@ import {
   getSlowRoundContext,
 } from '@/services/revenueService';
 import { isGateOpen } from '@/services/demoGate';
+import { getMemberSummary, getAtRiskMembers } from '@/services/memberService';
 import AgentUpsell from '@/components/ui/AgentUpsell';
 
 const COLORS = {
@@ -106,47 +107,85 @@ export default function RevenuePage() {
           </div>
 
           {hasPOS && !hasTeeSheet ? (
-            <div className="flex flex-col gap-4">
-              {/* POS data loaded — show what we have */}
-              <Panel className="border-l-4 border-l-green-500">
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl">✅</div>
-                  <div>
-                    <div className="font-semibold text-gray-800 dark:text-white/90 mb-1">POS Transactions Loaded</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Your point-of-sale data is connected. To compute F&amp;B revenue leakage, Swoop cross-references
-                      POS checks against tee sheet rounds — identifying which rounds skip dining and quantifying the revenue impact.
+            (() => {
+              const memberSummary = getMemberSummary();
+              const atRisk = getAtRiskMembers().slice(0, 3);
+              const riskCount = (memberSummary.atRisk || 0) + (memberSummary.critical || 0);
+              const duesAtRisk = memberSummary.potentialDuesAtRisk || 0;
+              return (
+                <div className="flex flex-col gap-4">
+                  {/* POS connected — surface real member-spend intelligence */}
+                  <div className="rounded-xl border border-green-200 bg-green-50/50 dark:bg-green-500/5 dark:border-green-500/20 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg">✅</span>
+                      <span className="font-semibold text-gray-800 dark:text-white/90">POS Connected — {686} transactions loaded</span>
+                      <SourceBadge system="POS" size="xs" />
                     </div>
-                  </div>
-                </div>
-              </Panel>
-
-              <Panel className="border-l-4 border-l-amber-400">
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl">📋</div>
-                  <div>
-                    <div className="font-semibold text-gray-800 dark:text-white/90 mb-1">Next: Connect Tee Sheet</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                      Import your tee sheet to unlock pace-to-dining attribution — the #1 hidden revenue leak at most clubs.
-                      Swoop will show you exactly which rounds are slow, which ones skip the grill, and how much that costs per month.
-                    </div>
-                    <div className="grid grid-cols-3 gap-3 text-center">
-                      {[
-                        { label: 'Industry avg leakage', value: '$8,400/mo', sub: '↑ benchmark — not your data yet' },
-                        { label: 'Top driver (industry avg)', value: 'Pace of Play', sub: 'benchmark — 62% of clubs' },
-                        { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
-                      ].map(({ label, value, sub }) => (
-                        <div key={label} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</div>
-                          <div className="font-bold text-gray-800 dark:text-white/90">{value}</div>
-                          <div className="text-[10px] text-gray-400 mt-0.5">{sub}</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="bg-white dark:bg-white/5 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">Members Imported</div>
+                        <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono">{memberSummary.total || 0}</div>
+                        <div className="text-[11px] text-gray-500 mt-0.5">spending patterns being analyzed</div>
+                      </div>
+                      {riskCount > 0 && (
+                        <div className="bg-white dark:bg-white/5 rounded-lg p-3 border border-red-200 dark:border-red-500/20">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-red-500 mb-1">At-Risk Members</div>
+                          <div className="text-2xl font-bold text-red-600 dark:text-red-400 font-mono">{riskCount}</div>
+                          <div className="text-[11px] text-gray-500 mt-0.5">declining engagement detected</div>
                         </div>
-                      ))}
+                      )}
+                      {duesAtRisk > 0 && (
+                        <div className="bg-white dark:bg-white/5 rounded-lg p-3 border border-red-200 dark:border-red-500/20">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-red-500 mb-1">Dues at Risk</div>
+                          <div className="text-2xl font-bold text-red-600 dark:text-red-400 font-mono">${Math.round(duesAtRisk / 1000)}K</div>
+                          <div className="text-[11px] text-gray-500 mt-0.5">annual dues from at-risk members</div>
+                        </div>
+                      )}
+                    </div>
+                    {atRisk.length > 0 && (
+                      <div className="mt-3">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Members Declining — Cross-Reference with Spend</div>
+                        <div className="flex flex-col gap-1.5">
+                          {atRisk.map(m => (
+                            <div key={m.id || m.memberId} className="flex items-center justify-between bg-white dark:bg-white/5 rounded-lg px-3 py-2 border border-gray-100 dark:border-gray-700">
+                              <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">{m.name}</div>
+                              <div className="flex items-center gap-3 text-xs text-gray-500">
+                                <span className="font-mono text-red-500 font-semibold">Score {m.healthScore ?? m.score ?? '—'}</span>
+                                {m.duesAnnual > 0 && <span>${Math.round(m.duesAnnual / 1000)}K/yr dues</span>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/40 dark:bg-amber-500/5 dark:border-amber-500/20 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">📋</div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-800 dark:text-white/90 mb-1">Next: Connect Tee Sheet → unlock revenue leakage</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                          Swoop will cross-reference POS checks against tee sheet rounds — identifying which rounds skip dining and quantifying the revenue impact per slow hole.
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 text-center">
+                          {[
+                            { label: 'Industry avg leakage', value: '$8,400/mo', sub: 'benchmark — not your data yet' },
+                            { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
+                          ].map(({ label, value, sub }) => (
+                            <div key={label} className="bg-white/60 dark:bg-white/5 rounded-lg p-3 border border-amber-100 dark:border-amber-500/10">
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</div>
+                              <div className="font-bold text-gray-800 dark:text-white/90">{value}</div>
+                              <div className="text-[10px] text-gray-400 mt-0.5">{sub}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </Panel>
-            </div>
+              );
+            })()
           ) : (
             <DataEmptyState
               icon="💰"

@@ -61,7 +61,16 @@ const KPI_SOURCES = {
   'Board Confidence Score': ['All Systems'],
 };
 
-function KPIStrip({ kpis, onDrillDown }) {
+const KPI_NAV = {
+  'At Risk': 'members',
+  'Retention Rate': 'members',
+  'Dues at Risk': 'revenue',
+  'Dues Protected': 'revenue',
+  'Service Consistency': 'service',
+  'Operational Response': 'automations',
+};
+
+function KPIStrip({ kpis, navigate, onDrillDown }) {
   const colorMap = {
     green: 'text-success-500',
     blue: 'text-blue-400',
@@ -72,10 +81,11 @@ function KPIStrip({ kpis, onDrillDown }) {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
       {kpis.map((kpi) => {
         const sources = KPI_SOURCES[kpi.label] || ['All Systems'];
+        const dest = KPI_NAV[kpi.label];
         return (
           <div
             key={kpi.label}
-            onClick={() => onDrillDown?.()}
+            onClick={() => dest ? navigate?.(dest) : onDrillDown?.()}
             className="bg-gray-900 rounded-xl p-4 text-center border border-[#2d2d44] cursor-pointer transition-all duration-150 hover:shadow-lg hover:-translate-y-px"
           >
             <div className={`text-[28px] font-bold ${colorMap[kpi.color] || 'text-success-500'}`}>
@@ -234,7 +244,7 @@ export default function BoardReport() {
         </div>
       )}
 
-      <KPIStrip kpis={kpis} onDrillDown={() => setActiveTab(1)} />
+      <KPIStrip kpis={kpis} navigate={navigate} onDrillDown={() => setActiveTab(1)} />
 
       {/* Board Confidence Score Methodology */}
       <details className="mb-4 bg-white border border-gray-200 rounded-lg p-3 px-4">

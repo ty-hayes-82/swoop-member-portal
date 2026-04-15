@@ -112,7 +112,7 @@ export default function QualityTab() {
 
         <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-4 sm:flex-wrap sm:ml-auto">
           {[
-            { label: 'Resolution Rate', value: `${resolutionRate}%`, color: resolutionRate >= 70 ? '#12b76a' : '#ca8a04' },
+            { label: 'Resolution Rate', value: resolvedCount === 0 && totalComplaints > 0 ? 'Tracking' : `${resolutionRate}%`, color: resolutionRate >= 70 ? '#12b76a' : '#ca8a04' },
             { label: 'Understaffed Days', value: `${understaffedDays.length}`, color: understaffedDays.length <= 1 ? '#12b76a' : '#ef4444' },
             { label: 'Open Complaints', value: `${totalComplaints - resolvedCount}`, color: (totalComplaints - resolvedCount) <= 2 ? '#ca8a04' : '#ef4444' },
             ...(adjustedScore != null ? [{
