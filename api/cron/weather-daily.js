@@ -57,15 +57,26 @@ export default async function handler(req, res) {
     for (const club of clubs) {
       const clubResult = { clubId: club.club_id, name: club.name, steps: [] };
 
-      // Step 1: Archive today's actual conditions
+      // Step 1: Refresh 5-day forecast cache first so the cache is always
+      // populated with 5 days. Doing this before the archive step lets the
+      // archive step reuse the cached result instead of making a separate
+      // 1-day call that would overwrite the cache with fewer days.
+      let refreshedForecast = null;
+      try {
+        refreshedForecast = await getForecast(club.club_id, { hours: 24, days: 5 });
+        clubResult.steps.push({ step: 'refresh_forecast', status: 'ok' });
+      } catch (e) {
+        clubResult.steps.push({ step: 'refresh_forecast', status: 'error', message: e.message });
+      }
+
+      // Step 2: Archive today's actual conditions
       try {
         const current = await getCurrentConditions(club.club_id);
 
-        // Get today's high/low from daily forecast
+        // Get today's high/low from the already-fetched 5-day forecast
         let dailyData = {};
         try {
-          const forecast = await getForecast(club.club_id, { hours: 0, days: 1 });
-          const todayForecast = forecast.daily?.[0] || {};
+          const todayForecast = refreshedForecast?.daily?.[0] || {};
           dailyData = {
             high: todayForecast.high || Math.round(current.temp),
             low: todayForecast.low || Math.round(current.temp),
@@ -96,7 +107,7 @@ export default async function handler(req, res) {
         await archiveDailyWeather(club.club_id, today, archiveData);
         clubResult.steps.push({ step: 'archive_today', status: 'ok' });
 
-        // Step 2: Check for severe weather → create operational intervention
+        // Step 3: Check for severe weather → create operational intervention
         const { impacted, reason } = assessWeatherImpact(archiveData);
         if (impacted && (archiveData.gusts > 25 || archiveData.precipTotal > 0.5)) {
           try {
@@ -130,14 +141,6 @@ export default async function handler(req, res) {
         }
       } catch (e) {
         clubResult.steps.push({ step: 'archive_today', status: 'error', message: e.message });
-      }
-
-      // Step 3: Refresh tomorrow's forecast cache
-      try {
-        await getForecast(club.club_id, { hours: 24, days: 3 });
-        clubResult.steps.push({ step: 'refresh_forecast', status: 'ok' });
-      } catch (e) {
-        clubResult.steps.push({ step: 'refresh_forecast', status: 'error', message: e.message });
       }
 
       results.push(clubResult);

@@ -5,6 +5,7 @@
  * Uses TailAdmin-style layout: centered form with max-w-md mx-auto
  */
 import { useState } from 'react';
+import { refreshWeatherForLocation } from '@/services/weatherService';
 
 const TEMPLATES = [
   { file: 'swoop-template-members-only.xlsx', label: 'Members Only', desc: '20 members — test health scores and at-risk detection', sheets: '1 sheet', color: '#3b82f6' },
@@ -103,6 +104,10 @@ export default function NewClubSetup({ onComplete, onBack }) {
         localStorage.setItem('swoop_club_id', data.clubId);
         localStorage.setItem('swoop_club_name', clubName.trim());
         localStorage.setItem('swoop_auth_user', JSON.stringify(data.user));
+        if (city.trim()) {
+          localStorage.setItem('swoop_club_city', city.trim());
+          localStorage.setItem('swoop_club_state', state.trim() || '');
+        }
       }
       setStep(2);
     } catch {
@@ -121,9 +126,21 @@ export default function NewClubSetup({ onComplete, onBack }) {
     localStorage.setItem('swoop_auth_user', JSON.stringify(user));
     localStorage.setItem('swoop_club_id', clubId);
     localStorage.setItem('swoop_club_name', clubName.trim());
+    // Store city/state so weather fetches use the club's actual location
+    // (replaces any stale location from a prior session).
+    if (city.trim()) {
+      localStorage.setItem('swoop_club_city', city.trim());
+      localStorage.setItem('swoop_club_state', state.trim() || '');
+    } else {
+      localStorage.removeItem('swoop_club_city');
+      localStorage.removeItem('swoop_club_state');
+    }
     // Notify AuthProvider so useCurrentClub / useAuth pick up the new session
     // without a page reload — otherwise the header falls back to "demo".
     window.dispatchEvent(new Event('swoop:auth-changed'));
+    // Kick off a fresh weather fetch for the new location so Today View
+    // shows this club's forecast instead of the previous session's data.
+    refreshWeatherForLocation();
     onComplete?.(user);
   };
 
