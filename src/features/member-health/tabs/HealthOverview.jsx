@@ -253,20 +253,15 @@ export default function HealthOverview() {
             <div
               key={d.level}
               onClick={() => { setHealthFilter(healthFilter === d.level ? null : d.level); setInnerTab('members'); }}
-              className="bg-white shadow-theme-xs rounded-xl p-4 cursor-pointer select-none"
-              style={{
-                border: `1px solid ${healthFilter === d.level ? d.color + 'aa' : d.color + '40'}`,
-                boxShadow: healthFilter === d.level ? `0 0 0 2px ${d.color}30` : undefined,
-                transition: 'box-shadow 0.15s, transform 0.15s',
-                transform: healthFilter === d.level ? 'scale(1.02)' : 'scale(1)',
-              }}
+              className="bg-white shadow-theme-xs rounded-xl p-4"
+              style={{ border: `1px solid ${d.color}40`, cursor: 'pointer', transition: 'box-shadow 0.15s, transform 0.15s, opacity 0.15s', opacity: 1 }}
             >
               <div className="flex justify-between mb-2">
                 <span className="text-xs text-gray-400 uppercase tracking-wide">{d.level}</span>
-                <span className="text-xs font-semibold" style={{ color: d.color }}>{(d.percentage * 100).toFixed(0)}%</span>
+                <span className="text-xs" style={{ color: d.color }}>{(d.percentage * 100).toFixed(0)}%</span>
               </div>
               <div className="text-[28px] font-mono font-bold" style={{ color: d.color }}>{d.count}</div>
-              <div className="text-xs text-gray-400">members {healthFilter === d.level ? '— filtered ✓' : '— click to filter'}</div>
+              <div className="text-xs text-gray-400">members</div>
               <div className="h-1 bg-gray-200 rounded-sm mt-2">
                 <div className="h-full rounded-sm" style={{ background: d.color, width: `${d.percentage * 100}%` }} />
               </div>
