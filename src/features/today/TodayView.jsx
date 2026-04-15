@@ -27,7 +27,7 @@ import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist from './OnboardingChecklist';
 import { getTodayTeeSheet } from '@/services/operationsService';
-import { getMemberSummary, getFullRoster } from '@/services/memberService';
+import { getMemberSummary, getFullRoster, getAtRiskMembers } from '@/services/memberService';
 import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
 import { trackAction } from '@/services/activityService';
 import { getHealthRollup } from '@/services/apiHealthService';
@@ -214,23 +214,63 @@ export default function TodayView() {
     );
   }
 
-  // Real authenticated club with no operational data — show welcome state
+  // Real authenticated club with no operational data — show value-preview welcome state
   if (isAuthenticatedClub() && !briefing?.teeSheet?.roundsToday && priorities.length === 0 && !hasRealMemberData()) {
+    const hasMembersGate = isGateOpen('members');
+    const hasTeeSheet = isGateOpen('tee-sheet');
+    const hasPOS = isGateOpen('fb');
+    const steps = [
+      { id: 'members', label: 'Member Roster', done: hasMembersGate, preview: 'Who's going quiet and why — health scores, dues at risk, at-risk alerts' },
+      { id: 'tee-sheet', label: 'Tee Sheet', done: hasTeeSheet, preview: 'Today's bookings with health scores — know which at-risk members are on the course right now' },
+      { id: 'fb', label: 'POS / F&B', done: hasPOS, preview: 'F&B leakage from slow rounds and understaffing — quantified to the dollar' },
+    ];
+    const connectedCount = steps.filter(s => s.done).length;
     return (
       <PageTransition>
-        <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col gap-5 w-full">
           <div>
             <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90 m-0">{getGreeting()}</h1>
             <p className="text-sm text-gray-500 mt-1 mb-0">{formatDate()}</p>
           </div>
-          <DataEmptyState icon="📊" title="Welcome to your dashboard" description="Import your member roster, tee sheet, and POS data to see today's operational briefing. Start with members — each data source you connect unlocks more insights." dataType="club data" />
+
+          {/* Value preview — what this dashboard becomes once connected */}
+          <div className="rounded-2xl border border-gray-200 bg-white dark:bg-white/[0.03] dark:border-gray-800 overflow-hidden">
+            <div className="px-5 pt-5 pb-3">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:text-brand-400 mb-1">
+                Here's what you'll see when connected
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 m-0">
+                Connect your three core systems to unlock your full operational briefing. Each source adds a layer of intelligence you can't get from any single vendor.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
+              {steps.map(step => (
+                <div key={step.id} className="px-5 py-4 flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${step.done ? 'bg-success-100 text-success-700 dark:bg-success-500/20 dark:text-success-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'}`}>
+                      {step.done ? '✓' : '○'}
+                    </div>
+                    <span className={`text-xs font-bold ${step.done ? 'text-success-700 dark:text-success-400' : 'text-gray-500 dark:text-gray-400'}`}>{step.label}</span>
+                  </div>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-500 m-0 leading-relaxed">{step.preview}</p>
+                </div>
+              ))}
+            </div>
+            {connectedCount > 0 && (
+              <div className="px-5 py-2.5 bg-success-50 dark:bg-success-500/5 border-t border-success-100 dark:border-success-500/20">
+                <span className="text-xs text-success-700 dark:text-success-400 font-semibold">{connectedCount} of 3 source{connectedCount !== 1 ? 's' : ''} connected</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400"> — keep going to unlock the full briefing</span>
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-3 flex-wrap">
             <button
               type="button"
               onClick={() => navigate('admin', { tab: 'data-hub' })}
               className="px-5 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors"
             >
-              Go to Import Data →
+              {hasMembersGate ? 'Add More Data Sources →' : 'Start with Member Roster →'}
             </button>
             <button
               type="button"
@@ -247,6 +287,7 @@ export default function TodayView() {
 
   // Derive quick stats
   const memberSummary = getMemberSummary();
+  const topAtRisk = getAtRiskMembers().slice(0, 3);
   const totalMembers = memberSummary.totalMembers || memberSummary.total || 0;
   const hourlyData = getHourlyForecast();
   const dailyData = getDailyForecast(1);
@@ -392,6 +433,22 @@ export default function TodayView() {
                     {(memberSummary.atRisk + memberSummary.critical).toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500">need attention this week</div>
+                  {topAtRisk.length > 0 && (
+                    <div className="mt-1.5 flex flex-col gap-0.5">
+                      {topAtRisk.map(m => {
+                        const fullName = m.name || `${m.firstName || ''} ${m.lastName || ''}`.trim();
+                        const parts = fullName.trim().split(' ');
+                        const shortName = parts.length >= 2 ? `${parts[0]} ${parts.at(-1)[0]}.` : fullName;
+                        const reason = m.topRisk || m.signal || 'Declining engagement';
+                        return (
+                          <div key={m.memberId || m.member_id} className="text-[11px] text-gray-600 dark:text-gray-400 leading-snug">
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">{shortName}</span>
+                            {' — '}<span className="text-gray-400">{reason}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
               {memberSummary.potentialDuesAtRisk > 0 && (

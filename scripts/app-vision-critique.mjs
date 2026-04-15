@@ -44,9 +44,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const APP_URL     = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
 const API_KEY     = process.env.GEMINI_API_KEY;
-const FLASH_MODEL = 'gemini-2.5-flash';   // per-agent critiques (75 calls) — Flash with thinking
-const RECS_MODEL  = 'gemini-2.5-flash';   // per-screenshot recommendations (15 calls)
-const PRO_MODEL   = 'gemini-2.5-pro';     // master report (1 call)
+const FLASH_MODEL = 'gemini-2.5-pro';    // per-agent critiques — Pro for all calls (C12)
+const RECS_MODEL  = 'gemini-2.5-pro';    // per-screenshot recommendations
+const PRO_MODEL   = 'gemini-2.5-pro';    // master report
 const THINKING_CONFIG = { thinkingConfig: { thinkingBudget: 2000 } }; // 2k budget for fast iteration cycles
 const VIEWPORT    = { width: 1440, height: 900 };
 const FIXTURE_DIR = path.resolve(__dirname, '../tests/fixtures/small');

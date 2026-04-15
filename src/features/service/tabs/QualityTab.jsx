@@ -29,8 +29,11 @@ export default function QualityTab() {
 
   // Derive a service consistency score (higher = better)
   // Factors: resolution rate, understaffed complaint ratio (inverted), pace impact
+  // When no complaints are resolved yet (Tracking state), use 50 as a neutral baseline
+  // so a fresh club isn't automatically penalised 40 points before staff has had a chance to respond.
+  const resolutionFactor = resolvedCount === 0 ? 50 : resolutionRate;
   const consistencyScore = Math.round(
-    (resolutionRate * 0.4) +
+    (resolutionFactor * 0.4) +
     ((100 - understaffedPct) * 0.3) +
     ((100 - (slowRoundStats.overallRate || 0) * 100) * 0.3)
   );
@@ -40,9 +43,10 @@ export default function QualityTab() {
   const weatherImpactedComplaints = feedbackRecords.filter(f => f.weatherContext?.isWeatherImpacted || f.weatherContext?.is_weather_impacted).length;
   const nonWeatherComplaints = totalComplaints - weatherImpactedComplaints;
   const adjustedResolutionRate = nonWeatherComplaints > 0 ? Math.round((resolvedCount / Math.max(nonWeatherComplaints, 1)) * 100) : 100;
+  const adjustedResolutionFactor = resolvedCount === 0 ? 50 : adjustedResolutionRate;
   const adjustedScore = weatherImpactedComplaints > 0
     ? Math.min(100, Math.round(
-        (adjustedResolutionRate * 0.4) +
+        (adjustedResolutionFactor * 0.4) +
         ((100 - understaffedPct) * 0.3) +
         ((100 - (slowRoundStats.overallRate || 0) * 100) * 0.3)
       ))

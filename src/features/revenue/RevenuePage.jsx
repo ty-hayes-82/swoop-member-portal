@@ -187,16 +187,69 @@ export default function RevenuePage() {
               );
             })()
           ) : (
-            <DataEmptyState
-              icon="💰"
-              title="Revenue leakage needs data"
-              description={
-                hasTeeSheet && !hasPOS
-                  ? 'Connect your POS system to see how pace of play and staffing gaps translate to F&B revenue loss.'
-                  : 'Import your tee sheet, POS, and scheduling data to see how operational failures connect to F&B revenue loss.'
-              }
-              dataType="operations data"
-            />
+            /* No data at all — show a value-preview panel so the GM understands what they'll unlock */
+            <div className="flex flex-col gap-4">
+              {/* Industry benchmark hero */}
+              <div className="rounded-xl border border-gray-200 bg-white dark:bg-white/[0.03] dark:border-gray-800 p-5">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">Industry Benchmark</div>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-4xl font-extrabold text-gray-800 dark:text-white/90 font-mono">$8,400</span>
+                  <span className="text-base text-gray-500">/mo avg revenue leakage</span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 m-0">
+                  For a 400-member club. Swoop cross-references your tee sheet, POS, and scheduling data to tell you exactly where these dollars go — and what stops them.
+                </p>
+              </div>
+
+              {/* Three locked source rows */}
+              <div className="rounded-xl border border-gray-200 bg-white dark:bg-white/[0.03] dark:border-gray-800 overflow-hidden">
+                <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800">
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">What Swoop will quantify for you</div>
+                </div>
+                {[
+                  { label: 'Pace of Play', desc: 'Slow rounds suppress F&B conversion — Swoop identifies which holes and shifts', est: '$3,200–$5,000', color: '#ef4444', icon: '⛳', source: 'Tee Sheet + POS' },
+                  { label: 'Understaffing', desc: 'Gaps in shift coverage drive complaints and reduce check sizes', est: '$1,800–$2,800', color: '#f59e0b', icon: '👥', source: 'Scheduling' },
+                  { label: 'Weather No-Shows', desc: 'Revenue lost to cancelled rounds on adverse-weather days', est: '$800–$1,200', color: '#60a5fa', icon: '🌧️', source: 'Weather API + Tee Sheet' },
+                ].map(row => (
+                  <div key={row.label} className="flex items-center gap-4 px-5 py-3.5 border-b last:border-b-0 border-gray-50 dark:border-gray-800/60">
+                    <div className="text-xl w-7 flex-shrink-0">{row.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{row.label}</span>
+                        <span className="text-[10px] text-gray-400 border border-gray-200 dark:border-gray-700 rounded px-1.5 py-0.5">🔒 needs {row.source}</span>
+                      </div>
+                      <div className="text-[11px] text-gray-400">{row.desc}</div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-sm font-mono font-bold" style={{ color: row.color }}>{row.est}</div>
+                      <div className="text-[10px] text-gray-400">est/mo</div>
+                    </div>
+                    {/* Muted stub bar */}
+                    <div className="hidden sm:block w-24 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden flex-shrink-0">
+                      <div className="h-full rounded-full opacity-25" style={{ width: '60%', background: row.color }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA strip */}
+              <div className="flex gap-3 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => navigate('admin', { tab: 'data-hub' })}
+                  className="px-5 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors"
+                >
+                  {hasTeeSheet ? 'Connect POS →' : 'Connect Tee Sheet →'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('admin', { tab: 'data-hub' })}
+                  className="px-5 py-2.5 rounded-lg border border-gray-200 bg-transparent text-gray-600 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                >
+                  {hasTeeSheet ? 'View Connected Sources' : hasPOS ? 'Connect Tee Sheet →' : 'View All Integrations'}
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </PageTransition>
