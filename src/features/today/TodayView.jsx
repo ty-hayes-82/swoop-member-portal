@@ -10,8 +10,6 @@ import SwoopSection from '@/components/ui/SwoopSection';
 import PendingActionsInline from './PendingActionsInline';
 import MemberAlerts from './MemberAlerts';
 import WeekForecast from './WeekForecast';
-import MorningBriefingSentence from './MorningBriefingSentence';
-import DemoStoriesLauncher from './DemoStoriesLauncher';
 import { getFirstName } from '../../utils/nameUtils';
 import OvernightBrief from './OvernightBrief';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
@@ -427,17 +425,6 @@ export default function TodayView() {
           </div>
         </div>
 
-        {/* Overnight Brief — agents ran at 6:14 am · 4 findings */}
-        <SwoopSection title="Overnight Brief" titleColor={C.neutral} count={4} peek="Agents ran at 6:14 am · 4 findings">
-          <OvernightBrief />
-        </SwoopSection>
-
-        {/* Morning Briefing sentence + source badges */}
-        <MorningBriefingSentence />
-
-        {/* Demo Story Flows — 3 storyboard moments, demo mode only */}
-        {getDataMode() === 'demo' && <DemoStoriesLauncher />}
-
         {/* Club Status — 4 KPI tiles */}
         <SwoopSection
           title="Club Status"
@@ -497,6 +484,11 @@ export default function TodayView() {
               ]}
             />
           </div>
+        </SwoopSection>
+
+        {/* Overnight Brief */}
+        <SwoopSection title="Overnight Brief" titleColor={C.neutral} peek="what surfaced while you were away">
+          <OvernightBrief />
         </SwoopSection>
 
         {/* Today's Priorities */}

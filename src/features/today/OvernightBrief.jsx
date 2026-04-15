@@ -67,18 +67,7 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
     }
   }
 
-  // 4. Pending actions
-  if (pendingCount > 0) {
-    bullets.push({
-      icon: '📥',
-      text: `${pendingCount} action${pendingCount === 1 ? '' : 's'} ready for your approval`,
-      nav: 'automations',
-      navOpts: { tab: 'inbox' },
-      urgent: false,
-    });
-  }
-
-  // 5. Watch-list members
+  // 4. Watch-list members
   if (memberSummary.watch > 0 && bullets.length < 4) {
     bullets.push({
       icon: '👁️',
