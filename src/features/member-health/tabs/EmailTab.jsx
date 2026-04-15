@@ -1,5 +1,4 @@
 import { SoWhatCallout, PlaybookActionCard } from '@/components/ui';
-import QuickActions from '@/components/ui/QuickActions.jsx';
 import MemberLink from '@/components/MemberLink.jsx';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { getEmailHeatmap, getDecayingMembers } from '@/services/memberService';
@@ -99,9 +98,9 @@ export default function EmailTab() {
                   </span>
                 ))}
               </div>
-              <div onClick={e => e.stopPropagation()}>
-                <QuickActions memberName={m.name} memberId={m.memberId} context="Email decay — pre-departure window" />
-              </div>
+              <MemberLink memberId={m.memberId} mode="drawer" className="text-[11px] font-semibold text-brand-500 hover:underline cursor-pointer">
+                Open profile →
+              </MemberLink>
             </div>
           </div>
         ))}
