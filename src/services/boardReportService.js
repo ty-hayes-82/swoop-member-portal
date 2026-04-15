@@ -96,7 +96,8 @@ export const getKPIs = () => {
     // healthy + watch as an honest "still active" denominator.
     const watch = summary.watch || 0;
     const activeMembers = total - (summary.critical || 0);
-    const retentionPct = total > 0 ? Math.round((activeMembers / total) * 100) : 0;
+    // Retention: exclude both at-risk AND critical so it's honest (not 100% when 10 members are at risk)
+    const retentionPct = total > 0 ? Math.round(((total - atRisk) / total) * 100) : 0;
     const liveRetained = _liveKpis?.membersSaved > 0 ? _liveKpis.membersSaved : (healthy > 0 ? healthy : activeMembers);
     return [
       { label: 'Active Members', value: liveRetained, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total — ${atRisk} at risk, ${summary.critical || 0} critical` },

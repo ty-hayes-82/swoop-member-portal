@@ -587,9 +587,9 @@ export default function SMSChatSimulatorPage() {
       {/* Page header */}
       <div className="flex items-center justify-between flex-wrap gap-2 flex-shrink-0">
         <div>
-          <h1 className="text-xl font-bold m-0 text-gray-800 dark:text-white/90">SMS Chat Simulator</h1>
+          <h1 className="text-xl font-bold m-0 text-gray-800 dark:text-white/90">AI Member Chat</h1>
           <p className="text-sm text-gray-500 mt-0.5 mb-0">
-            Test AI agent interactions without Twilio. Select a persona and start chatting.
+            Preview how Swoop AI responds to member messages. Select a member and start a conversation.
           </p>
         </div>
       </div>
@@ -835,7 +835,7 @@ export default function SMSChatSimulatorPage() {
 
           {/* Footer */}
           <div className="flex-shrink-0 border-t border-gray-100 dark:border-gray-700 px-3 py-2 text-center">
-            <span className="text-[10px] text-gray-300">Debug tool — not visible in production</span>
+            <span className="text-[10px] text-gray-300">Swoop AI · Member Concierge</span>
           </div>
         </div>
       </div>

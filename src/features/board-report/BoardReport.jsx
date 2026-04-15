@@ -325,7 +325,7 @@ export default function BoardReport() {
                 successfully re-engaged — demonstrating the value of early detection and personal outreach.</>
               ) : (
                 <>Swoop is actively monitoring <strong>{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} members</strong> for engagement signals.
-                {dist.find(d => d.level === 'At Risk')?.count > 0 && <> <strong>{dist.find(d => d.level === 'At Risk').count} members</strong> have been flagged as at-risk and are being prioritized for outreach.</>}
+                {(kpis.find(k => k.label === 'At Risk')?.value ?? 0) > 0 && <> <strong>{kpis.find(k => k.label === 'At Risk').value} members</strong> have been flagged as at-risk and are being prioritized for outreach.</>}
                 Early detection is live — intervention opportunities will appear in the Action Inbox as patterns emerge.</>
               )}
             </p>
