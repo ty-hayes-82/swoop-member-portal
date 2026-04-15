@@ -171,7 +171,7 @@ export default function MobileShowcase() {
         <div className="text-center space-y-2 pt-4">
           <div className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-500">Swoop Golf</div>
           <h1 className="text-2xl font-bold text-white">Demo Showcase</h1>
-          <p className="text-sm text-gray-400">Tap any card to launch</p>
+          <p className="text-sm text-swoop-text-label">Tap any card to launch</p>
         </div>
 
         <div className="grid grid-cols-1 gap-3">
@@ -187,16 +187,16 @@ export default function MobileShowcase() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <div className="text-sm font-semibold text-white">{demo.name}</div>
-                    <div className="text-[11px] text-gray-500 shrink-0">{demo.time}</div>
+                    <div className="text-[11px] text-swoop-text-muted shrink-0">{demo.time}</div>
                   </div>
-                  <div className="text-xs text-gray-400 mt-0.5">{demo.desc}</div>
+                  <div className="text-xs text-swoop-text-label mt-0.5">{demo.desc}</div>
                 </div>
               </button>
             );
           })}
         </div>
 
-        <div className="text-center text-xs text-gray-600 pb-6">
+        <div className="text-center text-xs text-swoop-text-muted pb-6">
           Swoop Golf &middot; Investor Demo Suite
         </div>
       </div>

@@ -49,7 +49,7 @@ const REPLICATION_PHASES = [
 
 function Section({ title, children }) {
   return (
-    <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 sm:p-6 space-y-4">
+    <div className="bg-gray-900/80 border border-swoop-border rounded-xl p-5 sm:p-6 space-y-4">
       <h3 className="text-lg font-bold text-white">{title}</h3>
       {children}
     </div>
@@ -68,7 +68,7 @@ export default function ArchitectureMoat() {
       <button
         type="button"
         onClick={() => { window.location.hash = '#/demo/mobile-showcase'; }}
-        className="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-300 bg-transparent border-none cursor-pointer"
+        className="absolute top-4 left-4 text-sm text-swoop-text-muted hover:text-gray-300 bg-transparent border-none cursor-pointer"
       >
         &larr; Back
       </button>
@@ -77,7 +77,7 @@ export default function ArchitectureMoat() {
         <div className="text-center space-y-3 pt-8">
           <div className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-500">Swoop Golf</div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white">Technical Architecture &amp; Moat</h1>
-          <p className="text-gray-400 max-w-xl mx-auto">
+          <p className="text-swoop-text-label max-w-xl mx-auto">
             Multi-agent AI system purpose-built for private club operations. 18+ months to replicate.
           </p>
         </div>
@@ -90,8 +90,8 @@ export default function ArchitectureMoat() {
             { label: 'Avg Prompt Size', value: '2,500 tok', color: 'text-amber-400' },
             { label: 'Test Coverage', value: `${TEST_COVERAGE.total} tests`, color: 'text-white' },
           ].map((kpi, i) => (
-            <div key={i} className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 text-center">
-              <div className="text-xs text-gray-500 mb-2">{kpi.label}</div>
+            <div key={i} className="bg-gray-900/60 border border-swoop-border rounded-lg p-4 text-center">
+              <div className="text-xs text-swoop-text-muted mb-2">{kpi.label}</div>
               <div className={`text-xl sm:text-2xl font-bold ${kpi.color}`}>{kpi.value}</div>
             </div>
           ))}
@@ -103,12 +103,12 @@ export default function ArchitectureMoat() {
             <div className="min-w-[600px] space-y-4">
               {/* MCP Server layer */}
               <div className="bg-gray-800/60 rounded-lg p-4 text-center">
-                <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">MCP Server</div>
+                <div className="text-xs text-swoop-text-muted uppercase tracking-wider mb-1">MCP Server</div>
                 <div className="text-sm text-white font-semibold">Model Context Protocol — Tool Orchestration Layer</div>
               </div>
 
               <div className="flex justify-center">
-                <div className="w-px h-6 bg-gray-700" />
+                <div className="w-px h-6 bg-swoop-row" />
               </div>
 
               {/* Agent grid */}
@@ -116,28 +116,28 @@ export default function ArchitectureMoat() {
                 {AGENTS.map(agent => (
                   <div key={agent.id} className="rounded-lg p-3 border" style={{ borderColor: agent.color + '40', backgroundColor: agent.color + '10' }}>
                     <div className="text-xs font-bold" style={{ color: agent.color }}>{agent.label}</div>
-                    <div className="text-[11px] text-gray-400 mt-1">{agent.desc}</div>
+                    <div className="text-[11px] text-swoop-text-label mt-1">{agent.desc}</div>
                   </div>
                 ))}
               </div>
 
               <div className="flex justify-center">
-                <div className="w-px h-6 bg-gray-700" />
+                <div className="w-px h-6 bg-swoop-row" />
               </div>
 
               {/* Tool layer */}
               <div className="bg-gray-800/60 rounded-lg p-4 text-center">
-                <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Tool Layer</div>
+                <div className="text-xs text-swoop-text-muted uppercase tracking-wider mb-1">Tool Layer</div>
                 <div className="text-sm text-white font-semibold">46 MCP Tools</div>
               </div>
 
               <div className="flex justify-center">
-                <div className="w-px h-6 bg-gray-700" />
+                <div className="w-px h-6 bg-swoop-row" />
               </div>
 
               {/* Database */}
               <div className="bg-gray-800/60 rounded-lg p-4 text-center">
-                <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Data Layer</div>
+                <div className="text-xs text-swoop-text-muted uppercase tracking-wider mb-1">Data Layer</div>
                 <div className="text-sm text-white font-semibold">PostgreSQL + Vector Store + Integration APIs</div>
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function ArchitectureMoat() {
               </svg>
             </div>
           </div>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-swoop-text-label">
             The Chief of Staff agent monitors all inter-agent communication, resolves conflicts,
             and ensures coordinated member outreach. No single agent acts in isolation.
           </p>
@@ -199,7 +199,7 @@ export default function ArchitectureMoat() {
         <Section title="MCP Tool Inventory (46 tools)">
           <div className="flex flex-wrap gap-2">
             {visibleTools.map(tool => (
-              <span key={tool} className="px-2.5 py-1 bg-gray-800 border border-gray-700 rounded text-xs text-gray-300 font-mono">
+              <span key={tool} className="px-2.5 py-1 bg-swoop-row border border-swoop-border rounded text-xs text-swoop-text-ghost font-mono">
                 {tool}
               </span>
             ))}
@@ -224,10 +224,10 @@ export default function ArchitectureMoat() {
             ].map(t => (
               <div key={t.label} className="bg-gray-800/60 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-gray-400">{t.label}</span>
+                  <span className="text-xs text-swoop-text-label">{t.label}</span>
                   <span className="text-lg font-bold text-white">{t.count}</span>
                 </div>
-                <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-2 bg-swoop-row rounded-full overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${(t.count / TEST_COVERAGE.unit) * 100}%`, backgroundColor: t.color }} />
                 </div>
               </div>
@@ -237,7 +237,7 @@ export default function ArchitectureMoat() {
 
         {/* Competitor replication timeline */}
         <Section title="Competitor Replication Timeline">
-          <p className="text-sm text-gray-400 mb-4">
+          <p className="text-sm text-swoop-text-label mb-4">
             Estimated time for a well-funded competitor to rebuild Swoop's system from scratch,
             assuming a 4-person senior engineering team with AI/ML experience.
           </p>
@@ -245,26 +245,26 @@ export default function ArchitectureMoat() {
             {REPLICATION_PHASES.map((phase, i) => (
               <div key={i} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-300">{phase.phase}</span>
-                  <span className="text-gray-500">{phase.effort}</span>
+                  <span className="text-swoop-text-ghost">{phase.phase}</span>
+                  <span className="text-swoop-text-muted">{phase.effort}</span>
                 </div>
-                <div className="h-4 bg-gray-800 rounded-full overflow-hidden">
+                <div className="h-4 bg-swoop-row rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400"
                     style={{ width: `${phase.bar}%` }}
                   />
                 </div>
-                <div className="text-[10px] text-gray-600">Months {phase.months}</div>
+                <div className="text-[10px] text-swoop-text-muted">Months {phase.months}</div>
               </div>
             ))}
           </div>
           <div className="mt-4 bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-amber-400">18+ months</div>
-            <div className="text-sm text-gray-400">minimum replication time, assuming no domain expertise</div>
+            <div className="text-sm text-swoop-text-label">minimum replication time, assuming no domain expertise</div>
           </div>
         </Section>
 
-        <div className="text-center text-xs text-gray-600 pb-8">
+        <div className="text-center text-xs text-swoop-text-muted pb-8">
           Confidential — Swoop Golf Inc. Technical Due Diligence
         </div>
       </div>

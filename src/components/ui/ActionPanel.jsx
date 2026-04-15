@@ -120,7 +120,7 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
   const py = compact ? 'py-2.5 px-3' : 'py-3.5 px-4';
 
   return (
-    <div className={`${py} rounded-xl bg-gray-50 border border-gray-200 dark:bg-gray-800/50 dark:border-gray-700 mt-2`}>
+    <div className={`${py} rounded-xl bg-swoop-row border border-swoop-border mt-2`}>
       {/* Recommended actions */}
       {activeRecommended.length > 0 && (
         <div className="mb-2">
@@ -131,14 +131,14 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
             {activeRecommended.map((action) => (
               <div
                 key={action.id || action.key}
-                className="flex items-center justify-between gap-2 px-3 py-2 bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700"
+                className="flex items-center justify-between gap-2 px-3 py-2 bg-swoop-panel rounded-lg border border-swoop-border"
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <span className="text-sm shrink-0">{action.icon}</span>
                   <div className="min-w-0">
-                    <div className="text-xs font-semibold text-gray-800 dark:text-white/90 truncate">{action.label}</div>
+                    <div className="text-xs font-semibold text-swoop-text truncate">{action.label}</div>
                     {action.description && (
-                      <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{action.description}</div>
+                      <div className="text-[10px] text-swoop-text-muted truncate">{action.description}</div>
                     )}
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDismiss(action); }}
-                    className="px-2.5 py-1 rounded-md bg-transparent text-gray-500 text-[11px] font-semibold border border-gray-200 cursor-pointer dark:border-gray-700 dark:text-gray-400"
+                    className="px-2.5 py-1 rounded-md bg-transparent text-swoop-text-muted text-[11px] font-semibold border border-swoop-border cursor-pointer"
                   >
                     Skip
                   </button>
@@ -183,7 +183,7 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
               <button
                 key={a.key}
                 onClick={(e) => { e.stopPropagation(); handleQuickAction(a); }}
-                className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-gray-200 bg-white text-gray-700 cursor-pointer inline-flex items-center gap-1 hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
+                className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-swoop-border bg-swoop-panel text-swoop-text-2 cursor-pointer inline-flex items-center gap-1 hover:bg-swoop-row-hover"
               >
                 <span>{a.icon}</span> {a.label}
               </button>
@@ -196,7 +196,7 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
       {onClose && (
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="mt-2 text-[11px] text-gray-400 bg-transparent border-none cursor-pointer p-0 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-brand-500"
+          className="mt-2 text-[11px] text-swoop-text-label bg-transparent border-none cursor-pointer p-0 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           Collapse
         </button>

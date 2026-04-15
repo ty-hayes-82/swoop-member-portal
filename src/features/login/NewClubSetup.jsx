@@ -11,12 +11,12 @@ const TEMPLATES = [
   { file: 'swoop-template-members-only.xlsx', label: 'Members Only', desc: '20 members — test health scores and at-risk detection', sheets: '1 sheet', color: '#3b82f6' },
   { file: 'swoop-template-members-rounds.xlsx', label: 'Members + Rounds', desc: '25 members, 80 rounds — adds golf engagement analysis', sheets: '2 sheets', color: '#8b5cf6' },
   { file: 'swoop-template-members-rounds-fb.xlsx', label: 'Members + Rounds + F&B', desc: '30 members, 100 rounds, 150 transactions — unlocks revenue signals', sheets: '3 sheets', color: '#039855' },
-  { file: 'swoop-template-full.xlsx', label: 'Full Dataset', desc: '40 members, 120 rounds, 200 transactions, 15 complaints — everything', sheets: '4 sheets', color: '#ff8b00' },
+  { file: 'swoop-template-full.xlsx', label: 'Full Dataset', desc: '40 members, 120 rounds, 200 transactions, 15 complaints — everything', sheets: '4 sheets', color: '#F3922D' },
 ];
 
 const STEP_LABELS = ['Club Info', 'Admin Account', 'Upload Data', 'Ready'];
 
-const inputClasses = 'h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:border-gray-700 dark:focus:border-brand-800';
+const inputClasses = 'h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-swoop-text-label focus:outline-hidden focus:ring-3 bg-transparent text-swoop-text border-swoop-border focus:border-brand-300 focus:ring-brand-500/20';
 
 export default function NewClubSetup({ onComplete, onBack }) {
   const [step, setStep] = useState(0);
@@ -147,12 +147,12 @@ export default function NewClubSetup({ onComplete, onBack }) {
   };
 
   return (
-    <div className="relative flex flex-col justify-center w-full min-h-screen bg-gray-50 dark:bg-gray-900 font-sans px-6 py-12">
+    <div className="relative flex flex-col justify-center w-full min-h-screen bg-swoop-row font-sans px-6 py-12">
       <div className="w-full max-w-lg mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-extrabold text-gray-800 dark:text-white/90">Set Up Your Club</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl font-extrabold text-swoop-text">Set Up Your Club</h1>
+          <p className="text-sm text-swoop-text-muted mt-1">
             Step {step + 1} of {STEP_LABELS.length}: {STEP_LABELS[step]}
           </p>
         </div>
@@ -160,13 +160,13 @@ export default function NewClubSetup({ onComplete, onBack }) {
         {/* Progress bar */}
         <div className="flex gap-1 mb-7">
           {STEP_LABELS.map((_, i) => (
-            <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= step ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'}`} />
+            <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= step ? 'bg-brand-500' : 'bg-swoop-border'}`} />
           ))}
         </div>
 
         {/* Error banner */}
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-lg bg-error-50 border border-error-500/30 text-error-700 text-sm font-medium dark:bg-error-500/10 dark:text-error-400">
+          <div className="mb-4 px-4 py-3 rounded-lg bg-error-50 border border-error-500/30 text-error-700 text-sm font-medium">
             {error}
           </div>
         )}
@@ -175,29 +175,29 @@ export default function NewClubSetup({ onComplete, onBack }) {
         {step === 0 && (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Club Name *</label>
+              <label className="text-sm font-semibold text-swoop-text-2 block mb-1.5">Club Name *</label>
               <input value={clubName} onChange={e => setClubName(e.target.value)} placeholder="Pine Valley Country Club" className={inputClasses} />
             </div>
             <div className="grid grid-cols-[1fr_80px_100px] gap-3">
               <div>
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">City</label>
+                <label className="text-sm font-semibold text-swoop-text-2 block mb-1.5">City</label>
                 <input value={city} onChange={e => setCity(e.target.value)} placeholder="Scottsdale" className={inputClasses} />
               </div>
               <div>
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">State</label>
+                <label className="text-sm font-semibold text-swoop-text-2 block mb-1.5">State</label>
                 <input value={state} onChange={e => setState(e.target.value)} placeholder="AZ" maxLength={2} className={inputClasses} />
               </div>
               <div>
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">ZIP</label>
+                <label className="text-sm font-semibold text-swoop-text-2 block mb-1.5">ZIP</label>
                 <input value={zip} onChange={e => setZip(e.target.value)} placeholder="85255" className={inputClasses} />
               </div>
             </div>
             <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Estimated Members</label>
+              <label className="text-sm font-semibold text-swoop-text-2 block mb-1.5">Estimated Members</label>
               <input type="number" value={memberCount} onChange={e => setMemberCount(e.target.value)} placeholder="300" className={inputClasses} />
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={onBack} className="px-5 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">
+              <button onClick={onBack} className="px-5 py-3 rounded-lg text-sm font-semibold text-swoop-text-2 bg-swoop-panel ring-1 ring-inset ring-gray-300 hover:bg-swoop-row-hover transition">
                 Back
               </button>
               <button onClick={handleClubInfoNext} className="flex-1 py-3 rounded-lg text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 transition">
@@ -211,23 +211,23 @@ export default function NewClubSetup({ onComplete, onBack }) {
         {step === 1 && (
           <div className="space-y-4">
             {existingAccountMode ? (
-              <div className="px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-300">
+              <div className="px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
                 <p className="font-semibold mb-0.5">You already have a Swoop account</p>
                 <p className="text-xs font-normal">Sign in with your existing password to link <strong>{clubName}</strong> to your account. Your previous club data won't be affected.</p>
               </div>
             ) : (
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Create your admin account</p>
+              <p className="text-sm font-semibold text-swoop-text-2">Create your admin account</p>
             )}
 
             {!existingAccountMode && (
               <div>
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Your Name *</label>
+                <label className="text-sm font-semibold text-swoop-text-2 block mb-1.5">Your Name *</label>
                 <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Sarah Mitchell" className={inputClasses} />
               </div>
             )}
 
             <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">Email *</label>
+              <label className="text-sm font-semibold text-swoop-text-2 block mb-1.5">Email *</label>
               <input
                 type="email"
                 value={adminEmail}
@@ -237,9 +237,9 @@ export default function NewClubSetup({ onComplete, onBack }) {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">
+              <label className="text-sm font-semibold text-swoop-text-2 block mb-1.5">
                 {existingAccountMode ? 'Your Password *' : 'Password'}
-                {!existingAccountMode && <span className="text-gray-400 font-normal ml-1">(optional — we'll generate one)</span>}
+                {!existingAccountMode && <span className="text-swoop-text-label font-normal ml-1">(optional — we'll generate one)</span>}
               </label>
               <input
                 type="password"
@@ -251,7 +251,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => { setError(null); setExistingAccountMode(false); setStep(0); }} className="px-5 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">
+              <button onClick={() => { setError(null); setExistingAccountMode(false); setStep(0); }} className="px-5 py-3 rounded-lg text-sm font-semibold text-swoop-text-2 bg-swoop-panel ring-1 ring-inset ring-gray-300 hover:bg-swoop-row-hover transition">
                 Back
               </button>
               <button onClick={handleCreateClub} disabled={loading} className={`flex-1 py-3 rounded-lg text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 transition ${loading ? 'opacity-70 cursor-wait' : ''}`}>
@@ -259,7 +259,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
               </button>
             </div>
             {existingAccountMode && (
-              <p className="text-xs text-center text-gray-400">
+              <p className="text-xs text-center text-swoop-text-label">
                 Wrong email?{' '}
                 <button className="text-brand-500 underline bg-transparent border-none cursor-pointer p-0 text-xs" onClick={() => { setExistingAccountMode(false); setAdminPassword(''); }}>
                   Use a different email
@@ -272,10 +272,10 @@ export default function NewClubSetup({ onComplete, onBack }) {
         {/* ─── Step 2: Upload Data ─── */}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="px-4 py-3 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/30 dark:text-blue-400">
+            <div className="px-4 py-3 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-700">
               Club created! Download a template to prepare your data, then run the Import Wizard.
             </div>
-            <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+            <p className="text-sm text-swoop-text-2 font-medium">
               The Import Wizard auto-maps Jonas columns, validates every row, and shows a dry-run preview before anything hits your database.
             </p>
 
@@ -286,14 +286,14 @@ export default function NewClubSetup({ onComplete, onBack }) {
                   key={t.file}
                   href={`/templates/${t.file}`}
                   download
-                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition no-underline text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600"
+                  className="flex items-center gap-3 p-3 rounded-lg border border-swoop-border hover:border-swoop-border transition no-underline text-swoop-text-2"
                 >
                   <span className="text-xl">📥</span>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-bold" style={{ color: t.color }}>{t.label}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{t.desc}</div>
+                    <div className="text-xs text-swoop-text-muted">{t.desc}</div>
                   </div>
-                  <span className="text-xs text-gray-400 font-semibold shrink-0">{t.sheets}</span>
+                  <span className="text-xs text-swoop-text-label font-semibold shrink-0">{t.sheets}</span>
                 </a>
               ))}
             </div>
@@ -307,7 +307,7 @@ export default function NewClubSetup({ onComplete, onBack }) {
               </a>
               <button
                 onClick={() => setStep(3)}
-                className="w-full py-3 rounded-lg text-sm font-bold bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700"
+                className="w-full py-3 rounded-lg text-sm font-bold bg-swoop-panel text-swoop-text-2 ring-1 ring-inset ring-gray-300 hover:bg-swoop-row-hover transition"
               >
                 Skip for Now
               </button>
@@ -319,17 +319,17 @@ export default function NewClubSetup({ onComplete, onBack }) {
         {step === 3 && (
           <div className="text-center space-y-5">
             <div className="text-5xl">🎉</div>
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
+            <h2 className="text-xl font-bold text-swoop-text">
               {clubName} is ready!
             </h2>
             {generatedPassword && (
-              <div className="text-left px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/30">
-                <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1">Save your auto-generated password</p>
-                <p className="font-mono text-sm font-bold text-amber-900 dark:text-amber-200 tracking-wide">{generatedPassword}</p>
-                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">You'll need this to sign back in. You can change it in Admin settings.</p>
+              <div className="text-left px-4 py-3 rounded-lg bg-amber-50 border border-amber-200">
+                <p className="text-xs font-semibold text-amber-800 mb-1">Save your auto-generated password</p>
+                <p className="font-mono text-sm font-bold text-amber-900 tracking-wide">{generatedPassword}</p>
+                <p className="text-xs text-amber-700 mt-1">You'll need this to sign back in. You can change it in Admin settings.</p>
               </div>
             )}
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-swoop-text-muted">
               No data uploaded yet. You can upload data from Admin &gt; CSV Import anytime.
             </p>
             <button onClick={handleFinish} className="w-full py-3.5 rounded-lg bg-brand-500 text-white text-base font-bold hover:bg-brand-600 transition">

@@ -29,15 +29,15 @@ export default function AgentUpsell({ agentName, benefit, metric, className = ''
         <div className="text-[10px] font-bold uppercase tracking-widest text-purple-500 mb-0.5">
           {agentName}
         </div>
-        <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+        <div className="text-xs text-swoop-text-muted leading-relaxed">
           {benefit}
           {metric && (
-            <span className="font-mono font-bold text-purple-600 dark:text-purple-400"> {metric}</span>
+            <span className="font-mono font-bold text-purple-600"> {metric}</span>
           )}
         </div>
         <a
           href="#/demo/agents-landing"
-          className="inline-block mt-1.5 text-[11px] font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 transition-colors"
+          className="inline-block mt-1.5 text-[11px] font-semibold text-purple-600 hover:text-purple-700 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
           Enable AI Agents &rarr;
@@ -46,7 +46,7 @@ export default function AgentUpsell({ agentName, benefit, metric, className = ''
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); setDismissed(true); }}
-        className="absolute top-2 right-2 text-gray-300 hover:text-gray-500 bg-transparent border-none cursor-pointer text-sm leading-none p-0"
+        className="absolute top-2 right-2 text-swoop-text-ghost hover:text-gray-500 bg-transparent border-none cursor-pointer text-sm leading-none p-0"
         title="Dismiss"
       >
         &times;

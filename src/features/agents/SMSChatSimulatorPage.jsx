@@ -62,17 +62,17 @@ const TOOL_COLORS = {
   get_my_schedule:         { bg: 'bg-indigo-50', text: 'text-indigo-700', icon: '🗓️' },
   rsvp_event:              { bg: 'bg-green-50',  text: 'text-green-700',  icon: '✅' },
   file_complaint:          { bg: 'bg-orange-50', text: 'text-orange-700', icon: '📝' },
-  get_member_profile:      { bg: 'bg-gray-50',   text: 'text-gray-700',   icon: '👤' },
+  get_member_profile:      { bg: 'bg-swoop-row',   text: 'text-swoop-text-2',   icon: '👤' },
   send_request_to_club:    { bg: 'bg-teal-50',   text: 'text-teal-700',   icon: '📨' },
 };
 function toolColor(name) {
-  return TOOL_COLORS[name] || { bg: 'bg-gray-50', text: 'text-gray-700', icon: '🔧' };
+  return TOOL_COLORS[name] || { bg: 'bg-swoop-row', text: 'text-swoop-text-2', icon: '🔧' };
 }
 
 const PRIORITY_COLORS = {
   high:   { pill: 'bg-red-100 text-red-700',    border: 'border-l-red-500'    },
   medium: { pill: 'bg-amber-100 text-amber-700', border: 'border-l-amber-500' },
-  low:    { pill: 'bg-gray-100 text-gray-600',   border: 'border-l-gray-400'  },
+  low:    { pill: 'bg-swoop-row text-swoop-text-muted',   border: 'border-l-gray-400'  },
 };
 function priColor(p) { return PRIORITY_COLORS[p] || PRIORITY_COLORS.low; }
 
@@ -115,16 +115,16 @@ function PersonaRail({ selected, onSelect }) {
             onClick={() => onSelect(m.id)}
             className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border-2 transition-all cursor-pointer text-left min-w-[96px]
               ${active
-                ? 'bg-brand-50 border-brand-500 dark:bg-brand-900/30 dark:border-brand-400 shadow-md ring-2 ring-brand-200 dark:ring-brand-800'
-                : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm dark:bg-gray-800/60 dark:border-gray-700'
+                ? 'bg-brand-50 border-brand-500 shadow-md ring-2 ring-brand-200'
+                : 'bg-swoop-panel border-swoop-border hover:border-swoop-border hover:shadow-sm'
               }`}
           >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors
-              ${active ? 'bg-brand-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}>
+              ${active ? 'bg-brand-500 text-white shadow-sm' : 'bg-swoop-row text-swoop-text-muted'}`}>
               {initials(m.name)}
             </div>
             <div className="text-center">
-              <p className={`text-[11px] font-semibold leading-tight whitespace-nowrap ${active ? 'text-brand-700 dark:text-brand-300' : 'text-gray-700 dark:text-gray-200'}`}>
+              <p className={`text-[11px] font-semibold leading-tight whitespace-nowrap ${active ? 'text-brand-700' : 'text-swoop-text-2'}`}>
                 {m.first}
               </p>
               <span className={`inline-block text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full mt-0.5 ${m.statusColor}`}>
@@ -143,29 +143,29 @@ function ToolCallEntry({ call, autoExpand = false }) {
   const [expanded, setExpanded] = useState(autoExpand);
   const c = toolColor(call.name);
   return (
-    <div className="rounded-lg border border-gray-200 overflow-hidden text-xs mb-2">
+    <div className="rounded-lg border border-swoop-border overflow-hidden text-xs mb-2">
       <button
         onClick={() => setExpanded(v => !v)}
         className={`w-full flex items-center gap-2 px-3 py-2.5 ${c.bg} hover:brightness-95 transition-all text-left`}
       >
         <span className="text-base leading-none">{c.icon}</span>
         <span className={`font-semibold font-mono ${c.text} truncate flex-1`}>{call.name}</span>
-        <span className="text-gray-400 text-[10px] ml-auto flex-shrink-0">
+        <span className="text-swoop-text-label text-[10px] ml-auto flex-shrink-0">
           {call.ts ? new Date(call.ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) : ''}
         </span>
-        <svg className={`w-3.5 h-3.5 text-gray-400 flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+        <svg className={`w-3.5 h-3.5 text-swoop-text-label flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       {expanded && (
-        <div className="px-3 py-2 space-y-2 bg-white border-t border-gray-100">
+        <div className="px-3 py-2 space-y-2 bg-swoop-panel border-t border-swoop-border-inset">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Input</p>
-            <pre className="text-[11px] text-gray-700 whitespace-pre-wrap font-mono leading-relaxed bg-gray-50 rounded p-2 overflow-x-auto max-h-32 overflow-y-auto">
+            <p className="text-[10px] uppercase tracking-wider text-swoop-text-label font-semibold mb-1">Input</p>
+            <pre className="text-[11px] text-swoop-text-2 whitespace-pre-wrap font-mono leading-relaxed bg-swoop-row rounded p-2 overflow-x-auto max-h-32 overflow-y-auto">
               {JSON.stringify(call.input, null, 2)}
             </pre>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Result</p>
-            <pre className="text-[11px] text-gray-700 whitespace-pre-wrap font-mono leading-relaxed bg-gray-50 rounded p-2 overflow-x-auto max-h-48 overflow-y-auto">
+            <p className="text-[10px] uppercase tracking-wider text-swoop-text-label font-semibold mb-1">Result</p>
+            <pre className="text-[11px] text-swoop-text-2 whitespace-pre-wrap font-mono leading-relaxed bg-swoop-row rounded p-2 overflow-x-auto max-h-48 overflow-y-auto">
               {JSON.stringify(call.result, null, 2)}
             </pre>
           </div>
@@ -227,7 +227,7 @@ function LiveActivityFeed({ onSwitchMember }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-10">
-        <div className="w-5 h-5 border-2 border-gray-200 border-t-brand-500 rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-swoop-border border-t-brand-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -242,7 +242,7 @@ function LiveActivityFeed({ onSwitchMember }) {
             className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${
               agentFilter === null
                 ? 'bg-brand-500 text-white border-brand-500'
-                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                : 'bg-swoop-panel text-swoop-text-muted border-swoop-border hover:border-swoop-border'
             }`}
           >
             All
@@ -254,7 +254,7 @@ function LiveActivityFeed({ onSwitchMember }) {
               className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${
                 agentFilter === id
                   ? 'bg-brand-500 text-white border-brand-500'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                  : 'bg-swoop-panel text-swoop-text-muted border-swoop-border hover:border-swoop-border'
               }`}
             >
               {agentLabel(id)}
@@ -265,16 +265,16 @@ function LiveActivityFeed({ onSwitchMember }) {
 
       {events.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 text-center px-4">
-          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-            <svg className="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <div className="w-10 h-10 rounded-full bg-swoop-row flex items-center justify-center mb-3">
+            <svg className="w-5 h-5 text-swoop-text-ghost" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
           </div>
-          <p className="text-xs text-gray-400">No agent activity yet.</p>
-          <p className="text-[11px] text-gray-300 mt-1">Import data and activate agents to see events here.</p>
+          <p className="text-xs text-swoop-text-label">No agent activity yet.</p>
+          <p className="text-[11px] text-swoop-text-ghost mt-1">Import data and activate agents to see events here.</p>
         </div>
       ) : (
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-swoop-border-inset">
           {events.map(ev => {
             const dot = agentDot(ev.agent_id);
             const matchedMember = ev.member_id ? MEMBER_BY_ID[ev.member_id] : null;
@@ -283,20 +283,20 @@ function LiveActivityFeed({ onSwitchMember }) {
                 <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${dot}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">{agentLabel(ev.agent_id)}</span>
-                    <span className="ml-auto text-[10px] text-gray-300 flex-shrink-0">{relativeTime(ev.created_at)}</span>
+                    <span className="text-[10px] font-bold text-swoop-text-muted uppercase tracking-wide">{agentLabel(ev.agent_id)}</span>
+                    <span className="ml-auto text-[10px] text-swoop-text-ghost flex-shrink-0">{relativeTime(ev.created_at)}</span>
                   </div>
-                  <p className="text-xs text-gray-700 dark:text-gray-200 leading-snug mt-0.5 line-clamp-2">
+                  <p className="text-xs text-swoop-text-2 leading-snug mt-0.5 line-clamp-2">
                     {ev.description || ev.action_type}
                   </p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     {ev.member_name && (
-                      <span className="text-[10px] text-gray-400">{ev.member_name}</span>
+                      <span className="text-[10px] text-swoop-text-label">{ev.member_name}</span>
                     )}
                     {matchedMember && onSwitchMember && (
                       <button
                         onClick={() => onSwitchMember(matchedMember.id)}
-                        className="text-[10px] font-semibold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 hover:bg-brand-100 rounded-full px-2 py-0.5 transition-colors border-none cursor-pointer"
+                        className="text-[10px] font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-full px-2 py-0.5 transition-colors border-none cursor-pointer"
                       >
                         ↩ Chat as {matchedMember.first}
                       </button>
@@ -372,7 +372,7 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
   if (loading) {
     return (
       <div className="flex items-center justify-center py-10">
-        <div className="w-5 h-5 border-2 border-gray-200 border-t-brand-500 rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-swoop-border border-t-brand-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -385,15 +385,15 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
         </div>
-        <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">No pending actions</p>
-        <p className="text-[11px] text-gray-400 mt-1">Agents are running on autopilot right now.</p>
+        <p className="text-xs font-semibold text-swoop-text-muted">No pending actions</p>
+        <p className="text-[11px] text-swoop-text-label mt-1">Agents are running on autopilot right now.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">
+      <p className="text-[10px] uppercase tracking-wider text-swoop-text-label font-semibold mb-1">
         {pending.length} awaiting review
       </p>
       {pending.map(action => {
@@ -403,7 +403,7 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
         return (
           <div
             key={action.id}
-            className={`rounded-xl border-l-4 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 overflow-hidden ${pc.border}`}
+            className={`rounded-xl border-l-4 border border-swoop-border bg-swoop-panel overflow-hidden ${pc.border}`}
           >
             <div className="px-3 py-2.5">
               {/* Header row */}
@@ -412,14 +412,14 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
                   {action.priority}
                 </span>
                 {action.source && (
-                  <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">
+                  <span className="text-[10px] font-semibold text-swoop-text-muted">
                     {action.source}
                   </span>
                 )}
               </div>
 
               {/* Description */}
-              <p className="text-xs text-gray-800 dark:text-white/90 leading-snug">
+              <p className="text-xs text-swoop-text leading-snug">
                 {action.description}
               </p>
 
@@ -431,11 +431,11 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
               {/* Member row */}
               {(action.memberName || matchedMember) && (
                 <div className="flex items-center gap-1.5 mt-1.5">
-                  <span className="text-[10px] text-gray-400">{action.memberName}</span>
+                  <span className="text-[10px] text-swoop-text-label">{action.memberName}</span>
                   {matchedMember && onSwitchMember && (
                     <button
                       onClick={() => onSwitchMember(matchedMember.id)}
-                      className="text-[10px] font-semibold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 hover:bg-brand-100 rounded-full px-2 py-0.5 transition-colors border-none cursor-pointer"
+                      className="text-[10px] font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-full px-2 py-0.5 transition-colors border-none cursor-pointer"
                     >
                       ↩ Chat as {matchedMember.first}
                     </button>
@@ -450,7 +450,7 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
                   value={noteText}
                   onChange={e => setNoteText(e.target.value)}
                   placeholder="Add a note (optional)…"
-                  className="mt-2 w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-white dark:bg-gray-700 dark:text-white"
+                  className="mt-2 w-full text-xs border border-swoop-border rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-swoop-panel"
                   autoFocus
                 />
               )}
@@ -467,7 +467,7 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
                     </button>
                     <button
                       onClick={() => { setExpanded(`dismiss-${action.id}`); setNoteText(''); }}
-                      className="flex-1 text-[11px] font-semibold bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg px-2 py-1.5 border-none cursor-pointer transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                      className="flex-1 text-[11px] font-semibold bg-swoop-row hover:bg-gray-200 text-swoop-text-muted rounded-lg px-2 py-1.5 border-none cursor-pointer transition-colors"
                     >
                       Dismiss
                     </button>
@@ -482,7 +482,7 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
                     </button>
                     <button
                       onClick={() => setExpanded(null)}
-                      className="text-[11px] text-gray-400 hover:text-gray-600 px-2 py-1.5 border-none cursor-pointer bg-transparent"
+                      className="text-[11px] text-swoop-text-label hover:text-gray-600 px-2 py-1.5 border-none cursor-pointer bg-transparent"
                     >
                       Cancel
                     </button>
@@ -497,7 +497,7 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
                     </button>
                     <button
                       onClick={() => setExpanded(null)}
-                      className="text-[11px] text-gray-400 hover:text-gray-600 px-2 py-1.5 border-none cursor-pointer bg-transparent"
+                      className="text-[11px] text-swoop-text-label hover:text-gray-600 px-2 py-1.5 border-none cursor-pointer bg-transparent"
                     >
                       Cancel
                     </button>
@@ -587,8 +587,8 @@ export default function SMSChatSimulatorPage() {
       {/* Page header */}
       <div className="flex items-center justify-between flex-wrap gap-2 flex-shrink-0">
         <div>
-          <h1 className="text-xl font-bold m-0 text-gray-800 dark:text-white/90">AI Member Chat</h1>
-          <p className="text-sm text-gray-500 mt-0.5 mb-0">
+          <h1 className="text-xl font-bold m-0 text-swoop-text">AI Member Chat</h1>
+          <p className="text-sm text-swoop-text-muted mt-0.5 mb-0">
             Preview how Swoop AI responds to member messages. Select a member and start a conversation.
           </p>
         </div>
@@ -603,17 +603,17 @@ export default function SMSChatSimulatorPage() {
         style={{ height: 'calc(100vh - 280px)', minHeight: '400px' }}
       >
         {/* LEFT: SMS chat */}
-        <div className="flex flex-col flex-1 min-w-0 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900/50 overflow-hidden shadow-theme-xs">
+        <div className="flex flex-col flex-1 min-w-0 rounded-xl border border-swoop-border bg-swoop-row overflow-hidden shadow-theme-xs">
           {/* Chat header */}
-          <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2.5 flex items-center gap-2.5">
+          <div className="flex-shrink-0 bg-swoop-panel border-b border-swoop-border px-4 py-2.5 flex items-center gap-2.5">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-[11px] flex-shrink-0 ${
               selectedMemberId === 'mbr_t01' ? 'bg-brand-500' : 'bg-gray-500'
             } text-white`}>
               {initials(selectedMember.name)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-800 dark:text-white/90 leading-tight">{selectedMember.name}</p>
-              <p className="text-[11px] text-gray-500">{selectedMember.type} · {selectedMember.id}</p>
+              <p className="text-sm font-semibold text-swoop-text leading-tight">{selectedMember.name}</p>
+              <p className="text-[11px] text-swoop-text-muted">{selectedMember.type} · {selectedMember.id}</p>
             </div>
             <span className={`text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 ${selectedMember.statusColor}`}>
               {selectedMember.status}
@@ -621,7 +621,7 @@ export default function SMSChatSimulatorPage() {
             {messages.length > 0 && (
               <button
                 onClick={() => { setMessages([]); setToolCalls([]); }}
-                className="text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex-shrink-0"
+                className="text-xs text-swoop-text-label hover:text-red-500 transition-colors px-2 py-1 flex-shrink-0"
               >
                 Clear
               </button>
@@ -632,10 +632,10 @@ export default function SMSChatSimulatorPage() {
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
             {isEmpty && (
               <div className="flex flex-col items-center justify-center h-full gap-3 px-4 text-center">
-                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
+                <div className="w-12 h-12 rounded-full bg-swoop-panel flex items-center justify-center shadow-sm">
                   <span className="text-xl">💬</span>
                 </div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-swoop-text-muted">
                   Send a message as <strong>{selectedMember.first}</strong>
                 </p>
                 <div className="flex flex-col gap-1.5 w-full max-w-xs">
@@ -643,7 +643,7 @@ export default function SMSChatSimulatorPage() {
                     <button
                       key={msg}
                       onClick={() => send(msg)}
-                      className="text-left text-xs bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+                      className="text-left text-xs bg-swoop-panel border border-swoop-border rounded-xl px-3 py-2.5 text-swoop-text-2 hover:bg-swoop-row-hover active:bg-gray-100 transition-colors shadow-sm"
                     >
                       {msg}
                     </button>
@@ -657,11 +657,11 @@ export default function SMSChatSimulatorPage() {
                 <div className={`max-w-[78%] rounded-2xl px-3.5 py-2 ${
                   msg.role === 'user'
                     ? 'bg-green-500 text-white rounded-br-sm'
-                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white/90 rounded-bl-sm shadow-sm'
+                    : 'bg-swoop-panel text-swoop-text rounded-bl-sm shadow-sm'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                   <div className={`flex items-center gap-1.5 mt-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <p className={`text-[10px] ${msg.role === 'user' ? 'text-green-100' : 'text-gray-400'}`}>{msg.time}</p>
+                    <p className={`text-[10px] ${msg.role === 'user' ? 'text-green-100' : 'text-swoop-text-label'}`}>{msg.time}</p>
                     {msg.simulated && (
                       <span className="text-[9px] px-1 py-0.5 rounded bg-yellow-100 text-yellow-600 font-semibold uppercase">sim</span>
                     )}
@@ -672,12 +672,12 @@ export default function SMSChatSimulatorPage() {
 
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm">
+                <div className="bg-swoop-panel rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm">
                   <div className="flex items-center gap-1">
-                    <span className="text-xs text-gray-400">Agent is thinking</span>
+                    <span className="text-xs text-swoop-text-label">Agent is thinking</span>
                     <span className="flex gap-0.5 ml-1">
                       {[0, 150, 300].map(d => (
-                        <span key={d} className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
+                        <span key={d} className="w-1.5 h-1.5 bg-swoop-border rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
                       ))}
                     </span>
                   </div>
@@ -694,7 +694,7 @@ export default function SMSChatSimulatorPage() {
                 <button
                   key={i}
                   onClick={() => send(msg)}
-                  className="whitespace-nowrap text-[11px] bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-full px-3 py-1.5 transition-colors flex-shrink-0 shadow-sm"
+                  className="whitespace-nowrap text-[11px] bg-swoop-panel border border-swoop-border hover:bg-swoop-row-hover text-swoop-text-muted rounded-full px-3 py-1.5 transition-colors flex-shrink-0 shadow-sm"
                 >
                   {msg}
                 </button>
@@ -705,7 +705,7 @@ export default function SMSChatSimulatorPage() {
           {/* Input */}
           <form
             onSubmit={e => { e.preventDefault(); send(input); }}
-            className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-3 py-2 flex items-end gap-2"
+            className="flex-shrink-0 bg-swoop-panel border-t border-swoop-border px-3 py-2 flex items-end gap-2"
           >
             <input
               ref={inputRef}
@@ -714,7 +714,7 @@ export default function SMSChatSimulatorPage() {
               onChange={e => setInput(e.target.value)}
               placeholder={`Message as ${selectedMember.first}…`}
               disabled={loading}
-              className="flex-1 rounded-full border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:bg-gray-50 dark:bg-gray-700 dark:text-white"
+              className="flex-1 rounded-full border border-swoop-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:bg-gray-50"
               autoComplete="off"
             />
             <button
@@ -730,9 +730,9 @@ export default function SMSChatSimulatorPage() {
         </div>
 
         {/* RIGHT: Debug panel */}
-        <div className="flex flex-col w-[400px] flex-shrink-0 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 overflow-hidden shadow-theme-xs">
+        <div className="flex flex-col w-[400px] flex-shrink-0 rounded-xl border border-swoop-border bg-swoop-panel overflow-hidden shadow-theme-xs">
           {/* Tabs */}
-          <div className="flex-shrink-0 flex border-b border-gray-200 dark:border-gray-700">
+          <div className="flex-shrink-0 flex border-b border-swoop-border">
             {[
               {
                 key: 'tools',
@@ -772,8 +772,8 @@ export default function SMSChatSimulatorPage() {
                 onClick={() => setRightTab(tab.key)}
                 className={`flex-1 flex items-center justify-center gap-1 px-2 py-2.5 text-[11px] font-semibold border-b-2 transition-colors whitespace-nowrap ${
                   rightTab === tab.key
-                    ? 'border-brand-500 text-brand-600 dark:text-brand-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                    ? 'border-brand-500 text-brand-600'
+                    : 'border-transparent text-swoop-text-muted hover:text-swoop-text-2'
                 }`}
               >
                 {tab.icon}
@@ -795,23 +795,23 @@ export default function SMSChatSimulatorPage() {
               <>
                 {toolCalls.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                      <svg className="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="w-10 h-10 rounded-full bg-swoop-row flex items-center justify-center mb-3">
+                      <svg className="w-5 h-5 text-swoop-text-ghost" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
                       </svg>
                     </div>
-                    <p className="text-xs text-gray-400">No tool calls yet.</p>
-                    <p className="text-[11px] text-gray-300 mt-1">Tool calls appear here as the agent uses them.</p>
+                    <p className="text-xs text-swoop-text-label">No tool calls yet.</p>
+                    <p className="text-[11px] text-swoop-text-ghost mt-1">Tool calls appear here as the agent uses them.</p>
                   </div>
                 ) : (
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">
+                      <p className="text-[10px] uppercase tracking-wider text-swoop-text-label font-semibold">
                         {toolCalls.length} call{toolCalls.length !== 1 ? 's' : ''} this session
                       </p>
                       <button
                         onClick={() => setToolCalls([])}
-                        className="text-[10px] text-gray-400 hover:text-red-500 transition-colors"
+                        className="text-[10px] text-swoop-text-label hover:text-red-500 transition-colors"
                       >
                         Clear
                       </button>
@@ -834,8 +834,8 @@ export default function SMSChatSimulatorPage() {
           </div>
 
           {/* Footer */}
-          <div className="flex-shrink-0 border-t border-gray-100 dark:border-gray-700 px-3 py-2 text-center">
-            <span className="text-[10px] text-gray-300">Swoop AI · Member Concierge</span>
+          <div className="flex-shrink-0 border-t border-swoop-border-inset px-3 py-2 text-center">
+            <span className="text-[10px] text-swoop-text-ghost">Swoop AI · Member Concierge</span>
           </div>
         </div>
       </div>

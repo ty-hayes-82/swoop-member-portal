@@ -24,8 +24,8 @@ export function IntegrationHealthStrip({ health }) {
 
 function StatCard({ label, value, accent }) {
   return (
-    <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-[10px] py-3 px-3.5">
-      <div className="text-[11px] uppercase tracking-widest text-gray-400 mb-1.5">
+    <div className="bg-swoop-panel border border-swoop-border rounded-[10px] py-3 px-3.5">
+      <div className="text-[11px] uppercase tracking-widest text-swoop-text-label mb-1.5">
         {label}
       </div>
       <div className="text-base font-bold font-mono" style={{ color: accent }}>

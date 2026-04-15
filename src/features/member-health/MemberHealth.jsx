@@ -53,7 +53,7 @@ export default function MemberHealth() {
           <button
             type="button"
             onClick={() => setShowInsight(false)}
-            className="absolute top-2 right-3 border-none bg-transparent text-gray-400 text-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500"
+            className="absolute top-2 right-3 border-none bg-transparent text-swoop-text-label text-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             Dismiss
           </button>
@@ -62,7 +62,7 @@ export default function MemberHealth() {
         <button
           type="button"
           onClick={() => setShowInsight(true)}
-          className="self-end border border-dashed border-gray-200 bg-gray-50 text-gray-500 text-xs uppercase tracking-widest py-1.5 px-2.5 rounded-lg cursor-pointer"
+          className="self-end border border-dashed border-swoop-border bg-swoop-row text-swoop-text-muted text-xs uppercase tracking-widest py-1.5 px-2.5 rounded-lg cursor-pointer"
         >
           Show AI insight
         </button>
@@ -74,7 +74,7 @@ export default function MemberHealth() {
         tabs={TABS}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        accentColor={'#ff8b00'}
+        accentColor={'#F3922D'}
         sourceSystems={sourceSystems}
       >
         {activeTab === 'health'       && <HealthOverview />}

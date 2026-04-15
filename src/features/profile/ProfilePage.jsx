@@ -188,43 +188,43 @@ export default function ProfilePage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
-      <h1 className="text-xl font-bold text-gray-800 dark:text-white/90 mb-1">My Profile</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <h1 className="text-xl font-bold text-swoop-text mb-1">My Profile</h1>
+      <p className="text-sm text-swoop-text-muted mb-6">
         Manage your account details and preferences.
       </p>
 
       {/* Avatar + role summary */}
-      <div className="flex items-center gap-4 mb-6 p-4 rounded-xl bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+      <div className="flex items-center gap-4 mb-6 p-4 rounded-xl bg-swoop-row border border-swoop-border">
         <div className="flex items-center justify-center w-16 h-16 rounded-full bg-brand-100 text-brand-600 font-bold text-xl">
           {initials}
         </div>
         <div>
-          <div className="font-semibold text-gray-800 dark:text-white/90">{formName || 'Club Manager'}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">{roleLabel}</div>
-          <div className="text-xs text-gray-400 mt-0.5">{clubName || (isDemo ? 'Demo Environment' : 'Connected Club')}</div>
+          <div className="font-semibold text-swoop-text">{formName || 'Club Manager'}</div>
+          <div className="text-sm text-swoop-text-muted">{roleLabel}</div>
+          <div className="text-xs text-swoop-text-label mt-0.5">{clubName || (isDemo ? 'Demo Environment' : 'Connected Club')}</div>
         </div>
       </div>
 
       {/* Your Role & Club Permissions */}
-      <div className="mb-8 p-4 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
+      <div className="mb-8 p-4 rounded-xl border border-swoop-border bg-swoop-panel">
         <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Your Role & Club Permissions</h3>
+          <h3 className="text-sm font-semibold text-swoop-text-2">Your Role & Club Permissions</h3>
           <SourceBadge system="Member CRM" size="xs" />
         </div>
-        <p className="text-xs text-gray-400 mb-3">{getRolePermissions(user.role).scope}</p>
+        <p className="text-xs text-swoop-text-label mb-3">{getRolePermissions(user.role).scope}</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
           {getRolePermissions(user.role).features.map((f) => {
             const icon = f.access === 'full' ? '✅' : f.access === 'view' ? '👁' : '🚫';
             const color = f.access === 'full'
-              ? 'text-success-700 dark:text-success-400'
+              ? 'text-success-700'
               : f.access === 'view'
-                ? 'text-gray-600 dark:text-gray-400'
-                : 'text-gray-400 dark:text-gray-600';
+                ? 'text-swoop-text-muted'
+                : 'text-swoop-text-label';
             const suffix = f.access === 'view' ? ' (view only)' : f.access === 'none' ? ' (no access)' : '';
             return (
               <div
                 key={f.name}
-                className={`flex items-center gap-2 text-xs px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800 ${color}`}
+                className={`flex items-center gap-2 text-xs px-2 py-1 rounded-md bg-swoop-row ${color}`}
                 title={`Access: ${f.access}`}
               >
                 <span className="shrink-0 text-sm leading-none">{icon}</span>
@@ -233,7 +233,7 @@ export default function ProfilePage() {
             );
           })}
         </div>
-        <div className="mt-3 text-[10px] text-gray-400 italic leading-snug">
+        <div className="mt-3 text-[10px] text-swoop-text-label italic leading-snug">
           Permissions are derived from your assigned role ({roleLabel}). Contact your Swoop admin if you need a higher access level.
         </div>
       </div>
@@ -241,56 +241,56 @@ export default function ProfilePage() {
       {/* Profile form */}
       <div className="space-y-4 mb-8">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
+          <label className="block text-sm font-semibold text-swoop-text-2 mb-1">Full Name</label>
           <input
             type="text"
             value={formName}
             onChange={(e) => setFormName(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white/90"
+            className="w-full px-3 py-2.5 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
+          <label className="block text-sm font-semibold text-swoop-text-2 mb-1">Email Address</label>
           <input
             type="email"
             value={formEmail}
             onChange={(e) => setFormEmail(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white/90"
+            className="w-full px-3 py-2.5 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Role</label>
-          <input type="text" value={roleLabel} disabled className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500" />
+          <label className="block text-sm font-semibold text-swoop-text-2 mb-1">Role</label>
+          <input type="text" value={roleLabel} disabled className="w-full px-3 py-2.5 rounded-lg border border-swoop-border bg-swoop-row text-sm text-swoop-text-muted" />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Club</label>
-          <input type="text" value={clubName || (isDemo ? 'Demo Environment' : clubId)} disabled className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500" />
+          <label className="block text-sm font-semibold text-swoop-text-2 mb-1">Club</label>
+          <input type="text" value={clubName || (isDemo ? 'Demo Environment' : clubId)} disabled className="w-full px-3 py-2.5 rounded-lg border border-swoop-border bg-swoop-row text-sm text-swoop-text-muted" />
         </div>
       </div>
 
       {/* Google Integration */}
-      <div className="mb-8 p-4 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Google Integration</h3>
-        <p className="text-xs text-gray-400 mb-4">
+      <div className="mb-8 p-4 rounded-xl border border-swoop-border bg-swoop-panel">
+        <h3 className="text-sm font-semibold text-swoop-text-2 mb-1">Google Integration</h3>
+        <p className="text-xs text-swoop-text-label mb-4">
           Connect your Google account to create Gmail drafts and Google Calendar events directly from Swoop.
         </p>
         {googleStatus.connected ? (
-          <div className="flex items-center justify-between p-3 rounded-lg bg-success-50 border border-success-200 dark:bg-success-500/10 dark:border-success-500/30">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-success-50 border border-success-200">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-success-500 text-sm font-semibold">Connected</span>
                 {googleStatus.googleEmail && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{googleStatus.googleEmail}</span>
+                  <span className="text-xs text-swoop-text-muted">{googleStatus.googleEmail}</span>
                 )}
               </div>
-              <div className="text-[10px] text-gray-400 mt-1">
+              <div className="text-[10px] text-swoop-text-label mt-1">
                 {googleStatus.scopes?.calendar && 'Calendar'}{googleStatus.scopes?.calendar && googleStatus.scopes?.gmail && ' + '}{googleStatus.scopes?.gmail && 'Gmail'}
               </div>
             </div>
             <button
               onClick={handleGoogleDisconnect}
               disabled={googleLoading}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border border-red-200 bg-red-50 text-red-600 dark:bg-red-500/10 dark:border-red-500/30 disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border border-red-200 bg-red-50 text-red-600 disabled:opacity-50"
             >
               {googleLoading ? 'Disconnecting...' : 'Disconnect'}
             </button>
@@ -298,7 +298,7 @@ export default function ProfilePage() {
         ) : (
           <button
             onClick={handleGoogleConnect}
-            className="w-full p-3 rounded-lg border-2 border-dashed border-gray-300 text-sm font-semibold text-gray-600 cursor-pointer hover:border-brand-400 hover:text-brand-500 transition-all dark:border-gray-600 dark:text-gray-400 dark:hover:border-brand-500 dark:hover:text-brand-400"
+            className="w-full p-3 rounded-lg border-2 border-dashed border-swoop-border text-sm font-semibold text-swoop-text-muted cursor-pointer hover:border-brand-400 hover:text-brand-500 transition-all"
           >
             Connect Google Account (Calendar + Gmail)
           </button>
@@ -306,15 +306,15 @@ export default function ProfilePage() {
       </div>
 
       {/* Send Mode Settings */}
-      <div className="mb-8 p-4 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Message Delivery</h3>
-        <p className="text-xs text-gray-400 mb-4">
+      <div className="mb-8 p-4 rounded-xl border border-swoop-border bg-swoop-panel">
+        <h3 className="text-sm font-semibold text-swoop-text-2 mb-1">Message Delivery</h3>
+        <p className="text-xs text-swoop-text-label mb-4">
           Choose how emails and texts are sent when you approve an action.
         </p>
 
         {/* Email send mode */}
         <div className="mb-4">
-          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Email Delivery</label>
+          <label className="block text-xs font-medium text-swoop-text-muted mb-2">Email Delivery</label>
           <div className="flex gap-2 flex-wrap">
             {EMAIL_SEND_MODES.map(mode => {
               const disabled = mode.requiresGoogle && !googleStatus.connected;
@@ -325,17 +325,17 @@ export default function ProfilePage() {
                   disabled={disabled}
                   className={`flex-1 min-w-[140px] p-3 rounded-lg border-2 text-left transition-all ${
                     disabled
-                      ? 'border-gray-200 opacity-50 cursor-not-allowed dark:border-gray-700'
+                      ? 'border-swoop-border opacity-50 cursor-not-allowed'
                       : emailSendMode === mode.value
-                        ? 'border-brand-500 bg-brand-500/5 cursor-pointer dark:bg-brand-500/10'
-                        : 'border-gray-200 hover:border-gray-300 cursor-pointer dark:border-gray-700'
+                        ? 'border-brand-500 bg-brand-500/5 cursor-pointer'
+                        : 'border-swoop-border hover:border-swoop-border cursor-pointer'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-sm">{mode.value === 'local' ? '📱' : mode.value === 'gmail_api' ? '📨' : mode.value === 'gmail' ? '✉' : '☁️'}</span>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{mode.label}</span>
+                    <span className="text-sm font-semibold text-swoop-text">{mode.label}</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 m-0">{mode.desc}</p>
+                  <p className="text-[10px] text-swoop-text-label m-0">{mode.desc}</p>
                 </button>
               );
             })}
@@ -344,7 +344,7 @@ export default function ProfilePage() {
 
         {/* SMS send mode */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Text Message Delivery</label>
+          <label className="block text-xs font-medium text-swoop-text-muted mb-2">Text Message Delivery</label>
           <div className="flex gap-2">
             {SEND_MODES.map(mode => (
               <button
@@ -352,15 +352,15 @@ export default function ProfilePage() {
                 onClick={() => setSmsSendMode(mode.value)}
                 className={`flex-1 p-3 rounded-lg border-2 text-left cursor-pointer transition-all ${
                   smsSendMode === mode.value
-                    ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10'
-                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                    ? 'border-brand-500 bg-brand-500/5'
+                    : 'border-swoop-border hover:border-swoop-border'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-sm">{mode.value === 'local' ? '📱' : '☁️'}</span>
-                  <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{mode.label}</span>
+                  <span className="text-sm font-semibold text-swoop-text">{mode.label}</span>
                 </div>
-                <p className="text-[10px] text-gray-400 m-0">{mode.desc}</p>
+                <p className="text-[10px] text-swoop-text-label m-0">{mode.desc}</p>
               </button>
             ))}
           </div>
@@ -368,30 +368,30 @@ export default function ProfilePage() {
       </div>
 
       {/* Demo override section */}
-      <div className="mb-8 p-4 rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Test Overrides</h3>
-        <p className="text-xs text-gray-400 mb-3">
+      <div className="mb-8 p-4 rounded-xl border border-swoop-border bg-swoop-row">
+        <h3 className="text-sm font-semibold text-swoop-text-2 mb-1">Test Overrides</h3>
+        <p className="text-xs text-swoop-text-label mb-3">
           When testing actions, messages will be sent to these addresses instead of the member's real contact info.
         </p>
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Override Email</label>
+            <label className="block text-xs font-medium text-swoop-text-muted mb-1">Override Email</label>
             <input
               type="email"
               value={demoEmail}
               onChange={(e) => setDemoEmail(e.target.value)}
               placeholder="your@email.com"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              className="w-full px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Override Phone (SMS)</label>
+            <label className="block text-xs font-medium text-swoop-text-muted mb-1">Override Phone (SMS)</label>
             <input
               type="tel"
               value={demoPhone}
               onChange={(e) => setDemoPhone(e.target.value)}
               placeholder="+1 (555) 000-0000"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              className="w-full px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
             />
           </div>
         </div>
@@ -402,7 +402,7 @@ export default function ProfilePage() {
         onClick={handleSaveProfile}
         disabled={saving}
         className="w-full py-3 rounded-lg font-bold text-sm text-white cursor-pointer disabled:opacity-50"
-        style={{ background: '#ff8b00' }}
+        style={{ background: '#F3922D' }}
       >
         {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
       </button>

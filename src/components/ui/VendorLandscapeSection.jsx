@@ -1,9 +1,9 @@
 // VendorLandscapeSection.jsx — full vendor landscape organized by category
 
 const TIER_CLS = {
-  primary:     { text: 'text-success-600 dark:text-success-400', bg: 'bg-success-50 dark:bg-success-500/10', border: 'border-success-200 dark:border-success-500/30' },
-  supported:   { text: 'text-gray-500 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
-  coming_soon: { text: 'text-gray-500 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+  primary:     { text: 'text-success-600', bg: 'bg-success-50', border: 'border-success-200' },
+  supported:   { text: 'text-swoop-text-muted', bg: 'bg-swoop-row', border: 'border-swoop-border' },
+  coming_soon: { text: 'text-swoop-text-muted', bg: 'bg-swoop-row', border: 'border-swoop-border' },
 };
 
 export default function VendorLandscapeSection({ categories }) {
@@ -12,8 +12,8 @@ export default function VendorLandscapeSection({ categories }) {
   return (
     <div>
       <div className="mb-3">
-        <div className="text-base font-bold text-gray-800 dark:text-white/90">Full Vendor Landscape</div>
-        <div className="text-[11px] text-gray-500 mt-0.5 dark:text-gray-400">
+        <div className="text-base font-bold text-swoop-text">Full Vendor Landscape</div>
+        <div className="text-[11px] text-swoop-text-muted mt-0.5">
           {totalVendors}+ compatible vendors across {categories.length} categories \u2014 Swoop works with what you already have
         </div>
       </div>
@@ -25,13 +25,13 @@ export default function VendorLandscapeSection({ categories }) {
           const soonCount      = cat.vendors.filter(v => v.tier === 'coming_soon').length;
 
           return (
-            <div key={cat.category} className="rounded-lg border border-gray-200 border-l-[3px] border-l-brand-500 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]">
+            <div key={cat.category} className="rounded-lg border border-swoop-border border-l-[3px] border-l-brand-500 bg-swoop-panel p-3">
               {/* Category header */}
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="text-sm leading-none">{cat.icon}</span>
                 <div>
-                  <div className="text-xs font-bold text-gray-800 leading-tight dark:text-white/90">{cat.category}</div>
-                  <div className="text-[10px] text-gray-500 mt-px dark:text-gray-400">{cat.description}</div>
+                  <div className="text-xs font-bold text-swoop-text leading-tight">{cat.category}</div>
+                  <div className="text-[10px] text-swoop-text-muted mt-px">{cat.description}</div>
                 </div>
               </div>
 
@@ -48,10 +48,10 @@ export default function VendorLandscapeSection({ categories }) {
               </div>
 
               {/* Tier counts */}
-              <div className="flex gap-2.5 border-t border-gray-100 pt-1.5 dark:border-gray-800">
+              <div className="flex gap-2.5 border-t border-swoop-border-inset pt-1.5">
                 {primaryCount   > 0 && <Tally label="Live"      count={primaryCount}   cls="text-success-500" />}
-                {supportedCount > 0 && <Tally label="Supported" count={supportedCount} cls="text-gray-500 dark:text-gray-400" />}
-                {soonCount      > 0 && <Tally label="Coming"    count={soonCount}      cls="text-gray-500 dark:text-gray-400" />}
+                {supportedCount > 0 && <Tally label="Supported" count={supportedCount} cls="text-swoop-text-muted" />}
+                {soonCount      > 0 && <Tally label="Coming"    count={soonCount}      cls="text-swoop-text-muted" />}
               </div>
             </div>
           );

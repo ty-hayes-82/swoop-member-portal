@@ -75,11 +75,11 @@ function MiniBarChart({ data, dataKey, color, label }) {
   const max = Math.max(...data.map(d => d[dataKey]));
   return (
     <div className="space-y-2">
-      <div className="text-xs text-gray-400 uppercase tracking-wider">{label}</div>
+      <div className="text-xs text-swoop-text-label uppercase tracking-wider">{label}</div>
       {data.map((d, i) => (
         <div key={i} className="flex items-center gap-3">
-          <div className="w-16 text-xs text-gray-500 shrink-0">{d.month}</div>
-          <div className="flex-1 h-6 bg-gray-800 rounded overflow-hidden">
+          <div className="w-16 text-xs text-swoop-text-muted shrink-0">{d.month}</div>
+          <div className="flex-1 h-6 bg-swoop-row rounded overflow-hidden">
             <div
               className="h-full rounded transition-all duration-700"
               style={{
@@ -89,7 +89,7 @@ function MiniBarChart({ data, dataKey, color, label }) {
               }}
             />
           </div>
-          <div className="w-12 text-xs text-right text-gray-300">{typeof d[dataKey] === 'number' && d[dataKey] > 1000 ? `$${(d[dataKey] / 1000).toFixed(0)}K` : d[dataKey]}</div>
+          <div className="w-12 text-xs text-right text-swoop-text-ghost">{typeof d[dataKey] === 'number' && d[dataKey] > 1000 ? `$${(d[dataKey] / 1000).toFixed(0)}K` : d[dataKey]}</div>
         </div>
       ))}
     </div>
@@ -108,7 +108,7 @@ function RetentionLine({ data }) {
 
   return (
     <div className="space-y-2">
-      <div className="text-xs text-gray-400 uppercase tracking-wider">Retention Trend</div>
+      <div className="text-xs text-swoop-text-label uppercase tracking-wider">Retention Trend</div>
       <svg viewBox="0 0 300 100" className="w-full h-20">
         <polyline fill="none" stroke="#10b981" strokeWidth="2.5" points={points} strokeLinecap="round" strokeLinejoin="round" />
         {data.map((d, i) => {
@@ -130,35 +130,35 @@ function RetentionLine({ data }) {
 function ClubCard({ club, index }) {
   const roi = ((club.protected - club.swoopCost) / club.swoopCost * 100).toFixed(0);
   return (
-    <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-6 space-y-5">
+    <div className="bg-gray-900/80 border border-swoop-border rounded-xl p-6 space-y-5">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-lg font-bold text-white">{club.name}</h3>
-          <p className="text-sm text-gray-500">{club.members} members</p>
+          <p className="text-sm text-swoop-text-muted">{club.members} members</p>
         </div>
         <div className="text-right">
           <div className="text-2xl font-bold text-emerald-400">
             <AnimatedNumber target={club.saves} suffix=" saves" duration={1400 + index * 300} />
           </div>
-          <div className="text-sm text-gray-400">90-day pilot</div>
+          <div className="text-sm text-swoop-text-label">90-day pilot</div>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-gray-800/60 rounded-lg p-3 text-center">
-          <div className="text-xs text-gray-500 mb-1">Revenue Protected</div>
+          <div className="text-xs text-swoop-text-muted mb-1">Revenue Protected</div>
           <div className="text-lg font-bold text-white">
             <AnimatedNumber target={club.protected} prefix="$" duration={2000} />
           </div>
         </div>
         <div className="bg-gray-800/60 rounded-lg p-3 text-center">
-          <div className="text-xs text-gray-500 mb-1">Retention Lift</div>
+          <div className="text-xs text-swoop-text-muted mb-1">Retention Lift</div>
           <div className="text-lg font-bold text-emerald-400">
             {club.retentionBefore}% → {club.retentionAfter}%
           </div>
         </div>
         <div className="bg-gray-800/60 rounded-lg p-3 text-center">
-          <div className="text-xs text-gray-500 mb-1">ROI</div>
+          <div className="text-xs text-swoop-text-muted mb-1">ROI</div>
           <div className="text-lg font-bold text-amber-400">
             <AnimatedNumber target={parseInt(roi)} suffix="x" duration={2200} />
           </div>
@@ -186,7 +186,7 @@ export default function PilotResults() {
       <button
         type="button"
         onClick={() => { window.location.hash = '#/demo/mobile-showcase'; }}
-        className="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-300 bg-transparent border-none cursor-pointer"
+        className="absolute top-4 left-4 text-sm text-swoop-text-muted hover:text-gray-300 bg-transparent border-none cursor-pointer"
       >
         &larr; Back
       </button>
@@ -196,7 +196,7 @@ export default function PilotResults() {
         <div className="text-center space-y-3 pt-8">
           <div className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-500">Swoop Golf</div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white">90-Day Pilot Results</h1>
-          <p className="text-gray-400 max-w-xl mx-auto">
+          <p className="text-swoop-text-label max-w-xl mx-auto">
             Controlled pilot across 3 private clubs in the Scottsdale/Phoenix market.
             AI-driven member retention intervention system deployed for 90 days.
           </p>
@@ -210,8 +210,8 @@ export default function PilotResults() {
             { label: 'Avg Retention Lift', value: '+4.3pp', color: 'text-amber-400' },
             { label: 'Avg ROI', value: '38x', color: 'text-emerald-400' },
           ].map((kpi, i) => (
-            <div key={i} className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 text-center">
-              <div className="text-xs text-gray-500 mb-2">{kpi.label}</div>
+            <div key={i} className="bg-gray-900/60 border border-swoop-border rounded-lg p-4 text-center">
+              <div className="text-xs text-swoop-text-muted mb-2">{kpi.label}</div>
               <div className={`text-xl sm:text-2xl font-bold ${kpi.color}`}>{kpi.value}</div>
             </div>
           ))}
@@ -225,26 +225,26 @@ export default function PilotResults() {
         </div>
 
         {/* Methodology */}
-        <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6">
+        <div className="bg-gray-900/60 border border-swoop-border rounded-xl p-6">
           <button
             onClick={() => setShowMethodology(!showMethodology)}
             className="w-full flex items-center justify-between text-left bg-transparent border-none cursor-pointer"
           >
             <h3 className="text-lg font-semibold text-white">Methodology</h3>
-            <span className="text-gray-400 text-sm">{showMethodology ? 'Hide' : 'Show'} details</span>
+            <span className="text-swoop-text-label text-sm">{showMethodology ? 'Hide' : 'Show'} details</span>
           </button>
           {showMethodology && (
-            <div className="mt-4 space-y-3 text-sm text-gray-400">
-              <p><strong className="text-gray-300">Study Design:</strong> Controlled 90-day pilot with 3 private clubs in the Phoenix/Scottsdale metro area. Each club deployed the full Swoop AI stack including churn prediction, automated GM alerts, and AI-assisted outreach.</p>
-              <p><strong className="text-gray-300">Measurement:</strong> "Save" defined as a member flagged at-risk (churn probability &gt;60%) who remained active through the pilot period after receiving at least one Swoop-generated intervention. Revenue protected calculated as member annual dues for each saved member.</p>
-              <p><strong className="text-gray-300">Baseline:</strong> Retention rates measured using each club's trailing 12-month membership data prior to pilot start. Post-pilot retention measured at 90-day mark with projected annual run rate.</p>
-              <p><strong className="text-gray-300">ROI Calculation:</strong> (Revenue Protected - Swoop Annual License Cost) / Swoop Annual License Cost. License cost estimated at $9/member/year for pilot pricing tier.</p>
-              <p><strong className="text-gray-300">Limitations:</strong> Small sample size (3 clubs). Seasonal effects not fully controlled. Results represent simulated pilot data for investor evaluation purposes.</p>
+            <div className="mt-4 space-y-3 text-sm text-swoop-text-label">
+              <p><strong className="text-swoop-text-ghost">Study Design:</strong> Controlled 90-day pilot with 3 private clubs in the Phoenix/Scottsdale metro area. Each club deployed the full Swoop AI stack including churn prediction, automated GM alerts, and AI-assisted outreach.</p>
+              <p><strong className="text-swoop-text-ghost">Measurement:</strong> "Save" defined as a member flagged at-risk (churn probability &gt;60%) who remained active through the pilot period after receiving at least one Swoop-generated intervention. Revenue protected calculated as member annual dues for each saved member.</p>
+              <p><strong className="text-swoop-text-ghost">Baseline:</strong> Retention rates measured using each club's trailing 12-month membership data prior to pilot start. Post-pilot retention measured at 90-day mark with projected annual run rate.</p>
+              <p><strong className="text-swoop-text-ghost">ROI Calculation:</strong> (Revenue Protected - Swoop Annual License Cost) / Swoop Annual License Cost. License cost estimated at $9/member/year for pilot pricing tier.</p>
+              <p><strong className="text-swoop-text-ghost">Limitations:</strong> Small sample size (3 clubs). Seasonal effects not fully controlled. Results represent simulated pilot data for investor evaluation purposes.</p>
             </div>
           )}
         </div>
 
-        <div className="text-center text-xs text-gray-600 pb-8">
+        <div className="text-center text-xs text-swoop-text-muted pb-8">
           Confidential — Swoop Golf Inc. Investor Data Room
         </div>
       </div>

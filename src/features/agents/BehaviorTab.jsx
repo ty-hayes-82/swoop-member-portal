@@ -74,8 +74,8 @@ export default function BehaviorTab({ config, onSave, loading }) {
     <div className="space-y-6">
       {/* Tone */}
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Tone</h3>
-        <p className="text-xs text-gray-400 mb-3 m-0">How this agent communicates with members and in action descriptions.</p>
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Tone</h3>
+        <p className="text-xs text-swoop-text-label mb-3 m-0">How this agent communicates with members and in action descriptions.</p>
         <div className="space-y-2">
           {TONE_OPTIONS.map(opt => (
             <button
@@ -84,12 +84,12 @@ export default function BehaviorTab({ config, onSave, loading }) {
               onClick={() => onSave({ tone: opt.value })}
               className={`w-full p-3 rounded-xl border-2 text-left cursor-pointer transition-all ${
                 tone === opt.value
-                  ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10'
-                  : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                  ? 'border-brand-500 bg-brand-500/5'
+                  : 'border-swoop-border hover:border-swoop-border'
               }`}
             >
-              <div className="text-xs font-bold text-gray-800 dark:text-white/90">{opt.label}</div>
-              <p className="text-[10px] text-gray-400 m-0 mt-0.5">{opt.desc}</p>
+              <div className="text-xs font-bold text-swoop-text">{opt.label}</div>
+              <p className="text-[10px] text-swoop-text-label m-0 mt-0.5">{opt.desc}</p>
             </button>
           ))}
         </div>
@@ -97,26 +97,26 @@ export default function BehaviorTab({ config, onSave, loading }) {
 
       {/* Sweep Cadence */}
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Sweep Cadence</h3>
-        <p className="text-xs text-gray-400 mb-3 m-0">How often this agent scans for new actions to recommend.</p>
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Sweep Cadence</h3>
+        <p className="text-xs text-swoop-text-label mb-3 m-0">How often this agent scans for new actions to recommend.</p>
         <select
           value={cadence}
           onChange={e => onSave({ cadence: e.target.value })}
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+          className="w-full px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
         >
           {CADENCE_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
         {/* Description for selected cadence */}
-        <p className="text-[10px] text-gray-400 mt-1 m-0">
+        <p className="text-[10px] text-swoop-text-label mt-1 m-0">
           {CADENCE_OPTIONS.find(o => o.value === cadence)?.desc}
         </p>
-        <div className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <div className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-swoop-row border border-swoop-border">
           <svg className="w-3.5 h-3.5 text-brand-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
           </svg>
-          <span className="text-xs text-gray-600 dark:text-gray-300">
+          <span className="text-xs text-swoop-text-muted">
             Next sweep: <span className="font-semibold">{nextSweep}</span>
           </span>
         </div>
@@ -124,8 +124,8 @@ export default function BehaviorTab({ config, onSave, loading }) {
 
       {/* Auto-Approve */}
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Auto-Approve</h3>
-        <p className="text-xs text-gray-400 mb-3 m-0">
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Auto-Approve</h3>
+        <p className="text-xs text-swoop-text-label mb-3 m-0">
           Let this agent execute actions automatically when confidence is high enough.
         </p>
 
@@ -138,14 +138,14 @@ export default function BehaviorTab({ config, onSave, loading }) {
             aria-label="Toggle auto-approve"
             onClick={() => onSave({ autoApproveEnabled: !autoApproveEnabled })}
             className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer border-none ${
-              autoApproveEnabled ? 'bg-brand-500' : 'bg-gray-300 dark:bg-gray-600'
+              autoApproveEnabled ? 'bg-brand-500' : 'bg-swoop-border'
             }`}
           >
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-swoop-panel shadow transition-transform ${
               autoApproveEnabled ? 'translate-x-[22px]' : 'translate-x-0.5'
             }`} />
           </button>
-          <span className="text-sm text-gray-700 dark:text-gray-300">
+          <span className="text-sm text-swoop-text-2">
             {autoApproveEnabled ? 'Auto-approve ON' : 'Manual review for all actions'}
           </span>
         </div>
@@ -154,7 +154,7 @@ export default function BehaviorTab({ config, onSave, loading }) {
           <div className="space-y-4 pl-1">
             {/* Confidence threshold slider */}
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+              <label className="block text-xs font-medium text-swoop-text-muted mb-1">
                 Confidence Threshold: {Math.round(autoApproveThreshold * 100)}%
               </label>
               <input
@@ -166,7 +166,7 @@ export default function BehaviorTab({ config, onSave, loading }) {
                 onChange={e => onSave({ autoApproveThreshold: parseFloat(e.target.value) })}
                 className="w-full accent-brand-500 h-1.5"
               />
-              <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+              <div className="flex justify-between text-[10px] text-swoop-text-label mt-0.5">
                 <span>More auto-approved (70%)</span>
                 <span>Only high-confidence (95%)</span>
               </div>
@@ -174,11 +174,11 @@ export default function BehaviorTab({ config, onSave, loading }) {
 
             {/* Dollar cap */}
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+              <label className="block text-xs font-medium text-swoop-text-muted mb-1">
                 Dollar Cap
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-swoop-text-label">$</span>
                 <input
                   type="number"
                   min="0"
@@ -186,10 +186,10 @@ export default function BehaviorTab({ config, onSave, loading }) {
                   value={dollarCap}
                   onChange={e => onSave({ dollarCap: e.target.value })}
                   placeholder="No limit"
-                  className="w-full pl-7 pr-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+                  className="w-full pl-7 pr-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
                 />
               </div>
-              <p className="text-[10px] text-gray-400 mt-1 m-0">
+              <p className="text-[10px] text-swoop-text-label mt-1 m-0">
                 Actions above this dollar amount always require manual approval. Leave blank for no limit.
               </p>
             </div>

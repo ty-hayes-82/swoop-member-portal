@@ -42,12 +42,12 @@ function ChartTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const item = payload[0];
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 dark:bg-gray-800 dark:border-gray-700">
-      <div className="text-xs font-bold text-gray-800 dark:text-white/90">{item.payload.name}</div>
-      <div className="text-sm font-mono text-gray-600 dark:text-gray-300">
+    <div className="bg-swoop-panel border border-swoop-border rounded-lg shadow-lg px-3 py-2">
+      <div className="text-xs font-bold text-swoop-text">{item.payload.name}</div>
+      <div className="text-sm font-mono text-swoop-text-muted">
         ${item.value.toLocaleString()}/mo
       </div>
-      <div className="text-[10px] text-gray-400 mt-0.5">{item.payload.source}</div>
+      <div className="text-[10px] text-swoop-text-label mt-0.5">{item.payload.source}</div>
     </div>
   );
 }
@@ -100,8 +100,8 @@ export default function RevenuePage() {
       <PageTransition>
         <div className="p-6 w-full">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Revenue Leakage</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-2xl font-bold text-swoop-text">Revenue Leakage</h1>
+            <p className="text-sm text-swoop-text-muted mt-1">
               Revenue lost to slow rounds, understaffing, and weather — quantified across every system.
             </p>
           </div>
@@ -115,41 +115,41 @@ export default function RevenuePage() {
               return (
                 <div className="flex flex-col gap-4">
                   {/* POS connected — surface real member-spend intelligence */}
-                  <div className="rounded-xl border border-green-200 bg-green-50/50 dark:bg-green-500/5 dark:border-green-500/20 p-4">
+                  <div className="rounded-xl border border-green-200 bg-green-50/50 p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">✅</span>
-                      <span className="font-semibold text-gray-800 dark:text-white/90">POS Connected — {686} transactions loaded</span>
+                      <span className="font-semibold text-swoop-text">POS Connected — {686} transactions loaded</span>
                       <SourceBadge system="POS" size="xs" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="bg-white dark:bg-white/5 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">Members Imported</div>
-                        <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono">{memberSummary.total || 0}</div>
-                        <div className="text-[11px] text-gray-500 mt-0.5">spending patterns being analyzed</div>
+                      <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Members Imported</div>
+                        <div className="text-2xl font-bold text-swoop-text font-mono">{memberSummary.total || 0}</div>
+                        <div className="text-[11px] text-swoop-text-muted mt-0.5">spending patterns being analyzed</div>
                       </div>
                       {riskCount > 0 && (
-                        <div className="bg-white dark:bg-white/5 rounded-lg p-3 border border-red-200 dark:border-red-500/20">
+                        <div className="bg-swoop-panel rounded-lg p-3 border border-red-200">
                           <div className="text-[10px] font-bold uppercase tracking-wide text-red-500 mb-1">At-Risk Members</div>
-                          <div className="text-2xl font-bold text-red-600 dark:text-red-400 font-mono">{riskCount}</div>
-                          <div className="text-[11px] text-gray-500 mt-0.5">declining engagement detected</div>
+                          <div className="text-2xl font-bold text-red-600 font-mono">{riskCount}</div>
+                          <div className="text-[11px] text-swoop-text-muted mt-0.5">declining engagement detected</div>
                         </div>
                       )}
                       {duesAtRisk > 0 && (
-                        <div className="bg-white dark:bg-white/5 rounded-lg p-3 border border-red-200 dark:border-red-500/20">
+                        <div className="bg-swoop-panel rounded-lg p-3 border border-red-200">
                           <div className="text-[10px] font-bold uppercase tracking-wide text-red-500 mb-1">Dues at Risk</div>
-                          <div className="text-2xl font-bold text-red-600 dark:text-red-400 font-mono">${Math.round(duesAtRisk / 1000)}K</div>
-                          <div className="text-[11px] text-gray-500 mt-0.5">annual dues from at-risk members</div>
+                          <div className="text-2xl font-bold text-red-600 font-mono">${Math.round(duesAtRisk / 1000)}K</div>
+                          <div className="text-[11px] text-swoop-text-muted mt-0.5">annual dues from at-risk members</div>
                         </div>
                       )}
                     </div>
                     {atRisk.length > 0 && (
                       <div className="mt-3">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Members Declining — Cross-Reference with Spend</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-2">Members Declining — Cross-Reference with Spend</div>
                         <div className="flex flex-col gap-1.5">
                           {atRisk.map(m => (
-                            <div key={m.id || m.memberId} className="flex items-center justify-between bg-white dark:bg-white/5 rounded-lg px-3 py-2 border border-gray-100 dark:border-gray-700">
-                              <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">{m.name}</div>
-                              <div className="flex items-center gap-3 text-xs text-gray-500">
+                            <div key={m.id || m.memberId} className="flex items-center justify-between bg-swoop-panel rounded-lg px-3 py-2 border border-swoop-border-inset">
+                              <div className="text-sm text-swoop-text-2 font-medium">{m.name}</div>
+                              <div className="flex items-center gap-3 text-xs text-swoop-text-muted">
                                 <span className="font-mono text-red-500 font-semibold">Score {m.healthScore ?? m.score ?? '—'}</span>
                                 {m.duesAnnual > 0 && <span>${Math.round(m.duesAnnual / 1000)}K/yr dues</span>}
                               </div>
@@ -160,12 +160,12 @@ export default function RevenuePage() {
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/40 dark:bg-amber-500/5 dark:border-amber-500/20 p-4">
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
                     <div className="flex items-start gap-3">
                       <div className="text-2xl">📋</div>
                       <div className="flex-1">
-                        <div className="font-semibold text-gray-800 dark:text-white/90 mb-1">Next: Connect Tee Sheet → unlock revenue leakage</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                        <div className="font-semibold text-swoop-text mb-1">Next: Connect Tee Sheet → unlock revenue leakage</div>
+                        <div className="text-sm text-swoop-text-muted mb-3">
                           Swoop will cross-reference POS checks against tee sheet rounds — identifying which rounds skip dining and quantifying the revenue impact per slow hole.
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-center">
@@ -173,10 +173,10 @@ export default function RevenuePage() {
                             { label: 'Industry avg leakage', value: '$8,400/mo', sub: 'benchmark — not your data yet' },
                             { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
                           ].map(({ label, value, sub }) => (
-                            <div key={label} className="bg-white/60 dark:bg-white/5 rounded-lg p-3 border border-amber-100 dark:border-amber-500/10">
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</div>
-                              <div className="font-bold text-gray-800 dark:text-white/90">{value}</div>
-                              <div className="text-[10px] text-gray-400 mt-0.5">{sub}</div>
+                            <div key={label} className="bg-white/60 rounded-lg p-3 border border-amber-100">
+                              <div className="text-xs text-swoop-text-muted mb-1">{label}</div>
+                              <div className="font-bold text-swoop-text">{value}</div>
+                              <div className="text-[10px] text-swoop-text-label mt-0.5">{sub}</div>
                             </div>
                           ))}
                         </div>
@@ -190,42 +190,42 @@ export default function RevenuePage() {
             /* No data at all — show a value-preview panel so the GM understands what they'll unlock */
             <div className="flex flex-col gap-4">
               {/* Industry benchmark hero */}
-              <div className="rounded-xl border border-gray-200 bg-white dark:bg-white/[0.03] dark:border-gray-800 p-5">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">Industry Benchmark</div>
+              <div className="rounded-xl border border-swoop-border bg-swoop-panel p-5">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Industry Benchmark</div>
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-4xl font-extrabold text-gray-800 dark:text-white/90 font-mono">$8,400</span>
-                  <span className="text-base text-gray-500">/mo avg revenue leakage</span>
+                  <span className="text-4xl font-extrabold text-swoop-text font-mono">$8,400</span>
+                  <span className="text-base text-swoop-text-muted">/mo avg revenue leakage</span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 m-0">
+                <p className="text-xs text-swoop-text-muted m-0">
                   For a 400-member club. Swoop cross-references your tee sheet, POS, and scheduling data to tell you exactly where these dollars go — and what stops them.
                 </p>
               </div>
 
               {/* Three locked source rows */}
-              <div className="rounded-xl border border-gray-200 bg-white dark:bg-white/[0.03] dark:border-gray-800 overflow-hidden">
-                <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800">
-                  <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">What Swoop will quantify for you</div>
+              <div className="rounded-xl border border-swoop-border bg-swoop-panel overflow-hidden">
+                <div className="px-5 py-3 border-b border-swoop-border-inset">
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">What Swoop will quantify for you</div>
                 </div>
                 {[
                   { label: 'Pace of Play', desc: 'Slow rounds suppress F&B conversion — Swoop identifies which holes and shifts', est: '$3,200–$5,000', color: '#ef4444', icon: '⛳', source: 'Tee Sheet + POS' },
                   { label: 'Understaffing', desc: 'Gaps in shift coverage drive complaints and reduce check sizes', est: '$1,800–$2,800', color: '#f59e0b', icon: '👥', source: 'Scheduling' },
                   { label: 'Weather No-Shows', desc: 'Revenue lost to cancelled rounds on adverse-weather days', est: '$800–$1,200', color: '#60a5fa', icon: '🌧️', source: 'Weather API + Tee Sheet' },
                 ].map(row => (
-                  <div key={row.label} className="flex items-center gap-4 px-5 py-3.5 border-b last:border-b-0 border-gray-50 dark:border-gray-800/60">
+                  <div key={row.label} className="flex items-center gap-4 px-5 py-3.5 border-b last:border-b-0 border-gray-50">
                     <div className="text-xl w-7 flex-shrink-0">{row.icon}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{row.label}</span>
-                        <span className="text-[10px] text-gray-400 border border-gray-200 dark:border-gray-700 rounded px-1.5 py-0.5">🔒 needs {row.source}</span>
+                        <span className="text-sm font-semibold text-swoop-text-2">{row.label}</span>
+                        <span className="text-[10px] text-swoop-text-label border border-swoop-border rounded px-1.5 py-0.5">🔒 needs {row.source}</span>
                       </div>
-                      <div className="text-[11px] text-gray-400">{row.desc}</div>
+                      <div className="text-[11px] text-swoop-text-label">{row.desc}</div>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <div className="text-sm font-mono font-bold" style={{ color: row.color }}>{row.est}</div>
-                      <div className="text-[10px] text-gray-400">est/mo</div>
+                      <div className="text-[10px] text-swoop-text-label">est/mo</div>
                     </div>
                     {/* Muted stub bar */}
-                    <div className="hidden sm:block w-24 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden flex-shrink-0">
+                    <div className="hidden sm:block w-24 h-2 bg-swoop-row rounded-full overflow-hidden flex-shrink-0">
                       <div className="h-full rounded-full opacity-25" style={{ width: '60%', background: row.color }} />
                     </div>
                   </div>
@@ -244,7 +244,7 @@ export default function RevenuePage() {
                 <button
                   type="button"
                   onClick={() => navigate('admin', { tab: 'data-hub' })}
-                  className="px-5 py-2.5 rounded-lg border border-gray-200 bg-transparent text-gray-600 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                  className="px-5 py-2.5 rounded-lg border border-swoop-border bg-transparent text-swoop-text-muted text-sm font-semibold cursor-pointer hover:bg-swoop-row-hover transition-colors"
                 >
                   {hasTeeSheet ? 'View Connected Sources' : hasPOS ? 'Connect Tee Sheet →' : 'View All Integrations'}
                 </button>
@@ -275,10 +275,10 @@ export default function RevenuePage() {
         {/* Header */}
         <div className="flex justify-between items-start flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">
+            <h1 className="text-2xl font-bold text-swoop-text">
               Revenue Leakage
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-swoop-text-muted mt-1">
               Before members resign, they stop spending. Slow rounds, understaffed shifts, and missed dining — quantified across every system before it shows up in dues revenue.
             </p>
           </div>
@@ -325,12 +325,12 @@ export default function RevenuePage() {
 
         {/* Hero KPI Strip */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
-            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Total Monthly Leakage</div>
+          <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Total Monthly Leakage</div>
             <div className="text-2xl font-bold text-error-500 font-mono mt-1">
               $<AnimatedNumber value={leakage.TOTAL} duration={1200} />
             </div>
-            <div className="text-[11px] text-gray-500 mt-1">${(leakage.TOTAL * 12).toLocaleString()}/yr</div>
+            <div className="text-[11px] text-swoop-text-muted mt-1">${(leakage.TOTAL * 12).toLocaleString()}/yr</div>
             {/* "vs last month" delta is mocked until revenueService exposes a historical series. */}
             {leakage.MOM_DELTA != null && (
             <div className={`mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border ${leakage.MOM_DELTA > 0 ? 'bg-error-500/[0.08] text-error-500 border-error-500/15' : 'bg-success-500/[0.08] text-success-600 border-success-500/15'}`}
@@ -340,57 +340,57 @@ export default function RevenuePage() {
             </div>
             )}
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
-            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Pace of Play</div>
-            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+          <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Pace of Play</div>
+            <div className="text-2xl font-bold text-swoop-text font-mono mt-1">
               $<AnimatedNumber value={leakage.PACE_LOSS} duration={1200} />
             </div>
             <SourceBadge system="Tee Sheet" size="xs" />
-            <div className="text-[11px] text-gray-400 mt-1.5 leading-snug">Slow rounds drop post-round F&B conversion from ~41% to ~22%.</div>
+            <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Slow rounds drop post-round F&B conversion from ~41% to ~22%.</div>
           </div>
           {leakage.STAFFING_LOSS > 0 ? (
             <button
               type="button"
               onClick={() => navigate('service', { tab: 'staffing' })}
-              className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800 cursor-pointer text-left hover:border-brand-500 hover:shadow-md transition-all group"
+              className="bg-swoop-panel border border-swoop-border rounded-xl p-4 cursor-pointer text-left hover:border-brand-500 hover:shadow-md transition-all group"
               title="View Staffing tab in Service for the underlying detail"
             >
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Understaffed Days</div>
-              <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Understaffed Days</div>
+              <div className="text-2xl font-bold text-swoop-text font-mono mt-1">
                 $<AnimatedNumber value={leakage.STAFFING_LOSS} duration={1200} />
               </div>
               <SourceBadge system="Scheduling" size="xs" />
-              <div className="text-[11px] text-gray-400 mt-1.5 leading-snug group-hover:text-brand-500 transition-colors">Complaints spike 2–3x on short-staffed days. View staffing →</div>
+              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug group-hover:text-brand-500 transition-colors">Complaints spike 2–3x on short-staffed days. View staffing →</div>
             </button>
           ) : (
-            <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-4 dark:bg-white/[0.02] dark:border-gray-700 opacity-70">
+            <div className="bg-swoop-row border border-dashed border-swoop-border rounded-xl p-4 opacity-70">
               <div className="flex items-center gap-1.5 mb-1">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Understaffed Days</div>
-                <span className="text-[9px] font-bold uppercase tracking-wide text-gray-400 border border-gray-300 rounded px-1 py-0.5">Locked</span>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Understaffed Days</div>
+                <span className="text-[9px] font-bold uppercase tracking-wide text-swoop-text-label border border-swoop-border rounded px-1 py-0.5">Locked</span>
               </div>
-              <div className="text-2xl font-bold text-gray-300 dark:text-gray-600 font-mono mt-1">$—</div>
+              <div className="text-2xl font-bold text-swoop-text-ghost font-mono mt-1">$—</div>
               <SourceBadge system="Scheduling" size="xs" />
-              <div className="text-[11px] text-gray-400 mt-1.5 leading-snug">Connect scheduling data to unlock staffing-driven loss tracking.</div>
+              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Connect scheduling data to unlock staffing-driven loss tracking.</div>
             </div>
           )}
           {leakage.WEATHER_LOSS > 0 ? (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Weather No-Shows</div>
-              <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Weather No-Shows</div>
+              <div className="text-2xl font-bold text-swoop-text font-mono mt-1">
                 $<AnimatedNumber value={leakage.WEATHER_LOSS} duration={1200} />
               </div>
               <SourceBadge system="Weather API" size="xs" />
-              <div className="text-[11px] text-gray-400 mt-1.5 leading-snug">Proactive notification recovers ~60% of at-risk tee times.</div>
+              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Proactive notification recovers ~60% of at-risk tee times.</div>
             </div>
           ) : (
-            <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-4 dark:bg-white/[0.02] dark:border-gray-700 opacity-70">
+            <div className="bg-swoop-row border border-dashed border-swoop-border rounded-xl p-4 opacity-70">
               <div className="flex items-center gap-1.5 mb-1">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Weather No-Shows</div>
-                <span className="text-[9px] font-bold uppercase tracking-wide text-gray-400 border border-gray-300 rounded px-1 py-0.5">Locked</span>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Weather No-Shows</div>
+                <span className="text-[9px] font-bold uppercase tracking-wide text-swoop-text-label border border-swoop-border rounded px-1 py-0.5">Locked</span>
               </div>
-              <div className="text-2xl font-bold text-gray-300 dark:text-gray-600 font-mono mt-1">$—</div>
+              <div className="text-2xl font-bold text-swoop-text-ghost font-mono mt-1">$—</div>
               <SourceBadge system="Weather API" size="xs" />
-              <div className="text-[11px] text-gray-400 mt-1.5 leading-snug">Connect scheduling + weather feed to unlock no-show analysis.</div>
+              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Connect scheduling + weather feed to unlock no-show analysis.</div>
             </div>
           )}
         </div>
@@ -402,17 +402,17 @@ export default function RevenuePage() {
           sourceSystems={['Tee Sheet', 'POS', 'Scheduling', 'Weather']}
         >
           {/* Trend context — Pillar 3: PROVE IT depth */}
-          <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800 flex items-center justify-between gap-3 flex-wrap">
+          <div className="mb-4 p-3 bg-swoop-row border border-swoop-border rounded-lg flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Tracking Since</div>
-              <div className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">First month of revenue leakage tracking</div>
+              <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Tracking Since</div>
+              <div className="text-xs text-swoop-text-2 mt-0.5">First month of revenue leakage tracking</div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">This Month</div>
+              <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">This Month</div>
               <div className="text-sm font-bold font-mono text-error-500">${leakage.TOTAL.toLocaleString()}</div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Recoverable at 20%</div>
+              <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Recoverable at 20%</div>
               <div className="text-sm font-bold font-mono text-success-500">~${Math.round(leakage.TOTAL * 0.2).toLocaleString()}/mo</div>
             </div>
           </div>
@@ -431,7 +431,7 @@ export default function RevenuePage() {
             </ResponsiveContainer>
           </div>
           {chartDisplayData.some(d => d.locked) && (
-            <div className="text-[10px] text-gray-400 mt-1 italic">
+            <div className="text-[10px] text-swoop-text-label mt-1 italic">
               Grey bars = data source not yet connected — connect scheduling and weather to compute those leakage buckets
             </div>
           )}
@@ -445,45 +445,45 @@ export default function RevenuePage() {
             sourceSystems={['Tee Sheet', 'POS']}
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-error-50 border border-error-500/20 rounded-xl p-4 dark:bg-error-500/5">
+              <div className="bg-error-50 border border-error-500/20 rounded-xl p-4">
                 <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Bottleneck</div>
-                <div className="text-2xl font-bold text-gray-800 dark:text-white/90 mt-1">
+                <div className="text-2xl font-bold text-swoop-text mt-1">
                   Hole {bottleneck.hole}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">{bottleneck.course} course</div>
-                <div className="text-sm text-gray-700 dark:text-gray-300 mt-2 font-mono">
+                <div className="text-xs text-swoop-text-muted mt-1">{bottleneck.course} course</div>
+                <div className="text-sm text-swoop-text-2 mt-2 font-mono">
                   {bottleneck.avgDelay.toFixed(1)} min avg delay
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-swoop-text-muted">
                   {bottleneck.roundsAffected} rounds affected
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Dining Conversion</div>
+              <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Dining Conversion</div>
                 <div className="flex items-baseline gap-3 mt-1">
                   <div>
                     <div className="text-xs text-success-500 font-semibold">Fast rounds</div>
                     <div className="text-2xl font-bold text-success-500 font-mono">{bottleneck.fastConversionPct}%</div>
                   </div>
-                  <div className="text-gray-300 text-2xl">vs</div>
+                  <div className="text-swoop-text-ghost text-2xl">vs</div>
                   <div>
                     <div className="text-xs text-error-500 font-semibold">Slow rounds</div>
                     <div className="text-2xl font-bold text-error-500 font-mono">{bottleneck.slowConversionPct}%</div>
                   </div>
                 </div>
-                <div className="text-[11px] text-gray-500 mt-2">
+                <div className="text-[11px] text-swoop-text-muted mt-2">
                   Post-round dining conversion gap from POS data
                 </div>
               </div>
 
-              <div className="bg-warning-50 border border-warning-500/20 rounded-xl p-4 dark:bg-warning-500/5">
+              <div className="bg-warning-50 border border-warning-500/20 rounded-xl p-4">
                 <div className="text-[10px] font-bold uppercase tracking-wide text-warning-500">Per-Round Impact</div>
-                <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+                <div className="text-3xl font-bold text-swoop-text font-mono mt-1">
                   ${dollarPerSlowRound}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">per slow round</div>
-                <div className="text-[11px] text-gray-600 dark:text-gray-400 mt-2 leading-snug">
+                <div className="text-xs text-swoop-text-muted mt-1">per slow round</div>
+                <div className="text-[11px] text-swoop-text-muted mt-2 leading-snug">
                   {slowContext.slowRounds.toLocaleString()} slow rounds/month ={' '}
                   <span className="font-mono font-bold text-error-500">
                     ${(slowContext.slowRounds * dollarPerSlowRound).toLocaleString()}
@@ -492,9 +492,9 @@ export default function RevenuePage() {
               </div>
             </div>
 
-            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
-              <p className="text-xs text-gray-600 dark:text-gray-400 italic leading-relaxed m-0">
-                <strong className="text-gray-800 dark:text-white/90">Layer 3 insight:</strong>{' '}
+            <div className="mt-4 p-3 bg-swoop-row border border-swoop-border rounded-lg">
+              <p className="text-xs text-swoop-text-muted italic leading-relaxed m-0">
+                <strong className="text-swoop-text">Layer 3 insight:</strong>{' '}
                 Nobody at this club has ever connected pace of play on Hole {bottleneck.hole} to dining revenue.
                 The tee sheet knows the pace. The POS knows the dining. Neither knows the other exists. Swoop sees both.
               </p>
@@ -503,13 +503,13 @@ export default function RevenuePage() {
             {/* Inline Fix It action — Pillar 2 */}
             <div className="mt-4 flex items-center justify-between gap-3 flex-wrap p-4 bg-gradient-to-r from-success-500/[0.06] to-success-500/[0.02] border border-success-500/20 rounded-xl">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wide text-success-600 dark:text-success-400">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-success-600">
                   Recommended Action
                 </div>
-                <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mt-0.5">
+                <div className="text-sm font-semibold text-swoop-text mt-0.5">
                   Deploy ranger to Hole {bottleneck.hole} on weekends
                 </div>
-                <div className="text-xs text-gray-500 mt-0.5">
+                <div className="text-xs text-swoop-text-muted mt-0.5">
                   Projected recovery: ${Math.round(leakage.PACE_LOSS * 0.2).toLocaleString()}/mo at 20% slow-round reduction
                 </div>
               </div>
@@ -545,10 +545,10 @@ export default function RevenuePage() {
         <div className="bg-gradient-to-r from-brand-500/10 to-brand-500/5 border border-brand-500/30 rounded-2xl p-6 flex flex-col gap-4">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <h3 className="text-base font-bold text-gray-800 dark:text-white/90">
+              <h3 className="text-base font-bold text-swoop-text">
                 Take this story to the board
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 max-w-xl">
+              <p className="text-sm text-swoop-text-muted mt-1 max-w-xl">
                 The Board Report turns this analysis into a 4-tab executive summary.
               </p>
             </div>
@@ -570,11 +570,11 @@ export default function RevenuePage() {
               <button
                 key={tab.label}
                 onClick={() => navigate('board-report', { tab: i })}
-                className="bg-white/80 dark:bg-white/[0.04] border border-brand-500/20 rounded-lg p-2.5 text-left cursor-pointer hover:border-brand-500/50 transition-colors"
+                className="bg-white/80 border border-brand-500/20 rounded-lg p-2.5 text-left cursor-pointer hover:border-brand-500/50 transition-colors"
               >
                 <div className="text-sm">{tab.icon}</div>
-                <div className="text-[11px] font-bold text-gray-800 dark:text-white/90 mt-0.5">{tab.label}</div>
-                <div className="text-[10px] text-gray-500 dark:text-gray-400">{tab.detail}</div>
+                <div className="text-[11px] font-bold text-swoop-text mt-0.5">{tab.label}</div>
+                <div className="text-[10px] text-swoop-text-muted">{tab.detail}</div>
               </button>
             ))}
           </div>

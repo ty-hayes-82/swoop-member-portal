@@ -95,11 +95,11 @@ const FREQ_COLORS = {
   violet: 'text-violet-400',
 };
 
-const TAG_STYLES = 'inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-white/[0.06] text-gray-400 border border-white/[0.08]';
+const TAG_STYLES = 'inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-white/[0.06] text-swoop-text-label border border-white/[0.08]';
 
 function AgentCard({ agent }) {
   return (
-    <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-5 hover:border-gray-700 transition-colors">
+    <div className="bg-gray-900/60 border border-swoop-border rounded-2xl p-5 hover:border-gray-700 transition-colors">
       <div className="flex items-start gap-3.5 mb-3">
         {agent.icon}
         <div className="flex-1 min-w-0">
@@ -109,7 +109,7 @@ function AgentCard({ agent }) {
           </div>
         </div>
       </div>
-      <p className="text-[13px] text-gray-400 leading-relaxed mb-4">
+      <p className="text-[13px] text-swoop-text-label leading-relaxed mb-4">
         {agent.description}
       </p>
       <div className="flex flex-wrap gap-1.5">
@@ -147,7 +147,7 @@ export default function AgentsLanding() {
           Seven agents. One team.<br />
           Working while you sleep.
         </h1>
-        <p className="text-base md:text-lg text-gray-400 leading-relaxed max-w-xl mx-auto">
+        <p className="text-base md:text-lg text-swoop-text-label leading-relaxed max-w-xl mx-auto">
           Each agent monitors a different dimension of your club operation. They share data,
           resolve conflicts, and present a single coordinated action plan every morning. You
           approve. They execute.
@@ -178,7 +178,7 @@ export default function AgentsLanding() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
             <div>
-              <p className="text-[13px] text-gray-400 leading-relaxed">
+              <p className="text-[13px] text-swoop-text-label leading-relaxed">
                 The meta-agent. Reviews all pending actions from all agents, detects
                 conflicts, deduplicates, and ranks by impact. Instead of 12
                 disconnected alerts, your GM gets 3–5 coordinated recommendations
@@ -195,7 +195,7 @@ export default function AgentsLanding() {
               ].map(item => (
                 <div key={item.label} className="flex gap-2">
                   <span className="text-amber-400 text-[12px] font-bold shrink-0 w-24">{item.label}</span>
-                  <span className="text-[12px] text-gray-500 leading-snug">{item.desc}</span>
+                  <span className="text-[12px] text-swoop-text-muted leading-snug">{item.desc}</span>
                 </div>
               ))}
             </div>
@@ -204,7 +204,7 @@ export default function AgentsLanding() {
       </div>
 
       {/* Footer */}
-      <div className="text-center pb-10 text-xs text-gray-600">
+      <div className="text-center pb-10 text-xs text-swoop-text-muted">
         Swoop Golf · AI Agent Platform
       </div>
     </div>

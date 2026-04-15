@@ -83,23 +83,23 @@ export default function ComplaintsTab() {
           <EvidenceStrip systems={['Complaints', 'Scheduling', 'Weather', 'Pace of Play']} compact />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-white border border-purple-200 rounded-xl p-3">
+          <div className="bg-swoop-panel border border-purple-200 rounded-xl p-3">
             <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Understaffed days</div>
-            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{understaffedPct}%</div>
-            <div className="text-[11px] text-gray-500">of complaints occur on understaffed shifts</div>
+            <div className="text-2xl font-bold text-swoop-text font-mono mt-1">{understaffedPct}%</div>
+            <div className="text-[11px] text-swoop-text-muted">of complaints occur on understaffed shifts</div>
           </div>
-          <div className="bg-white border border-purple-200 rounded-xl p-3">
+          <div className="bg-swoop-panel border border-purple-200 rounded-xl p-3">
             <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Adverse weather</div>
-            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{weatherPct > 0 ? `${weatherPct}%` : '—'}</div>
-            <div className="text-[11px] text-gray-500">of complaints during adverse conditions</div>
+            <div className="text-2xl font-bold text-swoop-text font-mono mt-1">{weatherPct > 0 ? `${weatherPct}%` : '—'}</div>
+            <div className="text-[11px] text-swoop-text-muted">of complaints during adverse conditions</div>
           </div>
-          <div className="bg-white border border-purple-200 rounded-xl p-3">
+          <div className="bg-swoop-panel border border-purple-200 rounded-xl p-3">
             <div className="text-[10px] font-bold uppercase tracking-wide text-warning-500">Slow rounds</div>
-            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{slowRoundPct}%</div>
-            <div className="text-[11px] text-gray-500">of dining complaints follow slow rounds</div>
+            <div className="text-2xl font-bold text-swoop-text font-mono mt-1">{slowRoundPct}%</div>
+            <div className="text-[11px] text-swoop-text-muted">of dining complaints follow slow rounds</div>
           </div>
         </div>
-        <div className="mt-2 text-[11px] text-gray-600 dark:text-gray-400 italic leading-snug">
+        <div className="mt-2 text-[11px] text-swoop-text-muted italic leading-snug">
           Complaints aren't random — they cluster around specific cross-domain operational gaps.
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function ComplaintsTab() {
             className={`py-1 px-3.5 rounded-full text-xs font-semibold cursor-pointer border ${
               statusFilter === f.key
                 ? 'border-brand-500 bg-brand-500/[0.07] text-brand-500'
-                : 'border-gray-200 bg-transparent text-gray-400'
+                : 'border-swoop-border bg-transparent text-swoop-text-label'
             }`}
           >
             {f.label} ({f.key ? feedbackRecords.filter(r => r.status === f.key).length : feedbackRecords.filter(r => r.status !== 'resolved').length})
@@ -135,28 +135,28 @@ export default function ComplaintsTab() {
           <div className="text-xs font-bold text-error-500 uppercase tracking-wide mb-1.5">
             Root Cause Pattern
           </div>
-          <div className="text-sm text-gray-800 dark:text-white/90 mb-1">
+          <div className="text-sm text-swoop-text mb-1">
             {understaffedComplaints} of {feedbackRecords.length} complaints occurred on understaffed days
           </div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-swoop-text-muted">
             Service Speed complaints correlate with understaffed shifts — {conversionDrop}% lower dining conversion on slow-pace days
           </div>
         </div>
       )}
 
       {/* Complaints List */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-base font-bold text-gray-800 dark:text-white/90 m-0">
+          <h3 className="text-base font-bold text-swoop-text m-0">
             {statusFilter === 'resolved' ? 'Resolved' : 'Open'} Complaints ({openComplaints.length})
           </h3>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-swoop-text-label">
             {feedbackRecords.length} total this month
           </div>
         </div>
 
         {openComplaints.length === 0 ? (
-          <div className="py-6 text-center text-gray-400 text-sm">
+          <div className="py-6 text-center text-swoop-text-label text-sm">
             {feedbackRecords.length === 0
               ? 'No complaint records this month.'
               : statusFilter === 'resolved'
@@ -182,7 +182,7 @@ export default function ComplaintsTab() {
                 <div key={complaint.id}>
                   <div
                     onClick={() => setExpandedComplaintId(isComplaintExpanded ? null : complaint.id)}
-                    className={`p-4 bg-gray-100 rounded-lg flex justify-between items-center flex-wrap gap-2 cursor-pointer transition-shadow hover:shadow-sm ${daysSince > 7 ? 'border border-error-500/30' : 'border border-gray-200'}`}
+                    className={`p-4 bg-swoop-row rounded-lg flex justify-between items-center flex-wrap gap-2 cursor-pointer transition-shadow hover:shadow-sm ${daysSince > 7 ? 'border border-error-500/30' : 'border border-swoop-border'}`}
                   >
                     <div className="flex-1 min-w-[200px]">
                       <div className="flex items-center gap-2 mb-1">
@@ -219,7 +219,7 @@ export default function ComplaintsTab() {
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-swoop-text-muted">
                         {complaint.category} — {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </div>
                     </div>
@@ -288,15 +288,15 @@ export default function ComplaintsTab() {
         const resolved = feedbackRecords.filter(f => f.status === 'resolved' && f.resolved_date);
         if (resolved.length === 0) return null;
         return (
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
+          <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+            <h3 className="text-base font-bold text-swoop-text mb-4">
               Recently Resolved ({resolved.length})
             </h3>
             <div className="flex flex-col gap-2">
               {resolved.map(complaint => (
                 <div
                   key={complaint.id}
-                  className="p-4 bg-gray-100 rounded-lg border border-success-500/20 flex justify-between items-center flex-wrap gap-2"
+                  className="p-4 bg-swoop-row rounded-lg border border-success-500/20 flex justify-between items-center flex-wrap gap-2"
                 >
                   <div className="flex-1 min-w-[200px]">
                     <div className="flex items-center gap-2 mb-1">
@@ -308,7 +308,7 @@ export default function ComplaintsTab() {
                         <span className="font-semibold text-[#1a1a2e] text-sm">Member {complaint.memberId}</span>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-swoop-text-muted">
                       {complaint.category} — Filed {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>
                   </div>
@@ -316,7 +316,7 @@ export default function ComplaintsTab() {
                     <span className="text-[11px] font-semibold text-success-500">
                       Resolved {new Date(complaint.resolved_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
-                    <span className="text-[11px] text-gray-400">
+                    <span className="text-[11px] text-swoop-text-label">
                       by {complaint.resolved_by}
                     </span>
                   </div>
@@ -333,8 +333,8 @@ export default function ComplaintsTab() {
       />
 
       {/* Understaffed Day Correlation */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+        <h3 className="text-base font-bold text-swoop-text mb-4">
           Understaffed Day Correlation
         </h3>
         <div className="flex items-center gap-6 flex-wrap">
@@ -342,12 +342,12 @@ export default function ComplaintsTab() {
             <div className="font-mono text-4xl font-extrabold text-error-500 leading-none">
               {understaffedComplaints}/{feedbackRecords.length}
             </div>
-            <div className="text-sm text-gray-500 mt-1">
+            <div className="text-sm text-swoop-text-muted mt-1">
               complaints occurred on understaffed days
             </div>
           </div>
           <div className="flex-1 min-w-[200px]">
-            <div className="text-sm leading-relaxed text-gray-500">
+            <div className="text-sm leading-relaxed text-swoop-text-muted">
               <strong className="text-[#1a1a2e]">{Math.round((understaffedComplaints / feedbackRecords.length) * 100)}%</strong> of all complaints
               are linked to days when the Grill Room was understaffed. Staffing is the single biggest driver of service inconsistency.
             </div>
@@ -356,18 +356,18 @@ export default function ComplaintsTab() {
       </div>
 
       {/* Complaint Drivers */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+        <h3 className="text-base font-bold text-swoop-text mb-4">
           Complaint Drivers
         </h3>
         <div className="flex flex-col gap-1">
           {getFeedbackSummary().map(cat => (
             <div
               key={cat.category}
-              className="flex justify-between items-center p-2 bg-gray-100 rounded-lg text-sm"
+              className="flex justify-between items-center p-2 bg-swoop-row rounded-lg text-sm"
             >
-              <div className="text-gray-800 dark:text-white/90 font-medium">{cat.category}</div>
-              <div className="flex items-center gap-4 text-[13px] text-gray-500">
+              <div className="text-swoop-text font-medium">{cat.category}</div>
+              <div className="flex items-center gap-4 text-[13px] text-swoop-text-muted">
                 <div>{cat.count} complaints</div>
                 <div className="font-semibold" style={{ color: cat.unresolvedCount > 0 ? '#ef4444' : '#12b76a' }}>
                   {cat.unresolvedCount} unresolved
@@ -388,21 +388,21 @@ export default function ComplaintsTab() {
           return acc;
         }, {});
         return (
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
+          <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+            <h3 className="text-base font-bold text-swoop-text mb-4">
               Complaints by Weather Condition
             </h3>
-            <div className="text-[13px] text-gray-500 mb-4">
+            <div className="text-[13px] text-swoop-text-muted mb-4">
               {weatherComplaints.length} of {feedbackRecords.length} complaints ({Math.round(weatherComplaints.length / feedbackRecords.length * 100)}%) occurred on weather-impacted days
             </div>
             <div className="flex flex-col gap-1">
               {Object.entries(byCondition).sort((a, b) => b[1] - a[1]).map(([cond, count]) => (
                 <div
                   key={cond}
-                  className="flex justify-between items-center p-2 bg-gray-100 rounded-lg text-sm"
+                  className="flex justify-between items-center p-2 bg-swoop-row rounded-lg text-sm"
                 >
-                  <div className="text-gray-800 dark:text-white/90 font-medium">{cond}</div>
-                  <div className="text-[13px] text-gray-500">{count} complaints</div>
+                  <div className="text-swoop-text font-medium">{cond}</div>
+                  <div className="text-[13px] text-swoop-text-muted">{count} complaints</div>
                 </div>
               ))}
             </div>
@@ -411,24 +411,24 @@ export default function ComplaintsTab() {
       })()}
 
       {/* Pace Impact on Dining */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-2">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+        <h3 className="text-base font-bold text-swoop-text mb-2">
           Pace Impact on Post-Round Dining
         </h3>
-        <p className="text-sm leading-relaxed text-gray-500 mb-4">
+        <p className="text-sm leading-relaxed text-swoop-text-muted mb-4">
           When rounds exceed 4.5 hours, post-round dining conversion drops <strong className="text-error-500">{conversionDrop}%</strong> — from{' '}
           {(fastConversionRate * 100).toFixed(0)}% to {(slowConversionRate * 100).toFixed(0)}%. Slow pace is a service quality issue that directly impacts member satisfaction.
         </p>
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 rounded-lg text-center bg-success-500/[0.08] border border-success-500/20">
-            <div className="text-[11px] text-gray-400 font-semibold mb-1">Under 4.5 hrs</div>
+            <div className="text-[11px] text-swoop-text-label font-semibold mb-1">Under 4.5 hrs</div>
             <div className="font-mono text-2xl font-bold text-success-500">{(fastConversionRate * 100).toFixed(0)}%</div>
-            <div className="text-[11px] text-gray-500">dine after round</div>
+            <div className="text-[11px] text-swoop-text-muted">dine after round</div>
           </div>
           <div className="p-4 rounded-lg text-center bg-error-500/[0.08] border border-error-500/20">
-            <div className="text-[11px] text-gray-400 font-semibold mb-1">Over 4.5 hrs</div>
+            <div className="text-[11px] text-swoop-text-label font-semibold mb-1">Over 4.5 hrs</div>
             <div className="font-mono text-2xl font-bold text-error-500">{(slowConversionRate * 100).toFixed(0)}%</div>
-            <div className="text-[11px] text-gray-500">dine after round</div>
+            <div className="text-[11px] text-swoop-text-muted">dine after round</div>
           </div>
         </div>
       </div>

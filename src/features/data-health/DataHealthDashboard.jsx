@@ -80,7 +80,7 @@ export default function DataHealthDashboard() {
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="text-xl font-bold m-0">Data Health</h2>
-        <p className="text-sm text-gray-500 mt-1 mb-0">
+        <p className="text-sm text-swoop-text-muted mt-1 mb-0">
           Connection status, data freshness, and feature availability across all data domains.
         </p>
       </div>
@@ -95,12 +95,12 @@ export default function DataHealthDashboard() {
               const impact = DOMAIN_PILLAR_IMPACT[domain.code];
               if (!impact) return null;
               return (
-                <div key={domain.code} className="bg-white border border-warning-500/20 rounded-xl p-3">
-                  <div className="text-xs font-bold text-gray-800 dark:text-white/90 mb-1">
+                <div key={domain.code} className="bg-swoop-panel border border-warning-500/20 rounded-xl p-3">
+                  <div className="text-xs font-bold text-swoop-text mb-1">
                     {DOMAIN_INFO[domain.code]?.icon} {DOMAIN_INFO[domain.code]?.label || domain.code} disconnected
                   </div>
-                  <div className="text-[10px] text-gray-500 mb-2">Blocks:</div>
-                  <ul className="text-[11px] text-gray-700 dark:text-gray-300 m-0 pl-4 leading-snug">
+                  <div className="text-[10px] text-swoop-text-muted mb-2">Blocks:</div>
+                  <ul className="text-[11px] text-swoop-text-2 m-0 pl-4 leading-snug">
                     {impact.features.map(f => (
                       <li key={f}>{f}</li>
                     ))}
@@ -118,16 +118,16 @@ export default function DataHealthDashboard() {
       {/* Value Score */}
       <div className="p-6 rounded-2xl bg-gradient-to-br from-brand-500/[0.03] to-brand-500/[0.01] border border-brand-500/20 flex justify-between items-center">
         <div>
-          <div className="text-xs text-gray-400 uppercase tracking-wide">Platform Value Score</div>
+          <div className="text-xs text-swoop-text-label uppercase tracking-wide">Platform Value Score</div>
           <div className="text-4xl font-bold font-mono text-brand-500">{valueScore}%</div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-swoop-text-muted">
             {valueScore < 50 ? 'Connect more data sources to unlock full platform value' : valueScore < 85 ? 'Good coverage — add POS or Email for maximum insight' : 'Excellent — near-full platform value'}
           </div>
         </div>
         <div className="w-[120px] h-[120px] relative">
           <svg width="120" height="120" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="50" fill="none" stroke="#F3F4F6" strokeWidth="10" />
-            <circle cx="60" cy="60" r="50" fill="none" stroke="#ff8b00" strokeWidth="10"
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#F3922D" strokeWidth="10"
               strokeDasharray={`${valueScore * 3.14} ${314 - valueScore * 3.14}`}
               strokeLinecap="round" transform="rotate(-90 60 60)" />
           </svg>
@@ -137,10 +137,10 @@ export default function DataHealthDashboard() {
       {nextDomain && (
         <div className="p-4 rounded-xl bg-blue-600/[0.024] border border-blue-600/[0.12] flex justify-between items-center">
           <div>
-            <div className="text-sm font-bold text-gray-800 dark:text-white/90">
+            <div className="text-sm font-bold text-swoop-text">
               Recommended: Connect {nextDomain.domain.replace('_', ' ')}
             </div>
-            <div className="text-xs text-gray-500">{nextDomain.message}</div>
+            <div className="text-xs text-swoop-text-muted">{nextDomain.message}</div>
           </div>
           <button onClick={() => navigate('integrations')} className="py-2 px-4 rounded-lg border-none bg-blue-600 text-white font-bold text-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500">Connect Now</button>
         </div>
@@ -154,16 +154,16 @@ export default function DataHealthDashboard() {
           const dependentFeatures = features.filter(f => f.missingHard?.includes(domain.code)).length;
 
           return (
-            <div key={domain.code} className={`p-4 rounded-xl bg-white dark:bg-white/[0.03] border ${isConnected ? 'border-success-500/20' : 'border-gray-200 dark:border-gray-800'} ${isConnected ? '' : 'opacity-85'}`}>
+            <div key={domain.code} className={`p-4 rounded-xl bg-swoop-panel border ${isConnected ? 'border-success-500/20' : 'border-swoop-border'} ${isConnected ? '' : 'opacity-85'}`}>
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{info.icon}</span>
                   <div>
-                    <div className="font-bold text-sm text-gray-800 dark:text-white/90">{info.label}</div>
-                    <div className="text-xs text-gray-400">{info.desc}</div>
+                    <div className="font-bold text-sm text-swoop-text">{info.label}</div>
+                    <div className="text-xs text-swoop-text-label">{info.desc}</div>
                   </div>
                 </div>
-                <span className={`text-[10px] font-bold py-[3px] px-2 rounded-xl uppercase ${isConnected ? 'bg-success-500/[0.08] text-success-500' : 'bg-gray-400/[0.08] text-gray-400'}`}>
+                <span className={`text-[10px] font-bold py-[3px] px-2 rounded-xl uppercase ${isConnected ? 'bg-success-500/[0.08] text-success-500' : 'bg-gray-400/[0.08] text-swoop-text-label'}`}>
                   {isConnected ? 'Connected' : 'Not Connected'}
                 </span>
               </div>
@@ -174,15 +174,15 @@ export default function DataHealthDashboard() {
                   { label: 'Value', val: `${valuePct}%` },
                   { label: 'Unlocks', val: isConnected ? '✓' : dependentFeatures > 0 ? `${dependentFeatures} features` : '—' },
                 ].map(m => (
-                  <div key={m.label} className="py-1.5 px-2 rounded-lg bg-gray-100">
-                    <div className="text-[10px] text-gray-400">{m.label}</div>
+                  <div key={m.label} className="py-1.5 px-2 rounded-lg bg-swoop-row">
+                    <div className="text-[10px] text-swoop-text-label">{m.label}</div>
                     <div className="text-sm font-bold font-mono">{m.val}</div>
                   </div>
                 ))}
               </div>
 
               {isConnected && domain.last_sync_at && (
-                <div className="text-[10px] text-gray-400 mt-2">
+                <div className="text-[10px] text-swoop-text-label mt-2">
                   Last sync: {new Date(domain.last_sync_at).toLocaleString()} · {domain.health_status || 'healthy'}
                 </div>
               )}
@@ -194,7 +194,7 @@ export default function DataHealthDashboard() {
               )}
 
               {info.vendor && (
-                <div className="text-[10px] text-gray-400 mt-1">Supported: {info.vendor}</div>
+                <div className="text-[10px] text-swoop-text-label mt-1">Supported: {info.vendor}</div>
               )}
             </div>
           );
@@ -202,17 +202,17 @@ export default function DataHealthDashboard() {
       </div>
 
       {features.length > 0 && (
-        <div className="p-4 rounded-xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800">
+        <div className="p-4 rounded-xl bg-swoop-panel border border-swoop-border">
           <div className="font-bold text-sm mb-2">Feature Availability</div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             {[
               { label: 'Available', count: data?.availableFeatures ?? features.filter(f => f.status === 'available').length, color: 'text-success-500', bg: 'bg-success-500/[0.03]' },
               { label: 'Degraded', count: data?.degradedFeatures ?? features.filter(f => f.status === 'degraded').length, color: 'text-warning-500', bg: 'bg-warning-500/[0.03]' },
-              { label: 'Locked', count: data?.unavailableFeatures ?? features.filter(f => f.status === 'unavailable').length, color: 'text-gray-400', bg: 'bg-gray-400/[0.03]' },
+              { label: 'Locked', count: data?.unavailableFeatures ?? features.filter(f => f.status === 'unavailable').length, color: 'text-swoop-text-label', bg: 'bg-gray-400/[0.03]' },
             ].map(m => (
               <div key={m.label} className={`p-2 rounded-lg ${m.bg}`}>
                 <div className={`text-xl font-bold font-mono ${m.color}`}>{m.count}</div>
-                <div className="text-[10px] text-gray-400">{m.label}</div>
+                <div className="text-[10px] text-swoop-text-label">{m.label}</div>
               </div>
             ))}
           </div>

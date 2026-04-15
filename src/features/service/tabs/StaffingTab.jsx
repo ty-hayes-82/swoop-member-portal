@@ -46,7 +46,7 @@ export default function StaffingTab() {
               {briefing?.todayRisks?.demandForecast?.recommendation
                 || 'No staffing recommendations available — import scheduling data to enable demand forecasting.'}
             </div>
-            <div className="text-sm text-gray-500 leading-relaxed mb-4">
+            <div className="text-sm text-swoop-text-muted leading-relaxed mb-4">
               {(() => {
                 const bookedRounds = briefing?.teeSheet?.roundsToday || 0;
                 const df = briefing?.todayRisks?.demandForecast;
@@ -69,8 +69,8 @@ export default function StaffingTab() {
       </div>
 
       {/* Understaffing = Inconsistent Service */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-4">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+        <h3 className="text-lg font-bold text-swoop-text mb-4">
           Understaffing Drives Service Inconsistency
         </h3>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4 mb-6">
@@ -88,14 +88,14 @@ export default function StaffingTab() {
               <div className="text-xs font-bold text-error-500 uppercase tracking-widest mb-1">
                 Pace-to-Revenue Connection · Layer 3 Insight
               </div>
-              <div className="text-lg font-bold text-gray-800 dark:text-white/90">
+              <div className="text-lg font-bold text-swoop-text">
                 ${dollarPerSlowRound} revenue gap per slow round
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => navigate('revenue')}
-                className="rounded-lg bg-white border border-brand-500 text-brand-500 px-4 py-2 text-xs font-semibold cursor-pointer whitespace-nowrap hover:bg-brand-50"
+                className="rounded-lg bg-swoop-panel border border-brand-500 text-brand-500 px-4 py-2 text-xs font-semibold cursor-pointer whitespace-nowrap hover:bg-brand-50"
               >
                 Full breakdown →
               </button>
@@ -110,33 +110,33 @@ export default function StaffingTab() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            <div className="bg-white border border-gray-200 rounded-xl p-3 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-3">
               <div className="text-[10px] font-bold uppercase tracking-wide text-error-500">Slow Rounds</div>
               <div className="text-2xl font-bold text-error-500 font-mono mt-1">
                 {Math.round((paceFB.slowConversionRate || 0) * 100)}%
               </div>
-              <div className="text-[11px] text-gray-500">post-round dining conversion</div>
+              <div className="text-[11px] text-swoop-text-muted">post-round dining conversion</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-3 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-3">
               <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Fast Rounds</div>
               <div className="text-2xl font-bold text-success-500 font-mono mt-1">
                 {Math.round((paceFB.fastConversionRate || 0) * 100)}%
               </div>
-              <div className="text-[11px] text-gray-500">post-round dining conversion</div>
+              <div className="text-[11px] text-swoop-text-muted">post-round dining conversion</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-3 dark:bg-white/[0.03] dark:border-gray-800">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Monthly Impact</div>
-              <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-3">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Monthly Impact</div>
+              <div className="text-2xl font-bold text-swoop-text font-mono mt-1">
                 ${(paceFB.revenueLostPerMonth || 0).toLocaleString()}
               </div>
-              <div className="text-[11px] text-gray-500">
+              <div className="text-[11px] text-swoop-text-muted">
                 {paceFB.slowRoundsPerMonth?.toLocaleString() || 0} slow rounds/mo
               </div>
             </div>
           </div>
 
-          <div className="text-xs text-gray-600 dark:text-gray-400 italic leading-relaxed bg-white/50 dark:bg-white/[0.02] border border-gray-200/50 dark:border-gray-800 rounded-lg p-3">
-            <strong className="text-gray-800 dark:text-white/90">The Layer 3 connection:</strong>{' '}
+          <div className="text-xs text-swoop-text-muted italic leading-relaxed bg-white/50 border border-gray-200/50 rounded-lg p-3">
+            <strong className="text-swoop-text">The Layer 3 connection:</strong>{' '}
             Slow rounds skip the dining room. The tee sheet knows the pace.
             The POS knows the dining. Neither knows the other exists. Swoop sees both —
             and {leakage ? `that's $${leakage.PACE_LOSS.toLocaleString()}/mo of the $${leakage.TOTAL.toLocaleString()} total leakage` : 'that\'s why thousands per month are slipping through the cracks'}.
@@ -145,8 +145,8 @@ export default function StaffingTab() {
       )}
 
       {/* Understaffed Days Detail */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+        <h3 className="text-base font-bold text-swoop-text mb-4">
           Understaffed Days — {understaffedDays.length > 0 ? new Date(understaffedDays[0].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Current Period'}
         </h3>
         <div className="flex flex-col gap-2">
@@ -157,16 +157,16 @@ export default function StaffingTab() {
             <div key={idx}>
             <div
               onClick={() => setExpandedDay(isExpanded ? null : day.date)}
-              className="p-4 bg-gray-100 rounded-lg border border-gray-200 cursor-pointer transition-colors duration-100 hover:bg-gray-200/40"
+              className="p-4 bg-swoop-row rounded-lg border border-swoop-border cursor-pointer transition-colors duration-100 hover:bg-gray-200/40"
             >
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <div className="text-sm font-semibold text-[#1a1a2e] mb-1">
                     {new Date(day.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                    <span className="text-gray-400 text-xs ml-2">{isExpanded ? '▾' : '▸'}</span>
+                    <span className="text-swoop-text-label text-xs ml-2">{isExpanded ? '▾' : '▸'}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] text-gray-500">{day.outlet} Lunch</span>
+                    <span className="text-[13px] text-swoop-text-muted">{day.outlet} Lunch</span>
                     {day.weather?.conditions && (
                       <span
                         className="text-[10px] font-bold py-0.5 px-1.5 rounded-full"
@@ -187,7 +187,7 @@ export default function StaffingTab() {
                   {day.scheduledStaff}/{day.requiredStaff} servers
                 </div>
               </div>
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2 text-[13px] text-gray-500">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2 text-[13px] text-swoop-text-muted">
                 <div>
                   Ticket time: <strong className="text-[#1a1a2e]">+{(day.ticketTimeIncrease * 100).toFixed(0)}%</strong>
                 </div>
@@ -201,20 +201,20 @@ export default function StaffingTab() {
             </div>
             {isExpanded && (
               <div className="py-2 px-3.5 text-[13px] ml-3.5 border-l-[3px] border-l-error-500/30">
-                <div className="font-semibold text-gray-800 dark:text-white/90 mb-1.5">
+                <div className="font-semibold text-swoop-text mb-1.5">
                   {dayComplaints.length} complaint{dayComplaints.length !== 1 ? 's' : ''} filed on this day:
                 </div>
                 {dayComplaints.length > 0 ? dayComplaints.map(c => (
-                  <div key={c.id} className="flex justify-between items-center py-1 border-b border-gray-200">
+                  <div key={c.id} className="flex justify-between items-center py-1 border-b border-swoop-border">
                     <span>
                       <MemberLink mode="drawer" memberId={c.memberId} className="font-semibold text-brand-500 no-underline">
                         {c.memberName || c.memberId}
                       </MemberLink>
-                      <span className="text-gray-400"> — {c.category}</span>
+                      <span className="text-swoop-text-label"> — {c.category}</span>
                     </span>
-                    <span className="text-[11px] text-gray-400">{c.status}</span>
+                    <span className="text-[11px] text-swoop-text-label">{c.status}</span>
                   </div>
-                )) : <div className="text-gray-400">No individual complaints recorded for this date.</div>}
+                )) : <div className="text-swoop-text-label">No individual complaints recorded for this date.</div>}
               </div>
             )}
             </div>
@@ -224,17 +224,17 @@ export default function StaffingTab() {
       </div>
 
       {/* Staffing-to-Satisfaction Correlation */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-2">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+        <h3 className="text-base font-bold text-swoop-text mb-2">
           Staffing-to-Satisfaction Correlation
         </h3>
-        <p className="text-sm leading-relaxed text-gray-500 mb-4">
+        <p className="text-sm leading-relaxed text-swoop-text-muted mb-4">
           <strong className="text-[#1a1a2e]">{totalComplaints} of {feedbackRecords.length} complaints</strong>{' '}
           occurred on understaffed days. When the Grill Room runs with 2-3 servers instead of 4, service complaints increase {avgComplaintMultiplier}x.
         </p>
         <div className="bg-gradient-to-br from-success-500/[0.08] to-success-500/[0.02] border border-success-500/30 rounded-lg p-4 flex items-start gap-2">
           <span className="text-lg">💡</span>
-          <div className="text-sm leading-normal text-gray-500">
+          <div className="text-sm leading-normal text-swoop-text-muted">
             <strong className="text-[#1a1a2e]">Recommendation:</strong>{' '}
             Maintain 4-server minimum for Grill Room lunch on high-demand days (Wed-Sat). This eliminates the primary driver of service inconsistency.
           </div>
@@ -247,8 +247,8 @@ export default function StaffingTab() {
         if (!dailyForecast?.length) return null;
 
         return (
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
+          <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+            <h3 className="text-base font-bold text-swoop-text mb-4">
               7-Day Weather & Demand Outlook
             </h3>
             <div className="flex flex-col gap-1">
@@ -263,17 +263,17 @@ export default function StaffingTab() {
                 return (
                   <div
                     key={i}
-                    className={`flex justify-between items-center py-2 px-3 rounded-lg border ${hasRisk ? 'bg-amber-500/[0.08] border-amber-500/30' : 'bg-gray-100 border-gray-200'}`}
+                    className={`flex justify-between items-center py-2 px-3 rounded-lg border ${hasRisk ? 'bg-amber-500/[0.08] border-amber-500/30' : 'bg-swoop-row border-swoop-border'}`}
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-[13px] font-semibold text-[#1a1a2e] w-[120px]">
                         {dateStr}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-swoop-text-muted">
                         {day.conditionsText || day.conditions || '—'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-4 text-xs text-swoop-text-muted">
                       <span>{day.high || '—'}°F</span>
                       <span className={gusts > 15 ? 'text-amber-500' : ''}>
                         {gusts > 0 ? `${gusts}mph` : '—'}
@@ -301,9 +301,9 @@ export default function StaffingTab() {
 function MetricCard({ label, value, sublabel }) {
   return (
     <div>
-      <div className="text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">{label}</div>
+      <div className="text-xs font-medium text-swoop-text-muted mb-1 uppercase tracking-wide">{label}</div>
       <div className="text-xl font-bold text-[#1a1a2e] font-mono mb-1">{value}</div>
-      {sublabel && <div className="text-xs text-gray-400 leading-snug">{sublabel}</div>}
+      {sublabel && <div className="text-xs text-swoop-text-label leading-snug">{sublabel}</div>}
     </div>
   );
 }

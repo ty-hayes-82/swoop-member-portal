@@ -27,7 +27,7 @@ const useIsMobile = () => {
 };
 
 const Sparkline = ({ data = [], color = '#06b6d4' }) => {
-  if (!data.length) return <span className="text-xs text-gray-400">No trend data</span>;
+  if (!data.length) return <span className="text-xs text-swoop-text-label">No trend data</span>;
   const width = 160;
   const height = 48;
   const max = Math.max(...data);
@@ -54,7 +54,7 @@ const Section = ({ title, description, children, defaultCollapsed = false, colla
   const isCollapsed = collapsible && collapsed;
 
   return (
-    <section {...rest} className="border border-gray-200 rounded-xl p-4 bg-white" style={{ padding: '10px 12px', borderRadius: '10px' }}>
+    <section {...rest} className="border border-swoop-border rounded-xl p-4 bg-swoop-panel" style={{ padding: '10px 12px', borderRadius: '10px' }}>
       <div
         onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
         className={`flex justify-between items-baseline ${isCollapsed ? '' : 'mb-2'} ${collapsible ? 'cursor-pointer' : 'cursor-default'}`}
@@ -62,11 +62,11 @@ const Section = ({ title, description, children, defaultCollapsed = false, colla
       >
         <div className="flex items-baseline gap-2" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
           <h3 className="m-0 text-base" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px', letterSpacing: '0.02em' }}>{title}</h3>
-          {isCollapsed && summary && <span className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>{summary}</span>}
+          {isCollapsed && summary && <span className="text-xs text-swoop-text-label" style={{ fontSize: '10px', lineHeight: 1.4 }}>{summary}</span>}
         </div>
         <div className="flex items-center gap-2" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
-          {description && !isCollapsed && <span className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>{description}</span>}
-          {collapsible && <span className="text-xs text-gray-400 transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)', fontSize: '10px', lineHeight: 1.4 }}>{'\u25BC'}</span>}
+          {description && !isCollapsed && <span className="text-xs text-swoop-text-label" style={{ fontSize: '10px', lineHeight: 1.4 }}>{description}</span>}
+          {collapsible && <span className="text-xs text-swoop-text-label transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)', fontSize: '10px', lineHeight: 1.4 }}>{'\u25BC'}</span>}
         </div>
       </div>
       {!isCollapsed && Array.isArray(sourceSystems) && sourceSystems.length > 0 && (
@@ -86,7 +86,7 @@ function ActivityTimeline({ activity = [] }) {
   const [showAll, setShowAll] = React.useState(false);
   const visible = showAll ? activity : activity.slice(0, 3);
 
-  if (!activity.length) return <span className="text-gray-500">No recent activity logged.</span>;
+  if (!activity.length) return <span className="text-swoop-text-muted">No recent activity logged.</span>;
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -94,9 +94,9 @@ function ActivityTimeline({ activity = [] }) {
         <div key={a.id} className="flex justify-between gap-3 text-sm">
           <div>
             <div className="font-semibold">{a.type}</div>
-            <div className="text-gray-500">{a.detail}</div>
+            <div className="text-swoop-text-muted">{a.detail}</div>
           </div>
-          <div className="text-gray-400">{formatDateTime(a.timestamp)}</div>
+          <div className="text-swoop-text-label">{formatDateTime(a.timestamp)}</div>
         </div>
       ))}
       {activity.length > 3 && !showAll && (
@@ -133,14 +133,14 @@ function RiskSignalRow({ signal, profile }) {
 
   return (
     <div
-      className="border border-gray-200 rounded-lg px-3 py-2.5"
+      className="border border-swoop-border rounded-lg px-3 py-2.5"
       style={{ fontSize: '11px', lineHeight: 1.4 }}
     >
       <div className="flex justify-between items-center" style={{ lineHeight: 1.4 }}>
         <div className="font-semibold flex-1 min-w-0" style={{ lineHeight: 1.4 }}>{signal.label}</div>
         <SourceBadge system={signal.source ?? 'Member CRM'} size="xs" />
       </div>
-      <div className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>
+      <div className="text-xs text-swoop-text-label" style={{ fontSize: '10px', lineHeight: 1.4 }}>
         {formatDateTime(signal.timestamp)} {'\u00B7'} Confidence {signal.confidence ?? '\u2014'}
       </div>
       <div className="flex gap-1.5 mt-1.5">
@@ -151,7 +151,7 @@ function RiskSignalRow({ signal, profile }) {
           className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer border ${
             addressed
               ? 'bg-success-100 text-success-700 border-success-300 cursor-default'
-              : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
+              : 'bg-swoop-panel border-swoop-border text-swoop-text-muted hover:bg-swoop-row-hover'
           }`}
         >
           {addressed ? '\u2713 Addressed' : 'Mark addressed'}
@@ -162,7 +162,7 @@ function RiskSignalRow({ signal, profile }) {
           disabled={addressed}
           className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer border ${
             addressed
-              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-default'
+              ? 'bg-swoop-row text-swoop-text-label border-swoop-border cursor-default'
               : 'bg-brand-50 border-brand-300 text-brand-600 hover:bg-brand-100'
           }`}
         >
@@ -229,7 +229,7 @@ function MemberJourneyTimeline({ profile }) {
   const domainColors = {
     Golf: '#12b76a',
     Dining: '#f59e0b',
-    Events: '#ff8b00',
+    Events: '#F3922D',
     Email: '#2563eb',
     Risk: '#ef4444',
     Activity: '#9CA3AF',
@@ -243,7 +243,7 @@ function MemberJourneyTimeline({ profile }) {
   };
 
   if (!journeyEvents.length) {
-    return <span className="text-sm text-gray-500">No journey data available.</span>;
+    return <span className="text-sm text-swoop-text-muted">No journey data available.</span>;
   }
 
   return (
@@ -256,7 +256,7 @@ function MemberJourneyTimeline({ profile }) {
       </div>
     <div className="flex flex-col relative pl-5">
       {/* Vertical timeline line */}
-      <div className="absolute left-2 top-1 bottom-1 w-0.5 bg-gray-200" />
+      <div className="absolute left-2 top-1 bottom-1 w-0.5 bg-swoop-border" />
       {journeyEvents.map((evt, i) => {
         const color = domainColors[evt.domain] ?? '#9CA3AF';
         const icon = typeIcons[evt.type] ?? '\u2022';
@@ -270,9 +270,9 @@ function MemberJourneyTimeline({ profile }) {
                 <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-px rounded-sm" style={{ background: color + '14', color: color }}>
                   {evt.domain}
                 </span>
-                <span className="text-xs text-gray-400">{formatDateTime(evt.date) !== '\u2014' ? formatDateTime(evt.date) : evt.date}</span>
+                <span className="text-xs text-swoop-text-label">{formatDateTime(evt.date) !== '\u2014' ? formatDateTime(evt.date) : evt.date}</span>
               </div>
-              <div className="text-sm text-gray-500 mt-0.5">{evt.label}</div>
+              <div className="text-sm text-swoop-text-muted mt-0.5">{evt.label}</div>
             </div>
           </div>
         );
@@ -301,7 +301,7 @@ function HealthDimensionGrid({ profile }) {
   const w = archetypeWeights[arch] || { golf: 0.9, dining: 0.8, email: 0.7, events: 0.6 };
 
   const dimensions = [
-    { label: 'Golf Engagement', weight: '30%', gate: 'tee-sheet', source: 'tee sheet', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#ff8b00' },
+    { label: 'Golf Engagement', weight: '30%', gate: 'tee-sheet', source: 'tee sheet', value: profile.golfScore ?? Math.min(100, Math.round(score * w.golf)), color: '#F3922D' },
     { label: 'Dining Frequency', weight: '25%', gate: 'fb', source: 'POS', value: profile.diningScore ?? Math.min(100, Math.round(score * w.dining)), color: '#12b76a' },
     { label: 'Email Engagement', weight: '25%', gate: 'email', source: 'email', value: profile.emailScore ?? Math.min(100, Math.round(score * w.email)), color: '#3B82F6' },
     { label: 'Event Attendance', weight: '20%', gate: 'events', source: 'events', value: profile.eventScore ?? Math.min(100, Math.round(score * w.events)), color: '#8b5cf6' },
@@ -313,22 +313,22 @@ function HealthDimensionGrid({ profile }) {
         const connected = isGateOpen(d.gate);
         if (!connected) {
           return (
-            <div key={d.label} className="px-2.5 py-2 rounded-lg border border-dashed border-gray-200 bg-gray-50" style={{ opacity: 0.5 }}>
+            <div key={d.label} className="px-2.5 py-2 rounded-lg border border-dashed border-swoop-border bg-swoop-row" style={{ opacity: 0.5 }}>
               <div className="flex justify-between mb-1">
-                <span className="text-[11px] text-gray-400">{d.label} ({d.weight})</span>
+                <span className="text-[11px] text-swoop-text-label">{d.label} ({d.weight})</span>
               </div>
-              <div className="text-[10px] text-gray-400">Not connected</div>
-              <div className="text-[9px] text-gray-300 mt-0.5">Connect {d.source} to unlock</div>
+              <div className="text-[10px] text-swoop-text-label">Not connected</div>
+              <div className="text-[9px] text-swoop-text-ghost mt-0.5">Connect {d.source} to unlock</div>
             </div>
           );
         }
         return (
-          <div key={d.label} className="px-2.5 py-2 rounded-lg border border-gray-200 bg-gray-50">
+          <div key={d.label} className="px-2.5 py-2 rounded-lg border border-swoop-border bg-swoop-row">
             <div className="flex justify-between mb-1">
-              <span className="text-[11px] text-gray-400">{d.label} ({d.weight})</span>
+              <span className="text-[11px] text-swoop-text-label">{d.label} ({d.weight})</span>
               <span className="text-[11px] font-bold font-mono" style={{ color: d.value >= 60 ? '#12b76a' : d.value >= 35 ? '#f59e0b' : '#ef4444' }}>{d.value}</span>
             </div>
-            <div className="h-1 rounded-sm bg-gray-100">
+            <div className="h-1 rounded-sm bg-swoop-row">
               <div className="h-full rounded-sm" style={{ background: d.value >= 60 ? '#12b76a' : d.value >= 35 ? '#f59e0b' : '#ef4444', width: `${d.value}%` }} />
             </div>
           </div>
@@ -357,24 +357,24 @@ function ChurnPredictionBadge({ profile }) {
       <div className="flex gap-4 mb-2">
         <div className="text-center px-4 py-2 rounded-xl" style={{ background: `${color}10`, border: `1px solid ${color}30` }}>
           <div className="text-2xl font-bold font-mono" style={{ color }}>{prob}%</div>
-          <div className="text-[10px] text-gray-400">90-day risk</div>
+          <div className="text-[10px] text-swoop-text-label">90-day risk</div>
         </div>
         <div className="flex gap-2">
-          <div className="text-center px-3 py-2 rounded-lg bg-gray-100">
+          <div className="text-center px-3 py-2 rounded-lg bg-swoop-row">
             <div className="text-sm font-bold font-mono">{prediction.prob_30d}%</div>
-            <div className="text-[10px] text-gray-400">30-day</div>
+            <div className="text-[10px] text-swoop-text-label">30-day</div>
           </div>
-          <div className="text-center px-3 py-2 rounded-lg bg-gray-100">
+          <div className="text-center px-3 py-2 rounded-lg bg-swoop-row">
             <div className="text-sm font-bold font-mono">{prediction.prob_60d}%</div>
-            <div className="text-[10px] text-gray-400">60-day</div>
+            <div className="text-[10px] text-swoop-text-label">60-day</div>
           </div>
         </div>
       </div>
       {factors.length > 0 && (
         <div className="flex flex-col gap-1">
-          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contributing factors</div>
+          <div className="text-[10px] font-bold text-swoop-text-label uppercase tracking-wider">Contributing factors</div>
           {factors.slice(0, 3).map((f, i) => (
-            <div key={i} className="text-xs text-gray-500 flex gap-1.5 items-start">
+            <div key={i} className="text-xs text-swoop-text-muted flex gap-1.5 items-start">
               <span className="font-bold shrink-0" style={{ color }}>{Math.round(f.weight * 100)}%</span>
               <span>{f.factor} — {f.detail}</span>
             </div>
@@ -454,18 +454,18 @@ function OutreachHistory({ profile }) {
   }, [profile.activity, profile.memberId]);
 
   if (!outreachEvents.length) {
-    return <span className="text-sm text-gray-500">No outreach history recorded yet.</span>;
+    return <span className="text-sm text-swoop-text-muted">No outreach history recorded yet.</span>;
   }
 
   return (
     <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
       {outreachEvents.map((evt, i) => (
-        <div key={evt.id || i} className="flex justify-between items-start gap-3 px-2.5 py-2 rounded-lg bg-gray-100 border border-gray-200" style={{ fontSize: '11px', lineHeight: 1.4 }}>
+        <div key={evt.id || i} className="flex justify-between items-start gap-3 px-2.5 py-2 rounded-lg bg-swoop-row border border-swoop-border" style={{ fontSize: '11px', lineHeight: 1.4 }}>
           <div style={{ lineHeight: 1.4 }}>
             <div className="font-semibold text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>{evt.type}</div>
-            <div className="text-xs text-gray-500" style={{ fontSize: '10px', lineHeight: 1.4 }}>{evt.detail}</div>
+            <div className="text-xs text-swoop-text-muted" style={{ fontSize: '10px', lineHeight: 1.4 }}>{evt.detail}</div>
           </div>
-          <div className="text-xs text-gray-400 whitespace-nowrap" style={{ fontSize: '10px', lineHeight: 1.4 }}>
+          <div className="text-xs text-swoop-text-label whitespace-nowrap" style={{ fontSize: '10px', lineHeight: 1.4 }}>
             {formatDateTime(evt.timestamp)}
           </div>
         </div>
@@ -583,21 +583,21 @@ function DrawerSnapshotSection({ profile }) {
           const hint = hints[cat.key];
           const fam = famHints[cat.key];
           return (
-            <div key={cat.key} className="px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50" style={{ fontSize: '11px', lineHeight: 1.4 }}>
+            <div key={cat.key} className="px-3 py-2.5 rounded-lg border border-swoop-border bg-swoop-row" style={{ fontSize: '11px', lineHeight: 1.4 }}>
               <div className="flex items-center gap-1.5 mb-1" style={{ lineHeight: 1.4, gap: '4px' }}>
                 <span className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>{cat.icon}</span>
                 <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: cat.color, lineHeight: 1.4 }}>{cat.label}</span>
                 {items.length > 0 && (
-                  <span className="ml-auto text-[10px] text-gray-400 bg-white rounded-full px-1.5 py-px border border-gray-200" style={{ lineHeight: 1.4, fontSize: '10px' }}>{items.length}</span>
+                  <span className="ml-auto text-[10px] text-swoop-text-label bg-swoop-panel rounded-full px-1.5 py-px border border-swoop-border" style={{ lineHeight: 1.4, fontSize: '10px' }}>{items.length}</span>
                 )}
               </div>
               {hint && (
-                <div className="text-xs text-gray-500 italic border-l-2 pl-2 mb-1" style={{ borderColor: `${cat.color}60`, fontSize: '10px', lineHeight: 1.4 }}>
+                <div className="text-xs text-swoop-text-muted italic border-l-2 pl-2 mb-1" style={{ borderColor: `${cat.color}60`, fontSize: '10px', lineHeight: 1.4 }}>
                   {hint}
                 </div>
               )}
               {fam && fam.map((fm, i) => (
-                <div key={i} className="text-[11px] text-gray-400 italic border-l-2 pl-2 mb-1 border-purple-300" style={{ lineHeight: 1.4, fontSize: '10px' }}>
+                <div key={i} className="text-[11px] text-swoop-text-label italic border-l-2 pl-2 mb-1 border-purple-300" style={{ lineHeight: 1.4, fontSize: '10px' }}>
                   {fm.name}: {fm.notes}
                 </div>
               ))}
@@ -605,12 +605,12 @@ function DrawerSnapshotSection({ profile }) {
                 <div className="flex flex-col gap-1" style={{ lineHeight: 1.4, gap: '4px' }}>
                   {items.slice(0, 2).map((evt, i) => (
                     <div key={i} className="flex gap-2 items-start text-[11px]" style={{ lineHeight: 1.4, gap: '4px' }}>
-                      <span className="shrink-0 text-gray-400 font-mono whitespace-nowrap" style={{ lineHeight: 1.4, fontSize: '10px' }}>{evt.timestamp || formatDate(evt.date)}</span>
-                      <span className="text-gray-600" style={{ lineHeight: 1.4 }}>{evt.detail || evt.event || evt.description}</span>
+                      <span className="shrink-0 text-swoop-text-label font-mono whitespace-nowrap" style={{ lineHeight: 1.4, fontSize: '10px' }}>{evt.timestamp || formatDate(evt.date)}</span>
+                      <span className="text-swoop-text-muted" style={{ lineHeight: 1.4 }}>{evt.detail || evt.event || evt.description}</span>
                     </div>
                   ))}
                   {items.length > 2 && (
-                    <div className="text-[10px] text-gray-400">+{items.length - 2} more</div>
+                    <div className="text-[10px] text-swoop-text-label">+{items.length - 2} more</div>
                   )}
                 </div>
               )}
@@ -618,9 +618,9 @@ function DrawerSnapshotSection({ profile }) {
           );
         })}
         {emptyCats.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-1 border-t border-gray-100" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
+          <div className="flex flex-wrap gap-2 pt-1 border-t border-swoop-border-inset" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
             {emptyCats.map(c => (
-              <span key={c.key} className="text-[10px] text-gray-300 flex items-center gap-0.5" style={{ lineHeight: 1.4, gap: '4px' }}>
+              <span key={c.key} className="text-[10px] text-swoop-text-ghost flex items-center gap-0.5" style={{ lineHeight: 1.4, gap: '4px' }}>
                 {c.icon} {c.label}: No data
               </span>
             ))}
@@ -639,7 +639,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
   if (!profile) {
     return (
-      <div className="p-6 text-gray-400">
+      <div className="p-6 text-swoop-text-label">
         Select a member to view their profile.
       </div>
     );
@@ -689,11 +689,11 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
       <div className="flex justify-between items-start gap-4 flex-wrap" style={{ flexWrap: 'nowrap', gap: '8px' }}>
         <div className="flex gap-4 items-center">
-          <div className={`${layout === 'page' ? 'w-20 h-20 text-[28px]' : 'w-10 h-10 text-sm'} rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center font-bold text-[#1a1a2e]`}>
+          <div className={`${layout === 'page' ? 'w-20 h-20 text-[28px]' : 'w-10 h-10 text-sm'} rounded-full bg-swoop-row border border-swoop-border flex items-center justify-center font-bold text-[#1a1a2e]`}>
             {initials}
           </div>
           <div>
-          <div className="text-sm text-gray-400 tracking-wide uppercase" style={{ display: 'none', fontSize: '10px' }}>Member Snapshot</div>
+          <div className="text-sm text-swoop-text-label tracking-wide uppercase" style={{ display: 'none', fontSize: '10px' }}>Member Snapshot</div>
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className={`${layout === 'page' ? 'text-[32px]' : ''}`} style={{ fontSize: layout === 'page' ? undefined : '18px', fontWeight: 700, margin: '0px', lineHeight: 1.2 }}>{profile.name}</h2>
             {/* Cross-pillar bridge: featured-in-board-report badge */}
@@ -713,13 +713,13 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
               } catch { return null; }
             })()}
           </div>
-          <div className="text-sm text-gray-500" style={{ fontSize: '10px' }}>
+          <div className="text-sm text-swoop-text-muted" style={{ fontSize: '10px' }}>
             {profile.tier} {'\u2022'} Joined {formatDate(profile.joinDate)}
           </div>
           <div className="flex gap-3 mt-2 flex-wrap" style={{ gap: '6px', marginTop: '6px' }}>
             {topMetrics.map((metric) => (
-              <div key={metric.label} className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-200" style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '11px' }}>
-                <div className="text-xs text-gray-400 uppercase tracking-wider" style={{ fontSize: '10px', letterSpacing: '0.05em', marginBottom: '1px' }}>{metric.label}</div>
+              <div key={metric.label} className="px-3 py-2 rounded-lg bg-swoop-row border border-swoop-border" style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '11px' }}>
+                <div className="text-xs text-swoop-text-label uppercase tracking-wider" style={{ fontSize: '10px', letterSpacing: '0.05em', marginBottom: '1px' }}>{metric.label}</div>
                 <div className="text-sm font-semibold" style={{ fontSize: '13px', lineHeight: 1.2, fontWeight: 600 }}>{metric.value}</div>
               </div>
             ))}
@@ -727,7 +727,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
         </div>
         <div className="text-right" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
-          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1" style={{ fontSize: '10px' }}>Health score</div>
+          <div className="text-xs text-swoop-text-label uppercase tracking-wider mb-1" style={{ fontSize: '10px' }}>Health score</div>
           <div className="text-[42px] font-mono" style={{ color: profile.healthScore > 69 ? '#12b76a' : profile.healthScore > 40 ? '#f59e0b' : '#ef4444', fontSize: '24px', lineHeight: 1 }}>
             {profile.healthScore ?? '\u2014'}
           </div>
@@ -791,15 +791,15 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         <Section title="Household" description={`${profile.family.length + 1} members`} sourceSystems={['Member CRM']}>
           <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
             {/* Aggregate household value */}
-            <div className="flex gap-4 px-3 py-2 bg-gray-100 rounded-lg border border-gray-200" style={{ fontSize: '11px', lineHeight: 1.4 }}>
+            <div className="flex gap-4 px-3 py-2 bg-swoop-row rounded-lg border border-swoop-border" style={{ fontSize: '11px', lineHeight: 1.4 }}>
               <div style={{ lineHeight: 1.4 }}>
-                <div className="text-xs text-gray-400 uppercase tracking-wide" style={{ fontSize: '10px', lineHeight: 1.4 }}>Household value</div>
+                <div className="text-xs text-swoop-text-label uppercase tracking-wide" style={{ fontSize: '10px', lineHeight: 1.4 }}>Household value</div>
                 <div className="text-base font-bold font-mono" style={{ fontSize: '12px', lineHeight: 1.4 }}>
                   ${Math.round((profile.duesAnnual || 0) * (1 + (profile.family?.length ?? 0) * 0.6)).toLocaleString()}/yr
                 </div>
               </div>
               <div style={{ lineHeight: 1.4 }}>
-                <div className="text-xs text-gray-400 uppercase tracking-wide" style={{ fontSize: '10px', lineHeight: 1.4 }}>Health (lowest)</div>
+                <div className="text-xs text-swoop-text-label uppercase tracking-wide" style={{ fontSize: '10px', lineHeight: 1.4 }}>Health (lowest)</div>
                 <div className="text-base font-bold font-mono" style={{ color: (profile.healthScore ?? 50) > 69 ? '#12b76a' : (profile.healthScore ?? 50) > 40 ? '#f59e0b' : '#ef4444', fontSize: '12px', lineHeight: 1.4 }}>
                   {profile.healthScore ?? '\u2014'}
                 </div>
@@ -818,15 +818,15 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                     openProfile(f.memberId);
                   }
                 }}
-                className={`flex justify-between items-center px-3 py-2 rounded-lg border border-gray-200 transition-colors duration-100 ${f.memberId ? 'cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500' : 'cursor-default'}`}
+                className={`flex justify-between items-center px-3 py-2 rounded-lg border border-swoop-border transition-colors duration-100 ${f.memberId ? 'cursor-pointer hover:bg-swoop-row-hover focus:outline-none focus:ring-2 focus:ring-brand-500' : 'cursor-default'}`}
                 style={{ fontSize: '11px', lineHeight: 1.4 }}
               >
                 <div style={{ lineHeight: 1.4 }}>
                   <div className={`font-semibold text-sm ${f.memberId ? 'text-brand-500' : 'text-[#1a1a2e]'}`} style={{ fontSize: '12px', lineHeight: 1.4 }}>{f.name}</div>
-                  <div className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>{f.relation}</div>
+                  <div className="text-xs text-swoop-text-label" style={{ fontSize: '10px', lineHeight: 1.4 }}>{f.relation}</div>
                 </div>
                 {f.notes && (
-                    <div className="text-xs text-gray-500 max-w-[50%] text-right" style={{ fontSize: '10px', lineHeight: 1.4 }}>
+                    <div className="text-xs text-swoop-text-muted max-w-[50%] text-right" style={{ fontSize: '10px', lineHeight: 1.4 }}>
                       {f.notes}
                     </div>
                   )}
@@ -839,7 +839,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       {/* Archetype Description — Call Prep */}
       {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && (
         <Section title={`Archetype: ${profile.archetype}`} description="Behavioral profile">
-          <div className="text-sm text-gray-500 leading-relaxed" style={{ fontSize: '10px', lineHeight: 1.4 }}>
+          <div className="text-sm text-swoop-text-muted leading-relaxed" style={{ fontSize: '10px', lineHeight: 1.4 }}>
             {ARCHETYPE_DESCRIPTIONS[profile.archetype]}
           </div>
         </Section>
@@ -858,7 +858,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           {getTalkingPoints(profile).map((point, i) => (
             <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]" style={{ fontSize: '11px', lineHeight: 1.4, padding: '6px 10px', marginBottom: '2px' }}>
               <span className="text-brand-500 font-bold text-sm shrink-0" style={{ fontSize: '12px', lineHeight: 1.4 }}>{i + 1}.</span>
-              <span className="text-sm text-gray-500 leading-normal" style={{ fontSize: '10px', lineHeight: 1.4 }}>{point}</span>
+              <span className="text-sm text-swoop-text-muted leading-normal" style={{ fontSize: '10px', lineHeight: 1.4 }}>{point}</span>
             </div>
           ))}
         </div>
@@ -887,7 +887,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             </div>
           )}
           {profile.preferences?.notes && (
-            <div className="text-sm text-gray-500" style={{ fontSize: '10px', lineHeight: 1.4 }}>{profile.preferences.notes}</div>
+            <div className="text-sm text-swoop-text-muted" style={{ fontSize: '10px', lineHeight: 1.4 }}>{profile.preferences.notes}</div>
           )}
         </div>
       </Section>
@@ -914,7 +914,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           {(profile.riskSignals ?? []).map((signal) => (
             <RiskSignalRow key={signal.id} signal={signal} profile={profile} />
           ))}
-          {!(profile.riskSignals ?? []).length && <span className="text-gray-500">No active risks.</span>}
+          {!(profile.riskSignals ?? []).length && <span className="text-swoop-text-muted">No active risks.</span>}
         </div>
       </Section>
 
@@ -924,7 +924,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             value={noteText}
             onChange={(event) => setNoteText(event.target.value)}
             placeholder="Add a quick staff note..."
-            className="w-full min-h-24 rounded-lg border border-gray-200 p-2 text-sm font-sans bg-gray-100 text-[#1a1a2e]"
+            className="w-full min-h-24 rounded-lg border border-swoop-border p-2 text-sm font-sans bg-swoop-row text-[#1a1a2e]"
             style={{ fontSize: '12px', lineHeight: 1.4, minHeight: '48px', height: '48px' }}
           />
           <button
@@ -937,15 +937,15 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           </button>
           <div className="flex flex-col gap-2" style={{ fontSize: '11px', lineHeight: 1.4 }}>
             {(profile.staffNotes ?? []).map((note) => (
-              <div key={note.id} className="border border-gray-200 rounded-lg px-3 py-2.5" style={{ lineHeight: 1.4 }}>
+              <div key={note.id} className="border border-swoop-border rounded-lg px-3 py-2.5" style={{ lineHeight: 1.4 }}>
                 <div className="font-semibold" style={{ lineHeight: 1.4 }}>{note.author}</div>
-                <div className="text-xs text-gray-400" style={{ fontSize: '10px', lineHeight: 1.4 }}>
+                <div className="text-xs text-swoop-text-label" style={{ fontSize: '10px', lineHeight: 1.4 }}>
                   {note.department ?? 'General'} {'\u00B7'} {formatDateTime(note.timestamp)}
                 </div>
                 <div className="mt-1.5" style={{ lineHeight: 1.4 }}>{note.text}</div>
               </div>
             ))}
-            {!(profile.staffNotes ?? []).length && <span className="text-gray-500">No notes yet.</span>}
+            {!(profile.staffNotes ?? []).length && <span className="text-swoop-text-muted">No notes yet.</span>}
           </div>
         </div>
       </Section>
@@ -957,7 +957,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         />
       )}
 
-      <div className={isDrawerLayout ? 'sticky bottom-0 bg-white pt-4 pb-2 shadow-[0_-12px_32px_rgba(15,23,42,0.08)] z-[5]' : ''} style={{ paddingTop: '8px', paddingBottom: '6px' }}>
+      <div className={isDrawerLayout ? 'sticky bottom-0 bg-swoop-panel pt-4 pb-2 shadow-[0_-12px_32px_rgba(15,23,42,0.08)] z-[5]' : ''} style={{ paddingTop: '8px', paddingBottom: '6px' }}>
         <Section title="Quick actions">
           <div className="flex flex-wrap gap-2">
             {quickActions.map((action) => (
@@ -965,7 +965,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                 key={action.key}
                 type="button"
                 onClick={() => onQuickAction?.(profile.memberId, action.key)}
-                className="px-3.5 py-2 rounded-xl border border-gray-200 bg-gray-100 cursor-pointer font-semibold"
+                className="px-3.5 py-2 rounded-xl border border-swoop-border bg-swoop-row cursor-pointer font-semibold"
                 style={{ fontSize: '11px', padding: '5px 10px', borderRadius: '6px' }}
               >
                 {action.icon} {action.label}
@@ -980,7 +980,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
           <button
             type="button"
             onClick={onClose}
-            className="border-none bg-transparent text-gray-400 cursor-pointer font-semibold focus-visible:ring-2 focus-visible:ring-brand-500"
+            className="border-none bg-transparent text-swoop-text-label cursor-pointer font-semibold focus-visible:ring-2 focus-visible:ring-brand-500"
             style={{ fontSize: '10px' }}
           >
             Close
@@ -998,10 +998,10 @@ class DrawerErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-8 text-center text-gray-400">
+        <div className="p-8 text-center text-swoop-text-label">
           <div className="text-2xl mb-3">Something went wrong</div>
           <div className="text-sm mb-4">Unable to load this member profile.</div>
-          <button onClick={this.props.onClose} className="px-5 py-2 rounded-md border border-gray-200 bg-white cursor-pointer text-[#1a1a2e]">Close</button>
+          <button onClick={this.props.onClose} className="px-5 py-2 rounded-md border border-swoop-border bg-swoop-panel cursor-pointer text-[#1a1a2e]">Close</button>
         </div>
       );
     }

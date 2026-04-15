@@ -36,8 +36,8 @@ export default function SegmentsTab({ config, onSave }) {
   return (
     <div className="space-y-6">
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Member Segments</h3>
-        <p className="text-xs text-gray-400 mb-3 m-0">
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Member Segments</h3>
+        <p className="text-xs text-swoop-text-label mb-3 m-0">
           Limit this agent to specific member segments. Unchecked segments are ignored by the agent.
         </p>
         <div className="space-y-2">
@@ -46,7 +46,7 @@ export default function SegmentsTab({ config, onSave }) {
             return (
               <label
                 key={seg.key}
-                className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-xl border border-swoop-border bg-swoop-panel cursor-pointer hover:border-swoop-border transition-colors"
               >
                 <input
                   type="checkbox"
@@ -54,7 +54,7 @@ export default function SegmentsTab({ config, onSave }) {
                   onChange={() => toggleSegment(seg.key)}
                   className="w-4 h-4 rounded accent-brand-500"
                 />
-                <span className="text-xs font-medium text-gray-800 dark:text-white/90">{seg.label}</span>
+                <span className="text-xs font-medium text-swoop-text">{seg.label}</span>
               </label>
             );
           })}

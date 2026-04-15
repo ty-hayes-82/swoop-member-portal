@@ -9,19 +9,19 @@ export default function CollapsibleSection({
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden mb-6 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="rounded-xl border border-swoop-border bg-swoop-panel overflow-hidden mb-6">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-5 py-3.5 bg-gray-100 border-none flex items-center justify-between cursor-pointer transition-colors duration-150 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-brand-500"
+        className="w-full px-5 py-3.5 bg-swoop-row border-none flex items-center justify-between cursor-pointer transition-colors duration-150 hover:bg-gray-200 focus-visible:ring-2 focus-visible:ring-brand-500"
       >
         <div className="flex items-center gap-2.5">
           <span className="text-lg">{icon}</span>
-          <span className="text-base font-semibold text-gray-800 dark:text-white/90">
+          <span className="text-base font-semibold text-swoop-text">
             {title}
           </span>
         </div>
         <span
-          className="text-xl text-gray-500 inline-block transition-transform duration-200 dark:text-gray-400"
+          className="text-xl text-swoop-text-muted inline-block transition-transform duration-200"
           style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
         >
           \u25BC

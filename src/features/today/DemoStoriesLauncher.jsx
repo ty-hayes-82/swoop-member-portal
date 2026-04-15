@@ -98,7 +98,7 @@ export default function DemoStoriesLauncher() {
           <span className="text-[11px] font-bold uppercase tracking-widest text-purple-600">
             ⚡ Demo Story Flows
           </span>
-          <span className="text-[10px] text-gray-400">3 storyboard moments · ~10 min total</span>
+          <span className="text-[10px] text-swoop-text-label">3 storyboard moments · ~10 min total</span>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -117,7 +117,7 @@ export default function DemoStoriesLauncher() {
             type="button"
             onClick={() => !isLocked && handleStartStory(story.id)}
             disabled={isLocked}
-            className={`text-left bg-white border border-gray-200 rounded-2xl p-4 transition-all duration-200 dark:bg-white/[0.03] dark:border-gray-800 group ${
+            className={`text-left bg-swoop-panel border border-swoop-border rounded-2xl p-4 transition-all duration-200 group ${
               isLocked
                 ? 'opacity-50 grayscale cursor-not-allowed'
                 : 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
@@ -138,7 +138,7 @@ export default function DemoStoriesLauncher() {
                 >
                   {isLocked ? '🔒' : story.number}
                 </span>
-                <span className="text-[10px] font-mono font-bold text-gray-500">{story.runtime}</span>
+                <span className="text-[10px] font-mono font-bold text-swoop-text-muted">{story.runtime}</span>
               </div>
               <span
                 className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded"
@@ -148,17 +148,17 @@ export default function DemoStoriesLauncher() {
               </span>
             </div>
 
-            <div className={`text-sm font-bold leading-tight mb-0.5 ${isLocked ? 'text-gray-400' : 'text-gray-800 dark:text-white/90'}`}>
+            <div className={`text-sm font-bold leading-tight mb-0.5 ${isLocked ? 'text-swoop-text-label' : 'text-swoop-text'}`}>
               {story.title}
             </div>
-            <div className="text-[11px] text-gray-500 mb-2">{story.subtitle}</div>
+            <div className="text-[11px] text-swoop-text-muted mb-2">{story.subtitle}</div>
 
-            <div className={`text-[11px] italic leading-snug mb-3 ${isLocked ? 'text-gray-400' : 'text-gray-700 dark:text-gray-300'}`}>
+            <div className={`text-[11px] italic leading-snug mb-3 ${isLocked ? 'text-swoop-text-label' : 'text-swoop-text-2'}`}>
               {!isGateOpen('members') && story.lockedTeaser ? story.lockedTeaser : story.teaser}
             </div>
 
             {isLocked ? (
-              <div className="text-[10px] font-bold text-gray-400 flex items-center gap-1">
+              <div className="text-[10px] font-bold text-swoop-text-label flex items-center gap-1">
                 Import {unlockLabel} to unlock
               </div>
             ) : (

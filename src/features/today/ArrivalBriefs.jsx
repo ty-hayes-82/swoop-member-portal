@@ -23,18 +23,18 @@ function formatTeeTime(isoTime) {
 
 function CollapsibleSection({ role, isOpen, onToggle }) {
   return (
-    <div className="border border-gray-100 rounded-lg overflow-hidden">
+    <div className="border border-swoop-border-inset rounded-lg overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 border-none cursor-pointer transition-colors text-left"
+        className="w-full flex items-center gap-2 px-3 py-2 bg-swoop-row hover:bg-swoop-row-hover border-none cursor-pointer transition-colors text-left"
       >
         <span className="text-sm">{role.icon}</span>
-        <span className="text-xs font-semibold text-gray-700 flex-1">{role.label}</span>
-        <span className="text-[10px] text-gray-400">{isOpen ? '▾' : '▸'}</span>
+        <span className="text-xs font-semibold text-swoop-text-2 flex-1">{role.label}</span>
+        <span className="text-[10px] text-swoop-text-label">{isOpen ? '▾' : '▸'}</span>
       </button>
       {isOpen && (
-        <div className="px-3 py-2 text-xs text-gray-600 leading-relaxed bg-white">
+        <div className="px-3 py-2 text-xs text-swoop-text-muted leading-relaxed bg-swoop-panel">
           {role.briefText || 'No brief available'}
         </div>
       )}
@@ -56,14 +56,14 @@ function ArrivalCard({ brief }) {
 
   return (
     <div
-      className="bg-white border border-gray-200 rounded-xl p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
+      className="bg-swoop-panel border border-swoop-border rounded-xl p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
       style={{ borderLeft: `3px solid ${urgencyColor}` }}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-bold text-gray-800">
+            <span className="text-sm font-bold text-swoop-text">
               {brief.member_name}
             </span>
             {hasComplaint && (
@@ -76,11 +76,11 @@ function ArrivalCard({ brief }) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+          <div className="flex items-center gap-2 mt-1 text-xs text-swoop-text-muted">
             <span>{formatTeeTime(brief.tee_time)}</span>
             {brief.course && (
               <>
-                <span className="text-gray-300">|</span>
+                <span className="text-swoop-text-ghost">|</span>
                 <span>{brief.course}</span>
               </>
             )}
@@ -171,8 +171,8 @@ export default function ArrivalBriefs() {
         <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wide">
           Arrival Briefs
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
-          <div className="text-xs text-gray-400">Loading arrival briefs...</div>
+        <div className="bg-swoop-panel border border-swoop-border rounded-xl p-6 text-center">
+          <div className="text-xs text-swoop-text-label">Loading arrival briefs...</div>
         </div>
       </div>
     );
@@ -184,8 +184,8 @@ export default function ArrivalBriefs() {
         <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wide">
           Arrival Briefs
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-          <div className="text-xs text-gray-400">Unable to load briefs</div>
+        <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4 text-center">
+          <div className="text-xs text-swoop-text-label">Unable to load briefs</div>
         </div>
       </div>
     );
@@ -197,22 +197,22 @@ export default function ArrivalBriefs() {
         <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wide">
           Arrival Briefs
           {briefs.length > 0 && (
-            <span className="ml-1.5 text-gray-400 font-normal">({briefs.length})</span>
+            <span className="ml-1.5 text-swoop-text-label font-normal">({briefs.length})</span>
           )}
         </div>
         <button
           type="button"
           onClick={fetchBriefs}
-          className="text-[10px] text-gray-400 hover:text-brand-500 bg-transparent border-none cursor-pointer transition-colors"
+          className="text-[10px] text-swoop-text-label hover:text-brand-500 bg-transparent border-none cursor-pointer transition-colors"
         >
           Refresh
         </button>
       </div>
 
       {briefs.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
+        <div className="bg-swoop-panel border border-swoop-border rounded-xl p-6 text-center">
           <div className="text-lg mb-1">🏌️</div>
-          <div className="text-xs text-gray-400">No upcoming arrivals in the next 2 hours</div>
+          <div className="text-xs text-swoop-text-label">No upcoming arrivals in the next 2 hours</div>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">

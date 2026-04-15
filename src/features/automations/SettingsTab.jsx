@@ -79,8 +79,8 @@ export default function SettingsTab() {
 
       {/* AI Model Selection */}
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">AI Model</h3>
-        <p className="text-xs text-gray-400 mb-3">Choose the AI model that powers agent recommendations and message drafting.</p>
+        <h3 className="text-sm font-bold text-swoop-text mb-1">AI Model</h3>
+        <p className="text-xs text-swoop-text-label mb-3">Choose the AI model that powers agent recommendations and message drafting.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {AI_MODELS.map(model => (
             <button
@@ -88,15 +88,15 @@ export default function SettingsTab() {
               onClick={() => update('aiModel', model.value)}
               className={`p-3 rounded-xl border-2 text-left cursor-pointer transition-all ${
                 settings.aiModel === model.value
-                  ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10'
-                  : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                  ? 'border-brand-500 bg-brand-500/5'
+                  : 'border-swoop-border hover:border-swoop-border'
               }`}
             >
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-xs font-bold text-gray-800 dark:text-white/90">{model.label}</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 dark:bg-gray-800">{model.provider}</span>
+                <span className="text-xs font-bold text-swoop-text">{model.label}</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-swoop-row text-swoop-text-muted">{model.provider}</span>
               </div>
-              <p className="text-[10px] text-gray-400 m-0 leading-snug">{model.desc}</p>
+              <p className="text-[10px] text-swoop-text-label m-0 leading-snug">{model.desc}</p>
             </button>
           ))}
         </div>
@@ -104,11 +104,11 @@ export default function SettingsTab() {
 
       {/* Advanced Model Parameters */}
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Model Parameters</h3>
-        <p className="text-xs text-gray-400 mb-3">Fine-tune how the AI generates responses.</p>
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Model Parameters</h3>
+        <p className="text-xs text-swoop-text-label mb-3">Fine-tune how the AI generates responses.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="block text-xs font-medium text-swoop-text-muted mb-1">
               Temperature: {settings.temperature.toFixed(1)}
             </label>
             <input
@@ -120,13 +120,13 @@ export default function SettingsTab() {
               onChange={e => update('temperature', parseFloat(e.target.value))}
               className="w-full accent-brand-500"
             />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+            <div className="flex justify-between text-[10px] text-swoop-text-label mt-0.5">
               <span>Precise (0)</span>
               <span>Creative (1.5)</span>
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="block text-xs font-medium text-swoop-text-muted mb-1">
               Max Response Length: {settings.maxTokens} tokens
             </label>
             <input
@@ -138,7 +138,7 @@ export default function SettingsTab() {
               onChange={e => update('maxTokens', parseInt(e.target.value))}
               className="w-full accent-brand-500"
             />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+            <div className="flex justify-between text-[10px] text-swoop-text-label mt-0.5">
               <span>Brief (100)</span>
               <span>Detailed (2000)</span>
             </div>
@@ -148,8 +148,8 @@ export default function SettingsTab() {
 
       {/* Brand Voice / Tone */}
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Brand Voice & Tone</h3>
-        <p className="text-xs text-gray-400 mb-3">Define how all AI-generated outreach sounds. This tone applies to emails, texts, and internal action descriptions.</p>
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Brand Voice & Tone</h3>
+        <p className="text-xs text-swoop-text-label mb-3">Define how all AI-generated outreach sounds. This tone applies to emails, texts, and internal action descriptions.</p>
         <div className="space-y-2 mb-3">
           {TONE_PRESETS.map(tone => (
             <button
@@ -157,12 +157,12 @@ export default function SettingsTab() {
               onClick={() => update('tone', tone.value)}
               className={`w-full p-3 rounded-xl border-2 text-left cursor-pointer transition-all ${
                 settings.tone === tone.value
-                  ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10'
-                  : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                  ? 'border-brand-500 bg-brand-500/5'
+                  : 'border-swoop-border hover:border-swoop-border'
               }`}
             >
-              <div className="text-xs font-bold text-gray-800 dark:text-white/90">{tone.label}</div>
-              <p className="text-[10px] text-gray-400 m-0 mt-0.5">{tone.desc}</p>
+              <div className="text-xs font-bold text-swoop-text">{tone.label}</div>
+              <p className="text-[10px] text-swoop-text-label m-0 mt-0.5">{tone.desc}</p>
             </button>
           ))}
         </div>
@@ -170,7 +170,7 @@ export default function SettingsTab() {
         {/* Custom tone description */}
         {settings.tone === 'custom' && (
           <div className="mb-3">
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="block text-xs font-medium text-swoop-text-muted mb-1">
               Describe your club's voice
             </label>
             <textarea
@@ -178,43 +178,43 @@ export default function SettingsTab() {
               onChange={e => update('customToneDesc', e.target.value)}
               placeholder="e.g., We're a historic club with a modern attitude. Our tone is confident but never stuffy — think country club meets craft brewery. We use first names, avoid jargon, and always sound like we genuinely care."
               rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90 resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm resize-none"
             />
           </div>
         )}
 
         {/* Tone preview */}
         {selectedTone?.example && (
-          <div className="p-3 rounded-lg bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-            <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Preview</div>
-            <p className="text-xs text-gray-700 dark:text-gray-300 m-0 leading-relaxed italic">"{selectedTone.example}"</p>
+          <div className="p-3 rounded-lg bg-swoop-row border border-swoop-border">
+            <div className="text-[10px] font-semibold text-swoop-text-muted mb-1 uppercase tracking-wide">Preview</div>
+            <p className="text-xs text-swoop-text-2 m-0 leading-relaxed italic">"{selectedTone.example}"</p>
           </div>
         )}
       </section>
 
       {/* Sender Identity */}
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Sender Identity</h3>
-        <p className="text-xs text-gray-400 mb-3">How outreach messages are signed.</p>
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Sender Identity</h3>
+        <p className="text-xs text-swoop-text-label mb-3">How outreach messages are signed.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title / Role</label>
+            <label className="block text-xs font-medium text-swoop-text-muted mb-1">Title / Role</label>
             <input
               type="text"
               value={settings.senderTitle}
               onChange={e => update('senderTitle', e.target.value)}
               placeholder="General Manager"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              className="w-full px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Custom Sign-off</label>
+            <label className="block text-xs font-medium text-swoop-text-muted mb-1">Custom Sign-off</label>
             <input
               type="text"
               value={settings.clubSignoff}
               onChange={e => update('clubSignoff', e.target.value)}
               placeholder="e.g., See you at the club!"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              className="w-full px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
             />
           </div>
         </div>
@@ -222,14 +222,14 @@ export default function SettingsTab() {
 
       {/* Example Guidance for LLM */}
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Example Messages</h3>
-        <p className="text-xs text-gray-400 mb-3">
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Example Messages</h3>
+        <p className="text-xs text-swoop-text-label mb-3">
           Provide real examples of great outreach from your club. The AI uses these as guidance to match your style and quality bar.
         </p>
         <div className="space-y-3">
           {settings.examples.map((ex, i) => (
-            <div key={i} className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <div key={i} className="rounded-xl border border-swoop-border overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 bg-swoop-row border-b border-swoop-border">
                 <input
                   type="text"
                   value={ex.label}
@@ -239,7 +239,7 @@ export default function SettingsTab() {
                     update('examples', next);
                   }}
                   placeholder="Category (e.g., Service Recovery)"
-                  className="text-xs font-semibold text-gray-700 dark:text-gray-300 bg-transparent border-none outline-none flex-1"
+                  className="text-xs font-semibold text-swoop-text-2 bg-transparent border-none outline-none flex-1"
                 />
                 <button
                   type="button"
@@ -248,7 +248,7 @@ export default function SettingsTab() {
                     const next = settings.examples.filter((_, j) => j !== i);
                     update('examples', next);
                   }}
-                  className="text-xs text-gray-400 hover:text-red-500 cursor-pointer bg-transparent border-none p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
+                  className="text-xs text-swoop-text-label hover:text-red-500 cursor-pointer bg-transparent border-none p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
                 >
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -262,13 +262,13 @@ export default function SettingsTab() {
                 }}
                 placeholder="Paste an example email or text message that represents your best outreach..."
                 rows={3}
-                className="w-full px-3 py-2 text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border-none outline-none resize-none"
+                className="w-full px-3 py-2 text-xs text-swoop-text-2 bg-swoop-panel border-none outline-none resize-none"
               />
             </div>
           ))}
           <button
             onClick={() => update('examples', [...settings.examples, { label: '', text: '' }])}
-            className="text-xs font-semibold text-brand-500 cursor-pointer bg-transparent border border-dashed border-brand-300 rounded-lg px-4 py-2 hover:bg-brand-50 dark:hover:bg-brand-500/5 transition-colors w-full"
+            className="text-xs font-semibold text-brand-500 cursor-pointer bg-transparent border border-dashed border-brand-300 rounded-lg px-4 py-2 hover:bg-brand-50 transition-colors w-full"
           >
             + Add Example
           </button>
@@ -277,8 +277,8 @@ export default function SettingsTab() {
 
       {/* Auto-Approve Defaults */}
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Auto-Approve</h3>
-        <p className="text-xs text-gray-400 mb-3">
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Auto-Approve</h3>
+        <p className="text-xs text-swoop-text-label mb-3">
           When enabled, agent actions above the confidence threshold are executed automatically without requiring your approval.
         </p>
         <div className="flex items-center gap-3 mb-3">
@@ -289,20 +289,20 @@ export default function SettingsTab() {
             aria-label="Toggle auto-approve"
             onClick={() => update('autoApproveEnabled', !settings.autoApproveEnabled)}
             className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${
-              settings.autoApproveEnabled ? 'bg-brand-500' : 'bg-gray-300 dark:bg-gray-600'
+              settings.autoApproveEnabled ? 'bg-brand-500' : 'bg-swoop-border'
             }`}
           >
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-swoop-panel shadow transition-transform ${
               settings.autoApproveEnabled ? 'translate-x-[22px]' : 'translate-x-0.5'
             }`} />
           </button>
-          <span className="text-sm text-gray-700 dark:text-gray-300">
+          <span className="text-sm text-swoop-text-2">
             {settings.autoApproveEnabled ? 'Auto-approve is ON' : 'Auto-approve is OFF (manual review for all actions)'}
           </span>
         </div>
         {settings.autoApproveEnabled && (
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="block text-xs font-medium text-swoop-text-muted mb-1">
               Confidence Threshold: {Math.round(settings.autoApproveThreshold * 100)}%
             </label>
             <input
@@ -314,7 +314,7 @@ export default function SettingsTab() {
               onChange={e => update('autoApproveThreshold', parseFloat(e.target.value))}
               className="w-full accent-brand-500"
             />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+            <div className="flex justify-between text-[10px] text-swoop-text-label mt-0.5">
               <span>More actions auto-approved (50%)</span>
               <span>Only high-confidence (99%)</span>
             </div>
@@ -326,7 +326,7 @@ export default function SettingsTab() {
       <button
         onClick={handleSave}
         className="w-full py-3 rounded-lg font-bold text-sm text-white cursor-pointer disabled:opacity-50"
-        style={{ background: '#ff8b00' }}
+        style={{ background: '#F3922D' }}
       >
         {saved ? 'Saved!' : 'Save Settings'}
       </button>

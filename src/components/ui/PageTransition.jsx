@@ -138,7 +138,7 @@ export function LoadingSpinner({
 }) {
   return (
     <div
-      className={`rounded-full border-3 border-brand-100 border-t-brand-500 animate-spin dark:border-brand-500/20 dark:border-t-brand-500 ${className}`}
+      className={`rounded-full border-3 border-brand-100 border-t-brand-500 animate-spin ${className}`}
       style={{ width: size, height: size }}
     />
   );

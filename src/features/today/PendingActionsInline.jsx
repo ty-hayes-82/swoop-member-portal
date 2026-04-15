@@ -129,13 +129,13 @@ export default function PendingActionsInline({ topPriority = null }) {
                   {expandedId === (topPriority.id || 'hero') ? 'Collapse' : 'Act Now'}
                 </span>
               </div>
-              <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-1 leading-snug">
+              <div className="text-sm font-semibold text-swoop-text mb-1 leading-snug">
                 {topPriority.memberName ? (
                   <>
                     <MemberLink
                       mode="drawer"
                       memberId={topPriority.memberId}
-                      className="font-bold text-gray-800 dark:text-white/90"
+                      className="font-bold text-swoop-text"
                     >
                       {topPriority.memberName}
                     </MemberLink>
@@ -146,7 +146,7 @@ export default function PendingActionsInline({ topPriority = null }) {
                 )}
               </div>
               {topPriority.recommendation && (
-                <div className="text-xs text-gray-500 leading-snug">
+                <div className="text-xs text-swoop-text-muted leading-snug">
                   {topPriority.recommendation}
                 </div>
               )}
@@ -178,13 +178,13 @@ export default function PendingActionsInline({ topPriority = null }) {
 
         {/* Pending action cards */}
         {topActions.map((action) => {
-          const prioColor = PRIORITY_COLORS[action.priority] ?? '#ff8b00';
+          const prioColor = PRIORITY_COLORS[action.priority] ?? '#F3922D';
           const isExpanded = expandedId === action.id;
           return (
             <div key={action.id}>
               <div
                 onClick={() => toggleExpand(action.id)}
-                className="py-3 px-4 rounded-xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md"
+                className="py-3 px-4 rounded-xl bg-swoop-panel border border-swoop-border shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md"
                 style={{ borderLeft: `4px solid ${prioColor}` }}
               >
                 <div className="flex justify-between items-center mb-1">
@@ -206,7 +206,7 @@ export default function PendingActionsInline({ topPriority = null }) {
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handleSnooze(action.id, 24); }}
-                      className="text-[10px] font-semibold text-gray-500 py-0.5 px-2 rounded-[10px] bg-gray-100 hover:bg-gray-200 border-none cursor-pointer dark:bg-white/[0.06] dark:text-gray-400"
+                      className="text-[10px] font-semibold text-swoop-text-muted py-0.5 px-2 rounded-[10px] bg-swoop-row hover:bg-gray-200 border-none cursor-pointer"
                       title="Snooze 24h"
                     >
                       Snooze 24h
@@ -216,7 +216,7 @@ export default function PendingActionsInline({ topPriority = null }) {
                     </span>
                   </div>
                 </div>
-                <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-0.5 leading-snug">
+                <div className="text-sm font-semibold text-swoop-text mb-0.5 leading-snug">
                   {action.description}
                 </div>
                 {action.impactMetric && (

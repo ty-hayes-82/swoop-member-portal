@@ -11,7 +11,7 @@ import SourceBadge from '@/components/ui/SourceBadge';
 const DOMAIN_COLORS = {
   Golf: '#12b76a',
   Dining: '#f59e0b',
-  Events: '#ff8b00',
+  Events: '#F3922D',
   Email: '#2563eb',
   Risk: '#ef4444',
   Activity: '#9CA3AF',

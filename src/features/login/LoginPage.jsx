@@ -94,7 +94,7 @@ export default function LoginPage({ onLogin }) {
   // ── Left brand panel (shared between both screens) ──
   const brandPanel = (
     <div className="hidden lg:flex lg:w-1/2 items-center justify-center relative overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #ff8b00 0%, #e67a00 50%, #cc6d00 100%)' }}
+      style={{ background: 'linear-gradient(135deg, #F3922D 0%, #e67a00 50%, #cc6d00 100%)' }}
     >
       <div className="relative z-10 max-w-md px-12 text-white">
         <img src="/favicon.svg" alt="Swoop Golf" className="w-16 h-16 mb-6 brightness-0 invert" />
@@ -130,18 +130,18 @@ export default function LoginPage({ onLogin }) {
       <div className="min-h-screen flex font-sans">
         {brandPanel}
 
-        <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 px-6 py-12">
+        <div className="w-full lg:w-1/2 flex items-center justify-center bg-swoop-row px-6 py-12">
           <div className="w-full max-w-[420px]">
             {/* Mobile-only logo */}
             <div className="text-center mb-8 lg:mb-10">
               <div className="flex items-center justify-center mb-3 lg:hidden">
                 <img src="/favicon.svg" alt="Swoop Golf" className="w-12 h-12" />
               </div>
-              <div className="text-[28px] font-extrabold text-gray-900">
+              <div className="text-[28px] font-extrabold text-swoop-text">
                 <span className="lg:hidden">Swoop Golf</span>
                 <span className="hidden lg:inline">Welcome back</span>
               </div>
-              <div className="text-sm text-gray-500 mt-1">
+              <div className="text-sm text-swoop-text-muted mt-1">
                 <span className="lg:hidden">Club Intelligence for General Managers</span>
                 <span className="hidden lg:inline">Sign in to your club dashboard</span>
               </div>
@@ -150,7 +150,7 @@ export default function LoginPage({ onLogin }) {
             {/* Google Sign-In — primary CTA */}
             <button
               onClick={() => { window.location.href = '/api/google/signin'; }}
-              className="w-full py-3.5 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-center gap-3 shadow-sm"
+              className="w-full py-3.5 rounded-xl border border-swoop-border bg-swoop-panel text-swoop-text-2 text-sm font-semibold cursor-pointer hover:bg-swoop-row-hover transition-colors flex items-center justify-center gap-3 shadow-sm"
             >
               <svg width="18" height="18" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -163,15 +163,15 @@ export default function LoginPage({ onLogin }) {
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-6">
-              <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-xs text-gray-400">or sign in with email</span>
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-swoop-border" />
+              <span className="text-xs text-swoop-text-label">or sign in with email</span>
+              <div className="flex-1 h-px bg-swoop-border" />
             </div>
 
             {/* Email/password form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label htmlFor="login-email" className="text-[13px] font-semibold text-gray-700 block mb-1.5">Email</label>
+                <label htmlFor="login-email" className="text-[13px] font-semibold text-swoop-text-2 block mb-1.5">Email</label>
                 <input
                   id="login-email"
                   type="email"
@@ -180,11 +180,11 @@ export default function LoginPage({ onLogin }) {
                   placeholder="you@yourclub.com"
                   required
                   aria-required="true"
-                  className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                  className="w-full h-12 rounded-xl border border-swoop-border bg-swoop-panel px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
                 />
               </div>
               <div>
-                <label htmlFor="login-password" className="text-[13px] font-semibold text-gray-700 block mb-1.5">Password</label>
+                <label htmlFor="login-password" className="text-[13px] font-semibold text-swoop-text-2 block mb-1.5">Password</label>
                 <input
                   id="login-password"
                   type="password"
@@ -193,7 +193,7 @@ export default function LoginPage({ onLogin }) {
                   placeholder="Enter password"
                   required
                   aria-required="true"
-                  className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                  className="w-full h-12 rounded-xl border border-swoop-border bg-swoop-panel px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
                 />
               </div>
 
@@ -224,9 +224,9 @@ export default function LoginPage({ onLogin }) {
 
             {/* Forgot password form */}
             {showForgotPassword && (
-              <div className="mt-4 p-4 rounded-xl border border-gray-200 bg-gray-50">
-                <div className="text-sm font-semibold text-gray-700 mb-2">Reset your password</div>
-                <p className="text-xs text-gray-500 mb-3">Enter your email and we'll send you a reset link.</p>
+              <div className="mt-4 p-4 rounded-xl border border-swoop-border bg-swoop-row">
+                <div className="text-sm font-semibold text-swoop-text-2 mb-2">Reset your password</div>
+                <p className="text-xs text-swoop-text-muted mb-3">Enter your email and we'll send you a reset link.</p>
                 <label htmlFor="forgot-email" className="sr-only">Account email</label>
                 <input
                   id="forgot-email"
@@ -235,7 +235,7 @@ export default function LoginPage({ onLogin }) {
                   onChange={e => setForgotEmail(e.target.value)}
                   placeholder="Your account email"
                   aria-required="true"
-                  className="w-full h-11 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  className="w-full h-11 rounded-lg border border-swoop-border bg-swoop-panel px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                 />
                 {forgotMessage && (
                   <div className={`mt-2 text-xs font-medium ${forgotMessage.includes('error') ? 'text-error-500' : 'text-success-600'}`}>
@@ -252,7 +252,7 @@ export default function LoginPage({ onLogin }) {
                   </button>
                   <button
                     onClick={() => { setShowForgotPassword(false); setForgotMessage(''); }}
-                    className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 text-xs font-semibold hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-swoop-text-muted text-xs font-semibold hover:bg-swoop-row-hover transition-colors"
                   >
                     Cancel
                   </button>
@@ -262,9 +262,9 @@ export default function LoginPage({ onLogin }) {
 
             {/* Signup / explore alternatives */}
             <div className="flex items-center gap-3 my-6">
-              <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-[11px] uppercase tracking-wide text-gray-400">New to Swoop?</span>
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-swoop-border" />
+              <span className="text-[11px] uppercase tracking-wide text-swoop-text-label">New to Swoop?</span>
+              <div className="flex-1 h-px bg-swoop-border" />
             </div>
 
             <button
@@ -276,7 +276,7 @@ export default function LoginPage({ onLogin }) {
 
             <button
               onClick={() => setScreen('explore')}
-              className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-600 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors"
+              className="w-full py-3 rounded-xl border border-swoop-border bg-swoop-panel text-swoop-text-muted text-sm font-semibold cursor-pointer hover:bg-swoop-row-hover transition-colors"
             >
               Explore without an account
             </button>
@@ -291,17 +291,17 @@ export default function LoginPage({ onLogin }) {
     <div className="min-h-screen flex font-sans">
       {brandPanel}
 
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 px-6 py-12">
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-swoop-row px-6 py-12">
         <div className="w-full max-w-[420px]">
           {/* Mobile-only logo */}
           <div className="text-center mb-8 lg:mb-10">
             <div className="flex items-center justify-center mb-3 lg:hidden">
               <img src="/favicon.svg" alt="Swoop Golf" className="w-12 h-12" />
             </div>
-            <div className="text-[28px] font-extrabold text-gray-900">
+            <div className="text-[28px] font-extrabold text-swoop-text">
               Get Started
             </div>
-            <div className="text-sm text-gray-500 mt-1">
+            <div className="text-sm text-swoop-text-muted mt-1">
               Set up your club or explore with sample data
             </div>
           </div>
@@ -317,9 +317,9 @@ export default function LoginPage({ onLogin }) {
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400 font-medium">or explore with sample data</span>
-            <div className="flex-1 h-px bg-gray-200" />
+            <div className="flex-1 h-px bg-swoop-border" />
+            <span className="text-xs text-swoop-text-label font-medium">or explore with sample data</span>
+            <div className="flex-1 h-px bg-swoop-border" />
           </div>
 
           {/* Demo contact info — collapsed into demo button */}
@@ -332,16 +332,16 @@ export default function LoginPage({ onLogin }) {
                 value={demoEmail}
                 onChange={e => setDemoEmail(e.target.value)}
                 placeholder="Your email (optional — for test emails)"
-                className="w-full h-10 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                className="w-full h-10 rounded-lg border border-swoop-border bg-swoop-panel px-4 py-2.5 text-sm outline-none box-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <button
               onClick={() => startDemo()}
-              className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors"
+              className="w-full py-3 rounded-xl border border-swoop-border bg-swoop-panel text-swoop-text-2 text-sm font-semibold cursor-pointer hover:bg-swoop-row-hover transition-colors"
             >
               Explore Demo (Pinetree CC)
-              <span className="block text-xs font-normal text-gray-400 mt-0.5">Sample data pre-loaded — no signup needed</span>
+              <span className="block text-xs font-normal text-swoop-text-label mt-0.5">Sample data pre-loaded — no signup needed</span>
             </button>
 
             {/* Conference Demo — phone-optimized scene navigator on the mobile shell. Tap-to-enter, no login. */}
@@ -364,8 +364,8 @@ export default function LoginPage({ onLogin }) {
 
           {/* Back to sign in */}
           <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-gray-200" />
-            <div className="flex-1 h-px bg-gray-200" />
+            <div className="flex-1 h-px bg-swoop-border" />
+            <div className="flex-1 h-px bg-swoop-border" />
           </div>
 
           <button

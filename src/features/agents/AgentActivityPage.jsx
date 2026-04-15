@@ -7,16 +7,16 @@ import { apiFetch, getClubId } from '@/services/apiClient';
 
 // ── Agent color map ──────────────────────────────────────────────────────────
 const AGENT_COLORS = {
-  agt_retention:    { bg: 'bg-red-100 dark:bg-red-900/40',    text: 'text-red-700 dark:text-red-300',    dot: 'bg-red-500' },
-  agt_teesheet:     { bg: 'bg-blue-100 dark:bg-blue-900/40',   text: 'text-blue-700 dark:text-blue-300',   dot: 'bg-blue-500' },
-  agt_concierge:    { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300', dot: 'bg-purple-500' },
-  agt_revenue:      { bg: 'bg-green-100 dark:bg-green-900/40',  text: 'text-green-700 dark:text-green-300',  dot: 'bg-green-500' },
-  agt_staffing:     { bg: 'bg-amber-100 dark:bg-amber-900/40',  text: 'text-amber-700 dark:text-amber-300',  dot: 'bg-amber-500' },
-  agt_complaint:    { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-700 dark:text-orange-300', dot: 'bg-orange-500' },
-  agt_cos:          { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-300', dot: 'bg-indigo-500' },
+  agt_retention:    { bg: 'bg-red-100',    text: 'text-red-700',    dot: 'bg-red-500' },
+  agt_teesheet:     { bg: 'bg-blue-100',   text: 'text-blue-700',   dot: 'bg-blue-500' },
+  agt_concierge:    { bg: 'bg-purple-100', text: 'text-purple-700', dot: 'bg-purple-500' },
+  agt_revenue:      { bg: 'bg-green-100',  text: 'text-green-700',  dot: 'bg-green-500' },
+  agt_staffing:     { bg: 'bg-amber-100',  text: 'text-amber-700',  dot: 'bg-amber-500' },
+  agt_complaint:    { bg: 'bg-orange-100', text: 'text-orange-700', dot: 'bg-orange-500' },
+  agt_cos:          { bg: 'bg-indigo-100', text: 'text-indigo-700', dot: 'bg-indigo-500' },
 };
 
-const DEFAULT_COLORS = { bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-700 dark:text-gray-300', dot: 'bg-gray-500' };
+const DEFAULT_COLORS = { bg: 'bg-swoop-row', text: 'text-swoop-text-2', dot: 'bg-gray-500' };
 
 function agentColor(agentId) {
   return AGENT_COLORS[agentId] || DEFAULT_COLORS;
@@ -92,7 +92,7 @@ function useAgentActivity(pollInterval = 5000) {
 function LiveFeedItem({ event }) {
   const c = agentColor(event.agent_id);
   return (
-    <div className="flex items-start gap-3 py-3 px-4 border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+    <div className="flex items-start gap-3 py-3 px-4 border-b border-swoop-border-inset hover:bg-swoop-row-hover transition-colors">
       {/* Agent dot */}
       <div className="pt-1 flex-shrink-0">
         <div className={`w-2.5 h-2.5 rounded-full ${c.dot}`} />
@@ -105,21 +105,21 @@ function LiveFeedItem({ event }) {
             {agentLabel(event.agent_id)}
           </span>
           {event.phase && (
-            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wider">
+            <span className="text-[10px] text-swoop-text-label font-medium uppercase tracking-wider">
               {event.phase}
             </span>
           )}
-          <span className="ml-auto text-[11px] text-gray-400 dark:text-gray-500 flex-shrink-0">
+          <span className="ml-auto text-[11px] text-swoop-text-label flex-shrink-0">
             {relativeTime(event.created_at)}
           </span>
         </div>
 
-        <p className="mt-1 text-sm text-gray-700 dark:text-gray-200 leading-snug">
+        <p className="mt-1 text-sm text-swoop-text-2 leading-snug">
           {event.description || event.action_type}
         </p>
 
         {event.member_name && (
-          <span className="inline-flex items-center gap-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <span className="inline-flex items-center gap-1 mt-1 text-xs text-swoop-text-muted">
             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
             </svg>
@@ -128,19 +128,19 @@ function LiveFeedItem({ event }) {
         )}
 
         {event.reasoning && (
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500 italic leading-snug">
+          <p className="mt-1 text-xs text-swoop-text-label italic leading-snug">
             {event.reasoning}
           </p>
         )}
 
         <div className="flex items-center gap-3 mt-1.5">
           {event.confidence != null && (
-            <span className="text-[10px] text-gray-400 dark:text-gray-500">
+            <span className="text-[10px] text-swoop-text-label">
               Confidence: {Math.round(event.confidence * 100)}%
             </span>
           )}
           {event.auto_executed && (
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-green-600 dark:text-green-400">
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-green-600">
               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
               Auto-executed
             </span>
@@ -158,18 +158,18 @@ function PlaybookCard({ playbook }) {
   const currentStep = playbook.current_step;
 
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 p-4 shadow-theme-xs">
+    <div className="rounded-xl border border-swoop-border bg-swoop-panel p-4 shadow-theme-xs">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-gray-800 dark:text-white/90 truncate">
+        <h4 className="text-sm font-semibold text-swoop-text truncate">
           {playbook.playbook_name}
         </h4>
-        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 uppercase">
+        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 uppercase">
           Active
         </span>
       </div>
 
       {playbook.member_name && (
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+        <p className="mt-1 text-xs text-swoop-text-muted flex items-center gap-1">
           <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
           </svg>
@@ -179,11 +179,11 @@ function PlaybookCard({ playbook }) {
 
       {/* Progress bar */}
       <div className="mt-3">
-        <div className="flex justify-between text-[10px] text-gray-400 dark:text-gray-500 mb-1">
+        <div className="flex justify-between text-[10px] text-swoop-text-label mb-1">
           <span>Step {completedSteps + 1} of {totalSteps}</span>
           <span>{progress}%</span>
         </div>
-        <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-swoop-row overflow-hidden">
           <div
             className="h-full rounded-full bg-brand-500 transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -192,19 +192,19 @@ function PlaybookCard({ playbook }) {
       </div>
 
       {currentStep && (
-        <div className="mt-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/40">
-          <p className="text-xs font-medium text-gray-700 dark:text-gray-200">
+        <div className="mt-3 p-2 rounded-lg bg-swoop-row">
+          <p className="text-xs font-medium text-swoop-text-2">
             Next: {currentStep.title}
           </p>
           {currentStep.due_date && (
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+            <p className="text-[10px] text-swoop-text-label mt-0.5">
               Due: {formatDate(currentStep.due_date)}
             </p>
           )}
         </div>
       )}
 
-      <div className="mt-2 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500">
+      <div className="mt-2 flex items-center justify-between text-[10px] text-swoop-text-label">
         <span>Started {relativeTime(playbook.started_at)}</span>
         {playbook.triggered_by && <span>by {playbook.triggered_by}</span>}
       </div>
@@ -215,15 +215,15 @@ function PlaybookCard({ playbook }) {
 function CoordinationCard({ log }) {
   const details = log.conflict_details;
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 p-4 shadow-theme-xs">
+    <div className="rounded-xl border border-swoop-border bg-swoop-panel p-4 shadow-theme-xs">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${AGENT_COLORS.agt_cos?.dot || 'bg-indigo-500'}`} />
-          <h4 className="text-sm font-semibold text-gray-800 dark:text-white/90">
+          <h4 className="text-sm font-semibold text-swoop-text">
             Chief of Staff Coordination
           </h4>
         </div>
-        <span className="text-[11px] text-gray-400 dark:text-gray-500">
+        <span className="text-[11px] text-swoop-text-label">
           {formatDate(log.log_date)}
         </span>
       </div>
@@ -249,7 +249,7 @@ function CoordinationCard({ log }) {
       )}
 
       {details && typeof details === 'object' && (
-        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40 rounded-lg p-2">
+        <div className="mt-2 text-xs text-swoop-text-muted bg-swoop-row rounded-lg p-2">
           <pre className="whitespace-pre-wrap font-sans text-[11px] leading-relaxed">
             {typeof details === 'string' ? details : JSON.stringify(details, null, 2)}
           </pre>
@@ -262,8 +262,8 @@ function CoordinationCard({ log }) {
 function Stat({ label, value }) {
   return (
     <div className="text-center">
-      <p className="text-lg font-bold text-gray-800 dark:text-white/90">{value ?? 0}</p>
-      <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">{label}</p>
+      <p className="text-lg font-bold text-swoop-text">{value ?? 0}</p>
+      <p className="text-[10px] text-swoop-text-label uppercase tracking-wider">{label}</p>
     </div>
   );
 }
@@ -271,13 +271,13 @@ function Stat({ label, value }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-        <svg className="w-8 h-8 text-gray-300 dark:text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <div className="w-16 h-16 rounded-full bg-swoop-row flex items-center justify-center mb-4">
+        <svg className="w-8 h-8 text-swoop-text-ghost" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
         </svg>
       </div>
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">No agent activity yet</h3>
-      <p className="mt-1 text-xs text-gray-400 dark:text-gray-500 max-w-xs">
+      <h3 className="text-sm font-semibold text-swoop-text-muted">No agent activity yet</h3>
+      <p className="mt-1 text-xs text-swoop-text-label max-w-xs">
         Import data and activate agents to see them work. Activity from all agents will appear here in real time.
       </p>
     </div>
@@ -312,12 +312,12 @@ export default function AgentActivityPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold m-0 text-gray-800 dark:text-white/90">Agent Activity</h1>
-          <p className="text-sm text-gray-500 mt-1 mb-0">
+          <h1 className="text-xl font-bold m-0 text-swoop-text">Agent Activity</h1>
+          <p className="text-sm text-swoop-text-muted mt-1 mb-0">
             Real-time view of all agent communications, decisions, and actions.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+        <div className="flex items-center gap-2 text-xs text-swoop-text-label">
           <PulsingDot />
           <span>Live</span>
         </div>
@@ -334,7 +334,7 @@ export default function AgentActivityPage() {
       )}
 
       {/* Tabs */}
-      <div role="tablist" className="flex gap-0.5 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+      <div role="tablist" className="flex gap-0.5 rounded-lg bg-swoop-row p-0.5 border border-swoop-border">
         {TABS.map(tab => (
           <button
             key={tab.key}
@@ -343,8 +343,8 @@ export default function AgentActivityPage() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500 ${
               activeTab === tab.key
-                ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
-                : 'bg-transparent text-gray-500 hover:text-gray-700'
+                ? 'bg-swoop-panel text-swoop-text shadow-theme-xs'
+                : 'bg-transparent text-swoop-text-muted hover:text-swoop-text-2'
             }`}
           >
             {tab.label}
@@ -361,7 +361,7 @@ export default function AgentActivityPage() {
       <div className="min-h-[300px]">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-6 h-6 border-2 border-gray-300 border-t-brand-500 rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-swoop-border border-t-brand-500 rounded-full animate-spin" />
           </div>
         ) : !hasActivity ? (
           <EmptyState />
@@ -369,9 +369,9 @@ export default function AgentActivityPage() {
           <>
             {/* Live Feed */}
             {activeTab === 'feed' && (
-              <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 shadow-theme-xs overflow-hidden">
+              <div className="rounded-xl border border-swoop-border bg-swoop-panel shadow-theme-xs overflow-hidden">
                 {data.activity.length === 0 ? (
-                  <p className="p-6 text-sm text-gray-400 dark:text-gray-500 text-center">No activity events recorded yet.</p>
+                  <p className="p-6 text-sm text-swoop-text-label text-center">No activity events recorded yet.</p>
                 ) : (
                   data.activity.map(event => (
                     <LiveFeedItem key={event.activity_id} event={event} />
@@ -384,7 +384,7 @@ export default function AgentActivityPage() {
             {activeTab === 'playbooks' && (
               <div className="grid gap-4 sm:grid-cols-2">
                 {data.activePlaybooks.length === 0 ? (
-                  <p className="p-6 text-sm text-gray-400 dark:text-gray-500 text-center col-span-2">No active playbooks running.</p>
+                  <p className="p-6 text-sm text-swoop-text-label text-center col-span-2">No active playbooks running.</p>
                 ) : (
                   data.activePlaybooks.map(pb => (
                     <PlaybookCard key={pb.run_id} playbook={pb} />
@@ -397,7 +397,7 @@ export default function AgentActivityPage() {
             {activeTab === 'coordination' && (
               <div className="grid gap-4">
                 {data.coordination.length === 0 ? (
-                  <p className="p-6 text-sm text-gray-400 dark:text-gray-500 text-center">No coordination events recorded yet.</p>
+                  <p className="p-6 text-sm text-swoop-text-label text-center">No coordination events recorded yet.</p>
                 ) : (
                   data.coordination.map(log => (
                     <CoordinationCard key={log.log_id} log={log} />
@@ -414,9 +414,9 @@ export default function AgentActivityPage() {
 
 function SummaryCard({ label, value }) {
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 p-3 shadow-theme-xs text-center">
-      <p className="text-2xl font-bold text-gray-800 dark:text-white/90">{value}</p>
-      <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider mt-0.5">{label}</p>
+    <div className="rounded-xl border border-swoop-border bg-swoop-panel p-3 shadow-theme-xs text-center">
+      <p className="text-2xl font-bold text-swoop-text">{value}</p>
+      <p className="text-[10px] text-swoop-text-label uppercase tracking-wider mt-0.5">{label}</p>
     </div>
   );
 }

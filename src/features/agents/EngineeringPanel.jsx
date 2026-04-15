@@ -13,9 +13,9 @@ import ValidationRulesConfig from './ValidationRulesConfig';
 // ---------------------------------------------------------------------------
 
 const MODELS = [
-  { id: 'claude-opus-4-20250514',    label: 'Claude Opus',   cost: '$$$', badge: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
-  { id: 'claude-sonnet-4-20250514',  label: 'Claude Sonnet', cost: '$$',  badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' },
-  { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku',  cost: '$',   badge: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
+  { id: 'claude-opus-4-20250514',    label: 'Claude Opus',   cost: '$$$', badge: 'bg-red-100 text-red-700' },
+  { id: 'claude-sonnet-4-20250514',  label: 'Claude Sonnet', cost: '$$',  badge: 'bg-yellow-100 text-yellow-700' },
+  { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku',  cost: '$',   badge: 'bg-green-100 text-green-700' },
 ];
 
 /** Default model recommendations per agent type. */
@@ -184,25 +184,25 @@ export default function EngineeringPanel({ agentId, role }) {
   const defaultModel = MODEL_DEFAULTS[agentId] || MODELS[1].id;
 
   return (
-    <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+    <div className="space-y-6 rounded-lg border border-swoop-border bg-swoop-panel p-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-swoop-text">
           Engineering Controls
         </h3>
-        <span className="rounded bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+        <span className="rounded bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
           Swoop Admin Only
         </span>
       </div>
 
       {/* ── Model Selector ─────────────────────────────────────────────── */}
       <section>
-        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1 block text-sm font-medium text-swoop-text-2">
           Model
         </label>
         <select
           value={model}
           onChange={(e) => setModel(e.target.value)}
-          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          className="w-full rounded-md border border-swoop-border bg-swoop-panel px-3 py-2 text-sm"
         >
           {MODELS.map((m) => (
             <option key={m.id} value={m.id}>
@@ -224,7 +224,7 @@ export default function EngineeringPanel({ agentId, role }) {
 
       {/* ── Temperature Slider ─────────────────────────────────────────── */}
       <section>
-        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1 block text-sm font-medium text-swoop-text-2">
           Temperature: {temperature.toFixed(1)}
         </label>
         <div className="relative">
@@ -239,7 +239,7 @@ export default function EngineeringPanel({ agentId, role }) {
           />
           {/* Recommended zone indicator */}
           <div
-            className="pointer-events-none absolute top-0 h-2 rounded bg-green-300/50 dark:bg-green-600/40"
+            className="pointer-events-none absolute top-0 h-2 rounded bg-green-300/50"
             style={{
               left: `${recommendedZone[0] * 100}%`,
               width: `${(recommendedZone[1] - recommendedZone[0]) * 100}%`,
@@ -247,14 +247,14 @@ export default function EngineeringPanel({ agentId, role }) {
             }}
           />
         </div>
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-xs text-swoop-text-muted">
           Recommended zone: {recommendedZone[0].toFixed(1)} - {recommendedZone[1].toFixed(1)} (shown in green)
         </p>
       </section>
 
       {/* ── Max Tokens ─────────────────────────────────────────────────── */}
       <section>
-        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1 block text-sm font-medium text-swoop-text-2">
           Max Tokens
         </label>
         <input
@@ -263,13 +263,13 @@ export default function EngineeringPanel({ agentId, role }) {
           max="8192"
           value={maxTokens}
           onChange={(e) => setMaxTokens(parseInt(e.target.value, 10) || 600)}
-          className="w-32 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          className="w-32 rounded-md border border-swoop-border bg-swoop-panel px-3 py-2 text-sm"
         />
       </section>
 
       {/* ── Prefill ────────────────────────────────────────────────────── */}
       <section>
-        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1 block text-sm font-medium text-swoop-text-2">
           Assistant Prefill
         </label>
         <textarea
@@ -277,9 +277,9 @@ export default function EngineeringPanel({ agentId, role }) {
           onChange={(e) => setPrefill(e.target.value)}
           placeholder="{member_first_name},"
           rows={3}
-          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          className="w-full rounded-md border border-swoop-border bg-swoop-panel px-3 py-2 text-sm"
         />
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-xs text-swoop-text-muted">
           Supports interpolation: {'{member_first_name}'}, {'{member_last_name}'}
         </p>
       </section>
@@ -298,10 +298,10 @@ export default function EngineeringPanel({ agentId, role }) {
           {saving ? 'Saving...' : 'Save Engineering Config'}
         </button>
         {saveStatus === 'saved' && (
-          <span className="text-sm text-green-600 dark:text-green-400">Saved successfully</span>
+          <span className="text-sm text-green-600">Saved successfully</span>
         )}
         {saveStatus === 'error' && (
-          <span className="text-sm text-red-600 dark:text-red-400">Save failed</span>
+          <span className="text-sm text-red-600">Save failed</span>
         )}
       </div>
     </div>

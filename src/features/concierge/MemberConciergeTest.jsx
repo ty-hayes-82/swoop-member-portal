@@ -209,9 +209,9 @@ export default function MemberConciergeTest() {
   const isEmpty = messages.length === 0 && !loading;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100" style={{ height: '100dvh' }}>
+    <div className="flex flex-col h-screen bg-swoop-row" style={{ height: '100dvh' }}>
       {/* ── Member selector bar ─────────────────────────────────── */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-2">
+      <div className="flex-shrink-0 bg-swoop-panel border-b border-swoop-border px-3 py-2">
         <div className="flex items-center gap-1 overflow-x-auto pb-1">
           {MEMBERS.map(m => {
             const active = m.id === selectedId;
@@ -221,8 +221,8 @@ export default function MemberConciergeTest() {
                 onClick={() => selectMember(m.id)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all flex-shrink-0 ${
                   active
-                    ? 'bg-gray-900 text-white shadow-md'
-                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    ? 'bg-swoop-canvas text-white shadow-md'
+                    : 'bg-swoop-row text-swoop-text-2 hover:bg-swoop-row-hover'
                 }`}
               >
                 <div className={`w-8 h-8 rounded-full ${m.color} flex items-center justify-center text-white text-xs font-bold`}>
@@ -230,7 +230,7 @@ export default function MemberConciergeTest() {
                 </div>
                 <div className="text-left">
                   <div className="text-xs font-semibold leading-tight">{m.name.split(' ')[0]}</div>
-                  <div className={`text-[10px] leading-tight ${active ? 'text-gray-300' : 'text-gray-500'}`}>
+                  <div className={`text-[10px] leading-tight ${active ? 'text-swoop-text-ghost' : 'text-swoop-text-muted'}`}>
                     {m.archetype}
                   </div>
                 </div>
@@ -244,31 +244,31 @@ export default function MemberConciergeTest() {
       </div>
 
       {/* ── Context strip ───────────────────────────────────────── */}
-      <div className="flex-shrink-0 bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-swoop-row border-b border-swoop-border px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <div className={`w-10 h-10 rounded-full ${member.color} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
             {member.initials}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-900 text-sm">{member.name}</span>
-              <span className="text-xs text-gray-500">{member.revenue}</span>
+              <span className="font-semibold text-swoop-text text-sm">{member.name}</span>
+              <span className="text-xs text-swoop-text-muted">{member.revenue}</span>
               <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white ${healthColor(member.health)}`}>
                 {member.health}
               </span>
             </div>
-            <div className="text-xs text-gray-500 truncate">{member.archetype} &middot; {member.signal}</div>
+            <div className="text-xs text-swoop-text-muted truncate">{member.archetype} &middot; {member.signal}</div>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded border border-gray-200 hover:border-gray-300"
+            className="text-xs text-swoop-text-muted hover:text-swoop-text-2 px-2 py-1 rounded border border-swoop-border hover:border-swoop-border"
           >
             {sidebarOpen ? 'Hide' : 'Profile'}
           </button>
           {messages.length > 0 && (
-            <button onClick={clearChat} className="text-xs text-gray-400 hover:text-red-500 px-2 py-1">
+            <button onClick={clearChat} className="text-xs text-swoop-text-label hover:text-red-500 px-2 py-1">
               Clear
             </button>
           )}
@@ -289,15 +289,15 @@ export default function MemberConciergeTest() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-700 text-sm font-medium">Chatting as {member.name}</p>
-                  <p className="text-gray-500 text-xs mt-1">{member.archetype} &middot; Health {member.health} &middot; {member.revenue}</p>
+                  <p className="text-swoop-text-2 text-sm font-medium">Chatting as {member.name}</p>
+                  <p className="text-swoop-text-muted text-xs mt-1">{member.archetype} &middot; Health {member.health} &middot; {member.revenue}</p>
                 </div>
                 <div className="flex flex-col gap-2 w-full max-w-sm">
                   {member.suggestions.map(msg => (
                     <button
                       key={msg}
                       onClick={() => send(msg)}
-                      className="text-left text-sm bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                      className="text-left text-sm bg-swoop-panel border border-swoop-border rounded-xl px-4 py-3 text-swoop-text-2 hover:bg-swoop-row-hover active:bg-gray-100 transition-colors"
                     >
                       {msg}
                     </button>
@@ -312,11 +312,11 @@ export default function MemberConciergeTest() {
                   className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
                     msg.role === 'user'
                       ? 'bg-blue-500 text-white rounded-br-md'
-                      : 'bg-white text-gray-900 rounded-bl-md shadow-sm'
+                      : 'bg-swoop-panel text-swoop-text rounded-bl-md shadow-sm'
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                  <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
+                  <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-blue-100' : 'text-swoop-text-label'}`}>
                     {msg.time}
                   </p>
                 </div>
@@ -325,9 +325,9 @@ export default function MemberConciergeTest() {
 
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+                <div className="bg-swoop-panel rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                   <div className="flex items-center gap-1">
-                    <span className="text-xs text-gray-500">Concierge is typing</span>
+                    <span className="text-xs text-swoop-text-muted">Concierge is typing</span>
                     <span className="flex gap-0.5">
                       <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                       <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -351,7 +351,7 @@ export default function MemberConciergeTest() {
                   <button
                     key={i}
                     onClick={() => send(msg)}
-                    className="whitespace-nowrap text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full px-3 py-1.5 transition-colors flex-shrink-0"
+                    className="whitespace-nowrap text-xs bg-swoop-border hover:bg-gray-300 text-swoop-text-2 rounded-full px-3 py-1.5 transition-colors flex-shrink-0"
                   >
                     {msg}
                   </button>
@@ -362,7 +362,7 @@ export default function MemberConciergeTest() {
           {/* Input bar */}
           <form
             onSubmit={handleSubmit}
-            className="flex-shrink-0 bg-white border-t border-gray-200 px-3 py-2 flex items-end gap-2"
+            className="flex-shrink-0 bg-swoop-panel border-t border-swoop-border px-3 py-2 flex items-end gap-2"
           >
             <input
               ref={inputRef}
@@ -371,7 +371,7 @@ export default function MemberConciergeTest() {
               onChange={e => setInput(e.target.value)}
               placeholder={`Message as ${member.name.split(' ')[0]}...`}
               disabled={loading}
-              className="flex-1 rounded-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-50"
+              className="flex-1 rounded-full border border-swoop-border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-50"
               autoComplete="off"
             />
             <button
@@ -386,17 +386,17 @@ export default function MemberConciergeTest() {
           </form>
 
           {/* Powered by badge */}
-          <div className="flex-shrink-0 bg-white text-center py-1.5">
-            <span className="text-[10px] text-gray-400 tracking-wide">Powered by <span className="font-semibold text-gray-500">Swoop AI</span></span>
+          <div className="flex-shrink-0 bg-swoop-panel text-center py-1.5">
+            <span className="text-[10px] text-swoop-text-label tracking-wide">Powered by <span className="font-semibold text-swoop-text-muted">Swoop AI</span></span>
           </div>
         </div>
 
         {/* ── Collapsible sidebar ─────────────────────────────────── */}
         {sidebarOpen && (
-          <div className="w-80 flex-shrink-0 bg-white border-l border-gray-200 overflow-y-auto p-4 space-y-4">
+          <div className="w-80 flex-shrink-0 bg-swoop-panel border-l border-swoop-border overflow-y-auto p-4 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900 text-sm">Member Profile</h3>
-              <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+              <h3 className="font-semibold text-swoop-text text-sm">Member Profile</h3>
+              <button onClick={() => setSidebarOpen(false)} className="text-swoop-text-label hover:text-gray-600 text-lg leading-none">&times;</button>
             </div>
 
             <div className="flex items-center gap-3">
@@ -404,8 +404,8 @@ export default function MemberConciergeTest() {
                 {member.initials}
               </div>
               <div>
-                <div className="font-semibold text-gray-900">{member.name}</div>
-                <div className="text-xs text-gray-500">{member.id}</div>
+                <div className="font-semibold text-swoop-text">{member.name}</div>
+                <div className="text-xs text-swoop-text-muted">{member.id}</div>
               </div>
             </div>
 
@@ -416,18 +416,18 @@ export default function MemberConciergeTest() {
             </div>
 
             <div>
-              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Risk Signal</div>
+              <div className="text-xs font-medium text-swoop-text-muted uppercase tracking-wide mb-1">Risk Signal</div>
               <div className="text-sm text-red-700 bg-red-50 rounded-lg px-3 py-2">{member.signal}</div>
             </div>
 
             <div>
-              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Suggested Messages</div>
+              <div className="text-xs font-medium text-swoop-text-muted uppercase tracking-wide mb-2">Suggested Messages</div>
               <div className="space-y-1.5">
                 {member.suggestions.map(msg => (
                   <button
                     key={msg}
                     onClick={() => { send(msg); setSidebarOpen(false); }}
-                    className="w-full text-left text-xs bg-gray-50 hover:bg-gray-100 rounded-lg px-3 py-2 text-gray-700 transition-colors"
+                    className="w-full text-left text-xs bg-swoop-row hover:bg-swoop-row-hover rounded-lg px-3 py-2 text-swoop-text-2 transition-colors"
                   >
                     {msg}
                   </button>
@@ -443,11 +443,11 @@ export default function MemberConciergeTest() {
 
 function ProfileStat({ label, value, badge }) {
   return (
-    <div className="bg-gray-50 rounded-lg px-3 py-2">
-      <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
+    <div className="bg-swoop-row rounded-lg px-3 py-2">
+      <div className="text-[10px] text-swoop-text-muted uppercase tracking-wide">{label}</div>
       <div className="flex items-center gap-1.5 mt-0.5">
         {badge && <span className={`w-2.5 h-2.5 rounded-full ${badge}`} />}
-        <span className="text-sm font-semibold text-gray-900">{value}</span>
+        <span className="text-sm font-semibold text-swoop-text">{value}</span>
       </div>
     </div>
   );

@@ -57,24 +57,24 @@ export default function CohortTab() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
+      <div className="bg-swoop-panel border border-swoop-border rounded-xl p-6">
         <div className="flex justify-between items-start flex-wrap gap-4">
           <div>
             <h4 className="text-base font-bold text-[#1a1a2e] m-0 mb-1">
               First 90 Days
             </h4>
-            <p className="text-xs text-gray-400 m-0">
+            <p className="text-xs text-swoop-text-label m-0">
               New member integration tracking — are they building habits?
             </p>
           </div>
           <div className="flex gap-2">
             <div className="text-center px-3.5 py-1.5 rounded-lg bg-success-500/[0.06] border border-success-500/15">
               <div className="text-lg font-bold text-success-600" style={{ fontFamily: mono }}>{newMembers.length}</div>
-              <div className="text-[10px] text-gray-400">New Members</div>
+              <div className="text-[10px] text-swoop-text-label">New Members</div>
             </div>
             <div className={`text-center px-3.5 py-1.5 rounded-lg ${flaggedCount > 0 ? 'bg-orange-600/[0.06] border border-orange-600/15' : 'bg-success-500/[0.06] border border-success-500/15'}`}>
               <div className="text-lg font-bold" style={{ fontFamily: mono, color: flaggedCount > 0 ? '#ea580c' : '#039855' }}>{flaggedCount}</div>
-              <div className="text-[10px] text-gray-400">Falling Behind</div>
+              <div className="text-[10px] text-swoop-text-label">Falling Behind</div>
             </div>
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function CohortTab() {
           {PHASES.map((phase, i) => (
             <div key={phase.label} className="flex-1 px-3 py-2 text-center" style={{ background: `${phase.color}10`, borderRight: i < PHASES.length - 1 ? '2px solid #ffffff' : 'none' }}>
               <div className="text-[11px] font-bold" style={{ color: phase.color }}>{phase.label}</div>
-              <div className="text-[10px] text-gray-400">Weeks {phase.weeks}</div>
+              <div className="text-[10px] text-swoop-text-label">Weeks {phase.weeks}</div>
             </div>
           ))}
         </div>
@@ -98,7 +98,7 @@ export default function CohortTab() {
         const action = getSuggestedAction(member);
 
         return (
-          <div key={member.name} className="bg-white rounded-xl p-4" style={{ border: `1px solid ${isBehind ? 'rgba(234,88,12,0.2)' : '#E5E7EB'}` }}>
+          <div key={member.name} className="bg-swoop-panel rounded-xl p-4" style={{ border: `1px solid ${isBehind ? 'rgba(234,88,12,0.2)' : '#E5E7EB'}` }}>
             <div className="flex justify-between items-center flex-wrap gap-2 mb-2">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm text-[#1a1a2e]">{member.name}</span>
@@ -110,12 +110,12 @@ export default function CohortTab() {
                 <span className="text-sm font-bold px-2 py-0.5 rounded-md" style={{ fontFamily: mono, color: getScoreColor(member.healthScore), background: `${getScoreColor(member.healthScore)}10` }}>
                   {member.healthScore}
                 </span>
-                <span className="text-[11px] text-gray-400">{member.archetype}</span>
+                <span className="text-[11px] text-swoop-text-label">{member.archetype}</span>
               </div>
             </div>
 
             {/* Progress bar */}
-            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden mb-2">
+            <div className="h-1.5 bg-swoop-border rounded-full overflow-hidden mb-2">
               <div className="h-full rounded-full transition-[width] duration-400 ease-out" style={{ width: `${Math.min(member.daysIn / 90 * 100, 100)}%`, background: PHASES[phase].color }} />
             </div>
 

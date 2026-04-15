@@ -83,9 +83,9 @@ function ChatPanel({ config, side }) {
   const isEmpty = messages.length === 0 && !loading;
 
   return (
-    <div className="flex flex-col h-full border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+    <div className="flex flex-col h-full border border-swoop-border rounded-2xl overflow-hidden bg-swoop-panel shadow-sm">
       {/* Header */}
-      <div className="flex-shrink-0 px-4 py-3 flex items-center gap-3 border-b border-gray-200" style={{ background: `linear-gradient(135deg, ${config.color}08, ${config.color}15)` }}>
+      <div className="flex-shrink-0 px-4 py-3 flex items-center gap-3 border-b border-swoop-border" style={{ background: `linear-gradient(135deg, ${config.color}08, ${config.color}15)` }}>
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs"
           style={{ background: config.color }}
@@ -93,7 +93,7 @@ function ChatPanel({ config, side }) {
           {config.avatar}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-gray-900 text-sm">{config.name}</div>
+          <div className="font-semibold text-swoop-text text-sm">{config.name}</div>
           <div className="text-xs" style={{ color: config.color }}>{config.archetype}</div>
         </div>
       </div>
@@ -102,12 +102,12 @@ function ChatPanel({ config, side }) {
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2.5" style={{ minHeight: 0 }}>
         {isEmpty && (
           <div className="flex flex-col items-center justify-center h-full gap-3 px-4">
-            <p className="text-gray-400 text-sm text-center">
+            <p className="text-swoop-text-label text-sm text-center">
               Ask {getFirstName(config.name)} anything
             </p>
             <button
               onClick={() => send(config.seedMessage)}
-              className="text-left text-sm bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors w-full max-w-xs"
+              className="text-left text-sm bg-swoop-row border border-swoop-border rounded-xl px-4 py-3 text-swoop-text-2 hover:bg-swoop-row-hover transition-colors w-full max-w-xs"
             >
               "{config.seedMessage}"
             </button>
@@ -120,12 +120,12 @@ function ChatPanel({ config, side }) {
               className={`max-w-[85%] rounded-2xl px-3.5 py-2 ${
                 msg.role === 'user'
                   ? 'text-white rounded-br-md'
-                  : 'bg-gray-100 text-gray-900 rounded-bl-md'
+                  : 'bg-swoop-row text-swoop-text rounded-bl-md'
               }`}
               style={msg.role === 'user' ? { background: config.color } : undefined}
             >
               <p className="text-sm whitespace-pre-wrap m-0">{msg.text}</p>
-              <p className={`text-[10px] mt-1 m-0 ${msg.role === 'user' ? 'opacity-60' : 'text-gray-400'}`}>
+              <p className={`text-[10px] mt-1 m-0 ${msg.role === 'user' ? 'opacity-60' : 'text-swoop-text-label'}`}>
                 {msg.time}
               </p>
             </div>
@@ -134,9 +134,9 @@ function ChatPanel({ config, side }) {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-2.5">
+            <div className="bg-swoop-row rounded-2xl rounded-bl-md px-4 py-2.5">
               <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-500">Typing</span>
+                <span className="text-xs text-swoop-text-muted">Typing</span>
                 <span className="flex gap-0.5">
                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -153,7 +153,7 @@ function ChatPanel({ config, side }) {
       {/* Input */}
       <form
         onSubmit={(e) => { e.preventDefault(); send(input); }}
-        className="flex-shrink-0 border-t border-gray-200 px-3 py-2 flex items-center gap-2"
+        className="flex-shrink-0 border-t border-swoop-border px-3 py-2 flex items-center gap-2"
       >
         <input
           ref={inputRef}
@@ -162,7 +162,7 @@ function ChatPanel({ config, side }) {
           onChange={e => setInput(e.target.value)}
           placeholder={`Message ${getFirstName(config.name)}...`}
           disabled={loading}
-          className="flex-1 rounded-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:bg-gray-50"
+          className="flex-1 rounded-full border border-swoop-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:bg-gray-50"
           style={{ '--tw-ring-color': config.color }}
           autoComplete="off"
         />
@@ -183,18 +183,18 @@ function ChatPanel({ config, side }) {
 
 export default function ArchetypeCompare() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-swoop-row flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 px-6 py-4 bg-white border-b border-gray-200">
+      <div className="flex-shrink-0 px-6 py-4 bg-swoop-panel border-b border-swoop-border">
         <button
           type="button"
           onClick={() => { window.location.hash = '#/today'; }}
-          className="text-sm text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer mb-2 p-0"
+          className="text-sm text-swoop-text-label hover:text-gray-600 bg-transparent border-none cursor-pointer mb-2 p-0"
         >
           &larr; Back to Today
         </button>
-        <h1 className="text-xl font-bold text-gray-800 m-0">Archetype Compare</h1>
-        <p className="text-sm text-gray-500 mt-1 mb-0">
+        <h1 className="text-xl font-bold text-swoop-text m-0">Archetype Compare</h1>
+        <p className="text-sm text-swoop-text-muted mt-1 mb-0">
           Same platform, completely different experiences. Each member gets a concierge tuned to their archetype.
         </p>
       </div>

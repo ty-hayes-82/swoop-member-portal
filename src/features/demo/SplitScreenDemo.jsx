@@ -39,7 +39,7 @@ function AgentEventCard({ event, index }) {
     'member-risk': 'border-amber-400 bg-amber-950/60',
     'concierge': 'border-emerald-400 bg-emerald-950/60',
     'health-score': 'border-purple-400 bg-purple-950/60',
-  }[event.agent] || 'border-gray-500 bg-gray-900/60';
+  }[event.agent] || 'border-swoop-border bg-gray-900/60';
 
   const avatarIcon = {
     'service-recovery': '\u{1F6A8}',
@@ -59,13 +59,13 @@ function AgentEventCard({ event, index }) {
         <div className="text-2xl flex-shrink-0">{avatarIcon}</div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-300">
+            <span className="text-xs font-bold uppercase tracking-wider text-swoop-text-ghost">
               {event.agentLabel}
             </span>
-            <span className="text-[10px] text-gray-500 flex-shrink-0">{event.time}</span>
+            <span className="text-[10px] text-swoop-text-muted flex-shrink-0">{event.time}</span>
           </div>
           <div className="text-sm text-gray-100 font-medium mb-1">{event.title}</div>
-          <div className="text-xs text-gray-400 leading-relaxed">{event.detail}</div>
+          <div className="text-xs text-swoop-text-label leading-relaxed">{event.detail}</div>
           {event.action && (
             <div className="mt-2 text-xs font-semibold text-emerald-400 bg-emerald-900/40 rounded px-2 py-1 inline-block">
               {event.action}
@@ -128,17 +128,17 @@ function ConciergePanel({ onMessageSent, resetKey }) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-100">
+    <div className="flex flex-col h-full bg-swoop-row">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+      <div className="flex-shrink-0 bg-swoop-panel border-b border-swoop-border px-4 py-3 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-sm">
           PC
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-gray-900 text-sm">Pinetree CC Concierge</div>
-          <div className="text-xs text-gray-500">James Whitfield</div>
+          <div className="font-semibold text-swoop-text text-sm">Pinetree CC Concierge</div>
+          <div className="text-xs text-swoop-text-muted">James Whitfield</div>
         </div>
-        <div className="text-[10px] text-gray-400 bg-gray-100 rounded-full px-2 py-1">Member View</div>
+        <div className="text-[10px] text-swoop-text-label bg-swoop-row rounded-full px-2 py-1">Member View</div>
       </div>
 
       {/* Messages */}
@@ -148,7 +148,7 @@ function ConciergePanel({ onMessageSent, resetKey }) {
             <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
               <span className="text-2xl">&#127965;</span>
             </div>
-            <p className="text-gray-500 text-sm text-center">
+            <p className="text-swoop-text-muted text-sm text-center">
               Welcome to Pinetree Country Club. How can I help you today?
             </p>
             {showSuggestions && (
@@ -157,7 +157,7 @@ function ConciergePanel({ onMessageSent, resetKey }) {
                   <button
                     key={i}
                     onClick={() => send(msg)}
-                    className="text-left text-sm bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                    className="text-left text-sm bg-swoop-panel border border-swoop-border rounded-xl px-4 py-3 text-swoop-text-2 hover:bg-swoop-row-hover active:bg-gray-100 transition-colors"
                   >
                     {msg}
                   </button>
@@ -172,10 +172,10 @@ function ConciergePanel({ onMessageSent, resetKey }) {
             <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
               msg.role === 'user'
                 ? 'bg-blue-500 text-white rounded-br-md'
-                : 'bg-white text-gray-900 rounded-bl-md shadow-sm'
+                : 'bg-swoop-panel text-swoop-text rounded-bl-md shadow-sm'
             }`}>
               <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-              <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
+              <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-blue-100' : 'text-swoop-text-label'}`}>
                 {msg.time}
               </p>
             </div>
@@ -184,9 +184,9 @@ function ConciergePanel({ onMessageSent, resetKey }) {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+            <div className="bg-swoop-panel rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
               <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-500">Concierge is typing</span>
+                <span className="text-xs text-swoop-text-muted">Concierge is typing</span>
                 <span className="flex gap-0.5">
                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -206,7 +206,7 @@ function ConciergePanel({ onMessageSent, resetKey }) {
             <button
               key={i}
               onClick={() => send(msg)}
-              className="whitespace-nowrap text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full px-3 py-1.5 transition-colors flex-shrink-0"
+              className="whitespace-nowrap text-xs bg-swoop-border hover:bg-gray-300 text-swoop-text-2 rounded-full px-3 py-1.5 transition-colors flex-shrink-0"
             >
               {msg}
             </button>
@@ -217,7 +217,7 @@ function ConciergePanel({ onMessageSent, resetKey }) {
       {/* Input bar */}
       <form
         onSubmit={(e) => { e.preventDefault(); send(input); }}
-        className="flex-shrink-0 bg-white border-t border-gray-200 px-3 py-2 flex items-end gap-2"
+        className="flex-shrink-0 bg-swoop-panel border-t border-swoop-border px-3 py-2 flex items-end gap-2"
       >
         <input
           ref={inputRef}
@@ -226,7 +226,7 @@ function ConciergePanel({ onMessageSent, resetKey }) {
           onChange={e => setInput(e.target.value)}
           placeholder="Message concierge..."
           disabled={loading}
-          className="flex-1 rounded-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-50"
+          className="flex-1 rounded-full border border-swoop-border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-50"
           autoComplete="off"
         />
         <button
@@ -277,15 +277,15 @@ function GMIntelFeed({ events, loading }) {
   const agentCount = new Set(events.map(e => e.agent)).size;
 
   return (
-    <div className="flex flex-col h-full bg-gray-950 text-white">
+    <div className="flex flex-col h-full bg-swoop-canvas text-white">
       {/* Header */}
-      <div className="flex-shrink-0 border-b border-gray-800 px-4 py-3 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-sm">
+      <div className="flex-shrink-0 border-b border-swoop-border px-4 py-3 flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-swoop-row flex items-center justify-center text-sm">
           &#129504;
         </div>
         <div className="flex-1">
           <div className="font-semibold text-sm text-gray-100">GM Intelligence Feed</div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wider">Real-time Agent Activations</div>
+          <div className="text-[10px] text-swoop-text-muted uppercase tracking-wider">Real-time Agent Activations</div>
         </div>
         <div className="flex items-center gap-2">
           {agentCount > 0 && (
@@ -313,8 +313,8 @@ function GMIntelFeed({ events, loading }) {
         {events.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
             <div className="text-4xl opacity-30">&#129504;</div>
-            <p className="text-gray-500 text-sm">Waiting for member interaction...</p>
-            <p className="text-gray-600 text-xs max-w-[240px]">
+            <p className="text-swoop-text-muted text-sm">Waiting for member interaction...</p>
+            <p className="text-swoop-text-muted text-xs max-w-[240px]">
               When the member sends a message, agents will activate here in real time.
             </p>
           </div>
@@ -325,13 +325,13 @@ function GMIntelFeed({ events, loading }) {
         ))}
 
         {loading && (
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-800 bg-gray-900/50">
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-swoop-border bg-gray-900/50">
             <div className="flex gap-0.5">
               <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
               <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
               <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <span className="text-xs text-gray-400">Agents analyzing interaction...</span>
+            <span className="text-xs text-swoop-text-label">Agents analyzing interaction...</span>
           </div>
         )}
         <div ref={bottomRef} />
@@ -343,8 +343,8 @@ function GMIntelFeed({ events, loading }) {
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-sm font-semibold text-white">James Whitfield</span>
           <span className="text-sm font-bold text-emerald-400">$18K/yr</span>
-          <span className="text-xs text-gray-300">6-year member</span>
-          <span className="text-xs text-gray-400">Balanced Active</span>
+          <span className="text-xs text-swoop-text-ghost">6-year member</span>
+          <span className="text-xs text-swoop-text-label">Balanced Active</span>
           <span className="text-sm font-bold text-amber-400 bg-amber-900/50 rounded px-2 py-0.5">Health: 42</span>
         </div>
       </div>
@@ -404,16 +404,16 @@ export default function SplitScreenDemo() {
   return (
     <div className="flex flex-col h-screen" style={{ height: '100dvh' }}>
       {/* Top header bar */}
-      <div className="flex-shrink-0 bg-gray-900 text-white px-4 py-3 flex items-center justify-between gap-3 border-b border-gray-700">
+      <div className="flex-shrink-0 bg-swoop-canvas text-white px-4 py-3 flex items-center justify-between gap-3 border-b border-swoop-border">
         <div className="min-w-0">
           <div className="text-sm font-bold tracking-wide uppercase">SWOOP DEMO — Both Sides of the Glass</div>
-          <div className="text-[11px] text-gray-400 hidden sm:block">
+          <div className="text-[11px] text-swoop-text-label hidden sm:block">
             Left: what the member sees. Right: what the GM sees. Same moment.
           </div>
         </div>
         <button
           onClick={handleReset}
-          className="flex-shrink-0 text-xs font-semibold bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg px-3 py-1.5 transition-colors"
+          className="flex-shrink-0 text-xs font-semibold bg-swoop-row hover:bg-gray-600 text-swoop-text-ghost rounded-lg px-3 py-1.5 transition-colors"
         >
           Clear &amp; Reset
         </button>
@@ -422,7 +422,7 @@ export default function SplitScreenDemo() {
       {/* Content area */}
       <div className="flex-1 flex flex-col md:flex-row min-h-0 relative">
         {/* LEFT: Concierge Chat (55% desktop, full on mobile) */}
-        <div className={`md:w-[55%] md:border-r border-gray-300 flex-1 min-h-0 ${mobileTab !== 'chat' ? 'hidden md:flex md:flex-col' : 'flex flex-col'}`}>
+        <div className={`md:w-[55%] md:border-r border-swoop-border flex-1 min-h-0 ${mobileTab !== 'chat' ? 'hidden md:flex md:flex-col' : 'flex flex-col'}`}>
           <ConciergePanel onMessageSent={handleMessageSent} resetKey={resetKey} />
         </div>
 
@@ -434,7 +434,7 @@ export default function SplitScreenDemo() {
         {/* Mobile floating toggle */}
         <button
           onClick={() => setMobileTab(t => t === 'chat' ? 'feed' : 'chat')}
-          className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white text-sm font-semibold px-5 py-3 rounded-full shadow-lg border border-gray-600 active:scale-95 transition-transform"
+          className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-swoop-row text-white text-sm font-semibold px-5 py-3 rounded-full shadow-lg border border-swoop-border active:scale-95 transition-transform"
         >
           {mobileToggleLabel}
         </button>

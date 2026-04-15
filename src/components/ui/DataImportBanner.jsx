@@ -142,7 +142,7 @@ export default function DataImportBanner() {
       }}
     >
       <div
-        className="mx-auto max-w-4xl mt-3 px-5 py-3.5 rounded-xl shadow-theme-xl bg-white/95 backdrop-blur-sm border border-gray-200 flex items-center gap-3 text-sm text-gray-800 font-medium"
+        className="mx-auto max-w-4xl mt-3 px-5 py-3.5 rounded-xl shadow-theme-xl bg-white/95 backdrop-blur-sm border border-swoop-border flex items-center gap-3 text-sm text-swoop-text font-medium"
         style={{
           borderLeft: '4px solid #22c55e',
           background: 'linear-gradient(90deg, rgba(34,197,94,0.06) 0%, rgba(255,255,255,0.97) 30%)',
@@ -150,7 +150,7 @@ export default function DataImportBanner() {
       >
         <span className="text-green-600 text-lg flex-shrink-0">&#10003;</span>
         <span className="flex-1">{banner.message}</span>
-        <span className="text-gray-400 text-xs flex-shrink-0 ml-2">click to dismiss</span>
+        <span className="text-swoop-text-label text-xs flex-shrink-0 ml-2">click to dismiss</span>
       </div>
     </div>
   );

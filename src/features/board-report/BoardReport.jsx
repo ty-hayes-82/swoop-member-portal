@@ -28,7 +28,7 @@ const colors = {
   textMuted: '#BCC3CF',
   text: '#D8DCE3',
   white: '#F0F0F5',
-  brand: '#ff8b00',
+  brand: '#F3922D',
 };
 
 function formatCurrency(val) {
@@ -86,7 +86,7 @@ function KPIStrip({ kpis, navigate, onDrillDown }) {
           <div
             key={kpi.label}
             onClick={() => dest ? navigate?.(dest) : onDrillDown?.()}
-            className="bg-gray-900 rounded-xl p-4 text-center border border-[#2d2d44] cursor-pointer transition-all duration-150 hover:shadow-lg hover:-translate-y-px"
+            className="bg-swoop-canvas rounded-xl p-4 text-center border border-[#2d2d44] cursor-pointer transition-all duration-150 hover:shadow-lg hover:-translate-y-px"
           >
             <div className={`text-[28px] font-bold ${colorMap[kpi.color] || 'text-success-500'}`}>
               {kpi.prefix}
@@ -183,8 +183,8 @@ export default function BoardReport() {
       <PageTransition>
         <div className="p-6 w-full">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Board Report — Service, Members & Operations</h1>
-            <p className="text-sm text-gray-500 mt-1">Monthly executive summary — service quality, member health, and operational response</p>
+            <h1 className="text-2xl font-bold text-swoop-text">Board Report — Service, Members & Operations</h1>
+            <p className="text-sm text-swoop-text-muted mt-1">Monthly executive summary — service quality, member health, and operational response</p>
           </div>
           <DataEmptyState icon="📊" title="Board report needs data" description="Import member, golf, and F&B data to generate your executive board report with KPIs, member saves, and operational insights." dataType="club data" />
           <AgentUpsell
@@ -217,10 +217,10 @@ export default function BoardReport() {
       <div className="p-6 w-full">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+          <h1 className="text-xl sm:text-2xl font-bold text-swoop-text">
             Board Report — Service, Members & Operations
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-swoop-text-muted mt-1">
             Monthly executive summary — service quality, member health, and operational response
           </p>
         </div>
@@ -247,8 +247,8 @@ export default function BoardReport() {
       <KPIStrip kpis={kpis} navigate={navigate} onDrillDown={() => setActiveTab(1)} />
 
       {/* Board Confidence Score Methodology */}
-      <details className="mb-4 bg-white border border-gray-200 rounded-lg p-3 px-4">
-        <summary className="text-xs font-semibold text-gray-400 cursor-pointer list-none flex items-center gap-1.5">
+      <details className="mb-4 bg-swoop-panel border border-swoop-border rounded-lg p-3 px-4">
+        <summary className="text-xs font-semibold text-swoop-text-label cursor-pointer list-none flex items-center gap-1.5">
           <span className="text-sm">&#9432;</span> How is the Board Confidence Score calculated?
         </summary>
         <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2.5">
@@ -258,10 +258,10 @@ export default function BoardReport() {
             { label: 'Operational Response', weight: '25%', value: `${avgDetectionHrs != null ? `${avgDetectionHrs} hrs` : '—'} avg`, benchmark: 'Detection to action time', color: 'text-amber-500' },
             { label: 'Financial Performance', weight: '20%', value: totalDues > 0 ? `$${totalDues.toLocaleString()} protected` : 'No data', benchmark: 'Dues + F&B vs plan', color: 'text-violet-500' },
           ].map(m => (
-            <div key={m.label} className="p-2.5 rounded-lg bg-gray-100 border border-gray-200">
+            <div key={m.label} className="p-2.5 rounded-lg bg-swoop-row border border-swoop-border">
               <div className={`text-[10px] font-bold uppercase tracking-wide ${m.color}`}>{m.label} ({m.weight})</div>
-              <div className="text-sm font-bold text-gray-800 mt-1">{m.value}</div>
-              <div className="text-[10px] text-gray-400">{m.benchmark}</div>
+              <div className="text-sm font-bold text-swoop-text mt-1">{m.value}</div>
+              <div className="text-[10px] text-swoop-text-label">{m.benchmark}</div>
             </div>
           ))}
         </div>
@@ -276,7 +276,7 @@ export default function BoardReport() {
             className={`px-5 py-2 rounded-lg cursor-pointer font-semibold text-sm transition-all duration-150 focus-visible:ring-2 focus-visible:ring-brand-500 ${
               activeTab === i
                 ? 'bg-brand-500 text-white border-none'
-                : 'bg-transparent text-gray-400 border border-gray-300'
+                : 'bg-transparent text-swoop-text-label border border-swoop-border'
             }`}
           >{tab}</button>
         ))}
@@ -289,7 +289,7 @@ export default function BoardReport() {
           <div className="text-[10px] font-bold uppercase tracking-widest text-brand-500 mb-2">
             ⬢ Auto-Generated Executive Narrative
           </div>
-          <p className="text-sm text-gray-800 dark:text-white/90 leading-relaxed m-0">
+          <p className="text-sm text-swoop-text leading-relaxed m-0">
             {memberSaves.length > 0 ? (
               <>
                 This month, <strong>{getClubName()}</strong> retained{' '}
@@ -319,10 +319,10 @@ export default function BoardReport() {
         <>
           {/* Executive Summary — covers service, operations, and member health */}
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 mb-4">
+            <h2 className="text-lg font-bold text-swoop-text mb-4">
               Executive Summary
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="text-swoop-text-muted leading-relaxed mb-4">
               {feedbackRecords.length === 0 ? (
                 <>This month, no service complaints were logged at {getClubName()}.</>
               ) : resolutionRate > 0 ? (
@@ -337,7 +337,7 @@ export default function BoardReport() {
                 : <>, with no service disruptions identified this period.</>
               }
             </p>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="text-swoop-text-muted leading-relaxed mb-4">
               {dist.find(d => d.level === 'Healthy')?.count > 0 ? (
                 <>Member health remained strong with <strong>{dist.find(d => d.level === 'Healthy').count} members in healthy status</strong>.
                 Through proactive interventions, <strong>{memberSaves.length} members</strong> showing early disengagement signals were
@@ -348,7 +348,7 @@ export default function BoardReport() {
                 Early detection is live — intervention opportunities will appear in the Action Inbox as patterns emerge.</>
               )}
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-swoop-text-muted leading-relaxed">
               Staffing alignment and proactive scheduling adjustments prevented service gaps on high-demand days. The
               operational response improvements continue to compound, with response times improving {responseTimeImprovement}% since launch.
             </p>
@@ -359,29 +359,29 @@ export default function BoardReport() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <button
                 onClick={() => setActiveTab(1)}
-                className="bg-white border border-gray-200 rounded-xl p-4 text-left cursor-pointer hover:border-brand-500 transition-colors dark:bg-white/[0.03] dark:border-gray-800"
+                className="bg-swoop-panel border border-swoop-border rounded-xl p-4 text-left cursor-pointer hover:border-brand-500 transition-colors"
               >
                 <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Member Saves Detail →</div>
-                <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{memberSaves.length}</div>
-                <div className="text-xs text-gray-500">members retained · ${totalDues.toLocaleString()} dues protected</div>
+                <div className="text-2xl font-bold text-swoop-text font-mono mt-1">{memberSaves.length}</div>
+                <div className="text-xs text-swoop-text-muted">members retained · ${totalDues.toLocaleString()} dues protected</div>
               </button>
               <button
                 onClick={() => setActiveTab(2)}
-                className="bg-white border border-gray-200 rounded-xl p-4 text-left cursor-pointer hover:border-brand-500 transition-colors dark:bg-white/[0.03] dark:border-gray-800"
+                className="bg-swoop-panel border border-swoop-border rounded-xl p-4 text-left cursor-pointer hover:border-brand-500 transition-colors"
               >
                 <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Operational Saves Detail →</div>
-                <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{operationalSaves.length}</div>
-                <div className="text-xs text-gray-500">disruptions prevented · ${totalOpsRevenue.toLocaleString()} protected</div>
+                <div className="text-2xl font-bold text-swoop-text font-mono mt-1">{operationalSaves.length}</div>
+                <div className="text-xs text-swoop-text-muted">disruptions prevented · ${totalOpsRevenue.toLocaleString()} protected</div>
               </button>
             </div>
           )}
 
           {/* Service & Operations — unified section */}
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
+            <h2 className="text-lg font-bold text-swoop-text mb-1.5">
               Service & Operations
             </h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-swoop-text-muted mb-4">
               Service consistency, complaint resolution, staffing coverage, and operational response.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
@@ -391,21 +391,21 @@ export default function BoardReport() {
                 );
                 const csColorClass = consistencyScore >= 70 ? 'text-success-500' : consistencyScore >= 50 ? 'text-warning-500' : 'text-error-500';
                 return (
-                  <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                  <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                     <div className={`text-[28px] font-bold ${csColorClass}`}>{consistencyScore}</div>
                     <div className="text-[11px] text-[#BCC3CF]">Service Consistency Score</div>
                   </div>
                 );
               })()}
-              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+              <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{resolutionRate}%</div>
                 <div className="text-[11px] text-[#BCC3CF]">Complaint Resolution Rate</div>
               </div>
-              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+              <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{Math.round(((30 - understaffedDays.length) / 30) * 100)}%</div>
                 <div className="text-[11px] text-[#BCC3CF]">Staffing Alignment Rate</div>
               </div>
-              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+              <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{avgDetectionHrs != null ? `${avgDetectionHrs} hrs` : '—'}</div>
                 <div className="text-[11px] text-[#BCC3CF]">Avg Detection to Action</div>
               </div>
@@ -413,15 +413,15 @@ export default function BoardReport() {
 
             {/* Staffing detail row */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+              <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{Math.max(0, 30 - understaffedDays.length)}</div>
                 <div className="text-[11px] text-[#BCC3CF]">Days Fully Staffed</div>
               </div>
-              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+              <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{operationalSaves.length}</div>
                 <div className="text-[11px] text-[#BCC3CF]">Staffing Recommendations Acted On</div>
               </div>
-              <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+              <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 {(() => {
                   const understaffedComplaintPct = feedbackRecords.length > 0 ? Math.round((feedbackRecords.filter(f => f.isUnderstaffedDay).length / feedbackRecords.length) * 100) : 0;
                   return (
@@ -437,9 +437,9 @@ export default function BoardReport() {
             {/* Complaint categories */}
             <div className="flex gap-2 flex-wrap">
               {feedbackSummary.slice(0, 4).map(cat => (
-                <div key={cat.category} className="py-1.5 px-3 rounded-lg text-xs bg-gray-100 border border-gray-200">
-                  <span className="font-semibold text-gray-800 dark:text-white/90">{cat.category}</span>
-                  <span className="text-gray-400"> — {cat.count} total, {cat.unresolvedCount} open</span>
+                <div key={cat.category} className="py-1.5 px-3 rounded-lg text-xs bg-swoop-row border border-swoop-border">
+                  <span className="font-semibold text-swoop-text">{cat.category}</span>
+                  <span className="text-swoop-text-label"> — {cat.count} total, {cat.unresolvedCount} open</span>
                 </div>
               ))}
             </div>
@@ -447,10 +447,10 @@ export default function BoardReport() {
 
           {/* Weather Impact Summary */}
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
+            <h2 className="text-lg font-bold text-swoop-text mb-1.5">
               Weather Impact
             </h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-swoop-text-muted mb-4">
               Weather conditions and their effect on operations this month.
             </p>
             {(() => {
@@ -480,26 +480,26 @@ export default function BoardReport() {
               return (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                    <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                    <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                       <div className={`text-[28px] font-bold ${totalWeatherDays > 3 ? 'text-warning-500' : 'text-blue-400'}`}>
                         {totalWeatherDays || '—'}
                       </div>
                       <div className="text-[11px] text-[#BCC3CF]">Adverse Weather Days</div>
                     </div>
-                    <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                    <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                       <div className="text-[28px] font-bold text-blue-400">
                         {weatherImpactedComplaints.length || '—'}
                       </div>
                       <div className="text-[11px] text-[#BCC3CF]">Weather-Related Complaints</div>
                     </div>
-                    <div className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                    <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                       <div className={`text-[28px] font-bold ${adjScoreColorClass}`}>
                         {weatherImpactedComplaints.length > 0 ? adjScore : '—'}
                       </div>
                       <div className="text-[11px] text-[#BCC3CF]">Weather-Adj Consistency</div>
                     </div>
                   </div>
-                  <div className="text-[13px] text-gray-600 leading-relaxed">
+                  <div className="text-[13px] text-swoop-text-muted leading-relaxed">
                     {weatherImpactedComplaints.length > 0 ? (
                       <>
                         <strong>{weatherImpactedComplaints.length} complaints</strong> ({weatherPct}%) occurred on weather-impacted days,
@@ -521,10 +521,10 @@ export default function BoardReport() {
 
           {/* Member Health Overview */}
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 mb-1.5">
+            <h2 className="text-lg font-bold text-swoop-text mb-1.5">
               Member Health Overview
             </h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-swoop-text-muted mb-4">
               Health distribution and intervention outcomes this month.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
@@ -532,7 +532,7 @@ export default function BoardReport() {
                 const delta = Number.isFinite(d?.delta) ? d.delta : 0;
                 const deltaColorClass = delta > 0 ? 'text-error-500' : delta < 0 ? 'text-success-500' : 'text-[#BCC3CF]';
                 return (
-                  <div key={d.level} className="bg-gray-900 rounded-xl p-3.5 border border-[#2d2d44] text-center">
+                  <div key={d.level} className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                     <div className="text-2xl font-bold" style={{ color: d.color }}>{d.count}</div>
                     <div className="text-[11px] text-[#BCC3CF]">{d.level}</div>
                     {delta !== 0 && (
@@ -544,7 +544,7 @@ export default function BoardReport() {
                 );
               })}
             </div>
-            <div className="text-[13px] text-gray-600 leading-relaxed">
+            <div className="text-[13px] text-swoop-text-muted leading-relaxed">
               <strong>{memberSaves.length} members</strong> were successfully re-engaged through proactive interventions this month.
               Top interventions included GM personal calls, F&B director outreach, and membership director meetings.
             </div>
@@ -552,7 +552,7 @@ export default function BoardReport() {
 
           {/* F&B Performance */}
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-1.5">
+            <h2 className="text-lg font-bold text-swoop-text mb-1.5">
               F&B Performance
             </h2>
             {(() => {
@@ -573,26 +573,26 @@ export default function BoardReport() {
                 const prdRate = '68.5%'; // from validated seed data
                 return (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
-                      <div className="text-2xl font-bold text-gray-800 dark:text-white/90">${Math.round(normalAvg).toLocaleString()}</div>
-                      <div className="text-xs text-gray-500">Avg Daily F&B Revenue</div>
+                    <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                      <div className="text-2xl font-bold text-swoop-text">${Math.round(normalAvg).toLocaleString()}</div>
+                      <div className="text-xs text-swoop-text-muted">Avg Daily F&B Revenue</div>
                     </div>
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
+                    <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
                       <div className="text-2xl font-bold text-[#ef4444]">-${Math.round(totalRevLoss).toLocaleString()}</div>
-                      <div className="text-xs text-gray-500">Revenue Lost (Understaffed)</div>
+                      <div className="text-xs text-swoop-text-muted">Revenue Lost (Understaffed)</div>
                     </div>
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
+                    <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
                       <div className="text-2xl font-bold text-[#12b76a]">{prdRate}</div>
-                      <div className="text-xs text-gray-500">Post-Round Dining Rate</div>
+                      <div className="text-xs text-swoop-text-muted">Post-Round Dining Rate</div>
                     </div>
                   </div>
                 );
               }
               return (
                 <>
-                  <div className="rounded-xl border border-warning-500/40 bg-warning-50 dark:bg-warning-500/10 p-2 px-3 mb-4 text-xs flex items-center gap-1.5">
+                  <div className="rounded-xl border border-warning-500/40 bg-warning-50 p-2 px-3 mb-4 text-xs flex items-center gap-1.5">
                     <span className="font-bold text-warning-500">Awaiting data</span>
-                    <span className="text-gray-400">— Import F&B transactions via CSV Import or connect your POS system to unlock revenue metrics.</span>
+                    <span className="text-swoop-text-label">— Import F&B transactions via CSV Import or connect your POS system to unlock revenue metrics.</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 opacity-40">
                     {[
@@ -600,9 +600,9 @@ export default function BoardReport() {
                       { label: 'Covers vs Capacity', value: '—' },
                       { label: 'Post-Round Dining Rate', value: '—' },
                     ].map(m => (
-                      <div key={m.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700 text-center">
-                        <div className="text-2xl font-bold text-gray-400">{m.value}</div>
-                        <div className="text-xs text-gray-400">{m.label}</div>
+                      <div key={m.label} className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                        <div className="text-2xl font-bold text-swoop-text-label">{m.value}</div>
+                        <div className="text-xs text-swoop-text-label">{m.label}</div>
                       </div>
                     ))}
                   </div>
@@ -619,34 +619,34 @@ export default function BoardReport() {
         <div className="flex flex-col gap-4">
           {/* Header KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
               <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Members Retained</div>
-              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{memberSaves.length}</div>
-              <div className="text-xs text-gray-500 mt-1">through proactive intervention</div>
+              <div className="text-3xl font-bold text-swoop-text font-mono mt-1">{memberSaves.length}</div>
+              <div className="text-xs text-swoop-text-muted mt-1">through proactive intervention</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
               <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Dues Protected</div>
-              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">${totalDues.toLocaleString()}</div>
-              <div className="text-xs text-gray-500 mt-1">annual dues from saved members</div>
+              <div className="text-3xl font-bold text-swoop-text font-mono mt-1">${totalDues.toLocaleString()}</div>
+              <div className="text-xs text-swoop-text-muted mt-1">annual dues from saved members</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
               <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Avg Health Improvement</div>
-              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">
+              <div className="text-3xl font-bold text-swoop-text font-mono mt-1">
                 {memberSaves.length > 0
                   ? '+' + Math.round(memberSaves.reduce((s, m) => s + ((m.healthAfter || 0) - (m.healthBefore || 0)), 0) / memberSaves.length)
                   : '—'}
               </div>
-              <div className="text-xs text-gray-500 mt-1">health score points per save</div>
+              <div className="text-xs text-swoop-text-muted mt-1">health score points per save</div>
             </div>
           </div>
           {duesAtRiskNote && (
-            <div className="text-xs text-gray-500 italic bg-gray-50 dark:bg-white/[0.03] rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-800">
+            <div className="text-xs text-swoop-text-muted italic bg-swoop-row rounded-lg px-3 py-2 border border-swoop-border">
               {duesAtRiskNote}
             </div>
           )}
 
           {memberSaves.length === 0 && (
-            <div className="py-8 text-center text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+            <div className="py-8 text-center text-sm text-swoop-text-muted border border-dashed border-swoop-border rounded-xl">
               No member saves recorded yet. Approve actions in the{' '}
               <button
                 type="button"
@@ -662,7 +662,7 @@ export default function BoardReport() {
           {memberSaves.map((m) => (
             <Panel key={m.name || m.memberName}>
               <div className="flex justify-between items-center mb-2.5 cursor-pointer" onClick={() => m.memberId && openProfile(m.memberId)} title="Click to open member profile">
-                <h3 className="text-base font-bold text-gray-800 dark:text-white/90 hover:text-brand-500 transition-colors">
+                <h3 className="text-base font-bold text-swoop-text hover:text-brand-500 transition-colors">
                   <MemberLink memberId={m.memberId} mode="drawer" className="!text-inherit !no-underline hover:!text-brand-500">
                     {m.name || m.memberName}
                   </MemberLink>
@@ -673,18 +673,18 @@ export default function BoardReport() {
                 )}
               </div>
               <div className="flex gap-2 items-center mb-2.5">
-                <span className="text-[13px] text-gray-500">Health:</span>
+                <span className="text-[13px] text-swoop-text-muted">Health:</span>
                 <HealthBadge value={m.healthBefore} />
-                <span className="text-gray-500">{'→'}</span>
+                <span className="text-swoop-text-muted">{'→'}</span>
                 <HealthBadge value={m.healthAfter} />
               </div>
-              <div className="text-[13px] leading-relaxed text-gray-600 dark:text-gray-400">
+              <div className="text-[13px] leading-relaxed text-swoop-text-muted">
                 <div><strong>Trigger:</strong> {m.trigger}</div>
                 <div><strong>Action:</strong> {m.action}</div>
                 <div><strong>Outcome:</strong> <span className="text-success-500">{m.outcome}</span></div>
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
-                <div className="text-[11px] font-semibold text-gray-500 mb-2 uppercase tracking-wide">Evidence Chain</div>
+              <div className="mt-3 pt-3 border-t border-swoop-border">
+                <div className="text-[11px] font-semibold text-swoop-text-muted mb-2 uppercase tracking-wide">Evidence Chain</div>
                 <div className="flex items-center flex-wrap">
                   {[
                     { label: 'Signal detected', color: 'bg-red-500' },
@@ -695,9 +695,9 @@ export default function BoardReport() {
                     <div key={step.label} className="flex items-center">
                       <div className="flex items-center gap-1">
                         <div className={`w-2 h-2 rounded-full ${step.color}`} />
-                        <span className="text-[11px] text-gray-600 dark:text-gray-400 whitespace-nowrap">{step.label}</span>
+                        <span className="text-[11px] text-swoop-text-muted whitespace-nowrap">{step.label}</span>
                       </div>
-                      {i < 3 && <span className="mx-1.5 text-gray-500 text-[10px]">{'-->'}</span>}
+                      {i < 3 && <span className="mx-1.5 text-swoop-text-muted text-[10px]">{'-->'}</span>}
                     </div>
                   ))}
                 </div>
@@ -713,32 +713,32 @@ export default function BoardReport() {
         <div className="flex flex-col gap-4">
           {/* Header KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
               <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Disruptions Prevented</div>
-              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{operationalSaves.length}</div>
-              <div className="text-xs text-gray-500 mt-1">caught before member impact</div>
+              <div className="text-3xl font-bold text-swoop-text font-mono mt-1">{operationalSaves.length}</div>
+              <div className="text-xs text-swoop-text-muted mt-1">caught before member impact</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
               <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Revenue Protected</div>
-              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">${totalOpsRevenue.toLocaleString()}</div>
-              <div className="text-xs text-gray-500 mt-1">from operational saves this month</div>
+              <div className="text-3xl font-bold text-swoop-text font-mono mt-1">${totalOpsRevenue.toLocaleString()}</div>
+              <div className="text-xs text-swoop-text-muted mt-1">from operational saves this month</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+            <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
               <div className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Avg Detection-to-Action</div>
-              <div className="text-3xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{avgDetectionHrs != null ? `${avgDetectionHrs} hrs` : '—'}</div>
-              <div className="text-xs text-gray-500 mt-1">vs industry standard 6+ weeks</div>
+              <div className="text-3xl font-bold text-swoop-text font-mono mt-1">{avgDetectionHrs != null ? `${avgDetectionHrs} hrs` : '—'}</div>
+              <div className="text-xs text-swoop-text-muted mt-1">vs industry standard 6+ weeks</div>
             </div>
           </div>
 
           {operationalSaves.map((o) => (
             <Panel key={o.event}>
               <div className="flex justify-between items-center mb-2.5">
-                <h3 className="text-base font-bold text-gray-800 dark:text-white/90">{o.event}</h3>
+                <h3 className="text-base font-bold text-swoop-text">{o.event}</h3>
                 {o.revenueProtected > 0 && (
                   <span className="text-xs font-mono font-bold text-success-500">${o.revenueProtected.toLocaleString()}</span>
                 )}
               </div>
-              <div className="text-[13px] leading-relaxed text-gray-600 dark:text-gray-400">
+              <div className="text-[13px] leading-relaxed text-swoop-text-muted">
                 <div><strong>Detection:</strong> {o.detection}</div>
                 <div><strong>Action:</strong> {o.action}</div>
                 <div><strong>Outcome:</strong> <span className="text-success-500">{o.outcome}</span></div>
@@ -753,31 +753,31 @@ export default function BoardReport() {
         <h2 className="br-tab-heading">What We Learned</h2>
         <div className="flex flex-col gap-4">
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">Top Patterns Discovered This Month</h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <h2 className="text-lg font-bold text-swoop-text mb-2">Top Patterns Discovered This Month</h2>
+            <p className="text-xs text-swoop-text-muted mb-4">
               Cross-domain insights surfaced by Swoop's intelligence layer.
             </p>
             <div className="flex flex-col gap-3">
               {feedbackSummary.slice(0, 3).map((cat, i) => (
-                <div key={cat.category} className="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
+                <div key={cat.category} className="flex items-start gap-3 p-3 bg-swoop-row border border-swoop-border rounded-lg">
                   <div className="text-2xl font-bold text-brand-500 font-mono shrink-0">{i + 1}</div>
                   <div className="flex-1">
-                    <div className="text-sm font-semibold text-gray-800 dark:text-white/90">{cat.category}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">
+                    <div className="text-sm font-semibold text-swoop-text">{cat.category}</div>
+                    <div className="text-xs text-swoop-text-muted mt-0.5">
                       {cat.count} occurrences this month · {cat.unresolvedCount} still open
                     </div>
                   </div>
                 </div>
               ))}
               {feedbackSummary.length === 0 && (
-                <div className="text-sm text-gray-500 italic">Pattern detection requires complaint and member data.</div>
+                <div className="text-sm text-swoop-text-muted italic">Pattern detection requires complaint and member data.</div>
               )}
             </div>
           </Panel>
 
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">What Worked</h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <h2 className="text-lg font-bold text-swoop-text mb-2">What Worked</h2>
+            <p className="text-xs text-swoop-text-muted mb-4">
               Highest-impact interventions, ranked by health score improvement.
             </p>
             <div className="flex flex-col gap-2">
@@ -787,14 +787,14 @@ export default function BoardReport() {
                 .map((m, i) => {
                   const delta = (m.healthAfter || 0) - (m.healthBefore || 0);
                   return (
-                    <div key={i} className="flex items-center justify-between p-3 bg-success-50 border border-success-500/20 rounded-lg dark:bg-success-500/5">
+                    <div key={i} className="flex items-center justify-between p-3 bg-success-50 border border-success-500/20 rounded-lg">
                       <div>
-                        <div className="text-sm font-semibold text-gray-800 dark:text-white/90">{m.name || m.memberName}</div>
-                        <div className="text-xs text-gray-500">{m.action}</div>
+                        <div className="text-sm font-semibold text-swoop-text">{m.name || m.memberName}</div>
+                        <div className="text-xs text-swoop-text-muted">{m.action}</div>
                       </div>
                       <div className="text-right shrink-0 ml-3">
                         <div className="text-lg font-bold text-success-500 font-mono">+{delta}</div>
-                        <div className="text-[10px] text-gray-500">health pts</div>
+                        <div className="text-[10px] text-swoop-text-muted">health pts</div>
                       </div>
                     </div>
                   );
@@ -803,46 +803,46 @@ export default function BoardReport() {
           </Panel>
 
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">What to Watch</h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <h2 className="text-lg font-bold text-swoop-text mb-2">What to Watch</h2>
+            <p className="text-xs text-swoop-text-muted mb-4">
               Emerging risks based on health distribution trends.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {dist.filter(d => Number.isFinite(d?.delta) && d.delta > 0).map(d => (
-                <div key={d.level} className="p-3 bg-warning-50 border border-warning-500/20 rounded-lg dark:bg-warning-500/5">
+                <div key={d.level} className="p-3 bg-warning-50 border border-warning-500/20 rounded-lg">
                   <div className="text-xs font-semibold text-warning-500 uppercase">{d.level} growing</div>
-                  <div className="text-sm text-gray-800 dark:text-white/90 mt-1">
+                  <div className="text-sm text-swoop-text mt-1">
                     <span className="font-mono font-bold">+{d.delta}</span> members moved into {d.level} this month
                   </div>
                 </div>
               ))}
               {dist.filter(d => Number.isFinite(d?.delta) && d.delta > 0).length === 0 && (
-                <div className="text-sm text-gray-500 italic col-span-2">Health distribution is stable or improving.</div>
+                <div className="text-sm text-swoop-text-muted italic col-span-2">Health distribution is stable or improving.</div>
               )}
             </div>
           </Panel>
 
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">Response Time Improvements</h2>
-            <p className="text-xs text-gray-500 mb-3">How fast Swoop catches and acts on signals.</p>
+            <h2 className="text-lg font-bold text-swoop-text mb-2">Response Time Improvements</h2>
+            <p className="text-xs text-swoop-text-muted mb-3">How fast Swoop catches and acts on signals.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Industry Standard</div>
-                <div className="text-2xl font-bold text-gray-500 font-mono mt-1">6+ weeks</div>
-                <div className="text-xs text-gray-500 mt-1">from member dissatisfaction to GM awareness</div>
+              <div className="p-4 bg-swoop-row border border-swoop-border rounded-lg">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Industry Standard</div>
+                <div className="text-2xl font-bold text-swoop-text-muted font-mono mt-1">6+ weeks</div>
+                <div className="text-xs text-swoop-text-muted mt-1">from member dissatisfaction to GM awareness</div>
               </div>
-              <div className="p-4 bg-success-50 border border-success-500/20 rounded-lg dark:bg-success-500/5">
+              <div className="p-4 bg-success-50 border border-success-500/20 rounded-lg">
                 <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">With Swoop</div>
                 <div className="text-2xl font-bold text-success-500 font-mono mt-1">{avgDetectionHrs != null ? `${avgDetectionHrs} hrs` : '—'}</div>
-                <div className="text-xs text-gray-500 mt-1">average detection-to-action time</div>
+                <div className="text-xs text-swoop-text-muted mt-1">average detection-to-action time</div>
               </div>
             </div>
           </Panel>
 
           {/* Next Month Priorities — auto-derived from emerging risks */}
           <Panel>
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">Recommended Focus for Next Month</h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <h2 className="text-lg font-bold text-swoop-text mb-2">Recommended Focus for Next Month</h2>
+            <p className="text-xs text-swoop-text-muted mb-4">
               Auto-derived from emerging risks, top complaint patterns, and recoverable revenue.
             </p>
             <div className="flex flex-col gap-3">
@@ -890,11 +890,11 @@ export default function BoardReport() {
                 });
 
                 if (priorities.length === 0) {
-                  return <div className="text-sm text-gray-500 italic">No emerging priorities detected. Maintain current trajectory.</div>;
+                  return <div className="text-sm text-swoop-text-muted italic">No emerging priorities detected. Maintain current trajectory.</div>;
                 }
 
                 return priorities.map(p => (
-                  <div key={p.rank} className="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
+                  <div key={p.rank} className="flex items-start gap-3 p-3 bg-swoop-row border border-swoop-border rounded-lg">
                     <div
                       className="text-2xl font-bold font-mono shrink-0"
                       style={{ color: p.color }}
@@ -902,8 +902,8 @@ export default function BoardReport() {
                       {p.rank}
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm font-semibold text-gray-800 dark:text-white/90">{p.title}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{p.detail}</div>
+                      <div className="text-sm font-semibold text-swoop-text">{p.title}</div>
+                      <div className="text-xs text-swoop-text-muted mt-0.5">{p.detail}</div>
                     </div>
                     <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight shrink-0">
                       {p.owner}

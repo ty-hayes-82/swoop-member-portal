@@ -14,7 +14,7 @@ const US_STATES = [
   'VA','WA','WV','WI','WY','DC',
 ];
 
-const inputClasses = 'h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:border-gray-700 dark:focus:border-brand-800';
+const inputClasses = 'h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-swoop-text-label focus:outline-hidden focus:ring-3 bg-transparent text-swoop-text border-swoop-border focus:border-brand-300 focus:ring-brand-500/20';
 
 export default function QuickClubSetup({ onComplete, existingClubId }) {
   const [clubName, setClubName] = useState('');
@@ -72,16 +72,16 @@ export default function QuickClubSetup({ onComplete, existingClubId }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-swoop-row px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome to Swoop</div>
-          <p className="text-gray-500 dark:text-gray-400">Let's set up your club in 30 seconds</p>
+          <div className="text-3xl font-bold text-swoop-text mb-2">Welcome to Swoop</div>
+          <p className="text-swoop-text-muted">Let's set up your club in 30 seconds</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="bg-swoop-panel rounded-2xl shadow-lg p-8 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-sm font-medium text-swoop-text-2 mb-1.5">
               Club Name
             </label>
             <input
@@ -96,7 +96,7 @@ export default function QuickClubSetup({ onComplete, existingClubId }) {
 
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-swoop-text-2 mb-1.5">
                 City
               </label>
               <input
@@ -108,7 +108,7 @@ export default function QuickClubSetup({ onComplete, existingClubId }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-swoop-text-2 mb-1.5">
                 State
               </label>
               <select
@@ -123,7 +123,7 @@ export default function QuickClubSetup({ onComplete, existingClubId }) {
           </div>
 
           {error && (
-            <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">
+            <div className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
               {error}
             </div>
           )}
@@ -136,7 +136,7 @@ export default function QuickClubSetup({ onComplete, existingClubId }) {
             {loading ? 'Setting up...' : 'Get Started'}
           </button>
 
-          <p className="text-xs text-center text-gray-400 dark:text-gray-500">
+          <p className="text-xs text-center text-swoop-text-label">
             You can add more details, invite your team, and import data after setup.
           </p>
         </form>

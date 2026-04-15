@@ -27,9 +27,9 @@ const PRIORITY_COLORS = {
 };
 
 const PRIORITY_BADGES = {
-  high: { bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400' },
-  medium: { bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
-  low: { bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' },
+  high: { bg: 'bg-red-50', text: 'text-red-600' },
+  medium: { bg: 'bg-amber-50', text: 'text-amber-600' },
+  low: { bg: 'bg-blue-50', text: 'text-blue-600' },
 };
 
 function ActionCard({ action, onApprove, onDismiss }) {
@@ -37,28 +37,28 @@ function ActionCard({ action, onApprove, onDismiss }) {
   const badge = PRIORITY_BADGES[priority] || PRIORITY_BADGES.medium;
 
   return (
-    <div className={`border border-gray-200 rounded-xl px-4 py-3.5 bg-white border-l-4 ${PRIORITY_COLORS[priority] || ''} dark:bg-gray-900 dark:border-gray-800`}>
+    <div className={`border border-swoop-border rounded-xl px-4 py-3.5 bg-swoop-panel border-l-4 ${PRIORITY_COLORS[priority] || ''}`}>
       {/* Hero: member name + dollar — the marketing-site framing */}
       <div className="flex items-start justify-between gap-3 mb-1">
         <div className="flex-1 min-w-0">
           {action.memberName && (
-            <div className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wide">
+            <div className="text-xs font-bold text-swoop-text-muted mb-0.5 uppercase tracking-wide">
               {action.memberName}
               {action.archetype ? ` · ${action.archetype}` : ''}
             </div>
           )}
-          <div className="text-sm font-semibold text-gray-800 dark:text-white/90 leading-snug">
+          <div className="text-sm font-semibold text-swoop-text leading-snug">
             {action.description}
           </div>
           {action.rationale && (
-            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+            <div className="text-[11px] text-swoop-text-muted mt-1 leading-snug">
               {action.rationale}
             </div>
           )}
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           {action.impactMetric && (
-            <span className="text-xs font-mono font-bold text-success-600 dark:text-success-400 bg-success-50 dark:bg-success-500/10 border border-success-500/20 px-2 py-0.5 rounded-md whitespace-nowrap">
+            <span className="text-xs font-mono font-bold text-success-600 bg-success-50 border border-success-500/20 px-2 py-0.5 rounded-md whitespace-nowrap">
               {action.impactMetric}
             </span>
           )}
@@ -68,7 +68,7 @@ function ActionCard({ action, onApprove, onDismiss }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex-wrap">
+      <div className="flex items-center gap-2 text-xs text-swoop-text-muted mb-1.5 flex-wrap">
         {action.source && (
           <SourceBadge system={
             action.source === 'anthropic' ? 'Swoop AI' :
@@ -76,7 +76,7 @@ function ActionCard({ action, onApprove, onDismiss }) {
             action.source
           } size="xs" />
         )}
-        {action.actionType && <span className="text-[10px] uppercase tracking-wide text-gray-400">{action.actionType.replace(/_/g, ' ').toLowerCase()}</span>}
+        {action.actionType && <span className="text-[10px] uppercase tracking-wide text-swoop-text-label">{action.actionType.replace(/_/g, ' ').toLowerCase()}</span>}
         {action.contributing_agents && (
           <span className="text-[10px] text-purple-500 font-medium">
             Flagged by: {Array.isArray(action.contributing_agents) ? action.contributing_agents.join(' + ') : action.contributing_agents}
@@ -93,9 +93,9 @@ function ActionCard({ action, onApprove, onDismiss }) {
 
       {/* Drafted message preview — if available */}
       {(action.draftedMessage || action.suggestedScript || action.messageTemplate) && (
-        <div className="mb-2.5 p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-          <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1">Drafted message</div>
-          <p className="text-xs text-gray-700 dark:text-gray-300 m-0 leading-relaxed line-clamp-3">
+        <div className="mb-2.5 p-2.5 rounded-lg bg-swoop-row border border-swoop-border-inset">
+          <div className="text-[9px] font-bold uppercase tracking-widest text-swoop-text-label mb-1">Drafted message</div>
+          <p className="text-xs text-swoop-text-2 m-0 leading-relaxed line-clamp-3">
             {action.draftedMessage || action.suggestedScript || action.messageTemplate}
           </p>
         </div>
@@ -114,7 +114,7 @@ function ActionCard({ action, onApprove, onDismiss }) {
         </button>
         <button
           onClick={() => onDismiss(action.id)}
-          className="px-4 py-1.5 rounded-lg bg-transparent text-gray-500 border border-gray-200 text-xs font-semibold cursor-pointer hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+          className="px-4 py-1.5 rounded-lg bg-transparent text-swoop-text-muted border border-swoop-border text-xs font-semibold cursor-pointer hover:bg-swoop-row-hover transition-colors"
         >
           Dismiss
         </button>
@@ -129,15 +129,15 @@ function HandledCard({ action }) {
   const timeStr = time ? new Date(time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
 
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-b-0">
+    <div className="flex items-start gap-3 py-2.5 border-b border-swoop-border-inset last:border-b-0">
       <div className={`shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-        isApproved ? 'bg-success-50 text-success-500 dark:bg-success-500/10' : 'bg-gray-100 text-gray-400 dark:bg-gray-800'
+        isApproved ? 'bg-success-50 text-success-500' : 'bg-swoop-row text-swoop-text-label'
       }`}>
         {isApproved ? '✓' : '×'}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-xs text-gray-700 dark:text-gray-300 line-clamp-1">{action.description}</div>
-        <div className="text-[10px] text-gray-400 mt-0.5">
+        <div className="text-xs text-swoop-text-2 line-clamp-1">{action.description}</div>
+        <div className="text-[10px] text-swoop-text-label mt-0.5">
           {isApproved ? 'Approved' : 'Dismissed'} {timeStr && `· ${timeStr}`}
         </div>
       </div>
@@ -192,24 +192,24 @@ export default function InboxTab() {
       {/* Pillar 3 PROVE IT — Impact rollup */}
       {totalPending > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+          <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
             <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500">Pending</div>
-            <div className="text-2xl font-bold text-gray-800 dark:text-white/90 font-mono mt-1">{totalPending}</div>
-            <div className="text-xs text-gray-500 mt-0.5">awaiting your approval</div>
+            <div className="text-2xl font-bold text-swoop-text font-mono mt-1">{totalPending}</div>
+            <div className="text-xs text-swoop-text-muted mt-0.5">awaiting your approval</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+          <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
             <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Total Dollar Impact</div>
-            <div className="text-2xl font-bold text-success-600 dark:text-success-400 font-mono mt-1">
+            <div className="text-2xl font-bold text-success-600 font-mono mt-1">
               ${totalDollarImpact.toLocaleString()}
             </div>
-            <div className="text-xs text-gray-500 mt-0.5">if all approved</div>
+            <div className="text-xs text-swoop-text-muted mt-0.5">if all approved</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-800">
+          <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
             <div className="text-[10px] font-bold uppercase tracking-wide text-warning-500">Highest Impact</div>
-            <div className="text-base font-bold text-gray-800 dark:text-white/90 font-mono mt-1 truncate" title={topImpactAction?.description}>
+            <div className="text-base font-bold text-swoop-text font-mono mt-1 truncate" title={topImpactAction?.description}>
               {topImpactAction?.impactMetric || (topImpactAction?._dollar ? `$${topImpactAction._dollar.toLocaleString()}` : '—')}
             </div>
-            <div className="text-xs text-gray-500 mt-0.5 truncate">{topImpactAction?.description || 'No actions'}</div>
+            <div className="text-xs text-swoop-text-muted mt-0.5 truncate">{topImpactAction?.description || 'No actions'}</div>
           </div>
         </div>
       )}
@@ -217,7 +217,7 @@ export default function InboxTab() {
       {/* Filter bar */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-semibold text-swoop-text-2">
             {totalPending} pending action{totalPending !== 1 ? 's' : ''}
           </span>
         </div>
@@ -228,8 +228,8 @@ export default function InboxTab() {
               onClick={() => setPriorityFilter(p)}
               className={`px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold cursor-pointer border transition-colors ${
                 priorityFilter === p
-                  ? 'bg-gray-800 text-white border-gray-800 dark:bg-gray-200 dark:text-gray-900 dark:border-gray-200'
-                  : 'bg-transparent text-gray-500 border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800'
+                  ? 'bg-swoop-row text-white border-swoop-border'
+                  : 'bg-transparent text-swoop-text-muted border-swoop-border hover:bg-swoop-row-hover'
               }`}
             >
               {p === 'all' ? 'All' : p.charAt(0).toUpperCase() + p.slice(1)}
@@ -245,21 +245,21 @@ export default function InboxTab() {
           const isLiveWithData = getDataMode() === 'live' && isGateOpen('members') && priorityFilter === 'all';
           if (isLiveWithData) {
             return (
-              <div className="rounded-xl border border-brand-200 bg-brand-50/40 dark:bg-brand-500/5 dark:border-brand-500/20 p-5">
+              <div className="rounded-xl border border-brand-200 bg-brand-50/40 p-5">
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                    <svg className="w-4 h-4 text-brand-600 dark:text-brand-400 animate-spin" style={{ animationDuration: '3s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg className="w-4 h-4 text-brand-600 animate-spin" style={{ animationDuration: '3s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round" />
                     </svg>
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-brand-800 dark:text-brand-300">AI agents are scanning your data</div>
-                    <div className="text-xs text-brand-600/80 dark:text-brand-400/80 mt-0.5">
+                    <div className="text-sm font-semibold text-brand-800">AI agents are scanning your data</div>
+                    <div className="text-xs text-brand-600/80 mt-0.5">
                       Your agents are analyzing member activity, tee sheet patterns, and service records. Recommendations will appear here as they are generated.
                     </div>
                   </div>
                 </div>
-                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">What your agents are looking for</div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-muted mb-2">What your agents are looking for</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {[
                     { icon: '⚠️', label: 'At-risk members', detail: 'Members with declining visit frequency or low engagement scores' },
@@ -267,11 +267,11 @@ export default function InboxTab() {
                     { icon: '🎂', label: 'Milestone opportunities', detail: 'Birthdays, anniversaries, and first-year member check-ins' },
                     { icon: '📊', label: 'Revenue recovery', detail: 'Understaffed periods and pace-of-play revenue leakage' },
                   ].map(item => (
-                    <div key={item.label} className="flex items-start gap-2 bg-white/60 dark:bg-white/5 rounded-lg p-2.5 border border-brand-100 dark:border-brand-500/10">
+                    <div key={item.label} className="flex items-start gap-2 bg-white/60 rounded-lg p-2.5 border border-brand-100">
                       <span className="text-base shrink-0">{item.icon}</span>
                       <div>
-                        <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">{item.label}</div>
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{item.detail}</div>
+                        <div className="text-xs font-semibold text-swoop-text-2">{item.label}</div>
+                        <div className="text-[10px] text-swoop-text-muted mt-0.5 leading-snug">{item.detail}</div>
                       </div>
                     </div>
                   ))}
@@ -282,8 +282,8 @@ export default function InboxTab() {
           return (
             <div className="py-12 text-center">
               <div className="text-3xl mb-3">✓</div>
-              <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">All caught up</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="font-semibold text-swoop-text-2 mb-1">All caught up</div>
+              <div className="text-sm text-swoop-text-muted">
                 {priorityFilter !== 'all'
                   ? `No ${priorityFilter} priority actions. Try "All" filter.`
                   : 'No pending actions right now. Your AI agents will surface recommendations here.'}
@@ -305,33 +305,33 @@ export default function InboxTab() {
       )}
 
       {/* Trust Ramp — shows automation confidence level based on review history */}
-      <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:bg-gray-800/50 dark:border-gray-800">
+      <div className="rounded-xl border border-swoop-border bg-swoop-row px-4 py-3">
         <div className="flex items-start justify-between gap-3 mb-2">
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-muted">
               Automation Trust Level
             </div>
-            <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mt-0.5">
+            <div className="text-sm font-semibold text-swoop-text mt-0.5">
               {trustLevel.label}
             </div>
-            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+            <div className="text-[11px] text-swoop-text-muted mt-0.5">
               {trustLevel.description}
             </div>
           </div>
           <div className="text-right shrink-0">
             <div className="text-lg font-bold text-brand-500 font-mono">{totalHandled}</div>
-            <div className="text-[10px] text-gray-400">reviewed</div>
+            <div className="text-[10px] text-swoop-text-label">reviewed</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+          <div className="flex-1 bg-swoop-border rounded-full h-1.5 overflow-hidden">
             <div
               className="h-full bg-brand-500 rounded-full transition-all duration-500"
               style={{ width: `${Math.min(100, (totalHandled / 30) * 100)}%` }}
             />
           </div>
           {nextLevel && (
-            <div className="text-[10px] text-gray-400 whitespace-nowrap shrink-0">
+            <div className="text-[10px] text-swoop-text-label whitespace-nowrap shrink-0">
               {nextLevel.threshold - totalHandled} more to unlock "{nextLevel.label}"
             </div>
           )}
@@ -342,7 +342,7 @@ export default function InboxTab() {
           )}
         </div>
         {totalApproved > 0 && (
-          <div className="text-[10px] text-gray-400 mt-1.5">
+          <div className="text-[10px] text-swoop-text-label mt-1.5">
             {totalApproved} approved · {totalHandled - totalApproved} dismissed — approval rate {Math.round((totalApproved / totalHandled) * 100)}%
           </div>
         )}
@@ -353,7 +353,7 @@ export default function InboxTab() {
         <div className="mt-2">
           <button
             onClick={() => setShowHandled(!showHandled)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 cursor-pointer bg-transparent border-none p-0 hover:text-gray-700 dark:hover:text-gray-300 focus-visible:ring-2 focus-visible:ring-brand-500"
+            className="flex items-center gap-1.5 text-xs font-semibold text-swoop-text-muted cursor-pointer bg-transparent border-none p-0 hover:text-swoop-text-2 focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             <svg className={`w-3 h-3 transition-transform ${showHandled ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
@@ -361,7 +361,7 @@ export default function InboxTab() {
             Recently handled ({handled.length})
           </button>
           {showHandled && (
-            <div className="mt-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 dark:bg-gray-800/50 dark:border-gray-800">
+            <div className="mt-2 rounded-xl border border-swoop-border bg-swoop-row px-4 py-2">
               {handled.map(action => (
                 <HandledCard key={action.id} action={action} />
               ))}

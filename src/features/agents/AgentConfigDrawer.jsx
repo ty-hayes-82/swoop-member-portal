@@ -103,19 +103,19 @@ export default function AgentConfigDrawer({ agentId, agentName, open, onClose })
       />
 
       {/* Drawer panel */}
-      <div className="fixed inset-y-0 right-0 w-full max-w-md z-50 flex flex-col bg-white dark:bg-gray-900 shadow-xl border-l border-gray-200 dark:border-gray-800">
+      <div className="fixed inset-y-0 right-0 w-full max-w-md z-50 flex flex-col bg-swoop-panel shadow-xl border-l border-swoop-border">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-swoop-border">
           <div>
-            <h2 className="text-base font-bold text-gray-800 dark:text-white/90 m-0">
+            <h2 className="text-base font-bold text-swoop-text m-0">
               Configure {agentName || 'Agent'}
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5 m-0">Per-agent behavior, notifications, and targeting.</p>
+            <p className="text-xs text-swoop-text-label mt-0.5 m-0">Per-agent behavior, notifications, and targeting.</p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close drawer"
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer bg-transparent border-none transition-colors"
+            className="p-1.5 rounded-lg text-swoop-text-label hover:text-gray-600 hover:bg-swoop-row-hover cursor-pointer bg-transparent border-none transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -124,7 +124,7 @@ export default function AgentConfigDrawer({ agentId, agentName, open, onClose })
         </div>
 
         {/* Tab bar */}
-        <div role="tablist" className="flex gap-0.5 mx-5 mt-4 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+        <div role="tablist" className="flex gap-0.5 mx-5 mt-4 rounded-lg bg-swoop-row p-0.5 border border-swoop-border">
           {TABS.map(t => (
             <button
               key={t.key}
@@ -133,8 +133,8 @@ export default function AgentConfigDrawer({ agentId, agentName, open, onClose })
               onClick={() => setTab(t.key)}
               className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 ${
                 tab === t.key
-                  ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
-                  : 'bg-transparent text-gray-500 hover:text-gray-700'
+                  ? 'bg-swoop-panel text-swoop-text shadow-theme-xs'
+                  : 'bg-transparent text-swoop-text-muted hover:text-swoop-text-2'
               }`}
             >
               {t.label}
@@ -146,7 +146,7 @@ export default function AgentConfigDrawer({ agentId, agentName, open, onClose })
         <div className="flex-1 overflow-y-auto px-5 py-5">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-brand-500 rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-swoop-border border-t-brand-500 rounded-full animate-spin" />
             </div>
           ) : (
             <>
@@ -174,12 +174,12 @@ export default function AgentConfigDrawer({ agentId, agentName, open, onClose })
         </div>
 
         {/* Footer: Save */}
-        <div className="px-5 py-4 border-t border-gray-200 dark:border-gray-800">
+        <div className="px-5 py-4 border-t border-swoop-border">
           <button
             onClick={handleSave}
             disabled={saving}
             className="w-full py-2.5 rounded-lg font-bold text-sm text-white cursor-pointer border-none transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-brand-500"
-            style={{ background: saved ? '#12b76a' : '#ff8b00' }}
+            style={{ background: saved ? '#12b76a' : '#F3922D' }}
           >
             {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Configuration'}
           </button>

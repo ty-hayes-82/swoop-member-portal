@@ -3,7 +3,7 @@
 export function SkeletonLine({ width = '100%', height = 16, marginBottom = 8, style = {} }) {
   return (
     <div
-      className="animate-pulse bg-gray-200 rounded-lg dark:bg-gray-700"
+      className="animate-pulse bg-swoop-border rounded-lg"
       style={{ width, height, marginBottom, ...style }}
     />
   );
@@ -12,7 +12,7 @@ export function SkeletonLine({ width = '100%', height = 16, marginBottom = 8, st
 export function SkeletonCircle({ size = 40, style = {} }) {
   return (
     <div
-      className="animate-pulse bg-gray-200 rounded-full dark:bg-gray-700"
+      className="animate-pulse bg-swoop-border rounded-full"
       style={{ width: size, height: size, ...style }}
     />
   );
@@ -26,7 +26,7 @@ export function SkeletonCard({
 }) {
   return (
     <div
-      className="rounded-xl border border-gray-200 bg-white p-5 sm:p-6 dark:border-gray-800 dark:bg-white/[0.03]"
+      className="rounded-xl border border-swoop-border bg-swoop-panel p-5 sm:p-6"
       style={style}
     >
       {/* Header skeleton */}
@@ -68,11 +68,11 @@ export function SkeletonTable({
 }) {
   return (
     <div
-      className="rounded-xl border border-gray-200 bg-white overflow-hidden dark:border-gray-800 dark:bg-white/[0.03]"
+      className="rounded-xl border border-swoop-border bg-swoop-panel overflow-hidden"
       style={style}
     >
       {/* Table header */}
-      <div className="p-4 border-b border-gray-200 flex gap-4 dark:border-gray-800">
+      <div className="p-4 border-b border-swoop-border flex gap-4">
         {Array.from({ length: columns }).map((_, i) => (
           <SkeletonLine
             key={i}
@@ -87,7 +87,7 @@ export function SkeletonTable({
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div
           key={rowIndex}
-          className="p-4 border-b border-gray-200 flex gap-4 items-center dark:border-gray-800"
+          className="p-4 border-b border-swoop-border flex gap-4 items-center"
         >
           {Array.from({ length: columns }).map((_, colIndex) => (
             <SkeletonLine
@@ -117,7 +117,7 @@ export function SkeletonGrid({
       {Array.from({ length: cards }).map((_, i) => (
         <div
           key={i}
-          className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-3 dark:border-gray-800 dark:bg-white/[0.03]"
+          className="rounded-xl border border-swoop-border bg-swoop-panel p-4 flex flex-col gap-3"
           style={{ height: cardHeight }}
         >
           <SkeletonLine width="60%" height={16} />

@@ -108,7 +108,7 @@ const SwoopSidebar = () => {
 
   return (
     <aside
-      className={`fixed flex flex-col top-0 px-5 left-0 bg-black text-white h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-800/50
+      className={`fixed flex flex-col top-0 px-5 left-0 bg-swoop-canvas text-swoop-text h-screen transition-all duration-300 ease-in-out z-50 border-r border-swoop-border
         ${showFull ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
@@ -135,7 +135,7 @@ const SwoopSidebar = () => {
         <nav className="mb-6" role="navigation" aria-label="Main navigation">
           <div className="flex flex-col gap-1">
             <h2
-              className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+              className={`mb-4 text-xs uppercase flex leading-[20px] text-swoop-text-label ${
                 !isExpanded && !isHovered
                   ? "lg:justify-center"
                   : "justify-start"
@@ -160,7 +160,7 @@ const SwoopSidebar = () => {
                     className={`menu-item group cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-1 focus-visible:ring-offset-black ${
                       isActive(item.key)
                         ? "bg-brand-500/15 text-brand-400"
-                        : "text-gray-300 hover:bg-white/5 hover:text-white"
+                        : "text-swoop-text-ghost hover:bg-white/5 hover:text-white"
                     } ${
                       !isExpanded && !isHovered
                         ? "lg:justify-center"
@@ -172,7 +172,7 @@ const SwoopSidebar = () => {
                       className={`${
                         isActive(item.key)
                           ? "text-brand-400"
-                          : "text-gray-400 group-hover:text-gray-300"
+                          : "text-swoop-text-label group-hover:text-gray-300"
                       }`}
                     >
                       {navIcons[item.key] || (
@@ -212,7 +212,7 @@ const SwoopSidebar = () => {
                 <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400">
                   ⚡ Demo Stories
                 </p>
-                <span className="text-[9px] text-gray-500 font-mono">~10 min</span>
+                <span className="text-[9px] text-swoop-text-muted font-mono">~10 min</span>
               </div>
               <div className="flex flex-col gap-1.5">
                 <button
@@ -222,7 +222,7 @@ const SwoopSidebar = () => {
                   style={{ borderLeftWidth: '3px', borderLeftColor: '#32d583' }}
                 >
                   <div className="text-[11px] font-bold text-white leading-tight">01 · Saturday Briefing</div>
-                  <div className="text-[9px] text-gray-400">Daniel · ~4 min</div>
+                  <div className="text-[9px] text-swoop-text-label">Daniel · ~4 min</div>
                 </button>
                 <button
                   type="button"
@@ -231,7 +231,7 @@ const SwoopSidebar = () => {
                   style={{ borderLeftWidth: '3px', borderLeftColor: '#F59E0B' }}
                 >
                   <div className="text-[11px] font-bold text-white leading-tight">02 · Quiet Resignation</div>
-                  <div className="text-[9px] text-gray-400">First Domino · ~3 min</div>
+                  <div className="text-[9px] text-swoop-text-label">First Domino · ~3 min</div>
                 </button>
                 <button
                   type="button"
@@ -240,7 +240,7 @@ const SwoopSidebar = () => {
                   style={{ borderLeftWidth: '3px', borderLeftColor: '#60A5FA' }}
                 >
                   <div className="text-[11px] font-bold text-white leading-tight">03 · Revenue Leakage</div>
-                  <div className="text-[9px] text-gray-400">$9,377/mo · ~3 min</div>
+                  <div className="text-[9px] text-swoop-text-label">$9,377/mo · ~3 min</div>
                 </button>
               </div>
             </div>

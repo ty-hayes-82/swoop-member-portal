@@ -193,15 +193,15 @@ export default function PreviewModal({ isOpen, onClose, agentId, config }) {
       <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
 
       {/* Modal content */}
-      <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-xl bg-white dark:bg-gray-900 shadow-2xl">
+      <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-xl bg-swoop-panel shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-swoop-border bg-swoop-panel px-6 py-4">
+          <h3 className="text-lg font-semibold text-swoop-text">
             Test Configuration
           </h3>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="text-swoop-text-label hover:text-gray-600"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -213,13 +213,13 @@ export default function PreviewModal({ isOpen, onClose, agentId, config }) {
         <div className="px-6 py-4 space-y-4">
           {/* Scenario selector */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-swoop-text-2 mb-1">
               Select Scenario
             </label>
             <select
               value={selectedScenario}
               onChange={(e) => { setSelectedScenario(e.target.value); setResult(null); }}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full rounded-md border border-swoop-border bg-swoop-panel px-3 py-2 text-sm text-swoop-text focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               {QA_SCENARIOS.map(s => (
                 <option key={s.id} value={s.id}>{s.label}</option>
@@ -228,21 +228,21 @@ export default function PreviewModal({ isOpen, onClose, agentId, config }) {
           </div>
 
           {/* Scenario preview */}
-          <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-3">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+          <div className="rounded-lg bg-swoop-row border border-swoop-border p-3">
+            <p className="text-xs font-medium text-swoop-text-muted uppercase tracking-wide mb-1">
               Member says:
             </p>
-            <p className="text-sm text-gray-800 dark:text-gray-200 italic">
+            <p className="text-sm text-swoop-text italic">
               "{scenario.input}"
             </p>
             <div className="mt-2 flex gap-2 flex-wrap">
               {scenario.must_contain.length > 0 && (
-                <span className="text-xs text-green-600 dark:text-green-400">
+                <span className="text-xs text-green-600">
                   Must include: {scenario.must_contain.join(', ')}
                 </span>
               )}
               {scenario.must_not_contain.length > 0 && (
-                <span className="text-xs text-red-600 dark:text-red-400">
+                <span className="text-xs text-red-600">
                   Must avoid: {scenario.must_not_contain.join(', ')}
                 </span>
               )}
@@ -275,8 +275,8 @@ export default function PreviewModal({ isOpen, onClose, agentId, config }) {
               {result.passed !== null && (
                 <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
                   result.passed
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
                 }`}>
                   {result.passed ? 'PASS' : 'FAIL'}
                 </div>
@@ -284,7 +284,7 @@ export default function PreviewModal({ isOpen, onClose, agentId, config }) {
 
               {/* Failures */}
               {result.failures?.length > 0 && (
-                <div className="text-sm text-red-600 dark:text-red-400 space-y-1">
+                <div className="text-sm text-red-600 space-y-1">
                   {result.failures.map((f, i) => (
                     <p key={i}>{f}</p>
                   ))}
@@ -293,11 +293,11 @@ export default function PreviewModal({ isOpen, onClose, agentId, config }) {
 
               {/* Agent response */}
               {result.response && (
-                <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-3">
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                <div className="rounded-lg bg-swoop-row border border-swoop-border p-3">
+                  <p className="text-xs font-medium text-swoop-text-muted uppercase tracking-wide mb-1">
                     Agent Response:
                   </p>
-                  <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                  <p className="text-sm text-swoop-text whitespace-pre-wrap">
                     {result.response}
                   </p>
                 </div>
@@ -305,13 +305,13 @@ export default function PreviewModal({ isOpen, onClose, agentId, config }) {
 
               {/* Tool calls */}
               {result.tool_calls?.length > 0 && (
-                <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-3">
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                <div className="rounded-lg bg-swoop-row border border-swoop-border p-3">
+                  <p className="text-xs font-medium text-swoop-text-muted uppercase tracking-wide mb-1">
                     Tool Calls:
                   </p>
                   <ul className="space-y-1">
                     {result.tool_calls.map((tc, i) => (
-                      <li key={i} className="text-sm text-gray-700 dark:text-gray-300 font-mono">
+                      <li key={i} className="text-sm text-swoop-text-2 font-mono">
                         {tc.name || tc}({tc.input ? JSON.stringify(tc.input) : ''})
                       </li>
                     ))}

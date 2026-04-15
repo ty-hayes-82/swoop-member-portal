@@ -194,7 +194,7 @@ export default function MorningBriefingSentence() {
           >
             ⬢ LAYER 3 · {sources.length} SYSTEMS
           </span>
-          <span className="text-[10px] text-gray-400 italic">Cross-domain synthesis no single vendor can produce</span>
+          <span className="text-[10px] text-swoop-text-label italic">Cross-domain synthesis no single vendor can produce</span>
         </div>
       )}
       <StoryHeadline
@@ -229,21 +229,21 @@ export default function MorningBriefingSentence() {
       )}
       {/* Trust math — how is this computed? */}
       <details className="px-1 mb-2">
-        <summary className="text-[11px] text-gray-500 cursor-pointer list-none flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-300">
+        <summary className="text-[11px] text-swoop-text-muted cursor-pointer list-none flex items-center gap-1 hover:text-swoop-text-2">
           <span className="opacity-60">ⓘ</span>
           <span className="font-semibold">How is this computed?</span>
         </summary>
-        <div className="mt-2 ml-4 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-l-2 border-gray-200 dark:border-gray-700 pl-3">
-          <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Today's briefing computed from:</div>
+        <div className="mt-2 ml-4 text-[11px] text-swoop-text-muted leading-relaxed border-l-2 border-swoop-border pl-3">
+          <div className="font-semibold text-swoop-text-2 mb-1">Today's briefing computed from:</div>
           <ul className="m-0 p-0 list-none space-y-1">
             {segments.map(s => (
               <li key={s.key} className="flex items-start gap-1.5">
-                <span className="text-gray-400">•</span>
+                <span className="text-swoop-text-label">•</span>
                 <span>{s.text}</span>
               </li>
             ))}
           </ul>
-          <div className="mt-2 italic text-gray-500">
+          <div className="mt-2 italic text-swoop-text-muted">
             Each segment cross-references {sources.length} source system{sources.length === 1 ? '' : 's'}: {sources.join(', ')}.
             No single system can produce this sentence on its own.
           </div>

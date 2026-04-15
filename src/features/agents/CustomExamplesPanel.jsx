@@ -24,12 +24,12 @@ const SCENARIO_TYPES = [
 ];
 
 const SCENARIO_BADGE_COLORS = {
-  complaint:      'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-  booking:        'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-  greeting:       'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
-  grief:          'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
-  're-engagement': 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-  corporate:      'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
+  complaint:      'bg-red-100 text-red-700',
+  booking:        'bg-blue-100 text-blue-700',
+  greeting:       'bg-green-100 text-green-700',
+  grief:          'bg-purple-100 text-purple-700',
+  're-engagement': 'bg-amber-100 text-amber-700',
+  corporate:      'bg-indigo-100 text-indigo-700',
 };
 
 const EMPTY_FORM = { scenario: 'complaint', input: '', ideal_response: '' };
@@ -123,35 +123,35 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
     <div className="space-y-6">
       {/* Header + count */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-swoop-text">
           Custom Examples
         </h3>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm text-swoop-text-muted">
           {examples.length}/{MAX_EXAMPLES} examples
         </span>
       </div>
 
-      <p className="text-sm text-gray-600 dark:text-gray-400">
+      <p className="text-sm text-swoop-text-muted">
         Teach the agent how to respond to specific scenarios using few-shot examples.
         Each example pairs a member message with your ideal agent response.
       </p>
 
       {error && (
-        <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-300">
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {/* ---- Form ---- */}
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+      <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-swoop-border bg-swoop-row p-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-swoop-text-2 mb-1">
             Scenario Type
           </label>
           <select
             value={form.scenario}
             onChange={(e) => setForm(prev => ({ ...prev, scenario: e.target.value }))}
-            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-md border border-swoop-border bg-swoop-panel px-3 py-2 text-sm text-swoop-text focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             {SCENARIO_TYPES.map(st => (
               <option key={st.value} value={st.value}>{st.label}</option>
@@ -160,7 +160,7 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-swoop-text-2 mb-1">
             Member Input
           </label>
           <textarea
@@ -168,12 +168,12 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
             onChange={(e) => setForm(prev => ({ ...prev, input: e.target.value }))}
             placeholder='e.g., "We waited 40 minutes and nobody checked on us."'
             rows={3}
-            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-md border border-swoop-border bg-swoop-panel px-3 py-2 text-sm text-swoop-text placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-swoop-text-2 mb-1">
             Ideal Response
           </label>
           <textarea
@@ -181,7 +181,7 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
             onChange={(e) => setForm(prev => ({ ...prev, ideal_response: e.target.value }))}
             placeholder='e.g., "James, ugh — 40 minutes with nobody checking on you? That\'s completely unacceptable. I just filed this with our F&B director."'
             rows={3}
-            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-md border border-swoop-border bg-swoop-panel px-3 py-2 text-sm text-swoop-text placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -197,7 +197,7 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
             <button
               type="button"
               onClick={cancelEdit}
-              className="px-4 py-2 text-sm font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="px-4 py-2 text-sm font-medium rounded-md border border-swoop-border text-swoop-text-2 hover:bg-swoop-row-hover transition-colors"
             >
               Cancel
             </button>
@@ -207,7 +207,7 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
 
       {/* ---- Example cards ---- */}
       {examples.length === 0 ? (
-        <p className="text-sm text-gray-400 dark:text-gray-500 italic">
+        <p className="text-sm text-swoop-text-label italic">
           No examples yet. Add your first example above to start training the agent.
         </p>
       ) : (
@@ -215,16 +215,16 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
           {examples.map((ex, i) => (
             <div
               key={i}
-              className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 space-y-2"
+              className="rounded-lg border border-swoop-border bg-swoop-panel p-4 space-y-2"
             >
               <div className="flex items-center justify-between">
-                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${SCENARIO_BADGE_COLORS[ex.scenario] || 'bg-gray-100 text-gray-700'}`}>
+                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${SCENARIO_BADGE_COLORS[ex.scenario] || 'bg-swoop-row text-swoop-text-2'}`}>
                   {ex.scenario}
                 </span>
                 <div className="flex gap-2">
                   <button
                     onClick={() => startEdit(i)}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-xs text-blue-600 hover:underline"
                   >
                     Edit
                   </button>
@@ -232,13 +232,13 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
                     <span className="flex gap-1">
                       <button
                         onClick={() => executeDelete(i)}
-                        className="text-xs text-red-600 dark:text-red-400 hover:underline font-semibold"
+                        className="text-xs text-red-600 hover:underline font-semibold"
                       >
                         Confirm
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(null)}
-                        className="text-xs text-gray-500 hover:underline"
+                        className="text-xs text-swoop-text-muted hover:underline"
                       >
                         Cancel
                       </button>
@@ -246,7 +246,7 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
                   ) : (
                     <button
                       onClick={() => confirmDelete(i)}
-                      className="text-xs text-red-600 dark:text-red-400 hover:underline"
+                      className="text-xs text-red-600 hover:underline"
                     >
                       Delete
                     </button>
@@ -254,12 +254,12 @@ export default function CustomExamplesPanel({ agentId, examples = [], onConfigUp
                 </div>
               </div>
 
-              <div className="text-sm text-gray-700 dark:text-gray-300">
-                <span className="font-medium text-gray-500 dark:text-gray-400">Member: </span>
+              <div className="text-sm text-swoop-text-2">
+                <span className="font-medium text-swoop-text-muted">Member: </span>
                 {truncate(ex.input)}
               </div>
-              <div className="text-sm text-gray-700 dark:text-gray-300">
-                <span className="font-medium text-gray-500 dark:text-gray-400">Response: </span>
+              <div className="text-sm text-swoop-text-2">
+                <span className="font-medium text-swoop-text-muted">Response: </span>
                 {truncate(ex.ideal_response)}
               </div>
             </div>

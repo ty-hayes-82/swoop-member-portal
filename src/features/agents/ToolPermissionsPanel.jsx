@@ -22,7 +22,7 @@ import { apiFetch } from '@/services/apiClient';
 
 const STATES = {
   auto_execute:      { label: 'Auto',     color: 'bg-green-500',  textColor: 'text-white' },
-  requires_approval: { label: 'Approval', color: 'bg-yellow-400', textColor: 'text-gray-900' },
+  requires_approval: { label: 'Approval', color: 'bg-yellow-400', textColor: 'text-swoop-text' },
   denied:            { label: 'Disabled', color: 'bg-red-500',    textColor: 'text-white' },
 };
 
@@ -56,9 +56,9 @@ function groupByCategory(tools) {
 
 function RiskBadge({ level }) {
   const styles = {
-    low:    'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
-    medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
-    high:   'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+    low:    'bg-green-100 text-green-700',
+    medium: 'bg-yellow-100 text-yellow-700',
+    high:   'bg-red-100 text-red-700',
   };
   return (
     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${styles[level] || styles.low}`}>
@@ -73,7 +73,7 @@ function RiskBadge({ level }) {
 
 function PermissionToggle({ value, onChange }) {
   return (
-    <div className="flex rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
+    <div className="flex rounded-md overflow-hidden border border-swoop-border">
       {STATE_ORDER.map((state) => {
         const meta = STATES[state];
         const active = value === state;
@@ -85,7 +85,7 @@ function PermissionToggle({ value, onChange }) {
             className={`px-3 py-1 text-xs font-medium transition-colors ${
               active
                 ? `${meta.color} ${meta.textColor}`
-                : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                : 'bg-swoop-row text-swoop-text-muted hover:bg-gray-200'
             }`}
           >
             {meta.label}
@@ -177,7 +177,7 @@ export default function ToolPermissionsPanel({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Tool Permissions</h3>
+        <h3 className="text-lg font-semibold text-swoop-text">Tool Permissions</h3>
         <div className="flex items-center gap-3">
           {savedMsg && (
             <span className={`text-sm ${savedMsg === 'Saved' ? 'text-green-600' : 'text-red-600'}`}>
@@ -191,7 +191,7 @@ export default function ToolPermissionsPanel({
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               dirty
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700'
+                : 'bg-swoop-border text-swoop-text-label cursor-not-allowed'
             }`}
           >
             {saving ? 'Saving...' : 'Save'}
@@ -204,23 +204,23 @@ export default function ToolPermissionsPanel({
         if (!catTools?.length) return null;
         return (
           <div key={cat}>
-            <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+            <h4 className="text-sm font-semibold text-swoop-text-muted uppercase tracking-wide mb-3">
               {CATEGORY_LABELS[cat] || cat}
             </h4>
             <div className="space-y-2">
               {catTools.map((tool) => (
                 <div
                   key={tool.name}
-                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                  className="flex items-center justify-between p-3 rounded-lg bg-swoop-row border border-swoop-border"
                 >
                   <div className="flex-1 min-w-0 mr-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      <span className="text-sm font-medium text-swoop-text">
                         {tool.displayName}
                       </span>
                       <RiskBadge level={tool.riskLevel} />
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                    <p className="text-xs text-swoop-text-muted mt-0.5 truncate">
                       {tool.description}
                     </p>
                   </div>

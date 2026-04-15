@@ -38,14 +38,14 @@ export default function WeekForecast() {
   if (weatherLoading && !forecast?.length) {
     return (
       <div className="flex flex-col gap-3" aria-busy="true">
-        <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3">
-          <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-3" />
+        <div className="bg-swoop-panel border border-swoop-border rounded-xl px-4 py-3">
+          <div className="h-3 w-24 bg-swoop-border rounded animate-pulse mb-3" />
           <div className="grid grid-cols-6 gap-2">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
-                <div className="h-2.5 w-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                <div className="h-5 w-5 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
-                <div className="h-3 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-2.5 w-6 bg-swoop-border rounded animate-pulse" />
+                <div className="h-5 w-5 bg-swoop-border rounded-full animate-pulse" />
+                <div className="h-3 w-8 bg-swoop-border rounded animate-pulse" />
               </div>
             ))}
           </div>
@@ -56,7 +56,7 @@ export default function WeekForecast() {
 
   if (weatherError) {
     return (
-      <div className="text-xs text-gray-400 px-2 py-3">Failed to load weather forecast.</div>
+      <div className="text-xs text-swoop-text-label px-2 py-3">Failed to load weather forecast.</div>
     );
   }
 
@@ -71,13 +71,13 @@ export default function WeekForecast() {
         const slice = hourly.slice(0, 12);
         const peakTemp = Math.max(...slice.map(h => h.temp));
         return (
-          <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 weather-hourly-enhanced">
+          <div className="bg-swoop-panel border border-swoop-border rounded-xl px-4 py-3 weather-hourly-enhanced">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Today's Hourly</span>
-                {location && <span className="text-[10px] text-gray-400">{location}</span>}
+                {location && <span className="text-[10px] text-swoop-text-label">{location}</span>}
               </div>
-              <span className="text-[9px] text-gray-400">
+              <span className="text-[9px] text-swoop-text-label">
                 {source === 'google' ? 'Google Weather' : source}
               </span>
             </div>
@@ -92,11 +92,11 @@ export default function WeekForecast() {
                     className={`flex flex-col items-center py-1${isPeak ? ' hourly-peak' : ''}`}
                     style={isPeak ? { background: 'rgba(232,167,50,0.06)', borderRadius: 10 } : undefined}
                   >
-                    <span className="text-[10px] text-gray-500 font-medium">{formatHour(h.time)}</span>
+                    <span className="text-[10px] text-swoop-text-muted font-medium">{formatHour(h.time)}</span>
                     <span className="text-sm my-0.5 leading-none">{icon}</span>
-                    <span className="text-xs font-bold text-gray-800 dark:text-white/90">{Math.round(h.temp)}°</span>
+                    <span className="text-xs font-bold text-swoop-text">{Math.round(h.temp)}°</span>
                     {prob > 0 && (
-                      <span className={`text-[9px] font-semibold mt-0.5 ${prob > 30 ? 'text-blue-500' : 'text-gray-400'}`}>
+                      <span className={`text-[9px] font-semibold mt-0.5 ${prob > 30 ? 'text-blue-500' : 'text-swoop-text-label'}`}>
                         {prob}%
                       </span>
                     )}
@@ -114,7 +114,7 @@ export default function WeekForecast() {
           <div className="flex items-center justify-between mb-2 px-1">
             <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">5-Day Forecast</span>
             {!hourly.length && (
-              <span className="text-[9px] text-gray-400">
+              <span className="text-[9px] text-swoop-text-label">
                 {source === 'google' ? 'Google Weather' : source}
               </span>
             )}
@@ -133,34 +133,34 @@ export default function WeekForecast() {
               return (
                 <div
                   key={day.date}
-                  className={`bg-white dark:bg-white/[0.04] rounded-lg border border-gray-200/80 dark:border-gray-700/50 px-2 py-2.5 flex flex-col forecast-card${i === 0 ? ' forecast-card-today' : ''}`}
+                  className={`bg-swoop-panel rounded-lg border border-gray-200/80 px-2 py-2.5 flex flex-col forecast-card${i === 0 ? ' forecast-card-today' : ''}`}
                 >
                   {/* Date header */}
                   <div className="text-center mb-1.5">
-                    <div className={`text-xs font-bold leading-tight ${i === 0 ? 'text-blue-600' : 'text-gray-700 dark:text-white/80'}`}>
+                    <div className={`text-xs font-bold leading-tight ${i === 0 ? 'text-blue-600' : 'text-swoop-text-2'}`}>
                       {dayName}
                     </div>
-                    <div className="text-[9px] text-gray-400">{dateStr}</div>
+                    <div className="text-[9px] text-swoop-text-label">{dateStr}</div>
                   </div>
 
                   {/* Day temp + icon */}
                   <div className="flex flex-col items-center">
                     <span className="text-xl leading-none mb-0.5">{icon}</span>
-                    <span className="text-lg font-bold text-gray-800 dark:text-white/90 leading-tight">
+                    <span className="text-lg font-bold text-swoop-text leading-tight">
                       {Math.round(day.high)}°
                     </span>
-                    <span className="text-[10px] text-gray-500 leading-tight truncate w-full text-center">
+                    <span className="text-[10px] text-swoop-text-muted leading-tight truncate w-full text-center">
                       {day.conditionsText || day.conditions}
                     </span>
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-gray-100 dark:border-gray-700/50 my-1.5" />
+                  <div className="border-t border-swoop-border-inset my-1.5" />
 
                   {/* Night */}
                   <div className="flex flex-col items-center mb-1.5">
-                    <span className="text-[9px] text-gray-400 uppercase font-semibold tracking-wide">Night</span>
-                    <span className="text-sm font-bold text-gray-500 dark:text-gray-400 leading-tight">
+                    <span className="text-[9px] text-swoop-text-label uppercase font-semibold tracking-wide">Night</span>
+                    <span className="text-sm font-bold text-swoop-text-muted leading-tight">
                       {Math.round(day.low)}°
                     </span>
                   </div>
@@ -169,24 +169,24 @@ export default function WeekForecast() {
                   <div className="flex flex-col gap-0.5 mt-auto">
                     {wind > 0 && (
                       <div className="flex justify-between text-[9px]">
-                        <span className="text-gray-400">Wind</span>
-                        <span className={`font-semibold ${hasWind ? 'text-warning-500' : 'text-gray-500'}`}>
+                        <span className="text-swoop-text-label">Wind</span>
+                        <span className={`font-semibold ${hasWind ? 'text-warning-500' : 'text-swoop-text-muted'}`}>
                           {Math.round(wind)} mph
                         </span>
                       </div>
                     )}
                     {precipProb > 0 && (
                       <div className="flex justify-between text-[9px]">
-                        <span className="text-gray-400">Precip</span>
-                        <span className={`font-semibold ${hasRain ? 'text-blue-500' : 'text-gray-500'}`}>
+                        <span className="text-swoop-text-label">Precip</span>
+                        <span className={`font-semibold ${hasRain ? 'text-blue-500' : 'text-swoop-text-muted'}`}>
                           {precipProb}%
                         </span>
                       </div>
                     )}
                     {day.humidity > 0 && (
                       <div className="flex justify-between text-[9px]">
-                        <span className="text-gray-400">Humid</span>
-                        <span className="font-semibold text-gray-500">{day.humidity}%</span>
+                        <span className="text-swoop-text-label">Humid</span>
+                        <span className="font-semibold text-swoop-text-muted">{day.humidity}%</span>
                       </div>
                     )}
                   </div>

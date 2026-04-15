@@ -36,16 +36,16 @@ function AgentCard({ result, agent }) {
         <div className="text-xs text-purple-600 mb-3">{result.detail}</div>
         <div className="flex flex-col gap-2">
           {result.actions.map((a, i) => (
-            <div key={i} className="rounded-lg bg-white border border-purple-100 p-3">
+            <div key={i} className="rounded-lg bg-swoop-panel border border-purple-100 p-3">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded text-white"
                   style={{ background: a.priority === 'high' ? '#ef4444' : '#f59e0b' }}>
                   {a.priority}
                 </span>
-                <span className="text-xs font-bold text-gray-800">{a.headline}</span>
+                <span className="text-xs font-bold text-swoop-text">{a.headline}</span>
               </div>
-              <div className="text-[11px] text-gray-600">{a.rationale}</div>
-              {a.owner && <div className="text-[10px] text-gray-400 mt-1">{a.owner}</div>}
+              <div className="text-[11px] text-swoop-text-muted">{a.rationale}</div>
+              {a.owner && <div className="text-[10px] text-swoop-text-label mt-1">{a.owner}</div>}
             </div>
           ))}
         </div>
@@ -54,9 +54,9 @@ function AgentCard({ result, agent }) {
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
-      <div className="text-sm font-bold text-gray-800 mb-1">{result.title || agent.label}</div>
-      <div className="text-xs text-gray-600 leading-relaxed">{result.detail}</div>
+    <div className="rounded-xl border border-swoop-border bg-swoop-panel p-4">
+      <div className="text-sm font-bold text-swoop-text mb-1">{result.title || agent.label}</div>
+      <div className="text-xs text-swoop-text-muted leading-relaxed">{result.detail}</div>
 
       {result.adjustments && (
         <div className="mt-2 flex flex-col gap-1">
@@ -175,12 +175,12 @@ export default function WeatherCascade() {
         <button
           type="button"
           onClick={() => { window.location.hash = '#/today'; }}
-          className="text-sm text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer mb-3 p-0"
+          className="text-sm text-swoop-text-label hover:text-gray-600 bg-transparent border-none cursor-pointer mb-3 p-0"
         >
           &larr; Back to Today
         </button>
-        <h1 className="text-2xl font-bold text-gray-800 m-0">Weather Cascade Demo</h1>
-        <p className="text-sm text-gray-500 mt-1 mb-0">Watch how a single weather change triggers a cascade of intelligent agent responses</p>
+        <h1 className="text-2xl font-bold text-swoop-text m-0">Weather Cascade Demo</h1>
+        <p className="text-sm text-swoop-text-muted mt-1 mb-0">Watch how a single weather change triggers a cascade of intelligent agent responses</p>
       </div>
 
       {/* Current Weather Card */}
@@ -188,8 +188,8 @@ export default function WeatherCascade() {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs font-bold uppercase tracking-wider text-sky-500 mb-1">Current Conditions</div>
-            <div className="text-2xl font-bold text-gray-800">Saturday: 82 F, Sunny</div>
-            <div className="text-sm text-gray-500 mt-1">Pine Tree CC &middot; 220 rounds booked &middot; Wind: 8 mph</div>
+            <div className="text-2xl font-bold text-swoop-text">Saturday: 82 F, Sunny</div>
+            <div className="text-sm text-swoop-text-muted mt-1">Pine Tree CC &middot; 220 rounds booked &middot; Wind: 8 mph</div>
           </div>
           <div className="text-5xl">☀</div>
         </div>
@@ -222,7 +222,7 @@ export default function WeatherCascade() {
           <button
             type="button"
             onClick={handleReset}
-            className="text-xs text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer"
+            className="text-xs text-swoop-text-label hover:text-gray-600 bg-transparent border-none cursor-pointer"
           >
             Reset
           </button>
@@ -233,7 +233,7 @@ export default function WeatherCascade() {
       {(state === 'running' || state === 'done') && (
         <div className="flex flex-col gap-0 relative">
           {/* Vertical line */}
-          <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gray-200" style={{ zIndex: 0 }} />
+          <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-swoop-border" style={{ zIndex: 0 }} />
 
           {AGENTS.map((agent, idx) => {
             const isActive = idx <= activeStep;
@@ -259,12 +259,12 @@ export default function WeatherCascade() {
                   >
                     {agent.icon}
                   </div>
-                  <div className="text-[10px] font-mono text-gray-400 mt-1">{agent.delay / 1000}s</div>
+                  <div className="text-[10px] font-mono text-swoop-text-label mt-1">{agent.delay / 1000}s</div>
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold text-gray-700 mb-1.5">{agent.label}</div>
+                  <div className="text-sm font-bold text-swoop-text-2 mb-1.5">{agent.label}</div>
                   {isActive && !hasResult && agent.apiAgent && (
                     <div className="flex items-center gap-2 text-xs text-purple-500">
                       <div className="animate-spin w-3 h-3 border-2 border-purple-200 border-t-purple-500 rounded-full" />

@@ -70,7 +70,7 @@ export default function TomorrowForecast() {
       : `${roundsBooked} rounds booked — standard dining demand`;
 
   return (
-    <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+    <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
       <div className="text-[11px] font-bold text-blue-600 uppercase tracking-wide mb-3">
         Tomorrow's Forecast
       </div>
@@ -78,41 +78,41 @@ export default function TomorrowForecast() {
       {/* Demand prediction */}
       <div className={`grid ${hasTeeSheet ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'} gap-3 mb-4`}>
         {hasTeeSheet && <div className="text-center">
-          <div className="text-lg font-bold text-gray-800 dark:text-white/90">
+          <div className="text-lg font-bold text-swoop-text">
             {roundsBooked}
           </div>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-swoop-text-label">
             Rounds booked
           </div>
         </div>}
         <div className="text-center">
-          <div className="text-lg font-bold text-gray-800 dark:text-white/90">
+          <div className="text-lg font-bold text-swoop-text">
             {tempHigh}°F
           </div>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-swoop-text-label">
             High temp
           </div>
         </div>
         <div className="text-center">
-          <div className={`text-lg font-bold ${gusts > 15 ? 'text-warning-500' : 'text-gray-800 dark:text-white/90'}`}>
+          <div className={`text-lg font-bold ${gusts > 15 ? 'text-warning-500' : 'text-swoop-text'}`}>
             {gusts > wind ? `${wind}–${gusts}` : wind} mph
           </div>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-swoop-text-label">
             Wind{gusts > wind ? ' / Gusts' : ''}
           </div>
         </div>
         <div className="text-center">
-          <div className={`text-lg font-bold ${precipProb > 40 ? 'text-warning-500' : 'text-gray-800 dark:text-white/90'}`}>
+          <div className={`text-lg font-bold ${precipProb > 40 ? 'text-warning-500' : 'text-swoop-text'}`}>
             {precipProb}%
           </div>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-swoop-text-label">
             Rain chance
           </div>
         </div>
       </div>
 
       {/* Staffing recommendation per outlet */}
-      <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">
+      <div className="text-[11px] font-bold text-swoop-text-muted uppercase tracking-wide mb-2">
         Staffing Recommendation
       </div>
 
@@ -125,7 +125,7 @@ export default function TomorrowForecast() {
               className="flex justify-between items-center py-2 px-3 rounded-lg"
               style={{ background: `${color}08`, border: `1px solid ${color}20` }}
             >
-              <span className="text-sm font-semibold text-gray-800 dark:text-white/90">
+              <span className="text-sm font-semibold text-swoop-text">
                 {outlet.name}
               </span>
               <span className="text-xs font-semibold" style={{ color }}>
@@ -139,20 +139,20 @@ export default function TomorrowForecast() {
 
       {/* Event & weather impact notes */}
       <div className="flex flex-col gap-1">
-        {diningImpact && <div className="text-xs text-gray-500 leading-snug">
+        {diningImpact && <div className="text-xs text-swoop-text-muted leading-snug">
           {diningImpact}
         </div>}
-        <div className={`text-xs leading-snug ${gusts > 15 || precipProb > 40 ? 'text-warning-500' : 'text-gray-500'}`}>
+        <div className={`text-xs leading-snug ${gusts > 15 || precipProb > 40 ? 'text-warning-500' : 'text-swoop-text-muted'}`}>
           {weatherImpact}
         </div>
       </div>
 
       {(highDemand || gusts > 15 || precipProb > 40) && (
-        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
+        <div className="mt-3 pt-3 border-t border-swoop-border">
           <div className="text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-1">
             Layer 3 · Demand projection
           </div>
-          <div className="text-[11px] text-gray-600 dark:text-gray-400 leading-snug">
+          <div className="text-[11px] text-swoop-text-muted leading-snug">
             {highDemand && (gusts > 15 || precipProb > 40) ? (
               <>High demand × adverse weather → <span className="font-semibold text-warning-600">likely staffing risk</span>. Cross-references tee sheet × weather × historical conversion.</>
             ) : highDemand ? (

@@ -43,10 +43,10 @@ function healthLabel(score) {
 // --- Stat card ---
 function Stat({ label, value, accent, sub, mono }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4">
-      <div className="text-xs text-gray-400 uppercase tracking-wide">{label}</div>
+    <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
+      <div className="text-xs text-swoop-text-label uppercase tracking-wide">{label}</div>
       <div className={`text-[28px] font-bold mt-1 ${mono ? 'font-mono' : ''}`} style={{ color: accent || '#1a1a2e' }}>{value}</div>
-      {sub && <div className="text-xs text-gray-500 mt-0.5">{sub}</div>}
+      {sub && <div className="text-xs text-swoop-text-muted mt-0.5">{sub}</div>}
     </div>
   );
 }
@@ -57,7 +57,7 @@ function Section({ title, children, cols, collapsible = false, defaultCollapsed 
   const isCollapsed = collapsible && collapsed;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-6">
+    <div className="bg-swoop-panel border border-swoop-border rounded-2xl p-6">
       {title && (
         <div
           onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
@@ -65,7 +65,7 @@ function Section({ title, children, cols, collapsible = false, defaultCollapsed 
         >
           <div className="flex items-baseline gap-2 flex-wrap">
             <h3 className="m-0 text-base font-bold text-[#1a1a2e]">{title}</h3>
-            {isCollapsed && summary && <span className="text-xs text-gray-400">{summary}</span>}
+            {isCollapsed && summary && <span className="text-xs text-swoop-text-label">{summary}</span>}
             {!isCollapsed && Array.isArray(sourceSystems) && sourceSystems.length > 0 && (
               <div className="flex gap-1 flex-wrap items-center">
                 {sourceSystems.map(s => (
@@ -74,7 +74,7 @@ function Section({ title, children, cols, collapsible = false, defaultCollapsed 
               </div>
             )}
           </div>
-          {collapsible && <span className="text-xs text-gray-400 transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
+          {collapsible && <span className="text-xs text-swoop-text-label transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)' }}>{'\u25BC'}</span>}
         </div>
       )}
       {!isCollapsed && (cols ? <div className="gap-4" style={{ display: 'grid', gridTemplateColumns: cols }}>{children}</div> : children)}
@@ -138,21 +138,21 @@ function buildSnapshot(activity, preferences, staffNotes) {
 function SnapshotCard({ cat, items, prefHint, familyHints }) {
   const hasContent = items.length > 0 || prefHint || (familyHints && familyHints.length > 0);
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-2">
+    <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 mb-1">
         <span className="text-base">{cat.icon}</span>
         <span className="text-xs font-bold uppercase tracking-wide" style={{ color: cat.color }}>{cat.label}</span>
         {items.length > 0 && (
-          <span className="ml-auto text-[10px] text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">{items.length} recent</span>
+          <span className="ml-auto text-[10px] text-swoop-text-label bg-swoop-row rounded-full px-2 py-0.5">{items.length} recent</span>
         )}
       </div>
       {prefHint && (
-        <div className="text-xs text-gray-500 italic border-l-2 pl-2 mb-1" style={{ borderColor: `${cat.color}60` }}>
+        <div className="text-xs text-swoop-text-muted italic border-l-2 pl-2 mb-1" style={{ borderColor: `${cat.color}60` }}>
           {prefHint}
         </div>
       )}
       {familyHints && familyHints.length > 0 && familyHints.map((fh, i) => (
-        <div key={i} className="text-xs text-gray-400 italic border-l-2 pl-2 mb-1 border-purple-300">
+        <div key={i} className="text-xs text-swoop-text-label italic border-l-2 pl-2 mb-1 border-purple-300">
           {fh.name}: {fh.note}
         </div>
       ))}
@@ -160,16 +160,16 @@ function SnapshotCard({ cat, items, prefHint, familyHints }) {
         <div className="flex flex-col gap-1.5">
           {items.slice(0, 3).map((evt, i) => (
             <div key={i} className="flex gap-2 items-start text-xs">
-              <span className="shrink-0 text-gray-400 font-mono whitespace-nowrap">{evt.timestamp || fmtDate(evt.date)}</span>
-              <span className="text-gray-700">{evt.detail || evt.event || evt.description}</span>
+              <span className="shrink-0 text-swoop-text-label font-mono whitespace-nowrap">{evt.timestamp || fmtDate(evt.date)}</span>
+              <span className="text-swoop-text-2">{evt.detail || evt.event || evt.description}</span>
             </div>
           ))}
           {items.length > 3 && (
-            <div className="text-[10px] text-gray-400">+{items.length - 3} more in timeline</div>
+            <div className="text-[10px] text-swoop-text-label">+{items.length - 3} more in timeline</div>
           )}
         </div>
       ) : !prefHint && (!familyHints || familyHints.length === 0) ? (
-        <div className="text-xs text-gray-300">No recent activity</div>
+        <div className="text-xs text-swoop-text-ghost">No recent activity</div>
       ) : null}
     </div>
   );
@@ -328,7 +328,7 @@ export default function MemberProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px] text-gray-400">
+      <div className="flex justify-center items-center min-h-[400px] text-swoop-text-label">
         Loading member profile...
       </div>
     );
@@ -337,8 +337,8 @@ export default function MemberProfilePage() {
   if (!profile) {
     return (
       <div className="flex flex-col items-center gap-4 min-h-[400px] pt-20">
-        <div className="text-lg text-gray-400">Member not found</div>
-        <button onClick={() => setMemberId(null)} className="border border-gray-200 rounded-lg px-4 py-2 bg-transparent text-[#1a1a2e] cursor-pointer">
+        <div className="text-lg text-swoop-text-label">Member not found</div>
+        <button onClick={() => setMemberId(null)} className="border border-swoop-border rounded-lg px-4 py-2 bg-transparent text-[#1a1a2e] cursor-pointer">
           {'\u2190'} Back to roster
         </button>
       </div>
@@ -413,16 +413,16 @@ export default function MemberProfilePage() {
 
       {/* Back button + header */}
       <div className="flex justify-between items-center flex-wrap gap-4">
-        <button onClick={() => setMemberId(null)} className="border border-gray-200 rounded-lg px-3.5 py-1.5 bg-white text-gray-500 cursor-pointer text-sm">
+        <button onClick={() => setMemberId(null)} className="border border-swoop-border rounded-lg px-3.5 py-1.5 bg-swoop-panel text-swoop-text-muted cursor-pointer text-sm">
           {'\u2190'} All Members
         </button>
-        <button onClick={() => openProfile(memberId)} className="border border-gray-200 rounded-lg px-3.5 py-1.5 bg-white text-gray-500 cursor-pointer text-sm">
+        <button onClick={() => openProfile(memberId)} className="border border-swoop-border rounded-lg px-3.5 py-1.5 bg-swoop-panel text-swoop-text-muted cursor-pointer text-sm">
           Open Quick View {'\u2192'}
         </button>
       </div>
 
       {/* Hero header */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-8 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-6 items-center">
+      <div className="bg-swoop-panel border border-swoop-border rounded-2xl p-5 sm:p-8 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-6 items-center">
         <div>
           <div className="flex items-center gap-4 flex-wrap">
             <h1 className="m-0 text-[28px] font-bold text-[#1a1a2e]">
@@ -432,7 +432,7 @@ export default function MemberProfilePage() {
               {healthLabel(score)} {'\u00B7'} {score}
             </span>
           </div>
-          <div className="flex gap-6 mt-2 flex-wrap text-sm text-gray-500">
+          <div className="flex gap-6 mt-2 flex-wrap text-sm text-swoop-text-muted">
             <span>{profile.archetype}</span>
             <span>{profile.tier || profile.membershipType}</span>
             {profile.externalId && <span>ID: {profile.externalId}</span>}
@@ -442,7 +442,7 @@ export default function MemberProfilePage() {
             )}
           </div>
           {contact.lastSeenLocation && (
-            <div className="mt-2 text-xs text-gray-400">
+            <div className="mt-2 text-xs text-swoop-text-label">
               Last seen: {contact.lastSeenLocation}
             </div>
           )}
@@ -452,7 +452,7 @@ export default function MemberProfilePage() {
           <div className="w-[100px] h-[100px] rounded-full flex items-center justify-center mx-auto" style={{ border: `6px solid ${color}` }}>
             <span className="text-[32px] font-bold font-mono" style={{ color }}>{score}</span>
           </div>
-          <div className="text-xs text-gray-400 mt-1.5">Health Score</div>
+          <div className="text-xs text-swoop-text-label mt-1.5">Health Score</div>
           {/* Dues at risk dollar anchor lives inside MemberDecayChain (rendered
               below) — see drawer comment for the v2/v3 history. Single source
               of truth for the Story 2 "$32K/yr" beat. */}
@@ -467,9 +467,9 @@ export default function MemberProfilePage() {
       {/* Key metrics row */}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
         <Stat label="Annual Dues" value={fmt$(profile.duesAnnual)} accent={'#1a1a2e'} />
-        <Stat label="Total Value" value={fmt$(profile.memberValueAnnual)} accent={'#ff8b00'} />
+        <Stat label="Total Value" value={fmt$(profile.memberValueAnnual)} accent={'#F3922D'} />
         <Stat label="Account Balance" value={fmt$(profile.accountBalance)} accent={profile.accountBalance < 0 ? '#ef4444' : '#12b76a'} />
-        <Stat label="Email Open Rate" value={fmtPct(profile.emailOpenRate)} accent={'#ff8b00'} mono />
+        <Stat label="Email Open Rate" value={fmtPct(profile.emailOpenRate)} accent={'#F3922D'} mono />
         <Stat label="Rounds (30d)" value={profile.roundsPlayed ?? '\u2014'} accent={'#12b76a'} mono />
         <Stat label="Dining Spend (30d)" value={fmt$(profile.diningSpend)} accent={'#f59e0b'} />
       </div>
@@ -489,9 +489,9 @@ export default function MemberProfilePage() {
             ))}
           </div>
           {emptyCategories.length > 0 && activeCategories.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
+            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-swoop-border-inset">
               {emptyCategories.map((cat) => (
-                <span key={cat.key} className="text-[11px] text-gray-300 flex items-center gap-1">
+                <span key={cat.key} className="text-[11px] text-swoop-text-ghost flex items-center gap-1">
                   <span>{cat.icon}</span> {cat.label}: No data
                 </span>
               ))}
@@ -517,7 +517,7 @@ export default function MemberProfilePage() {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-[200px] flex items-center justify-center text-gray-400">
+            <div className="h-[200px] flex items-center justify-center text-swoop-text-label">
               Insufficient trend data
             </div>
           )}
@@ -530,11 +530,11 @@ export default function MemberProfilePage() {
               <div className="flex flex-col gap-2">
                 {riskSignals.map((signal, i) => (
                   <div key={i} className="p-2 rounded-lg border border-red-500/20 bg-red-500/[0.05]">
-                    <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                    <div className="text-sm font-semibold text-swoop-text">
                       {signal.label || signal.detail || signal}
                     </div>
                     {signal.source && (
-                      <div className="text-xs text-gray-400 mt-0.5">
+                      <div className="text-xs text-swoop-text-label mt-0.5">
                         Source: {signal.source} {signal.confidence ? `\u00B7 Confidence: ${signal.confidence}` : ''}
                       </div>
                     )}
@@ -555,22 +555,22 @@ export default function MemberProfilePage() {
           <div className="flex flex-col gap-4">
             {preferences.teeWindows && (
               <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wide">Tee Time Preference</div>
+                <div className="text-xs text-swoop-text-label uppercase tracking-wide">Tee Time Preference</div>
                 <div className="text-sm text-[#1a1a2e] mt-0.5">{preferences.teeWindows}</div>
               </div>
             )}
             {preferences.dining && (
               <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wide">Dining Preference</div>
+                <div className="text-xs text-swoop-text-label uppercase tracking-wide">Dining Preference</div>
                 <div className="text-sm text-[#1a1a2e] mt-0.5">{preferences.dining}</div>
               </div>
             )}
             {preferences.favoriteSpots && preferences.favoriteSpots.length > 0 && (
                 <div>
-                  <div className="text-xs text-gray-400 uppercase tracking-wide">Favorite Spots</div>
+                  <div className="text-xs text-swoop-text-label uppercase tracking-wide">Favorite Spots</div>
                   <div className="flex gap-1.5 flex-wrap mt-1">
                     {(Array.isArray(preferences.favoriteSpots) ? preferences.favoriteSpots : [preferences.favoriteSpots]).map((spot, i) => (
-                      <span key={i} className="px-2.5 py-0.5 rounded-full text-xs bg-brand-500/10 border border-brand-500/20 text-gray-500">
+                      <span key={i} className="px-2.5 py-0.5 rounded-full text-xs bg-brand-500/10 border border-brand-500/20 text-swoop-text-muted">
                         {spot}
                       </span>
                     ))}
@@ -579,12 +579,12 @@ export default function MemberProfilePage() {
             )}
             {preferences.notes && (
               <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wide">Member Notes</div>
-                <div className="text-sm text-gray-500 mt-0.5 leading-normal">{preferences.notes}</div>
+                <div className="text-xs text-swoop-text-label uppercase tracking-wide">Member Notes</div>
+                <div className="text-sm text-swoop-text-muted mt-0.5 leading-normal">{preferences.notes}</div>
               </div>
             )}
             {!preferences.teeWindows && !preferences.dining && !preferences.notes && (
-              <div className="text-gray-400 text-sm">No preferences on file</div>
+              <div className="text-swoop-text-label text-sm">No preferences on file</div>
             )}
           </div>
         </Section>
@@ -594,10 +594,10 @@ export default function MemberProfilePage() {
           {family.length > 0 ? (
             <div className="flex flex-col gap-2">
               {family.map((member, i) => (
-                <div key={i} className="flex justify-between items-center p-2 rounded-lg border border-gray-200 bg-gray-100">
+                <div key={i} className="flex justify-between items-center p-2 rounded-lg border border-swoop-border bg-swoop-row">
                   <div>
                     <div className="text-sm font-semibold">{member.name}</div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-swoop-text-label">
                       {member.relationship} {member.age ? `\u00B7 Age ${member.age}` : ''}
                     </div>
                   </div>
@@ -611,17 +611,17 @@ export default function MemberProfilePage() {
               ))}
             </div>
           ) : (
-            <div className="text-gray-400 text-sm">No family members on file</div>
+            <div className="text-swoop-text-label text-sm">No family members on file</div>
           )}
         </Section>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-4 bg-white border border-gray-200 rounded-xl">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-4 bg-swoop-panel border border-swoop-border rounded-xl">
         {[
           { label: 'Schedule call', icon: '\uD83D\uDCDE', color: '#039855' },
           { label: 'Send email', icon: '\u2709\uFE0F', color: '#3B82F6' },
-          { label: 'Send SMS', icon: '\uD83D\uDCF1', color: '#ff8b00' },
+          { label: 'Send SMS', icon: '\uD83D\uDCF1', color: '#F3922D' },
           { label: 'Offer comp', icon: '\uD83C\uDF81', color: '#8b5cf6' },
         ].map(action => (
           <button
@@ -640,19 +640,19 @@ export default function MemberProfilePage() {
       {/* Contact info */}
       <Section title="Contact Information" cols="repeat(auto-fit, minmax(200px, 1fr))" sourceSystems={['Member CRM']}>
         <div>
-          <div className="text-xs text-gray-400 uppercase">Email</div>
+          <div className="text-xs text-swoop-text-label uppercase">Email</div>
           <div className="text-sm mt-0.5">{contact.email || profile.email || '\u2014'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-400 uppercase">Phone</div>
+          <div className="text-xs text-swoop-text-label uppercase">Phone</div>
           <div className="text-sm mt-0.5">{contact.phone || profile.phone || '\u2014'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-400 uppercase">Preferred Channel</div>
+          <div className="text-xs text-swoop-text-label uppercase">Preferred Channel</div>
           <div className="text-sm mt-0.5">{contact.preferredChannel || '\u2014'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-400 uppercase">Last Seen</div>
+          <div className="text-xs text-swoop-text-label uppercase">Last Seen</div>
           <div className="text-sm mt-0.5">{contact.lastSeenLocation || '\u2014'}</div>
         </div>
       </Section>
@@ -663,20 +663,20 @@ export default function MemberProfilePage() {
           <>
             {invoices.summary && (
               <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2 mb-4">
-                <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
-                  <div className="text-[10px] text-gray-400 uppercase">Total Billed</div>
+                <div className="p-2 rounded-lg bg-swoop-row border border-swoop-border">
+                  <div className="text-[10px] text-swoop-text-label uppercase">Total Billed</div>
                   <div className="text-base font-bold font-mono">{fmt$(invoices.summary.totalBilled)}</div>
                 </div>
-                <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
-                  <div className="text-[10px] text-gray-400 uppercase">Total Paid</div>
+                <div className="p-2 rounded-lg bg-swoop-row border border-swoop-border">
+                  <div className="text-[10px] text-swoop-text-label uppercase">Total Paid</div>
                   <div className="text-base font-bold font-mono text-success-500">{fmt$(invoices.summary.totalPaid)}</div>
                 </div>
                 <div className="p-2 rounded-lg border" style={{ background: invoices.summary.outstanding > 0 ? '#ef444410' : '#F3F4F6', borderColor: invoices.summary.outstanding > 0 ? '#ef444430' : '#E5E7EB' }}>
-                  <div className="text-[10px] text-gray-400 uppercase">Outstanding</div>
+                  <div className="text-[10px] text-swoop-text-label uppercase">Outstanding</div>
                   <div className="text-base font-bold font-mono" style={{ color: invoices.summary.outstanding > 0 ? '#ef4444' : '#1a1a2e' }}>{fmt$(invoices.summary.outstanding)}</div>
                 </div>
-                <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
-                  <div className="text-[10px] text-gray-400 uppercase">Payment Status</div>
+                <div className="p-2 rounded-lg bg-swoop-row border border-swoop-border">
+                  <div className="text-[10px] text-swoop-text-label uppercase">Payment Status</div>
                   <div className="text-sm font-bold mt-0.5" style={{ color: invoices.summary.paymentStatus === 'current' ? '#12b76a' : invoices.summary.paymentStatus === 'chronic' ? '#ef4444' : '#f59e0b' }}>
                     {(invoices.summary.paymentStatus || 'unknown').charAt(0).toUpperCase() + (invoices.summary.paymentStatus || 'unknown').slice(1)}
                   </div>
@@ -686,9 +686,9 @@ export default function MemberProfilePage() {
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="border-b border-swoop-border">
                     {['Date', 'Type', 'Description', 'Amount', 'Status', 'Paid', 'Late Fee'].map((h) => (
-                      <th key={h} className="px-2.5 py-2 text-left text-gray-400 font-semibold uppercase tracking-tight">{h}</th>
+                      <th key={h} className="px-2.5 py-2 text-left text-swoop-text-label font-semibold uppercase tracking-tight">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -696,10 +696,10 @@ export default function MemberProfilePage() {
                   {invoiceItems.slice(0, 20).map((inv, i) => {
                     const statusColor = inv.status === 'paid' ? '#12b76a' : inv.status === 'current' ? '#f59e0b' : '#ef4444';
                     return (
-                      <tr key={i} className="border-b border-gray-200">
+                      <tr key={i} className="border-b border-swoop-border">
                         <td className="px-2.5 py-2 font-mono">{fmtDate(inv.dueDate || inv.invoiceDate)}</td>
                         <td className="px-2.5 py-2">{inv.type}</td>
-                        <td className="px-2.5 py-2 text-gray-500 max-w-[200px]">{inv.description}</td>
+                        <td className="px-2.5 py-2 text-swoop-text-muted max-w-[200px]">{inv.description}</td>
                         <td className="px-2.5 py-2 font-mono">{fmt$(inv.amount)}</td>
                         <td className="px-2.5 py-2">
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: `${statusColor}15`, color: statusColor }}>
@@ -716,7 +716,7 @@ export default function MemberProfilePage() {
             </div>
           </>
         ) : (
-          <div className="text-gray-400 text-sm">No invoice history available</div>
+          <div className="text-swoop-text-label text-sm">No invoice history available</div>
         )}
       </Section>
 
@@ -726,19 +726,19 @@ export default function MemberProfilePage() {
           return activity.length > 0 ? (
           <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
             {activity.map((event, i) => (
-              <div key={i} className="flex gap-4 items-start p-2 rounded-lg border-b border-gray-200">
-                <span className="shrink-0 w-20 text-xs text-gray-400 font-mono pt-0.5">
+              <div key={i} className="flex gap-4 items-start p-2 rounded-lg border-b border-swoop-border">
+                <span className="shrink-0 w-20 text-xs text-swoop-text-label font-mono pt-0.5">
                   {fmtDate(event.date)}
                 </span>
                 <div>
                   <div className="text-sm text-[#1a1a2e]">{event.event || event.description}</div>
-                  {event.domain && <div className="text-xs text-gray-400 mt-0.5">{event.domain}</div>}
+                  {event.domain && <div className="text-xs text-swoop-text-label mt-0.5">{event.domain}</div>}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-gray-400 text-sm">No recent activity</div>
+          <div className="text-swoop-text-label text-sm">No recent activity</div>
         );
         })()}
       </Section>
@@ -748,10 +748,10 @@ export default function MemberProfilePage() {
         <Section title="Staff Notes" sourceSystems={['Swoop App']}>
           <div className="flex flex-col gap-2">
             {staffNotes.map((note, i) => (
-              <div key={i} className="p-4 rounded-lg bg-gray-100 border border-gray-200">
+              <div key={i} className="p-4 rounded-lg bg-swoop-row border border-swoop-border">
                 <div className="text-sm text-[#1a1a2e]">{typeof note === 'string' ? note : note.note || note.text}</div>
                 {note.author && (
-                  <div className="text-xs text-gray-400 mt-1">
+                  <div className="text-xs text-swoop-text-label mt-1">
                     {note.author} {note.date ? `\u00B7 ${fmtDate(note.date)}` : ''}
                   </div>
                 )}
@@ -793,25 +793,25 @@ function MemberRoster({ onSelect }) {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search by name or member ID..."
-        className="px-4 py-3 rounded-lg border border-gray-200 bg-white text-[#1a1a2e] text-sm max-w-[400px]"
+        className="px-4 py-3 rounded-lg border border-swoop-border bg-swoop-panel text-[#1a1a2e] text-sm max-w-[400px]"
       />
-      <div className="text-xs text-gray-400">
+      <div className="text-xs text-swoop-text-label">
         Showing {filtered.length} at-risk members {'\u00B7'} Click any row to view full profile
       </div>
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="bg-swoop-panel border border-swoop-border rounded-2xl overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         <table className="w-full border-collapse text-sm min-w-[600px]">
           <thead>
-            <tr className="border-b border-gray-200">
+            <tr className="border-b border-swoop-border">
               {['Name', 'Score', 'Archetype', 'Type', 'Annual Dues', 'Top Risk'].map((h) => (
-                <th key={h} className="px-3.5 py-2.5 text-left text-gray-400 text-xs font-semibold uppercase">{h}</th>
+                <th key={h} className="px-3.5 py-2.5 text-left text-swoop-text-label text-xs font-semibold uppercase">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="p-5 text-center text-gray-400">Loading...</td></tr>
+              <tr><td colSpan={6} className="p-5 text-center text-swoop-text-label">Loading...</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={6} className="p-5 text-center text-gray-400">No members found</td></tr>
+              <tr><td colSpan={6} className="p-5 text-center text-swoop-text-label">No members found</td></tr>
             ) : filtered.map((m) => {
               const sc = m.score ?? m.healthScore ?? 0;
               const bk = healthBucket(sc);
@@ -820,16 +820,16 @@ function MemberRoster({ onSelect }) {
                 <tr
                   key={m.memberId}
                   onClick={() => onSelect(m.memberId)}
-                  className="border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  className="border-b border-swoop-border cursor-pointer hover:bg-swoop-row-hover"
                 >
                   <td className="px-3.5 py-2.5 font-semibold">{m.name}</td>
                   <td className="px-3.5 py-2.5">
                     <span className="font-mono font-bold" style={{ color: cl }}>{sc}</span>
                   </td>
-                  <td className="px-3.5 py-2.5 text-gray-500">{m.archetype}</td>
-                  <td className="px-3.5 py-2.5 text-gray-500">{m.membershipType}</td>
+                  <td className="px-3.5 py-2.5 text-swoop-text-muted">{m.archetype}</td>
+                  <td className="px-3.5 py-2.5 text-swoop-text-muted">{m.membershipType}</td>
                   <td className="px-3.5 py-2.5 font-mono">{fmt$(m.annualDues || m.duesAnnual)}</td>
-                  <td className="px-3.5 py-2.5 text-gray-500 max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap">{m.topRisk}</td>
+                  <td className="px-3.5 py-2.5 text-swoop-text-muted max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap">{m.topRisk}</td>
                 </tr>
               );
             })}

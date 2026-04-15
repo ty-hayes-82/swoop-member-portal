@@ -24,22 +24,22 @@ export default function StatCard({
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`rounded-xl border border-gray-200 p-5 flex flex-col gap-2 min-w-0 transition-all duration-150 dark:border-gray-800 dark:bg-white/[0.03] ${
+      className={`rounded-xl border border-swoop-border p-5 flex flex-col gap-2 min-w-0 transition-all duration-150 ${
         onClick ? 'cursor-pointer' : 'cursor-default'
       } ${
         hovered && onClick
-          ? 'bg-gray-50 shadow-theme-md dark:bg-white/[0.05]'
-          : 'bg-white shadow-theme-xs dark:bg-white/[0.03]'
+          ? 'bg-swoop-row shadow-theme-md'
+          : 'bg-swoop-panel shadow-theme-xs'
       }`}
     >
       <div className="flex justify-between items-start">
-        <span className="text-xs text-gray-600 font-medium tracking-wide leading-tight dark:text-gray-400">
+        <span className="text-xs text-swoop-text-muted font-medium tracking-wide leading-tight">
           {label}
         </span>
         {badge && <Badge text={badge.text} variant={badge.variant} size="sm" />}
       </div>
 
-      <div className="font-mono text-[28px] font-semibold text-gray-800 leading-none tracking-tight dark:text-white/90">
+      <div className="font-mono text-[28px] font-semibold text-swoop-text leading-none tracking-tight">
         {formatValue(value, format)}
       </div>
 

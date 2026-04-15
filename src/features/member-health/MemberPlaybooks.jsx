@@ -100,7 +100,7 @@ export default function MemberPlaybooks() {
         steps={DECAY_STEPS}
         beforeMetrics={DECAY_BEFORE}
         afterMetrics={DECAY_AFTER}
-        accentColor={'#ff8b00'}
+        accentColor={'#F3922D'}
       />
     </div>
   );

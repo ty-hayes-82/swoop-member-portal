@@ -89,27 +89,27 @@ export default function BrandVoicePanel({ agentId, behavioralConfig = {}, onConf
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Brand Voice</h3>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <h3 className="text-lg font-semibold text-swoop-text">Brand Voice</h3>
+        <p className="mt-1 text-sm text-swoop-text-muted">
           Customize how the agent communicates to match your club's brand and culture.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-300">
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {lastSaved && (
-        <div className="rounded-md bg-green-50 dark:bg-green-900/20 p-3 text-sm text-green-700 dark:text-green-300">
+        <div className="rounded-md bg-green-50 p-3 text-sm text-green-700">
           Saved successfully.
         </div>
       )}
 
       {/* ---- Brand voice notes ---- */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="block text-sm font-medium text-swoop-text-2">
           Brand Voice Notes
         </label>
         <textarea
@@ -121,10 +121,10 @@ export default function BrandVoicePanel({ agentId, behavioralConfig = {}, onConf
           }}
           placeholder="e.g., Always acknowledge member tenure. For 10+ year members, say 'As one of our most valued long-standing members...' Never use the word 'unfortunately.'"
           rows={4}
-          className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full rounded-md border border-swoop-border bg-swoop-panel px-3 py-2 text-sm text-swoop-text placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400 dark:text-gray-500">
+          <span className="text-xs text-swoop-text-label">
             {voiceNotes.length}/{MAX_VOICE_NOTES_CHARS} characters
           </span>
           <button
@@ -139,7 +139,7 @@ export default function BrandVoicePanel({ agentId, behavioralConfig = {}, onConf
 
       {/* ---- Greeting style ---- */}
       <fieldset className="space-y-3">
-        <legend className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <legend className="text-sm font-medium text-swoop-text-2">
           Greeting Style
         </legend>
         <div className="space-y-2">
@@ -148,8 +148,8 @@ export default function BrandVoicePanel({ agentId, behavioralConfig = {}, onConf
               key={opt.value}
               className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
                 greetingStyle === opt.value
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-swoop-border hover:bg-swoop-row-hover'
               }`}
             >
               <input
@@ -161,8 +161,8 @@ export default function BrandVoicePanel({ agentId, behavioralConfig = {}, onConf
                 className="mt-0.5 text-blue-600 focus:ring-blue-500"
               />
               <div>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">{opt.label}</span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{opt.description}</p>
+                <span className="text-sm font-medium text-swoop-text">{opt.label}</span>
+                <p className="text-xs text-swoop-text-muted">{opt.description}</p>
               </div>
             </label>
           ))}
@@ -171,7 +171,7 @@ export default function BrandVoicePanel({ agentId, behavioralConfig = {}, onConf
 
       {/* ---- Response length ---- */}
       <fieldset className="space-y-3">
-        <legend className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <legend className="text-sm font-medium text-swoop-text-2">
           Response Length
         </legend>
         <div className="space-y-2">
@@ -180,8 +180,8 @@ export default function BrandVoicePanel({ agentId, behavioralConfig = {}, onConf
               key={opt.value}
               className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
                 responseLength === opt.value
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-swoop-border hover:bg-swoop-row-hover'
               }`}
             >
               <input
@@ -193,8 +193,8 @@ export default function BrandVoicePanel({ agentId, behavioralConfig = {}, onConf
                 className="mt-0.5 text-blue-600 focus:ring-blue-500"
               />
               <div>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">{opt.label}</span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{opt.description}</p>
+                <span className="text-sm font-medium text-swoop-text">{opt.label}</span>
+                <p className="text-xs text-swoop-text-muted">{opt.description}</p>
               </div>
             </label>
           ))}

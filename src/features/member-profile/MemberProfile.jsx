@@ -39,9 +39,9 @@ const HealthTooltip = ({ active, payload }) => {
   const item = payload[0]?.payload;
   if (!item) return null;
   return (
-    <div className="rounded-md border border-slate-200 bg-white px-3 py-2 shadow">
-      <div className="text-sm font-semibold text-slate-700">{item.label}</div>
-      <div className="text-sm text-slate-500">Health score: {item.score}</div>
+    <div className="rounded-md border border-swoop-border bg-swoop-panel px-3 py-2 shadow">
+      <div className="text-sm font-semibold text-swoop-text-2">{item.label}</div>
+      <div className="text-sm text-swoop-text-muted">Health score: {item.score}</div>
     </div>
   );
 };
@@ -117,18 +117,18 @@ export default function MemberProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-10">
+    <div className="min-h-screen bg-swoop-row px-4 py-8 sm:px-6 lg:px-10">
       <div className="flex w-full flex-col gap-8">
         <button
           type="button"
           onClick={() => navigate('/', { replace: true })}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-swoop-text-muted hover:text-slate-900"
         >
           ← Back to dashboard
         </button>
 
         {state.loading && (
-          <div className="rounded-3xl border border-slate-100 bg-white px-6 py-16 text-center text-lg font-semibold text-slate-500 shadow">
+          <div className="rounded-3xl border border-slate-100 bg-swoop-panel px-6 py-16 text-center text-lg font-semibold text-swoop-text-muted shadow">
             Loading member profile…
           </div>
         )}
@@ -143,27 +143,27 @@ export default function MemberProfile() {
         {profile && !state.loading && (
           <div className="flex flex-col gap-8">
             {/* Hero */}
-            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl sm:p-8">
+            <section className="rounded-3xl border border-slate-100 bg-swoop-panel p-6 shadow-xl sm:p-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-900 text-2xl font-semibold text-white md:h-24 md:w-24 md:text-3xl">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-swoop-canvas text-2xl font-semibold text-white md:h-24 md:w-24 md:text-3xl">
                       {profile.member.initials || '??'}
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Member Profile</p>
+                      <p className="text-xs uppercase tracking-[0.3em] text-swoop-text-label">Member Profile</p>
                       <div className="mt-1 flex flex-wrap items-center gap-3">
-                        <h1 className="text-3xl font-semibold text-slate-900 md:text-4xl">{profile.member.name}</h1>
+                        <h1 className="text-3xl font-semibold text-swoop-text md:text-4xl">{profile.member.name}</h1>
                         <span className="rounded-full bg-success-50 px-3 py-1 text-sm font-semibold text-success-700">
                           {profile.member.membershipType || 'Member'}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-swoop-text-muted">
                         Member since {formatDate(profile.member.joinDate)} · Status: {profile.member.status || 'Active'}
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+                  <div className="flex flex-wrap gap-3 text-sm text-swoop-text-muted">
                     <span>Archetype: <strong>{profile.member.archetype || '—'}</strong></span>
                     <span>Health trend: <strong className="capitalize">{profile.member.healthTrend}</strong></span>
                   </div>
@@ -173,13 +173,13 @@ export default function MemberProfile() {
                   <div className="flex items-center gap-6">
                     <div className="relative h-28 w-28">
                       <div className="absolute inset-0 rounded-full" style={gaugeStyle} />
-                      <div className="absolute inset-2 flex flex-col items-center justify-center rounded-full bg-white text-center">
-                        <span className="text-3xl font-semibold text-slate-900">{profile.member.healthScore ?? '—'}</span>
-                        <span className="text-xs uppercase tracking-wide text-slate-500">Health</span>
+                      <div className="absolute inset-2 flex flex-col items-center justify-center rounded-full bg-swoop-panel text-center">
+                        <span className="text-3xl font-semibold text-swoop-text">{profile.member.healthScore ?? '—'}</span>
+                        <span className="text-xs uppercase tracking-wide text-swoop-text-muted">Health</span>
                       </div>
                     </div>
-                    <div className="text-sm text-slate-500">
-                      <div className="text-xs uppercase tracking-wider text-slate-400">Δ vs last week</div>
+                    <div className="text-sm text-swoop-text-muted">
+                      <div className="text-xs uppercase tracking-wider text-swoop-text-label">Δ vs last week</div>
                       <div className={`text-lg font-semibold ${profile.member.scoreDelta >= 0 ? 'text-success-600' : 'text-red-500'}`}>
                         {profile.member.scoreDelta >= 0 ? '▲' : '▼'} {Math.abs(profile.member.scoreDelta ?? 0).toFixed(1)} pts
                       </div>
@@ -190,7 +190,7 @@ export default function MemberProfile() {
                       <button
                         key={button.label}
                         type="button"
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                        className="inline-flex items-center gap-2 rounded-full border border-swoop-border px-4 py-2 text-sm font-semibold text-swoop-text-2 transition hover:border-slate-400"
                       >
                         <span>{button.icon}</span>
                         {button.label}
@@ -202,14 +202,14 @@ export default function MemberProfile() {
             </section>
 
             {/* Health timeline */}
-            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+            <section className="rounded-3xl border border-slate-100 bg-swoop-panel p-6 shadow">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900">Health Score</h2>
-                  <p className="text-sm text-slate-500">Last 12 weeks</p>
+                  <h2 className="text-xl font-semibold text-swoop-text">Health Score</h2>
+                  <p className="text-sm text-swoop-text-muted">Last 12 weeks</p>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+                <div className="flex items-center gap-2 text-sm text-swoop-text-muted">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-swoop-row px-3 py-1 text-xs font-semibold uppercase tracking-wide">
                     Trend: <span className="capitalize">{profile.member.healthTrend}</span>
                   </span>
                 </div>
@@ -224,25 +224,25 @@ export default function MemberProfile() {
                       <ReferenceArea y1={70} y2={100} fill="#dcfce7" fillOpacity={0.4} stroke="none" />
                       <ReferenceArea y1={50} y2={70} fill="#fef9c3" fillOpacity={0.4} stroke="none" />
                       <ReferenceArea y1={30} y2={50} fill="#fee2e2" fillOpacity={0.4} stroke="none" />
-                      <Line type="monotone" dataKey="score" stroke={'#ff8b00'} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="score" stroke={'#F3922D'} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-slate-500">Not enough historical data.</div>
+                  <div className="flex h-full items-center justify-center text-sm text-swoop-text-muted">Not enough historical data.</div>
                 )}
               </div>
             </section>
 
             {/* Key metrics */}
-            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
-              <h2 className="text-xl font-semibold text-slate-900">Key Metrics</h2>
+            <section className="rounded-3xl border border-slate-100 bg-swoop-panel p-6 shadow">
+              <h2 className="text-xl font-semibold text-swoop-text">Key Metrics</h2>
               <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {(profile.keyMetrics ?? []).map((metric) => {
                   const positive = metric.id === 'visit-gap' ? metric.trend > 0 : metric.trend >= 0;
                   return (
                     <div key={metric.id} className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-                      <p className="text-xs uppercase tracking-widest text-slate-400">{metric.label}</p>
-                      <div className="mt-2 text-3xl font-semibold text-slate-900">{metricValue(metric)}</div>
+                      <p className="text-xs uppercase tracking-widest text-swoop-text-label">{metric.label}</p>
+                      <div className="mt-2 text-3xl font-semibold text-swoop-text">{metricValue(metric)}</div>
                       <div className={`mt-1 text-sm font-semibold ${positive ? 'text-success-600' : 'text-red-500'}`}>{trendCopy(metric)}</div>
                     </div>
                   );
@@ -251,10 +251,10 @@ export default function MemberProfile() {
             </section>
 
             {/* Risk signals */}
-            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+            <section className="rounded-3xl border border-slate-100 bg-swoop-panel p-6 shadow">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-slate-900">Risk Signals</h2>
-                <p className="text-sm text-slate-500">Signals driving the current score</p>
+                <h2 className="text-xl font-semibold text-swoop-text">Risk Signals</h2>
+                <p className="text-sm text-swoop-text-muted">Signals driving the current score</p>
               </div>
               {profile.riskSignals?.length ? (
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -267,37 +267,37 @@ export default function MemberProfile() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-slate-500">No active risks — keep monitoring weekly.</p>
+                <p className="mt-4 text-sm text-swoop-text-muted">No active risks — keep monitoring weekly.</p>
               )}
             </section>
 
             {/* Activity timeline & engagement history */}
             <div className="grid gap-6 lg:grid-cols-2">
-              <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+              <section className="rounded-3xl border border-slate-100 bg-swoop-panel p-6 shadow">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-slate-900">Recent Activity</h2>
-                  <span className="text-xs uppercase tracking-widest text-slate-400">Last 20 touchpoints</span>
+                  <h2 className="text-xl font-semibold text-swoop-text">Recent Activity</h2>
+                  <span className="text-xs uppercase tracking-widest text-swoop-text-label">Last 20 touchpoints</span>
                 </div>
                 <div className="mt-4 flex flex-col gap-4">
                   {timelineEntries.map((item) => (
                     <div key={item.id} className="relative pl-6">
                       <span className="absolute left-0 top-2 text-lg">{item.icon ?? '•'}</span>
                       <div className="flex items-center justify-between text-sm">
-                        <p className="font-semibold text-slate-900">{item.type?.toUpperCase?.() ?? 'Event'}</p>
-                        <span className="text-xs text-slate-400">{formatDateTime(item.date)}</span>
+                        <p className="font-semibold text-swoop-text">{item.type?.toUpperCase?.() ?? 'Event'}</p>
+                        <span className="text-xs text-swoop-text-label">{formatDateTime(item.date)}</span>
                       </div>
-                      <p className="text-sm text-slate-600">{item.description}</p>
+                      <p className="text-sm text-swoop-text-muted">{item.description}</p>
                     </div>
                   ))}
-                  {!timelineEntries.length && <p className="text-sm text-slate-500">No recent touchpoints logged.</p>}
+                  {!timelineEntries.length && <p className="text-sm text-swoop-text-muted">No recent touchpoints logged.</p>}
                 </div>
               </section>
 
-              <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+              <section className="rounded-3xl border border-slate-100 bg-swoop-panel p-6 shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold text-slate-900">Engagement History</h2>
-                    <p className="text-sm text-slate-500">Weekly score trend</p>
+                    <h2 className="text-xl font-semibold text-swoop-text">Engagement History</h2>
+                    <p className="text-sm text-swoop-text-muted">Weekly score trend</p>
                   </div>
                 </div>
                 <div className="mt-6 h-64 w-full">
@@ -307,92 +307,92 @@ export default function MemberProfile() {
                         <XAxis dataKey="label" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                         <YAxis domain={[0, 100]} hide />
                         <Tooltip content={<HealthTooltip />} />
-                        <Area type="monotone" dataKey="score" stroke={'#ff8b00'} fill="#fde68a" strokeWidth={3} fillOpacity={0.4} />
+                        <Area type="monotone" dataKey="score" stroke={'#F3922D'} fill="#fde68a" strokeWidth={3} fillOpacity={0.4} />
                       </AreaChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="flex h-full items-center justify-center text-sm text-slate-500">Not enough data.</div>
+                    <div className="flex h-full items-center justify-center text-sm text-swoop-text-muted">Not enough data.</div>
                   )}
                 </div>
               </section>
             </div>
 
             {/* Contact & notes */}
-            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+            <section className="rounded-3xl border border-slate-100 bg-swoop-panel p-6 shadow">
               <div className="grid gap-6 lg:grid-cols-2">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900">Contact</h2>
+                  <h2 className="text-xl font-semibold text-swoop-text">Contact</h2>
                   <div className="mt-4 grid gap-4 sm:grid-cols-2">
                     <div>
-                      <p className="text-xs uppercase tracking-widest text-slate-400">Email</p>
-                      <p className="text-sm font-semibold text-slate-900">{profile.contact?.email ?? '—'}</p>
+                      <p className="text-xs uppercase tracking-widest text-swoop-text-label">Email</p>
+                      <p className="text-sm font-semibold text-swoop-text">{profile.contact?.email ?? '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-widest text-slate-400">Phone</p>
-                      <p className="text-sm font-semibold text-slate-900">{profile.contact?.phone ?? '—'}</p>
+                      <p className="text-xs uppercase tracking-widest text-swoop-text-label">Phone</p>
+                      <p className="text-sm font-semibold text-swoop-text">{profile.contact?.phone ?? '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-widest text-slate-400">Preferred channel</p>
-                      <p className="text-sm font-semibold text-slate-900">{profile.contact?.preferredChannel ?? '—'}</p>
+                      <p className="text-xs uppercase tracking-widest text-swoop-text-label">Preferred channel</p>
+                      <p className="text-sm font-semibold text-swoop-text">{profile.contact?.preferredChannel ?? '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-widest text-slate-400">Last outreach</p>
-                      <p className="text-sm font-semibold text-slate-900">{formatDateTime(profile.contact?.lastOutreach)}</p>
+                      <p className="text-xs uppercase tracking-widest text-swoop-text-label">Last outreach</p>
+                      <p className="text-sm font-semibold text-swoop-text">{formatDateTime(profile.contact?.lastOutreach)}</p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-widest text-slate-400">Last visit</p>
-                      <p className="text-sm font-semibold text-slate-900">{formatDate(profile.contact?.lastVisitDate)}</p>
+                      <p className="text-xs uppercase tracking-widest text-swoop-text-label">Last visit</p>
+                      <p className="text-sm font-semibold text-swoop-text">{formatDate(profile.contact?.lastVisitDate)}</p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-widest text-slate-400">Days since visit</p>
-                      <p className="text-sm font-semibold text-slate-900">{profile.contact?.daysSinceLastVisit ?? '—'}</p>
+                      <p className="text-xs uppercase tracking-widest text-swoop-text-label">Days since visit</p>
+                      <p className="text-sm font-semibold text-swoop-text">{profile.contact?.daysSinceLastVisit ?? '—'}</p>
                     </div>
                   </div>
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900">Notes & Outreach</h2>
+                  <h2 className="text-xl font-semibold text-swoop-text">Notes & Outreach</h2>
                   <div className="mt-4 flex flex-col gap-3">
                     {notes.map((note) => (
                       <div key={note.id} className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-                        <div className="flex items-center justify-between text-xs uppercase tracking-widest text-slate-400">
+                        <div className="flex items-center justify-between text-xs uppercase tracking-widest text-swoop-text-label">
                           <span>{note.owner}</span>
                           <span>{note.channel ?? '—'}</span>
                         </div>
-                        <p className="mt-2 text-sm font-semibold text-slate-900">{note.note}</p>
-                        <p className="text-xs text-slate-500">{formatDateTime(note.date)}</p>
+                        <p className="mt-2 text-sm font-semibold text-swoop-text">{note.note}</p>
+                        <p className="text-xs text-swoop-text-muted">{formatDateTime(note.date)}</p>
                       </div>
                     ))}
-                    {!notes.length && <p className="text-sm text-slate-500">No notes logged yet.</p>}
+                    {!notes.length && <p className="text-sm text-swoop-text-muted">No notes logged yet.</p>}
                   </div>
                 </div>
               </div>
             </section>
 
             {/* Financial summary */}
-            <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow">
+            <section className="rounded-3xl border border-slate-100 bg-swoop-panel p-6 shadow">
               <div className="flex flex-col gap-2">
-                <h2 className="text-xl font-semibold text-slate-900">Financial Summary</h2>
-                <p className="text-sm text-slate-500">Real spend backing this member&apos;s health score</p>
+                <h2 className="text-xl font-semibold text-swoop-text">Financial Summary</h2>
+                <p className="text-sm text-swoop-text-muted">Real spend backing this member&apos;s health score</p>
               </div>
               <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Annual dues</p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(financials.annualDues)}</p>
+                  <p className="text-xs uppercase tracking-widest text-swoop-text-label">Annual dues</p>
+                  <p className="mt-2 text-3xl font-semibold text-swoop-text">{formatCurrency(financials.annualDues)}</p>
                 </div>
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">YTD total spend</p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(financials.ytdTotal)}</p>
+                  <p className="text-xs uppercase tracking-widest text-swoop-text-label">YTD total spend</p>
+                  <p className="mt-2 text-3xl font-semibold text-swoop-text">{formatCurrency(financials.ytdTotal)}</p>
                   <p className={`text-sm font-semibold ${financials.deltaVsPrior >= 0 ? 'text-success-600' : 'text-red-500'}`}>
                     {financials.deltaVsPrior >= 0 ? '▲' : '▼'} {formatCurrency(Math.abs(financials.deltaVsPrior || 0))} vs prior year
                   </p>
                 </div>
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Prior year spend</p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(financials.priorYearTotal)}</p>
+                  <p className="text-xs uppercase tracking-widest text-swoop-text-label">Prior year spend</p>
+                  <p className="mt-2 text-3xl font-semibold text-swoop-text">{formatCurrency(financials.priorYearTotal)}</p>
                 </div>
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Lifetime value (est)</p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(financials.lifetimeValue)}</p>
+                  <p className="text-xs uppercase tracking-widest text-swoop-text-label">Lifetime value (est)</p>
+                  <p className="mt-2 text-3xl font-semibold text-swoop-text">{formatCurrency(financials.lifetimeValue)}</p>
                 </div>
               </div>
               <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -403,8 +403,8 @@ export default function MemberProfile() {
                   { label: 'YTD Pro Shop', value: breakdown.proShop },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl border border-slate-100 p-4">
-                    <p className="text-xs uppercase tracking-widest text-slate-400">{item.label}</p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(item.value)}</p>
+                    <p className="text-xs uppercase tracking-widest text-swoop-text-label">{item.label}</p>
+                    <p className="mt-2 text-2xl font-semibold text-swoop-text">{formatCurrency(item.value)}</p>
                   </div>
                 ))}
               </div>

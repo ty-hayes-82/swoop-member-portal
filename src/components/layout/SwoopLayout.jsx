@@ -8,7 +8,7 @@ const LayoutContent = ({ children, footer, actionsDrawer, mobileBar }) => {
   const { isExpanded, isHovered } = useSidebar();
 
   return (
-    <div className="h-screen lg:flex w-full overflow-hidden">
+    <div className="h-screen lg:flex w-full overflow-hidden bg-swoop-canvas text-swoop-text">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-brand-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-semibold">
         Skip to content
       </a>
@@ -20,10 +20,10 @@ const LayoutContent = ({ children, footer, actionsDrawer, mobileBar }) => {
         }`}
       >
         <SwoopHeader />
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 w-full md:p-6 pb-28 md:pb-32 min-w-0">
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 w-full md:p-6 pb-28 md:pb-32 min-w-0 bg-swoop-canvas text-swoop-text">
           <Suspense
             fallback={
-              <div className="flex items-center justify-center min-h-[200px] text-gray-400">
+              <div className="flex items-center justify-center min-h-[200px] text-swoop-text-muted">
                 Loading...
               </div>
             }
@@ -31,7 +31,7 @@ const LayoutContent = ({ children, footer, actionsDrawer, mobileBar }) => {
             {children}
           </Suspense>
         </main>
-        <footer className="border-t border-gray-200 px-4 py-4 md:px-6 text-center text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <footer className="border-t border-swoop-border px-4 py-4 md:px-6 text-center text-xs text-swoop-text-muted">
           {footer}
         </footer>
       </div>

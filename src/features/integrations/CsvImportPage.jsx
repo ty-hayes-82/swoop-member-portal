@@ -221,11 +221,11 @@ function MultiFileDropZone({ onFilesClassified }) {
   const clearAll = () => setFiles([]);
 
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] p-5 mb-4">
+    <div className="rounded-xl border border-swoop-border bg-swoop-panel p-5 mb-4">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-0.5">Quick Upload</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <h3 className="text-sm font-bold text-swoop-text mb-0.5">Quick Upload</h3>
+          <p className="text-xs text-swoop-text-muted">
             Drop all your files at once — we'll auto-detect each one.
           </p>
         </div>
@@ -233,7 +233,7 @@ function MultiFileDropZone({ onFilesClassified }) {
           <button
             type="button"
             onClick={clearAll}
-            className="text-xs text-gray-500 hover:text-gray-700 bg-transparent border-none cursor-pointer"
+            className="text-xs text-swoop-text-muted hover:text-swoop-text-2 bg-transparent border-none cursor-pointer"
           >
             Clear all
           </button>
@@ -248,7 +248,7 @@ function MultiFileDropZone({ onFilesClassified }) {
         className={`rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition-colors ${
           dragOver
             ? 'border-brand-500 bg-brand-500/[0.05]'
-            : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/[0.02]'
+            : 'border-swoop-border bg-swoop-row'
         }`}
       >
         <input
@@ -261,10 +261,10 @@ function MultiFileDropZone({ onFilesClassified }) {
           data-testid="bulk-csv-input"
         />
         <div className="text-3xl mb-2">📁</div>
-        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <div className="text-sm font-semibold text-swoop-text-2">
           Drop CSV or XLSX files here, or click to browse
         </div>
-        <div className="text-xs text-gray-400 mt-1">
+        <div className="text-xs text-swoop-text-label mt-1">
           Up to 22 datasets — members, tee sheet, POS, payroll, events, etc.
         </div>
       </div>
@@ -278,16 +278,16 @@ function MultiFileDropZone({ onFilesClassified }) {
               : c.confidence >= 0.5 ? { label: 'medium', color: 'bg-amber-500/10 text-amber-600' }
               : { label: 'low', color: 'bg-red-500/10 text-red-600' };
             return (
-              <div key={f.name + i} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-800">
+              <div key={f.name + i} className="flex items-center gap-3 p-3 rounded-lg border border-swoop-border">
                 <div className="text-lg">📄</div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-gray-800 dark:text-white/90 truncate">{f.name}</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-sm font-semibold text-swoop-text truncate">{f.name}</div>
+                  <div className="text-xs text-swoop-text-muted">
                     {(f.size / 1024).toFixed(1)} KB · {f.headers.length} columns · detected as{' '}
                     <select
                       value={c?.importType || ''}
                       onChange={(e) => overrideType(i, e.target.value)}
-                      className="text-xs bg-transparent border border-gray-200 rounded px-1 py-0.5 dark:border-gray-700"
+                      className="text-xs bg-transparent border border-swoop-border rounded px-1 py-0.5"
                     >
                       <option value="">— choose —</option>
                       {JONAS_IMPORT_TYPES.map(t => (
@@ -302,7 +302,7 @@ function MultiFileDropZone({ onFilesClassified }) {
                 <button
                   type="button"
                   onClick={() => removeFile(i)}
-                  className="text-gray-400 hover:text-red-500 bg-transparent border-none cursor-pointer text-lg leading-none"
+                  className="text-swoop-text-label hover:text-red-500 bg-transparent border-none cursor-pointer text-lg leading-none"
                   title="Remove"
                 >
                   ×
@@ -454,17 +454,17 @@ function StepIndicator({ current }) {
                   ? 'bg-success-500 text-white'
                   : i === current
                   ? 'bg-brand-500 text-white'
-                  : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                  : 'bg-swoop-border text-swoop-text-muted'
               }`}
             >
               {i < current ? '✓' : i + 1}
             </div>
-            <span className={`text-[10px] mt-1 ${i === current ? 'text-brand-500 font-semibold' : 'text-gray-400'}`}>
+            <span className={`text-[10px] mt-1 ${i === current ? 'text-brand-500 font-semibold' : 'text-swoop-text-label'}`}>
               {label}
             </span>
           </div>
           {i < STEPS.length - 1 && (
-            <div className={`w-12 h-0.5 mx-1 mb-4 ${i < current ? 'bg-success-500' : 'bg-gray-200 dark:bg-gray-700'}`} />
+            <div className={`w-12 h-0.5 mx-1 mb-4 ${i < current ? 'bg-success-500' : 'bg-swoop-border'}`} />
           )}
         </div>
       ))}
@@ -481,7 +481,7 @@ function StepSelectData({ vendor, setVendor, importType, setImportType, onNext }
     <div>
       {/* Vendor selector */}
       <div className="mb-6">
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+        <h2 className="text-sm font-semibold text-swoop-text-2 mb-3">
           Which club software are you importing from?
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -492,12 +492,12 @@ function StepSelectData({ vendor, setVendor, importType, setImportType, onNext }
               disabled={!v.supported}
               className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                 vendor === v.id
-                  ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10'
-                  : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                  ? 'border-brand-500 bg-brand-500/5'
+                  : 'border-swoop-border hover:border-swoop-border'
               }`}
             >
-              <div className="font-semibold text-sm text-gray-800 dark:text-white/90">{v.name}</div>
-              <div className="text-[10px] text-gray-400 mt-0.5">{v.supported ? v.description : 'Coming soon'}</div>
+              <div className="font-semibold text-sm text-swoop-text">{v.name}</div>
+              <div className="text-[10px] text-swoop-text-label mt-0.5">{v.supported ? v.description : 'Coming soon'}</div>
             </button>
           ))}
         </div>
@@ -506,11 +506,11 @@ function StepSelectData({ vendor, setVendor, importType, setImportType, onNext }
       {/* Data type cards */}
       {vendor && (
         <div>
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+          <h2 className="text-sm font-semibold text-swoop-text-2 mb-1">
             What data are you importing?
           </h2>
           {vendor === 'jonas' && (
-            <p className="text-xs text-gray-400 mb-3">
+            <p className="text-xs text-swoop-text-label mb-3">
               Follow the recommended order below. Each import unlocks more intelligence.
             </p>
           )}
@@ -521,31 +521,31 @@ function StepSelectData({ vendor, setVendor, importType, setImportType, onNext }
                 onClick={() => { setImportType(t.key); }}
                 className={`w-full text-left p-3 rounded-xl border-2 transition-all cursor-pointer ${
                   importType === t.key
-                    ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10'
-                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                    ? 'border-brand-500 bg-brand-500/5'
+                    : 'border-swoop-border hover:border-swoop-border'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div className="text-xl mt-0.5">{t.icon}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-gray-800 dark:text-white/90">{t.label}</span>
+                      <span className="font-semibold text-sm text-swoop-text">{t.label}</span>
                       {vendor === 'jonas' && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-swoop-row text-swoop-text-muted">
                           Step {t.stepNumber}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{t.description}</p>
+                    <p className="text-xs text-swoop-text-muted mt-0.5 line-clamp-2">{t.description}</p>
                     {vendor === 'jonas' && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {t.unlocks.slice(0, 2).map(u => (
-                          <span key={u} className="text-[10px] px-1.5 py-0.5 rounded-full bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400">
+                          <span key={u} className="text-[10px] px-1.5 py-0.5 rounded-full bg-success-50 text-success-600">
                             {u}
                           </span>
                         ))}
                         {t.unlocks.length > 2 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400 dark:bg-gray-700">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-swoop-row text-swoop-text-label">
                             +{t.unlocks.length - 2} more
                           </span>
                         )}
@@ -554,8 +554,8 @@ function StepSelectData({ vendor, setVendor, importType, setImportType, onNext }
                   </div>
                 </div>
                 {vendor === 'jonas' && (
-                  <div className="mt-2 ml-8 text-[10px] text-gray-400">
-                    Jonas file: <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">{t.jonasFile}</code>
+                  <div className="mt-2 ml-8 text-[10px] text-swoop-text-label">
+                    Jonas file: <code className="bg-swoop-row px-1 rounded">{t.jonasFile}</code>
                     {' '}&middot;{' '}Export via {t.jonasExportMethod}
                   </div>
                 )}
@@ -570,7 +570,7 @@ function StepSelectData({ vendor, setVendor, importType, setImportType, onNext }
         onClick={onNext}
         disabled={!vendor || !importType}
         className="w-full mt-6 py-3 rounded-lg font-bold text-sm text-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-        style={{ background: '#ff8b00' }}
+        style={{ background: '#F3922D' }}
       >
         Next: Upload File
       </button>
@@ -609,18 +609,18 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
     <div>
       {/* Instructions card */}
       {vendor === 'jonas' && config && (
-        <div className="mb-5 p-4 rounded-xl bg-blue-50 border border-blue-100 dark:bg-blue-500/10 dark:border-blue-500/20">
-          <div className="font-semibold text-sm text-blue-800 dark:text-blue-300 mb-1">
+        <div className="mb-5 p-4 rounded-xl bg-blue-50 border border-blue-100">
+          <div className="font-semibold text-sm text-blue-800 mb-1">
             How to export from Jonas
           </div>
-          <ol className="text-xs text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
+          <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
             <li>Open <strong>{config.jonasModule}</strong> in Jonas</li>
             <li>Navigate to the relevant report or entity list</li>
             <li>Export via <strong>{config.jonasExportMethod}</strong></li>
             <li>Save as CSV (comma-delimited) or Excel (.xlsx)</li>
           </ol>
-          <div className="mt-2 text-[10px] text-blue-500 dark:text-blue-500">
-            Expected file: <code className="bg-blue-100 dark:bg-blue-500/20 px-1 rounded">{config.jonasFile}</code>
+          <div className="mt-2 text-[10px] text-blue-500">
+            Expected file: <code className="bg-blue-100 px-1 rounded">{config.jonasFile}</code>
           </div>
         </div>
       )}
@@ -639,8 +639,8 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
           dragOver
             ? 'border-brand-400 bg-brand-500/5'
             : file
-            ? 'border-success-400 bg-success-50 dark:bg-success-500/5 dark:border-success-500/40'
-            : 'border-gray-300 bg-gray-50 hover:border-brand-400 dark:bg-gray-800 dark:border-gray-600'
+            ? 'border-success-400 bg-success-50'
+            : 'border-swoop-border bg-swoop-row hover:border-brand-400'
         }`}
       >
         <input
@@ -655,18 +655,18 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
         {file ? (
           <>
             <div className="text-3xl mb-2">✅</div>
-            <div className="font-semibold text-sm text-gray-800 dark:text-white/90">{file.name}</div>
-            <div className="text-xs text-gray-400 mt-1">
+            <div className="font-semibold text-sm text-swoop-text">{file.name}</div>
+            <div className="text-xs text-swoop-text-label mt-1">
               {(file.size / 1024).toFixed(1)} KB &middot; Click or drop to change
             </div>
           </>
         ) : (
           <>
             <div className="text-3xl mb-2">📁</div>
-            <div className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+            <div className="font-semibold text-sm text-swoop-text-2">
               Drop your file here, or click to browse
             </div>
-            <div className="text-xs text-gray-400 mt-1">CSV or XLSX &middot; First row must be column headers</div>
+            <div className="text-xs text-swoop-text-label mt-1">CSV or XLSX &middot; First row must be column headers</div>
           </>
         )}
       </div>
@@ -674,14 +674,14 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
       {/* Required fields hint */}
       {/* File type error */}
       {fileError && (
-        <div className="mb-3 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400">
+        <div className="mb-3 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
           {fileError}
         </div>
       )}
 
       {config && (
-        <div className="mb-4 text-xs text-gray-400">
-          <span className="font-semibold text-gray-500 dark:text-gray-400">Required columns: </span>
+        <div className="mb-4 text-xs text-swoop-text-label">
+          <span className="font-semibold text-swoop-text-muted">Required columns: </span>
           {config.fields.filter(f => f.required).map(f => f.label).join(', ')}
         </div>
       )}
@@ -689,7 +689,7 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="flex-1 py-3 rounded-lg border border-gray-200 font-semibold text-sm text-gray-600 cursor-pointer hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+          className="flex-1 py-3 rounded-lg border border-swoop-border font-semibold text-sm text-swoop-text-muted cursor-pointer hover:bg-swoop-row-hover"
         >
           Back
         </button>
@@ -697,7 +697,7 @@ function StepUploadFile({ importType, vendor, file, setFile, onNext, onBack }) {
           onClick={onNext}
           disabled={!file}
           className="flex-[2] py-3 rounded-lg font-bold text-sm text-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ background: '#ff8b00' }}
+          style={{ background: '#F3922D' }}
         >
           Next: Map Columns
         </button>
@@ -725,7 +725,7 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
   return (
     <div>
       {mappedCount === 0 && (
-        <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-300">
+        <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
           <strong>Auto-detection didn't match any columns.</strong> This usually means the file is from a different vendor or a different data type than selected. Map fields manually below, or go back and double-check your vendor and data-type selection.
         </div>
       )}
@@ -733,8 +733,8 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
       {/* Status summary */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-1">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Column Mapping</span>
-          <span className="text-xs text-gray-400 ml-2">
+          <span className="text-sm font-semibold text-swoop-text-2">Column Mapping</span>
+          <span className="text-xs text-swoop-text-label ml-2">
             {mappedCount} of {csvHeaders.length} columns mapped
           </span>
         </div>
@@ -750,13 +750,13 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
       </div>
 
       {/* Mapping table */}
-      <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-0 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+      <div className="rounded-xl border border-swoop-border overflow-hidden mb-4">
+        <div className="grid grid-cols-[1fr_auto_1fr] gap-0 text-xs font-semibold text-swoop-text-muted bg-swoop-row px-3 py-2 border-b border-swoop-border">
           <div>Your CSV Column</div>
           <div className="px-3">→</div>
           <div>Swoop Field</div>
         </div>
-        <div className="divide-y divide-gray-100 dark:divide-gray-800">
+        <div className="divide-y divide-swoop-border-inset">
           {csvHeaders.map(header => {
             const swoopField = mapping[header];
             const fieldConfig = swoopFields.find(f => f.swoop === swoopField);
@@ -767,18 +767,18 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
               <div
                 key={header}
                 className={`grid grid-cols-[1fr_auto_1fr] gap-0 items-center px-3 py-2 ${
-                  isMapped ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/50'
+                  isMapped ? 'bg-swoop-panel' : 'bg-gray-50/50'
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <code className="text-xs font-mono text-gray-700 dark:text-gray-300 truncate">{header}</code>
+                  <code className="text-xs font-mono text-swoop-text-2 truncate">{header}</code>
                   {previewRows[0] && (
-                    <span className="text-[10px] text-gray-400 truncate max-w-[120px]" title={previewRows[0][header]}>
+                    <span className="text-[10px] text-swoop-text-label truncate max-w-[120px]" title={previewRows[0][header]}>
                       e.g. "{previewRows[0][header]?.slice(0, 30)}"
                     </span>
                   )}
                 </div>
-                <div className="px-3 text-gray-300 dark:text-gray-600">→</div>
+                <div className="px-3 text-swoop-text-ghost">→</div>
                 <div>
                   <select
                     value={swoopField || ''}
@@ -786,9 +786,9 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
                     className={`w-full px-2 py-1.5 rounded-lg border text-xs ${
                       isMapped
                         ? isRequired
-                          ? 'border-success-300 bg-success-50 text-success-800 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400'
-                          : 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-400'
-                        : 'border-gray-200 bg-white text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-500'
+                          ? 'border-success-300 bg-success-50 text-success-800'
+                          : 'border-blue-200 bg-blue-50 text-blue-700'
+                        : 'border-swoop-border bg-swoop-panel text-swoop-text-muted'
                     }`}
                   >
                     <option value="">— Skip this column —</option>
@@ -811,15 +811,15 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
       {/* Preview */}
       {previewRows.length > 0 && (
         <div className="mb-4">
-          <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+          <div className="text-xs font-semibold text-swoop-text-muted mb-2">
             Data Preview (first {previewRows.length} rows, mapped fields only)
           </div>
-          <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <div className="rounded-lg border border-swoop-border overflow-x-auto">
             <table className="w-full text-[11px]">
               <thead>
-                <tr className="bg-gray-50 dark:bg-gray-800">
+                <tr className="bg-swoop-row">
                   {swoopFields.filter(f => mappedSwoopFields.has(f.swoop)).map(f => (
-                    <th key={f.swoop} className="px-2 py-1.5 text-left font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                    <th key={f.swoop} className="px-2 py-1.5 text-left font-semibold text-swoop-text-muted whitespace-nowrap">
                       {f.label}
                     </th>
                   ))}
@@ -833,9 +833,9 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
                     if (swoopF) reverseMap[swoopF] = csvH;
                   }
                   return (
-                    <tr key={i} className="border-t border-gray-100 dark:border-gray-800">
+                    <tr key={i} className="border-t border-swoop-border-inset">
                       {swoopFields.filter(f => mappedSwoopFields.has(f.swoop)).map(f => (
-                        <td key={f.swoop} className="px-2 py-1 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[150px] truncate">
+                        <td key={f.swoop} className="px-2 py-1 text-swoop-text-2 whitespace-nowrap max-w-[150px] truncate">
                           {row[reverseMap[f.swoop]] || '—'}
                         </td>
                       ))}
@@ -851,7 +851,7 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="flex-1 py-3 rounded-lg border border-gray-200 font-semibold text-sm text-gray-600 cursor-pointer hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+          className="flex-1 py-3 rounded-lg border border-swoop-border font-semibold text-sm text-swoop-text-muted cursor-pointer hover:bg-swoop-row-hover"
         >
           Back
         </button>
@@ -859,7 +859,7 @@ function StepMapColumns({ importType, csvHeaders, mapping, setMapping, previewRo
           onClick={onNext}
           disabled={requiredMissing.length > 0}
           className="flex-[2] py-3 rounded-lg font-bold text-sm text-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ background: '#ff8b00' }}
+          style={{ background: '#F3922D' }}
         >
           {requiredMissing.length > 0
             ? `Map ${requiredMissing.length} required field${requiredMissing.length > 1 ? 's' : ''} to continue`
@@ -894,8 +894,8 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
     <div>
       {!result && !error && !uploading && (
         <div className="py-4">
-          <h2 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-1 text-center">Dry-Run Preview</h2>
-          <p className="text-xs text-gray-400 mb-4 text-center">
+          <h2 className="text-lg font-bold text-swoop-text mb-1 text-center">Dry-Run Preview</h2>
+          <p className="text-xs text-swoop-text-label mb-4 text-center">
             Nothing has been sent to the server yet. Review the changes below before importing.
           </p>
 
@@ -903,41 +903,41 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
           {aiPanel}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-            <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 text-center">
-              <div className="text-xl font-bold text-gray-800 dark:text-white/90">{preview.totalRows.toLocaleString()}</div>
-              <div className="text-[10px] text-gray-400">Total rows</div>
+            <div className="p-3 rounded-lg bg-swoop-row text-center">
+              <div className="text-xl font-bold text-swoop-text">{preview.totalRows.toLocaleString()}</div>
+              <div className="text-[10px] text-swoop-text-label">Total rows</div>
             </div>
-            <div className="p-3 rounded-lg bg-success-50 dark:bg-success-500/10 text-center">
-              <div className="text-xl font-bold text-success-600 dark:text-success-400">{preview.toCreate.toLocaleString()}</div>
-              <div className="text-[10px] text-gray-400">To create</div>
+            <div className="p-3 rounded-lg bg-success-50 text-center">
+              <div className="text-xl font-bold text-success-600">{preview.toCreate.toLocaleString()}</div>
+              <div className="text-[10px] text-swoop-text-label">To create</div>
             </div>
-            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-center">
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{preview.toUpdate.toLocaleString()}</div>
-              <div className="text-[10px] text-gray-400">To update</div>
+            <div className="p-3 rounded-lg bg-blue-50 text-center">
+              <div className="text-xl font-bold text-blue-600">{preview.toUpdate.toLocaleString()}</div>
+              <div className="text-[10px] text-swoop-text-label">To update</div>
             </div>
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-center">
-              <div className="text-xl font-bold text-red-600 dark:text-red-400">{preview.rejected.length.toLocaleString()}</div>
-              <div className="text-[10px] text-gray-400">Rejected</div>
+            <div className="p-3 rounded-lg bg-red-50 text-center">
+              <div className="text-xl font-bold text-red-600">{preview.rejected.length.toLocaleString()}</div>
+              <div className="text-[10px] text-swoop-text-label">Rejected</div>
             </div>
           </div>
 
           {preview.unknownColumns.length > 0 && (
-            <div className="mb-3 p-2 rounded-lg bg-yellow-50 border border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/30 text-xs text-yellow-700 dark:text-yellow-400">
+            <div className="mb-3 p-2 rounded-lg bg-yellow-50 border border-yellow-200 text-xs text-yellow-700">
               <strong>{preview.unknownColumns.length}</strong> unmapped column{preview.unknownColumns.length > 1 ? 's' : ''} (will be ignored): {preview.unknownColumns.slice(0, 6).join(', ')}{preview.unknownColumns.length > 6 ? '…' : ''}
             </div>
           )}
 
           {preview.rejected.length > 0 && (
-            <div className="mb-3 rounded-lg border border-red-200 dark:border-red-500/30 max-h-40 overflow-y-auto">
-              <div className="px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-xs font-semibold text-red-700 dark:text-red-400 sticky top-0">
+            <div className="mb-3 rounded-lg border border-red-200 max-h-40 overflow-y-auto">
+              <div className="px-3 py-1.5 bg-red-50 text-xs font-semibold text-red-700 sticky top-0">
                 Rejected rows
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 divide-y divide-gray-100 dark:divide-gray-800">
+              <div className="text-xs text-swoop-text-muted divide-y divide-swoop-border-inset">
                 {preview.rejected.slice(0, 25).map((r, i) => (
                   <div key={i} className="px-3 py-1">Row {r.row}: <span className="text-red-500">{r.reason}</span></div>
                 ))}
                 {preview.rejected.length > 25 && (
-                  <div className="px-3 py-1 text-gray-400">…and {preview.rejected.length - 25} more</div>
+                  <div className="px-3 py-1 text-swoop-text-label">…and {preview.rejected.length - 25} more</div>
                 )}
               </div>
             </div>
@@ -958,15 +958,15 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
             if (sampleRows.length === 0 || sampleFields.length === 0) return null;
             return (
               <div className="mb-4">
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
+                <div className="text-xs font-semibold text-swoop-text-muted mb-1.5">
                   Sample records ({Math.min(5, sampleRows.length)} of {preview.toCreate + preview.toUpdate})
                 </div>
-                <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                <div className="rounded-lg border border-swoop-border overflow-x-auto">
                   <table className="w-full text-[11px]">
                     <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-800">
+                      <tr className="bg-swoop-row">
                         {sampleFields.map(f => (
-                          <th key={f} className="px-2 py-1.5 text-left font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                          <th key={f} className="px-2 py-1.5 text-left font-semibold text-swoop-text-muted whitespace-nowrap">
                             {f.replace(/_/g, ' ')}
                           </th>
                         ))}
@@ -974,9 +974,9 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
                     </thead>
                     <tbody>
                       {sampleRows.map((row, i) => (
-                        <tr key={i} className="border-t border-gray-100 dark:border-gray-800">
+                        <tr key={i} className="border-t border-swoop-border-inset">
                           {sampleFields.map(f => (
-                            <td key={f} className="px-2 py-1 text-gray-700 dark:text-gray-300 max-w-[140px] truncate whitespace-nowrap">
+                            <td key={f} className="px-2 py-1 text-swoop-text-2 max-w-[140px] truncate whitespace-nowrap">
                               {row[reverseMap[f]] || '—'}
                             </td>
                           ))}
@@ -989,17 +989,17 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
             );
           })()}
 
-          <p className="text-xs text-gray-400 mb-4 text-center">
+          <p className="text-xs text-swoop-text-label mb-4 text-center">
             {config?.label} &middot; {Object.values(mapping).filter(Boolean).length} columns mapped
           </p>
 
           {preview.toCreate + preview.toUpdate === 0 ? (
             <div>
-              <div className="mb-3 p-3 rounded-lg bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30">
-                <div className="text-sm font-bold text-red-700 dark:text-red-400 mb-1">
+              <div className="mb-3 p-3 rounded-lg bg-red-50 border border-red-200">
+                <div className="text-sm font-bold text-red-700 mb-1">
                   Nothing to import
                 </div>
-                <div className="text-xs text-red-600 dark:text-red-400">
+                <div className="text-xs text-red-600">
                   {preview.rejected.length > 0
                     ? `All ${preview.rejected.length.toLocaleString()} rows were rejected. Fix the issues listed above in your source file and re-upload.`
                     : 'No valid rows were found in this file. Check that you selected the right file and data type.'}
@@ -1007,7 +1007,7 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
               </div>
               <button
                 onClick={onReset}
-                className="w-full py-3 rounded-lg border border-gray-300 font-semibold text-sm text-gray-700 cursor-pointer hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                className="w-full py-3 rounded-lg border border-swoop-border font-semibold text-sm text-swoop-text-2 cursor-pointer hover:bg-swoop-row-hover"
               >
                 Start Over
               </button>
@@ -1015,21 +1015,21 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
           ) : (
             <>
               {isDemo && (
-                <div className="mb-3 p-2.5 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/30 text-xs text-blue-700 dark:text-blue-400 text-center">
+                <div className="mb-3 p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-700 text-center">
                   Demo mode — data will not be written to the database.
                 </div>
               )}
               <div className="flex gap-3">
                 <button
                   onClick={onBack}
-                  className="flex-1 py-3 rounded-lg border border-gray-200 font-semibold text-sm text-gray-600 cursor-pointer hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                  className="flex-1 py-3 rounded-lg border border-swoop-border font-semibold text-sm text-swoop-text-muted cursor-pointer hover:bg-swoop-row-hover"
                 >
                   Back
                 </button>
                 <button
                   onClick={onImport}
                   className="flex-[2] py-3 rounded-lg font-bold text-sm text-white cursor-pointer"
-                  style={{ background: '#ff8b00' }}
+                  style={{ background: '#F3922D' }}
                 >
                   {isDemo ? 'Simulate Import' : `Start Import (${(preview.toCreate + preview.toUpdate).toLocaleString()} rows)`}
                 </button>
@@ -1042,22 +1042,22 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
       {uploading && (
         <div className="text-center py-12" role="status" aria-live="polite">
           <div className="inline-block w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mb-4" />
-          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <p className="text-sm font-semibold text-swoop-text-2">
             Importing {parsedRows.length.toLocaleString()} rows…
           </p>
-          <p className="text-xs text-gray-400 mt-1">Please keep this tab open until it finishes.</p>
+          <p className="text-xs text-swoop-text-label mt-1">Please keep this tab open until it finishes.</p>
         </div>
       )}
 
       {error && (
         <div className="py-6">
-          <div className="p-4 rounded-xl bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30">
-            <div className="text-sm font-bold text-red-700 dark:text-red-400 mb-1">Import Failed</div>
-            <div className="text-sm text-red-600 dark:text-red-400">{error}</div>
+          <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+            <div className="text-sm font-bold text-red-700 mb-1">Import Failed</div>
+            <div className="text-sm text-red-600">{error}</div>
           </div>
           <button
             onClick={onReset}
-            className="w-full mt-4 py-3 rounded-lg border border-gray-200 font-semibold text-sm text-gray-600 cursor-pointer hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
+            className="w-full mt-4 py-3 rounded-lg border border-swoop-border font-semibold text-sm text-swoop-text-muted cursor-pointer hover:bg-swoop-row-hover"
           >
             Start Over
           </button>
@@ -1068,47 +1068,47 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
         <div className="py-6">
           <div className={`p-4 rounded-xl border ${
             result.status === 'completed'
-              ? 'bg-success-50 border-success-200 dark:bg-success-500/10 dark:border-success-500/30'
+              ? 'bg-success-50 border-success-200'
               : result.status === 'partial'
-              ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/30'
-              : 'bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/30'
+              ? 'bg-yellow-50 border-yellow-200'
+              : 'bg-red-50 border-red-200'
           }`}>
             <div className="flex items-center gap-3 mb-3">
               <div className="text-3xl">
                 {result.status === 'completed' ? '✅' : result.status === 'partial' ? '⚠️' : '❌'}
               </div>
               <div>
-                <div className="font-bold text-sm text-gray-800 dark:text-white/90">
+                <div className="font-bold text-sm text-swoop-text">
                   Import {result.status === 'completed' ? 'Complete' : result.status === 'partial' ? 'Partially Complete' : 'Failed'}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-swoop-text-muted">
                   {config?.label} &middot; {result.totalRows.toLocaleString()} rows processed
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-              <div className="p-2 rounded-lg bg-white/60 dark:bg-gray-800/60">
-                <div className="text-lg font-bold text-gray-800 dark:text-white/90">{result.totalRows.toLocaleString()}</div>
-                <div className="text-[10px] text-gray-400">Total</div>
+              <div className="p-2 rounded-lg bg-white/60">
+                <div className="text-lg font-bold text-swoop-text">{result.totalRows.toLocaleString()}</div>
+                <div className="text-[10px] text-swoop-text-label">Total</div>
               </div>
-              <div className="p-2 rounded-lg bg-white/60 dark:bg-gray-800/60">
-                <div className="text-lg font-bold text-success-600 dark:text-success-400">{result.success.toLocaleString()}</div>
-                <div className="text-[10px] text-gray-400">Imported</div>
+              <div className="p-2 rounded-lg bg-white/60">
+                <div className="text-lg font-bold text-success-600">{result.success.toLocaleString()}</div>
+                <div className="text-[10px] text-swoop-text-label">Imported</div>
               </div>
-              <div className="p-2 rounded-lg bg-white/60 dark:bg-gray-800/60">
-                <div className={`text-lg font-bold ${result.errors > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-400'}`}>
+              <div className="p-2 rounded-lg bg-white/60">
+                <div className={`text-lg font-bold ${result.errors > 0 ? 'text-red-600' : 'text-swoop-text-label'}`}>
                   {result.errors.toLocaleString()}
                 </div>
-                <div className="text-[10px] text-gray-400">Errors</div>
+                <div className="text-[10px] text-swoop-text-label">Errors</div>
               </div>
             </div>
             {result.errorDetails?.length > 0 && (
-              <div className="mt-3 max-h-32 overflow-y-auto text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+              <div className="mt-3 max-h-32 overflow-y-auto text-xs text-swoop-text-muted space-y-0.5">
                 {result.errorDetails.slice(0, 10).map((e, i) => (
                   <div key={i} className="py-0.5">Row {e.row}: <span className="text-red-500">{e.field}</span> — {e.message}</div>
                 ))}
                 {result.errorDetails.length > 10 && (
-                  <div className="text-gray-400">...and {result.errorDetails.length - 10} more</div>
+                  <div className="text-swoop-text-label">...and {result.errorDetails.length - 10} more</div>
                 )}
               </div>
             )}
@@ -1116,9 +1116,9 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
 
           {/* What to do next */}
           {result.status !== 'failed' && config && (
-            <div className="mt-4 p-3 rounded-xl bg-blue-50 border border-blue-100 dark:bg-blue-500/10 dark:border-blue-500/20">
-              <div className="font-semibold text-xs text-blue-800 dark:text-blue-300 mb-1">What this unlocks:</div>
-              <ul className="text-xs text-blue-600 dark:text-blue-400 space-y-0.5">
+            <div className="mt-4 p-3 rounded-xl bg-blue-50 border border-blue-100">
+              <div className="font-semibold text-xs text-blue-800 mb-1">What this unlocks:</div>
+              <ul className="text-xs text-blue-600 space-y-0.5">
                 {config.unlocks.map(u => <li key={u}>• {u}</li>)}
               </ul>
             </div>
@@ -1126,12 +1126,12 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
 
           {/* Next import suggestion — dependency-aware onboarding nudge */}
           {result.status !== 'failed' && NEXT_IMPORT_SUGGESTION[importType] && onImportNext && (
-            <div className="mt-4 flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-brand-200 bg-brand-50/50 dark:bg-brand-500/5 dark:border-brand-500/20">
+            <div className="mt-4 flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-brand-200 bg-brand-50/50">
               <div>
-                <div className="text-xs font-bold text-brand-600 dark:text-brand-400">
+                <div className="text-xs font-bold text-brand-600">
                   Next: Import {NEXT_IMPORT_SUGGESTION[importType].label}
                 </div>
-                <div className="text-[11px] text-gray-500 mt-0.5">
+                <div className="text-[11px] text-swoop-text-muted mt-0.5">
                   {NEXT_IMPORT_SUGGESTION[importType].why}
                 </div>
               </div>
@@ -1139,7 +1139,7 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
                 type="button"
                 onClick={() => onImportNext(NEXT_IMPORT_SUGGESTION[importType].type)}
                 className="shrink-0 px-4 py-2 rounded-lg text-xs font-bold text-white border-none cursor-pointer hover:opacity-90 transition-opacity"
-                style={{ background: '#ff8b00' }}
+                style={{ background: '#F3922D' }}
               >
                 Import {NEXT_IMPORT_SUGGESTION[importType].label} →
               </button>
@@ -1150,7 +1150,7 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
             <button
               onClick={onReset}
               className="flex-1 py-3 rounded-lg font-bold text-sm text-white cursor-pointer"
-              style={{ background: '#ff8b00' }}
+              style={{ background: '#F3922D' }}
             >
               Import More Data
             </button>
@@ -1174,7 +1174,7 @@ function StepImport({ importType, mapping, parsedRows, csvHeaders, result, error
               return (
                 <button
                   onClick={() => { window.location.hash = `/${nav.route}`; }}
-                  className="flex-1 py-3 rounded-lg font-bold text-sm cursor-pointer border border-brand-500 text-brand-500 bg-transparent hover:bg-brand-50 transition-colors dark:hover:bg-brand-500/10"
+                  className="flex-1 py-3 rounded-lg font-bold text-sm cursor-pointer border border-brand-500 text-brand-500 bg-transparent hover:bg-brand-50 transition-colors"
                 >
                   {nav.label}
                 </button>
@@ -1282,8 +1282,8 @@ export default function CsvImportPage() {
   if (!user || !IMPORT_ALLOWED_ROLES.has(user.role)) {
     return (
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <h1 className="text-xl font-bold text-gray-800 dark:text-white/90 mb-2">Import Data</h1>
-        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-300">
+        <h1 className="text-xl font-bold text-swoop-text mb-2">Import Data</h1>
+        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
           CSV import is restricted to General Managers and club admins. Contact your GM if you need a dataset loaded.
         </div>
       </div>
@@ -1559,18 +1559,18 @@ export default function CsvImportPage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div className="flex items-center justify-between gap-3 mb-1">
-        <h1 className="text-xl font-bold text-gray-800 dark:text-white/90">Import Data</h1>
+        <h1 className="text-xl font-bold text-swoop-text">Import Data</h1>
         {step > 0 && (
           <button
             type="button"
             onClick={() => setAiDismissed(d => !d)}
-            className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 border-none bg-transparent cursor-pointer shrink-0"
+            className="text-xs text-swoop-text-label hover:text-gray-600 border-none bg-transparent cursor-pointer shrink-0"
           >
             {aiDismissed ? '✦ Show AI tips' : 'Hide AI tips'}
           </button>
         )}
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <p className="text-sm text-swoop-text-muted mb-6">
         Import CSV or XLSX files from your club software. We'll auto-detect columns and map them for you.
       </p>
 
@@ -1580,7 +1580,7 @@ export default function CsvImportPage() {
           <MultiFileDropZone onFilesClassified={setBulkFiles} />
           {bulkFiles.length > 0 && (
             <div className="mb-4 flex items-center justify-between">
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-swoop-text-muted">
                 {bulkFiles.length} file{bulkFiles.length === 1 ? '' : 's'} ready
                 {!bulkReady && ' — resolve unknown types before importing'}
               </div>
@@ -1595,11 +1595,11 @@ export default function CsvImportPage() {
             </div>
           )}
           {bulkResults && (
-            <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800">
-              <div className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">Batch import results</div>
+            <div className="mb-4 p-3 rounded-lg bg-swoop-row border border-swoop-border">
+              <div className="text-xs font-bold text-swoop-text-2 mb-2">Batch import results</div>
               <div className="flex flex-col gap-1">
                 {bulkResults.map((r, i) => (
-                  <div key={i} className="text-xs text-gray-600 dark:text-gray-400">
+                  <div key={i} className="text-xs text-swoop-text-muted">
                     {r.error ? '✗' : '✓'} {r.file}{r.importType ? ` → ${r.importType}` : ''}
                     {r.error ? ` (${r.error})` : ` — ${r.accepted || 0} accepted${r.rejected ? `, ${r.rejected} rejected` : ''}`}
                   </div>
@@ -1608,9 +1608,9 @@ export default function CsvImportPage() {
             </div>
           )}
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
-            <span className="text-xs uppercase font-semibold text-gray-400 tracking-wide whitespace-nowrap">or use the guided wizard</span>
-            <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
+            <div className="flex-1 border-t border-swoop-border" />
+            <span className="text-xs uppercase font-semibold text-swoop-text-label tracking-wide whitespace-nowrap">or use the guided wizard</span>
+            <div className="flex-1 border-t border-swoop-border" />
           </div>
         </>
       )}
@@ -1637,7 +1637,7 @@ export default function CsvImportPage() {
             onBack={() => setStep(0)}
           />
           {parseError && (
-            <div className="mt-3 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400">
+            <div className="mt-3 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
               {parseError}
             </div>
           )}

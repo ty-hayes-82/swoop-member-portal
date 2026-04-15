@@ -39,8 +39,8 @@ export default function AIImportAssistant({
       className={[
         'rounded-xl border p-4 mt-3',
         isStep3
-          ? 'border-l-4 border-l-orange-400 border-orange-200 bg-orange-50/60 dark:bg-orange-500/5 dark:border-orange-500/20'
-          : 'border-orange-200 bg-orange-50/60 dark:bg-orange-500/5 dark:border-orange-500/20',
+          ? 'border-l-4 border-l-orange-400 border-orange-200 bg-orange-50/60'
+          : 'border-orange-200 bg-orange-50/60',
       ].join(' ')}
     >
       {/* Header */}
@@ -51,7 +51,7 @@ export default function AIImportAssistant({
         <button
           type="button"
           onClick={onDismiss}
-          className="text-[11px] text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer p-0 leading-none dark:hover:text-gray-300"
+          className="text-[11px] text-swoop-text-label hover:text-gray-600 border-none bg-transparent cursor-pointer p-0 leading-none"
         >
           Hide
         </button>
@@ -63,20 +63,20 @@ export default function AIImportAssistant({
           <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '0ms' }} />
           <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '150ms' }} />
           <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-          <span className="ml-2 text-xs text-gray-400 italic">Reviewing mapping…</span>
+          <span className="ml-2 text-xs text-swoop-text-label italic">Reviewing mapping…</span>
         </div>
       )}
 
       {/* Step 1 / Step 3: narrative insight */}
       {!isStep2 && insight && (
-        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed m-0">
+        <p className="text-sm text-swoop-text-2 leading-relaxed m-0">
           {insight}
         </p>
       )}
 
       {/* Step 2: chips only — no prose */}
       {isStep2 && suggestions.length === 0 && !loading && validation && (
-        <p className="text-xs text-gray-500 italic m-0">Mapping looks clean.</p>
+        <p className="text-xs text-swoop-text-muted italic m-0">Mapping looks clean.</p>
       )}
 
       {/* Suggestion chips */}
@@ -92,8 +92,8 @@ export default function AIImportAssistant({
                 key={s.id}
                 className={`flex items-start gap-3 p-2.5 rounded-lg border ${
                   isWarning
-                    ? 'bg-amber-50/80 border-amber-200 dark:bg-amber-500/5 dark:border-amber-500/20'
-                    : 'bg-white/60 dark:bg-white/5 border-orange-100 dark:border-orange-500/20'
+                    ? 'bg-amber-50/80 border-amber-200'
+                    : 'bg-white/60 border-orange-100'
                 }`}
               >
                 {/* Icon */}
@@ -103,11 +103,11 @@ export default function AIImportAssistant({
 
                 {/* Label + reason */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold text-gray-800 dark:text-gray-100 leading-snug">
+                  <div className="text-xs font-semibold text-swoop-text leading-snug">
                     {s.label}
                   </div>
                   {s.reason && (
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+                    <div className="text-[11px] text-swoop-text-muted mt-0.5 leading-snug">
                       {s.reason}
                     </div>
                   )}
@@ -130,12 +130,12 @@ export default function AIImportAssistant({
                     <button
                       type="button"
                       onClick={() => onApplySuggestion(s)}
-                      className="px-3 py-1 rounded-md text-[11px] font-bold border cursor-pointer transition-colors border-gray-300 text-gray-600 bg-transparent hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-800"
+                      className="px-3 py-1 rounded-md text-[11px] font-bold border cursor-pointer transition-colors border-swoop-border text-swoop-text-muted bg-transparent hover:bg-swoop-row-hover"
                     >
                       Skip
                     </button>
                   ) : isWarning ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">
                       Review
                     </span>
                   ) : null}
@@ -148,17 +148,17 @@ export default function AIImportAssistant({
 
       {/* Validation row */}
       {validation && (
-        <div className="mt-3 flex items-center gap-4 text-[11px] font-semibold border-t border-orange-100 dark:border-orange-500/20 pt-2.5">
-          <span className="text-emerald-600 dark:text-emerald-400">
+        <div className="mt-3 flex items-center gap-4 text-[11px] font-semibold border-t border-orange-100 pt-2.5">
+          <span className="text-emerald-600">
             ✓ {validation.ready} ready
           </span>
           {validation.warnings > 0 && (
-            <span className="text-amber-600 dark:text-amber-400">
+            <span className="text-amber-600">
               ⚠ {validation.warnings} warning{validation.warnings !== 1 ? 's' : ''}
             </span>
           )}
           {validation.errors > 0 && (
-            <span className="text-red-600 dark:text-red-400">
+            <span className="text-red-600">
               ✕ {validation.errors} error{validation.errors !== 1 ? 's' : ''}
             </span>
           )}

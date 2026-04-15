@@ -19,7 +19,7 @@ const recoveryMethods = [
   { method: 'Personal GM Call', success: 95, count: 6, color: '#12b76a' },
   { method: 'Event Invitation', success: 91, count: 3, color: '#2563eb' },
   { method: 'Billing Resolution', success: 100, count: 2, color: '#8b5cf6' },
-  { method: 'Engagement Autopilot', success: 87, count: 4, color: '#ff8b00' },
+  { method: 'Engagement Autopilot', success: 87, count: 4, color: '#F3922D' },
 ];
 
 export default function RecoveryTab() {
@@ -48,20 +48,20 @@ export default function RecoveryTab() {
           { label: 'Retention Rate', value: '100%', color: '#12b76a', subtitle: 'of intervened members' },
           { label: 'Avg Response Time', value: '4.2 hrs', color: '#2563eb', subtitle: 'from alert to first action' },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-white shadow-theme-xs rounded-2xl border border-gray-200 p-4">
-            <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">{kpi.label}</div>
+          <div key={kpi.label} className="bg-swoop-panel shadow-theme-xs rounded-2xl border border-swoop-border p-4">
+            <div className="text-xs text-swoop-text-label uppercase tracking-wider mb-2">{kpi.label}</div>
             <div className="text-[28px] font-mono font-bold" style={{ color: kpi.color }}>{kpi.value}</div>
-            <div className="text-xs text-gray-400 mt-1">{kpi.subtitle}</div>
+            <div className="text-xs text-swoop-text-label mt-1">{kpi.subtitle}</div>
           </div>
         ))}
       </div>
 
       {/* Recovery Timeline */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-theme-xs">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6 shadow-theme-xs">
         <div className="mb-5">
           <div className="text-[11px] font-bold text-success-500 uppercase tracking-[1.5px] mb-1">Recovery Timeline</div>
           <h3 className="text-xl font-bold text-[#1a1a2e] m-0 leading-tight">Intervention Outcomes</h3>
-          <p className="text-xs text-gray-400 mt-1.5 mb-0">
+          <p className="text-xs text-swoop-text-label mt-1.5 mb-0">
             Each intervention below turned an at-risk member into a retained, re-engaged member.
             Total members retained: <strong className="text-success-500">{memberSaves.length}</strong>
           </p>
@@ -71,18 +71,18 @@ export default function RecoveryTab() {
           {memberSaves.map((save) => {
             const improvement = save.healthAfter - save.healthBefore;
             return (
-              <div key={save.name} className="grid grid-cols-1 sm:grid-cols-[1.2fr_100px_1.8fr_1fr] gap-2 sm:gap-4 items-start sm:items-center px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-xs">
+              <div key={save.name} className="grid grid-cols-1 sm:grid-cols-[1.2fr_100px_1.8fr_1fr] gap-2 sm:gap-4 items-start sm:items-center px-4 py-3.5 bg-swoop-row border border-swoop-border rounded-xl text-xs">
                 {/* Member + Trigger */}
                 <div>
                   <div className="font-bold text-[13px] text-[#1a1a2e]">{save.name}</div>
-                  <div className="text-gray-400 mt-0.5 leading-snug">{save.trigger}</div>
+                  <div className="text-swoop-text-label mt-0.5 leading-snug">{save.trigger}</div>
                 </div>
 
                 {/* Health Score Change */}
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-1">
                     <span className="font-mono font-bold text-[13px] text-error-500">{save.healthBefore}</span>
-                    <span className="text-gray-400 text-sm">{'\u2192'}</span>
+                    <span className="text-swoop-text-label text-sm">{'\u2192'}</span>
                     <span className="font-mono font-bold text-[13px] text-success-500">{save.healthAfter}</span>
                   </div>
                   <div className="text-[10px] font-bold text-success-500 mt-0.5">+{improvement} pts</div>
@@ -90,10 +90,10 @@ export default function RecoveryTab() {
 
                 {/* Action + Outcome */}
                 <div>
-                  <div className="text-gray-500 leading-snug">
+                  <div className="text-swoop-text-muted leading-snug">
                     <strong className="text-blue-600">Action:</strong> {save.action}
                   </div>
-                  <div className="text-gray-500 mt-1 leading-snug">
+                  <div className="text-swoop-text-muted mt-1 leading-snug">
                     <strong className="text-success-500">Outcome:</strong> {save.outcome}
                   </div>
                 </div>
@@ -101,7 +101,7 @@ export default function RecoveryTab() {
                 {/* Member Retained */}
                 <div className="text-right">
                   <div className="font-mono font-bold text-sm text-success-500">Retained</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">member saved</div>
+                  <div className="text-[10px] text-swoop-text-label mt-0.5">member saved</div>
                 </div>
               </div>
             );
@@ -110,11 +110,11 @@ export default function RecoveryTab() {
       </div>
 
       {/* Recovery by Method */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-theme-xs">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6 shadow-theme-xs">
         <div className="mb-5">
           <div className="text-[11px] font-bold text-brand-500 uppercase tracking-[1.5px] mb-1">Recovery by Method</div>
           <h3 className="text-xl font-bold text-[#1a1a2e] m-0 leading-tight">Which Interventions Work Best</h3>
-          <p className="text-xs text-gray-400 mt-1.5 mb-0">
+          <p className="text-xs text-swoop-text-label mt-1.5 mb-0">
             Success rate by intervention type across all recovery actions.
           </p>
         </div>
@@ -124,10 +124,10 @@ export default function RecoveryTab() {
             <div key={rm.method} className="flex items-center gap-4">
               <div className="w-40 shrink-0">
                 <div className="text-[13px] font-semibold text-[#1a1a2e]">{rm.method}</div>
-                <div className="text-[11px] text-gray-400">{rm.count} interventions</div>
+                <div className="text-[11px] text-swoop-text-label">{rm.count} interventions</div>
               </div>
               <div className="flex-1 relative h-7">
-                <div className="absolute inset-0 bg-gray-50 rounded-lg border border-gray-200" />
+                <div className="absolute inset-0 bg-swoop-row rounded-lg border border-swoop-border" />
                 <div className="absolute top-0 left-0 bottom-0 rounded-lg" style={{ width: `${rm.success}%`, background: `${rm.color}20`, borderRight: `3px solid ${rm.color}` }} />
               </div>
               <div className="w-[60px] text-right font-mono font-bold text-sm" style={{ color: rm.color }}>{rm.success}%</div>
@@ -137,11 +137,11 @@ export default function RecoveryTab() {
       </div>
 
       {/* Monthly Recovery Trend */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-theme-xs">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6 shadow-theme-xs">
         <div className="mb-5">
           <div className="text-[11px] font-bold text-blue-600 uppercase tracking-[1.5px] mb-1">Monthly Trend</div>
           <h3 className="text-xl font-bold text-[#1a1a2e] m-0 leading-tight">Recovery Volume Over Time</h3>
-          <p className="text-xs text-gray-400 mt-1.5 mb-0">
+          <p className="text-xs text-swoop-text-label mt-1.5 mb-0">
             Members saved per month and response time improvement over the last 6 months.
           </p>
         </div>
@@ -154,7 +154,7 @@ export default function RecoveryTab() {
               <div key={t.month} className="flex-1 flex flex-col items-center gap-1.5">
                 <div className="font-mono text-xs font-bold text-success-500">{t.membersSaved}</div>
                 <div className="w-full max-w-[48px] rounded-t-md rounded-b-sm relative" style={{ height: `${barHeight}px`, background: 'linear-gradient(180deg, #12b76a, #12b76ae6)' }}>
-                  <div className="absolute -bottom-5 left-0 right-0 text-center text-[10px] text-gray-400 font-semibold">{t.month}</div>
+                  <div className="absolute -bottom-5 left-0 right-0 text-center text-[10px] text-swoop-text-label font-semibold">{t.month}</div>
                 </div>
               </div>
             );
@@ -162,12 +162,12 @@ export default function RecoveryTab() {
         </div>
 
         {/* Supplementary metrics row */}
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3 mt-10 pt-4 border-t border-gray-200">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3 mt-10 pt-4 border-t border-swoop-border">
           {trends.map((t) => (
-            <div key={t.month} className="text-center p-2 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="text-[11px] font-semibold text-gray-400">{t.month}</div>
+            <div key={t.month} className="text-center p-2 bg-swoop-row rounded-lg border border-swoop-border">
+              <div className="text-[11px] font-semibold text-swoop-text-label">{t.month}</div>
               <div className="font-mono text-sm font-bold text-success-500 mt-0.5">{formatCurrency(t.duesProtected)}</div>
-              <div className="text-[10px] text-gray-400">protected</div>
+              <div className="text-[10px] text-swoop-text-label">protected</div>
               <div className="text-[11px] font-semibold mt-1" style={{ color: t.responseTime <= 4.5 ? '#12b76a' : '#f59e0b' }}>{t.responseTime}h response</div>
             </div>
           ))}
@@ -183,7 +183,7 @@ export default function RecoveryTab() {
           <div className="text-sm font-bold text-success-500 mb-1">
             Every intervention here started as an alert on the Health Overview tab
           </div>
-          <div className="text-xs text-gray-500 leading-relaxed">
+          <div className="text-xs text-swoop-text-muted leading-relaxed">
             Swoop detected disengagement signals 6-8 weeks before any of these members would have resigned.
             The average health score improved by {kpis.avgImprovement} points after intervention, protecting {formatCurrency(kpis.totalDuesProtected)} in annual dues.
             Response time has improved from 8.1 hours in September to 3.8 hours in February.

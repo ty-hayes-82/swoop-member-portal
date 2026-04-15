@@ -34,7 +34,7 @@ export default function LogFeedbackButton() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 py-2.5 px-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] cursor-pointer text-xs font-semibold text-gray-500 w-full"
+        className="flex items-center gap-2 py-2.5 px-4 rounded-xl border border-swoop-border bg-swoop-panel cursor-pointer text-xs font-semibold text-swoop-text-muted w-full"
       >
         <span className="text-base">+</span>
         Log Member Feedback
@@ -43,16 +43,16 @@ export default function LogFeedbackButton() {
   }
 
   return (
-    <div className="p-4 rounded-xl border border-brand-500/20 bg-white dark:bg-white/[0.03] flex flex-col gap-2">
+    <div className="p-4 rounded-xl border border-brand-500/20 bg-swoop-panel flex flex-col gap-2">
       <div className="flex justify-between items-center">
-        <span className="text-sm font-bold text-gray-800 dark:text-white/90">
+        <span className="text-sm font-bold text-swoop-text">
           Log Feedback
         </span>
         <button
           type="button"
           aria-label="Close feedback form"
           onClick={() => setOpen(false)}
-          className="bg-transparent border-none cursor-pointer text-gray-400 text-base focus-visible:ring-2 focus-visible:ring-brand-500"
+          className="bg-transparent border-none cursor-pointer text-swoop-text-label text-base focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           <span aria-hidden="true">×</span>
         </button>
@@ -66,7 +66,7 @@ export default function LogFeedbackButton() {
             className={`py-1 px-2.5 rounded-md border cursor-pointer text-[11px] ${
               type === t
                 ? 'border-brand-500 bg-brand-500/[0.07] font-bold text-brand-500'
-                : 'border-gray-200 dark:border-gray-800 bg-transparent font-medium text-gray-500'
+                : 'border-swoop-border bg-transparent font-medium text-swoop-text-muted'
             }`}
           >
             {t}
@@ -79,7 +79,7 @@ export default function LogFeedbackButton() {
         placeholder="Member name"
         value={memberName}
         onChange={(e) => setMemberName(e.target.value)}
-        className="w-full py-2 px-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-100 text-gray-800 dark:text-white/90 text-xs box-border"
+        className="w-full py-2 px-2.5 rounded-lg border border-swoop-border bg-swoop-row text-swoop-text text-xs box-border"
       />
 
       <textarea
@@ -87,7 +87,7 @@ export default function LogFeedbackButton() {
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={3}
-        className="w-full py-2 px-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-100 text-gray-800 dark:text-white/90 text-xs box-border resize-y"
+        className="w-full py-2 px-2.5 rounded-lg border border-swoop-border bg-swoop-row text-swoop-text text-xs box-border resize-y"
       />
 
       <button
@@ -96,7 +96,7 @@ export default function LogFeedbackButton() {
         className={`py-2 px-4 rounded-lg border-none text-white text-xs font-bold focus-visible:ring-2 focus-visible:ring-brand-500 ${
           memberName.trim() && note.trim()
             ? 'bg-brand-500 cursor-pointer'
-            : 'bg-gray-200 cursor-default'
+            : 'bg-swoop-border cursor-default'
         }`}
       >
         Save Feedback

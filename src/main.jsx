@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/react';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import './styles/tailwind.css';
+import './styles/swoop-dark.css';
 
 // Initialize Sentry only when a DSN is configured. Dev builds without a DSN
 // keep working identically — no network calls, no init side-effects.

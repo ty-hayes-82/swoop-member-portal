@@ -140,7 +140,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
         onClick={onToggle}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={`border-t border-gray-200 cursor-pointer transition-all duration-150 ${index % 2 === 0 ? 'bg-[#F8F9FA]' : 'bg-gray-100'} hover:bg-gray-50 hover:translate-x-0.5`}
+        className={`border-t border-swoop-border cursor-pointer transition-all duration-150 ${index % 2 === 0 ? 'bg-[#F8F9FA]' : 'bg-swoop-row'} hover:bg-swoop-row-hover hover:translate-x-0.5`}
       >
         <td className="px-3 sm:px-4 py-2">
           <MemberLink
@@ -167,36 +167,36 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
               </div>
             </td>
             <td className="px-4 py-2 hidden md:table-cell">
-              {member.archetype ? <ArchetypeBadge archetype={member.archetype} size="xs" /> : <span className="text-xs text-gray-400">—</span>}
+              {member.archetype ? <ArchetypeBadge archetype={member.archetype} size="xs" /> : <span className="text-xs text-swoop-text-label">—</span>}
             </td>
           </>
         )}
         <td className="px-4 py-2 hidden sm:table-cell">
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-swoop-text-muted">
             {member.tier || '—'}
           </span>
         </td>
         <td className="px-4 py-2 hidden md:table-cell">
-          <span className="font-mono text-xs text-gray-500">
+          <span className="font-mono text-xs text-swoop-text-muted">
             {(member.duesAnnual || member.memberValueAnnual) ? `$${(member.duesAnnual || member.memberValueAnnual || 0).toLocaleString()}` : '—'}
           </span>
         </td>
         <td className="px-3 sm:px-4 py-2 text-right">
           <span
-            className={`text-sm font-semibold inline-block transition-all duration-150 ${isExpanded ? 'text-brand-500 rotate-90' : 'text-gray-400 rotate-0'}`}
+            className={`text-sm font-semibold inline-block transition-all duration-150 ${isExpanded ? 'text-brand-500 rotate-90' : 'text-swoop-text-label rotate-0'}`}
           >
             ›
           </span>
         </td>
       </tr>
       {isExpanded && (
-        <tr className="bg-gray-100">
+        <tr className="bg-swoop-row">
           <td colSpan={6} className="p-4">
             <div className="flex flex-col gap-4">
               {/* Member Details */}
               <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
                 <div>
-                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                  <div className="text-xs text-swoop-text-label uppercase tracking-wider mb-1">
                     Last Seen
                   </div>
                   <div className="text-sm text-[#1a1a2e]">
@@ -204,7 +204,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                  <div className="text-xs text-swoop-text-label uppercase tracking-wider mb-1">
                     Member Since
                   </div>
                   <div className="text-sm text-[#1a1a2e]">
@@ -212,7 +212,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                  <div className="text-xs text-swoop-text-label uppercase tracking-wider mb-1">
                     Annual Dues
                   </div>
                   <div className="text-sm text-[#1a1a2e] font-mono">
@@ -220,7 +220,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                  <div className="text-xs text-swoop-text-label uppercase tracking-wider mb-1">
                     Health Trend
                   </div>
                   <div className="flex gap-0.5 items-center">
@@ -242,7 +242,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
               {/* Top Risk Signal */}
               {member.topRisk && member.topRisk !== 'No current risks' && (
                 <div className="p-2 bg-amber-500/10 rounded-lg border-l-[3px] border-l-amber-500">
-                  <div className="text-xs text-gray-400 mb-1">
+                  <div className="text-xs text-swoop-text-label mb-1">
                     Primary Risk Signal:
                   </div>
                   <div className="text-sm text-[#1a1a2e]">
@@ -447,7 +447,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
       {/* Health Distribution — compact chip row */}
       {!rosterOnly && (
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider shrink-0">Health:</span>
+          <span className="text-[10px] font-bold text-swoop-text-label uppercase tracking-wider shrink-0">Health:</span>
           {filteredHealthDist.map((d) => {
             const isActive = activeHealthLevel === d.level;
             return (
@@ -478,7 +478,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
       {/* Archetype Filter - Clickable (hidden in roster-only) */}
       {!rosterOnly && (
         <div>
-          <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
+          <div className="text-sm text-swoop-text-label mb-2 uppercase tracking-wider">
             Filter by Archetype (click to filter)
           </div>
           <div className="flex flex-wrap gap-2">
@@ -496,9 +496,9 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
             })}
           </div>
           {/* Cross-domain decay legend — chips filter the grid. */}
-          <div className="mt-3 p-2 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800">
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filter by Cross-Domain Decay Pattern</div>
-            <div className="flex flex-wrap gap-2 text-[11px] text-gray-600 dark:text-gray-400">
+          <div className="mt-3 p-2 bg-swoop-row border border-swoop-border rounded-lg">
+            <div className="text-[10px] font-bold text-swoop-text-label uppercase tracking-wider mb-1">Filter by Cross-Domain Decay Pattern</div>
+            <div className="flex flex-wrap gap-2 text-[11px] text-swoop-text-muted">
               {[
                 { key: 'email', label: '📧 Email decay', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
                 { key: 'golf', label: '⛳ Golf drop', bg: 'bg-success-50', text: 'text-success-700', border: 'border-success-200' },
@@ -521,13 +521,13 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
                 <button
                   type="button"
                   onClick={() => { setSymptomFilter(null); setPage(0); }}
-                  className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-300 cursor-pointer text-[10px]"
+                  className="px-2 py-0.5 rounded bg-swoop-row text-swoop-text-muted border border-swoop-border cursor-pointer text-[10px]"
                 >
                   Clear
                 </button>
               )}
             </div>
-            <div className="text-[10px] text-gray-500 mt-1.5 italic">
+            <div className="text-[10px] text-swoop-text-muted mt-1.5 italic">
               {symptomFilter
                 ? `Showing members with ${symptomFilter === 'multi' ? 'multi-domain' : symptomFilter} decay signals. Click any to see their First Domino sequence.`
                 : 'Click any chip to filter by cross-domain symptom. Click any at-risk member to see their First Domino sequence.'}
@@ -539,7 +539,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
       {/* Activity Filter (hidden in roster-only) */}
       {!rosterOnly && (
         <div>
-          <div className="text-sm text-gray-400 mb-2 uppercase tracking-wider">
+          <div className="text-sm text-swoop-text-label mb-2 uppercase tracking-wider">
             Filter by Last Activity
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -549,7 +549,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
                 <button
                   key={f.key ?? 'all'}
                   onClick={() => { setActivityFilter(isActive ? null : f.key); setPage(0); }}
-                  className={`px-3.5 py-1.5 text-[13px] font-semibold rounded-xl cursor-pointer transition-all duration-150 ${isActive ? 'border border-brand-500 bg-brand-500/10 text-brand-500' : 'border border-gray-200 bg-gray-50 text-gray-500'}`}
+                  className={`px-3.5 py-1.5 text-[13px] font-semibold rounded-xl cursor-pointer transition-all duration-150 ${isActive ? 'border border-brand-500 bg-brand-500/10 text-brand-500' : 'border border-swoop-border bg-swoop-row text-swoop-text-muted'}`}
                 >
                   {f.label}
                 </button>
@@ -561,22 +561,22 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
 
       {/* Active Filters */}
       {(healthFilter || archetypeFilter || activityFilter) && (
-        <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-gray-200">
-          <span className="text-xs text-gray-400 uppercase tracking-wide">
+        <div className="flex items-center gap-2 p-2 bg-swoop-panel rounded-xl border border-swoop-border">
+          <span className="text-xs text-swoop-text-label uppercase tracking-wide">
             Active Filters:
           </span>
           {healthFilter && (
             <FilterChip
               label={`Health: ${healthFilter.max ? `${healthFilter.min}-${healthFilter.max}` : `${healthFilter.min}+`}`}
               onRemove={() => setHealthFilter(null)}
-              color={'#ff8b00'}
+              color={'#F3922D'}
             />
           )}
           {archetypeFilter && (
             <FilterChip
               label={`Archetype: ${archetypeFilter}`}
               onRemove={() => setArchetypeFilter(null)}
-              color={'#ff8b00'}
+              color={'#F3922D'}
             />
           )}
           {activityFilter && (
@@ -588,7 +588,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
           )}
           <button
             onClick={clearFilters}
-            className="ml-auto px-3 py-1 text-xs text-gray-400 bg-transparent border border-gray-200 rounded-lg cursor-pointer uppercase tracking-wider"
+            className="ml-auto px-3 py-1 text-xs text-swoop-text-label bg-transparent border border-swoop-border rounded-lg cursor-pointer uppercase tracking-wider"
           >
             Clear All
           </button>
@@ -596,10 +596,10 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
       )}
 
       {/* Member List Table */}
-      <div className="bg-gray-100 rounded-xl border border-gray-200 overflow-hidden">
-        <div className="p-3 sm:p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-swoop-row rounded-xl border border-swoop-border overflow-hidden">
+        <div className="p-3 sm:p-4 border-b border-swoop-border flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div className="flex items-center gap-3 sm:gap-4">
-            <span className="text-sm font-semibold text-gray-800 dark:text-white/90">
+            <span className="text-sm font-semibold text-swoop-text">
               All Members
             </span>
             <input
@@ -607,28 +607,28 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
               placeholder="Search by name..."
               value={searchTerm}
               onChange={e => { setSearchTerm(e.target.value); setPage(0); }}
-              className="px-3 py-1.5 text-xs font-sans bg-gray-100 border border-gray-200 rounded-lg text-[#1a1a2e] outline-none flex-1 sm:flex-none sm:min-w-[180px]"
+              className="px-3 py-1.5 text-xs font-sans bg-swoop-row border border-swoop-border rounded-lg text-[#1a1a2e] outline-none flex-1 sm:flex-none sm:min-w-[180px]"
             />
           </div>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-swoop-text-label">
             Showing {Math.min(page * PAGE_SIZE + 1, sortedMembers.length)}–{Math.min((page + 1) * PAGE_SIZE, sortedMembers.length)} of {sortedMembers.length} members{searchTerm && ` matching "${searchTerm}"`}
           </span>
         </div>
         {/* Source attribution — every health score, dues, and archetype shown
             below is a CROSS-DOMAIN composite. Pillar 1 (Show your sources). */}
-        <div className="px-3 sm:px-4 py-2 border-b border-gray-200 flex items-center gap-2 flex-wrap text-[10px] text-gray-500">
+        <div className="px-3 sm:px-4 py-2 border-b border-swoop-border flex items-center gap-2 flex-wrap text-[10px] text-swoop-text-muted">
           <span className="font-semibold uppercase tracking-wide">Sources:</span>
           <SourceBadgeRow systems={['Member CRM', 'Tee Sheet', 'POS', 'Email']} size="xs" />
-          <span className="text-gray-400">— health scores synthesize all four signals</span>
+          <span className="text-swoop-text-label">— health scores synthesize all four signals</span>
         </div>
         <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="w-full border-collapse text-sm member-table">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-swoop-row">
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className={`px-3 sm:px-4 py-2 text-xs text-gray-400 uppercase tracking-wider font-medium ${col.key === 'expand' ? 'text-right' : 'text-left'} ${col.hideClass}`}
+                    className={`px-3 sm:px-4 py-2 text-xs text-swoop-text-label uppercase tracking-wider font-medium ${col.key === 'expand' ? 'text-right' : 'text-left'} ${col.hideClass}`}
                   >
                     {col.sortable === false ? (
                       <span>{col.label}</span>
@@ -652,7 +652,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
             <tbody>
               {sortedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-gray-400">
+                  <td colSpan={6} className="p-6 text-center text-swoop-text-label">
                     No members match the current filters
                   </td>
                 </tr>
@@ -676,21 +676,21 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
         {sortedMembers.length > PAGE_SIZE && (() => {
           const totalPages = Math.ceil(sortedMembers.length / PAGE_SIZE);
           return (
-            <div className="flex justify-between items-center px-4 py-2 border-t border-gray-200 bg-gray-50">
+            <div className="flex justify-between items-center px-4 py-2 border-t border-swoop-border bg-swoop-row">
               <button
                 onClick={() => setPage(Math.max(0, page - 1))}
                 disabled={page === 0}
-                className={`px-3.5 py-1.5 text-[13px] font-semibold border border-gray-200 rounded-lg cursor-pointer ${page === 0 ? 'bg-gray-100 text-gray-400 opacity-50 cursor-default' : 'bg-white text-[#1a1a2e]'}`}
+                className={`px-3.5 py-1.5 text-[13px] font-semibold border border-swoop-border rounded-lg cursor-pointer ${page === 0 ? 'bg-swoop-row text-swoop-text-label opacity-50 cursor-default' : 'bg-swoop-panel text-[#1a1a2e]'}`}
               >
                 Previous
               </button>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-swoop-text-muted">
                 Page {page + 1} of {totalPages}
               </span>
               <button
                 onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
                 disabled={page >= totalPages - 1}
-                className={`px-3.5 py-1.5 text-[13px] font-semibold border border-gray-200 rounded-lg cursor-pointer ${page >= totalPages - 1 ? 'bg-gray-100 text-gray-400 opacity-50 cursor-default' : 'bg-white text-[#1a1a2e]'}`}
+                className={`px-3.5 py-1.5 text-[13px] font-semibold border border-swoop-border rounded-lg cursor-pointer ${page >= totalPages - 1 ? 'bg-swoop-row text-swoop-text-label opacity-50 cursor-default' : 'bg-swoop-panel text-[#1a1a2e]'}`}
               >
                 Next
               </button>

@@ -136,11 +136,11 @@ export default function OvernightBrief() {
           >
             Overnight Brief
           </span>
-          <span className="text-[10px] text-gray-400 font-mono">
+          <span className="text-[10px] text-swoop-text-label font-mono">
             Agents ran at {briefTimestamp()}
           </span>
         </div>
-        <span className="text-[10px] text-gray-400">{bullets.length} finding{bullets.length === 1 ? '' : 's'}</span>
+        <span className="text-[10px] text-swoop-text-label">{bullets.length} finding{bullets.length === 1 ? '' : 's'}</span>
       </div>
 
       {/* Bullets */}
@@ -148,7 +148,7 @@ export default function OvernightBrief() {
         {bullets.map((b, i) => (
           <li key={i} className="flex items-start gap-2">
             <span className="text-sm mt-px shrink-0">{b.icon}</span>
-            <span className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed flex-1">
+            <span className="text-xs text-swoop-text-2 leading-relaxed flex-1">
               {b.text}
             </span>
             {b.nav && (

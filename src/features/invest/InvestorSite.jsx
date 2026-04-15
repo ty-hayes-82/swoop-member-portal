@@ -81,12 +81,12 @@ export default function InvestorSite() {
   const [chatLoaded, setChatLoaded] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 font-sans antialiased selection:bg-emerald-500/30">
+    <div className="min-h-screen bg-swoop-canvas text-gray-100 font-sans antialiased selection:bg-emerald-500/30">
 
       {/* ── sticky nav ─── */}
       <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-gray-800/60 bg-gray-950/80 px-5 py-3 backdrop-blur-xl md:px-12">
         <span className="text-lg font-bold tracking-tight text-white">Swoop Golf</span>
-        <div className="hidden gap-5 text-sm text-gray-500 md:flex">
+        <div className="hidden gap-5 text-sm text-swoop-text-muted md:flex">
           {['problem', 'demo', 'how', 'numbers', 'agents', 'market', 'moat', 'ask'].map(s => (
             <button key={s} onClick={() => scrollTo(s)} className="capitalize transition-colors hover:text-white">{s}</button>
           ))}
@@ -120,7 +120,7 @@ export default function InvestorSite() {
             </h1>
           </Reveal>
           <Reveal delay={150}>
-            <p className="mx-auto mt-8 max-w-2xl text-lg text-gray-400 md:text-xl">
+            <p className="mx-auto mt-8 max-w-2xl text-lg text-swoop-text-label md:text-xl">
               <span className="font-semibold text-emerald-400">7 autonomous agents.</span>{' '}
               <span className="font-semibold text-white">$9,377/mo</span> in recoverable revenue per club.{' '}
               <span className="font-semibold text-white">$71/month</span> to run.
@@ -136,7 +136,7 @@ export default function InvestorSite() {
               </button>
               <button
                 onClick={() => scrollTo('numbers')}
-                className="rounded-xl border border-gray-700 px-8 py-3.5 text-lg font-semibold text-gray-300 transition-colors hover:border-gray-500 hover:text-white"
+                className="rounded-xl border border-swoop-border px-8 py-3.5 text-lg font-semibold text-swoop-text-ghost transition-colors hover:border-gray-500 hover:text-white"
               >
                 See the Numbers &rarr;
               </button>
@@ -145,7 +145,7 @@ export default function InvestorSite() {
         </div>
 
         {/* scroll hint */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-gray-600">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-swoop-text-muted">
           <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14m0 0l-6-6m6 6l6-6" /></svg>
         </div>
       </section>
@@ -155,7 +155,7 @@ export default function InvestorSite() {
         <div className="mx-auto max-w-5xl">
           <Reveal>
             <p className="text-6xl font-black text-red-400 md:text-8xl">$2.1B</p>
-            <p className="mt-4 text-xl font-semibold text-gray-200 md:text-2xl">in annual member dues lost to preventable churn</p>
+            <p className="mt-4 text-xl font-semibold text-swoop-text-ghost md:text-2xl">in annual member dues lost to preventable churn</p>
           </Reveal>
           <Reveal delay={200}>
             <div className="mt-12 grid gap-6 sm:grid-cols-3">
@@ -166,13 +166,13 @@ export default function InvestorSite() {
               ].map(s => (
                 <div key={s.stat} className="rounded-xl border border-red-900/30 bg-red-950/10 p-6 text-center">
                   <p className="text-3xl font-extrabold text-amber-400">{s.stat}</p>
-                  <p className="mt-2 text-sm text-gray-400">{s.label}</p>
+                  <p className="mt-2 text-sm text-swoop-text-label">{s.label}</p>
                 </div>
               ))}
             </div>
           </Reveal>
           <Reveal delay={350}>
-            <div className="mt-10 space-y-3 text-lg text-gray-400">
+            <div className="mt-10 space-y-3 text-lg text-swoop-text-label">
               <p>Every club runs <span className="text-white font-semibold">5-7 disconnected systems</span>. No one connects the signals.</p>
               <p>By the time a GM notices a member disengaging, it's <span className="text-red-400 font-semibold">6-8 weeks too late</span>.</p>
             </div>
@@ -188,7 +188,7 @@ export default function InvestorSite() {
             <h2 className="text-3xl font-bold text-white md:text-4xl">
               Text the AI concierge
             </h2>
-            <p className="mt-4 text-gray-400">
+            <p className="mt-4 text-swoop-text-label">
               You are <span className="font-semibold text-white">James Whitfield</span>, an $18K/yr member. See how the AI responds in real-time.
             </p>
           </Reveal>
@@ -196,15 +196,15 @@ export default function InvestorSite() {
           <Reveal delay={200}>
             <div className="mt-10">
               {chatLoaded ? (
-                <div className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-gray-700 shadow-2xl shadow-emerald-900/10" style={{ maxHeight: 400 }}>
-                  <Suspense fallback={<div className="flex h-64 items-center justify-center text-gray-500">Loading Concierge...</div>}>
+                <div className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-swoop-border shadow-2xl shadow-emerald-900/10" style={{ maxHeight: 400 }}>
+                  <Suspense fallback={<div className="flex h-64 items-center justify-center text-swoop-text-muted">Loading Concierge...</div>}>
                     <ConciergeChatPage />
                   </Suspense>
                 </div>
               ) : (
                 <button
                   onClick={() => setChatLoaded(true)}
-                  className="mx-auto flex items-center gap-3 rounded-2xl border border-gray-700 bg-gray-900/80 px-10 py-6 text-lg text-gray-300 shadow-xl transition-all hover:border-emerald-500 hover:shadow-emerald-900/20 hover:text-white"
+                  className="mx-auto flex items-center gap-3 rounded-2xl border border-swoop-border bg-gray-900/80 px-10 py-6 text-lg text-swoop-text-ghost shadow-xl transition-all hover:border-emerald-500 hover:shadow-emerald-900/20 hover:text-white"
                 >
                   <span className="text-3xl">{'\u{1F4AC}'}</span> Launch Concierge Chat
                 </button>
@@ -215,7 +215,7 @@ export default function InvestorSite() {
                 {SUGGESTED_MESSAGES.map(m => (
                   <span
                     key={m}
-                    className="rounded-full border border-gray-700 bg-gray-900 px-4 py-1.5 text-sm text-gray-400"
+                    className="rounded-full border border-swoop-border bg-swoop-canvas px-4 py-1.5 text-sm text-swoop-text-label"
                   >
                     {m}
                   </span>
@@ -255,11 +255,11 @@ export default function InvestorSite() {
               },
             ].map((s, i) => (
               <Reveal key={s.step} delay={i * 150}>
-                <div className="relative rounded-xl border border-gray-700 bg-gray-800/40 p-8">
+                <div className="relative rounded-xl border border-swoop-border bg-gray-800/40 p-8">
                   <span className="text-4xl">{s.icon}</span>
                   <p className="mt-4 text-xs font-bold uppercase tracking-widest text-emerald-500">Step {s.step}</p>
                   <h3 className="mt-2 text-xl font-bold text-white">{s.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-gray-400">{s.desc}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-swoop-text-label">{s.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -284,9 +284,9 @@ export default function InvestorSite() {
               { value: '$71/mo', label: 'Infrastructure cost for the full agent fleet' },
             ].map((s, i) => (
               <Reveal key={s.value} delay={i * 80}>
-                <div className="rounded-xl border border-gray-700 bg-gray-800/40 p-8 text-center">
+                <div className="rounded-xl border border-swoop-border bg-gray-800/40 p-8 text-center">
                   <p className="text-4xl font-black text-emerald-400 md:text-5xl">{s.value}</p>
-                  <p className="mt-3 text-sm text-gray-400">{s.label}</p>
+                  <p className="mt-3 text-sm text-swoop-text-label">{s.label}</p>
                 </div>
               </Reveal>
             ))}
@@ -307,11 +307,11 @@ export default function InvestorSite() {
               <Reveal key={a.name} delay={i * 60}>
                 <a
                   href={a.link}
-                  className="group flex min-w-[220px] shrink-0 snap-start flex-col rounded-xl border border-gray-700 bg-gray-800/40 p-6 transition-all hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-900/10 md:min-w-0"
+                  className="group flex min-w-[220px] shrink-0 snap-start flex-col rounded-xl border border-swoop-border bg-gray-800/40 p-6 transition-all hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-900/10 md:min-w-0"
                 >
                   <span className="text-3xl">{a.icon}</span>
                   <h3 className="mt-3 text-base font-bold text-white transition-colors group-hover:text-emerald-400">{a.name}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-400">{a.desc}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-swoop-text-label">{a.desc}</p>
                   <span className="mt-auto pt-4 text-xs font-semibold text-emerald-500 transition-colors group-hover:text-emerald-400">See it live &rarr;</span>
                 </a>
               </Reveal>
@@ -334,18 +334,18 @@ export default function InvestorSite() {
                   { label: 'TAM', value: '$1.5B', desc: '30K clubs x $500/yr' },
                   { label: 'SAM', value: '$150M', desc: '3K premium clubs x $4K/yr' },
                 ].map(m => (
-                  <div key={m.label} className="rounded-xl border border-gray-700 bg-gray-800/40 p-6">
+                  <div key={m.label} className="rounded-xl border border-swoop-border bg-gray-800/40 p-6">
                     <div className="flex items-baseline gap-3">
                       <span className="text-xs font-bold uppercase tracking-widest text-emerald-500">{m.label}</span>
                       <span className="text-3xl font-black text-white">{m.value}</span>
                     </div>
-                    <p className="mt-1 text-sm text-gray-400">{m.desc}</p>
+                    <p className="mt-1 text-sm text-swoop-text-label">{m.desc}</p>
                   </div>
                 ))}
               </div>
             </Reveal>
             <Reveal delay={250}>
-              <div className="rounded-xl border border-gray-700 bg-gray-800/40 p-8">
+              <div className="rounded-xl border border-swoop-border bg-gray-800/40 p-8">
                 <h3 className="mb-6 text-lg font-bold text-white">Growth Trajectory</h3>
                 <div className="space-y-4">
                   {[
@@ -355,10 +355,10 @@ export default function InvestorSite() {
                   ].map(g => (
                     <div key={g.year}>
                       <div className="mb-1 flex items-baseline justify-between text-sm">
-                        <span className="text-gray-400">{g.year}</span>
+                        <span className="text-swoop-text-label">{g.year}</span>
                         <span className="font-semibold text-white">{g.clubs} &middot; {g.arr}</span>
                       </div>
-                      <div className="h-3 w-full overflow-hidden rounded-full bg-gray-700">
+                      <div className="h-3 w-full overflow-hidden rounded-full bg-swoop-row">
                         <div className="h-full rounded-full bg-emerald-500 transition-all duration-1000" style={{ width: g.width }} />
                       </div>
                     </div>
@@ -385,9 +385,9 @@ export default function InvestorSite() {
               { title: '$71/month', desc: '10x cheaper than any comparable platform. AI-native architecture, not bolted-on features.' },
             ].map((m, i) => (
               <Reveal key={m.title} delay={i * 100}>
-                <div className="rounded-xl border border-gray-700 bg-gray-800/40 p-8">
+                <div className="rounded-xl border border-swoop-border bg-gray-800/40 p-8">
                   <h3 className="text-lg font-bold text-emerald-400">{m.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-gray-400">{m.desc}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-swoop-text-label">{m.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -412,14 +412,14 @@ export default function InvestorSite() {
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-emerald-500">Valuation</p>
                   <p className="mt-1 text-4xl font-black text-white">$2.5M</p>
-                  <p className="mt-1 text-sm text-gray-400">pre-money</p>
+                  <p className="mt-1 text-sm text-swoop-text-label">pre-money</p>
                 </div>
               </div>
-              <hr className="my-8 border-gray-700" />
+              <hr className="my-8 border-swoop-border" />
               <div className="grid gap-8 sm:grid-cols-2">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-emerald-500">Use of Funds</p>
-                  <ul className="mt-3 space-y-2 text-sm text-gray-300">
+                  <ul className="mt-3 space-y-2 text-sm text-swoop-text-ghost">
                     <li>2 engineers (6 months)</li>
                     <li>5 pilot club onboarding</li>
                     <li>Conference demos and sales</li>
@@ -455,13 +455,13 @@ export default function InvestorSite() {
               <Reveal key={d.label} delay={i * 50}>
                 <a
                   href={d.href}
-                  className="group flex items-start gap-4 rounded-xl border border-gray-700 bg-gray-800/40 p-5 transition-all hover:border-emerald-500"
+                  className="group flex items-start gap-4 rounded-xl border border-swoop-border bg-gray-800/40 p-5 transition-all hover:border-emerald-500"
                 >
                   <div className="min-w-0">
                     <p className="font-semibold text-white transition-colors group-hover:text-emerald-400">{d.label}</p>
-                    <p className="mt-1 text-sm text-gray-400">{d.desc}</p>
+                    <p className="mt-1 text-sm text-swoop-text-label">{d.desc}</p>
                   </div>
-                  <span className="ml-auto mt-1 shrink-0 text-gray-600 transition-colors group-hover:text-emerald-400">&rarr;</span>
+                  <span className="ml-auto mt-1 shrink-0 text-swoop-text-muted transition-colors group-hover:text-emerald-400">&rarr;</span>
                 </a>
               </Reveal>
             ))}
@@ -472,10 +472,10 @@ export default function InvestorSite() {
       {/* ════════════════ 11. FOOTER ════════════════ */}
       <footer className="border-t border-gray-800/60 px-6 py-10 md:px-16">
         <div className="mx-auto max-w-6xl text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-swoop-text-muted">
             Built with Anthropic Claude &middot; 46 MCP tools &middot; 118 tests &middot; Open to technical due diligence
           </p>
-          <p className="mt-2 text-xs text-gray-700">
+          <p className="mt-2 text-xs text-swoop-text-2">
             &copy; {new Date().getFullYear()} Swoop Golf. All rights reserved.
           </p>
         </div>

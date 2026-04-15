@@ -44,17 +44,17 @@ export default function EvidenceStrip({ signals = [], systems = [], compact = fa
     : systems.map(s => ({ source: s, detail: '' }));
   if (!items.length) return null;
   return (
-    <div className={`flex flex-wrap border-t border-gray-200 dark:border-gray-800 ${compact ? 'gap-1.5 py-1.5 mt-1.5' : 'gap-2 py-2 mt-2.5'}`}>
+    <div className={`flex flex-wrap border-t border-swoop-border ${compact ? 'gap-1.5 py-1.5 mt-1.5' : 'gap-2 py-2 mt-2.5'}`}>
       {items.map((sig, i) => (
         <div
           key={i}
-          className={`inline-flex items-center gap-1 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 ${
+          className={`inline-flex items-center gap-1 bg-swoop-row border border-swoop-border rounded-lg ${
             compact ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs'
-          } text-gray-600 dark:text-gray-400`}
+          } text-swoop-text-muted`}
           title={SOURCE_DESCRIPTIONS[sig.source] || (sig.timestamp ? sig.source + ' \u2014 ' + sig.timestamp : sig.source)}
         >
           <span>{SOURCE_ICONS[sig.source] || '\uD83D\uDD17'}</span>
-          <span className="font-semibold text-gray-500 dark:text-gray-300">{sig.source}</span>
+          <span className="font-semibold text-swoop-text-muted">{sig.source}</span>
           {!compact && <span className="opacity-80">{sig.detail}</span>}
         </div>
       ))}

@@ -38,15 +38,15 @@ export default function WeekOverWeekGrid() {
         <div
           key={label}
           onClick={link ? () => navigate(link) : undefined}
-          className={`bg-white dark:bg-white/[0.03] rounded-xl border border-gray-200 dark:border-gray-800 p-4 ${link ? 'cursor-pointer' : 'cursor-default'}`}
+          className={`bg-swoop-panel rounded-xl border border-swoop-border p-4 ${link ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">{label}</div>
-          <div className="text-lg font-bold text-gray-800 dark:text-white/90 font-mono">{current}</div>
+          <div className="text-xs text-swoop-text-label uppercase tracking-wide mb-1">{label}</div>
+          <div className="text-lg font-bold text-swoop-text font-mono">{current}</div>
           <div className="flex justify-between items-center mt-1">
-            <span className="text-xs text-gray-400">Prior: {prior}</span>
+            <span className="text-xs text-swoop-text-label">Prior: {prior}</span>
             <span className={`text-xs font-bold ${positive ? 'text-success-500' : 'text-error-500'}`}>{delta}</span>
           </div>
-          <div className="text-[11px] text-gray-500 mt-1.5 leading-snug">
+          <div className="text-[11px] text-swoop-text-muted mt-1.5 leading-snug">
             {context}
             {link && <span className="text-brand-500 font-semibold"> Tap to investigate →</span>}
           </div>

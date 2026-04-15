@@ -71,7 +71,7 @@ export default function ServiceView() {
         <ServiceTicketsPanel />
 
         {/* Tab switcher */}
-        <div role="tablist" aria-label="Service tabs" className="flex gap-1 self-start rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
+        <div role="tablist" aria-label="Service tabs" className="flex gap-1 self-start rounded-lg bg-swoop-row p-0.5 border border-swoop-border overflow-x-auto">
           {tabs.map(({ key, label }) => (
             <button
               key={key}
@@ -80,8 +80,8 @@ export default function ServiceView() {
               onClick={() => setActiveTab(key)}
               className={`px-5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500 ${
                 activeTab === key
-                  ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
-                  : 'bg-transparent text-gray-500 hover:text-gray-700'
+                  ? 'bg-swoop-panel text-swoop-text shadow-theme-xs'
+                  : 'bg-transparent text-swoop-text-muted hover:text-swoop-text-2'
               }`}
             >
               {label}

@@ -101,26 +101,26 @@ export default function ForbiddenActionsInput({
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+      <label className="block text-sm font-semibold text-swoop-text">
         Forbidden Actions
       </label>
-      <p className="text-xs text-gray-500 dark:text-gray-400">
+      <p className="text-xs text-swoop-text-muted">
         Actions the agent must never perform. Type to add or pick from suggestions.
       </p>
 
       <div ref={wrapperRef} className="relative">
         {/* Tag area + input */}
-        <div className="flex flex-wrap gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 min-h-[42px]">
+        <div className="flex flex-wrap gap-2 p-2 rounded-lg border border-swoop-border bg-swoop-panel min-h-[42px]">
           {tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 text-xs font-medium"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-medium"
             >
               {tag}
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="hover:text-red-900 dark:hover:text-red-100"
+                className="hover:text-red-900"
               >
                 x
               </button>
@@ -137,13 +137,13 @@ export default function ForbiddenActionsInput({
             onFocus={() => setShowSuggestions(true)}
             onKeyDown={handleKeyDown}
             placeholder={tags.length ? '' : 'e.g. offer_refund'}
-            className="flex-1 min-w-[120px] bg-transparent text-sm text-gray-900 dark:text-white outline-none placeholder-gray-400"
+            className="flex-1 min-w-[120px] bg-transparent text-sm text-swoop-text outline-none placeholder-gray-400"
           />
         </div>
 
         {/* Autocomplete dropdown */}
         {showSuggestions && filtered.length > 0 && (
-          <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+          <ul className="absolute z-10 mt-1 w-full bg-swoop-panel border border-swoop-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
             {filtered.map((s) => (
               <li key={s}>
                 <button
@@ -152,7 +152,7 @@ export default function ForbiddenActionsInput({
                     addTag(s);
                     setShowSuggestions(false);
                   }}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full text-left px-3 py-2 text-sm text-swoop-text-2 hover:bg-swoop-row-hover"
                 >
                   {s}
                 </button>
@@ -171,7 +171,7 @@ export default function ForbiddenActionsInput({
           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
             dirty
               ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700'
+              : 'bg-swoop-border text-swoop-text-label cursor-not-allowed'
           }`}
         >
           {saving ? 'Saving...' : 'Save'}

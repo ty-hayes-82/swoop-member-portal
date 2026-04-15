@@ -104,7 +104,7 @@ export default function GamePlanGenerator() {
           <div className="rounded-2xl p-4" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)' }}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">Game Plan Ready</span>
-              <span className="text-xs font-mono text-gray-400">Generated in {elapsed}s</span>
+              <span className="text-xs font-mono text-swoop-text-label">Generated in {elapsed}s</span>
             </div>
             <p className="text-white text-sm font-medium m-0 leading-relaxed">{plan.summary}</p>
             {plan.risk_level && (
@@ -126,7 +126,7 @@ export default function GamePlanGenerator() {
             return (
               <div
                 key={idx}
-                className="rounded-xl border bg-white p-4 transition-all duration-300"
+                className="rounded-xl border bg-swoop-panel p-4 transition-all duration-300"
                 style={{
                   borderColor: isApproved ? '#86efac' : '#e5e7eb',
                   borderLeftWidth: 4,
@@ -154,9 +154,9 @@ export default function GamePlanGenerator() {
                         </span>
                       ))}
                     </div>
-                    <div className="text-sm font-bold text-gray-800 mb-1">{action.headline}</div>
-                    <div className="text-xs text-gray-600 leading-relaxed mb-1">{action.rationale}</div>
-                    <div className="flex items-center gap-3 text-[11px] text-gray-500">
+                    <div className="text-sm font-bold text-swoop-text mb-1">{action.headline}</div>
+                    <div className="text-xs text-swoop-text-muted leading-relaxed mb-1">{action.rationale}</div>
+                    <div className="flex items-center gap-3 text-[11px] text-swoop-text-muted">
                       {action.impact && <span className="font-semibold text-red-500">{action.impact}</span>}
                       {action.owner && <span>{action.owner}</span>}
                     </div>
@@ -183,7 +183,7 @@ export default function GamePlanGenerator() {
           <button
             type="button"
             onClick={() => { setState('idle'); setPlan(null); }}
-            className="self-center text-sm text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer mt-2"
+            className="self-center text-sm text-swoop-text-label hover:text-gray-600 bg-transparent border-none cursor-pointer mt-2"
           >
             Generate another plan
           </button>

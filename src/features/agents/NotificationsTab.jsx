@@ -33,8 +33,8 @@ export default function NotificationsTab({ config, onSave }) {
   return (
     <div className="space-y-6">
       <section>
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Notification Channels</h3>
-        <p className="text-xs text-gray-400 mb-3 m-0">
+        <h3 className="text-sm font-bold text-swoop-text mb-1">Notification Channels</h3>
+        <p className="text-xs text-swoop-text-label mb-3 m-0">
           Choose how you want to be notified when this agent proposes or executes an action.
         </p>
         <div className="space-y-2">
@@ -43,11 +43,11 @@ export default function NotificationsTab({ config, onSave }) {
             return (
               <div
                 key={ch.key}
-                className="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60"
+                className="flex items-center justify-between p-3 rounded-xl border border-swoop-border bg-swoop-panel"
               >
                 <div>
-                  <div className="text-xs font-bold text-gray-800 dark:text-white/90">{ch.label}</div>
-                  <p className="text-[10px] text-gray-400 m-0 mt-0.5">{ch.desc}</p>
+                  <div className="text-xs font-bold text-swoop-text">{ch.label}</div>
+                  <p className="text-[10px] text-swoop-text-label m-0 mt-0.5">{ch.desc}</p>
                 </div>
                 <button
                   type="button"
@@ -56,10 +56,10 @@ export default function NotificationsTab({ config, onSave }) {
                   aria-label={`Toggle ${ch.label}`}
                   onClick={() => toggleChannel(ch.key)}
                   className={`relative w-9 h-5 rounded-full transition-colors cursor-pointer border-none flex-shrink-0 ${
-                    isOn ? 'bg-brand-500' : 'bg-gray-300 dark:bg-gray-600'
+                    isOn ? 'bg-brand-500' : 'bg-swoop-border'
                   }`}
                 >
-                  <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                  <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-swoop-panel shadow transition-transform ${
                     isOn ? 'translate-x-[18px]' : 'translate-x-0.5'
                   }`} />
                 </button>

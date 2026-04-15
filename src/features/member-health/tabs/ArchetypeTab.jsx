@@ -44,7 +44,7 @@ export default function ArchetypeTab() {
             : p.archetype === 'Balanced Active' ? '#12b76a' : '#9CA3AF';
           return (
             <button key={p.archetype} onClick={() => setSelected(p.archetype)}
-              className={`px-3.5 py-1.5 rounded-xl cursor-pointer text-xs ${isSelected ? 'border border-brand-500 bg-brand-500/[0.05] text-brand-500 font-bold' : 'border border-gray-200 bg-white text-gray-500 font-normal'}`}
+              className={`px-3.5 py-1.5 rounded-xl cursor-pointer text-xs ${isSelected ? 'border border-brand-500 bg-brand-500/[0.05] text-brand-500 font-bold' : 'border border-swoop-border bg-swoop-panel text-swoop-text-muted font-normal'}`}
             >
               {p.archetype}
               <span className="ml-1.5" style={{ color: churnColor }}>{p.count}</span>
@@ -56,17 +56,17 @@ export default function ArchetypeTab() {
       {/* Main profile section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left — visual */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200">
+        <div className="bg-swoop-panel rounded-xl p-4 border border-swoop-border">
           <div className="font-serif text-lg text-[#1a1a2e] mb-1">{profile.archetype}</div>
-          <div className="text-xs text-gray-400 mb-4">
+          <div className="text-xs text-swoop-text-label mb-4">
             {profile.count} members at your club
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <RadarChart data={radarData}>
               <PolarGrid stroke={'#E5E7EB'} />
               <PolarAngleAxis dataKey="dim" tick={{ fill: '#6B7280', fontSize: 11 }} />
-              <Radar dataKey="value" fill={'#ff8b00'} fillOpacity={0.2}
-                stroke={'#ff8b00'} strokeWidth={2} />
+              <Radar dataKey="value" fill={'#F3922D'} fillOpacity={0.2}
+                stroke={'#F3922D'} strokeWidth={2} />
               <Tooltip formatter={v => [`${v}`, 'Engagement']}
                 contentStyle={{ background: '#ffffff', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 12 }}
                 labelStyle={{ color: '#1a1a2e' }} />
@@ -77,27 +77,27 @@ export default function ArchetypeTab() {
         {/* Right — plain English intel */}
         <div className="flex flex-col gap-2">
           {intel.summary && (
-            <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1">What this archetype is</div>
+            <div className="bg-swoop-panel rounded-xl p-4 border border-swoop-border">
+              <div className="text-[10px] font-bold text-swoop-text-label tracking-wider uppercase mb-1">What this archetype is</div>
               <div className="text-sm text-[#1a1a2e] leading-relaxed">{intel.summary}</div>
             </div>
           )}
           {intel.retention && (
-            <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1">Retention outlook</div>
-              <div className="text-sm text-gray-500 leading-relaxed">{intel.retention}</div>
+            <div className="bg-swoop-panel rounded-xl p-4 border border-swoop-border">
+              <div className="text-[10px] font-bold text-swoop-text-label tracking-wider uppercase mb-1">Retention outlook</div>
+              <div className="text-sm text-swoop-text-muted leading-relaxed">{intel.retention}</div>
             </div>
           )}
           {intel.opportunity && (
-            <div className="bg-white rounded-xl px-4 py-2 border border-success-500/15">
+            <div className="bg-swoop-panel rounded-xl px-4 py-2 border border-success-500/15">
               <div className="text-[10px] font-bold text-success-500 tracking-wider uppercase mb-1">Opportunity</div>
-              <div className="text-sm text-gray-500 leading-relaxed">{intel.opportunity}</div>
+              <div className="text-sm text-swoop-text-muted leading-relaxed">{intel.opportunity}</div>
             </div>
           )}
           {intel.watch && (
             <div className="bg-amber-500/[0.05] rounded-xl px-4 py-2 border border-amber-500/20">
               <div className="text-[10px] font-bold text-amber-500 tracking-wider uppercase mb-1">Watch for</div>
-              <div className="text-sm text-gray-500 leading-relaxed">{intel.watch}</div>
+              <div className="text-sm text-swoop-text-muted leading-relaxed">{intel.watch}</div>
             </div>
           )}
         </div>
@@ -117,14 +117,14 @@ function SpendPotentialCard({ archetype }) {
   const categories = [
     { key: 'golf', label: 'Golf', engagement: current.engagement.golf, color: '#12b76a' },
     { key: 'dining', label: 'Dining', engagement: current.engagement.dining, color: '#f59e0b' },
-    { key: 'events', label: 'Events', engagement: current.engagement.events, color: '#ff8b00' },
+    { key: 'events', label: 'Events', engagement: current.engagement.events, color: '#F3922D' },
     { key: 'email', label: 'Email', engagement: current.engagement.email, color: '#2563eb' },
   ];
 
   const avgAll = patterns.reduce((sum, p) => sum + p.avgAnnualSpend, 0) / patterns.length;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
+    <div className="bg-swoop-panel rounded-xl border border-swoop-border p-6">
       <div className="flex justify-between items-center mb-4">
         <div>
           <div className="text-[10px] font-bold text-brand-500 tracking-wider uppercase mb-0.5">
@@ -135,7 +135,7 @@ function SpendPotentialCard({ archetype }) {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-xs text-gray-400">Avg annual spend</div>
+          <div className="text-xs text-swoop-text-label">Avg annual spend</div>
           <div className="text-xl font-bold font-mono text-[#1a1a2e]">
             ${current.avgAnnualSpend.toLocaleString()}
           </div>
@@ -149,15 +149,15 @@ function SpendPotentialCard({ archetype }) {
         {categories.map(cat => {
           const potential = 100 - cat.engagement;
           return (
-            <div key={cat.key} className="bg-gray-100 rounded-lg p-2 text-center">
-              <div className="text-xs text-gray-400 mb-1">{cat.label}</div>
+            <div key={cat.key} className="bg-swoop-row rounded-lg p-2 text-center">
+              <div className="text-xs text-swoop-text-label mb-1">{cat.label}</div>
               <div className="h-1.5 bg-gray-200/60 rounded-full overflow-hidden mb-1.5">
                 <div className="h-full rounded-full" style={{ width: cat.engagement + '%', background: cat.color }} />
               </div>
               <div className="text-[13px] font-bold font-mono" style={{ color: cat.color }}>
                 {cat.engagement}%
               </div>
-              <div className="text-[10px] text-gray-400">engaged</div>
+              <div className="text-[10px] text-swoop-text-label">engaged</div>
               {potential > 30 && (
                 <div className="mt-1 text-[10px] font-semibold text-success-500 bg-success-500/[0.08] px-1.5 py-0.5 rounded inline-block">
                   {potential}% untapped
@@ -169,7 +169,7 @@ function SpendPotentialCard({ archetype }) {
       </div>
 
       {current.spendPotential > 0 && (
-        <div className="mt-4 p-2 bg-success-500/[0.05] border border-success-500/[0.13] rounded-lg text-xs text-gray-500 leading-normal">
+        <div className="mt-4 p-2 bg-success-500/[0.05] border border-success-500/[0.13] rounded-lg text-xs text-swoop-text-muted leading-normal">
           <strong className="text-success-500">Untapped potential:</strong>{' '}
           ${current.spendPotential.toLocaleString()}/member/year in dining and events.{' '}
           Across {current.count} {archetype} members, that&rsquo;s{' '}
@@ -185,7 +185,7 @@ function SpendPotentialCard({ archetype }) {
         >View Outreach Playbook for {archetype}</button>
         <button
           onClick={() => navigate('playbooks')}
-          className="px-[18px] py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-[1.5px] border-gray-300 bg-white text-gray-700"
+          className="px-[18px] py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-[1.5px] border-swoop-border bg-swoop-panel text-swoop-text-2"
         >View All Playbooks</button>
       </div>
     </div>

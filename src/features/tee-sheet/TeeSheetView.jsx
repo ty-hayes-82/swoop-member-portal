@@ -47,7 +47,7 @@ function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border-l-4 p-4 border border-gray-200" style={{ borderLeftColor: color }}>
+    <div className="bg-swoop-panel rounded-xl border-l-4 p-4 border border-swoop-border" style={{ borderLeftColor: color }}>
       <div
         className="cursor-pointer"
         onClick={onToggle}
@@ -56,13 +56,13 @@ function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               {showMemberNames() ? (
-                <MemberLink memberId={teeTime.memberId} mode="drawer" className="font-bold text-sm text-gray-800">
+                <MemberLink memberId={teeTime.memberId} mode="drawer" className="font-bold text-sm text-swoop-text">
                   {teeTime.name}
                 </MemberLink>
               ) : (
-                <span className="font-bold text-sm text-gray-800">Member</span>
+                <span className="font-bold text-sm text-swoop-text">Member</span>
               )}
-              <span className="text-xs text-gray-400">{teeTime.time} - {teeTime.course}</span>
+              <span className="text-xs text-swoop-text-label">{teeTime.time} - {teeTime.course}</span>
               {isVip && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200">VIP</span>}
             </div>
             <div className="flex items-center gap-2 mt-1">
@@ -76,7 +76,7 @@ function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
           </span>
         </div>
         {showMemberNames() && (
-          <div className="text-xs text-gray-600 leading-relaxed">
+          <div className="text-xs text-swoop-text-muted leading-relaxed">
             {teeTime.cartPrep.note}
           </div>
         )}
@@ -109,7 +109,7 @@ function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
         )}
         <button
           onClick={onToggle}
-          className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-gray-200 bg-white text-gray-500 inline-flex items-center gap-1"
+          className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-swoop-border bg-swoop-panel text-swoop-text-muted inline-flex items-center gap-1"
         >
           {isExpanded ? '▾ Less' : '▸ More actions'}
         </button>
@@ -137,34 +137,34 @@ function CartPrepCard({ teeTime, onSendCartText, onSendDiningNudge }) {
   const isAtRisk = teeTime.healthScore < 50;
   const firstName = getFirstName(teeTime.name);
   return (
-    <div className={`rounded-xl border p-4 ${isAtRisk ? 'bg-red-50/30 border-red-200' : 'bg-white border-gray-200'}`}>
+    <div className={`rounded-xl border p-4 ${isAtRisk ? 'bg-red-50/30 border-red-200' : 'bg-swoop-panel border-swoop-border'}`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-gray-800">{showMemberNames() ? teeTime.name : 'Member'}</span>
-          <span className="text-xs text-gray-400">{teeTime.time}</span>
+          <span className="text-sm font-bold text-swoop-text">{showMemberNames() ? teeTime.name : 'Member'}</span>
+          <span className="text-xs text-swoop-text-label">{teeTime.time}</span>
         </div>
         <span className="font-mono text-xs font-bold" style={{ color }}>{teeTime.healthScore}</span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
         {teeTime.cartPrep.beverage && (
           <div className="flex items-start gap-1.5">
-            <span className="text-gray-400 shrink-0">Beverage:</span>
-            <span className="text-gray-700 font-medium">{teeTime.cartPrep.beverage}</span>
+            <span className="text-swoop-text-label shrink-0">Beverage:</span>
+            <span className="text-swoop-text-2 font-medium">{teeTime.cartPrep.beverage}</span>
           </div>
         )}
         {teeTime.cartPrep.snack && (
           <div className="flex items-start gap-1.5">
-            <span className="text-gray-400 shrink-0">Snack:</span>
-            <span className="text-gray-700 font-medium">{teeTime.cartPrep.snack}</span>
+            <span className="text-swoop-text-label shrink-0">Snack:</span>
+            <span className="text-swoop-text-2 font-medium">{teeTime.cartPrep.snack}</span>
           </div>
         )}
         <div className="flex items-start gap-1.5 sm:col-span-1">
-          <span className="text-gray-400 shrink-0">Group:</span>
-          <span className="text-gray-700 font-medium">{teeTime.group.join(', ')}</span>
+          <span className="text-swoop-text-label shrink-0">Group:</span>
+          <span className="text-swoop-text-2 font-medium">{teeTime.group.join(', ')}</span>
         </div>
       </div>
       {teeTime.cartPrep.note && (
-        <div className={`mt-2 text-[11px] leading-relaxed p-2 rounded-lg ${isAtRisk ? 'bg-red-500/5 text-red-700 border border-red-200' : 'bg-gray-50 text-gray-500'}`}>
+        <div className={`mt-2 text-[11px] leading-relaxed p-2 rounded-lg ${isAtRisk ? 'bg-red-500/5 text-red-700 border border-red-200' : 'bg-swoop-row text-swoop-text-muted'}`}>
           {teeTime.cartPrep.note}
         </div>
       )}
@@ -296,7 +296,7 @@ export default function TeeSheetView() {
       <PageTransition>
         <div className="flex flex-col gap-6">
           <StoryHeadline variant="insight" headline="Who's on the course today — and who needs your attention?" context="Import tee sheet data to see today's rounds, at-risk members on course, and cart prep recommendations." />
-          <div className="py-12 px-4 text-center text-sm text-gray-400 border border-dashed border-gray-200 rounded-xl">
+          <div className="py-12 px-4 text-center text-sm text-swoop-text-label border border-dashed border-swoop-border rounded-xl">
             No tee sheet data available yet. Import tee sheet reservations to see today's schedule.
           </div>
         </div>
@@ -339,11 +339,11 @@ export default function TeeSheetView() {
         )}
 
         {/* Today's Tee Sheet Timeline */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+        <div className="bg-swoop-panel rounded-2xl border border-swoop-border overflow-hidden">
+          <div className="p-4 border-b border-swoop-border flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
-              <div className="text-sm font-bold text-gray-800">Today's Tee Sheet</div>
-              <div className="text-xs text-gray-400">{(getTeeSheetSummary().date ? new Date(getTeeSheetSummary().date + 'T12:00:00') : new Date()).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} - {teeData.length} groups</div>
+              <div className="text-sm font-bold text-swoop-text">Today's Tee Sheet</div>
+              <div className="text-xs text-swoop-text-label">{(getTeeSheetSummary().date ? new Date(getTeeSheetSummary().date + 'T12:00:00') : new Date()).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} - {teeData.length} groups</div>
               {/* Source badges for the underlying columns — Pillar 1: SEE IT */}
               <div className="flex gap-1 mt-1.5 flex-wrap">
                 <SourceBadge system="Tee Sheet" size="xs" />
@@ -352,7 +352,7 @@ export default function TeeSheetView() {
                 <SourceBadge system="POS" size="xs" />
               </div>
             </div>
-            <div className="flex items-center gap-3 text-xs text-gray-500">
+            <div className="flex items-center gap-3 text-xs text-swoop-text-muted">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> At Risk</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> Watch</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-success-500" /> Healthy</span>
@@ -362,7 +362,7 @@ export default function TeeSheetView() {
           <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="bg-gray-50 text-xs text-gray-400 uppercase tracking-wider">
+                <tr className="bg-swoop-row text-xs text-swoop-text-label uppercase tracking-wider">
                   <th className="px-4 py-2.5 text-left font-medium" title="Source: Tee Sheet">Time ⛳</th>
                   <th className="px-4 py-2.5 text-left font-medium" title="Source: Tee Sheet">Course ⛳</th>
                   <th className="px-4 py-2.5 text-left font-medium" title="Source: Member CRM">Member ★</th>
@@ -385,23 +385,23 @@ export default function TeeSheetView() {
                     <tr
                       key={`${t.memberId}-${t.time}`}
                       title={rowTitle}
-                      className={`border-t border-gray-100 transition-colors ${isAtRisk ? 'bg-red-50/30' : i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-gray-50`}
+                      className={`border-t border-swoop-border-inset transition-colors ${isAtRisk ? 'bg-red-50/30' : i % 2 === 0 ? 'bg-swoop-panel' : 'bg-gray-50/50'} hover:bg-swoop-row-hover`}
                     >
-                      <td className="px-4 py-2.5 font-mono text-xs font-semibold text-gray-700 whitespace-nowrap">{t.time}</td>
-                      <td className="px-4 py-2.5 text-xs text-gray-500">{t.course}</td>
+                      <td className="px-4 py-2.5 font-mono text-xs font-semibold text-swoop-text-2 whitespace-nowrap">{t.time}</td>
+                      <td className="px-4 py-2.5 text-xs text-swoop-text-muted">{t.course}</td>
                       <td className="px-4 py-2.5">
                         {showMemberNames() ? (
                           <MemberLink
                             memberId={t.memberId}
                             mode="drawer"
-                            className="font-semibold text-sm text-gray-800 hover:text-brand-500"
+                            className="font-semibold text-sm text-swoop-text hover:text-brand-500"
                           >
                             <span title={t.duesAnnual > 0 ? `$${t.duesAnnual.toLocaleString()}/yr in dues — click to view full profile` : 'Click to view profile'}>
                               {t.name}
                             </span>
                           </MemberLink>
                         ) : (
-                          <span className="font-semibold text-sm text-gray-800">Member</span>
+                          <span className="font-semibold text-sm text-swoop-text">Member</span>
                         )}
                       </td>
                       <td className="px-4 py-2.5 hidden sm:table-cell">
@@ -416,14 +416,14 @@ export default function TeeSheetView() {
                           {t.healthScore}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 hidden md:table-cell text-xs text-gray-500 max-w-[200px] truncate" title={t.group.join(', ')}>
+                      <td className="px-4 py-2.5 hidden md:table-cell text-xs text-swoop-text-muted max-w-[200px] truncate" title={t.group.join(', ')}>
                         {t.group.join(', ')}
                       </td>
                       <td className="px-4 py-2.5 text-center hidden lg:table-cell">
                         {t.cancelRisk > 0.3 ? (
                           <span className="font-mono text-xs font-bold text-red-500">{Math.round(t.cancelRisk * 100)}%</span>
                         ) : (
-                          <span className="font-mono text-xs text-gray-400">{Math.round(t.cancelRisk * 100)}%</span>
+                          <span className="font-mono text-xs text-swoop-text-label">{Math.round(t.cancelRisk * 100)}%</span>
                         )}
                       </td>
                       <td className="px-4 py-2.5">
@@ -468,9 +468,9 @@ export default function TeeSheetView() {
         <div>
           <button
             onClick={() => setShowCartPrep(!showCartPrep)}
-            className="flex items-center gap-2 text-sm font-bold text-gray-800 cursor-pointer bg-transparent border-none p-0 mb-3 focus-visible:ring-2 focus-visible:ring-brand-500"
+            className="flex items-center gap-2 text-sm font-bold text-swoop-text cursor-pointer bg-transparent border-none p-0 mb-3 focus-visible:ring-2 focus-visible:ring-brand-500"
           >
-            <svg className={`w-4 h-4 text-gray-400 transition-transform ${showCartPrep ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+            <svg className={`w-4 h-4 text-swoop-text-label transition-transform ${showCartPrep ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
             </svg>
             Cart Prep Recommendations ({teeData.length} carts)

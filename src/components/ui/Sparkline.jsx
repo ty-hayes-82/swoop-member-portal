@@ -4,7 +4,7 @@ export default function Sparkline({
   data = [],
   width = 80,
   height = 24,
-  color = '#ff8b00',
+  color = '#F3922D',
   lineWidth = 2,
   showDots = false,
   className = ''
@@ -78,7 +78,7 @@ export function SparkBar({
   data = [],
   width = 80,
   height = 24,
-  color = '#ff8b00',
+  color = '#F3922D',
   gap = 2,
   className = ''
 }) {

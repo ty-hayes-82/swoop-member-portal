@@ -15,7 +15,7 @@ const DOMAIN_TO_SYSTEM = {
 const DOMAIN_COLORS = {
   Golf: '#12b76a',
   'F&B': '#f59e0b',
-  Email: '#ff8b00',
+  Email: '#F3922D',
   Feedback: '#ef4444',
   All: '#9CA3AF',
   Membership: '#ef4444',
@@ -48,7 +48,7 @@ export default function ResignationTimeline() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-swoop-text-muted">
         5 preventable resignations in January — each with a distinct decay pattern.
       </div>
       {scenarios.map((scenario) => {
@@ -57,7 +57,7 @@ export default function ResignationTimeline() {
         return (
           <div
             key={scenario.memberId}
-            className={`bg-gray-50 rounded-xl overflow-hidden border ${isOpen ? 'border-error-500/30' : 'border-gray-200 dark:border-gray-800'}`}
+            className={`bg-swoop-row rounded-xl overflow-hidden border ${isOpen ? 'border-error-500/30' : 'border-swoop-border'}`}
           >
             <button
               onClick={() => setExpanded(isOpen ? null : scenario.memberId)}
@@ -70,17 +70,17 @@ export default function ResignationTimeline() {
                 >
                   {scenario.name}
                 </MemberLink>
-                <div className="text-xs text-gray-400 mt-0.5">
+                <div className="text-xs text-swoop-text-label mt-0.5">
                   {scenario.archetype} · Resigned {scenario.resignDate}
                 </div>
               </div>
-              <span className="text-gray-400">{isOpen ? '▾' : '▸'}</span>
+              <span className="text-swoop-text-label">{isOpen ? '▾' : '▸'}</span>
             </button>
 
             {isOpen && (
-              <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-800">
+              <div className="px-4 pb-4 border-t border-swoop-border">
                 <div className="flex items-center justify-between flex-wrap gap-2 py-2 mb-2">
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-swoop-text-label">
                     Pattern: {scenario.pattern}
                   </div>
                   {/* Source attribution — every timeline entry below is sourced
@@ -101,11 +101,11 @@ export default function ResignationTimeline() {
                 <div className="flex flex-col gap-2">
                   {scenario.timeline.map((point, index) => (
                     <div key={index} className="flex gap-4 items-start">
-                      <span className="shrink-0 w-[70px] text-xs text-gray-400 font-mono pt-0.5">
+                      <span className="shrink-0 w-[70px] text-xs text-swoop-text-label font-mono pt-0.5">
                         {point.date}
                       </span>
                       <span className="shrink-0 w-2 h-2 rounded-full mt-1" style={{ background: DOMAIN_COLORS[point.domain] ?? '#9CA3AF' }} />
-                      <span className="text-xs text-gray-500 leading-normal">{point.event}</span>
+                      <span className="text-xs text-swoop-text-muted leading-normal">{point.event}</span>
                     </div>
                   ))}
 
@@ -120,8 +120,8 @@ export default function ResignationTimeline() {
                   )}
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between flex-wrap gap-2">
-                  <div className="text-[11px] text-gray-500 italic leading-snug">
+                <div className="mt-3 pt-3 border-t border-swoop-border flex items-center justify-between flex-wrap gap-2">
+                  <div className="text-[11px] text-swoop-text-muted italic leading-snug">
                     This pattern may be repeating in current members.
                   </div>
                   <button

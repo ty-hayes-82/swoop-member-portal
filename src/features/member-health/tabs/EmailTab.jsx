@@ -29,26 +29,26 @@ export default function EmailTab() {
   return (
     <div className="flex flex-col gap-6">
       {/* Heatmap */}
-      <div className="bg-gray-100 rounded-xl p-4 border border-gray-200 dark:border-gray-800 overflow-x-auto">
-        <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-1">
+      <div className="bg-swoop-row rounded-xl p-4 border border-swoop-border overflow-x-auto">
+        <div className="text-sm font-semibold text-swoop-text mb-1">
           Communication Health — Email Engagement
         </div>
-        <div className="text-xs text-gray-400 mb-4">
+        <div className="text-xs text-swoop-text-label mb-4">
           Email engagement is an early health score input — decay here precedes golf and dining disengagement by 6-8 weeks
         </div>
         <table className="border-collapse text-xs w-full min-w-[400px]">
           <thead>
             <tr>
-              <th className="py-1 px-2 text-gray-400 text-left min-w-[140px]">Campaign</th>
+              <th className="py-1 px-2 text-swoop-text-label text-left min-w-[140px]">Campaign</th>
               {archetypes.map(a => (
-                <th key={a} className="py-1 px-2 text-gray-400 text-center min-w-[80px] text-[10px]">{a.split(' ')[0]}</th>
+                <th key={a} className="py-1 px-2 text-swoop-text-label text-center min-w-[80px] text-[10px]">{a.split(' ')[0]}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {campaigns.map(c => (
               <tr key={c}>
-                <td className="py-1 px-2 text-gray-500 text-[10px] max-w-[140px]">{c}</td>
+                <td className="py-1 px-2 text-swoop-text-muted text-[10px] max-w-[140px]">{c}</td>
                 {archetypes.map(a => {
                   const rate = getRate(c, a);
                   const color = Number.isFinite(rate) ? heatColor(rate) : '#9CA3AF';
@@ -70,19 +70,19 @@ export default function EmailTab() {
       </div>
 
       {/* Decay watch list */}
-      <div className="bg-gray-100 rounded-xl border border-error-500/20 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="bg-swoop-row rounded-xl border border-error-500/20 overflow-hidden">
+        <div className="p-4 border-b border-swoop-border">
           <span className="text-sm font-semibold text-error-500">
             ⚠ Engagement Decay Watch List
           </span>
-          <span className="ml-2 text-xs text-gray-400">Email decay precedes disengagement by 4-6 weeks</span>
+          <span className="ml-2 text-xs text-swoop-text-label">Email decay precedes disengagement by 4-6 weeks</span>
         </div>
         {decaying.map((m, i) => (
           <div key={i} className="p-4" style={{ borderBottom: i < decaying.length - 1 ? '1px solid #E5E7EB' : 'none' }}>
             <div className="flex justify-between items-center">
               <MemberLink
                 memberId={m.memberId}
-                className="text-gray-800 dark:text-white/90 text-sm"
+                className="text-swoop-text text-sm"
               >
                 {m.name}
               </MemberLink>
@@ -91,7 +91,7 @@ export default function EmailTab() {
             <div className="flex justify-between items-center mt-1 flex-wrap gap-2">
               <div className="flex gap-4">
                 {[['Nov', m.nov], ['Dec', m.dec], ['Jan', m.jan]].map(([label, val]) => (
-                  <span key={label} className="text-xs text-gray-400">
+                  <span key={label} className="text-xs text-swoop-text-label">
                     {label}: <span className="font-mono" style={{ color: heatColor(Number.isFinite(val) ? val : 0) }}>
                       {formatPercent(val)}
                     </span>

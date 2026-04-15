@@ -37,14 +37,14 @@ export default function AutomationsHub() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-bold m-0 text-gray-800 dark:text-white/90">Recommended Actions</h1>
-        <p className="text-sm text-gray-500 mt-1 mb-0">
+        <h1 className="text-xl font-bold m-0 text-swoop-text">Recommended Actions</h1>
+        <p className="text-sm text-swoop-text-muted mt-1 mb-0">
           Smart actions to improve member experience and revenue — approve or dismiss in seconds.
         </p>
       </div>
 
       {/* Tab navigation — mobile-optimized: equal-width tabs, hidden icons on small screens */}
-      <div role="tablist" aria-label="Automations tabs" className="flex gap-0.5 sm:gap-1 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+      <div role="tablist" aria-label="Automations tabs" className="flex gap-0.5 sm:gap-1 rounded-lg bg-swoop-row p-0.5 border border-swoop-border">
         {TABS.map(tab => (
           <button
             key={tab.key}
@@ -53,8 +53,8 @@ export default function AutomationsHub() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500 ${
               activeTab === tab.key
-                ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
-                : 'bg-transparent text-gray-500 hover:text-gray-700'
+                ? 'bg-swoop-panel text-swoop-text shadow-theme-xs'
+                : 'bg-transparent text-swoop-text-muted hover:text-swoop-text-2'
             }`}
           >
             <span className="text-sm hidden sm:inline">{tab.icon}</span>

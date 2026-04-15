@@ -95,19 +95,19 @@ function MessageContent({ text }) {
           const cells = rows.map(r => r.split('|').filter(c => c.trim()).map(c => c.trim()));
           return (
             <div key={i} className="my-2 overflow-x-auto">
-              <table className="text-xs border border-gray-200 rounded w-full">
+              <table className="text-xs border border-swoop-border rounded w-full">
                 <thead>
-                  <tr className="bg-gray-50">
+                  <tr className="bg-swoop-row">
                     {(cells[0] || []).map((c, ci) => (
-                      <th key={ci} className="px-2 py-1 text-left font-semibold text-gray-600 border-b border-gray-200">{c}</th>
+                      <th key={ci} className="px-2 py-1 text-left font-semibold text-swoop-text-muted border-b border-swoop-border">{c}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {cells.slice(1).map((row, ri) => (
-                    <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <tr key={ri} className={ri % 2 === 0 ? 'bg-swoop-panel' : 'bg-swoop-row'}>
                       {row.map((c, ci) => (
-                        <td key={ci} className="px-2 py-1 border-b border-gray-100">
+                        <td key={ci} className="px-2 py-1 border-b border-swoop-border-inset">
                           {/high/i.test(c) ? <span className="inline-block px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-semibold">{c}</span>
                             : /medium/i.test(c) ? <span className="inline-block px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded text-[10px] font-semibold">{c}</span>
                             : /low/i.test(c) ? <span className="inline-block px-1.5 py-0.5 bg-red-100 text-red-700 rounded text-[10px] font-semibold">{c}</span>
@@ -222,11 +222,11 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
   const isEmpty = messages.length === 0 && !loading;
 
   return (
-    <div className="flex flex-col bg-gray-50 rounded-xl border border-gray-200" style={{ height: 'min(700px, 75vh)' }}>
+    <div className="flex flex-col bg-swoop-row rounded-xl border border-swoop-border" style={{ height: 'min(700px, 75vh)' }}>
       {/* File drop zone */}
       <div
-        className={`flex-shrink-0 border-b border-gray-200 p-4 transition-colors cursor-pointer ${
-          dragOver ? 'bg-orange-50 border-orange-300' : 'bg-white'
+        className={`flex-shrink-0 border-b border-swoop-border p-4 transition-colors cursor-pointer ${
+          dragOver ? 'bg-orange-50 border-orange-300' : 'bg-swoop-panel'
         }`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
@@ -241,16 +241,16 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
           onChange={(e) => handleFileDrop(e.target.files)}
         />
         <div className="flex items-center justify-center gap-3 py-2">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${dragOver ? 'bg-orange-100' : 'bg-gray-100'}`}>
-            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${dragOver ? 'bg-orange-100' : 'bg-swoop-row'}`}>
+            <svg className="w-5 h-5 text-swoop-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
           </div>
           <div>
-            <div className="text-sm font-semibold text-gray-700">
+            <div className="text-sm font-semibold text-swoop-text-2">
               {fileData ? `${fileData.filename} (${fileData.rowCount} rows)` : 'Drop a CSV, XLSX, or TSV file to get started'}
             </div>
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-swoop-text-label">
               {fileData ? 'Drop another file to replace' : 'or click to browse'}
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
               </svg>
             </div>
-            <p className="text-gray-500 text-sm text-center max-w-xs">
+            <p className="text-swoop-text-muted text-sm text-center max-w-xs">
               Drop a file above or ask me what data your club needs. I'll guide you through the import.
             </p>
             <div className="flex flex-col gap-2 w-full max-w-xs">
@@ -274,7 +274,7 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
                 <button
                   key={msg}
                   onClick={() => sendMessage(msg)}
-                  className="text-left text-sm bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                  className="text-left text-sm bg-swoop-panel border border-swoop-border rounded-xl px-4 py-2.5 text-swoop-text-2 hover:bg-swoop-row-hover active:bg-gray-100 transition-colors"
                 >
                   {msg}
                 </button>
@@ -288,7 +288,7 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
             <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
               msg.role === 'user'
                 ? 'bg-orange-500 text-white rounded-br-md'
-                : 'bg-white text-gray-900 rounded-bl-md shadow-sm border border-gray-100'
+                : 'bg-swoop-panel text-swoop-text rounded-bl-md shadow-sm border border-swoop-border-inset'
             }`}>
               {msg.role === 'assistant' ? <MessageContent text={msg.text} /> : (
                 <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
@@ -296,7 +296,7 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
               {msg.role === 'assistant' && msg.toolsCalled?.length > 0 && (
                 <div className="flex gap-1 flex-wrap mt-1.5">
                   {msg.toolsCalled.map((t, ti) => (
-                    <span key={ti} className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">
+                    <span key={ti} className="text-[10px] bg-swoop-row text-swoop-text-muted px-1.5 py-0.5 rounded">
                       {t}
                     </span>
                   ))}
@@ -310,7 +310,7 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
                   Confirm Import
                 </button>
               )}
-              <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-orange-200' : 'text-gray-400'}`}>
+              <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-orange-200' : 'text-swoop-text-label'}`}>
                 {msg.time}
               </p>
             </div>
@@ -319,9 +319,9 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-gray-100">
+            <div className="bg-swoop-panel rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-swoop-border-inset">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-500">Analyzing</span>
+                <span className="text-xs text-swoop-text-muted">Analyzing</span>
                 <span className="flex gap-0.5">
                   <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -338,7 +338,7 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
       {/* Input bar */}
       <form
         onSubmit={handleSubmit}
-        className="flex-shrink-0 bg-white border-t border-gray-200 px-3 py-2 flex items-center gap-2 rounded-b-xl"
+        className="flex-shrink-0 bg-swoop-panel border-t border-swoop-border px-3 py-2 flex items-center gap-2 rounded-b-xl"
       >
         <input
           ref={inputRef}
@@ -347,7 +347,7 @@ export default function DataOnboardingChat({ clubId, onImportComplete }) {
           onChange={e => setInput(e.target.value)}
           placeholder="Ask about your data or import..."
           disabled={loading}
-          className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:bg-gray-50"
+          className="flex-1 rounded-full border border-swoop-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:bg-gray-50"
           autoComplete="off"
         />
         <button

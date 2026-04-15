@@ -91,10 +91,10 @@ export default function TodaysRisks() {
               <div
                 key={outlet.name}
                 onClick={() => navigate('service', { tab: 'staffing' })}
-                className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 rounded-xl py-3 px-4 cursor-pointer transition-all duration-150 hover:shadow-md hover:-translate-y-px"
+                className="bg-swoop-panel border border-swoop-border rounded-xl py-3 px-4 cursor-pointer transition-all duration-150 hover:shadow-md hover:-translate-y-px"
                 style={{ borderLeft: `3px solid ${color}` }}
               >
-                <div className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">
+                <div className="text-sm font-bold text-swoop-text mb-1">
                   {outlet.name}
                 </div>
                 <div className="flex items-center gap-2">
@@ -105,7 +105,7 @@ export default function TodaysRisks() {
                     {label}
                   </span>
                 </div>
-                <div className="text-xs text-gray-500 mt-0.5">
+                <div className="text-xs text-swoop-text-muted mt-0.5">
                   servers
                 </div>
               </div>
@@ -129,15 +129,15 @@ export default function TodaysRisks() {
                     <div
                       key={c.id}
                       onClick={() => navigate('service', { tab: 'complaints' })}
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between py-2.5 px-3.5 rounded-lg cursor-pointer transition-shadow duration-150 hover:shadow-md gap-1.5 sm:gap-0 ${isOld ? 'bg-red-500/[0.024] border border-red-500/[0.15]' : 'border border-gray-200'} ${isCritical ? 'animate-[pulse-border_2s_infinite]' : ''}`}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between py-2.5 px-3.5 rounded-lg cursor-pointer transition-shadow duration-150 hover:shadow-md gap-1.5 sm:gap-0 ${isOld ? 'bg-red-500/[0.024] border border-red-500/[0.15]' : 'border border-swoop-border'} ${isCritical ? 'animate-[pulse-border_2s_infinite]' : ''}`}
                     >
                       <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0 flex-wrap">
                         <span onClick={(e) => e.stopPropagation()}>
-                        <MemberLink memberId={c.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 dark:text-white/90 whitespace-nowrap">
+                        <MemberLink memberId={c.memberId} mode="drawer" className="font-semibold text-sm text-swoop-text whitespace-nowrap">
                             {c.memberName}
                           </MemberLink>
                         </span>
-                        <span className="text-xs text-gray-500">{c.category}</span>
+                        <span className="text-xs text-swoop-text-muted">{c.category}</span>
                         {c.isUnderstaffedDay && (
                           <span className="text-[9px] font-bold text-error-500 bg-error-500/[0.07] px-1.5 py-px rounded-full">Understaffed</span>
                         )}
@@ -152,7 +152,7 @@ export default function TodaysRisks() {
                         <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight">
                           {c.daysOpen > 14 ? 'GM' : 'Dept Head'}
                         </span>
-                        <span className={`text-xs font-bold ${isOld ? 'text-error-500' : 'text-gray-600'}`}>{c.daysOpen}d</span>
+                        <span className={`text-xs font-bold ${isOld ? 'text-error-500' : 'text-swoop-text-muted'}`}>{c.daysOpen}d</span>
                         <span className="text-[10px] font-semibold py-0.5 px-2 rounded-xl capitalize" style={{ background: `${statusColor}15`, color: statusColor }}>
                           {c.status.replace('_', ' ')}
                         </span>

@@ -62,16 +62,16 @@ export default function MaxCompAmount({
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+      <label className="block text-sm font-semibold text-swoop-text">
         Max Comp Amount
       </label>
-      <p className="text-xs text-gray-500 dark:text-gray-400">
+      <p className="text-xs text-swoop-text-muted">
         Agent will not offer complimentary items above this value without GM approval
       </p>
 
       <div className="flex items-center gap-3">
         <div className="relative w-32">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm font-medium">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-swoop-text-muted text-sm font-medium">
             $
           </span>
           <input
@@ -80,7 +80,7 @@ export default function MaxCompAmount({
             step="1"
             value={amount}
             onChange={handleChange}
-            className="w-full pl-7 pr-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-7 pr-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm text-swoop-text outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -91,7 +91,7 @@ export default function MaxCompAmount({
           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
             dirty
               ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700'
+              : 'bg-swoop-border text-swoop-text-label cursor-not-allowed'
           }`}
         >
           {saving ? 'Saving...' : 'Save'}

@@ -255,7 +255,7 @@ export default function IntegrationsPage() {
       </header>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-lg p-1" style={{ alignSelf: 'flex-start' }}>
+      <div className="flex gap-1 bg-swoop-row rounded-lg p-1" style={{ alignSelf: 'flex-start' }}>
         {[
           { id: 'connections', label: 'Connections' },
           { id: 'imported-data', label: 'Imported Data' },
@@ -295,12 +295,12 @@ export default function IntegrationsPage() {
       {/* AI Chat tab — conversational assistant, separate from the guided wizard */}
       {activeTab === 'ai-assistant' && (
         <div className="flex flex-col gap-4">
-          <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-sm text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-300">
+          <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-sm text-blue-700">
             <strong>AI Chat</strong> — ask questions about your data, get format guidance, or troubleshoot a file.
             For a step-by-step import with auto-mapping, use the <button
               type="button"
               onClick={() => navigate('integrations/csv-import')}
-              className="underline font-semibold bg-transparent border-none cursor-pointer text-blue-700 dark:text-blue-300 p-0"
+              className="underline font-semibold bg-transparent border-none cursor-pointer text-blue-700 p-0"
             >Import Data wizard</button>.
           </div>
           <DataOnboardingChat clubId={clubId} onImportComplete={() => { /* refetch if needed */ }} />
@@ -375,7 +375,7 @@ export default function IntegrationsPage() {
               marginTop: 6,
               color: card.color || '#1a1a2e'
             }}>{card.value}</div>
-            <div className="text-sm text-gray-500">{card.sub}</div>
+            <div className="text-sm text-swoop-text-muted">{card.sub}</div>
             {card.color && (
               <div style={{
                 position: 'absolute',
@@ -408,10 +408,10 @@ export default function IntegrationsPage() {
               padding: '6px 14px',
               fontSize: 13,
               fontWeight: 600,
-              border: `1px solid ${statusFilter === filter.value ? '#ff8b00' : '#E5E7EB'}`,
+              border: `1px solid ${statusFilter === filter.value ? '#F3922D' : '#E5E7EB'}`,
               borderRadius: '12px',
-              background: statusFilter === filter.value ? `${'#ff8b00'}15` : '#F8F9FA',
-              color: statusFilter === filter.value ? '#ff8b00' : '#6B7280',
+              background: statusFilter === filter.value ? `${'#F3922D'}15` : '#F8F9FA',
+              color: statusFilter === filter.value ? '#F3922D' : '#6B7280',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
@@ -437,7 +437,7 @@ export default function IntegrationsPage() {
                 <span className="text-2xl">{category.icon}</span>
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 700 }}>{category.label}</div>
-                  <div className="text-sm text-gray-500">{category.description}</div>
+                  <div className="text-sm text-swoop-text-muted">{category.description}</div>
                 </div>
               </div>
             </div>
@@ -448,7 +448,7 @@ export default function IntegrationsPage() {
                 const syncInfo = SYNC_DETAILS[vendor.name];
                 return (
                 <div key={vendor.name} style={{
-                  border: `1px solid ${isExpanded ? '#ff8b00' + '50' : '#E5E7EB'}`,
+                  border: `1px solid ${isExpanded ? '#F3922D' + '50' : '#E5E7EB'}`,
                   borderRadius: '12px',
                   padding: '12px 14px',
                   background: '#F8F9FA',
@@ -474,16 +474,16 @@ export default function IntegrationsPage() {
                     </span>
                   </div>
                   {isConnected && (
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-swoop-text-label">
                       Last sync: {timeAgo(vendor.lastSync) || '2m ago'}
                     </div>
                   )}
                   {isConnected && VENDOR_POWERS[vendor.name] && (
-                    <div style={{ fontSize: 11, color: '#ff8b00', opacity: 0.85 }}>
+                    <div style={{ fontSize: 11, color: '#F3922D', opacity: 0.85 }}>
                       Powers: {VENDOR_POWERS[vendor.name]}
                     </div>
                   )}
-                  <div className="text-[13px] text-gray-500">{vendor.dataPoints}</div>
+                  <div className="text-[13px] text-swoop-text-muted">{vendor.dataPoints}</div>
 
                   {/* Sync detail panel for connected systems */}
                   {isConnected && isExpanded && syncInfo && (
@@ -505,13 +505,13 @@ export default function IntegrationsPage() {
                       <div style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Recent Syncs</div>
                       {syncInfo.history.map((h, i) => (
                         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px', borderBottom: i < syncInfo.history.length - 1 ? `1px solid ${'#E5E7EB'}` : 'none' }}>
-                          <span className="text-gray-400">{h.time}</span>
+                          <span className="text-swoop-text-label">{h.time}</span>
                           <span style={{ fontFamily: '"JetBrains Mono", monospace', color: '#6B7280' }}>{h.records} records</span>
                           <span style={{ color: h.ok ? '#12b76a' : '#ef4444', fontWeight: 600 }}>{h.ok ? 'OK' : 'Error'}</span>
                         </div>
                       ))}
                       <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
-                        <button onClick={() => alert('Manual sync triggered. Check back in 2 minutes.')} style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#ff8b00'}40`, background: `${'#ff8b00'}12`, color: '#ff8b00', cursor: 'pointer' }}>Force Sync</button>
+                        <button onClick={() => alert('Manual sync triggered. Check back in 2 minutes.')} style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#F3922D'}40`, background: `${'#F3922D'}12`, color: '#F3922D', cursor: 'pointer' }}>Force Sync</button>
                         <button onClick={() => alert('Sync logs will be available in the next release.')} style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>View Logs</button>
                         <button onClick={() => alert('Configuration panel coming soon.')} style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#E5E7EB'}`, background: 'transparent', color: '#6B7280', cursor: 'pointer' }}>Configure</button>
                         <button onClick={() => { if (confirm('Disconnect this integration?')) alert('Integration disconnected.'); }} style={{ padding: '5px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '6px', border: `1px solid ${'#ef4444'}40`, background: 'transparent', color: '#ef4444', cursor: 'pointer', marginLeft: 'auto' }}>Disconnect</button>
@@ -528,9 +528,9 @@ export default function IntegrationsPage() {
                           padding: '6px 12px',
                           fontSize: 12,
                           fontWeight: 600,
-                          border: `1px solid ${'#ff8b00'}`,
+                          border: `1px solid ${'#F3922D'}`,
                           borderRadius: '8px',
-                          background: '#ff8b00',
+                          background: '#F3922D',
                           color: '#fff',
                           cursor: 'pointer',
                           transition: 'all 0.15s ease',
@@ -545,7 +545,7 @@ export default function IntegrationsPage() {
                             padding: 0,
                             border: 'none',
                             background: 'none',
-                            color: '#ff8b00',
+                            color: '#F3922D',
                             fontSize: 11,
                             fontWeight: 600,
                             cursor: 'pointer',
@@ -574,7 +574,7 @@ export default function IntegrationsPage() {
                           onClick={() => navigate('integrations/csv-import', { category: category.csvCategory, vendor: vendor.name })}
                           style={{
                             padding: 0, border: 'none', background: 'none',
-                            color: '#ff8b00', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                            color: '#F3922D', fontSize: 11, fontWeight: 600, cursor: 'pointer',
                           }}
                         >
                           upload CSV instead →

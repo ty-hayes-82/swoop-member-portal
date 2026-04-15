@@ -8,6 +8,7 @@ layer(base);
 @theme {
   --font-*: initial;
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
@@ -41,19 +42,53 @@ layer(base);
   --color-white: #ffffff;
   --color-black: #000000;
 
-  /* Swoop brand orange #ff8b00 */
-  --color-brand-25: #fff9f0;
-  --color-brand-50: #fff3e0;
-  --color-brand-100: #ffe0b2;
-  --color-brand-200: #ffcc80;
-  --color-brand-300: #ffb74d;
-  --color-brand-400: #ffa726;
-  --color-brand-500: #ff8b00;
-  --color-brand-600: #e67e00;
-  --color-brand-700: #c06800;
-  --color-brand-800: #9a5400;
-  --color-brand-900: #7a4300;
-  --color-brand-950: #4a2800;
+  /* Swoop brand orange #F3922D — canonical (STYLING.md) */
+  --color-brand-25: #fff8f0;
+  --color-brand-50: #fff1e0;
+  --color-brand-100: #ffe0b8;
+  --color-brand-200: #fcc98a;
+  --color-brand-300: #f8b25c;
+  --color-brand-400: #f59e3a;
+  --color-brand-500: #f3922d;
+  --color-brand-600: #d97a1a;
+  --color-brand-700: #b05f12;
+  --color-brand-800: #8a4a0f;
+  --color-brand-900: #6b3a0c;
+  --color-brand-950: #3f2107;
+
+  /* Swoop dark dashboard palette — see STYLING.md */
+  --color-swoop-canvas: rgb(14, 14, 14);
+  --color-swoop-panel: rgb(17, 17, 17);
+  --color-swoop-section: rgba(255, 255, 255, 0.03);
+  --color-swoop-row: rgba(255, 255, 255, 0.04);
+  --color-swoop-row-hover: rgba(255, 255, 255, 0.06);
+  --color-swoop-border: rgba(255, 255, 255, 0.08);
+  --color-swoop-border-inset: rgba(255, 255, 255, 0.06);
+  --color-swoop-text: #ffffff;
+  --color-swoop-text-2: rgba(255, 255, 255, 0.65);
+  --color-swoop-text-muted: rgba(255, 255, 255, 0.5);
+  --color-swoop-text-label: rgba(255, 255, 255, 0.4);
+  --color-swoop-text-ghost: rgba(255, 255, 255, 0.35);
+  --color-swoop-accent: rgb(243, 146, 45);
+  --color-swoop-accent-soft: rgba(243, 146, 45, 0.08);
+  --color-swoop-accent-tint: rgba(243, 146, 45, 0.12);
+  --color-swoop-accent-fill: rgba(243, 146, 45, 0.15);
+  --color-swoop-accent-border: rgba(243, 146, 45, 0.3);
+  --color-swoop-accent-border-strong: rgba(243, 146, 45, 0.35);
+  --color-swoop-danger: rgb(239, 68, 68);
+  --color-swoop-danger-bg: rgba(239, 68, 68, 0.07);
+  --color-swoop-danger-bdr: rgba(239, 68, 68, 0.18);
+  --color-swoop-danger-fill: rgba(239, 68, 68, 0.15);
+  --color-swoop-danger-border: rgba(239, 68, 68, 0.3);
+  --color-swoop-success: rgb(34, 197, 94);
+  --color-swoop-success-bg: rgba(34, 197, 94, 0.06);
+  --color-swoop-success-bdr: rgba(34, 197, 94, 0.18);
+  --color-swoop-success-fill: rgba(34, 197, 94, 0.15);
+  --color-swoop-success-border: rgba(34, 197, 94, 0.3);
+  --color-swoop-warn: rgb(243, 146, 45);
+  --color-swoop-warn-bg: rgba(243, 146, 45, 0.07);
+  --color-swoop-warn-bdr: rgba(243, 146, 45, 0.18);
+  --color-swoop-gold: rgb(181, 149, 106);
 
   --color-blue-light-25: #f5fbff;
   --color-blue-light-50: #f0f9ff;
@@ -147,7 +182,7 @@ layer(base);
   --shadow-theme-xl: 0px 20px 24px -4px rgba(16, 24, 40, 0.08),
     0px 8px 8px -4px rgba(16, 24, 40, 0.03);
   --shadow-datepicker: -5px 0 0 #262d3c, 5px 0 0 #262d3c;
-  --shadow-focus-ring: 0px 0px 0px 4px rgba(255, 139, 0, 0.12);
+  --shadow-focus-ring: 0px 0px 0px 4px rgba(243, 146, 45, 0.12);
   --shadow-slider-navigation: 0px 1px 2px 0px rgba(16, 24, 40, 0.1),
     0px 1px 3px 0px rgba(16, 24, 40, 0.1);
   --shadow-tooltip: 0px 4px 6px -2px rgba(16, 24, 40, 0.05),
@@ -172,7 +207,7 @@ layer(base);
   ::backdrop,
   ::file-selector-button {
     box-sizing: border-box;
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--color-swoop-border, currentColor);
   }
   html, body {
     height: 100%;
@@ -180,7 +215,7 @@ layer(base);
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    @apply bg-gray-50 font-sans text-gray-800;
+    @apply bg-swoop-canvas font-sans text-swoop-text;
   }
   #root {
     height: 100%;
@@ -402,8 +437,8 @@ layer(base);
   transition: all 0.2s ease;
 }
 .forecast-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border-color: #ff8b00 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  border-color: #f3922d !important;
   transform: translateY(-1px);
 }
 .forecast-card-today {

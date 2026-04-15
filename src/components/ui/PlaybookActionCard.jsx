@@ -40,13 +40,13 @@ export default function PlaybookActionCard({
   if (isCompact) {
     return (
       <div className={`flex items-center justify-between px-3.5 py-2 rounded-lg gap-3 flex-wrap ${
-        isUrgent ? 'bg-error-50 border-l-[3px] border-l-error-500 dark:bg-error-500/5' : 'bg-success-50 border-l-[3px] border-l-success-500 dark:bg-success-500/5'
+        isUrgent ? 'bg-error-50 border-l-[3px] border-l-error-500' : 'bg-success-50 border-l-[3px] border-l-success-500'
       }`}>
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="text-sm">{icon}</span>
-          <span className="text-xs font-semibold text-gray-800 dark:text-white/90">{title}</span>
+          <span className="text-xs font-semibold text-swoop-text">{title}</span>
           {memberCount && (
-            <span className="text-[11px] text-gray-500 bg-gray-100 px-1.5 py-px rounded dark:bg-gray-800 dark:text-gray-400">
+            <span className="text-[11px] text-swoop-text-muted bg-swoop-row px-1.5 py-px rounded">
               {memberCount} members
             </span>
           )}
@@ -70,17 +70,17 @@ export default function PlaybookActionCard({
       onMouseLeave={() => setHovered(false)}
       className={`rounded-xl px-5 py-4 transition-colors duration-150 border-l-4 ${
         isUrgent
-          ? `border-l-error-500 ${hovered ? 'bg-error-50' : 'bg-error-50/50'} dark:bg-error-500/5`
-          : `border-l-success-500 ${hovered ? 'bg-success-50' : 'bg-success-50/50'} dark:bg-success-500/5`
+          ? `border-l-error-500 ${hovered ? 'bg-error-50' : 'bg-error-50/50'}`
+          : `border-l-success-500 ${hovered ? 'bg-success-50' : 'bg-success-50/50'}`
       }`}
     >
       <div className="flex items-center gap-2 mb-2">
         <span className="text-sm">{icon}</span>
         <span className={`text-[10px] font-bold tracking-widest uppercase ${isUrgent ? 'text-error-500' : 'text-success-500'}`}>{label}</span>
       </div>
-      <div className="text-sm font-bold text-gray-800 mb-1 dark:text-white/90">{title}</div>
+      <div className="text-sm font-bold text-swoop-text mb-1">{title}</div>
       {description && (
-        <div className="text-sm text-gray-600 leading-relaxed mb-3 dark:text-gray-400">{description}</div>
+        <div className="text-sm text-swoop-text-muted leading-relaxed mb-3">{description}</div>
       )}
       <div className="flex items-center gap-2.5 flex-wrap">
         <button
@@ -89,13 +89,13 @@ export default function PlaybookActionCard({
         >{buttonLabel}</button>
         <button
           onClick={handleViewPlaybook}
-          className="px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer border-[1.5px] border-brand-200 bg-transparent text-brand-500 dark:border-brand-500/30"
+          className="px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer border-[1.5px] border-brand-200 bg-transparent text-brand-500"
         >View Details</button>
         {impact && (
           <span className="text-xs font-bold text-error-500 ml-auto">{impact}</span>
         )}
         {memberCount && (
-          <span className="text-[11px] text-gray-500 dark:text-gray-400">{memberCount} members affected</span>
+          <span className="text-[11px] text-swoop-text-muted">{memberCount} members affected</span>
         )}
       </div>
     </div>

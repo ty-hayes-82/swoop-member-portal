@@ -23,24 +23,24 @@ export default function ScenarioSlider({
   const annualRecovery = monthlyRecovery * 12;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-6 dark:bg-white/[0.03] dark:border-gray-800">
+    <div className="bg-swoop-panel border border-swoop-border rounded-2xl p-6">
       <div className="flex items-start justify-between mb-1">
         <div>
-          <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-0.5">
+          <h3 className="text-base font-bold text-swoop-text mb-0.5">
             Recovery Scenario Modeling
           </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-swoop-text-muted">
             Drag the slider to model what slow-round reduction would recover
           </p>
         </div>
         <div className="text-right">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">
             Monthly Recovery
           </div>
           <div className="text-3xl font-bold text-success-500 font-mono leading-none mt-1">
             $<AnimatedNumber value={monthlyRecovery} duration={400} />
           </div>
-          <div className="text-[11px] text-gray-500 mt-1">
+          <div className="text-[11px] text-swoop-text-muted mt-1">
             ${annualRecovery.toLocaleString()}/yr
           </div>
         </div>
@@ -48,7 +48,7 @@ export default function ScenarioSlider({
 
       {/* Slider */}
       <div className="mt-5">
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+        <div className="flex items-center justify-between text-xs text-swoop-text-muted mb-2">
           <span>Slow round reduction</span>
           <span className="font-mono font-bold text-brand-500 text-sm">
             {reductionPct}%
@@ -61,10 +61,10 @@ export default function ScenarioSlider({
           step="5"
           value={reductionPct}
           onChange={(e) => setReductionPct(Number(e.target.value))}
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-500 dark:bg-gray-700"
+          className="w-full h-2 bg-swoop-border rounded-lg appearance-none cursor-pointer accent-brand-500"
           aria-label="Slow round reduction percentage"
         />
-        <div className="flex justify-between text-[10px] text-gray-400 mt-1 font-mono">
+        <div className="flex justify-between text-[10px] text-swoop-text-label mt-1 font-mono">
           <span>0%</span>
           <span>10%</span>
           <span>20%</span>
@@ -104,18 +104,18 @@ export default function ScenarioSlider({
       </div>
 
       {/* Breakdown */}
-      <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-gray-200 dark:border-gray-800">
+      <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-swoop-border">
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">
             Slow rounds eliminated
           </div>
-          <div className="text-lg font-bold text-gray-800 dark:text-white/90 font-mono mt-0.5">
+          <div className="text-lg font-bold text-swoop-text font-mono mt-0.5">
             <AnimatedNumber value={slowRoundsEliminated} duration={400} />
-            <span className="text-xs text-gray-400 font-normal">/mo</span>
+            <span className="text-xs text-swoop-text-label font-normal">/mo</span>
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">
             Pace recovery
           </div>
           <div className="text-lg font-bold text-success-500 font-mono mt-0.5">
@@ -123,7 +123,7 @@ export default function ScenarioSlider({
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">
             Staffing recovery
           </div>
           <div className="text-lg font-bold text-success-500 font-mono mt-0.5">
@@ -132,9 +132,9 @@ export default function ScenarioSlider({
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-800">
-        <p className="text-[11px] text-gray-500 italic leading-relaxed">
-          Modeled at <span className="font-mono font-semibold text-gray-700 dark:text-gray-300">${dollarPerSlowRound}/slow round</span>{' '}
+      <div className="mt-4 pt-3 border-t border-swoop-border">
+        <p className="text-[11px] text-swoop-text-muted italic leading-relaxed">
+          Modeled at <span className="font-mono font-semibold text-swoop-text-2">${dollarPerSlowRound}/slow round</span>{' '}
           based on the dining conversion gap (22% slow vs 41% fast). Staffing recovery assumes faster pace eases dining-room demand pressure.
         </p>
       </div>

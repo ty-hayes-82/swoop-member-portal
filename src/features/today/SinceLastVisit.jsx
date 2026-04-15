@@ -42,9 +42,9 @@ export default function SinceLastVisit({ yesterdayData = null }) {
     <div
       className={`flex flex-col bg-blue-600/[0.024] border border-blue-600/[0.12] rounded-lg ${showYesterday ? 'gap-2.5 py-3 px-3.5' : 'gap-0 py-2 px-3.5'}`}
     >
-      <div className="flex items-center gap-2.5 text-xs text-gray-500">
+      <div className="flex items-center gap-2.5 text-xs text-swoop-text-muted">
         <span className="font-semibold">Since your last visit</span>
-        <span className="text-gray-400">({formatTimeAgo(elapsed)})</span>
+        <span className="text-swoop-text-label">({formatTimeAgo(elapsed)})</span>
         {pendingAgentCount > 0 && (
           <span className="inline-flex items-center gap-1 py-0.5 px-2 rounded-full bg-brand-500/[0.07] border border-brand-500/20 text-brand-500 font-bold text-[11px]">
             {pendingAgentCount} new action{pendingAgentCount !== 1 ? 's' : ''}
@@ -57,8 +57,8 @@ export default function SinceLastVisit({ yesterdayData = null }) {
         <div className="flex gap-4 flex-wrap pt-1.5 border-t border-blue-600/[0.08]">
           {yesterdayData.revenue != null && (
             <div className="text-xs">
-              <span className="text-gray-400">Revenue: </span>
-              <span className="font-bold font-mono text-gray-800 dark:text-white/90">
+              <span className="text-swoop-text-label">Revenue: </span>
+              <span className="font-bold font-mono text-swoop-text">
                 {formatCurrency(yesterdayData.revenue)}
               </span>
               {yesterdayData.revenueVsPlan != null && (
@@ -70,8 +70,8 @@ export default function SinceLastVisit({ yesterdayData = null }) {
           )}
           {yesterdayData.rounds != null && (
             <div className="text-xs">
-              <span className="text-gray-400">Rounds: </span>
-              <span className="font-bold font-mono text-gray-800 dark:text-white/90">
+              <span className="text-swoop-text-label">Rounds: </span>
+              <span className="font-bold font-mono text-swoop-text">
                 {yesterdayData.rounds}
               </span>
             </div>

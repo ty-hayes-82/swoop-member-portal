@@ -305,10 +305,10 @@ const TEST_HEATMAP = [
 
 function Section({ title, subtitle, children }) {
   return (
-    <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 sm:p-6 space-y-4">
+    <div className="bg-gray-900/80 border border-swoop-border rounded-xl p-5 sm:p-6 space-y-4">
       <div>
         <h3 className="text-lg font-bold text-white">{title}</h3>
-        {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
+        {subtitle && <p className="text-sm text-swoop-text-label mt-1">{subtitle}</p>}
       </div>
       {children}
     </div>
@@ -319,11 +319,11 @@ function CodeBlock({ children, label }) {
   return (
     <div className="rounded-lg overflow-hidden">
       {label && (
-        <div className="bg-gray-800 px-3 py-1.5 text-xs text-gray-400 font-mono border-b border-gray-700">
+        <div className="bg-swoop-row px-3 py-1.5 text-xs text-swoop-text-label font-mono border-b border-swoop-border">
           {label}
         </div>
       )}
-      <pre className="bg-gray-950 p-3 text-xs text-gray-300 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">
+      <pre className="bg-swoop-canvas p-3 text-xs text-swoop-text-ghost font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">
         {children}
       </pre>
     </div>
@@ -343,7 +343,7 @@ export default function TechnicalDeepDive() {
       <button
         type="button"
         onClick={() => { window.location.hash = '#/demo/mobile-showcase'; }}
-        className="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-300 bg-transparent border-none cursor-pointer"
+        className="absolute top-4 left-4 text-sm text-swoop-text-muted hover:text-gray-300 bg-transparent border-none cursor-pointer"
       >
         &larr; Back
       </button>
@@ -355,7 +355,7 @@ export default function TechnicalDeepDive() {
           <h1 className="text-3xl sm:text-4xl font-bold text-white">
             Not a Thin Wrapper
           </h1>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-swoop-text-label max-w-2xl mx-auto">
             8 distinct system prompts. 30 MCP tools with real SQL queries. Agent-to-agent bridge
             with typed event routing. 118 unit tests + 13 integration tests. All open for inspection.
           </p>
@@ -370,10 +370,10 @@ export default function TechnicalDeepDive() {
             { label: 'Unit Tests', value: '118', sub: 'all passing' },
             { label: 'Integration Tests', value: '13', sub: 'live API' },
           ].map((kpi, i) => (
-            <div key={i} className="bg-gray-900/60 border border-gray-800 rounded-lg p-3 text-center">
+            <div key={i} className="bg-gray-900/60 border border-swoop-border rounded-lg p-3 text-center">
               <div className="text-2xl font-bold text-white">{kpi.value}</div>
-              <div className="text-xs text-gray-500 mt-0.5">{kpi.label}</div>
-              <div className="text-[10px] text-gray-600">{kpi.sub}</div>
+              <div className="text-xs text-swoop-text-muted mt-0.5">{kpi.label}</div>
+              <div className="text-[10px] text-swoop-text-muted">{kpi.sub}</div>
             </div>
           ))}
         </div>
@@ -394,7 +394,7 @@ export default function TechnicalDeepDive() {
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer ${
                   i === selectedAgent
                     ? 'text-white border-current'
-                    : 'text-gray-500 border-gray-700 hover:text-gray-300 bg-transparent'
+                    : 'text-swoop-text-muted border-swoop-border hover:text-gray-300 bg-transparent'
                 }`}
                 style={i === selectedAgent ? { color: a.color, borderColor: a.color, backgroundColor: a.color + '15' } : {}}
               >
@@ -408,8 +408,8 @@ export default function TechnicalDeepDive() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: agent.color }} />
-                <span className="text-xs text-gray-400 font-mono">{agent.file}</span>
-                <span className="text-xs text-gray-600 ml-auto">{agent.tokens} tokens</span>
+                <span className="text-xs text-swoop-text-label font-mono">{agent.file}</span>
+                <span className="text-xs text-swoop-text-muted ml-auto">{agent.tokens} tokens</span>
               </div>
               <CodeBlock label="System Prompt (excerpt)">
                 {agent.promptExcerpt}
@@ -418,7 +418,7 @@ export default function TechnicalDeepDive() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-xs text-gray-400">Agent Output</span>
+                <span className="text-xs text-swoop-text-label">Agent Output</span>
               </div>
               <CodeBlock label="Sample Output">
                 {agent.sampleOutput}
@@ -450,7 +450,7 @@ export default function TechnicalDeepDive() {
                     {i + 1}
                   </div>
                   <span className="text-sm text-white font-medium">{step.label}</span>
-                  <span className="text-gray-600 ml-auto text-xs">{expandedTrace === i ? 'collapse' : 'expand'}</span>
+                  <span className="text-swoop-text-muted ml-auto text-xs">{expandedTrace === i ? 'collapse' : 'expand'}</span>
                 </button>
                 {expandedTrace === i && (
                   <div className="ml-11 mt-2">
@@ -460,7 +460,7 @@ export default function TechnicalDeepDive() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-swoop-text-muted mt-2">
             Every tool call is validated against JSON schema before execution. FK constraints prevent hallucinated member IDs.
             23 hallucination attempts caught in testing — zero reached the UI.
           </p>
@@ -490,7 +490,7 @@ export default function TechnicalDeepDive() {
                 {/* Content */}
                 <div className="pb-4">
                   <div className="text-xs font-bold" style={{ color: step.color }}>{step.agent}</div>
-                  <div className="text-sm text-gray-300 mt-0.5">{step.action}</div>
+                  <div className="text-sm text-swoop-text-ghost mt-0.5">{step.action}</div>
                 </div>
               </div>
             ))}
@@ -538,8 +538,8 @@ export default function TechnicalDeepDive() {
               const barWidth = Math.min(100, (total / 25) * 100);
               return (
                 <div key={i} className="flex items-center gap-3">
-                  <div className="w-40 sm:w-48 text-xs text-gray-300 truncate shrink-0">{mod.module}</div>
-                  <div className="flex-1 h-5 bg-gray-800 rounded overflow-hidden relative">
+                  <div className="w-40 sm:w-48 text-xs text-swoop-text-ghost truncate shrink-0">{mod.module}</div>
+                  <div className="flex-1 h-5 bg-swoop-row rounded overflow-hidden relative">
                     <div
                       className="h-full rounded transition-all"
                       style={{
@@ -548,7 +548,7 @@ export default function TechnicalDeepDive() {
                         opacity: mod.covered ? 0.7 : 0.5,
                       }}
                     />
-                    <span className="absolute right-2 top-0 h-full flex items-center text-[10px] text-gray-400 font-mono">
+                    <span className="absolute right-2 top-0 h-full flex items-center text-[10px] text-swoop-text-label font-mono">
                       {total > 0 ? `${mod.unit}u + ${mod.integration}i` : 'no tests'}
                     </span>
                   </div>
@@ -557,14 +557,14 @@ export default function TechnicalDeepDive() {
             })}
           </div>
           <div className="flex gap-6 mt-3">
-            <div className="flex items-center gap-2 text-xs text-gray-400">
+            <div className="flex items-center gap-2 text-xs text-swoop-text-label">
               <div className="w-3 h-3 rounded bg-emerald-500/70" /> Covered
             </div>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
+            <div className="flex items-center gap-2 text-xs text-swoop-text-label">
               <div className="w-3 h-3 rounded bg-red-500/50" /> Needs tests (server-side — roadmap Q2)
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-swoop-text-muted mt-2">
             Tests validate real behavior: member health calculations, agent action proposals,
             service recovery flows, briefing generation, and data import pipelines. Not just
             "does the API respond" — "does the agent make the right decision."
@@ -576,8 +576,8 @@ export default function TechnicalDeepDive() {
         {/* ============================================================= */}
         <div className="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-xl p-6 text-center space-y-4">
           <h3 className="text-xl font-bold text-white">Verify It Yourself</h3>
-          <p className="text-gray-400 max-w-xl mx-auto text-sm">
-            Fork the repo. Run <code className="text-red-400 bg-gray-800 px-1.5 py-0.5 rounded text-xs">npm test</code> —
+          <p className="text-swoop-text-label max-w-xl mx-auto text-sm">
+            Fork the repo. Run <code className="text-red-400 bg-swoop-row px-1.5 py-0.5 rounded text-xs">npm test</code> —
             118 unit tests + 13 integration tests, all passing. Read every system prompt.
             Inspect every MCP tool handler. Trace the agent bridge code path by path.
           </p>
@@ -586,16 +586,16 @@ export default function TechnicalDeepDive() {
               href="https://github.com/swoop-golf/swoop-member-portal"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-colors no-underline"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-swoop-panel text-swoop-text rounded-lg font-semibold text-sm hover:bg-swoop-row-hover transition-colors no-underline"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
               Fork on GitHub
             </a>
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-800 text-gray-300 rounded-lg text-sm border border-gray-700">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-swoop-row text-swoop-text-ghost rounded-lg text-sm border border-swoop-border">
               <span className="font-mono text-xs">npm test && npm run test:integration</span>
             </div>
           </div>
-          <p className="text-xs text-gray-600 mt-2">
+          <p className="text-xs text-swoop-text-muted mt-2">
             This is not a demo repo with 3 files. It is the production codebase: 8 agent triggers,
             30 MCP tool handlers, agent bridge, chief of staff coordination, and full test suite.
           </p>

@@ -39,7 +39,7 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="border border-gray-200 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 overflow-hidden">
+    <div className="border border-swoop-border rounded-xl bg-swoop-panel overflow-hidden">
       {/* Step header — always visible */}
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Reorder buttons */}
@@ -49,7 +49,7 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
             onClick={onMoveUp}
             disabled={index === 0}
             aria-label="Move step up"
-            className="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 disabled:opacity-20 cursor-pointer border-none bg-transparent dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-brand-500"
+            className="w-5 h-5 rounded flex items-center justify-center text-swoop-text-label hover:bg-swoop-row-hover disabled:opacity-20 cursor-pointer border-none bg-transparent focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             <svg aria-hidden="true" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clipRule="evenodd" /></svg>
           </button>
@@ -58,7 +58,7 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
             onClick={onMoveDown}
             disabled={index === total - 1}
             aria-label="Move step down"
-            className="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 disabled:opacity-20 cursor-pointer border-none bg-transparent dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-brand-500"
+            className="w-5 h-5 rounded flex items-center justify-center text-swoop-text-label hover:bg-swoop-row-hover disabled:opacity-20 cursor-pointer border-none bg-transparent focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             <svg aria-hidden="true" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" /></svg>
           </button>
@@ -78,17 +78,17 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
         </span>
 
         {/* Title */}
-        <div className="flex-1 min-w-0 text-sm font-semibold text-gray-800 dark:text-white/90 truncate">
+        <div className="flex-1 min-w-0 text-sm font-semibold text-swoop-text truncate">
           {step.title}
         </div>
 
         {/* Timing */}
-        <span className="text-[11px] text-gray-400 shrink-0">{step.timing}</span>
+        <span className="text-[11px] text-swoop-text-label shrink-0">{step.timing}</span>
 
         {/* Expand/collapse */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-xs text-gray-400 hover:text-brand-500 cursor-pointer bg-transparent border-none p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
+          className="text-xs text-swoop-text-label hover:text-brand-500 cursor-pointer bg-transparent border-none p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           {expanded ? 'Close' : 'Edit'}
         </button>
@@ -99,7 +99,7 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
             type="button"
             onClick={onRemove}
             aria-label="Remove step"
-            className="text-xs text-gray-400 hover:text-red-500 cursor-pointer bg-transparent border-none p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
+            className="text-xs text-swoop-text-label hover:text-red-500 cursor-pointer bg-transparent border-none p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             <span aria-hidden="true">&times;</span>
           </button>
@@ -108,10 +108,10 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
 
       {/* Expanded edit form */}
       {expanded && (
-        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 px-4 py-3 space-y-3">
+        <div className="border-t border-swoop-border bg-swoop-row px-4 py-3 space-y-3">
           {/* Badge selector */}
           <div>
-            <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Badge / Action Type</label>
+            <label className="block text-[11px] font-medium text-swoop-text-muted mb-1">Badge / Action Type</label>
             <div className="flex flex-wrap gap-1.5">
               {BADGE_PRESETS.map(b => (
                 <button
@@ -132,35 +132,35 @@ function StepEditor({ step, index, total, onChange, onRemove, onMoveUp, onMoveDo
 
           {/* Title */}
           <div>
-            <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Step Title</label>
+            <label className="block text-[11px] font-medium text-swoop-text-muted mb-1">Step Title</label>
             <input
               type="text"
               value={step.title}
               onChange={e => onChange({ ...step, title: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              className="w-full px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
             />
           </div>
 
           {/* Detail */}
           <div>
-            <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Description</label>
+            <label className="block text-[11px] font-medium text-swoop-text-muted mb-1">Description</label>
             <textarea
               value={step.detail}
               onChange={e => onChange({ ...step, detail: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90 resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm resize-none"
             />
           </div>
 
           {/* Timing */}
           <div>
-            <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Timing Window</label>
+            <label className="block text-[11px] font-medium text-swoop-text-muted mb-1">Timing Window</label>
             <input
               type="text"
               value={step.timing}
               onChange={e => onChange({ ...step, timing: e.target.value })}
               placeholder="e.g., Hour 1–2, Day 1–3, Immediately"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              className="w-full px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-sm"
             />
           </div>
         </div>
@@ -233,16 +233,16 @@ export default function PlaybookEditor({ playbook, onClose }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-bold text-gray-800 dark:text-white/90 m-0">
+          <h3 className="text-base font-bold text-swoop-text m-0">
             Customize: {playbook.name}
           </h3>
-          <p className="text-xs text-gray-400 mt-0.5 m-0">
+          <p className="text-xs text-swoop-text-label mt-0.5 m-0">
             Edit steps, reorder, add new actions, or reset to defaults.
           </p>
         </div>
         <button
           onClick={onClose}
-          className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer bg-transparent border-none dark:text-gray-400 dark:hover:text-gray-300 focus-visible:ring-2 focus-visible:ring-brand-500"
+          className="text-sm text-swoop-text-muted hover:text-swoop-text-2 cursor-pointer bg-transparent border-none focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           Done
         </button>
@@ -267,7 +267,7 @@ export default function PlaybookEditor({ playbook, onClose }) {
       {/* Add step */}
       <button
         onClick={handleAddStep}
-        className="w-full py-2 rounded-xl border-2 border-dashed border-gray-300 text-sm font-semibold text-gray-500 cursor-pointer bg-transparent hover:border-brand-400 hover:text-brand-500 transition-colors dark:border-gray-700 dark:text-gray-400"
+        className="w-full py-2 rounded-xl border-2 border-dashed border-swoop-border text-sm font-semibold text-swoop-text-muted cursor-pointer bg-transparent hover:border-brand-400 hover:text-brand-500 transition-colors"
       >
         + Add Step
       </button>
@@ -276,14 +276,14 @@ export default function PlaybookEditor({ playbook, onClose }) {
       <div className="flex gap-3">
         <button
           onClick={handleReset}
-          className="flex-1 py-2.5 rounded-lg border border-gray-200 font-semibold text-sm text-gray-600 cursor-pointer hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+          className="flex-1 py-2.5 rounded-lg border border-swoop-border font-semibold text-sm text-swoop-text-muted cursor-pointer hover:bg-swoop-row-hover"
         >
           Reset to Defaults
         </button>
         <button
           onClick={handleSave}
           className="flex-[2] py-2.5 rounded-lg font-bold text-sm text-white cursor-pointer"
-          style={{ background: '#ff8b00' }}
+          style={{ background: '#F3922D' }}
         >
           {saved ? 'Saved!' : 'Save Customizations'}
         </button>

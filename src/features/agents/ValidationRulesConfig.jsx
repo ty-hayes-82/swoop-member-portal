@@ -32,7 +32,7 @@ export default function ValidationRulesConfig({ rules, onChange }) {
 
   return (
     <section>
-      <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+      <h4 className="mb-2 text-sm font-medium text-swoop-text-2">
         Validation Rules
       </h4>
       <div className="space-y-3">
@@ -43,47 +43,47 @@ export default function ValidationRulesConfig({ rules, onChange }) {
           return (
             <div
               key={rule.id}
-              className={`rounded-md border p-3 ${enabled ? 'border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-900/20' : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'}`}
+              className={`rounded-md border p-3 ${enabled ? 'border-blue-300 bg-blue-50' : 'border-swoop-border bg-swoop-row'}`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => toggleRule(rule.id)}
-                    className={`relative h-5 w-9 rounded-full transition-colors ${enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}
+                    className={`relative h-5 w-9 rounded-full transition-colors ${enabled ? 'bg-blue-600' : 'bg-swoop-border'}`}
                   >
                     <span
-                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${enabled ? 'left-[18px]' : 'left-0.5'}`}
+                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-swoop-panel transition-transform ${enabled ? 'left-[18px]' : 'left-0.5'}`}
                     />
                   </button>
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    <span className="text-sm font-medium text-swoop-text">
                       {rule.label}
                     </span>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{rule.desc}</p>
+                    <p className="text-xs text-swoop-text-muted">{rule.desc}</p>
                   </div>
                 </div>
               </div>
 
               {enabled && (
                 <div className="mt-2 flex items-center gap-4 pl-11">
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                  <label className="flex items-center gap-1.5 text-xs text-swoop-text-muted">
                     <input
                       type="checkbox"
                       checked={ruleState?.retryOnFail || false}
                       onChange={(e) => updateRuleRetry(rule.id, 'retryOnFail', e.target.checked)}
-                      className="h-3.5 w-3.5 rounded border-gray-300"
+                      className="h-3.5 w-3.5 rounded border-swoop-border"
                     />
                     Retry on fail
                   </label>
                   {ruleState?.retryOnFail && (
-                    <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                    <label className="flex items-center gap-1.5 text-xs text-swoop-text-muted">
                       Max retries:
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
                           onClick={() => updateRuleRetry(rule.id, 'maxRetries', Math.max(1, (ruleState.maxRetries || 1) - 1))}
-                          className="h-5 w-5 rounded border border-gray-300 text-xs dark:border-gray-600"
+                          className="h-5 w-5 rounded border border-swoop-border text-xs"
                         >
                           -
                         </button>
@@ -91,7 +91,7 @@ export default function ValidationRulesConfig({ rules, onChange }) {
                         <button
                           type="button"
                           onClick={() => updateRuleRetry(rule.id, 'maxRetries', Math.min(3, (ruleState.maxRetries || 1) + 1))}
-                          className="h-5 w-5 rounded border border-gray-300 text-xs dark:border-gray-600"
+                          className="h-5 w-5 rounded border border-swoop-border text-xs"
                         >
                           +
                         </button>

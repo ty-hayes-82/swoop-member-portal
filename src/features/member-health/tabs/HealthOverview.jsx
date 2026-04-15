@@ -253,19 +253,19 @@ export default function HealthOverview() {
             <div
               key={d.level}
               onClick={() => { setHealthFilter(healthFilter === d.level ? null : d.level); setInnerTab('members'); }}
-              className="bg-white shadow-theme-xs rounded-xl p-4"
+              className="bg-swoop-panel shadow-theme-xs rounded-xl p-4"
               style={{ border: `1px solid ${d.color}40`, cursor: 'pointer', transition: 'box-shadow 0.15s, transform 0.15s, opacity 0.15s', opacity: 1 }}
             >
               <div className="flex justify-between mb-2">
-                <span className="text-xs text-gray-400 uppercase tracking-wide">{d.level}</span>
+                <span className="text-xs text-swoop-text-label uppercase tracking-wide">{d.level}</span>
                 <span className="text-xs" style={{ color: d.color }}>{(d.percentage * 100).toFixed(0)}%</span>
               </div>
               <div className="text-[28px] font-mono font-bold" style={{ color: d.color }}>{d.count}</div>
-              <div className="text-xs text-gray-400">members</div>
-              <div className="h-1 bg-gray-200 rounded-sm mt-2">
+              <div className="text-xs text-swoop-text-label">members</div>
+              <div className="h-1 bg-swoop-border rounded-sm mt-2">
                 <div className="h-full rounded-sm" style={{ background: d.color, width: `${d.percentage * 100}%` }} />
               </div>
-              <div className="mt-2 text-xs text-gray-500 leading-snug">
+              <div className="mt-2 text-xs text-swoop-text-muted leading-snug">
                 <strong>{d.count} members</strong> {descriptor} —{' '}
                 <span style={{ color: deltaColor }}>{deltaCopy}</span>
               </div>
@@ -279,7 +279,7 @@ export default function HealthOverview() {
 
         {/* Inner tab bar + Re-Score */}
         <div className="flex items-center justify-between mb-3.5">
-          <div className="flex gap-px bg-gray-100 border border-gray-200 rounded-lg p-[3px] dark:bg-gray-800 dark:border-gray-700">
+          <div className="flex gap-px bg-swoop-row border border-swoop-border rounded-lg p-[3px]">
             {[['members', 'Members'], ['email', 'Email Engagement']].map(([key, label]) => (
               <button
                 key={key}
@@ -287,15 +287,15 @@ export default function HealthOverview() {
                 onClick={() => setInnerTab(key)}
                 className={`px-4 py-[6px] rounded-[6px] text-[13px] font-semibold border-none transition-all duration-150 whitespace-nowrap cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-500 ${
                   innerTab === key
-                    ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
-                    : 'bg-transparent text-gray-500 hover:text-gray-700'
+                    ? 'bg-swoop-panel text-swoop-text shadow-theme-xs'
+                    : 'bg-transparent text-swoop-text-muted hover:text-swoop-text-2'
                 }`}
               >{label}</button>
             ))}
           </div>
           <div className="flex items-center gap-2">
             {rescoreMsg && (
-              <span className={`text-[11px] font-medium ${rescoreMsg.type === 'success' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+              <span className={`text-[11px] font-medium ${rescoreMsg.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
                 {rescoreMsg.text}
               </span>
             )}
@@ -303,10 +303,10 @@ export default function HealthOverview() {
               type="button"
               onClick={handleRescore}
               disabled={rescoring}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700 transition-colors cursor-pointer disabled:opacity-50 dark:bg-white/[0.03] dark:border-gray-700 dark:text-gray-400"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-swoop-border bg-swoop-panel text-swoop-text-muted hover:border-swoop-border hover:text-swoop-text-2 transition-colors cursor-pointer disabled:opacity-50"
             >
               {rescoring ? (
-                <span className="inline-block w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                <span className="inline-block w-3 h-3 border-2 border-swoop-border border-t-transparent rounded-full animate-spin" />
               ) : (
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -324,13 +324,13 @@ export default function HealthOverview() {
         {innerTab === 'members' && (
           <>
             {/* Filter bar */}
-            <div className="flex items-center gap-2 mb-2 px-2.5 py-[5px] bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-800/50 dark:border-gray-700" style={{ flexWrap: 'nowrap', overflow: 'hidden' }}>
+            <div className="flex items-center gap-2 mb-2 px-2.5 py-[5px] bg-swoop-row border border-swoop-border rounded-lg" style={{ flexWrap: 'nowrap', overflow: 'hidden' }}>
               {/* Archetype dropdown trigger */}
               <div className="shrink-0">
                 <button
                   type="button"
                   onClick={() => setArchetypePickerOpen(o => !o)}
-                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-white text-gray-600 cursor-pointer hover:border-gray-300 transition-colors whitespace-nowrap dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold border border-swoop-border bg-swoop-panel text-swoop-text-muted cursor-pointer hover:border-swoop-border transition-colors whitespace-nowrap"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
@@ -362,26 +362,26 @@ export default function HealthOverview() {
                 )}
                 {(healthFilter || archetypeFilter || showFirst90) && (
                   <button type="button" onClick={() => { setHealthFilter(null); setArchetypeFilter(null); setShowFirst90(false); }}
-                    className="text-[10px] text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer whitespace-nowrap shrink-0 dark:hover:text-gray-300">
+                    className="text-[10px] text-swoop-text-label hover:text-gray-600 bg-transparent border-none cursor-pointer whitespace-nowrap shrink-0">
                     Clear all
                   </button>
                 )}
               </div>
 
               {/* Member count */}
-              <span className="text-[11px] text-gray-400 shrink-0 whitespace-nowrap">
+              <span className="text-[11px] text-swoop-text-label shrink-0 whitespace-nowrap">
                 {filteredMembers.length === allMembers.length
                   ? `${allMembers.length} members`
                   : `${filteredMembers.length} of ${allMembers.length}`}
               </span>
 
-              <div className="w-px h-4 bg-gray-200 dark:bg-gray-600 shrink-0" />
+              <div className="w-px h-4 bg-swoop-border shrink-0" />
 
               <button type="button" onClick={() => setShowFirst90(f => !f)}
                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold border cursor-pointer whitespace-nowrap shrink-0 transition-colors ${
                   showFirst90
-                    ? 'border-blue-300 bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/30 dark:text-blue-400'
-                    : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400'
+                    ? 'border-blue-300 bg-blue-50 text-blue-700'
+                    : 'border-swoop-border bg-swoop-panel text-swoop-text-muted hover:border-swoop-border'
                 }`}>
                 🌱 First 90 Days
               </button>
@@ -389,7 +389,7 @@ export default function HealthOverview() {
 
             {/* Archetype pill shelf */}
             {archetypePickerOpen && (
-              <div className="flex flex-wrap gap-1.5 p-2 mb-2 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+              <div className="flex flex-wrap gap-1.5 p-2 mb-2 bg-swoop-panel border border-swoop-border rounded-lg">
                 {ARCHETYPES.map(a => {
                   const color = ARCHETYPE_COLORS[a] || '#6b7280';
                   const isActive = archetypeFilter === a;
@@ -406,17 +406,17 @@ export default function HealthOverview() {
             )}
 
             {/* Member table */}
-            <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+            <div className="border border-swoop-border rounded-xl overflow-hidden">
               <table className="w-full border-collapse text-sm">
                 <thead>
-                  <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                    <th className="py-2 text-[10px] text-gray-400 font-medium text-left" style={{ width: 28, paddingLeft: 14 }}>#</th>
-                    <th className="px-3 py-2 text-[10px] text-gray-400 font-medium text-left">Member</th>
-                    <th className="px-3 py-2 text-[10px] text-gray-400 font-medium text-left" style={{ width: 90 }}>Score</th>
-                    <th className="px-3 py-2 text-[10px] text-gray-400 font-medium text-left hidden sm:table-cell" style={{ width: 110 }}>Archetype</th>
-                    <th className="px-3 py-2 text-[10px] text-gray-400 font-medium text-left hidden md:table-cell">Signal</th>
-                    <th className="px-3 py-2 text-[10px] text-gray-400 font-medium text-left hidden sm:table-cell" style={{ width: 130 }}>Assign To</th>
-                    <th className="px-3 py-2 text-[10px] text-gray-400 font-medium text-center" style={{ width: 58 }}>Alerts</th>
+                  <tr className="bg-swoop-row border-b border-swoop-border">
+                    <th className="py-2 text-[10px] text-swoop-text-label font-medium text-left" style={{ width: 28, paddingLeft: 14 }}>#</th>
+                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left">Member</th>
+                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left" style={{ width: 90 }}>Score</th>
+                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left hidden sm:table-cell" style={{ width: 110 }}>Archetype</th>
+                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left hidden md:table-cell">Signal</th>
+                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left hidden sm:table-cell" style={{ width: 130 }}>Assign To</th>
+                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-center" style={{ width: 58 }}>Alerts</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -428,22 +428,22 @@ export default function HealthOverview() {
                     const ownerColor = OWNER_COLORS[m.owner] || '#6b7280';
                     const archetypeColor = ARCHETYPE_COLORS[m.archetype] || '#6b7280';
                     const rowBg = isExpanded
-                      ? 'bg-indigo-50/40 dark:bg-indigo-500/5'
+                      ? 'bg-indigo-50/40'
                       : idx % 2 === 0
-                        ? 'bg-white hover:bg-gray-50 dark:bg-transparent dark:hover:bg-white/[0.02]'
-                        : 'bg-gray-50/50 hover:bg-gray-50 dark:bg-white/[0.01] dark:hover:bg-white/[0.02]';
+                        ? 'bg-swoop-panel hover:bg-swoop-row-hover'
+                        : 'bg-gray-50/50 hover:bg-swoop-row-hover';
 
                     return (
                       <Fragment key={m.memberId}>
                         <tr onClick={() => setExpandedId(isExpanded ? null : m.memberId)}
-                          className={`border-t border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-150 ${rowBg}`}>
+                          className={`border-t border-swoop-border cursor-pointer transition-all duration-150 ${rowBg}`}>
                           <td className="py-2.5 text-[11px] font-mono font-bold text-center" style={{ paddingLeft: 14 }}>
                             {isExpanded
                               ? <span className="text-brand-500 text-[10px]">▼</span>
-                              : <span className="text-gray-400">{globalIdx + 1}</span>}
+                              : <span className="text-swoop-text-label">{globalIdx + 1}</span>}
                           </td>
                           <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
-                            <MemberLink memberId={m.memberId} mode="drawer" className="font-semibold text-sm text-[#1a1a2e] hover:text-brand-500 transition-colors dark:text-white/90">
+                            <MemberLink memberId={m.memberId} mode="drawer" className="font-semibold text-sm text-[#1a1a2e] hover:text-brand-500 transition-colors">
                               {m.name}
                             </MemberLink>
                           </td>
@@ -452,7 +452,7 @@ export default function HealthOverview() {
                               <span className="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded shrink-0" style={{ color: sc, background: sc + '15' }}>
                                 {m.score}
                               </span>
-                              <div className="flex-1 h-[3px] bg-gray-100 dark:bg-gray-700 rounded-full" style={{ minWidth: 24, maxWidth: 40 }}>
+                              <div className="flex-1 h-[3px] bg-swoop-row rounded-full" style={{ minWidth: 24, maxWidth: 40 }}>
                                 <div className="h-full rounded-full" style={{ width: `${Math.min(100, m.score)}%`, background: sc }} />
                               </div>
                             </div>
@@ -462,7 +462,7 @@ export default function HealthOverview() {
                               {m.archetype}
                             </span>
                           </td>
-                          <td className="px-3 py-2.5 text-xs text-gray-500 dark:text-gray-400 hidden md:table-cell" style={{ maxWidth: 260 }}>
+                          <td className="px-3 py-2.5 text-xs text-swoop-text-muted hidden md:table-cell" style={{ maxWidth: 260 }}>
                             <span className="line-clamp-1">{m.reason}</span>
                           </td>
                           <td className="px-3 py-2.5 hidden sm:table-cell">
@@ -474,7 +474,7 @@ export default function HealthOverview() {
                             {hasEmailDecay && (
                               <div className="relative group inline-flex justify-center">
                                 <span className="text-sm cursor-default select-none">✉</span>
-                                <div className="hidden group-hover:block absolute right-0 top-full mt-1 z-10 w-48 p-2 bg-gray-900 text-white text-[10px] rounded-lg shadow-xl pointer-events-none">
+                                <div className="hidden group-hover:block absolute right-0 top-full mt-1 z-10 w-48 p-2 bg-swoop-canvas text-white text-[10px] rounded-lg shadow-xl pointer-events-none">
                                   <div className="font-bold mb-1 text-yellow-300">⚠ Email Decay</div>
                                   <div>Open {m.name.split(' ')[0]}&apos;s profile to review the engagement trend and take action.</div>
                                 </div>
@@ -484,16 +484,16 @@ export default function HealthOverview() {
                         </tr>
 
                         {isExpanded && (
-                          <tr className="bg-[#f8faff] dark:bg-gray-800/30">
-                            <td colSpan={7} className="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+                          <tr className="bg-[#f8faff]">
+                            <td colSpan={7} className="px-4 py-3 border-t border-swoop-border-inset">
                               <div className="flex gap-8 flex-wrap items-start mb-3 pl-6">
                                 <div>
-                                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">Signal</div>
-                                  <div className="text-xs text-gray-600 dark:text-gray-300 max-w-sm">{m.reason}</div>
+                                  <div className="text-[10px] font-bold text-swoop-text-label uppercase tracking-wide mb-1">Signal</div>
+                                  <div className="text-xs text-swoop-text-muted max-w-sm">{m.reason}</div>
                                 </div>
                                 <div>
-                                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">Recommended Action</div>
-                                  <div className="text-xs text-gray-600 dark:text-gray-300 max-w-sm">{m.action}</div>
+                                  <div className="text-[10px] font-bold text-swoop-text-label uppercase tracking-wide mb-1">Recommended Action</div>
+                                  <div className="text-xs text-swoop-text-muted max-w-sm">{m.action}</div>
                                   <span className="mt-1.5 inline-block text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ color: OWNER_COLORS[m.owner] || '#6b7280', background: (OWNER_COLORS[m.owner] || '#6b7280') + '18' }}>
                                     {m.owner}
                                   </span>
@@ -523,12 +523,12 @@ export default function HealthOverview() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-2 px-1">
-                <span className="text-[11px] text-gray-400">
+                <span className="text-[11px] text-swoop-text-label">
                   Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredMembers.length)} of {filteredMembers.length} members
                 </span>
                 <div className="flex items-center gap-1">
                   <button type="button" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                    className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-gray-200 bg-white text-gray-500 cursor-pointer hover:border-gray-300 disabled:opacity-40 disabled:cursor-default transition-colors dark:bg-white/[0.03] dark:border-gray-700 dark:text-gray-400">
+                    className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-swoop-border bg-swoop-panel text-swoop-text-muted cursor-pointer hover:border-swoop-border disabled:opacity-40 disabled:cursor-default transition-colors">
                     ← Prev
                   </button>
                   {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
@@ -541,12 +541,12 @@ export default function HealthOverview() {
                     const prevP = i > 0 ? (totalPages <= 7 ? i : [...new Set([1, totalPages, page - 1, page, page + 1].filter(x => x >= 1 && x <= totalPages))].sort((a,b)=>a-b)[i-1]) : null;
                     return (
                       <Fragment key={p}>
-                        {prevP && p - prevP > 1 && <span className="text-[11px] text-gray-300 px-0.5">…</span>}
+                        {prevP && p - prevP > 1 && <span className="text-[11px] text-swoop-text-ghost px-0.5">…</span>}
                         <button type="button" onClick={() => setPage(p)}
                           className={`w-7 h-7 text-[11px] font-semibold rounded-md border cursor-pointer transition-colors ${
                             p === page
                               ? 'bg-brand-500 text-white border-brand-500'
-                              : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 dark:bg-white/[0.03] dark:border-gray-700 dark:text-gray-400'
+                              : 'bg-swoop-panel border-swoop-border text-swoop-text-muted hover:border-swoop-border'
                           }`}>
                           {p}
                         </button>
@@ -554,7 +554,7 @@ export default function HealthOverview() {
                     );
                   })}
                   <button type="button" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                    className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-gray-200 bg-white text-gray-500 cursor-pointer hover:border-gray-300 disabled:opacity-40 disabled:cursor-default transition-colors dark:bg-white/[0.03] dark:border-gray-700 dark:text-gray-400">
+                    className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-swoop-border bg-swoop-panel text-swoop-text-muted cursor-pointer hover:border-swoop-border disabled:opacity-40 disabled:cursor-default transition-colors">
                     Next →
                   </button>
                 </div>

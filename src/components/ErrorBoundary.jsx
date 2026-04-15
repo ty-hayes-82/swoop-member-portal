@@ -88,11 +88,11 @@ export default class ErrorBoundary extends Component {
           : this.props.fallback;
       }
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 font-sans">
+        <div className="min-h-screen flex items-center justify-center bg-swoop-row font-sans">
           <div className="max-w-md text-center p-8">
             <div className="text-4xl mb-4">&#x26A0;&#xFE0F;</div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white/90 mb-2">Something went wrong</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            <h1 className="text-xl font-bold text-swoop-text mb-2">Something went wrong</h1>
+            <p className="text-sm text-swoop-text-muted mb-6">
               An unexpected error occurred. Try going back to the dashboard or refreshing the page.
             </p>
             <div className="flex gap-3 justify-center">
@@ -104,7 +104,7 @@ export default class ErrorBoundary extends Component {
               </button>
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-3 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
+                className="px-6 py-3 rounded-lg border border-swoop-border bg-swoop-panel text-swoop-text-2 text-sm font-semibold hover:bg-swoop-row-hover transition-colors cursor-pointer"
               >
                 Refresh Page
               </button>
@@ -132,13 +132,13 @@ function ErrorDetails({ error }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="text-xs text-gray-400 cursor-pointer bg-transparent border-none p-0 flex items-center gap-1"
+        className="text-xs text-swoop-text-label cursor-pointer bg-transparent border-none p-0 flex items-center gap-1"
       >
         <span className="inline-block transition-transform duration-150" style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}>&#x25B6;</span>
         Error details
       </button>
       {open && (
-        <pre className="mt-2 text-xs text-error-500 bg-error-50 dark:bg-error-500/10 p-3 rounded-lg overflow-auto max-h-40">
+        <pre className="mt-2 text-xs text-error-500 bg-error-50 p-3 rounded-lg overflow-auto max-h-40">
           {error.toString()}
         </pre>
       )}
@@ -184,8 +184,8 @@ export class RouteErrorBoundary extends Component {
       return (
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-center">
           <div className="text-3xl">&#x26A0;&#xFE0F;</div>
-          <h2 className="text-lg font-bold text-gray-800">Page failed to load</h2>
-          <p className="text-sm text-gray-500 max-w-sm">
+          <h2 className="text-lg font-bold text-swoop-text">Page failed to load</h2>
+          <p className="text-sm text-swoop-text-muted max-w-sm">
             This page encountered an error. You can try navigating elsewhere or refreshing.
           </p>
           <div className="flex gap-3">
@@ -200,7 +200,7 @@ export class RouteErrorBoundary extends Component {
             </button>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-lg border border-swoop-border bg-swoop-panel text-swoop-text-2 text-sm font-semibold hover:bg-swoop-row-hover transition-colors cursor-pointer"
             >
               Refresh
             </button>

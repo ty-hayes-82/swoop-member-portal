@@ -103,18 +103,18 @@ export default function ConciergeChatPage() {
   const isEmpty = messages.length === 0 && !loading;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100" style={{ height: '100dvh' }}>
+    <div className="flex flex-col h-screen bg-swoop-row" style={{ height: '100dvh' }}>
       {/* Header */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 safe-area-top">
+      <div className="flex-shrink-0 bg-swoop-panel border-b border-swoop-border px-4 py-3 flex items-center gap-3 safe-area-top">
         <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-sm">
           PC
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-gray-900 text-sm">Pinetree CC Concierge</div>
-          <div className="text-xs text-gray-500">James Whitfield</div>
+          <div className="font-semibold text-swoop-text text-sm">Pinetree CC Concierge</div>
+          <div className="text-xs text-swoop-text-muted">James Whitfield</div>
         </div>
         {messages.length > 0 && (
-          <button onClick={clearChat} className="text-xs text-gray-400 hover:text-red-500 px-2 py-1">
+          <button onClick={clearChat} className="text-xs text-swoop-text-label hover:text-red-500 px-2 py-1">
             Clear
           </button>
         )}
@@ -127,7 +127,7 @@ export default function ConciergeChatPage() {
             <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
               <span className="text-2xl">&#127965;</span>
             </div>
-            <p className="text-gray-500 text-sm text-center">
+            <p className="text-swoop-text-muted text-sm text-center">
               Welcome to Pinetree Country Club. How can I help you today?
             </p>
             <div className="flex flex-col gap-2 w-full max-w-xs">
@@ -135,7 +135,7 @@ export default function ConciergeChatPage() {
                 <button
                   key={msg}
                   onClick={() => send(msg)}
-                  className="text-left text-sm bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                  className="text-left text-sm bg-swoop-panel border border-swoop-border rounded-xl px-4 py-3 text-swoop-text-2 hover:bg-swoop-row-hover active:bg-gray-100 transition-colors"
                 >
                   {msg}
                 </button>
@@ -150,11 +150,11 @@ export default function ConciergeChatPage() {
               className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
                 msg.role === 'user'
                   ? 'bg-blue-500 text-white rounded-br-md'
-                  : 'bg-white text-gray-900 rounded-bl-md shadow-sm'
+                  : 'bg-swoop-panel text-swoop-text rounded-bl-md shadow-sm'
               }`}
             >
               <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-              <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
+              <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-blue-100' : 'text-swoop-text-label'}`}>
                 {msg.time}
               </p>
             </div>
@@ -163,9 +163,9 @@ export default function ConciergeChatPage() {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+            <div className="bg-swoop-panel rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
               <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-500">Concierge is typing</span>
+                <span className="text-xs text-swoop-text-muted">Concierge is typing</span>
                 <span className="flex gap-0.5">
                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -186,7 +186,7 @@ export default function ConciergeChatPage() {
             <button
               key={i}
               onClick={() => send(msg)}
-              className="whitespace-nowrap text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full px-3 py-1.5 transition-colors flex-shrink-0"
+              className="whitespace-nowrap text-xs bg-swoop-border hover:bg-gray-300 text-swoop-text-2 rounded-full px-3 py-1.5 transition-colors flex-shrink-0"
             >
               {msg}
             </button>
@@ -197,7 +197,7 @@ export default function ConciergeChatPage() {
       {/* Input bar */}
       <form
         onSubmit={handleSubmit}
-        className="flex-shrink-0 bg-white border-t border-gray-200 px-3 py-2 flex items-end gap-2 safe-area-bottom"
+        className="flex-shrink-0 bg-swoop-panel border-t border-swoop-border px-3 py-2 flex items-end gap-2 safe-area-bottom"
       >
         <input
           ref={inputRef}
@@ -206,7 +206,7 @@ export default function ConciergeChatPage() {
           onChange={e => setInput(e.target.value)}
           placeholder="Message concierge..."
           disabled={loading}
-          className="flex-1 rounded-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-50"
+          className="flex-1 rounded-full border border-swoop-border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-50"
           autoComplete="off"
         />
         <button
@@ -221,8 +221,8 @@ export default function ConciergeChatPage() {
       </form>
 
       {/* Powered by badge */}
-      <div className="flex-shrink-0 bg-white text-center py-1.5">
-        <span className="text-[10px] text-gray-400 tracking-wide">Powered by <span className="font-semibold text-gray-500">Swoop AI</span></span>
+      <div className="flex-shrink-0 bg-swoop-panel text-center py-1.5">
+        <span className="text-[10px] text-swoop-text-label tracking-wide">Powered by <span className="font-semibold text-swoop-text-muted">Swoop AI</span></span>
       </div>
     </div>
   );

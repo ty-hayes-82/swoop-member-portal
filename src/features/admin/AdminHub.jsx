@@ -91,14 +91,14 @@ export default function AdminHub() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-bold m-0 text-gray-800 dark:text-white/90">Admin</h1>
-        <p className="text-sm text-gray-500 mt-1 mb-0">
+        <h1 className="text-xl font-bold m-0 text-swoop-text">Admin</h1>
+        <p className="text-sm text-swoop-text-muted mt-1 mb-0">
           Integrations and data health monitoring.
         </p>
       </div>
 
       {/* Tab navigation */}
-      <div role="tablist" aria-label="Admin tabs" className="flex gap-1 rounded-lg bg-gray-100 p-0.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-x-auto">
+      <div role="tablist" aria-label="Admin tabs" className="flex gap-1 rounded-lg bg-swoop-row p-0.5 border border-swoop-border overflow-x-auto">
         {ADMIN_TABS.map(tab => (
           <button
             key={tab.key}
@@ -107,8 +107,8 @@ export default function AdminHub() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all duration-150 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-500 ${
               activeTab === tab.key
-                ? 'bg-white text-gray-800 shadow-theme-xs dark:bg-gray-700 dark:text-white'
-                : 'bg-transparent text-gray-500 hover:text-gray-700'
+                ? 'bg-swoop-panel text-swoop-text shadow-theme-xs'
+                : 'bg-transparent text-swoop-text-muted hover:text-swoop-text-2'
             }`}
           >
             <span className="text-sm">{tab.icon}</span>
@@ -177,8 +177,8 @@ function DataHubTab({ clubId }) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-white/90">Data Hub</h2>
-        <p className="text-sm text-gray-500 mt-1 mb-0">
+        <h2 className="text-lg font-bold m-0 text-swoop-text">Data Hub</h2>
+        <p className="text-sm text-swoop-text-muted mt-1 mb-0">
           Connect data sources, upload CSVs, and see what intelligence each connection unlocks.
         </p>
       </div>
@@ -192,14 +192,14 @@ function DataHubTab({ clubId }) {
                 <span className="text-[10px] font-bold uppercase tracking-widest text-brand-500">Next Intelligence Unlock</span>
                 <SourceBadge system={unlockImpact.sourceSystem} size="xs" />
               </div>
-              <h3 className="text-base font-bold m-0 text-gray-800 dark:text-white/90">
+              <h3 className="text-base font-bold m-0 text-swoop-text">
                 Connect {unlockImpact.label} to unlock {unlockPct}% more platform value
               </h3>
-              <div className="mt-1 text-xs font-semibold text-warning-600 dark:text-warning-400">
+              <div className="mt-1 text-xs font-semibold text-warning-600">
                 {unlockImpact.dollar}
               </div>
-              <div className="mt-3 text-[11px] uppercase tracking-wide text-gray-400">Would enable:</div>
-              <ul className="text-xs text-gray-700 dark:text-gray-300 m-0 pl-4 leading-snug mt-1">
+              <div className="mt-3 text-[11px] uppercase tracking-wide text-swoop-text-label">Would enable:</div>
+              <ul className="text-xs text-swoop-text-2 m-0 pl-4 leading-snug mt-1">
                 {unlockImpact.features.map(f => (
                   <li key={f}>{f}</li>
                 ))}
@@ -219,7 +219,7 @@ function DataHubTab({ clubId }) {
       {/* Live System Health — consumes apiHealthService.getHealthRollup() */}
       <Card>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-bold m-0 text-gray-800 dark:text-white/90">Live System Health</h3>
+          <h3 className="text-base font-bold m-0 text-swoop-text">Live System Health</h3>
           {health && (
             <Badge
               color={health.overall === 'ok' ? 'success' : health.overall === 'degraded' ? 'warning' : 'light'}
@@ -231,23 +231,23 @@ function DataHubTab({ clubId }) {
         </div>
 
         {healthLoading ? (
-          <div className="text-xs text-gray-400">Checking /api/health...</div>
+          <div className="text-xs text-swoop-text-label">Checking /api/health...</div>
         ) : !health || health.overall === 'unknown' ? (
-          <div className="text-xs text-gray-500">
-            Health endpoint unreachable or returned no data. The app is still usable — this card will populate once <code className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-800">/api/health</code> responds.
+          <div className="text-xs text-swoop-text-muted">
+            Health endpoint unreachable or returned no data. The app is still usable — this card will populate once <code className="px-1 py-0.5 rounded bg-swoop-row">/api/health</code> responds.
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel">
               <div className="flex items-center gap-2">
                 <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold ${
                   health.db?.status === 'ok' ? 'bg-success-500/10 text-success-600' : 'bg-error-500/10 text-error-600'
                 }`}>
                   {health.db?.status === 'ok' ? '✓' : '!'}
                 </span>
-                <span className="text-sm font-semibold text-gray-800 dark:text-white/90">Database</span>
+                <span className="text-sm font-semibold text-swoop-text">Database</span>
               </div>
-              <div className="text-[11px] text-gray-500">
+              <div className="text-[11px] text-swoop-text-muted">
                 {health.db?.status === 'ok'
                   ? `Connected${health.db.latencyMs != null ? ` · ${health.db.latencyMs} ms` : ''}`
                   : 'Connection failed'}
@@ -255,27 +255,27 @@ function DataHubTab({ clubId }) {
             </div>
 
             {health.integrations.length === 0 ? (
-              <div className="text-[11px] text-gray-500 px-3 py-2">No integrations reported by health endpoint.</div>
+              <div className="text-[11px] text-swoop-text-muted px-3 py-2">No integrations reported by health endpoint.</div>
             ) : (
               health.integrations.map(intg => (
-                <div key={intg.key || intg.name} className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div key={intg.key || intg.name} className="flex items-center justify-between px-3 py-2 rounded-lg border border-swoop-border bg-swoop-panel">
                   <div className="flex items-center gap-2">
                     <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold ${
                       intg.status === 'ok' ? 'bg-success-500/10 text-success-600'
                         : intg.status === 'stale' ? 'bg-warning-500/10 text-warning-600'
-                          : 'bg-gray-400/10 text-gray-500'
+                          : 'bg-gray-400/10 text-swoop-text-muted'
                     }`}>
                       {intg.badge}
                     </span>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{intg.name}</span>
+                    <span className="text-sm font-semibold text-swoop-text">{intg.name}</span>
                   </div>
-                  <div className="text-[11px] text-gray-500 text-right max-w-[60%] truncate" title={intg.hint}>{intg.hint}</div>
+                  <div className="text-[11px] text-swoop-text-muted text-right max-w-[60%] truncate" title={intg.hint}>{intg.hint}</div>
                 </div>
               ))
             )}
 
             {health.fetchedAt && (
-              <div className="text-[10px] text-gray-400 mt-1">
+              <div className="text-[10px] text-swoop-text-label mt-1">
                 Fetched {new Date(health.fetchedAt).toLocaleTimeString()}
               </div>
             )}
@@ -287,10 +287,10 @@ function DataHubTab({ clubId }) {
       <ConnectedSourcesCard />
 
       {/* CSV Upload link */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 rounded-xl p-4 bg-brand-50 border border-brand-200 dark:bg-brand-500/5 dark:border-brand-500/20">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 rounded-xl p-4 bg-brand-50 border border-brand-200">
         <div>
-          <div className="font-bold text-sm text-gray-800 dark:text-white/90">Manual Data Upload</div>
-          <div className="text-xs text-gray-500">Upload CSV files for members, rounds, transactions, or complaints when API access isn&rsquo;t available.</div>
+          <div className="font-bold text-sm text-swoop-text">Manual Data Upload</div>
+          <div className="text-xs text-swoop-text-muted">Upload CSV files for members, rounds, transactions, or complaints when API access isn&rsquo;t available.</div>
         </div>
         <button onClick={() => navigate('csv-import')} className="px-4 py-2 rounded-lg border-none bg-brand-500 text-white font-bold text-xs cursor-pointer shrink-0 self-start sm:self-auto focus-visible:ring-2 focus-visible:ring-brand-500">Open Upload Tool</button>
       </div>
@@ -305,13 +305,13 @@ function ConnectedSourcesCard() {
   return (
     <>
       <Card>
-        <h3 className="text-base font-bold mb-3 m-0 text-gray-800 dark:text-white/90">Connected Sources</h3>
+        <h3 className="text-base font-bold mb-3 m-0 text-swoop-text">Connected Sources</h3>
         {isLoading && !systems ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" aria-busy="true">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="px-3.5 py-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800 animate-pulse h-[82px]"
+                className="px-3.5 py-3 rounded-lg border border-swoop-border bg-swoop-row animate-pulse h-[82px]"
               />
             ))}
           </div>
@@ -320,16 +320,16 @@ function ConnectedSourcesCard() {
           {sources.map(source => (
             <div key={source.id} className={`px-3.5 py-3 rounded-lg border ${
               source.status === 'connected'
-                ? 'border-success-300 bg-success-50 dark:border-success-500/30 dark:bg-success-500/5'
-                : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
+                ? 'border-success-300 bg-success-50'
+                : 'border-swoop-border bg-swoop-row'
             }`}>
               <div className="flex justify-between items-center mb-1.5">
-                <span className="text-lg font-bold text-gray-400">{source.logo}</span>
+                <span className="text-lg font-bold text-swoop-text-label">{source.logo}</span>
                 <Badge color={source.status === 'connected' ? 'success' : 'light'} size="sm">{source.status}</Badge>
               </div>
-              <div className="font-semibold text-sm text-gray-800 dark:text-white/90">{source.name}</div>
-              <div className="text-[11px] text-gray-500 mt-0.5">{source.category}</div>
-              {source.status === 'connected' && source.lastSync && <div className="text-[11px] text-success-600 dark:text-success-400 mt-1">Synced {source.lastSync}</div>}
+              <div className="font-semibold text-sm text-swoop-text">{source.name}</div>
+              <div className="text-[11px] text-swoop-text-muted mt-0.5">{source.category}</div>
+              {source.status === 'connected' && source.lastSync && <div className="text-[11px] text-success-600 mt-1">Synced {source.lastSync}</div>}
             </div>
           ))}
         </div>
@@ -351,23 +351,23 @@ function ActivityLogTab({ clubId }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-white/90">Activity Log</h2>
-        <p className="text-sm text-gray-500 mt-1 mb-0">
+        <h2 className="text-lg font-bold m-0 text-swoop-text">Activity Log</h2>
+        <p className="text-sm text-swoop-text-muted mt-1 mb-0">
           Every action taken in the platform — approvals, dismissals, outreach, imports, and system events.
         </p>
       </div>
       {entries.length === 0 ? (
-        <div className="p-8 text-center text-gray-400 text-sm">
+        <div className="p-8 text-center text-swoop-text-label text-sm">
           No activity logged yet. Actions will appear here as you use the platform.
         </div>
       ) : (
         entries.map((entry, i) => (
-          <div key={i} className="flex justify-between items-start px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+          <div key={i} className="flex justify-between items-start px-3.5 py-2.5 rounded-lg border border-swoop-border bg-swoop-panel">
             <div>
-              <div className="font-semibold text-sm text-gray-800 dark:text-white/90">{entry.type || entry.description}</div>
-              <div className="text-xs text-gray-500">{entry.memberName || entry.detail || ''}</div>
+              <div className="font-semibold text-sm text-swoop-text">{entry.type || entry.description}</div>
+              <div className="text-xs text-swoop-text-muted">{entry.memberName || entry.detail || ''}</div>
             </div>
-            <div className="text-[11px] text-gray-500 whitespace-nowrap">
+            <div className="text-[11px] text-swoop-text-muted whitespace-nowrap">
               {entry.timestamp ? new Date(entry.timestamp).toLocaleString() : ''}
             </div>
           </div>
@@ -391,35 +391,35 @@ function UserRolesTab() {
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-white/90">User Roles</h2>
-          <p className="text-sm text-gray-500 mt-1 mb-0">
+          <h2 className="text-lg font-bold m-0 text-swoop-text">User Roles</h2>
+          <p className="text-sm text-swoop-text-muted mt-1 mb-0">
             Manage team access and role assignments.
           </p>
         </div>
-        <button className="px-4 py-2 rounded-lg border border-brand-500 bg-brand-50 text-brand-500 font-bold text-sm cursor-pointer dark:bg-brand-500/5">
+        <button className="px-4 py-2 rounded-lg border border-brand-500 bg-brand-50 text-brand-500 font-bold text-sm cursor-pointer">
           + Invite User
         </button>
       </div>
 
-      <div className="border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800 overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="border border-swoop-border rounded-xl overflow-hidden overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         <table className="w-full border-collapse text-sm min-w-[600px]">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+            <tr className="bg-swoop-row border-b border-swoop-border">
               {['Name', 'Email', 'Role', 'Status', 'Last Active'].map(h => (
-                <th key={h} className="px-3.5 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                <th key={h} className="px-3.5 py-2.5 text-left text-xs font-semibold text-swoop-text-muted uppercase tracking-wide">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {teamMembers.map((m, i) => (
-              <tr key={m.email} className={`bg-white dark:bg-white/[0.03] ${i < teamMembers.length - 1 ? 'border-b border-gray-200 dark:border-gray-800' : ''}`}>
-                <td className="px-3.5 py-3 font-semibold text-gray-800 dark:text-white/90">{m.name}</td>
-                <td className="px-3.5 py-3 text-gray-500">{m.email}</td>
+              <tr key={m.email} className={`bg-swoop-panel ${i < teamMembers.length - 1 ? 'border-b border-swoop-border' : ''}`}>
+                <td className="px-3.5 py-3 font-semibold text-swoop-text">{m.name}</td>
+                <td className="px-3.5 py-3 text-swoop-text-muted">{m.email}</td>
                 <td className="px-3.5 py-3">
                   <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
                     m.role === 'General Manager'
-                      ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/10'
-                      : 'bg-blue-50 text-blue-500 dark:bg-blue-500/10'
+                      ? 'bg-brand-50 text-brand-500'
+                      : 'bg-blue-50 text-blue-500'
                   }`}>{m.role}</span>
                 </td>
                 <td className="px-3.5 py-3">
@@ -432,7 +432,7 @@ function UserRolesTab() {
                     {m.status}
                   </span>
                 </td>
-                <td className="px-3.5 py-3 text-gray-500 text-xs">{m.lastActive}</td>
+                <td className="px-3.5 py-3 text-swoop-text-muted text-xs">{m.lastActive}</td>
               </tr>
             ))}
           </tbody>
@@ -440,12 +440,12 @@ function UserRolesTab() {
       </div>
 
       {/* Account section */}
-      <div className="border-t border-gray-200 dark:border-gray-800 pt-4 mt-2">
-        <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+      <div className="border-t border-swoop-border pt-4 mt-2">
+        <div className="text-xs font-bold text-swoop-text-muted uppercase tracking-wide mb-2">
           Your Account
         </div>
-        <div className="border border-gray-200 rounded-xl bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-          <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-white/90">
+        <div className="border border-swoop-border rounded-xl bg-swoop-panel p-4">
+          <div className="flex flex-col gap-2 text-sm text-swoop-text">
             <div><strong>Signed in as:</strong> {user.name || '—'} ({user.role || '—'})</div>
             <div><strong>Email:</strong> {user.email || '—'}</div>
             <div><strong>Club ID:</strong> {user.clubId || 'Demo Mode'}</div>
@@ -458,7 +458,7 @@ function UserRolesTab() {
             localStorage.removeItem('swoop_club_id');
             window.location.reload();
           }}
-          className="mt-2 px-4 py-2 rounded-lg border border-error-300 bg-error-50 text-error-600 font-semibold text-xs cursor-pointer dark:bg-error-500/5 dark:border-error-500/30"
+          className="mt-2 px-4 py-2 rounded-lg border border-error-300 bg-error-50 text-error-600 font-semibold text-xs cursor-pointer"
         >Sign Out</button>
       </div>
     </div>
@@ -495,24 +495,24 @@ function WeatherStatusBadge({ city, clubId }) {
   };
 
   const pill = {
-    null:         { dot: 'bg-gray-300',                   text: 'text-gray-400',  label: 'Weather' },
-    checking:     { dot: 'bg-yellow-400 animate-pulse',   text: 'text-yellow-600 dark:text-yellow-400', label: 'Checking…' },
-    connected:    { dot: 'bg-success-500',                text: 'text-success-600 dark:text-success-400', label: 'Weather connected' },
-    'no-location':{ dot: 'bg-gray-300',                   text: 'text-gray-400',  label: 'No location set' },
-    error:        { dot: 'bg-error-400',                  text: 'text-error-600 dark:text-error-400', label: 'Weather unavailable' },
-  }[status] ?? { dot: 'bg-gray-300', text: 'text-gray-400', label: 'Weather' };
+    null:         { dot: 'bg-swoop-border',                   text: 'text-swoop-text-label',  label: 'Weather' },
+    checking:     { dot: 'bg-yellow-400 animate-pulse',   text: 'text-yellow-600', label: 'Checking…' },
+    connected:    { dot: 'bg-success-500',                text: 'text-success-600', label: 'Weather connected' },
+    'no-location':{ dot: 'bg-swoop-border',                   text: 'text-swoop-text-label',  label: 'No location set' },
+    error:        { dot: 'bg-error-400',                  text: 'text-error-600', label: 'Weather unavailable' },
+  }[status] ?? { dot: 'bg-swoop-border', text: 'text-swoop-text-label', label: 'Weather' };
 
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-1.5">
         <span className={`inline-block w-2 h-2 rounded-full ${pill.dot}`} />
         <span className={`text-xs font-semibold ${pill.text}`}>{pill.label}</span>
-        {detail && <span className="text-xs text-gray-400">{detail}</span>}
+        {detail && <span className="text-xs text-swoop-text-label">{detail}</span>}
       </div>
       <button
         onClick={check}
         disabled={status === 'checking'}
-        className="px-2.5 py-1 rounded-md border border-gray-200 bg-white text-gray-600 text-[11px] font-semibold hover:bg-gray-50 transition disabled:opacity-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+        className="px-2.5 py-1 rounded-md border border-swoop-border bg-swoop-panel text-swoop-text-muted text-[11px] font-semibold hover:bg-swoop-row-hover transition disabled:opacity-50"
       >
         {status === 'checking' ? '…' : 'Test'}
       </button>
@@ -569,33 +569,33 @@ function ClubSettingsEditor({ club, onSaved }) {
     setSaving(false);
   };
 
-  const inputCls = 'h-9 w-full rounded-lg border px-3 py-2 text-sm bg-white text-gray-800 border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 dark:bg-gray-800 dark:text-white/90 dark:border-gray-700';
+  const inputCls = 'h-9 w-full rounded-lg border px-3 py-2 text-sm bg-swoop-panel text-swoop-text border-swoop-border focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400';
 
   return (
     <Card>
       <div className="flex flex-col gap-3">
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white/90 m-0">Club Settings</h3>
-        {err && <p className="text-xs text-error-600 dark:text-error-400">{err}</p>}
+        <h3 className="text-sm font-bold text-swoop-text m-0">Club Settings</h3>
+        {err && <p className="text-xs text-error-600">{err}</p>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">Club Name</label>
+            <label className="text-xs font-semibold text-swoop-text-muted block mb-1">Club Name</label>
             <input value={name} onChange={e => setName(e.target.value)} className={inputCls} />
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">Founded Year</label>
+            <label className="text-xs font-semibold text-swoop-text-muted block mb-1">Founded Year</label>
             <input type="number" value={foundedYear} onChange={e => setFoundedYear(e.target.value)} placeholder="e.g. 1965" className={inputCls} />
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">City</label>
+            <label className="text-xs font-semibold text-swoop-text-muted block mb-1">City</label>
             <input value={city} onChange={e => setCity(e.target.value)} placeholder="Scottsdale" className={inputCls} />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">State</label>
+              <label className="text-xs font-semibold text-swoop-text-muted block mb-1">State</label>
               <input value={state} onChange={e => setState(e.target.value)} maxLength={2} placeholder="AZ" className={inputCls} />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">ZIP</label>
+              <label className="text-xs font-semibold text-swoop-text-muted block mb-1">ZIP</label>
               <input value={zip} onChange={e => setZip(e.target.value)} placeholder="85255" className={inputCls} />
             </div>
           </div>
@@ -731,8 +731,8 @@ function ClubManagementTab({ currentClubId }) {
 
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-white/90">Club Management</h2>
-          <p className="text-sm text-gray-500 mt-1 mb-0">
+          <h2 className="text-lg font-bold m-0 text-swoop-text">Club Management</h2>
+          <p className="text-sm text-swoop-text-muted mt-1 mb-0">
             View all clubs in the database, switch between them, or clean up test data.
           </p>
         </div>
@@ -766,39 +766,39 @@ function ClubManagementTab({ currentClubId }) {
           >
             + New Club
           </button>
-          <button onClick={fetchClubs} className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 font-semibold text-xs cursor-pointer hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">
+          <button onClick={fetchClubs} className="px-3 py-1.5 rounded-lg border border-swoop-border bg-swoop-panel text-swoop-text-muted font-semibold text-xs cursor-pointer hover:bg-swoop-row-hover">
             Refresh
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="px-3.5 py-2.5 rounded-lg bg-error-50 text-error-700 text-sm font-medium dark:bg-error-500/10 dark:text-error-400">
+        <div className="px-3.5 py-2.5 rounded-lg bg-error-50 text-error-700 text-sm font-medium">
           {error}
         </div>
       )}
       {success && (
-        <div className="px-3.5 py-2.5 rounded-lg bg-success-50 text-success-700 text-sm font-medium dark:bg-success-500/10 dark:text-success-400">
+        <div className="px-3.5 py-2.5 rounded-lg bg-success-50 text-success-700 text-sm font-medium">
           {success}
         </div>
       )}
 
       {loading ? (
-        <div className="text-center py-8 text-gray-400 text-sm">Loading clubs...</div>
+        <div className="text-center py-8 text-swoop-text-label text-sm">Loading clubs...</div>
       ) : clubs.length === 0 ? (
         <Card>
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8 text-swoop-text-label">
             <div className="text-3xl mb-2">🏌️</div>
             <div className="text-sm font-medium">No clubs found in database</div>
           </div>
         </Card>
       ) : (
-        <div className="border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800 overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="border border-swoop-border rounded-xl overflow-hidden overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="w-full border-collapse text-sm min-w-[700px]">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+              <tr className="bg-swoop-row border-b border-swoop-border">
                 {['Club ID', 'Name', 'Location', 'Members', 'Last Activity', 'Actions'].map(h => (
-                  <th key={h} className="px-3.5 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                  <th key={h} className="px-3.5 py-2.5 text-left text-xs font-semibold text-swoop-text-muted uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -806,21 +806,21 @@ function ClubManagementTab({ currentClubId }) {
               {clubs.map((club, i) => {
                 const isActive = club.club_id === currentClubId;
                 return (
-                  <tr key={club.club_id} className={`${isActive ? 'bg-brand-50 dark:bg-brand-500/5' : 'bg-white dark:bg-white/[0.03]'} ${i < clubs.length - 1 ? 'border-b border-gray-200 dark:border-gray-800' : ''}`}>
-                    <td className="px-3.5 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">
+                  <tr key={club.club_id} className={`${isActive ? 'bg-brand-50' : 'bg-swoop-panel'} ${i < clubs.length - 1 ? 'border-b border-swoop-border' : ''}`}>
+                    <td className="px-3.5 py-3 font-mono text-xs text-swoop-text-muted">
                       {club.club_id}
                       {isActive && <span className="ml-2 px-1.5 py-0.5 rounded bg-brand-500 text-white text-[10px] font-bold">ACTIVE</span>}
                     </td>
-                    <td className="px-3.5 py-3 font-semibold text-gray-800 dark:text-white/90">{club.name || '—'}</td>
-                    <td className="px-3.5 py-3 text-gray-500 text-xs">{[club.city, club.state].filter(Boolean).join(', ') || '—'}</td>
-                    <td className="px-3.5 py-3 text-gray-600 dark:text-gray-400">{club.member_count ?? '—'}</td>
-                    <td className="px-3.5 py-3 text-gray-500 text-xs">{club.last_activity ? new Date(club.last_activity).toLocaleDateString() : '—'}</td>
+                    <td className="px-3.5 py-3 font-semibold text-swoop-text">{club.name || '—'}</td>
+                    <td className="px-3.5 py-3 text-swoop-text-muted text-xs">{[club.city, club.state].filter(Boolean).join(', ') || '—'}</td>
+                    <td className="px-3.5 py-3 text-swoop-text-muted">{club.member_count ?? '—'}</td>
+                    <td className="px-3.5 py-3 text-swoop-text-muted text-xs">{club.last_activity ? new Date(club.last_activity).toLocaleDateString() : '—'}</td>
                     <td className="px-3.5 py-3">
                       <div className="flex gap-2">
                         {!isActive && (
                           <button
                             onClick={() => handleSwitch(club.club_id, club.name)}
-                            className="px-2.5 py-1 rounded-md border border-brand-300 bg-brand-50 text-brand-600 text-[11px] font-bold cursor-pointer hover:bg-brand-100 dark:bg-brand-500/5 dark:border-brand-500/30"
+                            className="px-2.5 py-1 rounded-md border border-brand-300 bg-brand-50 text-brand-600 text-[11px] font-bold cursor-pointer hover:bg-brand-100"
                           >
                             Switch
                           </button>
@@ -829,7 +829,7 @@ function ClubManagementTab({ currentClubId }) {
                           <button
                             onClick={() => handleResetData(club.club_id, club.name)}
                             disabled={resetting === club.club_id}
-                            className="px-2.5 py-1 rounded-md border border-warning-300 bg-warning-50 text-warning-700 text-[11px] font-bold cursor-pointer hover:bg-warning-100 disabled:opacity-50 dark:bg-warning-500/5 dark:border-warning-500/30"
+                            className="px-2.5 py-1 rounded-md border border-warning-300 bg-warning-50 text-warning-700 text-[11px] font-bold cursor-pointer hover:bg-warning-100 disabled:opacity-50"
                           >
                             {resetting === club.club_id ? 'Resetting...' : 'Reset Data'}
                           </button>
@@ -837,7 +837,7 @@ function ClubManagementTab({ currentClubId }) {
                         <button
                           onClick={() => handleDelete(club.club_id)}
                           disabled={deleting === club.club_id}
-                          className="px-2.5 py-1 rounded-md border border-error-300 bg-error-50 text-error-600 text-[11px] font-bold cursor-pointer hover:bg-error-100 disabled:opacity-50 dark:bg-error-500/5 dark:border-error-500/30"
+                          className="px-2.5 py-1 rounded-md border border-error-300 bg-error-50 text-error-600 text-[11px] font-bold cursor-pointer hover:bg-error-100 disabled:opacity-50"
                         >
                           {deleting === club.club_id ? 'Deleting...' : 'Delete Club'}
                         </button>
@@ -852,7 +852,7 @@ function ClubManagementTab({ currentClubId }) {
       )}
 
       <Card>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-swoop-text-muted">
           <strong>Current club:</strong> {currentClubId || 'None selected'}
           {currentClubId?.startsWith('demo_') && <span className="ml-2 text-warning-500 font-semibold">(Demo session — data will be cleaned up on logout)</span>}
         </div>

@@ -21,11 +21,11 @@ export default function SourceBadge({ system, signal, timestamp, size = 'sm' }) 
     return (
       <span
         title={`${system} \u2022 ${timestamp}`}
-        className={`inline-flex items-center gap-1.5 rounded-md bg-gray-100 border border-gray-200 font-medium tracking-tight whitespace-nowrap shrink-0 cursor-default select-none text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 ${size === 'xs' ? 'text-[10px] px-2 py-1' : 'text-[11px] px-2.5 py-1.5'}`}
+        className={`inline-flex items-center gap-1.5 rounded-md bg-swoop-row border border-swoop-border font-medium tracking-tight whitespace-nowrap shrink-0 cursor-default select-none text-swoop-text-muted ${size === 'xs' ? 'text-[10px] px-2 py-1' : 'text-[11px] px-2.5 py-1.5'}`}
       >
         <span className={size === 'xs' ? 'text-[10px]' : 'text-[11px]'}>{icon}</span>
-        <span className="text-gray-800 font-semibold dark:text-white/90">{signal}</span>
-        <span className="text-[9px] text-gray-500 opacity-80 dark:text-gray-400">
+        <span className="text-swoop-text font-semibold">{signal}</span>
+        <span className="text-[9px] text-swoop-text-muted opacity-80">
           {timestamp}
         </span>
       </span>
@@ -36,7 +36,7 @@ export default function SourceBadge({ system, signal, timestamp, size = 'sm' }) 
   return (
     <span
       title={`Source: ${system}`}
-      className={`inline-flex items-center gap-1 rounded bg-gray-100 border border-gray-200 font-medium tracking-wide whitespace-nowrap shrink-0 cursor-default select-none text-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 ${sizeCls}`}
+      className={`inline-flex items-center gap-1 rounded bg-swoop-row border border-swoop-border font-medium tracking-wide whitespace-nowrap shrink-0 cursor-default select-none text-swoop-text-muted ${sizeCls}`}
     >
       <span className={size === 'xs' ? 'text-[9px]' : 'text-[10px]'}>{icon}</span>
       {system}
@@ -52,7 +52,7 @@ export function SourceBadgeRow({ sources = [], systems = [], size = 'xs' }) {
 
   return (
     <div className="flex gap-1.5 flex-wrap items-center">
-      <span className="text-[10px] text-gray-500 mr-0.5 dark:text-gray-400">
+      <span className="text-[10px] text-swoop-text-muted mr-0.5">
         {sources.length ? 'Signals:' : 'Source:'}
       </span>
       {items.map((item, idx) => (

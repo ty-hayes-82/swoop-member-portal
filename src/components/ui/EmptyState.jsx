@@ -11,17 +11,17 @@ export default function EmptyState({
 }) {
   return (
     <div
-      className={`flex flex-col items-center justify-center px-5 py-16 sm:px-6 text-center min-h-[300px] rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] ${className}`}
+      className={`flex flex-col items-center justify-center px-5 py-16 sm:px-6 text-center min-h-[300px] rounded-xl border border-swoop-border bg-swoop-panel ${className}`}
     >
       <div className="text-[64px] mb-4 opacity-60">
         {icon}
       </div>
 
-      <h3 className="text-lg font-bold text-gray-800 mb-3 m-0 dark:text-white/90">
+      <h3 className="text-lg font-bold text-swoop-text mb-3 m-0">
         {title}
       </h3>
 
-      <p className="text-sm text-gray-600 max-w-[400px] mb-6 leading-relaxed dark:text-gray-400">
+      <p className="text-sm text-swoop-text-muted max-w-[400px] mb-6 leading-relaxed">
         {description}
       </p>
 

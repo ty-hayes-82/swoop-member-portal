@@ -172,7 +172,7 @@ function GmGreetingAlert({ onDismiss }) {
         return (
           <div
             key={alert.memberId}
-            className="rounded-xl border-l-4 border border-gray-200 bg-white p-4 shadow-sm animate-[slideDown_0.4s_ease-out]"
+            className="rounded-xl border-l-4 border border-swoop-border bg-swoop-panel p-4 shadow-sm animate-[slideDown_0.4s_ease-out]"
             style={{ borderLeftColor: alert.isAtRisk ? '#ef4444' : '#f59e0b' }}
           >
             <div className="flex items-start justify-between gap-3">
@@ -181,11 +181,11 @@ function GmGreetingAlert({ onDismiss }) {
                   <span className="text-xs font-bold uppercase tracking-wider text-white px-2 py-0.5 rounded-full" style={{ background: alert.isAtRisk ? '#ef4444' : '#f59e0b' }}>
                     {alert.isAtRisk ? 'AT-RISK CHECK-IN' : 'VIP CHECK-IN'}
                   </span>
-                  <span className="text-xs text-gray-400">&mdash;</span>
+                  <span className="text-xs text-swoop-text-label">&mdash;</span>
                 </div>
-                <div className="text-sm font-bold text-gray-800 mb-0.5">
+                <div className="text-sm font-bold text-swoop-text mb-0.5">
                   {alert.name ? (
-                    <MemberLink memberId={alert.memberId} mode="drawer" className="text-gray-800 hover:text-brand-500 no-underline">
+                    <MemberLink memberId={alert.memberId} mode="drawer" className="text-swoop-text hover:text-brand-500 no-underline">
                       {alert.name}
                     </MemberLink>
                   ) : (
@@ -193,17 +193,17 @@ function GmGreetingAlert({ onDismiss }) {
                   )}
                   {' '}just checked in
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
+                <div className="flex items-center gap-3 text-xs text-swoop-text-muted mb-2">
                   <span>Health: <strong className="font-mono" style={{ color: scoreColor }}>{alert.healthScore}</strong></span>
                   <span>{alert.archetype}</span>
                   <span>{alert.time} {alert.course}</span>
                   <span>${(alert.duesAnnual / 1000).toFixed(0)}K/yr</span>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Talking Points</div>
+                <div className="bg-swoop-row rounded-lg p-3 border border-swoop-border-inset">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-swoop-text-label mb-1.5">Talking Points</div>
                   <ul className="m-0 pl-4 space-y-1">
                     {alert.talkingPoints.map((point, i) => (
-                      <li key={i} className="text-xs text-gray-700 leading-relaxed">{point}</li>
+                      <li key={i} className="text-xs text-swoop-text-2 leading-relaxed">{point}</li>
                     ))}
                   </ul>
                 </div>
@@ -212,7 +212,7 @@ function GmGreetingAlert({ onDismiss }) {
                 type="button"
                 aria-label={`Dismiss check-in alert for ${alert.name}`}
                 onClick={() => setDismissed(prev => [...prev, alert.memberId])}
-                className="bg-transparent border-none cursor-pointer text-gray-300 hover:text-gray-500 text-lg p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
+                className="bg-transparent border-none cursor-pointer text-swoop-text-ghost hover:text-gray-500 text-lg p-1 focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 <span aria-hidden="true">x</span>
               </button>
@@ -302,37 +302,37 @@ export default function TodayView() {
       <PageTransition>
         <div className="flex flex-col gap-5 w-full">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90 m-0">{getGreeting()}</h1>
-            <p className="text-sm text-gray-500 mt-1 mb-0">{formatDate()}</p>
+            <h1 className="text-2xl font-bold text-swoop-text m-0">{getGreeting()}</h1>
+            <p className="text-sm text-swoop-text-muted mt-1 mb-0">{formatDate()}</p>
           </div>
 
           {/* Value preview — what this dashboard becomes once connected */}
-          <div className="rounded-2xl border border-gray-200 bg-white dark:bg-white/[0.03] dark:border-gray-800 overflow-hidden">
+          <div className="rounded-2xl border border-swoop-border bg-swoop-panel overflow-hidden">
             <div className="px-5 pt-5 pb-3">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:text-brand-400 mb-1">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500 mb-1">
                 Here's what you'll see when connected
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 m-0">
+              <p className="text-sm text-swoop-text-muted m-0">
                 Connect your three core systems to unlock your full operational briefing. Each source adds a layer of intelligence you can't get from any single vendor.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-swoop-border-inset">
               {steps.map(step => (
                 <div key={step.id} className="px-5 py-4 flex flex-col gap-1.5">
                   <div className="flex items-center gap-2">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${step.done ? 'bg-success-100 text-success-700 dark:bg-success-500/20 dark:text-success-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'}`}>
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${step.done ? 'bg-success-100 text-success-700' : 'bg-swoop-row text-swoop-text-label'}`}>
                       {step.done ? '✓' : '○'}
                     </div>
-                    <span className={`text-xs font-bold ${step.done ? 'text-success-700 dark:text-success-400' : 'text-gray-500 dark:text-gray-400'}`}>{step.label}</span>
+                    <span className={`text-xs font-bold ${step.done ? 'text-success-700' : 'text-swoop-text-muted'}`}>{step.label}</span>
                   </div>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-500 m-0 leading-relaxed">{step.preview}</p>
+                  <p className="text-[11px] text-swoop-text-muted m-0 leading-relaxed">{step.preview}</p>
                 </div>
               ))}
             </div>
             {connectedCount > 0 && (
-              <div className="px-5 py-2.5 bg-success-50 dark:bg-success-500/5 border-t border-success-100 dark:border-success-500/20">
-                <span className="text-xs text-success-700 dark:text-success-400 font-semibold">{connectedCount} of 3 source{connectedCount !== 1 ? 's' : ''} connected</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400"> — keep going to unlock the full briefing</span>
+              <div className="px-5 py-2.5 bg-success-50 border-t border-success-100">
+                <span className="text-xs text-success-700 font-semibold">{connectedCount} of 3 source{connectedCount !== 1 ? 's' : ''} connected</span>
+                <span className="text-xs text-swoop-text-muted"> — keep going to unlock the full briefing</span>
               </div>
             )}
           </div>
@@ -348,7 +348,7 @@ export default function TodayView() {
             <button
               type="button"
               onClick={() => navigate('admin')}
-              className="px-5 py-2.5 rounded-lg border border-gray-200 bg-transparent text-gray-600 text-sm font-semibold cursor-pointer hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+              className="px-5 py-2.5 rounded-lg border border-swoop-border bg-transparent text-swoop-text-muted text-sm font-semibold cursor-pointer hover:bg-swoop-row-hover transition-colors"
             >
               View Integrations
             </button>
@@ -365,7 +365,7 @@ export default function TodayView() {
 
         {/* Section 1: Compact Greeting Bar */}
         <div
-          className="rounded-xl dark:border-gray-800 dark:bg-white/[0.03] today-greeting-enhanced fade-in-up"
+          className="rounded-xl today-greeting-enhanced fade-in-up"
           style={{
             background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%)',
             border: 'none',
@@ -475,8 +475,8 @@ export default function TodayView() {
           >
             <div className="text-3xl flex-shrink-0">🪟</div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold text-gray-800 mb-0.5">See Both Sides of the Glass</div>
-              <div className="text-xs text-gray-600 leading-relaxed">
+              <div className="text-sm font-bold text-swoop-text mb-0.5">See Both Sides of the Glass</div>
+              <div className="text-xs text-swoop-text-muted leading-relaxed">
                 Watch the member experience and GM dashboard side by side — the killer demo that shows how Swoop connects every touchpoint.
               </div>
             </div>

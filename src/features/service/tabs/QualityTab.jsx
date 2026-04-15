@@ -74,26 +74,26 @@ export default function QualityTab() {
       <EvidenceStrip systems={['Complaints', 'Scheduling', 'POS', 'Tee Sheet', 'Weather']} compact />
 
       {/* Service Consistency Score */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-wrap">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-wrap">
         <div className="flex items-center gap-4">
           <div
             className="w-[72px] h-[72px] rounded-full flex items-center justify-center shrink-0"
             style={{ background: `conic-gradient(${scoreColor} ${consistencyScore * 3.6}deg, #E5E7EB 0deg)` }}
           >
-            <div className="w-[58px] h-[58px] rounded-full bg-white flex flex-col items-center justify-center">
+            <div className="w-[58px] h-[58px] rounded-full bg-swoop-panel flex flex-col items-center justify-center">
               <span className="font-mono text-[22px] font-extrabold leading-none" style={{ color: scoreColor }}>
                 {consistencyScore}
               </span>
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-400 uppercase tracking-widest font-bold">
+            <div className="text-xs text-swoop-text-label uppercase tracking-widest font-bold">
               Service Consistency Score
             </div>
-            <div className="text-lg font-bold text-gray-800 dark:text-white/90">
+            <div className="text-lg font-bold text-swoop-text">
               {consistencyScore >= 70 ? 'Consistent' : consistencyScore >= 50 ? 'Needs Attention' : 'At Risk'}
             </div>
-            <div className="text-xs text-gray-500 mt-0.5">
+            <div className="text-xs text-swoop-text-muted mt-0.5">
               {consistencyScore >= 70
                 ? 'Service is consistent — no major gaps detected'
                 : consistencyScore >= 50
@@ -126,7 +126,7 @@ export default function QualityTab() {
           ].map(m => (
             <div key={m.label} className="text-center min-w-[80px] py-1.5 px-3 rounded-lg" style={{ background: `${m.color}08`, border: `1px solid ${m.color}20` }}>
               <div className="font-mono text-lg font-bold" style={{ color: m.color }}>{m.value}</div>
-              <div className="text-[10px] text-gray-400 font-semibold">{m.label}</div>
+              <div className="text-[10px] text-swoop-text-label font-semibold">{m.label}</div>
             </div>
           ))}
         </div>
@@ -156,7 +156,7 @@ export default function QualityTab() {
             <div className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: scoreColor }}>
               Biggest Driver
             </div>
-            <div className="text-sm text-gray-800 dark:text-white/90 mb-1">
+            <div className="text-sm text-swoop-text mb-1">
               {top.text}
             </div>
             <button
@@ -170,12 +170,12 @@ export default function QualityTab() {
       })()}
 
       {/* By Day of Week */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+        <h3 className="text-base font-bold text-swoop-text mb-4">
           Complaints by Day of Week
         </h3>
         {!hasAnyDayData && (
-          <div className="text-sm text-gray-400 italic mb-2">
+          <div className="text-sm text-swoop-text-label italic mb-2">
             Complaint dates not yet available — day-of-week breakdown will populate as complaints are resolved and timestamped.
           </div>
         )}
@@ -217,7 +217,7 @@ export default function QualityTab() {
                     cursor: count > 0 ? 'pointer' : 'default',
                   }}
                 />
-                <span className="text-[11px] text-gray-400 font-semibold">{day}</span>
+                <span className="text-[11px] text-swoop-text-label font-semibold">{day}</span>
               </div>
             );
           })}
@@ -225,8 +225,8 @@ export default function QualityTab() {
       </div>
 
       {/* By Category */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+        <h3 className="text-base font-bold text-swoop-text mb-4">
           Complaint Drivers
         </h3>
         <div className="flex flex-col gap-2">
@@ -234,13 +234,13 @@ export default function QualityTab() {
             <div
               key={cat.category}
               onClick={() => navigate('service', { tab: 'complaints', category: cat.category })}
-              className="flex items-center gap-4 cursor-pointer py-1 rounded-lg transition-colors duration-100 hover:bg-gray-100"
+              className="flex items-center gap-4 cursor-pointer py-1 rounded-lg transition-colors duration-100 hover:bg-swoop-row-hover"
               title={`Click to view ${cat.category} complaints`}
             >
-              <div className="w-[130px] text-[13px] font-medium text-gray-800 dark:text-white/90 shrink-0">
+              <div className="w-[130px] text-[13px] font-medium text-swoop-text shrink-0">
                 {cat.category}
               </div>
-              <div className="flex-1 h-5 bg-gray-100 rounded overflow-hidden">
+              <div className="flex-1 h-5 bg-swoop-row rounded overflow-hidden">
                 <div
                   className="h-full rounded flex items-center pl-2 transition-all duration-300"
                   style={{
@@ -266,8 +266,8 @@ export default function QualityTab() {
       </div>
 
       {/* By Outlet */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
+      <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
+        <h3 className="text-base font-bold text-swoop-text mb-4">
           Service Quality by Outlet
         </h3>
         {(() => {
@@ -292,7 +292,7 @@ export default function QualityTab() {
               return { name, ...data, risk };
             })
             .sort((a, b) => (b.complaints + b.understaffedDays) - (a.complaints + a.understaffedDays));
-          if (allOutlets.length === 0) return <div className="text-sm text-gray-400">No outlet-level complaint data available.</div>;
+          if (allOutlets.length === 0) return <div className="text-sm text-swoop-text-label">No outlet-level complaint data available.</div>;
           const riskColors = { high: '#ef4444', medium: '#ca8a04', low: '#12b76a' };
           return (
             <div className="flex flex-col gap-2">
@@ -303,14 +303,14 @@ export default function QualityTab() {
                 <div key={o.name}>
                 <div
                   onClick={() => setExpandedOutlet(isExpanded ? null : o.name)}
-                  className="flex items-center justify-between py-2.5 px-3.5 rounded-lg bg-gray-100 border border-gray-200 cursor-pointer transition-colors duration-100 hover:bg-gray-200/40"
+                  className="flex items-center justify-between py-2.5 px-3.5 rounded-lg bg-swoop-row border border-swoop-border cursor-pointer transition-colors duration-100 hover:bg-gray-200/40"
                 >
                   <div className="flex items-center gap-2.5">
                     <span
                       className="w-2 h-2 rounded-full shrink-0"
                       style={{ background: riskColor }}
                     />
-                    <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{o.name}</span>
+                    <span className="text-sm font-semibold text-swoop-text">{o.name}</span>
                   </div>
                   <div className="flex items-center gap-2 sm:gap-4 text-xs flex-wrap">
                     {o.understaffedDays > 0 && (
@@ -318,7 +318,7 @@ export default function QualityTab() {
                         {o.understaffedDays} understaffed day{o.understaffedDays !== 1 ? 's' : ''}
                       </span>
                     )}
-                    <span className="text-gray-500">
+                    <span className="text-swoop-text-muted">
                       {o.totalComplaints} complaint{o.totalComplaints !== 1 ? 's' : ''}
                     </span>
                     <span
@@ -327,12 +327,12 @@ export default function QualityTab() {
                     >
                       {o.risk}
                     </span>
-                    <span className="text-gray-400 text-xs">{isExpanded ? '▾' : '▸'}</span>
+                    <span className="text-swoop-text-label text-xs">{isExpanded ? '▾' : '▸'}</span>
                   </div>
                 </div>
                 {isExpanded && (
                   <div
-                    className="py-2 px-3.5 text-xs text-gray-500 ml-3.5"
+                    className="py-2 px-3.5 text-xs text-swoop-text-muted ml-3.5"
                     style={{ borderLeft: `3px solid ${riskColor}30` }}
                   >
                     {o.totalComplaints > 0 ? (

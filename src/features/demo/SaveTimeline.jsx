@@ -169,20 +169,20 @@ function ResultCard() {
       <div className="grid grid-cols-3 gap-4 mb-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-white">{RESULT.duesProtected}</div>
-          <div className="text-[10px] text-gray-400 uppercase tracking-wider">Dues Protected</div>
+          <div className="text-[10px] text-swoop-text-label uppercase tracking-wider">Dues Protected</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-white">{RESULT.gmTime}</div>
-          <div className="text-[10px] text-gray-400 uppercase tracking-wider">GM Time</div>
+          <div className="text-[10px] text-swoop-text-label uppercase tracking-wider">GM Time</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-white">{RESULT.timespan}</div>
-          <div className="text-[10px] text-gray-400 uppercase tracking-wider">Total Window</div>
+          <div className="text-[10px] text-swoop-text-label uppercase tracking-wider">Total Window</div>
         </div>
       </div>
-      <div className="bg-gray-900 rounded-xl p-4 border border-gray-700">
-        <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Board Report Line Item</div>
-        <div className="text-sm text-gray-200">{RESULT.boardLine}</div>
+      <div className="bg-swoop-canvas rounded-xl p-4 border border-swoop-border">
+        <div className="text-[10px] text-swoop-text-muted uppercase tracking-wider mb-1">Board Report Line Item</div>
+        <div className="text-sm text-swoop-text-ghost">{RESULT.boardLine}</div>
       </div>
     </div>
   );
@@ -249,12 +249,12 @@ export default function SaveTimeline() {
   const notStarted = activeIndex < 0 && !isPlaying;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-swoop-canvas text-white">
       {/* Header */}
-      <div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+      <div className="border-b border-swoop-border px-6 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-100">The Invisible Save</h1>
-          <p className="text-sm text-gray-500">James Whitfield's 30-day retention story</p>
+          <p className="text-sm text-swoop-text-muted">James Whitfield's 30-day retention story</p>
         </div>
         <div className="flex items-center gap-3">
           {notStarted ? (
@@ -268,14 +268,14 @@ export default function SaveTimeline() {
             <>
               <button
                 onClick={() => setIsPlaying(p => !p)}
-                className="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-swoop-row hover:bg-gray-700 text-swoop-text-ghost text-sm transition-colors"
                 disabled={showResult}
               >
                 {isPlaying ? 'Pause' : 'Resume'}
               </button>
               <button
                 onClick={handleReset}
-                className="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-swoop-row hover:bg-gray-700 text-swoop-text-ghost text-sm transition-colors"
               >
                 Reset
               </button>
@@ -290,8 +290,8 @@ export default function SaveTimeline() {
           {notStarted && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="text-5xl mb-4 opacity-40">&#9201;</div>
-              <p className="text-gray-400 text-lg mb-2">Ready to replay</p>
-              <p className="text-gray-600 text-sm max-w-md">
+              <p className="text-swoop-text-label text-lg mb-2">Ready to replay</p>
+              <p className="text-swoop-text-muted text-sm max-w-md">
                 Watch how Swoop's agent network detected, intervened, and saved a $18K member
                 in 30 days with only 8 minutes of GM time.
               </p>
@@ -301,7 +301,7 @@ export default function SaveTimeline() {
           <div className="relative">
             {/* Vertical line */}
             {activeIndex >= 0 && (
-              <div className="absolute left-[52px] top-0 bottom-0 w-0.5 bg-gray-800" />
+              <div className="absolute left-[52px] top-0 bottom-0 w-0.5 bg-swoop-row" />
             )}
 
             {TIMELINE_EVENTS.map((event, idx) => {
@@ -318,14 +318,14 @@ export default function SaveTimeline() {
                 >
                   {/* Date column */}
                   <div className="w-[44px] flex-shrink-0 text-right">
-                    <span className="text-xs font-mono text-gray-400">{event.date}</span>
+                    <span className="text-xs font-mono text-swoop-text-label">{event.date}</span>
                   </div>
 
                   {/* Dot on timeline */}
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 z-10 transition-all duration-300 ${
                     isCurrent
                       ? (event.highlight ? 'bg-emerald-500 ring-4 ring-emerald-500/30' : 'bg-blue-500 ring-4 ring-blue-500/30')
-                      : 'bg-gray-700'
+                      : 'bg-swoop-row'
                   }`}>
                     <span className="text-[10px]">{event.icon}</span>
                   </div>
@@ -333,7 +333,7 @@ export default function SaveTimeline() {
                   {/* Content */}
                   <div className={`flex-1 rounded-xl p-4 transition-all duration-500 ${
                     isCurrent
-                      ? (event.highlight ? 'bg-emerald-950/40 border border-emerald-700' : 'bg-gray-900 border border-gray-700')
+                      ? (event.highlight ? 'bg-emerald-950/40 border border-emerald-700' : 'bg-swoop-canvas border border-swoop-border')
                       : 'bg-gray-900/40 border border-gray-800/50'
                   }`}>
                     <div className="flex items-center gap-2 mb-1">
@@ -345,7 +345,7 @@ export default function SaveTimeline() {
                       )}
                     </div>
                     <div className="text-sm font-semibold text-gray-100 mb-1">{event.title}</div>
-                    <div className="text-xs text-gray-400 leading-relaxed">{event.detail}</div>
+                    <div className="text-xs text-swoop-text-label leading-relaxed">{event.detail}</div>
                   </div>
                 </div>
               );
@@ -358,56 +358,56 @@ export default function SaveTimeline() {
         {/* Health score chart sidebar */}
         <div className="w-[300px] flex-shrink-0">
           <div className="sticky top-8">
-            <div className="bg-gray-900 rounded-xl border border-gray-800 p-4">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+            <div className="bg-swoop-canvas rounded-xl border border-swoop-border p-4">
+              <div className="text-xs font-bold text-swoop-text-label uppercase tracking-wider mb-3">
                 Health Score
               </div>
               {activeIndex >= 0 ? (
                 <HealthChart events={TIMELINE_EVENTS} activeIndex={activeIndex} />
               ) : (
-                <div className="h-[120px] flex items-center justify-center text-gray-600 text-xs">
+                <div className="h-[120px] flex items-center justify-center text-swoop-text-muted text-xs">
                   Waiting for timeline start...
                 </div>
               )}
             </div>
 
             {/* Member card */}
-            <div className="mt-4 bg-gray-900 rounded-xl border border-gray-800 p-4">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+            <div className="mt-4 bg-swoop-canvas rounded-xl border border-swoop-border p-4">
+              <div className="text-xs font-bold text-swoop-text-label uppercase tracking-wider mb-3">
                 Member Profile
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Name</span>
-                  <span className="text-gray-200">James Whitfield</span>
+                  <span className="text-swoop-text-muted">Name</span>
+                  <span className="text-swoop-text-ghost">James Whitfield</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Annual Dues</span>
-                  <span className="text-gray-200">$18,000</span>
+                  <span className="text-swoop-text-muted">Annual Dues</span>
+                  <span className="text-swoop-text-ghost">$18,000</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Tenure</span>
-                  <span className="text-gray-200">6 years</span>
+                  <span className="text-swoop-text-muted">Tenure</span>
+                  <span className="text-swoop-text-ghost">6 years</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Archetype</span>
-                  <span className="text-gray-200">Balanced Active</span>
+                  <span className="text-swoop-text-muted">Archetype</span>
+                  <span className="text-swoop-text-ghost">Balanced Active</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Family</span>
-                  <span className="text-gray-200">Erin (spouse), Logan (son)</span>
+                  <span className="text-swoop-text-muted">Family</span>
+                  <span className="text-swoop-text-ghost">Erin (spouse), Logan (son)</span>
                 </div>
               </div>
             </div>
 
             {/* Agents involved */}
-            <div className="mt-4 bg-gray-900 rounded-xl border border-gray-800 p-4">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+            <div className="mt-4 bg-swoop-canvas rounded-xl border border-swoop-border p-4">
+              <div className="text-xs font-bold text-swoop-text-label uppercase tracking-wider mb-3">
                 Agents Involved
               </div>
               <div className="flex flex-wrap gap-2">
                 {['Concierge', 'Service Recovery', 'Member Risk'].map(a => (
-                  <span key={a} className="text-[10px] px-2 py-1 rounded-full bg-gray-800 text-gray-300 border border-gray-700">
+                  <span key={a} className="text-[10px] px-2 py-1 rounded-full bg-swoop-row text-swoop-text-ghost border border-swoop-border">
                     {a}
                   </span>
                 ))}

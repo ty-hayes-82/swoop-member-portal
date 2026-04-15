@@ -9,10 +9,10 @@ import { getAgents, getAllActions, getAgentSummary, getCoordinationGraph } from 
 import AgentConfigDrawer from '@/features/agents/AgentConfigDrawer';
 
 const STATUS_STYLES = {
-  active: { bg: 'bg-success-50 dark:bg-success-500/10', text: 'text-success-600 dark:text-success-400', label: 'Active' },
-  idle: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-500 dark:text-gray-400', label: 'Idle' },
-  learning: { bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', label: 'Learning' },
-  paused: { bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', label: 'Paused' },
+  active: { bg: 'bg-success-50', text: 'text-success-600', label: 'Active' },
+  idle: { bg: 'bg-swoop-row', text: 'text-swoop-text-muted', label: 'Idle' },
+  learning: { bg: 'bg-blue-50', text: 'text-blue-600', label: 'Learning' },
+  paused: { bg: 'bg-amber-50', text: 'text-amber-600', label: 'Paused' },
 };
 
 const TONE_OPTIONS = [
@@ -65,22 +65,22 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
   }, [agent.id, onRunNow]);
 
   return (
-    <div className="border border-gray-200 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 overflow-hidden">
+    <div className="border border-swoop-border rounded-xl bg-swoop-panel overflow-hidden">
       <div className="p-4">
         {/* Header */}
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-lg">
+            <div className="w-9 h-9 rounded-lg bg-swoop-row flex items-center justify-center text-lg">
               🤖
             </div>
             <div>
-              <div className="text-sm font-bold text-gray-800 dark:text-white/90">{agent.name}</div>
+              <div className="text-sm font-bold text-swoop-text">{agent.name}</div>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>
                   {style.label}
                 </span>
                 {agent.accuracy && (
-                  <span className="text-[10px] text-gray-400">{agent.accuracy}% accuracy</span>
+                  <span className="text-[10px] text-swoop-text-label">{agent.accuracy}% accuracy</span>
                 )}
               </div>
             </div>
@@ -90,7 +90,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
               onClick={handleRunNow}
               disabled={running}
               title="Manually trigger this agent now (normally runs on schedule or webhook)"
-              className="px-3 py-1 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-300 text-brand-600 bg-brand-50 hover:bg-brand-100 dark:border-brand-500/40 dark:text-brand-400 dark:bg-brand-500/10 dark:hover:bg-brand-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-300 text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
             >
               {running ? (
                 <span className="inline-block w-2.5 h-2.5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -106,7 +106,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
               className={`px-3 py-1 rounded-lg text-[11px] font-semibold cursor-pointer border transition-colors ${
                 isPaused
                   ? 'bg-brand-500 text-white border-brand-500'
-                  : 'bg-transparent text-gray-500 border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400'
+                  : 'bg-transparent text-swoop-text-muted border-swoop-border hover:bg-swoop-row-hover'
               }`}
             >
               {isPaused ? 'Resume' : 'Pause'}
@@ -115,7 +115,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
         </div>
 
         {/* Description */}
-        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 m-0">
+        <p className="text-xs text-swoop-text-muted leading-relaxed mb-3 m-0">
           {agent.description}
         </p>
 
@@ -123,7 +123,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
         {agent.sourceSystems && (
           <div className="flex flex-wrap gap-1 mb-3">
             {(Array.isArray(agent.sourceSystems) ? agent.sourceSystems : []).map(s => (
-              <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+              <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-swoop-row text-swoop-text-muted">
                 {s}
               </span>
             ))}
@@ -141,11 +141,11 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
             </svg>
             Configure
           </button>
-          <span className="text-gray-300 dark:text-gray-600">|</span>
+          <span className="text-swoop-text-ghost">|</span>
           <button
             onClick={() => { setShowSettings(!showSettings); if (showActions) setShowActions(false); }}
             className={`flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-transparent border-none p-0 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${
-              showSettings ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              showSettings ? 'text-brand-500' : 'text-swoop-text-muted hover:text-swoop-text-2'
             }`}
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -157,7 +157,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
             <button
               onClick={() => { setShowActions(!showActions); if (showSettings) setShowSettings(false); }}
               className={`flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-transparent border-none p-0 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${
-                showActions ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                showActions ? 'text-brand-500' : 'text-swoop-text-muted hover:text-swoop-text-2'
               }`}
             >
               <svg className={`w-3 h-3 transition-transform ${showActions ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor">
@@ -170,12 +170,12 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
 
         {/* Last action time */}
         {agent.lastAction && (
-          <div className="text-[10px] text-gray-400 mt-2">
+          <div className="text-[10px] text-swoop-text-label mt-2">
             Last active: {new Date(agent.lastAction).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
           </div>
         )}
         {runResult && (
-          <div className={`text-[11px] font-medium mt-1 ${runResult.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+          <div className={`text-[11px] font-medium mt-1 ${runResult.ok ? 'text-emerald-600' : 'text-red-600'}`}>
             {runResult.text}
           </div>
         )}
@@ -183,10 +183,10 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
 
       {/* Expandable: Settings Panel */}
       {showSettings && (
-        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 px-4 py-3 space-y-3">
+        <div className="border-t border-swoop-border bg-swoop-row px-4 py-3 space-y-3">
           {/* Auto-approve threshold */}
           <div>
-            <label className="block text-[11px] font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="block text-[11px] font-medium text-swoop-text-muted mb-1">
               Auto-approve threshold: {Math.round(localConfig.autoApproveThreshold * 100)}%
             </label>
             <input
@@ -195,7 +195,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
               onChange={e => handleConfigChange('autoApproveThreshold', parseFloat(e.target.value))}
               className="w-full accent-brand-500 h-1.5"
             />
-            <div className="flex justify-between text-[9px] text-gray-400">
+            <div className="flex justify-between text-[9px] text-swoop-text-label">
               <span>More auto-approved</span>
               <span>Manual review</span>
             </div>
@@ -203,11 +203,11 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
 
           {/* Tone override */}
           <div>
-            <label className="block text-[11px] font-medium text-gray-600 dark:text-gray-400 mb-1">Tone Override</label>
+            <label className="block text-[11px] font-medium text-swoop-text-muted mb-1">Tone Override</label>
             <select
               value={localConfig.toneOverride}
               onChange={e => handleConfigChange('toneOverride', e.target.value)}
-              className="w-full px-2 py-1.5 rounded-lg border border-gray-200 bg-white text-xs dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              className="w-full px-2 py-1.5 rounded-lg border border-swoop-border bg-swoop-panel text-xs"
             >
               {TONE_OPTIONS.map(t => (
                 <option key={t.value} value={t.value}>{t.label}</option>
@@ -217,7 +217,7 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
 
           {/* Max actions per day */}
           <div>
-            <label className="block text-[11px] font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="block text-[11px] font-medium text-swoop-text-muted mb-1">
               Max actions/day: {localConfig.maxActionsPerDay}
             </label>
             <input
@@ -237,25 +237,25 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
               aria-label="Notify me when this agent proposes an action"
               onClick={() => handleConfigChange('notifyOnAction', !localConfig.notifyOnAction)}
               className={`relative w-9 h-5 rounded-full transition-colors cursor-pointer ${
-                localConfig.notifyOnAction ? 'bg-brand-500' : 'bg-gray-300 dark:bg-gray-600'
+                localConfig.notifyOnAction ? 'bg-brand-500' : 'bg-swoop-border'
               }`}
             >
-              <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+              <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-swoop-panel shadow transition-transform ${
                 localConfig.notifyOnAction ? 'translate-x-[18px]' : 'translate-x-0.5'
               }`} />
             </button>
-            <span className="text-[11px] text-gray-600 dark:text-gray-400">Notify me when this agent proposes an action</span>
+            <span className="text-[11px] text-swoop-text-muted">Notify me when this agent proposes an action</span>
           </div>
 
           {/* Custom instructions */}
           <div>
-            <label className="block text-[11px] font-medium text-gray-600 dark:text-gray-400 mb-1">Custom Instructions</label>
+            <label className="block text-[11px] font-medium text-swoop-text-muted mb-1">Custom Instructions</label>
             <textarea
               value={localConfig.customInstructions}
               onChange={e => handleConfigChange('customInstructions', e.target.value)}
               placeholder="e.g., Focus on members with dues over $10K. Always recommend a phone call before email for high-value members. Never suggest comp offers for members with outstanding balances." // lint-no-hardcoded-dollars: allow — placeholder example text in textarea
               rows={2}
-              className="w-full px-2 py-1.5 rounded-lg border border-gray-200 bg-white text-[11px] dark:bg-gray-900 dark:border-gray-700 dark:text-white/90 resize-none"
+              className="w-full px-2 py-1.5 rounded-lg border border-swoop-border bg-swoop-panel text-[11px] resize-none"
             />
           </div>
 
@@ -270,12 +270,12 @@ function AgentCard({ agent, agentStatus, agentConfig, onToggle, onSaveConfig, on
 
       {/* Expandable: Recent Actions */}
       {showActions && agentActions.length > 0 && (
-        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
+        <div className="border-t border-swoop-border bg-swoop-row px-4 py-3">
           <div className="space-y-1.5">
             {agentActions.map(a => (
-              <div key={a.id} className="text-xs text-gray-600 dark:text-gray-400 pl-3 border-l-2 border-gray-200 dark:border-gray-700 py-1">
+              <div key={a.id} className="text-xs text-swoop-text-muted pl-3 border-l-2 border-swoop-border py-1">
                 <div className="line-clamp-2">{a.description}</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">
+                <div className="text-[10px] text-swoop-text-label mt-0.5">
                   {a.status} {a.timestamp ? `· ${new Date(a.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
                 </div>
               </div>
@@ -294,18 +294,18 @@ function CoordinationPanel({ agents }) {
   if (edges.length === 0) return null;
 
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-4">
-      <div className="text-sm font-bold text-gray-800 dark:text-white/90 mb-1">Agent Coordination Graph</div>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 m-0">
+    <div className="border border-swoop-border rounded-xl bg-swoop-panel p-4">
+      <div className="text-sm font-bold text-swoop-text mb-1">Agent Coordination Graph</div>
+      <p className="text-xs text-swoop-text-muted mb-3 m-0">
         Agents share member context in real time. Each link shows agents coordinating on the same member.
       </p>
       <div className="flex flex-wrap gap-2">
         {edges.slice(0, 8).map(e => (
-          <div key={`${e.agentA}-${e.agentB}`} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20">
-            <span className="text-[11px] font-semibold text-brand-700 dark:text-brand-300">{agentMap[e.agentA] || e.agentA}</span>
+          <div key={`${e.agentA}-${e.agentB}`} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-brand-50 border border-brand-100">
+            <span className="text-[11px] font-semibold text-brand-700">{agentMap[e.agentA] || e.agentA}</span>
             <svg className="w-3 h-3 text-brand-400" viewBox="0 0 20 20" fill="currentColor"><path d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" /></svg>
-            <span className="text-[11px] font-semibold text-brand-700 dark:text-brand-300">{agentMap[e.agentB] || e.agentB}</span>
-            <span className="text-[10px] text-brand-500 dark:text-brand-400 ml-1">{e.sharedMembers.length} shared</span>
+            <span className="text-[11px] font-semibold text-brand-700">{agentMap[e.agentB] || e.agentB}</span>
+            <span className="text-[10px] text-brand-500 ml-1">{e.sharedMembers.length} shared</span>
           </div>
         ))}
       </div>
@@ -347,17 +347,17 @@ export default function AgentsTab() {
     <div className="flex flex-col gap-6">
       {/* Summary strip */}
       <div className="flex gap-4 flex-wrap">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success-50 dark:bg-success-500/10">
-          <span className="text-sm font-bold text-success-600 dark:text-success-400">{summary.activeAgents || agents.length}</span>
-          <span className="text-xs text-success-600 dark:text-success-400">Active Agents</span>
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success-50">
+          <span className="text-sm font-bold text-success-600">{summary.activeAgents || agents.length}</span>
+          <span className="text-xs text-success-600">Active Agents</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-brand-50 dark:bg-brand-500/10">
-          <span className="text-sm font-bold text-brand-600 dark:text-brand-400">{summary.pendingActions || 0}</span>
-          <span className="text-xs text-brand-600 dark:text-brand-400">Pending Actions</span>
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-brand-50">
+          <span className="text-sm font-bold text-brand-600">{summary.pendingActions || 0}</span>
+          <span className="text-xs text-brand-600">Pending Actions</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-          <span className="text-sm font-bold text-gray-600 dark:text-gray-400">{summary.approvedActions || 0}</span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">Approved This Period</span>
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-swoop-row">
+          <span className="text-sm font-bold text-swoop-text-muted">{summary.approvedActions || 0}</span>
+          <span className="text-xs text-swoop-text-muted">Approved This Period</span>
         </div>
       </div>
 
@@ -384,8 +384,8 @@ export default function AgentsTab() {
       {agents.length === 0 && (
         <div className="py-12 text-center">
           <div className="text-3xl mb-3">🤖</div>
-          <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">No agents configured</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="font-semibold text-swoop-text-2 mb-1">No agents configured</div>
+          <div className="text-sm text-swoop-text-muted">
             Import your member roster and tee sheet data to activate agents. Start in{' '}
             <button
               type="button"

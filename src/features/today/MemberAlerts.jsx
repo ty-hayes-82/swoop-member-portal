@@ -121,7 +121,7 @@ function buildPriorityList() {
 const ARCHETYPE_COLORS = {
   'Die-Hard Golfer': '#12b76a',
   'Social Butterfly': '#2563eb',
-  'Balanced Active': '#ff8b00',
+  'Balanced Active': '#F3922D',
   'Weekend Warrior': '#f59e0b',
   'Declining': '#ef4444',
   'New Member': '#3B82F6',
@@ -221,14 +221,14 @@ export default function MemberAlerts() {
               key={m.memberId}
               className={`py-3 px-4 border rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-px ${
                 bulkApproved
-                  ? 'bg-success-50 dark:bg-success-500/5 border-success-200 dark:border-success-800 opacity-60'
-                  : 'bg-white dark:bg-white/[0.03] border-gray-200 dark:border-gray-800'
+                  ? 'bg-success-50 border-success-200 opacity-60'
+                  : 'bg-swoop-panel border-swoop-border'
               }`}
               style={{ borderLeft: `3px solid ${bulkApproved ? '#12b76a' : scoreColor}` }}
             >
               <div className="flex justify-between items-center mb-1.5">
                 <div className="flex items-center gap-2">
-                  <MemberLink memberId={m.memberId} mode="drawer" className="font-bold text-sm text-gray-800 dark:text-white/90">
+                  <MemberLink memberId={m.memberId} mode="drawer" className="font-bold text-sm text-swoop-text">
                     {m.name}
                   </MemberLink>
                   <span
@@ -266,7 +266,7 @@ export default function MemberAlerts() {
                 </div>
               </div>
 
-              <div className="text-xs text-gray-500 mb-1 leading-snug flex items-center gap-2">
+              <div className="text-xs text-swoop-text-muted mb-1 leading-snug flex items-center gap-2">
                 <span>{m.reason}</span>
                 {m.roundsTrend?.length > 0 && (
                   <span className="inline-flex items-end gap-px shrink-0" title={m.roundsTrend.map(t => `${t.month}: ${t.rounds}`).join(' → ')}>

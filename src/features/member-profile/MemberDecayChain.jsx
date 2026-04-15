@@ -26,7 +26,7 @@ import SourceBadge from '@/components/ui/SourceBadge';
 const DOMAIN_COLORS = {
   Golf: '#12b76a',
   Dining: '#f59e0b',
-  Events: '#ff8b00',
+  Events: '#F3922D',
   Email: '#2563eb',
   Risk: '#ef4444',
   Activity: '#9CA3AF',
@@ -132,7 +132,7 @@ function DecayChainAction({ profile }) {
     <div className="mt-3 pt-3 border-t border-red-500/10 flex items-center justify-between gap-2 flex-wrap">
       <div className="flex-1 min-w-0">
         <div className="text-[9px] font-bold uppercase tracking-wider text-success-600">Recommended Outreach</div>
-        <div className="text-[11px] text-gray-700 dark:text-gray-300 mt-0.5">{recommendation}</div>
+        <div className="text-[11px] text-swoop-text-2 mt-0.5">{recommendation}</div>
       </div>
       <button
         type="button"
@@ -191,33 +191,33 @@ function RecoveryTimeline({ member, decayChainLength }) {
         <button
           type="button"
           onClick={() => setShowMath((v) => !v)}
-          className="text-[9px] text-gray-500 hover:text-gray-700 underline decoration-dotted bg-transparent border-none cursor-pointer p-0 focus-visible:ring-2 focus-visible:ring-brand-500"
+          className="text-[9px] text-swoop-text-muted hover:text-swoop-text-2 underline decoration-dotted bg-transparent border-none cursor-pointer p-0 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           {showMath ? 'Hide math' : 'How is this computed?'}
         </button>
       </div>
-      <div className="text-[12px] text-gray-700 dark:text-gray-300 leading-snug">
+      <div className="text-[12px] text-swoop-text-2 leading-snug">
         If the {reversalPhrase}, health score is modeled to recover from{' '}
         <span className="font-bold text-error-500">{score}</span> toward{' '}
         <span className="font-bold text-success-600">~{TARGET}</span> in{' '}
         <span className="font-bold">~{weeks} weeks</span>.
       </div>
-      <div className="text-[10px] text-gray-500 italic mt-0.5">
+      <div className="text-[10px] text-swoop-text-muted italic mt-0.5">
         Directional forecast, not a promise. Actual recovery depends on member response.
       </div>
       {showMath && (
-        <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded text-[10px] text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
+        <div className="mt-2 p-2 bg-swoop-row border border-swoop-border rounded text-[10px] text-swoop-text-muted font-mono leading-relaxed">
           <div>gap = {TARGET} &minus; {score} = {gap} pts</div>
           <div>base = gap / 8 pts-per-week = {baseWeeks.toFixed(1)}w</div>
           <div>+ domino drag ({decayChainLength} dominoes) = +{dominoDrag.toFixed(1)}w</div>
           <div>+ archetype mod ({archetype || 'n/a'}) = {archetypeMod >= 0 ? '+' : ''}{archetypeMod}w</div>
-          <div className="mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-1 pt-1 border-t border-swoop-border">
             total = {rawWeeks.toFixed(1)}w &rarr; clamped [2, 12] = <span className="font-bold">{weeks}w</span>
           </div>
         </div>
       )}
       <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-        <span className="text-[9px] uppercase tracking-wider text-gray-400 font-semibold">Systems that drive recovery:</span>
+        <span className="text-[9px] uppercase tracking-wider text-swoop-text-label font-semibold">Systems that drive recovery:</span>
         <SourceBadge system="Tee Sheet" size="xs" />
         <SourceBadge system="POS" size="xs" />
         <SourceBadge system="Email" size="xs" />
@@ -279,7 +279,7 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
             First Domino &mdash; Engagement Decay Sequence
           </span>
           {isPage && (
-            <div className="text-[11px] text-gray-500 mt-0.5">Cross-domain timeline &middot; Pillar 2: FIX IT</div>
+            <div className="text-[11px] text-swoop-text-muted mt-0.5">Cross-domain timeline &middot; Pillar 2: FIX IT</div>
           )}
         </div>
         <div className="flex items-center gap-1.5 flex-wrap justify-end">
@@ -315,7 +315,7 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
               <div className="flex flex-col gap-1">
                 <div className={`${stepPad} rounded-md`} style={{ background: color + '16', border: `1px solid ${color}40` }}>
                   <div className={`${stepLabelSize} font-bold uppercase tracking-tight`} style={{ color }}>{step.domain} dropped</div>
-                  <div className="text-[10px] text-gray-400">{step.date}</div>
+                  <div className="text-[10px] text-swoop-text-label">{step.date}</div>
                 </div>
                 {system && (
                   <div className="px-1">
@@ -325,7 +325,7 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
               </div>
               {i < decayChain.length - 1 && (
                 <span
-                  className={`${isPage ? 'mx-2 mt-2.5 text-base' : 'mx-1.5 mt-2 text-sm'} text-gray-400 font-bold`}
+                  className={`${isPage ? 'mx-2 mt-2.5 text-base' : 'mx-1.5 mt-2 text-sm'} text-swoop-text-label font-bold`}
                   style={{ animation: `mdcSlideIn 200ms ease-out ${(i * 300) + 200}ms backwards` }}
                 >
                   &rarr;
@@ -341,7 +341,7 @@ export default function MemberDecayChain({ member, variant = 'drawer' }) {
           100% { opacity: 1; transform: translateX(0); }
         }
       `}</style>
-      <div className="mt-2 pt-2 border-t border-red-500/10 text-[10px] text-gray-500 italic leading-snug">
+      <div className="mt-2 pt-2 border-t border-red-500/10 text-[10px] text-swoop-text-muted italic leading-snug">
         Cross-domain decay pattern. No single system would have flagged this in time.
       </div>
       {/* Inline Fix It action — Pillar 2 */}

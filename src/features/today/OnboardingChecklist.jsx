@@ -16,27 +16,27 @@ export const LOW_DATA_THRESHOLD = 10;
 function ChecklistItem({ done, title, description, teaser, actionLabel, onAction }) {
   return (
     <div
-      className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]"
+      className="flex items-start gap-4 rounded-xl border border-swoop-border bg-swoop-panel p-4"
     >
       <div
         className={`flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold shrink-0 ${
           done
-            ? 'bg-brand-50 text-brand-500 border border-brand-200 dark:bg-brand-500/15 dark:border-brand-500/30'
-            : 'bg-gray-50 text-gray-400 border border-gray-200 dark:bg-white/5 dark:border-gray-700'
+            ? 'bg-brand-50 text-brand-500 border border-brand-200'
+            : 'bg-swoop-row text-swoop-text-label border border-swoop-border'
         }`}
         aria-hidden="true"
       >
         {done ? '\u2713' : '\u25CB'}
       </div>
       <div className="flex-1 min-w-0">
-        <div className={`text-sm font-semibold ${done ? 'text-gray-500 line-through dark:text-gray-500' : 'text-gray-800 dark:text-white/90'}`}>
+        <div className={`text-sm font-semibold ${done ? 'text-swoop-text-muted line-through' : 'text-swoop-text'}`}>
           {title}
         </div>
-        <div className="text-xs text-gray-500 mt-1 dark:text-gray-400">
+        <div className="text-xs text-swoop-text-muted mt-1">
           {description}
         </div>
         {teaser && !done && (
-          <div className="text-[11px] text-brand-500/70 mt-1.5 italic dark:text-brand-400/60">
+          <div className="text-[11px] text-brand-500/70 mt-1.5 italic">
             {teaser}
           </div>
         )}
@@ -95,10 +95,10 @@ export default function OnboardingChecklist() {
   return (
     <div className="flex flex-col gap-4 w-full">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90 m-0">
+        <h1 className="text-2xl font-bold text-swoop-text m-0">
           Welcome to Swoop. Let&rsquo;s get your club&rsquo;s data flowing.
         </h1>
-        <p className="text-sm text-gray-500 mt-1 mb-0 dark:text-gray-400">
+        <p className="text-sm text-swoop-text-muted mt-1 mb-0">
           Complete these three steps to unlock the operational cockpit. {doneCount} of {items.length} done.
         </p>
       </div>

@@ -82,7 +82,7 @@ function LOICard({ loi }) {
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <h3 className="text-lg font-bold text-white">{loi.name}</h3>
-          <p className="text-sm text-gray-500">{loi.location} &middot; {loi.members} members</p>
+          <p className="text-sm text-swoop-text-muted">{loi.location} &middot; {loi.members} members</p>
         </div>
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${style.bg} ${style.text} self-start`}>
           {loi.status === 'signed' && (
@@ -94,17 +94,17 @@ function LOICard({ loi }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-gray-800/60 rounded-lg p-3">
-          <div className="text-xs text-gray-500">Current Tech Spend</div>
+          <div className="text-xs text-swoop-text-muted">Current Tech Spend</div>
           <div className="text-sm font-semibold text-white">{loi.techSpend}</div>
         </div>
         <div className="bg-gray-800/60 rounded-lg p-3">
-          <div className="text-xs text-gray-500">Primary Pain Point</div>
-          <div className="text-sm text-gray-300">{loi.painPoint}</div>
+          <div className="text-xs text-swoop-text-muted">Primary Pain Point</div>
+          <div className="text-sm text-swoop-text-ghost">{loi.painPoint}</div>
         </div>
       </div>
 
       {loi.signedDate && (
-        <div className="text-xs text-gray-500">Signed: {loi.signedDate}</div>
+        <div className="text-xs text-swoop-text-muted">Signed: {loi.signedDate}</div>
       )}
 
       <button
@@ -116,8 +116,8 @@ function LOICard({ loi }) {
 
       {expanded && (
         <blockquote className="border-l-2 border-emerald-500/40 pl-4 py-2">
-          <p className="text-sm text-gray-300 italic">"{loi.quote}"</p>
-          <p className="text-xs text-gray-500 mt-2">— {loi.gmName}, {loi.gmTitle}</p>
+          <p className="text-sm text-swoop-text-ghost italic">"{loi.quote}"</p>
+          <p className="text-xs text-swoop-text-muted mt-2">— {loi.gmName}, {loi.gmTitle}</p>
         </blockquote>
       )}
     </div>
@@ -138,7 +138,7 @@ export default function LOITracker() {
       <button
         type="button"
         onClick={() => { window.location.hash = '#/demo/mobile-showcase'; }}
-        className="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-300 bg-transparent border-none cursor-pointer"
+        className="absolute top-4 left-4 text-sm text-swoop-text-muted hover:text-gray-300 bg-transparent border-none cursor-pointer"
       >
         &larr; Back
       </button>
@@ -147,7 +147,7 @@ export default function LOITracker() {
         <div className="text-center space-y-3 pt-8">
           <div className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-500">Swoop Golf</div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white">Letter of Intent Tracker</h1>
-          <p className="text-gray-400 max-w-lg mx-auto">
+          <p className="text-swoop-text-label max-w-lg mx-auto">
             Pipeline of committed clubs in the Scottsdale/Phoenix private club market.
           </p>
         </div>
@@ -159,16 +159,16 @@ export default function LOITracker() {
             { label: 'Total Members', value: totalMembers.toLocaleString(), color: 'text-white' },
             { label: 'Addressable Tech Spend', value: `$${totalSpend}K/yr`, color: 'text-white' },
           ].map((kpi, i) => (
-            <div key={i} className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 text-center">
-              <div className="text-xs text-gray-500 mb-2">{kpi.label}</div>
+            <div key={i} className="bg-gray-900/60 border border-swoop-border rounded-lg p-4 text-center">
+              <div className="text-xs text-swoop-text-muted mb-2">{kpi.label}</div>
               <div className={`text-xl sm:text-2xl font-bold ${kpi.color}`}>{kpi.value}</div>
             </div>
           ))}
         </div>
 
         {/* Pipeline funnel visual */}
-        <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-5">
-          <div className="text-xs text-gray-400 uppercase tracking-wider mb-3">Pipeline Status</div>
+        <div className="bg-gray-900/60 border border-swoop-border rounded-xl p-5">
+          <div className="text-xs text-swoop-text-label uppercase tracking-wider mb-3">Pipeline Status</div>
           <div className="flex items-center gap-2 h-8">
             <div className="bg-emerald-500/30 border border-emerald-500/50 rounded-l-lg h-full flex items-center justify-center text-xs text-emerald-400 font-semibold" style={{ width: `${(signedCount / LOIS.length) * 100}%` }}>
               {signedCount} Signed
@@ -185,7 +185,7 @@ export default function LOITracker() {
           ))}
         </div>
 
-        <div className="text-center text-xs text-gray-600 pb-8">
+        <div className="text-center text-xs text-swoop-text-muted pb-8">
           Confidential — Swoop Golf Inc. Investor Pipeline
         </div>
       </div>

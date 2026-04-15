@@ -25,7 +25,7 @@ function PlaybookDetail({ playbook, onClose }) {
   if (editingSteps) {
     const PlaybookEditor = React.lazy(() => import('@/features/automations/PlaybookEditor'));
     return (
-      <React.Suspense fallback={<div className="p-4 text-gray-400">Loading editor...</div>}>
+      <React.Suspense fallback={<div className="p-4 text-swoop-text-label">Loading editor...</div>}>
         <PlaybookEditor playbook={{ ...playbook, steps: displaySteps }} onClose={() => setEditingSteps(false)} />
       </React.Suspense>
     );
@@ -46,27 +46,27 @@ function PlaybookDetail({ playbook, onClose }) {
             </>
           )}
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white/90 m-0 mb-2">{playbook.name}</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed m-0">{playbook.description}</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-swoop-text m-0 mb-2">{playbook.name}</h2>
+        <p className="text-sm text-swoop-text-muted leading-relaxed m-0">{playbook.description}</p>
       </div>
 
       {/* Track Record (if any) */}
       {playbook.trackRecord?.length > 0 && (
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div className="sm:text-right">
-            <div className="text-xs text-gray-400">Track record</div>
+            <div className="text-xs text-swoop-text-label">Track record</div>
             <div className="text-base font-bold text-success-600">{playbook.trackRecord[0]?.result}</div>
-            <div className="text-xs text-gray-400">{playbook.trackRecord[0]?.period}</div>
+            <div className="text-xs text-swoop-text-label">{playbook.trackRecord[0]?.period}</div>
           </div>
         </div>
       )}
 
       {/* Steps Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
-        <div className="text-xs sm:text-[13px] text-gray-400 font-medium">When you activate this playbook:</div>
+        <div className="text-xs sm:text-[13px] text-swoop-text-label font-medium">When you activate this playbook:</div>
         <button
           onClick={() => setEditingSteps(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-transparent text-xs font-semibold text-gray-500 cursor-pointer hover:bg-gray-50 transition dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-swoop-border bg-transparent text-xs font-semibold text-swoop-text-muted cursor-pointer hover:bg-swoop-row-hover transition"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -78,32 +78,32 @@ function PlaybookDetail({ playbook, onClose }) {
 
       {/* Steps */}
       {displaySteps.map((step, idx) => (
-        <div key={idx} className="bg-gray-50 border border-gray-200 rounded-xl p-3 sm:p-4 lg:px-6 mb-3 dark:bg-gray-800 dark:border-gray-700">
+        <div key={idx} className="bg-swoop-row border border-swoop-border rounded-xl p-3 sm:p-4 lg:px-6 mb-3">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
             <div className="w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold shrink-0">{idx + 1}</div>
             <span style={{ background: step.badge.bg, color: step.badge.color }} className="text-[11px] font-semibold px-2.5 py-0.5 rounded">{step.badge.text}</span>
-            <span className="text-[11px] text-gray-400 ml-auto">{step.timing}</span>
+            <span className="text-[11px] text-swoop-text-label ml-auto">{step.timing}</span>
           </div>
-          <div className="font-semibold text-sm text-gray-800 dark:text-white/90 mb-1">{step.title}</div>
-          <div className="text-xs sm:text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed">{step.detail}</div>
+          <div className="font-semibold text-sm text-swoop-text mb-1">{step.title}</div>
+          <div className="text-xs sm:text-[13px] text-swoop-text-muted leading-relaxed">{step.detail}</div>
         </div>
       ))}
 
       {/* Track Record */}
       {playbook.trackRecord?.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 mt-6 sm:mt-8 dark:bg-gray-900 dark:border-gray-800">
+        <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4 sm:p-6 mt-6 sm:mt-8">
           <div className="flex items-center gap-2 mb-3 sm:mb-4">
             <span className="text-success-600 font-bold">{'\u2713'}</span>
             <span className="text-xs font-bold tracking-wider text-success-600 uppercase">Track Record</span>
           </div>
           {playbook.trackRecord.map((tr, idx) => (
             <div key={idx} className={`flex flex-col sm:flex-row sm:justify-between sm:items-center py-2.5 gap-1 sm:gap-2 ${
-              idx < playbook.trackRecord.length - 1 ? 'border-b border-gray-100 dark:border-gray-800' : ''
+              idx < playbook.trackRecord.length - 1 ? 'border-b border-swoop-border-inset' : ''
             }`}>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs sm:text-[13px] font-semibold text-gray-800 dark:text-white/90">{tr.period}</span>
-                <span className="text-[10px] sm:text-[11px] bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded">{tr.runs}</span>
-                <span className="text-xs sm:text-[13px] text-gray-500">{tr.result}</span>
+                <span className="text-xs sm:text-[13px] font-semibold text-swoop-text">{tr.period}</span>
+                <span className="text-[10px] sm:text-[11px] bg-swoop-row text-swoop-text-muted px-2 py-0.5 rounded">{tr.runs}</span>
+                <span className="text-xs sm:text-[13px] text-swoop-text-muted">{tr.result}</span>
               </div>
               {tr.impact && <span className="text-xs sm:text-[13px] font-semibold text-success-600">{tr.impact}</span>}
             </div>
@@ -184,14 +184,14 @@ function DetailSlideOver({ playbook, onClose }) {
       />
       {/* Panel */}
       <div
-        className="relative w-full max-w-[600px] bg-white dark:bg-gray-900 shadow-2xl overflow-y-auto transition-transform duration-250 ease-out"
+        className="relative w-full max-w-[600px] bg-swoop-panel shadow-2xl overflow-y-auto transition-transform duration-250 ease-out"
         style={{ transform: visible ? 'translateX(0)' : 'translateX(100%)' }}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 bg-white/95 dark:bg-gray-900/95 border-b border-gray-200 dark:border-gray-800 backdrop-blur-sm">
-          <span className="text-[13px] font-semibold text-gray-700 dark:text-white/80">Playbook Details</span>
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 bg-white/95 border-b border-swoop-border backdrop-blur-sm">
+          <span className="text-[13px] font-semibold text-swoop-text-2">Playbook Details</span>
           <button
             onClick={handleClose}
-            className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white cursor-pointer bg-transparent border-none px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition focus-visible:ring-2 focus-visible:ring-brand-500"
+            className="text-xs font-semibold text-swoop-text-muted hover:text-swoop-text-2 cursor-pointer bg-transparent border-none px-2 py-1 rounded hover:bg-swoop-row-hover transition focus-visible:ring-2 focus-visible:ring-brand-500"
           >
             {'\u2715'} Close
           </button>
@@ -302,8 +302,8 @@ export default function PlaybooksPage({ embedded = false }) {
   if (loading) {
     return (
       <Wrapper>
-        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-          <div className="w-8 h-8 border-2 border-gray-300 border-t-brand-500 rounded-full animate-spin mb-4" />
+        <div className="flex flex-col items-center justify-center py-20 text-swoop-text-label">
+          <div className="w-8 h-8 border-2 border-swoop-border border-t-brand-500 rounded-full animate-spin mb-4" />
           <span className="text-sm">Loading playbooks...</span>
         </div>
       </Wrapper>
@@ -314,9 +314,9 @@ export default function PlaybooksPage({ embedded = false }) {
   if (error) {
     return (
       <Wrapper>
-        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-20 text-swoop-text-label">
           <span className="text-sm text-red-500 mb-2">Failed to load playbooks</span>
-          <span className="text-xs text-gray-400">{error}</span>
+          <span className="text-xs text-swoop-text-label">{error}</span>
         </div>
       </Wrapper>
     );
@@ -330,15 +330,15 @@ export default function PlaybooksPage({ embedded = false }) {
       <div className="flex flex-col gap-4 sm:gap-5">
         {/* Category Filter Pills */}
         <div className="overflow-x-auto -mx-1 px-1 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="inline-flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
+          <div className="inline-flex gap-1 bg-swoop-row rounded-lg p-0.5">
             {CATEGORY_FILTERS.map(cat => (
               <button
                 key={cat}
                 onClick={() => setCategoryFilter(cat)}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer border-none whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-brand-500 ${
                   categoryFilter === cat
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
-                    : 'bg-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                    ? 'bg-swoop-panel text-swoop-text shadow-sm'
+                    : 'bg-transparent text-swoop-text-muted hover:text-swoop-text-2'
                 }`}
               >{cat}</button>
             ))}
@@ -374,23 +374,23 @@ export default function PlaybooksPage({ embedded = false }) {
 
         {/* Empty activity banner */}
         {!hasAnyActivity && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-center">
-            <p className="text-sm text-amber-700 dark:text-amber-300 m-0">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+            <p className="text-sm text-amber-700 m-0">
               No playbook activity yet. Import data and activate agents to see playbooks fire.
             </p>
           </div>
         )}
 
         {/* Total Bar */}
-        <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-xs text-gray-500 dark:text-gray-400">
-          <span>Showing <strong className="text-gray-700 dark:text-white/80">{filtered.length} playbooks</strong> across {groupedPlaybooks.length} categories</span>
-          <span><span className="font-bold text-gray-700 dark:text-white/80 tabular-nums">{totalTriggers}</span> total triggers</span>
+        <div className="flex items-center justify-between px-3 py-2 bg-swoop-row rounded-lg text-xs text-swoop-text-muted">
+          <span>Showing <strong className="text-swoop-text-2">{filtered.length} playbooks</strong> across {groupedPlaybooks.length} categories</span>
+          <span><span className="font-bold text-swoop-text-2 tabular-nums">{totalTriggers}</span> total triggers</span>
         </div>
 
         {/* Grouped Table */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-swoop-panel border border-swoop-border rounded-xl overflow-hidden">
           {/* Table Header */}
-          <div className="hidden sm:grid grid-cols-[1fr_120px_80px_1fr_70px] gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+          <div className="hidden sm:grid grid-cols-[1fr_120px_80px_1fr_70px] gap-2 px-4 py-2.5 bg-swoop-row border-b border-swoop-border text-[11px] font-semibold text-swoop-text-label uppercase tracking-wider">
             <div>Playbook</div>
             <div>Triggered</div>
             <div>Steps</div>
@@ -402,7 +402,7 @@ export default function PlaybooksPage({ embedded = false }) {
           {groupedPlaybooks.map(group => (
             <div key={group.category}>
               {/* Category Label */}
-              <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-2 px-4 py-2 border-b border-swoop-border-inset">
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: group.meta.dotColor }} />
                 <span className="text-xs font-bold" style={{ color: group.meta.color }}>{group.category}</span>
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: group.meta.bg, color: group.meta.color }}>{group.items.length}</span>
@@ -413,16 +413,16 @@ export default function PlaybooksPage({ embedded = false }) {
                 <div
                   key={pb.id}
                   onClick={() => setSelectedId(pb.id)}
-                  className={`group grid grid-cols-1 sm:grid-cols-[1fr_120px_80px_1fr_70px] gap-1 sm:gap-2 px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors ${
+                  className={`group grid grid-cols-1 sm:grid-cols-[1fr_120px_80px_1fr_70px] gap-1 sm:gap-2 px-4 py-3 border-b border-swoop-border-inset cursor-pointer transition-colors ${
                     selectedId === pb.id
-                      ? 'bg-brand-50 dark:bg-brand-500/5'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                      ? 'bg-brand-50'
+                      : 'hover:bg-swoop-row-hover'
                   }`}
                 >
                   {/* Playbook Name */}
                   <div className="flex items-center gap-2">
                     <span className={`text-sm font-semibold transition-colors ${
-                      selectedId === pb.id ? 'text-brand-500' : 'text-gray-800 dark:text-white/90 group-hover:text-brand-500'
+                      selectedId === pb.id ? 'text-brand-500' : 'text-swoop-text group-hover:text-brand-500'
                     }`}>{pb.name}</span>
                     <svg className="w-3.5 h-3.5 text-brand-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
@@ -432,7 +432,7 @@ export default function PlaybooksPage({ embedded = false }) {
                   {/* Triggered */}
                   <div className="flex items-center">
                     {pb.triggeredCount > 0 ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-600 dark:text-brand-400">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-600">
                         <span className="relative flex h-2 w-2">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75" />
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500" />
@@ -440,18 +440,18 @@ export default function PlaybooksPage({ embedded = false }) {
                         {pb.triggeredCount} triggered
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-400">0 triggered</span>
+                      <span className="text-xs text-swoop-text-label">0 triggered</span>
                     )}
                   </div>
 
                   {/* Steps */}
-                  <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center">{pb.steps.length} steps</div>
+                  <div className="text-xs text-swoop-text-muted flex items-center">{pb.steps.length} steps</div>
 
                   {/* Track Record */}
-                  <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center leading-snug">{pb.trackRecord?.[0]?.result || '\u2014'}</div>
+                  <div className="text-xs text-swoop-text-muted flex items-center leading-snug">{pb.trackRecord?.[0]?.result || '\u2014'}</div>
 
                   {/* Runs */}
-                  <div className="text-xs text-gray-400 text-right flex items-center justify-end sm:justify-end">{getRuns(pb)}</div>
+                  <div className="text-xs text-swoop-text-label text-right flex items-center justify-end sm:justify-end">{getRuns(pb)}</div>
                 </div>
               ))}
             </div>

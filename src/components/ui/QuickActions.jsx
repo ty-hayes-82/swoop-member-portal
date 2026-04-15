@@ -175,7 +175,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
       onClick={() => setMode(mode === key ? null : key)}
       className={`px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer inline-flex items-center gap-1.5 transition-all duration-150 border ${
         mode === key
-          ? `bg-brand-50 text-brand-500 border-brand-200 dark:bg-brand-500/10 dark:border-brand-500/30`
+          ? `bg-brand-50 text-brand-500 border-brand-200`
           : `bg-brand-500 text-white border-brand-500 shadow-theme-xs`
       }`}
     >{icon} {label}</button>
@@ -187,8 +187,8 @@ export default function QuickActions({ memberName, memberId, context = '', arche
       onClick={() => setMode(mode === key ? null : key)}
       className={`px-3.5 py-2 rounded-xl text-sm font-semibold cursor-pointer inline-flex items-center gap-1.5 transition-all duration-150 border ${
         mode === key
-          ? 'bg-blue-light-50 text-blue-light-600 border-blue-light-200 dark:bg-blue-light-500/10 dark:border-blue-light-500/30'
-          : 'bg-blue-light-50/50 text-blue-light-600 border-blue-light-200/50 dark:bg-blue-light-500/5 dark:border-blue-light-500/20'
+          ? 'bg-blue-light-50 text-blue-light-600 border-blue-light-200'
+          : 'bg-blue-light-50/50 text-blue-light-600 border-blue-light-200/50'
       }`}
     >{icon} {label}</button>
   );
@@ -196,7 +196,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
   return (
     <div>
       {sent && (
-        <div className="mb-3 px-3 py-2 rounded-lg bg-success-50 border border-success-200 text-sm text-success-500 dark:bg-success-500/10 dark:border-success-500/30">
+        <div className="mb-3 px-3 py-2 rounded-lg bg-success-50 border border-success-200 text-sm text-success-500">
           \u2713 {sent === 'note' ? 'Personal note ready to send' : sent === 'call' ? 'Call scheduled' : 'Task assigned to ' + staff}
         </div>
       )}
@@ -207,29 +207,29 @@ export default function QuickActions({ memberName, memberId, context = '', arche
       </div>
 
       {mode === 'note' && (
-        <div className="mt-3 p-4 bg-white border border-brand-200 rounded-xl dark:bg-white/[0.03] dark:border-brand-500/30">
+        <div className="mt-3 p-4 bg-swoop-panel border border-brand-200 rounded-xl">
           <div className="text-[11px] text-brand-500 font-bold tracking-wide mb-3">
             PERSONAL NOTE TO {memberName?.toUpperCase()}
             {aiDraft && !aiDraft.fallback && (
-              <span className="ml-2 text-[10px] font-medium text-gray-400 normal-case">AI-generated draft</span>
+              <span className="ml-2 text-[10px] font-medium text-swoop-text-label normal-case">AI-generated draft</span>
             )}
           </div>
           {draftLoading ? (
-            <div className="w-full h-40 p-3 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center dark:bg-gray-800 dark:border-gray-700">
-              <div className="text-sm text-gray-400 animate-pulse">Generating draft...</div>
+            <div className="w-full h-40 p-3 bg-swoop-row border border-swoop-border rounded-lg flex items-center justify-center">
+              <div className="text-sm text-swoop-text-label animate-pulse">Generating draft...</div>
             </div>
           ) : (
             <textarea
               value={note || (aiDraft?.body ?? defaultNote)}
               onChange={e => setNote(e.target.value)}
-              className="w-full h-40 p-3 text-sm text-gray-800 bg-gray-100 border border-gray-200 rounded-lg resize-y leading-relaxed outline-none box-border dark:bg-gray-800 dark:border-gray-700 dark:text-white/90"
+              className="w-full h-40 p-3 text-sm text-swoop-text bg-swoop-row border border-swoop-border rounded-lg resize-y leading-relaxed outline-none box-border"
             />
           )}
           <div className="flex gap-3 mt-3">
             <button onClick={() => handleSend('note')} disabled={draftLoading} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-brand-500">
               {sendBtnLabel}
             </button>
-            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium focus-visible:ring-2 focus-visible:ring-brand-500">
+            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-swoop-text-muted font-medium focus-visible:ring-2 focus-visible:ring-brand-500">
               Dismiss
             </button>
           </div>
@@ -237,7 +237,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
       )}
 
       {mode === 'call' && (
-        <div className="mt-3 p-4 bg-white border border-success-200 rounded-xl dark:bg-white/[0.03] dark:border-success-500/30">
+        <div className="mt-3 p-4 bg-swoop-panel border border-success-200 rounded-xl">
           <div className="text-[11px] text-success-500 font-bold tracking-wide mb-3">
             SCHEDULE A CALL WITH {memberName?.toUpperCase()}
           </div>
@@ -248,11 +248,11 @@ export default function QuickActions({ memberName, memberId, context = '', arche
               AI-Generated Talking Points
             </div>
             {tpLoading ? (
-              <div className="text-xs text-gray-400 animate-pulse py-2">Generating personalized talking points...</div>
+              <div className="text-xs text-swoop-text-label animate-pulse py-2">Generating personalized talking points...</div>
             ) : talkingPoints ? (
-              <div className="text-xs text-gray-700 leading-relaxed whitespace-pre-line dark:text-gray-300">{talkingPoints}</div>
+              <div className="text-xs text-swoop-text-2 leading-relaxed whitespace-pre-line">{talkingPoints}</div>
             ) : (
-              <ul className="m-0 pl-4 space-y-1 text-xs text-gray-600 dark:text-gray-400">
+              <ul className="m-0 pl-4 space-y-1 text-xs text-swoop-text-muted">
                 <li>Acknowledge recent experience and show you're aware of their feedback</li>
                 <li>Ask about {firstName}'s preferences — listen for what matters most</li>
                 <li>Mention a specific improvement or upcoming event they'd enjoy</li>
@@ -261,15 +261,15 @@ export default function QuickActions({ memberName, memberId, context = '', arche
             )}
           </div>
 
-          <div className="text-sm text-gray-600 mb-4 leading-relaxed dark:text-gray-400">
+          <div className="text-sm text-swoop-text-muted mb-4 leading-relaxed">
             When would you like to call?
           </div>
           <div className="flex gap-3 flex-wrap mb-4">
             {['Today 4 PM', 'Friday AM', 'Saturday at the tee', 'Monday morning'].map(t => (
               <button key={t} onClick={() => setTime(t)} className={`px-3 py-1.5 rounded-full text-xs cursor-pointer border ${
                 time === t
-                  ? 'font-bold border-success-500 bg-success-50 text-success-500 dark:bg-success-500/10 dark:border-success-500/40'
-                  : 'font-normal border-gray-200 bg-transparent text-gray-600 dark:border-gray-700 dark:text-gray-400'
+                  ? 'font-bold border-success-500 bg-success-50 text-success-500'
+                  : 'font-normal border-swoop-border bg-transparent text-swoop-text-muted'
               }`}>{t}</button>
             ))}
           </div>
@@ -277,7 +277,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
             <button onClick={() => handleSend('call')} disabled={calendarBusy} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-brand-500">
               {calendarBusy ? 'Adding...' : googleConnected ? 'Add to Google Calendar' : 'Add to calendar'}
             </button>
-            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium focus-visible:ring-2 focus-visible:ring-brand-500">Dismiss</button>
+            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-swoop-text-muted font-medium focus-visible:ring-2 focus-visible:ring-brand-500">Dismiss</button>
             {googleConnected && (
               <span className="text-[10px] text-success-500 font-medium ml-1">Google Calendar connected</span>
             )}
@@ -286,16 +286,16 @@ export default function QuickActions({ memberName, memberId, context = '', arche
       )}
 
       {mode === 'task' && (
-        <div className="mt-3 p-4 bg-white border border-blue-light-200 rounded-xl dark:bg-white/[0.03] dark:border-blue-light-500/30">
+        <div className="mt-3 p-4 bg-swoop-panel border border-blue-light-200 rounded-xl">
           <div className="text-[11px] text-blue-light-600 font-bold tracking-wide mb-3">
             ASSIGN FOLLOW-UP TASK
           </div>
-          <div className="text-sm text-gray-600 mb-3 dark:text-gray-400">
+          <div className="text-sm text-swoop-text-muted mb-3">
             Task: <em>Follow up with {memberName} re: {context || 'service complaint'}</em>
           </div>
           <div className="mb-3">
-            <div className="text-[11px] text-gray-500 mb-1 dark:text-gray-400">Assign to</div>
-            <select onChange={e => setStaff(e.target.value)} value={staff} className="px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-100 text-gray-800 cursor-pointer outline-none dark:bg-gray-800 dark:border-gray-700 dark:text-white/90">
+            <div className="text-[11px] text-swoop-text-muted mb-1">Assign to</div>
+            <select onChange={e => setStaff(e.target.value)} value={staff} className="px-3 py-2 text-sm rounded-lg border border-swoop-border bg-swoop-row text-swoop-text cursor-pointer outline-none">
               {STAFF.map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
@@ -303,7 +303,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
             <button onClick={() => handleSend('task')} className="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none bg-brand-500 text-white shadow-theme-xs focus-visible:ring-2 focus-visible:ring-brand-500">
               Assign task
             </button>
-            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-gray-500 font-medium focus-visible:ring-2 focus-visible:ring-brand-500">Dismiss</button>
+            <button onClick={() => setMode(null)} className="px-3.5 py-2 rounded-lg text-sm cursor-pointer border-none bg-transparent text-swoop-text-muted font-medium focus-visible:ring-2 focus-visible:ring-brand-500">Dismiss</button>
           </div>
         </div>
       )}
@@ -314,11 +314,11 @@ export default function QuickActions({ memberName, memberId, context = '', arche
           <button
             onClick={() => setShowOutreach(!showOutreach)}
             className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-semibold cursor-pointer flex items-center justify-between transition-all duration-150 ${
-              showOutreach ? 'bg-brand-50 border-brand-200 text-brand-500 dark:bg-brand-500/5 dark:border-brand-500/30' : 'bg-white border-brand-200/50 text-brand-500 dark:bg-white/[0.03] dark:border-brand-500/20'
+              showOutreach ? 'bg-brand-50 border-brand-200 text-brand-500' : 'bg-swoop-panel border-brand-200/50 text-brand-500'
             }`}
           >
             <span>\uD83D\uDCE8 Outreach Playbook for {archetype}</span>
-            <span className="text-xs text-gray-400">{showOutreach ? '\u25B2' : '\u25BC'} {outreachActions.length} actions</span>
+            <span className="text-xs text-swoop-text-label">{showOutreach ? '\u25B2' : '\u25BC'} {outreachActions.length} actions</span>
           </button>
           {showOutreach && (
             <div className="mt-3 flex flex-col gap-2">
@@ -326,16 +326,16 @@ export default function QuickActions({ memberName, memberId, context = '', arche
                 const cat = outreachCategories.find(c => c.key === action.category);
                 return (
                   <div key={action.id} className={`px-3.5 py-3 rounded-xl border flex items-start gap-2.5 ${
-                    idx < 2 ? 'border-brand-200 bg-brand-50/50 dark:border-brand-500/20 dark:bg-brand-500/5' : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'
+                    idx < 2 ? 'border-brand-200 bg-brand-50/50' : 'border-swoop-border bg-swoop-panel'
                   }`}>
                     <span className="text-base mt-0.5">{cat?.icon || '\u2728'}</span>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-gray-800 mb-0.5 dark:text-white/90">
+                      <div className="text-sm font-semibold text-swoop-text mb-0.5">
                         {action.label}
-                        {idx < 2 && <span className="text-[10px] font-bold text-brand-500 ml-1.5 bg-brand-50 px-1.5 py-px rounded dark:bg-brand-500/15">TOP</span>}
+                        {idx < 2 && <span className="text-[10px] font-bold text-brand-500 ml-1.5 bg-brand-50 px-1.5 py-px rounded">TOP</span>}
                       </div>
-                      <div className="text-xs text-gray-500 leading-snug dark:text-gray-400">{action.description}</div>
-                      <div className="mt-1.5 text-[11px] text-gray-400">Owner: {action.defaultOwner}</div>
+                      <div className="text-xs text-swoop-text-muted leading-snug">{action.description}</div>
+                      <div className="mt-1.5 text-[11px] text-swoop-text-label">Owner: {action.defaultOwner}</div>
                     </div>
                     <button
                       onClick={(e) => {
@@ -344,7 +344,7 @@ export default function QuickActions({ memberName, memberId, context = '', arche
                         showToast(action.label + ' triggered for ' + memberName, 'info');
                         trackAction({ actionType: 'outreach', actionSubtype: action.category || 'general', memberId, memberName, description: action.label });
                       }}
-                      className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-200 bg-brand-50 text-brand-500 whitespace-nowrap shrink-0 dark:bg-brand-500/10 dark:border-brand-500/30"
+                      className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-200 bg-brand-50 text-brand-500 whitespace-nowrap shrink-0"
                     >Deploy</button>
                   </div>
                 );
@@ -358,38 +358,38 @@ export default function QuickActions({ memberName, memberId, context = '', arche
         <button
           type="button"
           onClick={() => navigate('automations', { tab: 'playbooks' })}
-          className="text-[11px] text-gray-400 hover:text-brand-500 bg-transparent border-none cursor-pointer p-0 font-medium transition-colors"
+          className="text-[11px] text-swoop-text-label hover:text-brand-500 bg-transparent border-none cursor-pointer p-0 font-medium transition-colors"
         >
           ✦ Start a multi-step playbook for {getFirstName(memberName)} →
         </button>
       </div>
 
       {actionLog.length > 0 && (
-        <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden dark:border-gray-800">
-          <div className="px-3 py-2.5 text-[11px] font-bold tracking-wide uppercase text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400">
+        <div className="mt-4 border border-swoop-border rounded-xl overflow-hidden">
+          <div className="px-3 py-2.5 text-[11px] font-bold tracking-wide uppercase text-swoop-text-muted bg-swoop-row">
             Follow-up tracker
           </div>
           {actionLog.map((entry, idx) => {
             const meta = ACTION_META[entry.type] ?? ACTION_META.note;
             const isLast = idx === actionLog.length - 1;
-            const statusCls = STATUS_CLS[entry.status] || 'text-gray-600 bg-gray-100';
+            const statusCls = STATUS_CLS[entry.status] || 'text-swoop-text-muted bg-swoop-row';
             return (
-              <div key={entry.id} className={`px-3.5 py-3 flex justify-between items-center gap-3 flex-wrap ${isLast ? '' : 'border-b border-gray-200 dark:border-gray-800'}`}>
+              <div key={entry.id} className={`px-3.5 py-3 flex justify-between items-center gap-3 flex-wrap ${isLast ? '' : 'border-b border-swoop-border'}`}>
                 <div className="min-w-0 flex-1">
                   <div className={`text-sm font-semibold flex items-center gap-1.5 ${meta.colorCls}`}>
                     <span aria-hidden="true">{meta.icon}</span> {meta.label}
                   </div>
-                  <div className="text-xs text-gray-600 mt-1 dark:text-gray-400">
+                  <div className="text-xs text-swoop-text-muted mt-1">
                     Owner: <strong>{entry.owner}</strong> \u00B7 Due: {entry.dueLabel}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-swoop-text-muted">
                     Logged {formatLoggedAt(entry.createdAt)}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${statusCls}`}>{entry.status}</span>
                   {entry.status !== 'Completed' && (
-                    <button onClick={() => markActionCompleted(entry.id)} className="px-2.5 py-1 rounded-lg border border-gray-200 bg-transparent text-brand-500 text-xs cursor-pointer font-semibold dark:border-gray-700">
+                    <button onClick={() => markActionCompleted(entry.id)} className="px-2.5 py-1 rounded-lg border border-swoop-border bg-transparent text-brand-500 text-xs cursor-pointer font-semibold">
                       Mark done
                     </button>
                   )}

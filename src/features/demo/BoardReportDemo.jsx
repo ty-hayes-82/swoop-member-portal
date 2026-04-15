@@ -48,17 +48,17 @@ export default function BoardReportDemo() {
   const kpis = report?.kpis;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-swoop-row py-8 px-4">
       <div className="max-w-3xl mx-auto">
         <button
           type="button"
           onClick={() => { window.location.hash = '#/today'; }}
-          className="text-sm text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer mb-3 p-0"
+          className="text-sm text-swoop-text-label hover:text-gray-600 bg-transparent border-none cursor-pointer mb-3 p-0"
         >
           &larr; Back to Today
         </button>
-        <h1 className="text-2xl font-bold text-gray-800 m-0">Board Report Generator</h1>
-        <p className="text-sm text-gray-500 mt-1 mb-6">
+        <h1 className="text-2xl font-bold text-swoop-text m-0">Board Report Generator</h1>
+        <p className="text-sm text-swoop-text-muted mt-1 mb-6">
           Pine Tree CC &middot; January 2026 &middot; AI-generated executive narrative
         </p>
 
@@ -108,7 +108,7 @@ export default function BoardReportDemo() {
           <div className="flex flex-col gap-5">
             {/* Generated-in badge */}
             <div className="text-right">
-              <span className="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded">
+              <span className="text-xs font-mono text-swoop-text-label bg-swoop-row px-2 py-1 rounded">
                 Generated in {elapsed}s
               </span>
             </div>
@@ -121,22 +121,22 @@ export default function BoardReportDemo() {
                 { label: 'Concierge Members', value: kpis.concierge.active_members, sub: `${kpis.concierge.satisfaction_rate}% satisfaction`, color: '#7c3aed' },
                 { label: 'GM Hours Saved', value: kpis.gm_hours_saved, sub: `${kpis.agents_running} agents running`, color: '#d97706' },
               ].map((kpi) => (
-                <div key={kpi.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+                <div key={kpi.label} className="bg-swoop-panel rounded-xl border border-swoop-border p-4 text-center">
                   <div className="text-3xl font-bold" style={{ color: kpi.color }}>{kpi.value}</div>
-                  <div className="text-xs font-semibold text-gray-600 mt-1">{kpi.label}</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">{kpi.sub}</div>
+                  <div className="text-xs font-semibold text-swoop-text-muted mt-1">{kpi.label}</div>
+                  <div className="text-[10px] text-swoop-text-label mt-0.5">{kpi.sub}</div>
                 </div>
               ))}
             </div>
 
             {/* Narrative */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm" style={{ fontFamily: 'Georgia, serif' }}>
+            <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6 shadow-sm" style={{ fontFamily: 'Georgia, serif' }}>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-800 m-0" style={{ fontFamily: 'system-ui, sans-serif' }}>
+                  <h2 className="text-lg font-bold text-swoop-text m-0" style={{ fontFamily: 'system-ui, sans-serif' }}>
                     Executive Summary
                   </h2>
-                  <p className="text-xs text-gray-400 mt-0.5 m-0" style={{ fontFamily: 'system-ui, sans-serif' }}>
+                  <p className="text-xs text-swoop-text-label mt-0.5 m-0" style={{ fontFamily: 'system-ui, sans-serif' }}>
                     {kpis.club} &middot; {kpis.month}
                   </p>
                 </div>
@@ -149,7 +149,7 @@ export default function BoardReportDemo() {
                   Print
                 </button>
               </div>
-              <div className="text-gray-700 text-[15px] leading-relaxed whitespace-pre-line">
+              <div className="text-swoop-text-2 text-[15px] leading-relaxed whitespace-pre-line">
                 {report.narrative}
               </div>
             </div>
@@ -160,15 +160,15 @@ export default function BoardReportDemo() {
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <div className="text-2xl font-bold">${(kpis.member_saves.dues_protected / 1000).toFixed(0)}K</div>
-                  <div className="text-xs text-gray-400">Dues Protected</div>
+                  <div className="text-xs text-swoop-text-label">Dues Protected</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold">${(kpis.revenue.incremental_fb / 1000).toFixed(0)}K</div>
-                  <div className="text-xs text-gray-400">Incremental F&B</div>
+                  <div className="text-xs text-swoop-text-label">Incremental F&B</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold">{kpis.revenue.tee_time_utilization}%</div>
-                  <div className="text-xs text-gray-400">Tee Time Utilization</div>
+                  <div className="text-xs text-swoop-text-label">Tee Time Utilization</div>
                 </div>
               </div>
             </div>
@@ -177,7 +177,7 @@ export default function BoardReportDemo() {
             <button
               type="button"
               onClick={() => { setState('idle'); setReport(null); }}
-              className="self-center text-sm text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer mt-2"
+              className="self-center text-sm text-swoop-text-label hover:text-gray-600 bg-transparent border-none cursor-pointer mt-2"
             >
               Generate another report
             </button>
