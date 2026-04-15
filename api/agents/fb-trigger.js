@@ -231,9 +231,11 @@ function buildRootCauseAnalysis(fbPerf, menuMix, coverDelta, weather, staffing, 
   const insights = [];
   const causes = [];
 
-  // Check margin vs baseline (assume 65% is normal)
+  // Only run margin analysis when we have real F&B performance data.
+  // If total_covers === 0 the avg_margin_pct is 0 by default, making the
+  // delta a spurious -65 that produces the false "F&B margin down 65.0 points" action.
   const marginDelta = fbPerf.avg_margin_pct - 65;
-  if (Math.abs(marginDelta) > 2) {
+  if (fbPerf.total_covers > 0 && Math.abs(marginDelta) > 2) {
     const direction = marginDelta > 0 ? 'up' : 'down';
     let cause = `F&B margin ${direction} ${Math.abs(marginDelta).toFixed(1)} points.`;
     const correlations = [];

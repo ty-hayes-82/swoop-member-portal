@@ -363,7 +363,7 @@ export default function TodayView() {
           <div className="fade-in-up rounded-xl p-4" style={{ background: 'white', border: '2px solid transparent', borderImage: 'linear-gradient(135deg, #e8a732, #12b76a, #3B82F6) 1' }}>
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm text-gray-700 m-0">
-                <strong>Full intelligence unlocked</strong> — 3 core systems connected. You now see cross-domain insights no single vendor can produce.
+                <strong>Full intelligence unlocked</strong> — 3 core systems connected. You now see member health, revenue leakage, and service quality in one place.
               </p>
               <button
                 type="button"

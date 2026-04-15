@@ -5,6 +5,7 @@ import { NAV_ITEMS } from "@/config/navigation";
 import { useCurrentClub } from "@/hooks/useCurrentClub";
 import { memberProfiles } from "@/data/members";
 import { loadStaticDemo, hasRealClub } from "@/services/demoSession";
+import { isGateOpen } from "@/services/demoGate";
 import { useApp } from "@/context/AppContext";
 
 // Client-side fallback: used when /api/search returns empty (e.g. demo mode).
@@ -227,7 +228,7 @@ const SwoopHeader = () => {
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder="Search or type command..."
+                  placeholder="Search members..."
                   aria-label="Search"
                   value={searchQuery}
                   onChange={handleSearchChange}
@@ -296,7 +297,7 @@ const SwoopHeader = () => {
           {/* Page context + badge */}
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <span className="font-medium text-gray-800 dark:text-white/90 hidden sm:inline">{currentNav.label}</span>
-            {clubId !== "demo" && (
+            {clubId !== "demo" && isGateOpen('members') && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-xs font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
                 LIVE

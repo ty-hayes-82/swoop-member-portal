@@ -149,7 +149,14 @@ const sanitizeFeedbackRecords = (source) => {
   if (!Array.isArray(source) || source.length === 0) return [];
   const now = Date.now();
   return source.map((record) => {
-    const dateStr = record?.date ?? (record?.submitted_at ? String(record.submitted_at).split('T')[0] : null);
+    // Normalize date to YYYY-MM-DD. The API can return a PostgreSQL Date object,
+    // an ISO timestamp, or a space-separated timestamp ("2026-02-25 00:00:00").
+    const rawDate = record?.date ?? (record?.submitted_at ? record.submitted_at : null);
+    let dateStr = null;
+    if (rawDate != null) {
+      const s = rawDate instanceof Date ? rawDate.toISOString() : String(rawDate);
+      dateStr = s.split('T')[0].split(' ')[0];
+    }
     const daysOpen = dateStr ? Math.max(0, Math.round((now - new Date(dateStr).getTime()) / 86400000)) : (record?.daysOpen ?? record?.ageDays ?? 0);
     return {
       date: dateStr ?? 'Unknown date',

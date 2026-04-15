@@ -101,7 +101,7 @@ export default function RevenuePage() {
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Revenue Leakage</h1>
             <p className="text-sm text-gray-500 mt-1">
-              Cross-domain revenue attribution across pace of play, staffing, and weather.
+              Revenue lost to slow rounds, understaffing, and weather — quantified across every system.
             </p>
           </div>
 
@@ -181,7 +181,7 @@ export default function RevenuePage() {
               Revenue Leakage
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Cross-domain revenue attribution. The dollars no single system can show you.
+              Revenue lost to slow rounds, understaffing, and weather — quantified where no single system looks.
             </p>
           </div>
           <button
@@ -281,7 +281,7 @@ export default function RevenuePage() {
           <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-white/5 dark:border-gray-800 flex items-center justify-between gap-3 flex-wrap">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Tracking Since</div>
-              <div className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">First month of cross-domain attribution</div>
+              <div className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">First month of revenue leakage tracking</div>
             </div>
             <div className="text-right">
               <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">This Month</div>
