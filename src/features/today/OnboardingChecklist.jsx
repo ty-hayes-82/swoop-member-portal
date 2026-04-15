@@ -118,9 +118,10 @@ export default function OnboardingChecklist() {
         </div>
       </Panel>
 
-      {/* Live insights from anything already imported — also shows the
-          locked roadmap so the GM sees what each next file unlocks. */}
-      <StageInsightsPanel />
+      {/* Live insights from anything already imported — only show once data
+          starts flowing so we don't surface contradictory progress indicators
+          or render a white card in the zero-data state. */}
+      {doneCount > 0 && <StageInsightsPanel />}
     </div>
   );
 }

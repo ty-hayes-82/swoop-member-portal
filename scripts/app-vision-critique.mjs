@@ -5,9 +5,9 @@
  * Full E2E visual QA pipeline for the Swoop Member Portal app.
  *
  * Creates a real club, imports all 5 CSV fixtures sequentially, screenshots
- * the app at each import stage, then runs 5 specialist Gemini agents on every
+ * the app at each import stage, then runs 6 specialist Gemini agents on every
  * screenshot to evaluate functionality, GM value, design quality, usability,
- * and data integrity.
+ * data integrity, and demo-storyboard alignment.
  *
  * Output mirrors website-critique-output/ structure:
  *   tests/e2e/reports/app-critique-{TIMESTAMP}/
@@ -44,13 +44,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const APP_URL     = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
 const API_KEY     = process.env.GEMINI_API_KEY;
-const FLASH_MODEL = 'gemini-2.5-pro';    // per-agent critiques — Pro for all calls (C12)
-const RECS_MODEL  = 'gemini-2.5-pro';    // per-screenshot recommendations
-const PRO_MODEL   = 'gemini-2.5-pro';    // master report
+const FLASH_MODEL = 'gemini-3.1-pro-preview';    // per-agent critiques
+const RECS_MODEL  = 'gemini-3.1-pro-preview';    // per-screenshot recommendations
+const PRO_MODEL   = 'gemini-3.1-pro-preview';    // master report
 const THINKING_CONFIG = { thinkingConfig: { thinkingBudget: 2000 } }; // 2k budget for fast iteration cycles
 const VIEWPORT    = { width: 1440, height: 900 };
 const FIXTURE_DIR = path.resolve(__dirname, '../tests/fixtures/small');
-const OUTPUT_BASE = path.resolve(__dirname, '../tests/e2e/reports');
+const OUTPUT_BASE = path.resolve(__dirname, '../../critiques');
 
 // ─── 5 Agent Definitions ──────────────────────────────────────────────────────
 
@@ -461,6 +461,131 @@ One sentence: is the data on this page trustworthy for a GM to act on?
 - Never penalize for legitimately absent data — only for wrongly absent or wrong data.
 - "I cannot verify" is acceptable when a metric cannot be validated from the screenshot.
 - Under 400 words total.`,
+  },
+
+  // ── 6. The Storyboard Alignment Critic ────────────────────────────────────
+  {
+    id: 'storyboard',
+    name: 'The Storyboard Alignment Critic',
+    userPromptSuffix: 'Score how well this screen delivers the demo storyboard moments it is supposed to hit at this stage. Cite specific visible elements (or their absence) as evidence for each beat.',
+    systemPrompt: `You are the keeper of the Swoop demo storyboard — the exact sequence of moments that
+close founding-partner deals. Your job is to grade every screenshot on whether it delivers
+those moments in the right order, at the right prominence, with the right specificity.
+
+You are modeled on the storyboard-alignment audit in docs/storyboard-alignment-audit.md.
+You do NOT invent new priorities. You compare what is visible to the storyboard's eight
+canonical moments and flag missing, buried, or undersold beats.
+
+Your question: "If a founding-partner prospect saw only this screen, would they feel any of
+the storyboard's key moments land — and would they land at the right prominence?"
+
+## The Eight Canonical Storyboard Moments
+
+1. **Morning Brief / Today View** — one screen replacing 4 systems. 220 rounds booked ·
+   weather · 3 at-risk on today's tee sheet · staffing gap. The "See It" wedge — relief of
+   one screen replacing four systems. Belongs above the fold on Today.
+2. **At-risk member on today's tee sheet** — a named member whose health score dropped
+   82 → 61 over 3 weeks with a tee time today. Quantified outcome: $32K dues save. This is
+   the single most important demo beat on Today.
+3. **First-domino decay sequence** — email dropped → golf dropped → dining stopped, with
+   relative dates. "The CRM says active. The tee sheet says present. Only the composite
+   view reveals the trajectory." Must be visible inline on at-risk member cards, not buried
+   in a drawer.
+4. **90-day new member window** — "Day 47, 0 events attended" framing. 94% vs 61% renewal
+   gap if 2+ events in Q1. Belongs in Today's Priorities or equivalent.
+5. **Saturday staffing insight** — 220 rounds + 2 servers short = $31 per slow round in
+   missed F&B. The cross-domain $/slow-round figure is the "demo-stopping" number. A bare
+   "$X,XXX revenue impact" aggregate is a partial miss.
+6. **Complaint follow-through** — complaint open > 30 days with an explicit "GM Call Due"
+   style overdue trigger, not just a day counter. Industry benchmark 4.2 hrs vs 6 weeks.
+7. **Revenue leakage decomposition** — $9,580/month F&B leak decomposed into root causes
+   (slow rounds, understaffed Fridays, weather no-shows). The waterfall / stacked decomp
+   is the Revenue page hero. Scenario slider + $2,000/mo recoverable framing.
+8. **Board report auto-generation** — 4-tab, one-click report: Summary · Member Saves ·
+   Operational Saves · What We Learned. 45-min meeting → 20 min quantified outcome.
+
+## Which Moments Apply to Which Pages
+
+- Today / Morning Brief → Moments 1, 2, 3, 4, 5 (6 supporting)
+- Members → Moments 2, 3, 4 (showing decay chains + 90-day filter)
+- Tee Sheet → Moments 2, 5 (at-risk members on today's sheet; staffing impact)
+- Service / Complaints → Moment 6
+- Revenue → Moments 5, 7 ($31/slow round + $9,580 decomposition)
+- Board Report → Moment 8
+- Automations / Actions → Moment 3 (decay-triggered outreach) + Moment 6 (complaint SLA)
+
+Pages render empty states at Stage 0 — empty-state copy that names the missing storyboard
+beat ("Import your tee sheet to see at-risk members teeing off today") counts as partial
+alignment, not a miss.
+
+## Scoring Model
+
+Use the audit's 3-tier severity for each applicable moment on this screen:
+- 🟢 **Aligned** — moment surfaced at correct prominence and specificity (full points)
+- 🟡 **Moderate miss** — moment present but wrong position, wrong depth, aggregate when
+  per-unit needed, or undersold (partial points)
+- 🔴 **Critical miss** — moment missing, requires 2+ clicks to reach, or replaced by
+  generic filler (zero points)
+
+## Evaluation Dimensions
+
+### 1. Storyboard Moment Coverage (40 pts)
+For each moment that SHOULD appear on this page: is it present at all? Aligned / moderate /
+critical. Score proportionally across applicable moments.
+
+### 2. Prominence & Sequencing (20 pts)
+Are the highest-priority moments above the fold? Is the order on the page consistent with
+the storyboard's narrative sequence? Below-the-fold placement for a #1 moment is a big hit.
+
+### 3. Specificity & Quantification (20 pts)
+Do the visible numbers match the storyboard's signature figures (82→61, $32K, $31/slow
+round, $9,580/mo, 94% vs 61%, 4.2hr vs 6wk, 45min→20min)? Or are they generic
+aggregates ("$3,240 revenue impact") when the per-unit version is what closes the room?
+
+### 4. Cross-Domain Intelligence Visibility (10 pts)
+Can a viewer see the Layer-3 cross-system insight? (slow rounds × dining conversion,
+email decay × golf decay × dining decay, staffing gap × rounds × conversion). These are
+what no single vendor can produce and what justifies the $18K/yr price.
+
+### 5. Demo Narrative Continuity (10 pts)
+Does this screen connect to the next storyboard beat? Is there a clear handoff (CTA, link,
+nav cue) to the follow-up moment a GM would want to click into next?
+
+## Output Format — use EXACTLY this structure:
+
+### Alignment Verdict: [ON-STORYBOARD / PARTIAL / DRIFTING / OFF-STORYBOARD]
+
+**Overall Score: [N] / 100**
+
+### Storyboard Moment Coverage — [N]/40
+For each applicable moment on this page, one line:
+- Moment #[N] ([short name]): 🟢 Aligned / 🟡 Moderate / 🔴 Critical — [visible evidence or what's missing]
+
+### Prominence & Sequencing — [N]/20
+[Specific observations about placement, order, above-vs-below the fold]
+
+### Specificity & Quantification — [N]/20
+[Are the signature numbers visible? Which ones? Which are replaced by aggregates?]
+
+### Cross-Domain Intelligence Visibility — [N]/10
+[Is the Layer-3 cross-system insight on screen, or does this look like a single-vendor dashboard?]
+
+### Demo Narrative Continuity — [N]/10
+[Does this screen hand off to the next storyboard beat?]
+
+### Most Critical Miss
+One sentence: the single storyboard beat that is hurt most by its current state on this page.
+
+### Demo-Room Simulation
+One sentence: if a founding-partner prospect watched this screen for 15 seconds, which
+storyboard moment (if any) would land?
+
+## Rules
+- Only score moments that apply to this page (use the map above).
+- Empty-state copy that names a storyboard beat is partial alignment, not a miss.
+- Never penalize for legitimately absent moments (e.g., Moment 8 on Today).
+- Cite visible labels, numbers, and placements as evidence — never vague UX phrasing.
+- Under 450 words total.`,
   },
 ];
 
@@ -931,6 +1056,7 @@ all 5 agent scores. Structure output as:
 | Design Critic | X/100 | ... |
 | UX Evaluator | X/100 | ... |
 | Data Validator | X/100 | ... |
+| Storyboard Alignment | X/100 | ... |
 | **Composite** | **X/100** | |
 
 ## P1 — Critical (fix before any sales demo)
@@ -978,19 +1104,19 @@ async function generateMasterReport(genAI, allResults, scores, outputDir) {
 
   // Build score matrix text for the prompt
   const rows = Object.entries(scores.scores).map(([slug, s]) => {
-    const agents = ['functionality', 'gm', 'design', 'ux', 'data-validator'];
+    const agents = ['functionality', 'gm', 'design', 'ux', 'data-validator', 'storyboard'];
     const cols = agents.map(a => s[a] ?? 'N/A').join(' | ');
     return `| ${slug} | ${s.stage} | ${s.page} | ${cols} | **${s.composite ?? 'N/A'}** |`;
   });
 
   const matrixText = [
-    '| Screenshot | Stage | Page | Functionality | GM | Design | UX | Data Validator | Composite |',
-    '|------------|-------|------|--------------|-----|--------|----|---------------|-----------|',
+    '| Screenshot | Stage | Page | Functionality | GM | Design | UX | Data Validator | Storyboard | Composite |',
+    '|------------|-------|------|--------------|-----|--------|----|---------------|-----------|-----------|',
     ...rows,
   ].join('\n');
 
   // Aggregate per-agent averages
-  const agentIds = ['functionality', 'gm', 'design', 'ux', 'data-validator'];
+  const agentIds = ['functionality', 'gm', 'design', 'ux', 'data-validator', 'storyboard'];
   const agentAverages = {};
   for (const id of agentIds) {
     const vals = Object.values(scores.scores).map(s => s[id]).filter(v => typeof v === 'number');
@@ -1004,8 +1130,8 @@ async function generateMasterReport(genAI, allResults, scores, outputDir) {
 
   const model = genAI.getGenerativeModel({ model: PRO_MODEL, generationConfig: THINKING_CONFIG });
 
-  const prompt = `You are a senior product consultant and UX strategist who has just reviewed all 75 Gemini critiques of
-the Swoop Member Portal app — 15 screenshots × 5 specialist agents.
+  const prompt = `You are a senior product consultant and UX strategist who has just reviewed all 90 Gemini critiques of
+the Swoop Member Portal app — 15 screenshots × 6 specialist agents.
 
 App: Swoop Club Intelligence | Private golf club management SaaS | $18,000/year
 Run date: ${scores.run} | Club ID: ${scores.club_id}
@@ -1019,6 +1145,7 @@ ${matrixText}
 - Design Critic: ${agentAverages.design ?? 'N/A'}/100
 - UX Evaluator: ${agentAverages.ux ?? 'N/A'}/100
 - Data Validator: ${agentAverages['data-validator'] ?? 'N/A'}/100
+- Storyboard Alignment: ${agentAverages.storyboard ?? 'N/A'}/100
 
 ## Critique Summaries (truncated)
 ${critiqueSummary.slice(0, 25000)}
@@ -1082,6 +1209,9 @@ Produce the MASTER_REPORT.md using EXACTLY this structure:
 
 ### Data Validator (avg: ${agentAverages['data-validator'] ?? 'N/A'}/100)
 [1 paragraph: data accuracy, suspicious metrics, and empty state correctness]
+
+### Storyboard Alignment Critic (avg: ${agentAverages.storyboard ?? 'N/A'}/100)
+[1 paragraph: which of the 8 canonical demo moments are landing, which are missing or buried, and which page is drifting furthest from the storyboard]
 
 ---
 *Generated by Swoop App Vision Critique | Model: ${PRO_MODEL} | ${new Date().toISOString()}*
@@ -1246,18 +1376,19 @@ async function main() {
   console.log(
     'Screenshot'.padEnd(22) +
     'Func'.padStart(5) + ' GM'.padStart(5) + ' Des'.padStart(5) +
-    ' UX'.padStart(5) + ' Data'.padStart(6) + ' AVG'.padStart(6)
+    ' UX'.padStart(5) + ' Data'.padStart(6) + ' Story'.padStart(7) + ' AVG'.padStart(6)
   );
-  console.log('─'.repeat(60));
+  console.log('─'.repeat(67));
   for (const [slug, s] of Object.entries(scores.scores)) {
     const fmt = v => (v !== null && v !== undefined ? String(v).padStart(5) : '  N/A');
     console.log(
       slug.padEnd(22) +
       fmt(s.functionality) + fmt(s.gm) + fmt(s.design) +
-      fmt(s.ux) + fmt(s['data-validator']).padStart(6) + fmt(s.composite).padStart(6)
+      fmt(s.ux) + fmt(s['data-validator']).padStart(6) +
+      fmt(s.storyboard).padStart(7) + fmt(s.composite).padStart(6)
     );
   }
-  console.log('═'.repeat(60));
+  console.log('═'.repeat(67));
   console.log(`\n✅ Output: ${outputDir}`);
   console.log(`   Screenshots: ${Object.keys(scores.scores).length} captured`);
   console.log(`   Critiques:   ${allResults.length} written`);

@@ -115,7 +115,7 @@ export default function RevenuePage() {
               return (
                 <div className="flex flex-col gap-4">
                   {/* POS connected — surface real member-spend intelligence */}
-                  <div className="rounded-xl border border-green-200 bg-green-50/50 p-4">
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">✅</span>
                       <span className="font-semibold text-swoop-text">POS Connected — {686} transactions loaded</span>
@@ -128,14 +128,14 @@ export default function RevenuePage() {
                         <div className="text-[11px] text-swoop-text-muted mt-0.5">spending patterns being analyzed</div>
                       </div>
                       {riskCount > 0 && (
-                        <div className="bg-swoop-panel rounded-lg p-3 border border-red-200">
+                        <div className="bg-swoop-panel rounded-lg p-3 border border-red-500/30">
                           <div className="text-[10px] font-bold uppercase tracking-wide text-red-500 mb-1">At-Risk Members</div>
                           <div className="text-2xl font-bold text-red-600 font-mono">{riskCount}</div>
                           <div className="text-[11px] text-swoop-text-muted mt-0.5">declining engagement detected</div>
                         </div>
                       )}
                       {duesAtRisk > 0 && (
-                        <div className="bg-swoop-panel rounded-lg p-3 border border-red-200">
+                        <div className="bg-swoop-panel rounded-lg p-3 border border-red-500/30">
                           <div className="text-[10px] font-bold uppercase tracking-wide text-red-500 mb-1">Dues at Risk</div>
                           <div className="text-2xl font-bold text-red-600 font-mono">${Math.round(duesAtRisk / 1000)}K</div>
                           <div className="text-[11px] text-swoop-text-muted mt-0.5">annual dues from at-risk members</div>
@@ -160,7 +160,7 @@ export default function RevenuePage() {
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
+                  <div className="rounded-xl border border-brand-500/25 bg-brand-500/[0.06] p-4">
                     <div className="flex items-start gap-3">
                       <div className="text-2xl">📋</div>
                       <div className="flex-1">
@@ -173,7 +173,7 @@ export default function RevenuePage() {
                             { label: 'Industry avg leakage', value: '$8,400/mo', sub: 'benchmark — not your data yet' },
                             { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
                           ].map(({ label, value, sub }) => (
-                            <div key={label} className="bg-white/60 rounded-lg p-3 border border-amber-100">
+                            <div key={label} className="rounded-lg p-3 border border-swoop-border-inset bg-swoop-row">
                               <div className="text-xs text-swoop-text-muted mb-1">{label}</div>
                               <div className="font-bold text-swoop-text">{value}</div>
                               <div className="text-[10px] text-swoop-text-label mt-0.5">{sub}</div>

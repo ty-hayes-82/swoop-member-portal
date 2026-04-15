@@ -587,9 +587,9 @@ export default function SMSChatSimulatorPage() {
       {/* Page header */}
       <div className="flex items-center justify-between flex-wrap gap-2 flex-shrink-0">
         <div>
-          <h1 className="text-xl font-bold m-0 text-swoop-text">AI Member Chat</h1>
+          <h1 className="text-xl font-bold m-0 text-swoop-text">AI Assistant Simulator</h1>
           <p className="text-sm text-swoop-text-muted mt-0.5 mb-0">
-            Preview how Swoop AI responds to member messages. Select a member and start a conversation.
+            Simulate inbound member messages and preview how Swoop AI would respond. Select a persona and send a test message.
           </p>
         </div>
       </div>
@@ -613,7 +613,7 @@ export default function SMSChatSimulatorPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-swoop-text leading-tight">{selectedMember.name}</p>
-              <p className="text-[11px] text-swoop-text-muted">{selectedMember.type} · {selectedMember.id}</p>
+              <p className="text-[11px] text-swoop-text-muted">{selectedMember.type}</p>
             </div>
             <span className={`text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 ${selectedMember.statusColor}`}>
               {selectedMember.status}
@@ -636,7 +636,7 @@ export default function SMSChatSimulatorPage() {
                   <span className="text-xl">💬</span>
                 </div>
                 <p className="text-sm text-swoop-text-muted">
-                  Send a message as <strong>{selectedMember.first}</strong>
+                  Simulate a message from <strong>{selectedMember.first}</strong>
                 </p>
                 <div className="flex flex-col gap-1.5 w-full max-w-xs">
                   {quickMessages.map(msg => (

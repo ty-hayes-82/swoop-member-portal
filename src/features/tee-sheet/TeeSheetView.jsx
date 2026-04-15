@@ -193,7 +193,7 @@ function CartPrepCard({ teeTime, onSendCartText, onSendDiningNudge }) {
   const isAtRisk = teeTime.healthScore < 50;
   const firstName = getFirstName(teeTime.name);
   return (
-    <div className={`rounded-xl border p-4 ${isAtRisk ? 'bg-red-50/30 border-red-200' : 'bg-swoop-panel border-swoop-border'}`}>
+    <div className={`rounded-xl border p-4 ${isAtRisk ? 'bg-red-500/[0.07] border-red-500/30' : 'bg-swoop-panel border-swoop-border'}`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-swoop-text">{showMemberNames() ? teeTime.name : 'Member'}</span>
@@ -220,7 +220,7 @@ function CartPrepCard({ teeTime, onSendCartText, onSendDiningNudge }) {
         </div>
       </div>
       {teeTime.cartPrep.note && (
-        <div className={`mt-2 text-[11px] leading-relaxed p-2 rounded-lg ${isAtRisk ? 'bg-red-500/5 text-red-700 border border-red-200' : 'bg-swoop-row text-swoop-text-muted'}`}>
+        <div className={`mt-2 text-[11px] leading-relaxed p-2 rounded-lg ${isAtRisk ? 'bg-red-500/10 text-red-300 border border-red-500/30' : 'bg-swoop-row text-swoop-text-muted'}`}>
           {teeTime.cartPrep.note}
         </div>
       )}
@@ -441,7 +441,7 @@ export default function TeeSheetView() {
                     <tr
                       key={`${t.memberId}-${t.time}`}
                       title={rowTitle}
-                      className={`border-t border-swoop-border-inset transition-colors ${isAtRisk ? 'bg-red-50/30' : i % 2 === 0 ? 'bg-swoop-panel' : 'bg-gray-50/50'} hover:bg-swoop-row-hover`}
+                      className={`border-t border-swoop-border-inset transition-colors ${isAtRisk ? 'bg-red-500/[0.06]' : i % 2 === 0 ? 'bg-swoop-panel' : 'bg-swoop-row'} hover:bg-swoop-row-hover`}
                     >
                       <td className="px-4 py-2.5 font-mono text-xs font-semibold text-swoop-text-2 whitespace-nowrap">{t.time}</td>
                       <td className="px-4 py-2.5 text-xs text-swoop-text-muted">{t.course}</td>

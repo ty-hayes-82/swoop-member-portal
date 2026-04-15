@@ -57,9 +57,13 @@ function MicroLabel({ children, color = 'rgba(255,255,255,0.4)' }) {
 }
 
 // Club Status KPI tile — matches today.html lines 135–183
-function ClubKpiTile({ label, labelColor, icon, value, valueSize = 32, valueColor, source, footerLines, accentBg, accentBorder }) {
+function ClubKpiTile({ label, labelColor, icon, value, valueSize = 32, valueColor, source, footerLines, accentBg, accentBorder, onClick }) {
   return (
-    <div style={{
+    <div
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      style={{
       background: accentBg || 'rgba(255,255,255,0.04)',
       border: `1px solid ${accentBorder || 'rgba(255,255,255,0.08)'}`,
       borderRadius: 14,
@@ -67,6 +71,7 @@ function ClubKpiTile({ label, labelColor, icon, value, valueSize = 32, valueColo
       display: 'flex',
       flexDirection: 'column',
       gap: 6,
+      cursor: onClick ? 'pointer' : undefined,
     }}>
       <MicroLabel color={labelColor}>{label}</MicroLabel>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -221,6 +226,9 @@ export default function TodayView() {
   const topPriority = priorities[0];
   const briefing = getDailyBriefing();
   const roundsToday = briefing?.teeSheet?.roundsToday || 0;
+  // Data-source gates — used to suppress phantom KPIs when a source isn't connected.
+  // Fixes the 1_today P1 where tee-sheet / staffing numbers appeared out of thin air.
+  const teeSheetConnected = isGateOpen('tee-sheet') || roundsToday > 0;
 
 
   const [isLoading, setIsLoading] = useState(true);
@@ -429,7 +437,11 @@ export default function TodayView() {
         <SwoopSection
           title="Club Status"
           titleColor={C.neutral}
-          peek={`Good conditions · ${roundsToday || 220} rounds · 6 at-risk on sheet · ${pendingAgentCount} pending actions`}
+          peek={
+            teeSheetConnected
+              ? `Good conditions · ${roundsToday || 220} rounds · 6 at-risk on sheet · ${pendingAgentCount ?? 0} pending actions`
+              : `Connect tee sheet to unlock today's rounds and at-risk alerts · ${pendingAgentCount ?? 0} pending actions`
+          }
         >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
             <ClubKpiTile
@@ -444,44 +456,83 @@ export default function TodayView() {
                 { text: 'No rain in forecast · Cart paths dry' },
               ]}
             />
-            <ClubKpiTile
-              label="Tee Times Today"
-              icon="👥"
-              value={roundsToday || 220}
-              valueColor={C.accent}
-              source="⛳ Tee Sheet"
-              footerLines={[
-                { text: 'First tee: 6:30 AM · Last: 4:15 PM' },
-                { text: '92% utilisation · 18 walk-ins expected' },
-              ]}
-            />
-            <ClubKpiTile
-              label="At-Risk on Sheet"
-              labelColor="rgba(239,68,68,0.7)"
-              icon="🚨"
-              value="6"
-              valueColor={C.danger}
-              source="◈ Tee Sheet + CRM"
-              accentBg="rgba(239,68,68,0.07)"
-              accentBorder="rgba(239,68,68,0.18)"
-              footerLines={[
-                { text: '$95K combined dues · 3 critical' },
-                { text: 'Kevin Hurst · Anne Jordan · 4 more', color: C.danger, bold: true },
-              ]}
-            />
+            {teeSheetConnected ? (
+              <ClubKpiTile
+                label="Tee Times Today"
+                icon="👥"
+                value={roundsToday || 220}
+                valueColor={C.accent}
+                source="⛳ Tee Sheet"
+                footerLines={[
+                  { text: 'First tee: 6:30 AM · Last: 4:15 PM' },
+                  { text: '92% utilisation · 18 walk-ins expected' },
+                ]}
+              />
+            ) : (
+              <ClubKpiTile
+                label="Tee Times Today"
+                icon="⛳"
+                value="—"
+                valueSize={24}
+                valueColor={C.neutral}
+                source="Tee Sheet not connected"
+                footerLines={[
+                  { text: 'Connect your tee sheet to see' },
+                  { text: 'today\u2019s rounds + utilisation', color: C.accent, bold: true },
+                ]}
+                onClick={() => navigate('integrations')}
+              />
+            )}
+            {teeSheetConnected ? (
+              <ClubKpiTile
+                label="At-Risk on Sheet"
+                labelColor="rgba(239,68,68,0.7)"
+                icon="🚨"
+                value="6"
+                valueColor={C.danger}
+                source="◈ Tee Sheet + CRM"
+                accentBg="rgba(239,68,68,0.07)"
+                accentBorder="rgba(239,68,68,0.18)"
+                footerLines={[
+                  { text: '$95K combined dues · 3 critical' },
+                  { text: 'Kevin Hurst · Anne Jordan · 4 more', color: C.danger, bold: true },
+                ]}
+              />
+            ) : (
+              <ClubKpiTile
+                label="At-Risk on Sheet"
+                labelColor="rgba(255,255,255,0.4)"
+                icon="⛳"
+                value="—"
+                valueSize={24}
+                valueColor={C.neutral}
+                source="Needs tee sheet + member data"
+                footerLines={[
+                  { text: 'We\u2019ll cross-reference who\u2019s teeing off' },
+                  { text: 'today once your tee sheet is connected', color: C.accent, bold: true },
+                ]}
+                onClick={() => navigate('integrations')}
+              />
+            )}
             <ClubKpiTile
               label="Pending Actions"
               labelColor="rgba(243,146,45,0.7)"
               icon="🔔"
-              value={pendingAgentCount || 20}
+              value={pendingAgentCount ?? 0}
               valueColor={C.accent}
               source="◉ Analytics"
               accentBg="rgba(243,146,45,0.07)"
               accentBorder="rgba(243,146,45,0.18)"
-              footerLines={[
-                { text: '8 high priority · 12 standard' },
-                { text: '3 expiring today · Review now →', color: C.accent, bold: true },
-              ]}
+              footerLines={
+                pendingAgentCount > 0
+                  ? [
+                      { text: `${pendingAgentCount} item${pendingAgentCount === 1 ? '' : 's'} in the queue` },
+                      { text: 'Review now →', color: C.accent, bold: true },
+                    ]
+                  : [
+                      { text: 'Queue clear — no open actions' },
+                    ]
+              }
             />
           </div>
         </SwoopSection>
