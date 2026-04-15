@@ -1,9 +1,9 @@
 // HealthOverview — members intelligence panel
-// V6: inner 2-tab (Members / Email), archetype filter + First 90 Days toggle, Re-Score button
-import { Fragment, useMemo, useState, useCallback } from 'react';
+// V7: full roster, paginated (25/page), archetype + health-tier + first-90 filters, interactive KPI cards
+import { Fragment, useMemo, useState, useCallback, useEffect } from 'react';
 import MemberLink from '@/components/MemberLink.jsx';
 import EmailTab from '@/features/member-health/tabs/EmailTab';
-import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getVolatileMembers, getMemberSummary } from '@/services/memberService';
+import { getHealthDistribution, getAtRiskMembers, getWatchMembers, getFullRoster, getMemberSummary } from '@/services/memberService';
 import { getComplaintCorrelation } from '@/services/staffingService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { isGateOpen } from '@/services/demoGate';
@@ -140,22 +140,29 @@ const scoreColor = (score) =>
   : score < 50 ? '#f59e0b'
   : '#6B7280';
 
+const PAGE_SIZE = 25;
+
+const HEALTH_RANGES = {
+  Healthy:   [70, 100],
+  Watch:     [50,  69],
+  'At Risk': [30,  49],
+  Critical:  [ 0,  29],
+};
+
 export default function HealthOverview() {
   const dist = getHealthDistribution();
-  const atRisk = getAtRiskMembers();
-  const watchList = getWatchMembers();
-  const volatileMembers = getVolatileMembers();
 
   const [expandedId, setExpandedId] = useState(null);
-  const [showAll, setShowAll] = useState(false);
   const [innerTab, setInnerTab] = useState('members');
   const [archetypeFilter, setArchetypeFilter] = useState(null);
   const [archetypePickerOpen, setArchetypePickerOpen] = useState(false);
   const [showFirst90, setShowFirst90] = useState(false);
+  const [healthFilter, setHealthFilter] = useState(null);
+  const [page, setPage] = useState(1);
   const [rescoring, setRescoring] = useState(false);
   const [rescoreMsg, setRescoreMsg] = useState(null);
 
-  const { showToast } = useApp();
+  useApp(); // keep context subscription
 
   const handleRescore = useCallback(async () => {
     setRescoring(true);
@@ -183,34 +190,52 @@ export default function HealthOverview() {
     setRescoring(false);
   }, []);
 
-  if (atRisk.length === 0 && watchList.length === 0) {
+  // Full roster enriched with action/owner — sorted worst-first
+  const allMembers = useMemo(() => {
+    const roster = getFullRoster();
+    if (!roster.length) return [];
+    return roster
+      .map(m => {
+        const score = m.score ?? m.healthScore ?? 50;
+        const complaint = getComplaintInfo(m.memberId);
+        const reason = complaint
+          ? `Complaint unresolved ${complaint.days} days (${complaint.category})`
+          : m.topRisk || 'No current risks';
+        const { action, type, owner } = getDifferentiatedAction({ ...m, score }, complaint);
+        return { ...m, score, reason, action, actionType: type, owner };
+      })
+      .sort((a, b) => a.score - b.score);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => { setPage(1); }, [archetypeFilter, showFirst90, healthFilter]);
+
+  const filteredMembers = useMemo(() => {
+    let list = allMembers;
+    if (healthFilter) {
+      const [lo, hi] = HEALTH_RANGES[healthFilter] ?? [0, 100];
+      list = list.filter(m => m.score >= lo && m.score <= hi);
+    }
+    if (archetypeFilter) list = list.filter(m => m.archetype === archetypeFilter);
+    if (showFirst90) {
+      const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
+      list = list.filter(m => m.joinDate && new Date(m.joinDate) >= cutoff);
+    }
+    return list;
+  }, [allMembers, archetypeFilter, showFirst90, healthFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
+  const displayedMembers = filteredMembers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  if (allMembers.length === 0) {
     const summary = getMemberSummary();
     if (summary.total > 0) {
-      const hasTee = isGateOpen('tee-sheet');
-      const hasFb = isGateOpen('fb');
-      const hasEmail = isGateOpen('email');
-      const nextSource = !hasTee ? 'tee sheet' : !hasFb ? 'POS' : !hasEmail ? 'email' : null;
-      const desc = nextSource
-        ? `${summary.total} members imported${hasTee ? ' + tee sheet' : ''}${hasFb ? ' + POS' : ''}${hasEmail ? ' + email' : ''}. Connect your ${nextSource} to unlock deeper risk scoring.`
-        : `${summary.total} members imported with all engagement sources connected. No members currently at risk.`;
+      const desc = `${summary.total} members imported. Connect tee sheet, POS, or email to unlock deeper risk scoring.`;
       return <DataEmptyState icon="✅" title="No members at risk" description={desc} dataType="engagement data" />;
     }
     return <DataEmptyState icon="👥" title="No members imported yet" description="Import your member roster to start tracking member health and engagement." dataType="members" />;
   }
-
-  const allPriorityMembers = useMemo(
-    () => buildPriorityList(atRisk, watchList, volatileMembers),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [atRisk.length, watchList.length, volatileMembers.length]
-  );
-
-  const displayedMembers = useMemo(() => {
-    let list = allPriorityMembers;
-    if (archetypeFilter) list = list.filter(m => m.archetype === archetypeFilter);
-    if (showFirst90) list = list.filter(m => m.archetype === 'New Member');
-    if (!archetypeFilter && !showFirst90 && !showAll) list = list.slice(0, 10);
-    return list;
-  }, [allPriorityMembers, archetypeFilter, showFirst90, showAll]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -225,13 +250,23 @@ export default function HealthOverview() {
             ? 'same as last month.'
             : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;
           return (
-            <div key={d.level} className="bg-white shadow-theme-xs rounded-xl p-4" style={{ border: `1px solid ${d.color}40`, cursor: 'pointer', transition: 'box-shadow 0.15s, transform 0.15s, opacity 0.15s' }}>
+            <div
+              key={d.level}
+              onClick={() => { setHealthFilter(healthFilter === d.level ? null : d.level); setInnerTab('members'); }}
+              className="bg-white shadow-theme-xs rounded-xl p-4 cursor-pointer select-none"
+              style={{
+                border: `1px solid ${healthFilter === d.level ? d.color + 'aa' : d.color + '40'}`,
+                boxShadow: healthFilter === d.level ? `0 0 0 2px ${d.color}30` : undefined,
+                transition: 'box-shadow 0.15s, transform 0.15s',
+                transform: healthFilter === d.level ? 'scale(1.02)' : 'scale(1)',
+              }}
+            >
               <div className="flex justify-between mb-2">
                 <span className="text-xs text-gray-400 uppercase tracking-wide">{d.level}</span>
-                <span className="text-xs" style={{ color: d.color }}>{(d.percentage * 100).toFixed(0)}%</span>
+                <span className="text-xs font-semibold" style={{ color: d.color }}>{(d.percentage * 100).toFixed(0)}%</span>
               </div>
               <div className="text-[28px] font-mono font-bold" style={{ color: d.color }}>{d.count}</div>
-              <div className="text-xs text-gray-400">members</div>
+              <div className="text-xs text-gray-400">members {healthFilter === d.level ? '— filtered ✓' : '— click to filter'}</div>
               <div className="h-1 bg-gray-200 rounded-sm mt-2">
                 <div className="h-full rounded-sm" style={{ background: d.color, width: `${d.percentage * 100}%` }} />
               </div>
@@ -295,6 +330,7 @@ export default function HealthOverview() {
           <>
             {/* Filter bar */}
             <div className="flex items-center gap-2 mb-2 px-2.5 py-[5px] bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-800/50 dark:border-gray-700" style={{ flexWrap: 'nowrap', overflow: 'hidden' }}>
+              {/* Archetype dropdown trigger */}
               <div className="shrink-0">
                 <button
                   type="button"
@@ -305,45 +341,53 @@ export default function HealthOverview() {
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
-                  {archetypeFilter || 'Archetype'}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                    style={{ transition: 'transform 0.15s', transform: archetypePickerOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  >
+                  Archetype
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ transition: 'transform 0.15s', transform: archetypePickerOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                     <polyline points="6 9 12 15 18 9" />
                   </svg>
                 </button>
               </div>
 
+              {/* Active filter chips */}
               <div className="flex items-center gap-1.5 flex-1 overflow-hidden">
-                {archetypeFilter && (
-                  <button
-                    type="button"
-                    onClick={() => setArchetypeFilter(null)}
+                {healthFilter && (
+                  <button type="button" onClick={() => setHealthFilter(null)}
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold cursor-pointer whitespace-nowrap shrink-0"
-                    style={{
-                      background: (ARCHETYPE_COLORS[archetypeFilter] || '#6b7280') + '18',
-                      color: ARCHETYPE_COLORS[archetypeFilter] || '#6b7280',
-                      border: `1px solid ${(ARCHETYPE_COLORS[archetypeFilter] || '#6b7280')}50`,
-                    }}
-                  >
-                    {ARCHETYPE_EMOJIS[archetypeFilter]} {archetypeFilter}
-                    <span className="ml-0.5 opacity-70">×</span>
+                    style={{ background: '#6366f118', color: '#6366f1', border: '1px solid #6366f150' }}>
+                    {healthFilter} <span className="opacity-70">×</span>
+                  </button>
+                )}
+                {archetypeFilter && (
+                  <button type="button" onClick={() => setArchetypeFilter(null)}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold cursor-pointer whitespace-nowrap shrink-0"
+                    style={{ background: (ARCHETYPE_COLORS[archetypeFilter] || '#6b7280') + '18', color: ARCHETYPE_COLORS[archetypeFilter] || '#6b7280', border: `1px solid ${(ARCHETYPE_COLORS[archetypeFilter] || '#6b7280')}50` }}>
+                    {ARCHETYPE_EMOJIS[archetypeFilter]} {archetypeFilter} <span className="opacity-70">×</span>
+                  </button>
+                )}
+                {(healthFilter || archetypeFilter || showFirst90) && (
+                  <button type="button" onClick={() => { setHealthFilter(null); setArchetypeFilter(null); setShowFirst90(false); }}
+                    className="text-[10px] text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer whitespace-nowrap shrink-0 dark:hover:text-gray-300">
+                    Clear all
                   </button>
                 )}
               </div>
 
+              {/* Member count */}
+              <span className="text-[11px] text-gray-400 shrink-0 whitespace-nowrap">
+                {filteredMembers.length === allMembers.length
+                  ? `${allMembers.length} members`
+                  : `${filteredMembers.length} of ${allMembers.length}`}
+              </span>
+
               <div className="w-px h-4 bg-gray-200 dark:bg-gray-600 shrink-0" />
 
-              <button
-                type="button"
-                onClick={() => setShowFirst90(f => !f)}
+              <button type="button" onClick={() => setShowFirst90(f => !f)}
                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold border cursor-pointer whitespace-nowrap shrink-0 transition-colors ${
                   showFirst90
                     ? 'border-blue-300 bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/30 dark:text-blue-400'
                     : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400'
-                }`}
-              >
+                }`}>
                 🌱 First 90 Days
               </button>
             </div>
@@ -355,18 +399,10 @@ export default function HealthOverview() {
                   const color = ARCHETYPE_COLORS[a] || '#6b7280';
                   const isActive = archetypeFilter === a;
                   return (
-                    <button
-                      key={a}
-                      type="button"
+                    <button key={a} type="button"
                       onClick={() => { setArchetypeFilter(isActive ? null : a); setArchetypePickerOpen(false); }}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer border transition-all whitespace-nowrap"
-                      style={{
-                        borderColor: isActive ? color : color + '60',
-                        background: isActive ? color + '20' : color + '10',
-                        color,
-                        opacity: isActive ? 1 : 0.8,
-                      }}
-                    >
+                      style={{ borderColor: isActive ? color : color + '60', background: isActive ? color + '20' : color + '10', color, opacity: isActive ? 1 : 0.8 }}>
                       {ARCHETYPE_EMOJIS[a]} {a}
                     </button>
                   );
@@ -390,6 +426,7 @@ export default function HealthOverview() {
                 </thead>
                 <tbody>
                   {displayedMembers.map((m, idx) => {
+                    const globalIdx = (page - 1) * PAGE_SIZE + idx;
                     const sc = scoreColor(m.score);
                     const isExpanded = expandedId === m.memberId;
                     const hasEmailDecay = m.actionType === 'email' || (m.reason || '').toLowerCase().includes('email');
@@ -403,14 +440,12 @@ export default function HealthOverview() {
 
                     return (
                       <Fragment key={m.memberId}>
-                        <tr
-                          onClick={() => setExpandedId(isExpanded ? null : m.memberId)}
-                          className={`border-t border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-150 ${rowBg}`}
-                        >
+                        <tr onClick={() => setExpandedId(isExpanded ? null : m.memberId)}
+                          className={`border-t border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-150 ${rowBg}`}>
                           <td className="py-2.5 text-[11px] font-mono font-bold text-center" style={{ paddingLeft: 14 }}>
                             {isExpanded
                               ? <span className="text-brand-500 text-[10px]">▼</span>
-                              : <span className="text-gray-400">{idx + 1}</span>}
+                              : <span className="text-gray-400">{globalIdx + 1}</span>}
                           </td>
                           <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
                             <MemberLink memberId={m.memberId} mode="drawer" className="font-semibold text-sm text-[#1a1a2e] hover:text-brand-500 transition-colors dark:text-white/90">
@@ -470,11 +505,8 @@ export default function HealthOverview() {
                                 </div>
                               </div>
                               <div className="pl-6" onClick={e => e.stopPropagation()}>
-                                <MemberLink
-                                  memberId={m.memberId}
-                                  mode="drawer"
-                                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-500 hover:underline cursor-pointer"
-                                >
+                                <MemberLink memberId={m.memberId} mode="drawer"
+                                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-500 hover:underline cursor-pointer">
                                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                                     <polyline points="15 3 21 3 21 9" />
@@ -493,15 +525,45 @@ export default function HealthOverview() {
               </table>
             </div>
 
-            {/* Show all — only when no filters active */}
-            {!archetypeFilter && !showFirst90 && allPriorityMembers.length > 10 && (
-              <button
-                type="button"
-                onClick={() => setShowAll(s => !s)}
-                className="mt-2 px-4 py-2 text-xs font-semibold text-brand-500 bg-transparent border border-brand-500/20 rounded-lg cursor-pointer w-full text-center hover:bg-brand-500/5 transition-colors"
-              >
-                {showAll ? 'Show fewer' : `View all ${allPriorityMembers.length} members →`}
-              </button>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-2 px-1">
+                <span className="text-[11px] text-gray-400">
+                  Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredMembers.length)} of {filteredMembers.length} members
+                </span>
+                <div className="flex items-center gap-1">
+                  <button type="button" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                    className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-gray-200 bg-white text-gray-500 cursor-pointer hover:border-gray-300 disabled:opacity-40 disabled:cursor-default transition-colors dark:bg-white/[0.03] dark:border-gray-700 dark:text-gray-400">
+                    ← Prev
+                  </button>
+                  {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                    // Show first, last, current ±1, and ellipsis
+                    const p = totalPages <= 7 ? i + 1 : (() => {
+                      const pages = new Set([1, totalPages, page - 1, page, page + 1].filter(x => x >= 1 && x <= totalPages));
+                      return [...pages].sort((a,b)=>a-b)[i];
+                    })();
+                    if (!p) return null;
+                    const prevP = i > 0 ? (totalPages <= 7 ? i : [...new Set([1, totalPages, page - 1, page, page + 1].filter(x => x >= 1 && x <= totalPages))].sort((a,b)=>a-b)[i-1]) : null;
+                    return (
+                      <Fragment key={p}>
+                        {prevP && p - prevP > 1 && <span className="text-[11px] text-gray-300 px-0.5">…</span>}
+                        <button type="button" onClick={() => setPage(p)}
+                          className={`w-7 h-7 text-[11px] font-semibold rounded-md border cursor-pointer transition-colors ${
+                            p === page
+                              ? 'bg-brand-500 text-white border-brand-500'
+                              : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 dark:bg-white/[0.03] dark:border-gray-700 dark:text-gray-400'
+                          }`}>
+                          {p}
+                        </button>
+                      </Fragment>
+                    );
+                  })}
+                  <button type="button" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                    className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-gray-200 bg-white text-gray-500 cursor-pointer hover:border-gray-300 disabled:opacity-40 disabled:cursor-default transition-colors dark:bg-white/[0.03] dark:border-gray-700 dark:text-gray-400">
+                    Next →
+                  </button>
+                </div>
+              </div>
             )}
           </>
         )}
