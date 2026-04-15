@@ -21,7 +21,8 @@
     "insights:full": "npm run test:insights && npm run insights:report && npm run insights:critique",
     "vision:capture": "npx playwright test --config=playwright.insights.config.js",
     "vision:critique": "node scripts/gemini-critique.mjs",
-    "vision:full": "npm run vision:capture && npm run vision:critique"
+    "vision:full": "npm run vision:capture && npm run vision:critique",
+    "app:critique": "node scripts/app-vision-critique.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.87.0",

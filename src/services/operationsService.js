@@ -119,8 +119,19 @@ const toBucket = (value, fallback) => (typeof value === 'string' && value.trim()
 export const _init = async () => {
   _apiLoaded = true;
   try {
-    const data = await apiFetch('/api/operations');
-    if (data) _d = data;
+    const [ops, teeSheet] = await Promise.allSettled([
+      apiFetch('/api/operations'),
+      apiFetch('/api/tee-sheet'),
+    ]);
+    if (ops.status === 'fulfilled' && ops.value) {
+      _d = ops.value;
+    }
+    if (teeSheet.status === 'fulfilled' && teeSheet.value?.rows?.length > 0) {
+      _d = _d ?? {};
+      _d.todayTeeSheet    = teeSheet.value.rows;
+      _d.teeSheetSummary  = teeSheet.value.summary;
+      _d.teeSheetDate     = teeSheet.value.date;
+    }
   } catch { /* keep static fallback */ }
 };
 

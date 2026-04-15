@@ -109,7 +109,9 @@ export default withAuth(async function handler(req, res) {
         bottleneckCount: Number(r.bottleneck_count),
       })),
 
-      paceFBImpact: {
+      // Null when no tee rounds exist — operationsService treats null as "no data"
+      // and returns EMPTY_PACE_FB in live mode, triggering the Revenue empty state.
+      paceFBImpact: rounds.length === 0 ? null : {
         slowPRDRate: Number(paceFBImpact.rows[0]?.slow_prd_rate ?? 0),
         fastPRDRate: Number(paceFBImpact.rows[0]?.fast_prd_rate ?? 0),
       },

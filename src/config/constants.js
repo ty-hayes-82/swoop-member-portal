@@ -20,12 +20,10 @@ export function getClubName() {
 }
 
 export function isRealClub() {
-  try {
-    if (getDataMode() !== 'live') return false;
-    // Seeded/test clubs are not "real" — check for production flag
-    const isProduction = localStorage.getItem('swoop_production') === 'true';
-    return isProduction;
-  } catch { return false; }
+  // Any live-mode club (real clubId in localStorage) is treated as a real club.
+  // The old swoop_production flag is no longer required — it was never set during
+  // onboarding, causing the Board Report demo-data banner to always show.
+  return getDataMode() === 'live';
 }
 
 // Backward compat — some files import CLUB_NAME

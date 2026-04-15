@@ -4,7 +4,8 @@
 // Components never change — they call the same synchronous service functions as always.
 
 import { useState, useEffect, createContext, useContext } from 'react';
-import { getDataMode } from '@/services/demoGate';
+import { getDataMode, setGateCache } from '@/services/demoGate';
+import { apiFetch } from '@/services/apiClient';
 import { _init as initOps }      from '@/services/operationsService';
 import { _init as initMembers }  from '@/services/memberService';
 import { _init as initStaffing } from '@/services/staffingService';
@@ -68,13 +69,18 @@ export function DataProvider({ children }) {
       setTimeout(() => resolve('timeout'), 10000)
     );
 
-    Promise.race([initAllServices(), timeout]).then(results => {
+    Promise.race([initAllServices(), timeout]).then(async results => {
       if (results !== 'timeout') {
         const anySucceeded = results.some(r => r.status === 'fulfilled');
         if (anySucceeded) setPhase(2);
       } else {
         console.info('[DataProvider] API timeout — using static data');
       }
+      // Populate gate cache so isGateOpen() works in live mode
+      try {
+        const gates = await apiFetch('/api/gates');
+        if (gates) setGateCache(gates);
+      } catch { /* non-fatal — gates remain uncached */ }
       setReady(true);
     }).catch(err => {
       console.warn('[DataProvider] API hydration failed, using static data:', err);
@@ -87,6 +93,7 @@ export function DataProvider({ children }) {
   useEffect(() => {
     const handler = () => {
       console.info('[DataProvider] Refreshing all services after data import...');
+      setGateCache(null); // invalidate so re-init re-fetches gate state
       setRefreshKey(k => k + 1);
     };
     window.addEventListener('swoop:data-imported', handler);

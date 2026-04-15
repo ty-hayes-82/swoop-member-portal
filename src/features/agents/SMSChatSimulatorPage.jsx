@@ -365,8 +365,7 @@ function useAgentInbox() {
 }
 
 // ── AgentInboxPanel ───────────────────────────────────────────────────────────
-function AgentInboxPanel({ onSwitchMember }) {
-  const { pending, loading, approve, dismiss } = useAgentInbox();
+function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember }) {
   const [expanded, setExpanded] = useState(null); // actionId whose note field is open
   const [noteText, setNoteText] = useState('');
 
@@ -524,8 +523,8 @@ export default function SMSChatSimulatorPage() {
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Separate hook call for inbox count badge
-  const { pending: pendingActions } = useAgentInbox();
+  // Single hook instance shared between the badge and AgentInboxPanel
+  const { pending: pendingActions, loading: inboxLoading, approve: inboxApprove, dismiss: inboxDismiss } = useAgentInbox();
 
   const selectedMember = MEMBER_BY_ID[selectedMemberId] || TEST_MEMBERS[0];
   const quickMessages = QUICK_MESSAGES[selectedMemberId] || [];
@@ -830,7 +829,7 @@ export default function SMSChatSimulatorPage() {
             )}
 
             {rightTab === 'inbox' && (
-              <AgentInboxPanel onSwitchMember={switchToMember} />
+              <AgentInboxPanel pending={pendingActions} loading={inboxLoading} approve={inboxApprove} dismiss={inboxDismiss} onSwitchMember={switchToMember} />
             )}
           </div>
 

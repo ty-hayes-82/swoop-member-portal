@@ -4,7 +4,7 @@ import { useNavigationContext } from "@/context/NavigationContext";
 import { useMemberProfile } from "@/context/MemberProfileContext";
 import { useApp } from "@/context/AppContext";
 import { NAV_ITEMS } from "@/config/navigation";
-import { isGateOpen } from "@/services/demoGate";
+import { isGateOpen, getDataMode } from "@/services/demoGate";
 import { getAtRiskMembers } from "@/services/memberService";
 
 const primaryItems = NAV_ITEMS.filter(
@@ -204,8 +204,8 @@ const SwoopSidebar = () => {
           </div>
         </nav>
 
-        {/* Demo Story Flows — always available navigation to the 3 storyboard moments */}
-        {showFull && (
+        {/* Demo Story Flows — only shown in demo mode, not in live club sessions */}
+        {showFull && getDataMode() === 'demo' && (
           <div className="mt-auto mb-6">
             <div className="rounded-xl bg-white/5 p-3 border border-white/10">
               <div className="flex items-center justify-between mb-2">
