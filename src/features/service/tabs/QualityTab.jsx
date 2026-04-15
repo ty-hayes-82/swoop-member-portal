@@ -48,14 +48,18 @@ export default function QualityTab() {
       ))
     : null;
 
-  // Complaints by day of week
+  // Complaints by day of week — guard against invalid/missing dates
   const dayOfWeekMap = {};
   feedbackRecords.forEach(r => {
-    const day = new Date(r.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' });
+    if (!r.date || r.date === 'Unknown date') return;
+    const parsed = new Date(r.date.length === 10 ? r.date + 'T00:00:00' : r.date);
+    if (isNaN(parsed.getTime())) return;
+    const day = parsed.toLocaleDateString('en-US', { weekday: 'short' });
     dayOfWeekMap[day] = (dayOfWeekMap[day] || 0) + 1;
   });
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const maxDayCount = Math.max(...weekdays.map(d => dayOfWeekMap[d] || 0), 1);
+  const hasAnyDayData = weekdays.some(d => dayOfWeekMap[d] > 0);
 
   // Complaints by category
   const maxCatCount = Math.max(...feedbackSummary.map(c => c.count), 1);
@@ -165,6 +169,11 @@ export default function QualityTab() {
         <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
           Complaints by Day of Week
         </h3>
+        {!hasAnyDayData && (
+          <div className="text-sm text-gray-400 italic mb-2">
+            Complaint dates not yet available — day-of-week breakdown will populate as complaints are resolved and timestamped.
+          </div>
+        )}
         <div className="flex gap-2 items-end h-[120px] relative">
           {weekdays.map(day => {
             const count = dayOfWeekMap[day] || 0;
@@ -172,7 +181,11 @@ export default function QualityTab() {
             const isWeekend = day === 'Sat' || day === 'Sun';
             const isHovered = hoveredBar === day;
             // Build tooltip detail
-            const dayComplaints = feedbackRecords.filter(r => new Date(r.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' }) === day);
+            const dayComplaints = feedbackRecords.filter(r => {
+              if (!r.date || r.date === 'Unknown date') return false;
+              const p = new Date(r.date.length === 10 ? r.date + 'T00:00:00' : r.date);
+              return !isNaN(p.getTime()) && p.toLocaleDateString('en-US', { weekday: 'short' }) === day;
+            });
             const catBreakdown = {};
             dayComplaints.forEach(c => { catBreakdown[c.category] = (catBreakdown[c.category] || 0) + 1; });
             return (

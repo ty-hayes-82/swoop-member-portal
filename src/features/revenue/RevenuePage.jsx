@@ -132,7 +132,7 @@ export default function RevenuePage() {
                     </div>
                     <div className="grid grid-cols-3 gap-3 text-center">
                       {[
-                        { label: 'Avg leakage found', value: '$8,400/mo', sub: 'across similar clubs' },
+                        { label: 'Industry avg leakage', value: '$8,400/mo', sub: '↑ benchmark — not your data yet' },
                         { label: 'Top driver', value: 'Pace of Play', sub: '62% of leakage' },
                         { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
                       ].map(({ label, value, sub }) => (
@@ -164,12 +164,18 @@ export default function RevenuePage() {
     );
   }
 
-  // Build chart data
-  const chartData = [
+  // Build chart data — always show all 3 rows so the chart isn't sparse;
+  // zero-value rows render as locked/pending bars at a minimal stub width
+  const ALL_LEAKAGE_ROWS = [
     { name: 'Pace of Play', value: leakage.PACE_LOSS, color: COLORS.pace, source: 'Tee Sheet + POS' },
     { name: 'Understaffed Days', value: leakage.STAFFING_LOSS, color: COLORS.staffing, source: 'Scheduling + POS' },
     { name: 'Weather No-Shows', value: leakage.WEATHER_LOSS, color: COLORS.weather, source: 'Weather + POS' },
-  ].filter(d => d.value > 0);
+  ];
+  const chartData = ALL_LEAKAGE_ROWS.filter(d => d.value > 0);
+  // For display: use all rows when chart would otherwise be too sparse
+  const chartDisplayData = chartData.length < 2
+    ? ALL_LEAKAGE_ROWS.map(d => ({ ...d, value: d.value > 0 ? d.value : Math.round(leakage.TOTAL * 0.05) || 100, locked: d.value === 0 }))
+    : chartData;
 
   return (
     <PageTransition>
@@ -247,10 +253,14 @@ export default function RevenuePage() {
               <div className="text-[11px] text-gray-400 mt-1.5 leading-snug group-hover:text-brand-500 transition-colors">Complaints spike 2–3x on short-staffed days. View staffing →</div>
             </button>
           ) : (
-            <div className="bg-white border border-dashed border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-700">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Understaffed Days</div>
-              <div className="text-sm text-gray-400 dark:text-gray-500 mt-2">Import scheduling data to track staffing-related revenue loss.</div>
+            <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-4 dark:bg-white/[0.02] dark:border-gray-700 opacity-70">
+              <div className="flex items-center gap-1.5 mb-1">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Understaffed Days</div>
+                <span className="text-[9px] font-bold uppercase tracking-wide text-gray-400 border border-gray-300 rounded px-1 py-0.5">Locked</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-300 dark:text-gray-600 font-mono mt-1">$—</div>
               <SourceBadge system="Scheduling" size="xs" />
+              <div className="text-[11px] text-gray-400 mt-1.5 leading-snug">Connect scheduling data to unlock staffing-driven loss tracking.</div>
             </div>
           )}
           {leakage.WEATHER_LOSS > 0 ? (
@@ -263,10 +273,14 @@ export default function RevenuePage() {
               <div className="text-[11px] text-gray-400 mt-1.5 leading-snug">Proactive notification recovers ~60% of at-risk tee times.</div>
             </div>
           ) : (
-            <div className="bg-white border border-dashed border-gray-200 rounded-xl p-4 dark:bg-white/[0.03] dark:border-gray-700">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Weather No-Shows</div>
-              <div className="text-sm text-gray-400 dark:text-gray-500 mt-2">Weather impact analysis computes once scheduling + weather data are loaded.</div>
+            <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-4 dark:bg-white/[0.02] dark:border-gray-700 opacity-70">
+              <div className="flex items-center gap-1.5 mb-1">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Weather No-Shows</div>
+                <span className="text-[9px] font-bold uppercase tracking-wide text-gray-400 border border-gray-300 rounded px-1 py-0.5">Locked</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-300 dark:text-gray-600 font-mono mt-1">$—</div>
               <SourceBadge system="Weather API" size="xs" />
+              <div className="text-[11px] text-gray-400 mt-1.5 leading-snug">Connect scheduling + weather feed to unlock no-show analysis.</div>
             </div>
           )}
         </div>
@@ -292,20 +306,25 @@ export default function RevenuePage() {
               <div className="text-sm font-bold font-mono text-success-500">~${Math.round(leakage.TOTAL * 0.2).toLocaleString()}/mo</div>
             </div>
           </div>
-          <div style={{ height: 280 }}>
+          <div style={{ height: 200 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} layout="vertical" margin={{ top: 10, right: 30, left: 80, bottom: 10 }}>
+              <BarChart data={chartDisplayData} layout="vertical" margin={{ top: 6, right: 30, left: 80, bottom: 6 }}>
                 <XAxis type="number" tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `$${v.toLocaleString()}`} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: '#6b7280' }} width={140} />
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(0,0,0,0.04)' }} />
                 <Bar dataKey="value" radius={[0, 8, 8, 0]}>
-                  {chartData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
+                  {chartDisplayData.map((entry, i) => (
+                    <Cell key={i} fill={entry.locked ? '#e5e7eb' : entry.color} opacity={entry.locked ? 0.7 : 1} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
+          {chartDisplayData.some(d => d.locked) && (
+            <div className="text-[10px] text-gray-400 mt-1 italic">
+              Grey bars = data source not yet connected — connect scheduling and weather to compute those leakage buckets
+            </div>
+          )}
         </Panel>
 
         {/* Hole 12 Bottleneck Drill-down */}
