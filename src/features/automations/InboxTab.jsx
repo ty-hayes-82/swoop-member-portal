@@ -69,7 +69,11 @@ function ActionCard({ action, onApprove, onDismiss }) {
 
       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex-wrap">
         {action.source && (
-          <SourceBadge system={action.source} size="xs" />
+          <SourceBadge system={
+            action.source === 'anthropic' ? 'Swoop AI' :
+            action.source === 'fb-intelligence' ? 'F&B Intelligence' :
+            action.source
+          } size="xs" />
         )}
         {action.actionType && <span className="text-[10px] uppercase tracking-wide text-gray-400">{action.actionType.replace(/_/g, ' ').toLowerCase()}</span>}
         {action.contributing_agents && (

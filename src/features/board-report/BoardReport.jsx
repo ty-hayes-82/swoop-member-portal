@@ -280,17 +280,30 @@ export default function BoardReport() {
             ⬢ Auto-Generated Executive Narrative
           </div>
           <p className="text-sm text-gray-800 dark:text-white/90 leading-relaxed m-0">
-            This month, <strong>{getClubName()}</strong> retained{' '}
-            <strong className="text-success-600">{memberSaves.length} members</strong> worth{' '}
-            <strong className="text-success-600 font-mono">${totalDues.toLocaleString()}</strong> in annual dues
-            through proactive intervention. The operations team prevented{' '}
-            <strong className="text-blue-600">{operationalSaves.length} disruptions</strong>, protecting{' '}
-            <strong className="text-blue-600 font-mono">${totalOpsRevenue.toLocaleString()}</strong> in operational revenue.
-            Service consistency held at <strong>{resolutionRate}%</strong> complaint resolution
-            with an average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'}</strong> detection-to-action time —
-            compared to the industry standard of 6+ weeks.
-            Health distribution: <strong>{dist.find(d => d.level === 'Healthy')?.count || 0} healthy</strong>,
-            {' '}{dist.find(d => d.level === 'At Risk')?.count || 0} at-risk.
+            {memberSaves.length > 0 ? (
+              <>
+                This month, <strong>{getClubName()}</strong> retained{' '}
+                <strong className="text-success-600">{memberSaves.length} members</strong> worth{' '}
+                <strong className="text-success-600 font-mono">${totalDues.toLocaleString()}</strong> in annual dues
+                through proactive intervention. The operations team prevented{' '}
+                <strong className="text-blue-600">{operationalSaves.length} disruptions</strong>, protecting{' '}
+                <strong className="text-blue-600 font-mono">${totalOpsRevenue.toLocaleString()}</strong> in operational revenue.
+                Service consistency held at <strong>{resolutionRate}%</strong> complaint resolution
+                with an average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'}</strong> detection-to-action time.
+                Health distribution: <strong>{dist.find(d => d.level === 'Healthy')?.count || 0} healthy</strong>,
+                {' '}{dist.find(d => d.level === 'At Risk')?.count || 0} at-risk.
+              </>
+            ) : (
+              <>
+                <strong>{getClubName()}</strong> has{' '}
+                <strong className="text-success-600">{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} active members</strong>{' '}
+                being monitored. Swoop is tracking member engagement, tee sheet activity, and service quality
+                in real time.
+                {resolutionRate > 0 && <> Service complaint resolution rate: <strong>{resolutionRate}%</strong>.</>}
+                {' '}As behavioral data accumulates, Swoop will identify at-risk members early and surface
+                intervention opportunities — turning insight into retention before members consider leaving.
+              </>
+            )}
           </p>
         </div>
         <>
@@ -306,9 +319,15 @@ export default function BoardReport() {
               they impacted members.
             </p>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Member health remained strong with <strong>{dist.find(d => d.level === 'Healthy')?.count ?? 0} members in healthy status</strong>.
-              Through proactive interventions, <strong>{memberSaves.length} members</strong> showing early disengagement signals were
-              successfully re-engaged — demonstrating the value of early detection and personal outreach.
+              {dist.find(d => d.level === 'Healthy')?.count > 0 ? (
+                <>Member health remained strong with <strong>{dist.find(d => d.level === 'Healthy').count} members in healthy status</strong>.
+                Through proactive interventions, <strong>{memberSaves.length} members</strong> showing early disengagement signals were
+                successfully re-engaged — demonstrating the value of early detection and personal outreach.</>
+              ) : (
+                <>Swoop is actively monitoring <strong>{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} members</strong> for engagement signals.
+                {dist.find(d => d.level === 'At Risk')?.count > 0 && <> <strong>{dist.find(d => d.level === 'At Risk').count} members</strong> have been flagged as at-risk and are being prioritized for outreach.</>}
+                Early detection is live — intervention opportunities will appear in the Action Inbox as patterns emerge.</>
+              )}
             </p>
             <p className="text-gray-600 leading-relaxed">
               Staffing alignment and proactive scheduling adjustments prevented service gaps on high-demand days. The

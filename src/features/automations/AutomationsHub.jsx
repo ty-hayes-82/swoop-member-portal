@@ -14,8 +14,8 @@ const AgentActivityPage = lazy(() => import('@/features/agents/AgentActivityPage
 
 const TABS = [
   { key: 'inbox', label: 'Inbox', icon: '📥' },
-  { key: 'playbooks', label: 'Playbooks', icon: '📋' },
-  { key: 'agents', label: 'Agents', icon: '🤖' },
+  { key: 'playbooks', label: 'Action Plans', icon: '📋' },
+  { key: 'agents', label: 'AI Agents', icon: '🤖' },
   { key: 'activity', label: 'Activity', icon: '📡' },
   { key: 'settings', label: 'Settings', icon: '⚙️' },
 ];
@@ -42,9 +42,9 @@ export default function AutomationsHub() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-bold m-0 text-gray-800 dark:text-white/90">Automations</h1>
+        <h1 className="text-xl font-bold m-0 text-gray-800 dark:text-white/90">Recommended Actions</h1>
         <p className="text-sm text-gray-500 mt-1 mb-0">
-          AI agents, action inbox, and automated playbooks.
+          Smart actions to improve member experience and revenue — approve or dismiss in seconds.
         </p>
       </div>
 
