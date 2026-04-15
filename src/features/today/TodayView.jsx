@@ -6,31 +6,22 @@ import { useNavigation } from '@/context/NavigationContext';
 import { getPriorityItems, useCockpitData } from '@/services/cockpitService';
 import { getDailyBriefing } from '@/services/briefingService';
 import MemberLink from '@/components/MemberLink';
-import TodaysRisks from './TodaysRisks';
 import PendingActionsInline from './PendingActionsInline';
 import MemberAlerts from './MemberAlerts';
-import TomorrowForecast from './TomorrowForecast';
 import WeekForecast from './WeekForecast';
 import MorningBriefingSentence from './MorningBriefingSentence';
 import DemoStoriesLauncher from './DemoStoriesLauncher';
 import { getFirstName } from '../../utils/nameUtils';
 import OvernightBrief from './OvernightBrief';
-import SourceBadge from '@/components/ui/SourceBadge';
-import { AnimatedNumber } from '@/components/ui/PageTransition';
 import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
-import { getWeatherAlerts } from '@/services/weatherService';
 import { isAuthenticatedClub } from '@/config/constants';
 import { getDataMode, isGateOpen } from '@/services/demoGate';
-import { hasRealMemberData } from '@/services/memberService';
+import { hasRealMemberData, getMemberSummary } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist from './OnboardingChecklist';
 import { getTodayTeeSheet } from '@/services/operationsService';
-import { getMemberSummary, getFullRoster } from '@/services/memberService';
-import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
-import { trackAction } from '@/services/activityService';
 import { getHealthRollup } from '@/services/apiHealthService';
-import { getUnderstaffedDays } from '@/services/staffingService';
 
 // ─── Dark theme tokens ────────────────────────────────────────────────────────
 const D = {
@@ -259,16 +250,6 @@ export default function TodayView() {
   const briefing = getDailyBriefing();
   const roundsToday = briefing?.teeSheet?.roundsToday || 0;
 
-  const [, setWeatherTick] = useState(0);
-  useEffect(() => {
-    const handler = () => setWeatherTick(t => t + 1);
-    window.addEventListener('swoop:weather-updated', handler);
-    return () => window.removeEventListener('swoop:weather-updated', handler);
-  }, []);
-
-  const weatherAlerts = getWeatherAlerts();
-  const [dismissedAlerts, setDismissedAlerts] = useState([]);
-  const [core3Dismissed, setCore3Dismissed] = useState(() => !!localStorage.getItem('swoop_core3_celebrated'));
 
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -377,22 +358,6 @@ export default function TodayView() {
     );
   }
 
-  // Derive quick stats
-  const memberSummary = getMemberSummary();
-  const totalMembers = memberSummary.totalMembers || memberSummary.total || 0;
-  const hourlyData = getHourlyForecast();
-  const dailyData = getDailyForecast(1);
-
-  // Course condition derived from weather
-  const courseCondition = (() => {
-    const today = dailyData?.[0];
-    if (!today && !hourlyData?.length) return null;
-    const wind = today?.wind || 0;
-    const precip = typeof today?.precipProb === 'object' ? today?.precipProb?.percent : (today?.precipProb || 0);
-    if (precip > 50 || wind > 25) return { label: 'Poor', color: '#ef4444', icon: '🌧️' };
-    if (precip > 30 || wind > 15) return { label: 'Fair', color: '#f59e0b', icon: '⛅' };
-    return { label: 'Good', color: '#12b76a', icon: '🌤️' };
-  })();
 
   return (
     <PageTransition>
@@ -496,22 +461,6 @@ export default function TodayView() {
           <OvernightBrief />
         </CollapsibleSection>
 
-        {/* Core-3 celebration banner — shows once when members + tee-sheet + F&B are all imported */}
-        {!core3Dismissed && isGateOpen('members') && isGateOpen('tee-sheet') && isGateOpen('fb') && (
-          <div className="fade-in-up rounded-xl p-4" style={{ background: 'white', border: '2px solid transparent', borderImage: 'linear-gradient(135deg, #e8a732, #12b76a, #3B82F6) 1' }}>
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm text-gray-700 m-0">
-                <strong>Full intelligence unlocked</strong> — 3 core systems connected. You now see member health, revenue leakage, and service quality in one place.
-              </p>
-              <button
-                type="button"
-                onClick={() => { localStorage.setItem('swoop_core3_celebrated', 'true'); setCore3Dismissed(true); }}
-                className="text-xs text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer shrink-0"
-              >Dismiss</button>
-            </div>
-          </div>
-        )}
-
         {/* Section 1.6: Demo Story Flows — 3 storyboard moments, demo mode only */}
         {getDataMode() === 'demo' && <DemoStoriesLauncher />}
 
@@ -543,53 +492,6 @@ export default function TodayView() {
             </button>
           </div>
         )}
-
-        {/* Section 2: Quick Stats Row */}
-        <div className="fade-in-up fade-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-          {[
-            { icon: courseCondition?.icon || '🌤️', bg: '#ecfdf5', label: 'Course Condition', value: courseCondition?.label || '—', color: courseCondition?.color || '#9ca3af', source: 'Weather API' },
-            roundsToday > 0 ? { icon: '👥', bg: '#eef2ff', label: 'Tee Times Today', value: String(roundsToday), color: '#6366f1', source: 'Tee Sheet' } : null,
-            (() => {
-              const teeSheet = getTodayTeeSheet();
-              const atRiskOnSheet = teeSheet.filter(t => (t.healthScore ?? 100) < 50).length;
-              if (teeSheet.length > 0 && atRiskOnSheet > 0) {
-                return { icon: '🚨', bg: '#fef2f2', label: 'At-Risk on Sheet', value: String(atRiskOnSheet), color: '#ef4444', source: 'Tee Sheet + CRM' };
-              }
-              return { icon: '📊', bg: '#fffbeb', label: 'Active Members', value: totalMembers > 0 ? String(totalMembers) : '—', color: '#e8a732', source: 'Member CRM' };
-            })(),
-            { icon: '🔔', bg: '#f5f3ff', label: 'Pending Actions', value: cockpitLoading && !cockpitData ? '...' : String(pendingAgentCount || priorities.length), color: '#8b5cf6', source: 'Analytics' },
-          ].filter(Boolean).map((stat) => (
-            <div
-              key={stat.label}
-              className="today-stat-card"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: `1px solid ${D.border}`,
-                borderRadius: 14,
-                padding: '16px 18px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 14,
-                cursor: 'default',
-              }}
-            >
-              <div style={{ width: 42, height: 42, background: 'rgba(255,255,255,0.08)', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
-                {stat.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div style={{ fontSize: 11, color: D.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 2 }} title={stat.label === 'Pending Actions' ? 'Total actions awaiting your approval across all agents' : stat.label}>{stat.label}</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, letterSpacing: -0.3 }}>
-                  {/^\d+$/.test(stat.value) ? <AnimatedNumber value={parseInt(stat.value, 10)} duration={800} /> : stat.value}
-                </div>
-                {stat.source && (
-                  <div style={{ marginTop: 4 }}>
-                    <SourceBadge system={stat.source} size="xs" />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
 
         {/* At-Risk Members on Today's Sheet — persistent named list with talking points */}
         {(() => {
@@ -637,138 +539,9 @@ export default function TodayView() {
           );
         })()}
 
-        {/* Today's Priorities — consolidated alert strip */}
-        {(() => {
-          const roster = getFullRoster();
-          const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
-          const newMembers = roster.filter(m => m.joinDate && new Date(m.joinDate) >= cutoff);
-          const needsAttention = newMembers.filter(m => (m.score ?? m.healthScore ?? 100) < 70);
-          const understaffed = getUnderstaffedDays();
-          const totalLoss = understaffed.reduce((s, d) => s + (d.revenueLoss || 0), 0);
-          if (!newMembers.length && !understaffed.length) return null;
-          const itemCount = (newMembers.length > 0 ? 1 : 0) + understaffed.length;
-          const peekParts = [];
-          if (newMembers.length > 0) peekParts.push(`${newMembers.length} new member${newMembers.length !== 1 ? 's' : ''}`);
-          if (understaffed.length > 0) peekParts.push(`${understaffed.length} staffing gap${understaffed.length !== 1 ? 's' : ''}`);
-          return (
-            <CollapsibleSection title="Today's Priorities" count={itemCount} peek={peekParts.join(' · ')} accentColor={D.accent} defaultOpen={true}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {/* 90-Day New Member Alert */}
-                {newMembers.length > 0 && (
-                  <div style={{ padding: '12px 16px', borderBottom: understaffed.length > 0 ? `1px solid ${D.borderSub}` : 'none' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: '#f59e0b', marginBottom: 4 }}>
-                          New Member Watch — First 90 Days
-                        </div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>
-                          {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in their first 90 days
-                          {needsAttention.length > 0 && (
-                            <span style={{ color: '#f59e0b' }}> — {needsAttention.length} need{needsAttention.length === 1 ? 's' : ''} attention</span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: 11, color: D.textMuted, marginTop: 3 }}>
-                          Members who attend 2+ events in the first quarter renew at <strong style={{ color: D.green }}>94%</strong>. Members who don't renew at <strong style={{ color: D.red }}>61%</strong>.
-                        </div>
-                      </div>
-                      <DarkBtn onClick={() => navigate('members', { filter: 'new' })}>View →</DarkBtn>
-                    </div>
-                  </div>
-                )}
-                {/* Staffing Flag */}
-                {understaffed.length > 0 && (
-                  <div style={{ padding: '12px 16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: D.red, marginBottom: 4 }}>
-                          Staffing Alert
-                        </div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>
-                          {understaffed.length} understaffed day{understaffed.length !== 1 ? 's' : ''} this period
-                          {totalLoss > 0 && (
-                            <span style={{ color: D.red }}> — ${totalLoss.toLocaleString()} revenue impact</span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: 11, color: D.textMuted, marginTop: 3 }}>
-                          {understaffed[0]?.outlet} on {understaffed[0]?.date}: {understaffed[0]?.scheduledStaff} scheduled vs {understaffed[0]?.requiredStaff} required
-                        </div>
-                      </div>
-                      <DarkBtn onClick={() => navigate('service')}>View →</DarkBtn>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CollapsibleSection>
-          );
-        })()}
-
-        {/* Weather Alerts Banner */}
-        {weatherAlerts.filter(a => !dismissedAlerts.includes(a.headline)).map((alert, i) => {
-          const isSevere = alert.severity === 'EXTREME' || alert.severity === 'SEVERE';
-          const handleNotify = () => {
-            const teeSheet = getTodayTeeSheet();
-            const affected = teeSheet.length;
-            trackAction({
-              actionType: 'approve',
-              actionSubtype: 'weather_notify',
-              referenceType: 'weather_alert',
-              referenceId: alert.headline || `alert_${i}`,
-              description: `Notify ${affected} affected tee times of ${alert.headline || alert.type}`,
-            });
-            setDismissedAlerts(prev => [...prev, alert.headline]);
-          };
-          return (
-          <div key={alert.headline || i} className={`flex items-center justify-between rounded-xl px-4 py-3 border flex-wrap gap-2 ${
-            isSevere
-              ? 'border-error-500/40 bg-error-50 dark:bg-error-500/10'
-              : 'border-warning-500/40 bg-warning-50 dark:bg-warning-500/10'
-          }`}>
-            <div className="flex items-center gap-2 flex-wrap">
-              <SourceBadge system="Weather API" size="xs" />
-              <span className={`text-sm font-semibold ${
-                isSevere ? 'text-error-500' : 'text-warning-500'
-              }`}>
-                {alert.headline || `${alert.type} Warning`}
-              </span>
-              {alert.description && (
-                <span className="text-xs text-gray-500">
-                  — {alert.description}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              {isSevere && getTodayTeeSheet().length > 0 && (
-                <button
-                  onClick={handleNotify}
-                  className="bg-error-500 text-white border-none cursor-pointer text-xs font-bold px-3 py-1 rounded-md hover:bg-error-600 focus-visible:ring-2 focus-visible:ring-brand-500"
-                  title="Send weather alert to affected tee times"
-                >
-                  Notify affected tee times →
-                </button>
-              )}
-              <button
-                onClick={() => setDismissedAlerts(prev => [...prev, alert.headline])}
-                aria-label={`Dismiss weather alert: ${alert.headline || alert.type}`}
-                className="bg-transparent border-none cursor-pointer text-gray-400 text-sm px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-brand-500"
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-          );
-        })}
-
-        {/* GM Greeting Alerts — real-time check-in notifications */}
-        <GmGreetingAlert />
-
         {/* Section 3: Priority Member Alerts */}
         <CollapsibleSection title="Member Alerts" accentColor={D.red} defaultOpen={true} peek="health score changes, renewals, flags">
           <MemberAlerts />
-        </CollapsibleSection>
-
-        {/* Section 4: Staffing vs Demand + Open Complaints (moved up for visibility) */}
-        <CollapsibleSection title="Today's Risks" accentColor={D.accent} defaultOpen={true} peek="staffing gaps, complaints, pace issues">
-          <TodaysRisks />
         </CollapsibleSection>
 
         {/* Section 5: Action Queue */}
@@ -776,10 +549,6 @@ export default function TodayView() {
           <PendingActionsInline topPriority={topPriority} />
         </CollapsibleSection>
 
-        {/* Section 7: Tomorrow's Forecast */}
-        <CollapsibleSection title="Tomorrow's Forecast" accentColor={D.textMuted} defaultOpen={false} peek="weather, tee times, staffing">
-          <TomorrowForecast />
-        </CollapsibleSection>
 
       </div>
     </PageTransition>
