@@ -545,7 +545,7 @@ export default function HealthOverview() {
                         </tr>
 
                         {isExpanded && (
-                          <tr className="bg-swoop-panel">
+                          <tr className="bg-swoop-row">
                             <td colSpan={7} className="px-4 py-3 border-t border-swoop-border-inset">
                               <div className="flex gap-8 flex-wrap items-start mb-3 pl-6">
                                 <div>
