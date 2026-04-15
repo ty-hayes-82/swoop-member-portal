@@ -5,7 +5,7 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { getAllActions } from '@/services/agentService';
 import MemberLink from '@/components/MemberLink';
 import ActionPanel from '@/components/ui/ActionPanel';
-import SourceBadge from '@/components/ui/SourceBadge';
+import ActionCard from '@/components/ui/ActionCard';
 import { apiFetch } from '@/services/apiClient';
 
 // Fire-and-forget POST to /api/recommendation-feedback. The human-eval loop
@@ -20,7 +20,6 @@ function sendFeedback({ feedback, actionId, agentId, reason, snoozeHours, rating
 }
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
-const PRIORITY_COLORS = { high: '#ef4444', medium: '#f59e0b', low: '#9CA3AF' };
 
 // Map agent/source names to role-based owners
 const SOURCE_TO_OWNER = {
@@ -110,48 +109,40 @@ export default function PendingActionsInline({ topPriority = null }) {
 
       <div className="flex flex-col gap-2">
         {/* Hero alert — top priority action card */}
-        {hasHero && (
-          <div>
-            <div
-              onClick={() => toggleExpand(topPriority.id || 'hero')}
-              className="py-3.5 px-[18px] rounded-xl bg-red-500/[0.024] border border-red-500/[0.15] border-l-4 border-l-red-500 shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md"
+        {hasHero && (() => {
+          const heroId = topPriority.id || 'hero';
+          const heroAction = {
+            id: heroId,
+            priority: topPriority.priority || 'high',
+            description: topPriority.headline,
+            impactMetric: topPriority.recommendation,
+            source: topPriority.source || 'Briefing',
+          };
+          const heroTitle = topPriority.memberName ? (
+            <>
+              <MemberLink
+                mode="drawer"
+                memberId={topPriority.memberId}
+                className="font-bold text-swoop-text"
+              >
+                {topPriority.memberName}
+              </MemberLink>
+              {' '}{topPriority.headline.replace(topPriority.memberName, '').trim()}
+            </>
+          ) : topPriority.headline;
+
+          return (
+            <ActionCard
+              key={heroId}
+              action={heroAction}
+              ownerLabel="GM"
+              titleNode={heroTitle}
+              impactNode={topPriority.recommendation}
+              expanded={expandedId === heroId}
+              onToggle={() => toggleExpand(heroId)}
+              onApprove={() => toggleExpand(heroId)}
+              approveLabel="Act Now"
             >
-              <div className="flex justify-between items-center mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wide py-0.5 px-2 rounded-[10px] bg-red-500/[0.08] text-red-500">
-                    Priority
-                  </span>
-                  <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight">
-                    GM
-                  </span>
-                </div>
-                <span className="text-[10px] font-semibold text-red-500 py-0.5 px-2 rounded-[10px] bg-red-500/[0.06]">
-                  {expandedId === (topPriority.id || 'hero') ? 'Collapse' : 'Act Now'}
-                </span>
-              </div>
-              <div className="text-sm font-semibold text-swoop-text mb-1 leading-snug">
-                {topPriority.memberName ? (
-                  <>
-                    <MemberLink
-                      mode="drawer"
-                      memberId={topPriority.memberId}
-                      className="font-bold text-swoop-text"
-                    >
-                      {topPriority.memberName}
-                    </MemberLink>
-                    {' '}{topPriority.headline.replace(topPriority.memberName, '').trim()}
-                  </>
-                ) : (
-                  topPriority.headline
-                )}
-              </div>
-              {topPriority.recommendation && (
-                <div className="text-xs text-swoop-text-muted leading-snug">
-                  {topPriority.recommendation}
-                </div>
-              )}
-            </div>
-            {expandedId === (topPriority.id || 'hero') && (
               <ActionPanel
                 context={{
                   memberId: topPriority.memberId,
@@ -172,77 +163,40 @@ export default function PendingActionsInline({ topPriority = null }) {
                 onClose={() => setExpandedId(null)}
                 compact
               />
-            )}
-          </div>
-        )}
+            </ActionCard>
+          );
+        })()}
 
         {/* Pending action cards */}
-        {topActions.map((action) => {
-          const prioColor = PRIORITY_COLORS[action.priority] ?? '#F3922D';
-          const isExpanded = expandedId === action.id;
-          return (
-            <div key={action.id}>
-              <div
-                onClick={() => toggleExpand(action.id)}
-                className="py-3 px-4 rounded-xl bg-swoop-panel border border-swoop-border shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md"
-                style={{ borderLeft: `4px solid ${prioColor}` }}
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span
-                      className="text-[10px] font-bold uppercase tracking-wide py-0.5 px-2 rounded-[10px]"
-                      style={{ background: `${prioColor}15`, color: prioColor }}
-                    >
-                      {action.priority}
-                    </span>
-                    <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight">
-                      {getActionOwner(action)}
-                    </span>
-                    {action.source && (
-                      <SourceBadge system={action.source} size="xs" />
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); handleSnooze(action.id, 24); }}
-                      className="text-[10px] font-semibold text-swoop-text-muted py-0.5 px-2 rounded-[10px] bg-swoop-row hover:bg-gray-200 border-none cursor-pointer"
-                      title="Snooze 24h"
-                    >
-                      Snooze 24h
-                    </button>
-                    <span className="text-[10px] font-semibold text-brand-500 py-0.5 px-2 rounded-[10px] bg-brand-500/[0.06]">
-                      {isExpanded ? 'Collapse' : 'Take action'}
-                    </span>
-                  </div>
-                </div>
-                <div className="text-sm font-semibold text-swoop-text mb-0.5 leading-snug">
-                  {action.description}
-                </div>
-                {action.impactMetric && (
-                  <div className="text-xs text-success-500 font-medium">
-                    {action.impactMetric}
-                  </div>
-                )}
-              </div>
-              {isExpanded && (
-                <ActionPanel
-                  context={{
-                    memberId: action.memberId,
-                    memberName: action.memberName,
-                    description: action.description,
-                    source: action.source,
-                  }}
-                  recommended={buildRecommended(action)}
-                  onApprove={handleApprove}
-                  onDismiss={handleDismiss}
-                  onClose={() => setExpandedId(null)}
-                  compact
-                />
-              )}
-            </div>
-          );
-        })}
+        {topActions.map((action) => (
+          <ActionCard
+            key={action.id}
+            action={action}
+            ownerLabel={getActionOwner(action)}
+            expanded={expandedId === action.id}
+            onToggle={() => toggleExpand(action.id)}
+            onSnooze={(a, hours) => handleSnooze(a.id, hours)}
+            onApprove={(a) => {
+              const channel = (a.recommendedChannel || 'email').toLowerCase();
+              const execType = channel === 'sms' || channel === 'push' ? 'sms' : channel === 'call' ? 'staff_task' : 'email';
+              handleApprove(a.id, { executionType: execType, memberId: a.memberId, memberName: a.memberName });
+            }}
+          >
+            <ActionPanel
+              context={{
+                memberId: action.memberId,
+                memberName: action.memberName,
+                description: action.description,
+                source: action.source,
+              }}
+              recommended={buildRecommended(action)}
+              onApprove={handleApprove}
+              onDismiss={handleDismiss}
+              onClose={() => setExpandedId(null)}
+              compact
+            />
+          </ActionCard>
+        ))}
 
         {/* CTA to review all */}
         {hasActions && (

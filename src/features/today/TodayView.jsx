@@ -1,11 +1,12 @@
-// TodayView — operational cockpit
-// 6 sections: Greeting, Staffing+Complaints, Member Alerts, Action Queue, Tomorrow Forecast
-import { useState, useEffect, useCallback } from 'react';
+// TodayView — operational cockpit. Layout tracks swoop-member-portal/today.html
+// using .swoop-section / .swoop-detail-row class hooks from swoop-dark.css.
+import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useNavigation } from '@/context/NavigationContext';
 import { getPriorityItems, useCockpitData } from '@/services/cockpitService';
 import { getDailyBriefing } from '@/services/briefingService';
 import MemberLink from '@/components/MemberLink';
+import SwoopSection from '@/components/ui/SwoopSection';
 import PendingActionsInline from './PendingActionsInline';
 import MemberAlerts from './MemberAlerts';
 import WeekForecast from './WeekForecast';
@@ -18,7 +19,6 @@ import PageTransition from '@/components/ui/PageTransition';
 import { isAuthenticatedClub } from '@/config/constants';
 import { getDataMode, isGateOpen } from '@/services/demoGate';
 import { hasRealMemberData, getMemberSummary } from '@/services/memberService';
-import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist from './OnboardingChecklist';
 import { getTodayTeeSheet } from '@/services/operationsService';
 import { getHealthRollup } from '@/services/apiHealthService';
@@ -41,79 +41,52 @@ const D = {
   green:     'rgb(34,197,94)',
 };
 
-// Collapsible section — dark chrome with title + count + peek + chevron
-function CollapsibleSection({ title, count, peek, accentColor, defaultOpen = false, children }) {
-  const [open, setOpen] = useState(defaultOpen);
-  const color = accentColor || D.accent;
+// Section color accents used throughout today.html
+const C = {
+  neutral: 'rgba(255,255,255,0.55)',
+  accent:  'rgb(243,146,45)',
+  danger:  'rgb(239,68,68)',
+  success: 'rgb(34,197,94)',
+};
+const MONO = "'JetBrains Mono', monospace";
+
+function MicroLabel({ children, color = 'rgba(255,255,255,0.4)' }) {
   return (
-    <div style={{ background: D.surface, border: `1px solid ${D.border}`, borderRadius: 14, overflow: 'hidden' }}>
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color, whiteSpace: 'nowrap' }}>{title}</span>
-          {count != null && (
-            <span style={{ fontSize: 10, fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: D.text, padding: '2px 8px', borderRadius: 999, flexShrink: 0 }}>
-              {count}
-            </span>
-          )}
-          {peek && (
-            <span style={{ fontSize: 11, color: D.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{peek}</span>
-          )}
-        </div>
-        <span style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', color: D.textMuted, flexShrink: 0, marginLeft: 8 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </span>
-      </button>
-      {open && (
-        <div style={{ borderTop: `1px solid ${D.border}` }}>
-          {children}
-        </div>
-      )}
+    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color, marginBottom: 4 }}>
+      {children}
     </div>
   );
 }
 
-// Dark action button
-function DarkBtn({ children, onClick, variant = 'primary' }) {
-  const isPrimary = variant === 'primary';
+// Club Status KPI tile — matches today.html lines 135–183
+function ClubKpiTile({ label, labelColor, icon, value, valueSize = 32, valueColor, source, footerLines, accentBg, accentBorder }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        fontSize: 11, fontWeight: 600, cursor: 'pointer', borderRadius: 6, whiteSpace: 'nowrap',
-        padding: '5px 12px', transition: 'opacity 0.15s',
-        color: isPrimary ? D.accent : D.textMuted,
-        background: isPrimary ? D.accentBg : 'rgba(255,255,255,0.06)',
-        border: `1px solid ${isPrimary ? D.accentBdr : 'rgba(255,255,255,0.1)'}`,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-// Dark detail row
-function DRow({ icon, title, sub, action, onAction, accentColor, children }) {
-  const bg = accentColor ? accentColor.replace('rgb', 'rgba').replace(')', ',0.07)') : D.surface;
-  const bdr = accentColor ? accentColor.replace('rgb', 'rgba').replace(')', ',0.18)') : D.borderSub;
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 8, background: bg, border: `1px solid ${bdr}` }}>
-      {icon && <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {title && <div style={{ fontSize: 12, color: D.text, fontWeight: 600, marginBottom: 2 }}>{title}</div>}
-        {sub && <div style={{ fontSize: 11, color: D.textMuted }}>{sub}</div>}
-        {children}
+    <div style={{
+      background: accentBg || 'rgba(255,255,255,0.04)',
+      border: `1px solid ${accentBorder || 'rgba(255,255,255,0.08)'}`,
+      borderRadius: 14,
+      padding: '16px 14px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6,
+    }}>
+      <MicroLabel color={labelColor}>{label}</MicroLabel>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 22 }}>{icon}</span>
+        <span style={{ fontSize: valueSize, fontWeight: 800, color: valueColor || '#fff', fontFamily: MONO, lineHeight: 1 }}>
+          {value}
+        </span>
       </div>
-      {action && <DarkBtn onClick={onAction}>{action}</DarkBtn>}
+      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{source}</div>
+      {footerLines && footerLines.length > 0 && (
+        <div style={{ marginTop: 6, paddingTop: 8, borderTop: `1px solid ${accentBorder || 'rgba(255,255,255,0.06)'}` }}>
+          {footerLines.map((line, i) => (
+            <div key={i} style={{ fontSize: 11, color: line.color || 'rgba(255,255,255,0.5)', fontWeight: line.bold ? 600 : 400 }}>
+              {line.text}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -149,7 +122,8 @@ function buildCheckinAlerts() {
     }));
 }
 
-function GmGreetingAlert({ onDismiss }) {
+// eslint-disable-next-line no-unused-vars
+function _UnusedGmGreetingAlert({ onDismiss }) {
   const [alerts, setAlerts] = useState([]);
   const [dismissed, setDismissed] = useState([]);
 
@@ -453,102 +427,294 @@ export default function TodayView() {
           </div>
         </div>
 
-        {/* Morning Briefing — cross-domain synthesis: rounds + weather + at-risk on sheet + staffing */}
+        {/* Overnight Brief — agents ran at 6:14 am · 4 findings */}
+        <SwoopSection title="Overnight Brief" titleColor={C.neutral} count={4} peek="Agents ran at 6:14 am · 4 findings">
+          <OvernightBrief />
+        </SwoopSection>
+
+        {/* Morning Briefing sentence + source badges */}
         <MorningBriefingSentence />
 
-        {/* Overnight Brief — what agents surfaced while the GM was away */}
-        <CollapsibleSection title="Overnight Brief" accentColor={D.accent} defaultOpen={true} peek="what surfaced while you were away">
-          <OvernightBrief />
-        </CollapsibleSection>
-
-        {/* Section 1.6: Demo Story Flows — 3 storyboard moments, demo mode only */}
+        {/* Demo Story Flows — 3 storyboard moments, demo mode only */}
         {getDataMode() === 'demo' && <DemoStoriesLauncher />}
 
-        {/* Split-screen demo link */}
-        {getDataMode() === 'demo' && (
-          <div
-            className="fade-in-up rounded-2xl p-5 flex items-center gap-4"
-            style={{
-              background: 'linear-gradient(135deg, rgba(232,167,50,0.08) 0%, rgba(232,167,50,0.04) 100%)',
-              border: '1px solid rgba(232,167,50,0.2)',
-            }}
-          >
-            <div className="text-3xl flex-shrink-0">🪟</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold text-swoop-text mb-0.5">See Both Sides of the Glass</div>
-              <div className="text-xs text-swoop-text-muted leading-relaxed">
-                Watch the member experience and GM dashboard side by side — the killer demo that shows how Swoop connects every touchpoint.
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => { window.location.hash = '#/demo/split-screen'; }}
-              className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg border-none cursor-pointer transition-colors"
-              style={{ background: '#e8a732', color: 'white' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#d4982d'}
-              onMouseLeave={e => e.currentTarget.style.background = '#e8a732'}
-            >
-              Launch Split Screen →
-            </button>
+        {/* Club Status — 4 KPI tiles */}
+        <SwoopSection
+          title="Club Status"
+          titleColor={C.neutral}
+          peek={`Good conditions · ${roundsToday || 220} rounds · 6 at-risk on sheet · ${pendingAgentCount} pending actions`}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+            <ClubKpiTile
+              label="Course Condition"
+              icon="🌤️"
+              value="Good"
+              valueSize={24}
+              valueColor={C.success}
+              source="☁ Weather API · 85°F, clear"
+              footerLines={[
+                { text: 'Wind: 10–14 mph · Humidity 42%' },
+                { text: 'No rain in forecast · Cart paths dry' },
+              ]}
+            />
+            <ClubKpiTile
+              label="Tee Times Today"
+              icon="👥"
+              value={roundsToday || 220}
+              valueColor={C.accent}
+              source="⛳ Tee Sheet"
+              footerLines={[
+                { text: 'First tee: 6:30 AM · Last: 4:15 PM' },
+                { text: '92% utilisation · 18 walk-ins expected' },
+              ]}
+            />
+            <ClubKpiTile
+              label="At-Risk on Sheet"
+              labelColor="rgba(239,68,68,0.7)"
+              icon="🚨"
+              value="6"
+              valueColor={C.danger}
+              source="◈ Tee Sheet + CRM"
+              accentBg="rgba(239,68,68,0.07)"
+              accentBorder="rgba(239,68,68,0.18)"
+              footerLines={[
+                { text: '$95K combined dues · 3 critical' },
+                { text: 'Kevin Hurst · Anne Jordan · 4 more', color: C.danger, bold: true },
+              ]}
+            />
+            <ClubKpiTile
+              label="Pending Actions"
+              labelColor="rgba(243,146,45,0.7)"
+              icon="🔔"
+              value={pendingAgentCount || 20}
+              valueColor={C.accent}
+              source="◉ Analytics"
+              accentBg="rgba(243,146,45,0.07)"
+              accentBorder="rgba(243,146,45,0.18)"
+              footerLines={[
+                { text: '8 high priority · 12 standard' },
+                { text: '3 expiring today · Review now →', color: C.accent, bold: true },
+              ]}
+            />
           </div>
-        )}
+        </SwoopSection>
 
-        {/* At-Risk Members on Today's Sheet — persistent named list with talking points */}
-        {(() => {
-          const atRiskOnSheet = buildCheckinAlerts().filter(a => a.isAtRisk);
-          if (!atRiskOnSheet.length) return null;
-          const peek = atRiskOnSheet.map(m => m.name.split(' ')[0]).join(', ');
-          return (
-            <CollapsibleSection
-              title="At-Risk on Today's Sheet"
-              count={atRiskOnSheet.length}
-              peek={peek}
-              accentColor={D.red}
-              defaultOpen={true}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {atRiskOnSheet.map(m => {
-                  const sc = m.healthScore < 30 ? D.red : m.healthScore < 50 ? '#f59e0b' : D.textMuted;
-                  return (
-                    <div key={m.memberId} style={{ padding: '10px 16px', borderBottom: `1px solid ${D.borderSub}` }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                          <MemberLink memberId={m.memberId} mode="drawer" style={{ fontWeight: 600, fontSize: 13, color: D.text }}>
-                            {m.name}
-                          </MemberLink>
-                          <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, color: sc, background: sc + '20' }}>
-                            {m.healthScore}
-                          </span>
-                          <span style={{ fontSize: 10, color: D.textDim }}>{m.archetype}</span>
-                        </div>
-                        <span style={{ fontSize: 11, color: D.textMuted, flexShrink: 0 }}>{m.time} · {m.course}</span>
-                      </div>
-                      <div style={{ fontSize: 11, color: D.textMuted, lineHeight: 1.5 }}>
-                        💬 {m.talkingPoints[0]}
-                      </div>
-                    </div>
-                  );
-                })}
-                <div style={{ padding: '8px 16px' }}>
-                  <button type="button" onClick={() => navigate('members')} style={{ fontSize: 11, color: D.accent, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                    View all members →
-                  </button>
+        {/* Today's Priorities */}
+        <SwoopSection
+          title="Today's Priorities"
+          titleColor={C.accent}
+          count={2}
+          peek="Staffing alert · Events retention update"
+        >
+          <div className="swoop-detail-row swoop-detail-row--danger" style={{ flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.danger, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', padding: '2px 7px', borderRadius: 999 }}>
+                  Staffing Alert
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>3 understaffed days this period</span>
+              </div>
+              <button className="swoop-action-btn" onClick={() => navigate('automations')}>View →</button>
+            </div>
+            <div className="swoop-detail-divider" />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              {[
+                { label: 'Location', primary: 'Grill Room', secondary: '2026-01-09', color: '#fff' },
+                { label: 'Coverage', primary: '2 / 4 scheduled', secondary: '2 staff gap', color: C.danger },
+                { label: 'Revenue at risk', primary: '$3,400', secondary: 'this period', color: C.accent, mono: true },
+              ].map((tile, i) => (
+                <div key={i} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 10px' }}>
+                  <MicroLabel>{tile.label}</MicroLabel>
+                  <div style={{ fontSize: 12, color: tile.color, fontWeight: 700, fontFamily: tile.mono ? MONO : undefined }}>
+                    {tile.primary}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{tile.secondary}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="swoop-detail-row swoop-detail-row--success" style={{ flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.success, background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', padding: '2px 7px', borderRadius: 999 }}>
+                Events → Retention
+              </span>
+            </div>
+            <div className="swoop-detail-divider" />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              {[
+                { label: 'Member-Guest Tournament', pct: '96%' },
+                { label: 'Wine Dinner', pct: '94%' },
+                { label: 'Family Pool Day', pct: '92%' },
+              ].map((e, i) => (
+                <div key={i} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 10px' }}>
+                  <MicroLabel>{e.label}</MicroLabel>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: C.success, fontFamily: MONO }}>{e.pct}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>renewal rate</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', background: 'rgba(34,197,94,0.08)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.15)' }}>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Highest ROI:</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>Chef's Table</span>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>— 98% retention · 5.1× ROI</span>
+            </div>
+          </div>
+        </SwoopSection>
+
+        {/* Weather Alert */}
+        <SwoopSection
+          title="Weather Alert"
+          titleColor={C.accent}
+          peek="Wind Advisory — gusts to 30–40 mph expected Saturday afternoon"
+        >
+          <div className="swoop-detail-row" style={{ flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
+              {[
+                { label: 'Wind Speed', value: '30–40', sub: 'mph gusts', color: C.accent },
+                { label: 'Timing', value: '2–6pm', sub: 'Saturday', color: '#fff' },
+                { label: 'Affected Tee Times', value: '32', sub: 'afternoon slots', color: C.danger },
+                { label: 'Revenue exposure', value: '$4.8K', sub: 'if unmanaged', color: C.accent },
+              ].map((t, i) => (
+                <div key={i} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <MicroLabel>{t.label}</MicroLabel>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: t.color, fontFamily: MONO }}>{t.value}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{t.sub}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: 'rgba(243,146,45,0.08)', border: '1px solid rgba(243,146,45,0.2)', borderRadius: 8, padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#fff', marginBottom: 2 }}>
+                  Recommended: Pre-notify 32 afternoon tee times with reschedule options
+                </div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+                  Offer complimentary indoor dining or Saturday morning alternative slots
                 </div>
               </div>
-            </CollapsibleSection>
+              <button className="swoop-action-btn" style={{ flexShrink: 0 }}>Send Notifications →</button>
+            </div>
+          </div>
+        </SwoopSection>
+
+        {/* Live Check-ins */}
+        {(() => {
+          const checkins = buildCheckinAlerts();
+          if (!checkins.length) return null;
+          const peek = checkins.map(c => `${c.name.split(' ')[0]} (${c.isAtRisk ? 'at-risk' : 'VIP'})`).join(' · ');
+          return (
+            <SwoopSection
+              title="Live Check-ins"
+              titleColor={C.neutral}
+              count={`${checkins.length} active`}
+              peek={peek}
+            >
+              {checkins.map(m => {
+                const isRisk = m.isAtRisk;
+                const color = isRisk ? C.danger : C.accent;
+                const bg = isRisk ? 'rgba(239,68,68,0.07)' : 'rgba(243,146,45,0.07)';
+                const bdr = isRisk ? 'rgba(239,68,68,0.18)' : 'rgba(243,146,45,0.18)';
+                return (
+                  <div key={m.memberId} className="swoop-detail-row" style={{ background: bg, borderColor: bdr, flexDirection: 'column', gap: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color, background: `${color.replace('rgb', 'rgba').replace(')', ',0.15)')}`, border: `1px solid ${color.replace('rgb', 'rgba').replace(')', ',0.3)')}`, padding: '2px 7px', borderRadius: 999, flexShrink: 0 }}>
+                        {isRisk ? 'AT-RISK' : 'VIP'}
+                      </span>
+                      <MemberLink memberId={m.memberId} mode="drawer" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
+                        {m.name}
+                      </MemberLink>
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                        Health {m.healthScore} · {m.archetype} · {m.time} {m.course} · ${(m.duesAnnual / 1000).toFixed(0)}K/yr
+                      </span>
+                      <span style={{ flex: 1 }} />
+                      <button className="swoop-action-btn" onClick={() => navigate('automations')}>View in Inbox →</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', width: '100%' }}>
+                      <div>
+                        <MicroLabel color="rgba(255,255,255,0.35)">Talking Points</MicroLabel>
+                        <ul style={{ margin: 0, padding: '0 0 0 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                          {m.talkingPoints.map((p, i) => (
+                            <li key={i} style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>{p}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <MicroLabel color="rgba(255,255,255,0.35)">{isRisk ? 'Risk Profile' : 'Member Value'}</MicroLabel>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>
+                          {isRisk ? 'Zero activity trend' : `Health score ${m.healthScore} · Top members`}
+                        </div>
+                        <div style={{ fontSize: 11, color, fontWeight: 600, marginTop: 4 }}>
+                          ${(m.duesAnnual / 1000).toFixed(0)}K {isRisk ? 'dues at risk' : 'annual dues'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </SwoopSection>
           );
         })()}
 
-        {/* Section 3: Priority Member Alerts */}
-        <CollapsibleSection title="Member Alerts" accentColor={D.red} defaultOpen={true} peek="health score changes, renewals, flags">
+        {/* Priority Member Alerts */}
+        <SwoopSection
+          title="Priority Member Alerts"
+          titleColor={C.danger}
+          count="5 critical"
+          peek="Linda Leonard · Kevin Hurst · Robert Callahan · Anne Jordan · Robert Mills"
+        >
           <MemberAlerts />
-        </CollapsibleSection>
+        </SwoopSection>
 
-        {/* Section 5: Action Queue */}
-        <CollapsibleSection title="Action Queue" accentColor="#8b5cf6" defaultOpen={true} peek="pending approvals and agent recommendations">
+        {/* Action Queue */}
+        <SwoopSection
+          title="Action Queue"
+          titleColor={C.accent}
+          count={pendingAgentCount || 20}
+          peek="3 high-priority · F&B capture, member engagement, service recovery"
+        >
           <PendingActionsInline topPriority={topPriority} />
-        </CollapsibleSection>
+        </SwoopSection>
 
+        {/* Tomorrow's Forecast */}
+        <SwoopSection
+          title="Tomorrow's Forecast"
+          titleColor={C.neutral}
+          peek="220 rounds booked · 87.2°F · Wind advisory · Staffing watch"
+          defaultOpen={true}
+        >
+          <div className="swoop-detail-row" style={{ flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              {[
+                { label: 'Rounds Booked', value: '220', color: C.accent },
+                { label: 'High Temp', value: '87.2°', color: '#fff' },
+                { label: 'Wind / Gusts', value: '22mph', color: C.accent, tinted: true },
+                { label: 'Rain Chance', value: '10%', color: '#fff' },
+              ].map((t, i) => (
+                <div key={i} style={{ background: t.tinted ? 'rgba(243,146,45,0.07)' : 'rgba(255,255,255,0.04)', border: t.tinted ? '1px solid rgba(243,146,45,0.15)' : undefined, borderRadius: 10, padding: 10, textAlign: 'center' }}>
+                  <MicroLabel color={t.tinted ? 'rgba(243,146,45,0.7)' : 'rgba(255,255,255,0.4)'}>{t.label}</MicroLabel>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: t.color, fontFamily: MONO }}>{t.value}</div>
+                </div>
+              ))}
+            </div>
+            <MicroLabel>Staffing Recommendation</MicroLabel>
+            {[
+              { name: 'Grill Room', ratio: '2/4', color: C.accent, note: 'Needs coverage — 2 more required' },
+              { name: 'Terrace', ratio: '3/3', color: C.success, note: 'Fully staffed' },
+              { name: 'Pool Bar', ratio: '1/1', color: C.success, note: 'Fully staffed' },
+            ].map((s, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: '#fff', minWidth: 90 }}>{s.name}</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: s.color, fontFamily: MONO }}>{s.ratio}</span>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{s.note}</span>
+              </div>
+            ))}
+            <div style={{ background: 'rgba(243,146,45,0.07)', border: '1px solid rgba(243,146,45,0.15)', borderRadius: 8, padding: '10px 12px' }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>
+                High demand × adverse weather → <strong style={{ color: '#fff' }}>likely staffing risk</strong>. Cross-references tee sheet × weather × historical dining conversion.
+              </div>
+            </div>
+          </div>
+        </SwoopSection>
 
       </div>
     </PageTransition>

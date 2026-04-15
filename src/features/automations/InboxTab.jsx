@@ -6,7 +6,23 @@ import { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getAllActions } from '@/services/agentService';
 import { getDataMode, isGateOpen } from '@/services/demoGate';
-import SourceBadge, { SourceBadgeRow } from '@/components/ui/SourceBadge';
+import { SourceBadgeRow } from '@/components/ui/SourceBadge';
+import ActionCard from '@/components/ui/ActionCard';
+
+// Map source/agent identifiers to a role-based owner label for the card header.
+const SOURCE_TO_OWNER = {
+  'Member Pulse': 'Membership',
+  'Demand Optimizer': 'GM',
+  'Service Recovery': 'F&B',
+  'Revenue Analyst': 'GM',
+};
+function getOwnerLabel(action) {
+  if (action?.suggestedOwner) return action.suggestedOwner.split('·')[0].trim();
+  if (action?.source && SOURCE_TO_OWNER[action.source]) return SOURCE_TO_OWNER[action.source];
+  if (action?.actionType === 'STAFFING_ADJUSTMENT') return 'F&B';
+  if (action?.actionType === 'SERVICE_RECOVERY') return 'F&B';
+  return 'GM';
+}
 
 // Extract a dollar value from impactMetric strings like "$32K dues protected"
 function extractDollar(metricStr) {
@@ -20,106 +36,76 @@ function extractDollar(metricStr) {
   return value;
 }
 
-const PRIORITY_COLORS = {
-  high: 'border-l-red-500',
-  medium: 'border-l-amber-400',
-  low: 'border-l-blue-400',
-};
+function InboxActionCard({ action, onApprove, onDismiss }) {
+  const handleApprove = () => {
+    const channel = (action.recommendedChannel || 'email').toLowerCase();
+    const execType = channel === 'sms' || channel === 'push' ? 'sms' : channel === 'call' ? 'staff_task' : 'email';
+    onApprove(action.id, { executionType: execType, memberId: action.memberId, memberName: action.memberName });
+  };
+  const handleDismiss = () => onDismiss(action.id);
 
-const PRIORITY_BADGES = {
-  high: { bg: 'bg-red-50', text: 'text-red-600' },
-  medium: { bg: 'bg-amber-50', text: 'text-amber-600' },
-  low: { bg: 'bg-blue-50', text: 'text-blue-600' },
-};
+  const titleNode = action.memberName ? (
+    <>
+      <span className="text-[10px] font-bold text-swoop-text-muted uppercase tracking-wide block mb-0.5">
+        {action.memberName}{action.archetype ? ` · ${action.archetype}` : ''}
+      </span>
+      {action.description}
+    </>
+  ) : action.description;
 
-function ActionCard({ action, onApprove, onDismiss }) {
-  const priority = action.priority || 'medium';
-  const badge = PRIORITY_BADGES[priority] || PRIORITY_BADGES.medium;
+  const hasDraft = !!(action.draftedMessage || action.suggestedScript || action.messageTemplate);
+  const hasSignals = Array.isArray(action.signals) && action.signals.length > 0;
+  const hasRationale = !!action.rationale;
+  const hasContrib = !!action.contributing_agents;
+  const hasActionType = !!action.actionType;
+  const hasExpandable = hasDraft || hasSignals || hasRationale || hasContrib || hasActionType;
 
   return (
-    <div className={`border border-swoop-border rounded-xl px-4 py-3.5 bg-swoop-panel border-l-4 ${PRIORITY_COLORS[priority] || ''}`}>
-      {/* Hero: member name + dollar — the marketing-site framing */}
-      <div className="flex items-start justify-between gap-3 mb-1">
-        <div className="flex-1 min-w-0">
-          {action.memberName && (
-            <div className="text-xs font-bold text-swoop-text-muted mb-0.5 uppercase tracking-wide">
-              {action.memberName}
-              {action.archetype ? ` · ${action.archetype}` : ''}
-            </div>
-          )}
-          <div className="text-sm font-semibold text-swoop-text leading-snug">
-            {action.description}
-          </div>
-          {action.rationale && (
-            <div className="text-[11px] text-swoop-text-muted mt-1 leading-snug">
+    <ActionCard
+      action={action}
+      ownerLabel={getOwnerLabel(action)}
+      titleNode={titleNode}
+      onApprove={handleApprove}
+      onDismiss={handleDismiss}
+    >
+      {hasExpandable && (
+        <div className="mt-2 px-4 py-3 rounded-xl bg-swoop-row border border-swoop-border">
+          {hasRationale && (
+            <div className="text-[11px] text-swoop-text-muted leading-snug mb-2">
               {action.rationale}
             </div>
           )}
-        </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          {action.impactMetric && (
-            <span className="text-xs font-mono font-bold text-success-600 bg-success-50 border border-success-500/20 px-2 py-0.5 rounded-md whitespace-nowrap">
-              {action.impactMetric}
-            </span>
+          {(hasActionType || hasContrib) && (
+            <div className="flex items-center gap-2 text-xs text-swoop-text-muted mb-2 flex-wrap">
+              {hasActionType && (
+                <span className="text-[10px] uppercase tracking-wide text-swoop-text-label">
+                  {action.actionType.replace(/_/g, ' ').toLowerCase()}
+                </span>
+              )}
+              {hasContrib && (
+                <span className="text-[10px] text-purple-500 font-medium">
+                  Flagged by: {Array.isArray(action.contributing_agents) ? action.contributing_agents.join(' + ') : action.contributing_agents}
+                </span>
+              )}
+            </div>
           )}
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${badge.bg} ${badge.text}`}>
-            {priority}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 text-xs text-swoop-text-muted mb-1.5 flex-wrap">
-        {action.source && (
-          <SourceBadge system={
-            action.source === 'anthropic' ? 'Swoop AI' :
-            action.source === 'fb-intelligence' ? 'F&B Intelligence' :
-            action.source
-          } size="xs" />
-        )}
-        {action.actionType && <span className="text-[10px] uppercase tracking-wide text-swoop-text-label">{action.actionType.replace(/_/g, ' ').toLowerCase()}</span>}
-        {action.contributing_agents && (
-          <span className="text-[10px] text-purple-500 font-medium">
-            Flagged by: {Array.isArray(action.contributing_agents) ? action.contributing_agents.join(' + ') : action.contributing_agents}
-          </span>
-        )}
-      </div>
-
-      {/* Signal sources — Pillar 1: SEE IT */}
-      {Array.isArray(action.signals) && action.signals.length > 0 && (
-        <div className="mb-2">
-          <SourceBadgeRow systems={action.signals.map(s => typeof s === 'string' ? s : (s.source || s.system)).filter(Boolean)} />
+          {hasSignals && (
+            <div className="mb-2">
+              <div className="text-[9px] font-bold uppercase tracking-widest text-swoop-text-label mb-1">Signals</div>
+              <SourceBadgeRow systems={action.signals.map(s => typeof s === 'string' ? s : (s.source || s.system)).filter(Boolean)} />
+            </div>
+          )}
+          {hasDraft && (
+            <div className="p-2.5 rounded-lg bg-swoop-panel border border-swoop-border-inset">
+              <div className="text-[9px] font-bold uppercase tracking-widest text-swoop-text-label mb-1">Drafted message</div>
+              <p className="text-xs text-swoop-text-2 m-0 leading-relaxed">
+                {action.draftedMessage || action.suggestedScript || action.messageTemplate}
+              </p>
+            </div>
+          )}
         </div>
       )}
-
-      {/* Drafted message preview — if available */}
-      {(action.draftedMessage || action.suggestedScript || action.messageTemplate) && (
-        <div className="mb-2.5 p-2.5 rounded-lg bg-swoop-row border border-swoop-border-inset">
-          <div className="text-[9px] font-bold uppercase tracking-widest text-swoop-text-label mb-1">Drafted message</div>
-          <p className="text-xs text-swoop-text-2 m-0 leading-relaxed line-clamp-3">
-            {action.draftedMessage || action.suggestedScript || action.messageTemplate}
-          </p>
-        </div>
-      )}
-
-      <div className="flex gap-2">
-        <button
-          onClick={() => {
-            const channel = (action.recommendedChannel || 'email').toLowerCase();
-            const execType = channel === 'sms' || channel === 'push' ? 'sms' : channel === 'call' ? 'staff_task' : 'email';
-            onApprove(action.id, { executionType: execType, memberId: action.memberId, memberName: action.memberName });
-          }}
-          className="px-4 py-1.5 rounded-lg bg-success-500 text-white border-none text-xs font-semibold cursor-pointer hover:bg-success-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
-        >
-          Approve
-        </button>
-        <button
-          onClick={() => onDismiss(action.id)}
-          className="px-4 py-1.5 rounded-lg bg-transparent text-swoop-text-muted border border-swoop-border text-xs font-semibold cursor-pointer hover:bg-swoop-row-hover transition-colors"
-        >
-          Dismiss
-        </button>
-      </div>
-    </div>
+    </ActionCard>
   );
 }
 
@@ -294,7 +280,7 @@ export default function InboxTab() {
       ) : (
         <div className="grid gap-3">
           {pending.map(action => (
-            <ActionCard
+            <InboxActionCard
               key={action.id}
               action={action}
               onApprove={approveAction}
