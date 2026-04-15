@@ -12,7 +12,6 @@ const MobileApp = lazy(() => import('@/mobile/MobileApp'));
 const ConferenceShell = lazy(() => import('@/mobile/conference/ConferenceShell'));
 const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatPage'));
 const MemberConciergeTest = lazy(() => import('@/features/concierge/MemberConciergeTest'));
-const InvestorSite = lazy(() => import('@/features/invest/InvestorSite'));
 const QuickClubSetup = lazy(() => import('@/features/login/QuickClubSetup'));
 const NewClubSetup = lazy(() => import('@/features/login/NewClubSetup'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
@@ -397,15 +396,6 @@ export default function App() {
     return (
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading Concierge...</div>}>
         <ConciergeChatPage />
-      </Suspense>
-    );
-  }
-
-  // Investor site — accessible without auth
-  if (currentHash === '#/invest') {
-    return (
-      <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500 font-sans">Loading...</div>}>
-        <InvestorSite />
       </Suspense>
     );
   }

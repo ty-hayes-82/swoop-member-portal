@@ -26,13 +26,14 @@ import { getDataMode, isGateOpen } from '@/services/demoGate';
 import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist from './OnboardingChecklist';
-import StageInsightsPanel from './StageInsightsPanel';
 import { getTodayTeeSheet } from '@/services/operationsService';
-import { getMemberSummary } from '@/services/memberService';
+import { getMemberSummary, getFullRoster } from '@/services/memberService';
 import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
 import { trackAction } from '@/services/activityService';
 import { getHealthRollup } from '@/services/apiHealthService';
 import { getMemberSaves } from '@/services/boardReportService';
+import { getUnderstaffedDays } from '@/services/staffingService';
+import { getEventROI } from '@/services/experienceInsightsService';
 
 // GM Greeting Alert — simulates real-time member check-in notifications
 function buildCheckinAlerts() {
@@ -504,8 +505,103 @@ export default function TodayView() {
           ))}
         </div>
 
-        {/* Stage Insights — one card per imported dataset, headline insight */}
-        <StageInsightsPanel />
+        {/* 90-Day New Member Alert — survey-validated: 4/4 GMs cite first 90 days as top risk */}
+        {(() => {
+          const roster = getFullRoster();
+          const cutoff = new Date();
+          cutoff.setDate(cutoff.getDate() - 90);
+          const newMembers = roster.filter(m => m.joinDate && new Date(m.joinDate) >= cutoff);
+          if (!newMembers.length) return null;
+          const needsAttention = newMembers.filter(m => (m.score ?? m.healthScore ?? 100) < 70);
+          return (
+            <div className="fade-in-up rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 dark:border-amber-500/20 dark:bg-amber-500/5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400 mb-1">
+                    New Member Watch — First 90 Days
+                  </div>
+                  <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                    {newMembers.length} member{newMembers.length !== 1 ? 's' : ''} in their first 90 days
+                    {needsAttention.length > 0 && (
+                      <span className="text-amber-600 dark:text-amber-400"> — {needsAttention.length} need{needsAttention.length === 1 ? 's' : ''} attention</span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-gray-500 mt-0.5">
+                    Members who attend 2+ events in the first quarter renew at <strong className="text-success-600">94%</strong>. Members who don't renew at <strong className="text-error-600">61%</strong>.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('members', { filter: 'new' })}
+                  className="shrink-0 text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
+                >
+                  View →
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Staffing Flag — understaffed days this month */}
+        {(() => {
+          const understaffed = getUnderstaffedDays();
+          if (!understaffed.length) return null;
+          const totalLoss = understaffed.reduce((s, d) => s + (d.revenueLoss || 0), 0);
+          return (
+            <div className="fade-in-up rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 dark:border-red-500/20 dark:bg-red-500/5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-red-600 dark:text-red-400 mb-1">
+                    Staffing Alert
+                  </div>
+                  <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                    {understaffed.length} understaffed day{understaffed.length !== 1 ? 's' : ''} this period
+                    {totalLoss > 0 && (
+                      <span className="text-red-600 dark:text-red-400"> — ${totalLoss.toLocaleString()} revenue impact</span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-gray-500 mt-0.5">
+                    {understaffed[0]?.outlet} on {understaffed[0]?.date}: {understaffed[0]?.scheduledStaff} scheduled vs {understaffed[0]?.requiredStaff} required
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('service')}
+                  className="shrink-0 text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
+                >
+                  View →
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Event-Retention Correlation */}
+        {(() => {
+          const events = getEventROI();
+          if (!events.length) return null;
+          const best = events.reduce((a, b) => (b.retentionRate > a.retentionRate ? b : a), events[0]);
+          return (
+            <div className="fade-in-up rounded-xl border border-gray-200 bg-white px-4 py-3 dark:bg-white/[0.03] dark:border-gray-800">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:text-brand-400 mb-1.5">
+                Events → Retention
+              </div>
+              <div className="flex items-center gap-4 flex-wrap">
+                {events.slice(0, 3).map(e => (
+                  <div key={e.type} className="flex items-center gap-1.5">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{e.type}</span>
+                    <span className="text-xs font-bold" style={{ color: e.retentionRate >= 95 ? '#12b76a' : e.retentionRate >= 90 ? '#f59e0b' : '#6b7280' }}>
+                      {e.retentionRate}% renewal
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="text-[11px] text-gray-500 mt-1">
+                Highest ROI: <strong className="text-gray-700 dark:text-gray-300">{best.type}</strong> ({best.retentionRate}% retention, {best.roi}x ROI)
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Section 2.5: Live Activity Feed */}
         <RecentActivityFeed />
@@ -655,18 +751,30 @@ export default function TodayView() {
           if (!saves.length) return null;
           return (
             <div className="fade-in-up fade-delay-2 flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-success-600 dark:text-success-400">
-                  ✓ Recent Member Saves
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate('board-report')}
-                  className="text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline"
-                >
-                  Full report →
-                </button>
-              </div>
+              {(() => {
+                const totalProtected = saves.reduce((s, sv) => s + (sv.duesAtRisk || 0), 0);
+                return (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-success-600 dark:text-success-400">
+                        ✓ Recent Member Saves
+                      </div>
+                      {totalProtected > 0 && (
+                        <span className="text-[10px] font-bold text-success-600 dark:text-success-400 bg-success-50 dark:bg-success-500/10 border border-success-500/20 px-2 py-0.5 rounded-full">
+                          ${totalProtected.toLocaleString()} dues protected this month
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => navigate('board-report')}
+                      className="text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline"
+                    >
+                      Full board report →
+                    </button>
+                  </div>
+                );
+              })()}
               <div className="bg-white border border-success-500/20 rounded-xl divide-y divide-gray-100 dark:bg-white/[0.03] dark:border-success-500/20 dark:divide-gray-800">
                 {saves.map((s, i) => (
                   <div key={s.memberId || i} className="flex items-center gap-3 px-4 py-3">
@@ -697,11 +805,6 @@ export default function TodayView() {
             </div>
           );
         })()}
-
-        {/* Section 6: Weather — Hourly + 5-Day Forecast */}
-        <div className="flex flex-col gap-3 fade-in-up fade-delay-2">
-          <WeekForecast />
-        </div>
 
         {/* Section 7: Tomorrow's Forecast */}
         <TomorrowForecast />

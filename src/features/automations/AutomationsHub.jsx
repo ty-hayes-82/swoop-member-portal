@@ -2,22 +2,17 @@
  * AutomationsHub — Consolidated automation section
  * 3 tabs: Inbox (default), Playbooks, Agents
  */
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { useApp } from '@/context/AppContext';
 import InboxTab from './InboxTab';
 import AgentsTab from './AgentsTab';
-import SettingsTab from './SettingsTab';
 import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
-
-const AgentActivityPage = lazy(() => import('@/features/agents/AgentActivityPage'));
 
 const TABS = [
   { key: 'inbox', label: 'Inbox', icon: '📥' },
   { key: 'playbooks', label: 'Action Plans', icon: '📋' },
   { key: 'agents', label: 'AI Agents', icon: '🤖' },
-  { key: 'activity', label: 'Activity', icon: '📡' },
-  { key: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
 export default function AutomationsHub() {
@@ -78,12 +73,6 @@ export default function AutomationsHub() {
         {activeTab === 'inbox' && <InboxTab />}
         {activeTab === 'playbooks' && <PlaybooksPage embedded />}
         {activeTab === 'agents' && <AgentsTab />}
-        {activeTab === 'activity' && (
-          <Suspense fallback={<div className="flex items-center justify-center py-16 text-sm text-gray-400">Loading activity…</div>}>
-            <AgentActivityPage />
-          </Suspense>
-        )}
-        {activeTab === 'settings' && <SettingsTab />}
       </div>
     </div>
   );

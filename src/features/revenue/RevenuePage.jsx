@@ -181,7 +181,7 @@ export default function RevenuePage() {
               Revenue Leakage
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Revenue lost to slow rounds, understaffing, and weather — quantified where no single system looks.
+              Before members resign, they stop spending. Slow rounds, understaffed shifts, and missed dining — quantified across every system before it shows up in dues revenue.
             </p>
           </div>
           <button

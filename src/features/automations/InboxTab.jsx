@@ -174,6 +174,18 @@ export default function InboxTab() {
     .map(a => ({ ...a, _dollar: extractDollar(a.impactMetric) }))
     .sort((a, b) => b._dollar - a._dollar)[0];
 
+  // Trust ramp: track how many actions have been handled (approved/dismissed)
+  const totalHandled = inbox.filter(i => i.status === 'approved' || i.status === 'dismissed').length;
+  const totalApproved = inbox.filter(i => i.status === 'approved').length;
+  const TRUST_LEVELS = [
+    { threshold: 0,  label: 'Manual only',       description: 'Every action requires your approval.' },
+    { threshold: 5,  label: 'Learning your style', description: 'AI is watching your approvals to understand priorities.' },
+    { threshold: 15, label: 'Trusted assistant',  description: 'Low-risk actions can be auto-suggested. You still approve all.' },
+    { threshold: 30, label: 'Co-pilot mode',      description: 'You can enable auto-send for low-risk outreach.' },
+  ];
+  const trustLevel = TRUST_LEVELS.reduce((best, l) => totalHandled >= l.threshold ? l : best, TRUST_LEVELS[0]);
+  const nextLevel = TRUST_LEVELS.find(l => l.threshold > totalHandled);
+
   return (
     <div className="flex flex-col gap-4">
       {/* Pillar 3 PROVE IT — Impact rollup */}
@@ -248,6 +260,50 @@ export default function InboxTab() {
           ))}
         </div>
       )}
+
+      {/* Trust Ramp — shows automation confidence level based on review history */}
+      <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:bg-gray-800/50 dark:border-gray-800">
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Automation Trust Level
+            </div>
+            <div className="text-sm font-semibold text-gray-800 dark:text-white/90 mt-0.5">
+              {trustLevel.label}
+            </div>
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+              {trustLevel.description}
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="text-lg font-bold text-brand-500 font-mono">{totalHandled}</div>
+            <div className="text-[10px] text-gray-400">reviewed</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="h-full bg-brand-500 rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(100, (totalHandled / 30) * 100)}%` }}
+            />
+          </div>
+          {nextLevel && (
+            <div className="text-[10px] text-gray-400 whitespace-nowrap shrink-0">
+              {nextLevel.threshold - totalHandled} more to unlock "{nextLevel.label}"
+            </div>
+          )}
+          {!nextLevel && (
+            <div className="text-[10px] text-success-500 font-semibold whitespace-nowrap shrink-0">
+              Max trust unlocked
+            </div>
+          )}
+        </div>
+        {totalApproved > 0 && (
+          <div className="text-[10px] text-gray-400 mt-1.5">
+            {totalApproved} approved · {totalHandled - totalApproved} dismissed — approval rate {Math.round((totalApproved / totalHandled) * 100)}%
+          </div>
+        )}
+      </div>
 
       {/* Recently handled */}
       {handled.length > 0 && (

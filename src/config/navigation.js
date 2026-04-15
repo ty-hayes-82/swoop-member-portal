@@ -46,19 +46,20 @@ export const navItems = [
   {
     key: 'tee-sheet',
     label: 'Tee Sheet',
-    section: 'PRIMARY',
+    section: 'HIDDEN',
     icon: '🏌️',
     color: theme.colors.navOperations,
     subtitle: "Today's bookings, at-risk golfers, and cart prep recommendations.",
     sourceSystems: ['Tee Sheet', 'Member CRM', 'Weather', 'POS'],
+    hidden: true,
   },
   {
     key: 'automations',
-    label: 'Automations',
+    label: 'Actions',
     section: 'PRIMARY',
     icon: '⚡',
     color: theme.colors.navBriefing,
-    subtitle: 'AI agents, action inbox, and automated playbooks.',
+    subtitle: 'Recommended actions, playbooks, and AI agents.',
     sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email'],
   },
   {
