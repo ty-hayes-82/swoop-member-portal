@@ -1,7 +1,6 @@
 // ServiceView — service quality, staffing intelligence, and complaint patterns
 // Addresses #1 survey demand (service consistency, 70%) and #2 (staffing-to-demand, 60%)
 import { useState, useEffect } from 'react';
-import { StoryHeadline } from '@/components/ui';
 import { useNavigationContext } from '@/context/NavigationContext';
 import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
@@ -59,12 +58,6 @@ export default function ServiceView() {
   return (
     <PageTransition>
       <div className="flex flex-col gap-6">
-        <StoryHeadline
-          variant="insight"
-          headline="Is your service consistent across shifts, outlets, and days — and where is it at risk?"
-          context="Cross-domain view connecting staffing levels, complaint patterns, and pace of play to service quality outcomes."
-        />
-
         <EvidenceStrip systems={['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather']} />
 
         {/* Service tickets surface from imported service_requests */}
