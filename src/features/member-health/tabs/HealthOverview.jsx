@@ -406,17 +406,35 @@ export default function HealthOverview() {
             )}
 
             {/* Member table */}
-            <div className="border border-swoop-border rounded-xl overflow-hidden">
+            <div className="overflow-hidden" style={{ borderRadius: 8, border: '1px solid rgba(255,255,255,0.07)' }}>
               <table className="w-full border-collapse text-sm">
                 <thead>
-                  <tr className="bg-swoop-row border-b border-swoop-border">
-                    <th className="py-2 text-[10px] text-swoop-text-label font-medium text-left" style={{ width: 28, paddingLeft: 14 }}>#</th>
-                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left">Member</th>
-                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left" style={{ width: 90 }}>Score</th>
-                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left hidden sm:table-cell" style={{ width: 110 }}>Archetype</th>
-                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left hidden md:table-cell">Signal</th>
-                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-left hidden sm:table-cell" style={{ width: 130 }}>Assign To</th>
-                    <th className="px-3 py-2 text-[10px] text-swoop-text-label font-medium text-center" style={{ width: 58 }}>Alerts</th>
+                  <tr className="bg-swoop-row">
+                    {[
+                      { label: '#', style: { width: 28, paddingLeft: 14, textAlign: 'left' } },
+                      { label: 'Member', style: { textAlign: 'left' }, className: 'px-3' },
+                      { label: 'Score', style: { width: 90, textAlign: 'left' }, className: 'px-3' },
+                      { label: 'Archetype', style: { width: 110, textAlign: 'left' }, className: 'px-3 hidden sm:table-cell' },
+                      { label: 'Signal', style: { textAlign: 'left' }, className: 'px-3 hidden md:table-cell' },
+                      { label: 'Assign To', style: { width: 130, textAlign: 'left' }, className: 'px-3 hidden sm:table-cell' },
+                      { label: 'Alerts', style: { width: 58, textAlign: 'center' }, className: 'px-3' },
+                    ].map(h => (
+                      <th
+                        key={h.label}
+                        className={`text-swoop-text-label ${h.className || ''}`}
+                        style={{
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                          fontSize: 10,
+                          fontWeight: 600,
+                          paddingTop: 10,
+                          paddingBottom: 10,
+                          opacity: 0.75,
+                          borderBottom: '1px solid rgba(255,255,255,0.08)',
+                          ...h.style,
+                        }}
+                      >{h.label}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -429,48 +447,91 @@ export default function HealthOverview() {
                     const archetypeColor = ARCHETYPE_COLORS[m.archetype] || '#6b7280';
                     const rowBg = isExpanded
                       ? 'bg-indigo-50/40'
-                      : idx % 2 === 0
-                        ? 'bg-swoop-panel hover:bg-swoop-row-hover'
-                        : 'bg-gray-50/50 hover:bg-swoop-row-hover';
+                      : 'hover:bg-swoop-row-hover';
+                    const rowStyle = isExpanded
+                      ? { borderTop: '1px solid rgba(255,255,255,0.06)' }
+                      : {
+                          borderTop: '1px solid rgba(255,255,255,0.06)',
+                          backgroundColor: idx % 2 === 0 ? undefined : 'rgba(255,255,255,0.03)',
+                        };
+                    const cellPad = { paddingTop: 10, paddingBottom: 10 };
 
                     return (
                       <Fragment key={m.memberId}>
                         <tr onClick={() => setExpandedId(isExpanded ? null : m.memberId)}
-                          className={`border-t border-swoop-border cursor-pointer transition-all duration-150 ${rowBg}`}>
-                          <td className="py-2.5 text-[11px] font-mono font-bold text-center" style={{ paddingLeft: 14 }}>
+                          className={`cursor-pointer transition-all duration-150 ${rowBg}`}
+                          style={rowStyle}>
+                          <td
+                            className="font-mono text-center"
+                            style={{ paddingLeft: 14, ...cellPad, color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 500 }}
+                          >
                             {isExpanded
-                              ? <span className="text-brand-500 text-[10px]">▼</span>
-                              : <span className="text-swoop-text-label">{globalIdx + 1}</span>}
+                              ? <span className="text-brand-500" style={{ fontSize: 10 }}>▼</span>
+                              : globalIdx + 1}
                           </td>
-                          <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
-                            <MemberLink memberId={m.memberId} mode="drawer" className="font-semibold text-sm text-[#1a1a2e] hover:text-brand-500 transition-colors">
+                          <td className="px-3" style={cellPad} onClick={e => e.stopPropagation()}>
+                            <MemberLink
+                              memberId={m.memberId}
+                              mode="drawer"
+                              className="hover:underline transition-colors"
+                              style={{ color: 'rgb(243,146,45)', textDecoration: 'none', fontSize: 13, fontWeight: 500, letterSpacing: '0.01em' }}
+                            >
                               {m.name}
                             </MemberLink>
                           </td>
-                          <td className="px-3 py-2.5">
+                          <td className="px-3" style={cellPad}>
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded shrink-0" style={{ color: sc, background: sc + '15' }}>
+                              <span
+                                className="font-mono shrink-0"
+                                style={{
+                                  color: sc,
+                                  background: sc + '15',
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  minWidth: 26,
+                                  textAlign: 'center',
+                                  display: 'inline-block',
+                                  borderRadius: 4,
+                                  padding: '2px 5px',
+                                }}
+                              >
                                 {m.score}
                               </span>
-                              <div className="flex-1 h-[3px] bg-swoop-row rounded-full" style={{ minWidth: 24, maxWidth: 40 }}>
-                                <div className="h-full rounded-full" style={{ width: `${Math.min(100, m.score)}%`, background: sc }} />
+                              <div className="flex-1" style={{ minWidth: 24, maxWidth: 40, height: 5, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.07)' }}>
+                                <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(100, m.score)}%`, background: sc }} />
                               </div>
                             </div>
                           </td>
-                          <td className="px-3 py-2.5 hidden sm:table-cell">
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ color: archetypeColor, background: archetypeColor + '18', border: `1px solid ${archetypeColor}40` }}>
+                          <td className="px-3 hidden sm:table-cell" style={cellPad}>
+                            <span
+                              className="whitespace-nowrap"
+                              style={{
+                                color: archetypeColor,
+                                background: archetypeColor + '18',
+                                border: `1px solid ${archetypeColor}40`,
+                                fontSize: 10,
+                                fontWeight: 600,
+                                letterSpacing: '0.03em',
+                                padding: '3px 7px',
+                                borderRadius: 4,
+                                display: 'inline-block',
+                              }}
+                            >
                               {m.archetype}
                             </span>
                           </td>
-                          <td className="px-3 py-2.5 text-xs text-swoop-text-muted hidden md:table-cell" style={{ maxWidth: 260 }}>
+                          <td className="px-3 hidden md:table-cell" style={{ maxWidth: 260, ...cellPad, fontSize: 12, color: 'rgba(255,255,255,0.65)', fontWeight: 400 }}>
                             <span className="line-clamp-1">{m.reason}</span>
                           </td>
-                          <td className="px-3 py-2.5 hidden sm:table-cell">
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ color: ownerColor, background: ownerColor + '18' }}>
+                          <td className="px-3 hidden sm:table-cell" style={{ ...cellPad, fontSize: 11, fontWeight: 500 }}>
+                            <span
+                              className="whitespace-nowrap"
+                              style={{ color: ownerColor, background: ownerColor + '18', fontSize: 10, fontWeight: 600, padding: '3px 7px', borderRadius: 4, display: 'inline-block' }}
+                            >
                               {m.owner}
                             </span>
                           </td>
-                          <td className="px-3 py-2.5 text-center">
+                          <td className="px-3 text-center" style={cellPad}>
                             {hasEmailDecay && (
                               <div className="relative group inline-flex justify-center">
                                 <span className="text-sm cursor-default select-none">✉</span>
