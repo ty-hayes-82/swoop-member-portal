@@ -134,8 +134,9 @@ export default function ScenarioSlider({
 
       <div className="mt-4 pt-3 border-t border-swoop-border">
         <p className="text-[11px] text-swoop-text-muted italic leading-relaxed">
-          Modeled at <span className="font-mono font-semibold text-swoop-text-2">${dollarPerSlowRound}/slow round</span>{' '}
-          based on the dining conversion gap (22% slow vs 41% fast). Staffing recovery assumes faster pace eases dining-room demand pressure.
+          Lever 1 — ranger on Hole 12 — is modeled at{' '}
+          <span className="font-mono font-semibold text-swoop-text-2">${dollarPerSlowRound}/slow round</span>{' '}
+          (22% slow vs 41% fast dining conversion). Lever 2 — add one server to Friday lunch based on weather-demand forecast — closes the Understaffed Fridays root cause. Combined recovery: <span className="font-mono font-semibold text-success-600">~$2,000+/mo</span> from two operational changes. Board-ready in one slide.
         </p>
       </div>
     </div>

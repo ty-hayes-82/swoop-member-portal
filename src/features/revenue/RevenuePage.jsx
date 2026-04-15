@@ -260,7 +260,7 @@ export default function RevenuePage() {
   // zero-value rows render as locked/pending bars at a minimal stub width
   const ALL_LEAKAGE_ROWS = [
     { name: 'Pace of Play', value: leakage.PACE_LOSS, color: COLORS.pace, source: 'Tee Sheet + POS' },
-    { name: 'Understaffed Days', value: leakage.STAFFING_LOSS, color: COLORS.staffing, source: 'Scheduling + POS' },
+    { name: 'Understaffed Fridays', value: leakage.STAFFING_LOSS, color: COLORS.staffing, source: 'Scheduling + POS' },
     { name: 'Weather No-Shows', value: leakage.WEATHER_LOSS, color: COLORS.weather, source: 'Weather + POS' },
   ];
   const chartData = ALL_LEAKAGE_ROWS.filter(d => d.value > 0);
@@ -275,9 +275,31 @@ export default function RevenuePage() {
         {/* Header */}
         <div className="flex justify-between items-start flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-swoop-text">
-              Revenue Leakage
-            </h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl font-bold text-swoop-text">
+                Revenue Leakage
+              </h1>
+              {(() => {
+                const causes = [
+                  leakage.PACE_LOSS > 0 && 'Pace of Play',
+                  leakage.STAFFING_LOSS > 0 && 'Understaffed Fridays',
+                  leakage.WEATHER_LOSS > 0 && 'Weather',
+                ].filter(Boolean);
+                const count = causes.length;
+                const word = count === 3 ? 'Three' : count === 2 ? 'Two' : 'One';
+                const label = `${count} root cause${count === 1 ? '' : 's'}`;
+                return (
+                  <span
+                    className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-error-500/30 bg-error-500/[0.08] text-[11px] font-bold text-error-600"
+                    title={`${word} root causes: ${causes.join(', ')}`}
+                  >
+                    <span className="uppercase tracking-wide">{label}</span>
+                    <span className="text-error-500/50">·</span>
+                    <span className="font-semibold text-error-600/90">{causes.join(' · ')}</span>
+                  </span>
+                );
+              })()}
+            </div>
             <p className="text-sm text-swoop-text-muted mt-1">
               Before members resign, they stop spending. Slow rounds, understaffed shifts, and missed dining — quantified across every system before it shows up in dues revenue.
             </p>
@@ -346,7 +368,7 @@ export default function RevenuePage() {
               $<AnimatedNumber value={leakage.PACE_LOSS} duration={1200} />
             </div>
             <SourceBadge system="Tee Sheet" size="xs" />
-            <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Slow rounds drop post-round F&B conversion from ~41% to ~22%.</div>
+            <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Slow rounds skip post-round dining — 41% → 22% conversion drop.</div>
           </div>
           {leakage.STAFFING_LOSS > 0 ? (
             <button
@@ -355,17 +377,17 @@ export default function RevenuePage() {
               className="bg-swoop-panel border border-swoop-border rounded-xl p-4 cursor-pointer text-left hover:border-brand-500 hover:shadow-md transition-all group"
               title="View Staffing tab in Service for the underlying detail"
             >
-              <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Understaffed Days</div>
+              <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Understaffed Fridays</div>
               <div className="text-2xl font-bold text-swoop-text font-mono mt-1">
                 $<AnimatedNumber value={leakage.STAFFING_LOSS} duration={1200} />
               </div>
               <SourceBadge system="Scheduling" size="xs" />
-              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug group-hover:text-brand-500 transition-colors">Complaints spike 2–3x on short-staffed days. View staffing →</div>
+              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug group-hover:text-brand-500 transition-colors">Short-staffed Fridays drop dining conversion — same root cause as slow rounds. View staffing →</div>
             </button>
           ) : (
             <div className="bg-swoop-row border border-dashed border-swoop-border rounded-xl p-4 opacity-70">
               <div className="flex items-center gap-1.5 mb-1">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Understaffed Days</div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Understaffed Fridays</div>
                 <span className="text-[9px] font-bold uppercase tracking-wide text-swoop-text-label border border-swoop-border rounded px-1 py-0.5">Locked</span>
               </div>
               <div className="text-2xl font-bold text-swoop-text-ghost font-mono mt-1">$—</div>
@@ -398,7 +420,7 @@ export default function RevenuePage() {
         {/* Decomposition Chart */}
         <Panel
           title="Leakage Decomposition"
-          subtitle={`Where the $${leakage.TOTAL.toLocaleString()} is going — and which systems prove it`}
+          subtitle={`$${leakage.TOTAL.toLocaleString()}/mo across three root causes: Pace of Play (Tee Sheet + POS), Understaffed Fridays (Scheduling + POS), Weather No-Shows (Weather + POS).`}
           sourceSystems={['Tee Sheet', 'POS', 'Scheduling', 'Weather']}
         >
           {/* Trend context — Pillar 3: PROVE IT depth */}
@@ -441,7 +463,7 @@ export default function RevenuePage() {
         {bottleneck && (
           <Panel
             title={`The Hole ${bottleneck.hole} Bottleneck`}
-            subtitle="Pace of play → dining conversion → dollar gap. The Layer 3 connection."
+            subtitle="The tee sheet knows the pace. The POS knows the dining. Neither knows the other exists."
             sourceSystems={['Tee Sheet', 'POS']}
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -495,16 +517,15 @@ export default function RevenuePage() {
             <div className="mt-4 p-3 bg-swoop-row border border-swoop-border rounded-lg">
               <p className="text-xs text-swoop-text-muted italic leading-relaxed m-0">
                 <strong className="text-swoop-text">Layer 3 insight:</strong>{' '}
-                Nobody at this club has ever connected pace of play on Hole {bottleneck.hole} to dining revenue.
-                The tee sheet knows the pace. The POS knows the dining. Neither knows the other exists. Swoop sees both.
+                Nobody at this club has ever connected pace of play on Hole {bottleneck.hole} to dining revenue. The tee sheet knows the pace. The POS knows the dining. Neither knows the other exists. Swoop sees both.
               </p>
             </div>
 
-            {/* Inline Fix It action — Pillar 2 */}
+            {/* Inline Fix It action — Pillar 2 — Lever 1: Ranger on Hole 12 */}
             <div className="mt-4 flex items-center justify-between gap-3 flex-wrap p-4 bg-gradient-to-r from-success-500/[0.06] to-success-500/[0.02] border border-success-500/20 rounded-xl">
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-wide text-success-600">
-                  Recommended Action
+                  Lever 1 · Recommended Action
                 </div>
                 <div className="text-sm font-semibold text-swoop-text mt-0.5">
                   Deploy ranger to Hole {bottleneck.hole} on weekends
@@ -525,12 +546,54 @@ export default function RevenuePage() {
                 {rangerDeployed ? '✓ Approved' : 'Approve & Deploy →'}
               </button>
             </div>
+
+            {/* Lever 2: Add one server to Friday lunch */}
+            <div className="mt-3 flex items-center justify-between gap-3 flex-wrap p-4 bg-gradient-to-r from-blue-500/[0.06] to-blue-500/[0.02] border border-blue-500/20 rounded-xl">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-blue-600">
+                  Lever 2 · Recommended Action
+                </div>
+                <div className="text-sm font-semibold text-swoop-text mt-0.5">
+                  Add one server to Friday lunch based on weather-demand forecast
+                </div>
+                <div className="text-xs text-swoop-text-muted mt-0.5">
+                  Projected recovery: ~${(leakage.STAFFING_LOSS || 850).toLocaleString()}/mo · closes the Understaffed Fridays root cause
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  trackAction({
+                    actionType: 'approve',
+                    actionSubtype: 'add_friday_server',
+                    referenceType: 'revenue_recommendation',
+                    referenceId: 'friday_server_lunch',
+                    description: 'Add one server to Friday lunch based on weather-demand forecast',
+                  });
+                  if (showToast) showToast('Friday server call-in queued. Logged to action history.', 'success');
+                }}
+                className="rounded-lg px-5 py-2.5 text-sm font-semibold cursor-pointer border-none whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 bg-blue-500 text-white hover:bg-blue-600"
+              >
+                Approve & Schedule →
+              </button>
+            </div>
+
+            {/* Combined recovery callout */}
+            <div className="mt-3 p-3 rounded-xl border border-success-500/25 bg-gradient-to-r from-success-500/[0.10] via-success-500/[0.06] to-blue-500/[0.10] flex items-center justify-center gap-4 flex-wrap text-center">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">✅</span>
+                <span className="text-xs font-bold uppercase tracking-wide text-success-700">Both levers deployed</span>
+              </div>
+              <span className="text-success-600/40">·</span>
+              <span className="text-sm font-mono font-bold text-success-700">~$2,000+/mo</span>
+              <span className="text-success-600/40">·</span>
+              <span className="text-xs font-semibold text-swoop-text-2">From two operational changes</span>
+            </div>
           </Panel>
         )}
 
         <AgentUpsell
-          agentName="Staffing-Demand Agent"
-          benefit="Auto-adjusts coverage to recover"
+          agentName="Understaffed Fridays — AI Fix Available"
+          benefit="Staffing-Demand Agent predicts Friday coverage gaps from weather + demand and auto-drafts server call-ins to close the second root cause. Recovers"
           metric={`$${leakage.STAFFING_LOSS.toLocaleString()}/mo.`}
         />
 
@@ -549,7 +612,7 @@ export default function RevenuePage() {
                 Take this story to the board
               </h3>
               <p className="text-sm text-swoop-text-muted mt-1 max-w-xl">
-                The Board Report turns this analysis into a 4-tab executive summary.
+                Exact dollar impact, specific root causes, concrete remediation plan. Budget approved based on data, not anecdote.
               </p>
             </div>
             <button
@@ -577,6 +640,16 @@ export default function RevenuePage() {
                 <div className="text-[10px] text-swoop-text-muted">{tab.detail}</div>
               </button>
             ))}
+          </div>
+
+          {/* GM buyer quote — closes Story 3 */}
+          <div className="mt-2 p-4 rounded-xl border-l-4 border-brand-500 bg-white/60">
+            <p className="text-sm italic text-swoop-text-2 leading-relaxed m-0">
+              “I used to spend 6 hours pulling reports from 4 systems. Now I open one page and the story is already there.”
+            </p>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-swoop-text-label mt-2">
+              — What GMs say after seeing the Board Report
+            </div>
           </div>
         </div>
       </div>
