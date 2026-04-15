@@ -424,8 +424,8 @@ export default function TodayView() {
         {/* Section 1.5: Morning Briefing Synthesis (Pillar 1: SEE IT) */}
         <MorningBriefingSentence />
 
-        {/* Section 1.6: Demo Story Flows — 3 storyboard moments, one click to start. */}
-        <DemoStoriesLauncher />
+        {/* Section 1.6: Demo Story Flows — 3 storyboard moments, demo mode only */}
+        {getDataMode() === 'demo' && <DemoStoriesLauncher />}
 
         {/* Split-screen demo link */}
         {getDataMode() === 'demo' && (

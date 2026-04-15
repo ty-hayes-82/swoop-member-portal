@@ -12,11 +12,15 @@ export default withAuth(async function handler(req, res) {
 
   const clubId = getReadClubId(req);
 
-  const [mem, tee, pos, svc, email, pace] = await Promise.allSettled([
+  const [mem, tee, pos, posAlt, svc, svcAlt, email, pace] = await Promise.allSettled([
     sql`SELECT 1 FROM members WHERE club_id = ${clubId} LIMIT 1`,
     sql`SELECT 1 FROM bookings WHERE club_id = ${clubId} LIMIT 1`,
+    // POS data may be in pos_checks (legacy) or transactions (newer imports)
     sql`SELECT 1 FROM pos_checks WHERE club_id = ${clubId} LIMIT 1`,
+    sql`SELECT 1 FROM transactions WHERE club_id = ${clubId} LIMIT 1`,
+    // Complaints data may be in service_requests or complaints table
     sql`SELECT 1 FROM service_requests WHERE club_id = ${clubId} LIMIT 1`,
+    sql`SELECT 1 FROM complaints WHERE club_id = ${clubId} LIMIT 1`,
     sql`SELECT 1 FROM email_events LIMIT 1`,
     sql`SELECT 1 FROM pace_of_play WHERE club_id = ${clubId} LIMIT 1`,
   ]);
@@ -27,8 +31,8 @@ export default withAuth(async function handler(req, res) {
   res.status(200).json({
     members:        has(mem),
     'tee-sheet':    has(tee),
-    fb:             has(pos),
-    complaints:     has(svc),
+    fb:             has(pos) || has(posAlt),
+    complaints:     has(svc) || has(svcAlt),
     email:          has(email),
     pace:           has(pace),
   });

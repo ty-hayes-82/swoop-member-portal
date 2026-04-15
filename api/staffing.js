@@ -100,7 +100,7 @@ export default withAuth(async function handler(req, res) {
             m.archetype,
             c.reported_at::date AS date,
             c.category,
-            COALESCE(c.severity, -0.5) AS sentiment,
+            -0.2 AS sentiment,
             c.status,
             c.description,
             c.resolved_at,

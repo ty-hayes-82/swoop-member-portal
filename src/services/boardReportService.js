@@ -75,13 +75,27 @@ export const getKPIs = () => {
   if (summary.totalMembers > 0 || summary.total > 0) {
     const total = summary.totalMembers || summary.total;
     const healthy = summary.healthy || 0;
+    const atRisk = (summary.atRisk || 0) + (summary.critical || 0);
+    const hasHealthTiers = healthy > 0 || atRisk > 0 || (summary.watch || 0) > 0;
+
+    // When no health tiers exist (members imported but no behavioral data yet),
+    // show total members tracked rather than misleading "0 retained / 0% rate".
+    if (!hasHealthTiers) {
+      return [
+        { label: 'Members Onboarded', value: total, unit: 'members', prefix: '', suffix: '', color: 'blue', description: 'Total active members in system' },
+        { label: 'Dues at Risk', value: Math.round((summary.potentialDuesAtRisk || 0) / 1000), unit: '$K', prefix: '$', suffix: 'K', color: 'warning', description: 'Estimated at-risk dues (import tee + POS to refine)' },
+        { label: 'Health Scores', value: 0, unit: '%', prefix: '', suffix: '%', color: 'warning', description: 'Import tee times + POS to compute member health' },
+        { label: 'Awaiting Data', value: total, unit: 'members', prefix: '', suffix: '', color: 'blue', description: 'Members pending health score computation' },
+      ];
+    }
+
     const retentionPct = total > 0 ? Math.round((healthy / total) * 100) : 0;
     const liveRetained = _liveKpis?.membersSaved > 0 ? _liveKpis.membersSaved : healthy;
     return [
       { label: 'Members Retained', value: liveRetained, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total members tracked` },
       { label: 'Dues at Risk', value: Math.round((summary.potentialDuesAtRisk || 0) / 1000), unit: '$K', prefix: '$', suffix: 'K', color: 'warning', description: 'Annual dues from at-risk + critical members' },
       { label: 'Retention Rate', value: retentionPct, unit: '%', prefix: '', suffix: '%', color: retentionPct >= 80 ? 'success' : 'warning', description: 'Healthy members as % of total' },
-      { label: 'At Risk', value: (summary.atRisk || 0) + (summary.critical || 0), unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
+      { label: 'At Risk', value: atRisk, unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
     ];
   }
 
