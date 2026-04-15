@@ -446,7 +446,7 @@ export default function HealthOverview() {
                     const ownerColor = OWNER_COLORS[m.owner] || '#6b7280';
                     const archetypeColor = ARCHETYPE_COLORS[m.archetype] || '#6b7280';
                     const rowBg = isExpanded
-                      ? 'bg-indigo-50/40'
+                      ? 'bg-indigo-900/30'
                       : 'hover:bg-swoop-row-hover';
                     const rowStyle = isExpanded
                       ? { borderTop: '1px solid rgba(255,255,255,0.06)' }
@@ -545,7 +545,7 @@ export default function HealthOverview() {
                         </tr>
 
                         {isExpanded && (
-                          <tr className="bg-[#f8faff]">
+                          <tr className="bg-swoop-panel">
                             <td colSpan={7} className="px-4 py-3 border-t border-swoop-border-inset">
                               <div className="flex gap-8 flex-wrap items-start mb-3 pl-6">
                                 <div>
