@@ -313,10 +313,19 @@ export default function BoardReport() {
               Executive Summary
             </h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              This month, {getClubName()} delivered consistent service quality with an <strong>{resolutionRate}% complaint resolution rate</strong>{avgResolutionDays ? <> and
-              an average resolution time of <strong>{avgResolutionDays} days</strong></> : ''}. The operations team responded to alerts with an
-              average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'} detection-to-action time</strong>, catching {operationalSaves.length} service disruptions before
-              they impacted members.
+              {feedbackRecords.length === 0 ? (
+                <>This month, no service complaints were logged at {getClubName()}.</>
+              ) : resolutionRate > 0 ? (
+                <>This month, {getClubName()} achieved a <strong>{resolutionRate}% complaint resolution rate</strong>{avgResolutionDays ? <> with an average resolution time of <strong>{avgResolutionDays} days</strong></> : ''} across {feedbackRecords.length} service complaints.</>
+              ) : (
+                <>{feedbackRecords.length} service complaint{feedbackRecords.length !== 1 ? 's' : ''} received at {getClubName()} this month — <strong>under review</strong>.</>
+              )}
+              {' '}The operations team responded to alerts with an average{' '}
+              <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'} detection-to-action time</strong>
+              {operationalSaves.length > 0
+                ? <>, preventing <strong>{operationalSaves.length} service disruption{operationalSaves.length !== 1 ? 's' : ''}</strong> before they impacted members.</>
+                : <>, with no service disruptions identified this period.</>
+              }
             </p>
             <p className="text-gray-600 leading-relaxed mb-4">
               {dist.find(d => d.level === 'Healthy')?.count > 0 ? (

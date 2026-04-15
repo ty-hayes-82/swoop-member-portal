@@ -696,7 +696,7 @@ async function createClub(appUrl) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      clubName: 'Pinehurst Country Club',
+      clubName: 'Lakewood Country Club',
       city: 'Phoenix', state: 'AZ', zip: '85001',
       memberCount: 100, courseCount: 1, outletCount: 2,
       adminEmail: email,
