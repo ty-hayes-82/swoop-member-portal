@@ -14,7 +14,6 @@ import WeekForecast from './WeekForecast';
 import MorningBriefingSentence from './MorningBriefingSentence';
 import DemoStoriesLauncher from './DemoStoriesLauncher';
 import { getFirstName } from '../../utils/nameUtils';
-import RecentActivityFeed from './RecentActivityFeed';
 import OvernightBrief from './OvernightBrief';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { AnimatedNumber } from '@/components/ui/PageTransition';
@@ -27,13 +26,11 @@ import { hasRealMemberData } from '@/services/memberService';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import OnboardingChecklist from './OnboardingChecklist';
 import { getTodayTeeSheet } from '@/services/operationsService';
-import { getMemberSummary, getFullRoster, getAtRiskMembers } from '@/services/memberService';
+import { getMemberSummary, getFullRoster } from '@/services/memberService';
 import { getDailyForecast, getHourlyForecast } from '@/services/weatherService';
 import { trackAction } from '@/services/activityService';
 import { getHealthRollup } from '@/services/apiHealthService';
-import { getMemberSaves } from '@/services/boardReportService';
 import { getUnderstaffedDays } from '@/services/staffingService';
-import { getEventROI } from '@/services/experienceInsightsService';
 
 // GM Greeting Alert — simulates real-time member check-in notifications
 function buildCheckinAlerts() {
@@ -287,7 +284,6 @@ export default function TodayView() {
 
   // Derive quick stats
   const memberSummary = getMemberSummary();
-  const topAtRisk = getAtRiskMembers().slice(0, 3);
   const totalMembers = memberSummary.totalMembers || memberSummary.total || 0;
   const hourlyData = getHourlyForecast();
   const dailyData = getDailyForecast(1);
@@ -397,6 +393,9 @@ export default function TodayView() {
           </div>
         </div>
 
+        {/* Morning Briefing — cross-domain synthesis: rounds + weather + at-risk on sheet + staffing */}
+        <MorningBriefingSentence />
+
         {/* Overnight Brief — what agents surfaced while the GM was away */}
         <OvernightBrief />
 
@@ -415,72 +414,6 @@ export default function TodayView() {
             </div>
           </div>
         )}
-
-        {/* Section 1.4: What you can see now — hero insight summary for authenticated live clubs */}
-        {isAuthenticatedClub() && memberSummary.total > 0 && (
-          <div className="rounded-xl border border-brand-200 bg-brand-50/30 p-4 dark:border-brand-500/30 dark:bg-brand-500/5">
-            <div className="text-[10px] font-semibold text-brand-600 uppercase tracking-wide mb-2 dark:text-brand-400">
-              What you can see now
-            </div>
-            <div className="flex items-baseline gap-6 flex-wrap">
-              <div>
-                <div className="text-2xl font-bold text-gray-800 dark:text-white/90">{memberSummary.total.toLocaleString()}</div>
-                <div className="text-xs text-gray-500">members imported</div>
-              </div>
-              {(memberSummary.atRisk + memberSummary.critical) > 0 && (
-                <div>
-                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                    {(memberSummary.atRisk + memberSummary.critical).toLocaleString()}
-                  </div>
-                  <div className="text-xs text-gray-500">need attention this week</div>
-                  {topAtRisk.length > 0 && (
-                    <div className="mt-1.5 flex flex-col gap-0.5">
-                      {topAtRisk.map(m => {
-                        const fullName = m.name || `${m.firstName || ''} ${m.lastName || ''}`.trim();
-                        const parts = fullName.trim().split(' ');
-                        const shortName = parts.length >= 2 ? `${parts[0]} ${parts.at(-1)[0]}.` : fullName;
-                        const reason = m.topRisk || m.signal || 'Declining engagement';
-                        return (
-                          <div key={m.memberId || m.member_id} className="text-[11px] text-gray-600 dark:text-gray-400 leading-snug">
-                            <span className="font-semibold text-gray-700 dark:text-gray-300">{shortName}</span>
-                            {' — '}<span className="text-gray-400">{reason}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
-              {memberSummary.potentialDuesAtRisk > 0 && (
-                <div>
-                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                    ${Math.round(memberSummary.potentialDuesAtRisk / 1000)}K
-                  </div>
-                  <div className="text-xs text-gray-500">dues at risk</div>
-                </div>
-              )}
-              {memberSummary.watch > 0 && (
-                <div>
-                  <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-                    {memberSummary.watch.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-gray-500">on the watch list</div>
-                </div>
-              )}
-              {memberSummary.healthy > 0 && (
-                <div>
-                  <div className="text-2xl font-bold text-success-600 dark:text-success-400">
-                    {memberSummary.healthy.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-gray-500">healthy</div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Section 1.5: Morning Briefing Synthesis (Pillar 1: SEE IT) */}
-        <MorningBriefingSentence />
 
         {/* Section 1.6: Demo Story Flows — 3 storyboard moments, demo mode only */}
         {getDataMode() === 'demo' && <DemoStoriesLauncher />}
@@ -562,6 +495,56 @@ export default function TodayView() {
           ))}
         </div>
 
+        {/* At-Risk Members on Today's Sheet — persistent named list with talking points */}
+        {(() => {
+          const atRiskOnSheet = buildCheckinAlerts().filter(a => a.isAtRisk);
+          if (!atRiskOnSheet.length) return null;
+          return (
+            <div
+              className="fade-in-up rounded-2xl border p-4"
+              style={{ borderColor: 'rgba(239,68,68,0.25)', background: 'rgba(254,242,242,0.5)' }}
+              data-section="member-alerts"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-red-600 dark:text-red-400">
+                  ⚠ At-Risk on Today's Sheet — {atRiskOnSheet.length} flagged
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('members')}
+                  className="text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline"
+                >
+                  View all →
+                </button>
+              </div>
+              <div className="flex flex-col gap-2">
+                {atRiskOnSheet.map(m => {
+                  const sc = m.healthScore < 30 ? '#ef4444' : m.healthScore < 50 ? '#f59e0b' : '#6b7280';
+                  return (
+                    <div key={m.memberId} className="bg-white dark:bg-white/[0.03] rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <MemberLink memberId={m.memberId} mode="drawer" className="font-semibold text-sm text-gray-800 dark:text-white/90 hover:text-brand-500 transition-colors">
+                            {m.name}
+                          </MemberLink>
+                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded shrink-0" style={{ color: sc, background: sc + '15' }}>
+                            {m.healthScore}
+                          </span>
+                          <span className="text-[10px] text-gray-400">{m.archetype}</span>
+                        </div>
+                        <span className="text-[11px] text-gray-400 shrink-0">{m.time} · {m.course}</span>
+                      </div>
+                      <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        💬 {m.talkingPoints[0]}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Today's Priorities — consolidated alert strip */}
         {(() => {
           const roster = getFullRoster();
@@ -570,9 +553,7 @@ export default function TodayView() {
           const needsAttention = newMembers.filter(m => (m.score ?? m.healthScore ?? 100) < 70);
           const understaffed = getUnderstaffedDays();
           const totalLoss = understaffed.reduce((s, d) => s + (d.revenueLoss || 0), 0);
-          const events = getEventROI();
-          if (!newMembers.length && !understaffed.length && !events.length) return null;
-          const best = events.length ? events.reduce((a, b) => (b.retentionRate > a.retentionRate ? b : a), events[0]) : null;
+          if (!newMembers.length && !understaffed.length) return null;
           return (
             <div className="fade-in-up rounded-2xl border border-gray-200 bg-white dark:bg-white/[0.03] dark:border-gray-800 p-4 flex flex-col gap-3">
               <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:text-brand-400">
@@ -634,104 +615,9 @@ export default function TodayView() {
                   </div>
                 </div>
               )}
-              {/* Event-Retention Correlation */}
-              {best && (
-                <div className="rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3 dark:bg-white/[0.02] dark:border-gray-800">
-                  <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:text-brand-400 mb-1.5">
-                    Events → Retention
-                  </div>
-                  <div className="flex items-center gap-4 flex-wrap">
-                    {events.slice(0, 3).map(e => (
-                      <div key={e.type} className="flex items-center gap-1.5">
-                        <span className="text-xs text-gray-600 dark:text-gray-400">{e.type}</span>
-                        <span className="text-xs font-bold" style={{ color: e.retentionRate >= 95 ? '#12b76a' : e.retentionRate >= 90 ? '#f59e0b' : '#6b7280' }}>
-                          {e.retentionRate}% renewal
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-[11px] text-gray-500 mt-1">
-                    Highest ROI: <strong className="text-gray-700 dark:text-gray-300">{best.type}</strong> ({best.retentionRate}% retention, {best.roi}x ROI)
-                  </div>
-                </div>
-              )}
             </div>
           );
         })()}
-
-        {/* Section 2.5: Live Activity Feed */}
-        <RecentActivityFeed />
-
-        {/* F&B Quick Stats — renders when briefing has F&B data */}
-        {briefing?.fb && (
-          <div className="fade-in-up fade-delay-1 flex flex-col gap-2">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-              {[
-                { icon: '🍽️', label: 'Dining Covers Today', value: String(briefing.fb.covers), color: '#ea580c' },
-                { icon: '💵', label: 'Avg Check Size', value: `$${briefing.fb.avgCheck}`, color: '#039855' },
-                ...(roundsToday > 0 ? [{ icon: '⛳', label: 'Post-Round Dining', value: `${briefing.fb.postRoundRate}%`, color: '#2563eb' }] : []),
-              ].map(s => (
-                <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                  <span className="text-lg">{s.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">{s.label}</div>
-                    <div className="text-base font-bold" style={{ color: s.color }}>{s.value}</div>
-                    <div style={{ marginTop: 2 }}>
-                      <SourceBadge system="POS" size="xs" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="text-[11px] text-gray-500 px-2 leading-snug italic">
-              Post-round dining is linked to pace of play —{' '}
-              <span className="font-semibold text-error-600">slow rounds drop conversion to 22%</span>{' '}
-              vs 41% for fast rounds.{' '}
-              <button
-                type="button"
-                onClick={() => navigate('revenue')}
-                className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
-              >
-                See Revenue →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Email Engagement Stats — renders when briefing has email data */}
-        {briefing?.email && (
-          <div className="fade-in-up fade-delay-1 flex flex-col gap-2">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-              {[
-                { icon: '📧', label: 'Email Open Rate', value: `${briefing.email.openRate}%`, color: '#7c3aed' },
-                { icon: '🖱️', label: 'Click-Through Rate', value: `${briefing.email.clickRate}%`, color: '#0891b2' },
-                { icon: '📉', label: 'Engagement Decay', value: `${briefing.email.decayCount} members`, color: '#dc2626' },
-              ].map(s => (
-                <div key={s.label} className="bg-white border border-gray-200 rounded-xl py-2.5 px-3.5 flex items-center gap-3" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                  <span className="text-lg">{s.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">{s.label}</div>
-                    <div className="text-base font-bold" style={{ color: s.color }}>{s.value}</div>
-                    <div style={{ marginTop: 2 }}>
-                      <SourceBadge system="Email" size="xs" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="text-[11px] text-gray-500 px-2 leading-snug italic">
-              Email decay is the <span className="font-bold text-error-600">first domino</span>{' '}
-              in member disengagement.{' '}
-              <button
-                type="button"
-                onClick={() => navigate('members', { mode: 'email-decay' })}
-                className="text-brand-500 font-bold bg-transparent border-none cursor-pointer p-0 hover:underline focus-visible:ring-2 focus-visible:ring-brand-500"
-              >
-                View decay watch list →
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Weather Alerts Banner */}
         {weatherAlerts.filter(a => !dismissedAlerts.includes(a.headline)).map((alert, i) => {
@@ -800,67 +686,6 @@ export default function TodayView() {
 
         {/* Section 5: Action Queue */}
         <PendingActionsInline topPriority={topPriority} />
-
-        {/* Section 5.5: Prove It — recent member saves */}
-        {(() => {
-          const saves = getMemberSaves().slice(0, 3);
-          if (!saves.length) return null;
-          return (
-            <div className="fade-in-up fade-delay-2 flex flex-col gap-2">
-              {(() => {
-                const totalProtected = saves.reduce((s, sv) => s + (sv.duesAtRisk || 0), 0);
-                return (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="text-[10px] font-bold uppercase tracking-wide text-success-600 dark:text-success-400">
-                        ✓ Recent Member Saves
-                      </div>
-                      {totalProtected > 0 && (
-                        <span className="text-[10px] font-bold text-success-600 dark:text-success-400 bg-success-50 dark:bg-success-500/10 border border-success-500/20 px-2 py-0.5 rounded-full">
-                          ${totalProtected.toLocaleString()} dues protected this month
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => navigate('board-report')}
-                      className="text-[11px] text-brand-500 font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline"
-                    >
-                      Full board report →
-                    </button>
-                  </div>
-                );
-              })()}
-              <div className="bg-white border border-success-500/20 rounded-xl divide-y divide-gray-100 dark:bg-white/[0.03] dark:border-success-500/20 dark:divide-gray-800">
-                {saves.map((s, i) => (
-                  <div key={s.memberId || i} className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-6 h-6 rounded-full bg-success-50 dark:bg-success-500/10 flex items-center justify-center text-[11px] font-bold text-success-600 dark:text-success-400 shrink-0">
-                      ✓
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-gray-800 dark:text-white/90 truncate">
-                        {s.name}
-                      </div>
-                      <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                        {s.trigger || s.action}
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      {s.scoreBefore != null && s.scoreAfter != null && (
-                        <div className="text-[11px] font-mono font-bold text-success-600 dark:text-success-400">
-                          {s.scoreBefore}→{s.scoreAfter}
-                        </div>
-                      )}
-                      {s.duesAtRisk > 0 && (
-                        <div className="text-[10px] text-gray-400">${s.duesAtRisk.toLocaleString()} protected</div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })()}
 
         {/* Section 7: Tomorrow's Forecast */}
         <TomorrowForecast />
