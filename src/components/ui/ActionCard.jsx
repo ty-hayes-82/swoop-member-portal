@@ -75,22 +75,47 @@ export default function ActionCard({
     if (fn) fn();
   };
 
+  // Canonical container tint (STYLING.md §2.8): severity-tinted row with
+  // background rgba(color,0.07) and border rgba(color,0.18).
+  const tintBg = `${accent}12`;      // ~0.07 alpha
+  const tintBorder = `${accent}2E`;  // ~0.18 alpha
+
   return (
     <div className={className}>
       <div
         onClick={toggle}
-        className="py-3 px-4 rounded-xl bg-swoop-panel border border-swoop-border shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md"
-        style={{ borderLeft: `4px solid ${accent}` }}
+        className="swoop-detail-row cursor-pointer"
+        style={{
+          background: tintBg,
+          borderColor: tintBorder,
+          flexDirection: 'column',
+          gap: 0,
+        }}
       >
-        {/* Top row: priority + owner + source · actions */}
-        <div className="flex justify-between items-center mb-1">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span
-              className="text-[10px] font-bold uppercase tracking-wide py-0.5 px-2 rounded-[10px]"
-              style={{ background: `${badgeColor}15`, color: badgeColor }}
-            >
-              {priority}
-            </span>
+        {/* Header strip: severity badge · owner · source · spacer · actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', flexWrap: 'wrap' }}>
+          <span
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: badgeColor,
+              background: `${badgeColor}26`,
+              border: `1px solid ${badgeColor}4D`,
+              padding: '2px 7px',
+              borderRadius: 999,
+              flexShrink: 0,
+            }}
+          >
+            {priority}
+          </span>
+
+          <div className="font-bold text-sm text-white leading-snug" style={{ minWidth: 0, flex: '1 1 auto' }}>
+            {titleNode ?? action?.description}
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
             {ownerLabel && (
               <span className="text-[9px] font-bold py-0.5 px-1.5 rounded bg-brand-500/[0.06] text-brand-500 uppercase tracking-tight">
                 {ownerLabel}
@@ -106,13 +131,12 @@ export default function ActionCard({
                 size="xs"
               />
             )}
-          </div>
-          <div className="flex items-center gap-1.5">
             {onSnooze && (
               <button
                 type="button"
                 onClick={stop(() => onSnooze(action, 24))}
-                className="text-[10px] font-semibold text-swoop-text-muted py-0.5 px-2 rounded-[10px] bg-swoop-row hover:bg-gray-200 border-none cursor-pointer"
+                className="text-[10px] font-semibold py-0.5 px-2 rounded-md border-none cursor-pointer"
+                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}
                 title="Snooze 24h"
               >
                 Snooze 24h
@@ -122,7 +146,8 @@ export default function ActionCard({
               <button
                 type="button"
                 onClick={stop(() => onDismiss(action))}
-                className="text-[10px] font-semibold text-swoop-text-muted py-0.5 px-2 rounded-[10px] bg-swoop-row hover:bg-gray-200 border-none cursor-pointer"
+                className="text-[10px] font-semibold py-0.5 px-2 rounded-md border-none cursor-pointer"
+                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}
                 title="Dismiss"
               >
                 Dismiss
@@ -132,18 +157,7 @@ export default function ActionCard({
               <button
                 type="button"
                 onClick={stop(() => onApprove(action))}
-                style={{
-                  background: 'rgb(34, 197, 94)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '6px 14px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'background 0.15s',
-                }}
+                className="swoop-action-btn"
               >
                 {approveLabel}
               </button>
@@ -151,14 +165,12 @@ export default function ActionCard({
           </div>
         </div>
 
-        {/* Title */}
-        <div className="text-sm font-semibold text-swoop-text mb-0.5 leading-snug">
-          {titleNode ?? action?.description}
-        </div>
-
-        {/* Impact line */}
+        {/* Impact line — muted sub-text under the header strip */}
         {(impactNode ?? action?.impactMetric) && (
-          <div className="text-xs text-success-500 font-medium">
+          <div
+            className="text-xs leading-snug"
+            style={{ color: 'rgba(255,255,255,0.65)', marginTop: 6, width: '100%' }}
+          >
             {impactNode ?? action?.impactMetric}
           </div>
         )}

@@ -20,6 +20,13 @@ const healthColor = (score) => {
   return '#ef4444';
 };
 
+const healthRgb = (score) => {
+  if (score >= 70) return '18,183,106';
+  if (score >= 50) return '245,158,11';
+  if (score >= 30) return '234,88,12';
+  return '239,68,68';
+};
+
 const healthLabel = (score) => {
   if (score >= 70) return 'Healthy';
   if (score >= 50) return 'Watch';
@@ -31,8 +38,10 @@ const showMemberNames = () => isGateOpen('members');
 
 function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
   const color = healthColor(teeTime.healthScore);
+  const rgb = healthRgb(teeTime.healthScore);
   const isVip = teeTime.duesAnnual >= 18000;
   const hasComplaint = teeTime.cartPrep.note?.toLowerCase().includes('complaint') || teeTime.cartPrep.note?.toLowerCase().includes('critical');
+  const severityLabel = isVip ? 'VIP' : healthLabel(teeTime.healthScore).toUpperCase();
 
   const recommended = [];
   if (hasComplaint) {
@@ -46,87 +55,134 @@ function AlertCard({ teeTime, onSendRecovery, isExpanded, onToggle }) {
     recommended.push({ key: 'comp', icon: '🎁', label: 'Comp Offer', type: 'comp_offer', description: `VIP recovery — $${(teeTime.duesAnnual / 1000).toFixed(0)}K member` });
   }
 
+  const metaParts = [
+    `${teeTime.time} ${teeTime.course}`,
+    `Health ${teeTime.healthScore}`,
+    teeTime.archetype,
+    teeTime.duesAnnual > 0 ? `$${Math.round(teeTime.duesAnnual / 1000)}K/yr` : null,
+  ].filter(Boolean);
+
   return (
-    <div className="bg-swoop-panel rounded-xl border-l-4 p-4 border border-swoop-border" style={{ borderLeftColor: color }}>
+    <div>
       <div
-        className="cursor-pointer"
         onClick={onToggle}
+        className="swoop-detail-row cursor-pointer"
+        style={{
+          background: `rgba(${rgb},0.07)`,
+          borderColor: `rgba(${rgb},0.18)`,
+          flexDirection: 'column',
+          gap: 0,
+        }}
       >
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {showMemberNames() ? (
-                <MemberLink memberId={teeTime.memberId} mode="drawer" className="font-bold text-sm text-swoop-text">
-                  {teeTime.name}
-                </MemberLink>
-              ) : (
-                <span className="font-bold text-sm text-swoop-text">Member</span>
-              )}
-              <span className="text-xs text-swoop-text-label">{teeTime.time} - {teeTime.course}</span>
-              {isVip && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200">VIP</span>}
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="font-mono text-sm font-bold" style={{ color }}>{teeTime.healthScore}</span>
-              <span className="text-[10px] font-semibold" style={{ color }}>{healthLabel(teeTime.healthScore)}</span>
-              <ArchetypeBadge archetype={teeTime.archetype} size="xs" />
-            </div>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: `${color}15`, color }}>
+        {/* Header strip */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', flexWrap: 'wrap' }}>
+          <span
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color,
+              background: `rgba(${rgb},0.15)`,
+              border: `1px solid rgba(${rgb},0.3)`,
+              padding: '2px 7px',
+              borderRadius: 999,
+              flexShrink: 0,
+            }}
+          >
+            {severityLabel}
+          </span>
+          {showMemberNames() ? (
+            <MemberLink
+              memberId={teeTime.memberId}
+              mode="drawer"
+              style={{ fontSize: 13, fontWeight: 700, color: '#fff', textDecoration: 'none' }}
+            >
+              {teeTime.name}
+            </MemberLink>
+          ) : (
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Member</span>
+          )}
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+            {metaParts.join(' · ')}
+          </span>
+          <span style={{ flex: '1 1 0%' }} />
+          <span
+            className="text-[10px] font-bold py-0.5 px-2 rounded-full shrink-0"
+            style={{ background: `rgba(${rgb},0.15)`, color }}
+          >
             {Math.round(teeTime.cancelRisk * 100)}% cancel risk
           </span>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onToggle(); }}
+            className="swoop-action-btn"
+          >
+            {isExpanded ? 'Less ▴' : 'Act →'}
+          </button>
         </div>
-        {showMemberNames() && (
-          <div className="text-xs text-swoop-text-muted leading-relaxed">
-            {teeTime.cartPrep.note}
+
+        {/* Divider + note + quick actions */}
+        {showMemberNames() && teeTime.cartPrep.note && (
+          <div
+            style={{
+              marginTop: 10,
+              paddingTop: 10,
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              width: '100%',
+            }}
+          >
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>
+              Signal
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', marginBottom: 10 }}>
+              {teeTime.cartPrep.note}
+            </div>
+            <div className="flex gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+              {hasComplaint && (
+                <button
+                  type="button"
+                  onClick={() => onSendRecovery(teeTime, 'email')}
+                  className="swoop-action-btn"
+                >
+                  ✉ Recovery Email
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onSendRecovery(teeTime, 'sms')}
+                className="swoop-action-btn"
+              >
+                💬 {hasComplaint ? 'Apology Text' : 'Check-in Text'}
+              </button>
+              {showMemberNames() && (
+                <MemberLink
+                  memberId={teeTime.memberId}
+                  mode="drawer"
+                  className="swoop-action-btn no-underline"
+                >
+                  🔗 Decay Sequence
+                </MemberLink>
+              )}
+            </div>
           </div>
         )}
-      </div>
-      {/* Quick action buttons (always visible) */}
-      <div className="flex gap-2 mt-3 flex-wrap">
-        {hasComplaint && (
-          <button
-            onClick={() => onSendRecovery(teeTime, 'email')}
-            className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-red-200 bg-red-50 text-red-600 inline-flex items-center gap-1"
-          >
-            <span>✉</span> Send Recovery Email
-          </button>
-        )}
-        <button
-          onClick={() => onSendRecovery(teeTime, 'sms')}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-200 bg-brand-50 text-brand-500 inline-flex items-center gap-1"
-        >
-          <span>💬</span> {hasComplaint ? 'Send Apology Text' : 'Personal Check-in Text'}
-        </button>
-        {/* Cross-pillar bridge — link to First Domino in profile drawer */}
-        {showMemberNames() && (
-          <MemberLink
-            memberId={teeTime.memberId}
-            mode="drawer"
-            className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-purple-200 bg-purple-50 text-purple-600 inline-flex items-center gap-1 no-underline"
-          >
-            <span>🔗</span> View Decay Sequence
-          </MemberLink>
-        )}
-        <button
-          onClick={onToggle}
-          className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-swoop-border bg-swoop-panel text-swoop-text-muted inline-flex items-center gap-1"
-        >
-          {isExpanded ? '▾ Less' : '▸ More actions'}
-        </button>
       </div>
       {/* Expanded inline action panel */}
       {isExpanded && (
-        <ActionPanel
-          context={{
-            memberId: teeTime.memberId,
-            memberName: teeTime.name,
-            description: teeTime.cartPrep.note,
-            source: 'Tee Sheet',
-          }}
-          recommended={recommended}
-          onClose={onToggle}
-          compact
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <ActionPanel
+            context={{
+              memberId: teeTime.memberId,
+              memberName: teeTime.name,
+              description: teeTime.cartPrep.note,
+              source: 'Tee Sheet',
+            }}
+            recommended={recommended}
+            onClose={onToggle}
+            compact
+          />
+        </div>
       )}
     </div>
   );

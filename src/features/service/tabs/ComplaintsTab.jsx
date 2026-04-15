@@ -178,59 +178,72 @@ export default function ComplaintsTab() {
                 complaintRecommended.push({ key: 'apology-sms', icon: '💬', label: 'Send Apology Text', type: 'sms', description: 'Personal apology via SMS' });
               }
 
+              // Severity tint from age: >7d danger, 3–7d warn, <3d neutral
+              const severityRgb = daysSince > 7 ? '239,68,68' : daysSince > 3 ? '243,146,45' : '202,138,4';
+              const severityColor = `rgb(${severityRgb})`;
+              const severityLabel = daysSince > 7 ? 'OVERDUE' : daysSince > 3 ? 'AGING' : 'NEW';
               return (
                 <div key={complaint.id}>
                   <div
                     onClick={() => setExpandedComplaintId(isComplaintExpanded ? null : complaint.id)}
-                    className={`p-4 bg-swoop-row rounded-lg flex justify-between items-center flex-wrap gap-2 cursor-pointer transition-shadow hover:shadow-sm ${daysSince > 7 ? 'border border-error-500/30' : 'border border-swoop-border'}`}
+                    className="swoop-detail-row cursor-pointer"
+                    style={{
+                      background: `rgba(${severityRgb},0.07)`,
+                      borderColor: `rgba(${severityRgb},0.18)`,
+                      flexDirection: 'column',
+                      gap: 0,
+                    }}
                   >
-                    <div className="flex-1 min-w-[200px]">
-                      <div className="flex items-center gap-2 mb-1">
-                        {complaint.memberName ? (
-                          <MemberLink mode="drawer" memberId={complaint.memberId} className="font-semibold text-[#1a1a2e] text-sm">
-                            {complaint.memberName}
-                          </MemberLink>
-                        ) : (
-                          <span className="font-semibold text-[#1a1a2e] text-sm">
-                            Member {complaint.memberId}
-                          </span>
-                        )}
-                        {complaint.isUnderstaffedDay && (
-                          <span className="text-[10px] font-bold text-error-500 bg-error-500/[0.07] py-0.5 px-1.5 rounded-full">
-                            Understaffed day
-                          </span>
-                        )}
-                        {daysSince <= 3 && (
-                          <span className="text-[10px] font-bold text-[#ca8a04] bg-[#ca8a0412] py-0.5 px-1.5 rounded-full">
-                            High-demand day
-                          </span>
-                        )}
-                        {(complaint.weatherContext?.isWeatherImpacted || complaint.weatherContext?.is_weather_impacted) && (
-                          <span
-                            className="text-[10px] font-bold text-blue-600 bg-blue-600/[0.07] py-0.5 px-1.5 rounded-full"
-                            title={complaint.weatherContext?.impactReason || complaint.weatherContext?.impact_reason || ''}
-                          >
-                            Weather: {complaint.weatherContext?.impactReason || complaint.weatherContext?.impact_reason || 'Weather impact'}
-                          </span>
-                        )}
-                        {!complaint.weatherContext && complaint.category === 'Pace of Play' && (
-                          <span className="text-[10px] font-bold text-blue-600 bg-blue-600/[0.07] py-0.5 px-1.5 rounded-full">
-                            Weather impact
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-swoop-text-muted">
-                        {complaint.category} — {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {daysSince > 7 && (
-                        <span className="text-[11px] font-bold text-error-500">
-                          {daysSince}d open
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', flexWrap: 'wrap' }}>
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 700,
+                          letterSpacing: '0.1em',
+                          textTransform: 'uppercase',
+                          color: severityColor,
+                          background: `rgba(${severityRgb},0.15)`,
+                          border: `1px solid rgba(${severityRgb},0.3)`,
+                          padding: '2px 7px',
+                          borderRadius: 999,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {severityLabel}
+                      </span>
+                      {complaint.memberName ? (
+                        <MemberLink
+                          mode="drawer"
+                          memberId={complaint.memberId}
+                          style={{ fontSize: 13, fontWeight: 700, color: '#fff', textDecoration: 'none' }}
+                        >
+                          {complaint.memberName}
+                        </MemberLink>
+                      ) : (
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
+                          Member {complaint.memberId}
                         </span>
                       )}
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                        {complaint.category} · {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {daysSince > 0 ? ` · ${daysSince}d open` : ''}
+                      </span>
+                      {complaint.isUnderstaffedDay && (
+                        <span className="text-[10px] font-bold text-error-500 bg-error-500/[0.07] py-0.5 px-1.5 rounded-full">
+                          Understaffed
+                        </span>
+                      )}
+                      {(complaint.weatherContext?.isWeatherImpacted || complaint.weatherContext?.is_weather_impacted) && (
+                        <span
+                          className="text-[10px] font-bold text-blue-400 bg-blue-400/[0.1] py-0.5 px-1.5 rounded-full"
+                          title={complaint.weatherContext?.impactReason || complaint.weatherContext?.impact_reason || ''}
+                        >
+                          Weather
+                        </span>
+                      )}
+                      <span style={{ flex: '1 1 0%' }} />
                       <span
-                        className="text-[11px] font-semibold py-0.5 px-2.5 rounded-full"
+                        className="text-[10px] font-semibold py-0.5 px-2 rounded-full"
                         style={{ background: statusStyle.bg, color: statusStyle.color }}
                       >
                         {statusStyle.label}
@@ -250,16 +263,11 @@ export default function ComplaintsTab() {
                               description: `Schedule resolution call for ${complaint.category} (${daysSince}d open)`,
                             });
                           }}
-                          className="text-[10px] font-bold text-white bg-brand-500 hover:bg-brand-600 px-2 py-0.5 rounded cursor-pointer border-none focus-visible:ring-2 focus-visible:ring-brand-500"
+                          className="swoop-action-btn"
                           title="Schedule a resolution call (one-tap)"
                         >
-                          Schedule call
+                          Schedule call →
                         </button>
-                      )}
-                      {complaint.status !== 'resolved' && (
-                        <span className="text-[10px] font-semibold text-brand-500">
-                          {isComplaintExpanded ? '▾' : '▸ Act'}
-                        </span>
                       )}
                     </div>
                   </div>
@@ -301,11 +309,11 @@ export default function ComplaintsTab() {
                   <div className="flex-1 min-w-[200px]">
                     <div className="flex items-center gap-2 mb-1">
                       {complaint.memberName ? (
-                        <MemberLink mode="drawer" memberId={complaint.memberId} className="font-semibold text-[#1a1a2e] text-sm">
+                        <MemberLink mode="drawer" memberId={complaint.memberId} className="font-semibold text-swoop-text text-sm">
                           {complaint.memberName}
                         </MemberLink>
                       ) : (
-                        <span className="font-semibold text-[#1a1a2e] text-sm">Member {complaint.memberId}</span>
+                        <span className="font-semibold text-swoop-text text-sm">Member {complaint.memberId}</span>
                       )}
                     </div>
                     <div className="text-xs text-swoop-text-muted">
@@ -348,7 +356,7 @@ export default function ComplaintsTab() {
           </div>
           <div className="flex-1 min-w-[200px]">
             <div className="text-sm leading-relaxed text-swoop-text-muted">
-              <strong className="text-[#1a1a2e]">{Math.round((understaffedComplaints / feedbackRecords.length) * 100)}%</strong> of all complaints
+              <strong className="text-swoop-text">{Math.round((understaffedComplaints / feedbackRecords.length) * 100)}%</strong> of all complaints
               are linked to days when the Grill Room was understaffed. Staffing is the single biggest driver of service inconsistency.
             </div>
           </div>

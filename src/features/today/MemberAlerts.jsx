@@ -210,85 +210,117 @@ export default function MemberAlerts() {
 
       <div className="flex flex-col gap-2">
         {members.map((m) => {
-          const scoreColor = m.score < 30 ? '#ef4444'
-            : m.score < 50 ? '#f59e0b'
-            : '#6B7280';
-          const arcColor = ARCHETYPE_COLORS[m.archetype] || '#9CA3AF';
+          // Canonical §2.8 tint pair: severity color drives background + border.
+          // Bulk-approved rows shift to green success tint.
+          const severityRgb = bulkApproved
+            ? '34,197,94'
+            : m.score < 30 ? '239,68,68'
+            : m.score < 50 ? '243,146,45'
+            : '245,158,11';
+          const severityColor = `rgb(${severityRgb})`;
+          const severityLabel = bulkApproved ? 'APPROVED' : healthTierLabel(m.score).toUpperCase();
           const teeTime = getTeeTimeForMember(m.memberId);
+
+          const metaParts = [
+            `Health ${m.score}`,
+            m.archetype,
+            teeTime ? `Tees ${teeTime.time}` : null,
+            m.duesAnnual > 0 ? `$${Math.round(m.duesAnnual / 1000)}K/yr` : null,
+          ].filter(Boolean);
 
           return (
             <div
               key={m.memberId}
-              className={`py-3 px-4 border rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-px ${
-                bulkApproved
-                  ? 'bg-success-50 border-success-200 opacity-60'
-                  : 'bg-swoop-panel border-swoop-border'
-              }`}
-              style={{ borderLeft: `3px solid ${bulkApproved ? '#12b76a' : scoreColor}` }}
+              className="swoop-detail-row"
+              style={{
+                background: `rgba(${severityRgb},0.07)`,
+                borderColor: `rgba(${severityRgb},0.18)`,
+                flexDirection: 'column',
+                gap: 0,
+                opacity: bulkApproved ? 0.7 : 1,
+              }}
             >
-              <div className="flex justify-between items-center mb-1.5">
-                <div className="flex items-center gap-2">
-                  <MemberLink memberId={m.memberId} mode="drawer" className="font-bold text-sm text-swoop-text">
-                    {m.name}
-                  </MemberLink>
-                  <span
-                    className="text-[10px] font-bold py-0.5 px-2 rounded-[10px]"
-                    style={{ background: `${scoreColor}15`, color: scoreColor }}
-                  >
-                    {m.score} · {healthTierLabel(m.score)}
-                  </span>
-                  <span
-                    className="text-[10px] font-semibold py-0.5 px-2 rounded-[10px]"
-                    style={{ background: `${arcColor}12`, color: arcColor }}
-                  >
-                    {m.archetype}
-                  </span>
-                  {m.duesAnnual > 0 && (
-                    <span
-                      className="text-[10px] font-mono font-bold py-0.5 px-2 rounded-[10px]"
-                      style={{
-                        background: m.score < 50 ? '#fef2f2' : '#fef3c7',
-                        color: m.score < 50 ? '#b91c1c' : '#b45309',
-                      }}
-                      title={`$${m.duesAnnual.toLocaleString()}/yr ${m.score < 50 ? 'at risk' : 'in dues'}`}
-                    >
-                      ${Math.round(m.duesAnnual / 1000)}K{m.score < 50 ? ' at risk' : '/yr'}
-                    </span>
-                  )}
-                  {teeTime && (
-                    <span
-                      className="text-[10px] font-bold py-0.5 px-2 rounded-[10px] uppercase tracking-wide"
-                      style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
-                    >
-                      Tees off at {teeTime.time}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="text-xs text-swoop-text-muted mb-1 leading-snug flex items-center gap-2">
-                <span>{m.reason}</span>
+              {/* Header strip */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: severityColor,
+                    background: `rgba(${severityRgb},0.15)`,
+                    border: `1px solid rgba(${severityRgb},0.3)`,
+                    padding: '2px 7px',
+                    borderRadius: 999,
+                    flexShrink: 0,
+                  }}
+                >
+                  {severityLabel}
+                </span>
+                <MemberLink
+                  memberId={m.memberId}
+                  mode="drawer"
+                  className="underline decoration-brand-500/50"
+                  style={{ fontSize: 13, fontWeight: 700, color: '#fff', textDecoration: 'none' }}
+                >
+                  {m.name}
+                </MemberLink>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                  {metaParts.join(' · ')}
+                </span>
                 {m.roundsTrend?.length > 0 && (
                   <span className="inline-flex items-end gap-px shrink-0" title={m.roundsTrend.map(t => `${t.month}: ${t.rounds}`).join(' → ')}>
                     {m.roundsTrend.map((t, i) => {
                       const max = Math.max(...m.roundsTrend.map(r => r.rounds), 1);
                       const h = Math.max(Math.round((t.rounds / max) * 16), 2);
-                      return <span key={i} style={{ width: 4, height: h, borderRadius: 1, background: i === m.roundsTrend.length - 1 ? '#ef4444' : '#d1d5db' }} />;
+                      return <span key={i} style={{ width: 4, height: h, borderRadius: 1, background: i === m.roundsTrend.length - 1 ? severityColor : 'rgba(255,255,255,0.25)' }} />;
                     })}
                   </span>
                 )}
+                <span style={{ flex: '1 1 0%' }} />
+                <button
+                  type="button"
+                  onClick={() => navigate('members')}
+                  className="swoop-action-btn"
+                >
+                  View →
+                </button>
               </div>
-              <div className="text-xs font-semibold flex items-center gap-2">
-                {m.owner && (
-                  <span className={`text-[9px] font-bold py-0.5 px-1.5 rounded uppercase tracking-tight shrink-0 ${
-                    bulkApproved ? 'bg-success-500/[0.06] text-success-500' : 'bg-brand-500/[0.06] text-brand-500'
-                  }`}>
-                    {m.owner}
-                  </span>
-                )}
-                <span className={bulkApproved ? 'text-success-500 line-through' : 'text-brand-500'}>
-                  {bulkApproved && '✓ '}{m.action}
-                </span>
+
+              {/* Divider + 2-col body */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 8,
+                  marginTop: 10,
+                  paddingTop: 10,
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                  width: '100%',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>
+                    Signal
+                  </div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>
+                    {m.reason}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>
+                    Recommended Action
+                  </div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>
+                    {bulkApproved && '✓ '}{m.action}
+                  </div>
+                  {m.owner && (
+                    <div style={{ fontSize: 11, color: severityColor, fontWeight: 600, marginTop: 4 }}>
+                      {m.owner}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           );
