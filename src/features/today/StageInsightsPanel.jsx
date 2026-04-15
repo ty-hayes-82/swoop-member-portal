@@ -91,7 +91,7 @@ export default function StageInsightsPanel() {
           background: unlockedCount === totalStages ? '#dcfce7' : '#fef3c7',
           color: unlockedCount === totalStages ? '#15803d' : '#a16207',
         }}>
-          {Math.round((unlockedCount / totalStages) * 100)}% complete
+          {unlockedCount} of {totalStages} datasets connected
         </div>
       </div>
 

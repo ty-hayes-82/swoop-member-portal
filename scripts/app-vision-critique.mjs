@@ -696,11 +696,11 @@ async function createClub(appUrl) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      clubName: `App Critique ${new Date().toISOString().slice(0, 10)}`,
+      clubName: 'Pinehurst Country Club',
       city: 'Phoenix', state: 'AZ', zip: '85001',
       memberCount: 100, courseCount: 1, outletCount: 2,
       adminEmail: email,
-      adminName: 'App Critique Bot',
+      adminName: 'James Mitchell',
       adminPassword: password,
     }),
   });
