@@ -48,13 +48,14 @@ export default function QualityTab() {
       ))
     : null;
 
-  // Complaints by day of week — guard against invalid/missing dates
+  // Complaints by day of week — use getDay() for platform-independent weekday extraction
+  const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const dayOfWeekMap = {};
   feedbackRecords.forEach(r => {
     if (!r.date || r.date === 'Unknown date') return;
     const parsed = new Date(r.date.length === 10 ? r.date + 'T00:00:00' : r.date);
     if (isNaN(parsed.getTime())) return;
-    const day = parsed.toLocaleDateString('en-US', { weekday: 'short' });
+    const day = DOW[parsed.getDay()];
     dayOfWeekMap[day] = (dayOfWeekMap[day] || 0) + 1;
   });
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -184,7 +185,7 @@ export default function QualityTab() {
             const dayComplaints = feedbackRecords.filter(r => {
               if (!r.date || r.date === 'Unknown date') return false;
               const p = new Date(r.date.length === 10 ? r.date + 'T00:00:00' : r.date);
-              return !isNaN(p.getTime()) && p.toLocaleDateString('en-US', { weekday: 'short' }) === day;
+              return !isNaN(p.getTime()) && DOW[p.getDay()] === day;
             });
             const catBreakdown = {};
             dayComplaints.forEach(c => { catBreakdown[c.category] = (catBreakdown[c.category] || 0) + 1; });

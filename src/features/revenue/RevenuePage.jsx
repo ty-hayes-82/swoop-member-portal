@@ -133,7 +133,7 @@ export default function RevenuePage() {
                     <div className="grid grid-cols-3 gap-3 text-center">
                       {[
                         { label: 'Industry avg leakage', value: '$8,400/mo', sub: '↑ benchmark — not your data yet' },
-                        { label: 'Top driver', value: 'Pace of Play', sub: '62% of leakage' },
+                        { label: 'Top driver (industry avg)', value: 'Pace of Play', sub: 'benchmark — 62% of clubs' },
                         { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
                       ].map(({ label, value, sub }) => (
                         <div key={label} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
@@ -204,12 +204,30 @@ export default function RevenuePage() {
           <ARAgingPanel />
         </div>
 
-        {/* Story headline */}
-        <StoryHeadline
-          variant="urgent"
-          headline={`$${leakage.TOTAL.toLocaleString()}/month in F&B revenue lost to operational failures.`}
-          context="Three root causes. Three different source systems. One number that's invisible until you connect them."
-        />
+        {/* Story headline — copy matches whichever leakage sources have real data */}
+        {(() => {
+          const activeSources = [
+            leakage.PACE_LOSS > 0 && 'pace of play',
+            leakage.STAFFING_LOSS > 0 && 'understaffing',
+            leakage.WEATHER_LOSS > 0 && 'weather no-shows',
+          ].filter(Boolean);
+          const sourceCount = activeSources.length;
+          const lossType = sourceCount === 1
+            ? activeSources[0]
+            : 'operational failures';
+          const contextLine = sourceCount >= 3
+            ? 'Three root causes. Three different source systems. One number that\'s invisible until you connect them.'
+            : sourceCount === 2
+            ? `Two root causes across two source systems. Connect scheduling and weather to see the full picture.`
+            : `One root cause identified so far. Connect scheduling and weather data to uncover additional leakage.`;
+          return (
+            <StoryHeadline
+              variant="urgent"
+              headline={`$${leakage.TOTAL.toLocaleString()}/month in revenue lost to ${lossType}.`}
+              context={contextLine}
+            />
+          );
+        })()}
 
         <EvidenceStrip systems={leakage.sources} />
 
