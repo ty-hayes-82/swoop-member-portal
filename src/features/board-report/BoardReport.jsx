@@ -415,7 +415,7 @@ export default function BoardReport() {
                 in real time.
                 {resolutionRate > 0 && <> Service complaint resolution rate: <strong>{resolutionRate}%</strong>.</>}
                 {' '}As behavioral data accumulates, we are identifying at-risk members early and surfacing
-                root issues before they impact retention.
+                root causes before they impact retention.
               </>
             )}
           </p>

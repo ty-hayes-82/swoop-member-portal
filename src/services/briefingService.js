@@ -118,11 +118,11 @@ export const DEMO_BRIEFING = {
     weather: 'clear',
     tempHigh: 82,
     wind: 8,
-    forecast: 'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
+    forecast: 'Clear skies, 82°F. Afternoon gusts to 30-40 mph possible.',
     // Must stay at 3 entries — Story 1 narration says "3 at-risk members on today's tee sheet". Locked by briefingService.demo.test.js.
     atRiskTeetimes: [
-      { memberId: 'mbr_t01', name: 'James Whitfield', time: '8:00 AM', health: 42, topRisk: 'Unresolved complaint Jan 16 — 42-min Grill Room wait, felt ignored. $18K dues at risk' },
-      { memberId: 'mbr_t04', name: 'Anne Jordan', time: '7:08 AM', health: 28, topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace — zero rounds since. 10-year member' },
+      { memberId: 'mbr_t01', name: 'James Whitfield', time: '8:00 AM', health: 42, topRisk: 'Unresolved complaint Jan 16: 42-min Grill Room wait, felt ignored. $18K dues at risk' },
+      { memberId: 'mbr_t04', name: 'Anne Jordan', time: '7:08 AM', health: 28, topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace. Zero rounds since. 10-year member.' },
       { memberId: 'mbr_t05', name: 'Robert Callahan', time: '9:00 AM', health: 22, topRisk: 'Hitting exact $3,020 F&B minimum then stopping. 9-day complaint unresolved. No golf since Nov' },
     ],
     staffingGaps: [],
@@ -130,7 +130,7 @@ export const DEMO_BRIEFING = {
     demandForecast: {
       expectedRounds: 192,
       golfModifier: 0.87,
-      recommendation: 'Saturday: Grill Room needs 4 servers — only 2 scheduled',
+      recommendation: 'Saturday: Grill Room needs 4 servers, only 2 scheduled',
       weatherSummary: 'Afternoon wind advisory may shift 32 tee times indoors',
     },
     cancellationRisk: {
@@ -150,8 +150,8 @@ export const DEMO_BRIEFING = {
     rounds: 82,
     roundsVsLastWeek: 8,
     incidents: [
-      'Grill Room understaffed — 2 service speed complaints',
-      'James Whitfield filed a slow-service complaint — left unhappy, no follow-up',
+      'Grill Room understaffed: 2 service speed complaints',
+      'James Whitfield filed a slow-service complaint, left unhappy, no follow-up',
     ],
     weather: 'sunny',
     isUnderstaffed: true,
@@ -241,8 +241,8 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       rounds:         null, // TODO: compute from real tee sheet data
       roundsVsLastWeek: +8,
       incidents: [
-        ...(isGateOpen('fb') ? ['Grill Room understaffed — 2 service speed complaints'] : []),
-        ...(isGateOpen('complaints') ? ['James Whitfield filed a slow-service complaint — left unhappy, no follow-up'] : []),
+        ...(isGateOpen('fb') ? ['Grill Room understaffed: 2 service speed complaints'] : []),
+        ...(isGateOpen('complaints') ? ['James Whitfield filed a slow-service complaint, left unhappy, no follow-up'] : []),
       ],
       weather:        yesterday.weather,
       isUnderstaffed: yesterday.isUnderstaffed,
@@ -250,12 +250,12 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     todayRisks: {
       // Must match the canonical DEMO_BRIEFING block above and the cockpit / teeSheet narrative.
       weather:    'clear', tempHigh: 82, wind: 8,
-      forecast:   'Clear skies, 82°F — afternoon gusts to 30-40 mph possible',
+      forecast:   'Clear skies, 82°F. Afternoon gusts to 30-40 mph possible.',
       atRiskTeetimes: [
         { memberId: 'mbr_t01', name: 'James Whitfield', archetype: 'Balanced Active',   time: '8:00 AM', score: 42,
-          topRisk: 'Unresolved complaint Jan 16 — 42-min Grill Room wait, felt ignored. $18K dues at risk' },
+          topRisk: 'Unresolved complaint Jan 16: 42-min Grill Room wait, felt ignored. $18K dues at risk' },
         { memberId: 'mbr_t04', name: 'Anne Jordan',     archetype: 'Weekend Warrior',  time: '7:08 AM', score: 28,
-          topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace — zero rounds since. 10-year member' },
+          topRisk: 'Missed 3 Saturday waitlists, walked off Jan 7 after slow pace. Zero rounds since. 10-year member.' },
         { memberId: 'mbr_t05', name: 'Robert Callahan', archetype: 'Declining',        time: '9:00 AM', score: 22,
           topRisk: 'Hitting exact $3,020 F&B minimum then stopping. 9-day complaint unresolved. No golf since Nov' },
       ],
@@ -284,11 +284,11 @@ export const getDailyBriefing = (date = '2026-01-17') => {
     },
     pendingActions: [
       { playbookId: 'service-save',       title: 'Service Save Protocol',        status: 'recommended', urgency: 'high',
-        reason: 'James Whitfield complaint unresolved — at risk of resignation' },
+        reason: 'James Whitfield complaint unresolved: at risk of resignation' },
       { playbookId: 'peak-demand-capture',title: 'Peak Demand Capture',          status: 'recommended', urgency: 'high',
         reason: `${cancelSummary.highRisk} high-risk bookings tomorrow · wind advisory · $${cancelSummary.totalRevAtRisk} at stake` },
       { playbookId: 'slow-saturday',      title: 'Slow Saturday Recovery',       status: 'available',   urgency: 'medium',
-        reason: '28% slow round rate — weekend pace deteriorating' },
+        reason: '28% slow round rate: weekend pace deteriorating' },
       { playbookId: 'engagement-decay',   title: 'Engagement Decay Intervention',status: 'available',   urgency: 'medium',
         reason: isGateOpen('email') ? '5 members showing accelerated email decay' : 'Multiple members showing declining engagement signals' },
     ],
@@ -325,7 +325,7 @@ export const getDailyBriefing = (date = '2026-01-17') => {
       {
         id: 'at-risk-touchpoints',
         icon: '👋',
-        title: '3 at-risk members playing today — greet personally',
+        title: '3 at-risk members playing today: greet personally',
         impact: `$${Math.round(atRiskDues / 1000)}K dues at stake`,
         effort: '15 min',
         conversionRate: null,

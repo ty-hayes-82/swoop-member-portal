@@ -20,7 +20,7 @@ export const cockpitItems = [
       'Complaint acknowledged but unresolved \u2014 timer exceeded 1-day SLA.',
       'Average Grill Room check dropped from $47 \u2192 $28 since January 3.',
       'Health score fell 78 \u2192 42 once the third complaint hit.',
-      'Post-round dining conversion: 22% after slow rounds vs 41% after fast — $9.6K/mo leakage at stake',
+      'Post-round dining conversion: 22% after slow rounds vs 41% after fast. $9.6K/mo leakage at stake.',
     ],
     stakes: '$18,000/yr in dues ($90K lifetime value)',
     memberName: 'James Whitfield',
@@ -38,7 +38,7 @@ export const cockpitItems = [
       metric: { value: '1-day', label: 'warning lead time' },
     },
     suggestedActions: [
-      'Call James Whitfield before his 8:00 AM tee time — apologize for the 42-min wait',
+      'Call James Whitfield before his 8:00 AM tee time: apologize for the 42-min wait',
       'Send written follow-up with comp lunch offer for the family',
     ],
   },
@@ -48,7 +48,7 @@ export const cockpitItems = [
     questionDomain: 'Weather & Course Ops',
     questionLabel: 'What external factors could disrupt today?',
     icon: '\uD83C\uDF2C\uFE0F',
-    headline: 'Wind advisory forecast for Saturday — 30-40 mph gusts expected after 11am.',
+    headline: 'Wind advisory forecast for Saturday: 30-40 mph gusts expected after 11am.',
     recommendation:
       'Pre-notify 32 afternoon tee times with reschedule options. Open 6 simulator slots as backup. Alert F&B to shift lunch capacity indoors.',
     evidenceSignals: [
@@ -78,7 +78,7 @@ export const cockpitItems = [
     },
     suggestedActions: [
       'Pre-notify 32 afternoon tee times with reschedule options by 10 AM',
-      'Open 6 simulator slots as backup — post to member app',
+      'Open 6 simulator slots as backup: post to member app',
     ],
   },
   {

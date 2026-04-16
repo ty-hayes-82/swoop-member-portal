@@ -44,7 +44,7 @@ export default function StaffingTab() {
             </div>
             <div className="text-lg font-bold text-[#1a1a2e] mb-2">
               {briefing?.todayRisks?.demandForecast?.recommendation
-                || 'No staffing recommendations available — import scheduling data to enable demand forecasting.'}
+                || 'No staffing recommendations available. Import scheduling data to enable demand forecasting.'}
             </div>
             <div className="text-sm text-swoop-text-muted leading-relaxed mb-4">
               {(() => {
@@ -138,7 +138,7 @@ export default function StaffingTab() {
           <div className="text-xs text-swoop-text-muted italic leading-relaxed bg-white/50 border border-gray-200/50 rounded-lg p-3">
             <strong className="text-swoop-text">The Layer 3 connection:</strong>{' '}
             Slow rounds skip the dining room. The tee sheet knows the pace.
-            The POS knows the dining. Neither knows the other exists. Swoop sees both —
+            The POS knows the dining. Neither knows the other exists. Swoop sees both,
             and {leakage ? `that's $${leakage.PACE_LOSS.toLocaleString()}/mo of the $${leakage.TOTAL.toLocaleString()} total leakage` : 'that\'s why thousands per month are slipping through the cracks'}.
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function StaffingTab() {
       {/* Understaffed Days Detail */}
       <div className="bg-swoop-panel rounded-2xl border border-swoop-border p-6">
         <h3 className="text-base font-bold text-swoop-text mb-4">
-          Understaffed Days — {understaffedDays.length > 0 ? new Date(understaffedDays[0].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Current Period'}
+          Understaffed Days: {understaffedDays.length > 0 ? new Date(understaffedDays[0].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Current Period'}
         </h3>
         <div className="flex flex-col gap-2">
           {understaffedDays.map((day, idx) => {

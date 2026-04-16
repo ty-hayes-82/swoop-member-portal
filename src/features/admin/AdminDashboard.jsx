@@ -420,9 +420,9 @@ function IntegrationsTab({ onNavigate }) {
 // ONBOARDING / SETUP GUIDE TAB
 // ═══════════════════════════════════════════════════════════════════════
 const ONBOARDING_STEPS = [
-  { id: 'tee', label: 'Connect tee sheet system', desc: 'ForeTees connected — tee time data flowing into demand intelligence.', done: true, target: 'integrations' },
-  { id: 'pos', label: 'Connect POS system', desc: 'Northstar POS connected — dining frequency and spend data active.', done: true, target: 'integrations' },
-  { id: 'crm', label: 'Connect member CRM', desc: 'Clubessential CMS connected — member profiles, dues, and households syncing.', done: true, target: 'integrations' },
+  { id: 'tee', label: 'Connect tee sheet system', desc: 'ForeTees connected: tee time data flowing into demand intelligence.', done: true, target: 'integrations' },
+  { id: 'pos', label: 'Connect POS system', desc: 'Northstar POS connected: dining frequency and spend data active.', done: true, target: 'integrations' },
+  { id: 'crm', label: 'Connect member CRM', desc: 'Clubessential CMS connected: member profiles, dues, and households syncing.', done: true, target: 'integrations' },
   { id: 'members', label: 'Upload member roster', desc: '487 members imported with health scores and engagement history.', done: true, target: 'integrations/csv-import' },
   { id: 'team', label: 'Invite your department heads', desc: '4 of 6 team members have accepted invitations.', done: false, progress: '4/6' },
   { id: 'notifications', label: 'Configure notification channels', desc: 'Set up email, SMS, push, and Slack alerts for your team.', done: false },

@@ -248,12 +248,12 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
             <td className="px-4 py-2 hidden lg:table-cell max-w-[220px]">
               {member.topRisk && member.topRisk !== 'No current risks' ? (
                 <div className="flex flex-col gap-0.5">
-                  {/* Domain provenance badges — show which systems flagged the decline */}
+                  {/* Domain provenance badges — show source system that flagged the decline */}
                   {(() => {
                     const risk = member.topRisk.toLowerCase();
                     const domains = [];
-                    if (/golf|round|tee|frequency/.test(risk)) domains.push({ icon: '⛳', label: 'Golf' });
-                    if (/dining|f&b|food|beverage|spend|check/.test(risk)) domains.push({ icon: '🍽️', label: 'Dining' });
+                    if (/golf|round|tee|frequency/.test(risk)) domains.push({ icon: '⛳', label: 'Tee Sheet' });
+                    if (/dining|f&b|food|beverage|spend|check/.test(risk)) domains.push({ icon: '🍽️', label: 'POS' });
                     if (/email|open rate|newsletter/.test(risk)) domains.push({ icon: '📧', label: 'Email' });
                     return domains.length > 0 ? (
                       <div className="flex items-center gap-1 mb-0.5 flex-wrap">
@@ -284,13 +284,28 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
           </span>
         </td>
         <td className="px-4 py-2 hidden md:table-cell">
-          <span
-            className="font-mono text-xs"
-            style={{ color: hasScore && member.score < 50 ? '#ef4444' : undefined }}
-            title={hasScore && member.score < 50 ? 'Dues at risk — member health below 50' : undefined}
-          >
-            {(member.duesAnnual || member.memberValueAnnual) ? `$${(member.duesAnnual || member.memberValueAnnual || 0).toLocaleString()}` : '—'}
-          </span>
+          {(() => {
+            const totalVal = member.memberValueAnnual || member.duesAnnual || 0;
+            const dues = member.duesAnnual || 0;
+            const hasFB = totalVal > dues && dues > 0;
+            if (!totalVal) return <span className="font-mono text-xs text-swoop-text-label">—</span>;
+            return (
+              <div className="flex flex-col gap-0.5">
+                <span
+                  className="font-mono text-xs font-semibold"
+                  style={{ color: hasScore && member.score < 50 ? '#ef4444' : undefined }}
+                  title={hasFB
+                    ? `Dues: $${dues.toLocaleString()} + F&B: $${(totalVal - dues).toLocaleString()} = $${totalVal.toLocaleString()} total annual value`
+                    : `Annual dues: $${totalVal.toLocaleString()}`}
+                >
+                  ${totalVal.toLocaleString()}
+                </span>
+                {hasFB && (
+                  <span className="text-[9px] text-swoop-text-label">dues + F&B</span>
+                )}
+              </div>
+            );
+          })()}
         </td>
         <td className="px-3 sm:px-4 py-2 text-right">
           <span

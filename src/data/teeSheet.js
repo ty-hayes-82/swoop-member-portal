@@ -8,7 +8,7 @@ export const todayTeeSheet = [
     archetype: 'Declining', healthScore: 18, tier: 'Full Golf', duesAnnual: 18000,
     group: ['Kevin Hurst', 'Guest'],
     cancelRisk: 0.82,
-    cartPrep: { beverage: 'Coffee, black', snack: 'Granola bar', note: 'High churn risk — pro shop greet by name. Include comp round voucher in cart.' },
+    cartPrep: { beverage: 'Coffee, black', snack: 'Granola bar', note: 'High churn risk: pro shop greet by name. Include comp round voucher in cart.' },
   },
   {
     time: '7:00 AM', course: 'South', memberId: 'mbr_015', name: 'John Harrison',
@@ -22,14 +22,14 @@ export const todayTeeSheet = [
     archetype: 'Weekend Warrior', healthScore: 28, tier: 'Full Golf', duesAnnual: 14000,
     group: ['Anne Jordan', 'Marcus Jordan'],
     cancelRisk: 0.71,
-    cartPrep: { beverage: 'Sparkling water', snack: 'Mixed nuts', note: 'At-risk — starter greet warmly. Husband Marcus playing too. Suggest post-round brunch.' },
+    cartPrep: { beverage: 'Sparkling water', snack: 'Mixed nuts', note: 'At-risk: starter greet warmly. Husband Marcus playing too. Suggest post-round brunch.' },
   },
   {
     time: '7:16 AM', course: 'South', memberId: 'mbr_022', name: 'Rob Callaway',
     archetype: 'Die-Hard Golfer', healthScore: 92, tier: 'Full Golf', duesAnnual: 22000,
     group: ['Rob Callaway', 'Steve Whitmore', 'Phil Egan'],
     cancelRisk: 0.04,
-    cartPrep: { beverage: 'Coffee with cream', snack: null, note: 'VIP — $22K member. Prefers South course. Towels + extra tees.' },
+    cartPrep: { beverage: 'Coffee with cream', snack: null, note: 'VIP: $22K member. Prefers South course. Towels + extra tees.' },
   },
   {
     time: '7:24 AM', course: 'North', memberId: 'mbr_034', name: 'Sarah Collins',
@@ -43,7 +43,7 @@ export const todayTeeSheet = [
     archetype: 'Snowbird', healthScore: 75, tier: 'Full Golf', duesAnnual: 20000,
     group: ['Ronald Petersen', 'George Langford', 'Don Mueller', 'Frank Pace'],
     cancelRisk: 0.10,
-    cartPrep: { beverage: 'Coffee, black', snack: 'Banana', note: 'Snowbird group — first season back. Welcome-back card in cart.' },
+    cartPrep: { beverage: 'Coffee, black', snack: 'Banana', note: 'Snowbird group: first season back. Welcome-back card in cart.' },
   },
   // 8:00 AM block — prime time
   {
@@ -51,21 +51,21 @@ export const todayTeeSheet = [
     archetype: 'Balanced Active', healthScore: 42, tier: 'Full Golf', duesAnnual: 18000,
     group: ['James Whitfield', 'Logan Whitfield'],
     cancelRisk: 0.68,
-    cartPrep: { beverage: 'Coffee with refill thermos', snack: 'Muffin', note: 'CRITICAL — Unresolved complaint (Jan 16). GM should greet at starter. Include handwritten apology note + comp lunch voucher. Playing with son Logan.' },
+    cartPrep: { beverage: 'Coffee with refill thermos', snack: 'Muffin', note: 'CRITICAL: Unresolved complaint (Jan 16). GM should greet at starter. Include handwritten apology note + comp lunch voucher. Playing with son Logan.' },
   },
   {
     time: '8:08 AM', course: 'South', memberId: 'mbr_051', name: 'Victoria Sinclair',
     archetype: 'Social Butterfly', healthScore: 82, tier: 'Social', duesAnnual: 9000,
     group: ['Victoria Sinclair', 'Claire Donovan', 'Patricia Monroe', 'Rita Vasquez'],
     cancelRisk: 0.05,
-    cartPrep: { beverage: 'Mimosas (pre-ordered)', snack: 'Cheese & crackers', note: 'Social group — event ambassadors. Mention upcoming Wine & Jazz Night.' },
+    cartPrep: { beverage: 'Mimosas (pre-ordered)', snack: 'Cheese & crackers', note: 'Social group: event ambassadors. Mention upcoming Wine & Jazz Night.' },
   },
   {
     time: '8:16 AM', course: 'North', memberId: 'mbr_078', name: 'Scott Patterson',
     archetype: 'Weekend Warrior', healthScore: 68, tier: 'Sports', duesAnnual: 16000,
     group: ['Scott Patterson', 'Nathan Burke'],
     cancelRisk: 0.15,
-    cartPrep: { beverage: 'Water', snack: 'Protein bar', note: 'Watch list — engagement dipping. Suggest Saturday morning league.' },
+    cartPrep: { beverage: 'Water', snack: 'Protein bar', note: 'Watch list: engagement dipping. Suggest Saturday morning league.' },
   },
   {
     time: '8:24 AM', course: 'South', memberId: 'mbr_112', name: 'Jason Rivera',
@@ -80,21 +80,21 @@ export const todayTeeSheet = [
     archetype: 'Declining', healthScore: 22, tier: 'Corporate', duesAnnual: 18000,
     group: ['Robert Callahan'],
     cancelRisk: 0.59,
-    cartPrep: { beverage: 'Sparkling water', snack: null, note: 'AT-RISK — Playing solo. 9-day-old complaint unresolved. F&B Director should check in at turn. Comp beverage cart on back nine.' },
+    cartPrep: { beverage: 'Sparkling water', snack: null, note: 'AT-RISK: Playing solo. 9-day-old complaint unresolved. F&B Director should check in at turn. Comp beverage cart on back nine.' },
   },
   {
     time: '9:08 AM', course: 'South', memberId: 'mbr_188', name: 'Patricia Monroe',
     archetype: 'Balanced Active', healthScore: 65, tier: 'Full Golf', duesAnnual: 15000,
     group: ['Patricia Monroe', 'Evelyn Park', 'Jennifer Walsh'],
     cancelRisk: 0.12,
-    cartPrep: { beverage: 'Water', snack: 'Apple slices', note: 'Regular group. Evelyn is Watch list — be attentive.' },
+    cartPrep: { beverage: 'Water', snack: 'Apple slices', note: 'Regular group. Evelyn is Watch list: be attentive.' },
   },
   {
     time: '9:16 AM', course: 'North', memberId: 'mbr_t06', name: 'Sandra Chen',
     archetype: 'Social Butterfly', healthScore: 36, tier: 'House', duesAnnual: 9000,
     group: ['Sandra Chen', 'David Chen'],
     cancelRisk: 0.38,
-    cartPrep: { beverage: 'Iced coffee', snack: 'Fruit & cheese', note: 'At-risk — dining spend down 58%. Playing with husband David. Suggest family event invite.' },
+    cartPrep: { beverage: 'Iced coffee', snack: 'Fruit & cheese', note: 'At-risk: dining spend down 58%. Playing with husband David. Suggest family event invite.' },
   },
   // 10:00 AM block
   {
@@ -102,7 +102,7 @@ export const todayTeeSheet = [
     archetype: 'Balanced Active', healthScore: 52, tier: 'Full Golf', duesAnnual: 18000,
     group: ['Priya Brock', 'Greg Holloway'],
     cancelRisk: 0.20,
-    cartPrep: { beverage: 'Water', snack: 'Trail mix', note: 'Both on Watch list — email engagement declining. Standard cart setup.' },
+    cartPrep: { beverage: 'Water', snack: 'Trail mix', note: 'Both on Watch list: email engagement declining. Standard cart setup.' },
   },
   {
     time: '10:08 AM', course: 'North', memberId: 'mbr_198', name: 'Marcus Flynn',
@@ -116,7 +116,7 @@ export const todayTeeSheet = [
     archetype: 'Balanced Active', healthScore: 33, tier: 'Full Golf', duesAnnual: 18000,
     group: ['Robert Mills'],
     cancelRisk: 0.45,
-    cartPrep: { beverage: 'Coffee', snack: null, note: 'AT-RISK — Practicing but skipping clubhouse. Solo round. Suggest post-round lunch on the house.' },
+    cartPrep: { beverage: 'Coffee', snack: null, note: 'AT-RISK: Practicing but skipping clubhouse. Solo round. Suggest post-round lunch on the house.' },
   },
   // 11:00 AM+ block — lighter
   {
@@ -131,7 +131,7 @@ export const todayTeeSheet = [
     archetype: 'Balanced Active', healthScore: 71, tier: 'Full Golf', duesAnnual: 15000,
     group: ['Robert Chen', 'Guest', 'Guest'],
     cancelRisk: 0.09,
-    cartPrep: { beverage: 'Water', snack: null, note: 'Bringing 2 guests — potential prospects. Extra scorecards + guest info cards.' },
+    cartPrep: { beverage: 'Water', snack: null, note: 'Bringing 2 guests: potential prospects. Extra scorecards + guest info cards.' },
   },
   {
     time: '12:00 PM', course: 'North', memberId: 'mbr_210', name: 'Mark Patterson',
@@ -145,7 +145,7 @@ export const todayTeeSheet = [
     archetype: 'Balanced Active', healthScore: 78, tier: 'Full Golf', duesAnnual: 18000,
     group: ['Tom Bradford', 'Client', 'Client', 'Client'],
     cancelRisk: 0.07,
-    cartPrep: { beverage: 'Premium water + soft drinks', snack: 'Charcuterie box (pre-ordered)', note: 'Client entertainment round. VIP cart setup — premium amenities, extra towels, branded gifts.' },
+    cartPrep: { beverage: 'Premium water + soft drinks', snack: 'Charcuterie box (pre-ordered)', note: 'Client entertainment round. VIP cart setup: premium amenities, extra towels, branded gifts.' },
   },
 ];
 
@@ -160,5 +160,5 @@ export const teeSheetSummary = {
   weatherCondition: 'sunny',
   weatherTemp: 82,
   weatherWind: 8,
-  weatherForecast: 'Clear skies, high 82°F. Light winds 8 mph — afternoon gusts to 30-40 mph possible.',
+  weatherForecast: 'Clear skies, high 82°F. Light winds 8 mph. Afternoon gusts to 30-40 mph possible.',
 };

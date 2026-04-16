@@ -126,11 +126,16 @@ export default function RevenuePage() {
                       <span className="text-[10px] text-swoop-text-label ml-auto">Last synced: {(() => { const d = new Date(); return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`; })()}</span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                      <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Members Imported</div>
-                        <div className="text-2xl font-bold text-swoop-text font-mono">{memberSummary.total || 0}</div>
-                        <div className="text-[11px] text-swoop-text-muted mt-0.5">Baseline spend mapped</div>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigate('members')}
+                        className="bg-swoop-panel rounded-lg p-3 border border-swoop-border text-left transition-all hover:border-brand-500/40 hover:bg-brand-500/5 cursor-pointer group"
+                        title="View member roster"
+                      >
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1 group-hover:text-brand-400 transition-colors">Members Imported</div>
+                        <div className="text-2xl font-bold text-swoop-text font-mono group-hover:text-brand-400 transition-colors">{memberSummary.total || 0}</div>
+                        <div className="text-[11px] text-swoop-text-muted mt-0.5">View roster →</div>
+                      </button>
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
                         <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">F&B Transactions</div>
                         <div className="text-2xl font-bold text-swoop-text font-mono">686</div>
