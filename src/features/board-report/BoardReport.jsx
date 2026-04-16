@@ -282,13 +282,12 @@ export default function BoardReport() {
 
       {/* Top 3 Signals — GM-first summary before any raw KPIs */}
       {(() => {
-        const atRiskCount = memberSummaryForCount.atRisk || 0;
-        const criticalCount = memberSummaryForCount.critical || 0;
+        const distAtRiskCount = (dist.find(d => d.level === 'At Risk')?.count || 0) + (dist.find(d => d.level === 'Critical')?.count || 0);
         const signals = [
           memberSaves.length > 0
             ? { icon: '🛡️', color: '#22c55e', label: `${memberSaves.length} member${memberSaves.length !== 1 ? 's' : ''} retained`, sub: `$${totalDues.toLocaleString()} in annual dues protected through early intervention` }
-            : (atRiskCount + criticalCount > 0)
-              ? { icon: '⚠️', color: '#ef4444', label: `${atRiskCount + criticalCount} member${atRiskCount + criticalCount !== 1 ? 's' : ''} at risk`, sub: 'Proactive outreach recommended before dues renewal window' }
+            : (distAtRiskCount > 0)
+              ? { icon: '⚠️', color: '#ef4444', label: `${distAtRiskCount} member${distAtRiskCount !== 1 ? 's' : ''} at risk`, sub: 'Proactive outreach recommended before dues renewal window' }
               : null,
           operationalSaves.length > 0
             ? { icon: '⚡', color: '#60a5fa', label: `${operationalSaves.length} operational issue${operationalSaves.length !== 1 ? 's' : ''} prevented`, sub: `$${totalOpsRevenue.toLocaleString()} in operational revenue protected` }

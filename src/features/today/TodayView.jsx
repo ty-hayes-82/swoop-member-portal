@@ -332,24 +332,17 @@ export default function TodayView() {
           <div className="flex gap-3 flex-wrap">
             <button
               type="button"
-              onClick={() => navigate('admin', { tab: 'data-hub' })}
+              onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
               className="px-5 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors"
             >
-              {hasMembersGate ? 'Add More Data Sources →' : 'Start with Member Roster →'}
+              Explore with Sample Data →
             </button>
             <button
               type="button"
-              onClick={() => navigate('admin')}
+              onClick={() => navigate('admin', { tab: 'data-hub' })}
               className="px-5 py-2.5 rounded-lg border border-swoop-border bg-transparent text-swoop-text-muted text-sm font-semibold cursor-pointer hover:bg-swoop-row-hover transition-colors"
             >
-              View Integrations
-            </button>
-            <button
-              type="button"
-              onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
-              className="px-5 py-2.5 rounded-lg border border-brand-500/40 bg-brand-500/10 text-brand-500 text-sm font-semibold cursor-pointer hover:bg-brand-500/20 transition-colors"
-            >
-              Explore with Sample Data
+              {hasMembersGate ? 'Add More Data Sources' : 'Connect My Data'}
             </button>
           </div>
         </div>
@@ -690,7 +683,7 @@ export default function TodayView() {
             peek={priorityMemberCount > 0
               ? `${atRiskCount} at-risk · ${watchCount} on watch`
               : 'No critical alerts at this time'}
-            defaultOpen={false}
+            defaultOpen={priorityMemberCount > 0}
           >
             <MemberAlerts />
           </SwoopSection>

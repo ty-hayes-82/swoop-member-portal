@@ -366,7 +366,6 @@ export default function TeeSheetView() {
         <StoryHeadline
           variant="insight"
           headline="Who's on the course today — and who needs your attention?"
-          context={`${getTeeSheetSummary().totalRounds} rounds booked across ${teeData.length} tee times. ${atRiskTimes.length} at-risk members playing today. ${getTeeSheetSummary().weatherTemp}\u00B0F, ${getTeeSheetSummary().weatherCondition}.`}
         />
 
         <EvidenceStrip systems={['Tee Sheet', 'Member CRM', 'Weather', 'POS']} />

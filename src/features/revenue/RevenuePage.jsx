@@ -124,7 +124,7 @@ export default function RevenuePage() {
                       <SourceBadge system="POS" size="xs" />
                       <span className="text-[10px] text-swoop-text-label ml-auto">Last synced: {(() => { const d = new Date(); return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`; })()}</span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
                         <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Members Imported</div>
                         <div className="text-2xl font-bold text-swoop-text font-mono">{memberSummary.total || 0}</div>
@@ -134,6 +134,11 @@ export default function RevenuePage() {
                         <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">F&B Transactions</div>
                         <div className="text-2xl font-bold text-swoop-text font-mono">686</div>
                         <div className="text-[11px] text-swoop-text-muted mt-0.5">dining checks analyzed</div>
+                      </div>
+                      <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Total F&B Analyzed</div>
+                        <div className="text-2xl font-bold text-success-500 font-mono">${(686 * avgCheckSize).toLocaleString()}</div>
+                        <div className="text-[11px] text-swoop-text-muted mt-0.5">total spend in dataset</div>
                       </div>
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
                         <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Avg Check Size</div>
@@ -525,7 +530,7 @@ export default function RevenuePage() {
                   ${dollarPerSlowRound}
                 </div>
                 <div className="text-xs text-swoop-text-muted mt-1">per slow round</div>
-                <div className="text-[10px] text-swoop-text-ghost mt-1 leading-snug">(monthly F&B leakage ÷ slow rounds)</div>
+                <div className="text-[10px] text-swoop-text-ghost mt-1 leading-snug">(41%→22% conv. drop × ${avgCheckSize} avg check × ~4 dining covers/round)</div>
                 <div className="text-[11px] text-swoop-text-muted mt-2 leading-snug">
                   {slowContext.slowRounds.toLocaleString()} slow rounds/month ={' '}
                   <span className="font-mono font-bold text-error-500">
