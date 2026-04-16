@@ -248,7 +248,7 @@ export default function HealthOverview() {
           <span className="text-lg leading-none mt-0.5 text-brand-500">◆</span>
           <div className="flex-1">
             <div className="text-sm font-semibold text-swoop-text">
-              {allMembers.length} members imported: connect golf and dining data to calculate member health scores
+              {allMembers.length} members imported: connect golf and dining data to protect at-risk dues
             </div>
             <div className="text-xs text-swoop-text-muted mt-1 leading-relaxed">
               Detect 82→61 health score drops, track the cross-domain decay sequence, and protect at-risk annual dues before members resign (NGCOA pilot average: $32K+ retained per saved member*).

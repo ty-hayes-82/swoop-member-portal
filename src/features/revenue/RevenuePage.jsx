@@ -104,7 +104,7 @@ export default function RevenuePage() {
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-swoop-text">Revenue Leakage</h1>
             <p className="text-sm text-swoop-text-muted mt-1">
-              Revenue lost to slow rounds, understaffing, and weather: quantified across every system.
+              Revenue lost to slow rounds, understaffing, and weather: quantified in dollars.
             </p>
           </div>
 
@@ -305,7 +305,7 @@ export default function RevenuePage() {
               })()}
             </div>
             <p className="text-sm text-swoop-text-muted mt-1">
-              Before members resign, they stop spending. Slow rounds, understaffed shifts, and missed dining: quantified across every system before it shows up in dues revenue.
+              Before members resign, they stop spending. Slow rounds, understaffed shifts, and missed dining: quantified in dollars before it shows up in dues revenue.
             </p>
           </div>
           <button
@@ -616,7 +616,7 @@ export default function RevenuePage() {
 
         <AgentUpsell
           agentName="Auto-Draft Server Call-ins for Understaffed Fridays"
-          benefit="Staffing-Demand Agent predicts Friday coverage gaps from weather + demand and auto-drafts server call-ins to close the second root cause."
+          benefit="Demand intelligence forecasts Friday coverage gaps from weather + demand and auto-drafts server call-ins to close the second root cause."
           metric={leakage.STAFFING_LOSS > 0 ? `Recovers $${leakage.STAFFING_LOSS.toLocaleString()}/mo.` : undefined}
         />
 
@@ -671,7 +671,7 @@ export default function RevenuePage() {
               “I used to spend 6 hours pulling reports from 4 systems. Now I open one page and the story is already there.”
             </p>
             <div className="text-[10px] font-bold uppercase tracking-wider text-swoop-text-label mt-2">
-              — What GMs say after seeing the Board Report
+              What GMs say after seeing the Board Report
             </div>
           </div>
         </div>

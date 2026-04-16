@@ -144,7 +144,7 @@ export default function OvernightBrief() {
             Overnight Brief
           </span>
           <span className="text-[10px] text-swoop-text-label font-mono">
-            Agents ran at {briefTimestamp()}
+            Intelligence compiled at {briefTimestamp()}
           </span>
         </div>
         <span className="text-[10px] text-swoop-text-label">{bullets.length} finding{bullets.length === 1 ? '' : 's'}</span>

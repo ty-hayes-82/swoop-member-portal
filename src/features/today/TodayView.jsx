@@ -692,14 +692,14 @@ export default function TodayView() {
                 </span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>3 understaffed days this period</span>
               </div>
-              <button className="swoop-action-btn" onClick={() => navigate('automations')}>View →</button>
+              <button className="swoop-action-btn" onClick={() => navigate('automations')}>Add Shift →</button>
             </div>
             <div className="swoop-detail-divider" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
               {[
                 { label: 'Location', primary: 'Grill Room', secondary: '2026-01-09', color: '#fff' },
                 { label: 'Coverage', primary: '2 / 4 scheduled', secondary: '2 staff gap', color: C.danger },
-                { label: 'Revenue at risk', primary: '$3,400', secondary: 'this period', color: C.accent, mono: true },
+                { label: 'Revenue at risk', primary: '$3,400', secondary: '~100 lost covers × $34 avg check', color: C.accent, mono: true },
               ].map((tile, i) => (
                 <div key={i} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 10px' }}>
                   <MicroLabel>{tile.label}</MicroLabel>

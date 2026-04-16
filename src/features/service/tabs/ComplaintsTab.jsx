@@ -10,6 +10,24 @@ import ActionPanel from '@/components/ui/ActionPanel';
 import { trackAction } from '@/services/activityService';
 import AgentUpsell from '@/components/ui/AgentUpsell';
 
+const CATEGORY_LABELS = {
+  'staff_service': 'Staff Service',
+  'food_quality': 'Food Quality',
+  'course_conditions': 'Course Conditions',
+  'pace_of_play': 'Pace of Play',
+  'facilities': 'Facilities',
+  'billing': 'Billing',
+  'communication': 'Communication',
+  'pro_shop': 'Pro Shop',
+  'locker_room': 'Locker Room',
+  'service_speed': 'Service Speed',
+};
+function humanizeCategory(raw) {
+  if (!raw) return 'General';
+  return CATEGORY_LABELS[raw.toLowerCase().replace(/\s+/g, '_')] ||
+    raw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 const STATUS_STYLES = {
   resolved: { bg: `${'#12b76a'}12`, color: '#12b76a', label: 'Resolved' },
   in_progress: { bg: '#ca8a0412', color: '#ca8a04', label: 'In Progress' },
@@ -225,7 +243,7 @@ export default function ComplaintsTab() {
                         </span>
                       )}
                       <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
-                        {complaint.category} · {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {humanizeCategory(complaint.category)} · {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         {daysSince > 0 ? ` · ${daysSince}d open` : ''}
                       </span>
                       {complaint.isUnderstaffedDay && (
@@ -317,7 +335,7 @@ export default function ComplaintsTab() {
                       )}
                     </div>
                     <div className="text-xs text-swoop-text-muted">
-                      {complaint.category}, filed {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {humanizeCategory(complaint.category)}, filed {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
@@ -374,7 +392,7 @@ export default function ComplaintsTab() {
               key={cat.category}
               className="flex justify-between items-center p-2 bg-swoop-row rounded-lg text-sm"
             >
-              <div className="text-swoop-text font-medium">{cat.category}</div>
+              <div className="text-swoop-text font-medium">{humanizeCategory(cat.category)}</div>
               <div className="flex items-center gap-4 text-[13px] text-swoop-text-muted">
                 <div>{cat.count} complaints</div>
                 <div className="font-semibold" style={{ color: cat.unresolvedCount > 0 ? '#ef4444' : '#12b76a' }}>

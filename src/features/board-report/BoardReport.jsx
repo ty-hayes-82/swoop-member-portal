@@ -365,8 +365,8 @@ export default function BoardReport() {
                 through proactive intervention. The operations team prevented{' '}
                 <strong className="text-blue-600">{operationalSaves.length} disruptions</strong>, protecting{' '}
                 <strong className="text-blue-600 font-mono">${totalOpsRevenue.toLocaleString()}</strong> in operational revenue.
-                {resolutionRate > 0 && <>Service consistency: <strong>{resolutionRate}% complaint resolution rate</strong>, with an average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'}</strong> detection-to-action time.</>}
-                {resolutionRate === 0 && feedbackRecords.length > 0 && <>Service complaints are under active review, with an average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'}</strong> detection-to-action time.</>}
+                {resolutionRate > 0 && <>Service consistency: <strong>{resolutionRate}% complaint resolution rate</strong>{avgDetectionHrs != null && <>, average <strong>{avgDetectionHrs}-hour</strong> detection-to-action time</>}.</>}
+                {resolutionRate === 0 && feedbackRecords.length > 0 && <>Service complaints are under active review{avgDetectionHrs != null && <>, average <strong>{avgDetectionHrs}-hour</strong> detection-to-action time</>}.</>}
                 Health distribution: <strong>{memberSummaryForCount.healthy || dist.find(d => d.level === 'Healthy')?.count || 0} healthy</strong>,
                 {' '}{(memberSummaryForCount.atRisk || 0) + (memberSummaryForCount.critical || 0)} at-risk.
               </>
@@ -397,12 +397,18 @@ export default function BoardReport() {
               ) : (
                 <>{feedbackRecords.length} service complaint{feedbackRecords.length !== 1 ? 's' : ''} received at {getClubName()} this month: <strong>under review</strong>.</>
               )}
-              {' '}The operations team responded to alerts with an average{' '}
-              <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'} detection-to-action time</strong>
-              {operationalSaves.length > 0
-                ? <>, preventing <strong>{operationalSaves.length} service disruption{operationalSaves.length !== 1 ? 's' : ''}</strong> before they impacted members.</>
-                : <>, with no service disruptions identified this period.</>
-              }
+              {avgDetectionHrs != null ? (
+                <>{' '}The operations team responded to alerts with an average{' '}
+                <strong>{avgDetectionHrs}-hour detection-to-action time</strong>
+                {operationalSaves.length > 0
+                  ? <>, preventing <strong>{operationalSaves.length} service disruption{operationalSaves.length !== 1 ? 's' : ''}</strong> before they impacted members.</>
+                  : <>, with no service disruptions identified this period.</>
+                }</>
+              ) : (
+                operationalSaves.length > 0
+                  ? <>{' '}The operations team prevented <strong>{operationalSaves.length} service disruption{operationalSaves.length !== 1 ? 's' : ''}</strong> before they impacted members.</>
+                  : null
+              )}
             </p>
             <p className="text-swoop-text-muted leading-relaxed mb-4">
               {dist.find(d => d.level === 'Healthy')?.count > 0 ? (
@@ -412,7 +418,7 @@ export default function BoardReport() {
               ) : (
                 <>Swoop is actively monitoring <strong>{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} members</strong> for engagement signals.
                 {(kpis.find(k => k.label === 'At Risk')?.value ?? 0) > 0 && <> <strong>{kpis.find(k => k.label === 'At Risk').value} members</strong> have been flagged as at-risk and are being prioritized for outreach.</>}
-                Early detection is live. Intervention opportunities will appear in the Action Inbox as patterns emerge.</>
+                {' '}Early detection is live. Intervention opportunities will appear in the Action Inbox as patterns emerge.</>
               )}
             </p>
             <p className="text-swoop-text-muted leading-relaxed">

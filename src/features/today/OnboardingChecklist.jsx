@@ -108,10 +108,10 @@ export default function OnboardingChecklist() {
     <div className="flex flex-col gap-4 w-full">
       <div>
         <h1 className="text-2xl font-bold text-swoop-text m-0">
-          See your at-risk members, F&amp;B gaps, and staffing risks — in one view.
+          See your at-risk members, F&amp;B gaps, and staffing risks in one view.
         </h1>
         <p className="text-sm text-swoop-text-muted mt-1 mb-0">
-          Connect four data sources to unlock your full member intelligence dashboard. {doneCount} of {items.length} done.
+          Connect four data sources to access your full member intelligence dashboard. {doneCount} of {items.length} done.
         </p>
       </div>
       <Panel title="Onboarding checklist" subtitle="Each source you connect activates more of Today View.">
