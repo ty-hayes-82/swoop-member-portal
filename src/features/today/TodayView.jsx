@@ -433,10 +433,11 @@ export default function TodayView() {
           </div>
         </div>
 
-        {/* Club Status — 4 KPI tiles */}
+        {/* Club Status — 4 KPI tiles (pinned top, expanded) */}
         <SwoopSection
           title="Club Status"
           titleColor={C.neutral}
+          defaultOpen={true}
           peek={
             teeSheetConnected
               ? `Good conditions · ${roundsToday || 220} rounds · 6 at-risk on sheet · ${pendingAgentCount ?? 0} pending actions`
@@ -537,9 +538,88 @@ export default function TodayView() {
           </div>
         </SwoopSection>
 
-        {/* Overnight Brief */}
-        <SwoopSection title="Overnight Brief" titleColor={C.neutral} peek="what surfaced while you were away">
+        {/* Overnight Brief (pinned, expanded) */}
+        <SwoopSection title="Overnight Brief" titleColor={C.neutral} peek="what surfaced while you were away" defaultOpen={true}>
           <OvernightBrief />
+        </SwoopSection>
+
+        {/* Live Check-ins (pinned 3rd, expanded) */}
+        {(() => {
+          const checkins = buildCheckinAlerts();
+          if (!checkins.length) return null;
+          const peek = checkins.map(c => `${c.name.split(' ')[0]} (${c.isAtRisk ? 'at-risk' : 'VIP'})`).join(' · ');
+          return (
+            <SwoopSection
+              title="Live Check-ins"
+              titleColor={C.neutral}
+              count={`${checkins.length} active`}
+              peek={peek}
+              defaultOpen={true}
+            >
+              {checkins.map(m => {
+                const isRisk = m.isAtRisk;
+                const color = isRisk ? C.danger : C.accent;
+                const bg = isRisk ? 'rgba(239,68,68,0.07)' : 'rgba(243,146,45,0.07)';
+                const bdr = isRisk ? 'rgba(239,68,68,0.18)' : 'rgba(243,146,45,0.18)';
+                return (
+                  <div key={m.memberId} className="swoop-detail-row" style={{ background: bg, borderColor: bdr, flexDirection: 'column', gap: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color, background: `${color.replace('rgb', 'rgba').replace(')', ',0.15)')}`, border: `1px solid ${color.replace('rgb', 'rgba').replace(')', ',0.3)')}`, padding: '2px 7px', borderRadius: 999, flexShrink: 0 }}>
+                        {isRisk ? 'AT-RISK' : 'VIP'}
+                      </span>
+                      <MemberLink memberId={m.memberId} mode="drawer" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
+                        {m.name}
+                      </MemberLink>
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                        Health {m.healthScore} · {m.archetype} · {m.time} {m.course} · ${(m.duesAnnual / 1000).toFixed(0)}K/yr
+                      </span>
+                      <span style={{ flex: 1 }} />
+                      <button className="swoop-action-btn" onClick={() => navigate('automations')}>View in Inbox →</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', width: '100%' }}>
+                      <div>
+                        <MicroLabel color="rgba(255,255,255,0.35)">Talking Points</MicroLabel>
+                        <ul style={{ margin: 0, padding: '0 0 0 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                          {m.talkingPoints.map((p, i) => (
+                            <li key={i} style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>{p}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <MicroLabel color="rgba(255,255,255,0.35)">{isRisk ? 'Risk Profile' : 'Member Value'}</MicroLabel>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>
+                          {isRisk ? 'Zero activity trend' : `Health score ${m.healthScore} · Top members`}
+                        </div>
+                        <div style={{ fontSize: 11, color, fontWeight: 600, marginTop: 4 }}>
+                          ${(m.duesAnnual / 1000).toFixed(0)}K {isRisk ? 'dues at risk' : 'annual dues'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </SwoopSection>
+          );
+        })()}
+
+        {/* Priority Member Alerts — highest urgency */}
+        <SwoopSection
+          title="Priority Member Alerts"
+          titleColor={C.danger}
+          count="5 critical"
+          peek="Linda Leonard · Kevin Hurst · Robert Callahan · Anne Jordan · Robert Mills"
+        >
+          <MemberAlerts />
+        </SwoopSection>
+
+        {/* Action Queue */}
+        <SwoopSection
+          title="Action Queue"
+          titleColor={C.accent}
+          count={pendingAgentCount || 20}
+          peek="3 high-priority · F&B capture, member engagement, service recovery"
+        >
+          <PendingActionsInline topPriority={topPriority} />
         </SwoopSection>
 
         {/* Today's Priorities */}
@@ -638,84 +718,6 @@ export default function TodayView() {
               <button className="swoop-action-btn" style={{ flexShrink: 0 }}>Send Notifications →</button>
             </div>
           </div>
-        </SwoopSection>
-
-        {/* Live Check-ins */}
-        {(() => {
-          const checkins = buildCheckinAlerts();
-          if (!checkins.length) return null;
-          const peek = checkins.map(c => `${c.name.split(' ')[0]} (${c.isAtRisk ? 'at-risk' : 'VIP'})`).join(' · ');
-          return (
-            <SwoopSection
-              title="Live Check-ins"
-              titleColor={C.neutral}
-              count={`${checkins.length} active`}
-              peek={peek}
-            >
-              {checkins.map(m => {
-                const isRisk = m.isAtRisk;
-                const color = isRisk ? C.danger : C.accent;
-                const bg = isRisk ? 'rgba(239,68,68,0.07)' : 'rgba(243,146,45,0.07)';
-                const bdr = isRisk ? 'rgba(239,68,68,0.18)' : 'rgba(243,146,45,0.18)';
-                return (
-                  <div key={m.memberId} className="swoop-detail-row" style={{ background: bg, borderColor: bdr, flexDirection: 'column', gap: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
-                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color, background: `${color.replace('rgb', 'rgba').replace(')', ',0.15)')}`, border: `1px solid ${color.replace('rgb', 'rgba').replace(')', ',0.3)')}`, padding: '2px 7px', borderRadius: 999, flexShrink: 0 }}>
-                        {isRisk ? 'AT-RISK' : 'VIP'}
-                      </span>
-                      <MemberLink memberId={m.memberId} mode="drawer" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
-                        {m.name}
-                      </MemberLink>
-                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
-                        Health {m.healthScore} · {m.archetype} · {m.time} {m.course} · ${(m.duesAnnual / 1000).toFixed(0)}K/yr
-                      </span>
-                      <span style={{ flex: 1 }} />
-                      <button className="swoop-action-btn" onClick={() => navigate('automations')}>View in Inbox →</button>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', width: '100%' }}>
-                      <div>
-                        <MicroLabel color="rgba(255,255,255,0.35)">Talking Points</MicroLabel>
-                        <ul style={{ margin: 0, padding: '0 0 0 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                          {m.talkingPoints.map((p, i) => (
-                            <li key={i} style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>{p}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <MicroLabel color="rgba(255,255,255,0.35)">{isRisk ? 'Risk Profile' : 'Member Value'}</MicroLabel>
-                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>
-                          {isRisk ? 'Zero activity trend' : `Health score ${m.healthScore} · Top members`}
-                        </div>
-                        <div style={{ fontSize: 11, color, fontWeight: 600, marginTop: 4 }}>
-                          ${(m.duesAnnual / 1000).toFixed(0)}K {isRisk ? 'dues at risk' : 'annual dues'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </SwoopSection>
-          );
-        })()}
-
-        {/* Priority Member Alerts */}
-        <SwoopSection
-          title="Priority Member Alerts"
-          titleColor={C.danger}
-          count="5 critical"
-          peek="Linda Leonard · Kevin Hurst · Robert Callahan · Anne Jordan · Robert Mills"
-        >
-          <MemberAlerts />
-        </SwoopSection>
-
-        {/* Action Queue */}
-        <SwoopSection
-          title="Action Queue"
-          titleColor={C.accent}
-          count={pendingAgentCount || 20}
-          peek="3 high-priority · F&B capture, member engagement, service recovery"
-        >
-          <PendingActionsInline topPriority={topPriority} />
         </SwoopSection>
 
         {/* Tomorrow's Forecast */}
