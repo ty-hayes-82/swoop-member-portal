@@ -466,7 +466,7 @@ export default function TodayView() {
           peek={
             teeSheetConnected
               ? `Good conditions · ${roundsToday || 220} rounds · ${pendingAgentCount ?? 0} pending actions`
-              : `Connect tee sheet to see today's rounds and at-risk alerts · ${pendingAgentCount ?? 0} pending actions`
+              : `Connect tee sheet to uncover slow-play dining leakage and retention risks · ${pendingAgentCount ?? 0} pending actions`
           }
         >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>

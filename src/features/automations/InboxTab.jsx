@@ -9,6 +9,7 @@ import { getDataMode, isGateOpen } from '@/services/demoGate';
 import { SourceBadgeRow } from '@/components/ui/SourceBadge';
 import ActionCard from '@/components/ui/ActionCard';
 import { getComplaintCorrelation, getUnderstaffedDays } from '@/services/staffingService';
+import { getTomorrowForecast } from '@/services/weatherService';
 
 // Map source/agent identifiers to a role-based owner label for the card header.
 const SOURCE_TO_OWNER = {
@@ -228,6 +229,8 @@ export default function InboxTab() {
               const dayLabel = topDay?.day || topDay?.date ? new Date(topDay.date || Date.now()).toLocaleDateString('en-US', { weekday: 'long' }) : 'Saturday';
               const teeCount = topDay?.teeTimesCount || topDay?.teeTimes || 34;
               const mealPeriod = (topDay?.shift || topDay?.period || 'lunch').toLowerCase();
+              const wx = getTomorrowForecast();
+              const wxSuffix = wx ? ` · ${wx.condition === 'sunny' || (!wx.rain && wx.high >= 70) ? `☀ ${wx.high}°F clear — strong dining demand expected` : wx.rain ? `🌧 ${wx.high}°F rain — lower demand than forecast` : `${wx.high}°F ${wx.description || wx.condition}`}` : '';
               return (
                 <div className="flex items-start gap-3 py-2 px-3 rounded-lg bg-swoop-panel border border-swoop-border">
                   <span className="text-sm shrink-0">⚠️</span>
@@ -236,7 +239,7 @@ export default function InboxTab() {
                       Add a server to {dayLabel} {mealPeriod}
                     </div>
                     <div className="text-[11px] text-swoop-text-muted mt-0.5">
-                      Based on {teeCount} upcoming tee times — projected F&B demand exceeds current coverage. {understaffedDays.length > 1 ? `+${understaffedDays.length - 1} other understaffed window${understaffedDays.length - 1 !== 1 ? 's' : ''} detected.` : ''}
+                      Based on {teeCount} upcoming tee times{wxSuffix}: projected F&B demand exceeds current coverage. {understaffedDays.length > 1 ? `+${understaffedDays.length - 1} other understaffed window${understaffedDays.length - 1 !== 1 ? 's' : ''} detected.` : ''}
                     </div>
                   </div>
                   <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-warning-500/10 text-warning-500">Add Staff</span>

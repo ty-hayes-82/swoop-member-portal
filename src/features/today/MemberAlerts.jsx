@@ -107,7 +107,12 @@ function buildPriorityList() {
         owner = 'Front Desk';
       } else {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Golf and F&B activity both below 90-day average; email engagement softening';
-        action = m.action || 'Personalized outreach based on engagement pattern';
+        const memberDues = m.duesAnnual || m.dues_annual || m.dues || 0;
+        action = m.action || (memberDues > 10000
+          ? `GM personal call: high-value member ($${Math.round(memberDues / 1000)}K/yr) showing disengagement`
+          : score < 45
+          ? 'Membership Director outreach: score below 45 — schedule retention conversation'
+          : 'Membership Director check-in: identify engagement gaps before next renewal');
         owner = ACTION_OWNERS[archetype] || 'Membership Director';
       }
 

@@ -318,7 +318,7 @@ export default function RevenuePage() {
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-swoop-text">
-                Revenue Leakage
+                {isGateOpen('tee-sheet') ? 'Revenue Leakage' : 'F&B Revenue'}
               </h1>
               {(() => {
                 const causes = [
@@ -364,9 +364,14 @@ export default function RevenuePage() {
               </div>
             </div>
             <div className="h-10 w-px bg-swoop-border hidden sm:block" />
-            <div className="text-sm text-swoop-text-muted leading-relaxed max-w-md">
-              Post-round dining conversion falls from <span className="font-bold text-swoop-text">41%</span> on on-pace rounds to <span className="font-bold text-error-500">22%</span> on slow rounds.
-              At a <span className="font-bold text-swoop-text">${avgCheckSize} avg check</span>, every slow round forfeits <span className="font-bold text-error-500">${dollarPerSlowRound}</span> in F&amp;B revenue, before a single member decides not to renew.
+            <div className="flex-1 min-w-0">
+              <div className="text-sm text-swoop-text-muted leading-relaxed max-w-md">
+                Post-round dining conversion falls from <span className="font-bold text-swoop-text">41%</span> on on-pace rounds to <span className="font-bold text-error-500">22%</span> on slow rounds.
+                At a <span className="font-bold text-swoop-text">${avgCheckSize} avg check</span>, every slow round forfeits <span className="font-bold text-error-500">${dollarPerSlowRound}</span> in F&amp;B revenue per foursome (4 players × ${avgCheckSize} × 19-point conversion drop), before a single member decides not to renew.
+              </div>
+              <div className="text-[11px] text-swoop-text-label mt-2">
+                At a 30% F&amp;B margin, <span className="font-semibold text-swoop-text">${Math.round(leakage.PACE_LOSS * 0.30).toLocaleString()}/mo</span> of that leakage is margin dollars — the direct hit to club profitability.
+              </div>
             </div>
           </div>
         )}

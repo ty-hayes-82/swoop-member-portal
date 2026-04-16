@@ -19,7 +19,10 @@ export default function ScenarioSlider({
   );
 
   const slowRoundsEliminated = Math.round(baseSlowRounds * (reductionPct / 100));
-  const monthlyRecovery = scenario.totalRecovery;
+  // Compute paceRecovery from the displayed rounds × displayed $/round so both numbers multiply correctly on screen
+  const paceRecovery = slowRoundsEliminated * dollarPerSlowRound;
+  const staffingRecovery = scenario.recoveredStaffing ?? 0;
+  const monthlyRecovery = paceRecovery + staffingRecovery;
   const annualRecovery = monthlyRecovery * 12;
 
   return (
@@ -119,7 +122,7 @@ export default function ScenarioSlider({
             Pace recovery
           </div>
           <div className="text-lg font-bold text-success-500 font-mono mt-0.5">
-            $<AnimatedNumber value={scenario.recoveredPace} duration={400} />
+            $<AnimatedNumber value={paceRecovery} duration={400} />
           </div>
         </div>
         <div>
@@ -127,7 +130,7 @@ export default function ScenarioSlider({
             Staffing recovery
           </div>
           <div className="text-lg font-bold text-success-500 font-mono mt-0.5">
-            $<AnimatedNumber value={scenario.recoveredStaffing} duration={400} />
+            $<AnimatedNumber value={staffingRecovery} duration={400} />
           </div>
         </div>
       </div>
