@@ -1,0 +1,125 @@
+Swoop Agent Architecture: Clean Plan
+
+Core insight
+There are two fundamentally different agent types in the Swoop platform, and they've been muddled together. Separating them cleanly — and building each on the Managed Agents pattern — is what makes the platform scalable, auditable, and aligned with Swoop's actual role as a Layer 3 integration layer.
+Type 1: Identity-bound agents. One per human. Each GM, each F&B Director, each server, each member gets their own personalized agent with its own durable session. These agents are the relationship surface — they know the individual, learn preferences, handle routing, and communicate on behalf of or to that person.
+Type 2: Domain-analyst agents. Stateless specialists — Revenue Analyst, Service Recovery, Member Pulse, Labor Optimizer, Engagement Autopilot. These agents don't belong to any person. They scan signals across the club, find insights, generate recommended actions, and hand those actions off to the right identity-bound agent for routing and execution.
+Swoop itself never books a tee time, never rings up a sale, never sends an email without confirmation. We are an integration, communication, and insights layer. Every real-world action is executed by a human in the source system — we just make sure the right human gets the right message at the right moment, with the right context.
+
+The two-type separation, mapped to Managed Agents
+Type 1 — Identity-bound agents (Session = Person)
+
+One durable session per human. session_id is tied to user_id for staff, member_id for members.
+Session lives forever (or for the life of their membership / employment).
+Harness is a routing brain. Its only job is to interact with its human and call other agents as tools via execute(name, input).
+Learns continuously — preferences, communication tone, approval patterns, delegation habits — all as session events.
+Scoped permissions. A server's agent can't read the Controller's session. The GM's agent can read direct-report sessions but only with logged access.
+
+Categories:
+BucketSession scopePrimary purposeMember conciergesOne per memberRelationship memory, preferences, bookings, concierge requestsGM conciergeOne per GMRouting, triage, decision logging, morning briefingsRole-based staff agentsOne per employeeRole-specific briefings, task routing, confirmation loops
+Type 2 — Domain-analyst agents (Session = Domain)
+
+One durable session per domain, not per person. E.g., session_id = revenue_analyst_pinetree.
+Stateless brains, durable signal history. Each analyst agent runs on schedule or on trigger, writes its findings to its own session log, and publishes recommended actions.
+Handoff pattern. An analyst agent never acts directly. It emits a recommendation event. An identity-bound agent picks up the recommendation and routes it to the human responsible for executing.
+Memory matters. The Revenue Analyst needs to remember "I recommended this twilight pricing change 3 weeks ago and the GM dismissed it" so it doesn't nag. That's the session log at work.
+
+Categories:
+AgentSignal sourcesTypical outputRevenue AnalystTee sheet, POS, weather, historical yieldPricing recommendations, capture opportunitiesService RecoveryComplaint log, CRM, email, time-since-last-touchEscalation and outreach recommendationsMember PulseEngagement decay, spend trends, rounds frequencyAt-risk tier changes, outreach prioritiesLabor OptimizerScheduling, forecast covers, historical staffing gapsCoverage pivots, shift adjustmentsEngagement AutopilotParticipation decay, archetype baselinesReactivation outreach suggestionsDraft CommunicatorApproved tone + context + urgency from any agentMessage drafts in user voice
+
+How they interact (the handoff loop)
+Every meaningful action in the platform follows this pattern:
+
+Signal emerges. A domain-analyst agent detects something — underfilled Tuesday twilight, James Whitfield's engagement decay, a 9-day-unresolved complaint.
+Analyst emits recommendation. Written as an event to the analyst's session log AND to the relevant identity-bound sessions.
+Identity-bound agent picks it up. The Head Pro's agent receives the Tuesday twilight flag. The GM's agent receives the Whitfield escalation. The F&B Director's agent receives the unresolved complaint.
+Identity-bound agent delivers to the human. Via morning briefing, notification, or direct chat — framed in that person's voice, respecting their learned priorities.
+Human acts in the source system. The pro shop books the tee time in ForeTees. The F&B Director comps the meal in Jonas POS. Swoop does not.
+Human confirms back to the agent. "Done — booked James for Saturday 8:40." The agent writes a confirmation_received event to its session AND back to the originating analyst's session.
+Analyst closes the loop. Outcome tracking: did the intervention work? Feedback into future recommendations.
+
+This confirmation loop is the operational backbone. It's what makes Swoop an integration layer and not an action platform — and what protects the club from ever having an AI take a real-world action unsupervised.
+
+Architecture spec
+Data model additions
+Three new tables, all append-only:
+
+agent_sessions — one row per session. Columns: session_id, session_type (identity | analyst), owner_id (user_id, member_id, or analyst_name), club_id, created_at, status.
+agent_session_events — the universal event log. Columns: event_id, session_id, event_type, payload (JSONB), source_agent, created_at, correlation_id (for tracking recommendations across sessions).
+agent_handoffs — explicit record of cross-session handoffs. Columns: handoff_id, source_session_id, target_session_id, recommendation_event_id, status (pending | accepted | acted | confirmed | rejected), confirmed_at, outcome.
+
+The existing agent_actions table becomes a read-view derived from event logs, not a primary write target.
+Harness design
+Following the Managed Agents pattern:
+
+assembleAgentCall(sessionId, agentId, triggerEvent) becomes the universal harness entry point.
+Harness fetches relevant session slices via getEvents(sessionId, filter) — never loads full history.
+Tool calls follow execute(toolName, input) → string. Tools include: other agents, data connectors, notification channels, human-confirmation requests.
+Session writes happen via emitEvent(sessionId, eventPayload). Every state change is an event.
+Stateless harness: if it crashes mid-turn, the next run resumes from the last event.
+
+Permissions and scoping
+
+Each session has explicit read/write scopes.
+The GM session can read summaries of direct-report sessions (not raw events).
+Member sessions are readable by the Membership Director and GM, writable only by member-facing agents.
+Analyst sessions are globally readable by all identity-bound agents at the club but writable only by the analyst itself.
+Every cross-session read is logged to an audit event. Members and staff can see who accessed their data and when.
+
+
+Role rollout — build order
+Phase 1 — Foundation (Sprint 1-2)
+
+Ship the session + event log infrastructure.
+Refactor assembleAgentCall() as the harness.
+Migrate the existing 8 agents onto the event-log model without changing their behavior. This is pure infrastructure.
+
+Phase 2 — First identity agents (Sprint 3-4)
+
+GM concierge (routing brain over the existing 7 specialists).
+Member concierge (one per member, starting with pilot club's full roster).
+Validate the handoff loop with the GM session before scaling to other roles.
+
+Phase 3 — Split the monolithic concierge (Sprint 4-5)
+
+Booking, Service Recovery, Personal Concierge become three identity-agent-callable specialists sharing the member session.
+
+Phase 4 — Role-based staff agents (Sprint 5-8)
+
+Priority order: Membership Director → F&B Director → Head Pro → Dining Room Manager → Controller. Five roles, five sprints.
+Each role gets a role template (default briefing, default tool routing, default signal subscriptions) and a personal overlay (preferences learned from behavior).
+
+Phase 5 — Confirmation loop hardening (continuous)
+
+Two-way confirmation UX: staff confirms in-app that they acted in the source system.
+Unconfirmed recommendations auto-escalate after configurable thresholds.
+Outcome tracking feeds back into analyst agents.
+
+
+What this gets right (Managed Agents best practices applied)
+
+Brain decoupled from hands. Analyst agents don't own the data they're analyzing. Identity agents don't own the data they're routing. Everything flows through sessions and tool calls.
+No pets. Any agent can crash and be rebooted from its session log. No "we can't lose this one instance" failure mode.
+Session outlives the harness. Model upgrades, harness rewrites, feature additions — none of them disturb the accumulated memory.
+Credentials never touch the brain. Vendor API keys stay in a vault; identity agents only see tool-call results, never raw tokens. (This becomes important when pro shop agents start pushing booking confirmations back through Jonas or ForeTees.)
+Context management in the harness, not the session. Each agent type decides what to load from its session per turn. No lossy compaction at the storage layer.
+Many brains, many hands. Analyst agents hand off to identity agents. Identity agents hand off to other identity agents (GM → F&B Director). Member agents hand off to staff agents. All through the same event-log primitive.
+
+
+What this rules out
+
+No agent books a tee time directly. Ever.
+No agent sends an external communication without a human approval in the loop (beyond the auto-approve thresholds the GM has explicitly set).
+No cross-session data access without an audit event.
+No silent mutation of shared state. Every change is an event with a provenance trail.
+
+
+The clean mental model
+Analyst agents find. They look across signals and surface what matters.
+Identity agents route. They carry recommendations to the human who can act, in that human's voice and on that human's schedule.
+Humans do. Every real-world action happens in Jonas, ForeTees, Toast, Clubessential, or whatever system the club already uses.
+Sessions remember. Every recommendation, every decision, every outcome — durable, queryable, transferable across model upgrades and role turnover.
+That's the architecture. It matches how clubs actually work, it matches what Swoop actually is, and it matches the Managed Agents pattern without having to adopt the hosted runtime.
+
+Concrete next move
+Before Sprint 1 starts, write a one-page spec for agent_session_events — the exact schema, the first 10 event types to support, and the migration path for today's agent_actions table. Everything else builds on that foundation, so getting the event model right in the first week pays back for years.Opus 4.7Claude is AI and can make mistakes. Plea

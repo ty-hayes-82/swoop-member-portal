@@ -10,6 +10,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId } from '../lib/withAuth.js';
 import { getOrCreateSession, updateSessionSummary, emitConciergeEvent, getConciergeEvents } from '../agents/concierge-session.js';
+import { getOrCreateAgentSession, emitAgentEvent } from '../agents/session-core.js';
 import { buildConciergePrompt } from '../../src/config/conciergePrompt.js';
 import { getAnthropicClient, MANAGED_AGENT_ID, MANAGED_ENV_ID } from '../agents/managed-config.js';
 import { routeEvent } from '../agents/agent-events.js';
@@ -706,6 +707,9 @@ async function chatHandler(req, res) {
     console.warn('[concierge/chat] session error (continuing):', e.message);
   }
 
+  // Phase 2a: dual-write to universal agent session (fire-and-forget)
+  getOrCreateAgentSession(`mbr_${member_id}_concierge`, 'identity', member_id, clubId).catch(() => {});
+
   // Get club name (fallback for demo)
   let clubName = 'Pinetree Country Club';
   try {
@@ -786,6 +790,8 @@ async function chatHandler(req, res) {
   try {
     await emitConciergeEvent(member_id, clubId, { type: 'user_message', text: message });
   } catch (_) { /* non-blocking */ }
+  // Phase 2a: dual-write to universal session event log (fire-and-forget)
+  emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'user_message', text: message, source_agent: 'member_concierge' }).catch(() => {});
 
   if (SIMULATION_MODE) {
     // Simulation: return a canned response based on the message
@@ -874,6 +880,15 @@ async function chatHandler(req, res) {
             result_summary: JSON.stringify(toolResult).slice(0, 200),
           });
         } catch (_) { /* non-blocking */ }
+        // Phase 2a: dual-write tool_call to universal session event log (fire-and-forget)
+        emitAgentEvent(`mbr_${member_id}_concierge`, clubId, {
+          type: 'tool_call',
+          tool: toolUse.name,
+          args: toolUse.input,
+          status: toolResult?.status || 'ok',
+          result_summary: JSON.stringify(toolResult).slice(0, 200),
+          source_agent: 'member_concierge',
+        }).catch(() => {});
         // Emit dedicated request_submitted event for follow-up status queries (Sprint B)
         if (toolResult?.status === 'request_submitted' && toolResult?.request_id) {
           try {
@@ -886,6 +901,16 @@ async function chatHandler(req, res) {
               expected_response: toolResult.expected_response,
             });
           } catch (_) { /* non-blocking */ }
+          // Phase 2a: dual-write request_submitted to universal session event log (fire-and-forget)
+          emitAgentEvent(`mbr_${member_id}_concierge`, clubId, {
+            type: 'request_submitted',
+            request_id: toolResult.request_id,
+            request_type: toolUse.name,
+            routed_to: toolResult.routed_to,
+            details: toolResult.details,
+            expected_response: toolResult.expected_response,
+            source_agent: 'member_concierge',
+          }).catch(() => {});
         }
         return { type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(toolResult) };
       }));
@@ -947,6 +972,8 @@ async function chatHandler(req, res) {
     try {
       await emitConciergeEvent(member_id, clubId, { type: 'agent_response', text: responseText });
     } catch (_) { /* non-blocking */ }
+    // Phase 2a: dual-write agent_response to universal session event log (fire-and-forget)
+    emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'agent_response', text: responseText, source_agent: 'member_concierge' }).catch(() => {});
 
     // Update conversation summary (fallback for clusters that lack event log)
     try {
