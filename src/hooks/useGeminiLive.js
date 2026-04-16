@@ -1,17 +1,22 @@
 /**
- * useGeminiLive — Manages a Gemini Live bidirectional audio session.
+ * useGeminiLive — Gemini 3.1 Flash Live bidirectional audio session.
  *
- * Uses @google/genai live API directly from the browser with
- * VITE_GEMINI_API_KEY. Audio is captured at 16kHz PCM via AudioWorklet,
- * streamed to Gemini, and responses are played back via AudioContext.
+ * Architecture:
+ * - INPUT:  MediaStream → AudioWorklet (16kHz PCM) → base64 → session.sendRealtimeInput
+ * - OUTPUT: session onmessage audio chunks → AudioContext queue → speaker playback
+ *
+ * Two separate AudioContexts are used: inputCtx at 16kHz for mic capture,
+ * outputCtx at system default (typically 44.1/48kHz) for playback so the
+ * browser can resample Gemini's 24kHz output cleanly.
  */
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { GoogleGenAI, Modality } from '@google/genai';
 
 const LIVE_MODEL = 'gemini-3.1-flash-live-preview';
-const SAMPLE_RATE = 16000;
+const INPUT_SAMPLE_RATE = 16000;
+const OUTPUT_SAMPLE_RATE = 24000; // Gemini Live outputs 24kHz PCM
 
-// Tool declarations that mirror the SMS concierge backend
+// Tool declarations matching the SMS concierge backend
 const CONCIERGE_TOOLS = [
   {
     functionDeclarations: [
@@ -111,11 +116,11 @@ const CONCIERGE_TOOLS = [
   },
 ];
 
-// Simulate tool execution — mirrors what the backend would return
-function simulateToolResult(toolName, args) {
+// Simulate tool results for the demo
+function simulateToolResult(name, args = {}) {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-  switch (toolName) {
+  switch (name) {
     case 'book_tee_time':
       return { success: true, confirmation: `TEE-${Math.floor(Math.random() * 9000) + 1000}`, date: args.date || dateStr, time: args.time || '8:00 AM', players: args.players || 2 };
     case 'cancel_tee_time':
@@ -131,40 +136,35 @@ function simulateToolResult(toolName, args) {
         ],
       };
     case 'get_my_schedule':
-      return {
-        upcoming: [
-          { type: 'tee_time', date: 'Saturday Apr 19', time: '7:00 AM', players: 4 },
-          { type: 'dining', date: 'Saturday Apr 19', time: '7:00 PM', party: 2 },
-        ],
-      };
+      return { upcoming: [{ type: 'tee_time', date: 'Saturday Apr 19', time: '7:00 AM', players: 4 }] };
     case 'rsvp_event':
       return { success: true, event: args.event_name, confirmation: `RSVP-${Math.floor(Math.random() * 9000) + 1000}` };
     case 'file_complaint':
       return { success: true, ticket: `SVC-${Math.floor(Math.random() * 9000) + 1000}`, message: 'Complaint filed. Our team will follow up within 24 hours.' };
     case 'send_request_to_club':
-      return { success: true, message: 'Request sent to club staff. You will hear back shortly.' };
+      return { success: true, message: 'Request sent to club staff.' };
     default:
       return { success: false, message: 'Unknown tool.' };
   }
 }
 
-// Decode base64 PCM audio and enqueue to AudioContext
-function base64ToFloat32(b64) {
+// Decode base64 PCM16 → Float32 for Web Audio playback
+function pcm16Base64ToFloat32(b64) {
   const binary = atob(b64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   const int16 = new Int16Array(bytes.buffer);
   const float32 = new Float32Array(int16.length);
-  for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768;
+  for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768.0;
   return float32;
 }
 
-// Convert Float32Array to base64 PCM
-function float32ToBase64PCM(float32Array) {
-  const int16 = new Int16Array(float32Array.length);
-  for (let i = 0; i < float32Array.length; i++) {
-    const s = Math.max(-1, Math.min(1, float32Array[i]));
-    int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+// Encode Float32 mic audio → base64 PCM16
+function float32ToPcm16Base64(float32) {
+  const int16 = new Int16Array(float32.length);
+  for (let i = 0; i < float32.length; i++) {
+    const clamped = Math.max(-1, Math.min(1, float32[i]));
+    int16[i] = clamped < 0 ? clamped * 0x8000 : clamped * 0x7fff;
   }
   const bytes = new Uint8Array(int16.buffer);
   let binary = '';
@@ -172,34 +172,36 @@ function float32ToBase64PCM(float32Array) {
   return btoa(binary);
 }
 
-export function useGeminiLive({ systemPrompt, memberName = 'Member', onTranscript, onToolCall }) {
+export function useGeminiLive({ systemPrompt, onTranscript, onToolCall }) {
   const [status, setStatus] = useState('idle'); // idle | connecting | active | error
   const [error, setError] = useState(null);
 
   const sessionRef = useRef(null);
-  const audioCtxRef = useRef(null);
+  const inputCtxRef = useRef(null);   // 16kHz — mic capture only
+  const outputCtxRef = useRef(null);  // system rate — playback
   const mediaStreamRef = useRef(null);
   const workletNodeRef = useRef(null);
+  const mediaSourceRef = useRef(null);
   const playbackQueueRef = useRef([]);
   const isPlayingRef = useRef(false);
   const nextPlayTimeRef = useRef(0);
 
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-  // Drain the audio playback queue
+  // Drain audio playback queue sequentially
   const drainQueue = useCallback(() => {
     if (isPlayingRef.current || playbackQueueRef.current.length === 0) return;
-    const ctx = audioCtxRef.current;
-    if (!ctx) return;
+    const ctx = outputCtxRef.current;
+    if (!ctx || ctx.state === 'closed') return;
     isPlayingRef.current = true;
 
-    const process = () => {
+    const scheduleNext = () => {
       if (playbackQueueRef.current.length === 0) {
         isPlayingRef.current = false;
         return;
       }
       const float32 = playbackQueueRef.current.shift();
-      const buf = ctx.createBuffer(1, float32.length, 24000); // Gemini output is 24kHz
+      const buf = ctx.createBuffer(1, float32.length, OUTPUT_SAMPLE_RATE);
       buf.copyToChannel(float32, 0);
       const src = ctx.createBufferSource();
       src.buffer = buf;
@@ -207,14 +209,39 @@ export function useGeminiLive({ systemPrompt, memberName = 'Member', onTranscrip
       const startAt = Math.max(ctx.currentTime, nextPlayTimeRef.current);
       src.start(startAt);
       nextPlayTimeRef.current = startAt + buf.duration;
-      src.onended = process;
+      src.onended = scheduleNext;
     };
-    process();
+    scheduleNext();
+  }, []);
+
+  const stop = useCallback(() => {
+    // Disconnect mic worklet
+    workletNodeRef.current?.disconnect();
+    workletNodeRef.current = null;
+    mediaSourceRef.current?.disconnect();
+    mediaSourceRef.current = null;
+    // Stop mic track
+    mediaStreamRef.current?.getTracks().forEach(t => t.stop());
+    mediaStreamRef.current = null;
+    // Close session
+    try { sessionRef.current?.close?.(); } catch (_) {}
+    sessionRef.current = null;
+    // Close audio contexts
+    try { inputCtxRef.current?.close(); } catch (_) {}
+    inputCtxRef.current = null;
+    try { outputCtxRef.current?.close(); } catch (_) {}
+    outputCtxRef.current = null;
+    // Reset playback state
+    playbackQueueRef.current = [];
+    isPlayingRef.current = false;
+    nextPlayTimeRef.current = 0;
+    setStatus('idle');
+    setError(null);
   }, []);
 
   const start = useCallback(async () => {
     if (!apiKey) {
-      setError('VITE_GEMINI_API_KEY not set. Add it to your .env.local file.');
+      setError('Add VITE_GEMINI_API_KEY to .env.local and restart the dev server.');
       setStatus('error');
       return;
     }
@@ -223,10 +250,11 @@ export function useGeminiLive({ systemPrompt, memberName = 'Member', onTranscrip
       setStatus('connecting');
       setError(null);
 
-      // Init audio context
-      audioCtxRef.current = new AudioContext({ sampleRate: SAMPLE_RATE });
+      // Output AudioContext — system default sample rate, no forced 16kHz
+      outputCtxRef.current = new AudioContext();
       nextPlayTimeRef.current = 0;
 
+      // Connect to Gemini 3.1 Flash Live
       const genAI = new GoogleGenAI({ apiKey });
 
       const session = await genAI.live.connect({
@@ -240,14 +268,16 @@ export function useGeminiLive({ systemPrompt, memberName = 'Member', onTranscrip
           },
         },
         callbacks: {
-          onopen: () => setStatus('active'),
+          onopen: () => {
+            setStatus('active');
+          },
 
           onmessage: async (msg) => {
-            // Audio response
+            // Audio response chunks
             const parts = msg.serverContent?.modelTurn?.parts ?? [];
             for (const part of parts) {
               if (part.inlineData?.mimeType?.startsWith('audio/')) {
-                const float32 = base64ToFloat32(part.inlineData.data);
+                const float32 = pcm16Base64ToFloat32(part.inlineData.data);
                 playbackQueueRef.current.push(float32);
                 drainQueue();
               }
@@ -256,24 +286,21 @@ export function useGeminiLive({ systemPrompt, memberName = 'Member', onTranscrip
               }
             }
 
-            // Transcript from input audio
-            if (msg.serverContent?.inputTranscription?.text) {
-              onTranscript?.({ role: 'user', text: msg.serverContent.inputTranscription.text });
-            }
-            if (msg.serverContent?.outputTranscription?.text) {
-              onTranscript?.({ role: 'assistant', text: msg.serverContent.outputTranscription.text });
-            }
+            // Transcriptions
+            const inputText = msg.serverContent?.inputTranscription?.text;
+            const outputText = msg.serverContent?.outputTranscription?.text;
+            if (inputText) onTranscript?.({ role: 'user', text: inputText });
+            if (outputText) onTranscript?.({ role: 'assistant', text: outputText });
 
-            // Tool calls
-            const toolCalls = msg.toolCall?.functionCalls ?? [];
-            for (const call of toolCalls) {
-              const result = simulateToolResult(call.name, call.args || {});
-              onToolCall?.({ name: call.name, args: call.args, result });
-              // Send tool result back to session
-              await session.sendToolResponse({
+            // Tool calls — respond immediately
+            const functionCalls = msg.toolCall?.functionCalls ?? [];
+            for (const fc of functionCalls) {
+              const result = simulateToolResult(fc.name, fc.args || {});
+              onToolCall?.({ name: fc.name, args: fc.args, result, id: fc.id });
+              session.sendToolResponse({
                 functionResponses: [{
-                  id: call.id,
-                  name: call.name,
+                  id: fc.id,
+                  name: fc.name,
                   response: result,
                 }],
               });
@@ -281,69 +308,78 @@ export function useGeminiLive({ systemPrompt, memberName = 'Member', onTranscrip
           },
 
           onerror: (e) => {
-            setError(e?.message || 'Connection error');
+            setError(e?.message || String(e) || 'Connection error');
             setStatus('error');
           },
 
-          onclose: () => {
-            if (status !== 'idle') setStatus('idle');
+          onclose: (e) => {
+            if (e?.code !== 1000) {
+              setError(`Session closed: ${e?.reason || 'unknown'}`);
+              setStatus('error');
+            } else {
+              setStatus('idle');
+            }
           },
         },
       });
 
       sessionRef.current = session;
 
-      // Mic capture via AudioWorklet
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: SAMPLE_RATE, channelCount: 1 } });
+      // Mic capture — separate 16kHz AudioContext to avoid polluting output
+      inputCtxRef.current = new AudioContext({ sampleRate: INPUT_SAMPLE_RATE });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          sampleRate: INPUT_SAMPLE_RATE,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+        },
+      });
       mediaStreamRef.current = stream;
 
-      await audioCtxRef.current.audioWorklet.addModule(
-        URL.createObjectURL(new Blob([`
-          class MicProcessor extends AudioWorkletProcessor {
-            process(inputs) {
-              const ch = inputs[0]?.[0];
-              if (ch?.length) this.port.postMessage(ch.slice());
-              return true;
-            }
+      // AudioWorklet for low-latency mic → base64 PCM pipeline
+      const workletCode = `
+        class MicCapture extends AudioWorkletProcessor {
+          process(inputs) {
+            const ch = inputs[0]?.[0];
+            if (ch?.length) this.port.postMessage(ch.slice());
+            return true;
           }
-          registerProcessor('mic-processor', MicProcessor);
-        `], { type: 'application/javascript' }))
-      );
+        }
+        registerProcessor('mic-capture', MicCapture);
+      `;
+      const blob = new Blob([workletCode], { type: 'application/javascript' });
+      const url = URL.createObjectURL(blob);
+      await inputCtxRef.current.audioWorklet.addModule(url);
+      URL.revokeObjectURL(url);
 
-      const src = audioCtxRef.current.createMediaStreamSource(stream);
-      const worklet = new AudioWorkletNode(audioCtxRef.current, 'mic-processor');
-      worklet.port.onmessage = (e) => {
+      const source = inputCtxRef.current.createMediaStreamSource(stream);
+      const worklet = new AudioWorkletNode(inputCtxRef.current, 'mic-capture');
+
+      // Route mic audio to Gemini — do NOT connect to destination (prevents feedback)
+      worklet.port.onmessage = ({ data }) => {
         if (sessionRef.current && status !== 'idle') {
-          const b64 = float32ToBase64PCM(e.data);
-          sessionRef.current.sendRealtimeInput({
-            media: { mimeType: `audio/pcm;rate=${SAMPLE_RATE}`, data: b64 },
+          session.sendRealtimeInput({
+            audio: {
+              data: float32ToPcm16Base64(data),
+              mimeType: `audio/pcm;rate=${INPUT_SAMPLE_RATE}`,
+            },
           });
         }
       };
-      src.connect(worklet);
-      worklet.connect(audioCtxRef.current.destination); // silent node needed to keep worklet alive
+
+      // Source → worklet only; worklet is NOT connected to destination
+      source.connect(worklet);
+      mediaSourceRef.current = source;
       workletNodeRef.current = worklet;
 
     } catch (err) {
-      setError(err.message || 'Failed to start voice session');
+      const msg = err?.message || String(err);
+      setError(msg.includes('Permission denied') ? 'Microphone access denied. Allow mic access and try again.' : msg);
       setStatus('error');
+      stop();
     }
-  }, [apiKey, systemPrompt, drainQueue, onTranscript, onToolCall]);
-
-  const stop = useCallback(() => {
-    workletNodeRef.current?.disconnect();
-    workletNodeRef.current = null;
-    mediaStreamRef.current?.getTracks().forEach(t => t.stop());
-    mediaStreamRef.current = null;
-    sessionRef.current?.close?.();
-    sessionRef.current = null;
-    audioCtxRef.current?.close?.();
-    audioCtxRef.current = null;
-    playbackQueueRef.current = [];
-    isPlayingRef.current = false;
-    setStatus('idle');
-    setError(null);
-  }, []);
+  }, [apiKey, systemPrompt, drainQueue, onTranscript, onToolCall, stop]);
 
   // Cleanup on unmount
   useEffect(() => () => stop(), [stop]);
