@@ -10,6 +10,14 @@ const AGENT_ICONS = {
   'Board Report Compiler': '\uD83D\uDCCA',
 };
 
+const AGENT_CTAS = {
+  'Staffing-Demand Agent': 'Automate Shift Coverage \u2192',
+  'Service Recovery Agent': 'Draft Recovery Outreach \u2192',
+  'Re-Engagement Agent': 'Start Re-Engagement Campaign \u2192',
+  'Member Risk Agent': 'Activate Member Alerts \u2192',
+  'Board Report Compiler': 'Auto-Generate Report \u2192',
+};
+
 export default function AgentUpsell({ agentName, benefit, metric, className = '' }) {
   const [dismissed, setDismissed] = useState(false);
 
@@ -40,7 +48,7 @@ export default function AgentUpsell({ agentName, benefit, metric, className = ''
           className="inline-block mt-1.5 text-[11px] font-semibold text-purple-600 hover:text-purple-700 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
-          Enable AI Agents &rarr;
+          {AGENT_CTAS[agentName] || 'Enable AI Agents \u2192'}
         </a>
       </div>
       <button

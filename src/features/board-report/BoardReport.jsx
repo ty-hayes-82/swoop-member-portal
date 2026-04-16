@@ -442,9 +442,16 @@ export default function BoardReport() {
 
           {/* Service & Operations — unified section */}
           <Panel>
-            <h2 className="text-lg font-bold text-swoop-text mb-1.5">
-              Service & Operations
-            </h2>
+            <div className="flex items-start justify-between gap-3 mb-1.5">
+              <h2 className="text-lg font-bold text-swoop-text">
+                Service & Operations
+              </h2>
+              <div className="flex gap-1 flex-wrap justify-end">
+                <SourceBadge system="Scheduling" size="xs" />
+                <SourceBadge system="POS" size="xs" />
+                <SourceBadge system="Tee Sheet" size="xs" />
+              </div>
+            </div>
             <p className="text-xs text-swoop-text-muted mb-4">
               Service consistency, complaint resolution, staffing coverage, and operational response.
             </p>
@@ -529,9 +536,15 @@ export default function BoardReport() {
 
           {/* Weather Impact Summary */}
           <Panel>
-            <h2 className="text-lg font-bold text-swoop-text mb-1.5">
-              Weather Impact
-            </h2>
+            <div className="flex items-start justify-between gap-3 mb-1.5">
+              <h2 className="text-lg font-bold text-swoop-text">
+                Weather Impact
+              </h2>
+              <div className="flex gap-1 flex-wrap justify-end">
+                <SourceBadge system="Tee Sheet" size="xs" />
+                <SourceBadge system="Scheduling" size="xs" />
+              </div>
+            </div>
             <p className="text-xs text-swoop-text-muted mb-4">
               Weather conditions and their effect on operations this month.
             </p>

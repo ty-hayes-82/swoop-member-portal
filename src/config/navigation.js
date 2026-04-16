@@ -35,6 +35,15 @@ export const navItems = [
     sourceSystems: ['Scheduling', 'POS', 'Tee Sheet', 'Complaints', 'Weather'],
   },
   {
+    key: 'automations',
+    label: 'Actions',
+    section: 'PRIMARY',
+    icon: '⚡',
+    color: theme.colors.navBriefing,
+    subtitle: 'Recommended actions, playbooks, and AI agents.',
+    sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email'],
+  },
+  {
     key: 'revenue',
     label: 'Revenue',
     section: 'PRIMARY',
@@ -52,15 +61,6 @@ export const navItems = [
     subtitle: "Today's bookings, at-risk golfers, and cart prep recommendations.",
     sourceSystems: ['Tee Sheet', 'Member CRM', 'Weather', 'POS'],
     hidden: true,
-  },
-  {
-    key: 'automations',
-    label: 'Actions',
-    section: 'PRIMARY',
-    icon: '⚡',
-    color: theme.colors.navBriefing,
-    subtitle: 'Recommended actions, playbooks, and AI agents.',
-    sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email'],
   },
   {
     key: 'board-report',

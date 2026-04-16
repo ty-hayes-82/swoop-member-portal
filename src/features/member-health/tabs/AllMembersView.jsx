@@ -23,6 +23,31 @@ function filterRiskSignalForRoster(text) {
   return text || 'No current risks';
 }
 
+// Specific cross-domain signal variants — seeded by index so each member gets a unique signal
+const AT_RISK_SIGNALS = [
+  'Golf rounds down 3→0 this month; F&B spend $0 last 30 days',
+  'Missed 3 tee times this month; email open rate dropped to 12%',
+  'Dining visits down 60% vs. prior quarter; rounds halved',
+  'Zero F&B spend since last month; tee bookings declined 40%',
+  'Email unopened 45 days; last round 6 weeks ago',
+  'Golf frequency: 4→1 rounds/month; dining conversion rate dropped',
+  'Tee times cancelled twice; F&B check size below member average',
+  'Visit cadence dropped from weekly to monthly; email unsubscribed',
+];
+const CRITICAL_SIGNALS = [
+  'Rounds dropped to zero; dining spend at zero; email unopened 60 days',
+  'No tee times in 45 days; zero F&B activity; last email bounced',
+  'Golf: 0 rounds this month vs. 4/mo avg; $0 F&B; 0 email opens',
+  'Complete disengagement: no golf, no dining, no email response in 60 days',
+];
+const WATCH_SIGNALS = [
+  'Golf pace trending down vs. seasonal baseline; F&B slightly below average',
+  'Tee bookings down 20% vs. prior 90 days; dining still active',
+  'Email engagement declining; visit cadence beginning to slow',
+  'Dining frequency softening vs. member average; rounds stable',
+  'Minor drop in round frequency; F&B spend near average but declining',
+];
+
 function generateRoster() {
   const roster = [];
   const atRisk = getAtRiskMembers();
@@ -37,12 +62,12 @@ function generateRoster() {
   // Include at-risk and watch members
   (atRisk || []).forEach(m => {
     if (!roster.find(r => r.memberId === m.memberId)) {
-      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || 'Golf rounds and dining visits down vs. prior quarter' });
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || AT_RISK_SIGNALS[roster.length % AT_RISK_SIGNALS.length] });
     }
   });
   (watch || []).forEach(m => {
     if (!roster.find(r => r.memberId === m.memberId)) {
-      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2021-06-01', trend: 'stable', topRisk: m.signal || 'Minor engagement shift' });
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2021-06-01', trend: 'stable', topRisk: m.signal || WATCH_SIGNALS[roster.length % WATCH_SIGNALS.length] });
     }
   });
   // Generate remaining to reach 300, matching healthDistribution exactly
@@ -85,7 +110,7 @@ function generateRoster() {
         tier: MEMBERSHIP_TIERS[idx % MEMBERSHIP_TIERS.length],
         joinDate: `${yr}-${mo}-01`,
         trend: level === 'Healthy' ? 'stable' : level === 'Watch' ? 'stable' : 'down',
-        topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Golf or dining frequency softening' : level === 'At Risk' ? 'Golf rounds and dining visits down vs. prior quarter' : 'Rounds dropped, dining spend at zero, email unopened',
+        topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? WATCH_SIGNALS[idx % WATCH_SIGNALS.length] : level === 'At Risk' ? AT_RISK_SIGNALS[idx % AT_RISK_SIGNALS.length] : CRITICAL_SIGNALS[idx % CRITICAL_SIGNALS.length],
         lastSeenLocation: LOCATIONS[idx % LOCATIONS.length],
       });
     }
@@ -104,20 +129,23 @@ function getHealthLevel(score) {
 
 // Build a score tooltip showing which data domains contributed to the health score
 function buildScoreTooltip(member) {
-  const parts = [`Health Score: ${member.score}/100`];
+  const s = member.score ?? 70;
+  const risk = (member.topRisk || '').toLowerCase();
   const hasTeeSheet = isGateOpen('tee-sheet');
   const hasPOS = isGateOpen('fb');
-  const risk = (member.topRisk || '').toLowerCase();
-  if (hasTeeSheet) {
-    const golfSignal = /golf|round|tee|frequency/.test(risk) ? ' (declining)' : '';
-    parts.push(`⛳ Golf activity${golfSignal}`);
-  }
-  if (hasPOS) {
-    const fbSignal = /dining|f&b|food|beverage|spend/.test(risk) ? ' (declining)' : '';
-    parts.push(`🍴 F&B spend${fbSignal}`);
-  }
-  const emailSignal = /email|open rate|newsletter/.test(risk) ? ' (declining)' : '';
-  parts.push(`📧 Email engagement${emailSignal}`);
+
+  // Derive approximate domain scores from overall score + risk signals
+  const golfDeclining = /golf|round|tee|frequency/.test(risk);
+  const fbDeclining = /dining|f&b|food|beverage|spend/.test(risk);
+  const emailDeclining = /email|open rate|newsletter/.test(risk);
+  const golfScore = hasTeeSheet ? (golfDeclining ? Math.max(5, s - 20) : Math.min(100, s + 10)) : null;
+  const fbScore = hasPOS ? (fbDeclining ? Math.max(5, s - 15) : Math.min(100, s + 5)) : null;
+  const emailScore = emailDeclining ? Math.max(5, s - 25) : Math.min(100, s + 5);
+
+  const parts = [`Health Score: ${s}/100`, '─────────────'];
+  if (golfScore != null) parts.push(`⛳ Golf activity: ${golfScore}${golfDeclining ? ' ↓' : ''}`);
+  if (fbScore != null) parts.push(`🍴 F&B spend: ${fbScore}${fbDeclining ? ' ↓' : ''}`);
+  parts.push(`📧 Email: ${emailScore}${emailDeclining ? ' ↓' : ''}`);
   return parts.join('\n');
 }
 

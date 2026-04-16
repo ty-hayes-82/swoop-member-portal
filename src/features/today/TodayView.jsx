@@ -487,8 +487,8 @@ export default function TodayView() {
                 valueColor={C.neutral}
                 source="Tee Sheet not connected"
                 footerLines={[
-                  { text: 'Connect your tee sheet to see' },
-                  { text: 'today\u2019s rounds + utilisation', color: C.accent, bold: true },
+                  { text: 'Jonas · ForeTees · Golf Genius · GolfNow' },
+                  { text: 'Connect to see today\u2019s rounds + alerts', color: C.accent, bold: true },
                 ]}
                 onClick={() => navigate('integrations')}
               />
