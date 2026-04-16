@@ -43,7 +43,6 @@ const ROUTE_REDIRECTS = {
   // Revenue routes → Revenue page (Pillar 3: PROVE IT)
   'revenue-leakage': 'revenue',
   'fb-performance': 'revenue',
-  'operations': 'service',
   'staffing-service': 'service',
   // Insights-related → Service (V3)
   'insights': 'service',

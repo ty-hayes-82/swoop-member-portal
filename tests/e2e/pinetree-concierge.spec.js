@@ -338,7 +338,8 @@ test.describe('Suite 4 — SMS Concierge Tool Calls', () => {
       const smsTab = page.locator('button[role="tab"]:has-text("SMS"), button:has-text("SMS")').first();
       if (await smsTab.isVisible({ timeout: 4000 })) {
         await smsTab.click();
-        await page.waitForTimeout(1500);
+        // Wait for lazy-loaded SMSChatSimulatorPage to mount
+        await page.waitForTimeout(3000);
       }
 
       // Make sure James Whitfield is selected (first persona)
@@ -348,10 +349,11 @@ test.describe('Suite 4 — SMS Concierge Tool Calls', () => {
         await page.waitForTimeout(500);
       }
 
-      // Find message input — SMS simulator chat input
-      const input = page.locator('input[placeholder*="Message"]').first();
-      if (!await input.isVisible({ timeout: 5000 })) {
-        addIssue({ severity: 'high', suite: 'Suite 4', description: `Message input not found for tool: ${tool}`, expected: 'Input visible', actual: 'Not found' });
+      // Find message input — use data-testid for reliability, fall back to placeholder
+      const input = page.locator('[data-testid="sms-message-input"], input[placeholder*="Message"]').first();
+      if (!await input.isVisible({ timeout: 8000 })) {
+        const bodyText = await page.evaluate(() => document.body.innerText).catch(() => '');
+        addIssue({ severity: 'high', suite: 'Suite 4', description: `Message input not found for tool: ${tool}`, expected: 'Input visible', actual: bodyText.slice(0, 200) });
         return;
       }
 

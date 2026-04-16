@@ -718,6 +718,7 @@ export default function SMSChatSimulatorPage({ embedded = false }) {
               disabled={loading}
               className="flex-1 rounded-full border border-swoop-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:bg-gray-50"
               autoComplete="off"
+              data-testid="sms-message-input"
             />
             <button
               type="submit"
