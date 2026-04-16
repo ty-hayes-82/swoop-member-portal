@@ -39,7 +39,7 @@ export default function AutomationsHub() {
       <div>
         <h1 className="text-xl font-bold m-0 text-swoop-text">Recommended Actions</h1>
         <p className="text-sm text-swoop-text-muted mt-1 mb-0">
-          Smart actions to improve member experience and revenue — approve or dismiss in seconds.
+          Smart actions that improve member experience and revenue. Approve or dismiss in seconds.
         </p>
       </div>
 

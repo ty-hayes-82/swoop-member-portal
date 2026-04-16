@@ -48,7 +48,7 @@ export default function AgentUpsell({ agentName, benefit, metric, className = ''
           className="inline-block mt-1.5 text-[11px] font-semibold text-purple-600 hover:text-purple-700 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
-          {AGENT_CTAS[agentName] || 'Enable AI Agents \u2192'}
+          {AGENT_CTAS[agentName] || 'Enable Auto-Drafting \u2192'}
         </a>
       </div>
       <button

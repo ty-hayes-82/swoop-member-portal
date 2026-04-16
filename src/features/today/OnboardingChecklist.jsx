@@ -108,7 +108,7 @@ export default function OnboardingChecklist() {
     <div className="flex flex-col gap-4 w-full">
       <div>
         <h1 className="text-2xl font-bold text-swoop-text m-0">
-          Gain real-time visibility into member health and F&amp;B revenue.
+          Stop member churn and plug F&amp;B leakage before the weekend begins.
         </h1>
         <p className="text-sm text-swoop-text-muted mt-1 mb-0">
           Connect four data sources to activate the full operational cockpit. {doneCount} of {items.length} done.

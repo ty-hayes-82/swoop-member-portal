@@ -540,8 +540,7 @@ export default function RevenuePage() {
 
             <div className="mt-4 p-3 bg-swoop-row border border-swoop-border rounded-lg">
               <p className="text-xs text-swoop-text-muted italic leading-relaxed m-0">
-                <strong className="text-swoop-text">Layer 3 insight:</strong>{' '}
-                Nobody at this club has ever connected pace of play on Hole {bottleneck.hole} to dining revenue. The tee sheet knows the pace. The POS knows the dining. Neither knows the other exists. Swoop sees both.
+                Pace on Hole {bottleneck.hole} is creating a dining gap no single system can see: slow rounds delay the turn, and members skip the bar. Tee sheet data plus POS data reveals the direct revenue connection.
               </p>
             </div>
 
@@ -617,8 +616,8 @@ export default function RevenuePage() {
 
         <AgentUpsell
           agentName="Auto-Draft Server Call-ins for Understaffed Fridays"
-          benefit="Staffing-Demand Agent predicts Friday coverage gaps from weather + demand and auto-drafts server call-ins to close the second root cause. Recovers"
-          metric={`$${leakage.STAFFING_LOSS.toLocaleString()}/mo.`}
+          benefit="Staffing-Demand Agent predicts Friday coverage gaps from weather + demand and auto-drafts server call-ins to close the second root cause."
+          metric={leakage.STAFFING_LOSS > 0 ? `Recovers $${leakage.STAFFING_LOSS.toLocaleString()}/mo.` : undefined}
         />
 
         {/* Scenario Slider */}

@@ -14,6 +14,7 @@ import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from
 import { isRealClub, isAuthenticatedClub, getClubName } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import AgentUpsell from '@/components/ui/AgentUpsell';
+import InfoTooltip from '@/components/ui/InfoTooltip';
 
 const tabNames = ['Summary', 'Member Saves', 'Operational Saves', 'What We Learned'];
 
@@ -468,7 +469,10 @@ export default function BoardReport() {
                 return (
                   <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                     <div className={`text-[28px] font-bold ${csColorClass}`}>{consistencyScore}</div>
-                    <div className="text-[11px] text-[#BCC3CF]">Service Consistency Score</div>
+                    <div className="text-[11px] text-[#BCC3CF] flex items-center justify-center gap-1">
+                      Service Consistency Score
+                      <InfoTooltip text="Weighted composite: complaint resolution rate (40%), staffing coverage rate (30%), and baseline service score (30%). Higher is better — 70+ is on-target." />
+                    </div>
                   </div>
                 );
               })()}
@@ -479,7 +483,10 @@ export default function BoardReport() {
               {understaffedDays.length > 0 ? (
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{Math.round(((30 - understaffedDays.length) / 30) * 100)}%</div>
-                <div className="text-[11px] text-[#BCC3CF]">Staffing Alignment Rate</div>
+                <div className="text-[11px] text-[#BCC3CF] flex items-center justify-center gap-1">
+                  Staffing Alignment Rate
+                  <InfoTooltip text="Days in the last 30 where scheduled staff matched demand (based on tee times + reservations). Calculated as: (30 - understaffed days) / 30." />
+                </div>
               </div>
               ) : (
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center opacity-40">

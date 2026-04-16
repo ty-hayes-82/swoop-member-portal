@@ -513,7 +513,7 @@ export default function TodayView() {
                 value="—"
                 valueSize={24}
                 valueColor={C.neutral}
-                source="Needs tee sheet + member data"
+                source="Awaiting tee sheet connection"
                 footerLines={[
                   { text: 'We\u2019ll cross-reference who\u2019s teeing off' },
                   { text: 'today once your tee sheet is connected', color: C.accent, bold: true },

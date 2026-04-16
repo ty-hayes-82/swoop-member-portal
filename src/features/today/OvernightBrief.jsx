@@ -65,14 +65,15 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
     });
   }
 
-  // 3. At-risk members on today's tee sheet
+  // 3. At-risk members on today's tee sheet — highlight the greet window, not the count
+  //    (count is already in the Club Status KPI tile; unique value here is WHO and WHEN)
   if (teeSheet.length > 0) {
     const atRiskOnSheet = teeSheet.filter(t => (t.healthScore ?? 100) < 50);
     if (atRiskOnSheet.length > 0) {
       const topMember = atRiskOnSheet.sort((a, b) => (a.healthScore || 100) - (b.healthScore || 100))[0];
       bullets.push({
         icon: '⛳',
-        text: `${atRiskOnSheet.length} at-risk member${atRiskOnSheet.length === 1 ? '' : 's'} on today's tee sheet. ${topMember.name || 'A member'} tees off at ${topMember.time || 'soon'}.`,
+        text: `Greet window: ${topMember.name || 'An at-risk member'} tees off at ${topMember.time || 'this morning'} — highest-risk member on today's sheet.`,
         nav: 'tee-sheet',
         navOpts: null,
         urgent: false,
@@ -85,7 +86,7 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
   if (hasActivityData && leakage?.TOTAL > 0 && memberSummary.watch > 0 && bullets.length < 4) {
     bullets.push({
       icon: '👁️',
-      text: `${memberSummary.watch} member${memberSummary.watch === 1 ? '' : 's'} on watch: engagement signal declining — monitoring closely`,
+      text: `${memberSummary.watch} member${memberSummary.watch === 1 ? '' : 's'} on watch: engagement signal declining. Monitoring closely.`,
       nav: 'members',
       navOpts: { tab: 'watch' },
       urgent: false,
