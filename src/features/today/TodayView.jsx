@@ -16,6 +16,7 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { isAuthenticatedClub } from '@/config/constants';
 import { getDataMode, isGateOpen } from '@/services/demoGate';
+import { getConnectedSystems } from '@/services/integrationsService';
 import { hasRealMemberData, getMemberSummary, getAtRiskMembers, getWatchMembers } from '@/services/memberService';
 import OnboardingChecklist from './OnboardingChecklist';
 import { getTodayTeeSheet } from '@/services/operationsService';
@@ -265,10 +266,15 @@ export default function TodayView() {
   // Once any member exists, live widgets take over even if the checklist
   // would still mark the members step as incomplete (<10 threshold).
   if (getDataMode() === 'live' && (getMemberSummary().total || 0) === 0) {
+    // Weather forecast is only actionable once a tee sheet or scheduling system is
+    // connected — hide it during zero-data onboarding to reduce visual noise.
+    const hasTeeSheetOrSched = getConnectedSystems().some(
+      s => (s.category === 'tee-sheet' || s.category === 'scheduling') && s.status === 'connected',
+    );
     return (
       <PageTransition>
         <OnboardingChecklist />
-        <WeekForecast />
+        {hasTeeSheetOrSched && <WeekForecast />}
       </PageTransition>
     );
   }

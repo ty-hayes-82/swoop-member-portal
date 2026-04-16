@@ -9,7 +9,7 @@ import MemberLink from '@/components/MemberLink';
 import { getKPIs, getMemberSaves, getOperationalSaves, getDuesAtRiskNote, getMonthlyTrends } from '@/services/boardReportService';
 import { getRevenueScenario, getLeakageData, getDollarPerSlowRound } from '@/services/revenueService';
 import { isGateOpen } from '@/services/demoGate';
-import { getHealthDistribution, getLiveDashboard } from '@/services/memberService';
+import { getHealthDistribution, getLiveDashboard, getMemberSummary } from '@/services/memberService';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
 import { isRealClub, isAuthenticatedClub, getClubName } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
@@ -158,6 +158,8 @@ export default function BoardReport() {
   const memberSaves = getMemberSaves();
   const operationalSaves = getOperationalSaves();
   const dist = getHealthDistribution();
+  // Use getMemberSummary for at-risk counts so Board Report matches Members page
+  const memberSummaryForCount = getMemberSummary();
 
   const totalDues = memberSaves.reduce((sum, m) => sum + (m.duesAtRisk || 0), 0);
   const totalOpsRevenue = operationalSaves.reduce((sum, o) => sum + (o.revenueProtected || 0), 0);
@@ -275,8 +277,8 @@ export default function BoardReport() {
 
       {/* Top 3 Signals — GM-first summary before any raw KPIs */}
       {(() => {
-        const atRiskCount = dist.find(d => d.level === 'At Risk')?.count || 0;
-        const criticalCount = dist.find(d => d.level === 'Critical')?.count || 0;
+        const atRiskCount = memberSummaryForCount.atRisk || 0;
+        const criticalCount = memberSummaryForCount.critical || 0;
         const signals = [
           memberSaves.length > 0
             ? { icon: '🛡️', color: '#22c55e', label: `${memberSaves.length} member${memberSaves.length !== 1 ? 's' : ''} retained`, sub: `$${totalDues.toLocaleString()} in annual dues protected through early intervention` }
@@ -365,8 +367,8 @@ export default function BoardReport() {
                 <strong className="text-blue-600 font-mono">${totalOpsRevenue.toLocaleString()}</strong> in operational revenue.
                 {resolutionRate > 0 && <>Service consistency: <strong>{resolutionRate}% complaint resolution rate</strong>, with an average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'}</strong> detection-to-action time.</>}
                 {resolutionRate === 0 && feedbackRecords.length > 0 && <>Service complaints are under active review, with an average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'}</strong> detection-to-action time.</>}
-                Health distribution: <strong>{dist.find(d => d.level === 'Healthy')?.count || 0} healthy</strong>,
-                {' '}{dist.find(d => d.level === 'At Risk')?.count || 0} at-risk.
+                Health distribution: <strong>{memberSummaryForCount.healthy || dist.find(d => d.level === 'Healthy')?.count || 0} healthy</strong>,
+                {' '}{(memberSummaryForCount.atRisk || 0) + (memberSummaryForCount.critical || 0)} at-risk.
               </>
             ) : (
               <>

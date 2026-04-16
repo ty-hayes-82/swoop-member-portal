@@ -11,7 +11,7 @@ export default function InfoTooltip({ text, children }) {
     >
       {children || (
         <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-swoop-border text-swoop-text-label text-[10px] font-semibold ml-1">
-          \u24D8
+          {'\u24D8'}
         </span>
       )}
       {isVisible && (
