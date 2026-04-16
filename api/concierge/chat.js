@@ -158,6 +158,19 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
       } catch (e) {
         console.warn('[concierge] book_tee_time log error (continuing):', e.message);
       }
+      // Fire event to close the confirmation loop (Pro Shop auto-confirms in simulation)
+      try {
+        await routeEvent(clubId, 'booking_request_submitted', {
+          member_id: memberId,
+          member_name: profile.name,
+          phone: profile.phone || null,
+          request_id: requestId,
+          request_type: 'book_tee_time',
+          routed_to: 'Pro Shop',
+          details: { date: input.date, time: input.time, course, players },
+        });
+      } catch (e) { console.warn('[concierge] book_tee_time event routing error:', e.message); }
+
       return {
         status: 'request_submitted',
         pending: true,
@@ -190,6 +203,19 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
       } catch (e) {
         console.warn('[concierge] make_dining_reservation log error (continuing):', e.message);
       }
+
+      // Fire event to close the confirmation loop (Front Desk auto-confirms in simulation)
+      try {
+        await routeEvent(clubId, 'booking_request_submitted', {
+          member_id: memberId,
+          member_name: profile.name,
+          phone: profile.phone || null,
+          request_id: requestId,
+          request_type: 'make_dining_reservation',
+          routed_to: 'Front Desk',
+          details: { date: input.date, time, outlet: input.outlet || 'Main Dining Room', party_size: party, preferences: input.preferences },
+        });
+      } catch (e) { console.warn('[concierge] make_dining_reservation event routing error:', e.message); }
 
       return {
         status: 'request_submitted',
@@ -333,6 +359,19 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
         console.warn('[concierge] rsvp_event log error (continuing):', e.message);
       }
 
+      // Fire event to close the confirmation loop (Events Team auto-confirms in simulation)
+      try {
+        await routeEvent(clubId, 'booking_request_submitted', {
+          member_id: memberId,
+          member_name: profile.name,
+          phone: profile.phone || null,
+          request_id: requestId,
+          request_type: 'rsvp_event',
+          routed_to: 'Events Team',
+          details: { event: eventName, event_date: eventDate, registered_for: who, guest_count: guestCount },
+        });
+      } catch (e) { console.warn('[concierge] rsvp_event event routing error:', e.message); }
+
       return {
         status: 'request_submitted',
         pending: true,
@@ -392,6 +431,23 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
       } catch (e) {
         console.warn('[concierge] cancel_tee_time log error (continuing):', e.message);
       }
+
+      // Fire event to close the confirmation loop (Pro Shop auto-confirms in simulation)
+      try {
+        await routeEvent(clubId, 'booking_request_submitted', {
+          member_id: memberId,
+          member_name: profile.name,
+          phone: profile.phone || null,
+          request_id: requestId,
+          request_type: 'cancel_tee_time',
+          routed_to: 'Pro Shop',
+          details: {
+            booking_date: input.booking_date,
+            tee_time: bookingInfo?.tee_time || input.tee_time,
+            course: bookingInfo?.course_name,
+          },
+        });
+      } catch (e) { console.warn('[concierge] cancel_tee_time event routing error:', e.message); }
 
       return {
         status: 'request_submitted',

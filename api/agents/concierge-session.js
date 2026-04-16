@@ -71,3 +71,123 @@ export async function updateSessionPreferences(clubId, memberId, preferences) {
     WHERE club_id = ${clubId} AND member_id = ${memberId}
   `;
 }
+
+// ---------------------------------------------------------------------------
+// Durable event log (Sprint B: member_concierge_events)
+// ---------------------------------------------------------------------------
+
+/**
+ * Emit an event to the member's durable concierge event log.
+ * Session ID convention: mbr_{memberId}_concierge — permanent, never rotated.
+ *
+ * @param {string} memberId
+ * @param {string} clubId
+ * @param {object} event - { type, ...payload }
+ */
+export async function emitConciergeEvent(memberId, clubId, event) {
+  const sessionId = `mbr_${memberId}_concierge`;
+  try {
+    await sql`
+      INSERT INTO member_concierge_events (session_id, club_id, event_type, payload)
+      VALUES (${sessionId}, ${clubId}, ${event.type}, ${JSON.stringify(event)}::jsonb)
+    `;
+  } catch (err) {
+    // Table may not exist yet — log and continue without blocking the concierge
+    console.warn('[concierge-session] emitConciergeEvent failed (table missing?):', err.message);
+  }
+}
+
+/**
+ * Read events from the member's durable concierge event log.
+ *
+ * @param {string} memberId
+ * @param {object} opts - { last?: number, types?: string[], since?: Date }
+ * @returns {Promise<object[]>} event rows
+ */
+export async function getConciergeEvents(memberId, { last = 20, types = null, since = null } = {}) {
+  const sessionId = `mbr_${memberId}_concierge`;
+  try {
+    if (types && types.length > 0 && since) {
+      const r = await sql`
+        SELECT id, event_type, payload, emitted_at
+        FROM member_concierge_events
+        WHERE session_id = ${sessionId} AND event_type = ANY(${types}) AND emitted_at >= ${since}
+        ORDER BY emitted_at DESC LIMIT ${last}
+      `;
+      return r.rows;
+    }
+    if (types && types.length > 0) {
+      const r = await sql`
+        SELECT id, event_type, payload, emitted_at
+        FROM member_concierge_events
+        WHERE session_id = ${sessionId} AND event_type = ANY(${types})
+        ORDER BY emitted_at DESC LIMIT ${last}
+      `;
+      return r.rows;
+    }
+    const r = await sql`
+      SELECT id, event_type, payload, emitted_at
+      FROM member_concierge_events
+      WHERE session_id = ${sessionId}
+      ORDER BY emitted_at DESC LIMIT ${last}
+    `;
+    return r.rows;
+  } catch (err) {
+    console.warn('[concierge-session] getConciergeEvents failed:', err.message);
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Member confirmation delivery (Sprint A: booking confirmation loop)
+// ---------------------------------------------------------------------------
+
+/**
+ * Send a confirmation message back to a member via Twilio (or dry-run log).
+ * Called by the booking_request_submitted event handler after simulating
+ * staff confirmation.
+ *
+ * @param {string} clubId
+ * @param {string} memberId
+ * @param {string|null} phone - member phone number (null = dry-run only)
+ * @param {string} text - confirmation message text
+ */
+export async function sendMemberConfirmation(clubId, memberId, phone, text) {
+  const isDryRun = process.env.SMS_DRY_RUN === 'true' || !phone;
+
+  // Always emit to the durable event log
+  await emitConciergeEvent(memberId, clubId, {
+    type: 'staff_confirmed',
+    text,
+    delivered_via: isDryRun ? 'dry_run' : 'sms',
+  });
+
+  // Update session summary so the next concierge turn knows the request was confirmed
+  try {
+    await sql`
+      UPDATE member_concierge_sessions
+      SET conversation_summary = ${`[Staff confirmed]: ${text}`}, last_active = NOW()
+      WHERE club_id = ${clubId} AND member_id = ${memberId}
+    `;
+  } catch (_) { /* session may not exist yet */ }
+
+  if (isDryRun) {
+    console.log(`[concierge-session] DRY RUN confirmation → ${memberId}: ${text}`);
+    return { sent: false, dry_run: true, text };
+  }
+
+  // Live SMS via Twilio
+  try {
+    const twilio = (await import('twilio')).default;
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    const msg = await client.messages.create({
+      body: text,
+      from: process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_MESSAGING_SERVICE_SID,
+      to: phone,
+    });
+    return { sent: true, sid: msg.sid, text };
+  } catch (err) {
+    console.warn('[concierge-session] Twilio send failed:', err.message);
+    return { sent: false, error: err.message, text };
+  }
+}

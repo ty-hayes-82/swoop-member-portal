@@ -19,6 +19,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { sendSessionEvent, sendThreadMessage } from './managed-config.js';
+import { sendMemberConfirmation } from './concierge-session.js';
 
 // ---------------------------------------------------------------------------
 // Thread lifecycle logging
@@ -247,6 +248,85 @@ async function handleBookingCancelled(clubId, event) {
   return { deliveries: results, count: results.length };
 }
 
+// ---------------------------------------------------------------------------
+// Booking confirmation loop (Sprint A)
+// ---------------------------------------------------------------------------
+
+/**
+ * Format a natural confirmation message per booking type.
+ */
+function formatBookingConfirmation(requestType, firstName, details, routedTo) {
+  switch (requestType) {
+    case 'book_tee_time':
+      return `${firstName}, your tee time request for ${details.date || 'your requested date'}${details.time ? ` at ${details.time}` : ''} is confirmed. See you on the course!`;
+    case 'cancel_tee_time':
+      return `${firstName}, your tee time on ${details.booking_date || details.date || 'your requested date'}${details.tee_time ? ` at ${details.tee_time}` : ''} has been cancelled. The pro shop confirmed it.`;
+    case 'make_dining_reservation':
+      return `${firstName}, your table${details.party_size ? ` for ${details.party_size}` : ''} on ${details.date || 'your requested date'}${details.time ? ` at ${details.time}` : ''} is all set. Front desk confirmed it.`;
+    case 'rsvp_event':
+      return `${firstName}, you're confirmed for ${details.event || details.event_title || 'the event'}${details.event_date ? ` on ${details.event_date}` : ''}. Events team has your spot.`;
+    default:
+      return `${firstName}, your request has been confirmed by ${routedTo}.`;
+  }
+}
+
+/**
+ * Handle booking_request_submitted: simulate staff confirmation and deliver
+ * confirmation back to the member via SMS (or dry-run log).
+ *
+ * This closes the human-in-the-loop booking loop. In production this handler
+ * would instead notify real staff and wait for their confirmation. For now,
+ * auto-confirm immediately since SMS_DRY_RUN=true in dev.
+ */
+async function handleBookingRequestSubmitted(clubId, event) {
+  const {
+    member_id, member_name, phone, request_id,
+    request_type, routed_to, details = {},
+  } = event;
+
+  const firstName = (member_name || '').split(' ')[0] || 'there';
+
+  // 1. Mark activity_log entry as staff_confirmed
+  try {
+    await sql`
+      UPDATE activity_log
+      SET status = 'staff_confirmed',
+          meta = COALESCE(meta, '{}'::jsonb) || '{"confirmed_by": "simulation", "confirmed_at": "${new Date().toISOString()}"}'::jsonb
+      WHERE reference_id = ${request_id}
+    `;
+  } catch (err) {
+    console.warn('[agent-events] booking confirm: activity_log update failed:', err.message);
+  }
+
+  // 2. Format and deliver confirmation to member
+  const text = formatBookingConfirmation(request_type, firstName, details, routed_to);
+  const delivery = await sendMemberConfirmation(clubId, member_id, phone || null, text);
+
+  // 3. Also notify staffing / game-plan agents if relevant
+  if (request_type === 'book_tee_time') {
+    await handleConciergeBooking(clubId, {
+      booking_type: 'tee_time',
+      date: details.date,
+      party_size: details.players || 1,
+      member_id,
+    }).catch(() => {});
+  } else if (request_type === 'cancel_tee_time') {
+    await handleBookingCancelled(clubId, {
+      booking_type: 'tee_time',
+      date: details.booking_date || details.date,
+      member_id,
+    }).catch(() => {});
+  }
+
+  return {
+    delivered: true,
+    confirmation_sent: delivery.sent || delivery.dry_run,
+    dry_run: delivery.dry_run || false,
+    text,
+    request_id,
+  };
+}
+
 async function handleProactiveOutreachSent(clubId, event) {
   // Notify the Member Risk agent that proactive outreach was sent to a member.
   // This is a positive signal — the concierge is actively engaging the member.
@@ -276,6 +356,7 @@ const EVENT_HANDLERS = {
   booking_cancelled: handleBookingCancelled,
   fb_intelligence_update: handleFbIntelligenceUpdate,
   proactive_outreach_sent: handleProactiveOutreachSent,
+  booking_request_submitted: handleBookingRequestSubmitted,
 };
 
 /**
