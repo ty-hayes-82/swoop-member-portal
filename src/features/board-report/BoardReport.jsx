@@ -242,6 +242,15 @@ export default function BoardReport() {
           <p className="text-xs sm:text-sm text-swoop-text-muted mt-1">
             Monthly executive summary: service quality, member health, and operational response
           </p>
+          <p className="text-[11px] text-swoop-text-label mt-0.5">
+            {(() => {
+              const now = new Date();
+              const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+              const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+              const fmt = d => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+              return `${fmt(firstOfMonth)} – ${fmt(lastOfMonth)} · Last updated: ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            })()}
+          </p>
         </div>
         <div className="flex gap-2 shrink-0">
           <button
@@ -308,7 +317,7 @@ export default function BoardReport() {
         </summary>
         <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2.5">
           {[
-            { label: 'Service Quality', weight: '30%', value: `${resolutionRate}%`, benchmark: 'Complaint resolution + consistency', color: 'text-success-500' },
+            { label: 'Service Quality', weight: '30%', value: resolutionRate > 0 ? `${resolutionRate}%` : (feedbackRecords.length > 0 ? 'Under review' : 'No complaints'), benchmark: 'Complaint resolution + consistency', color: 'text-success-500' },
             { label: 'Member Health', weight: '25%', value: `${memberSaves.length} retained`, benchmark: 'Health scores + interventions', color: 'text-blue-500' },
             { label: 'Operational Response', weight: '25%', value: `${avgDetectionHrs != null ? `${avgDetectionHrs} hrs` : '—'} avg`, benchmark: 'Detection to action time', color: 'text-amber-500' },
             { label: 'Financial Performance', weight: '20%', value: totalDues > 0 ? `$${totalDues.toLocaleString()} protected` : 'No data', benchmark: 'Dues + F&B vs plan', color: 'text-violet-500' },
@@ -353,8 +362,8 @@ export default function BoardReport() {
                 through proactive intervention. The operations team prevented{' '}
                 <strong className="text-blue-600">{operationalSaves.length} disruptions</strong>, protecting{' '}
                 <strong className="text-blue-600 font-mono">${totalOpsRevenue.toLocaleString()}</strong> in operational revenue.
-                Service consistency held at <strong>{resolutionRate}%</strong> complaint resolution
-                with an average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'}</strong> detection-to-action time.
+                {resolutionRate > 0 && <>Service consistency: <strong>{resolutionRate}% complaint resolution rate</strong>, with an average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'}</strong> detection-to-action time.</>}
+                {resolutionRate === 0 && feedbackRecords.length > 0 && <>Service complaints are under active review, with an average <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'}</strong> detection-to-action time.</>}
                 Health distribution: <strong>{dist.find(d => d.level === 'Healthy')?.count || 0} healthy</strong>,
                 {' '}{dist.find(d => d.level === 'At Risk')?.count || 0} at-risk.
               </>
@@ -455,8 +464,8 @@ export default function BoardReport() {
                 );
               })()}
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
-                <div className="text-[28px] font-bold text-success-500">{resolutionRate}%</div>
-                <div className="text-[11px] text-[#BCC3CF]">Complaint Resolution Rate</div>
+                <div className="text-[28px] font-bold text-success-500">{resolutionRate > 0 ? `${resolutionRate}%` : (feedbackRecords.length > 0 ? '—' : '—')}</div>
+                <div className="text-[11px] text-[#BCC3CF]">{resolutionRate > 0 ? 'Complaint Resolution Rate' : (feedbackRecords.length > 0 ? 'Complaints Under Review' : 'No Complaints This Period')}</div>
               </div>
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{Math.round(((30 - understaffedDays.length) / 30) * 100)}%</div>

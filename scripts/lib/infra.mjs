@@ -178,11 +178,26 @@ export async function importCSV(appUrl, token, importType, csvPath, expectedRows
 export async function injectAuthAndNavigate(context, appUrl, hash, token, user, clubId) {
   const page = await context.newPage();
 
+  // Inject auth AND clear stale gate cache from previous pages in this context.
+  // Stale swoop_gates causes isGateOpen() to return wrong values on first render.
   await page.addInitScript(({ token, user, clubId }) => {
     localStorage.setItem('swoop_auth_token', token);
     localStorage.setItem('swoop_auth_user', JSON.stringify(user));
     localStorage.setItem('swoop_club_id', clubId);
+    // Clear the gate cache so DataProvider always fetches fresh /api/gates.
+    // Without this, stale fb/tee-sheet flags from prior pages leak across stages.
+    localStorage.removeItem('swoop_gates');
   }, { token, user, clubId });
+
+  // Capture browser console errors for diagnostics
+  page.on('console', msg => {
+    if (msg.type() === 'error') {
+      console.warn(`  [browser error] ${msg.text()}`);
+    }
+  });
+  page.on('pageerror', err => {
+    console.warn(`  [page crash] ${err.message}`);
+  });
 
   await page.goto(`${appUrl}${hash}`, { waitUntil: 'networkidle', timeout: 30_000 });
   return page;
@@ -207,6 +222,18 @@ export async function captureScreenshot(page, outputPath, waitMs = 3000) {
 
   await page.waitForTimeout(waitMs);
   await page.screenshot({ path: outputPath, fullPage: true });
+
+  // Blank-screen guard: if the screenshot is suspiciously small (< 40 KB),
+  // the React app likely rendered a black/empty state. Wait another 6 s and retry.
+  const stat = fs.statSync(outputPath);
+  if (stat.size < 40_000) {
+    console.warn(`  ⚠ ${path.basename(outputPath)} is ${stat.size} bytes — possible blank screen, retrying in 6 s…`);
+    await page.waitForTimeout(6000);
+    await page.screenshot({ path: outputPath, fullPage: true });
+    const stat2 = fs.statSync(outputPath);
+    console.log(`  🔁 Retry result: ${stat2.size} bytes`);
+  }
+
   console.log(`  📸 ${path.basename(outputPath)}`);
   return outputPath;
 }

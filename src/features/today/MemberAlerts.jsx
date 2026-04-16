@@ -75,7 +75,7 @@ function buildPriorityList() {
       let reason, action, owner;
       if (hasComplaint) {
         reason = `Complaint unresolved ${complaint.days} days (${complaint.category})`;
-        action = `Schedule GM call — complaint unresolved ${complaint.days} days`;
+        action = `Schedule GM call: complaint unresolved ${complaint.days} days`;
         owner = complaint.days > 14 ? 'GM' : (ACTION_OWNERS[archetype] || 'GM');
       } else if (archetype === 'Ghost') {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Email open rate dropped, golf rounds stopped, dining visits at zero';

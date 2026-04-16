@@ -680,7 +680,7 @@ function _generateRoster() {
   });
   (atRisk || []).forEach(m => {
     if (!roster.find(r => r.memberId === m.memberId)) {
-      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || 'Engagement declining' });
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || 'Golf rounds and dining visits down vs. prior quarter' });
     }
   });
   (watch || []).forEach(m => {
@@ -719,7 +719,7 @@ function _generateRoster() {
         tier: _MEMBERSHIP_TIERS[idx % _MEMBERSHIP_TIERS.length],
         joinDate: `${yr}-${mo}-01`,
         trend: level === 'Healthy' ? 'stable' : level === 'Watch' ? 'stable' : 'down',
-        topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Minor engagement shift' : 'Engagement declining',
+        topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Golf or dining frequency softening' : level === 'At Risk' ? 'Golf rounds and dining visits down vs. prior quarter' : 'Rounds dropped, dining spend at zero, email unopened',
         lastSeenLocation: isGateOpen() ? _LOCATIONS[idx % _LOCATIONS.length] : null,
       });
     }

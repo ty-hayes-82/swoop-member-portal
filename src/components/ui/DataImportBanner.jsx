@@ -53,7 +53,7 @@ function buildMessage(category) {
       const days = topComplaint?.daysOpen ?? topComplaint?.ageDays ?? 14;
       const dues = topMember?.duesAnnual ? `${Math.round(topMember.duesAnnual / 1000)}K` : '18K';
       const category = topComplaint?.category ? ` ${topComplaint.category}` : '';
-      return `${name}'s${category} complaint is ${days} days old \u2014 $${dues} dues at risk. ${open.length} open complaints, ${linked.length} linked to at-risk members.`;
+      return `${name}'s${category} complaint is ${days} days old: $${dues} dues at risk. ${open.length} open complaints, ${linked.length} linked to at-risk members.`;
     }
     case 'email': {
       const decaying = getDecayingMembers();

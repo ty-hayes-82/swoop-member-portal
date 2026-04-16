@@ -642,6 +642,7 @@ export default function TodayView() {
             peek={priorityMemberCount > 0
               ? `${atRiskCount} at-risk · ${watchCount} on watch`
               : 'No critical alerts at this time'}
+            defaultOpen={false}
           >
             <MemberAlerts />
           </SwoopSection>

@@ -31,8 +31,8 @@ export default function MembersView() {
       <PageTransition>
         <DataEmptyState
           icon="👥"
-          title="Import your member roster to get started"
-          description="Swoop cross-references your roster with tee sheet and POS data to identify at-risk members before they resign. Catch 82→61 health score drops early — clubs using Swoop protect an average of $32K+ in annual dues per member."
+          title="Protect your dues revenue."
+          description="Swoop cross-references your roster with tee sheet and POS data to identify at-risk members before they resign. Catch 82→61 health score drops early: clubs using Swoop protect an average of $32K+ in annual dues per member."
           dataType="members"
           actions={
             <div className="flex flex-col items-center gap-3 w-full max-w-xs">
