@@ -391,7 +391,7 @@ export default function RevenuePage() {
             </div>
             <SourceBadge system="Tee Sheet" size="xs" />
             <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">
-              <span className="font-bold text-brand-500">${dollarPerSlowRound} lost per slow round</span>: ${avgCheckSize} avg check × 41%→22% dining conversion drop when rounds run long.
+              <span className="font-bold text-brand-500">${dollarPerSlowRound} F&amp;B value at risk per slow round</span>: on-pace rounds drive ${avgCheckSize} avg check at 91% post-round dining capture. Slow rounds drop to 22% conversion, forfeiting the majority of that F&amp;B revenue.
             </div>
           </div>
           {leakage.STAFFING_LOSS > 0 ? (

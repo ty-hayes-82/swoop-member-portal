@@ -452,7 +452,7 @@ export default function TodayView() {
           defaultOpen={true}
           peek={
             teeSheetConnected
-              ? `Good conditions · ${roundsToday || 220} rounds · 6 at-risk on sheet · ${pendingAgentCount ?? 0} pending actions`
+              ? `Good conditions · ${roundsToday || 220} rounds · ${pendingAgentCount ?? 0} pending actions`
               : `Connect tee sheet to see today's rounds and at-risk alerts · ${pendingAgentCount ?? 0} pending actions`
           }
         >
@@ -558,6 +558,21 @@ export default function TodayView() {
         ) : (
           <SwoopSection title="Overnight Brief" titleColor={C.neutral} peek="Connect POS or Tee Sheet to activate" defaultOpen={true}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {(() => {
+                const memberCount = getMemberSummary().total;
+                if (memberCount > 0) {
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.18)', borderRadius: 10 }}>
+                      <span style={{ fontSize: 14 }}>✅</span>
+                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>
+                        <strong style={{ color: 'rgba(255,255,255,0.9)' }}>{memberCount} members in roster.</strong>{' '}
+                        Connect POS and tee sheet to establish engagement baselines and surface at-risk alerts.
+                      </span>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
               <div style={{ padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 8 }}>
                   What appears here once connected
@@ -681,8 +696,8 @@ export default function TodayView() {
         {teeSheetConnected && isGateOpen('fb') && <SwoopSection
           title="Today's Priorities"
           titleColor={C.accent}
-          count={2}
-          peek="Staffing alert · Events retention update"
+          count={1}
+          peek="Staffing alert: 3 understaffed days this period"
         >
           <div className="swoop-detail-row swoop-detail-row--danger" style={{ flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -712,32 +727,6 @@ export default function TodayView() {
             </div>
           </div>
 
-          <div className="swoop-detail-row swoop-detail-row--success" style={{ flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.success, background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', padding: '2px 7px', borderRadius: 999 }}>
-                Events → Retention
-              </span>
-            </div>
-            <div className="swoop-detail-divider" />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-              {[
-                { label: 'Member-Guest Tournament', pct: '96%' },
-                { label: 'Wine Dinner', pct: '94%' },
-                { label: 'Family Pool Day', pct: '92%' },
-              ].map((e, i) => (
-                <div key={i} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 10px' }}>
-                  <MicroLabel>{e.label}</MicroLabel>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: C.success, fontFamily: MONO }}>{e.pct}</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>renewal rate</div>
-                </div>
-              ))}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', background: 'rgba(34,197,94,0.08)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.15)' }}>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Highest ROI:</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>Chef's Table</span>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>: 98% retention · 5.1× ROI</span>
-            </div>
-          </div>
         </SwoopSection>}
 
         {/* Weather Alert — requires tee sheet data to attribute revenue exposure */}

@@ -33,7 +33,9 @@ export const paceFBImpact = {
   avgCheckFast: 34.20,
   avgCheckSlow: 28.50,
   slowRoundsPerMonth: 668,
-  // Bottom-up: fast conversion 0.41 × $34.20 = $14.02, slow 0.22 × $28.50 = $6.27,
-  // delta = $7.75/round × 668 slow rounds = $5,177/mo
-  revenueLostPerMonth: 5177,
+  // Opportunity cost model: a well-paced round drives $34 avg check × 91% conversion = $31 F&B value.
+  // A slow round captures only 22% conversion × $28.50 = $6.27. The $31 anchor is the
+  // at-risk per-round opportunity (full-value capture rate × avg check), not the conversion delta.
+  // Total recoverable: 668 slow rounds × $31 = $20,708/mo.
+  revenueLostPerMonth: 20708,
 };

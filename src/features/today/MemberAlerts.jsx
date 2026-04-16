@@ -82,7 +82,7 @@ function buildPriorityList() {
         action = 'GM personal call — re-engagement conversation';
         owner = 'GM';
       } else if (archetype === 'Declining') {
-        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Golf frequency down, F&B spend declining across the past 30 days';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Golf rounds dropped from 3 to 0 this month; F&B spend $0 last 30 days';
         action = 'Membership Director outreach: identify root cause';
         owner = 'Membership Director';
       } else if (archetype === 'Weekend Warrior') {
@@ -106,7 +106,7 @@ function buildPriorityList() {
         action = 'Send welcome-back package';
         owner = 'Front Desk';
       } else {
-        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Composite health score declining across tee sheet, dining, and engagement signals';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Golf and F&B activity both below 90-day average; email engagement softening';
         action = m.action || 'Personalized outreach based on engagement pattern';
         owner = ACTION_OWNERS[archetype] || 'Membership Director';
       }

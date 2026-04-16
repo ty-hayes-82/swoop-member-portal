@@ -73,7 +73,7 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
       const topMember = atRiskOnSheet.sort((a, b) => (a.healthScore || 100) - (b.healthScore || 100))[0];
       bullets.push({
         icon: '⛳',
-        text: `Greet window: ${topMember.name || 'An at-risk member'} tees off at ${topMember.time || 'this morning'} — highest-risk member on today's sheet.`,
+        text: `Greet window: ${topMember.name || 'An at-risk member'} tees off at ${topMember.time || 'this morning'}, the highest-risk member on today's sheet.`,
         nav: 'tee-sheet',
         navOpts: null,
         urgent: false,

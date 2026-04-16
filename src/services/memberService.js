@@ -668,6 +668,29 @@ const _LAST_NAMES = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Mill
 const _ARCHETYPES = ['Die-Hard Golfer','Social Butterfly','Balanced Active','Weekend Warrior','Declining','New Member','Ghost','Snowbird'];
 const _MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-Resident','Corporate','Full Golf','Social','Full Golf'];
 const _LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
+const _WATCH_SIGNALS = [
+  'Golf booking pace down 20% vs. prior 90 days; dining still active',
+  'Tee reservations softening vs. seasonal baseline; F&B near average',
+  'Email engagement declining; visit cadence beginning to slow',
+  'Dining frequency softening vs. member average; rounds stable',
+  'Minor drop in round frequency; F&B spend slightly below average',
+];
+const _AT_RISK_SIGNALS = [
+  'Golf rounds down 3→0 this month; F&B spend $0 last 30 days',
+  'Missed 3 tee times this month; email open rate dropped to 12%',
+  'Dining visits down 60% vs. prior quarter; rounds halved',
+  'Zero F&B spend since last month; tee bookings declined 40%',
+  'Email unopened 45 days; last round 6 weeks ago',
+  'Golf frequency: 4→1 rounds per month; dining conversion rate dropped',
+  'Tee times cancelled twice; F&B check size below member average',
+  'Visit cadence dropped from weekly to monthly; email unsubscribed',
+];
+const _CRITICAL_SIGNALS = [
+  'Rounds dropped to zero; dining spend at zero; email unopened 60 days',
+  'No tee times in 45 days; zero F&B activity; last email bounced',
+  'Golf: 0 rounds this month vs. 4 per month average; $0 F&B; 0 email opens',
+  'Complete disengagement: no golf, no dining, no email response in 60 days',
+];
 
 function _generateRoster() {
   if (!isGateOpen()) return [];
@@ -693,7 +716,8 @@ function _generateRoster() {
     const lvl = (m.score ?? m.healthScore ?? 70) >= 70 ? 'Healthy' : (m.score ?? 70) >= 50 ? 'Watch' : (m.score ?? 70) >= 30 ? 'At Risk' : 'Critical';
     currentCounts[lvl] = (currentCounts[lvl] || 0) + 1;
   });
-  const targets = { Healthy: 200, Watch: 35, 'At Risk': 39, Critical: 26 };
+  // Targets aligned with memberSummary (members.js) so Board Report and Members view show consistent counts
+  const targets = { Healthy: 265, Watch: 50, 'At Risk': 45, Critical: 30 };
   const needed = {
     Healthy: Math.max(0, targets.Healthy - currentCounts.Healthy),
     Watch: Math.max(0, targets.Watch - currentCounts.Watch),
@@ -719,7 +743,10 @@ function _generateRoster() {
         tier: _MEMBERSHIP_TIERS[idx % _MEMBERSHIP_TIERS.length],
         joinDate: `${yr}-${mo}-01`,
         trend: level === 'Healthy' ? 'stable' : level === 'Watch' ? 'stable' : 'down',
-        topRisk: level === 'Healthy' ? 'No current risks' : level === 'Watch' ? 'Golf or dining frequency softening' : level === 'At Risk' ? 'Golf rounds and dining visits down vs. prior quarter' : 'Rounds dropped, dining spend at zero, email unopened',
+        topRisk: level === 'Healthy' ? 'No current risks'
+          : level === 'Watch' ? _WATCH_SIGNALS[idx % _WATCH_SIGNALS.length]
+          : level === 'At Risk' ? _AT_RISK_SIGNALS[idx % _AT_RISK_SIGNALS.length]
+          : _CRITICAL_SIGNALS[idx % _CRITICAL_SIGNALS.length],
         lastSeenLocation: isGateOpen() ? _LOCATIONS[idx % _LOCATIONS.length] : null,
       });
     }
