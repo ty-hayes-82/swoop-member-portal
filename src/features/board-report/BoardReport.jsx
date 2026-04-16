@@ -92,10 +92,10 @@ function humanizeCategory(raw) {
 
 function KPIStrip({ kpis, navigate, onDrillDown }) {
   const colorMap = {
-    green: 'text-success-500',
+    green: 'text-success-500', success: 'text-success-500',
     blue: 'text-blue-400',
-    orange: 'text-warning-500',
-    red: 'text-error-500',
+    orange: 'text-warning-500', warning: 'text-warning-500',
+    red: 'text-error-500', error: 'text-error-500',
   };
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -372,8 +372,8 @@ export default function BoardReport() {
                 <strong className="text-blue-600 font-mono">${totalOpsRevenue.toLocaleString()}</strong> in operational revenue.
                 {resolutionRate > 0 && <>Service consistency: <strong>{resolutionRate}% complaint resolution rate</strong>{avgDetectionHrs != null && <>, average <strong>{avgDetectionHrs}-hour</strong> detection-to-action time</>}.</>}
                 {resolutionRate === 0 && feedbackRecords.length > 0 && <>Service complaints are under active review{avgDetectionHrs != null && <>, average <strong>{avgDetectionHrs}-hour</strong> detection-to-action time</>}.</>}
-                Health distribution: <strong>{memberSummaryForCount.healthy || dist.find(d => d.level === 'Healthy')?.count || 0} healthy</strong>,
-                {' '}{(memberSummaryForCount.atRisk || 0) + (memberSummaryForCount.critical || 0)} at-risk.
+                Health distribution: <strong>{dist.find(d => d.level === 'Healthy')?.count || memberSummaryForCount.healthy || 0} healthy</strong>,
+                {' '}{(dist.find(d => d.level === 'At Risk')?.count || 0) + (dist.find(d => d.level === 'Critical')?.count || 0)} at-risk.
               </>
             ) : (
               <>

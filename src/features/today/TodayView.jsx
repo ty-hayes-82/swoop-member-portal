@@ -344,6 +344,13 @@ export default function TodayView() {
             >
               View Integrations
             </button>
+            <button
+              type="button"
+              onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
+              className="px-5 py-2.5 rounded-lg border border-brand-500/40 bg-brand-500/10 text-brand-500 text-sm font-semibold cursor-pointer hover:bg-brand-500/20 transition-colors"
+            >
+              Explore with Sample Data
+            </button>
           </div>
         </div>
       </PageTransition>
@@ -481,21 +488,41 @@ export default function TodayView() {
                   { text: '92% utilisation · 18 walk-ins expected' },
                 ]}
               />
-            ) : (
-              <ClubKpiTile
-                label="Tee Times Today"
-                icon="⛳"
-                value="—"
-                valueSize={24}
-                valueColor={C.neutral}
-                source="Tee Sheet not connected"
-                footerLines={[
-                  { text: 'Jonas · ForeTees · Golf Genius · GolfNow' },
-                  { text: 'Connect to see today\u2019s rounds + alerts', color: C.accent, bold: true },
-                ]}
-                onClick={() => navigate('integrations')}
-              />
-            )}
+            ) : (() => {
+              const totalMembers = getMemberSummary().total || 0;
+              if (totalMembers > 0) {
+                const atRisk = getAtRiskMembers().length;
+                return (
+                  <ClubKpiTile
+                    label="Total Members"
+                    icon="👥"
+                    value={totalMembers}
+                    valueColor={C.success}
+                    source="◉ Member CRM"
+                    footerLines={[
+                      { text: `${atRisk > 0 ? `${atRisk} at-risk · ` : ''}Connect tee sheet to activate alerts` },
+                      { text: 'View members →', color: C.accent, bold: true },
+                    ]}
+                    onClick={() => navigate('members')}
+                  />
+                );
+              }
+              return (
+                <ClubKpiTile
+                  label="Tee Times Today"
+                  icon="⛳"
+                  value="—"
+                  valueSize={24}
+                  valueColor={C.neutral}
+                  source="Tee Sheet not connected"
+                  footerLines={[
+                    { text: 'Jonas · ForeTees · Golf Genius · GolfNow' },
+                    { text: 'Connect to see today\u2019s rounds + alerts', color: C.accent, bold: true },
+                  ]}
+                  onClick={() => navigate('integrations')}
+                />
+              );
+            })()}
             {teeSheetConnected ? (
               <ClubKpiTile
                 label="At-Risk on Sheet"

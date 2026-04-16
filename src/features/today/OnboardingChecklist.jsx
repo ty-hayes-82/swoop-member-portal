@@ -134,6 +134,21 @@ export default function OnboardingChecklist() {
           starts flowing so we don't surface contradictory progress indicators
           or render a white card in the zero-data state. */}
       {doneCount > 0 && <StageInsightsPanel />}
+
+      {/* Demo shortcut — let GMs explore before IT effort */}
+      <div className="rounded-xl border border-swoop-border bg-swoop-panel p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold text-swoop-text">Not ready to connect data yet?</div>
+          <div className="text-xs text-swoop-text-muted mt-0.5">Explore the full dashboard with a sample 300-member golf club to see exactly what you'll get.</div>
+        </div>
+        <button
+          type="button"
+          onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
+          className="flex-shrink-0 px-4 py-2 rounded-lg border border-brand-500/40 bg-brand-500/10 text-brand-500 text-sm font-semibold cursor-pointer hover:bg-brand-500/20 transition-colors whitespace-nowrap"
+        >
+          Explore with Sample Data
+        </button>
+      </div>
     </div>
   );
 }

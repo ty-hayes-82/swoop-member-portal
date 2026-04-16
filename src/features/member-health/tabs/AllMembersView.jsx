@@ -220,16 +220,26 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                     {healthLevel}
                   </span>
                 </div>
-                {hasScore && member.score < 70 && member.topRisk && member.topRisk !== 'No current risks' && (
-                  <SourceBadgeRow
-                    size="xs"
-                    systems={[
-                      /golf|round|tee|frequency/i.test(member.topRisk) && 'Tee Sheet',
-                      /dining|f&b|food|beverage|spend/i.test(member.topRisk) && 'POS',
-                      /email|open rate|newsletter/i.test(member.topRisk) && 'Email',
-                    ].filter(Boolean)}
-                  />
-                )}
+                {hasScore && (() => {
+                  const s = member.score ?? 70;
+                  const risk = (member.topRisk || '').toLowerCase();
+                  const hasTeeSheet = isGateOpen('tee-sheet');
+                  const hasPOS = isGateOpen('fb');
+                  const golfDeclining = /golf|round|tee|frequency/.test(risk);
+                  const fbDeclining = /dining|f&b|food|beverage|spend/.test(risk);
+                  const emailDeclining = /email|open rate|newsletter/.test(risk);
+                  const golfScore = hasTeeSheet ? (golfDeclining ? Math.max(5, s - 20) : Math.min(100, s + 10)) : null;
+                  const fbScore = hasPOS ? (fbDeclining ? Math.max(5, s - 15) : Math.min(100, s + 5)) : null;
+                  const emailScore = emailDeclining ? Math.max(5, s - 25) : Math.min(100, s + 5);
+                  const domainColor = (v) => v >= 70 ? '#12b76a' : v >= 50 ? '#f59e0b' : v >= 30 ? '#ea580c' : '#ef4444';
+                  return (
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                      {golfScore != null && <span className="text-[9px] font-semibold" style={{ color: domainColor(golfScore) }}>⛳{golfScore}</span>}
+                      {fbScore != null && <span className="text-[9px] font-semibold" style={{ color: domainColor(fbScore) }}>🍴{fbScore}</span>}
+                      <span className="text-[9px] font-semibold" style={{ color: domainColor(emailScore) }}>📧{emailScore}</span>
+                    </div>
+                  );
+                })()}
               </div>
             </td>
             <td className="px-4 py-2 hidden md:table-cell">

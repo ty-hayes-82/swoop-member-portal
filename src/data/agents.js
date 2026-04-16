@@ -143,6 +143,27 @@ export const agentActions = [
     ],
   },
   {
+    id: 'agx_staffing_sat',
+    timestamp: '2026-01-17T06:10:00Z',
+    agentId: 'demand-optimizer',
+    source: 'Demand Optimizer',
+    actionType: 'STAFFING_ADJUSTMENT',
+    description: 'Add server to Saturday lunch: 3 consecutive Saturdays show 2-server coverage vs. 4 required — $3.4K F&B left on table.',
+    status: 'pending',
+    impactMetric: '$3.4K F&B revenue protected',
+    priority: 'high',
+    rationale: 'POS data shows Saturday lunch averages $4,900 revenue but drops to $3,200 when only 2 servers are scheduled (vs. required 4). Ticket times increase 28% and 3 of the last 4 service complaints came from Saturday lunch shifts.',
+    signals: [
+      { system: 'POS', signal: 'Saturday lunch revenue $1,700 below potential (3-week avg)', timestamp: 'Last 3 Saturdays' },
+      { system: 'Staffing', signal: '2 servers scheduled vs. 4 required', timestamp: 'This Saturday' },
+      { system: 'Complaints', signal: '3 of 4 service complaints linked to Saturday lunch understaffing', timestamp: 'Last 30 days' },
+    ],
+    auditTrail: [
+      { id: 'rec', status: 'Recommended', owner: 'Demand Optimizer', timestamp: '2026-01-17T06:10:00Z' },
+    ],
+    suggestedOwner: 'F&B Director · Add to this Saturday shift',
+  },
+  {
     id: 'agx_004',
     timestamp: '2026-01-17T06:11:00Z',
     agentId: 'demand-optimizer',

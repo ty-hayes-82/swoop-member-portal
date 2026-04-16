@@ -11,6 +11,12 @@ const primaryItems = NAV_ITEMS.filter(
   (item) => item.section === "PRIMARY" && !item.hidden
 );
 
+const PILLAR_LABELS = {
+  see: { label: 'See It', tooltip: 'Monitor what\'s happening across your club' },
+  fix: { label: 'Fix It', tooltip: 'Take action on issues before they escalate' },
+  prove: { label: 'Prove It', tooltip: 'Quantify impact for members, staff, and board' },
+};
+
 // SVG icon components for each nav key
 const navIcons = {
   today: (
@@ -152,54 +158,76 @@ const SwoopSidebar = () => {
               )}
             </h2>
             <ul className="flex flex-col gap-1">
-              {primaryItems.map((item) => (
-                <li key={item.key}>
-                  <button
-                    onClick={() => navigate(item.key)}
-                    aria-label={item.label}
-                    className={`menu-item group cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-1 focus-visible:ring-offset-black ${
-                      isActive(item.key)
-                        ? "bg-brand-500/15 text-brand-400"
-                        : "text-swoop-text-ghost hover:bg-white/5 hover:text-white"
-                    } ${
-                      !isExpanded && !isHovered
-                        ? "lg:justify-center"
-                        : "lg:justify-start"
-                    }`}
-                    {...(isActive(item.key) ? { "aria-current": "page" } : {})}
-                  >
-                    <span
-                      className={`${
-                        isActive(item.key)
-                          ? "text-brand-400"
-                          : "text-swoop-text-label group-hover:text-gray-300"
-                      }`}
-                    >
-                      {navIcons[item.key] || (
-                        <span className="text-lg">{item.icon}</span>
-                      )}
-                    </span>
-                    {showFull && (
-                      <span className="menu-item-text">{item.label}</span>
-                    )}
-                    {showFull && (item.key === 'today' || item.key === 'automations') && pendingAgentCount > 0 && (
-                      <span className="ml-auto min-w-[20px] h-[18px] inline-flex items-center justify-center rounded-full bg-brand-500 text-white text-[10px] font-bold px-1.5">
-                        {pendingAgentCount}
-                      </span>
-                    )}
-                    {showFull && item.key === 'admin' && (
-                      <span
-                        className="ml-auto inline-flex items-center justify-center w-2 h-2 rounded-full"
-                        style={{ background: '#12b76a' }}
-                        title="Data Health: monitor connection freshness"
-                      />
-                    )}
-                    {showFull && isActive(item.key) && item.key !== 'today' && item.key !== 'automations' && item.key !== 'admin' && (
-                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-400" />
-                    )}
-                  </button>
-                </li>
-              ))}
+              {(() => {
+                const rendered = [];
+                let lastPillar = null;
+                primaryItems.forEach((item) => {
+                  const pillar = item.pillar;
+                  if (showFull && pillar && pillar !== lastPillar) {
+                    lastPillar = pillar;
+                    const def = PILLAR_LABELS[pillar];
+                    rendered.push(
+                      <li key={`pillar-${pillar}`} className="mt-3 mb-0.5 px-1" aria-hidden="true">
+                        <span
+                          className="text-[9px] font-bold uppercase tracking-widest text-swoop-text-label/60 select-none"
+                          title={def?.tooltip}
+                        >
+                          {def?.label || pillar}
+                        </span>
+                      </li>
+                    );
+                  }
+                  rendered.push(
+                    <li key={item.key}>
+                      <button
+                        onClick={() => navigate(item.key)}
+                        aria-label={item.label}
+                        className={`menu-item group cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-1 focus-visible:ring-offset-black ${
+                          isActive(item.key)
+                            ? "bg-brand-500/15 text-brand-400"
+                            : "text-swoop-text-ghost hover:bg-white/5 hover:text-white"
+                        } ${
+                          !isExpanded && !isHovered
+                            ? "lg:justify-center"
+                            : "lg:justify-start"
+                        }`}
+                        {...(isActive(item.key) ? { "aria-current": "page" } : {})}
+                      >
+                        <span
+                          className={`${
+                            isActive(item.key)
+                              ? "text-brand-400"
+                              : "text-swoop-text-label group-hover:text-gray-300"
+                          }`}
+                        >
+                          {navIcons[item.key] || (
+                            <span className="text-lg">{item.icon}</span>
+                          )}
+                        </span>
+                        {showFull && (
+                          <span className="menu-item-text">{item.label}</span>
+                        )}
+                        {showFull && (item.key === 'today' || item.key === 'automations') && pendingAgentCount > 0 && (
+                          <span className="ml-auto min-w-[20px] h-[18px] inline-flex items-center justify-center rounded-full bg-brand-500 text-white text-[10px] font-bold px-1.5">
+                            {pendingAgentCount}
+                          </span>
+                        )}
+                        {showFull && item.key === 'admin' && (
+                          <span
+                            className="ml-auto inline-flex items-center justify-center w-2 h-2 rounded-full"
+                            style={{ background: '#12b76a' }}
+                            title="Data Health: monitor connection freshness"
+                          />
+                        )}
+                        {showFull && isActive(item.key) && item.key !== 'today' && item.key !== 'automations' && item.key !== 'admin' && (
+                          <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-400" />
+                        )}
+                      </button>
+                    </li>
+                  );
+                });
+                return rendered;
+              })()}
             </ul>
           </div>
         </nav>
