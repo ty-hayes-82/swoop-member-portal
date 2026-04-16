@@ -19,6 +19,8 @@ import { withAuth, getWriteClubId } from '../lib/withAuth.js';
 import { createCoordinatorSession, createAgentThread, sendSessionEvent } from './managed-config.js';
 import { checkDataAvailable, TRIGGER_REQUIREMENTS } from './data-availability-check.js';
 import { realAgentCall } from './real-agent-call.js';
+import { resolveTargetSessions } from './analyst-harness.js';
+import { emitAgentEvent, createHandoff } from './session-core.js';
 
 // Fall into simulation mode when the Managed Agent platform isn't
 // configured — MANAGED_ENV_ID empty rejects the API call anyway, so the
@@ -229,8 +231,49 @@ async function complaintHandler(req, res) {
       `;
     }
 
+    // 7. Emit recommendation_received to GM + F&B Director sessions and record handoffs.
+    // resolveTargetSessions looks up active users by role — returns empty if users table
+    // is not yet seeded with demo personas (soft failure, demo trigger handles this directly).
+    const correlationId = `corr_${runId}`;
+    const summaryText = `${evaluation.repeatComplainant ? 'REPEAT COMPLAINANT: ' : ''}Member complaint (priority: ${priority}${category ? ', category: ' + category : ''}) — routed for service recovery`;
+    try {
+      const targets = await resolveTargetSessions(clubId, ['gm', 'fb_director']);
+      const srSessionId = `service_recovery_${clubId}`;
+
+      for (const target of targets) {
+        emitAgentEvent(target.sessionId, clubId, {
+          type: 'recommendation_received',
+          source_agent: 'service_recovery',
+          correlation_id: correlationId,
+          summary: summaryText,
+          request_id: runId,
+          member_id,
+        }).catch(() => {});
+
+        createHandoff({
+          sourceSessionId: srSessionId,
+          targetSessionId: target.sessionId,
+          recommendationEventId: correlationId,
+        }).catch(() => {});
+      }
+
+      // Emit to the analyst's own session so it has a record of the outbound recommendation
+      emitAgentEvent(srSessionId, clubId, {
+        type: 'recommendation_received',
+        source_agent: 'service_recovery',
+        correlation_id: correlationId,
+        summary: summaryText,
+        request_id: runId,
+        member_id,
+        targets_notified: targets.length,
+      }).catch(() => {});
+    } catch (e) {
+      console.warn('[complaint-trigger] handoff emission failed:', e.message);
+    }
+
     return res.status(200).json({
       triggered: true,
+      correlation_id: correlationId,
       session_id: sessionId,
       session_thread_id: threadId,
       run_id: runId,

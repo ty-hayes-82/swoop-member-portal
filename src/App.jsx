@@ -14,6 +14,7 @@ const ConciergeChatPage = lazy(() => import('@/features/concierge/ConciergeChatP
 const MemberConciergeTest = lazy(() => import('@/features/concierge/MemberConciergeTest'));
 const QuickClubSetup = lazy(() => import('@/features/login/QuickClubSetup'));
 const NewClubSetup = lazy(() => import('@/features/login/NewClubSetup'));
+const GBTCDemoControl = lazy(() => import('@/features/demo/GBTCDemoControl'));
 const WeatherCascade = lazy(() => import('@/features/demo/WeatherCascade'));
 const GamePlanDemo = lazy(() => import('@/features/demo/GamePlanDemo'));
 const BoardReportDemo = lazy(() => import('@/features/demo/BoardReportDemo'));
@@ -209,6 +210,15 @@ function RouterViews() {
   const isDemoMobileShowcase = hash === '#/demo/mobile-showcase';
   const isDemoAgentsLanding = hash === '#/demo/agents-landing';
   const isDemoMemberChat = hash === '#/demo/member-chat' || hash === '#/concierge/test';
+  const isDemoGBTC = hash === '#/demo-gbtc' || hash.startsWith('#/demo-gbtc?');
+
+  if (isDemoGBTC) {
+    return (
+      <Suspense fallback={<div style={{ minHeight: '100dvh', background: '#0f172a' }} />}>
+        <GBTCDemoControl />
+      </Suspense>
+    );
+  }
 
   if (isDemoPilotResults) {
     return (

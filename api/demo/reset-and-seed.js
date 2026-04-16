@@ -159,11 +159,33 @@ export default async function handler(req, res) {
       ON CONFLICT DO NOTHING`;
     results.pos_checks = 6;
 
+    // Demo staff users — required for resolveTargetSessions() in agent harness
+    // and for seeding persona session history via seed-demo-personas.mjs.
+    // Roles match Swoop role slugs used throughout the agent infrastructure.
+    try {
+      await sql`
+        INSERT INTO users (user_id, club_id, email, name, role, title, active)
+        VALUES
+          ('usr_sarah_gm',        ${CLUB_ID}, 'sarah.mitchell@pinetree.demo', 'Sarah Mitchell', 'gm',                  'General Manager',        TRUE),
+          ('usr_maya_fb',         ${CLUB_ID}, 'maya.chen@pinetree.demo',      'Maya Chen',      'fb_director',         'F&B Director',           TRUE),
+          ('usr_headpro',         ${CLUB_ID}, 'head.pro@pinetree.demo',       'Alex Torres',    'head_pro',            'Head Golf Professional', TRUE),
+          ('usr_membership_dir',  ${CLUB_ID}, 'membership@pinetree.demo',     'Diane Park',     'membership_director', 'Membership Director',    TRUE)
+        ON CONFLICT (user_id) DO UPDATE SET
+          club_id = EXCLUDED.club_id,
+          name    = EXCLUDED.name,
+          role    = EXCLUDED.role,
+          active  = TRUE
+      `;
+      results.demo_users = 4;
+    } catch (e) {
+      results.demo_users = e.message?.includes('does not exist') ? 'skip' : e.message;
+    }
+
     return res.status(200).json({
       success: true,
       club_id: CLUB_ID,
       results,
-      message: 'Database cleared and reseeded with 5 test members + associated data',
+      message: 'Database cleared and reseeded with 5 test members + 4 demo staff users',
     });
   } catch (err) {
     console.error('reset-and-seed error:', err);
