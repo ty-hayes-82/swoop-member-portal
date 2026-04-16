@@ -765,19 +765,21 @@ async function chatHandler(req, res) {
       conversationContext = `\n\nPrevious interaction history (most recent ${recentEvents.length} events):\n${lines.join('\n')}`;
     }
 
-    // For confirmation follow-up queries, surface pending requests explicitly
-    const confirmationFollowUp = /\b(did it go through|was it confirmed|has my request|did you send|did that go|was that processed|confirm|go through|get it|receive it|been processed)\b/i.test(message);
-    if (confirmationFollowUp) {
-      const pendingEvents = await getConciergeEvents(member_id, { last: 10, types: ['request_submitted', 'staff_confirmed'] });
-      if (pendingEvents?.length) {
-        const pendingLines = pendingEvents.slice().reverse().map(ev => {
-          const ts = ev.emitted_at ? new Date(ev.emitted_at).toISOString().slice(0, 16) : '';
-          const p = ev.payload || {};
-          if (ev.event_type === 'staff_confirmed') return `  ✓ CONFIRMED [${ts}]: ${p.text || ''}`;
-          return `  ⏳ PENDING [${ts}]: ${p.request_id} — ${p.request_type} sent to ${p.routed_to}. ${p.expected_response || ''}`;
-        });
-        pendingRequestsContext = `\n\nPENDING AND CONFIRMED REQUESTS (for status queries):\n${pendingLines.join('\n')}\nUse this to answer the member's follow-up question about whether their request went through.`;
-      }
+    // Always surface pending/confirmed requests so the model can answer status questions
+    // and avoid re-routing requests that already have a pending submission.
+    const pendingEvents = await getConciergeEvents(member_id, { last: 10, types: ['request_submitted', 'staff_confirmed'] });
+    if (pendingEvents?.length) {
+      const pendingLines = pendingEvents.slice().reverse().map(ev => {
+        const ts = ev.emitted_at ? new Date(ev.emitted_at).toISOString().slice(0, 16) : '';
+        const p = ev.payload || {};
+        if (ev.event_type === 'staff_confirmed') return `  ✓ CONFIRMED [${ts}]: ${p.text || ''}`;
+        return `  ⏳ PENDING [${ts}]: ${p.request_id} — ${p.request_type} sent to ${p.routed_to}. ${p.expected_response || ''}`;
+      });
+      const confirmationFollowUp = /\b(did it go through|was it confirmed|has my request|did you send|did that go|was that processed|confirm|go through|get it|receive it|been processed)\b/i.test(message);
+      const contextLabel = confirmationFollowUp
+        ? 'PENDING AND CONFIRMED REQUESTS (answer the member\'s status question using this — do NOT re-fire send_request_to_club):'
+        : 'YOUR RECENT REQUESTS (for context — if the member asks about status, use this):';
+      pendingRequestsContext = `\n\n${contextLabel}\n${pendingLines.join('\n')}`;
     }
   } catch (_) { /* event log not available — fall through */ }
 
@@ -850,8 +852,21 @@ async function chatHandler(req, res) {
 
     // Tool-use loop: execute ALL tool_use blocks per turn, feed results back, repeat until text
     let loopGuard = 0;
+    const seenToolCalls = new Set(); // dedup: prevent same tool+args twice in a session
     while (result.stop_reason === 'tool_use' && loopGuard++ < 5) {
-      const toolUses = result.content.filter(c => c.type === 'tool_use');
+      const rawToolUses = result.content.filter(c => c.type === 'tool_use');
+      if (rawToolUses.length === 0) break;
+
+      // Deduplication guard: skip calls with identical tool+args already seen this turn
+      const toolUses = rawToolUses.filter(toolUse => {
+        const key = `${toolUse.name}:${JSON.stringify(toolUse.input)}`;
+        if (seenToolCalls.has(key)) {
+          console.warn(`[concierge] dedup: skipping duplicate ${toolUse.name} call`);
+          return false;
+        }
+        seenToolCalls.add(key);
+        return true;
+      });
       if (toolUses.length === 0) break;
 
       // Execute all tools in this turn (may be multiple simultaneous calls)
@@ -912,7 +927,9 @@ async function chatHandler(req, res) {
             source_agent: 'member_concierge',
           }).catch(() => {});
         }
-        return { type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(toolResult) };
+        // Sanitize em-dashes from tool result text before returning to model (prevents echoing in responses)
+        const toolResultStr = JSON.stringify(toolResult).replace(/\u2014/g, ',');
+        return { type: 'tool_result', tool_use_id: toolUse.id, content: toolResultStr };
       }));
 
       messages.push({ role: 'assistant', content: result.content });
@@ -921,11 +938,16 @@ async function chatHandler(req, res) {
       // This is read by the model immediately before generating text, ensuring STEP 1 compliance
       // even after tool calls have run (where the model otherwise jumps to action summary).
       if (needsWarmth) {
-        const openerLine = isGhostMember
-          ? `"${memberFirstName}! We've missed you so much, it's so great to hear from you!"`
-          : isAtRiskMember
-            ? `"It's so great to hear from you, ${memberFirstName}!"`
-            : `"I know your last experience wasn't what it should have been, and I want to make sure this one is different."`;
+        let openerLine;
+        if (isGhostMember) {
+          openerLine = `a varied warm welcome-back (e.g. "${memberFirstName}! We've missed you so much — so glad you reached out." or "${memberFirstName}! You just made my day." — VARY it, never repeat the same phrase)`;
+        } else if (isAtRiskMember && hasPriorComplaintFlag) {
+          openerLine = `"I know your last experience wasn't what it should have been, ${memberFirstName} — I want to make this one different."`;
+        } else if (isAtRiskMember) {
+          openerLine = `a warm validation opener (e.g. "${memberFirstName}, always love hearing from you!" or "${memberFirstName}! You made my day reaching out." or "So good to hear from you, ${memberFirstName}!" — VARY it, never repeat the same phrase)`;
+        } else {
+          openerLine = `"I know your last experience wasn't what it should have been, and I want to make sure this one is different."`;
+        }
         toolResults.push({
           type: 'text',
           text: `[MANDATORY OPENER — write this as your FIRST sentence before anything else: ${openerLine}. Do not skip it. Do not start with the action summary. The opener is sentence one.]`,
@@ -945,6 +967,9 @@ async function chatHandler(req, res) {
     }
 
     let responseText = result.content?.find(c => c.type === 'text')?.text ?? '';
+
+    // Sanitize em-dashes from final response (belt-and-suspenders, model also instructed to avoid them)
+    responseText = responseText.replace(/\u2014/g, ',');
 
     // Sanitize: strip raw XML/parameter markup that occasionally leaks from model thinking.
     // When this pattern is detected, substitute a graceful fallback rather than exposing internals.
