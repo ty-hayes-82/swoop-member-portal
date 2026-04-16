@@ -49,7 +49,42 @@ const Sparkline = ({ data = [], color = '#06b6d4' }) => {
   );
 };
 
-const Section = ({ title, description, children, defaultCollapsed = false, collapsible = false, summary, sourceSystems, ...rest }) => {
+const PILL_STYLES = {
+  neutral: { background: 'rgba(148, 163, 184, 0.12)', color: '#cbd5e1', border: '1px solid rgba(148, 163, 184, 0.25)' },
+  warn:    { background: 'rgba(245, 158, 11, 0.12)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' },
+  amber:   { background: 'rgba(243, 146, 45, 0.14)', color: '#fdba74', border: '1px solid rgba(243, 146, 45, 0.3)' },
+  danger:  { background: 'rgba(239, 68, 68, 0.12)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.3)' },
+  success: { background: 'rgba(18, 183, 106, 0.12)', color: '#86efac', border: '1px solid rgba(18, 183, 106, 0.3)' },
+};
+
+export const SwPill = ({ variant = 'neutral', children }) => (
+  <span
+    style={{
+      ...PILL_STYLES[variant],
+      display: 'inline-block',
+      fontSize: '10px',
+      fontWeight: 600,
+      lineHeight: 1.4,
+      padding: '1px 6px',
+      borderRadius: '999px',
+      whiteSpace: 'nowrap',
+      marginRight: '4px',
+    }}
+  >
+    {children}
+  </span>
+);
+
+const Section = ({
+  title,
+  description,
+  children,
+  defaultCollapsed = true,
+  collapsible = true,
+  preview,
+  sourceSystems,
+  ...rest
+}) => {
   const [collapsed, setCollapsed] = React.useState(defaultCollapsed);
   const isCollapsed = collapsible && collapsed;
 
@@ -57,16 +92,33 @@ const Section = ({ title, description, children, defaultCollapsed = false, colla
     <section {...rest} className="border border-swoop-border rounded-xl p-4 bg-swoop-panel" style={{ padding: '10px 12px', borderRadius: '10px' }}>
       <div
         onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
-        className={`flex justify-between items-baseline ${isCollapsed ? '' : 'mb-2'} ${collapsible ? 'cursor-pointer' : 'cursor-default'}`}
-        style={{ fontSize: '12px', lineHeight: 1.4 }}
+        className={`flex justify-between items-center ${isCollapsed ? '' : 'mb-2'} ${collapsible ? 'cursor-pointer' : 'cursor-default'}`}
+        style={{ fontSize: '12px', lineHeight: 1.4, gap: '6px' }}
       >
-        <div className="flex items-baseline gap-2" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
-          <h3 className="m-0 text-base" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px', letterSpacing: '0.02em' }}>{title}</h3>
-          {isCollapsed && summary && <span className="text-xs text-swoop-text-label" style={{ fontSize: '10px', lineHeight: 1.4 }}>{summary}</span>}
+        <div className="flex items-baseline gap-2 shrink-0" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
+          <h3 className="m-0 text-base text-swoop-text" style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '0.02em' }}>{title}</h3>
         </div>
-        <div className="flex items-center gap-2" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
-          {description && !isCollapsed && <span className="text-xs text-swoop-text-label" style={{ fontSize: '10px', lineHeight: 1.4 }}>{description}</span>}
-          {collapsible && <span className="text-xs text-swoop-text-label transition-transform duration-200" style={{ transform: collapsed ? 'rotate(0)' : 'rotate(180deg)', fontSize: '10px', lineHeight: 1.4 }}>{'\u25BC'}</span>}
+        {isCollapsed && preview && (
+          <div className="flex items-center flex-wrap min-w-0" style={{ gap: '2px', flex: '1 1 auto', justifyContent: 'flex-start', marginLeft: '6px', overflow: 'hidden' }}>
+            {preview}
+          </div>
+        )}
+        <div className="flex items-center gap-2 shrink-0 ml-auto" style={{ fontSize: '11px', lineHeight: 1.4, gap: '4px' }}>
+          {description && <span className="text-xs text-swoop-text-label hidden sm:inline" style={{ fontSize: '10px', lineHeight: 1.4 }}>{description}</span>}
+          {collapsible && (
+            <span
+              className="text-swoop-text-label"
+              style={{
+                display: 'inline-block',
+                fontSize: '14px',
+                lineHeight: 1,
+                transform: collapsed ? 'rotate(0deg)' : 'rotate(90deg)',
+                transition: 'transform 0.15s ease',
+              }}
+            >
+              {'\u203A'}
+            </span>
+          )}
         </div>
       </div>
       {!isCollapsed && Array.isArray(sourceSystems) && sourceSystems.length > 0 && (
@@ -353,7 +405,12 @@ function ChurnPredictionBadge({ profile }) {
   const factors = prediction.risk_factors || [];
 
   return (
-    <Section title="Resignation Risk" description="AI-powered early warning">
+    <Section
+      title="Resignation Risk"
+      description="AI-powered early warning"
+      defaultCollapsed={false}
+      preview={<SwPill variant={prob >= 60 ? 'danger' : prob >= 30 ? 'warn' : 'success'}>{prob}% 90d</SwPill>}
+    >
       <div className="flex gap-4 mb-2">
         <div className="text-center px-4 py-2 rounded-xl" style={{ background: `${color}10`, border: `1px solid ${color}30` }}>
           <div className="text-2xl font-bold font-mono" style={{ color }}>{prob}%</div>
@@ -575,8 +632,16 @@ function DrawerSnapshotSection({ profile }) {
 
   if (activeCats.length === 0) return null;
 
+  const habitsPreview = (
+    <>
+      {activeCats.slice(0, 4).map(cat => (
+        <SwPill key={cat.key} variant="neutral">{cat.icon} {groups[cat.key].length || '·'}</SwPill>
+      ))}
+    </>
+  );
+
   return (
-    <Section title="Member Habits" description="Quick reference">
+    <Section title="Member Habits" description="Quick reference" preview={habitsPreview}>
       <div className="flex flex-col gap-2.5" style={{ fontSize: '12px', lineHeight: 1.4, gap: '4px' }}>
         {activeCats.map(cat => {
           const items = groups[cat.key];
@@ -681,7 +746,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
     <div className="flex flex-col gap-4" style={{ gap: '10px' }}>
       {/* Why am I looking at this member? — context banner */}
       {contextReason && (
-        <div className="px-3.5 py-2.5 rounded-lg bg-red-500/[0.04] border border-red-500/[0.13] border-l-[3px] border-l-red-500 text-sm text-[#1a1a2e]" style={{ padding: '6px 10px', fontSize: '12px', borderRadius: '8px' }}>
+        <div className="px-3.5 py-2.5 rounded-lg bg-red-500/[0.04] border border-red-500/[0.13] border-l-[3px] border-l-red-500 text-sm text-white" style={{ padding: '6px 10px', fontSize: '12px', borderRadius: '8px' }}>
           <span className="font-bold text-error-500 mr-1.5">Flagged:</span>
           {contextReason}
         </div>
@@ -689,7 +754,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
       <div className="flex justify-between items-start gap-4 flex-wrap" style={{ flexWrap: 'nowrap', gap: '8px' }}>
         <div className="flex gap-4 items-center">
-          <div className={`${layout === 'page' ? 'w-20 h-20 text-[28px]' : 'w-10 h-10 text-sm'} rounded-full bg-swoop-row border border-swoop-border flex items-center justify-center font-bold text-[#1a1a2e]`}>
+          <div className={`${layout === 'page' ? 'w-20 h-20 text-[28px]' : 'w-10 h-10 text-sm'} rounded-full bg-swoop-row border border-swoop-border flex items-center justify-center font-bold text-white`}>
             {initials}
           </div>
           <div>
@@ -765,16 +830,37 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <DrawerSnapshotSection profile={profile} />
 
       {/* Health Score Breakdown */}
-      {(profile.golfScore || profile.diningScore || profile.healthScore) && (
-        <Section title="Health Score Breakdown" description="Weighted engagement across 4 dimensions">
-          <HealthDimensionGrid profile={profile} />
-        </Section>
-      )}
+      {(profile.golfScore || profile.diningScore || profile.healthScore) && (() => {
+        const score = profile.healthScore ?? 50;
+        const variant = score >= 60 ? 'success' : score >= 35 ? 'warn' : 'danger';
+        const hsPreview = (
+          <>
+            <SwPill variant={variant}>⛳ {profile.golfScore ?? Math.round(score * 0.9)}</SwPill>
+            <SwPill variant={variant}>🍽 {profile.diningScore ?? Math.round(score * 0.8)}</SwPill>
+            <SwPill variant={variant}>✉ {profile.emailScore ?? Math.round(score * 0.7)}</SwPill>
+            <SwPill variant={variant}>🎉 {profile.eventScore ?? Math.round(score * 0.6)}</SwPill>
+          </>
+        );
+        return (
+          <Section title="Health Score Breakdown" description="Weighted engagement across 4 dimensions" preview={hsPreview}>
+            <HealthDimensionGrid profile={profile} />
+          </Section>
+        );
+      })()}
 
       {/* Resignation Risk — from predict-churn API */}
       <ChurnPredictionBadge profile={profile} />
 
-      <Section title="Contact" description={`Preferred channel: ${profile.contact?.preferredChannel ?? '\u2014'}`}>
+      <Section
+        title="Contact"
+        description={`Preferred channel: ${profile.contact?.preferredChannel ?? '\u2014'}`}
+        preview={
+          <>
+            <SwPill variant="neutral">💬 {profile.contact?.preferredChannel ?? 'SMS'}</SwPill>
+            {profile.contact?.lastOutreach && <SwPill variant="neutral">Last {formatDate(profile.contact.lastOutreach)}</SwPill>}
+          </>
+        }
+      >
         <div className="flex flex-col gap-1.5 text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           <span style={{ fontSize: '11px', lineHeight: 1.4 }}><strong>Phone:</strong> {profile.contact?.phone && profile.contact.phone !== '\u2014'
             ? <a href={`tel:${profile.contact.phone}`} className="text-brand-500 no-underline">{profile.contact.phone}</a>
@@ -787,8 +873,15 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </Section>
 
       {/* Household / Family Unit View */}
-      {profile.family && profile.family.length > 0 && (
-        <Section title="Household" description={`${profile.family.length + 1} members`} sourceSystems={['Member CRM']}>
+      {profile.family && profile.family.length > 0 && (() => {
+        const householdValue = Math.round((profile.duesAnnual || 0) * (1 + (profile.family?.length ?? 0) * 0.6));
+        return (
+        <Section
+          title="Household"
+          description={`${profile.family.length + 1} members`}
+          sourceSystems={['Member CRM']}
+          preview={<SwPill variant="neutral">${householdValue.toLocaleString()}/yr</SwPill>}
+        >
           <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
             {/* Aggregate household value */}
             <div className="flex gap-4 px-3 py-2 bg-swoop-row rounded-lg border border-swoop-border" style={{ fontSize: '11px', lineHeight: 1.4 }}>
@@ -822,7 +915,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
                 style={{ fontSize: '11px', lineHeight: 1.4 }}
               >
                 <div style={{ lineHeight: 1.4 }}>
-                  <div className={`font-semibold text-sm ${f.memberId ? 'text-brand-500' : 'text-[#1a1a2e]'}`} style={{ fontSize: '12px', lineHeight: 1.4 }}>{f.name}</div>
+                  <div className={`font-semibold text-sm ${f.memberId ? 'text-brand-500' : 'text-white'}`} style={{ fontSize: '12px', lineHeight: 1.4 }}>{f.name}</div>
                   <div className="text-xs text-swoop-text-label" style={{ fontSize: '10px', lineHeight: 1.4 }}>{f.relation}</div>
                 </div>
                 {f.notes && (
@@ -834,11 +927,16 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
             ))}
           </div>
         </Section>
-      )}
+        );
+      })()}
 
       {/* Archetype Description — Call Prep */}
       {profile.archetype && ARCHETYPE_DESCRIPTIONS[profile.archetype] && (
-        <Section title={`Archetype: ${profile.archetype}`} description="Behavioral profile">
+        <Section
+          title={`Archetype: ${profile.archetype}`}
+          description="Behavioral profile"
+          preview={<SwPill variant="amber">{profile.archetype}</SwPill>}
+        >
           <div className="text-sm text-swoop-text-muted leading-relaxed" style={{ fontSize: '10px', lineHeight: 1.4 }}>
             {ARCHETYPE_DESCRIPTIONS[profile.archetype]}
           </div>
@@ -847,13 +945,21 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
 
       {/* Spending Trend */}
       {(profile.duesAnnual || profile.spendHistory) && (
-        <Section title="Spending Trend" description="6-month direction">
+        <Section
+          title="Spending Trend"
+          description="6-month direction"
+          preview={<SwPill variant="warn">↓ trend</SwPill>}
+        >
           <SpendTrendSparkline profile={profile} />
         </Section>
       )}
 
       {/* Recommended Talking Points */}
-      <Section title="Talking Points" description="Personalized for this call">
+      <Section
+        title="Talking Points"
+        description="Personalized for this call"
+        preview={<SwPill variant="neutral">{getTalkingPoints(profile).length} points</SwPill>}
+      >
         <div className="flex flex-col gap-1.5" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {getTalkingPoints(profile).map((point, i) => (
             <div key={i} className="flex gap-2 items-start px-3 py-2 rounded-lg bg-brand-500/[0.04] border border-brand-500/[0.13]" style={{ fontSize: '11px', lineHeight: 1.4, padding: '6px 10px', marginBottom: '2px' }}>
@@ -865,11 +971,25 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       </Section>
 
       {/* Outreach History */}
-      <Section title="Outreach History" description="Past communications" sourceSystems={['Swoop App']}>
+      <Section
+        title="Outreach History"
+        description="Past communications"
+        sourceSystems={['Swoop App']}
+        preview={<SwPill variant="neutral">{getOutreachHistory(profile.memberId).length || 'None'}</SwPill>}
+      >
         <OutreachHistory profile={profile} />
       </Section>
 
-      <Section title="Preferences & insights" sourceSystems={['Member CRM']}>
+      <Section
+        title="Preferences & insights"
+        sourceSystems={['Member CRM']}
+        preview={
+          <>
+            {profile.preferences?.teeWindows && <SwPill variant="neutral">⛳ {profile.preferences.teeWindows}</SwPill>}
+            {profile.preferences?.favoriteSpots?.[0] && <SwPill variant="neutral">📍 {profile.preferences.favoriteSpots[0]}</SwPill>}
+          </>
+        }
+      >
         <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {profile.preferences?.favoriteSpots?.length > 0 && (
               <div className="text-sm" style={{ fontSize: '12px', lineHeight: 1.4 }}>
@@ -892,8 +1012,8 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
       </Section>
 
-      <Section title="Recent activity" description="Last 30 days" data-section="recent-activity"
-        collapsible defaultCollapsed summary={`${(profile.activity ?? []).length} entries`}
+      <Section title="Recent activity" description={`${(profile.activity ?? []).length} entries · Last 30 days`} data-section="recent-activity"
+        preview={<SwPill variant="neutral">{(profile.activity ?? []).length} entries</SwPill>}
         sourceSystems={['Tee Sheet', 'POS', 'Email', 'Events']}>
         <ActivityTimeline activity={profile.activity} />
       </Section>
@@ -901,15 +1021,19 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       <Section
         title="First Domino — Engagement Decay Sequence"
         description="Cross-domain timeline · Pillar 2: FIX IT"
-        collapsible
         defaultCollapsed={(profile.healthScore ?? 100) >= 50}
-        summary="Expand to view"
+        preview={<SwPill variant="warn">{(profile.riskSignals ?? []).length || 2} cascades</SwPill>}
         sourceSystems={['Tee Sheet', 'POS', 'Email', 'Analytics']}
       >
         <MemberJourneyTimeline profile={profile} />
       </Section>
 
-      <Section title="Risk signals" sourceSystems={['Analytics', 'Tee Sheet', 'POS', 'Email']}>
+      <Section
+        title="Risk signals"
+        defaultCollapsed={!(profile.riskSignals ?? []).length}
+        preview={<SwPill variant="danger">{(profile.riskSignals ?? []).length} active</SwPill>}
+        sourceSystems={['Analytics', 'Tee Sheet', 'POS', 'Email']}
+      >
         <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           {(profile.riskSignals ?? []).map((signal) => (
             <RiskSignalRow key={signal.id} signal={signal} profile={profile} />
@@ -918,13 +1042,16 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
         </div>
       </Section>
 
-      <Section title="Staff notes">
+      <Section
+        title="Staff notes"
+        preview={<SwPill variant="neutral">{(profile.staffNotes ?? []).length} notes</SwPill>}
+      >
         <div className="flex flex-col gap-2" style={{ fontSize: '12px', lineHeight: 1.4 }}>
           <textarea
             value={noteText}
             onChange={(event) => setNoteText(event.target.value)}
             placeholder="Add a quick staff note..."
-            className="w-full min-h-24 rounded-lg border border-swoop-border p-2 text-sm font-sans bg-swoop-row text-[#1a1a2e]"
+            className="w-full min-h-24 rounded-lg border border-swoop-border p-2 text-sm font-sans bg-swoop-row text-white"
             style={{ fontSize: '12px', lineHeight: 1.4, minHeight: '48px', height: '48px' }}
           />
           <button
@@ -958,7 +1085,7 @@ export function MemberProfileContent({ profile, onClose, onOpenFullPage, onAddNo
       )}
 
       <div className={isDrawerLayout ? 'sticky bottom-0 bg-swoop-panel pt-4 pb-2 shadow-[0_-12px_32px_rgba(15,23,42,0.08)] z-[5]' : ''} style={{ paddingTop: '8px', paddingBottom: '6px' }}>
-        <Section title="Quick actions">
+        <Section title="Quick actions" collapsible={false}>
           <div className="flex flex-wrap gap-2">
             {quickActions.map((action) => (
               <button
@@ -1001,7 +1128,7 @@ class DrawerErrorBoundary extends React.Component {
         <div className="p-8 text-center text-swoop-text-label">
           <div className="text-2xl mb-3">Something went wrong</div>
           <div className="text-sm mb-4">Unable to load this member profile.</div>
-          <button onClick={this.props.onClose} className="px-5 py-2 rounded-md border border-swoop-border bg-swoop-panel cursor-pointer text-[#1a1a2e]">Close</button>
+          <button onClick={this.props.onClose} className="px-5 py-2 rounded-md border border-swoop-border bg-swoop-panel cursor-pointer text-swoop-text">Close</button>
         </div>
       );
     }
@@ -1053,9 +1180,9 @@ export default function MemberProfileDrawer() {
 
   const panelBase = {
     position: 'fixed',
-    background: '#ffffff',
-    boxShadow: '0 12px 40px rgba(15, 23, 42, 0.25)',
-    borderLeft: '1px solid #E5E7EB',
+    background: '#111111',
+    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.6)',
+    borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
     borderTopLeftRadius: isMobile ? '16px' : 0,
     borderTopRightRadius: isMobile ? '16px' : 0,
     display: 'flex',
