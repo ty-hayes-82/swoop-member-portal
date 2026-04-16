@@ -102,7 +102,7 @@ export default function RevenuePage() {
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-swoop-text">Revenue Leakage</h1>
             <p className="text-sm text-swoop-text-muted mt-1">
-              Revenue lost to slow rounds, understaffing, and weather — quantified across every system.
+              Revenue lost to slow rounds, understaffing, and weather: quantified across every system.
             </p>
           </div>
 
@@ -127,37 +127,17 @@ export default function RevenuePage() {
                         <div className="text-2xl font-bold text-swoop-text font-mono">{memberSummary.total || 0}</div>
                         <div className="text-[11px] text-swoop-text-muted mt-0.5">spending patterns being analyzed</div>
                       </div>
-                      {riskCount > 0 && (
-                        <div className="bg-swoop-panel rounded-lg p-3 border border-red-500/30">
-                          <div className="text-[10px] font-bold uppercase tracking-wide text-red-500 mb-1">At-Risk Members</div>
-                          <div className="text-2xl font-bold text-red-600 font-mono">{riskCount}</div>
-                          <div className="text-[11px] text-swoop-text-muted mt-0.5">declining engagement detected</div>
-                        </div>
-                      )}
-                      {duesAtRisk > 0 && (
-                        <div className="bg-swoop-panel rounded-lg p-3 border border-red-500/30">
-                          <div className="text-[10px] font-bold uppercase tracking-wide text-red-500 mb-1">Dues at Risk</div>
-                          <div className="text-2xl font-bold text-red-600 font-mono">${Math.round(duesAtRisk / 1000)}K</div>
-                          <div className="text-[11px] text-swoop-text-muted mt-0.5">annual dues from at-risk members</div>
-                        </div>
-                      )}
-                    </div>
-                    {atRisk.length > 0 && (
-                      <div className="mt-3">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-2">Members Declining: Cross-Reference with Spend</div>
-                        <div className="flex flex-col gap-1.5">
-                          {atRisk.map(m => (
-                            <div key={m.id || m.memberId} className="flex items-center justify-between bg-swoop-panel rounded-lg px-3 py-2 border border-swoop-border-inset">
-                              <div className="text-sm text-swoop-text-2 font-medium">{m.name}</div>
-                              <div className="flex items-center gap-3 text-xs text-swoop-text-muted">
-                                <span className="font-mono text-red-500 font-semibold">Score {m.healthScore ?? m.score ?? '—'}</span>
-                                {m.duesAnnual > 0 && <span>${Math.round(m.duesAnnual / 1000)}K/yr dues</span>}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">F&B Transactions</div>
+                        <div className="text-2xl font-bold text-swoop-text font-mono">686</div>
+                        <div className="text-[11px] text-swoop-text-muted mt-0.5">dining checks analyzed</div>
                       </div>
-                    )}
+                      <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Revenue Tracked</div>
+                        <div className="text-2xl font-bold text-swoop-text font-mono">POS</div>
+                        <div className="text-[11px] text-swoop-text-muted mt-0.5">spend patterns mapped</div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="rounded-xl border border-brand-500/25 bg-brand-500/[0.06] p-4">
@@ -166,7 +146,7 @@ export default function RevenuePage() {
                       <div className="flex-1">
                         <div className="font-semibold text-swoop-text mb-1">Next: Connect Tee Sheet to track revenue leakage</div>
                         <div className="text-sm text-swoop-text-muted mb-3">
-                          Swoop will cross-reference POS checks against tee sheet rounds — identifying which rounds skip dining and quantifying the revenue impact per slow hole.
+                          Swoop will cross-reference POS checks against tee sheet rounds, identifying which rounds skip dining and quantifying the revenue impact per slow hole.
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-center">
                           {[

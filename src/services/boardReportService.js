@@ -1,6 +1,6 @@
 import { apiFetch, getClubId } from './apiClient';
 import { isGateOpen, getDataMode } from './demoGate';
-import { getMemberSummary as _getMemberSummary } from '@/services/memberService';
+import { getMemberSummary as _getMemberSummary, getHealthDistribution } from '@/services/memberService';
 import {
   kpis as staticKpis,
   memberSaves as staticMemberSaves,
@@ -75,7 +75,13 @@ export const getKPIs = () => {
   if (summary.totalMembers > 0 || summary.total > 0) {
     const total = summary.totalMembers || summary.total;
     const healthy = summary.healthy || 0;
-    const atRisk = (summary.atRisk || 0) + (summary.critical || 0);
+    // Use getHealthDistribution() so this count matches the Member Health Overview
+    const dist = getHealthDistribution();
+    const distAtRisk = dist.find(d => d.level === 'At Risk')?.count || 0;
+    const distCritical = dist.find(d => d.level === 'Critical')?.count || 0;
+    const atRisk = dist.length > 0
+      ? distAtRisk + distCritical
+      : (summary.atRisk || 0) + (summary.critical || 0);
     // 'Watch' is the DEFAULT tier assigned at import time before health scores are
     // computed. Treat Watch-only as "not yet scored" — same as no tiers.
     const hasRealHealthTiers = healthy > 0 || atRisk > 0 || (summary.critical || 0) > 0;

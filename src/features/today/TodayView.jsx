@@ -733,11 +733,11 @@ export default function TodayView() {
           </div>
         </SwoopSection>}
 
-        {/* Weather Alert */}
-        <SwoopSection
+        {/* Weather Alert — requires tee sheet data to attribute revenue exposure */}
+        {teeSheetConnected && <SwoopSection
           title="Weather Alert"
           titleColor={C.accent}
-          peek="Wind Advisory — gusts to 30–40 mph expected Saturday afternoon"
+          peek="Wind Advisory: gusts to 30–40 mph expected Saturday afternoon"
         >
           <div className="swoop-detail-row" style={{ flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
@@ -766,10 +766,10 @@ export default function TodayView() {
               <button className="swoop-action-btn" style={{ flexShrink: 0 }}>Send Notifications →</button>
             </div>
           </div>
-        </SwoopSection>
+        </SwoopSection>}
 
-        {/* Tomorrow's Forecast */}
-        <SwoopSection
+        {/* Tomorrow's Forecast — requires tee sheet data */}
+        {teeSheetConnected && <SwoopSection
           title="Tomorrow's Forecast"
           titleColor={C.neutral}
           peek="220 rounds booked · 87.2°F · Wind advisory · Staffing watch"
@@ -807,7 +807,7 @@ export default function TodayView() {
               </div>
             </div>
           </div>
-        </SwoopSection>
+        </SwoopSection>}
 
       </div>
     </PageTransition>

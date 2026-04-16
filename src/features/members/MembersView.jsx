@@ -31,26 +31,26 @@ export default function MembersView() {
       <PageTransition>
         <DataEmptyState
           icon="👥"
-          title="Connect your club systems to unlock member intelligence"
-          description="Identify $32K+ in at-risk annual dues per member, track cross-domain decay sequences, and catch 82→61 health score drops before members resign. Swoop pulls members, rounds, spend, and engagement directly from Jonas, Clubessential, Northstar, and similar systems."
+          title="Import your member roster to get started"
+          description="Swoop cross-references your roster with tee sheet and POS data to identify at-risk members before they resign. Catch 82→61 health score drops early and protect $32K+ in annual dues per member."
           dataType="members"
           actions={
-            <>
-              <button
-                type="button"
-                onClick={() => navigate('integrations')}
-                className="px-4 py-2 rounded-md text-xs font-bold bg-brand-500 text-white hover:bg-brand-600"
-              >
-                Connect Integrations →
-              </button>
+            <div className="flex flex-col items-center gap-3 w-full max-w-xs">
               <button
                 type="button"
                 onClick={() => navigate('integrations/csv-import', { category: 'members' })}
-                className="px-4 py-2 rounded-md text-xs font-semibold bg-transparent text-swoop-text-muted border border-swoop-border hover:text-swoop-text"
+                className="w-full px-5 py-3 rounded-lg text-sm font-bold bg-brand-500 text-white hover:bg-brand-600 transition-colors"
               >
-                Or upload a CSV
+                Import Member Roster →
               </button>
-            </>
+              <button
+                type="button"
+                onClick={() => navigate('integrations')}
+                className="w-full px-5 py-2.5 rounded-lg text-sm font-semibold bg-transparent text-swoop-text-muted border border-swoop-border hover:text-swoop-text hover:border-swoop-text transition-colors"
+              >
+                Connect Integrations
+              </button>
+            </div>
           }
         />
       </PageTransition>
