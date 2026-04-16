@@ -54,11 +54,11 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
     });
   }
 
-  // 2. Revenue / F&B leakage
+  // 2. Revenue / F&B leakage — show direction only, not the exact figure (Revenue page is source of truth)
   if (leakage?.TOTAL > 0) {
     bullets.push({
       icon: '💸',
-      text: `$${leakage.TOTAL.toLocaleString()}/mo in F&B leakage detected: pace, staffing, and weather gaps`,
+      text: 'F&B leakage detected: pace, staffing, and weather gaps. See Revenue for full breakdown.',
       nav: 'revenue',
       navOpts: null,
       urgent: riskCount === 0,

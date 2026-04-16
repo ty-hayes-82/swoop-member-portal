@@ -8,6 +8,7 @@ import { getAllActions } from '@/services/agentService';
 import { getDataMode, isGateOpen } from '@/services/demoGate';
 import { SourceBadgeRow } from '@/components/ui/SourceBadge';
 import ActionCard from '@/components/ui/ActionCard';
+import { getComplaintCorrelation, getUnderstaffedDays } from '@/services/staffingService';
 
 // Map source/agent identifiers to a role-based owner label for the card header.
 const SOURCE_TO_OWNER = {
@@ -187,8 +188,57 @@ export default function InboxTab() {
   const trustLevel = TRUST_LEVELS.reduce((best, l) => totalHandled >= l.threshold ? l : best, TRUST_LEVELS[0]);
   const nextLevel = TRUST_LEVELS.find(l => l.threshold > totalHandled);
 
+  // Service recovery alerts — unresolved complaints and understaffed days surfaced inline
+  const allComplaints = getComplaintCorrelation();
+  const unresolvedComplaints = allComplaints.filter(f => f.status !== 'resolved');
+  const understaffedDays = getUnderstaffedDays();
+
   return (
     <div className="flex flex-col gap-4">
+      {/* Service Recovery Alerts — surfaces unresolved complaints and staffing gaps */}
+      {(unresolvedComplaints.length > 0 || understaffedDays.length > 0) && (
+        <div className="rounded-xl border border-error-500/25 bg-error-500/[0.04] p-4">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-error-500 mb-3">
+            Service Recovery Needed
+          </div>
+          <div className="flex flex-col gap-2">
+            {unresolvedComplaints.slice(0, 3).map((c, i) => (
+              <div key={c.id || i} className="flex items-start gap-3 py-2 px-3 rounded-lg bg-swoop-panel border border-swoop-border">
+                <span className="text-sm shrink-0">🔴</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold text-swoop-text">
+                    Unresolved complaint: {c.category ? c.category.replace(/_/g, ' ') : 'Service issue'}
+                  </div>
+                  <div className="text-[11px] text-swoop-text-muted mt-0.5">
+                    {c.description || c.complaint || 'Member complaint awaiting resolution'}{c.date ? ` · Filed ${new Date(c.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
+                  </div>
+                </div>
+                <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-error-500/10 text-error-500">Open</span>
+              </div>
+            ))}
+            {unresolvedComplaints.length > 3 && (
+              <div className="text-[11px] text-swoop-text-muted pl-3">
+                +{unresolvedComplaints.length - 3} more unresolved complaint{unresolvedComplaints.length - 3 !== 1 ? 's' : ''} — see Service tab
+              </div>
+            )}
+            {understaffedDays.length > 0 && (
+              <div className="flex items-start gap-3 py-2 px-3 rounded-lg bg-swoop-panel border border-swoop-border">
+                <span className="text-sm shrink-0">⚠️</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold text-swoop-text">
+                    {understaffedDays.length} understaffed day{understaffedDays.length !== 1 ? 's' : ''} this period
+                  </div>
+                  <div className="text-[11px] text-swoop-text-muted mt-0.5">
+                    Review staffing coverage on the Service tab to address gaps before next high-demand day.
+                  </div>
+                </div>
+                <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-warning-500/10 text-warning-500">Review</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Pillar 3 PROVE IT — Impact rollup (gradient glass stat cards) */}
       {totalPending > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

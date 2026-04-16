@@ -467,29 +467,43 @@ export default function BoardReport() {
                 <div className="text-[28px] font-bold text-success-500">{resolutionRate > 0 ? `${resolutionRate}%` : (feedbackRecords.length > 0 ? '—' : '—')}</div>
                 <div className="text-[11px] text-[#BCC3CF]">{resolutionRate > 0 ? 'Complaint Resolution Rate' : (feedbackRecords.length > 0 ? 'Complaints Under Review' : 'No Complaints This Period')}</div>
               </div>
+              {understaffedDays.length > 0 ? (
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{Math.round(((30 - understaffedDays.length) / 30) * 100)}%</div>
                 <div className="text-[11px] text-[#BCC3CF]">Staffing Alignment Rate</div>
               </div>
+              ) : (
+              <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center opacity-40">
+                <div className="text-[28px] font-bold text-[#BCC3CF]">—</div>
+                <div className="text-[11px] text-[#BCC3CF]">Staffing Data</div>
+                <div className="text-[10px] text-[#BCC3CF] mt-1">awaiting scheduling import</div>
+              </div>
+              )}
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{avgDetectionHrs != null ? `${avgDetectionHrs} hrs` : '—'}</div>
                 <div className="text-[11px] text-[#BCC3CF]">Avg Detection to Action</div>
               </div>
             </div>
 
-            {/* Staffing detail row */}
+            {/* Staffing detail row — only show when there's real staffing or complaint data */}
+            {(understaffedDays.length > 0 || feedbackRecords.length > 0 || operationalSaves.length > 0) && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+              {understaffedDays.length > 0 && (
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{Math.max(0, 30 - understaffedDays.length)}</div>
                 <div className="text-[11px] text-[#BCC3CF]">Days Fully Staffed</div>
               </div>
+              )}
+              {operationalSaves.length > 0 && (
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 <div className="text-[28px] font-bold text-success-500">{operationalSaves.length}</div>
                 <div className="text-[11px] text-[#BCC3CF]">Staffing Recommendations Acted On</div>
               </div>
+              )}
+              {feedbackRecords.length > 0 && (
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
                 {(() => {
-                  const understaffedComplaintPct = feedbackRecords.length > 0 ? Math.round((feedbackRecords.filter(f => f.isUnderstaffedDay).length / feedbackRecords.length) * 100) : 0;
+                  const understaffedComplaintPct = Math.round((feedbackRecords.filter(f => f.isUnderstaffedDay).length / feedbackRecords.length) * 100);
                   return (
                     <>
                       <div className={`text-[28px] font-bold ${understaffedComplaintPct > 30 ? 'text-warning-500' : 'text-success-500'}`}>{understaffedComplaintPct}%</div>
@@ -498,7 +512,9 @@ export default function BoardReport() {
                   );
                 })()}
               </div>
+              )}
             </div>
+            )}
 
             {/* Complaint categories */}
             <div className="flex gap-2 flex-wrap">

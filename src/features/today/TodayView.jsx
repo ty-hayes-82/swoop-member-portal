@@ -373,6 +373,9 @@ export default function TodayView() {
             <div className="greeting-date" style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: '2px 0 0', fontWeight: 500 }}>
               {formatDate()}
             </div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', margin: '3px 0 0', letterSpacing: '0.06em', fontWeight: 600, textTransform: 'uppercase' }}>
+              See It · Fix It · Prove It
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             {(() => {
@@ -739,6 +742,7 @@ export default function TodayView() {
           title="Weather Alert"
           titleColor={C.accent}
           peek="Wind Advisory: gusts to 30–40 mph expected Saturday afternoon"
+          defaultOpen={false}
         >
           <div className="swoop-detail-row" style={{ flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
@@ -774,7 +778,7 @@ export default function TodayView() {
           title="Tomorrow's Forecast"
           titleColor={C.neutral}
           peek="220 rounds booked · 87.2°F · Wind advisory · Staffing watch"
-          defaultOpen={true}
+          defaultOpen={false}
         >
           <div className="swoop-detail-row" style={{ flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>

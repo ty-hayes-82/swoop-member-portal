@@ -272,9 +272,17 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                   <div className="text-xs text-swoop-text-label mb-1">
                     Primary Risk Signal:
                   </div>
-                  <div className="text-sm text-[#1a1a2e]">
+                  <div className="text-sm text-[#1a1a2e] mb-1.5">
                     {member.topRisk}
                   </div>
+                  <SourceBadgeRow
+                    size="xs"
+                    systems={[
+                      /golf|round|tee|frequency/i.test(member.topRisk) && 'Tee Sheet',
+                      /dining|f&b|food|beverage|spend/i.test(member.topRisk) && 'POS',
+                      /email|open rate|newsletter/i.test(member.topRisk) && 'Email',
+                    ].filter(Boolean)}
+                  />
                 </div>
               )}
 
