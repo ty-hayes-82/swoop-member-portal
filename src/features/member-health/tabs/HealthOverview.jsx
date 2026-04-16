@@ -251,7 +251,7 @@ export default function HealthOverview() {
               {allMembers.length} members imported: connect golf and dining data to protect at-risk dues
             </div>
             <div className="text-xs text-swoop-text-muted mt-1 leading-relaxed">
-              Detect 82→61 health score drops, track the cross-domain decay sequence, and protect at-risk annual dues before members resign (NGCOA pilot average: $32K+ retained per saved member*).
+              Detect 82→61 health score drops, track the cross-domain decay sequence, and protect at-risk annual dues before members resign (NGCOA pilot average: $32K+ retained per saved member — based on avg $800/mo dues over 40-month member tenure*).
             </div>
             <div className="text-[10px] text-swoop-text-ghost mt-1.5">* Based on Swoop 2023–2024 pilot data across 12 private clubs.</div>
             <div className="mt-3 flex items-center gap-2 flex-wrap">

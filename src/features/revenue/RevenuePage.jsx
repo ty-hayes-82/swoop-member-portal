@@ -122,6 +122,7 @@ export default function RevenuePage() {
                       <span className="text-lg">✅</span>
                       <span className="font-semibold text-swoop-text">POS Connected: {686} transactions loaded</span>
                       <SourceBadge system="POS" size="xs" />
+                      <span className="text-[10px] text-swoop-text-label ml-auto">Last synced: today</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
@@ -308,12 +309,6 @@ export default function RevenuePage() {
               Before members resign, they stop spending. Slow rounds, understaffed shifts, and missed dining: quantified in dollars before it shows up in dues revenue.
             </p>
           </div>
-          <button
-            onClick={() => navigate('board-report')}
-            className="rounded-lg bg-brand-500 text-white px-5 py-2 text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors focus-visible:ring-2 focus-visible:ring-brand-500"
-          >
-            Generate Board Report →
-          </button>
         </div>
 
         {/* Deep insights powered by imported CSV data */}
@@ -334,8 +329,8 @@ export default function RevenuePage() {
             </div>
             <div className="h-10 w-px bg-swoop-border hidden sm:block" />
             <div className="text-sm text-swoop-text-muted leading-relaxed max-w-md">
-              Dining conversion drops from <span className="font-bold text-swoop-text">41% → 22%</span> when rounds run long.
-              Every slow round costs your F&B operation <span className="font-bold text-error-500">${dollarPerSlowRound}</span> in missed revenue, before a single member decides not to renew.
+              Post-round dining conversion falls from <span className="font-bold text-swoop-text">41%</span> on on-pace rounds to <span className="font-bold text-error-500">22%</span> on slow rounds.
+              At a <span className="font-bold text-swoop-text">${avgCheckSize} avg check</span>, every slow round forfeits <span className="font-bold text-error-500">${dollarPerSlowRound}</span> in F&amp;B revenue — before a single member decides not to renew.
             </div>
           </div>
         )}
@@ -391,7 +386,8 @@ export default function RevenuePage() {
             </div>
             <SourceBadge system="Tee Sheet" size="xs" />
             <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">
-              <span className="font-bold text-brand-500">${dollarPerSlowRound} F&amp;B value at risk per slow round</span>: on-pace rounds drive ${avgCheckSize} avg check at 91% post-round dining capture. Slow rounds drop to 22% conversion, forfeiting the majority of that F&amp;B revenue.
+              <span className="font-bold text-brand-500">${dollarPerSlowRound} F&amp;B value per slow round forfeited</span>: dining conversion drops 41% → 22% when rounds run long, on a ${avgCheckSize} avg check.{' '}
+              <span className="text-swoop-text-ghost">{slowContext.slowRounds.toLocaleString()} slow rounds/mo affected.</span>
             </div>
           </div>
           {leakage.STAFFING_LOSS > 0 ? (

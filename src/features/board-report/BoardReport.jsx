@@ -120,6 +120,11 @@ function KPIStrip({ kpis, navigate, onDrillDown }) {
               {kpi.label}
               {kpi.description && <span className="ml-1 cursor-help opacity-60" title={kpi.description}>&#9432;</span>}
             </div>
+            {kpi.label === 'Dues at Risk' && (
+              <div className="mt-1 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide text-amber-600 bg-amber-500/10 border border-amber-500/20">
+                Churn Risk Model
+              </div>
+            )}
             {/* Source badges — Pillar 1: SEE IT */}
             <div className="flex gap-1 justify-center mt-2 flex-wrap">
               {sources.map(s => (

@@ -712,7 +712,7 @@ export default function TodayView() {
             <div className="swoop-detail-divider" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
               {[
-                { label: 'Location', primary: 'Grill Room', secondary: '2026-01-09', color: '#fff' },
+                { label: 'Location', primary: 'Grill Room', secondary: (() => { const d = new Date(); d.setDate(d.getDate() + 3); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); })(), color: '#fff' },
                 { label: 'Coverage', primary: '2 / 4 scheduled', secondary: '2 staff gap', color: C.danger },
                 { label: 'Revenue at risk', primary: '$3,400', secondary: '~100 lost covers × $34 avg check', color: C.accent, mono: true },
               ].map((tile, i) => (
