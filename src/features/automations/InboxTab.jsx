@@ -153,6 +153,20 @@ export default function InboxTab() {
   );
 
   const totalPending = inbox.filter(i => i.status === 'pending').length;
+  const highCount = inbox.filter(i => i.status === 'pending' && (i.priority === 'high' || i.priority === 'urgent')).length;
+
+  const handleBulkApproveHigh = () => {
+    const targets = inbox.filter(i => i.status === 'pending' && (i.priority === 'high' || i.priority === 'urgent'));
+    if (!targets.length) return;
+    if (!window.confirm(`Approve ${targets.length} high-priority action${targets.length === 1 ? '' : 's'}?`)) return;
+    targets.forEach(a => approveAction(a.id, { executionType: 'email', memberId: a.memberId, memberName: a.memberName }));
+  };
+  const handleBulkApproveAll = () => {
+    const targets = inbox.filter(i => i.status === 'pending');
+    if (!targets.length) return;
+    if (!window.confirm(`Approve all ${targets.length} pending actions?`)) return;
+    targets.forEach(a => approveAction(a.id, { executionType: 'email', memberId: a.memberId, memberName: a.memberName }));
+  };
 
   // Pillar 3 PROVE IT — total dollar impact rollup
   const allPending = inbox.filter(i => i.status === 'pending');
@@ -175,52 +189,91 @@ export default function InboxTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Pillar 3 PROVE IT — Impact rollup */}
+      {/* Pillar 3 PROVE IT — Impact rollup (gradient glass stat cards) */}
       {totalPending > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
-            <div className="text-[10px] font-bold uppercase tracking-wide text-brand-500">Pending</div>
-            <div className="text-2xl font-bold text-swoop-text font-mono mt-1">{totalPending}</div>
-            <div className="text-xs text-swoop-text-muted mt-0.5">awaiting your approval</div>
+          <div className="swoop-stat-card">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-brand-500">Pending</div>
+            <div className="text-[32px] font-extrabold text-swoop-text font-mono mt-1 leading-none">{totalPending}</div>
+            <div className="text-xs text-swoop-text-muted mt-1">awaiting your approval</div>
           </div>
-          <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
-            <div className="text-[10px] font-bold uppercase tracking-wide text-success-500">Total Dollar Impact</div>
-            <div className="text-2xl font-bold text-success-600 font-mono mt-1">
+          <div className="swoop-stat-card">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-success-500">Total Dollar Impact</div>
+            <div className="text-[32px] font-extrabold text-success-500 font-mono mt-1 leading-none">
               ${totalDollarImpact.toLocaleString()}
             </div>
-            <div className="text-xs text-swoop-text-muted mt-0.5">if all approved</div>
+            <div className="text-xs text-swoop-text-muted mt-1">if all approved</div>
           </div>
-          <div className="bg-swoop-panel border border-swoop-border rounded-xl p-4">
-            <div className="text-[10px] font-bold uppercase tracking-wide text-warning-500">Highest Impact</div>
-            <div className="text-base font-bold text-swoop-text font-mono mt-1 truncate" title={topImpactAction?.description}>
+          <div className="swoop-stat-card">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-warning-500">Highest Impact</div>
+            <div className="text-base font-extrabold text-swoop-text font-mono mt-1 truncate" title={topImpactAction?.description}>
               {topImpactAction?.impactMetric || (topImpactAction?._dollar ? `$${topImpactAction._dollar.toLocaleString()}` : '—')}
             </div>
-            <div className="text-xs text-swoop-text-muted mt-0.5 truncate">{topImpactAction?.description || 'No actions'}</div>
+            <div className="text-xs text-swoop-text-muted mt-1 truncate">{topImpactAction?.description || 'No actions'}</div>
           </div>
         </div>
       )}
 
-      {/* Filter bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+      {/* Bulk Actions Toolbar — process many high-priority items at once */}
+      {totalPending > 0 && (
+        <div className="flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-swoop-row border border-swoop-border flex-wrap">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-swoop-text-label">
+            Bulk Actions
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleBulkApproveHigh}
+              disabled={highCount === 0}
+              className="swoop-bulk-btn swoop-bulk-btn--high"
+              title="Approve every pending high-priority action"
+            >
+              Approve All High ({highCount})
+            </button>
+            <button
+              type="button"
+              onClick={handleBulkApproveAll}
+              className="swoop-bulk-btn swoop-bulk-btn--all"
+              title="Approve every pending action"
+            >
+              Approve All ({totalPending})
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Filter bar with keyboard shortcut hints + bottom separator */}
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-swoop-border">
+        <div className="flex items-center gap-4">
           <span className="text-sm font-semibold text-swoop-text-2">
             {totalPending} pending action{totalPending !== 1 ? 's' : ''}
           </span>
+          <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-swoop-text-label">
+            <span className="inline-flex items-center gap-1.5">
+              <kbd className="swoop-kbd">A</kbd> Approve
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <kbd className="swoop-kbd">D</kbd> Dismiss
+            </span>
+          </div>
         </div>
-        <div className="flex gap-1">
-          {['all', 'high', 'medium', 'low'].map(p => (
-            <button
-              key={p}
-              onClick={() => setPriorityFilter(p)}
-              className={`px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold cursor-pointer border transition-colors ${
-                priorityFilter === p
-                  ? 'bg-swoop-row text-white border-swoop-border'
-                  : 'bg-transparent text-swoop-text-muted border-swoop-border hover:bg-swoop-row-hover'
-              }`}
-            >
-              {p === 'all' ? 'All' : p.charAt(0).toUpperCase() + p.slice(1)}
-            </button>
-          ))}
+        <div className="flex gap-1 flex-wrap">
+          {['all', 'urgent', 'high', 'medium', 'low'].map(p => {
+            const isActive = priorityFilter === p;
+            return (
+              <button
+                key={p}
+                onClick={() => setPriorityFilter(p)}
+                className={`px-3 py-1 rounded-full text-[11px] font-semibold cursor-pointer border transition-all ${
+                  isActive
+                    ? 'bg-brand-500/[0.14] text-brand-500 border-brand-500/40'
+                    : 'bg-transparent text-swoop-text-muted border-swoop-border hover:text-swoop-text hover:border-white/20'
+                }`}
+              >
+                {p === 'all' ? 'All' : p.charAt(0).toUpperCase() + p.slice(1)}
+              </button>
+            );
+          })}
         </div>
       </div>
 

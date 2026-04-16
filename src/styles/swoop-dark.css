@@ -244,6 +244,142 @@
   color: var(--color-swoop-danger);
 }
 
+/* ---- Inbox approve / dismiss buttons -------------------------------------- */
+
+.swoop-approve-btn {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(243, 146, 45, 0.6);
+  background: linear-gradient(135deg, #f3922d 0%, #e07820 100%);
+  box-shadow:
+    0 4px 12px rgba(243, 146, 45, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.swoop-approve-btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 20px rgba(243, 146, 45, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.swoop-ghost-btn {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+.swoop-ghost-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ---- Inbox stat cards (gradient glass) ------------------------------------ */
+
+.swoop-stat-card {
+  position: relative;
+  padding: 16px 18px 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(255,255,255,0.09);
+  backdrop-filter: blur(6px);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  overflow: hidden;
+}
+.swoop-stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 0% 0%, rgba(243,146,45,0.06), transparent 55%);
+  pointer-events: none;
+}
+.swoop-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(243,146,45,0.45);
+  box-shadow: 0 8px 22px rgba(243,146,45,0.14), 0 0 0 1px rgba(243,146,45,0.22);
+}
+
+/* ---- Bulk action buttons --------------------------------------------------- */
+
+.swoop-bulk-btn {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+.swoop-bulk-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.swoop-bulk-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.swoop-bulk-btn--high {
+  color: #fff;
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.swoop-bulk-btn--high:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.22);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+}
+
+.swoop-bulk-btn--all {
+  color: #fff;
+  background: rgba(243, 146, 45, 0.16);
+  border-color: rgba(243, 146, 45, 0.45);
+}
+.swoop-bulk-btn--all:hover:not(:disabled) {
+  background: rgba(243, 146, 45, 0.24);
+  box-shadow: 0 4px 12px rgba(243, 146, 45, 0.28);
+}
+
+/* ---- Keyboard shortcut hint pill ------------------------------------------ */
+
+.swoop-kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4), inset 0 -1px 0 rgba(255,255,255,0.04);
+}
+
+/* ---- Action card hover + entrance animation ------------------------------- */
+
+@keyframes swoopCardFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.swoop-action-card {
+  animation: swoopCardFadeIn 260ms ease-out both;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.swoop-action-card:hover {
+  transform: translateX(3px);
+  box-shadow: -2px 4px 18px var(--priority-glow, rgba(243, 146, 45, 0.22));
+}
+
 /* ---- Pills & badges -------------------------------------------------------- */
 
 .swoop-count-pill {
