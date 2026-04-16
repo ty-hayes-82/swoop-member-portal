@@ -98,15 +98,13 @@ export const getKPIs = () => {
     }
 
     // "Active" = not critical — the members still paying dues and engaging.
-    // Prefer live saved count (from interventions) if available; fall back to
-    // healthy + watch as an honest "still active" denominator.
-    const watch = summary.watch || 0;
+    // Use total - critical so the Board Report count matches Members page total.
     const activeMembers = total - (summary.critical || 0);
     // Retention: exclude both at-risk AND critical so it's honest (not 100% when 10 members are at risk)
     const retentionPct = total > 0 ? Math.round(((total - atRisk) / total) * 100) : 0;
-    const liveRetained = _liveKpis?.membersSaved > 0 ? _liveKpis.membersSaved : (healthy > 0 ? healthy : activeMembers);
+    const liveRetained = _liveKpis?.membersSaved > 0 ? _liveKpis.membersSaved : activeMembers;
     return [
-      { label: 'Active Members', value: liveRetained, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total — ${distAtRisk} at-risk, ${distCritical} critical` },
+      { label: 'Active Members', value: liveRetained, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total: ${distAtRisk} at-risk, ${distCritical} critical (${activeMembers} non-critical)` },
       { label: 'Dues at Risk', value: Math.round((summary.potentialDuesAtRisk || 0) / 1000), unit: '$K', prefix: '$', suffix: 'K', color: 'warning', description: 'Churn Risk Model ±15%: annual dues from at-risk + critical members based on historical retention patterns' },
       { label: 'Non-Critical Rate', value: retentionPct, unit: '%', prefix: '', suffix: '%', color: retentionPct >= 80 ? 'success' : 'warning', description: 'Members not flagged critical, as % of total' },
       { label: 'At Risk', value: atRisk, unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },

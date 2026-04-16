@@ -12,7 +12,7 @@ import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
 const TABS = [
   { key: 'inbox', label: 'Inbox', icon: '📥' },
   { key: 'playbooks', label: 'Action Plans', icon: '📋' },
-  { key: 'agents', label: 'AI Agents', icon: '🤖' },
+  { key: 'agents', label: 'Automated Saves', icon: '🤖' },
 ];
 
 export default function AutomationsHub() {

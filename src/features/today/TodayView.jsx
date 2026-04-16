@@ -508,7 +508,7 @@ export default function TodayView() {
                 accentBorder="rgba(239,68,68,0.18)"
                 footerLines={[
                   { text: '$95K combined dues · 3 critical' },
-                  { text: 'Kevin Hurst · Anne Jordan · 4 more', color: C.danger, bold: true },
+                  { text: 'View tee sheet for greet window →', color: C.danger, bold: true },
                 ]}
               />
             ) : (
@@ -706,6 +706,7 @@ export default function TodayView() {
                   Staffing Alert
                 </span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>3 understaffed days this period</span>
+                <span style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginLeft: 4 }}>Model confidence: 85%</span>
               </div>
               <button className="swoop-action-btn" onClick={() => navigate('automations')}>Add Shift →</button>
             </div>

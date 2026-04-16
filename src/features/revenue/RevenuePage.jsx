@@ -122,7 +122,7 @@ export default function RevenuePage() {
                       <span className="text-lg">✅</span>
                       <span className="font-semibold text-swoop-text">POS Connected: {686} transactions loaded</span>
                       <SourceBadge system="POS" size="xs" />
-                      <span className="text-[10px] text-swoop-text-label ml-auto">Last synced: today</span>
+                      <span className="text-[10px] text-swoop-text-label ml-auto">Last synced: {(() => { const d = new Date(); return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`; })()}</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
@@ -153,7 +153,7 @@ export default function RevenuePage() {
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-center mb-3">
                           {[
-                            { label: 'Est. monthly leakage for your club', value: `$${(Math.round((memberSummary.total || 400) * 21 / 100) * 100).toLocaleString()}/mo`, sub: `Based on ${memberSummary.total || 400}-member club baseline` },
+                            { label: 'Est. monthly leakage for your club', value: `$${(Math.round((memberSummary.total || 400) * 21 / 100) * 100).toLocaleString()}/mo`, sub: `~$21/member/mo dining leakage (19% conv. drop × $34 avg check × rounds/mo)` },
                             { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
                           ].map(({ label, value, sub }) => (
                             <div key={label} className="rounded-lg p-3 border border-swoop-border-inset bg-swoop-row">
@@ -330,7 +330,7 @@ export default function RevenuePage() {
             <div className="h-10 w-px bg-swoop-border hidden sm:block" />
             <div className="text-sm text-swoop-text-muted leading-relaxed max-w-md">
               Post-round dining conversion falls from <span className="font-bold text-swoop-text">41%</span> on on-pace rounds to <span className="font-bold text-error-500">22%</span> on slow rounds.
-              At a <span className="font-bold text-swoop-text">${avgCheckSize} avg check</span>, every slow round forfeits <span className="font-bold text-error-500">${dollarPerSlowRound}</span> in F&amp;B revenue — before a single member decides not to renew.
+              At a <span className="font-bold text-swoop-text">${avgCheckSize} avg check</span>, every slow round forfeits <span className="font-bold text-error-500">${dollarPerSlowRound}</span> in F&amp;B revenue, before a single member decides not to renew.
             </div>
           </div>
         )}
@@ -386,7 +386,7 @@ export default function RevenuePage() {
             </div>
             <SourceBadge system="Tee Sheet" size="xs" />
             <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">
-              <span className="font-bold text-brand-500">${dollarPerSlowRound} F&amp;B value per slow round forfeited</span>: dining conversion drops 41% → 22% when rounds run long, on a ${avgCheckSize} avg check.{' '}
+              <span className="font-bold text-brand-500">${dollarPerSlowRound} F&amp;B value per slow round forfeited</span>: dining conversion drops 41% → 22% when rounds run long, on a ${avgCheckSize} avg check (monthly leakage ÷ slow rounds).{' '}
               <span className="text-swoop-text-ghost">{slowContext.slowRounds.toLocaleString()} slow rounds/mo affected.</span>
             </div>
           </div>
@@ -525,6 +525,7 @@ export default function RevenuePage() {
                   ${dollarPerSlowRound}
                 </div>
                 <div className="text-xs text-swoop-text-muted mt-1">per slow round</div>
+                <div className="text-[10px] text-swoop-text-ghost mt-1 leading-snug">(monthly F&B leakage ÷ slow rounds)</div>
                 <div className="text-[11px] text-swoop-text-muted mt-2 leading-snug">
                   {slowContext.slowRounds.toLocaleString()} slow rounds/month ={' '}
                   <span className="font-mono font-bold text-error-500">
