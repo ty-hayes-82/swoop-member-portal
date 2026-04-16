@@ -267,10 +267,16 @@ const FIELD_ALIASES = {
   'item description': 'item_description', 'sales category': 'sales_category',
   'regular price': 'regular_price', 'fire time': 'fire_time',
   'payment id': 'payment_id', 'settlement time': 'processed_at',
+  // Membership Types
+  'type code': 'type_code',
+  // Households / Dependents
+  'primary member #': 'primary_member_id', 'primary member id': 'primary_member_id',
   // Courses
   'course code': 'course_code', 'course name': 'course_name', 'interval (min)': 'interval_min',
   // Sales Areas
   'sales area id': 'sales_area_id', 'sales area description': 'description',
+  // POS Line Items
+  'line item id': 'line_item_id',
   // Events
   'pricing category': 'registration_fee',
   // Invoices / Aged Receivables
@@ -307,7 +313,8 @@ function resolveAliases(row, importType) {
   const overrides = IMPORT_ALIAS_OVERRIDES[importType] || {};
   const resolved = {};
   for (const [key, value] of Object.entries(row)) {
-    const lower = key.trim().toLowerCase();
+    // Strip UTF-8 BOM (\uFEFF) that Excel/Jonas exports place on the first column header
+    const lower = key.replace(/^\uFEFF/, '').trim().toLowerCase();
     const mapped = overrides[lower] || FIELD_ALIASES[lower] || lower;
     if (mapped !== '_skip') {
       resolved[mapped] = value;

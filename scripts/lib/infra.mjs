@@ -75,7 +75,8 @@ export async function anthropicWithRetry(fn, maxAttempts = 3, baseDelayMs = 2000
 // ─── CSV Parser ───────────────────────────────────────────────────────────────
 
 export function parseCSV(content) {
-  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  // Strip UTF-8 BOM if present (common in Jonas/Excel exports)
+  const lines = content.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   if (lines.length < 2) return [];
 
   function parseLine(line) {
